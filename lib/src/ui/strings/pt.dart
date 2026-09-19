@@ -1206,6 +1206,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get openFileTitle => 'Abrir ficheiro';
+  @override
+  String get outsideFileNote =>
+      'Fora de qualquer biblioteca: guardado onde está, sem índice, sem '
+      'histórico, ligações não seguidas';
+  @override
   String get typewriterOn => 'Ativar o modo máquina de escrever';
   @override
   String get typewriterOff => 'Desativar o modo máquina de escrever';

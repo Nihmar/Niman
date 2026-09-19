@@ -1230,6 +1230,12 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get openFileTitle => 'Obre un fitxer';
+  @override
+  String get outsideFileNote =>
+      'Fora de cap biblioteca: es desa on és, sense índex, sense historial, '
+      'els enllaços no se segueixen';
+  @override
   String get typewriterOn => 'Activa el mode màquina d’escriure';
   @override
   String get typewriterOff => 'Desactiva el mode màquina d’escriure';

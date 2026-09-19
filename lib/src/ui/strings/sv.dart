@@ -1206,6 +1206,12 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get openFileTitle => 'Öppna fil';
+  @override
+  String get outsideFileNote =>
+      'Utanför bibliotek: sparas där den ligger, inte indexerad, ingen '
+      'historik, länkar följs inte';
+  @override
   String get typewriterOn => 'Slå på skrivmaskinsläge';
   @override
   String get typewriterOff => 'Slå av skrivmaskinsläge';

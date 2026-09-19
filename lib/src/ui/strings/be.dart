@@ -1201,6 +1201,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get openFileTitle => 'Адкрыць файл';
+  @override
+  String get outsideFileNote =>
+      'Па-за бібліятэкай: захоўваецца там, дзе ляжыць, без індэкса, без '
+      'гісторыі, спасылкі не адкрываюцца';
+  @override
   String get typewriterOn => 'Уключыць рэжым друкавальнай машынкі';
   @override
   String get typewriterOff => 'Выключыць рэжым друкавальнай машынкі';

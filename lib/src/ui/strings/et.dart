@@ -1182,6 +1182,12 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get openFileTitle => 'Ava fail';
+  @override
+  String get outsideFileNote =>
+      'Väljaspool raamatukogu: salvestatakse oma kohale, indekseerimata, '
+      'ajaloota, linke ei järgita';
+  @override
   String get typewriterOn => 'Lülita kirjutusmasina režiim sisse';
   @override
   String get typewriterOff => 'Lülita kirjutusmasina režiim välja';

@@ -1189,6 +1189,12 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get openFileTitle => 'Dosya aç';
+  @override
+  String get outsideFileNote =>
+      'Kitaplık dışı: olduğu yere kaydedilir, dizinlenmez, geçmiş yok, '
+      'bağlantılar izlenmez';
+  @override
   String get typewriterOn => 'Daktilo modunu aç';
   @override
   String get typewriterOff => 'Daktilo modunu kapat';

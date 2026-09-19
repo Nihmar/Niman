@@ -2,6 +2,8 @@
 // directory-picker stub the open flow goes through, the pump helpers for
 // a shell full of streams and animations, and the finders for its
 // dialogs and tree rows.
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +14,32 @@ import 'package:niman/src/ui/tree.dart';
 final class FakeFilePicker extends FilePickerPlatform {
   /// The folder the picker answers with.
   String? directory;
+
+  /// The file the single-file picker answers with (null = canceled).
+  String? file;
+
+  /// The extensions the last single-file pick offered.
+  List<String>? offeredExtensions;
+
+  @override
+  Future<PlatformFile?> pickFile({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    void Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async {
+    offeredExtensions = allowedExtensions;
+    final path = file;
+    if (path == null) return null;
+    return _PickedFile(path);
+  }
 
   @override
   Future<String?> getDirectoryPath({
@@ -24,6 +52,38 @@ final class FakeFilePicker extends FilePickerPlatform {
   }) async {
     return directory;
   }
+}
+
+/// A picked file that is only its path: the flows under test read it
+/// themselves.
+final class _PickedFile extends PlatformFile {
+  new(this._path);
+
+  final String _path;
+
+  @override
+  String get name => _path.split('/').last;
+
+  @override
+  Uri get uri => Uri.file(_path);
+
+  @override
+  // Its type is cross_file's, which the app does not depend on, and
+  // nothing under test asks for it.
+  // ignore: always_declare_return_types, type_annotate_public_apis
+  get xFile => throw UnimplementedError();
+
+  @override
+  int? lengthSync() => null;
+
+  @override
+  Future<int> length() async => 0;
+
+  @override
+  Future<Uint8List> readAsBytes() async => Uint8List(0);
+
+  @override
+  Stream<Uint8List> readAsByteStream() => const Stream.empty();
 }
 
 /// Installs a [FakeFilePicker] for the current test and restores the

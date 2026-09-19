@@ -1195,6 +1195,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get openFileTitle => 'Odpri datoteko';
+  @override
+  String get outsideFileNote =>
+      'Zunaj knjižnice: shrani se, kjer je, brez kazala, brez zgodovine, '
+      'povezave se ne sledijo';
+  @override
   String get typewriterOn => 'Vklopi način pisalnega stroja';
   @override
   String get typewriterOff => 'Izklopi način pisalnega stroja';

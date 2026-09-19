@@ -1234,6 +1234,12 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get openFileTitle => 'Ouvrir un fichier';
+  @override
+  String get outsideFileNote =>
+      'Hors de toute bibliothèque : enregistré sur place, non indexé, sans '
+      'historique, liens non suivis';
+  @override
   String get typewriterOn => 'Activer le mode machine à écrire';
   @override
   String get typewriterOff => 'Désactiver le mode machine à écrire';

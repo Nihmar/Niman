@@ -1205,6 +1205,12 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get openFileTitle => 'Ireki fitxategia';
+  @override
+  String get outsideFileNote =>
+      'Liburutegitik kanpo: dagoen tokian gordetzen da, indexatu gabe, '
+      'historiarik gabe, estekak ez dira jarraitzen';
+  @override
   String get typewriterOn => 'Aktibatu idazmakina modua';
   @override
   String get typewriterOff => 'Desaktibatu idazmakina modua';

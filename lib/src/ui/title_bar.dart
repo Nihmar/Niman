@@ -116,23 +116,24 @@ final class AppTitleBar extends StatelessWidget {
   }
 }
 
-/// The bar in Zen mode (#69): the way out, the note's name, and the
-/// window's own buttons — the window stays a window, to move and to find
-/// in the taskbar.
-final class ZenTitleBar extends StatelessWidget {
-  /// Creates the bar for the note called [title].
+/// A thin bar for a window that is showing one thing (#69, #77): a
+/// button at the left, the thing's name in the middle, and the window's
+/// own buttons — the window stays a window, to move and to find in the
+/// taskbar.
+final class SlimTitleBar extends StatelessWidget {
+  /// Creates the bar for [title], with [leading] before it.
   const new({
     required this.title,
-    required this.onLeave,
+    required this.leading,
     required this.window,
     super.key,
   });
 
-  /// The note's name, so a glance back says where the writing is.
+  /// What the window is showing.
   final String title;
 
-  /// Leaves Zen mode.
-  final VoidCallback onLeave;
+  /// The way out, at the left.
+  final Widget leading;
 
   /// The window seam the buttons act through.
   final WindowController window;
@@ -141,21 +142,13 @@ final class ZenTitleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      key: const Key('zen-title-bar'),
       color: theme.colorScheme.surface,
       child: SizedBox(
         height: 38,
         child: Row(
           children: [
             const SizedBox(width: 4),
-            IconButton(
-              key: const Key('zen-leave'),
-              tooltip: '${AppStrings.zenModeLeave} (${AppStrings.keyEscape})',
-              icon: const Icon(Icons.fullscreen_exit),
-              iconSize: 18,
-              visualDensity: VisualDensity.compact,
-              onPressed: onLeave,
-            ),
+            leading,
             Expanded(
               child: DragToMoveArea(
                 child: Center(
@@ -176,6 +169,42 @@ final class ZenTitleBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The bar in Zen mode (#69): the way out, the note's name, and the
+/// window's own buttons.
+final class ZenTitleBar extends StatelessWidget {
+  /// Creates the bar for the note called [title].
+  const new({
+    required this.title,
+    required this.onLeave,
+    required this.window,
+    super.key,
+  });
+
+  /// The note's name, so a glance back says where the writing is.
+  final String title;
+
+  /// Leaves Zen mode.
+  final VoidCallback onLeave;
+
+  /// The window seam the buttons act through.
+  final WindowController window;
+
+  @override
+  Widget build(BuildContext context) => SlimTitleBar(
+    key: const Key('zen-title-bar'),
+    title: title,
+    window: window,
+    leading: IconButton(
+      key: const Key('zen-leave'),
+      tooltip: '${AppStrings.zenModeLeave} (${AppStrings.keyEscape})',
+      icon: const Icon(Icons.fullscreen_exit),
+      iconSize: 18,
+      visualDensity: VisualDensity.compact,
+      onPressed: onLeave,
+    ),
+  );
 }
 
 /// Left of the title: the leading gap and the sidebar toggle.

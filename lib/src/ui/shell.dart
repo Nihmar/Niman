@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_writer.dart';
@@ -46,6 +48,7 @@ import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outline_panel.dart';
+import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/pane_split.dart';
@@ -208,6 +211,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 shortcuts: ref.read(shortcutServiceProvider),
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
+                outsideFiles: ref.read(outsideFilesProvider),
                 targets: ref.read(widgetTargetServiceProvider),
                 widgetUpdater: ref.read(widgetUpdaterProvider),
                 widgetHost: ref.read(widgetHostServiceProvider),
@@ -217,7 +221,10 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
             ),
           ],
         ),
-        _ => OpenLibraryScreen(controller: controller),
+        _ => OpenLibraryScreen(
+          controller: controller,
+          outsideFiles: ref.read(outsideFilesProvider),
+        ),
       },
     );
   }
@@ -233,6 +240,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.shortcuts,
     required this.todoSourceFactory,
     required this.unsavedTracker,
+    required this.outsideFiles,
     required this.targets,
     required this.widgetUpdater,
     required this.widgetHost,
@@ -269,6 +277,9 @@ final class _LibraryShell extends StatefulWidget {
   /// The open notes' unsaved edits, which the window's close guard reads
   /// (T-PP-11); passed down to every [NoteView].
   final UnsavedTracker unsavedTracker;
+
+  /// The files open outside any library (#77).
+  final OutsideFiles outsideFiles;
 
   /// The home-screen widget taps (issue 6: each one lands on the tab or
   /// note its widget shows, switching libraries first when it points
@@ -2315,6 +2326,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         AppCommand.noteHistory: () => unawaited(_openHistory(note)),
       },
       AppCommand.reindexLibrary: () => unawaited(_reindex()),
+      // A picker for any file is a desktop thing: Android hands over a
+      // copy, which could not be saved back (#77).
+      if (Platform.isLinux || Platform.isWindows)
+        AppCommand.openFile: () => unawaited(_openFile()),
       AppCommand.switchLibrary: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (context) => SwitchLibraryScreen(
@@ -2337,6 +2352,25 @@ final class _LibraryShellState extends State<_LibraryShell>
     handlers: _commandHandlers,
     active: () => mounted && (ModalRoute.of(context)?.isCurrent ?? true),
   );
+
+  /// Opens a Markdown file from anywhere (#77). One inside this library
+  /// is one of its notes, and opens as one — editing it on its own would
+  /// skip its history and put two editors on one file. Anything else
+  /// opens outside the library, over it.
+  Future<void> _openFile() async {
+    final path = await pickOutsideFile();
+    if (path == null || !mounted) return;
+    final root = widget.controller.root;
+    if (root != null && p.isWithin(root, path)) {
+      _openNoteFromLink(relPath(path, root), null);
+      return;
+    }
+    await openOutsideFile(
+      context,
+      widget.outsideFiles,
+      EditorOnlyDocument(path),
+    );
+  }
 
   /// Re-reads the library into its index, saying when it is done.
   Future<void> _reindex() => _guard(() async {
