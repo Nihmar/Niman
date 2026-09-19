@@ -825,6 +825,15 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
+  Future<bool> get typewriter async => (await _library).typewriter;
+
+  @override
+  Future<void> setTypewriter({required bool enabled}) async {
+    _log.info('typewriter mode set to $enabled');
+    await _editLibrary((c) => c.copyWith(typewriter: enabled));
+  }
+
+  @override
   Future<double> get noteColumnWidth async => (await _library).noteColumnWidth;
 
   @override

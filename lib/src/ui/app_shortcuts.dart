@@ -55,6 +55,9 @@ enum AppCommand {
   /// Enter or leave Zen mode (#69): the note, and nothing else.
   zenMode,
 
+  /// Switch typewriter mode (#70): the line being written in the middle.
+  typewriterMode,
+
   /// The command palette (#155): commands and notes in one search.
   openPalette,
 
@@ -169,6 +172,10 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
     // Ctrl+Shift+Z is redo in both editors.
     AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
     AppShortcut(
+      AppCommand.typewriterMode,
+      SingleActivator(LogicalKeyboardKey.keyT, control: true, shift: true),
+    ),
+    AppShortcut(
       AppCommand.openPalette,
       SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
     ),
@@ -214,6 +221,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.toggleDock => AppStrings.sidePanelTooltip,
   AppCommand.splitDown => AppStrings.splitDown,
   AppCommand.zenMode => AppStrings.zenMode,
+  AppCommand.typewriterMode => AppStrings.typewriterTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,
   AppCommand.togglePreview => AppStrings.showPreviewTooltip,

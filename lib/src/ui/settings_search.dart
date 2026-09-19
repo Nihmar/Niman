@@ -182,6 +182,13 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.noteColumnWidth),
     ),
     SettingsSearchEntry(
+      title: AppStrings.typewriterTitle,
+      area: editor,
+      rowKey: SettingsKeys.typewriter,
+      value: () async => onOff(on: await controller.typewriter),
+      open: () => pushEditor(SettingsKeys.typewriter),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.linkTypeTitle,
       area: editor,
       rowKey: SettingsKeys.linkType,

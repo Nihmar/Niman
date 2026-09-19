@@ -1234,6 +1234,15 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get typewriterOn => 'Activer le mode machine à écrire';
+  @override
+  String get typewriterOff => 'Désactiver le mode machine à écrire';
+  @override
+  String get typewriterTitle => 'Mode machine à écrire';
+  @override
+  String get typewriterSubtitle =>
+      'Garder la ligne en cours d’écriture au milieu de l’éditeur';
+  @override
   String get zenMode => 'Mode zen';
   @override
   String get zenModeEnter => 'Passer en mode zen';

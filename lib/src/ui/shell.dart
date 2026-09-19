@@ -876,6 +876,9 @@ final class _LibraryShellState extends State<_LibraryShell>
         if (root != null) _workspace.remember(relPath(path, root), memento);
       },
       showLineNumbers: _editorSettings.lineNumbers,
+      typewriter: _editorSettings.typewriter,
+      // No switch in the phone's status row: it has no room left for one.
+      // Settings and the Search tab's commands reach it there.
       noteColumn: _editorSettings.noteColumn,
       autofocusEditor: _editorSettings.autofocusEditor,
       linkType: _editorSettings.linkType,
@@ -2215,6 +2218,18 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   void _toggleZen() => unawaited(_zen.toggle());
 
+  /// Switches typewriter mode (#70) for the library: the note on screen
+  /// follows at once, and the setting keeps it. Zen is left as it is —
+  /// the two are separate states.
+  void _toggleTypewriter() {
+    final on = !_editorSettings.typewriter;
+    setState(() => _editorSettings = _editorSettings.copyWith(typewriter: on));
+    unawaited(() async {
+      await widget.controller.setTypewriter(enabled: on);
+      widget.controller.notify();
+    }());
+  }
+
   void _onZenChanged() {
     if (mounted) setState(() {});
   }
@@ -2248,6 +2263,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       },
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
       if (_zen.on || _zenPossible) AppCommand.zenMode: _toggleZen,
+      // Not among what Zen leaves out: in Zen the status row and its
+      // switch are hidden, and this is the way to it (#70).
+      AppCommand.typewriterMode: _toggleTypewriter,
       // What Zen hides it also leaves alone: a toggle for chrome that is
       // not on screen would change it unseen.
       if (!_inZen) AppCommand.toggleSidebar: _toggleSidebar,
@@ -2386,6 +2404,10 @@ final class _LibraryShellState extends State<_LibraryShell>
           : AppStrings.switchToWysiwygTooltip,
     AppCommand.zenMode =>
       _zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
+    AppCommand.typewriterMode =>
+      _editorSettings.typewriter
+          ? AppStrings.typewriterOff
+          : AppStrings.typewriterOn,
     _ => null,
   };
 
@@ -2599,6 +2621,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       tabs: _deck(pane),
       onMemento: _workspace.remember,
       zen: _inZen,
+      typewriter: _editorSettings.typewriter,
+      onToggleTypewriter: _toggleTypewriter,
       onLoaded: _workspace.noteLoaded,
       showLineNumbers: _editorSettings.lineNumbers,
       noteColumn: _editorSettings.noteColumn,

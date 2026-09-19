@@ -1206,6 +1206,15 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get typewriterOn => 'Írógépmód bekapcsolása';
+  @override
+  String get typewriterOff => 'Írógépmód kikapcsolása';
+  @override
+  String get typewriterTitle => 'Írógépmód';
+  @override
+  String get typewriterSubtitle =>
+      'Az éppen írt sor a szerkesztő közepén marad';
+  @override
   String get zenMode => 'Zen mód';
   @override
   String get zenModeEnter => 'Zen mód bekapcsolása';

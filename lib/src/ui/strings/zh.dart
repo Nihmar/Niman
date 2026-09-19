@@ -1093,6 +1093,14 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get typewriterOn => '开启打字机模式';
+  @override
+  String get typewriterOff => '关闭打字机模式';
+  @override
+  String get typewriterTitle => '打字机模式';
+  @override
+  String get typewriterSubtitle => '让正在书写的行保持在编辑器中央';
+  @override
   String get zenMode => '禅模式';
   @override
   String get zenModeEnter => '进入禅模式';

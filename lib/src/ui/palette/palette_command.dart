@@ -43,7 +43,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.deleteNote ||
   AppCommand.noteHistory ||
   AppCommand.closeTab => PaletteGroup.note,
-  AppCommand.togglePreview || AppCommand.switchEditor => PaletteGroup.editor,
+  AppCommand.togglePreview ||
+  AppCommand.switchEditor ||
+  AppCommand.typewriterMode => PaletteGroup.editor,
   AppCommand.toggleSidebar ||
   AppCommand.toggleDock ||
   AppCommand.splitRight ||

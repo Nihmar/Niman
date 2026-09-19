@@ -1243,6 +1243,15 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get typewriterOn => 'Ενεργοποίηση λειτουργίας γραφομηχανής';
+  @override
+  String get typewriterOff => 'Απενεργοποίηση λειτουργίας γραφομηχανής';
+  @override
+  String get typewriterTitle => 'Λειτουργία γραφομηχανής';
+  @override
+  String get typewriterSubtitle =>
+      'Η γραμμή που γράφετε μένει στη μέση του επεξεργαστή';
+  @override
   String get zenMode => 'Λειτουργία Ζεν';
   @override
   String get zenModeEnter => 'Είσοδος σε λειτουργία Ζεν';

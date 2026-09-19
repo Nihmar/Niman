@@ -142,6 +142,36 @@ it. It is the desktop's alone — a phone is one note on one screen
 already. `F11` can be changed under Settings → Keyboard shortcuts, like
 every other.
 
+### Typewriter mode
+
+With typewriter mode on, the line you are writing stays in the middle
+of the editor, and the note moves under it instead of the caret
+wandering down the screen. It works in both editors, on every platform,
+and changes nothing in the text: it is only a way of scrolling.
+
+- **What moves the note.** Anything that moves the caret: typing onto a
+  new row, the arrow keys, a click or a tap, a find landing on its
+  match. A long paragraph is followed row by row, not line by line.
+- **What doesn't.** The mouse wheel, the scrollbar and a swipe scroll
+  freely, to read around; the next move of the caret brings its row
+  back to the middle.
+- **The ends.** The editor keeps half a screen of room below the last
+  line, so the end of a note reaches the middle too. At the start there
+  is nothing above, so the first lines are written where they stand
+  until the note is long enough to move.
+
+It is a setting of the library (**Settings → Editor → Typewriter
+mode**), off unless you turn it on. `Ctrl+Shift+T` or *Editor: Turn
+typewriter mode on* in the command palette switch it from anywhere, and
+on the desktop a button in the note's status row shows it and switches
+it. The phone's status row has no room for one more button: there the
+setting, and the commands under the Search tab, reach it.
+
+It is independent of [Zen mode](#zen-mode): either can be on without
+the other, and entering or leaving Zen leaves typewriter mode as it
+was. In Zen the status row is hidden, so the key and the palette are
+the way to it.
+
 ### Copy and paste
 
 The clipboard carries Markdown on both editors, so copying the same text
