@@ -1120,6 +1120,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get typewriterTitle => 'タイプライターモード';
+  @override
+  String get typewriterSubtitle => '書いている行をエディタの中央に保つ';
+  @override
   String get zenMode => 'Zen モード';
   @override
   String get zenModeEnter => 'Zen モードに入る';

@@ -48,6 +48,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   bool? _lineNumbers;
   bool _readableLineLength = true;
   double _noteColumnWidth = defaultNoteColumnWidth;
+  bool _typewriter = false;
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
   MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
@@ -75,6 +76,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final lineNumbers = await controller.lineNumbersEnabled;
     final readableLineLength = await controller.readableLineLength;
     final noteColumnWidth = await controller.noteColumnWidth;
+    final typewriter = await controller.typewriter;
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
     final missingNoteLocation = await controller.missingNoteLocation;
@@ -88,6 +90,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _lineNumbers = lineNumbers;
       _readableLineLength = readableLineLength;
       _noteColumnWidth = noteColumnWidth;
+      _typewriter = typewriter;
       _autofocusEditor = autofocus;
       _linkType = linkType;
       _missingNoteLocation = missingNoteLocation;
@@ -121,6 +124,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     await controller.setReadableLineLength(enabled: value);
     controller.notify();
     if (mounted) setState(() => _readableLineLength = value);
+  }
+
+  /// Persists typewriter mode (#70); an open note takes it on the spot,
+  /// through the shell's refresh.
+  Future<void> _toggleTypewriter(bool value) async {
+    final controller = widget.controller;
+    await controller.setTypewriter(enabled: value);
+    controller.notify();
+    if (mounted) setState(() => _typewriter = value);
   }
 
   /// Asks how wide the note column is.
@@ -453,6 +465,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               value: AppStrings.noteColumnWidthValue(_noteColumnWidth.round()),
               enabled: _readableLineLength,
               onTap: () => unawaited(_chooseNoteColumnWidth()),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.typewriter,
+            child: SettingsSwitchRow(
+              title: AppStrings.typewriterTitle,
+              description: AppStrings.typewriterSubtitle,
+              value: _typewriter,
+              onChanged: (value) => unawaited(_toggleTypewriter(value)),
             ),
           ),
           // Phones and tablets only: there is no on-screen keyboard to

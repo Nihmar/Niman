@@ -1204,6 +1204,10 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get typewriterTitle => 'Режим писаће машине';
+  @override
+  String get typewriterSubtitle => 'Ред који пишете остаје у средини уређивача';
+  @override
   String get zenMode => 'Зен режим';
   @override
   String get zenModeEnter => 'Уђи у зен режим';

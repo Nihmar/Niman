@@ -1213,6 +1213,11 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get typewriterTitle => 'Mënyra e makinës së shkrimit';
+  @override
+  String get typewriterSubtitle =>
+      'Rreshti që po shkruani mbetet në mes të redaktuesit';
+  @override
   String get zenMode => 'Mënyra zen';
   @override
   String get zenModeEnter => 'Hyr në mënyrën zen';

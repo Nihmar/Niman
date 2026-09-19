@@ -1201,6 +1201,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get typewriterTitle => 'Рэжым друкавальнай машынкі';
+  @override
+  String get typewriterSubtitle =>
+      'Трымаць радок, які вы пішаце, пасярэдзіне рэдактара';
+  @override
   String get zenMode => 'Рэжым дзэн';
   @override
   String get zenModeEnter => 'Увайсці ў рэжым дзэн';

@@ -328,6 +328,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get typewriter async => _config.typewriter;
+
+  @override
+  Future<void> setTypewriter({required bool enabled}) async {
+    _config = _config.copyWith(typewriter: enabled);
+  }
+
+  @override
   Future<double> get noteColumnWidth async => _config.noteColumnWidth;
 
   @override

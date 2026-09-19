@@ -1213,6 +1213,11 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get typewriterTitle => 'Modalità macchina da scrivere';
+  @override
+  String get typewriterSubtitle =>
+      'Tieni la riga che stai scrivendo al centro dell’editor';
+  @override
   String get zenMode => 'Modalità Zen';
   @override
   String get zenModeEnter => 'Entra in modalità Zen';

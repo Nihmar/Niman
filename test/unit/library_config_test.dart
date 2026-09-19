@@ -333,6 +333,7 @@ void main() {
         editorToolbar: 'link,-bold',
         readableLineLength: false,
         noteColumnWidth: 900,
+        typewriter: true,
       );
       await store.write(config);
       expect(await store.read(), config);
@@ -360,6 +361,7 @@ void main() {
         'treeWidth',
         'readableLineLength',
         'noteColumnWidth',
+        'typewriter',
       ]) {
         expect(content, contains('"$key"'), reason: key);
       }
@@ -480,6 +482,8 @@ void main() {
       // #171: the note is a centred column unless someone says otherwise.
       expect(config.readableLineLength, isTrue);
       expect(config.noteColumnWidth, defaultNoteColumnWidth);
+      // #70: typewriter mode is asked for, never assumed.
+      expect(config.typewriter, isFalse);
     });
 
     test('an out-of-range indentWidth is brought into range', () {

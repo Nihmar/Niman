@@ -299,6 +299,7 @@ final class LibraryConfig {
     this.pinnedCollapsed = false,
     this.lineNumbers = true,
     this.readableLineLength = true,
+    this.typewriter = false,
     this.noteColumnWidth = defaultNoteColumnWidth,
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
@@ -361,6 +362,7 @@ final class LibraryConfig {
       pinnedCollapsed: _boolOr(json['pinnedCollapsed'], false),
       lineNumbers: _boolOr(json['lineNumbers'], true),
       readableLineLength: _boolOr(json['readableLineLength'], true),
+      typewriter: _boolOr(json['typewriter'], false),
       noteColumnWidth: normalizeNoteColumnWidth(json['noteColumnWidth']),
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
@@ -454,6 +456,10 @@ final class LibraryConfig {
   /// width of its pane (default true, #171).
   final bool readableLineLength;
 
+  /// Whether the line being written keeps to the middle of the editor
+  /// (typewriter mode, #70; default false).
+  final bool typewriter;
+
   /// The width of that column's text, in logical pixels (default
   /// [defaultNoteColumnWidth]). A pane narrower than it is the column.
   final double noteColumnWidth;
@@ -531,6 +537,7 @@ final class LibraryConfig {
     bool? pinnedCollapsed,
     bool? lineNumbers,
     bool? readableLineLength,
+    bool? typewriter,
     double? noteColumnWidth,
     bool? editorAutofocus,
     bool? reminderShowTokens,
@@ -562,6 +569,7 @@ final class LibraryConfig {
       pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       readableLineLength: readableLineLength ?? this.readableLineLength,
+      typewriter: typewriter ?? this.typewriter,
       noteColumnWidth: noteColumnWidth ?? this.noteColumnWidth,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
@@ -593,6 +601,7 @@ final class LibraryConfig {
     'pinnedCollapsed',
     'lineNumbers',
     'readableLineLength',
+    'typewriter',
     'noteColumnWidth',
     'editorAutofocus',
     'reminderShowTokens',
@@ -633,6 +642,7 @@ final class LibraryConfig {
       'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
       'readableLineLength': readableLineLength,
+      'typewriter': typewriter,
       'noteColumnWidth': noteColumnWidth,
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
@@ -720,6 +730,7 @@ final class LibraryConfig {
         pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&
         readableLineLength == other.readableLineLength &&
+        typewriter == other.typewriter &&
         noteColumnWidth == other.noteColumnWidth &&
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&
