@@ -380,6 +380,8 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutEditorSection => '编辑器内';
   @override
+  String get shortcutFormatSection => '格式';
+  @override
   String get shortcutFind => '查找';
   @override
   String get shortcutReplace => '查找并替换';

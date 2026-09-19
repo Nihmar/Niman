@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -456,6 +457,23 @@ List<SettingsSearchEntry> settingsSearchEntries({
           value: noValue,
           open: () => openArea(SettingsAreaId.commands, commandRowKey(command)),
         ),
+    // The formatting keys (#205), where there is a keyboard to press:
+    // searching "bold" lands on its row rather than on nothing.
+    if (keyboardAttached)
+      for (final item in ToolbarItem.values)
+        if (item != ToolbarItem.tools)
+          SettingsSearchEntry(
+            title: item.label,
+            area: AppStrings.keyboardShortcutsTitle,
+            rowKey: editorShortcutRowKey(item),
+            value: () async =>
+                switch (AppKeyMap.current.value.editorBindingOf(item)) {
+                  final keys? => describeActivator(keys),
+                  null => AppStrings.shortcutNone,
+                },
+            open: () =>
+                openArea(SettingsAreaId.shortcuts, editorShortcutRowKey(item)),
+          ),
   ];
 }
 

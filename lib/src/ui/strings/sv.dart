@@ -411,6 +411,8 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'I editorn';
   @override
+  String get shortcutFormatSection => 'Formatering';
+  @override
   String get shortcutFind => 'Sök';
   @override
   String get shortcutReplace => 'Sök och ersätt';

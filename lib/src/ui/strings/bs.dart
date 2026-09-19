@@ -410,6 +410,8 @@ final class BosnianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'U uređivaču';
   @override
+  String get shortcutFormatSection => 'Formatiranje';
+  @override
   String get shortcutFind => 'Pretraga';
   @override
   String get shortcutReplace => 'Pronađi i zamijeni';

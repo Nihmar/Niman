@@ -407,6 +407,8 @@ final class CzechStrings extends Strings {
   @override
   String get shortcutEditorSection => 'V editoru';
   @override
+  String get shortcutFormatSection => 'Formátování';
+  @override
   String get shortcutFind => 'Hledat';
   @override
   String get shortcutReplace => 'Najít a nahradit';

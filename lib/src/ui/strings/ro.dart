@@ -413,6 +413,8 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'În editor';
   @override
+  String get shortcutFormatSection => 'Formatare';
+  @override
   String get shortcutFind => 'Caută';
   @override
   String get shortcutReplace => 'Caută și înlocuiește';

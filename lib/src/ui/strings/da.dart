@@ -408,6 +408,8 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'I editoren';
   @override
+  String get shortcutFormatSection => 'Formatering';
+  @override
   String get shortcutFind => 'Find';
   @override
   String get shortcutReplace => 'Find og erstat';

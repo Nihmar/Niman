@@ -415,6 +415,8 @@ final class FrenchStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Dans l’éditeur';
   @override
+  String get shortcutFormatSection => 'Mise en forme';
+  @override
   String get shortcutFind => 'Rechercher';
   @override
   String get shortcutReplace => 'Rechercher et remplacer';

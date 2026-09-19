@@ -407,6 +407,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'У редакторі';
   @override
+  String get shortcutFormatSection => 'Форматування';
+  @override
   String get shortcutFind => 'Шукати';
   @override
   String get shortcutReplace => 'Знайти і замінити';

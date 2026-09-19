@@ -406,6 +406,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Redaktoriuje';
   @override
+  String get shortcutFormatSection => 'Formatavimas';
+  @override
   String get shortcutFind => 'Ieškoti';
   @override
   String get shortcutReplace => 'Ieškoti ir pakeisti';

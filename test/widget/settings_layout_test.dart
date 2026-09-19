@@ -463,7 +463,8 @@ void main() {
       tester,
     ) async {
       await search(tester, 'indent');
-      expect(find.text(AppStrings.settingsSearchResults(1)), findsOne);
+      // The indent width, and Indent's formatting key (#205).
+      expect(find.text(AppStrings.settingsSearchResults(2)), findsOne);
       final result = find.byKey(const Key('settings-search-indent-width'));
       expect(
         find.descendant(

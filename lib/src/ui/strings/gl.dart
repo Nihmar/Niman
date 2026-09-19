@@ -413,6 +413,8 @@ final class GalicianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'No editor';
   @override
+  String get shortcutFormatSection => 'Formato';
+  @override
   String get shortcutFind => 'Buscar';
   @override
   String get shortcutReplace => 'Buscar e substituír';

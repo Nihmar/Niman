@@ -27,6 +27,21 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs (on a
   wide window Settings opens as a floating window)
 
+Formatting, in both editors, on the note's selection:
+
+- `Ctrl/⌘+B` — bold, `Ctrl/⌘+I` — italic, `Ctrl/⌘+U` — underline
+- `Ctrl/⌘+Shift+S` — strikethrough, `Ctrl/⌘+Shift+E` — code block
+- `Ctrl/⌘+K` — link, `Ctrl/⌘+Shift+H` — heading level
+- `Ctrl/⌘+Shift+L` — bulleted list, `Ctrl/⌘+Shift+O` — numbered list
+- `Ctrl/⌘+Shift+B` — quote
+- `Ctrl/⌘+M` / `Ctrl/⌘+Shift+M` — indent / outdent
+
+These do exactly what the toolbar's buttons do, and they are
+changeable like the rest (Settings → Keyboard shortcuts →
+**Formatting**). They apply while an editor has the focus, which is why
+a combination may also be an app shortcut elsewhere: `Ctrl+Shift+B` is
+the side panel outside an editor and a quote inside one.
+
 Moving and selecting in the source editor, on Windows and Linux:
 
 - `Ctrl+←` / `Ctrl+→` — jump a word
@@ -63,9 +78,14 @@ where it can, so one that needs an open note is not there without one.
 - **Conflicts.** A combination another command already has is never
   taken silently. The screen names that command and asks whether to
   move the keys; if you do, that command is left with no shortcut.
-- **Keys the text fields and the editor use.** Copy, paste, cut, select
-  all, undo, redo, find and replace may be taken, after a plain warning:
-  your command takes them there too.
+- **Keys the text fields and the editors use.** Copy, paste, cut, select
+  all, undo, redo, find, replace and the formatting keys may be taken,
+  after a plain warning: your command takes them there too, outside an
+  editor.
+- **The Formatting group** changes the same way, with its own conflicts:
+  a formatting key collides with another formatting key, not with an app
+  command, since the two apply in different places. A formatting key you
+  moved stops working on its old combination in both editors.
 - **Remove and restore.** **×** removes a command's shortcut. A command
   with none is still one `Ctrl+Shift+P` away in the command palette.
   **↺** puts back the key Niman ships, and **Restore defaults** puts back
