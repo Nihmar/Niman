@@ -124,3 +124,14 @@ never drift.
 Desktop builds accept `--quick-note`, `--new-todo`, `--new-note`,
 `--new-list`, `--new-voice`, routed through the same handler as the
 launcher actions.
+
+A path opens that file: `niman ~/project/README.md` opens it the way
+**Open file** does (see
+[organization](organization.md#opening-a-file-outside-any-library)). A
+relative path is read from where the command was typed.
+
+There is only ever one Niman per session. With Niman already running,
+`niman <file>` or `niman --quick-note` hands itself to that Niman, which
+comes to the front and does it, and the new launch ends without
+opening a window. That is also what keeps two processes from holding
+one library.

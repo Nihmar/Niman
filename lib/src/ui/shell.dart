@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -109,11 +110,14 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     }
     unawaited(_startLanguageAndActions());
     unawaited(_applyTheme());
+    _listenToLaunches();
   }
 
   @override
   void dispose() {
     AppLanguages.revision.removeListener(_republishQuickActions);
+    unawaited(_arrivals?.cancel());
+    unawaited(_launchFiles?.cancel());
     super.dispose();
   }
 
@@ -184,10 +188,41 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   /// files the OS hides, rewriting the tree down to its folders. The open
   /// screen shows the permission prompt instead.
   Future<void> _resume() async {
-    if (!await StorageAccess.hasAllFilesAccess()) return;
-    if (!mounted) return;
-    await ref.read(librarySessionProvider).resume();
+    if (await StorageAccess.hasAllFilesAccess() && mounted) {
+      await ref.read(librarySessionProvider).resume();
+    }
+    // A file the app was started with (#41). With a library open the
+    // shell takes it; with none, it opens on its own from here.
+    if (!mounted || _libraryReady) return;
+    final path = ref.read(launchRequestsProvider).consumeFile();
+    if (path != null) _openOutside(path);
   }
+
+  bool get _libraryReady =>
+      ref.read(librarySessionProvider).phase == LibraryPhase.ready;
+
+  /// Later launches (#41): each brings the window forward, and a file one
+  /// asks for opens here while there is no library for the shell.
+  StreamSubscription<void>? _arrivals;
+  StreamSubscription<String>? _launchFiles;
+
+  void _listenToLaunches() {
+    final requests = ref.read(launchRequestsProvider);
+    _arrivals = requests.arrivals.listen(
+      (_) => unawaited(ref.read(windowControllerProvider).show()),
+    );
+    _launchFiles = requests.files.listen((path) {
+      if (mounted && !_libraryReady) _openOutside(path);
+    });
+  }
+
+  void _openOutside(String path) => unawaited(
+    openOutsideFile(
+      context,
+      ref.read(outsideFilesProvider),
+      EditorOnlyDocument(path),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -212,6 +247,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
+                launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
                 widgetUpdater: ref.read(widgetUpdaterProvider),
                 widgetHost: ref.read(widgetHostServiceProvider),
@@ -241,6 +277,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.todoSourceFactory,
     required this.unsavedTracker,
     required this.outsideFiles,
+    required this.launchRequests,
     required this.targets,
     required this.widgetUpdater,
     required this.widgetHost,
@@ -280,6 +317,9 @@ final class _LibraryShell extends StatefulWidget {
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
+
+  /// Files and actions launches asked for (#41).
+  final LaunchRequests launchRequests;
 
   /// The home-screen widget taps (issue 6: each one lands on the tab or
   /// note its widget shows, switching libraries first when it points
@@ -593,6 +633,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   StreamSubscription<ShortcutAction>? _shortcutTaps;
   StreamSubscription<ShortcutAction>? _trayTaps;
   StreamSubscription<void>? _trayActivations;
+  StreamSubscription<String>? _launchFiles;
 
   /// Library session events (every note op bumps the revision): the
   /// pinned notes follow the files, so each one refreshes the note
@@ -1250,6 +1291,15 @@ final class _LibraryShellState extends State<_LibraryShell>
     _trayActivations = widget.tray.activated.listen(
       (_) => unawaited(widget.window.show()),
     );
+    // Files a launch asked for (#41): the one the app started with, once
+    // the shell can open it, and every later one.
+    _launchFiles = widget.launchRequests.files.listen(
+      (path) => unawaited(_openPath(path)),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final path = widget.launchRequests.consumeFile();
+      if (path != null && mounted) unawaited(_openPath(path));
+    });
     unawaited(_applyReminderLaunch());
     unawaited(_applyShortcutLaunch());
     unawaited(_homeWidgets.applyLaunchTarget());
@@ -1281,6 +1331,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     _todoController.removeListener(_homeWidgets.pushTodos);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
+    unawaited(_launchFiles?.cancel());
     _todoController.dispose();
     _personalDictionary?.dispose();
     _shellFocus.dispose();
@@ -2360,6 +2411,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _openFile() async {
     final path = await pickOutsideFile();
     if (path == null || !mounted) return;
+    await _openPath(path);
+  }
+
+  /// Opens the file at [path] (absolute): as its note when it is inside
+  /// this library, on its own otherwise. What Open file does with the
+  /// file picked, and what a launch with a file does (#41).
+  Future<void> _openPath(String path) async {
     final root = widget.controller.root;
     if (root != null && p.isWithin(root, path)) {
       _openNoteFromLink(relPath(path, root), null);
