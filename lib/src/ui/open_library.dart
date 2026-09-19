@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/library_root.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -12,6 +10,7 @@ import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/known_library_list.dart';
+import 'package:niman/src/ui/library_picker.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -284,56 +283,28 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     // The controller's event stream drives the rebuild (phase/lastError).
   }
 
-  /// Opens the native directory picker; `null` when the user cancels.
+  /// Opens the native directory picker; `null` when the user cancels or
+  /// the pick fails, which then says why.
   Future<String?> _pickDirectory(String title) async {
-    // Re-checked here too: the permission can be revoked from Settings
-    // while this screen is up.
-    if (!await StorageAccess.hasAllFilesAccess()) {
-      _storageLog.warning('pick blocked: no all-files access');
-      if (mounted) {
-        setState(() => _needsAccess = true);
-      }
-      return null;
-    }
     _setBusy(true);
-    try {
-      final raw = await FilePicker.getDirectoryPath(dialogTitle: title);
-      _setBusy(false);
-      if (raw == null || raw.trim().isEmpty) {
-        return null; // The user cancelled.
-      }
-      // The Android picker answers with a SAF tree URI rather than a
-      // path; the library is read by path, so map it to the real one.
-      final path = resolveLibraryRoot(raw);
-      if (path == null) {
-        _pickerError = AppStrings.openLibraryUnsupported;
+    final pick = await pickLibraryFolder(title);
+    if (!mounted) return null;
+    _setBusy(false);
+    switch (pick) {
+      case LibraryPicked(:final path):
+        return path;
+      case LibraryPickCancelled():
         return null;
-      }
-      if (Platform.isAndroid) {
-        // The folder must be reachable through the FUSE layer; fail here,
-        // where the cause is still obvious.
-        try {
-          Directory(path).statSync();
-        } on FileSystemException catch (e) {
-          _pickerError = AppStrings.folderAccessDenied(e);
-          return null;
-        }
-      }
-      return path;
-    } on Object catch (error) {
-      // For example "unknown_path" from SAF for protected trees.
-      _setBusy(false);
-      _pickerError = AppStrings.folderPickFailed(error);
-      return null;
+      case LibraryPickNeedsAccess():
+        setState(() => _needsAccess = true);
+        return null;
+      case LibraryPickFailed(:final message):
+        _pickerError = message;
+        return null;
     }
   }
 
-  Future<String?> _promptName() {
-    return showDialog<String>(
-      context: context,
-      builder: (context) => const _NewLibraryDialog(),
-    );
-  }
+  Future<String?> _promptName() => showNewLibraryDialog(context);
 
   void _setBusy(bool busy) {
     if (_busy == busy) return;
@@ -411,60 +382,5 @@ final class _AccessPrompt extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-/// Dialog that asks for the name of the new library folder.
-final class _NewLibraryDialog extends StatefulWidget {
-  /// Creates the dialog.
-  const new();
-
-  @override
-  State<_NewLibraryDialog> createState() => _NewLibraryDialogState();
-}
-
-final class _NewLibraryDialogState extends State<_NewLibraryDialog> {
-  late final TextEditingController _text = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Rebuild on every keystroke so "Create" tracks the (trimmed) name.
-    _text.addListener(() => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _text.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final name = _text.text.trim();
-    return AlertDialog(
-      title: Text(AppStrings.openLibraryCreateTitle),
-      content: TextField(
-        controller: _text,
-        autofocus: true,
-        decoration: InputDecoration(
-          labelText: AppStrings.openLibraryFolderName,
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppStrings.actionCancel),
-        ),
-        FilledButton(
-          onPressed: name.isEmpty ? null : _submit,
-          child: Text(AppStrings.actionCreate),
-        ),
-      ],
-    );
-  }
-
-  void _submit() {
-    Navigator.of(context).pop(_text.text.trim());
   }
 }

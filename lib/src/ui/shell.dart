@@ -42,6 +42,7 @@ import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
+import 'package:niman/src/ui/library_window.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -1329,10 +1330,10 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   @override
   void dispose() {
-    // A library closed or switched from the settings window: the window
-    // goes with the shell it was over (#202). Off the teardown, which
+    // A library closed or switched from a floating window: the window
+    // goes with the shell it was over (#202, #203). Off the teardown, which
     // must not change the navigator it runs under.
-    final window = _settingsWindow;
+    final window = _floatingWindow;
     if (window != null) {
       scheduleMicrotask(() {
         if (window.isActive) window.navigator?.removeRoute(window);
@@ -1902,6 +1903,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       shellFocus: _shellFocus,
       tabIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
+      onSwitchLibrary: _switchLibrary,
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
@@ -2311,25 +2313,55 @@ final class _LibraryShellState extends State<_LibraryShell>
     _selectShellTab(tab);
   }
 
-  /// The settings window while it is up: its key does not open a second,
-  /// and a library that closes from inside it takes it down (#202).
-  Route<void>? _settingsWindow;
+  /// The floating window up over the shell (#202, #203), if any: its key
+  /// does not open a second, and a library that closes from inside it
+  /// takes it down.
+  Route<void>? _floatingWindow;
+
+  /// Pushes [route] as the shell's floating window, unless one is up.
+  Future<void> _showFloatingWindow(Route<void> route) async {
+    if (_floatingWindow != null) return;
+    _floatingWindow = route;
+    try {
+      await Navigator.of(context).push(route);
+    } finally {
+      if (identical(_floatingWindow, route)) _floatingWindow = null;
+    }
+  }
 
   /// Settings as a floating window (#202).
-  Future<void> _openSettingsWindow() async {
-    if (_settingsWindow != null) return;
-    final route = settingsWindowRoute(
+  Future<void> _openSettingsWindow() => _showFloatingWindow(
+    settingsWindowRoute(
       context,
       controller: widget.controller,
       spellCheck: widget.spellCheck,
       transcription: widget.transcription,
-    );
-    _settingsWindow = route;
-    try {
-      await Navigator.of(context).push(route);
-    } finally {
-      if (identical(_settingsWindow, route)) _settingsWindow = null;
+    ),
+  );
+
+  /// The known libraries: a floating window on a wide window (#203), the
+  /// full screen on a phone.
+  void _switchLibrary() {
+    if (_wide) {
+      unawaited(
+        _showFloatingWindow(
+          libraryWindowRoute(
+            context,
+            controller: widget.controller,
+            unsaved: widget.unsavedTracker,
+          ),
+        ),
+      );
+      return;
     }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SwitchLibraryScreen(
+          controller: widget.controller,
+          onSwitched: () => Navigator.of(context).pop(),
+        ),
+      ),
+    );
   }
 
   /// The title bar's text: the app, and the open note when there is one.
@@ -2474,14 +2506,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       // copy, which could not be saved back (#77).
       if (Platform.isLinux || Platform.isWindows)
         AppCommand.openFile: () => unawaited(_openFile()),
-      AppCommand.switchLibrary: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) => SwitchLibraryScreen(
-            controller: widget.controller,
-            onSwitched: () => Navigator.of(context).pop(),
-          ),
-        ),
-      ),
+      AppCommand.switchLibrary: _switchLibrary,
     };
   }
 

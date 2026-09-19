@@ -96,21 +96,71 @@ void main() {
     expect(find.text('No notes yet'), findsOne);
   });
 
-  testWidgets('wide: the rail foot opens the library switcher', (tester) async {
+  // #203: a floating window, like Settings, and not a destination: the
+  // selection stays where it was.
+  testWidgets('wide: the rail foot opens the library window', (tester) async {
     await pumpWide(tester);
 
-    // Not a destination: it opens a screen and leaves the selection
-    // where it was (#170).
     await tester.tap(railDest('library'));
     await settle(tester);
-
-    expect(find.byType(SwitchLibraryScreen), findsOne);
-
-    // Back out: the rail is where it was. The pushed route takes the
-    // shell offstage, so the selection is checked after returning.
-    await tester.tap(find.backButton());
-    await settle(tester);
+    final window = find.byKey(const Key('library-window'));
+    expect(window, findsOne);
+    expect(find.byType(SwitchLibraryScreen), findsNothing);
+    expect(
+      find.descendant(
+        of: window,
+        matching: find.byKey(const Key('library-window-close-library')),
+      ),
+      findsOne,
+    );
     expect(railIndex(tester), 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await settle(tester);
+    expect(window, findsNothing);
+    expect(find.byKey(const Key('shell-rail')), findsOne);
+  });
+
+  testWidgets('wide: Close library from the library window goes back to '
+      'the opening screen, window and all', (tester) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('library'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('library-window-close-library')));
+    await settle(tester);
+    expect(find.byType(ShellRail), findsNothing, reason: 'the library closed');
+    expect(find.byKey(const Key('library-window')), findsNothing);
+    expect(find.byKey(const Key('create-library')), findsOne);
+  });
+
+  testWidgets('wide: a new library from the library window opens it', (
+    tester,
+  ) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('library'));
+    await settle(tester);
+    filePicker.directory = '/elsewhere';
+    await tester.tap(find.byKey(const Key('library-window-create')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'second');
+    await tester.pump();
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+    expect(find.byKey(const Key('library-window')), findsNothing);
+    expect(find.byType(ShellRail), findsOne);
+    expect(controller.root, '/elsewhere/second');
+  });
+
+  testWidgets('wide: a library opened from disk in the library window is '
+      'switched to', (tester) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('library'));
+    await settle(tester);
+    filePicker.directory = '/other';
+    await tester.tap(find.byKey(const Key('library-window-open')));
+    await settle(tester);
+    expect(find.byKey(const Key('library-window')), findsNothing);
+    expect(controller.root, '/other');
   });
 
   testWidgets('wide: the rail todo shows the list inline, rail stays', (
@@ -163,20 +213,16 @@ void main() {
     expect(window, findsNothing);
   });
 
-  // #202: the window sits on the app's navigator, over the shell; a
-  // library closed from inside it must not leave it over the next screen.
-  testWidgets('wide: closing the library from the settings window closes '
-      'the window too', (tester) async {
+  // #203: the library window switches and closes; the settings window
+  // does not offer the same two rows again.
+  testWidgets('wide: the settings window leaves switch and close to the '
+      'library window', (tester) async {
     await pumpWide(tester);
     await tester.tap(railDest('settings'));
     await settle(tester);
-    final close = find.byKey(const Key('close-library-setting'));
-    await tester.ensureVisible(close);
-    await settle(tester);
-    await tester.tap(close);
-    await settle(tester);
-    expect(find.byType(ShellRail), findsNothing, reason: 'the library closed');
-    expect(find.byKey(const Key('settings-window')), findsNothing);
+    expect(find.byKey(const Key('reindex-setting')), findsOne);
+    expect(find.byKey(const Key('switch-library-setting')), findsNothing);
+    expect(find.byKey(const Key('close-library-setting')), findsNothing);
   });
 
   testWidgets('wide: opening a tree note keeps the rail, note in detail', (
