@@ -1092,6 +1092,17 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(await appDatabase).setLanguage(language);
   }
 
+  /// The keyboard shortcuts changed on this device (#159).
+  @override
+  Future<String?> get keyMap async =>
+      await AppSettingsRepo(await appDatabase).keyMap();
+
+  @override
+  Future<void> setKeyMap(String json) async {
+    _log.info('key map set');
+    await AppSettingsRepo(await appDatabase).setKeyMap(json);
+  }
+
   /// How bright the app is (T-M6-05).
   @override
   Future<AppBrightness> get themeBrightness async =>
