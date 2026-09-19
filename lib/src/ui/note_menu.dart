@@ -14,6 +14,10 @@ enum NoteMenuAction {
   /// key and no switch on the status row, the way to it beside the note.
   typewriter,
 
+  /// The command palette (#206): on the phone, a way in that does not
+  /// ask for the two-finger swipe to be known already.
+  palette,
+
   /// Browse and restore past versions.
   history,
 
@@ -32,13 +36,22 @@ enum NoteMenuAction {
 final class NoteMenuButton extends StatelessWidget {
   /// A menu reporting the picked action to [onSelected]; [typewriter]
   /// says which way its typewriter entry reads.
-  const new({required this.onSelected, this.typewriter = false, super.key});
+  const new({
+    required this.onSelected,
+    this.typewriter = false,
+    this.palette = false,
+    super.key,
+  });
 
   /// Called with the action picked.
   final ValueChanged<NoteMenuAction> onSelected;
 
   /// Whether typewriter mode is on.
   final bool typewriter;
+
+  /// Whether to offer the command palette (#206): the phone, where no
+  /// key opens it.
+  final bool palette;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +68,12 @@ final class NoteMenuButton extends StatelessWidget {
           Icons.vertical_align_center,
           typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
         ),
+        if (palette)
+          _item(
+            NoteMenuAction.palette,
+            Icons.bolt_outlined,
+            AppStrings.commandPaletteTitle,
+          ),
         _item(
           NoteMenuAction.history,
           Icons.history,

@@ -1840,6 +1840,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the wide layout's editor header.
   Widget _noteMenu() => NoteMenuButton(
     typewriter: _editorSettings.typewriter,
+    // The phone has no key for the palette (#206); the wide layout has.
+    palette: !_wide,
     onSelected: (action) {
       final path = _selected;
       if (path == null) return;
@@ -1847,6 +1849,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         NoteMenuAction.outline => _showPanel(DockPane.outline),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
+        NoteMenuAction.palette => _openPalette(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -1908,6 +1911,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       tabIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
       onSwitchLibrary: _switchLibrary,
+      // The phone's way into the palette (#206); the desktop has a key.
+      onOpenPalette: narrow ? () => unawaited(_openPalette()) : null,
       buildWideSlots: () => _wideSlots(controller),
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
@@ -2251,9 +2256,21 @@ final class _LibraryShellState extends State<_LibraryShell>
       builder: (context, tab, _) => Scaffold(
         appBar: AppBar(
           title: Text(_tabTitle),
-          actions: tab == ShellTab.files
-              ? _filesAppBarActions(controller)
-              : const [],
+          actions: switch (tab) {
+            ShellTab.files => _filesAppBarActions(controller),
+            // The palette is not the library's search (#206): its own
+            // way in, on the bar of the tab whose results it used to
+            // sit above.
+            ShellTab.search => [
+              IconButton(
+                key: const Key('search-open-palette'),
+                tooltip: AppStrings.commandPaletteTitle,
+                icon: const Icon(Icons.bolt_outlined),
+                onPressed: () => unawaited(_openPalette()),
+              ),
+            ],
+            _ => const [],
+          },
         ),
         // Bodies stay mounted once visited (see TabBodyStack): the switch
         // only flips visibility and fades the incoming body in, instead of
@@ -3101,14 +3118,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The Search tab's body; the slot owns which of the two shows
   /// (issue #100 moved it into [SearchSlot]).
   Widget _searchSlot(LibrarySession controller) {
-    return SearchSlot(
-      controller: controller,
-      onOpenNote: _openSearchNote,
-      // The palette's commands head the search's results (#155): on a
-      // phone that is how they are reached without a keyboard.
-      commands: _paletteCommands,
-      onRunCommand: (command) => _runCommand(_commandHandlers(), command),
-    );
+    return SearchSlot(controller: controller, onOpenNote: _openSearchNote);
   }
 
   /// The desktop tree's controls at the base of its column (T-PP-22):
