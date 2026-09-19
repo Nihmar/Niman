@@ -57,6 +57,8 @@ final class ShellLayoutProps {
     this.zenTitle = '',
     this.onLeaveZen,
     this.leaveZenOnEsc,
+    this.zenPreviewVisible = false,
+    this.onZenTogglePreview,
   });
 
   /// The open library.
@@ -153,6 +155,12 @@ final class ShellLayoutProps {
 
   /// Leaves Zen, from its bar.
   final VoidCallback? onLeaveZen;
+
+  /// Whether the note in Zen shows its preview.
+  final bool zenPreviewVisible;
+
+  /// Flips it, from Zen's bar; null when the note has no preview.
+  final VoidCallback? onZenTogglePreview;
 
   /// Leaves Zen on the app's Esc, a [DismissIntent]; off outside Zen.
   final Action<DismissIntent>? leaveZenOnEsc;
@@ -372,6 +380,8 @@ final class WideShellLayout extends StatelessWidget {
                     title: props.zenTitle,
                     onLeave: props.onLeaveZen ?? () {},
                     window: props.window,
+                    previewVisible: props.zenPreviewVisible,
+                    onTogglePreview: props.onZenTogglePreview,
                   )
                 else if (props.window.customTitleBar)
                   AppTitleBar(

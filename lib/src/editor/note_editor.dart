@@ -126,11 +126,15 @@ final class NoteEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!column.enabled && !typewriter) return _editor(0, 0);
+    // In typewriter mode the row being written is lit, faintly: it is the
+    // row the eye keeps coming back to (0.0.8 test round).
+    final line = typewriter ? typewriterLineColor(context) : null;
+    if (!column.enabled && !typewriter) return _editor(0, 0, line);
     return LayoutBuilder(
       builder: (context, constraints) => _editor(
         column.enabled ? column.sideSpaceIn(constraints.maxWidth) : 0,
         typewriter ? typewriterSlack(constraints.maxHeight) : 0,
+        line,
       ),
     );
   }
@@ -144,7 +148,7 @@ final class NoteEditor extends StatelessWidget {
   /// editors does not move the text sideways. Both sides stay inside the
   /// editor's scroll view, so the scrollbar keeps to the pane's edge and
   /// the wheel scrolls from the margins too.
-  Widget _editor(double side, double slack) {
+  Widget _editor(double side, double slack, Color? line) {
     final gutter = side == 0 ? 0.0 : side + NoteColumn.textInset - _fieldInset;
     return CodeEditor(
       controller: controller,
@@ -164,6 +168,7 @@ final class NoteEditor extends StatelessWidget {
       style: CodeEditorStyle(
         fontSize: fontSize,
         cursorWidth: caretWidth,
+        cursorLineColor: line,
         fontFamily: 'monospace',
         fontFamilyFallback: const [
           'Consolas',
@@ -229,7 +234,7 @@ final class NoteEditor extends StatelessWidget {
               },
             ),
       },
-      toolbarController: _toolbarController(),
+      toolbarController: _stableToolbar(),
     );
   }
 
@@ -241,13 +246,48 @@ final class NoteEditor extends StatelessWidget {
   /// Windows or Linux took the app down (2026-09-10 crash report). The
   /// desktop gets a controller of our own instead: the same menu, placed
   /// at the click and dismissed by the next one.
-  SelectionToolbarController _toolbarController() {
+  SelectionToolbarController _toolbarController(ToolbarMenuBuilder builder) {
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS) {
-      return MobileSelectionToolbarController(builder: _selectionMenu);
+      return MobileSelectionToolbarController(builder: builder);
     }
-    return _DesktopSelectionToolbar(builder: _selectionMenu);
+    return _DesktopSelectionToolbar(builder: builder);
   }
+
+  /// One toolbar controller per editing controller, for as long as the
+  /// note is open.
+  ///
+  /// re_editor shows the toolbar through the controller it was built with
+  /// and hides it through the one it has now. Built anew on every build,
+  /// the one asked to hide had never shown anything, and the menu stayed
+  /// on screen — on the phone after any rebuild, and since the note
+  /// column (#171) the editor is rebuilt whenever the keyboard comes or
+  /// goes (0.0.8 test round). The controller stays; its menu is built by
+  /// the latest editor, with the latest spelling and format actions.
+  SelectionToolbarController _stableToolbar() {
+    _latest[controller] = this;
+    final key = controller;
+    return _toolbars[key] ??= _toolbarController(
+      ({
+        required context,
+        required anchors,
+        required controller,
+        required onDismiss,
+        required onRefresh,
+      }) => _latest[key]!._selectionMenu(
+        context: context,
+        anchors: anchors,
+        controller: controller,
+        onDismiss: onDismiss,
+        onRefresh: onRefresh,
+      ),
+    );
+  }
+
+  static final Expando<SelectionToolbarController> _toolbars = Expando(
+    'selection toolbar',
+  );
+  static final Expando<NoteEditor> _latest = Expando('latest editor');
 
   /// Cut/copy/paste/select all for the current selection, then the
   /// toolbar's formatting actions (#174), then Add to dictionary.

@@ -144,6 +144,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         context: context,
         flashHome: _flashHome,
         openArea: _openArea,
+        keyboardAttached: _keyboard.attached,
       ),
       query,
     );

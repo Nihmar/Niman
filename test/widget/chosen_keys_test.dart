@@ -60,7 +60,10 @@ void main() {
       if (!wysiwyg) expect(controller.text, '!hello');
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpWidget(const SizedBox());
-    });
+      // On the desktop, where the editors have Ctrl+Z: on the default
+      // (Android) test platform re_editor binds no undo, and the check
+      // above passed whether the editor heard the key or not.
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
   }
 
   testWidgets('nothing runs while a combination is being recorded', (

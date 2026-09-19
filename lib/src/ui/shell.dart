@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1525,7 +1526,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     return _selectedIsDir ? _selected! : parentOf(_selected!);
   }
 
-  void _select(Note note) {
+  void _select(Note note, {bool newTab = false}) {
     // A note opening in preview-only has no editable for the IME.
     final previewOnly = !note.isDir && _opensPreviewOnly();
     if (previewOnly) FocusManager.instance.primaryFocus?.unfocus();
@@ -1539,12 +1540,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         });
         return;
       }
-      // Ctrl+click opens alongside (#23); a click shows it in place.
-      final keys = HardwareKeyboard.instance;
-      _workspace.show(
-        note.path,
-        newTab: keys.isControlPressed || keys.isMetaPressed,
-      );
+      _showFromTree(note.path, newTab: newTab);
     }
     setState(() {
       _selected = note.path;
@@ -1561,6 +1557,44 @@ final class _LibraryShellState extends State<_LibraryShell>
         _noteOpened();
       }
     });
+  }
+
+  /// The tree's last plain click on a note, for telling a double click:
+  /// the note, when, and what the tab showed before it.
+  ({String path, DateTime at, String? replaced})? _lastTreeClick;
+
+  /// Shows the note at [path] from the tree, on the wide layout (#23 and
+  /// the 0.0.8 test round).
+  ///
+  /// - A click shows it in place of the tab's note.
+  /// - Ctrl+click, a middle click ([newTab]) or a double click opens it
+  ///   in a tab of its own. A double click starts as a click, so its
+  ///   second half puts back what the first replaced, then opens the note
+  ///   beside it. Waiting to tell the two apart instead would make every
+  ///   single click late.
+  void _showFromTree(String path, {required bool newTab}) {
+    final keys = HardwareKeyboard.instance;
+    final now = DateTime.now();
+    final last = _lastTreeClick;
+    _lastTreeClick = null;
+    if (newTab || keys.isControlPressed || keys.isMetaPressed) {
+      _workspace.show(path, newTab: true);
+      return;
+    }
+    if (last != null &&
+        last.path == path &&
+        now.difference(last.at) <= kDoubleTapTimeout) {
+      if (last.replaced case final replaced?) _workspace.show(replaced);
+      _workspace.show(path, newTab: true);
+      return;
+    }
+    final before = _workspace.value.activePath;
+    _workspace.show(path);
+    _lastTreeClick = (
+      path: path,
+      at: now,
+      replaced: before == path ? null : before,
+    );
   }
 
   /// Opens a search result at [path] (library-relative): phone — the
@@ -1790,12 +1824,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The open note's ⋮ menu (mockup H2), on the phone's note bar and in
   /// the wide layout's editor header.
   Widget _noteMenu() => NoteMenuButton(
+    typewriter: _editorSettings.typewriter,
     onSelected: (action) {
       final path = _selected;
       if (path == null) return;
       unawaited(switch (action) {
         NoteMenuAction.outline => _showPanel(DockPane.outline),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
+        NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -1860,6 +1896,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
       onLeaveZen: () => unawaited(_zen.leave()),
+      zenPreviewVisible: _notePreview,
+      onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
     );
     return narrow
@@ -2378,8 +2416,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (_wide && !_inZen)
         AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
       if (note != null) ...{
-        if (_previewToggleVisible && !_inZen)
-          AppCommand.togglePreview: _togglePreview,
+        if (_previewToggleVisible) AppCommand.togglePreview: _togglePreview,
         if (_editorSettings.editorsEnabled.length > 1)
           AppCommand.switchEditor: () => unawaited(
             _setEditorKind(
@@ -2973,6 +3010,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         controller: _todoController,
         reminders: widget.reminders,
         onAddTask: _addTodo,
+        column: _editorSettings.noteColumn,
       ),
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an
@@ -3041,6 +3079,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       expanded: _expanded,
       onToggle: _toggle,
       onSelect: _select,
+      onOpenInNewTab: (note) => _select(note, newTab: true),
       onLongPress: _showRowMenu,
       onSecondaryTapDown: (note, details) =>
           _showRowMenuAt(note, details.globalPosition),
