@@ -13,6 +13,18 @@ library;
 
 import 'package:niman/src/todo/todo_reminder.dart';
 
+/// [ReminderBackend.overdueState] where the OS holds the alarms (Android):
+/// one still pending past its time never fired, one that is gone did,
+/// and the two settings say which way a deferred one leans.
+String osAlarmOverdueState({
+  required bool pending,
+  required bool exact,
+  required bool batteryExempt,
+}) =>
+    '${pending ? 'STILL PENDING, never fired' : 'no longer pending, fired'}, '
+    'alarms ${exact ? 'exact' : 'inexact'}, '
+    'battery ${batteryExempt ? 'unrestricted' : 'optimized'}';
+
 /// The platform operations reminders need.
 abstract interface class ReminderBackend {
   /// Initializes the platform (timezone data, plugin, channel), once.
@@ -46,6 +58,20 @@ abstract interface class ReminderBackend {
 
   /// Payloads of notification taps while the app runs.
   Stream<String?> get taps;
+
+  /// What an overdue [reminder]'s state means here, for the log (#42):
+  /// [pending] is whether [pendingIds] still lists it, and [exact] and
+  /// [batteryExempt] are the settings that could have deferred it.
+  ///
+  /// The same facts read differently per backend. An OS alarm that is no
+  /// longer pending did fire; a desktop timer that is not armed may never
+  /// have been, because the process was not running at its time.
+  String overdueState(
+    TodoReminder reminder, {
+    required bool pending,
+    required bool exact,
+    required bool batteryExempt,
+  });
 
   /// Releases resources.
   Future<void> dispose();
