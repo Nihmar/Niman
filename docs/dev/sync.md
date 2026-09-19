@@ -367,6 +367,10 @@ for multistatus parsing: servers pick their own namespace prefixes
   `MOVE`, `OPTIONS`; paths are library-relative and percent-encoded per
   segment; hrefs in responses are decoded and made relative to the
   base, whatever mix of absolute URL / absolute path the server uses;
+- reads a `response` as an item only when it answers for something:
+  its own `status` (when it has one) is a 2xx and at least one of its
+  propstats succeeded. `stat` takes an exact path, or a lone item of
+  the kind asked for (a folder never stands in for a missing file);
 - streams both ways: `PUT` from a file stream with `Content-Length`,
   `GET` into a sink with sha256 computed in flight, never a whole file
   in memory;
@@ -410,7 +414,10 @@ one runs joins it.
 5. **Apply**, one decision at a time. Before touching a side, the engine
    checks it still is what the scan saw (local size + mtime; the remote
    with a PROPFIND when the decision has no precondition): a path that
-   moved meanwhile is skipped and decided again next run.
+   moved meanwhile is skipped and decided again next run. That PROPFIND
+   is only as good as the client's reading of "not there": some servers
+   answer a missing path with a `207` holding a `404`, which the parser
+   now drops rather than reading as the file (#163).
    - *upload*: missing remote folders are created (once per run), `PUT`
      streamed from disk with `If-Match` / `If-None-Match` and
      `X-OC-Mtime`, then a `PROPFIND Depth: 0` for the metadata to record.

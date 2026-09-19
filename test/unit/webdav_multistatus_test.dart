@@ -176,4 +176,20 @@ void main() {
       DateTime.utc(2026, 9, 15, 10),
     );
   });
+
+  // #163: some servers answer a PROPFIND for a missing path with a 207.
+  test('a response that answers for nothing is not an item', () {
+    const body = '''
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:">
+<D:response><D:href>/webdav/My%20Notes/gone.md</D:href>
+<D:status>HTTP/1.1 404 Not Found</D:status></D:response>
+<D:response><D:href>/webdav/My%20Notes/also-gone.md</D:href>
+<D:propstat><D:prop><D:getetag/><D:resourcetype/></D:prop>
+<D:status>HTTP/1.1 404 Not Found</D:status></D:propstat></D:response>
+<D:response><D:href>/webdav/My%20Notes/here.md</D:href>
+<D:status>HTTP/1.1 200 OK</D:status></D:response>
+</D:multistatus>''';
+    expect(parseMultistatus(body, base).map((i) => i.path), ['here.md']);
+  });
 }
