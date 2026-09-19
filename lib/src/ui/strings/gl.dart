@@ -1213,6 +1213,12 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get zenMode => 'Modo zen';
+  @override
+  String get zenModeEnter => 'Entrar no modo zen';
+  @override
+  String get zenModeLeave => 'Saír do modo zen';
+  @override
   String get keySpace => 'Espazo';
   @override
   String get keyEnter => 'Intro';

@@ -18,6 +18,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note
 - `Ctrl/⌘+\` — split the window right with the note on screen
 - `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history)
+- `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
+  leaves it (see [editing](editing.md#zen-mode))
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs
 
 Moving and selecting in the source editor, on Windows and Linux:

@@ -1223,6 +1223,12 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get zenMode => 'Zen-Modus';
+  @override
+  String get zenModeEnter => 'Zen-Modus starten';
+  @override
+  String get zenModeLeave => 'Zen-Modus verlassen';
+  @override
   String get keySpace => 'Leertaste';
   @override
   String get keyEnter => 'Eingabe';

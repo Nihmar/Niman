@@ -1214,6 +1214,12 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get zenMode => 'Zen-modus';
+  @override
+  String get zenModeEnter => 'Zen-modus openen';
+  @override
+  String get zenModeLeave => 'Zen-modus verlaten';
+  @override
   String get keySpace => 'Spatie';
   @override
   String get keyEnter => 'Enter';

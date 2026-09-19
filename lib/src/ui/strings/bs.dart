@@ -1203,6 +1203,12 @@ final class BosnianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get zenMode => 'Zen način';
+  @override
+  String get zenModeEnter => 'Uđi u Zen način';
+  @override
+  String get zenModeLeave => 'Izađi iz Zen načina';
+  @override
   String get keySpace => 'Razmak';
   @override
   String get keyEnter => 'Enter';

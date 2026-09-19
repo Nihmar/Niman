@@ -1196,6 +1196,12 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get zenMode => 'Zen režīms';
+  @override
+  String get zenModeEnter => 'Ieslēgt zen režīmu';
+  @override
+  String get zenModeLeave => 'Iziet no zen režīma';
+  @override
   String get keySpace => 'Atstarpe';
   @override
   String get keyEnter => 'Enter';

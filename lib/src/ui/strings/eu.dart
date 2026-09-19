@@ -1205,6 +1205,12 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get zenMode => 'Zen modua';
+  @override
+  String get zenModeEnter => 'Sartu zen moduan';
+  @override
+  String get zenModeLeave => 'Irten zen modutik';
+  @override
   String get keySpace => 'Zuriunea';
   @override
   String get keyEnter => 'Sartu';

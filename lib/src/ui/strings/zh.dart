@@ -1093,6 +1093,12 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get zenMode => '禅模式';
+  @override
+  String get zenModeEnter => '进入禅模式';
+  @override
+  String get zenModeLeave => '退出禅模式';
+  @override
   String get keySpace => '空格';
   @override
   String get keyEnter => '回车';

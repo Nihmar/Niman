@@ -1193,6 +1193,12 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get zenMode => 'Zen mode';
+  @override
+  String get zenModeEnter => 'Enter Zen mode';
+  @override
+  String get zenModeLeave => 'Leave Zen mode';
+  @override
   String get keySpace => 'Space';
   @override
   String get keyEnter => 'Enter';

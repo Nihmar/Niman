@@ -54,7 +54,13 @@ final class FakeWindowController implements WindowController {
   Future<void> minimize() async => minimizeCalls++;
 
   @override
-  Future<void> toggleMaximize() async => maximizeCalls++;
+  Future<void> toggleMaximize() async {
+    maximizeCalls++;
+    maximized.value = !maximized.value;
+  }
+
+  @override
+  Future<bool> isMaximized() async => maximized.value;
 
   @override
   Future<void> dispose() async {}

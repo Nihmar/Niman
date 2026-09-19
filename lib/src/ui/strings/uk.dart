@@ -1205,6 +1205,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get zenMode => 'Режим дзен';
+  @override
+  String get zenModeEnter => 'Увійти в режим дзен';
+  @override
+  String get zenModeLeave => 'Вийти з режиму дзен';
+  @override
   String get keySpace => 'Пробіл';
   @override
   String get keyEnter => 'Enter';

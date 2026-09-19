@@ -1200,6 +1200,12 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get zenMode => 'Zen-hamur';
+  @override
+  String get zenModeEnter => 'Fara í zen-ham';
+  @override
+  String get zenModeLeave => 'Hætta í zen-ham';
+  @override
   String get keySpace => 'Bil';
   @override
   String get keyEnter => 'Enter';

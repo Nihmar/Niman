@@ -1189,6 +1189,12 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get zenMode => 'Zen modu';
+  @override
+  String get zenModeEnter => 'Zen moduna gir';
+  @override
+  String get zenModeLeave => 'Zen modundan çık';
+  @override
   String get keySpace => 'Boşluk';
   @override
   String get keyEnter => 'Enter';

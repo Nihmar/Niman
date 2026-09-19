@@ -1213,6 +1213,12 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get zenMode => 'Modalità Zen';
+  @override
+  String get zenModeEnter => 'Entra in modalità Zen';
+  @override
+  String get zenModeLeave => 'Esci dalla modalità Zen';
+  @override
   String get keySpace => 'Spazio';
   @override
   String get keyEnter => 'Invio';

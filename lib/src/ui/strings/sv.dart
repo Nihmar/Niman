@@ -1206,6 +1206,12 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get zenMode => 'Zenläge';
+  @override
+  String get zenModeEnter => 'Gå till zenläge';
+  @override
+  String get zenModeLeave => 'Lämna zenläge';
+  @override
   String get keySpace => 'Blanksteg';
   @override
   String get keyEnter => 'Enter';

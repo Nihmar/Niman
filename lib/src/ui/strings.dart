@@ -764,6 +764,9 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get zenMode => _s.zenMode;
+  static String get zenModeEnter => _s.zenModeEnter;
+  static String get zenModeLeave => _s.zenModeLeave;
   static String get keySpace => _s.keySpace;
   static String get keyEnter => _s.keyEnter;
   static String get keyTab => _s.keyTab;

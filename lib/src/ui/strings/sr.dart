@@ -1204,6 +1204,12 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get zenMode => 'Зен режим';
+  @override
+  String get zenModeEnter => 'Уђи у зен режим';
+  @override
+  String get zenModeLeave => 'Изађи из зен режима';
+  @override
   String get keySpace => 'Размак';
   @override
   String get keyEnter => 'Enter';

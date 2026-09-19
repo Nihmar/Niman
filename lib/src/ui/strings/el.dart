@@ -1243,6 +1243,12 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get zenMode => 'Λειτουργία Ζεν';
+  @override
+  String get zenModeEnter => 'Είσοδος σε λειτουργία Ζεν';
+  @override
+  String get zenModeLeave => 'Έξοδος από τη λειτουργία Ζεν';
+  @override
   String get keySpace => 'Διάστημα';
   @override
   String get keyEnter => 'Enter';

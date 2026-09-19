@@ -42,6 +42,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.statusActions,
     required this.spellCheck,
     this.reloadToken = 0,
+    this.zen = false,
     this.onMemento,
     this.onLoaded,
     this.readNote,
@@ -133,6 +134,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// The editor's spelling state (T-PP-09).
   final EditorSpellCheck spellCheck;
 
+  /// Zen mode (#69): the notes without their chrome.
+  final bool zen;
+
   /// External-change reload requests for the open note (home-screen
   /// widget toggles); forwarded to the NoteView.
   final int reloadToken;
@@ -197,6 +201,7 @@ final class ShellDetailPane extends StatelessWidget {
     // chrome); the phone keeps it under the editor, extending the
     // keyboard.
     toolbarTop: true,
+    zen: zen,
     splitPreview: tab.splitPreview,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,
