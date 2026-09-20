@@ -17,6 +17,7 @@ import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -149,8 +150,17 @@ void main() {
     await settle(tester);
     expect(zenBar, findsOne);
 
+    // The sidebar toggle is out while Zen is on. The palette can answer
+    // with settings rows now (#229), but not with the ones that name a
+    // command, so nothing here says its name at all.
     await palette('file tree');
-    expect(find.byKey(const Key('palette-item-0')), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('command-palette')),
+        matching: find.text(AppStrings.shortcutToggleSidebar),
+      ),
+      findsNothing,
+    );
     // Esc closes the palette first, not Zen.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await settle(tester);

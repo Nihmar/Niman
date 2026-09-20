@@ -22,6 +22,7 @@ final class SettingsTab extends StatefulWidget {
     this.spellCheck,
     this.transcription,
     this.libraryRows = true,
+    this.target,
     super.key,
   });
 
@@ -37,6 +38,9 @@ final class SettingsTab extends StatefulWidget {
   /// Whether Settings offers Switch library and Close library; the
   /// settings window leaves them to the library window (#203).
   final bool libraryRows;
+
+  /// Where to open: an area and a row in it (#229); null opens the home.
+  final SettingsTarget? target;
 
   /// The left column's width: the areas' names and the search, no more.
   static const double listWidth = 280;
@@ -64,6 +68,7 @@ final class _SettingsTabState extends State<SettingsTab> {
             spellCheck: widget.spellCheck,
             transcription: widget.transcription,
             libraryRows: widget.libraryRows,
+            target: widget.target,
           );
         }
         return Row(
@@ -76,6 +81,7 @@ final class _SettingsTabState extends State<SettingsTab> {
                 transcription: widget.transcription,
                 navigation: _navigation,
                 libraryRows: widget.libraryRows,
+                target: widget.target,
               ),
             ),
             const VerticalDivider(width: 1),
