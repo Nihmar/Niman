@@ -40,9 +40,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   desktop reminders keep firing; Settings → Appearance → *Close to the
   tray* turns that off, and then the × quits as it used to. *Quit* asks
   about unsaved notes exactly as the × does.
-  On a desktop whose indicator answers no clicks of its own (Linux's
-  AppIndicator), *Open Niman* is how the window comes back; on Windows a
-  click on the icon does it too.
+  On Linux the click on the icon **is** the menu — a StatusNotifier item
+  has no right click of its own — and *Open Niman* is how the window
+  comes back. On Windows the right click opens the menu and a left click
+  brings the window back.
 - Markdown files open in Niman: the desktop entry declares
   `text/markdown`, so Niman is offered for `.md` files and can be made
   their default app. Double-clicking one opens it in the Niman already

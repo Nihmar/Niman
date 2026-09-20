@@ -68,6 +68,24 @@ abstract interface class TrayService {
   Future<void> dispose();
 }
 
+/// Which gesture opens the tray menu.
+///
+/// Linux: the click *is* the menu. A StatusNotifier item has no right
+/// click of its own, and nativeapi tells the desktop where the menu
+/// lives only while the trigger is `clicked`: with `rightClicked` it
+/// answers the SNI `Menu` property with "/", and KDE, told the item has
+/// no menu, showed nothing at all (0.0.8 test round).
+///
+/// Windows keeps the right click, where the left one brings the window
+/// back — the convention there, and the reason the two differ.
+///
+/// [isLinux] overrides the host platform for the test.
+ContextMenuTrigger trayContextMenuTrigger({bool? isLinux}) {
+  return (isLinux ?? Platform.isLinux)
+      ? ContextMenuTrigger.clicked
+      : ContextMenuTrigger.rightClicked;
+}
+
 /// Creates the platform service: a real tray on the desktops, a no-op
 /// elsewhere (Android has no tray; its quick actions are the launcher's).
 ///
@@ -148,7 +166,7 @@ final class PlatformTrayService implements TrayService {
       }
       tray
         ..setTooltip('Niman')
-        ..setContextMenuTrigger(ContextMenuTrigger.rightClicked);
+        ..setContextMenuTrigger(trayContextMenuTrigger());
       final icon = ImageAsset.fromAsset(iconAsset);
       if (icon != null) {
         _icon = icon;
