@@ -1,0 +1,1502 @@
+[
+ {
+  "html": "<pre><code>foo\tbaz\t\tbim\n</code></pre>\n",
+  "normalized": "<pre><code>foo\tbaz\t\tbim\n</code></pre>"
+ },
+ {
+  "html": "<pre><code>a\ta\nὐ\ta\n</code></pre>\n",
+  "normalized": "<pre><code>a\ta\nὐ\ta\n</code></pre>"
+ },
+ {
+  "html": "<ul>\n<li>\n<p>foo</p>\n<p>bar</p>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><p>foo</p><p>bar</p></li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>\n<p>foo</p>\n<pre><code>  bar\n</code></pre>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><p>foo</p><pre><code>  bar\n</code></pre></li></ul>"
+ },
+ {
+  "html": "<blockquote>\n<pre><code>  foo\n</code></pre>\n</blockquote>\n",
+  "normalized": "<blockquote><pre><code>  foo\n</code></pre></blockquote>"
+ },
+ {
+  "html": "<ul>\n<li>\n<pre><code>  foo\n</code></pre>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><pre><code>  foo\n</code></pre></li></ul>"
+ },
+ {
+  "html": "<pre><code>foo\nbar\n</code></pre>\n",
+  "normalized": "<pre><code>foo\nbar\n</code></pre>"
+ },
+ {
+  "html": "<ul>\n<li>foo\n<ul>\n<li>bar\n<ul>\n<li>baz</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n",
+  "normalized": "<ul><li>foo<ul><li>bar<ul><li>baz</li></ul></li></ul></li></ul>"
+ },
+ {
+  "html": "<h1>Foo</h1>\n",
+  "normalized": "<h1>Foo</h1>"
+ },
+ {
+  "html": "<hr />\n",
+  "normalized": "<hr>"
+ },
+ {
+  "html": "<p>!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>\n",
+  "normalized": "<p>!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?@[\\]^_`{|}~</p>"
+ },
+ {
+  "html": "<p>\\\t\\A\\a\\ \\3\\φ\\«</p>\n",
+  "normalized": "<p>\\ \\A\\a\\ \\3\\φ\\«</p>"
+ },
+ {
+  "html": "<p>*not emphasized*\n&lt;br/&gt; not a tag\n[not a link](/foo)\n`not code`\n1. not a list\n* not a list\n# not a heading\n[foo]: /url &quot;not a reference&quot;\n&amp;ouml; not a character entity</p>\n",
+  "normalized": "<p>*not emphasized* &lt;br/&gt; not a tag [not a link](/foo) `not code` 1. not a list * not a list # not a heading [foo]: /url &quot;not a reference&quot; &amp;ouml; not a character entity</p>"
+ },
+ {
+  "html": "<p>\\<em>emphasis</em></p>\n",
+  "normalized": "<p>\\<em>emphasis</em></p>"
+ },
+ {
+  "html": "<p>foo<br />\nbar</p>\n",
+  "normalized": "<p>foo<br>bar</p>"
+ },
+ {
+  "html": "<p><code>\\[\\`</code></p>\n",
+  "normalized": "<p><code>\\[\\`</code></p>"
+ },
+ {
+  "html": "<pre><code>\\[\\]\n</code></pre>\n",
+  "normalized": "<pre><code>\\[\\]\n</code></pre>"
+ },
+ {
+  "html": "<p><a href=\"https://example.com?find=%5C*\">https://example.com?find=\\*</a></p>\n",
+  "normalized": "<p><a href=\"https://example.com?find=%5C*\">https://example.com?find=\\*</a></p>"
+ },
+ {
+  "html": "<a href=\"/bar\\/)\">\n",
+  "normalized": "<a href=\"/bar\\/)\"> "
+ },
+ {
+  "html": "<p><a href=\"/bar*\" title=\"ti*tle\">foo</a></p>\n",
+  "normalized": "<p><a href=\"/bar*\" title=\"ti*tle\">foo</a></p>"
+ },
+ {
+  "html": "<pre><code class=\"language-foo+bar\">foo\n</code></pre>\n",
+  "normalized": "<pre><code class=\"language-foo+bar\">foo\n</code></pre>"
+ },
+ {
+  "html": "<p>  &amp; © Æ Ď\n¾ ℋ ⅆ\n∲ ≧̸</p>\n",
+  "normalized": "<p>&amp; © Æ Ď ¾ ℋ ⅆ ∲ ≧̸</p>"
+ },
+ {
+  "html": "<p># Ӓ Ϡ �</p>\n",
+  "normalized": "<p># Ӓ Ϡ �</p>"
+ },
+ {
+  "html": "<p>&quot; ആ ಫ</p>\n",
+  "normalized": "<p>&quot; ആ ಫ</p>"
+ },
+ {
+  "html": "<p>&amp;nbsp &amp;x; &amp;#; &amp;#x;\n&amp;#87654321;\n&amp;#abcdef0;\n&amp;ThisIsNotDefined; &amp;hi?;</p>\n",
+  "normalized": "<p>&amp;nbsp &amp;x; &amp;#; &amp;#x; &amp;#87654321; &amp;#abcdef0; &amp;ThisIsNotDefined; &amp;hi?;</p>"
+ },
+ {
+  "html": "<p>&amp;copy</p>\n",
+  "normalized": "<p>&amp;copy</p>"
+ },
+ {
+  "html": "<p>&amp;MadeUpEntity;</p>\n",
+  "normalized": "<p>&amp;MadeUpEntity;</p>"
+ },
+ {
+  "html": "<a href=\"&ouml;&ouml;.html\">\n",
+  "normalized": "<a href=\"öö.html\"> "
+ },
+ {
+  "html": "<p><a href=\"/f%C3%B6%C3%B6\" title=\"föö\">foo</a></p>\n",
+  "normalized": "<p><a href=\"/f%C3%B6%C3%B6\" title=\"föö\">foo</a></p>"
+ },
+ {
+  "html": "<pre><code class=\"language-föö\">foo\n</code></pre>\n",
+  "normalized": "<pre><code class=\"language-föö\">foo\n</code></pre>"
+ },
+ {
+  "html": "<p><code>f&amp;ouml;&amp;ouml;</code></p>\n",
+  "normalized": "<p><code>f&amp;ouml;&amp;ouml;</code></p>"
+ },
+ {
+  "html": "<pre><code>f&amp;ouml;f&amp;ouml;\n</code></pre>\n",
+  "normalized": "<pre><code>f&amp;ouml;f&amp;ouml;\n</code></pre>"
+ },
+ {
+  "html": "<p>*foo*\n<em>foo</em></p>\n",
+  "normalized": "<p>*foo* <em>foo</em></p>"
+ },
+ {
+  "html": "<p>* foo</p>\n<ul>\n<li>foo</li>\n</ul>\n",
+  "normalized": "<p>* foo</p><ul><li>foo</li></ul>"
+ },
+ {
+  "html": "<p>foo\n\nbar</p>\n",
+  "normalized": "<p>foo bar</p>"
+ },
+ {
+  "html": "<p>\tfoo</p>\n",
+  "normalized": "<p>foo</p>"
+ },
+ {
+  "html": "<p>+++</p>\n",
+  "normalized": "<p>+++</p>"
+ },
+ {
+  "html": "<pre><code>***\n</code></pre>\n",
+  "normalized": "<pre><code>***\n</code></pre>"
+ },
+ {
+  "html": "<p><em>-</em></p>\n",
+  "normalized": "<p><em>-</em></p>"
+ },
+ {
+  "html": "<ul>\n<li>Foo</li>\n</ul>\n<hr />\n<ul>\n<li>Bar</li>\n</ul>\n",
+  "normalized": "<ul><li>Foo</li></ul><hr><ul><li>Bar</li></ul>"
+ },
+ {
+  "html": "<p>#5 bolt</p>\n<p>#hashtag</p>\n",
+  "normalized": "<p>#5 bolt</p><p>#hashtag</p>"
+ },
+ {
+  "html": "<h3>foo</h3>\n<h2>foo</h2>\n<h1>foo</h1>\n",
+  "normalized": "<h3>foo</h3><h2>foo</h2><h1>foo</h1>"
+ },
+ {
+  "html": "<h1>foo</h1>\n<h5>foo</h5>\n",
+  "normalized": "<h1>foo</h1><h5>foo</h5>"
+ },
+ {
+  "html": "<h3>foo ###</h3>\n<h2>foo ###</h2>\n<h1>foo #</h1>\n",
+  "normalized": "<h3>foo ###</h3><h2>foo ###</h2><h1>foo #</h1>"
+ },
+ {
+  "html": "<h1>Foo <em>bar</em></h1>\n<h2>Foo <em>bar</em></h2>\n",
+  "normalized": "<h1>Foo <em>bar</em></h1><h2>Foo <em>bar</em></h2>"
+ },
+ {
+  "html": "<h2>Foo</h2>\n<h2>Foo</h2>\n<h1>Foo</h1>\n",
+  "normalized": "<h2>Foo</h2><h2>Foo</h2><h1>Foo</h1>"
+ },
+ {
+  "html": "<p>Foo\n= =</p>\n<p>Foo</p>\n<hr />\n",
+  "normalized": "<p>Foo = =</p><p>Foo</p><hr>"
+ },
+ {
+  "html": "<blockquote>\n<p>Foo</p>\n</blockquote>\n<hr />\n",
+  "normalized": "<blockquote><p>Foo</p></blockquote><hr>"
+ },
+ {
+  "html": "<hr />\n<h2>Foo</h2>\n<h2>Bar</h2>\n<p>Baz</p>\n",
+  "normalized": "<hr><h2>Foo</h2><h2>Bar</h2><p>Baz</p>"
+ },
+ {
+  "html": "<pre><code>foo\n</code></pre>\n<hr />\n",
+  "normalized": "<pre><code>foo\n</code></pre><hr>"
+ },
+ {
+  "html": "<p>Foo\nbar</p>\n<hr />\n<p>baz</p>\n",
+  "normalized": "<p>Foo bar</p><hr><p>baz</p>"
+ },
+ {
+  "html": "<pre><code>chunk1\n  \n  chunk2\n</code></pre>\n",
+  "normalized": "<pre><code>chunk1\n  \n  chunk2\n</code></pre>"
+ },
+ {
+  "html": "<pre><code>    foo\nbar\n</code></pre>\n",
+  "normalized": "<pre><code>    foo\nbar\n</code></pre>"
+ },
+ {
+  "html": "<pre><code>&lt;\n &gt;\n</code></pre>\n",
+  "normalized": "<pre><code>&lt;\n &gt;\n</code></pre>"
+ },
+ {
+  "html": "<pre><code>aaa\n```\n</code></pre>\n",
+  "normalized": "<pre><code>aaa\n```\n</code></pre>"
+ },
+ {
+  "html": "<blockquote>\n<pre><code>aaa\n</code></pre>\n</blockquote>\n<p>bbb</p>\n",
+  "normalized": "<blockquote><pre><code>aaa\n</code></pre></blockquote><p>bbb</p>"
+ },
+ {
+  "html": "<pre><code>aaa\naaa\naaa\n</code></pre>\n",
+  "normalized": "<pre><code>aaa\naaa\naaa\n</code></pre>"
+ },
+ {
+  "html": "<pre><code>aaa\n</code></pre>\n",
+  "normalized": "<pre><code>aaa\n</code></pre>"
+ },
+ {
+  "html": "<p>foo</p>\n<pre><code>bar\n</code></pre>\n<p>baz</p>\n",
+  "normalized": "<p>foo</p><pre><code>bar\n</code></pre><p>baz</p>"
+ },
+ {
+  "html": "<pre><code class=\"language-;\"></code></pre>\n",
+  "normalized": "<pre><code class=\"language-;\"></code></pre>"
+ },
+ {
+  "html": "<table><tr><td>\n<pre>\n**Hello**,\n<p><em>world</em>.\n</pre></p>\n</td></tr></table>\n",
+  "normalized": "<table><tr><td><pre>\n**Hello**,<p><em>world</em>.\n</pre></p></td></tr></table>"
+ },
+ {
+  "html": "<DIV CLASS=\"foo\">\n<p><em>Markdown</em></p>\n</DIV>\n",
+  "normalized": "<div class=\"foo\"><p><em>Markdown</em></p></div>"
+ },
+ {
+  "html": "<div id=\"foo\"\n*hi*\n",
+  "normalized": "div id=\"foo\" *hi* "
+ },
+ {
+  "html": "<table><tr><td>\nfoo\n</td></tr></table>\n",
+  "normalized": "<table><tr><td>foo</td></tr></table>"
+ },
+ {
+  "html": "<i class=\"foo\">\n*bar*\n</i>\n",
+  "normalized": "<i class=\"foo\"> *bar* </i> "
+ },
+ {
+  "html": "<p><del><em>foo</em></del></p>\n",
+  "normalized": "<p><del><em>foo</em></del></p>"
+ },
+ {
+  "html": "<style\n  type=\"text/css\">\nh1 {color:red;}\n\np {color:blue;}\n</style>\n<p>okay</p>\n",
+  "normalized": "<style type=\"text/css\">h1 {color:red;} p {color:blue;}</style><p>okay</p>"
+ },
+ {
+  "html": "<style>p{color:red;}</style>\n<p><em>foo</em></p>\n",
+  "normalized": "<style>p{color:red;}</style><p><em>foo</em></p>"
+ },
+ {
+  "html": "<?php\n\n  echo '>';\n\n?>\n<p>okay</p>\n",
+  "normalized": "<?php\n\n  echo '>'; ?><p>okay</p>"
+ },
+ {
+  "html": "  <div>\n<pre><code>&lt;div&gt;\n</code></pre>\n",
+  "normalized": "<div><pre><code>&lt;div&gt;\n</code></pre>"
+ },
+ {
+  "html": "<div>\n<p><em>Emphasized</em> text.</p>\n</div>\n",
+  "normalized": "<div><p><em>Emphasized</em> text.</p></div>"
+ },
+ {
+  "html": "<p><a href=\"/url\" title=\"title\">foo</a></p>\n",
+  "normalized": "<p><a href=\"/url\" title=\"title\">foo</a></p>"
+ },
+ {
+  "html": "<p><a href=\"/url\" title=\"\ntitle\nline1\nline2\n\">foo</a></p>\n",
+  "normalized": "<p><a href=\"/url\" title=\"\ntitle\nline1\nline2\n\">foo</a></p>"
+ },
+ {
+  "html": "<p><a href=\"\">foo</a></p>\n",
+  "normalized": "<p><a href=\"\">foo</a></p>"
+ },
+ {
+  "html": "<p><a href=\"first\">foo</a></p>\n",
+  "normalized": "<p><a href=\"first\">foo</a></p>"
+ },
+ {
+  "html": "<p>bar</p>\n",
+  "normalized": "<p>bar</p>"
+ },
+ {
+  "html": "<pre><code>[foo]: /url\n</code></pre>\n<p>[foo]</p>\n",
+  "normalized": "<pre><code>[foo]: /url\n</code></pre><p>[foo]</p>"
+ },
+ {
+  "html": "<p>===\n<a href=\"/url\">foo</a></p>\n",
+  "normalized": "<p>=== <a href=\"/url\">foo</a></p>"
+ },
+ {
+  "html": "<p>aaa\nbbb</p>\n<p>ccc\nddd</p>\n",
+  "normalized": "<p>aaa bbb</p><p>ccc ddd</p>"
+ },
+ {
+  "html": "<p>aaa\nbbb</p>\n",
+  "normalized": "<p>aaa bbb</p>"
+ },
+ {
+  "html": "<blockquote>\n<h1>Foo</h1>\n<p>bar\nbaz</p>\n</blockquote>\n",
+  "normalized": "<blockquote><h1>Foo</h1><p>bar baz</p></blockquote>"
+ },
+ {
+  "html": "<blockquote>\n<pre><code>foo\n</code></pre>\n</blockquote>\n<pre><code>bar\n</code></pre>\n",
+  "normalized": "<blockquote><pre><code>foo\n</code></pre></blockquote><pre><code>bar\n</code></pre>"
+ },
+ {
+  "html": "<blockquote>\n</blockquote>\n",
+  "normalized": "<blockquote></blockquote>"
+ },
+ {
+  "html": "<blockquote>\n<p>foo</p>\n<p>bar</p>\n</blockquote>\n",
+  "normalized": "<blockquote><p>foo</p><p>bar</p></blockquote>"
+ },
+ {
+  "html": "<blockquote>\n<p>bar</p>\n</blockquote>\n<p>baz</p>\n",
+  "normalized": "<blockquote><p>bar</p></blockquote><p>baz</p>"
+ },
+ {
+  "html": "<blockquote>\n<pre><code>code\n</code></pre>\n</blockquote>\n<blockquote>\n<p>not code</p>\n</blockquote>\n",
+  "normalized": "<blockquote><pre><code>code\n</code></pre></blockquote><blockquote><p>not code</p></blockquote>"
+ },
+ {
+  "html": "<ul>\n<li>\n<p>one</p>\n<p>two</p>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><p>one</p><p>two</p></li></ul>"
+ },
+ {
+  "html": "<blockquote>\n<blockquote>\n<ul>\n<li>one</li>\n</ul>\n<p>two</p>\n</blockquote>\n</blockquote>\n",
+  "normalized": "<blockquote><blockquote><ul><li>one</li></ul><p>two</p></blockquote></blockquote>"
+ },
+ {
+  "html": "<ul>\n<li>\n<p>Foo</p>\n<pre><code>bar\n\n\nbaz\n</code></pre>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><p>Foo</p><pre><code>bar\n\n\nbaz\n</code></pre></li></ul>"
+ },
+ {
+  "html": "<ol start=\"3\">\n<li>ok</li>\n</ol>\n",
+  "normalized": "<ol start=\"3\"><li>ok</li></ol>"
+ },
+ {
+  "html": "<pre><code>indented code\n</code></pre>\n<p>paragraph</p>\n<pre><code>more code\n</code></pre>\n",
+  "normalized": "<pre><code>indented code\n</code></pre><p>paragraph</p><pre><code>more code\n</code></pre>"
+ },
+ {
+  "html": "<ul>\n<li>foo</li>\n</ul>\n<p>bar</p>\n",
+  "normalized": "<ul><li>foo</li></ul><p>bar</p>"
+ },
+ {
+  "html": "<ul>\n<li></li>\n</ul>\n<p>foo</p>\n",
+  "normalized": "<ul><li></li></ul><p>foo</p>"
+ },
+ {
+  "html": "<ul>\n<li></li>\n</ul>\n",
+  "normalized": "<ul><li></li></ul>"
+ },
+ {
+  "html": "<ol>\n<li>\n<p>A paragraph\nwith two lines.</p>\n<pre><code>indented code\n</code></pre>\n<blockquote>\n<p>A block quote.</p>\n</blockquote>\n</li>\n</ol>\n",
+  "normalized": "<ol><li><p>A paragraph with two lines.</p><pre><code>indented code\n</code></pre><blockquote><p>A block quote.</p></blockquote></li></ol>"
+ },
+ {
+  "html": "<blockquote>\n<ol>\n<li>\n<blockquote>\n<p>Blockquote\ncontinued here.</p>\n</blockquote>\n</li>\n</ol>\n</blockquote>\n",
+  "normalized": "<blockquote><ol><li><blockquote><p>Blockquote continued here.</p></blockquote></li></ol></blockquote>"
+ },
+ {
+  "html": "<ol start=\"10\">\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ol>\n",
+  "normalized": "<ol start=\"10\"><li>foo<ul><li>bar</li></ul></li></ol>"
+ },
+ {
+  "html": "<ul>\n<li>\n<h1>Foo</h1>\n</li>\n<li>\n<h2>Bar</h2>\nbaz</li>\n</ul>\n",
+  "normalized": "<ul><li><h1>Foo</h1></li><li><h2>Bar</h2>baz</li></ul>"
+ },
+ {
+  "html": "<p>The number of windows in my house is\n14.  The number of doors is 6.</p>\n",
+  "normalized": "<p>The number of windows in my house is 14. The number of doors is 6.</p>"
+ },
+ {
+  "html": "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n<!-- -->\n<ul>\n<li>baz</li>\n<li>bim</li>\n</ul>\n",
+  "normalized": "<ul><li>foo</li><li>bar</li></ul><!-- --><ul><li>baz</li><li>bim</li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>a</li>\n<li>b</li>\n<li>c</li>\n<li>d\n- e</li>\n</ul>\n",
+  "normalized": "<ul><li>a</li><li>b</li><li>c</li><li>d - e</li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>\n<p>a</p>\n</li>\n<li>\n<p>b</p>\n<p>c</p>\n</li>\n<li>\n<p>d</p>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><p>a</p></li><li><p>b</p><p>c</p></li><li><p>d</p></li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>a\n<blockquote>\n<p>b</p>\n</blockquote>\n</li>\n<li>c</li>\n</ul>\n",
+  "normalized": "<ul><li>a<blockquote><p>b</p></blockquote></li><li>c</li></ul>"
+ },
+ {
+  "html": "<ol>\n<li>\n<pre><code>foo\n</code></pre>\n<p>bar</p>\n</li>\n</ol>\n",
+  "normalized": "<ol><li><pre><code>foo\n</code></pre><p>bar</p></li></ol>"
+ },
+ {
+  "html": "<p><code>foo</code></p>\n",
+  "normalized": "<p><code>foo</code></p>"
+ },
+ {
+  "html": "<p><code> a</code></p>\n",
+  "normalized": "<p><code> a</code></p>"
+ },
+ {
+  "html": "<p><code>foo </code></p>\n",
+  "normalized": "<p><code>foo </code></p>"
+ },
+ {
+  "html": "<p><code>foo `` bar</code></p>\n",
+  "normalized": "<p><code>foo `` bar</code></p>"
+ },
+ {
+  "html": "<p><a href=\"`\">`</p>\n",
+  "normalized": "<p><a href=\"`\">`</p>"
+ },
+ {
+  "html": "<p>`foo</p>\n",
+  "normalized": "<p>`foo</p>"
+ },
+ {
+  "html": "<p>a*&quot;foo&quot;*</p>\n",
+  "normalized": "<p>a*&quot;foo&quot;*</p>"
+ },
+ {
+  "html": "<p>5<em>6</em>78</p>\n",
+  "normalized": "<p>5<em>6</em>78</p>"
+ },
+ {
+  "html": "<p>foo_bar_</p>\n",
+  "normalized": "<p>foo_bar_</p>"
+ },
+ {
+  "html": "<p>foo-<em>(bar)</em></p>\n",
+  "normalized": "<p>foo-<em>(bar)</em></p>"
+ },
+ {
+  "html": "<p>*(*foo)</p>\n",
+  "normalized": "<p>*(*foo)</p>"
+ },
+ {
+  "html": "<p>_(_foo)</p>\n",
+  "normalized": "<p>_(_foo)</p>"
+ },
+ {
+  "html": "<p><em>foo_bar_baz</em></p>\n",
+  "normalized": "<p><em>foo_bar_baz</em></p>"
+ },
+ {
+  "html": "<p>a**&quot;foo&quot;**</p>\n",
+  "normalized": "<p>a**&quot;foo&quot;**</p>"
+ },
+ {
+  "html": "<p>__\nfoo bar__</p>\n",
+  "normalized": "<p>__ foo bar__</p>"
+ },
+ {
+  "html": "<p>пристаням__стремятся__</p>\n",
+  "normalized": "<p>пристаням__стремятся__</p>"
+ },
+ {
+  "html": "<p>**(**foo)</p>\n",
+  "normalized": "<p>**(**foo)</p>"
+ },
+ {
+  "html": "<p><strong>foo</strong>bar</p>\n",
+  "normalized": "<p><strong>foo</strong>bar</p>"
+ },
+ {
+  "html": "<p>__foo__bar</p>\n",
+  "normalized": "<p>__foo__bar</p>"
+ },
+ {
+  "html": "<p><em>foo <a href=\"/url\">bar</a></em></p>\n",
+  "normalized": "<p><em>foo <a href=\"/url\">bar</a></em></p>"
+ },
+ {
+  "html": "<p><em><em>foo</em> bar</em></p>\n",
+  "normalized": "<p><em><em>foo</em> bar</em></p>"
+ },
+ {
+  "html": "<p><em>foo**bar</em></p>\n",
+  "normalized": "<p><em>foo**bar</em></p>"
+ },
+ {
+  "html": "<p>foo<em><strong>bar</strong></em>baz</p>\n",
+  "normalized": "<p>foo<em><strong>bar</strong></em>baz</p>"
+ },
+ {
+  "html": "<p>** is not an empty emphasis</p>\n",
+  "normalized": "<p>** is not an empty emphasis</p>"
+ },
+ {
+  "html": "<p><strong>foo <em>bar</em> baz</strong></p>\n",
+  "normalized": "<p><strong>foo <em>bar</em> baz</strong></p>"
+ },
+ {
+  "html": "<p><strong>foo <em>bar <strong>baz</strong>\nbim</em> bop</strong></p>\n",
+  "normalized": "<p><strong>foo <em>bar <strong>baz</strong> bim</em> bop</strong></p>"
+ },
+ {
+  "html": "<p>foo ***</p>\n",
+  "normalized": "<p>foo ***</p>"
+ },
+ {
+  "html": "<p>foo <strong>*</strong></p>\n",
+  "normalized": "<p>foo <strong>*</strong></p>"
+ },
+ {
+  "html": "<p>*<strong>foo</strong></p>\n",
+  "normalized": "<p>*<strong>foo</strong></p>"
+ },
+ {
+  "html": "<p>foo ___</p>\n",
+  "normalized": "<p>foo ___</p>"
+ },
+ {
+  "html": "<p>foo <strong>_</strong></p>\n",
+  "normalized": "<p>foo <strong>_</strong></p>"
+ },
+ {
+  "html": "<p>_<strong>foo</strong></p>\n",
+  "normalized": "<p>_<strong>foo</strong></p>"
+ },
+ {
+  "html": "<p><strong>foo</strong></p>\n",
+  "normalized": "<p><strong>foo</strong></p>"
+ },
+ {
+  "html": "<p><strong><strong>foo</strong></strong></p>\n",
+  "normalized": "<p><strong><strong>foo</strong></strong></p>"
+ },
+ {
+  "html": "<p><em><strong><strong>foo</strong></strong></em></p>\n",
+  "normalized": "<p><em><strong><strong>foo</strong></strong></em></p>"
+ },
+ {
+  "html": "<p>*foo <em>bar baz</em></p>\n",
+  "normalized": "<p>*foo <em>bar baz</em></p>"
+ },
+ {
+  "html": "<p>**<a href=\"**\"></p>\n",
+  "normalized": "<p>**<a href=\"**\"></p>"
+ },
+ {
+  "html": "<p>**a<a href=\"https://foo.bar/?q=**\">https://foo.bar/?q=**</a></p>\n",
+  "normalized": "<p>**a<a href=\"https://foo.bar/?q=**\">https://foo.bar/?q=**</a></p>"
+ },
+ {
+  "html": "<p><a href=\"./target.md\"></a></p>\n",
+  "normalized": "<p><a href=\"./target.md\"></a></p>"
+ },
+ {
+  "html": "<p>[link](/my uri)</p>\n",
+  "normalized": "<p>[link](/my uri)</p>"
+ },
+ {
+  "html": "<p><a href=\"b)c\">a</a></p>\n",
+  "normalized": "<p><a href=\"b)c\">a</a></p>"
+ },
+ {
+  "html": "<p><a href=\"foo(and(bar))\">link</a></p>\n",
+  "normalized": "<p><a href=\"foo(and(bar))\">link</a></p>"
+ },
+ {
+  "html": "<p><a href=\"foo):\">link</a></p>\n",
+  "normalized": "<p><a href=\"foo):\">link</a></p>"
+ },
+ {
+  "html": "<p><a href=\"%22title%22\">link</a></p>\n",
+  "normalized": "<p><a href=\"%22title%22\">link</a></p>"
+ },
+ {
+  "html": "<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>\n",
+  "normalized": "<p>[link](/url &quot;title &quot;and&quot; title&quot;)</p>"
+ },
+ {
+  "html": "<p><a href=\"/uri\">link [foo [bar]]</a></p>\n",
+  "normalized": "<p><a href=\"/uri\">link [foo [bar]]</a></p>"
+ },
+ {
+  "html": "<p><a href=\"/uri\">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>\n",
+  "normalized": "<p><a href=\"/uri\">link <em>foo <strong>bar</strong> <code>#</code></em></a></p>"
+ },
+ {
+  "html": "<p><img src=\"uri3\" alt=\"[foo](uri2)\" /></p>\n",
+  "normalized": "<p><img alt=\"[foo](uri2)\" src=\"uri3\"></p>"
+ },
+ {
+  "html": "<p>[foo <bar attr=\"](baz)\"></p>\n",
+  "normalized": "<p>[foo <bar attr=\"](baz)\"></p>"
+ },
+ {
+  "html": "<p>[foo <a href=\"/uri\">bar</a>]<a href=\"/uri\">ref</a></p>\n",
+  "normalized": "<p>[foo <a href=\"/uri\">bar</a>]<a href=\"/uri\">ref</a></p>"
+ },
+ {
+  "html": "<p>[foo <bar attr=\"][ref]\"></p>\n",
+  "normalized": "<p>[foo <bar attr=\"][ref]\"></p>"
+ },
+ {
+  "html": "<p><a href=\"/url\">ẞ</a></p>\n",
+  "normalized": "<p><a href=\"/url\">ẞ</a></p>"
+ },
+ {
+  "html": "<p><a href=\"/url1\">bar</a></p>\n",
+  "normalized": "<p><a href=\"/url1\">bar</a></p>"
+ },
+ {
+  "html": "<p>[[[foo]]]</p>\n<p>[[[foo]]]: /url</p>\n",
+  "normalized": "<p>[[[foo]]]</p><p>[[[foo]]]: /url</p>"
+ },
+ {
+  "html": "<p>[\n]</p>\n<p>[\n]: /uri</p>\n",
+  "normalized": "<p>[ ]</p><p>[ ]: /uri</p>"
+ },
+ {
+  "html": "<p><a href=\"/url\" title=\"title\">foo</a>\n[]</p>\n",
+  "normalized": "<p><a href=\"/url\" title=\"title\">foo</a> []</p>"
+ },
+ {
+  "html": "<p>[[bar <a href=\"/url\">foo</a></p>\n",
+  "normalized": "<p>[[bar <a href=\"/url\">foo</a></p>"
+ },
+ {
+  "html": "<p>*<a href=\"/url\">foo*</a></p>\n",
+  "normalized": "<p>*<a href=\"/url\">foo*</a></p>"
+ },
+ {
+  "html": "<p><a href=\"/url1\">foo</a>(not a link)</p>\n",
+  "normalized": "<p><a href=\"/url1\">foo</a>(not a link)</p>"
+ },
+ {
+  "html": "<p><img src=\"/url\" alt=\"foo\" title=\"title\" /></p>\n",
+  "normalized": "<p><img alt=\"foo\" src=\"/url\" title=\"title\"></p>"
+ },
+ {
+  "html": "<p><img src=\"train.jpg\" alt=\"foo bar\" title=\"train &amp; tracks\" /></p>\n",
+  "normalized": "<p><img alt=\"foo bar\" src=\"train.jpg\" title=\"train &amp; tracks\"></p>"
+ },
+ {
+  "html": "<p><img src=\"url\" alt=\"foo\" /></p>\n",
+  "normalized": "<p><img alt=\"foo\" src=\"url\"></p>"
+ },
+ {
+  "html": "<p>![foo]</p>\n",
+  "normalized": "<p>![foo]</p>"
+ },
+ {
+  "html": "<p><a href=\"irc://foo.bar:2233/baz\">irc://foo.bar:2233/baz</a></p>\n",
+  "normalized": "<p><a href=\"irc://foo.bar:2233/baz\">irc://foo.bar:2233/baz</a></p>"
+ },
+ {
+  "html": "<p><a href=\"https://../\">https://../</a></p>\n",
+  "normalized": "<p><a href=\"https://../\">https://../</a></p>"
+ },
+ {
+  "html": "<p><a href=\"mailto:foo@bar.example.com\">foo@bar.example.com</a></p>\n",
+  "normalized": "<p><a href=\"mailto:foo@bar.example.com\">foo@bar.example.com</a></p>"
+ },
+ {
+  "html": "<p>&lt; https://foo.bar &gt;</p>\n",
+  "normalized": "<p>&lt; https://foo.bar &gt;</p>"
+ },
+ {
+  "html": "<p>foo@bar.example.com</p>\n",
+  "normalized": "<p>foo@bar.example.com</p>"
+ },
+ {
+  "html": "<p><a foo=\"bar\" bam = 'baz <em>\"</em>'\n_boolean zoop:33=zoop:33 /></p>\n",
+  "normalized": "<p><a 'baz <em bam=\"\" foo=\"bar\">\"</em>' _boolean zoop:33=zoop:33 /></p>"
+ },
+ {
+  "html": "<p>&lt;a href=&quot;hi'&gt; &lt;a href=hi'&gt;</p>\n",
+  "normalized": "<p>&lt;a href=&quot;hi'&gt; &lt;a href=hi'&gt;</p>"
+ },
+ {
+  "html": "<p>&lt;/a href=&quot;foo&quot;&gt;</p>\n",
+  "normalized": "<p>&lt;/a href=&quot;foo&quot;&gt;</p>"
+ },
+ {
+  "html": "<p>foo <!ELEMENT br EMPTY></p>\n",
+  "normalized": "<p>foo <!--ELEMENT br EMPTY--></p>"
+ },
+ {
+  "html": "<p>&lt;a href=&quot;&quot;&quot;&gt;</p>\n",
+  "normalized": "<p>&lt;a href=&quot;&quot;&quot;&gt;</p>"
+ },
+ {
+  "html": "<p><code>code   span</code></p>\n",
+  "normalized": "<p><code>code span</code></p>"
+ },
+ {
+  "html": "<p>foo\\</p>\n",
+  "normalized": "<p>foo\\</p>"
+ },
+ {
+  "html": "<p>foo\nbaz</p>\n",
+  "normalized": "<p>foo baz</p>"
+ },
+ {
+  "html": "<p>Multiple     spaces</p>\n",
+  "normalized": "<p>Multiple spaces</p>"
+ },
+ {
+  "html": "<ul>\n<li>`one</li>\n<li>two`</li>\n</ul>\n",
+  "normalized": "<ul><li>`one</li><li>two`</li></ul>"
+ },
+ {
+  "html": "<hr />\n<hr />\n<hr />\n",
+  "normalized": "<hr><hr><hr>"
+ },
+ {
+  "html": "<p>===</p>\n",
+  "normalized": "<p>===</p>"
+ },
+ {
+  "html": "<p>--\n**\n__</p>\n",
+  "normalized": "<p>-- ** __</p>"
+ },
+ {
+  "html": "<p>Foo\n***</p>\n",
+  "normalized": "<p>Foo ***</p>"
+ },
+ {
+  "html": "<p>_ _ _ _ a</p>\n<p>a------</p>\n<p>---a---</p>\n",
+  "normalized": "<p>_ _ _ _ a</p><p>a------</p><p>---a---</p>"
+ },
+ {
+  "html": "<ul>\n<li>foo</li>\n</ul>\n<hr />\n<ul>\n<li>bar</li>\n</ul>\n",
+  "normalized": "<ul><li>foo</li></ul><hr><ul><li>bar</li></ul>"
+ },
+ {
+  "html": "<p>Foo</p>\n<hr />\n<p>bar</p>\n",
+  "normalized": "<p>Foo</p><hr><p>bar</p>"
+ },
+ {
+  "html": "<h2>Foo</h2>\n<p>bar</p>\n",
+  "normalized": "<h2>Foo</h2><p>bar</p>"
+ },
+ {
+  "html": "<ul>\n<li>Foo</li>\n<li>\n<hr />\n</li>\n</ul>\n",
+  "normalized": "<ul><li>Foo</li><li><hr></li></ul>"
+ },
+ {
+  "html": "<h1>foo</h1>\n<h2>foo</h2>\n<h3>foo</h3>\n<h4>foo</h4>\n<h5>foo</h5>\n<h6>foo</h6>\n",
+  "normalized": "<h1>foo</h1><h2>foo</h2><h3>foo</h3><h4>foo</h4><h5>foo</h5><h6>foo</h6>"
+ },
+ {
+  "html": "<p>####### foo</p>\n",
+  "normalized": "<p>####### foo</p>"
+ },
+ {
+  "html": "<p>## foo</p>\n",
+  "normalized": "<p>## foo</p>"
+ },
+ {
+  "html": "<h1>foo <em>bar</em> *baz*</h1>\n",
+  "normalized": "<h1>foo <em>bar</em> *baz*</h1>"
+ },
+ {
+  "html": "<h1>foo</h1>\n",
+  "normalized": "<h1>foo</h1>"
+ },
+ {
+  "html": "<pre><code># foo\n</code></pre>\n",
+  "normalized": "<pre><code># foo\n</code></pre>"
+ },
+ {
+  "html": "<p>foo\n# bar</p>\n",
+  "normalized": "<p>foo # bar</p>"
+ },
+ {
+  "html": "<h3>foo ### b</h3>\n",
+  "normalized": "<h3>foo ### b</h3>"
+ },
+ {
+  "html": "<p>Foo bar</p>\n<h1>baz</h1>\n<p>Bar foo</p>\n",
+  "normalized": "<p>Foo bar</p><h1>baz</h1><p>Bar foo</p>"
+ },
+ {
+  "html": "<h1>Foo <em>bar\nbaz</em></h1>\n",
+  "normalized": "<h1>Foo <em>bar baz</em></h1>"
+ },
+ {
+  "html": "<h2>Foo</h2>\n",
+  "normalized": "<h2>Foo</h2>"
+ },
+ {
+  "html": "<h2>Foo\\</h2>\n",
+  "normalized": "<h2>Foo\\</h2>"
+ },
+ {
+  "html": "<ul>\n<li>Foo</li>\n</ul>\n<hr />\n",
+  "normalized": "<ul><li>Foo</li></ul><hr>"
+ },
+ {
+  "html": "<hr />\n<hr />\n",
+  "normalized": "<hr><hr>"
+ },
+ {
+  "html": "<h2>&gt; foo</h2>\n",
+  "normalized": "<h2>&gt; foo</h2>"
+ },
+ {
+  "html": "<p>Foo\nbar\n---\nbaz</p>\n",
+  "normalized": "<p>Foo bar --- baz</p>"
+ },
+ {
+  "html": "<pre><code>&lt;a/&gt;\n*hi*\n\n- one\n</code></pre>\n",
+  "normalized": "<pre><code>&lt;a/&gt;\n*hi*\n\n- one\n</code></pre>"
+ },
+ {
+  "html": "<pre><code>foo\n</code></pre>\n<p>bar</p>\n",
+  "normalized": "<pre><code>foo\n</code></pre><p>bar</p>"
+ },
+ {
+  "html": "<pre><code>foo  \n</code></pre>\n",
+  "normalized": "<pre><code>foo  \n</code></pre>"
+ },
+ {
+  "html": "<pre><code>aaa\n~~~\n</code></pre>\n",
+  "normalized": "<pre><code>aaa\n~~~\n</code></pre>"
+ },
+ {
+  "html": "<pre><code></code></pre>\n",
+  "normalized": "<pre><code></code></pre>"
+ },
+ {
+  "html": "<pre><code>```\naaa\n```\n</code></pre>\n",
+  "normalized": "<pre><code>```\naaa\n```\n</code></pre>"
+ },
+ {
+  "html": "<p><code> </code>\naaa</p>\n",
+  "normalized": "<p><code> </code> aaa</p>"
+ },
+ {
+  "html": "<pre><code class=\"language-ruby\">def foo(x)\n  return 3\nend\n</code></pre>\n",
+  "normalized": "<pre><code class=\"language-ruby\">def foo(x)\n  return 3\nend\n</code></pre>"
+ },
+ {
+  "html": "<pre><code class=\"language-aa\">foo\n</code></pre>\n",
+  "normalized": "<pre><code class=\"language-aa\">foo\n</code></pre>"
+ },
+ {
+  "html": " <div>\n  *hello*\n         <foo><a>\n",
+  "normalized": "<div>*hello* <foo><a> "
+ },
+ {
+  "html": "<div id=\"foo\" class=\"bar\n  baz\">\n</div>\n",
+  "normalized": "<div class=\"bar\n  baz\" id=\"foo\"></div>"
+ },
+ {
+  "html": "<div *???-&&&-<---\n*foo*\n",
+  "normalized": "div *???-&&&---- *foo* "
+ },
+ {
+  "html": "<a href=\"foo\">\n*bar*\n</a>\n",
+  "normalized": "<a href=\"foo\"> *bar* </a> "
+ },
+ {
+  "html": "<del>\n*foo*\n</del>\n",
+  "normalized": "<del> *foo* </del> "
+ },
+ {
+  "html": "<script type=\"text/javascript\">\n// JavaScript example\n\ndocument.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";\n</script>\n<p>okay</p>\n",
+  "normalized": "<script type=\"text/javascript\">// JavaScript example document.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";</script><p>okay</p>"
+ },
+ {
+  "html": "<ul>\n<li>\n<div>\n</li>\n<li>foo</li>\n</ul>\n",
+  "normalized": "<ul><li><div></li><li>foo</li></ul>"
+ },
+ {
+  "html": "<!-- Foo\n\nbar\n   baz -->\n<p>okay</p>\n",
+  "normalized": "<!-- Foo\n\nbar\n   baz --><p>okay</p>"
+ },
+ {
+  "html": "  <!-- foo -->\n<pre><code>&lt;!-- foo --&gt;\n</code></pre>\n",
+  "normalized": " <!-- foo --><pre><code>&lt;!-- foo --&gt;\n</code></pre>"
+ },
+ {
+  "html": "<p>Foo\n<a href=\"bar\">\nbaz</p>\n",
+  "normalized": "<p>Foo <a href=\"bar\"> baz</p>"
+ },
+ {
+  "html": "<table>\n  <tr>\n<pre><code>&lt;td&gt;\n  Hi\n&lt;/td&gt;\n</code></pre>\n  </tr>\n</table>\n",
+  "normalized": "<table><tr><pre><code>&lt;td&gt;\n  Hi\n&lt;/td&gt;\n</code></pre></tr></table>"
+ },
+ {
+  "html": "<p><a href=\"my%20url\" title=\"title\">Foo bar</a></p>\n",
+  "normalized": "<p><a href=\"my%20url\" title=\"title\">Foo bar</a></p>"
+ },
+ {
+  "html": "<p>[foo]:</p>\n<p>[foo]</p>\n",
+  "normalized": "<p>[foo]:</p><p>[foo]</p>"
+ },
+ {
+  "html": "<p><a href=\"url\">foo</a></p>\n",
+  "normalized": "<p><a href=\"url\">foo</a></p>"
+ },
+ {
+  "html": "",
+  "normalized": ""
+ },
+ {
+  "html": "<pre><code>[foo]: /url &quot;title&quot;\n</code></pre>\n<p>[foo]</p>\n",
+  "normalized": "<pre><code>[foo]: /url &quot;title&quot;\n</code></pre><p>[foo]</p>"
+ },
+ {
+  "html": "<h1>bar</h1>\n<p><a href=\"/url\">foo</a></p>\n",
+  "normalized": "<h1>bar</h1><p><a href=\"/url\">foo</a></p>"
+ },
+ {
+  "html": "<p>aaa<br />\nbbb</p>\n",
+  "normalized": "<p>aaa<br>bbb</p>"
+ },
+ {
+  "html": "<table>\n<thead>\n<tr>\n<th>f|oo</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b <code>|</code> az</td>\n</tr>\n<tr>\n<td>b <strong>|</strong> im</td>\n</tr>\n</tbody>\n</table>\n",
+  "normalized": "<table><thead><tr><th>f|oo</th></tr></thead><tbody><tr><td>b <code>|</code> az</td></tr><tr><td>b <strong>|</strong> im</td></tr></tbody></table>"
+ },
+ {
+  "html": "<table>\n<thead>\n<tr>\n<th>abc</th>\n<th>def</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>bar</td>\n<td></td>\n</tr>\n<tr>\n<td>bar</td>\n<td>baz</td>\n</tr>\n</tbody>\n</table>\n",
+  "normalized": "<table><thead><tr><th>abc</th><th>def</th></tr></thead><tbody><tr><td>bar</td><td></td></tr><tr><td>bar</td><td>baz</td></tr></tbody></table>"
+ },
+ {
+  "html": "<blockquote>\n<p>foo</p>\n</blockquote>\n<hr />\n",
+  "normalized": "<blockquote><p>foo</p></blockquote><hr>"
+ },
+ {
+  "html": "<blockquote>\n<p>foo\n- bar</p>\n</blockquote>\n",
+  "normalized": "<blockquote><p>foo - bar</p></blockquote>"
+ },
+ {
+  "html": "<blockquote>\n<p>foo</p>\n</blockquote>\n<blockquote>\n<p>bar</p>\n</blockquote>\n",
+  "normalized": "<blockquote><p>foo</p></blockquote><blockquote><p>bar</p></blockquote>"
+ },
+ {
+  "html": "<blockquote>\n<p>aaa</p>\n</blockquote>\n<hr />\n<blockquote>\n<p>bbb</p>\n</blockquote>\n",
+  "normalized": "<blockquote><p>aaa</p></blockquote><hr><blockquote><p>bbb</p></blockquote>"
+ },
+ {
+  "html": "<blockquote>\n<blockquote>\n<blockquote>\n<p>foo\nbar</p>\n</blockquote>\n</blockquote>\n</blockquote>\n",
+  "normalized": "<blockquote><blockquote><blockquote><p>foo bar</p></blockquote></blockquote></blockquote>"
+ },
+ {
+  "html": "<p>1234567890. not ok</p>\n",
+  "normalized": "<p>1234567890. not ok</p>"
+ },
+ {
+  "html": "<ul>\n<li>\n<p>foo</p>\n<pre><code>bar\n</code></pre>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><p>foo</p><pre><code>bar\n</code></pre></li></ul>"
+ },
+ {
+  "html": "<ol>\n<li>\n<pre><code> indented code\n</code></pre>\n<p>paragraph</p>\n<pre><code>more code\n</code></pre>\n</li>\n</ol>\n",
+  "normalized": "<ol><li><pre><code> indented code\n</code></pre><p>paragraph</p><pre><code>more code\n</code></pre></li></ol>"
+ },
+ {
+  "html": "<ul>\n<li>foo</li>\n<li>\n<pre><code>bar\n</code></pre>\n</li>\n<li>\n<pre><code>baz\n</code></pre>\n</li>\n</ul>\n",
+  "normalized": "<ul><li>foo</li><li><pre><code>bar\n</code></pre></li><li><pre><code>baz\n</code></pre></li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>foo</li>\n<li></li>\n<li>bar</li>\n</ul>\n",
+  "normalized": "<ul><li>foo</li><li></li><li>bar</li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>foo\n<ul>\n<li>bar\n<ul>\n<li>baz\n<ul>\n<li>boo</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n",
+  "normalized": "<ul><li>foo<ul><li>bar<ul><li>baz<ul><li>boo</li></ul></li></ul></li></ul></li></ul>"
+ },
+ {
+  "html": "<ul>\n<li>\n<ul>\n<li>foo</li>\n</ul>\n</li>\n</ul>\n",
+  "normalized": "<ul><li><ul><li>foo</li></ul></li></ul>"
+ },
+ {
+  "html": "<ul>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> foo\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> bar</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> baz</li>\n</ul>\n</li>\n<li><input disabled=\"\" type=\"checkbox\"> bim</li>\n</ul>\n",
+  "normalized": "<ul><li><input checked=\"\" disabled=\"\" type=\"checkbox\"> foo<ul><li><input disabled=\"\" type=\"checkbox\"> bar</li><li><input checked=\"\" disabled=\"\" type=\"checkbox\"> baz</li></ul></li><li><input disabled=\"\" type=\"checkbox\"> bim</li></ul>"
+ },
+ {
+  "html": "<p><a href=\"http://example.com?find=%5C*\">http://example.com?find=\\*</a></p>\n",
+  "normalized": "<p><a href=\"http://example.com?find=%5C*\">http://example.com?find=\\*</a></p>"
+ },
+ {
+  "html": "<p><code>``</code></p>\n",
+  "normalized": "<p><code>``</code></p>"
+ },
+ {
+  "html": "<p><code> </code>\n<code>  </code></p>\n",
+  "normalized": "<p><code> </code> <code> </code></p>"
+ },
+ {
+  "html": "<p><code>foo\\</code>bar`</p>\n",
+  "normalized": "<p><code>foo\\</code>bar`</p>"
+ },
+ {
+  "html": "<p>[not a <code>link](/foo</code>)</p>\n",
+  "normalized": "<p>[not a <code>link](/foo</code>)</p>"
+ },
+ {
+  "html": "<p><a href=\"http://foo.bar.%60baz\">http://foo.bar.`baz</a>`</p>\n",
+  "normalized": "<p><a href=\"http://foo.bar.%60baz\">http://foo.bar.`baz</a>`</p>"
+ },
+ {
+  "html": "<p><em>foo bar</em></p>\n",
+  "normalized": "<p><em>foo bar</em></p>"
+ },
+ {
+  "html": "<p>foo<em>bar</em></p>\n",
+  "normalized": "<p>foo<em>bar</em></p>"
+ },
+ {
+  "html": "<p>a_&quot;foo&quot;_</p>\n",
+  "normalized": "<p>a_&quot;foo&quot;_</p>"
+ },
+ {
+  "html": "<p>aa_&quot;bb&quot;_cc</p>\n",
+  "normalized": "<p>aa_&quot;bb&quot;_cc</p>"
+ },
+ {
+  "html": "<p>*foo bar\n*</p>\n",
+  "normalized": "<p>*foo bar *</p>"
+ },
+ {
+  "html": "<p>_foo bar _</p>\n",
+  "normalized": "<p>_foo bar _</p>"
+ },
+ {
+  "html": "<p>_пристаням_стремятся</p>\n",
+  "normalized": "<p>_пристаням_стремятся</p>"
+ },
+ {
+  "html": "<p>** foo bar**</p>\n",
+  "normalized": "<p>** foo bar**</p>"
+ },
+ {
+  "html": "<p>__ foo bar__</p>\n",
+  "normalized": "<p>__ foo bar__</p>"
+ },
+ {
+  "html": "<p>5__6__78</p>\n",
+  "normalized": "<p>5__6__78</p>"
+ },
+ {
+  "html": "<p>**foo bar **</p>\n",
+  "normalized": "<p>**foo bar **</p>"
+ },
+ {
+  "html": "<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>\n",
+  "normalized": "<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>"
+ },
+ {
+  "html": "<p><em>(<strong>foo</strong>)</em></p>\n",
+  "normalized": "<p><em>(<strong>foo</strong>)</em></p>"
+ },
+ {
+  "html": "<p><strong>(bar)</strong>.</p>\n",
+  "normalized": "<p><strong>(bar)</strong>.</p>"
+ },
+ {
+  "html": "<p><em>foo <em>bar</em> baz</em></p>\n",
+  "normalized": "<p><em>foo <em>bar</em> baz</em></p>"
+ },
+ {
+  "html": "<p><em>foo<strong>bar</strong>baz</em></p>\n",
+  "normalized": "<p><em>foo<strong>bar</strong>baz</em></p>"
+ },
+ {
+  "html": "<p><em>foo<strong>bar</strong></em></p>\n",
+  "normalized": "<p><em>foo<strong>bar</strong></em></p>"
+ },
+ {
+  "html": "<p><em>foo <a href=\"/url\"><em>bar</em></a></em></p>\n",
+  "normalized": "<p><em>foo <a href=\"/url\"><em>bar</em></a></em></p>"
+ },
+ {
+  "html": "<p><strong>foo\nbar</strong></p>\n",
+  "normalized": "<p><strong>foo bar</strong></p>"
+ },
+ {
+  "html": "<p><strong>foo <strong>bar</strong></strong></p>\n",
+  "normalized": "<p><strong>foo <strong>bar</strong></strong></p>"
+ },
+ {
+  "html": "<p><strong>foo <em>bar</em></strong></p>\n",
+  "normalized": "<p><strong>foo <em>bar</em></strong></p>"
+ },
+ {
+  "html": "<p>____ is not an empty strong emphasis</p>\n",
+  "normalized": "<p>____ is not an empty strong emphasis</p>"
+ },
+ {
+  "html": "<p>foo *****</p>\n",
+  "normalized": "<p>foo *****</p>"
+ },
+ {
+  "html": "<p><em>foo</em>*</p>\n",
+  "normalized": "<p><em>foo</em>*</p>"
+ },
+ {
+  "html": "<p><em>foo</em>***</p>\n",
+  "normalized": "<p><em>foo</em>***</p>"
+ },
+ {
+  "html": "<p>foo _____</p>\n",
+  "normalized": "<p>foo _____</p>"
+ },
+ {
+  "html": "<p><em>foo</em>_</p>\n",
+  "normalized": "<p><em>foo</em>_</p>"
+ },
+ {
+  "html": "<p><em>foo</em>___</p>\n",
+  "normalized": "<p><em>foo</em>___</p>"
+ },
+ {
+  "html": "<p><em><em>foo</em></em></p>\n",
+  "normalized": "<p><em><em>foo</em></em></p>"
+ },
+ {
+  "html": "<p><em><strong>foo</strong></em></p>\n",
+  "normalized": "<p><em><strong>foo</strong></em></p>"
+ },
+ {
+  "html": "<p>**foo <strong>bar baz</strong></p>\n",
+  "normalized": "<p>**foo <strong>bar baz</strong></p>"
+ },
+ {
+  "html": "<p>*<img src=\"foo\" title=\"*\"/></p>\n",
+  "normalized": "<p>*<img src=\"foo\" title=\"*\"></p>"
+ },
+ {
+  "html": "<p><em>a <code>_</code></em></p>\n",
+  "normalized": "<p><em>a <code>_</code></em></p>"
+ },
+ {
+  "html": "<p>This ~~has a</p>\n<p>new paragraph~~.</p>\n",
+  "normalized": "<p>This ~~has a</p><p>new paragraph~~.</p>"
+ },
+ {
+  "html": "<p><a href=\"\">link</a></p>\n",
+  "normalized": "<p><a href=\"\">link</a></p>"
+ },
+ {
+  "html": "<p>[link](foo\nbar)</p>\n",
+  "normalized": "<p>[link](foo bar)</p>"
+ },
+ {
+  "html": "<p>[a](&lt;b)c\n[a](&lt;b)c&gt;\n[a](<b>c)</p>\n",
+  "normalized": "<p>[a](&lt;b)c [a](&lt;b)c&gt; [a](<b>c)</p>"
+ },
+ {
+  "html": "<p><a href=\"foo(and(bar)\">link</a></p>\n",
+  "normalized": "<p><a href=\"foo(and(bar)\">link</a></p>"
+ },
+ {
+  "html": "<p><a href=\"foo%20b%C3%A4\">link</a></p>\n",
+  "normalized": "<p><a href=\"foo%20b%C3%A4\">link</a></p>"
+ },
+ {
+  "html": "<p><a href=\"/url%C2%A0%22title%22\">link</a></p>\n",
+  "normalized": "<p><a href=\"/url%C2%A0%22title%22\">link</a></p>"
+ },
+ {
+  "html": "<p>[link] (/uri)</p>\n",
+  "normalized": "<p>[link] (/uri)</p>"
+ },
+ {
+  "html": "<p><a href=\"/uri\">link [bar</a></p>\n",
+  "normalized": "<p><a href=\"/uri\">link [bar</a></p>"
+ },
+ {
+  "html": "<p>[foo <em>[bar <a href=\"/uri\">baz</a>](/uri)</em>](/uri)</p>\n",
+  "normalized": "<p>[foo <em>[bar <a href=\"/uri\">baz</a>](/uri)</em>](/uri)</p>"
+ },
+ {
+  "html": "<p><em>foo [bar</em> baz]</p>\n",
+  "normalized": "<p><em>foo [bar</em> baz]</p>"
+ },
+ {
+  "html": "<p><a href=\"/uri\"><img src=\"moon.jpg\" alt=\"moon\" /></a></p>\n",
+  "normalized": "<p><a href=\"/uri\"><img alt=\"moon\" src=\"moon.jpg\"></a></p>"
+ },
+ {
+  "html": "<p><a href=\"/uri\">foo *bar</a>*</p>\n",
+  "normalized": "<p><a href=\"/uri\">foo *bar</a>*</p>"
+ },
+ {
+  "html": "<p>[foo]\n<a href=\"/url\" title=\"title\">bar</a></p>\n",
+  "normalized": "<p>[foo] <a href=\"/url\" title=\"title\">bar</a></p>"
+ },
+ {
+  "html": "<p>[foo][ref[bar]]</p>\n<p>[ref[bar]]: /uri</p>\n",
+  "normalized": "<p>[foo][ref[bar]]</p><p>[ref[bar]]: /uri</p>"
+ },
+ {
+  "html": "<p>[]</p>\n<p>[]: /uri</p>\n",
+  "normalized": "<p>[]</p><p>[]: /uri</p>"
+ },
+ {
+  "html": "<p><a href=\"/url\" title=\"title\">Foo</a></p>\n",
+  "normalized": "<p><a href=\"/url\" title=\"title\">Foo</a></p>"
+ },
+ {
+  "html": "<p>[<a href=\"/url\" title=\"title\"><em>foo</em> bar</a>]</p>\n",
+  "normalized": "<p>[<a href=\"/url\" title=\"title\"><em>foo</em> bar</a>]</p>"
+ },
+ {
+  "html": "<p>[foo]</p>\n",
+  "normalized": "<p>[foo]</p>"
+ },
+ {
+  "html": "<p>[foo]<a href=\"/url1\">bar</a></p>\n",
+  "normalized": "<p>[foo]<a href=\"/url1\">bar</a></p>"
+ },
+ {
+  "html": "<p><img src=\"/url2\" alt=\"foo bar\" /></p>\n",
+  "normalized": "<p><img alt=\"foo bar\" src=\"/url2\"></p>"
+ },
+ {
+  "html": "<p>My <img src=\"/path/to/train.jpg\" alt=\"foo bar\" title=\"title\" /></p>\n",
+  "normalized": "<p>My <img alt=\"foo bar\" src=\"/path/to/train.jpg\" title=\"title\"></p>"
+ },
+ {
+  "html": "<p><img src=\"/url\" alt=\"foo\" /></p>\n",
+  "normalized": "<p><img alt=\"foo\" src=\"/url\"></p>"
+ },
+ {
+  "html": "<p><img src=\"/url\" alt=\"foo\" title=\"title\" />\n[]</p>\n",
+  "normalized": "<p><img alt=\"foo\" src=\"/url\" title=\"title\"> []</p>"
+ },
+ {
+  "html": "<p><img src=\"/url\" alt=\"Foo\" title=\"title\" /></p>\n",
+  "normalized": "<p><img alt=\"Foo\" src=\"/url\" title=\"title\"></p>"
+ },
+ {
+  "html": "<p><a href=\"http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean\">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>\n",
+  "normalized": "<p><a href=\"http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean\">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>"
+ },
+ {
+  "html": "<p><a href=\"made-up-scheme://foo,bar\">made-up-scheme://foo,bar</a></p>\n",
+  "normalized": "<p><a href=\"made-up-scheme://foo,bar\">made-up-scheme://foo,bar</a></p>"
+ },
+ {
+  "html": "<p><a href=\"http://example.com/%5C%5B%5C\">http://example.com/\\[\\</a></p>\n",
+  "normalized": "<p><a href=\"http://example.com/%5C%5B%5C\">http://example.com/\\[\\</a></p>"
+ },
+ {
+  "html": "<p>&lt;&gt;</p>\n",
+  "normalized": "<p>&lt;&gt;</p>"
+ },
+ {
+  "html": "<p>http://example.com</p>\n",
+  "normalized": "<p>http://example.com</p>"
+ },
+ {
+  "html": "<p>Visit <a href=\"http://www.commonmark.org\">www.commonmark.org</a>.</p>\n<p>Visit <a href=\"http://www.commonmark.org/a.b\">www.commonmark.org/a.b</a>.</p>\n",
+  "normalized": "<p>Visit <a href=\"http://www.commonmark.org\">www.commonmark.org</a>.</p><p>Visit <a href=\"http://www.commonmark.org/a.b\">www.commonmark.org/a.b</a>.</p>"
+ },
+ {
+  "html": "<p><a href=\"http://www.commonmark.org/he\">www.commonmark.org/he</a>&lt;lp</p>\n",
+  "normalized": "<p><a href=\"http://www.commonmark.org/he\">www.commonmark.org/he</a>&lt;lp</p>"
+ },
+ {
+  "html": "<p><a href=\"mailto:a.b-c_d@a.b\">a.b-c_d@a.b</a></p>\n<p><a href=\"mailto:a.b-c_d@a.b\">a.b-c_d@a.b</a>.</p>\n<p>a.b-c_d@a.b-</p>\n<p>a.b-c_d@a.b_</p>\n",
+  "normalized": "<p><a href=\"mailto:a.b-c_d@a.b\">a.b-c_d@a.b</a></p><p><a href=\"mailto:a.b-c_d@a.b\">a.b-c_d@a.b</a>.</p><p>a.b-c_d@a.b-</p><p>a.b-c_d@a.b_</p>"
+ },
+ {
+  "html": "<p><a><bab><c2c></p>\n",
+  "normalized": "<p><a><bab><c2c></p>"
+ },
+ {
+  "html": "<p>Foo <responsive-image src=\"foo.jpg\" /></p>\n",
+  "normalized": "<p>Foo <responsive-image src=\"foo.jpg\"></p>"
+ },
+ {
+  "html": "<p>&lt; a&gt;&lt;\nfoo&gt;&lt;bar/ &gt;\n&lt;foo bar=baz\nbim!bop /&gt;</p>\n",
+  "normalized": "<p>&lt; a&gt;&lt; foo&gt;&lt;bar/ &gt; &lt;foo bar=baz bim!bop /&gt;</p>"
+ },
+ {
+  "html": "<p>foo <!-- this is a\ncomment - with hyphen --></p>\n",
+  "normalized": "<p>foo <!-- this is a\ncomment - with hyphen --></p>"
+ },
+ {
+  "html": "<p>foo<br />\nbaz</p>\n",
+  "normalized": "<p>foo<br>baz</p>"
+ },
+ {
+  "html": "<p><em>foo<br />\nbar</em></p>\n",
+  "normalized": "<p><em>foo<br>bar</em></p>"
+ },
+ {
+  "html": "<p><a href=\"foo\\\nbar\"></p>\n",
+  "normalized": "<p><a href=\"foo\\\nbar\"></p>"
+ },
+ {
+  "html": "<h3>foo</h3>\n",
+  "normalized": "<h3>foo</h3>"
+ },
+ {
+  "html": "<p>Foo χρῆν</p>\n",
+  "normalized": "<p>Foo χρῆν</p>"
+ },
+ {
+  "html": "<p>a  \t b</p>",
+  "normalized": "<p>a b</p>"
+ },
+ {
+  "html": "<p>a  \t\nb</p>",
+  "normalized": "<p>a b</p>"
+ },
+ {
+  "html": " <p>a  b</p>",
+  "normalized": "<p>a b</p>"
+ },
+ {
+  "html": "<p>a  b</p> ",
+  "normalized": "<p>a b</p>"
+ },
+ {
+  "html": "\n\t<p>\n\t\ta  b\t\t</p>\n\t",
+  "normalized": "<p>a b</p>"
+ },
+ {
+  "html": "<i>a  b</i> ",
+  "normalized": "<i>a b</i> "
+ },
+ {
+  "html": "<br />",
+  "normalized": "<br>"
+ },
+ {
+  "html": "<br/>",
+  "normalized": "<br>"
+ },
+ {
+  "html": "<a title=\"bar\" HREF=\"foo\">x</a>",
+  "normalized": "<a href=\"foo\" title=\"bar\">x</a>"
+ },
+ {
+  "html": "&forall;&amp;&gt;&lt;&quot;",
+  "normalized": "∀&amp;&gt;&lt;&quot;"
+ },
+ {
+  "html": "<PRE>a\n b</PRE>",
+  "normalized": "<pre>a\n b</pre>"
+ },
+ {
+  "html": "<pre>a\n  b</pre>",
+  "normalized": "<pre>a\n  b</pre>"
+ },
+ {
+  "html": "<pre><code>a\n b\n</code></pre>",
+  "normalized": "<pre><code>a\n b\n</code></pre>"
+ },
+ {
+  "html": "<ul>\n<li>a</li>\n<li>b</li>\n</ul>",
+  "normalized": "<ul><li>a</li><li>b</li></ul>"
+ },
+ {
+  "html": "<ul><li>a</li></ul>\n",
+  "normalized": "<ul><li>a</li></ul>"
+ },
+ {
+  "html": "<div>\n<p>x</p>\n</div>",
+  "normalized": "<div><p>x</p></div>"
+ },
+ {
+  "html": "<p><em>a</em> <strong>b</strong></p>",
+  "normalized": "<p><em>a</em> <strong>b</strong></p>"
+ },
+ {
+  "html": "<!-- a comment -->",
+  "normalized": "<!-- a comment -->"
+ },
+ {
+  "html": "<!DOCTYPE html>",
+  "normalized": "<!DOCTYPE html>"
+ },
+ {
+  "html": "<?php echo 1; ?>",
+  "normalized": "<?php echo 1; ?>"
+ },
+ {
+  "html": "<![CDATA[x < y]]>",
+  "normalized": "<![CDATA[x < y]]>"
+ },
+ {
+  "html": "<p>&#35;</p>",
+  "normalized": "<p>#</p>"
+ },
+ {
+  "html": "<p>&#x22;</p>",
+  "normalized": "<p>&quot;</p>"
+ },
+ {
+  "html": "<p>&unknownentity;</p>",
+  "normalized": "<p>&unknownentity;</p>"
+ },
+ {
+  "html": "<p>&lt;script&gt;</p>",
+  "normalized": "<p>&lt;script&gt;</p>"
+ },
+ {
+  "html": "<img src=\"a b.png\" alt=\"x\">",
+  "normalized": "<img alt=\"x\" src=\"a b.png\">"
+ },
+ {
+  "html": "<a href=\"a%20b\">y</a>",
+  "normalized": "<a href=\"a%20b\">y</a>"
+ },
+ {
+  "html": "<p>café 中文</p>",
+  "normalized": "<p>café 中文</p>"
+ },
+ {
+  "html": "<p>a</p>\r\n<p>b</p>",
+  "normalized": "<p>a</p><p>b</p>"
+ },
+ {
+  "html": "<p>&amp;amp;</p>",
+  "normalized": "<p>&amp;amp;</p>"
+ },
+ {
+  "html": "<hr>",
+  "normalized": "<hr>"
+ },
+ {
+  "html": "<hr />",
+  "normalized": "<hr>"
+ },
+ {
+  "html": "<hr/>",
+  "normalized": "<hr>"
+ },
+ {
+  "html": "<p>a<br>\nb</p>",
+  "normalized": "<p>a<br>b</p>"
+ },
+ {
+  "html": "<p>a<br />\nb</p>",
+  "normalized": "<p>a<br>b</p>"
+ },
+ {
+  "html": "<table>\n<tr><td>a</td></tr>\n</table>",
+  "normalized": "<table><tr><td>a</td></tr></table>"
+ },
+ {
+  "html": "<blockquote>\n<p>q</p>\n</blockquote>",
+  "normalized": "<blockquote><p>q</p></blockquote>"
+ },
+ {
+  "html": "<h1>t</h1>\n<p>b</p>",
+  "normalized": "<h1>t</h1><p>b</p>"
+ },
+ {
+  "html": "<ol start=\"3\">\n<li>x</li>\n</ol>",
+  "normalized": "<ol start=\"3\"><li>x</li></ol>"
+ },
+ {
+  "html": "<p title=\"a&quot;b\">x</p>",
+  "normalized": "<p title=\"a&quot;b\">x</p>"
+ },
+ {
+  "html": "<input checked>",
+  "normalized": "<input checked>"
+ },
+ {
+  "html": "<input checked=\"\">",
+  "normalized": "<input checked=\"\">"
+ },
+ {
+  "html": "<p> x </p>",
+  "normalized": "<p>x</p>"
+ },
+ {
+  "html": "<pre>\n</pre>",
+  "normalized": "<pre>\n</pre>"
+ },
+ {
+  "html": "<p></p>",
+  "normalized": "<p></p>"
+ }
+]
