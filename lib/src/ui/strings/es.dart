@@ -1314,6 +1314,12 @@ final class SpanishStrings extends Strings {
   @override
   String get typewriterTitle => 'Modo máquina de escribir';
   @override
+  String get formatNoteTitle => 'Ordenar el Markdown';
+  @override
+  String get formatNoteDone => 'La nota se ha ordenado.';
+  @override
+  String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
+  @override
   String get typewriterSubtitle =>
       'Mantén la línea que escribes en el centro del editor';
   @override

@@ -800,6 +800,9 @@ final class AppStrings {
   static String get typewriterOn => _s.typewriterOn;
   static String get typewriterOff => _s.typewriterOff;
   static String get typewriterTitle => _s.typewriterTitle;
+  static String get formatNoteTitle => _s.formatNoteTitle;
+  static String get formatNoteDone => _s.formatNoteDone;
+  static String get formatNoteAlreadyTidy => _s.formatNoteAlreadyTidy;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zenModeEnter => _s.zenModeEnter;

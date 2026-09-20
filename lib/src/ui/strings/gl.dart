@@ -1301,6 +1301,12 @@ final class GalicianStrings extends Strings {
   @override
   String get typewriterTitle => 'Modo máquina de escribir';
   @override
+  String get formatNoteTitle => 'Arranxar o Markdown';
+  @override
+  String get formatNoteDone => 'A nota arranxouse.';
+  @override
+  String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
+  @override
   String get typewriterSubtitle =>
       'Mantén a liña que escribes no medio do editor';
   @override

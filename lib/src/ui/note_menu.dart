@@ -18,6 +18,9 @@ enum NoteMenuAction {
   /// ask for the two-finger swipe to be known already.
   palette,
 
+  /// Tidy the note's Markdown (#227).
+  format,
+
   /// Browse and restore past versions.
   history,
 
@@ -74,6 +77,11 @@ final class NoteMenuButton extends StatelessWidget {
             Icons.bolt_outlined,
             AppStrings.commandPaletteTitle,
           ),
+        _item(
+          NoteMenuAction.format,
+          Icons.cleaning_services_outlined,
+          AppStrings.formatNoteTitle,
+        ),
         _item(
           NoteMenuAction.history,
           Icons.history,

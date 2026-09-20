@@ -196,6 +196,24 @@ Tables, task lists, footnotes, strikethrough, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
+**Tidy the Markdown** — the note's ⋮ menu, or *Editor: Tidy the
+Markdown* in the palette — puts a note's own text in order without
+changing what it says:
+
+- a line that continues a list item is indented to that item's text, so
+  a wrapped item stays one item (this is what makes such a note read
+  right in the WYSIWYG, where it used to break the numbering);
+- a heading gets one space after its hashes;
+- runs of blank lines become one, and the trailing ones go;
+- spaces left at the end of a line go, except the ones that mean a line
+  break;
+- the note ends with a single newline.
+
+It never reflows your prose, and never touches what it cannot read:
+fenced code, tables, math, frontmatter and HTML come back byte for
+byte. Tidying twice changes nothing the second time. The note is saved
+first, so what is tidied is the note as it stands.
+
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
 changeable in Settings → Keyboard shortcuts → Formatting (see

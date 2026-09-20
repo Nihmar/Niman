@@ -52,6 +52,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.renameNote ||
   AppCommand.moveNote ||
   AppCommand.deleteNote ||
+  AppCommand.formatNote ||
   AppCommand.noteHistory => const {CommandNeed.openNote},
   AppCommand.closeTab ||
   AppCommand.nextTab ||

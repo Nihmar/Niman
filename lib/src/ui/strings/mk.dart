@@ -1297,6 +1297,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get typewriterTitle => 'Режим на машина за пишување';
   @override
+  String get formatNoteTitle => 'Средиго Markdown';
+  @override
+  String get formatNoteDone => 'Белешката е средена.';
+  @override
+  String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
+  @override
   String get typewriterSubtitle =>
       'Редот што го пишувате останува во средината на уредувачот';
   @override

@@ -1286,6 +1286,12 @@ final class SlovakStrings extends Strings {
   @override
   String get typewriterTitle => 'Režim písacieho stroja';
   @override
+  String get formatNoteTitle => 'Upratať Markdown';
+  @override
+  String get formatNoteDone => 'Poznámka bola upratená.';
+  @override
+  String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
+  @override
   String get typewriterSubtitle =>
       'Riadok, ktorý píšete, zostáva v strede editora';
   @override

@@ -1166,6 +1166,12 @@ final class ChineseStrings extends Strings {
   @override
   String get typewriterTitle => '打字机模式';
   @override
+  String get formatNoteTitle => '整理 Markdown';
+  @override
+  String get formatNoteDone => '已整理该笔记。';
+  @override
+  String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
+  @override
   String get typewriterSubtitle => '让正在书写的行保持在编辑器中央';
   @override
   String get zenMode => '禅模式';

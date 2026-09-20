@@ -1295,6 +1295,12 @@ final class HungarianStrings extends Strings {
   @override
   String get typewriterTitle => 'Írógépmód';
   @override
+  String get formatNoteTitle => 'Markdown rendbetétele';
+  @override
+  String get formatNoteDone => 'A jegyzet rendbe lett téve.';
+  @override
+  String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
+  @override
   String get typewriterSubtitle =>
       'Az éppen írt sor a szerkesztő közepén marad';
   @override

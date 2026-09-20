@@ -1304,6 +1304,12 @@ final class PolishStrings extends Strings {
   @override
   String get typewriterTitle => 'Tryb maszyny do pisania';
   @override
+  String get formatNoteTitle => 'Uporządkuj Markdown';
+  @override
+  String get formatNoteDone => 'Notatka została uporządkowana.';
+  @override
+  String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
+  @override
   String get typewriterSubtitle =>
       'Wiersz, który piszesz, zostaje na środku edytora';
   @override

@@ -1298,6 +1298,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get typewriterTitle => 'Режим „пишеща машина“';
   @override
+  String get formatNoteTitle => 'Подреди Markdown';
+  @override
+  String get formatNoteDone => 'Бележката беше подредена.';
+  @override
+  String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
+  @override
   String get typewriterSubtitle =>
       'Редът, който пишете, остава в средата на редактора';
   @override

@@ -1299,6 +1299,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get typewriterTitle => 'Mënyra e makinës së shkrimit';
   @override
+  String get formatNoteTitle => 'Rregullo Markdown-in';
+  @override
+  String get formatNoteDone => 'Shënimi u rregullua.';
+  @override
+  String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
+  @override
   String get typewriterSubtitle =>
       'Rreshti që po shkruani mbetet në mes të redaktuesit';
   @override

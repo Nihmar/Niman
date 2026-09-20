@@ -1279,6 +1279,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get typewriterTitle => 'Skrivemaskinmodus';
   @override
+  String get formatNoteTitle => 'Rydd opp i Markdown';
+  @override
+  String get formatNoteDone => 'Notatet ble ryddet.';
+  @override
+  String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
+  @override
   String get typewriterSubtitle =>
       'Hold linjen du skriver på midt i redigeringsfeltet';
   @override

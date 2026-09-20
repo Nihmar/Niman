@@ -1292,6 +1292,12 @@ final class BasqueStrings extends Strings {
   @override
   String get typewriterTitle => 'Idazmakina modua';
   @override
+  String get formatNoteTitle => 'Markdown txukundu';
+  @override
+  String get formatNoteDone => 'Oharra txukundu da.';
+  @override
+  String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
+  @override
   String get typewriterSubtitle =>
       'Idazten ari zaren lerroa editorearen erdian mantentzen da';
   @override
