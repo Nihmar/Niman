@@ -31,6 +31,7 @@ final class SettingsSearchEntry {
     required this.rowKey,
     required this.value,
     required this.open,
+    this.areaId,
     this.onHome = false,
   });
 
@@ -49,6 +50,11 @@ final class SettingsSearchEntry {
 
   /// Opens the row's screen with the row highlighted.
   final VoidCallback open;
+
+  /// Which area the row lives in, for a caller that opens settings
+  /// itself — the command palette (#229). Null for the rows that sit on
+  /// the settings home.
+  final SettingsAreaId? areaId;
 
   /// True for the maintenance actions: they sit on the home itself, so
   /// opening them means clearing the search and flashing in place.
@@ -98,6 +104,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: appearance,
       rowKey: SettingsKeys.language,
       value: () async => AppStrings.languageName(await controller.language),
+      areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.language),
     ),
     SettingsSearchEntry(
@@ -109,6 +116,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         AppBrightness.day => AppStrings.themeBrightnessDay,
         AppBrightness.night => AppStrings.themeBrightnessNight,
       },
+      areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.brightness),
     ),
     SettingsSearchEntry(
@@ -117,6 +125,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.palette,
       value: () async =>
           SettingsAppearanceScreen.paletteName(await controller.themePalette),
+      areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.palette),
     ),
     SettingsSearchEntry(
@@ -125,6 +134,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.uiTextScale,
       value: () async =>
           AppStrings.textScaleValue(await controller.uiTextScale),
+      areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.uiTextScale),
     ),
     SettingsSearchEntry(
@@ -133,6 +143,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.splitRatio,
       value: () async =>
           AppStrings.splitRatioValue(await controller.splitRatio),
+      areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.splitRatio),
     ),
     // The desktops only (#209): elsewhere there is no tray to close into.
@@ -142,6 +153,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         area: appearance,
         rowKey: SettingsKeys.closeToTray,
         value: () async => onOff(on: await controller.closeToTray),
+        areaId: SettingsAreaId.appearance,
         open: () => pushAppearance(SettingsKeys.closeToTray),
       ),
     SettingsSearchEntry(
@@ -149,6 +161,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: editor,
       rowKey: SettingsKeys.toolbar,
       value: noValue,
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.toolbar),
     ),
     SettingsSearchEntry(
@@ -174,6 +187,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: editor,
       rowKey: SettingsKeys.previewEnabled,
       value: () async => onOff(on: await controller.previewEnabled),
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.previewEnabled),
     ),
     SettingsSearchEntry(
@@ -181,6 +195,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: editor,
       rowKey: SettingsKeys.lineNumbers,
       value: () async => onOff(on: await controller.lineNumbersEnabled),
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.lineNumbers),
     ),
     SettingsSearchEntry(
@@ -188,6 +203,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: editor,
       rowKey: SettingsKeys.readableLineLength,
       value: () async => onOff(on: await controller.readableLineLength),
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.readableLineLength),
     ),
     SettingsSearchEntry(
@@ -204,6 +220,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: editor,
       rowKey: SettingsKeys.typewriter,
       value: () async => onOff(on: await controller.typewriter),
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.typewriter),
     ),
     SettingsSearchEntry(
@@ -214,6 +231,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         LinkType.wikilink => AppStrings.linkTypeWikilink,
         LinkType.markdown => AppStrings.linkTypeMarkdown,
       },
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.linkType),
     ),
     SettingsSearchEntry(
@@ -225,6 +243,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         MissingNoteLocation.currentFolder =>
           AppStrings.missingNoteLocationCurrentFolder,
       },
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.missingNoteLocation),
     ),
     SettingsSearchEntry(
@@ -233,6 +252,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.noteTextScale,
       value: () async =>
           AppStrings.textScaleValue(await controller.noteTextScale),
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.noteTextScale),
     ),
     SettingsSearchEntry(
@@ -241,6 +261,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.indentWidth,
       value: () async =>
           AppStrings.indentWidthValue(await controller.indentWidth),
+      areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.indentWidth),
     ),
     SettingsSearchEntry(
@@ -248,6 +269,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: folders,
       rowKey: SettingsKeys.listFolder,
       value: () async => ops == null ? null : await ops.listNoteFolder,
+      areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.listFolder),
     ),
     SettingsSearchEntry(
@@ -255,6 +277,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: folders,
       rowKey: SettingsKeys.templateFolder,
       value: () async => ops == null ? null : await ops.templateFolder,
+      areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.templateFolder),
     ),
     SettingsSearchEntry(
@@ -262,6 +285,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: folders,
       rowKey: SettingsKeys.templateHelp,
       value: noValue,
+      areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.templateHelp),
     ),
     SettingsSearchEntry(
@@ -269,6 +293,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: folders,
       rowKey: SettingsKeys.attachmentsFolder,
       value: () async => ops == null ? null : await ops.attachmentsFolder,
+      areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.attachmentsFolder),
     ),
     SettingsSearchEntry(
@@ -278,6 +303,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       value: () async => ops == null
           ? null
           : (await ops.quickNotePath) ?? AppStrings.quickNoteUnset,
+      areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.quickNote),
     ),
     SettingsSearchEntry(
@@ -285,6 +311,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: trashHistory,
       rowKey: SettingsKeys.trash,
       value: () async => ops == null ? null : onOff(on: await ops.trashEnabled),
+      areaId: SettingsAreaId.trashHistory,
       open: () => pushTrash(SettingsKeys.trash),
     ),
     SettingsSearchEntry(
@@ -293,6 +320,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.trashAutoEmpty,
       value: () async =>
           AppStrings.trashAutoEmptyValue(await controller.trashAutoEmptyDays),
+      areaId: SettingsAreaId.trashHistory,
       open: () => pushTrash(SettingsKeys.trashAutoEmpty),
     ),
     SettingsSearchEntry(
@@ -301,6 +329,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       rowKey: SettingsKeys.historyVersions,
       value: () async =>
           AppStrings.historyVersionsValue(await controller.historyVersions),
+      areaId: SettingsAreaId.trashHistory,
       open: () => pushTrash(SettingsKeys.historyVersions),
     ),
     SettingsSearchEntry(
@@ -329,6 +358,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         area: AppStrings.settingsSectionUpdates,
         rowKey: SettingsKeys.autoUpdate,
         value: () async => onOff(on: await controller.autoUpdateEnabled),
+        areaId: SettingsAreaId.updates,
         open: () => pushUpdates(SettingsKeys.autoUpdate),
       ),
       SettingsSearchEntry(
@@ -336,6 +366,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         area: AppStrings.settingsSectionUpdates,
         rowKey: SettingsKeys.checkUpdates,
         value: noValue,
+        areaId: SettingsAreaId.updates,
         open: () => pushUpdates(SettingsKeys.checkUpdates),
       ),
     ],
@@ -344,6 +375,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: AppStrings.settingsAreaDiagnostics,
       rowKey: SettingsKeys.debugLogs,
       value: () async => onOff(on: await controller.debugLogsEnabled),
+      areaId: SettingsAreaId.diagnostics,
       open: () => pushDiagnostics(SettingsKeys.debugLogs),
     ),
     SettingsSearchEntry(
@@ -351,6 +383,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: AppStrings.settingsAreaDiagnostics,
       rowKey: SettingsKeys.exportLog,
       value: noValue,
+      areaId: SettingsAreaId.diagnostics,
       open: () => pushDiagnostics(SettingsKeys.exportLog),
     ),
     SettingsSearchEntry(
@@ -358,6 +391,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: AppStrings.settingsAreaDiagnostics,
       rowKey: SettingsKeys.changelog,
       value: noValue,
+      areaId: SettingsAreaId.diagnostics,
       open: () => pushDiagnostics(SettingsKeys.changelog),
     ),
     SettingsSearchEntry(
@@ -365,6 +399,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: libraryArea(AppStrings.settingsSectionReminders),
       rowKey: SettingsKeys.reminderShowTokens,
       value: () async => onOff(on: await controller.reminderShowTokens),
+      areaId: SettingsAreaId.reminders,
       open: () =>
           openArea(SettingsAreaId.reminders, SettingsKeys.reminderShowTokens),
     ),
@@ -379,6 +414,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
               ? AppStrings.transcriptionModelNone
               : AppStrings.transcriptionModelName(model);
         },
+        areaId: SettingsAreaId.transcription,
         open: () => openArea(
           SettingsAreaId.transcription,
           SettingsKeys.transcriptionModel,
@@ -403,6 +439,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
         area: libraryArea(AppStrings.settingsSectionSync),
         rowKey: const Key('settings-area-sync'),
         value: () async => syncStatusLine(sync.status, DateTime.now()),
+        areaId: SettingsAreaId.sync,
         open: () =>
             openArea(SettingsAreaId.sync, const Key('settings-area-sync')),
       ),
@@ -452,6 +489,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
           title: appCommandLabel(command),
           area: AppStrings.keyboardShortcutsTitle,
           rowKey: shortcutRowKey(command),
+          areaId: SettingsAreaId.shortcuts,
           value: () async =>
               switch (AppKeyMap.current.value.bindingOf(command)) {
                 final keys? => describeActivator(keys),
@@ -465,6 +503,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
           title: appCommandLabel(command),
           area: AppStrings.commandsTitle,
           rowKey: commandRowKey(command),
+          areaId: SettingsAreaId.commands,
           value: noValue,
           open: () => openArea(SettingsAreaId.commands, commandRowKey(command)),
         ),
@@ -477,6 +516,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
             title: item.label,
             area: AppStrings.keyboardShortcutsTitle,
             rowKey: editorShortcutRowKey(item),
+            areaId: SettingsAreaId.shortcuts,
             value: () async =>
                 switch (AppKeyMap.current.value.editorBindingOf(item)) {
                   final keys? => describeActivator(keys),

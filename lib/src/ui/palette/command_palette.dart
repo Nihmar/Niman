@@ -15,6 +15,7 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
+import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -41,6 +42,32 @@ final class PaletteNoteChoice extends PaletteChoice {
   final String path;
 }
 
+/// A settings row, to open the settings at (#229).
+final class PaletteSettingChoice extends PaletteChoice {
+  /// Picked [setting].
+  const new(this.setting);
+
+  /// Which row.
+  final PaletteSetting setting;
+}
+
+/// One settings row as the palette lists it (#229): its title, the area
+/// it lives in, and where to open.
+@immutable
+final class PaletteSetting {
+  /// A row titled [title] of [area], at [target].
+  const new({required this.title, required this.area, required this.target});
+
+  /// The row's own title, as the settings screen reads it.
+  final String title;
+
+  /// Where it lives, for the line under it.
+  final String area;
+
+  /// The area and row the settings open at.
+  final SettingsTarget target;
+}
+
 /// Shows the palette and resolves to what was picked, or null.
 ///
 /// [commands] are the ones that can run here and now; [notesOnly] is
@@ -52,6 +79,7 @@ Future<PaletteChoice?> showCommandPalette(
   required Future<List<String>> Function(String query) searchNotes,
   List<AppCommand> recentCommands = const [],
   List<String> recentNotes = const [],
+  List<PaletteSetting> settings = const [],
   bool notesOnly = false,
   void Function(AppCommand command)? onTogglePin,
 }) {
@@ -66,6 +94,7 @@ Future<PaletteChoice?> showCommandPalette(
       searchNotes: searchNotes,
       recentCommands: recentCommands,
       recentNotes: recentNotes,
+      settings: notesOnly ? const [] : settings,
       onTogglePin: notesOnly ? null : onTogglePin,
     ),
   );
@@ -79,6 +108,7 @@ final class CommandPalette extends StatefulWidget {
     required this.searchNotes,
     this.recentCommands = const [],
     this.recentNotes = const [],
+    this.settings = const [],
     this.onTogglePin,
     super.key,
   });
@@ -94,6 +124,11 @@ final class CommandPalette extends StatefulWidget {
 
   /// Notes opened lately, most recent first.
   final List<String> recentNotes;
+
+  /// The settings rows the search can answer with (#229): after the
+  /// commands and the notes, because a setting is the rarest of the
+  /// three and the slowest to want.
+  final List<PaletteSetting> settings;
 
   /// Pins or unpins a command (#208); null leaves the pins out (Go to
   /// note's palette, which has no commands).
@@ -111,6 +146,7 @@ final class _CommandPaletteState extends State<CommandPalette> {
   final ScrollController _scroll = ScrollController();
   List<PaletteCommand> _commands = const [];
   List<String> _notes = const [];
+  List<PaletteSetting> _settings = const [];
   int _selected = 0;
   int _token = 0;
   Timer? _debounce;
@@ -189,14 +225,28 @@ final class _CommandPaletteState extends State<CommandPalette> {
     super.dispose();
   }
 
-  /// Everything listed, commands first: what ↑↓ walk.
+  /// Everything listed, commands first, settings last: what ↑↓ walk.
   List<PaletteChoice> get _items => [
     for (final c in _commands) PaletteCommandChoice(c.command),
     for (final n in _notes) PaletteNoteChoice(n),
+    for (final s in _settings) PaletteSettingChoice(s),
   ];
+
+  /// The settings rows [query] finds; nothing with nothing typed, since
+  /// the palette opens on what was used, and a setting never was.
+  List<PaletteSetting> _rankSettings(String query) {
+    if (query.trim().isEmpty) return const [];
+    return paletteRank(
+      widget.settings,
+      query,
+      name: (s) => '${s.area} ${s.title}',
+      id: (s) => s.title,
+    ).take(5).toList();
+  }
 
   void _refresh(String query) {
     setState(() {
+      _settings = _rankSettings(query);
       _commands = _rankCommands(query);
       if (query.trim().isEmpty) _notes = widget.recentNotes.take(8).toList();
       _selected = 0;
@@ -352,6 +402,10 @@ final class _CommandPaletteState extends State<CommandPalette> {
                                 _Heading(AppStrings.paletteNotes),
                               for (final path in _notes)
                                 row(_NoteLine(path: path)),
+                              if (_settings.isNotEmpty)
+                                _Heading(AppStrings.tabSettings),
+                              for (final setting in _settings)
+                                row(_SettingLine(setting: setting)),
                             ],
                           ),
                   ),
@@ -549,6 +603,43 @@ final class _PinButton extends StatelessWidget {
       color: pinned ? scheme.primary : scheme.onSurfaceVariant,
       icon: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
       onPressed: () => onPressed(command),
+    );
+  }
+}
+
+/// One settings row in the palette: its title, and where it lives.
+final class _SettingLine extends StatelessWidget {
+  const new({required this.setting});
+
+  final PaletteSetting setting;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(Icons.tune, size: 18, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            setting.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            setting.area,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

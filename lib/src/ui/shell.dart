@@ -61,6 +61,8 @@ import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
+import 'package:niman/src/ui/settings_areas.dart';
+import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/settings_window.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
@@ -2752,6 +2754,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       notesOnly: notesOnly,
       recentCommands: _recentCommands,
       recentNotes: _workspace.recentNotes,
+      settings: _paletteSettings(),
       onTogglePin: (command) =>
           unawaited(PinnedCommands.toggle(widget.controller, command)),
       searchNotes: (query) async => ops == null
@@ -2764,6 +2767,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         _runCommand(handlers, command);
       case PaletteNoteChoice(:final path):
         _openNoteFromLink(path, null);
+      case PaletteSettingChoice(:final setting):
+        _openSettingsAt(setting.target);
     }
   }
 
@@ -2776,6 +2781,64 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (command != AppCommand.openPalette && command != AppCommand.goToNote)
         PaletteCommand.of(command, label: _paletteLabel(command)),
   ];
+
+  /// The settings rows the palette can answer with (#229).
+  ///
+  /// The same rows the settings search finds, read for their titles and
+  /// their places: the palette opens the settings itself, so the
+  /// callbacks the settings screen builds them with are not used here.
+  List<PaletteSetting> _paletteSettings() {
+    final root = widget.controller.root;
+    if (root == null) return const [];
+    return [
+      for (final entry in settingsSearchEntries(
+        controller: widget.controller,
+        transcription: widget.transcription,
+        spellCheck: widget.spellCheck,
+        libraryName: p.basename(root),
+        context: context,
+        flashHome: (_) {},
+        openArea: (_, _) {},
+        libraryRows: !_wide,
+      ))
+        // The keyboard and Commands pages hold a row per command, which
+        // the palette already lists as the commands themselves: a second
+        // row saying the same name would be noise, and the key is on the
+        // command's own row anyway.
+        if (entry.areaId case final area?
+            when area != SettingsAreaId.shortcuts &&
+                area != SettingsAreaId.commands)
+          PaletteSetting(
+            title: entry.title,
+            area: entry.area,
+            target: (area: area, row: entry.rowKey),
+          ),
+    ];
+  }
+
+  /// Opens the settings at [target] (#229): the floating window on a
+  /// wide one, the Settings tab on a phone.
+  void _openSettingsAt(SettingsTarget target) {
+    if (_wide) {
+      unawaited(
+        _showFloatingWindow(
+          settingsWindowRoute(
+            context,
+            controller: widget.controller,
+            spellCheck: widget.spellCheck,
+            transcription: widget.transcription,
+            target: target,
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() => _settingsTarget = target);
+    _onDestinationSelected(ShellTab.settings.index);
+  }
+
+  /// Where the Settings tab opens next, once (#229).
+  SettingsTarget? _settingsTarget;
 
   /// Runs [command] through [handlers], remembering it for next time.
   void _runCommand(Map<AppCommand, VoidCallback> handlers, AppCommand command) {
@@ -3203,9 +3266,12 @@ final class _LibraryShellState extends State<_LibraryShell>
             ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
             : const SizedBox.shrink(),
       ShellTab.settings => SettingsTab(
+        // A palette pick opens the tab where it points, once (#229).
+        key: ValueKey(_settingsTarget),
         controller: controller,
         spellCheck: widget.spellCheck,
         transcription: widget.transcription,
+        target: _settingsTarget,
       ),
     };
   }
