@@ -1322,6 +1322,12 @@ final class FrenchStrings extends Strings {
   @override
   String get typewriterTitle => 'Mode machine à écrire';
   @override
+  String get formatNoteTitle => 'Ranger le Markdown';
+  @override
+  String get formatNoteDone => 'La note a été rangée.';
+  @override
+  String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
+  @override
   String get typewriterSubtitle =>
       'Garder la ligne en cours d’écriture au milieu de l’éditeur';
   @override

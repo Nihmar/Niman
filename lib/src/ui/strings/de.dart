@@ -1311,6 +1311,12 @@ final class GermanStrings extends Strings {
   @override
   String get typewriterTitle => 'Schreibmaschinenmodus';
   @override
+  String get formatNoteTitle => 'Markdown aufräumen';
+  @override
+  String get formatNoteDone => 'Die Notiz wurde aufgeräumt.';
+  @override
+  String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
+  @override
   String get typewriterSubtitle =>
       'Die Zeile, in der Sie schreiben, bleibt in der Mitte des Editors';
   @override

@@ -58,6 +58,9 @@ enum AppCommand {
   /// Switch typewriter mode (#70): the line being written in the middle.
   typewriterMode,
 
+  /// Tidy the note's Markdown (#227).
+  formatNote,
+
   /// Open a Markdown file outside the library (#77).
   openFile,
 
@@ -229,6 +232,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.splitDown => AppStrings.splitDown,
   AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.typewriterMode => AppStrings.typewriterTitle,
+  AppCommand.formatNote => AppStrings.formatNoteTitle,
   AppCommand.openFile => AppStrings.openFileTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,

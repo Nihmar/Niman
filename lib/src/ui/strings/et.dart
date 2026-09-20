@@ -1268,6 +1268,12 @@ final class EstonianStrings extends Strings {
   @override
   String get typewriterTitle => 'Kirjutusmasina režiim';
   @override
+  String get formatNoteTitle => 'Korrasta Markdown';
+  @override
+  String get formatNoteDone => 'Märge korrastati.';
+  @override
+  String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
+  @override
   String get typewriterSubtitle =>
       'Rida, mida kirjutad, püsib redaktori keskel';
   @override

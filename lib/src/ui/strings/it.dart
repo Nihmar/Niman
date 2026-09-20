@@ -1300,6 +1300,12 @@ final class ItalianStrings extends Strings {
   @override
   String get typewriterTitle => 'Modalità macchina da scrivere';
   @override
+  String get formatNoteTitle => 'Sistema il Markdown';
+  @override
+  String get formatNoteDone => 'Nota sistemata.';
+  @override
+  String get formatNoteAlreadyTidy => 'La nota era già a posto.';
+  @override
   String get typewriterSubtitle =>
       'Tieni la riga che stai scrivendo al centro dell’editor';
   @override

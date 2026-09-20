@@ -1287,6 +1287,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get typewriterTitle => 'Rašomosios mašinėlės režimas';
   @override
+  String get formatNoteTitle => 'Sutvarkyti Markdown';
+  @override
+  String get formatNoteDone => 'Pastaba sutvarkyta.';
+  @override
+  String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
+  @override
   String get typewriterSubtitle =>
       'Eilutė, kurią rašote, lieka redaktoriaus viduryje';
   @override

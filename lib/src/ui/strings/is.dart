@@ -1287,6 +1287,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get typewriterTitle => 'Ritvélarhamur';
   @override
+  String get formatNoteTitle => 'Taka til í Markdown';
+  @override
+  String get formatNoteDone => 'Tekið var til í glósunni.';
+  @override
+  String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
+  @override
   String get typewriterSubtitle =>
       'Línan sem þú skrifar helst fyrir miðju ritilsins';
   @override

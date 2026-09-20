@@ -1276,6 +1276,12 @@ final class EnglishStrings extends Strings {
   @override
   String get typewriterTitle => 'Typewriter mode';
   @override
+  String get formatNoteTitle => 'Tidy the Markdown';
+  @override
+  String get formatNoteDone => 'The note was tidied.';
+  @override
+  String get formatNoteAlreadyTidy => 'The note was already tidy.';
+  @override
   String get typewriterSubtitle =>
       'Keep the line you are writing in the middle of the editor';
   @override
