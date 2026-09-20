@@ -2255,13 +2255,14 @@ Two further consequences of the measured numbers:
 
 ## 5.7 A synthetic "worst note" spec and fixture
 
-Generator: a research prototype, re-runnable and byte-deterministic (no
-randomness, no timestamps), which produced the fixture during this study. **The
-prototype lived in the research scratch directory and is not in the repo**; the
-table below is the specification, so it is reproducible from this document, and
-[§10.3](#103-the-stages)'s Phase 1 commits it as `tool/make_worst_note.dart`
-next to the repo's existing `tool/make_fixture.dart` and
-`tool/generate_markdown_fixtures.dart`.
+Generator: **in the repo**, at `tool/make_worst_note.dart`, re-runnable and
+byte-deterministic (no randomness, no timestamps). It writes
+`test/fixtures/spec/worst-note.md`, and `dart run tool/make_worst_note.dart
+--check` prints what it produced next to the spec below.
+`test/unit/worst_note_test.dart` asserts both halves of the contract: that the
+fixture still has the shape this table asks for, and that the engine — the
+block scanner and the extension masker — survives it, which is Phase 1's
+"the parser is run against it".
 Every construct below is justified by a measured worst case from §1–§6; each section
 of the fixture is labelled in-file with the corpus value it exceeds.
 
@@ -2299,6 +2300,31 @@ of the fixture is labelled in-file with the corpus value it exceeds.
 | 28 | one mega-paragraph | 1 line | 2 000 lines / one `TextPainter` | 2 000 lines |
 
 ### 5.7.2 Measured stats of the generated fixture
+
+Measured 2026-09-21 on the committed fixture, which the generator reproduces
+byte for byte:
+
+| metric | value |
+|---|---|
+| bytes | 1 331 737 |
+| lines | 10 470 |
+| blank lines | 1 869 (17.9 %) |
+| max line | 4 209 B |
+| lines > 2 000 B | 48 |
+| headings | H1 17 / H2 2 / H3–H6 1 each, plus 2 setext |
+| fence marker lines | 8 (4 blocks: no info string, a language, empty, 2 000 lines) |
+| display math markers | 906 |
+| inline `$…$` | 20 707 |
+| wikilinks | 2 124 (704 embeds) |
+| footnote definitions | 60 |
+| CRLF lines | 120 |
+
+The engine's own numbers on it, from the same run: 1 427 blocks, every one of
+the twelve block kinds present, and a keystroke in prose re-scanning fewer than
+30 lines. A keystroke *inside* the 2 000-line paragraph re-scans about 2 000 —
+which is O(block), not O(document), and is the case a caller has to plan for.
+
+### 5.7.3 The stats the first version had
 
 Provenance: `scripts/gen_global_stats.py`, `gen_block_census.py`, `gen_inline_census.py`,
 `gen_math_deepdive.py`, `gen_worstcases.py`, `gen_layout_model.py`, all run on
