@@ -175,6 +175,27 @@ A [[wikilink]] and an ![[embed.png]].
     expect(blocks[1].opaque, isTrue);
   });
 
+  // 0.0.8 test round: a checklist opened in the WYSIWYG as one grey
+  // block. Its list items wrap over two lines, which the locator counted
+  // as blocks of their own; the counts then disagreed with the parser's
+  // and the codec kept the whole note verbatim rather than mis-slice it.
+  test('a note whose list items wrap is not one opaque block', () {
+    const source =
+        '# Title\n'
+        '\n'
+        '1. the first item, which runs on\n'
+        'and wraps without any indent\n'
+        '2. the second item\n'
+        '\n'
+        'A closing paragraph.\n';
+    final blocks = splitMarkdownBlocks(source);
+    expect(blocks.map((b) => b.tag), ['h1', 'ol', 'p']);
+    expect(blocks.every((b) => !b.opaque), isTrue);
+    // And it still round-trips: the wrapped line is the list's.
+    final decoded = codec.decode(source);
+    expect(codec.encode(decoded.document, decoded: decoded), source);
+  });
+
   test('an edit keeps every opaque block byte for byte', () {
     const note = r'''
 # Heading
