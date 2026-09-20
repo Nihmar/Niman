@@ -1238,6 +1238,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
   @override
+  String get paletteFooterTouch =>
+      'Bakstelėkite, kad naudotumėte · smeigtukas laiko viršuje';
+  @override
   String get palettePinned => 'Prisegti';
   @override
   String get palettePin => 'Prisegti';

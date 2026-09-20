@@ -1211,6 +1211,9 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get paletteFooterTouch =>
+      'उपयोग के लिए टैप करें · पिन इसे ऊपर रखती है';
+  @override
   String get palettePinned => 'पिन किए';
   @override
   String get palettePin => 'पिन करें';

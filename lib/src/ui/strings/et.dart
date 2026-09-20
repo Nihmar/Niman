@@ -1219,6 +1219,9 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get paletteFooterTouch =>
+      'Puuduta kasutamiseks · nööpnõel hoiab selle üleval';
+  @override
   String get palettePinned => 'Kinnitatud';
   @override
   String get palettePin => 'Kinnita';

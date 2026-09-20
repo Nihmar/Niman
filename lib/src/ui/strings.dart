@@ -780,6 +780,7 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get paletteFooterTouch => _s.paletteFooterTouch;
   static String get palettePinned => _s.palettePinned;
   static String get palettePin => _s.palettePin;
   static String get paletteUnpin => _s.paletteUnpin;

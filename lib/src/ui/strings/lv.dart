@@ -1234,6 +1234,9 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get paletteFooterTouch =>
+      'Pieskaries, lai izmantotu · spraudīte tur to augšā';
+  @override
   String get palettePinned => 'Piesprausti';
   @override
   String get palettePin => 'Piespraust';

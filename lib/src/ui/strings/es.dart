@@ -1265,6 +1265,9 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
   @override
+  String get paletteFooterTouch =>
+      'Toca para usar · el alfiler lo mantiene arriba';
+  @override
   String get palettePinned => 'Fijados';
   @override
   String get palettePin => 'Fijar';

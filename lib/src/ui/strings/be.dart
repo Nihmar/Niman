@@ -1238,6 +1238,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get paletteFooterTouch =>
+      'Крані, каб выканаць · шпілька трымае зверху';
+  @override
   String get palettePinned => 'Прышпіленыя';
   @override
   String get palettePin => 'Прышпіліць';
