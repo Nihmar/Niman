@@ -1255,6 +1255,9 @@ final class SlovakStrings extends Strings {
   String get dropHint =>
       'Pretiahnite súbory Markdown na otvorenie alebo priečinok na import';
   @override
+  String get dropNothing =>
+      'Prostredie pri tomto pustení neodovzdalo žiadne súbory.';
+  @override
   String get importFolderAction => 'Importovať';
   @override
   String dropRejected(String names) =>

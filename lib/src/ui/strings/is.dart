@@ -1257,6 +1257,9 @@ final class IcelandicStrings extends Strings {
       'Slepptu Markdown-skrám til að opna þær, eða möppu til að flytja hana '
       'inn';
   @override
+  String get dropNothing =>
+      'Skjáborðið afhenti engar skrár fyrir þetta sleppi.';
+  @override
   String get importFolderAction => 'Flytja inn';
   @override
   String dropRejected(String names) =>

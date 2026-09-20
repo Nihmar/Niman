@@ -18,6 +18,7 @@ import 'dart:io';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/launch_requests.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -88,6 +89,8 @@ final class AppDropTarget extends StatefulWidget {
 }
 
 final class _AppDropTargetState extends State<AppDropTarget> {
+  static const AppLogger _log = AppLogger(name: 'drop');
+
   bool _over = false;
 
   /// Linux and Windows: the phone has nothing to drag from, and the
@@ -103,8 +106,25 @@ final class _AppDropTargetState extends State<AppDropTarget> {
       onDragExited: (_) => setState(() => _over = false),
       onDragDone: (details) {
         setState(() => _over = false);
+        final paths = [for (final item in details.files) item.path];
+        // What the desktop handed over, in the note the log keeps: a drop
+        // that brings nothing looked exactly like a drop that was never
+        // made (#224), and the two need telling apart.
+        _log.info('drop: ${paths.length} path(s) ${paths.join(', ')}');
+        if (paths.isEmpty) {
+          _log.warning('drop: the desktop handed over no files');
+          ScaffoldMessenger.maybeOf(context)
+              ?.showSnackBar(SnackBar(content: Text(AppStrings.dropNothing)));
+          return;
+        }
+        final sorted = sortDrop(paths);
+        _log.debug(
+          'drop sorted: ${sorted.files.length} file(s), '
+          '${sorted.folders.length} folder(s), '
+          '${sorted.rejected.length} left alone',
+        );
         deliverDrop(
-          sortDrop([for (final item in details.files) item.path]),
+          sorted,
           widget.requests,
           ScaffoldMessenger.maybeOf(context),
         );

@@ -1261,6 +1261,9 @@ final class SerbianStrings extends Strings {
   String get dropHint =>
       'Испустите Markdown датотеке да их отворите или фасциклу да је увезете';
   @override
+  String get dropNothing =>
+      'Радна површина није предала ниједну датотеку при том испуштању.';
+  @override
   String get importFolderAction => 'Увези';
   @override
   String dropRejected(String names) =>

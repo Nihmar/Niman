@@ -1252,6 +1252,9 @@ final class SlovenianStrings extends Strings {
   String get dropHint =>
       'Spustite datoteke Markdown, da jih odprete, ali mapo, da jo uvozite';
   @override
+  String get dropNothing =>
+      'Namizje pri tem spustu ni predalo nobene datoteke.';
+  @override
   String get importFolderAction => 'Uvozi';
   @override
   String dropRejected(String names) =>

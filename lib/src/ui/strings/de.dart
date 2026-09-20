@@ -1281,6 +1281,9 @@ final class GermanStrings extends Strings {
       'Markdown-Dateien ablegen, um sie zu öffnen, oder einen Ordner, um ihn '
       'zu importieren';
   @override
+  String get dropNothing =>
+      'Der Desktop hat für dieses Ablegen keine Dateien übergeben.';
+  @override
   String get importFolderAction => 'Importieren';
   @override
   String dropRejected(String names) =>

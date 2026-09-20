@@ -1258,6 +1258,8 @@ final class LithuanianStrings extends Strings {
       'Numeskite Markdown failus, kad juos atidarytumėte, arba aplanką, kad '
       'jį importuotumėte';
   @override
+  String get dropNothing => 'Darbalaukis šiam numetimui neperdavė jokių failų.';
+  @override
   String get importFolderAction => 'Importuoti';
   @override
   String dropRejected(String names) =>

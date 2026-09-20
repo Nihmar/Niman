@@ -1255,6 +1255,8 @@ final class DanishStrings extends Strings {
       'Slip Markdown-filer for at åbne dem, eller en mappe for at importere '
       'den';
   @override
+  String get dropNothing => 'Skrivebordet afleverede ingen filer ved det slip.';
+  @override
   String get importFolderAction => 'Importér';
   @override
   String dropRejected(String names) =>

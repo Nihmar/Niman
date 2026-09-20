@@ -1270,6 +1270,8 @@ final class AlbanianStrings extends Strings {
   String get dropHint =>
       'Lëshoni skedarë Markdown për t’i hapur, ose një dosje për ta importuar';
   @override
+  String get dropNothing => 'Desktopi nuk dorëzoi asnjë skedar për atë lëshim.';
+  @override
   String get importFolderAction => 'Importo';
   @override
   String dropRejected(String names) =>

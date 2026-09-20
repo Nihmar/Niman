@@ -1274,6 +1274,9 @@ final class DutchStrings extends Strings {
       'Sleep Markdown-bestanden hierheen om ze te openen, of een map om hem '
       'te importeren';
   @override
+  String get dropNothing =>
+      'Het bureaublad gaf geen bestanden door bij dat slepen.';
+  @override
   String get importFolderAction => 'Importeren';
   @override
   String dropRejected(String names) =>

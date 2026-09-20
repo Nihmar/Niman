@@ -1229,6 +1229,8 @@ final class HindiStrings extends Strings {
   String get dropHint =>
       'खोलने के लिए Markdown फ़ाइलें छोड़ें, या आयात करने के लिए फ़ोल्डर';
   @override
+  String get dropNothing => 'डेस्कटॉप ने उस ड्रॉप के लिए कोई फ़ाइल नहीं दी।';
+  @override
   String get importFolderAction => 'आयात करें';
   @override
   String dropRejected(String names) =>

@@ -1246,6 +1246,8 @@ final class TurkishStrings extends Strings {
   String get dropHint =>
       'Açmak için Markdown dosyalarını, içe aktarmak için bir klasörü bırakın';
   @override
+  String get dropNothing => 'Masaüstü bu bırakma için hiçbir dosya vermedi.';
+  @override
   String get importFolderAction => 'İçe aktar';
   @override
   String dropRejected(String names) =>
