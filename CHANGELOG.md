@@ -6,6 +6,43 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.0.8] - 2026-09-20
+
+**Updates over 0.0.7 normally.** The signing key from 0.0.7 carries on, so this installs over it, and the app database migrates itself: the open notes, the shortcuts, the pins and the tray choice land where they belong.
+
+### Added
+- **Tabs, panes, and a workspace that remembers.** The desktop keeps every open note in tabs — one pane, then two, split from a tab or opened beside with a middle or double click — and tabs drag to reorder, move between panes, or drop to split. Phones get the same model as an open-notes switcher. Which notes were open, and where each one was left, is kept per device and restored on return
+- **The command palette.** One search for commands and notes: find a note by name, run a command, pin the commands used most so they wait at the top. The phone's palette stands apart from the library search, and a Commands page in Settings lists what the palette can run and when
+- **Keyboard shortcuts of your own.** Change, clear and restore shortcuts; the map lives on the device, both editors hear it, and a remapped key runs once. The palette's search finds a command by its keys too
+- **Zen mode and typewriter mode.** Zen clears the desktop down to the note, preview included; typewriter mode keeps the line being written in the middle of the screen, set per library from the note's menu
+- **A right dock** with the note's outline, tags and history, keeping its state as it moves beside the note
+- **Close to tray, and a tray menu worth having.** The window's × hides Niman to the tray on the desktops, where the reminders keep firing
+- **One Niman per desktop session.** A second launch reaches the running one instead of opening another
+- **Drop files on the window.** Markdown files and folders dropped on Niman land in the library; `.md` files open in Niman from the file manager, and a file passed on launch opens, even outside any library
+- **Tidy the Markdown**: the editor rewrites the note's Markdown clean — spacing, list marks, heading style — the same in both editors
+- The palette answers with settings too: its search reaches the app's own settings
+- Settings opens as a floating window on a wide window, and the library switcher floats too, with **Close library**
+
+### Changed
+- The rail is 48 px and icons only, with its way out at the foot
+- A note is a centred column, on by default; list notes, voice notes and the Todo list keep to it, and a window showing one thing wears a slim title bar
+- Settings is two columns on a wide window, every row stacking label, description and control
+- A note wears one row above it, with the note menu at its end; the formatting actions live on right-click in both editors
+- No keys named where there is no keyboard to press them: the phone's labels say what they do instead
+
+### Fixed
+- **Starts on a clean Windows**: the bundle carries the Visual C++ runtime it needs
+- A note whose list items wrap opens as a note again, instead of choking on its own wrapping
+- A section break reads as a line in the WYSIWYG, not a box of hyphens
+- `Ctrl+Z` on a note just opened no longer empties it
+- The buffer is never saved over a file that did not load, and a file that is not text says so instead of opening as one
+- In the palette the pointer selects, and a chosen key beats the formatting; on Linux the tray menu appears
+- A drop that brings nothing says so, and leaves a trace
+- Tapping a todo on the home-screen widget completes it again, and the testing build finds its placed widgets
+- The spellcheck panel opens at once on any note, and the overdue reminder line reads true on a desktop
+- A full sync waits out a backoff and names a stuck file, and a 207 that says "not there" is not taken for a file
+- The "+" dialog reads on a dark theme
+
 ## [0.0.7] - 2026-09-18
 
 - **Reinstall once, on Android.** Every release until now was signed with a throwaway key that changed from build to build, so Android refused to update over it. There is a real signing key now and every release from here on updates normally — but this one has to be uninstalled and installed again by hand. Your notes live in your library folder and are not touched by it; copy anything you keep elsewhere first
