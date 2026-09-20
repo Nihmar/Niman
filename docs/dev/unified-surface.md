@@ -37,11 +37,13 @@ Flavored Markdown, wikilinks, inline math and block math, and fast on
    that has to be verified on a real device, and no silent data loss. This is
    where the schedule risk lives, and it should be spiked before the plan is
    committed to.
-4. **The parser is measured, not written (D2).** The pure-Dart `markdown`
-   package stays, and Phase 1's first task is to run the spec suite against
-   it and publish the number; `highlight` stays as the code *grammar* engine
-   with its rendering path removed. That takes 20–36 days out of the
-   estimate — from ~140–245 to ~124–216 — and two new requirements (the
+4. **The parser is measured, not written (D2) — and the measurement is in.**
+   The pure-Dart `markdown` package scores **645/652 on CommonMark 0.31.2 and
+   662/677 on GFM** ([§4.9](#49-the-markdown-package-measured)), with 22
+   examples triaged: 8 to fix, 14 pinned because they are serializer details or
+   spec quirks that never reach the user. `highlight` stays as the code
+   *grammar* engine with its rendering path removed. That takes 23–42 days out
+   of the estimate — from ~140–245 to ~121–210 — and two new requirements (the
    export seam, and removing the split preview) take 5–9 of it back.
 5. **The rewrite also deletes real duplication**: today the same find bar,
    list tally, context menu, formatting commands, active-format computation
@@ -105,6 +107,7 @@ method.
   - [4.8 Recommended conformance strategy](#48-recommended-conformance-strategy)
   - [Appendix A — Quick reference constants for the Dart implementation](#appendix-a--quick-reference-constants-for-the-dart-implementation)
   - [Appendix B — Sources](#appendix-b--sources)
+  - [4.9 The `markdown` package measured](#49-the-markdown-package-measured)
 - [5. The corpus reality](#5-the-corpus-reality)
   - [5.1 Global stats](#51-global-stats)
   - [5.2 Block-level census](#52-block-level-census)
@@ -294,7 +297,7 @@ unless it says otherwise, and the rest of this document assumes it.
 | # | Decision | Answer | What it changes here |
 |---|---|---|---|
 | D1 | One widget with three modes, or three widgets over one engine? | **One widget, three modes** (`source` / `live` / `read`) | [§8](#8-the-proposal-one-surface-three-modes) stands as designed. The chrome (toolbar, find, context menu, tools) is one implementation, which is what R2 rides on. |
-| D2 | Does "no packages" include the pure-Dart `markdown` and `highlight`? | **They may stay.** `markdown` is the parser, `highlight` the code lexer | Phase 1 becomes *measure and close the gap* instead of *write a parser*: **−20 to −36 days** (the parser workstreams), the largest single lever here ([§1.4](#14-what-keeping-the-two-pure-dart-engines-changes), [§10.2](#102-what-the-decisions-do-to-the-effort)). The incremental scanner, the extensions and the token-source invariant are still Niman's. |
+| D2 | Does "no packages" include the pure-Dart `markdown` and `highlight`? | **They may stay.** `markdown` is the parser, `highlight` the code lexer | Phase 1 becomes *measure and close the gap* instead of *write a parser*: **−23 to −42 days** (the parser workstreams), the largest single lever here. **Measured on 2026-09-21: 645/652 CommonMark and 662/677 GFM**, with 22 examples triaged (8 to fix, 14 pinned) — see [§4.9](#49-the-markdown-package-measured) ([§1.4](#14-what-keeping-the-two-pure-dart-engines-changes), [§10.2](#102-what-the-decisions-do-to-the-effort)). The incremental scanner, the extensions and the token-source invariant are still Niman's. |
 | D3 | Does `editorKind` (`source` \| `wysiwyg`) survive? | **Yes, as a mode** — which mode a note opens in; `both` becomes the switch | No user-visible setting is removed. The mode switch replaces the eye and the `editorKind` toggle, and both keep their place in the row. |
 | D4 | Is the split preview still two panes? | **No — the side-by-side preview is rejected.** If `live` is a good interactive preview, a preview pane beside the editor is redundant | The preview becomes a **mode**, not a pane. Concretely: `previewEnabled`, the split ratio and the `source`\|`preview` split go from the settings and the UI, and with them the cross-engine scroll sync — `preview/scroll_sync.dart`, `preview/editor_lines.dart` and the `onIndicator` contract are **deleted, not generalized** (§3.2, §8.9). The two-*pane* split (two notes side by side, `Ctrl+\`) is a different feature and stays. |
 | D5 | Conformance target | **100 % of CommonMark 0.31.2 and the published GFM examples — plus the math** | The spec suite is the gate for the syntax ([§4.8](#48-recommended-conformance-strategy)); for math, the gate is **golden boxes against today's `katex_dart`** over every distinct expression in the corpus, because D8 fixes the target as what the app renders now. |
@@ -1362,6 +1365,68 @@ ext/niman/frontmatter/003 @unterminated
 * Obsidian callouts — https://help.obsidian.md/callouts
 * micromark (GFM tokenizer reference) — https://github.com/micromark
 * babelmark3 differential tester — https://babelmark.github.io/
+
+## 4.9 The `markdown` package measured
+
+Everything above describes the *specifications*. This section is the other half
+of decision D2: what the package that will actually parse Niman's notes does
+against them. It was measured on 2026-09-21 with `dart run tool/markdown_spec.dart`,
+and the harness, the fixtures and the gate are in the repo.
+
+### 4.9.1 The number
+
+| suite | examples | exact | **normalized** | failing |
+|---|---|---|---|---|
+| CommonMark 0.31.2 | 652 | 641 | **645 (98.9 %)** | 11 |
+| GFM 0.29-gfm | 677 | 658 | **662 (97.8 %)** | 19 |
+
+Two things about how that is counted, because both change how it reads:
+
+- **Normalized, by cmark's own normalizer.** The suites' expected HTML and a
+  parser's output differ in whitespace, attribute order, `<br />` and entity
+  form, none of which is a parsing difference. `tool/html_normalize.dart` is a
+  port of cmark's `test/normalize.py`, and `test/unit/html_normalize_test.dart`
+  proves it agrees byte for byte on 375 cases — one known exception, pinned.
+  Without that proof the number would be worth nothing.
+- **It measures HTML, and Niman will consume the AST.** Several divergences
+  (`data-metadata` on `<pre>`, `class` attributes on task-list items) are
+  serializer details that never reach a user. **The HTML number is a lower
+  bound**, and the bound that matters for the engine is higher.
+
+### 4.9.2 The failures, triaged
+
+Twenty-two examples fail by the reference's comparison; the other eight
+non-exact ones (four per suite) differ only in formatting and therefore pass.
+The complete list, with a bucket and a reason each, is
+`test/fixtures/spec/nonconforming.txt`; the shape of it is:
+
+| bucket | count | what they are |
+|---|---|---|
+| **fix** | 8 | two tab cases (a tab in a nested block loses its indentation), two lone link-reference-definition cases (they emit whitespace instead of nothing), three autolinks whose `mailto:`/`xmpp:` scheme is split off the link |
+| **pin** | 14 | `data-metadata` on `<pre>` and `class` on task-list items (4 — serializer details Niman never sees), the CommonMark 0.31.2 WHATWG HTML-comment rule (2 — GFM keeps 0.29's, and Niman is GFM-first), the 0.31.2 currency-emphasis rule (1 — which GFM's own example set omits), the bare-URL autolink examples inherited from CommonMark's section (3 — GFM itself autolinks), GFM's self-contradicting strikethrough (1), and the tagfilter extension (1 — sanitizing raw HTML is wrong for notes the app renders as written) |
+
+The gate runs **in both directions** (`test/unit/markdown_conformance_test.dart`):
+everything outside the allowlist must pass, and everything inside it must still
+fail, so a fix cannot go unnoticed and cannot hide behind an old exemption.
+
+### 4.9.3 What it changes
+
+- **Risk K1 collapses.** "The parser never fully conforms" was the largest
+  technical risk in the design document, with weeks of grind behind it. It is
+  now eight enumerated examples, two of which are whitespace.
+- **The conformance number is a measurement, not a goal**, and it is
+  re-measured on every `flutter test` rather than argued about. A future package
+  bump that regresses it fails CI on the example that moved.
+- **D2 is vindicated, and D5's target needs restating honestly.** "100 % of both
+  suites" is not free: it means fixing the eight, or pinning them as the
+  fourteen are pinned. The eight are cheap; what the number removes is the
+  *fear* that the gap is unbounded, which is what made "write our own parser"
+  look reasonable.
+- **The AST caveat is now the interesting question.** If the engine reads the
+  package's AST rather than its HTML, the engine's own conformance is a
+  different, unmeasured number — and the eight "fix" items would have to be
+  re-triaged against the AST path. Measuring *that* is Phase 1 work, and it is
+  the honest successor to this section.
 
 
 ---
@@ -9993,7 +10058,7 @@ Sizes in developer-days, for one experienced Flutter/Dart engineer:
 |---|---|---|
 | `SourceBuffer` + `SourceEdit` + Fenwick index | 4–7 | Small, self-contained, fully testable. |
 | `BlockScanner` + `BlockIndex` + incremental convergence | 6–10 | The "reparse until the state converges" rule needs careful tests (lazy continuation, fences, tables, HTML blocks). |
-| **Parser integration + spec harness + gap closing** (`markdown` 7.3.1) | **6–12** | *Was 29–54 as "write CommonMark + GFM".* Run the suite, pin every failure in the self-invalidating allowlist, fix what the app needs. |
+| **Parser integration into the engine + the 8 measured fixes** (`markdown` 7.3.1) | **3–6** | *Was 29–54 as "write CommonMark + GFM"; 6–12 before the measurement.* The harness is built and the gap is enumerated — [§4.9](#49-the-markdown-package-measured) — so what is left is wiring the package into the block scanner and fixing eight examples. |
 | App extensions: masking + parsing (wikilink, math delimiters, frontmatter, tags, embeds) | 3–6 | Mask the ranges the package must not see, then parse them with `links/parser.dart`'s rule. |
 | Isolate protocol + flat typed-array payloads | 4–6 | Warm pool, `Isolate.exit`, worker-mirror splices. |
 | `RenderedBlock` + style runs + the inline-widget correction table | 8–12 | No offset map to get wrong (D9/§8.6.0); the risky part is the `WidgetSpan` geometry. |
@@ -10011,13 +10076,13 @@ Sizes in developer-days, for one experienced Flutter/Dart engineer:
 | **Removing the split preview: settings, UI, scroll sync, docs** | **2–4** | New, D4. Deletes 429 lines rather than generalizing them. |
 | Migration glue, dual-path feature flag, test porting | 10–20 | 38 test files / 8 651 lines touch the old surfaces. |
 | Docs (`docs/user/editing.md`, `docs/dev/architecture.md`, this document) | 2–3 | Required by `AGENTS.md` in the same PR. |
-| **Total** | **~124–216** | ≈ **6–10 months** of one engineer's focused time (down from ~140–245). |
+| **Total** | **~121–210** | ≈ **6–10 months** of one engineer's focused time (down from ~140–245, and now anchored by a measurement rather than an assumption). |
 
 The arithmetic, stated plainly so it can be checked: the parser workstreams
-were 29–54 days and are now 9–18, the lexers were 5–10 and are now 4–8, and
-the two new rows add 5–9. So **D2 removed 20–36 days** — the largest single
-lever, and smaller than it first looked because the two new requirements eat
-part of it. The row-by-row low and high sums are 124 and 216.
+were 29–54 days and are now 6–12, the lexers were 5–10 and are now 4–8, and the
+two new rows add 5–9. So **D2 removed 23–42 days** — the largest single lever,
+and smaller than it first looked because the two new requirements eat part of
+it. The row-by-row low and high sums are 121 and 210.
 
 **The levers that remain**, in order:
 
@@ -10227,13 +10292,13 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    device with Gboard. Success = no lost characters, no caret jumps, no
    duplicated text, composition preserved, and the whole-value fallback
    (`enableDeltaModel: false`) also working.
-3. **How conformant is `markdown` 7.3.1, really?** Not a throwaway branch —
-   the first task of Phase 1, and the number the whole conformance plan hangs
-   on. Test: the spec harness against the package as it ships, both suites,
-   failures bucketed *fix* / *pin* / *mask*. Success = the gap is small and
-   enumerable; failure = the gap is large enough that writing the parser
-   becomes the cheaper path again, which is a decision to revisit rather than
-   a phase to grind through blind.
+3. ~~How conformant is `markdown` 7.3.1, really?~~ — **answered 2026-09-21:
+   645/652 and 662/677, 22 examples, 8 to fix.** The gap is small and
+   enumerable, so writing a parser is off the table for good
+   ([§4.9](#49-the-markdown-package-measured)). The successor question is
+   narrower and belongs to Phase 1: the number measures the package's *HTML*,
+   while the engine will consume its *AST*, so the eight fixes need
+   re-triaging against the AST path.
 4. **`SliverVariedExtentList` vs a custom `RenderSliver`** when heights above
    the viewport change. Test: 5 000 blocks, edit one near the top, scroll far
    down, measure scroll jumps and assertions.
@@ -10275,7 +10340,7 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
 
 | # | Risk | Why it is real | Mitigation | Residual |
 |---|---|---|---|---|
-| K1 | **The parser never fully conforms** | The emphasis delimiter algorithm, link reference definitions, HTML blocks and lazy continuation are the four places every hand-written Markdown parser fails. A 95 %-conformant parser is a permanent source of "my note renders differently here" bugs. The target is also not a single suite: CommonMark 0.31.2 ships 652 examples in `spec.json`, the published GFM HTML has 677, and cmark-gfm's `test/spec.txt` has 672 — so "pass the spec" has to be pinned to one artifact or it means nothing. | Build the spec harness in Phase 1 *before* the parser is finished; gate CI on `commonmark == 652/652` and `gfm == 677/677` against the pinned published HTML; put every accepted deviation in a checked-in allowlist that fails CI when an entry starts passing. | Medium. This is a grind, not a cliff. |
+| K1 | **The parser never fully conforms** — *closed by measurement* | This was the largest technical risk in the document, with weeks of grind assumed behind it. It is not: the package scores **645/652 and 662/677**, and the whole gap is **22 enumerated examples**, two of which are whitespace ([§4.9](#49-the-markdown-package-measured)). | Done: the harness exists, the allowlist names every accepted example with a bucket and a reason, and `flutter test` fails if one outside it fails or one inside it starts passing. | **Closed.** What remains is a different risk — whether the engine's *AST* path is as conformant as the HTML path, which the number does not measure. |
 | K2 | **IME/editing on a custom text surface is harder than it looks** | `DeltaTextInputClient`, composition ranges, autocorrect full-value fallbacks, Android OEM IMEs, dead keys, CJK, RTL. The framework itself is no guide: **nothing in `packages/flutter/lib/` sets `enableDeltaModel: true`, and `EditableText` does not implement `DeltaTextInputClient`** — the delta path is not what Flutter's own text field exercises. Worse, `EditableText` echoes the whole text back to the platform on every keystroke (`editable_text.dart:4016`), which is untenable at 934 KB and must be engineered around by hand. This is where a "weeks" estimate becomes "quarters". | Spike 1 (§10.4) before committing. Keep the whole-`TextEditingValue` path working as a first-class fallback, not an afterthought. Keep the legacy source editor behind the flag until the new one survives a device round-trip with at least two IMEs. | **High.** The single biggest schedule risk. |
 | K3 | **Visual quality regresses** | The app currently renders tables, math, images and code through packages with years of polish. A new renderer's first version will look worse in a hundred small ways. | Golden-image tests from Phase 2 onward; a written style checklist; the `MarkdownTheme` as the single place to fix all of them. | Medium. Recoverable, but only with an explicit visual QA round. |
 | K4 | **Performance is not actually better** | `re_editor` is a tuned large-text editor and the windowed preview is already good. The honest possibility is that the new surface matches rather than beats them. | Measure before/after on the same fixture with the same command in both harnesses; the baseline in [§2.2](#22-what-the-code-already-measured-and-what-it-says-to-keep) is the contract. Where it cannot beat, it must at least not regress — and the *uniformity* (no 200 KB cap, no blank wait, no 5–6 ms math block) is itself the win. | Medium. |
@@ -10577,11 +10642,11 @@ starts in. No step below waits on an answer.
 1. **Open the epic issue** and link this document. Child issues per phase,
    with the exit criteria from [§10.3](#103-the-stages) copied into them, and
    the decisions recorded in the epic so they are not re-litigated in the PRs.
-2. **Measure `markdown` 7.3.1 before writing anything** ([§10.4](#104-what-to-spike-first-before-committing-to-the-plan),
-   spike 3): the spec harness over both suites, failures bucketed *fix* /
-   *pin* / *mask*, and the number published in the issue. Every later
-   conformance decision depends on it, and it is a day's work rather than a
-   phase's.
+2. ~~Measure `markdown` 7.3.1 before writing anything~~ — **done, 2026-09-21**:
+   **645/652 CommonMark and 662/677 GFM**, 22 examples triaged (8 *fix*, 14
+   *pin*, none needing *mask*), the harness in `tool/markdown_spec.dart` and
+   the gate in `test/unit/markdown_conformance_test.dart`. The number and its
+   consequences are [§4.9](#49-the-markdown-package-measured).
 3. **Start the Android IME spike in parallel** (spike 2) — it is the risk that
    can cancel the plan, and it does not depend on step 2. Desktop is the
    measurement platform, Android is the risk platform; run them together
