@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
@@ -142,6 +143,26 @@ void main() {
     expect(bold(), isTrue, reason: 'unchanged: the old key does nothing');
     await press(tester, LogicalKeyboardKey.keyJ);
     expect(bold(), isFalse, reason: 'the new key toggled it back off');
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  // 0.0.8 test round: the side panel moved onto Ctrl+Shift+L — the
+  // bulleted list's key — and then nothing happened at all inside the
+  // editor. A key the user gave a command is the user's word, and wins
+  // there too (#159); the command's own handler runs it.
+  testWidgets('a key given to a command beats the formatting it collides '
+      'with', (tester) async {
+    final controller = await _pump(tester);
+    AppKeyMap.current.value = KeyMap.defaults.withBinding(
+      AppCommand.toggleDock,
+      const SingleActivator(
+        LogicalKeyboardKey.keyL,
+        control: true,
+        shift: true,
+      ),
+    );
+    await press(tester, LogicalKeyboardKey.keyL, shift: true);
+    expect(controller.text, _doc, reason: 'no list: the command has the key');
     await tester.pump(const Duration(seconds: 1));
   });
 
