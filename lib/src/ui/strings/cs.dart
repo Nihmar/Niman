@@ -1250,6 +1250,9 @@ final class CzechStrings extends Strings {
   String get dropHint =>
       'Přetáhněte soubory Markdown pro otevření, nebo složku pro import';
   @override
+  String get dropNothing =>
+      'Prostředí nepředalo při tomto upuštění žádné soubory.';
+  @override
   String get importFolderAction => 'Importovat';
   @override
   String dropRejected(String names) =>

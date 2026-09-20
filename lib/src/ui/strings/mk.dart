@@ -1267,6 +1267,9 @@ final class MacedonianStrings extends Strings {
   String get dropHint =>
       'Пуштете Markdown датотеки за да ги отворите или папка за да ја увезете';
   @override
+  String get dropNothing =>
+      'Работната површина не предаде ниту една датотека при тоа спуштање.';
+  @override
   String get importFolderAction => 'Увези';
   @override
   String dropRejected(String names) =>

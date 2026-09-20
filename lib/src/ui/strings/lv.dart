@@ -1253,6 +1253,8 @@ final class LatvianStrings extends Strings {
   String get dropHint =>
       'Nometiet Markdown failus, lai tos atvērtu, vai mapi, lai to importētu';
   @override
+  String get dropNothing => 'Darbvirsma šajā nomešanā nenodeva nevienu failu.';
+  @override
   String get importFolderAction => 'Importēt';
   @override
   String dropRejected(String names) =>

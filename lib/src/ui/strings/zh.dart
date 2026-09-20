@@ -1141,6 +1141,8 @@ final class ChineseStrings extends Strings {
   @override
   String get dropHint => '拖放 Markdown 文件以打开，或拖放文件夹以导入';
   @override
+  String get dropNothing => '桌面没有为这次拖放交出任何文件。';
+  @override
   String get importFolderAction => '导入';
   @override
   String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';

@@ -1263,6 +1263,9 @@ final class UkrainianStrings extends Strings {
       'Перетягніть файли Markdown, щоб відкрити їх, або теку, щоб '
       'імпортувати її';
   @override
+  String get dropNothing =>
+      'Стільниця не передала жодного файла під час цього перетягування.';
+  @override
   String get importFolderAction => 'Імпортувати';
   @override
   String dropRejected(String names) =>

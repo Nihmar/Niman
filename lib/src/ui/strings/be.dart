@@ -1258,6 +1258,9 @@ final class BelarusianStrings extends Strings {
       'Перацягніце файлы Markdown, каб адкрыць іх, або папку, каб '
       'імпартаваць яе';
   @override
+  String get dropNothing =>
+      'Працоўны стол не перадаў ніводнага файла пры гэтым перацягванні.';
+  @override
   String get importFolderAction => 'Імпартаваць';
   @override
   String dropRejected(String names) =>

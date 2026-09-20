@@ -1289,6 +1289,9 @@ final class CatalanStrings extends Strings {
       'Deixeu anar fitxers Markdown per obrir-los, o una carpeta per '
       'importar-la';
   @override
+  String get dropNothing =>
+      'L’escriptori no ha lliurat cap fitxer en aquest arrossegament.';
+  @override
   String get importFolderAction => 'Importa';
   @override
   String dropRejected(String names) =>

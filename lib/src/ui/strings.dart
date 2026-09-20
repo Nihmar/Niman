@@ -788,6 +788,7 @@ final class AppStrings {
   static String get spellCheckAgain => _s.spellCheckAgain;
   static String spellCheckCapped(int count) => _s.spellCheckCapped(count);
   static String get dropHint => _s.dropHint;
+  static String get dropNothing => _s.dropNothing;
   static String get importFolderAction => _s.importFolderAction;
   static String dropRejected(String names) => _s.dropRejected(names);
   static String importFolderTitle(String name) => _s.importFolderTitle(name);

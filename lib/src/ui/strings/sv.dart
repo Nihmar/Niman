@@ -1263,6 +1263,9 @@ final class SwedishStrings extends Strings {
       'Släpp Markdown-filer för att öppna dem, eller en mapp för att '
       'importera den';
   @override
+  String get dropNothing =>
+      'Skrivbordet lämnade inte över några filer vid släppet.';
+  @override
   String get importFolderAction => 'Importera';
   @override
   String dropRejected(String names) =>

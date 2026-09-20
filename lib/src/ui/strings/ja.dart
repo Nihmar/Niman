@@ -1171,6 +1171,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get dropHint => 'Markdown ファイルをドロップして開くか、フォルダーをドロップして読み込みます';
   @override
+  String get dropNothing => 'そのドロップでデスクトップからファイルは渡されませんでした。';
+  @override
   String get importFolderAction => '読み込む';
   @override
   String dropRejected(String names) =>
