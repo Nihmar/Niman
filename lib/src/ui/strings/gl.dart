@@ -1270,6 +1270,9 @@ final class GalicianStrings extends Strings {
   String get dropHint =>
       'Solta ficheiros Markdown para abrilos, ou un cartafol para importalo';
   @override
+  String get dropNothing =>
+      'O escritorio non entregou ningún ficheiro nese arrastre.';
+  @override
   String get importFolderAction => 'Importar';
   @override
   String dropRejected(String names) =>

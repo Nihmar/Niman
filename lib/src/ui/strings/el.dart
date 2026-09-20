@@ -1302,6 +1302,9 @@ final class GreekStrings extends Strings {
   String get dropHint =>
       'Αφήστε αρχεία Markdown για να ανοίξουν ή έναν φάκελο για εισαγωγή';
   @override
+  String get dropNothing =>
+      'Η επιφάνεια εργασίας δεν παρέδωσε αρχεία σε αυτή την απόθεση.';
+  @override
   String get importFolderAction => 'Εισαγωγή';
   @override
   String dropRejected(String names) =>

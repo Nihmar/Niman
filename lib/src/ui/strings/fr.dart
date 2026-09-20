@@ -1292,6 +1292,9 @@ final class FrenchStrings extends Strings {
       'Déposez des fichiers Markdown pour les ouvrir, ou un dossier pour '
       'l’importer';
   @override
+  String get dropNothing =>
+      'Le bureau n’a transmis aucun fichier pour ce dépôt.';
+  @override
   String get importFolderAction => 'Importer';
   @override
   String dropRejected(String names) =>

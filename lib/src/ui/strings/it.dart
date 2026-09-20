@@ -1270,6 +1270,9 @@ final class ItalianStrings extends Strings {
   String get dropHint =>
       'Rilascia file Markdown per aprirli, o una cartella per importarla';
   @override
+  String get dropNothing =>
+      'Il sistema non ha passato nessun file per quel trascinamento.';
+  @override
   String get importFolderAction => 'Importa';
   @override
   String dropRejected(String names) =>

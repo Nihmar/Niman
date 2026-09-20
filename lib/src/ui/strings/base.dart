@@ -599,6 +599,7 @@ abstract base class Strings {
   String get spellCheckAgain;
   String spellCheckCapped(int count);
   String get dropHint;
+  String get dropNothing;
   String get importFolderAction;
   String dropRejected(String names);
   String importFolderTitle(String name);

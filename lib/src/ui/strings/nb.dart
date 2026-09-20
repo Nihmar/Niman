@@ -1250,6 +1250,8 @@ final class NorwegianStrings extends Strings {
   String get dropHint =>
       'Slipp Markdown-filer for å åpne dem, eller en mappe for å importere den';
   @override
+  String get dropNothing => 'Skrivebordet leverte ingen filer for det slippet.';
+  @override
   String get importFolderAction => 'Importer';
   @override
   String dropRejected(String names) =>

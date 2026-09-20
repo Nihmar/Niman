@@ -1263,6 +1263,9 @@ final class PortugueseStrings extends Strings {
   String get dropHint =>
       'Largue ficheiros Markdown para os abrir, ou uma pasta para a importar';
   @override
+  String get dropNothing =>
+      'O ambiente de trabalho não entregou ficheiros nesse arrasto.';
+  @override
   String get importFolderAction => 'Importar';
   @override
   String dropRejected(String names) =>
