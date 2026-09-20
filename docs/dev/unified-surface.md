@@ -9028,11 +9028,27 @@ So the app's real worst note:
   reference definitions, all of which the spec suite and the synthetic fixtures
   must cover instead;
 - and contains a trap worth naming: `Geometria 1.md` has **7 530 `_` delimiter
-  runs, of which only 17 are real emphasis** once `$…$` is masked. Any inline
-  pass that scans delimiters before masking math sees 443× more work and gets
-  the emphasis wrong inside formulas. **Masking math (and code, and
-  frontmatter) before the inline pass is a correctness requirement, not an
-  optimisation.**
+  runs, of which only 15 are left once the extensions are masked** — 7 530 →
+  15, a 500× over-read of the emphasis algorithm for any inline pass that
+  scans delimiters before masking. And it gets the emphasis *wrong* inside
+  formulas, not merely slowly. **Masking (code, math, wikilinks, tags) before
+  the inline pass is a correctness requirement, not an optimisation.**
+
+  **Built, and measured** (`lib/src/markdown/extension_masker.dart`,
+  `dart run tool/extension_masker_bench.dart`) — and the numbers land on the
+  corpus profile's independently, which is the best evidence either is right:
+
+  | fixture | blocks | spans | inline math | wikilink | embed | tag | code | `_` runs before | after |
+  |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+  | `fixture-200kb.md` | 4 301 | 308 | 62 | 28 | 0 | 49 | 109 | 310 | **0** |
+  | `fixture-1mb.md` | 22 326 | 1 744 | 375 | 161 | 0 | 271 | 579 | 1 636 | **0** |
+  | `Geometria 1.md` | 7 530 | **13 044** | **13 004** | 2 | **38** | 0 | 0 | **7 530** | **15** |
+
+  The geometry note's row reproduces the corpus profile exactly where the two
+  overlap — 13 004 inline math spans, 38 embeds, 2 wikilinks, no code spans and
+  no tags — which is a cross-check neither measurement was built to pass. The
+  masker runs over a whole document in 19–31 ms (≈4 µs per block), once, and
+  only over the blocks that have inline content at all.
 
 The practical consequence for the plan: the spec suite in
 [§4.8](#48-recommended-conformance-strategy) and the adversarial fixture
