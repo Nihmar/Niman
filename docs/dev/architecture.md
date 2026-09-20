@@ -68,3 +68,13 @@ lines or when responsibilities mix.
   natively (RemoteViews) and row taps come back as `niman://` intents
   handled off the UI isolate. Placement runs a native config activity
   (library/note pick).
+
+## Planned, not built
+
+- **One Markdown surface.** The source editor, the WYSIWYG editor and the
+  preview are three surfaces today. [unified-surface.md](unified-surface.md)
+  is the research and design for replacing all three with one widget in pure
+  Flutter/Dart, uniform in functionality, performance and rendering. It is a
+  proposal, not a description of shipped code — the module map above is still
+  what the app is. The measured record of the packages that proposal would
+  replace is [editor-alternatives.md](editor-alternatives.md).
