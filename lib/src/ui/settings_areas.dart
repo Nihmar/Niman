@@ -62,6 +62,13 @@ enum SettingsAreaId {
   reminders,
 }
 
+/// A place in the settings: an area, and a row in it to flash (#229).
+///
+/// The command palette answers with settings rows as well as commands
+/// and notes, and a pick has to open the settings *there* — the area and
+/// the row — rather than on the home with a search to redo.
+typedef SettingsTarget = ({SettingsAreaId area, Key? row});
+
 /// What an area edits: the app, or the open library.
 enum SettingsGroup {
   /// The installation: the same for every library.

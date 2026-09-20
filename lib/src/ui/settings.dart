@@ -32,6 +32,7 @@ final class SettingsBody extends StatefulWidget {
     this.transcription,
     this.navigation,
     this.libraryRows = true,
+    this.target,
     super.key,
   });
 
@@ -58,6 +59,10 @@ final class SettingsBody extends StatefulWidget {
   /// Whether Maintenance offers Switch library and Close library. Not in
   /// the settings window (#203): the rail's library window does both.
   final bool libraryRows;
+
+  /// Where to open: the area, and the row to flash in it (#229). Null
+  /// opens the settings home, as a tap on Settings does.
+  final SettingsTarget? target;
 
   @override
   State<SettingsBody> createState() => _SettingsBodyState();
@@ -87,6 +92,14 @@ final class _SettingsBodyState extends State<SettingsBody> {
     _keyboard = KeyboardPresence();
     _keyboard.listen();
     unawaited(_load());
+    // Opened at a row (the palette's settings results, #229): the area
+    // opens once there is a tree to push its screen onto.
+    final target = widget.target;
+    if (target != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openArea(target.area, target.row);
+      });
+    }
   }
 
   @override

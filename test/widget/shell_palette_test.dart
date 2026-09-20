@@ -69,6 +69,11 @@ void main() {
     await settle(tester);
   }
 
+  Set<AppCommand> offered(WidgetTester tester) => {
+    for (final command
+        in tester.widget<CommandPalette>(find.byType(CommandPalette)).commands)
+      command.command,
+  };
   testWidgets('Ctrl+O finds a note by name and opens it', (tester) async {
     await pumpAt(tester, const Size(1400, 900));
     await keys(tester, LogicalKeyboardKey.keyO);
@@ -96,9 +101,11 @@ void main() {
   testWidgets('it offers what can run now', (tester) async {
     await pumpAt(tester, const Size(1400, 900));
     await keys(tester, LogicalKeyboardKey.keyP, shift: true);
-    // No note open: nothing to rename.
+    // No note open: nothing to rename. The palette can still answer
+    // with settings rows (#229), so it is the commands that are asked
+    // about here, not the list.
     await type(tester, 'rename');
-    expect(find.byKey(const Key('palette-item-0')), findsNothing);
+    expect(offered(tester), isNot(contains(AppCommand.renameNote)));
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await settle(tester);
 
@@ -106,17 +113,12 @@ void main() {
     await settle(tester);
     await keys(tester, LogicalKeyboardKey.keyP, shift: true);
     await type(tester, 'rename');
-    expect(find.byKey(const Key('palette-item-0')), findsOne);
+    expect(offered(tester), contains(AppCommand.renameNote));
   });
 
   // #207: the palette and the Commands page read one table. Whatever the
   // page says a command needs, the palette offers it exactly when that
   // holds: every command has a handler, and none shows early.
-  Set<AppCommand> offered(WidgetTester tester) => {
-    for (final command
-        in tester.widget<CommandPalette>(find.byType(CommandPalette)).commands)
-      command.command,
-  };
 
   Set<AppCommand> expected(Set<CommandNeed> met) => {
     for (final command in AppCommand.values)
