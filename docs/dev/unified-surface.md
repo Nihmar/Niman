@@ -37,18 +37,22 @@ Flavored Markdown, wikilinks, inline math and block math, and fast on
    that has to be verified on a real device, and no silent data loss. This is
    where the schedule risk lives, and it should be spiked before the plan is
    committed to.
-4. **The single biggest cost is the parser.** A from-scratch conformant
-   CommonMark + GFM parser is the largest work item in the project; keeping
-   the pure-Dart `markdown` package instead would remove roughly 35–50 days of
-   the estimated 130–220. That is a decision for the user, not a detail.
+4. **The parser is measured, not written (D2).** The pure-Dart `markdown`
+   package stays, and Phase 1's first task is to run the spec suite against
+   it and publish the number; `highlight` stays as the code *grammar* engine
+   with its rendering path removed. That takes 20–36 days out of the
+   estimate — from ~140–245 to ~124–216 — and two new requirements (the
+   export seam, and removing the split preview) take 5–9 of it back.
 5. **The rewrite also deletes real duplication**: today the same find bar,
    list tally, context menu, formatting commands, active-format computation
    and link handling are implemented once per surface, with slightly different
    behaviour. One widget collapses each of those rows to one implementation —
-   and scroll sync between editor and preview becomes the identity function.
-6. **It is a 6–11 month project for one engineer, and it can be stopped at any
-   phase boundary.** `read` mode alone (Phase 2) fixes the preview's blank
-   wait, the math stutter and the size cap, and is worth shipping on its own.
+   and the cross-engine scroll sync the split preview needed is deleted
+   outright rather than kept in step (D4).
+6. **It is a 6–10 month project for one engineer, and it can be stopped at any
+   phase boundary.** `read` mode alone (Phase 2) fixes the preview's wait for
+   first content, the math cost and the size cap, and is worth shipping on its
+   own.
 
 ## How to read this document
 
@@ -81,8 +85,8 @@ method.
   - [1.1 What was asked](#11-what-was-asked)
   - [1.2 What that decomposes into](#12-what-that-decomposes-into)
   - [1.3 The repo's own rules that constrain the answer](#13-the-repos-own-rules-that-constrain-the-answer)
-  - [1.4 What "no packages" costs, and what it buys](#14-what-no-packages-costs-and-what-it-buys)
-  - [1.5 Decisions taken that the user should confirm](#15-decisions-taken-that-the-user-should-confirm)
+  - [1.4 What keeping the two pure-Dart engines changes](#14-what-keeping-the-two-pure-dart-engines-changes)
+  - [1.5 The decisions, and what each one changes](#15-the-decisions-and-what-each-one-changes)
 - [2. Where we are today](#2-where-we-are-today)
   - [2.1 The three surfaces, and the code that exists for them](#21-the-three-surfaces-and-the-code-that-exists-for-them)
   - [2.2 What the code already measured (and what it says to keep)](#22-what-the-code-already-measured-and-what-it-says-to-keep)
@@ -155,14 +159,14 @@ method.
   - [9.6 Regression gates](#96-regression-gates)
 - [10. Effort and phasing](#10-effort-and-phasing)
   - [10.1 The rule that shapes the plan](#101-the-rule-that-shapes-the-plan)
-  - [10.2 What "no packages" means for effort](#102-what-no-packages-means-for-effort)
+  - [10.2 What the decisions do to the effort](#102-what-the-decisions-do-to-the-effort)
   - [10.3 The stages](#103-the-stages)
   - [10.4 What to spike first, before committing to the plan](#104-what-to-spike-first-before-committing-to-the-plan)
   - [10.5 How this lands in the repo's workflow](#105-how-this-lands-in-the-repos-workflow)
 - [11. Risks, alternatives and open questions](#11-risks-alternatives-and-open-questions)
   - [11.1 The risks, ranked by what they would cost](#111-the-risks-ranked-by-what-they-would-cost)
   - [11.2 Alternatives considered, and why they lose](#112-alternatives-considered-and-why-they-lose)
-  - [11.3 Open questions for the user](#113-open-questions-for-the-user)
+  - [11.3 The open questions, and what was answered](#113-the-open-questions-and-what-was-answered)
   - [11.4 What would make this project fail, in one sentence each](#114-what-would-make-this-project-fail-in-one-sentence-each)
 - [12. Appendix](#12-appendix)
   - [12.1 Source inventory of the surfaces being replaced](#121-source-inventory-of-the-surfaces-being-replaced)
@@ -208,7 +212,7 @@ from remote `main`.
 | R3 | Uniform performance | One windowing/layout/paint engine for all three modes. No mode may have a size cap the others do not (the WYSIWYG's 200 KB cap today), and no mode may have a different complexity class. | [§8.4](#84-layout-only-the-blocks-the-viewport-shows), [§9](#9-the-performance-budget) |
 | R4 | Uniform visual rendering | One typography and block-metrics model shared by all modes, so the same note reads the same in source, live and read. No more three different stylesheets. | [§8.3](#83-one-typography-one-block-metric-set) |
 | R5 | Full syntax support | CommonMark + GFM + wikilinks + `$…$` + `$$…$$` + YAML frontmatter, plus footnotes, tags and the app's link/embed rules. | [§4](#4-the-specification-commonmark-and-gfm), [§5](#5-the-corpus-reality) |
-| R6 | No packages | Own parser, own renderer, own editor, own math typesetter, own highlighter. `flutter_quill`, `re_editor`, `flutter_markdown_plus`, `markdown`, `katex`, `katex_dart`, `flutter_highlight` and the already-dead `flutter_smooth_markdown` all go. | [§1.4](#14-what-no-packages-costs-and-what-it-buys), [§4.8](#48-recommended-conformance-strategy), [§10.2](#102-what-no-packages-means-for-effort) |
+| R6 | No UI packages | No package may own the surface: own renderer, own editor, own viewport, own math typesetter. `flutter_quill`, `re_editor`, `flutter_markdown_plus`, `flutter_highlight`, `katex`, `katex_dart` and the already-dead `flutter_smooth_markdown` all go. **The two pure-Dart engines stay** (D2): `markdown` as the CommonMark/GFM parser and `highlight` as the code lexer. | [§1.4](#14-what-keeping-the-two-pure-dart-engines-changes), [§4.8](#48-recommended-conformance-strategy), [§10.2](#102-what-the-decisions-do-to-the-effort) |
 | R7 | Pure Flutter/Dart | Only `dart:ui` (`TextPainter`, `Paragraph`, `Canvas`), `package:flutter/widgets|rendering|material`, `dart:isolate`, `dart:typed_data` and fonts shipped as assets. No plugin, no native code, no FFI, no web view. | [§6](#6-the-primitives-available) |
 | R8 | Fast on `Geometria 1.md` | Concrete, asserted budget: cold open, first frame, per-keystroke, scroll frame, jump, math render, memory. | [§9](#9-the-performance-budget), [§5](#5-the-corpus-reality) |
 
@@ -234,7 +238,7 @@ satisfy rather than argue with:
 - **English everywhere**, docs updated in the same PR, one logical change per
   commit.
 
-## 1.4 What "no packages" costs, and what it buys
+## 1.4 What keeping the two pure-Dart engines changes
 
 Measured on this checkout with `flutter pub deps --json`: the seven
 surface packages (`flutter_quill`, `re_editor`, `flutter_markdown_plus`,
@@ -254,26 +258,57 @@ those packages' models to Markdown (`wysiwyg/markdown_document_codec.dart`,
 `wysiwyg/quill_*`, `preview/block_parse.dart`'s glue, the three separate find
 controllers, three separate toolbars' dispatch).
 
-What it costs is honest and large: **a CommonMark+GFM parser is the single
-biggest work item in this document** — see [§10.2](#102-what-no-packages-means-for-effort).
-The 652 CommonMark spec examples and GFM's own set are the acceptance
-criteria, and reaching them is measured in weeks, not days.
+**Decided (D2, 2026-09-20): `markdown` and `highlight` stay.** Neither pulls
+native code, so neither compromises R7, and keeping them removes the single
+largest work item in this document. What changes is not *whether* the surface
+is written from scratch — it still is — but where the parser comes from:
 
-## 1.5 Decisions taken that the user should confirm
+- **`markdown` 7.3.1 becomes the CommonMark/GFM engine**, and Phase 1 stops
+  being "write a conformant parser" and becomes **measure and close the gap**:
+  run the spec suite against it, enumerate and pin every failure, and fix only
+  what the app actually needs ([§4.8](#48-recommended-conformance-strategy)).
+  That is days, not weeks — and it is the biggest single lever in this
+  document ([§10.2](#102-what-the-decisions-do-to-the-effort)).
+- **What it does not remove.** The package has no incremental API, so the
+  line-state block scanner and the lazy per-block inline phase
+  ([§8.5](#85-the-parser-incremental-two-phase-line-oriented)) are still
+  Niman's — the package is called *per block*, on already-bounded input, never
+  over the document. The single-token-source invariant for links
+  ([§2.3](#23-the-existing-assets-worth-porting-not-discarding)) is still
+  Niman's, and the extensions the package does not know (wikilinks, math
+  delimiters, frontmatter) are still Niman's.
+- **`highlight` stays as the code *grammar* engine, not as the renderer.**
+  Its measured hazards are unchanged and must be contained
+  ([§8.8.2](#882-code-a-line-state-lexer-not-a-whole-block-regex), K13):
+  never call `Result.toHtml()` (super-quadratic: 100 KB → 6 869 ms), never lex
+  more than the visible or changed lines, and guard the input, because Dart
+  has no regex timeout and the `cpp` grammar is O(n²) on adversarial input.
+  The line-state driver and the line cache are Niman's either way; the
+  package supplies the language rules.
 
-These are recorded as assumptions throughout, but they are choices, not
-deductions. Each one changes the size of the work.
+## 1.5 The decisions, and what each one changes
 
-| # | Question | Assumption made here | Impact if wrong |
+Recorded 2026-09-20, from the user's answers. Everything below is settled
+unless it says otherwise, and the rest of this document assumes it.
+
+| # | Decision | Answer | What it changes here |
 |---|---|---|---|
-| D1 | Does "one widget" mean one widget with three modes, or three widgets over one engine? | **One widget, three modes.** The mode is a parameter; the preview is the same widget in `read` mode. | If three widgets: the shared engine still lands, but the uniformity of chrome (toolbar, find, context menu) is lost and R2 weakens. |
-| D2 | Does "no packages" include pure-Dart ones (`markdown`, `highlight`) that pull no native code? | **Yes, all of them.** Own parser and own highlighter. | If `markdown` may stay, the parser work drops from ~weeks to ~days, and CommonMark conformance is inherited. This is the single largest lever in the document. |
-| D3 | Does the `editorKind` setting (`source` \| `wysiwyg`) survive? | **Yes, as a mode.** It becomes which mode a note *opens* in; `both` becomes the mode switch. No user-visible setting is removed. | If it must survive verbatim, `live` mode simply is not the default. |
-| D4 | Is the split preview still two panes? | **Yes, but two instances of the same widget** — `source`/`live` on the left, `read` on the right — sharing one height map, which makes scroll sync exact instead of estimated. | If the preview must stay a separate widget, `ScrollMap`/`EditorLineView` stay and the sync stays approximate. |
-| D5 | Conformance target | **100 % of CommonMark 0.31.2 + GFM spec examples**, developed against `spec.json` from day one, with the handful of known GFM deviations pinned. | A "95 % of real-world notes" target would cut weeks but leave a permanently unknown correctness surface. |
-| D6 | Is `Geometria 1.md` committed as a fixture? | **No.** A generator produces an equivalent adversarial fixture ([§5.7](#57-a-synthetic-worst-note-spec-and-fixture)), committed as a script; the real note stays out of git. | Committing 934 KB of a personal note is a privacy and repo-size decision that is not ours to make. |
-| D7 | HTML paste | **Kept**, with an own minimal HTML→Markdown converter (~300–500 lines). | Dropping it removes a documented behaviour (`docs/user/editing.md`, "Copy and paste"). |
-| D8 | Math font | **Bundled assets, never system font names**: keep the 20 KaTeX TTFs (544 KB, OFL) the packages already vendor, add STIX Two Math (819 KB, OFL). Android ships **no** math font at any API level, so a system name is a silent no-op. | Not bundling means the same note renders differently per platform, or not at all. Confirmed by measurement, not assumption (§6.5.7). |
+| D1 | One widget with three modes, or three widgets over one engine? | **One widget, three modes** (`source` / `live` / `read`) | [§8](#8-the-proposal-one-surface-three-modes) stands as designed. The chrome (toolbar, find, context menu, tools) is one implementation, which is what R2 rides on. |
+| D2 | Does "no packages" include the pure-Dart `markdown` and `highlight`? | **They may stay.** `markdown` is the parser, `highlight` the code lexer | Phase 1 becomes *measure and close the gap* instead of *write a parser*: **−20 to −36 days** (the parser workstreams), the largest single lever here ([§1.4](#14-what-keeping-the-two-pure-dart-engines-changes), [§10.2](#102-what-the-decisions-do-to-the-effort)). The incremental scanner, the extensions and the token-source invariant are still Niman's. |
+| D3 | Does `editorKind` (`source` \| `wysiwyg`) survive? | **Yes, as a mode** — which mode a note opens in; `both` becomes the switch | No user-visible setting is removed. The mode switch replaces the eye and the `editorKind` toggle, and both keep their place in the row. |
+| D4 | Is the split preview still two panes? | **No — the side-by-side preview is rejected.** If `live` is a good interactive preview, a preview pane beside the editor is redundant | The preview becomes a **mode**, not a pane. Concretely: `previewEnabled`, the split ratio and the `source`\|`preview` split go from the settings and the UI, and with them the cross-engine scroll sync — `preview/scroll_sync.dart`, `preview/editor_lines.dart` and the `onIndicator` contract are **deleted, not generalized** (§3.2, §8.9). The two-*pane* split (two notes side by side, `Ctrl+\`) is a different feature and stays. |
+| D5 | Conformance target | **100 % of CommonMark 0.31.2 and the published GFM examples — plus the math** | The spec suite is the gate for the syntax ([§4.8](#48-recommended-conformance-strategy)); for math, the gate is **golden boxes against today's `katex_dart`** over every distinct expression in the corpus, because D8 fixes the target as what the app renders now. |
+| D6 | Is `Geometria 1.md` committed as a fixture? | **No** | The adversarial fixture is generated instead ([§5.7](#57-a-synthetic-worst-note-spec-and-fixture)); the real note stays out of git, and the math corpus for the golden test is extracted from it, not committed whole. |
+| D7 | HTML paste | **Kept** | One own HTML→Markdown converter (~300–500 lines, [§10.2](#102-what-the-decisions-do-to-the-effort)), because `docs/user/editing.md` promises that a pasted styled page arrives formatted. |
+| D8 | Math rendering | **What the app renders today is what is wanted.** The typesetter is replaced for the dependency reason, not to change the look | The KaTeX TTFs the packages already vendor must be **kept and bundled** (Android ships no math font at any API level, [§6.5.7](#657-math-fonts-availability-licensing-bundling)); the golden-file diff against `katex_dart` is the acceptance test ([§8.8.1](#881-math-own-tex-layout)). |
+| D9 | What does `live` mode reveal, and when? | **`live` is literally an interactive preview**: only the caret's **line** — or even just the **word** — temporarily becomes source, Obsidian-style | The reveal policy is [§8.6.2](#862-the-marker-reveal-policy)'s policy A, with per-word as a refinement. This is affordable *because* markers are hidden by style and not by removal: revealing changes a style run, not the text, so the layout cache and the caret's offsets stay valid ([§8.6.0](#860-the-two-ways-to-hide-a-marker)). |
+| D10 | Acceptance bar for "uniform performance" | **`source` must be very fast; the other modes as close as they can get** | `source` is the mode with no math layout and no hidden-run overhead, so it is the floor, and the budget in [§9.2](#92-the-budget-by-operation) holds it to the legacy numbers or better. `live`/`read` are judged against `source`, not against each other. |
+| D11 | Platform order | **Both desktop and Android must work**; the order is ours to choose | Desktop first for measurement (the benchmark runs there and the numbers are comparable), with the **Android IME spike running in parallel from day one** — it is the risk that can cancel the plan (§10.4, spike 2). |
+| D12 | Export/print/PDF | **Will be required** | The renderer must be able to paint a whole note to an offscreen `PictureRecorder` at an arbitrary width, not only into a viewport. Cheap to allow for now and expensive to retrofit, so it is a design constraint from Phase 2 ([§8.7.7](#877-the-export-seam)). |
+| D13 | One widget for every note kind? | **Markdown only.** The other kinds (list notes, audio notes) keep their own UI, separate from this widget | `MarkdownSurface` takes no pluggable block-kind registry. `ui/kinds/` stays as it is, and the note view keeps branching on the frontmatter kind. |
+
+| D14 | How much of `highlight` do we keep? — *decided here on the user's behalf, since they asked for whatever serves the objective* | **All of it as the lexer: the language modules stay, the driver and the renderer are Niman's, and the whole thing is bounded and measured before anything is rewritten.** No hand-written lexers unless a number says otherwise | `highlight` supplies the ~190 declarative language grammars, which is weeks of grunt work for no user-visible gain. What must not survive is its *usage*: `parse()` over a whole block and then `toHtml()` is super-quadratic (100 KB → 6 869 ms) and its grammars have **no regex timeout**, so a pasted note can hang the app. So: lex the **visible or changed block only**, cache by `(block revision, language)`, build spans from the token stream and never call `toHtml()`, never use `autoDetection` (the fence's info string names the language, or nothing is coloured), and cap the input — a block past N bytes/lines or a line past M chars renders plain. **The decision point is a number**: the adversarial fixture's 2 000-line fence, against [§9.2](#92-the-budget-by-operation)'s 1 ms. If one edit inside it costs more, the fallback is line-state lexers for the top ~15 languages with `highlight` demoted to the long tail — a change confined to one interface ([§8.8.2](#882-code-a-line-state-lexer-not-a-whole-block-regex)). |
+| D15 | Target release | **None.** Build it, then decide when to integrate | No deadline is forcing a big-bang cut, which has one consequence worth naming: nothing *external* pushes us off the legacy surfaces, so the rule that **each phase deletes the legacy surface whose mode it migrated** becomes more important, not less. Every phase boundary must leave the app shippable, and the feature flag is what makes that true. |
 
 
 ---
@@ -454,6 +489,16 @@ are reimplemented twice (`quill_editor_commands.dart`,
 - **Typewriter mode**: the caret's *row* (not line) stays centred, with half a
   screen of room below the last line; wheel/scrollbar scrolling is unaffected
   until the caret moves again.
+- **The split preview goes (D4).** Today a pane can show editor *and* preview
+  side by side (`splitPreview`, `previewEnabled`, a 0.2–0.8 split ratio, and
+  the `auto` behaviour above 600 dp), kept in step by a two-way scroll sync.
+  With `live` mode as an interactive preview (D9) that whole axis is
+  redundant, so it is removed rather than generalized: the preview becomes the
+  `read` **mode** of the same surface, switched like any other mode. This is a
+  deliberate, user-visible change and it must land with
+  `docs/user/editing.md` updated in the same commit — including the loss of
+  `previewEnabled` and the split ratio, and the fact that the two-*pane* split
+  (two notes side by side, `Ctrl+\`) is a different feature and stays.
 - **Readable line length**: a centred column, on by default, 480–1400 px
   (700 default), shared by both editors *and* the preview, with the toolbar,
   find bar and status row keeping to the same column while their backgrounds
@@ -8844,6 +8889,19 @@ p90 of `editsPerSecond`. These become the regression tests of [§9](#9-the-perfo
 
 ## 8.5 The parser: incremental, two-phase, line-oriented
 
+**Who does what, after D2.** The CommonMark/GFM *grammar* is `markdown`
+7.3.1's — the package stays, and none of this section replaces it. What this
+section describes is the machinery the package does **not** have and cannot
+give: it has no incremental API, no source spans on its nodes, and no notion of
+"re-parse only what moved". So the package is called **per block, on
+already-bounded input**, with the block boundaries, the source spans, the
+extensions and the caching all Niman's. The extension zone the package cannot
+know — wikilinks, `$…$` / `$$…$$` delimiters, YAML frontmatter, tags — sits in
+front of it and masks those ranges before the package ever sees them
+([§8.5.0](#850-what-the-corpus-does-and-does-not-exercise)). Conformance
+becomes a measurement against the spec suite with the failures pinned
+([§4.8](#48-recommended-conformance-strategy)), not a parser to write.
+
 The parse is split exactly where the measurements say, and the split is the
 same split the preview already uses — generalized to all modes:
 
@@ -9127,8 +9185,10 @@ one):
 | B — block | the whole block's markers | the one block, once per block entry | Cheapest and most stable; but a long wrapped paragraph shows all its syntax while you are anywhere in it. |
 | C — character | the marker the caret touches | up to one block per keystroke | Most "accurate", worst thrash and most distracting. |
 
-**Recommendation: A**, with B as the fallback if measurement shows the
-per-row rebuild is visible. Note the cost either way: rebuilding one block is
+**A is the decision (D9), with per-word as the refinement the user asked
+for**: only the caret's line — or, where it reads better, only the word the
+caret is in — temporarily becomes source. B stays as the fallback if
+measurement shows the per-row work is visible. Note the cost either way: rebuilding one block is
 one `InlineParser` pass over a few hundred characters plus one
 `TextPainter.layout` — tens of microseconds — so even C is technically
 affordable; the objection to C is human, not computational.
@@ -9314,12 +9374,37 @@ per-surface features:
 |---|---|
 | `onIndicator: CodeIndicatorValueNotifier` (which rows are laid out) | `MarkdownSurfaceController.visibleRows` / a `ValueListenable<List<VisibleRow>>` with the same meaning |
 | `scrollController`/`scrollOffset` per surface | one `ScrollController` owned by the controller |
-| two-way scroll sync between editor and preview | **identity**: both panes read the same height map, so sync is `pixelOfBlock(blockForLine(topLine))` — exact, not estimated |
+| two-way scroll sync between editor and preview | **Deleted (D4).** With the split preview rejected the sync has no counterpart to talk to; `ScrollMap` survives only *inside* the surface as `HeightMap`, and `scroll_sync.dart`, `editor_lines.dart` and the `onIndicator` contract go with it |
 | `activeItems` (toolbar pressed state) | `MarkdownSurfaceController.activeFormats`, computed from the inline spans at the caret |
 | `formatMenu`, `editor_context_menu` | one context-menu builder over `activeFormats` + the same toolbar item list |
 | `md_editing` / `quill_editor_commands` | one `MarkdownCommand` set operating on source splices |
 | `initialCaretOffset` (template `{{cursor}}`) | `MarkdownSurfaceController.revealOffset(offset)` then focus |
 | Zen mode's caret width, line numbers, column, typewriter | presentation parameters of the same widget |
+
+### 8.7.7 The export seam
+
+Export will be required (D12), and it is the one requirement that a
+viewport-shaped renderer cannot grow later: a print or PDF pass needs the
+**whole** note laid out at an arbitrary width, off-screen, with no scroll
+position and no laziness. Three consequences, all cheap now and expensive
+afterwards:
+
+1. **Layout is a pure function of (block, width, theme)** — no dependence on
+   the viewport, the scroll offset or the widget tree. That is already how the
+   block layer is described ([§8.4](#84-layout-only-the-blocks-the-viewport-shows));
+   export is what makes it non-negotiable, and it is what a test can assert.
+2. **The painter takes a target**, not a `Canvas` it found in a
+   `BuildContext`: `paintBlock(Canvas, Offset, width)` and a driver that walks
+   the `HeightMap` in order, so the same code serves the viewport and a
+   `PictureRecorder`.
+3. **A "layout everything" path exists and is allowed to be slow** — the
+   eager mode measured at 552 ms for the geometry note
+   ([§8.4](#84-layout-only-the-blocks-the-viewport-shows)) is a perfectly good
+   export cost, and having it as an explicit mode is what stops the viewport's
+   laziness from becoming an accidental API.
+
+Page breaking, headers and margins are *not* designed here — only the seam
+that makes them possible without rewriting the renderer.
 
 ## 8.8 The two specialised renderers
 
@@ -9487,8 +9572,36 @@ the Markdown parser's own pathological cases (the spec suite's
 `pathological_tests.py` is the list to adopt). The performance argument for
 replacing the lexer is strong; the robustness argument is decisive.
 
-The replacement is a CodeMirror-style stream lexer for the ~15 languages a
-notes app actually meets, with:
+**The decision, since the user deferred it (D14): keep `highlight`
+entirely as the lexer; replace only how it is used, and let a number decide
+whether it is enough.** The package's language modules are declarative `Mode`
+trees (190 of them, zero raw `RegExp`, compiled centrally) — weeks of grunt
+work to reproduce for no user-visible gain, and the geometry note has *zero*
+code fences, so code colouring is not the hot path on the real worst note. What
+must not survive is the usage: `parse()` over a whole block and then
+`toHtml()` is super-quadratic (100 KB → 6 869 ms), `autoDetection` is
+~39 ms/KB, and the grammars have **no regex timeout**, so a pasted note can
+hang the app (K13).
+
+So the rules are:
+
+1. **Lex the visible or changed block only**, cached by
+   `(block revision, language)`. Never the document.
+2. **Build spans from the token stream**; `toHtml()` is never called.
+3. **Never `autoDetection`**: the fence's info string names the language, or
+   the block is plain.
+4. **Cap the input, unconditionally.** A block past N bytes or N lines, or a
+   line past M chars, renders plain. The cap exists because there is no
+   timeout to fall back on, so the cap *is* the timeout.
+5. **The decision point is a number, not a preference**: the keystroke budget
+   inside the adversarial fixture's 2 000-line fence — **≤ 1 ms**
+   ([§9.2](#92-the-budget-by-operation)). If `highlight` meets it, there is
+   nothing left to write. If it does not, the fallback is line-state lexers
+   for the top ~15 languages with `highlight` demoted to the long tail — a
+   swap confined to the one interface below, which is why that interface is
+   specified even though its second implementation may never exist.
+
+The interface that both satisfy — a CodeMirror-style stream lexer — is:
 
 ```dart
 abstract class CodeLexer {
@@ -9517,7 +9630,7 @@ without touching the renderer.
 | `editor/list_tally*` + `quill_tally.dart` | 719 | one tally over the block index |
 | `editor/editor_context_menu.dart` + Quill's menu | 241 | one context menu |
 | `editor/md_editing.dart` + `quill_editor_commands.dart` | 539 | one `MarkdownCommand` set |
-| `preview/scroll_map.dart` + `scroll_sync.dart` + `editor_lines.dart` | 966 | `HeightMap` inside the surface (scroll sync becomes identity) |
+| `preview/scroll_map.dart` + `scroll_sync.dart` + `editor_lines.dart` | 966 | `scroll_map.dart` **ported** into `HeightMap`; `scroll_sync.dart` and `editor_lines.dart` (429 of the 966 lines) **deleted**, because D4 rejects the split preview they existed to keep in step |
 | `preview/math_*` + `katex` + `katex_dart` | 731 | own `TexParser` + `TexBox` layout + `TexPainter` |
 | New code | ~ | `SourceBuffer`, `BlockScanner`, `BlockIndex`, `InlineParser`, `RenderedBlock`, `HeightMap`, `MarkdownSurface`, `MarkdownSurfaceController`, `MarkdownTheme`, `Tex*`, `CodeLexer` |
 
@@ -9532,12 +9645,12 @@ packages reachable only through them leave the tree — including
 
 | Requirement | Mechanism |
 |---|---|
-| R1 one widget | `MarkdownSurface` + `MarkdownSurfaceMode`; the preview pane is the same widget in `read`. |
+| R1 one widget | `MarkdownSurface` + `MarkdownSurfaceMode`; the preview is the same widget in `read` **mode**, not a pane (D4). |
 | R2 uniform functionality | Every capability reads the buffer and the block index, which are mode-independent; `MarkdownSurfaceController` is the single API the shell talks to. |
 | R3 uniform performance | One viewport/height-map/inline-cache path; no mode has a size cap; source mode is a strict simplification of it. |
 | R4 uniform visual rendering | `MarkdownTheme` + `MarkdownMetrics`, one per construct, applied by the surface itself. |
 | R5 syntax | Own CommonMark+GFM parser + the app's extensions, developed against `spec.json`. |
-| R6 no packages | Own parser, renderer, editor, typesetter, lexer. |
+| R6 no UI packages | Own renderer, editor, viewport, typesetter. `markdown` and `highlight` stay as pure-Dart engines behind Niman's incremental driver (D2). |
 | R7 pure Flutter/Dart | `dart:ui`, `flutter/widgets|rendering`, `dart:isolate`, `dart:typed_data`, asset fonts. No plugin, no FFI, no native code. |
 | R8 speed on `Geometria 1.md` | Incremental block scan + lazy inline phase + viewport-only layout + Fenwick height map + two-level math cache + line-state code lexer, against the budget in [§9](#9-the-performance-budget). |
 
@@ -9662,7 +9775,7 @@ already uses).
 | Inline parse, one visible block | any | ≤ 60 µs | 150 µs | lazy, memoized per block revision |
 | **Keystroke, mid-buffer, total** | `fixture-200kb.md` | **≤ 0.5 ms** parse + ≤ 2 ms layout/paint | 8 ms | O(change): one line, one block |
 | **Keystroke, mid-buffer, total** | `Geometria 1.md` | ≤ 2 ms | 8 ms | as above; math block cached |
-| Keystroke inside a fenced code block | 2 000-line fence | ≤ 1 ms | 8 ms | line-state lexer, changed line only |
+| Keystroke inside a fenced code block | 2 000-line fence | ≤ 1 ms | 8 ms | **D14's decision point**: `highlight` driven per visible/changed block, or line-state lexers if this row fails |
 | Scroll frame (60 Hz) | `Geometria 1.md` | ≤ 6 ms | 16.7 ms | paint visible blocks; no parse, no math miss |
 | Scroll frame (120 Hz) | `Geometria 1.md` | ≤ 4 ms | 8.3 ms | as above, plus aggressive deferral |
 | Jump to an arbitrary line (10 000th) | `Geometria 1.md` | ≤ 25 ms to content | 60 ms | `HeightMap` prefix sums; only landed blocks laid out |
@@ -9675,6 +9788,14 @@ already uses).
 | Stats (word count + outline) | `Geometria 1.md` | ≤ 10 ms incremental | 30 ms | block-scan by-product; today 38–40 ms off-thread and O(bytes) |
 | Live mode open | `Geometria 1.md` | ≤ legacy preview open | ≤ 2× | **No size cap.** Today live mode refuses above 204 800 chars. |
 | Search/find across the note | `Geometria 1.md` | ≤ 30 ms | 80 ms | block index walk, off-thread above a threshold |
+
+The bar itself is D10, and it is deliberately asymmetric: **`source` must be
+very fast — at least the legacy numbers, in every row — and `live`/`read` are
+judged as close to `source` as they can get, not against each other.** Source
+mode is the floor because it does no math layout and carries no hidden runs;
+since it shares the whole pipeline, any win in the shared layers shows up there
+first. Where a row below has no separate `live` figure, the `source` figure is
+the target for both.
 
 ## 9.3 The legacy baseline to beat (measured)
 
@@ -9856,60 +9977,63 @@ switch until the new one is measurably better on the same fixture:
 - **The dependency diet happens at the end**, in one commit per package
   family, only once nothing imports them.
 
-## 10.2 What "no packages" means for effort
+## 10.2 What the decisions do to the effort
 
-The honest number first. A from-scratch CommonMark + GFM parser that passes
-the spec suite is the single largest item in this project, and it is *not*
-avoidable once D2 is answered "yes, all packages go". For scale: cmark's
-reference implementation is ~10 000 lines of C, and a conformant Dart port is
-realistically **3 000–5 000 lines of parser plus 2 000+ lines of tests**,
-because the emphasis delimiter algorithm, link reference definitions, HTML
-block types and lazy continuation are all fiddly in ways that only the spec
-examples reveal.
+**D2 removed the largest workstream.** The parser is `markdown` 7.3.1's, so the
+CommonMark/GFM grammar is no longer written here; Phase 1 becomes *measure and
+close the gap* against the spec suite. That removes the parser rows — 29–54
+days — and replaces them with 9–18 days of integration, harness and
+gap-closing. The code-lexer row shrinks too, because `highlight` supplies the
+language rules. Two rows are added by the other decisions: the export seam
+(D12) and the removal of the split preview and its scroll sync (D4).
 
-Rough sizes, in developer-days, for one experienced Flutter/Dart engineer:
+Sizes in developer-days, for one experienced Flutter/Dart engineer:
 
 | Workstream | Days | Notes |
 |---|---|---|
 | `SourceBuffer` + `SourceEdit` + Fenwick index | 4–7 | Small, self-contained, fully testable. |
 | `BlockScanner` + `BlockIndex` + incremental convergence | 6–10 | The "reparse until the state converges" rule needs careful tests (lazy continuation, fences, tables, HTML blocks). |
-| CommonMark block parsing | 8–15 | All block constructs + the spec's block sections. |
-| CommonMark inline parsing | 10–18 | Emphasis delimiter stack, links (all three reference forms), entities, escapes, autolinks, raw HTML, code spans. |
-| GFM extensions | 4–7 | Tables, task lists, strikethrough, extended autolinks, disallowed raw HTML. |
-| App extensions (wikilink, math delimiters, frontmatter, tags, embeds) | 2–4 | Mostly already specified by `links/parser.dart` and `highlighting.dart`. |
-| Spec harness + conformance grind | 5–10 | Interleaved with the two parser rows; the grind is where the last 5 % of examples live. |
-| Isolate protocol + flat typed-array payloads | 4–6 | Includes the worker-mirror splice design. |
-| `RenderedBlock` + style runs + the inline-widget correction table | 8–12 | Under approach B there is no offset map to get wrong; the risky part is the `WidgetSpan` geometry, which needs its own tests. |
+| **Parser integration + spec harness + gap closing** (`markdown` 7.3.1) | **6–12** | *Was 29–54 as "write CommonMark + GFM".* Run the suite, pin every failure in the self-invalidating allowlist, fix what the app needs. |
+| App extensions: masking + parsing (wikilink, math delimiters, frontmatter, tags, embeds) | 3–6 | Mask the ranges the package must not see, then parse them with `links/parser.dart`'s rule. |
+| Isolate protocol + flat typed-array payloads | 4–6 | Warm pool, `Isolate.exit`, worker-mirror splices. |
+| `RenderedBlock` + style runs + the inline-widget correction table | 8–12 | No offset map to get wrong (D9/§8.6.0); the risky part is the `WidgetSpan` geometry. |
 | **Editing core: IME, caret, selection, hit-testing, handles** | **15–25** | **Highest-risk item in the project.** Device work on Android is mandatory. |
 | Undo/redo over splices | 3–5 | Simple by construction. |
 | Viewport / `HeightMap` / sliver | 6–10 | Includes the custom-`RenderSliver` escape hatch if needed. |
 | `MarkdownTheme` + block rendering (headings, paragraphs, lists, quotes, code, tables, images, rules, checkboxes, callouts) | 15–25 | Where the visual quality actually comes from. |
-| Math typesetter (tokenizer → atoms → box model → painter) + font | 15–30 | Depends entirely on the required feature subset; see [§5.4](#54-math-deep-dive). |
-| Code lexers (~15 languages) | 5–10 | Or 0 if `highlight` is kept. |
-| HTML→Markdown (clipboard) | 3–5 | Keeps a documented behaviour. |
+| Math typesetter (tokenizer → atoms → box model → painter) + fonts | 15–30 | D8 fixes the target as today's rendering; the golden diff is the gate. |
+| **Code-lexer driver over `highlight`'s grammars + input guards** | **4–8** | *Was 5–10 for writing the lexers.* D14: the grammars stay; the driver, the line cache and the guards are ours, and the 2 000-line fence decides whether that is enough. **If it is not, add 5–10** for line-state lexers on the top ~15 languages. |
+| HTML→Markdown (clipboard) | 3–5 | Keeps a documented behaviour (D7). |
 | Shell integration: find/replace, folding, outline, stats, tally, context menu, toolbar, per-tab state | 10–15 | Also where the duplicated per-surface code disappears. |
 | Spellcheck underlines + dictionary integration | 2–3 | `EditorSpellCheck.rangesFor` is already line-based. |
 | Accessibility (`Semantics` for a custom text surface) | 3–5 | Non-optional on Android and for desktop screen readers. |
+| **Export seam: offscreen whole-note layout + painting** | **3–5** | New, D12. The seam only — page breaking and margins are not designed here. |
+| **Removing the split preview: settings, UI, scroll sync, docs** | **2–4** | New, D4. Deletes 429 lines rather than generalizing them. |
 | Migration glue, dual-path feature flag, test porting | 10–20 | 38 test files / 8 651 lines touch the old surfaces. |
-| Docs (`docs/user/editing.md`, `docs/dev/architecture.md`, new `docs/dev/unified-surface.md`) | 2–3 | Required by `AGENTS.md` in the same PR. |
-| **Total** | **~130–220** | ≈ 6–11 months of one engineer's focused time. |
+| Docs (`docs/user/editing.md`, `docs/dev/architecture.md`, this document) | 2–3 | Required by `AGENTS.md` in the same PR. |
+| **Total** | **~124–216** | ≈ **6–10 months** of one engineer's focused time (down from ~140–245). |
 
-**The levers that move this number most**, in order:
+The arithmetic, stated plainly so it can be checked: the parser workstreams
+were 29–54 days and are now 9–18, the lexers were 5–10 and are now 4–8, and
+the two new rows add 5–9. So **D2 removed 20–36 days** — the largest single
+lever, and smaller than it first looked because the two new requirements eat
+part of it. The row-by-row low and high sums are 124 and 216.
 
-1. **Keeping the `markdown` package as the parser** (D2 = no): −35 to −50 days,
-   and CommonMark conformance becomes inherited rather than earned. This is by
-   far the biggest single decision in the document. Note the tension with R6:
-   the user asked for no packages, so this is a *question to ask*, not a
-   recommendation to slip in.
-2. **Keeping the pure-Dart `highlight` package** for code: −5 to −10 days,
-   no native code, already a declared direct dependency.
-3. **Reducing live mode's ambition** to the "1:1 rendered text with dimmed
-   markers at zero size and no reveal policy): −15 to −25 days, at the cost
-   of the visual quality R4 asks for — a zero-size marker still occupies no
-   width, so this lever is now much cheaper than it first looked, and the
-   remaining work is the reveal policy and the inline-widget geometry.
-4. **Dropping HTML paste** (D7 = no): −3 to −5 days.
-5. **A narrower math subset** (see §5.4's 95 % list): −8 to −15 days.
+**The levers that remain**, in order:
+
+1. **Reducing `live` mode's reveal fidelity** from per-word (D9) to per-block:
+   −10 to −20 days. It costs the thing the user actually asked for — an
+   interactive preview that turns the caret's line back into source — so it is
+   the lever of last resort, not the first.
+2. **Keeping `highlight`'s grammars without the incremental driver**, i.e.
+   lexing the visible block only and accepting a full re-lex on edit inside it:
+   −4 to −8 days, and K13's guards become load-bearing rather than
+   belt-and-braces.
+3. **Dropping HTML paste**: −3 to −5 days. Contradicts D7.
+4. **A narrower math subset**: −8 to −15 days. Contradicts D8, which fixes the
+   target as what the app renders today.
+5. **Deferring export**: −3 to −5 days now, and much more later — a
+   viewport-shaped renderer cannot print. Contradicts D12.
 
 ## 10.3 The stages
 
@@ -9926,13 +10050,23 @@ epic (there is none today — the closest open issues are #228 "WYSIWYG: tables
 as tables", #45 "Performance & jank", #62 "Desktop performance & animation
 audit", #72 "Markdown linter"), with this document linked.
 
-### Phase 1 — Parser core, no UI
+### Phase 1 — The engine, no UI
+
+**Who parses.** `markdown` 7.3.1 (D2). This phase does **not** write a
+CommonMark parser; it *measures* the one that is already a dependency, closes
+the gap the app actually needs, and builds the incremental machinery the
+package does not have.
 
 **Deliverable:** `lib/src/markdown/` — `SourceBuffer`, `BlockScanner`,
-`BlockIndex`, `InlineParser`, `RenderedBlock`, `BlockStyleRuns`, plus the spec
-harness (`tool/markdown_spec.dart`) that runs `spec.json` and reports
-pass/fail per section. No widget, no shell change; the old surfaces keep
-running.
+`BlockIndex`, the per-block bridge to `markdown`, the extension masking
+(wikilinks, math, frontmatter, tags), `BlockStyleRuns`, plus the spec harness
+(`tool/markdown_spec.dart`) that runs the suites through the package and
+reports pass/fail per section. No widget, no shell change; the old surfaces
+keep running.
+
+**First task, before anything else:** run the harness against `markdown`
+7.3.1 as it ships and **publish the number**. Until that exists, "conformance"
+is an assumption; after it, it is a list.
 
 **Exit criteria:**
 
@@ -9946,20 +10080,24 @@ running.
   examples must be extracted from the HTML once and checked in as a fixture.
 - Any failure that is *accepted* goes in a checked-in allowlist of
   `spec/example-number` + a one-line reason, and **CI fails if an allowlisted
-  example starts passing**, so the list cannot rot. Three oddities are known
-  before the parser is written and are decided, not discovered: the GFM HTML
-  comment rule (which keeps CommonMark 0.29's grammar while CommonMark 0.31.2
-  moved to WHATWG), GFM's strikethrough prose contradicting its own example
-  (single `~there~` renders as `<del>`), and GFM's 8-vs-9 digit entity case.
-- The work is ordered bottom-up in the eleven gated stages of
-  [§4.8.1](#481-order-of-attack) (preliminaries → leaf blocks → HTML blocks →
-  reference definitions → containers → inline scaffolding → **emphasis** →
-  links/images → breaks → GFM extensions → Niman extensions), because
-  emphasis cannot be made correct before the character classes and the
-  precedence rules beneath it are exact.
+  example starts passing**, so the list cannot rot. Failures are triaged in
+  three buckets, and each is a decision rather than a bug report: *fix*
+  (the app needs it), *pin* (the package's documented or measured divergence,
+  recorded with its reason), or *mask* (the extension zone — wikilinks, math,
+  frontmatter — which the package never sees). The three GFM oddities already
+  known are decided up front, not discovered: the GFM HTML comment rule (which
+  keeps CommonMark 0.29's grammar while CommonMark 0.31.2 moved to WHATWG),
+  GFM's strikethrough prose contradicting its own example (single `~there~`
+  renders as `<del>`), and GFM's 8-vs-9 digit entity case.
+- **Gaps are closed bottom-up**, in the order of [§4.8.1](#481-order-of-attack)
+  (preliminaries → leaf blocks → HTML blocks → reference definitions →
+  containers → inline scaffolding → **emphasis** → links/images → breaks →
+  GFM extensions → Niman extensions), because an emphasis fix on top of a
+  wrong character class is wasted work. Where the package is already correct —
+  which the first task's number will show — nothing is touched.
 - Test names are `spec/version/example @section` (e.g.
   `gfm/0.29-gfm/257 @4.6 HTML blocks`), so a failure names its `spec.txt`
-  line range directly.
+  line range directly, whichever bucket it lands in.
 - The app's own extensions have tests ported from `links/parser.dart`,
   `highlighting.dart` and `math_syntax.dart`, so the new parser is provably a
   superset of today's behaviour for this app. The extension zone is outside
@@ -9994,10 +10132,16 @@ running.
   timings all at least as good as
   [§9](#9-the-performance-budget)'s incumbent row; the O(bytes) stats pass is
   O(changed).
-- Scroll sync with the still-legacy source editor works at least as well (it
-  is the only cross-engine path left).
+- **The export seam works** (D12): the same block painter renders the whole
+  note into an offscreen `PictureRecorder` at an arbitrary width, and a test
+  asserts it. This is the phase where it is cheap ([§8.7.7](#877-the-export-seam)).
 - Code highlighting, tables, task lists, footnotes, images, embeds and
   wikilinks all render, with the existing widget tests for the preview ported.
+- There is **no scroll sync to keep**, because D4 removes the split preview in
+  this phase rather than generalizing it: `scroll_sync.dart`,
+  `editor_lines.dart`, the `onIndicator` contract, the `previewEnabled` and
+  split-ratio settings and their UI all go, and `docs/user/editing.md` is
+  updated in the same commit.
 
 ### Phase 3 — `source` mode replaces `re_editor`
 
@@ -10031,8 +10175,16 @@ correction table, and the reveal policy chosen in
   expects, per a table-driven test over every span kind — under approach B
   this is expected to pass *by construction*, and the test exists to prove the
   zero-size runs really do not shift the offsets.
+- **The reveal is D9's**: on entry to a line — or to a word, the refinement
+  the user asked for — that run's style flips from hidden to visible, and back
+  when the caret leaves. Because the flip is a *style* change and not a text
+  change, the block's text, its offsets and the layout cache stay valid; the
+  measurable risk is only how often the block is re-laid out, so the criterion
+  is a budget: the flip costs one block re-layout (≤ 3 ms, [§9.2](#92-the-budget-by-operation))
+  and never fires more than once per caret row change.
 - The revealed-marker policy is validated on a device at 200 KB and on
-  `Geometria 1.md`, with no visible thrash.
+  `Geometria 1.md`, with no visible thrash, at per-line and at per-word
+  granularity, so the refinement is a setting or a constant and not a rewrite.
 - **The 200 KB cap is gone**: the geometry note opens and edits in live mode,
   which today it cannot.
 - Formatting toolbar, context menu, `activeFormats`, tools, spells and the
@@ -10042,12 +10194,15 @@ correction table, and the reveal policy chosen in
 ### Phase 5 — Delete the old world
 
 **Deliverable:** `re_editor`, `flutter_quill`, `flutter_markdown_plus`,
-`markdown`, `katex`, `katex_dart`, `flutter_highlight` and
-`flutter_smooth_markdown` removed from `pubspec.yaml`; `lib/src/editor/`,
-`lib/src/preview/` and their tests deleted; `docs/dev/editor-alternatives.md`
-superseded; `docs/user/editing.md` and `docs/dev/architecture.md` rewritten;
-`CHANGELOG.md` entry; the 55 orphaned packages confirmed gone from
-`pubspec.lock`.
+`flutter_highlight`, `katex`, `katex_dart` and `flutter_smooth_markdown`
+removed from `pubspec.yaml` (**`markdown` and `highlight` stay**, D2);
+`lib/src/editor/`, `lib/src/preview/` and their tests deleted;
+`docs/dev/editor-alternatives.md` superseded; `docs/user/editing.md`
+(including the split preview's removal, D4) and `docs/dev/architecture.md`
+rewritten; `CHANGELOG.md` entry; the 55 orphaned packages confirmed gone from
+`pubspec.lock`; and the **KaTeX fonts kept** — they must move from the
+package's assets into Niman's, or the same note changes appearance on first
+launch (D8, [§6.5.7](#657-math-fonts-availability-licensing-bundling)).
 
 **Exit criteria:** `flutter analyze --fatal-infos` clean, `flutter test` green,
 the three headless integration tests green, APK + Linux + Windows builds
@@ -10072,19 +10227,31 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    device with Gboard. Success = no lost characters, no caret jumps, no
    duplicated text, composition preserved, and the whole-value fallback
    (`enableDeltaModel: false`) also working.
-3. **`SliverVariedExtentList` vs a custom `RenderSliver`** when heights above
+3. **How conformant is `markdown` 7.3.1, really?** Not a throwaway branch —
+   the first task of Phase 1, and the number the whole conformance plan hangs
+   on. Test: the spec harness against the package as it ships, both suites,
+   failures bucketed *fix* / *pin* / *mask*. Success = the gap is small and
+   enumerable; failure = the gap is large enough that writing the parser
+   becomes the cheaper path again, which is a decision to revisit rather than
+   a phase to grind through blind.
+4. **`SliverVariedExtentList` vs a custom `RenderSliver`** when heights above
    the viewport change. Test: 5 000 blocks, edit one near the top, scroll far
    down, measure scroll jumps and assertions.
-4. **Math golden files.** Test: render every distinct math expression in a
+5. **Math golden files.** Test: render every distinct math expression in a
    corpus with `katex_dart` today, save the boxes as goldens, then render with
    the new typesetter and diff. This tells you the real required subset before
-   you write the typesetter, not after.
-5. **Per-keystroke `TextPainter` cost for one block** with a realistic span
+   you write the typesetter, not after — and D8 makes the *current* rendering
+   the target, so this is an acceptance test and not just a survey.
+6. **Per-keystroke `TextPainter` cost for one block** with a realistic span
    tree (bold inside a link inside a paragraph, 300 chars) to confirm the
    tens-of-microseconds assumption that the whole reveal policy rests on.
-6. **Typing latency measured end-to-end** (key event → painted frame) on
-   Android, since that is where the 0.507 ms desktop number is least
+7. **Typing latency measured end-to-end** (key event → painted frame) on
+   Android, since that is where the desktop keystroke number is least
    predictive.
+8. **Offscreen whole-note layout** (D12): lay out `Geometria 1.md` into a
+   `PictureRecorder` at 700 px and at a phone width, and check the eager cost
+   against the reader's expectation of an export (seconds are fine; minutes
+   are not).
 
 ## 10.5 How this lands in the repo's workflow
 
@@ -10112,7 +10279,7 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
 | K2 | **IME/editing on a custom text surface is harder than it looks** | `DeltaTextInputClient`, composition ranges, autocorrect full-value fallbacks, Android OEM IMEs, dead keys, CJK, RTL. The framework itself is no guide: **nothing in `packages/flutter/lib/` sets `enableDeltaModel: true`, and `EditableText` does not implement `DeltaTextInputClient`** — the delta path is not what Flutter's own text field exercises. Worse, `EditableText` echoes the whole text back to the platform on every keystroke (`editable_text.dart:4016`), which is untenable at 934 KB and must be engineered around by hand. This is where a "weeks" estimate becomes "quarters". | Spike 1 (§10.4) before committing. Keep the whole-`TextEditingValue` path working as a first-class fallback, not an afterthought. Keep the legacy source editor behind the flag until the new one survives a device round-trip with at least two IMEs. | **High.** The single biggest schedule risk. |
 | K3 | **Visual quality regresses** | The app currently renders tables, math, images and code through packages with years of polish. A new renderer's first version will look worse in a hundred small ways. | Golden-image tests from Phase 2 onward; a written style checklist; the `MarkdownTheme` as the single place to fix all of them. | Medium. Recoverable, but only with an explicit visual QA round. |
 | K4 | **Performance is not actually better** | `re_editor` is a tuned large-text editor and the windowed preview is already good. The honest possibility is that the new surface matches rather than beats them. | Measure before/after on the same fixture with the same command in both harnesses; the baseline in [§2.2](#22-what-the-code-already-measured-and-what-it-says-to-keep) is the contract. Where it cannot beat, it must at least not regress — and the *uniformity* (no 200 KB cap, no blank wait, no 5–6 ms math block) is itself the win. | Medium. |
-| K5 | **Scope**: this is a 6–11 month project on an app at 0.0.8 | The app has a release cadence and a backlog of user-visible issues (#228, #45, #62, #72 …). A ground-up surface competes with all of them. | Phase-by-phase shipping: `read` mode alone removes the preview's blank wait and the math stutter and is useful even if the project stops there. | Medium. |
+| K5 | **Scope**: this is a 6–10 month project on an app at 0.0.8 | The app has a release cadence and a backlog of user-visible issues (#228, #45, #62, #72 …). A ground-up surface competes with all of them. | Phase-by-phase shipping: `read` mode alone removes the preview's blank wait and the math stutter and is useful even if the project stops there. | Medium. |
 | K6 | **The 8 651 lines of surface tests are the real specification** | They encode hundreds of small decisions (the caret-landing retry, the `_isPlainLine` rule, the tally's tick preservation, the paste-Markdown contract) that this document does not list. | Port tests *per phase*, keeping the same test names where possible; treat a deleted test as a deleted requirement and say so in the commit. | Medium. |
 | K7 | **Hidden-marker mapping bugs** | A wrong offset translation silently writes the wrong bytes to disk: data loss, not a glitch. Approach B ([§8.6.0](#860-the-two-ways-to-hide-a-marker)) removes the map entirely by keeping the rendered text identical to the source, which is why it was chosen over the cheaper-looking "omit the marker" design. The residual is the `WidgetSpan` correction table for blocks with inline widgets. | Property-based tests: for random documents and random edit sequences, assert `buffer.text` is exactly the expected string. Never let a computed offset be the only thing between a keystroke and a write. | **Reduced to low** by approach B; the residual is the inline-widget geometry, which is testable in isolation. |
 | K8 | **Math fonts, stretchy delimiters, no MATH table, and no coverage signal** | Four verified facts make this harder than "ship a font": Flutter cannot do OpenType MATH glyph assembly at all (the engine's text stack has no `MATH`/`GlyphAssembly` path); `dart:ui` exposes **no glyph-outline API**, so surds and arrows must be authored `ui.Path`s; **Android ships no math font at any API level**, so a `fontFamily` name is a silent no-op rather than a fallback; and missing glyphs are **not reliably observable** — Skia has `Paragraph::unresolvedGlyphs()` but no native embedder surfaces it, so a widget test's tofu is deterministic while a device may silently substitute another font, and **a green test proves nothing about device coverage**. | Bundle the fonts (keep the 20 KaTeX TTFs the packages already vendor, 544 KB OFL; add STIX Two Math, 819 KB OFL) and never name a system font; build the stretchy-delimiter recipe as its own tested unit ([§6.5.4](#654-stretchy-delimiters-and-fraction-bars--the-concrete-recipe)); assert coverage with a build-time `fontTools` manifest in CI plus a zero-width terminal fallback. | Medium — bounded, but it is real work that a "just render the font" plan would miss. |
@@ -10130,61 +10297,43 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
 | **Do nothing** | The three surfaces are three implementations of the same features, they disagree visually, one has a 200 KB cap it enforces by refusing to open any of the repo's own fixtures, and the preview takes 137–182 ms to show first content and 35–71 ms to land a scroll jump. The uniformity requirement cannot be met by leaving them. |
 | **Fix the three in place** | Deduplicating find, tally, context menu, formatting and scroll-sync across three engines is a large refactor whose end state is *still* three engines with three models. It costs a large fraction of the rewrite without removing the cap, the stalls or the packages. |
 | **Adopt one package for all three** (the `editor-alternatives.md` candidates) | Already measured: every candidate is slower than the plain source editor at the keystroke, and the best model (appflowy_editor) fails this toolchain's analysis and brings an AGPL/MPL choice and 21 direct dependencies. `docs/dev/editor-alternatives.md` is the record. |
-| **Keep source-of-truth but reuse `markdown` for the parse** | The pragmatic version of this project: −35 to −50 days and inherited CommonMark conformance. It is rejected only because R6 says no packages. **It should be an explicit decision (D2), not an accident.** |
+| **Keep source-of-truth but reuse `markdown` for the parse** | **Adopted (D2).** Was listed here as the pragmatic variant; the user took it. −20 to −36 days and CommonMark conformance becomes a measurement rather than a rewrite. `highlight` stays for the same reason, with its hazards contained (K13). |
 | **A Delta/rich-text document with a Markdown codec** | Contradicts "disk is source of truth"; the codec is exactly the 648 lines and the fidelity bugs the app already has (#139, #165). |
 | **Render to HTML and use a web view / `flutter_html`** | Not pure Flutter, a plugin on every platform, and no chance of the keystroke numbers. |
 | **Only build live mode, drop source mode** | Source mode is the power-user surface and the one that never hits the size cap; it is also the cheapest mode to build (identity map). Dropping it saves little and removes the fallback that makes the migration safe. |
 | **Build `read` mode only** | A legitimate reduced scope that solves the visible problems (blank wait, math stutter, no size cap) in a fraction of the time. Worth keeping as the explicit stop point if K5 bites. |
 
-## 11.3 Open questions for the user
+## 11.3 The open questions, and what was answered
 
-These are the questions whose answers change the plan, in the order they
-matter. D1–D8 are in [§1.5](#15-decisions-taken-that-the-user-should-confirm);
-these are the ones that need a conversation rather than a default.
+Answered 2026-09-20; the decisions themselves and their consequences are in
+[§1.5](#15-the-decisions-and-what-each-one-changes). Recorded here as the
+conversation they came from, so the reasoning is not lost.
 
-1. **D2, again, because it dominates everything else:** may the pure-Dart
-   `markdown` package stay as the parser core (and `highlight` as the code
-   lexer)? "No packages" read literally costs ~40–60 days of the ~130–220,
-   and the two packages in question are pure Dart with no native code — they
-   do not compromise R7. If the answer is "no packages at all", the schedule
-   above stands.
-2. **Is the goal one widget with three modes (D1), or three widgets sharing an
-   engine?** The design here is the former; the latter keeps the preview as a
-   separate pane component and loses the scroll-sync-by-identity win.
-3. **What is the acceptance bar for "uniform performance"?** Equal timings in
-   all three modes, or "no mode is unusable and none has a cap"? The former is
-   stricter and costs more (source mode is inherently cheaper).
-4. **How much of the WYSIWYG's visual ambition is required?** Collapsing
-   `[text](url)` to `text` needs the full render-map design (K7); dimmed
-   markers with 1:1 offsets is far cheaper and much safer. Which one is
-   "renda visiva"?
-5. **Which platforms must be device-verified, and in what order?** The design
-   is riskiest on Android (IME) and most measurable on desktop. A plan that
-   verifies desktop first and Android last concentrates all the risk at the
-   end.
-6. **Is there a target release for this?** The phase plan can be cut at any
-   phase boundary; knowing whether the stop point is "0.1.0" or "someday"
-   decides how much of Phase 4 and 5 to schedule.
-7. **Export/print/PDF:** not in the requirement list, but if it is wanted
-   later, the renderer must be able to paint to an offscreen `PictureRecorder`
-   at an arbitrary width — cheap to allow for now, expensive to retrofit.
-8. **Should the new surface be one widget for *every* note, including the
-   non-Markdown kinds** the app already special-cases (todo lists, audio/voice
-   notes, the "widget" kind)? The answer decides whether `MarkdownSurface`
-   needs a pluggable block-kind registry ([§5.7](#57-a-synthetic-worst-note-spec-and-fixture)
-   and the `ui/kinds/` module) or stays strictly Markdown.
+| # | Question | Answer |
+|---|---|---|
+| 1 | May the pure-Dart `markdown` and `highlight` stay? | **Yes.** The scope lever: −20 to −36 days (the parser workstreams). |
+| 2 | One widget with three modes, or three widgets over one engine? | **One widget, three modes.** |
+| 3 | Acceptance bar for "uniform performance"? | **`source` must be very fast; the other modes as close as they can get.** Not "equal timings" — source mode is the floor, and it inherits every optimisation, so the gap should be small and is allowed to exist. |
+| 4 | How much of the WYSIWYG's visual ambition? | **All of it: `live` is literally an interactive preview**, Obsidian-style — only the caret's line, or even just the word, temporarily becomes source. That settles the reveal policy as policy A with a per-word refinement, and it is the reason markers are hidden by *style* rather than by removal: a style change re-reveals a run without touching the text, the offsets or the layout cache. |
+| 5 | Which platforms, in what order? | **Both desktop and Android.** Order ours: desktop first for measurement (the harness and the comparable numbers live there), with the Android IME spike in parallel from day one. |
+| 7 | Export/print/PDF? | **Will be required.** The renderer must paint offscreen at an arbitrary width from the start — a seam, not a feature. |
+| 8 | One widget for every note kind? | **No: Markdown only.** List notes and audio notes keep their own UI, separate from this widget, and `ui/kinds/` is untouched. |
+| 6 | Target release? | **None — build it first, then decide when to integrate** (D15). The plan can stop at any phase boundary; the only gate is that each one leaves the app shippable. |
 
 ## 11.4 What would make this project fail, in one sentence each
 
-- Answering D2 "no packages" but staffing the work as if `markdown` were being
-  reused.
-- Building the renderer before the render map, then discovering that caret
-  correctness cannot be bolted on.
-- Migrating live mode before the IME has survived a real Android device.
+- Writing a Markdown parser anyway, out of a habit formed before D2 was
+  answered.
+- Building the renderer before deciding how markers are hidden, then
+  discovering that the reveal policy (D9) cannot be retrofitted onto it.
+- Migrating `live` mode before the IME has survived a real Android device.
 - Deleting the legacy surfaces before the new one has beaten them on the same
   benchmark, in the same harness, on the same machine.
 - Treating the 38 surface test files as obsolete instead of as the
   specification they are.
+- Letting `highlight` keep rendering: its `toHtml()` is super-quadratic and its
+  grammars have no timeout, so "we kept the package" becomes a hang.
+- Retrofitting export: a viewport-shaped renderer cannot print a whole note.
 
 
 ---
@@ -10209,7 +10358,7 @@ these are the ones that need a conversation rather than a default.
 | 364 | `editor/md_editing.dart` | Replace with `MarkdownCommand` |
 | 305 | `editor/find_panel.dart` | Replace with one find bar |
 | 302 | `editor/highlight_sync.dart` | Port (becomes the render map's active-format pass) |
-| 299 | `preview/scroll_sync.dart` | **Delete** — scroll sync becomes identity |
+| 299 | `preview/scroll_sync.dart` | **Delete** — D4 rejects the split preview it existed for |
 | 294 | `preview/block_parse.dart` | Replace with the own parser |
 | 276 | `editor/list_tally.dart` | Port to the block index |
 | 270 | `links/resolver.dart` | Keep |
@@ -10232,7 +10381,7 @@ these are the ones that need a conversation rather than a default.
 | 143 | `editor/toolbar_item.dart` | Keep (the 14 items are the command set) |
 | 140 | `editor/markdown_format.dart` | Port into `MarkdownCommand` |
 | 133 | `editor/editor_shortcuts.dart` | Keep (remappable, `shortcuts.md` is the spec) |
-| 132 | `preview/editor_lines.dart` | Delete (`visibleRows` replaces it) |
+| 132 | `preview/editor_lines.dart` | **Delete** (D4); `visibleRows` on the controller replaces it for typewriter and outline |
 | 129 | `preview/preview_work.dart` | **Port** the isolate design, change the payload |
 | 123 | `frontmatter/edit.dart` | Keep |
 | 120 | `editor/toolbar.dart` | Keep, dispatch through the controller |
@@ -10421,21 +10570,33 @@ problem.
 
 ## 12.6 First-day checklist
 
-If the project is approved, in this order:
+The decisions are taken ([§1.5](#15-the-decisions-and-what-each-one-changes))
+and there is no target release (D15), so this is simply the order the work
+starts in. No step below waits on an answer.
 
-1. Open the epic issue, link this document, and answer D1–D9 in it.
-2. Create the child issues for Phases 1–5 with the exit criteria from §10.3.
-3. Branch `feat/unified-markdown-surface` (this branch) — keep it as the
-   research branch, and cut one working branch per phase from `main`.
-4. Phase 1 first commit: `lib/src/markdown/source_buffer.dart` + its unit
-   tests, because it is small, complete, and everything else sits on it.
-5. Second commit: `tool/markdown_spec.dart` and the spec harness, *before*
-   the parser, so the parser is written against a failing test suite rather
-   than a hopeful one.
-6. Spike 1 (Android IME) in parallel from day one — it is the risk that can
-   cancel the plan, and it does not depend on the parser.
-7. Record the incumbent's numbers (§9) in the issue as the baseline to beat,
-   with the machine and the exact commands, before any new code is measured.
+1. **Open the epic issue** and link this document. Child issues per phase,
+   with the exit criteria from [§10.3](#103-the-stages) copied into them, and
+   the decisions recorded in the epic so they are not re-litigated in the PRs.
+2. **Measure `markdown` 7.3.1 before writing anything** ([§10.4](#104-what-to-spike-first-before-committing-to-the-plan),
+   spike 3): the spec harness over both suites, failures bucketed *fix* /
+   *pin* / *mask*, and the number published in the issue. Every later
+   conformance decision depends on it, and it is a day's work rather than a
+   phase's.
+3. **Start the Android IME spike in parallel** (spike 2) — it is the risk that
+   can cancel the plan, and it does not depend on step 2. Desktop is the
+   measurement platform, Android is the risk platform; run them together
+   rather than in sequence (D11).
+4. **Then Phase 1 proper**, in this commit order: `SourceBuffer` + its unit
+   tests (small, complete, everything sits on it), then `BlockScanner` and the
+   per-line state machine, then the extension masking, then the per-block
+   bridge to the package.
+5. **Record the incumbent's numbers** ([§9.3](#93-the-legacy-baseline-to-beat-measured))
+   in the issue as the baseline to beat, with the machine and the exact
+   commands, before any new code is measured — the discipline
+   `editor-alternatives.md` established and this document's own benchmark
+   follows.
+6. **Keep this branch as the research branch**: it holds the dossier and the
+   benchmark, and one working branch per phase comes off `main`.
 
 
 ---
