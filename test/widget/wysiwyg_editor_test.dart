@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
@@ -27,6 +28,37 @@ final class _FakeChecker implements SpellChecker {
 }
 
 void main() {
+  // 0.0.8 test round: `---` read as a box with three hyphens in it.
+  // Quill has no attribute for a section break, so it travels as an
+  // opaque block — but it is drawn as a line across the page, and the
+  // note still saves byte for byte.
+  testWidgets('a section break is a line, not a box of hyphens', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WysiwygEditor(
+            data: 'Before.\n\n---\n\nAfter.\n',
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('wysiwyg-section-break')), findsOne);
+    expect(find.text('---'), findsNothing);
+
+    // It is the block itself, kept verbatim: what the note saves is in
+    // wysiwyg_codec_test, and the line drawn here is only its face.
+    const codec = MarkdownDocumentCodec();
+    final decoded = codec.decode('Before.\n\n---\n\nAfter.\n');
+    expect(
+      codec.encode(decoded.document, decoded: decoded),
+      'Before.\n\n---\n\nAfter.\n',
+    );
+  });
+
   testWidgets('opens a note without errors', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
