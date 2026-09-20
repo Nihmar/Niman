@@ -15,4 +15,14 @@
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <!-- The list widget's "+" dialog (issue 6), night twin of the one in
+         values/styles.xml: the light dialog's own text colours are dark,
+         which on the dark background left the field's hint black on
+         near-black (0.0.8 test round). -->
+    <style name="Theme.Niman.WidgetDialog" parent="android:Theme.Material.Dialog">
+        <item name="android:windowBackground">@drawable/widget_dialog_background</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:colorBackground">@color/widget_background</item>
+    </style>
 </resources>
