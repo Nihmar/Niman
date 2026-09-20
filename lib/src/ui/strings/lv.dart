@@ -1282,6 +1282,12 @@ final class LatvianStrings extends Strings {
   @override
   String get typewriterTitle => 'Rakstāmmašīnas režīms';
   @override
+  String get formatNoteTitle => 'Sakārtot Markdown';
+  @override
+  String get formatNoteDone => 'Piezīme tika sakārtota.';
+  @override
+  String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
+  @override
   String get typewriterSubtitle => 'Rinda, kuru rakstāt, paliek redaktora vidū';
   @override
   String get zenMode => 'Zen režīms';

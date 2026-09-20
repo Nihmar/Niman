@@ -1293,6 +1293,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get typewriterTitle => 'Режим друкарської машинки';
   @override
+  String get formatNoteTitle => 'Упорядкувати Markdown';
+  @override
+  String get formatNoteDone => 'Нотатку впорядковано.';
+  @override
+  String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
+  @override
   String get typewriterSubtitle =>
       'Рядок, який ви пишете, залишається посередині редактора';
   @override

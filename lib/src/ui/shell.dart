@@ -18,6 +18,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
+import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
@@ -1901,6 +1902,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _openPalette(),
+        NoteMenuAction.format => _formatNote(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -2550,6 +2552,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
+      AppCommand.formatNote: () => unawaited(_formatNote()),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
       AppCommand.closeTab: _workspace.closeActive,
@@ -2692,6 +2695,38 @@ final class _LibraryShellState extends State<_LibraryShell>
       _selected = folder;
       _selectedIsDir = true;
       _treeVisible = true;
+    });
+  }
+
+  /// Tidies the open note's Markdown (#227).
+  ///
+  /// Through the file rather than through the editor's buffer: the note
+  /// is saved first, tidied on disk and read back the way an edit from
+  /// another program is read back, so both editors show the result and
+  /// neither has to know how to rewrite its own document.
+  Future<void> _formatNote() async {
+    final path = _shownNote;
+    final ops = widget.controller.ops;
+    if (path == null || ops == null) return;
+    await _guard(() async {
+      // The buffer's own edits land first: what is tidied is the note as
+      // it stands, not the note as it was last written.
+      await widget.unsavedTracker.saveAll();
+      // The shell's paths are the library's own, relative to its root.
+      final text = await ops.readNote(path);
+      final tidied = formatMarkdown(text);
+      if (!mounted) return;
+      if (tidied == text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppStrings.formatNoteAlreadyTidy)),
+        );
+        return;
+      }
+      await ops.saveNote(path, tidied);
+      if (!mounted) return;
+      setState(() => _noteReloadToken++);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AppStrings.formatNoteDone)));
     });
   }
 

@@ -1284,6 +1284,12 @@ final class CroatianStrings extends Strings {
   @override
   String get typewriterTitle => 'Način pisaćeg stroja';
   @override
+  String get formatNoteTitle => 'Posloži Markdown';
+  @override
+  String get formatNoteDone => 'Bilješka je posložena.';
+  @override
+  String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
+  @override
   String get typewriterSubtitle =>
       'Redak koji pišete ostaje u sredini uređivača';
   @override

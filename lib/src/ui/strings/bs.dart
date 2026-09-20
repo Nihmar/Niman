@@ -1290,6 +1290,12 @@ final class BosnianStrings extends Strings {
   @override
   String get typewriterTitle => 'Način pisaće mašine';
   @override
+  String get formatNoteTitle => 'Posloži Markdown';
+  @override
+  String get formatNoteDone => 'Bilješka je posložena.';
+  @override
+  String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
+  @override
   String get typewriterSubtitle => 'Red koji pišete ostaje u sredini uređivača';
   @override
   String get zenMode => 'Zen način';

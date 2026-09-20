@@ -1332,6 +1332,12 @@ final class GreekStrings extends Strings {
   @override
   String get typewriterTitle => 'Λειτουργία γραφομηχανής';
   @override
+  String get formatNoteTitle => 'Τακτοποίηση του Markdown';
+  @override
+  String get formatNoteDone => 'Η σημείωση τακτοποιήθηκε.';
+  @override
+  String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
+  @override
   String get typewriterSubtitle =>
       'Η γραμμή που γράφετε μένει στη μέση του επεξεργαστή';
   @override
