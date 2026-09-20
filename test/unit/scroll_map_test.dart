@@ -111,6 +111,34 @@ void main() {
       expect(starts.length, 2);
     });
 
+    // The WYSIWYG keeps a whole note verbatim when the locator and the
+    // parser disagree, and a list item wrapped over two lines is how a
+    // note written on a phone reads (0.0.8 test round: a checklist
+    // opened as one grey block).
+    test('a list item wrapped over lines stays one block', () {
+      const source =
+          '1. the first item, which runs on\n'
+          'and wraps without any indent\n'
+          '2. the second item\n';
+      final starts = BlockLocator().locate(_lines(source));
+      expect(starts.length, _astBlocks(source).length);
+      expect(starts.length, 1);
+    });
+
+    test('a blank line then an unindented line still ends the list', () {
+      const source = '- one\n- two\n\nA paragraph of its own.\n';
+      final starts = BlockLocator().locate(_lines(source));
+      expect(starts.length, _astBlocks(source).length);
+      expect(starts.length, 2);
+    });
+
+    test('a heading right under a list item is its own block', () {
+      const source = '- one\n## A heading\n';
+      final starts = BlockLocator().locate(_lines(source));
+      expect(starts.length, _astBlocks(source).length);
+      expect(starts.length, 2);
+    });
+
     test('inline math never creates a block', () {
       const source = r'just $x$ here';
       final starts = BlockLocator().locate(_lines(source));
