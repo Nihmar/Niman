@@ -1233,6 +1233,9 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get paletteFooterTouch =>
+      'Tapnite za uporabo · bucika ga drži na vrhu';
+  @override
   String get palettePinned => 'Pripeto';
   @override
   String get palettePin => 'Pripni';

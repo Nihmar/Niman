@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
@@ -310,11 +311,21 @@ final class _CommandPaletteState extends State<CommandPalette> {
 
   @override
   Widget build(BuildContext context) {
+    // The keys shown depend on there being keys to press (#230), and a
+    // keyboard can arrive while the palette is open.
+    return ListenableBuilder(
+      listenable: KeyboardPresence.shared,
+      builder: (context, _) => _panelWithKeys(context),
+    );
+  }
+
+  Widget _panelWithKeys(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final items = _items;
     final pinned = _pinnedShown;
     final pin = widget.onTogglePin;
+    final keys = KeyboardPresence.shared.attached;
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: scheme.onSurfaceVariant,
     );
@@ -392,12 +403,24 @@ final class _CommandPaletteState extends State<CommandPalette> {
                               if (pinned > 0)
                                 _Heading(AppStrings.palettePinned),
                               for (final command in _commands.take(pinned))
-                                row(_CommandLine(command: command, pin: pin)),
+                                row(
+                                  _CommandLine(
+                                    command: command,
+                                    pin: pin,
+                                    keys: keys,
+                                  ),
+                                ),
                               if (_commands.length > pinned &&
                                   (pinned > 0 || _notes.isNotEmpty))
                                 _Heading(AppStrings.paletteCommands),
                               for (final command in _commands.skip(pinned))
-                                row(_CommandLine(command: command, pin: pin)),
+                                row(
+                                  _CommandLine(
+                                    command: command,
+                                    pin: pin,
+                                    keys: keys,
+                                  ),
+                                ),
                               if (_commands.isNotEmpty && _notes.isNotEmpty)
                                 _Heading(AppStrings.paletteNotes),
                               for (final path in _notes)
@@ -416,7 +439,11 @@ final class _CommandPaletteState extends State<CommandPalette> {
                       vertical: 8,
                     ),
                     child: Text(
-                      widget.onTogglePin == null
+                      // Without a keyboard the arrows and alt+P are
+                      // nothing to say (#230): the pin is a tap.
+                      !keys
+                          ? AppStrings.paletteFooterTouch
+                          : widget.onTogglePin == null
                           ? AppStrings.paletteFooter
                           : '${AppStrings.paletteFooter} · '
                                 '${AppStrings.palettePinFooter}',
@@ -500,9 +527,13 @@ final class _PaletteRow extends StatelessWidget {
 }
 
 final class _CommandLine extends StatelessWidget {
-  const new({required this.command, this.pin});
+  const new({required this.command, this.pin, this.keys = true});
 
   final PaletteCommand command;
+
+  /// Whether to show the command's key: there has to be a keyboard to
+  /// press it on (#230).
+  final bool keys;
 
   /// Pins or unpins this row's command (#208); null leaves the pin out.
   final void Function(AppCommand command)? pin;
@@ -521,7 +552,7 @@ final class _CommandLine extends StatelessWidget {
             style: theme.textTheme.bodyMedium,
           ),
         ),
-        if (binding != null)
+        if (binding != null && keys)
           Text(
             describeActivator(binding),
             style: theme.textTheme.labelSmall?.copyWith(

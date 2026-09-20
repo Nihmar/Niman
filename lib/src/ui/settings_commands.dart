@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
@@ -43,33 +44,41 @@ final class SettingsCommandsScreen extends StatelessWidget {
       appBar: AppBar(title: Text(AppStrings.commandsTitle)),
       body: SettingsHighlight(
         target: highlight,
-        child: ValueListenableBuilder<KeyMap>(
-          valueListenable: AppKeyMap.current,
-          // Every row built, not a lazy list: the search lands on a row
-          // that has to exist to scroll itself into view.
-          builder: (context, map, _) => SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Text(AppStrings.commandsIntro, style: muted),
-                ),
-                for (final group in [null, ...PaletteGroup.values])
-                  if (groups[group] case final commands?) ...[
-                    SettingsListHeading(
-                      group == null
-                          ? AppStrings.paletteCommands
-                          : paletteGroupName(group),
-                    ),
-                    for (final command in commands)
-                      _CommandRow(
-                        command: command,
-                        keys: map.bindingOf(command),
+        child: ListenableBuilder(
+          listenable: KeyboardPresence.shared,
+          builder: (context, _) => ValueListenableBuilder<KeyMap>(
+            valueListenable: AppKeyMap.current,
+            // Every row built, not a lazy list: the search lands on a row
+            // that has to exist to scroll itself into view.
+            builder: (context, map, _) => SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Text(AppStrings.commandsIntro, style: muted),
+                  ),
+                  for (final group in [null, ...PaletteGroup.values])
+                    if (groups[group] case final commands?) ...[
+                      SettingsListHeading(
+                        group == null
+                            ? AppStrings.paletteCommands
+                            : paletteGroupName(group),
                       ),
-                  ],
-              ],
+                      for (final command in commands)
+                        _CommandRow(
+                          command: command,
+                          // No keyboard, no keys to name (#230): what a
+                          // command needs is the point of this page, and
+                          // that stays.
+                          keys: KeyboardPresence.shared.attached
+                              ? map.bindingOf(command)
+                              : null,
+                        ),
+                    ],
+                ],
+              ),
             ),
           ),
         ),

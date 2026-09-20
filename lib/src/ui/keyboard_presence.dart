@@ -11,6 +11,14 @@ import 'package:flutter/services.dart';
 /// soft keyboard never sends — modifiers, arrows and the function row —
 /// count as the first sign of hardware.
 final class KeyboardPresence extends ChangeNotifier {
+  /// The app's own, listening from the first time anything asks.
+  ///
+  /// The settings home, the command palette and the Commands page all
+  /// want the same answer, and a keyboard seen by one is a keyboard seen
+  /// by all: a phone that has never had one is not told about keys it
+  /// cannot press (#230).
+  static final KeyboardPresence shared = KeyboardPresence()..listen();
+
   /// A physical keyboard has been seen (or the platform always has one).
   bool attached = !Platform.isAndroid && !Platform.isIOS;
 

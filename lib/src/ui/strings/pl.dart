@@ -1255,6 +1255,9 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get paletteFooterTouch =>
+      'Dotknij, aby użyć · pinezka trzyma na górze';
+  @override
   String get palettePinned => 'Przypięte';
   @override
   String get palettePin => 'Przypnij';

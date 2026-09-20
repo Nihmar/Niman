@@ -1269,6 +1269,9 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get paletteFooterTouch =>
+      'Toca per fer-ho servir · la xinxeta el manté a dalt';
+  @override
   String get palettePinned => 'Fixats';
   @override
   String get palettePin => 'Fixa';

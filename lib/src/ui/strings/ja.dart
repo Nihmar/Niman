@@ -1154,6 +1154,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get paletteFooterTouch => 'タップで実行 · ピンで上に固定';
+  @override
   String get palettePinned => 'ピン留め';
   @override
   String get palettePin => 'ピン留め';
