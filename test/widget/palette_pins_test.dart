@@ -1,6 +1,7 @@
 // #208: pinned commands. A pin heads the palette before anything is
 // typed, above what was used lately; the pin is kept on the device and
 // comes back on the next palette; Alt+P pins what is selected.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,6 +111,41 @@ void main() {
     expect(PinnedCommands.current.value, isEmpty);
     expect(controller.pinnedCommandsJson, '[]');
     expect(find.text(AppStrings.palettePinned.toUpperCase()), findsNothing);
+  });
+
+  // 0.0.8 test round: Alt+P did nothing while the pointer was over a
+  // row, because the selection was elsewhere. The pointer moves the
+  // selection now, so the row under the hand is the row it pins.
+  testWidgets('Alt+P pins the row the pointer is on', (tester) async {
+    await pump(tester);
+    await openPalette(tester);
+    final second = find.byKey(const Key('palette-item-1'));
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+    await mouse.moveTo(tester.getCenter(second));
+    await settle(tester);
+
+    // Which command that row is, read off its own pin button.
+    final key =
+        tester
+                .widgetList<IconButton>(
+                  find.descendant(
+                    of: second,
+                    matching: find.byType(IconButton),
+                  ),
+                )
+                .single
+                .key!
+            as ValueKey<String>;
+    final hovered = key.value.replaceFirst('palette-pin-', '');
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await settle(tester);
+    expect(PinnedCommands.current.value, hasLength(1));
+    expect(PinnedCommands.current.value.single.name, hovered);
   });
 
   testWidgets('Alt+P pins what is selected', (tester) async {
