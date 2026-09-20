@@ -149,11 +149,26 @@ class WidgetBridge(private val activity: Activity) :
     }
 
     private fun widgetIds(provider: String?): List<Int> {
-        if (provider.isNullOrEmpty()) return emptyList()
         val manager = activity.getSystemService(AppWidgetManager::class.java)
             ?: return emptyList()
-        val component = ComponentName(activity, "${activity.packageName}.$provider")
-        return manager.getAppWidgetIds(component).toList()
+        // The class itself, not "${'$'}{packageName}.${'$'}provider": the beta
+        // channel's application id carries a `.beta` suffix while the
+        // providers keep their own package, so the built name named a
+        // class that does not exist and every lookup came back empty —
+        // the app then believed no widget was placed and pushed no
+        // payload at all (#180 follow-up).
+        val component = when (provider) {
+            "TodoWidgetProvider" ->
+                ComponentName(activity, TodoWidgetProvider::class.java)
+            "NoteWidgetProvider" ->
+                ComponentName(activity, NoteWidgetProvider::class.java)
+            else -> return emptyList()
+        }
+        val ids = manager.getAppWidgetIds(component).toList()
+        // Logged because its silence is what hid the bug above: an empty
+        // answer reads as "no widget placed" everywhere upstream.
+        WidgetDebugLog.log(activity, "widget ids for $provider: $ids")
+        return ids
     }
 
     private fun targetOf(intent: Intent?): Map<String, String>? {
