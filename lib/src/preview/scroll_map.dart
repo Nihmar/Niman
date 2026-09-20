@@ -507,6 +507,17 @@ final class BlockLocator {
         j++;
         continue;
       }
+      // A plain line straight under a list line continues that item's
+      // paragraph, however little it is indented (CommonMark's lazy
+      // continuation): the parser keeps it in the list, so the locator
+      // must too, or the two disagree about how many blocks a note has —
+      // and the WYSIWYG then keeps the whole note verbatim rather than
+      // risk a mis-slice. A wrapped list item is how a note written on a
+      // phone, or by an editor that hard-wraps, reads.
+      if (lines[j - 1].trim().isNotEmpty && !_startsBlock(lines, j)) {
+        j++;
+        continue;
+      }
       break;
     }
     var end = j - 1;
