@@ -1254,6 +1254,9 @@ final class CroatianStrings extends Strings {
   String get dropHint =>
       'Ispustite Markdown datoteke da ih otvorite ili mapu da je uvezete';
   @override
+  String get dropNothing =>
+      'Radna površina nije predala nijednu datoteku pri tom ispuštanju.';
+  @override
   String get importFolderAction => 'Uvezi';
   @override
   String dropRejected(String names) =>

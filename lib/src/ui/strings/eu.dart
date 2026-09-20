@@ -1261,6 +1261,9 @@ final class BasqueStrings extends Strings {
   String get dropHint =>
       'Askatu Markdown fitxategiak irekitzeko, edo karpeta bat inportatzeko';
   @override
+  String get dropNothing =>
+      'Mahaigainak ez du fitxategirik eman arrastatze horretan.';
+  @override
   String get importFolderAction => 'Inportatu';
   @override
   String dropRejected(String names) =>

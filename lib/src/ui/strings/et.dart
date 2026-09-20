@@ -1238,6 +1238,9 @@ final class EstonianStrings extends Strings {
   String get dropHint =>
       'Lohista Markdowni failid avamiseks või kaust importimiseks';
   @override
+  String get dropNothing =>
+      'Töölaud ei andnud selle lohistamisega ühtegi faili.';
+  @override
   String get importFolderAction => 'Impordi';
   @override
   String dropRejected(String names) =>

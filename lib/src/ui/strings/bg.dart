@@ -1268,6 +1268,9 @@ final class BulgarianStrings extends Strings {
       'Пуснете файлове Markdown, за да ги отворите, или папка, за да я '
       'импортирате';
   @override
+  String get dropNothing =>
+      'Работният плот не предаде файлове при това пускане.';
+  @override
   String get importFolderAction => 'Импортиране';
   @override
   String dropRejected(String names) =>

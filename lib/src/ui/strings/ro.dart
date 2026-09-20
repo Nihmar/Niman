@@ -1268,6 +1268,9 @@ final class RomanianStrings extends Strings {
       'Plasează fișiere Markdown pentru a le deschide sau un dosar pentru '
       'a-l importa';
   @override
+  String get dropNothing =>
+      'Desktopul nu a predat niciun fișier la acea plasare.';
+  @override
   String get importFolderAction => 'Importă';
   @override
   String dropRejected(String names) =>

@@ -1284,6 +1284,9 @@ final class SpanishStrings extends Strings {
   String get dropHint =>
       'Suelta archivos Markdown para abrirlos, o una carpeta para importarla';
   @override
+  String get dropNothing =>
+      'El escritorio no entregó ningún archivo en ese arrastre.';
+  @override
   String get importFolderAction => 'Importar';
   @override
   String dropRejected(String names) =>

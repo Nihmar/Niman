@@ -1274,6 +1274,9 @@ final class PolishStrings extends Strings {
   String get dropHint =>
       'Upuść pliki Markdown, aby je otworzyć, lub folder, aby go zaimportować';
   @override
+  String get dropNothing =>
+      'Pulpit nie przekazał żadnych plików przy tym upuszczeniu.';
+  @override
   String get importFolderAction => 'Importuj';
   @override
   String dropRejected(String names) =>

@@ -1247,6 +1247,8 @@ final class EnglishStrings extends Strings {
   String get dropHint =>
       'Drop Markdown files to open them, or a folder to import it';
   @override
+  String get dropNothing => 'The desktop handed over no files for that drop.';
+  @override
   String get importFolderAction => 'Import';
   @override
   String dropRejected(String names) =>

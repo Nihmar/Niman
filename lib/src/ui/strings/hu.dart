@@ -1265,6 +1265,9 @@ final class HungarianStrings extends Strings {
       'Húzz ide Markdown-fájlokat a megnyitáshoz, vagy egy mappát az '
       'importáláshoz';
   @override
+  String get dropNothing =>
+      'Az asztali környezet nem adott át fájlt ehhez az ejtéshez.';
+  @override
   String get importFolderAction => 'Importálás';
   @override
   String dropRejected(String names) =>

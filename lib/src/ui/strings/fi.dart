@@ -1267,6 +1267,9 @@ final class FinnishStrings extends Strings {
   String get dropHint =>
       'Pudota Markdown-tiedostoja avataksesi ne tai kansio tuodaksesi sen';
   @override
+  String get dropNothing =>
+      'Työpöytä ei luovuttanut tiedostoja tässä pudotuksessa.';
+  @override
   String get importFolderAction => 'Tuo';
   @override
   String dropRejected(String names) =>
