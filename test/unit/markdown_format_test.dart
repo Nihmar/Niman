@@ -45,6 +45,28 @@ void main() {
     expect(tidy('#Title\n'), '#Title\n');
   });
 
+  // A tag is not a heading, and tidying must never make it one: `#note`
+  // written on its own line is a paragraph to Markdown, and stays the
+  // text it was.
+  test('a #tag is left exactly as it is', () {
+    expect(tidy('#tagDiEsempio\n'), '#tagDiEsempio\n');
+    expect(
+      tidy('Some prose with #tagDiEsempio in it.\n'),
+      'Some prose with #tagDiEsempio in it.\n',
+    );
+    expect(
+      tidy('#primo #secondo\nand a wrapped line\n'),
+      '#primo #secondo\nand a wrapped line\n',
+    );
+    // In a list item it is text like any other.
+    expect(
+      tidy('- a task #tagDiEsempio\n- another\n'),
+      '- a task #tagDiEsempio\n- another\n',
+    );
+    // And a real heading is still tidied.
+    expect(tidy('##  Heading #tagDiEsempio\n'), '## Heading #tagDiEsempio\n');
+  });
+
   test('blank runs collapse, and the note ends with one newline', () {
     expect(tidy('# T\n\n\n\nSome prose.\n\n\n'), '# T\n\nSome prose.\n');
   });
