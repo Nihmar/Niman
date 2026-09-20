@@ -9160,7 +9160,11 @@ Three things that table says, including one that is not flattering:
 
 The bridge (`lib/src/markdown/block_parser.dart`) masks a block, parses it with
 the package, and walks the syntax tree alongside the masked text to give every
-construct a source range. `dart run tool/block_parser_bench.dart`:
+construct a source range. `dart run tool/bench.dart` runs every measurement in
+this document's tables in one go — the buffer, the block scan, the masking and
+the inline phase — and each also stands alone (`tool/block_parser_bench.dart`
+below, `tool/source_buffer_bench.dart`, `tool/block_scanner_bench.dart`,
+`tool/extension_masker_bench.dart`):
 
 | fixture | blocks | with inline content | **all** | a viewport (40) | cache (120) |
 |---|---:|---:|---:|---:|---:|
