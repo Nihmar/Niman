@@ -44,8 +44,9 @@ void main() {
     await runScenario(tester, openBigNote: false, noteName: 'GandalfA');
   });
 
-  testWidgets('B: big note on screen, backlink keeps the suggestion',
-      (tester) async {
+  testWidgets('B: big note on screen, backlink keeps the suggestion', (
+    tester,
+  ) async {
     await runScenario(tester, openBigNote: true, noteName: 'GandalfB');
   });
 }
@@ -57,7 +58,12 @@ Future<void> runScenario(
 }) async {
   final lib = Directory(libraryPath);
   if (!lib.existsSync()) {
-    fail('scratch library missing at $libraryPath (see setup above)');
+    // A repro harness, not a test of the build: it wants a copy of a
+    // real library seeded by hand (see the header). Without it there is
+    // nothing to run — and a red test nobody can make green is one
+    // nobody reads.
+    markTestSkipped('no scratch library at $libraryPath (see the header)');
+    return;
   }
   final scratch = Directory.systemTemp.createTempSync('niman_it_');
   addTearDown(() => scratch.deleteSync(recursive: true));
@@ -65,9 +71,8 @@ Future<void> runScenario(
   await AppSettingsRepo(appDb).setLastLibraryPath(libraryPath);
   final controller = LibraryController(
     () async => appDb,
-    indexDbFactory: (path) async => IndexDatabase(
-      NativeDatabase(File('${scratch.path}/index.db')),
-    ),
+    indexDbFactory: (path) async =>
+        IndexDatabase(NativeDatabase(File('${scratch.path}/index.db'))),
   );
   addTearDown(() async {
     await controller.close();
@@ -185,7 +190,8 @@ Future<void> waitUntil(
     if (await probe()) return;
     await tester.pump(const Duration(milliseconds: 100));
   }
-  final texts = find.byType(Text)
+  final texts = find
+      .byType(Text)
       .evaluate()
       .map((e) => (e.widget as Text).data)
       .whereType<String>()

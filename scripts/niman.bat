@@ -2,7 +2,7 @@
 rem Niman dev helper for Windows hosts: terse output, full logs under
 rem %TEMP%\niman. Mirrors scripts/niman.sh and adds the windows build,
 rem which cannot be cross-built from Linux.
-rem Commands: analyze, test, check, apk [beta], windows.
+rem Commands: analyze, test, check, integration, apk [beta], windows.
 setlocal enabledelayedexpansion
 
 where flutter >nul 2>&1
@@ -21,6 +21,7 @@ set "log=%logdir%\niman-%cmd%.log"
 if "%cmd%"=="analyze" goto :analyze
 if "%cmd%"=="test" goto :test
 if "%cmd%"=="check" goto :check
+if "%cmd%"=="integration" goto :integration
 if "%cmd%"=="apk" goto :apk
 if "%cmd%"=="linux" goto :linux
 if "%cmd%"=="windows" goto :windows
@@ -44,6 +45,20 @@ call "%~f0" analyze
 if errorlevel 1 exit /b 1
 call "%~f0" test
 exit /b %errorlevel%
+
+:integration
+rem The tests that run headless (issue #241). sync_e2e needs a Linux
+rem host with a display (-d linux); it does not run from here.
+rem One file per invocation: a second file in the same command never
+rem starts (files under integration_test/ share one device run).
+call flutter test integration_test/app_boot_test.dart >"%log%" 2>&1
+set "status=%errorlevel%"
+if not "%status%"=="0" goto :integration_tail
+call flutter test integration_test/template_backlink_freeze_test.dart >>"%log%" 2>&1
+set "status=%errorlevel%"
+:integration_tail
+powershell -NoProfile -Command "Get-Content -Tail 8 '%log%'"
+exit /b %status%
 
 :apk
 rem A security agent that watches the temp directory (Trend Micro here)
@@ -83,10 +98,12 @@ if "%status%"=="0" echo artifact: build\windows\x64\runner\Release\niman.exe
 exit /b %status%
 
 :usage
-echo usage: scripts\niman.bat ^<analyze^|test^|check^|apk [beta]^|windows^>
+echo usage: scripts\niman.bat ^<analyze^|test^|check^|integration^|apk [beta]^|windows^>
 echo   analyze  flutter analyze --fatal-infos (issue lines + summary only)
 echo   test     flutter test (tail only)
 echo   check    analyze + test; use before committing
+echo   integration  the headless integration_test/ files (issue #241);
+echo            sync_e2e needs a Linux host with a display
 echo   apk      flutter build apk --release
 echo            (beta: the testing build, app ID dev.niman.niman.beta)
 echo   windows  flutter build windows --release

@@ -1,0 +1,51 @@
+name: check
+
+# The tests run on every pull request so the integration suite cannot rot
+# again unnoticed (issue #241). The WebDAV sync flow needs a Linux
+# display (`flutter test -d linux`) and stays a local run:
+# `./scripts/niman.sh integration`.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  FLUTTER_VERSION: '3.47.2'
+
+jobs:
+  check:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The headless integration tests build the Linux desktop bundle,
+      # which needs the same system libraries as the release build, plus
+      # a virtual display: the bundle is a GTK app and cannot start on
+      # a runner with no X server.
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake git ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-13-dev \
+            libayatana-appindicator3-dev libsecret-1-dev libjsoncpp-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev xvfb
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter analyze --fatal-infos
+      - run: flutter test
+      # One file per step: files under integration_test/ share one
+      # device run, and a second file in the same command never starts.
+      # xvfb-run stands in for the missing display: headless, but the
+      # GTK bundle still needs an X server to start.
+      - name: Headless integration tests
+        run: xvfb-run -a flutter test integration_test/app_boot_test.dart
+      - name: Repro harness (skips without its seeded library)
+        run: xvfb-run -a flutter test integration_test/template_backlink_freeze_test.dart
