@@ -102,19 +102,17 @@ void main() {
       expect(quillTallyTargets(_codec.decode('prose\n').document), isEmpty);
     });
 
-    test('a note the codec keeps opaque offers nothing', () {
-      // Text on the line under a list item is a lazy continuation of it,
-      // so the parser counts one block where the preview's locator
-      // counts two; the codec keeps the whole note verbatim rather than
-      // risk a mis-slice, and the WYSIWYG shows it read-only. There is
-      // no list to count because there is nothing to edit — which is
-      // also the one shape where the two editors cannot agree, and they
-      // do not pretend to.
+    // Text on the line under a list item is a lazy continuation of it.
+    // The locator used to count it as a block of its own, the counts
+    // disagreed with the parser's, and the codec kept the whole note
+    // verbatim — so the WYSIWYG had no list to count where the source
+    // editor had one (0.0.8 test round). The two agree now.
+    test('a list item with a wrapped line is counted, as in the source '
+        'editor', () {
       expect(
         quillTallyTargets(_codec.decode('- a - x\nprose\n').document),
-        isEmpty,
+        hasLength(tallyTargetsIn('- a - x\nprose\n').length),
       );
-      expect(tallyTargetsIn('- a - x\nprose\n'), hasLength(1));
     });
   });
 
