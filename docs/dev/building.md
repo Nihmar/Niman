@@ -24,13 +24,21 @@ Terse output; full logs in `/tmp/niman/niman-<cmd>.log`
 ./scripts/niman.sh analyze   # flutter analyze --fatal-infos
 ./scripts/niman.sh test      # flutter test (unit + widget)
 ./scripts/niman.sh check     # analyze + test; run before every commit
+./scripts/niman.sh integration  # integration_test/; run before every commit (issue #241)
 ./scripts/niman.sh apk       # Android release APK
 ./scripts/niman.sh apk beta  # Android testing build (issue #106)
 ./scripts/niman.sh linux     # Linux release bundle
 scripts\niman.bat check      # Windows equivalent
+scripts\niman.bat integration  # the headless integration_test/ files (sync_e2e needs Linux)
 scripts\niman.bat apk beta   # Android testing build, from Windows
 scripts\niman.bat windows    # Windows build (on a Windows host)
 ```
+
+`check` (`.github/workflows/check.yml`) runs analyze, `flutter test`
+and the headless integration tests on every pull request, so the suite
+cannot rot unnoticed again (issue #241). The WebDAV sync flow needs a
+Linux display (`flutter test -d linux`) and stays a local run inside
+`integration`.
 
 ## The two Android builds (issue #106)
 
@@ -80,7 +88,10 @@ every release tag as `niman-<version>-android-testing.apk`.
    `flutter analyze --fatal-infos`).
 3. `flutter test` runs `test/unit/` + `test/widget/`; single test:
    `flutter test test/unit/<f>.dart --plain-name "<name>"`.
-   `integration_test/` is on-device E2E, not part of the default run.
+   `integration_test/` is E2E, not part of the default run: `app_boot` +
+   `template_backlink` run headless (in CI too), `sync_e2e` needs
+   `-d linux` on a Linux host with a display. `./scripts/niman.sh
+   integration` runs all three (issue #241).
 4. Windows note: ~20 tests fail on path separators and temp-dir cleanup
    (pre-existing, green on Linux). Use `pwsh scripts/newfail.ps1` — it
    prints only failures not in `scripts/known-failures.txt` (exit 1 =

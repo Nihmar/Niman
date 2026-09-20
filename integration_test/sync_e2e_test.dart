@@ -27,6 +27,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_conflict_screen.dart';
 import 'package:niman/src/ui/sync/sync_settings_screen.dart';
 import 'package:path/path.dart' as p;
@@ -80,6 +81,18 @@ void main() {
     return file.existsSync() ? file.readAsStringSync() : null;
   }
 
+  /// Pumps for [ms], in frames, without asking the app to go quiet.
+  ///
+  /// Once a sync is configured something is always moving — the status
+  /// icon, the queue — so `pumpAndSettle` never returns and the test
+  /// died on its ten-minute timeout instead of failing on what it was
+  /// about.
+  Future<void> pumpFor(WidgetTester tester, [int ms = 600]) async {
+    for (var left = ms; left > 0; left -= 100) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
   /// Pumps real frames until [probe] holds.
   Future<void> waitUntil(
     WidgetTester tester,
@@ -101,8 +114,11 @@ void main() {
   testWidgets('set up, sync, and resolve a conflict by merging', (
     tester,
   ) async {
+    // A phone's window: Settings is a tab there. A wide one has the rail
+    // instead, and since #202 opens Settings as a floating window — a
+    // different walk through the same flow.
     tester.view
-      ..physicalSize = const Size(1000, 2000)
+      ..physicalSize = const Size(420, 900)
       ..devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
@@ -125,9 +141,19 @@ void main() {
     // --- Settings → Sync → WebDAV: address, test, save, first sync ----
     await tester.tap(find.byKey(const Key('tab-settings')));
     await tester.pumpAndSettle();
-    final row = find.byKey(const Key('sync-setting'));
-    await tester.scrollUntilVisible(row, 200);
-    await tester.tap(row);
+    // Through the settings search rather than by scrolling the list:
+    // the search is the app's own way in, and a list that grows does not
+    // break the walk (the scroll had become ambiguous — the screen has
+    // more than one scrollable).
+    await tester.enterText(
+      find.byKey(const Key('settings-search-field')),
+      AppStrings.settingsSectionSync,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('settings-search-settings-area-sync')),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(SyncSettingsScreen), findsOneWidget);
 
@@ -138,9 +164,12 @@ void main() {
     expect(find.byKey(const Key('sync-test-result')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('sync-save')));
-    await tester.pumpAndSettle();
     // The first sync asks before it starts.
-    expect(find.byKey(const Key('sync-first-dialog')), findsOneWidget);
+    await waitUntil(
+      tester,
+      () => find.byKey(const Key('sync-first-dialog')).evaluate().isNotEmpty,
+      'the first-sync question',
+    );
     await tester.tap(find.byKey(const Key('sync-first-start')));
     await waitUntil(
       tester,
@@ -178,15 +207,20 @@ void main() {
     );
 
     // --- The panel, then the merge screen ----------------------------
+    // Out of the sync screen first: the tab bar is under it.
+    while (find.backButton().evaluate().isNotEmpty) {
+      await tester.tap(find.backButton().first);
+      await pumpFor(tester);
+    }
     await tester.tap(find.byKey(const Key('tab-files')));
-    await tester.pumpAndSettle();
+    await pumpFor(tester);
     await tester.tap(find.byKey(const Key('sync-status-button')));
-    await tester.pumpAndSettle();
+    await pumpFor(tester);
     expect(find.byKey(const Key('sync-panel')), findsOneWidget);
     await tester.tap(find.byKey(const Key('sync-conflict-Plan.md')));
-    await tester.pumpAndSettle();
+    await pumpFor(tester);
     await tester.tap(find.text('Resolve'));
-    await tester.pumpAndSettle();
+    await pumpFor(tester);
     expect(find.byType(SyncConflictScreen), findsOneWidget);
     await waitUntil(
       tester,
@@ -195,12 +229,16 @@ void main() {
     );
 
     // Keep both lines of the overlap, then save the merge.
-    await tester.tap(find.byKey(const ValueKey('merge-choice-0')).last);
-    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppStrings.syncMergeKeepBoth));
+    await pumpFor(tester);
     await tester.tap(find.byKey(const Key('sync-save-merge')));
     await waitUntil(
       tester,
-      () => remote('Plan.md').contains('on the NAS'),
+      // Both markers: the server already holds the remote line from the
+      // conflict setup, so waiting for it alone returns at once.
+      () =>
+          remote('Plan.md').contains('on the phone') &&
+          remote('Plan.md').contains('on the NAS'),
       'the merged text to reach the server',
       timeout: const Duration(seconds: 60),
     );

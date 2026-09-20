@@ -19,13 +19,19 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 
 ## Verify
 - **Before analyze and tests**, run `dart fix --apply` then `dart format lib test tool` (both idempotent).
-- No CI — run checks locally before every commit:
-  - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`)
-  - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`)
+- CI (`.github/workflows/check.yml`) runs analyze + `flutter test` + the
+  headless integration tests on every PR. Run checks locally too:
+  - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`),
+    plus `./scripts/niman.sh integration` for `integration_test/`
+  - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`),
+    plus `scripts\niman.bat integration` for the headless files there
 - On Windows, ~20 tests fail on path separators and temp-dir cleanup (pre-existing, green on Linux). Use `pwsh scripts/newfail.ps1` — it prints only failures not in `scripts/known-failures.txt`. Exit code 1 = something new broke. Options: optional path filter, `-Update` to rewrite the baseline.
 - `flutter analyze --fatal-infos` (infos are fatal).
 - `flutter test` runs `test/unit/` + `test/widget/`. Single test: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
-- `integration_test/` = on-device E2E, not part of the default run.
+- `integration_test/` = E2E, not part of the default `flutter test` run,
+  and it rots when nothing runs it (#241): `app_boot` + `template_backlink`
+  run headless (in CI too); `sync_e2e` needs `-d linux` on a Linux host
+  with a display. Run all three via `integration` before every commit.
 - **New tests must be portable**: use `p.join` for paths (never literal `/`), no `chmod`.
 
 ## Codegen
