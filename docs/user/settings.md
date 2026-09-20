@@ -82,7 +82,9 @@ takes the app down. Writes are atomic (temp file + rename).
 Brightness (day / night / system) × palette (system or Catppuccin),
 preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
 ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
-log toggle (default on).
+log toggle (default on), the keyboard shortcuts and the formatting keys,
+the commands pinned in the palette, and — on the desktops — *Close to the
+tray* (default on: the window's × hides Niman and leaves it running).
 
 ### Sync
 

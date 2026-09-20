@@ -389,6 +389,16 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Hurtignotat';
   @override
+  String get trayOpen => 'Åpne Niman';
+  @override
+  String get trayQuit => 'Avslutt';
+  @override
+  String get closeToTrayTitle => 'Lukk til systemkurven';
+  @override
+  String get closeToTraySubtitle =>
+      'Vinduets × skjuler Niman og lar det kjøre, så påminnelser fortsatt '
+      'kommer. Avslutt fra ikonets meny.';
+  @override
   String get shortcutNewTodo => 'Ny oppgave';
   @override
   String get shortcutNewNote => 'Nytt notat';

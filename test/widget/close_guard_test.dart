@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/close_guard.dart';
+import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -43,6 +44,87 @@ Widget _host(UnsavedTracker tracker, WindowController window) {
 }
 
 void main() {
+  setUp(() => CloseToTray.enabled.value = false);
+  tearDown(() => CloseToTray.enabled.value = false);
+
+  // #209: with close-to-tray on, the × hides the window and nothing ends.
+  group('close to tray', () {
+    testWidgets('the veto stays armed, clean or not', (tester) async {
+      final tracker = UnsavedTracker();
+      final window = FakeWindowController();
+      await tester.pumpWidget(_host(tracker, window));
+      await tester.pump();
+      expect(window.preventHistory, isEmpty, reason: 'nothing to guard yet');
+
+      CloseToTray.enabled.value = true;
+      await tester.pump();
+      expect(window.preventHistory, [true], reason: 'the OS must report');
+    });
+
+    testWidgets('a close request hides the window instead of closing', (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      final window = FakeWindowController();
+      final note = _FakeNote('/lib/a.md', unsaved: true);
+      tracker.register(note);
+      CloseToTray.enabled.value = true;
+      await tester.pumpWidget(_host(tracker, window));
+      await tester.pump();
+
+      window.onCloseRequested!();
+      await tester.pumpAndSettle();
+      expect(window.hideCalls, 1);
+      expect(window.closeCalls, 0);
+      // Nothing was asked and nothing was written: the app is still here.
+      expect(find.text(AppStrings.closeUnsavedTitle), findsNothing);
+      expect(note.saveCalls, 0);
+    });
+
+    testWidgets("the tray's Quit closes for real, asking about unsaved", (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      final window = FakeWindowController();
+      final note = _FakeNote('/lib/a.md', unsaved: true);
+      tracker.register(note);
+      CloseToTray.enabled.value = true;
+      await tester.pumpWidget(_host(tracker, window));
+      await tester.pump();
+
+      CloseToTray.quit();
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.closeUnsavedTitle), findsOne);
+      await tester.tap(find.text(AppStrings.saveAndClose));
+      await tester.pumpAndSettle();
+      expect(note.saveCalls, 1);
+      expect(window.closeCalls, 1);
+      expect(window.hideCalls, 0);
+    });
+
+    testWidgets('a quit backed out of leaves the × hiding again', (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      final window = FakeWindowController();
+      tracker.register(_FakeNote('/lib/a.md', unsaved: true));
+      CloseToTray.enabled.value = true;
+      await tester.pumpWidget(_host(tracker, window));
+      await tester.pump();
+
+      CloseToTray.quit();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.actionCancel));
+      await tester.pumpAndSettle();
+      expect(window.closeCalls, 0);
+
+      window.onCloseRequested!();
+      await tester.pumpAndSettle();
+      expect(window.hideCalls, 1, reason: 'the quit is no longer under way');
+      expect(window.closeCalls, 0);
+    });
+  });
+
   testWidgets('arms the veto while dirty and clears it when clean', (
     tester,
   ) async {

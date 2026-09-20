@@ -397,6 +397,17 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Γρήγορη σημείωση';
   @override
+  String get trayOpen => 'Άνοιγμα του Niman';
+  @override
+  String get trayQuit => 'Έξοδος';
+  @override
+  String get closeToTrayTitle => 'Κλείσιμο στην περιοχή ειδοποιήσεων';
+  @override
+  String get closeToTraySubtitle =>
+      'Το × του παραθύρου κρύβει το Niman και το αφήνει να τρέχει, ώστε οι '
+      'υπενθυμίσεις να συνεχίζουν. Η έξοδος γίνεται από το μενού του '
+      'εικονιδίου.';
+  @override
   String get shortcutNewTodo => 'Νέο καθήκον';
   @override
   String get shortcutNewNote => 'Νέα σημείωση';

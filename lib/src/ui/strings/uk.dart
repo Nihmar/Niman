@@ -389,6 +389,16 @@ final class UkrainianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Швидка нотатка';
   @override
+  String get trayOpen => 'Відкрити Niman';
+  @override
+  String get trayQuit => 'Вийти';
+  @override
+  String get closeToTrayTitle => 'Закривати в область повідомлень';
+  @override
+  String get closeToTraySubtitle =>
+      '× вікна ховає Niman і залишає його працювати, тому нагадування й далі '
+      'приходять. Вийти можна з меню значка.';
+  @override
   String get shortcutNewTodo => 'Нове завдання';
   @override
   String get shortcutNewNote => 'Нова нотатка';

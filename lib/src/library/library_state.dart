@@ -713,6 +713,16 @@ final class LibraryController implements LibrarySession {
   Future<bool> get autoUpdateEnabled async =>
       await AppSettingsRepo(await appDatabase).autoUpdateEnabled();
 
+  @override
+  Future<bool> get closeToTray async =>
+      await AppSettingsRepo(await appDatabase).closeToTray();
+
+  @override
+  Future<void> setCloseToTray({required bool enabled}) async {
+    _log.info('close to tray: $enabled');
+    await AppSettingsRepo(await appDatabase).setCloseToTray(enabled: enabled);
+  }
+
   /// Sets (and persists) the auto-update toggle.
   @override
   Future<void> setAutoUpdateEnabled({required bool enabled}) async {

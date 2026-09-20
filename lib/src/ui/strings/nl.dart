@@ -392,6 +392,17 @@ final class DutchStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Snelnotitie';
   @override
+  String get trayOpen => 'Niman openen';
+  @override
+  String get trayQuit => 'Afsluiten';
+  @override
+  String get closeToTrayTitle => 'Sluiten naar het systeemvak';
+  @override
+  String get closeToTraySubtitle =>
+      'De × van het venster verbergt Niman en laat het doorlopen, zodat '
+      'herinneringen blijven komen. Afsluiten gaat via het menu van het '
+      'pictogram.';
+  @override
   String get shortcutNewTodo => 'Nieuwe taak';
   @override
   String get shortcutNewNote => 'Nieuwe notitie';

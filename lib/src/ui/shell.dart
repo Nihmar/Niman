@@ -34,6 +34,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
@@ -161,6 +162,10 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     AppKeyMap.current.value = KeyMap.fromJson(await session.keyMap);
     // And the commands pinned in its palette (#208).
     await PinnedCommands.load(session);
+    // Whether the window's × hides Niman to the tray (#209): the tray is
+    // the desktops', so nowhere else hides.
+    CloseToTray.enabled.value =
+        (Platform.isLinux || Platform.isWindows) && await session.closeToTray;
   }
 
   /// Applies the stored UI language (T-L10N-03).
@@ -188,7 +193,13 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       ShortcutAction.newVoice: AppStrings.shortcutNewAudio,
     };
     await ref.read(shortcutServiceProvider).publish(labels);
-    await ref.read(trayServiceProvider).init(labels);
+    await ref
+        .read(trayServiceProvider)
+        .init(
+          labels: labels,
+          openLabel: AppStrings.trayOpen,
+          quitLabel: AppStrings.trayQuit,
+        );
   }
 
   /// Resumes the last library, unless Android is withholding the
@@ -654,6 +665,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   StreamSubscription<ShortcutAction>? _shortcutTaps;
   StreamSubscription<ShortcutAction>? _trayTaps;
   StreamSubscription<void>? _trayActivations;
+  StreamSubscription<TrayCommand>? _trayCommands;
   StreamSubscription<String>? _launchFiles;
   StreamSubscription<String>? _launchFolders;
 
@@ -1340,6 +1352,16 @@ final class _LibraryShellState extends State<_LibraryShell>
     _trayActivations = widget.tray.activated.listen(
       (_) => unawaited(widget.window.show()),
     );
+    // The tray menu's own entries (#209): the way back to a hidden
+    // window, and the way out.
+    _trayCommands = widget.tray.commands.listen((command) {
+      switch (command) {
+        case TrayCommand.open:
+          unawaited(widget.window.show());
+        case TrayCommand.quit:
+          CloseToTray.quit();
+      }
+    });
     // Files a launch asked for (#41): the one the app started with, once
     // the shell can open it, and every later one.
     _launchFiles = widget.launchRequests.files.listen(
@@ -1393,6 +1415,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     _todoController.removeListener(_homeWidgets.pushTodos);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
+    unawaited(_trayCommands?.cancel());
     unawaited(_launchFiles?.cancel());
     unawaited(_launchFolders?.cancel());
     _todoController.dispose();

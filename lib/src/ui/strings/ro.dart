@@ -395,6 +395,16 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Notă rapidă';
   @override
+  String get trayOpen => 'Deschide Niman';
+  @override
+  String get trayQuit => 'Ieși';
+  @override
+  String get closeToTrayTitle => 'Închide în zona de notificare';
+  @override
+  String get closeToTraySubtitle =>
+      '× al ferestrei ascunde Niman și îl lasă pornit, așa că mementourile '
+      'vin în continuare. Se iese din meniul pictogramei.';
+  @override
   String get shortcutNewTodo => 'Sarcină nouă';
   @override
   String get shortcutNewNote => 'Notă nouă';

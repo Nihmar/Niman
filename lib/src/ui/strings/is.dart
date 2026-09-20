@@ -387,6 +387,16 @@ final class IcelandicStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Hraðminnisblað';
   @override
+  String get trayOpen => 'Opna Niman';
+  @override
+  String get trayQuit => 'Loka';
+  @override
+  String get closeToTrayTitle => 'Loka í bakkann';
+  @override
+  String get closeToTraySubtitle =>
+      '× á glugganum felur Niman og lætur það halda áfram, svo áminningar '
+      'berast enn. Lokað er úr valmynd táknsins.';
+  @override
   String get shortcutNewTodo => 'Ný verkefni';
   @override
   String get shortcutNewNote => 'Nýtt minnisblað';

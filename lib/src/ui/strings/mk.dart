@@ -391,6 +391,16 @@ final class MacedonianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Брзо белешко';
   @override
+  String get trayOpen => 'Отвори Niman';
+  @override
+  String get trayQuit => 'Излези';
+  @override
+  String get closeToTrayTitle => 'Затвори во лентата со известувања';
+  @override
+  String get closeToTraySubtitle =>
+      '× на прозорецот го крие Niman и го остава да работи, па потсетниците '
+      'сè уште доаѓаат. Се излегува од менито на иконата.';
+  @override
   String get shortcutNewTodo => 'Нова задача';
   @override
   String get shortcutNewNote => 'Нова белешка';

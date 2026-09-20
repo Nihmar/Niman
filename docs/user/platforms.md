@@ -34,7 +34,15 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 - Spellcheck via hunspell (`spellDictionaries` in library settings), plus
   a per-library personal dictionary (right-click *Add to dictionary*,
   `<library>/.niman/dictionary.txt`).
-- Tray support where the desktop provides one.
+- **The tray icon**, where the desktop provides one. Its menu has *Open
+  Niman* at the top, the five quick actions, and *Quit*. By default the
+  window's × **hides Niman to the tray** and leaves it running, so
+  desktop reminders keep firing; Settings → Appearance → *Close to the
+  tray* turns that off, and then the × quits as it used to. *Quit* asks
+  about unsaved notes exactly as the × does.
+  On a desktop whose indicator answers no clicks of its own (Linux's
+  AppIndicator), *Open Niman* is how the window comes back; on Windows a
+  click on the icon does it too.
 - Markdown files open in Niman: the desktop entry declares
   `text/markdown`, so Niman is offered for `.md` files and can be made
   their default app. Double-clicking one opens it in the Niman already

@@ -391,6 +391,16 @@ final class SlovenianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Hitra opomba';
   @override
+  String get trayOpen => 'Odpri Niman';
+  @override
+  String get trayQuit => 'Končaj';
+  @override
+  String get closeToTrayTitle => 'Zapri v vrstico z obvestili';
+  @override
+  String get closeToTraySubtitle =>
+      '× okna skrije Niman in ga pusti teči, tako da opomniki še vedno '
+      'pridejo. Konča se iz menija ikone.';
+  @override
   String get shortcutNewTodo => 'Nova naloga';
   @override
   String get shortcutNewNote => 'Nova opomba';

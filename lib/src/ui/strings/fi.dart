@@ -389,6 +389,16 @@ final class FinnishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Pikamuistiinpano';
   @override
+  String get trayOpen => 'Avaa Niman';
+  @override
+  String get trayQuit => 'Lopeta';
+  @override
+  String get closeToTrayTitle => 'Sulje ilmoitusalueelle';
+  @override
+  String get closeToTraySubtitle =>
+      'Ikkunan × piilottaa Nimanin ja jättää sen käyntiin, joten muistutukset '
+      'tulevat edelleen. Lopetus kuvakkeen valikosta.';
+  @override
   String get shortcutNewTodo => 'Uusi tehtävä';
   @override
   String get shortcutNewNote => 'Uusi muistiinpano';
