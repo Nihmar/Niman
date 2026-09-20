@@ -103,6 +103,14 @@ final class EditorFormatKeys {
     if (event is KeyUpEvent || AppKeyMap.capturing || !active()) return false;
     final keyboard = HardwareKeyboard.instance;
     final map = AppKeyMap.current.value;
+    // A key the user gave a command wins, here as everywhere else
+    // (#159): they moved the side panel onto Ctrl+Shift+L, which is the
+    // bulleted list's, and nothing happened at all in the editor (0.0.8
+    // test round). The command's own early handler takes it from here.
+    for (final MapEntry(key: command, value: chosen) in map.overrides.entries) {
+      if (chosen == null || !chosen.accepts(event, keyboard)) continue;
+      if (map.commandOn(chosen) == command) return false;
+    }
     for (final item in ToolbarItem.values) {
       final keys = map.editorBindingOf(item);
       if (keys == null || !keys.accepts(event, keyboard)) continue;
