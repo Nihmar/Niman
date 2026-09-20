@@ -36,6 +36,22 @@ final class SingleInstance {
 
   static const AppLogger _log = AppLogger(name: 'instance');
 
+  /// The instance this process claimed, held for as long as the process
+  /// lives.
+  ///
+  /// Nothing else refers to it once `main` has run: the claim is made,
+  /// `runApp` is called and `main` returns, leaving the object reachable
+  /// only through itself (its server socket's listener is one of its own
+  /// methods). Collected, it finalizes the lock file — and a closed file
+  /// is an unlocked file, so the next launch found the lock free, called
+  /// itself the first instance and opened a second window (0.0.8 test
+  /// round). The `.md` handed to it went there, and the running Niman
+  /// never heard about it.
+  static SingleInstance? _claimed;
+
+  /// The instance this process claimed, if it is the first one.
+  static SingleInstance? get claimed => _claimed;
+
   /// How long a later launch waits for the first to be listening: it
   /// may itself still be starting.
   static const Duration _patience = Duration(seconds: 5);
@@ -62,19 +78,75 @@ final class SingleInstance {
     bool Function(RandomAccessFile lock)? lockHeld,
   }) async {
     await dir.create(recursive: true);
+    // Ask the session itself, before anything else: a Niman that answers
+    // on the port it left in the address file is the session, whatever
+    // the lock file says. The lock is a guard against two launches racing
+    // each other, not the test for "is one already running" — it was
+    // that, and a released lock (a file the VM finalizes when nothing
+    // refers to it any more) made every launch call itself the first,
+    // open a window of its own and keep the file it was given (0.0.8
+    // test round).
+    if (await _handOverIfListening(dir, launch)) return null;
     final lock = await File(p.join(dir.path, 'niman.lock'))
         .open(mode: FileMode.append);
     final held = lockHeld?.call(lock) ?? await _lockedElsewhere(lock);
-    if (!held) {
-      final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-      final token = _newToken();
-      await _writeAddress(dir, server.port, token);
-      _log.info('first instance, listening on ${server.port}');
-      return SingleInstance._(lock, server, token);
+    if (held) {
+      // A launch that started at the same moment as the first one, whose
+      // listener is not up yet: wait for it and hand over.
+      await lock.close();
+      await _handOver(dir, launch);
+      return null;
     }
-    await lock.close();
-    await _handOver(dir, launch);
-    return null;
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final token = _newToken();
+    await _writeAddress(dir, server.port, token);
+    _log.info('first instance, listening on ${server.port}');
+    return _claimed = SingleInstance._(lock, server, token);
+  }
+
+  /// Hands [launch] to a session that is listening right now; false when
+  /// there is none (no address file, nobody on the port, a stale port
+  /// another program answers, a refused token).
+  static Future<bool> _handOverIfListening(
+    Directory dir,
+    Map<String, Object?> launch,
+  ) async {
+    final file = _addressFile(dir);
+    if (!file.existsSync()) return false;
+    try {
+      final handed = await _send(await file.readAsString(), launch);
+      if (handed) _log.info('handed the launch to the running Niman');
+      return handed;
+    } on Object catch (error) {
+      _log.info('no session answering ($error)');
+      return false;
+    }
+  }
+
+  /// Sends [launch] to the address in [addressJson]; true when the
+  /// session took it.
+  static Future<bool> _send(
+    String addressJson,
+    Map<String, Object?> launch,
+  ) async {
+    final address = jsonDecode(addressJson) as Map<String, Object?>;
+    final socket = await Socket.connect(
+      InternetAddress.loopbackIPv4,
+      address['port']! as int,
+      timeout: const Duration(seconds: 1),
+    );
+    try {
+      socket.writeln(jsonEncode({'token': address['token'], ...launch}));
+      await socket.flush();
+      final reply = await utf8.decoder
+          .bind(socket)
+          .transform(const LineSplitter())
+          .first
+          .timeout(const Duration(seconds: 2));
+      return reply == 'ok';
+    } finally {
+      await socket.close();
+    }
   }
 
   static Future<bool> _lockedElsewhere(RandomAccessFile lock) async {
@@ -120,24 +192,10 @@ final class SingleInstance {
     Object? lastError;
     while (DateTime.now().isBefore(deadline)) {
       try {
-        final address = jsonDecode(
-          await _addressFile(dir).readAsString(),
-        ) as Map<String, Object?>;
-        final socket = await Socket.connect(
-          InternetAddress.loopbackIPv4,
-          address['port']! as int,
-          timeout: const Duration(seconds: 1),
-        );
-        socket.writeln(jsonEncode({'token': address['token'], ...launch}));
-        await socket.flush();
-        final reply = await utf8.decoder
-            .bind(socket)
-            .transform(const LineSplitter())
-            .first
-            .timeout(const Duration(seconds: 2));
-        await socket.close();
-        if (reply == 'ok') return;
-        lastError = 'refused: $reply';
+        if (await _send(await _addressFile(dir).readAsString(), launch)) {
+          return;
+        }
+        lastError = 'the session refused the launch';
       } on Object catch (error) {
         lastError = error;
       }
