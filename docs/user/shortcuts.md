@@ -85,7 +85,9 @@ where it can, so one that needs an open note is not there without one.
 - **The Formatting group** changes the same way, with its own conflicts:
   a formatting key collides with another formatting key, not with an app
   command, since the two apply in different places. A formatting key you
-  moved stops working on its old combination in both editors.
+  moved stops working on its old combination in both editors. A key you
+  give an app command wins over the formatting that has it, inside the
+  editors too — your word is the last one.
 - **Remove and restore.** **×** removes a command's shortcut. A command
   with none is still one `Ctrl+Shift+P` away in the command palette.
   **↺** puts back the key Niman ships, and **Restore defaults** puts back

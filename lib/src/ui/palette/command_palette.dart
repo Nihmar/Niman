@@ -214,6 +214,12 @@ final class _CommandPaletteState extends State<CommandPalette> {
     });
   }
 
+  /// Selects the row at [index] (the pointer moved onto it).
+  void _select(int index) {
+    if (index == _selected || index < 0 || index >= _items.length) return;
+    setState(() => _selected = index);
+  }
+
   void _move(int step) {
     final count = _items.length;
     if (count == 0) return;
@@ -268,6 +274,10 @@ final class _CommandPaletteState extends State<CommandPalette> {
       return _PaletteRow(
         key: Key('palette-item-$at'),
         selected: at == _selected,
+        // The pointer moves the selection with it, as every palette
+        // does: the row under the hand is the row ↵ runs and Alt+P pins
+        // (0.0.8 test round — pinning acted on a row elsewhere).
+        onHover: () => _select(at),
         onTap: () => _choose(at),
         child: child,
       );
@@ -293,20 +303,23 @@ final class _CommandPaletteState extends State<CommandPalette> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Focus(
-                    onKeyEvent: _onKey,
-                    child: TextField(
-                      key: const Key('palette-field'),
-                      controller: _query,
-                      autofocus: true,
-                      onChanged: _refresh,
-                      onSubmitted: (_) => _choose(),
-                      decoration: InputDecoration(
-                        hintText: AppStrings.paletteHint,
-                        prefixIcon: const Icon(Icons.search),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 16,
+                  ColoredBox(
+                    color: scheme.surfaceContainerHighest,
+                    child: Focus(
+                      onKeyEvent: _onKey,
+                      child: TextField(
+                        key: const Key('palette-field'),
+                        controller: _query,
+                        autofocus: true,
+                        onChanged: _refresh,
+                        onSubmitted: (_) => _choose(),
+                        decoration: InputDecoration(
+                          hintText: AppStrings.paletteHint,
+                          prefixIcon: const Icon(Icons.search),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
                         ),
                       ),
                     ),
@@ -392,12 +405,17 @@ final class _PaletteRow extends StatelessWidget {
   const new({
     required this.selected,
     required this.onTap,
+    required this.onHover,
     required this.child,
     super.key,
   });
 
   final bool selected;
   final VoidCallback onTap;
+
+  /// The pointer came onto this row.
+  final VoidCallback onHover;
+
   final Widget child;
 
   @override
@@ -410,6 +428,12 @@ final class _PaletteRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
+          // The field keeps the keyboard: a row that took the focus left
+          // the arrows and Alt+P doing nothing until Tab put it back.
+          canRequestFocus: false,
+          onHover: (over) {
+            if (over) onHover();
+          },
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
