@@ -101,6 +101,11 @@ where you are; Settings → **Commands** lists them all, with their keys
 and what each one needs to show (an open note, a wide window, the
 desktop, and so on).
 
+Typing in the palette also finds **settings**, listed after the commands
+and the notes: pick one and the settings open on that row. The rows of
+the keyboard and Commands pages are left out, since the palette already
+lists those commands itself.
+
 **Pinned commands** head the palette before anything is typed, above the
 ones used lately. The pin on a command's row pins and unpins it, and
 `Alt+P` does the same to the selected row. Pins belong to the device,
