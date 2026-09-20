@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nativeapi/nativeapi.dart' show ContextMenuTrigger;
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/tray.dart';
 
@@ -17,6 +18,18 @@ void main() {
     expect(await tray.activated.isEmpty, isTrue);
     expect(await tray.commands.isEmpty, isTrue);
     await tray.dispose();
+  });
+
+  // 0.0.8 test round: nothing at all appeared on KDE. A StatusNotifier
+  // item has no right click of its own, and nativeapi publishes the
+  // menu's path only for the click trigger — with the other one it tells
+  // the desktop the item has no menu.
+  test('Linux opens the menu on the click; Windows on the right one', () {
+    expect(trayContextMenuTrigger(isLinux: true), ContextMenuTrigger.clicked);
+    expect(
+      trayContextMenuTrigger(isLinux: false),
+      ContextMenuTrigger.rightClicked,
+    );
   });
 
   test('the desktops get the real service; elsewhere the no-op', () {
