@@ -1231,6 +1231,8 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get paletteFooterTouch => 'Klepnutím spustíte · špendlík drží nahoře';
+  @override
   String get palettePinned => 'Připnuté';
   @override
   String get palettePin => 'Připnout';

@@ -1283,6 +1283,9 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get paletteFooterTouch =>
+      'Πατήστε για χρήση · η πινέζα το κρατά επάνω';
+  @override
   String get palettePinned => 'Καρφιτσωμένα';
   @override
   String get palettePin => 'Καρφίτσωμα';

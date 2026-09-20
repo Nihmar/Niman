@@ -1251,6 +1251,9 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get paletteFooterTouch =>
+      'Tocca per usare · la puntina lo tiene in cima';
+  @override
   String get palettePinned => 'Fissati';
   @override
   String get palettePin => 'Fissa';

@@ -1232,6 +1232,9 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get paletteFooterTouch =>
+      'Trykk for å bruke · nålen holder den øverst';
+  @override
   String get palettePinned => 'Festet';
   @override
   String get palettePin => 'Fest';

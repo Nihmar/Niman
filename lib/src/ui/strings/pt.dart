@@ -1244,6 +1244,9 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get paletteFooterTouch =>
+      'Toque para usar · o alfinete mantém-no no topo';
+  @override
   String get palettePinned => 'Fixados';
   @override
   String get palettePin => 'Fixar';

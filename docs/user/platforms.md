@@ -101,6 +101,11 @@ where you are; Settings → **Commands** lists them all, with their keys
 and what each one needs to show (an open note, a wide window, the
 desktop, and so on).
 
+On a device that has never had a hardware keyboard, nothing mentions
+keys you cannot press: the palette's rows and Settings → Commands drop
+the key column (what a command needs is still there), and the palette's
+footer says the pin is a tap. Plug a keyboard in and they come back.
+
 Typing in the palette also finds **settings**, listed after the commands
 and the notes: pick one and the settings open on that row. The rows of
 the keyboard and Commands pages are left out, since the palette already

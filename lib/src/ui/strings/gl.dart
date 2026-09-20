@@ -1251,6 +1251,9 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get paletteFooterTouch =>
+      'Toca para usar · o alfinete mantéeno arriba';
+  @override
   String get palettePinned => 'Fixados';
   @override
   String get palettePin => 'Fixar';

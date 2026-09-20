@@ -1251,6 +1251,9 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get paletteFooterTouch =>
+      'Prek për ta përdorur · gjilpëra e mban lart';
+  @override
   String get palettePinned => 'Të fiksuara';
   @override
   String get palettePin => 'Fikso';

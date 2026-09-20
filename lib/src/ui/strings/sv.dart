@@ -1244,6 +1244,9 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get paletteFooterTouch =>
+      'Tryck för att använda · nålen håller den överst';
+  @override
   String get palettePinned => 'Fästa';
   @override
   String get palettePin => 'Fäst';

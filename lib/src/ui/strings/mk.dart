@@ -1248,6 +1248,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get paletteFooterTouch =>
+      'Допрете за да го користите · иглата го држи на врв';
+  @override
   String get palettePinned => 'Прикачено';
   @override
   String get palettePin => 'Прикачи';

@@ -591,6 +591,7 @@ abstract base class Strings {
   String get paletteCommands;
   String get paletteNotes;
   String get paletteFooter;
+  String get paletteFooterTouch;
   String get palettePinned;
   String get palettePin;
   String get paletteUnpin;
