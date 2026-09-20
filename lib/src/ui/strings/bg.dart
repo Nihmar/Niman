@@ -1248,6 +1248,9 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get paletteFooterTouch =>
+      'Докоснете, за да използвате · карфицата го държи най-горе';
+  @override
   String get palettePinned => 'Закачени';
   @override
   String get palettePin => 'Закачи';

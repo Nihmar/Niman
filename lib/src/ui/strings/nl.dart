@@ -1254,6 +1254,9 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get paletteFooterTouch =>
+      'Tik om te gebruiken · de speld houdt het bovenaan';
+  @override
   String get palettePinned => 'Vastgezet';
   @override
   String get palettePin => 'Vastzetten';

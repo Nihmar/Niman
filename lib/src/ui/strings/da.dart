@@ -1236,6 +1236,9 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get paletteFooterTouch =>
+      'Tryk for at bruge · nålen holder den øverst';
+  @override
   String get palettePinned => 'Fastgjort';
   @override
   String get palettePin => 'Fastgør';

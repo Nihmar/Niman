@@ -1227,6 +1227,9 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get paletteFooterTouch =>
+      'Kullanmak için dokun · raptiye onu üstte tutar';
+  @override
   String get palettePinned => 'Sabitlenenler';
   @override
   String get palettePin => 'Sabitle';

@@ -1242,6 +1242,9 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get paletteFooterTouch =>
+      'Додирните за покретање · чиода држи на врху';
+  @override
   String get palettePinned => 'Закачено';
   @override
   String get palettePin => 'Закачи';

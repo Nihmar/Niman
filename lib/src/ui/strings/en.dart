@@ -1229,6 +1229,8 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get paletteFooterTouch => 'Tap to use · the pin keeps one at the top';
+  @override
   String get palettePinned => 'Pinned';
   @override
   String get palettePin => 'Pin';

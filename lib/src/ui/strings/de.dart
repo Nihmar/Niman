@@ -1261,6 +1261,9 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get paletteFooterTouch =>
+      'Tippen zum Ausführen · die Nadel hält es oben';
+  @override
   String get palettePinned => 'Angepinnt';
   @override
   String get palettePin => 'Anpinnen';

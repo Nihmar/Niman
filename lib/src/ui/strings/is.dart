@@ -1237,6 +1237,8 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get paletteFooterTouch => 'Ýttu til að nota · nælan heldur því efst';
+  @override
   String get palettePinned => 'Fest';
   @override
   String get palettePin => 'Festa';
