@@ -8766,9 +8766,38 @@ Why a line array beats a rope here:
   mixed-EOL file keeps its mixed EOLs by storing the separator per line — a
   decision to take deliberately and test).
 
-Cost check: a 10 331-line `Geometria 1.md` is a `List<String>` of 10 331
-entries; `lineOf` is ~14 Fenwick steps. Memory is the source text (~0.9 MB as
-UTF-16 is ~1.9 MB) plus 41 KB of index. Fine.
+**Built, and measured** (`lib/src/markdown/{fenwick_tree,source_buffer}.dart`,
+`dart run tool/source_buffer_bench.dart`, debug mode, best of many batches —
+the numbers are read as ratios, not absolutes):
+
+| fixture | lines | load | **content edit** | **structural edit** | line delete | `lineOf` | `lineAt` | `text` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `fixture-10kb.md` | 400 | 0.02 ms | 0.60 µs | 6.2 µs | 5.7 µs | 0.019 µs | 0.005 µs | 0.01 ms |
+| `fixture-200kb.md` | 6 289 | 0.45 ms | 0.38 µs | 83 µs | 83 µs | 0.024 µs | 0.004 µs | 0.17 ms |
+| `fixture-1mb.md` | 32 101 | 3.09 ms | 0.75 µs | 843 µs | 842 µs | 0.031 µs | 0.004 µs | 2.16 ms |
+| `Geometria 1.md` | 10 332 | 1.97 ms | 0.41 µs | 151 µs | 145 µs | 0.025 µs | 0.004 µs | 1.19 ms |
+
+What that says, and what it does not:
+
+- **A content edit is flat**, 0.38–0.75 µs from 400 to 32 101 lines — O(log n)
+  as designed, and 0.1 % of the 0.5 ms keystroke budget. This is the common
+  case and it is free.
+- **A line-count change is O(lines), and at 32 101 lines it costs 843 µs** —
+  above the keystroke budget, though still inside a 60 Hz frame. On the app's
+  own worst note (10 332 lines) it is 151 µs. So Enter and paste are fine at
+  the sizes this app actually has, and the *synthetic* 1 MB fixture is where
+  the rebuild starts to be the dominant cost of the keystroke.
+- **The fix, if it is ever needed, is block decomposition** — sums per block of
+  256 lines over a second tree — which turns the rebuild into
+  O(256 + log blocks). It was not built because the measurement says it is not
+  needed yet, and this table is what makes that a decision rather than a habit.
+- `lineOf` and `lineAt` are 20–30 ns and 4 ns: the queries the parser and the
+  caret make thousands of times are not a cost at all.
+- `text` is O(n) — 1.2 ms on the geometry note — which is why it is the
+  *save* path and never the keystroke path.
+
+Memory: a 10 331-line note is a `List<String>` of 10 331 entries plus 41 KB of
+Fenwick index, against ~1.9 MB for the text itself as UTF-16.
 
 **Where this sits in the survey's classification.** The prior-art survey
 ([§7.1](#71-the-three-candidate-architectures)) lays out three architectures and
