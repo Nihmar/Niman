@@ -1293,6 +1293,12 @@ final class SwedishStrings extends Strings {
   @override
   String get typewriterTitle => 'Skrivmaskinsläge';
   @override
+  String get formatNoteTitle => 'Städa upp i Markdown';
+  @override
+  String get formatNoteDone => 'Anteckningen städades.';
+  @override
+  String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
+  @override
   String get typewriterSubtitle =>
       'Håll raden du skriver på mitt i redigeraren';
   @override

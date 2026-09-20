@@ -1258,6 +1258,12 @@ final class HindiStrings extends Strings {
   @override
   String get typewriterTitle => 'टाइपराइटर मोड';
   @override
+  String get formatNoteTitle => 'मार्कडाउन व्यवस्थित करें';
+  @override
+  String get formatNoteDone => 'नोट व्यवस्थित कर दिया गया।';
+  @override
+  String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
+  @override
   String get typewriterSubtitle =>
       'जिस पंक्ति पर आप लिख रहे हैं उसे एडिटर के बीच में रखें';
   @override

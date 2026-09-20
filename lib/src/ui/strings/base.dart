@@ -611,6 +611,9 @@ abstract base class Strings {
   String get typewriterOn;
   String get typewriterOff;
   String get typewriterTitle;
+  String get formatNoteTitle;
+  String get formatNoteDone;
+  String get formatNoteAlreadyTidy;
   String get typewriterSubtitle;
   String get zenMode;
   String get zenModeEnter;

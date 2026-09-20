@@ -1282,6 +1282,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get typewriterTitle => 'Način pisalnega stroja';
   @override
+  String get formatNoteTitle => 'Pospravi Markdown';
+  @override
+  String get formatNoteDone => 'Zapisek je bil pospravljen.';
+  @override
+  String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
+  @override
   String get typewriterSubtitle =>
       'Vrstica, ki jo pišete, ostane na sredini urejevalnika';
   @override

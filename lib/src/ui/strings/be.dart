@@ -1288,6 +1288,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get typewriterTitle => 'Рэжым друкавальнай машынкі';
   @override
+  String get formatNoteTitle => 'Упарадкаваць Markdown';
+  @override
+  String get formatNoteDone => 'Нататка ўпарадкавана.';
+  @override
+  String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';
+  @override
   String get typewriterSubtitle =>
       'Трымаць радок, які вы пішаце, пасярэдзіне рэдактара';
   @override

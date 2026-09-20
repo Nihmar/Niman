@@ -1298,6 +1298,12 @@ final class RomanianStrings extends Strings {
   @override
   String get typewriterTitle => 'Mod mașină de scris';
   @override
+  String get formatNoteTitle => 'Aranjează Markdown-ul';
+  @override
+  String get formatNoteDone => 'Nota a fost aranjată.';
+  @override
+  String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
+  @override
   String get typewriterSubtitle =>
       'Rândul pe care scrii rămâne în mijlocul editorului';
   @override

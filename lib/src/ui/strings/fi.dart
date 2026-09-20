@@ -1298,6 +1298,12 @@ final class FinnishStrings extends Strings {
   @override
   String get typewriterTitle => 'Kirjoituskonetila';
   @override
+  String get formatNoteTitle => 'Siivoa Markdown';
+  @override
+  String get formatNoteDone => 'Muistiinpano siivottiin.';
+  @override
+  String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
+  @override
   String get typewriterSubtitle => 'Pidä kirjoitettava rivi editorin keskellä';
   @override
   String get zenMode => 'Zen-tila';

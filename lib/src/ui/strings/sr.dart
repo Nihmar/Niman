@@ -1291,6 +1291,12 @@ final class SerbianStrings extends Strings {
   @override
   String get typewriterTitle => 'Режим писаће машине';
   @override
+  String get formatNoteTitle => 'Сложи Markdown';
+  @override
+  String get formatNoteDone => 'Белешка је сложена.';
+  @override
+  String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
+  @override
   String get typewriterSubtitle => 'Ред који пишете остаје у средини уређивача';
   @override
   String get zenMode => 'Зен режим';

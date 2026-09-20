@@ -1304,6 +1304,12 @@ final class DutchStrings extends Strings {
   @override
   String get typewriterTitle => 'Typemachinemodus';
   @override
+  String get formatNoteTitle => 'Markdown opruimen';
+  @override
+  String get formatNoteDone => 'De notitie is opgeruimd.';
+  @override
+  String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
+  @override
   String get typewriterSubtitle =>
       'Houd de regel waarop je schrijft in het midden van de editor';
   @override

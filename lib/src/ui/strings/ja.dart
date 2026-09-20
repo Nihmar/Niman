@@ -1197,6 +1197,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get typewriterTitle => 'タイプライターモード';
   @override
+  String get formatNoteTitle => 'Markdown を整える';
+  @override
+  String get formatNoteDone => 'ノートを整えました。';
+  @override
+  String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
+  @override
   String get typewriterSubtitle => '書いている行をエディタの中央に保つ';
   @override
   String get zenMode => 'Zen モード';

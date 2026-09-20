@@ -1284,6 +1284,12 @@ final class DanishStrings extends Strings {
   @override
   String get typewriterTitle => 'Skrivemaskinetilstand';
   @override
+  String get formatNoteTitle => 'Ryd op i Markdown';
+  @override
+  String get formatNoteDone => 'Noten blev ryddet op.';
+  @override
+  String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
+  @override
   String get typewriterSubtitle =>
       'Hold linjen, du skriver på, midt i editoren';
   @override

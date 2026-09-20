@@ -1293,6 +1293,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get typewriterTitle => 'Modo máquina de escrever';
   @override
+  String get formatNoteTitle => 'Arrumar o Markdown';
+  @override
+  String get formatNoteDone => 'A nota foi arrumada.';
+  @override
+  String get formatNoteAlreadyTidy => 'A nota já estava arrumada.';
+  @override
   String get typewriterSubtitle =>
       'Manter a linha que está a escrever no meio do editor';
   @override

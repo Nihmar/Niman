@@ -1275,6 +1275,12 @@ final class TurkishStrings extends Strings {
   @override
   String get typewriterTitle => 'Daktilo modu';
   @override
+  String get formatNoteTitle => 'Markdown’ı düzenle';
+  @override
+  String get formatNoteDone => 'Not düzenlendi.';
+  @override
+  String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
+  @override
   String get typewriterSubtitle =>
       'Yazdığınız satır düzenleyicinin ortasında kalır';
   @override

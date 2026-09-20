@@ -1319,6 +1319,12 @@ final class CatalanStrings extends Strings {
   @override
   String get typewriterTitle => 'Mode màquina d’escriure';
   @override
+  String get formatNoteTitle => 'Endreça el Markdown';
+  @override
+  String get formatNoteDone => 'La nota s’ha endreçat.';
+  @override
+  String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
+  @override
   String get typewriterSubtitle =>
       'Mantén la línia que escriviu al mig de l’editor';
   @override

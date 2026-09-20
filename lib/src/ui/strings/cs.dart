@@ -1281,6 +1281,12 @@ final class CzechStrings extends Strings {
   @override
   String get typewriterTitle => 'Režim psacího stroje';
   @override
+  String get formatNoteTitle => 'Uklidit Markdown';
+  @override
+  String get formatNoteDone => 'Poznámka byla uklizena.';
+  @override
+  String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
+  @override
   String get typewriterSubtitle =>
       'Řádek, který píšete, zůstává uprostřed editoru';
   @override
