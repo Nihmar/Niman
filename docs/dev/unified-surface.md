@@ -9156,15 +9156,21 @@ TextSpan(children: [
 ])
 ```
 
-`theme.hidden` is a `TextStyle` with a zero-or-negligible font size and a
-transparent colour. A zero-size glyph run *should* have no advance — Flutter
-does not document it, which is why it is the first thing to spike
-([§10.4](#104-what-to-spike-first-before-committing-to-the-plan), spike 1), and
-the whole approach stands or falls on it. Given a zero advance, the markers
-occupy no width and the text visually closes up — which is the whole point of
-WYSIWYG — while `TextPainter.text.toPlainText()` still equals the block's
-source. The line height must come from the block's `StrutStyle`, not from the
-hidden runs, or the zero-size metrics would collapse the line box.
+`theme.hidden` is a `TextStyle` with **exactly zero** font size and a
+transparent colour — and "exactly" is measured, not assumed:
+`test/unit/zero_size_run_test.dart` lays the paragraph out both ways and shows
+that a run at 0 contributes no width, leaves the kerning either side untouched
+and keeps the paragraph's height, while a run at **0.01 adds 0.04 px** and is
+therefore not an option. Flutter does not document this, which is why it was
+the design's first spike; the test is the settled half of it (the test font),
+and the device pass is still owed ([§10.4](#104-what-to-spike-first-before-committing-to-the-plan),
+spike 2).
+
+Given a zero advance the markers occupy no width and the text visually closes
+up — the whole point of WYSIWYG — while `TextPainter.text.toPlainText()` still
+equals the block's source. The line height must come from the block's
+`StrutStyle`, not from the hidden runs, or the zero-size metrics would collapse
+the line box.
 
 **What this buys, concretely:**
 
@@ -9203,14 +9209,17 @@ hidden runs, or the zero-size metrics would collapse the line box.
    The two are complementary rather than alternatives: atomicity makes hidden
    text *navigable*, revealing makes it *editable*. `markdown_editor_live` was
    rejected precisely because it hid the markers and did neither.
-2. **A zero-size run must really have zero advance, on all three platforms.**
-   Flutter does not document this, so it is **spike material** (§10.4, spike
-   1): lay out `TextPainter`s with `fontSize: 0` and with a negligible size
-   (`0.01`) across Android, Linux and Windows, check the advance, kerning
-   around the run, fallback fonts and bidi, and pick the smallest value that
-   is exactly zero. If neither works, the fallback is approach A for the
-   *string* while keeping approach B's *policy* — and the `toSource` map comes
-   back for emphasized spans only.
+2. **A zero-size run must really have zero advance — settled for the test
+   font, owed for the platform fonts.** `test/unit/zero_size_run_test.dart`
+   shows that at exactly 0 there is no width, no kerning disturbance and no
+   height change, and that 0.01 is *not* zero (it adds 0.04 px over two
+   16 px markers). What remains is the device pass — the same three checks
+   against the real fonts of Android, Linux and Windows, including a fallback
+   font and a bidi run ([§10.4](#104-what-to-spike-first-before-committing-to-the-plan),
+   spike 2). If a platform fails it, the fallback is approach A for the
+   *string* while keeping approach B's *policy*, and the `toSource` map comes
+   back for emphasized spans only — which is why §8.6.1 is still in this
+   document.
 3. **Inline widgets cannot be collapsed by a style.** An image, a checkbox, an
    inline math box and a footnote marker are `WidgetSpan`/placeholder
    children; a placeholder has a size regardless of `fontSize`. So for those
@@ -9228,7 +9237,8 @@ hidden runs, or the zero-size metrics would collapse the line box.
 
 ### 8.6.1 The boundary rule that approach A would have needed
 
-Kept here because it is the fallback if spike 1 fails, and because it is the
+Kept here because it is the fallback if a platform's fonts fail spike 2, and
+because it is the
 subtlety that makes approach A expensive: with markers omitted from the
 string, a collapsed caret at a visual boundary is ambiguous. Typing at the end
 of `bold` in `some **bold** text` must produce `**boldX**`, not `**bold**X`.
@@ -10279,13 +10289,14 @@ Six unknowns can invalidate the design. Each should be answered by a
 throwaway branch (the repo has done this before — the `spike/*` branches in
 `editor-alternatives.md`), not by argument:
 
-1. **Zero-size runs really have zero advance.** The whole of approach B rests
-   on it ([§8.6.0](#860-the-two-ways-to-hide-a-marker)) and Flutter does not
-   document it. Test: lay out `TextPainter`s whose `TextSpan` tree mixes a
-   `fontSize: 0` (and `0.01`) run between normal runs, on Android, Linux and
-   Windows; measure the advance, the kerning around the run, the line box and
-   the effect of fallback fonts and bidi. Success = the marker adds exactly
-   0 px on all three. Failure = approach A for the string, with the map back.
+1. ~~Zero-size runs really have zero advance.~~ — **answered for the test
+   font 2026-09-21, owed for the platform fonts.** `test/unit/zero_size_run_test.dart`:
+   at exactly 0 the marker adds no width, disturbs no kerning and changes no
+   height, and **0.01 is not zero** (0.04 px over two 16 px markers), so the
+   constant is exactly 0. What is left is the same three checks with Android,
+   Linux and Windows fonts, a fallback font and a bidi run — the device half
+   of the spike, which is spike 2's trip.
+   ([§8.6.0](#860-the-two-ways-to-hide-a-marker))
 2. **Android IME with a custom `TextInputClient`.** The single highest
    risk in the editing path. Test: a minimal widget rendering a paragraph with
    markers collapsed to zero size, and typing across a span boundary on a real
