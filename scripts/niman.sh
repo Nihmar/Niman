@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Niman dev helper: terse output, full logs in /tmp/niman/niman-<cmd>.log.
-#   analyze | test | check | apk [testing] | linux
+#   analyze | test | check | integration | apk [testing] | linux
 set -u
 
 # Flutter fallback when not on PATH (AGENTS.md: Env).
@@ -27,6 +27,27 @@ analyze() {
 test_all() {
   flutter test >"$log" 2>&1
   local status=$?
+  tail -n 8 "$log"
+  return $status
+}
+
+integration() {
+  # The end-to-end tests (issue #241): the two that run headless first,
+  # then the WebDAV sync flow on the Linux desktop. The sync test needs
+  # a display; it cannot run headless or in CI. Each file gets its own
+  # invocation: files under integration_test/ share one device run, and
+  # a second file in the same command never starts.
+  flutter test integration_test/app_boot_test.dart >"$log" 2>&1
+  local status=$?
+  tail -n 4 "$log"
+  if [ $status -ne 0 ]; then return $status; fi
+  flutter test integration_test/template_backlink_freeze_test.dart \
+    >>"$log" 2>&1
+  status=$?
+  tail -n 4 "$log"
+  if [ $status -ne 0 ]; then return $status; fi
+  flutter test integration_test/sync_e2e_test.dart -d linux >>"$log" 2>&1
+  status=$?
   tail -n 8 "$log"
   return $status
 }
@@ -65,10 +86,12 @@ linux_build() {
 
 usage() {
   cat <<'EOF'
-usage: ./scripts/niman.sh <analyze|test|check|apk|linux>
+usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
   analyze  flutter analyze --fatal-infos (issue lines + summary only)
   test     flutter test (tail only)
   check    analyze + test; use before committing
+  integration  the integration_test/ suite (issue #241);
+             sync_e2e needs a Linux display
   apk [beta]      flutter build apk --release
                   (beta: the testing build, app ID dev.niman.niman.beta)
   linux    flutter build linux --release
@@ -80,6 +103,7 @@ case "$cmd" in
   analyze) analyze ;;
   test) test_all ;;
   check) analyze && test_all ;;
+  integration) integration ;;
   apk) apk "${2:-}" ;;
   linux) linux_build ;;
   *) usage; exit 1 ;;
