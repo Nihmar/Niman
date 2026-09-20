@@ -9156,6 +9156,32 @@ Three things that table says, including one that is not flattering:
 - Cold scan is 6.77 ms on the geometry note, against the design's 20 ms budget,
   and it is the one-off cost of opening a note.
 
+### 8.5.5 The inline phase, measured
+
+The bridge (`lib/src/markdown/block_parser.dart`) masks a block, parses it with
+the package, and walks the syntax tree alongside the masked text to give every
+construct a source range. `dart run tool/block_parser_bench.dart`:
+
+| fixture | blocks | with inline content | **all** | a viewport (40) | cache (120) |
+|---|---:|---:|---:|---:|---:|
+| `worst-note.md` | 2 435 | 983 | 484.50 ms | 64.09 ms | 67.60 ms |
+| `fixture-200kb.md` | 4 301 | 2 256 | 97.49 ms | 1.56 ms | 4.06 ms |
+| `Geometria 1.md` | 7 530 | 3 100 | **378.00 ms** | **5.13 ms** | 12.52 ms |
+
+The geometry note's whole-document inline phase is **378.00 ms** — the same
+figure this document has quoted all along from the *old* preview's split ("14 ms
+of blocks and 378 ms of inlines on the 931K note"), reproduced to the
+millisecond by code that shares nothing with it. That is the best evidence
+available that the split is a property of Markdown rather than of one
+implementation, and it is why the inline phase is done per visible block:
+
+- **a viewport's worth is 5.13 ms** — inside a frame, once, and only on a miss;
+- **the adversarial fixture's viewport is 64 ms**, because its blocks are
+  enormous (a 2 000-line paragraph, 4 209-byte lines). The bound is the block's
+  size, not the document's, which is what the cache and the viewport are for;
+- the two columns together are the whole argument for windowing: a
+  document-shaped cost of 378 ms against a screen-shaped one of 5 ms.
+
 Measured expectation: a keystroke in the middle of prose dirties one line and
 converges immediately — O(change), matching the 0.507 ms the tokenizer already
 achieves. Pasting 500 lines dirties 500 lines and converges at the end of the
