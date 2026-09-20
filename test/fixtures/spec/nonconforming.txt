@@ -1,0 +1,41 @@
+# Examples the `markdown` package does not match, with the reason each one is
+# accepted rather than chased.
+#
+# Format: `<suite>/<example> <bucket>: <reason>`, where the bucket is one of
+# the three the design document names (D2 / Phase 1):
+#
+#   fix   the app's own behaviour needs this example to pass
+#   pin   the divergence is deliberate, inherited, or does not reach a user
+#   mask  the extension zone Niman handles itself, which the package never sees
+#
+# `flutter test` fails if an example outside this file fails, and fails again
+# if an example inside it starts passing, so the list cannot rot.
+#
+# Measured 2026-09-21 with `dart run tool/markdown_spec.dart`. The comparison
+# is on cmark-normalized HTML; the eight examples that differ only in
+# formatting (whitespace, attribute order, entity form) are NOT listed here,
+# because by the reference's own comparison they pass.
+
+commonmark/0.31.2/6 fix: a tab in a nested block loses its indentation
+commonmark/0.31.2/207 fix: a lone link reference definition emits whitespace instead of nothing
+gfm/0.29-gfm/6 fix: a tab in a nested block loses its indentation
+gfm/0.29-gfm/176 fix: a lone link reference definition emits whitespace instead of nothing
+gfm/0.29-gfm/188 fix: a link reference definition inside a block loses its indentation
+gfm/0.29-gfm/633 fix: an autolink with a mailto: or xmpp: scheme is split at the scheme
+gfm/0.29-gfm/634 fix: an autolink with an xmpp: scheme is split at the scheme
+gfm/0.29-gfm/635 fix: an autolink with an xmpp: scheme is split at the scheme
+
+commonmark/0.31.2/143 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+commonmark/0.31.2/146 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+commonmark/0.31.2/354 pin: the CommonMark 0.31.2 currency-emphasis rule, which GFM's own example set omits
+commonmark/0.31.2/625 pin: the CommonMark 0.31.2 WHATWG HTML-comment rule; GFM keeps the older one and Niman is GFM-first
+commonmark/0.31.2/626 pin: the CommonMark 0.31.2 WHATWG HTML-comment rule; GFM keeps the older one and Niman is GFM-first
+gfm/0.29-gfm/113 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+gfm/0.29-gfm/116 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+gfm/0.29-gfm/279 pin: task-list items gain class attributes the spec does not ask for; Niman draws its own checkbox
+gfm/0.29-gfm/280 pin: task-list items gain class attributes the spec does not ask for; Niman draws its own checkbox
+gfm/0.29-gfm/493 pin: the GFM strikethrough prose contradicts its own example; one behaviour is pinned, deliberately
+gfm/0.29-gfm/617 pin: the published GFM HTML inherits CommonMark's bare-URL example; GFM itself autolinks, as does the app
+gfm/0.29-gfm/620 pin: the published GFM HTML inherits CommonMark's bare-URL example; GFM itself autolinks, as does the app
+gfm/0.29-gfm/621 pin: the published GFM HTML inherits CommonMark's bare-URL example; GFM itself autolinks, as does the app
+gfm/0.29-gfm/657 pin: tagfilter sanitizes raw HTML for GitHub's pages; a notes app renders its own notes as written
