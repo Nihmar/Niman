@@ -40,6 +40,7 @@
 library;
 
 import 'package:niman/src/markdown/fenwick_tree.dart';
+import 'package:niman/src/markdown/source_edit.dart';
 
 /// The text of a note, split into lines, with an index over it.
 final class SourceBuffer {
@@ -232,11 +233,11 @@ final class SourceBuffer {
   }
 
   /// Inserts [inserted] at [offset].
-  void insert(int offset, String inserted) =>
+  SourceEdit insert(int offset, String inserted) =>
       replaceRange(offset, offset, inserted);
 
   /// Deletes `[start, end)`.
-  void delete(int start, int end) => replaceRange(start, end, '');
+  SourceEdit delete(int start, int end) => replaceRange(start, end, '');
 
   /// Replaces `[start, end)` with [replacement], and bumps the revision.
   ///
@@ -245,12 +246,19 @@ final class SourceBuffer {
   /// dominant one, so an edit cannot introduce a second line-ending style; the
   /// terminator the replaced range's *last* line had is kept, so the text after
   /// the edit is untouched.
-  void replaceRange(int start, int end, String replacement) {
+  SourceEdit replaceRange(int start, int end, String replacement) {
     assert(
       start >= 0 && end >= start && end <= _length,
       'bad range $start..$end',
     );
-    if (start == end && replacement.isEmpty) return;
+    if (start == end && replacement.isEmpty) {
+      return SourceEdit(
+        firstLine: lineOf(start),
+        removedLines: 1,
+        insertedLines: 1,
+        revision: _revision,
+      );
+    }
 
     final startLine = lineOf(start);
     final startColumn = start - offsetOfLine(startLine);
@@ -302,6 +310,12 @@ final class SourceBuffer {
     _length = _index.total;
     _revision++;
     assert(_validate(), 'buffer invariants broken after the edit');
+    return SourceEdit(
+      firstLine: startLine,
+      removedLines: removedCount,
+      insertedLines: merged.length,
+      revision: _revision,
+    );
   }
 
   /// The span of line [index]: its text plus its terminator.

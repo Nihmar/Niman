@@ -9084,6 +9084,36 @@ The pattern already exists in this repo and should be the shape of the
 implementation: `highlighting.dart:341`'s `if (state == old.entering)`, the
 convergence check the current tokenizer uses to stop re-tokenizing.
 
+**Built, and measured** (`lib/src/markdown/block_scanner.dart`,
+`dart run tool/block_scanner_bench.dart`, debug mode):
+
+| fixture | lines | blocks | cold scan | keystroke | **lines re-scanned** | Enter | lines re-scanned |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `fixture-200kb.md` | 6 339 | 4 301 | 3.82 ms | 290 µs | **5** | 244 µs | 51 |
+| `fixture-1mb.md` | 32 151 | 22 326 | 12.08 ms | 1.23 ms | **3** | 1.85 ms | 52 |
+| `Geometria 1.md` | 10 382 | 7 530 | 6.77 ms | 236 µs | **7** | 352 µs | 51 |
+
+Three things that table says, including one that is not flattering:
+
+- **The convergence rule works as designed.** A keystroke in a 10 382-line note
+  recomputes the state of **7 lines**. That is the O(change) property, and it is
+  not a projection — it is the count, printed by the scanner itself.
+- **Enter costs 51 lines, not 1**, and that is correct rather than a leak: the
+  convergence point has to be a block boundary, so joining or splitting inside a
+  paragraph re-parses the rest of that paragraph. The bound is the paragraph,
+  which is the unit a caller already thinks in.
+- **The wall clock is not O(change) yet**, and the number most likely to be
+  misread: 236 µs for 7 lines of work. The state machine is O(change); the
+  *block list* is not. `edited` filters and rebuilds a `List<Block>` of 7 530
+  entries (three passes) and `_buildBlocks` allocates a fresh list per re-scan,
+  so the constant is per *block*, not per changed line. It fits the 0.5 ms
+  keystroke budget on the geometry note and does not on the synthetic 32 151-line
+  fixture (1.23 ms). The fix is a growable block structure with a prefix index
+  rather than a rebuilt list; the number is what makes that a decision to take
+  later rather than a surprise to discover then.
+- Cold scan is 6.77 ms on the geometry note, against the design's 20 ms budget,
+  and it is the one-off cost of opening a note.
+
 Measured expectation: a keystroke in the middle of prose dirties one line and
 converges immediately — O(change), matching the 0.507 ms the tokenizer already
 achieves. Pasting 500 lines dirties 500 lines and converges at the end of the
