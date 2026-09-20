@@ -21,14 +21,16 @@ jobs:
       - uses: actions/checkout@v4
 
       # The headless integration tests build the Linux desktop bundle,
-      # which needs the same system libraries as the release build.
+      # which needs the same system libraries as the release build, plus
+      # a virtual display: the bundle is a GTK app and cannot start on
+      # a runner with no X server.
       - name: Install build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake git ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-13-dev \
             libayatana-appindicator3-dev libsecret-1-dev libjsoncpp-dev \
-            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev xvfb
 
       - uses: subosito/flutter-action@v2
         with:
@@ -41,7 +43,9 @@ jobs:
       - run: flutter test
       # One file per step: files under integration_test/ share one
       # device run, and a second file in the same command never starts.
+      # xvfb-run stands in for the missing display: headless, but the
+      # GTK bundle still needs an X server to start.
       - name: Headless integration tests
-        run: flutter test integration_test/app_boot_test.dart
+        run: xvfb-run -a flutter test integration_test/app_boot_test.dart
       - name: Repro harness (skips without its seeded library)
-        run: flutter test integration_test/template_backlink_freeze_test.dart
+        run: xvfb-run -a flutter test integration_test/template_backlink_freeze_test.dart
