@@ -390,6 +390,16 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Rýchla poznámka';
   @override
+  String get trayOpen => 'Otvoriť Niman';
+  @override
+  String get trayQuit => 'Ukončiť';
+  @override
+  String get closeToTrayTitle => 'Zavrieť do oblasti upozornení';
+  @override
+  String get closeToTraySubtitle =>
+      '× okna skryje Niman a nechá ho bežať, takže pripomienky stále '
+      'prichádzajú. Ukončenie z ponuky ikony.';
+  @override
   String get shortcutNewTodo => 'Nová úloha';
   @override
   String get shortcutNewNote => 'Nová poznámka';

@@ -392,6 +392,16 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Брза белешка';
   @override
+  String get trayOpen => 'Отвори Niman';
+  @override
+  String get trayQuit => 'Изађи';
+  @override
+  String get closeToTrayTitle => 'Затвори у траку обавештења';
+  @override
+  String get closeToTraySubtitle =>
+      '× прозора скрива Niman и оставља га покренутим, па подсетници и даље '
+      'долазе. Излази се из менија иконе.';
+  @override
   String get shortcutNewTodo => 'Нов задатак';
   @override
   String get shortcutNewNote => 'Нова белешка';

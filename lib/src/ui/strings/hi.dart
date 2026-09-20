@@ -377,6 +377,16 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutQuickNote => 'क्विक नोट';
   @override
+  String get trayOpen => 'Niman खोलें';
+  @override
+  String get trayQuit => 'बंद करें';
+  @override
+  String get closeToTrayTitle => 'ट्रे में बंद करें';
+  @override
+  String get closeToTraySubtitle =>
+      'विंडो का × Niman को छिपा देता है और चलता छोड़ देता है, इसलिए रिमाइंडर '
+      'आते रहते हैं। ट्रे मेन्यू से बाहर निकलें।';
+  @override
   String get shortcutNewTodo => 'नया टू-डू';
   @override
   String get shortcutNewNote => 'नया नोट';

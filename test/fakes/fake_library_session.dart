@@ -283,6 +283,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<bool> get autoUpdateEnabled async => false;
 
+  /// Whether the window's × hides to the tray (#209).
+  bool closeToTrayValue = true;
+
+  @override
+  Future<bool> get closeToTray async => closeToTrayValue;
+
+  @override
+  Future<void> setCloseToTray({required bool enabled}) async =>
+      closeToTrayValue = enabled;
+
   @override
   Future<void> setAutoUpdateEnabled({required bool enabled}) async {}
 

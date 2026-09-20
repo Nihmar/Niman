@@ -286,6 +286,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the auto-update toggle.
   Future<void> setAutoUpdateEnabled({required bool enabled});
 
+  /// Whether the window's × hides Niman to the tray and leaves it
+  /// running (#209, default on); the desktops only.
+  Future<bool> get closeToTray;
+
+  /// Sets (and persists) the close-to-tray choice.
+  Future<void> setCloseToTray({required bool enabled});
+
   /// The latest available update the background check found, if any
   /// (issue #81). The shell banner and the settings row read it; both
   /// rebuild on session events.

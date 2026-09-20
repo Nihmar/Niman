@@ -388,6 +388,16 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Greita pastaba';
   @override
+  String get trayOpen => 'Atverti Niman';
+  @override
+  String get trayQuit => 'Baigti';
+  @override
+  String get closeToTrayTitle => 'Užverti į dėklą';
+  @override
+  String get closeToTraySubtitle =>
+      'Lango × paslepia Niman ir palieka jį veikti, todėl priminimai vis dar '
+      'ateina. Baigiama iš piktogramos meniu.';
+  @override
   String get shortcutNewTodo => 'Nauja užduotis';
   @override
   String get shortcutNewNote => 'Nauja pastaba';

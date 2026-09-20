@@ -384,6 +384,17 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Hızlı not';
   @override
+  String get trayOpen => 'Niman’ı aç';
+  @override
+  String get trayQuit => 'Çık';
+  @override
+  String get closeToTrayTitle => 'Bildirim alanına kapat';
+  @override
+  String get closeToTraySubtitle =>
+      'Pencerenin × işareti Niman’ı gizler ve çalışır durumda bırakır, '
+      'böylece hatırlatmalar gelmeye devam eder. Çıkış simgenin menüsünden '
+      'yapılır.';
+  @override
   String get shortcutNewTodo => 'Yeni görev';
   @override
   String get shortcutNewNote => 'Yeni not';

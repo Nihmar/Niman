@@ -397,6 +397,16 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Nota ràpida';
   @override
+  String get trayOpen => 'Obre el Niman';
+  @override
+  String get trayQuit => 'Surt';
+  @override
+  String get closeToTrayTitle => 'Tanca a l’àrea de notificació';
+  @override
+  String get closeToTraySubtitle =>
+      'La × de la finestra amaga el Niman i el deixa funcionant, així els '
+      'recordatoris segueixen arribant. Se surt des del menú de la icona.';
+  @override
   String get shortcutNewTodo => 'Tasca nova';
   @override
   String get shortcutNewNote => 'Nota nova';

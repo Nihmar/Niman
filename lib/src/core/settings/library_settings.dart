@@ -139,6 +139,20 @@ final class AppSettingsRepo {
     );
   }
 
+  /// Whether the window's × hides Niman to the tray (#209, default on).
+  Future<bool> closeToTray() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty || rows.first.closeToTray;
+  }
+
+  /// Persists the close-to-tray choice.
+  Future<void> setCloseToTray({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(closeToTray: Value(enabled)),
+    );
+  }
+
   /// The last update-check time, or null before the first check (issue
   /// #81).
   Future<DateTime?> lastUpdateCheck() async {

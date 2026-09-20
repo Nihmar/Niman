@@ -389,6 +389,16 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Gyorsjegyzet';
   @override
+  String get trayOpen => 'Niman megnyitása';
+  @override
+  String get trayQuit => 'Kilépés';
+  @override
+  String get closeToTrayTitle => 'Bezárás a tálcára';
+  @override
+  String get closeToTraySubtitle =>
+      'Az ablak × jele elrejti a Nimant és futni hagyja, így az emlékeztetők '
+      'továbbra is megjönnek. Kilépés az ikon menüjéből.';
+  @override
   String get shortcutNewTodo => 'Új feladat';
   @override
   String get shortcutNewNote => 'Új jegyzet';

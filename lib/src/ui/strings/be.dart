@@ -387,6 +387,16 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Хуткая заўвага';
   @override
+  String get trayOpen => 'Адкрыць Niman';
+  @override
+  String get trayQuit => 'Выйсці';
+  @override
+  String get closeToTrayTitle => 'Закрываць у вобласць апавяшчэнняў';
+  @override
+  String get closeToTraySubtitle =>
+      '× акна хавае Niman і пакідае яго працаваць, таму нагадванні ўсё яшчэ '
+      'прыходзяць. Выйсці можна з меню значка.';
+  @override
   String get shortcutNewTodo => 'Новае заданне';
   @override
   String get shortcutNewNote => 'Новая заўвага';

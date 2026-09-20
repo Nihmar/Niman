@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -133,6 +135,15 @@ List<SettingsSearchEntry> settingsSearchEntries({
           AppStrings.splitRatioValue(await controller.splitRatio),
       open: () => pushAppearance(SettingsKeys.splitRatio),
     ),
+    // The desktops only (#209): elsewhere there is no tray to close into.
+    if (Platform.isLinux || Platform.isWindows)
+      SettingsSearchEntry(
+        title: AppStrings.closeToTrayTitle,
+        area: appearance,
+        rowKey: SettingsKeys.closeToTray,
+        value: () async => onOff(on: await controller.closeToTray),
+        open: () => pushAppearance(SettingsKeys.closeToTray),
+      ),
     SettingsSearchEntry(
       title: AppStrings.toolbarSettingsTitle,
       area: editor,

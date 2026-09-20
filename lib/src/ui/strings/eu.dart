@@ -386,6 +386,16 @@ final class BasqueStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Ohar azkarra';
   @override
+  String get trayOpen => 'Ireki Niman';
+  @override
+  String get trayQuit => 'Irten';
+  @override
+  String get closeToTrayTitle => 'Itxi jakinarazpen-eremura';
+  @override
+  String get closeToTraySubtitle =>
+      'Leihoaren × Niman ezkutatzen du eta martxan uzten, oroigarriak iristen '
+      'jarraitzeko. Ikonoaren menutik irteten da.';
+  @override
   String get shortcutNewTodo => 'Zeregin berria';
   @override
   String get shortcutNewNote => 'Ohar berria';

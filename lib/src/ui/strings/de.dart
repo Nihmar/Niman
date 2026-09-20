@@ -393,6 +393,16 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Schnellnotiz';
   @override
+  String get trayOpen => 'Niman öffnen';
+  @override
+  String get trayQuit => 'Beenden';
+  @override
+  String get closeToTrayTitle => 'In den Infobereich schließen';
+  @override
+  String get closeToTraySubtitle =>
+      'Das × des Fensters blendet Niman aus und lässt es laufen, damit '
+      'Erinnerungen weiter kommen. Beenden über das Menü des Symbols.';
+  @override
   String get shortcutNewTodo => 'Neue Aufgabe';
   @override
   String get shortcutNewNote => 'Neue Notiz';

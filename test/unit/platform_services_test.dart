@@ -73,7 +73,12 @@ void main() {
       const service = NoopTrayService();
       expect(service.actions, emitsDone);
       expect(service.activated, emitsDone);
-      await service.init(const <ShortcutAction, String>{});
+      expect(service.commands, emitsDone);
+      await service.init(
+        labels: const <ShortcutAction, String>{},
+        openLabel: 'Open Niman',
+        quitLabel: 'Quit',
+      );
       await service.dispose();
     });
   });

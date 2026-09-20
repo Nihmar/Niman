@@ -383,6 +383,16 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Kiirmärge';
   @override
+  String get trayOpen => 'Ava Niman';
+  @override
+  String get trayQuit => 'Välju';
+  @override
+  String get closeToTrayTitle => 'Sule teavitusalale';
+  @override
+  String get closeToTraySubtitle =>
+      'Akna × peidab Nimani ja jätab selle tööle, nii et meeldetuletused '
+      'tulevad edasi. Väljumine ikooni menüüst.';
+  @override
   String get shortcutNewTodo => 'Uus ülesanne';
   @override
   String get shortcutNewNote => 'Uus märge';

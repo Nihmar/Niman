@@ -26,6 +26,15 @@ class AppSettings extends Table {
       .named('auto_update_enabled')
       .withDefault(const Constant(false))();
 
+  /// Whether the window's × hides Niman to the tray and leaves it
+  /// running (#209), instead of quitting.
+  ///
+  /// On by default on the desktops: the desktop reminders need the
+  /// process alive to fire, and the tray icon is how you get the window
+  /// back. The tray's Quit, and the × with this off, quit for real.
+  BoolColumn get closeToTray =>
+      boolean().named('close_to_tray').withDefault(const Constant(true))();
+
   /// Last update-check time, milliseconds since epoch; null until the
   /// first check runs (issue #81).
   IntColumn get lastUpdateCheckMs =>
@@ -331,7 +340,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 25;
+  int get schemaVersion => 26;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -377,7 +386,9 @@ class AppDatabase extends _$AppDatabase {
   /// empty: every library starts with nothing open, and pre-v24 databases
   /// gain `key_map` (issue #159), null: every shortcut as shipped, and
   /// pre-v25 databases gain `pinned_commands` (issue #208), null: the
-  /// palette opens on what was used lately, as it did.
+  /// palette opens on what was used lately, as it did, and pre-v26
+  /// databases gain `close_to_tray` (issue #209), on: the window's × puts
+  /// Niman in the tray, where the reminders keep firing.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -532,6 +543,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 25) {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN pinned_commands TEXT',
+        );
+      }
+      if (from < 26) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN close_to_tray '
+          'BOOLEAN NOT NULL DEFAULT 1',
         );
       }
     },

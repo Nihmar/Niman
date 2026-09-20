@@ -395,6 +395,16 @@ final class GalicianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Nota rápida';
   @override
+  String get trayOpen => 'Abrir Niman';
+  @override
+  String get trayQuit => 'Saír';
+  @override
+  String get closeToTrayTitle => 'Pechar na área de notificación';
+  @override
+  String get closeToTraySubtitle =>
+      'O × da xanela agocha Niman e déixao en marcha, así os recordatorios '
+      'seguen chegando. Sáese desde o menú da icona.';
+  @override
   String get shortcutNewTodo => 'Tarefa nova';
   @override
   String get shortcutNewNote => 'Nota nova';

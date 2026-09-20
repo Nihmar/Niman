@@ -20,6 +20,9 @@ final class FakeWindowController implements WindowController {
   /// How many times the window was brought to the front.
   int showCalls = 0;
 
+  /// How many times the window was hidden to the tray (#209).
+  int hideCalls = 0;
+
   /// The title bar's buttons.
   int minimizeCalls = 0;
   int maximizeCalls = 0;
@@ -46,6 +49,9 @@ final class FakeWindowController implements WindowController {
 
   @override
   Future<void> show() async => showCalls++;
+
+  @override
+  Future<void> hide() async => hideCalls++;
 
   @override
   Future<void> applyCustomTitleBar() async {}
