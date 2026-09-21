@@ -98,6 +98,11 @@ final class NoteEditor extends StatelessWidget {
   /// the editor's `maxScrollExtent` counts every line below the viewport
   /// as a single row, so it grows as wrapped lines scroll in and a
   /// fraction of it cannot say which line is on screen.
+  ///
+  /// Not the scroll sync's contract: it is how the editor publishes its
+  /// laid-out lines, and typewriter mode reads them to centre the cursor's
+  /// line (`preview/editor_lines.dart` says why in full). It is the editor's
+  /// only way to answer "which row is the caret on", so it stays.
   final ValueChanged<CodeIndicatorValueNotifier>? onIndicator;
 
   /// The editor's spelling state (issue #60): the context menu's

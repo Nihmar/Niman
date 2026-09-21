@@ -7,8 +7,19 @@ import 'package:re_editor/re_editor.dart';
 /// re_editor publishes the paragraphs it has laid out — a source line
 /// index and its offset from the top of the viewport — on every layout,
 /// through the notifier it hands to its indicator builder. The note editor
-/// attaches that notifier here and the scroll sync reads the visible lines
-/// from it.
+/// attaches that notifier here.
+///
+/// **This is not the scroll sync's file, and it outlives it.** The sync was
+/// its first reader and the phase that removed the sync very nearly removed
+/// this too, on the reasonable-sounding assumption that the two were one
+/// thing; they are not. Its other reader is **typewriter mode**, which asks
+/// `caretRowCenter` where the cursor's line is so it can put it in the middle
+/// of the pane — and the reason the offsets are tracked *and corrected by the
+/// scroll position* is that mode, not the sync: a scroll that lays nothing new
+/// out only repaints, so the offsets re_editor published are then as far off
+/// as the note has scrolled since. Deleting this file therefore means
+/// reimplementing typewriter centring first, which is a piece of work of its
+/// own rather than part of removing a pane.
 ///
 /// It has to: the editor's own `maxScrollExtent` is a running estimate.
 /// Every line below the viewport counts as a single row, so the extent
