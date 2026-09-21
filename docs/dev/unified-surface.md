@@ -11025,10 +11025,29 @@ what shift does. The *visual* motions (up and down over wrapped rows) need the
 layout that drew the line, so they belong to the surface, which has the
 `RenderParagraph` to ask.
 
-What is *not* built yet in this phase: the visual motions and the key bindings
-that call either set, mouse drag and double/triple click, undo/redo, the clipboard,
-find, folding, and the `MarkdownSurface` itself — the widget the shell will switch
-to, and the flag that lets a device try it.
+`edit_history.dart` is undo and redo: a history of *edits* — a range, what was
+there, what replaced it — rather than of texts, because storing whole notes would
+be O(n) per keystroke and would make the 1M-note rule a lie exactly where a writer
+notices it. Two rules a writer feels rather than reads: **typing coalesces** (a
+keystroke per undo entry makes Ctrl+Z useless, so consecutive insertions that no
+caret move, deletion or line break separates merge into the step they continue) and
+**the stack is bounded** (the oldest entries go before the memory does). Nine unit
+tests, and two of them corrected my own arithmetic — the first version of the
+bounded test inserted at a fixed offset, which lands *inside* the previous word, and
+the second version coalesced six edits into one because that is what a run of
+typing is.
+
+The surface now answers the keys that are its own business — the logical motions,
+shift to extend, Ctrl+Z/Y — and **the shortcuts wrap the focus, not the other way
+round**: a `CallbackShortcuts` only sees a key travelling through it on the way to
+the focused node, so one *below* the `Focus` it belongs to never fires. That cost
+one red test to learn. Eleven widget tests now hold the surface.
+
+What is *not* built yet in this phase: the visual motions (up and down over wrapped
+rows, which need the line's own layout), mouse drag and double/triple click, the
+clipboard, find, folding, the shell's remappable command table dispatching into the
+surface, and the `MarkdownSurface` widget itself — the thing the shell switches to,
+and the flag that lets a device try it.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 

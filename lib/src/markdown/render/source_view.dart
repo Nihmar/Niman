@@ -29,8 +29,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
@@ -49,6 +52,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.onSelection,
     this.focusNode,
     this.controller,
+    this.history,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
     this.syntax,
@@ -74,6 +78,11 @@ final class MarkdownSourceView extends StatefulWidget {
 
   /// The scroll position, when the caller owns one (an anchor jump does).
   final ScrollController? controller;
+
+  /// The undo history, when the caller owns one (the shell keeps it per note,
+  /// so
+  /// moving a note between tabs does not lose it). Null keeps one here.
+  final EditHistory? history;
 
   /// The page margins.
   final EdgeInsets padding;
@@ -109,6 +118,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   late FocusNode _focus;
   bool _ownsFocus = false;
 
+  /// The edits that made the note what it is, and the way back.
+  late EditHistory _history;
+
+  /// Whether there is anything to undo, for a toolbar that shows it.
+  bool get canUndo => _history.canUndo;
+
+  /// Whether there is anything to redo.
+  bool get canRedo => _history.canRedo;
+
   /// Where the caret is when the caller does not hold one — an uncontrolled
   /// view, which is what a test and a quick screen both are.
   SelectionModel _ownSelection = const SelectionModel.at(0);
@@ -140,8 +158,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _focus = widget.focusNode ?? FocusNode();
     _ownsFocus = widget.focusNode == null;
     _heights = _map();
+    _history = widget.history ?? EditHistory();
     _input = SourceInput(
       buffer: widget.buffer,
+      onRecord: _history.record,
       onTokenizer: (edit, buffer) =>
           SourceInput.retokenize(_tokens, edit, buffer),
       selection: () => _selection,
@@ -241,6 +261,50 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _heights.offsetOf(line).clamp(0.0, _scroll.position.maxScrollExtent),
     );
     _scheduleCaret();
+  }
+
+  /// Undoes the last edit, and says whether there was one.
+  bool undo() => _applyHistory(_history.undo(widget.buffer), forwards: false);
+
+  /// Redoes the last undone edit, and says whether there was one.
+  bool redo() => _applyHistory(_history.redo(widget.buffer), forwards: true);
+
+  /// Rebuilds what an undo or a redo changed, the same way a platform edit
+  /// does.
+  bool _applyHistory(EditRecord? record, {required bool forwards}) {
+    if (record == null) return false;
+    // The whole tokenizer and the map are rebuilt rather than patched: an undo
+    // can be a page away from the last edit, and `SourceEdit` describes a
+    // change
+    // the history record no longer has.
+    _tokens = HighlightDocument.fromText(widget.buffer.text);
+    final caret = forwards ? record.end : record.start;
+    setState(() {
+      _heights = _map();
+      _ownSelection = _selection
+          .collapsedTo(caret)
+          .clampTo(widget.buffer.length);
+    });
+    widget.onSelection?.call(_ownSelection);
+    _input.sendSelection();
+    _scheduleCaret();
+    _ensureCaretVisible();
+    return true;
+  }
+
+  /// Moves the caret by [motion], the logical motions the key table calls.
+  void moveCaretBy(CaretMotion motion, {bool extend = false}) {
+    final next = moveCaret(
+      _selection,
+      motion,
+      buffer: widget.buffer,
+      extend: extend,
+    );
+    setState(() => _ownSelection = next);
+    widget.onSelection?.call(next);
+    _input.sendSelection();
+    _scheduleCaret();
+    _ensureCaretVisible();
   }
 
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
@@ -352,49 +416,113 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   Widget build(BuildContext context) {
     final syntax = widget.syntax ?? SyntaxColors.of(context);
     final caretLine = _caretLineIndex;
-    return Focus(
-      focusNode: _focus,
-      onFocusChange: (hasFocus) => hasFocus ? _input.attach() : _input.detach(),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final available = constraints.maxWidth - widget.padding.horizontal;
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (details) => _focus.requestFocus(),
-            onTapUp: (details) {
-              final offset = offsetAt(details.globalPosition);
-              if (offset != null) placeCaret(offset);
-            },
-            child: CustomScrollView(
-              controller: _scroll,
-              slivers: <Widget>[
-                SliverPadding(
-                  padding: widget.padding,
-                  sliver: SliverMarkdownBlocks(
-                    heights: _heights,
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return _Line(
-                        key: ValueKey<int>(index),
-                        paragraphKey: _keyFor(index),
-                        styled: _tokens.lineAt(index),
-                        number: widget.showLineNumbers ? index + 1 : null,
-                        theme: widget.theme,
-                        syntax: syntax,
-                        dark: widget.dark,
-                        width: available,
-                        caret: index == caretLine ? _caretRect : null,
-                        caretOn: _caretOn,
-                      );
-                    }, childCount: _tokens.lineCount),
+    // The shortcuts wrap the focus, not the other way round: a
+    // `CallbackShortcuts`
+    // only sees a key that travels through it on the way to the focused node,
+    // so
+    // one *below* the `Focus` it belongs to never fires.
+    return _shortcuts(
+      Focus(
+        focusNode: _focus,
+        onFocusChange: (hasFocus) =>
+            hasFocus ? _input.attach() : _input.detach(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final available = constraints.maxWidth - widget.padding.horizontal;
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (details) => _focus.requestFocus(),
+              onTapUp: (details) {
+                final offset = offsetAt(details.globalPosition);
+                if (offset != null) placeCaret(offset);
+              },
+              child: CustomScrollView(
+                controller: _scroll,
+                slivers: <Widget>[
+                  SliverPadding(
+                    padding: widget.padding,
+                    sliver: SliverMarkdownBlocks(
+                      heights: _heights,
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return _Line(
+                          key: ValueKey<int>(index),
+                          paragraphKey: _keyFor(index),
+                          styled: _tokens.lineAt(index),
+                          number: widget.showLineNumbers ? index + 1 : null,
+                          theme: widget.theme,
+                          syntax: syntax,
+                          dark: widget.dark,
+                          width: available,
+                          caret: index == caretLine ? _caretRect : null,
+                          caretOn: _caretOn,
+                        );
+                      }, childCount: _tokens.lineCount),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
+
+  /// The keys the surface answers itself.
+  ///
+  /// The *logical* motions and undo/redo, which are this surface's own
+  /// business.
+  /// What the shell binds — the remappable command table, the toolbar, find —
+  /// is
+  /// dispatched to it by the shell, not captured here, so a user's rebinding
+  /// wins.
+  Widget _shortcuts(Widget child) => CallbackShortcuts(
+    bindings: <ShortcutActivator, VoidCallback>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
+          moveCaretBy(CaretMotion.characterLeft),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
+          moveCaretBy(CaretMotion.characterRight),
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () =>
+          moveCaretBy(CaretMotion.characterLeft, extend: true),
+      const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () =>
+          moveCaretBy(CaretMotion.characterRight, extend: true),
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () =>
+          moveCaretBy(CaretMotion.wordLeft),
+      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () =>
+          moveCaretBy(CaretMotion.wordRight),
+      const SingleActivator(
+        LogicalKeyboardKey.arrowLeft,
+        control: true,
+        shift: true,
+      ): () =>
+          moveCaretBy(CaretMotion.wordLeft, extend: true),
+      const SingleActivator(
+        LogicalKeyboardKey.arrowRight,
+        control: true,
+        shift: true,
+      ): () =>
+          moveCaretBy(CaretMotion.wordRight, extend: true),
+      const SingleActivator(LogicalKeyboardKey.home): () =>
+          moveCaretBy(CaretMotion.lineTextStart),
+      const SingleActivator(LogicalKeyboardKey.end): () =>
+          moveCaretBy(CaretMotion.lineEnd),
+      const SingleActivator(LogicalKeyboardKey.home, control: true): () =>
+          moveCaretBy(CaretMotion.documentStart),
+      const SingleActivator(LogicalKeyboardKey.end, control: true): () =>
+          moveCaretBy(CaretMotion.documentEnd),
+      const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
+      const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
+      const SingleActivator(
+        LogicalKeyboardKey.keyZ,
+        control: true,
+        shift: true,
+      ): redo,
+      const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
+          redo,
+      const SingleActivator(LogicalKeyboardKey.keyY, control: true): redo,
+    },
+    child: child,
+  );
 }
 
 /// One source line: its gutter number, its styled runs, and its caret.
