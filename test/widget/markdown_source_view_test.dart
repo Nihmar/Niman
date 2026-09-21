@@ -463,6 +463,69 @@ void main() {
     expect(carets.last.end, buffer.length);
   });
 
+  testWidgets('copy, cut and paste go through the clipboard', (tester) async {
+    // The clipboard is a platform channel, so the test owns it: what matters
+    // here
+    // is that the surface asks for the right text and puts back what it is
+    // given.
+    String? clipboard;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        switch (call.method) {
+          case 'Clipboard.setData':
+            clipboard = (call.arguments as Map)['text'] as String?;
+            return null;
+          case 'Clipboard.getData':
+            return clipboard == null
+                ? null
+                : <String, dynamic>{'text': clipboard};
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    final buffer = SourceBuffer.fromText('una riga\n');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // Not a cascade with the calls below: each is separated by a pump, because
+    // what is asserted between them comes from the frame in between.
+    // ignore: cascade_invocations
+    state.selectAll();
+    await tester.pump();
+    expect(state.selectedText, 'una riga\n');
+    await state.copySelection();
+    expect(clipboard, 'una riga\n');
+    await state.cutSelection();
+    await tester.pump();
+    expect(buffer.text, '', reason: 'cut removed the selection');
+    expect(state.canUndo, isTrue, reason: 'and it is one undo step');
+    await state.paste();
+    await tester.pump();
+    expect(buffer.text, 'una riga\n', reason: 'paste put it back');
+    state.undo();
+    await tester.pump();
+    expect(buffer.text, '', reason: 'the paste is undoable like any edit');
+  });
+
   testWidgets('a jump to a line brings it to the top', (tester) async {
     final note = StringBuffer();
     for (var at = 0; at < 500; at++) {

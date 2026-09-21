@@ -11060,8 +11060,17 @@ separate piece of work), and **Ctrl+A selects the note**. A test for each; the C
 one needed a tap first, which is the same rule that makes the connection exist only
 while the keyboard is up: a key reaches the surface through the focus it owns.
 
-What is *not* built yet in this phase: double and triple click, the clipboard, find,
-folding, the shell's remappable command table dispatching into the surface, and the
+**The clipboard** is the surface's own: Ctrl+C, Ctrl+X, Ctrl+V (and the meta
+equivalents), with `cutSelection` recording one undo step for the removal, and
+`selectedText` as the way a toolbar asks what is selected. There is deliberately no
+`onPaste` hook on the connection, because **there is no `TextInputAction.paste`**:
+an IME's paste button arrives as the text it pastes — an edit, through the deltas —
+and only a desktop Ctrl+V is the app's business. The test owns the channel
+(`Clipboard.setData`/`getData` on `SystemChannels.platform`) and drives copy, cut,
+paste and the undo of the paste.
+
+What is *not* built yet in this phase: double and triple click, find, folding, the
+shell's remappable command table dispatching into the surface, and the
 `MarkdownSurface` widget itself — the thing the shell switches to, and the flag that
 lets a device try it.
 
