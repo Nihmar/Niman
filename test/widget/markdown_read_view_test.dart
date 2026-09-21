@@ -351,6 +351,113 @@ void main() {
       expect(box.center.dx, closeTo(300, 0.5));
     });
 
+    testWidgets('a jump to a source line lands on that block', (tester) async {
+      // #256: an anchor jump arrives as a source *line*, and turning it into
+      // pixels through a uniform fraction of the note's height is wrong by a
+      // screen on a note whose paragraphs differ this much in height — one
+      // source line each, five or thirty visual ones. The height map knows
+      // where every block starts, so the line resolves to a block.
+      tester.view.physicalSize = const Size(800, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final state = await _pump(tester, _note(400), controller: controller);
+
+      // Two lines of prose and a blank line per paragraph, so paragraph 5
+      // starts at source line 15.
+      state.jumpToLine(15);
+      await tester.pump();
+      final target = find.textContaining('Paragraph 5 has', findRichText: true);
+      expect(target, findsOneWidget);
+      expect(
+        tester.getTopLeft(target).dy,
+        lessThan(40),
+        reason: 'the target block is at the top, not a screen away',
+      );
+      // The block above it is not on screen: the jump moved where it said.
+      expect(
+        find.textContaining('Paragraph 3 has', findRichText: true),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('Paragraph 0 has', findRichText: true),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a jump into tall paragraphs is corrected until it lands', (
+      tester,
+    ) async {
+      // The map estimates a paragraph from its *source* lines, and each of
+      // these is thirty words: one source line, eight or nine visual ones. So
+      // the first pass lands where the estimate says — several screens short —
+      // and the frame that lands measures the blocks around it, which pushes
+      // the target's own offset down. That is what the correction loop is for.
+      tester.view.physicalSize = const Size(600, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final filler = List.filled(30, 'filler words').join(' ');
+      final document = StringBuffer();
+      for (var at = 0; at < 12; at++) {
+        document
+          ..writeln(filler)
+          ..writeln();
+      }
+      document
+        ..writeln('The target paragraph.')
+        ..writeln();
+      for (var at = 0; at < 6; at++) {
+        document
+          ..writeln(filler)
+          ..writeln();
+      }
+      final state = await _pump(
+        tester,
+        document.toString(),
+        controller: controller,
+      );
+      // Twelve paragraphs of two lines each: the target is at line 24.
+      state.jumpToLine(24);
+      await tester.pumpAndSettle();
+      final target = find.textContaining(
+        'The target paragraph',
+        findRichText: true,
+      );
+      expect(target, findsOneWidget);
+      expect(
+        tester.getTopLeft(target).dy,
+        lessThan(40),
+        reason: 'the estimate was screens out and the correction closed it',
+      );
+    });
+
+    testWidgets('a line inside a tall block still lands on its block', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(400, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final long = List.filled(40, 'wrapping words').join(' ');
+      final state = await _pump(
+        tester,
+        'a first paragraph\n\n$long\n\nanother\n',
+        controller: controller,
+      );
+      // Line 2 is the first line of the tall paragraph.
+      state.jumpToLine(2);
+      await tester.pump();
+      expect(
+        find.textContaining('wrapping words', findRichText: true),
+        findsWidgets,
+      );
+      expect(tester.getTopLeft(find.byType(BlockView).at(1)).dy, lessThan(40));
+    });
+
     testWidgets('a fenced block is coloured by its language', (tester) async {
       // Phase 2's own exit criteria ask for code colouring, and neither surface
       // had it: the preview's `syntaxHighlighter` was never wired (only a test
