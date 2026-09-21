@@ -1519,6 +1519,40 @@ recorded decision rather than a conveniently chosen number.
 These are debug-mode harness numbers, as every benchmark in this repository is:
 the ratios carry and the absolutes do not.
 
+**And a device read about a second, which the harness cannot see (2026-09-21).**
+Opening the read pane on the geometry note took **1 022 ms** from the flip
+(`preview: flip showPreview=true` at 18:03:17.954) to the first frame after it
+(18:03:18.976), and that frame itself was cheap — 18.5 ms total, 10.8 of them
+build. The harness above reads 91 ms for the same note. Both can be true, and
+which one it was could not be told from the log, because **the read pane had no
+trace of its own**: the editor has had `note open first frame` since T-PP-22, the
+legacy preview logs its parse, and the pane the user was waiting for logged
+nothing. The missing instrument is the finding; the cause is still open.
+
+It now emits three lines, all of them through the existing seams and none of them
+per-frame: `[read] scan: N blocks, M lines in Xms` when the scanner runs,
+`[read] first content: N blocks, K built, Xms after the view was created` from the
+frame that first drew blocks, and `[preview] read pane first frame: … after call`
+at the flip. The frame window (`FrameProbe`, 2.5 s, frames over budget and worst
+build/raster) is watched too, but only when `AppLog.file` is attached — the run
+whose log can be handed over — which also keeps a 2.5-second timer out of widget
+tests, where it is a pending timer rather than a measurement.
+
+The same log had a second thing to say, and it said it wrongly: `[preview] parse
+async: stale rev 1 (current 1), dropped` — the numbers equal, which is the tell
+that the revision was *not* the reason. The condition is `!mounted || revision !=
+_parseRevision` and it was the first half: a `MarkdownPreview` for the 931 KB note
+was mounted, spent a parse off the isolate, and was gone before the result landed.
+The line now names which of the two happened, because reading it as a staleness
+bug cost an afternoon of chasing a parse that had nothing to do with the symptom.
+
+Where that legacy preview came from is a real gap, and the trace is what named it:
+`NoteView.unifiedMarkdown` defaults to `false` and
+`lib/src/ui/outside_file_screen.dart` never passes it, so a file opened from
+outside the library is drawn by the **old** engine while the same file inside the
+library is drawn by the new one — with the engine setting on, and no hint on
+screen. Fixed in the same round.
+
 ### 4.9.6 What it changes
 
 - **Risk K1 collapses.** "The parser never fully conforms" was the largest

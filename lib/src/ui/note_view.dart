@@ -594,6 +594,18 @@ final class _NoteViewState extends State<NoteView>
         'flip showPreview=${widget.showPreview} '
         'chars=${_previewText.length} scroll=$scroll',
       );
+      if (widget.showPreview) {
+        // What the flip costs to reach the pixels, and what the frames after
+        // it cost. The line above says when it started; without these two,
+        // "the preview was slow to open" (device report, 2026-09-21: about a
+        // second on the geometry note) could be neither confirmed nor
+        // attributed — the read pane had no trace of its own at all.
+        logNextFrame('preview', 'read pane first frame');
+        // The frame window is for a run whose log can be handed over; it is
+        // also a 2.5-second timer, which a widget test would report as a
+        // pending one (`AppLog.file` is attached in `main` and null there).
+        if (AppLog.file != null) FrameProbe.watch('preview', 'read pane open');
+      }
     }
     if (oldWidget.active && !widget.active) _handMemento(oldWidget.path);
     // Switched on while writing: the caret goes to the middle at once.
