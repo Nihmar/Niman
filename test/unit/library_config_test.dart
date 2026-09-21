@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
@@ -39,6 +40,45 @@ void main() {
       await store.write(LibraryConfig.defaults);
       expect(store.file.existsSync(), isTrue);
     });
+
+    test(
+      'a lost settings file says so, and a new library does not shout',
+      () async {
+        // #258's second half: the fallback to defaults is not neutral — engine,
+        // editors, toolbar and tree all revert — and it used to happen with no
+        // line anywhere. A library that has been written to before and has no
+        // settings file is a warning; one with no `.niman/` at all is just new.
+        final lib = await makeLibrary();
+        final store = LibraryConfigStore(lib.path);
+        AppLog.clear();
+        expect(await store.read(), LibraryConfig.defaults);
+        expect(
+          AppLog.lines().where((line) => line.contains('WARNING')).length,
+          0,
+          reason: 'a new library is not a problem: ${AppLog.lines()}',
+        );
+
+        await store.write(LibraryConfig.defaults);
+        store.file.deleteSync();
+        AppLog.clear();
+        expect(await store.read(), LibraryConfig.defaults);
+        final warnings = AppLog.lines()
+            .where((line) => line.contains('WARNING'))
+            .toList();
+        expect(warnings, hasLength(1));
+        expect(warnings.single, contains('settings.json is missing'));
+        expect(warnings.single, contains('on defaults'));
+
+        store.file.writeAsStringSync('{ not json');
+        AppLog.clear();
+        expect(await store.read(), LibraryConfig.defaults);
+        expect(
+          AppLog.lines().any((line) => line.contains('could not be parsed')),
+          isTrue,
+          reason: AppLog.lines().join('\n'),
+        );
+      },
+    );
 
     test('round trips a config through the file', () async {
       final lib = await makeLibrary();
