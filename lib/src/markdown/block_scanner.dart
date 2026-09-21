@@ -37,7 +37,11 @@ final class BlockScanner {
   final List<LineState> _entering = <LineState>[];
 
   /// The blocks of the scanned prefix, in line order.
-  List<Block> _blocks = <Block>[];
+  ///
+  /// Final, and spliced in place: the list is the one structure here whose size
+  /// is the document's, so an edit replaces a range of it rather than building
+  /// a new one.
+  final List<Block> _blocks = <Block>[];
 
   /// The blocks as of [SourceBuffer.revision], for a reader that wants them.
   BlockIndex get index => BlockIndex(
@@ -91,6 +95,13 @@ final class BlockScanner {
   /// stale, and comparing stale numbers with fresh ones is exactly how a
   /// scanner ends up with blocks that overlap themselves.
   void _rescanFrom(int from, [SourceEdit? edit]) {
+    // Which blocks survive, and where the survivors are, found by binary
+    // search rather than by walking the list: the block list is the one
+    // structure here whose size is the document's, so a pass over it per
+    // keystroke is the difference between a screen-shaped cost and a
+    // document-shaped one.
+    var headEnd = 0;
+    var tailStart = _blocks.length;
     if (edit != null) {
       final untouched = edit.firstUntouchedLine;
       if (edit.firstLine < _entering.length) {
@@ -105,26 +116,18 @@ final class BlockScanner {
           );
         }
       }
-      final aligned = <Block>[];
-      for (final block in _blocks) {
-        if (block.endLine <= edit.firstLine) {
-          aligned.add(block);
-        } else if (block.startLine >= untouched) {
-          // It survived: the same block, moved by however many lines the
-          // document gained or lost.
-          aligned.add(block.shifted(edit.lineDelta));
+      headEnd = _firstIndexWhere(0, (block) => block.endLine > edit.firstLine);
+      tailStart = _firstIndexWhere(0, (block) => block.startLine >= untouched);
+      // The survivors after the edit are the same blocks, moved by however
+      // many lines the document gained or lost. They are shifted in place:
+      // everything below compares line numbers.
+      if (edit.lineDelta != 0) {
+        for (var at = tailStart; at < _blocks.length; at++) {
+          _blocks[at] = _blocks[at].shifted(edit.lineDelta);
         }
-        // Anything else was inside the edit and is rebuilt below.
       }
-      _blocks = aligned;
     }
 
-    final head = <Block>[];
-    final oldStarts = <int>{0};
-    for (final block in _blocks) {
-      if (block.endLine <= from) head.add(block);
-      oldStarts.add(block.startLine);
-    }
     // The block that ends where the rebuild begins has to be rebuilt too.
     // Whether two adjacent lines are one block or two depends on the pair — a
     // paragraph that runs on, a quote continued lazily — so a rebuild that
@@ -132,8 +135,9 @@ final class BlockScanner {
     // belongs. Widening by one block costs one block's lines and removes the
     // whole class of boundary bugs.
     var start = from;
-    if (head.isNotEmpty && head.last.endLine == from) {
-      start = head.removeLast().startLine;
+    if (headEnd > 0 && _blocks[headEnd - 1].endLine == from) {
+      headEnd--;
+      start = _blocks[headEnd].startLine;
     }
 
     var line = start;
@@ -144,7 +148,7 @@ final class BlockScanner {
       if (line > start &&
           previous == state &&
           _isBlockBoundary(line, state) &&
-          oldStarts.contains(line)) {
+          _hasBoundaryAt(line, tailStart)) {
         // Converged: the state is what it was, nothing is continuing across
         // this line, and the block list already has a boundary here — so the
         // blocks after it are untouched and can be kept as they are.
@@ -157,11 +161,15 @@ final class BlockScanner {
     _scannedLineTotal += line - start;
 
     final rebuilt = _buildBlocks(start, line);
-    final tail = <Block>[];
-    for (final block in _blocks) {
-      if (block.startLine >= line) tail.add(block);
-    }
-    _blocks = <Block>[...head, ...rebuilt, ...tail];
+    // Everything from the convergence point on is what it was, so the
+    // survivors are spliced back in place instead of being copied into a new
+    // list: one range replacement, and the blocks inside the edit — the ones
+    // between the head and the tail — are what it drops.
+    final keepFrom = _firstIndexWhere(
+      tailStart,
+      (block) => block.startLine >= line,
+    );
+    _blocks.replaceRange(headEnd, keepFrom, rebuilt);
     // The states recorded after the convergence point are *kept*: convergence
     // means they are what they were, and a later edit down there needs the
     // state entering its block. Only the entries past the document's end go,
@@ -170,6 +178,36 @@ final class BlockScanner {
       _entering.removeRange(buffer.lineCount, _entering.length);
     }
     _lineCount = buffer.lineCount;
+  }
+
+  /// The first block index at or after [fromIndex] whose `test` holds, or the
+  /// list's length when none does.
+  ///
+  /// The block list is sorted by line, so this is a binary search — the point
+  /// of the whole method being that a keystroke must not walk 22 000 blocks.
+  int _firstIndexWhere(int fromIndex, bool Function(Block block) test) {
+    var low = fromIndex;
+    var high = _blocks.length;
+    while (low < high) {
+      final middle = (low + high) >> 1;
+      if (test(_blocks[middle])) {
+        high = middle;
+      } else {
+        low = middle + 1;
+      }
+    }
+    return low;
+  }
+
+  /// Whether a *surviving* block already starts at [line].
+  ///
+  /// Only the blocks from [fromIndex] on count: everything before it is either
+  /// before the edit or inside it, and a boundary from a block that is about to
+  /// be rebuilt is not a boundary the kept tail has.
+  bool _hasBoundaryAt(int line, int fromIndex) {
+    if (line == 0) return true;
+    final at = _firstIndexWhere(fromIndex, (block) => block.startLine >= line);
+    return at < _blocks.length && _blocks[at].startLine == line;
   }
 
   /// Records [state] as entering [line], growing the list as it goes.
