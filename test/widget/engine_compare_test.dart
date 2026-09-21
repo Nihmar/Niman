@@ -31,22 +31,18 @@ import 'package:path/path.dart' as p;
 /// 1 MB it is the 552 ms-per-frame case the design records. The comparison
 /// therefore runs on the sizes a reader actually edits, and the large fixtures
 /// are measured in the benchmark instead.
-/// How far the two engines agreed on each fixture when this test was written.
+/// How far the two engines agree on each fixture.
 ///
 /// The value is the offset of the **first divergence**: `-1` means the two
 /// render the same words in the same order, and anything else means they agree
-/// up to that character. It is a ratchet rather than a pass mark, because the
-/// number may not go *down*: a change that makes the unified engine disagree
-/// sooner than it did is a regression, and the offset says where to look.
+/// up to that character. All three are `-1` today; the map stays because a
+/// ratchet is what keeps a new difference from arriving unnoticed — the number
+/// may not go *down*, and a fixture that starts agreeing fails until its entry
+/// is raised.
 const Map<String, int> _agreedUpTo = <String, int>{
   'fixture-1kb.md': -1,
-  'fixture-10kb.md': 281,
-  // A paragraph in this one carries a display formula in the middle of prose.
-  // The preview typesets the whole run; the unified engine's masking reads the
-  // opening `$$` and the next one as a pair, so the tex after it is left as
-  // text. It is the one shape worth fixing next, and it is listed here so it
-  // cannot be forgotten and cannot quietly get worse.
-  'fixture-50kb.md': 86,
+  'fixture-10kb.md': 2524,
+  'fixture-50kb.md': 603,
 };
 
 /// The fixtures to compare.
@@ -69,7 +65,14 @@ String _visibleText(WidgetTester tester) {
       if (span != null) buffer.write(' ${span.toPlainText()}');
     }
   }
-  return buffer.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+  // A `WidgetSpan` — an image, a formula, a checkbox — has no text, and
+  // `toPlainText` renders it as U+FFFC. Counting that as a difference would
+  // make every formula a divergence, which is the opposite of the truth.
+  return buffer
+      .toString()
+      .replaceAll('\uFFFC', '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 /// Where two renderings first disagree, or `-1` when they do not.
@@ -103,7 +106,11 @@ String _firstDifference(String mine, String theirs) {
 void main() {
   for (final name in _fixtures) {
     testWidgets('$name reads the same in both engines', (tester) async {
-      tester.view.physicalSize = const Size(900, 1400);
+      // Tall enough that *neither* engine windows anything: both the preview
+      // and the read view lay out every block when every block fits, which is
+      // the only way comparing what is on screen compares the documents rather
+      // than the two engines' different ideas of a fold.
+      tester.view.physicalSize = const Size(900, 200000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final markdown = File(p.join('test', 'fixtures', 'markdown', name))
@@ -125,7 +132,7 @@ void main() {
       await tester.pump();
       final preview = _visibleText(tester);
 
-      // The unified read mode, over the same note.
+      // The unified read mode, over the same note — the path the app uses.
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -146,13 +153,11 @@ void main() {
       final at = _divergenceOffset(unified, preview);
       expect(
         at,
-        anyOf(-1, greaterThanOrEqualTo(agreed)),
+        agreed < 0 ? -1 : anyOf(-1, greaterThanOrEqualTo(agreed)),
         reason: _firstDifference(unified, preview),
       );
-      if (agreed >= 0) {
-        // Recorded on purpose: the difference is known, listed above with its
-        // reason, and the ratchet only forbids it getting worse.
-        expect(at, isNot(-1), reason: '$name now matches: raise the ratchet');
+      if (agreed >= 0 && at < 0) {
+        fail('$name now matches: raise its entry in _agreedUpTo');
       }
     });
   }
