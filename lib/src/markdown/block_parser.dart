@@ -66,7 +66,7 @@ final class BlockParser {
 
   /// Parses [block] without consulting the cache.
   ParsedBlock parse(Block block, SourceBuffer buffer) {
-    final text = blockText(block, buffer);
+    final text = _contentText(block, blockText(block, buffer));
     if (!_hasInlineContent(block.kind)) {
       return ParsedBlock(
         block: block,
@@ -156,6 +156,45 @@ final class BlockParser {
     // not one, and treating it as one would join runs that do not belong.
     final scheme = slice.substring(start, colon).toLowerCase();
     return scheme == 'mailto' || scheme == 'xmpp' ? scheme : null;
+  }
+
+  /// The block's text with its containers' syntax taken off.
+  ///
+  /// **Quotes, and only quotes — which is a finding, not an oversight.** The
+  /// `>` is pure syntax: the block scanner has already said this is a quote and
+  /// the renderer draws the bar itself, so the parser must see the content and
+  /// nothing else. Without this a `Text` node of `a\nb` cannot be found in the
+  /// source `> a\n> b`, the walk falls back to an estimate — the
+  /// [ParsedBlock.approximate] flag is exactly that — and the run then covers
+  /// the raw `> b`, putting a stray `>` on screen.
+  ///
+  /// A list marker is *not* the same kind of thing and is left alone: the
+  /// package needs it to know the line is an item at all, and `[x] …` without
+  /// its `-` is a paragraph whose text is `[x] …`, so the task box would come
+  /// back as those three characters.
+  static String _contentText(Block block, String raw) {
+    if (block.quoteDepth <= 0) return raw;
+    final lines = raw.split('\n');
+    for (var at = 0; at < lines.length; at++) {
+      var line = lines[at];
+      for (var level = 0; level < block.quoteDepth; level++) {
+        line = _withoutQuoteMark(line);
+      }
+      lines[at] = line;
+    }
+    return lines.join('\n');
+  }
+
+  /// [line] with one `>` and the space after it taken off, when it has them.
+  static String _withoutQuoteMark(String line) {
+    var at = 0;
+    while (at < line.length && at < 3 && line[at] == ' ') {
+      at++;
+    }
+    if (at >= line.length || line[at] != '>') return line;
+    at++;
+    if (at < line.length && line[at] == ' ') at++;
+    return line.substring(at);
   }
 
   /// The block's own text, its lines joined with `\n`.

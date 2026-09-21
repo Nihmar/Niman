@@ -235,7 +235,11 @@ final class BlockScanner {
     var line = from;
     while (line < to) {
       final kind = _kindOf(line);
-      final quoteDepth = _entering[line].quoteDepth;
+      // The depth *on* the line, not the one entering it: a quote's first line
+      // has no depth before its own `>`, so taking the entering state left
+      // every quote block at depth 0 — which made the renderer draw it as an
+      // unnested quote and the parser read the `>` as text.
+      final quoteDepth = _quoteDepthAfter(line, _text(line), _entering[line]);
       final listIndent = _entering[line].listIndent;
       var end = line + 1;
       while (end < to && _mergesInto(kind, line, end)) {

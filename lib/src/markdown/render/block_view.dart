@@ -415,6 +415,27 @@ final class _InlineBuilder {
       StyleKind.heading => theme.body,
       StyleKind.plain || StyleKind.hardBreak => theme.body,
     };
+    if (segment.kind == StyleKind.image && segment.href != null) {
+      // A Markdown image is a picture, and its alt text is what stands in for
+      // it when there is no picture — the same two rules the embed follows,
+      // because they are the same problem. Without a resolver there is nothing
+      // to resolve and the alt text is the honest thing to draw.
+      if (embedResolver == null) {
+        return TextSpan(text: text, style: theme.marker);
+      }
+      return WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: EmbedView(
+          target: segment.href!,
+          display: text,
+          // The construct as the note wrote it. For the inline form this is
+          // exact; a reference image shows the inline spelling instead, which
+          // is a smaller lie than showing nothing.
+          placeholder: '![$text](${segment.href})',
+          onResolve: embedResolver,
+        ),
+      );
+    }
     if (segment.kind == StyleKind.link && segment.href != null) {
       return TextSpan(
         text: text,
