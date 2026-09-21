@@ -11046,9 +11046,34 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    device with Gboard. Success = no lost characters, no caret jumps, no
    duplicated text, composition preserved, and the whole-value fallback
    (`enableDeltaModel: false`) also working.
-   **The instrument exists, 2026-09-21 (`lib/src/editor/text_input_probe.dart`,
-   Settings → Diagnostics → *Text input probe*; its own test drives it through
-   the platform channel so the probe itself is verified).** It owns a bare
+   **Answered on a device, 2026-09-21 — and the answer is the good one: the
+   delta model works.** A run on Android with Gboard, from the log (`[input]`,
+   119 lines):
+   * **56 insertions arrived as deltas**, one per character, at the right
+     offsets, with the selection tracking them (`DELTA insert @13 +"j" sel 14..14`)
+     — the framework's `enableDeltaModel` path is not exercised anywhere in
+     `flutter/lib`, so this was the phase's biggest unknown and it is now a
+     measured fact;
+   * **the whole-value fallback works too**: with `enableDeltaModel: false` the
+     same typing arrives as `WHOLE 1 chars`, `WHOLE 2 chars`, … — the entire
+     text every keystroke, which is what makes the delta path worth having;
+   * **autocorrect arrives as a replacement delta** (`DELTA replace 13..23
+     +"Alessandro "`), not as a whole value;
+   * **the platform sends invalid selections** (`sel -1..-1`, `sel -1..0`) in
+     its nine non-text updates — the surface must tolerate a range that is not
+     in the buffer rather than clamp it into one;
+   * **no stale delta ever arrived** (the `oldText` guard never fired).
+   Three things the run did not settle, and the probe now asks for them
+   directly: **no composing range was ever reported** (0 of 119 lines) although
+   Gboard was typing words — the probe underlines the range it is given and
+   counts the ones it has seen, so the next screenshot says whether the IME is
+   composing and the range is being dropped, or whether it is not composing at
+   all; **no `ACTION`** (Enter) and no platform `CLOSED` line, and **no keystroke
+   after the 900 KB fill**, so "one keystroke at note size carries one character,
+   not the file" is still an argument rather than a measurement.
+   **The instrument is `lib/src/editor/text_input_probe.dart`**
+   (Settings → Diagnostics → *Text input probe*; its own test drives it through
+   the platform channel so the probe itself is verified). It owns a bare
    `TextInputConnection` and records every event on screen and in the log under
    `[input]`: each delta with its kind, range, text and composing range, each
    whole-value update **with its character count** (the number that says the
