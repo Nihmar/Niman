@@ -11,9 +11,12 @@ void main() {
     final workspace = ShellWorkspace(FakeLibrarySession());
     addTearDown(workspace.dispose);
     // The template flow files a note and asks for its preview in the same
-    // turn, while the tab the follow makes is still one microtask away.
-    workspace.follow('Notes/Filed.md', alongside: true);
-    workspace.showPreviewWhenOpen('Notes/Filed.md');
+    // turn, while the tab the follow makes is still one microtask away. The
+    // cascade is the order made visible: the preview request queues behind
+    // the follow that creates the tab.
+    workspace
+      ..follow('Notes/Filed.md', alongside: true)
+      ..showPreviewWhenOpen('Notes/Filed.md');
     await pumpEventQueue();
     expect(workspace.value.tabs.single.path, 'Notes/Filed.md');
     expect(workspace.value.tabs.single.memento.preview, isTrue);
