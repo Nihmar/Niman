@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/editor_only.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:re_editor/re_editor.dart';
@@ -56,6 +58,7 @@ void main() {
     WidgetTester tester,
     EditorOnlyDocument first, {
     bool customTitleBar = false,
+    bool unifiedMarkdown = false,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -70,8 +73,14 @@ void main() {
               body: Center(
                 child: TextButton(
                   key: const Key('open'),
-                  onPressed: () =>
-                      unawaited(openOutsideFile(context, files, first)),
+                  onPressed: () => unawaited(
+                    openOutsideFile(
+                      context,
+                      files,
+                      first,
+                      unifiedMarkdown: unifiedMarkdown,
+                    ),
+                  ),
                   child: const Text('open'),
                 ),
               ),
@@ -106,6 +115,25 @@ void main() {
     expect(find.byType(CodeEditor), findsOne);
     expect(editorText(tester), contains('type: list'));
     expect(find.byKey(const Key('insert-image')), findsNothing);
+  });
+
+  testWidgets('the engine setting reaches a file opened outside a library', (
+    tester,
+  ) async {
+    // The setting belongs to a library, so a file outside one has none of its
+    // own: the shell hands its own down. Without that the same note was drawn
+    // by the old engine here and the new one inside the library, with nothing
+    // on screen to say so (2026-09-21).
+    await pump(
+      tester,
+      _FakeDocument('/tmp/draft.md', '# A title\n\nA paragraph.'),
+      unifiedMarkdown: true,
+    );
+    await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+    await tester.pumpAndSettle();
+    expect(find.byType(MarkdownReadView), findsOneWidget);
+    expect(find.byType(MarkdownPreview), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('an edit is written back to the file', (tester) async {

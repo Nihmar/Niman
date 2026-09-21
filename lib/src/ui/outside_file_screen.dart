@@ -41,6 +41,7 @@ final class OutsideFileScreen extends ConsumerStatefulWidget {
   const new({
     required this.files,
     this.documentFor = EditorOnlyDocument.new,
+    this.unifiedMarkdown = false,
     super.key,
   });
 
@@ -49,6 +50,14 @@ final class OutsideFileScreen extends ConsumerStatefulWidget {
 
   /// Opens a file picked from here.
   final EditorOnlyDocument Function(String path) documentFor;
+
+  /// Whether the note is drawn by the unified engine (`MarkdownEngine`).
+  ///
+  /// A file outside a library has no library config to read the setting from,
+  /// so the shell hands its own down. Without this the same note was drawn by
+  /// the old engine here and the new one inside the library, with nothing on
+  /// screen to say so.
+  final bool unifiedMarkdown;
 
   @override
   ConsumerState<OutsideFileScreen> createState() => _OutsideFileScreenState();
@@ -214,6 +223,7 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
           compact: true,
         ),
       ],
+      unifiedMarkdown: widget.unifiedMarkdown,
       readNote: (_) => document.read(),
       writeNote: (_, content) => document.write(content),
       reloadToken: view.reloadToken,
