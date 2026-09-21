@@ -371,6 +371,16 @@ abstract interface class LibrarySession {
   /// Whether the preview exists at all (default true).
   Future<bool> get previewEnabled;
 
+  /// Which engine draws a note (default [MarkdownEngine.legacy]).
+  ///
+  /// Opt-in: the unified surface is compared against the preview before it
+  /// replaces it, so a library that has never been configured reads back as the
+  /// surfaces the app has always shipped.
+  Future<MarkdownEngine> get markdownEngine;
+
+  /// Sets (and persists) the markdown engine.
+  Future<void> setMarkdownEngine(MarkdownEngine engine);
+
   /// Sets (and persists) the preview switch.
   Future<void> setPreviewEnabled({required bool enabled});
 

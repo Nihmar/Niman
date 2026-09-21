@@ -27,6 +27,9 @@ abstract final class SettingsKeys {
   static const splitRatio = Key('split-ratio-setting');
   static const closeToTray = Key('close-to-tray-setting');
 
+  /// The note's engine, in the appearance screen.
+  static const markdownEngine = Key('markdown-engine-setting');
+
   // Editor.
   static const toolbar = Key('toolbar-setting');
   static const editorSource = Key('editor-source-setting');
