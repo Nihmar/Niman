@@ -75,6 +75,21 @@ final class VisibleText {
     for (final span in replaced) {
       hidden.add((span.start, span.end));
     }
+    // Anything the parser did not account for *before its first construct* is
+    // container syntax: the `- ` of a list item, the `> ` of a quote, the
+    // `[x] ` of a task box. The parser strips them, so no run covers them, and
+    // without this they are read as text — which is what put `[x] - [x]` on
+    // screen where the preview drew a checkbox.
+    if (block.runs.isNotEmpty || replaced.isNotEmpty) {
+      var contentStart = block.text.length;
+      for (final run in block.runs) {
+        if (run.start < contentStart) contentStart = run.start;
+      }
+      for (final span in replaced) {
+        if (span.start < contentStart) contentStart = span.start;
+      }
+      if (contentStart > 0) hidden.add((0, contentStart));
+    }
     final segments = <VisibleSegment>[];
     final text = block.text;
     var at = 0;
