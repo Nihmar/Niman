@@ -1577,7 +1577,7 @@ available check that no line was double-counted or dropped:
 
 ---
 
-### 4.9.7 What is left of Phase 2, and in what order
+### 4.9.7 The removal that was planned, measured, and not taken
 
 Everything the phase set out to build is built, tested and behind a flag that is
 off by default. What remains is one removal, and it is written here because the
@@ -1642,11 +1642,27 @@ geometry note reaches first content in 91 ms against the preview's recorded
 new engine, including 652 CommonMark examples pumped without an exception. The
 numbers are in §4.9.5.
 
-**And the alternative, stated plainly**: leaving the split in place is a
-legitimate outcome rather than an incomplete one. Two engines behind a flag with
-`legacy` as the default is what ships today, it is green, and no user is
-touched by any of the work above. The removal is a decision about the product,
-not a debt — and it should be taken as one.
+**Decided, 2026-09-21: the split stays.** The removal above is not pending work
+but a rejected option, and it is recorded as a decision because the alternative
+is a real product change — it takes a screen away from people who have it — and
+because the measurements make re-litigating it expensive in the wrong direction.
+Three independent ways of cutting it were measured before choosing: the split
+ratio is 176 sites across 56 files, the pane alone 66 across 25, `previewEnabled`
+48 across 12. None of them is a slice; each is a pass through the shell's layout,
+chrome, actions and Zen, with no green intermediate state.
+
+So Phase 2 ends here, and it ends **complete as designed**: one engine, one
+theme, one pipeline, three modes — with the `read` mode built, measured and
+behind `MarkdownEngine.unified` rather than turned on. What the phase bought is
+that turning it on is now a decision about a surface that has been *shown* to
+match the one it replaces: identical rendering on every fixture the harness can
+drive, 91 ms to first content against 137, and the preview's own tests running
+against it.
+
+The one line that remains, whenever it is wanted, is the default in
+`LibraryConfig` — `MarkdownEngine.legacy` becomes `unified` — together with
+whatever the split's future then is. §4.9.5 has the numbers that should decide
+it.
 
 ## 5.1 Global stats
 
