@@ -11063,14 +11063,33 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
      its nine non-text updates — the surface must tolerate a range that is not
      in the buffer rather than clamp it into one;
    * **no stale delta ever arrived** (the `oldText` guard never fired).
-   Three things the run did not settle, and the probe now asks for them
-   directly: **no composing range was ever reported** (0 of 119 lines) although
-   Gboard was typing words — the probe underlines the range it is given and
-   counts the ones it has seen, so the next screenshot says whether the IME is
-   composing and the range is being dropped, or whether it is not composing at
-   all; **no `ACTION`** (Enter) and no platform `CLOSED` line, and **no keystroke
-   after the 900 KB fill**, so "one keystroke at note size carries one character,
-   not the file" is still an argument rather than a measurement.
+   A second run (316 lines) settled the rest, and it is the measurement the
+   design's central claim needed. At a **921 600-character buffer**:
+   * **the delta path carries one character**: `DELTA insert @921600 +"j" sel
+     921601..921601`;
+   * **the whole-value fallback carries the file**: with the model off, each
+     keystroke arrives as `WHOLE 921601 chars`, `WHOLE 921602 chars`, … — 921 KB
+     of text across the platform channel per key. "Untenable at 934 KB" was an
+     argument in §8.7.1; it is now a number;
+   * **and the echo race is real, and only at size.** Four deltas arrived whose
+     `oldText` disagreed with the buffer — all four at ~921 600 characters, none
+     in the small-buffer runs, and each one *one keystroke behind*
+     (`DELTA insert @921601`, then `DELTA insert @921601` again with
+     `oldText 921601, ours 921602`). The surface echoes `setEditingState` after
+     every update, and handing the platform 921 KB takes long enough that the
+     IME builds its next delta from a copy that predates it. Which is the
+     design's own rule, now with evidence: **do not echo the document per
+     keystroke, and treat a delta's `oldText` as authoritative when it
+     disagrees** — the probe recovered on that rule and the text stayed coherent.
+
+   What is still open is one question, and the probe now asks it on screen: **no
+   composing range has been reported in either run** (0 of 435 lines, with 208
+   insertions and 6 replacements), while Gboard was typing words. The probe
+   underlines the range it is given and counts what it has seen, so the next
+   screenshot separates "the IME does not compose here" from "it composes and
+   the range is dropped". Enter, backspace and the platform closing the
+   connection were not exercised at all (no `ACTION`, no `DELTA delete`, no
+   `CLOSED`).
    **The instrument is `lib/src/editor/text_input_probe.dart`**
    (Settings → Diagnostics → *Text input probe*; its own test drives it through
    the platform channel so the probe itself is verified). It owns a bare
