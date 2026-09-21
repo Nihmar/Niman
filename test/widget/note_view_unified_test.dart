@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 
 /// The note the editor is handed.
 const String _note = '''
@@ -40,6 +41,60 @@ Widget _app({required bool unified, bool showPreview = true}) => MaterialApp(
 );
 
 void main() {
+  testWidgets('an anchor jump lands on its heading in the read mode', (
+    tester,
+  ) async {
+    // #256: a jump arrives as a source line. The old path turned it into a
+    // uniform fraction of the note's estimated height, which a note whose
+    // paragraphs differ this much in height cannot honour.
+    tester.view.physicalSize = const Size(600, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final filler = List.filled(30, 'filler words').join(' ');
+    final note = StringBuffer('# First\n\n');
+    for (var at = 0; at < 8; at++) {
+      note.write('$filler\n\n');
+    }
+    note.write('## The target\n\nAfter the target.\n\n');
+    // Prose below it too, so the heading *can* reach the top of the viewport: a
+    // jump near the end of a note is clamped by the scroll extent, which is
+    // right and useless for this assertion.
+    for (var at = 0; at < 5; at++) {
+      note.write('$filler\n\n');
+    }
+    final key = GlobalKey<State<NoteView>>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteView(
+            key: key,
+            path: '/tmp/niman-anchor-test.md',
+            showLineNumbers: true,
+            autofocusEditor: false,
+            showPreview: true,
+            unifiedMarkdown: true,
+            readNote: (_) async => note.toString(),
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // The heading is at line 18: the title, a blank, then eight paragraphs of
+    // two lines and a blank each. The jump corrects itself across frames, so
+    // the settle runs them out.
+    (key.currentState! as NoteViewHandle).jumpToHeading(18);
+    await tester.pumpAndSettle();
+    final heading = find.textContaining('The target', findRichText: true);
+
+    expect(heading, findsWidgets, reason: 'the heading is on screen');
+    expect(
+      tester.getTopLeft(heading.first).dy,
+      lessThan(80),
+      reason: 'and it is at the top, not a screen away',
+    );
+  });
+
   testWidgets('the flag off is the preview the app has always had', (
     tester,
   ) async {

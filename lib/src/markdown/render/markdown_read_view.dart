@@ -102,6 +102,85 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// The estimator's evidence, as [builtBlocks] is the windowing's.
   int get measuredBlocks => _heights?.measuredCount ?? 0;
 
+  /// Scrolls so the block holding source [line] is at the top (#256).
+  ///
+  /// A jump arrives as a *line* — a `[[note#Heading]]`, an outline tap, a note
+  /// opened at an anchor — and the pixel it used to become was a uniform
+  /// fraction of the note's estimated height, which is wrong by a screen on a
+  /// note whose blocks differ this much in height (one source line each, five
+  /// or thirty visual ones). The height map knows where every block starts, so
+  /// the line resolves to a block and the block to its offset. What that offset
+  /// is worth is the map's business: exact where a frame has drawn, estimated
+  /// where none has, and a jump into unvisited territory lands on the estimate
+  /// and leaves the reader there (the alternative — moving under a finger
+  /// already on the screen — is worse, §8.4.3).
+  ///
+  /// Does nothing without a controller, or for a line past the last block.
+  void jumpToLine(int line) {
+    final index = _blockIndexAt(line);
+    if (index == null) return;
+    _jumpToIndex(index, attempt: 0);
+  }
+
+  /// How many frames a line jump may take to settle.
+  ///
+  /// Each pass lands where the map says the target is, the frame that lands
+  /// measures the blocks around it, and the target's own offset then moves by
+  /// what those measurements were wrong by — a paragraph estimated at one
+  /// visual line and drawn at three pushes it down, three times further than
+  /// the map thought. That converges geometrically — every pass covers the
+  /// ground the last one got wrong — and this bounds it. Measured on an anchor
+  /// jump into a note of thirty-word paragraphs: three passes, and the last one
+  /// moves nothing.
+  static const int _maxJumpAttempts = 12;
+
+  /// One pass of [jumpToLine]: jump to where the map says [index] starts, then
+  /// look again after the frame that landed.
+  void _jumpToIndex(int index, {required int attempt}) {
+    final heights = _heights;
+    final controller = widget.controller;
+    if (heights == null || controller == null || !controller.hasClients) {
+      return;
+    }
+    final offset = heights
+        .offsetOf(index)
+        .clamp(0.0, controller.position.maxScrollExtent);
+    final moved = (controller.position.pixels - offset).abs() > 0.5;
+    if (moved) {
+      controller.jumpTo(offset);
+    } else if (attempt > 0) {
+      // The map agrees with where we are: nothing left to correct.
+      return;
+    }
+    if (attempt >= _maxJumpAttempts) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _jumpToIndex(index, attempt: attempt + 1);
+    });
+  }
+
+  /// The index of the block holding source [line], or null when the note has
+  /// none that early.
+  ///
+  /// The blocks tile the note and are ordered by line, so this is the last one
+  /// that starts at or before [line]: a line inside a wrapped paragraph, or the
+  /// blank line under it, belongs to a block either way.
+  int? _blockIndexAt(int line) {
+    if (_blocks.isEmpty) return null;
+    var low = 0;
+    var high = _blocks.length - 1;
+    if (_blocks[low].startLine > line) return null;
+    while (low < high) {
+      final middle = (low + high + 1) >> 1;
+      if (_blocks[middle].startLine <= line) {
+        low = middle;
+      } else {
+        high = middle - 1;
+      }
+    }
+    return low;
+  }
+
   @override
   void initState() {
     super.initState();

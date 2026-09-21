@@ -9411,6 +9411,26 @@ most of the way down a 1 200-block note. The milliseconds carry a 250 ms ceiling
 there — the design's 25/60 ms row (§9.2) is a *release* build's target, and a
 debug jump pays a cold first content where it lands.
 
+**The anchor jump, which is what a jump *line* becomes (#256).** A jump arrives
+as a source line — `[[note#Heading]]`, an outline tap, a note opened at an anchor
+— and it used to become pixels through `ScrollMap.previewOffsetForLine`: a
+uniform *fraction* of the note's estimated height. That is a claim about line
+density, and the geometry note has none (its paragraphs are one source line and
+up to thirty visual ones). The read view now resolves the line the way the sliver
+places blocks: `MarkdownReadViewState.jumpToLine` binary-searches the block whose
+`startLine` is at or before the line, jumps to `offsetOf(index)`, and **looks
+again after the frame that landed** — a pass lands where the map says, the frame
+that landed measures the blocks around it, and the target's own offset moves by
+what those measurements were wrong by. It converges geometrically (each pass
+covers the ground the last one got wrong), which is measured: on a note of
+thirty-word paragraphs the first pass lands *off screen* and the third moves
+nothing, and the widget test that asserts the landing fails with the loop
+disabled. `NoteView` calls it for the read mode and keeps the fraction path for
+the legacy preview, which dies in phase 5. What a jump cannot fix is the map's
+own nature: into a region no frame has visited, the reader lands on the estimate
+and stays there, and the alternative — a scroll offset that moves under a finger
+already on the screen — is worse (§8.4.3).
+
 **What the sliver makes visible, and does not fix.** A jump *offset* is now as
 good as the map: into a region no frame has visited it lands where the estimates
 say, and the frame that lands there corrects them. That is the price named above,

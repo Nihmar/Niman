@@ -432,6 +432,13 @@ final class _NoteViewState extends State<NoteView>
   final ValueNotifier<Set<ToolbarItem>> _wysiwygActive =
       ValueNotifier<Set<ToolbarItem>>(const <ToolbarItem>{});
   late final ScrollController _previewScroll = ScrollController();
+
+  /// The read mode's own state, so an anchor jump can ask it for a line: the
+  /// read view knows which block a line belongs to and where that block starts,
+  /// which is what a jump needs and what a line *fraction* of the note cannot
+  /// say (#256).
+  final GlobalKey<MarkdownReadViewState> _readViewKey =
+      GlobalKey<MarkdownReadViewState>();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
 
@@ -1186,6 +1193,7 @@ final class _NoteViewState extends State<NoteView>
   /// because its render has to be shown to agree with the preview below before
   /// it can replace it.
   Widget _buildUnifiedPreview(BuildContext context) => MarkdownReadView(
+    key: _readViewKey,
     buffer: _unifiedSource,
     parser: _unifiedParser,
     mathCache: _mathCache,
@@ -1416,6 +1424,21 @@ final class _NoteViewState extends State<NoteView>
   void _syncPreviewToLine(int line, {int attempt = 0}) {
     if (!_previewIn(widget) || !mounted) return;
     const log = AppLogger(name: 'links');
+    if (widget.unifiedMarkdown) {
+      // The read mode's own answer, and it needs no retry loop: the line
+      // resolves to a block and the block to its offset in the height map,
+      // measured where a frame has drawn and estimated where none has. The
+      // fraction of `maxScrollExtent` below is the legacy path's — a uniform
+      // line density the geometry note does not have (#256).
+      final state = _readViewKey.currentState;
+      if (state == null) {
+        log.debug('anchor jump: the read view is not built yet — skipped');
+        return;
+      }
+      log.debug('anchor jump: read mode, source line $line');
+      state.jumpToLine(line);
+      return;
+    }
     log.debug(
       'anchor jump: scheduling preview scroll to line $line '
       '(attempt $attempt, preview ${widget.showPreview ? 'shown' : 'hidden'})',
