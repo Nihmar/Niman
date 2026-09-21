@@ -356,6 +356,74 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _ensureCaretVisible();
   }
 
+  /// The selected text, or null when the selection is a caret.
+  String? get selectedText {
+    final selection = _selection;
+    if (selection.isCollapsed) return null;
+    return widget.buffer.substring(selection.start, selection.end);
+  }
+
+  /// Copies the selection to the platform's clipboard.
+  Future<void> copySelection() async {
+    final text = selectedText;
+    if (text == null) return;
+    await Clipboard.setData(ClipboardData(text: text));
+  }
+
+  /// Copies the selection and removes it, in one undo step with the removal.
+  Future<void> cutSelection() async {
+    final text = selectedText;
+    if (text == null) return;
+    await Clipboard.setData(ClipboardData(text: text));
+    final selection = _selection;
+    _replaceRange(
+      selection.start,
+      selection.end,
+      '',
+      SelectionModel.at(selection.start),
+    );
+  }
+
+  /// Inserts the clipboard's text at the caret, replacing the selection.
+  Future<void> paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text;
+    if (text == null || text.isEmpty) return;
+    final selection = _selection;
+    _replaceRange(
+      selection.start,
+      selection.end,
+      text,
+      SelectionModel.at(selection.start + text.length),
+    );
+  }
+
+  /// Replaces `[start, end)` with [text] because the *app* asked, not the
+  /// platform: the history records it, the tokenizer follows it, and the
+  /// platform
+  /// is told where the caret went.
+  void _replaceRange(int start, int end, String text, SelectionModel caret) {
+    if (start < 0 || end < start || end > widget.buffer.length) return;
+    _history.record(
+      EditRecord(
+        start: start,
+        removed: widget.buffer.substring(start, end),
+        inserted: text,
+      ),
+    );
+    final edit = widget.buffer.replaceRange(start, end, text);
+    SourceInput.retokenize(_tokens, edit, widget.buffer);
+    final next = caret.clampTo(widget.buffer.length);
+    setState(() {
+      _heights = _map();
+      _ownSelection = next;
+    });
+    widget.onSelection?.call(next);
+    _input.sendSelection();
+    _scheduleCaret();
+    _ensureCaretVisible();
+  }
+
   /// Selects everything.
   void selectAll() {
     final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
@@ -613,6 +681,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           moveCaretBy(CaretMotion.documentStart),
       const SingleActivator(LogicalKeyboardKey.end, control: true): () =>
           moveCaretBy(CaretMotion.documentEnd),
+      const SingleActivator(LogicalKeyboardKey.keyC, control: true):
+          copySelection,
+      const SingleActivator(LogicalKeyboardKey.keyC, meta: true): copySelection,
+      const SingleActivator(LogicalKeyboardKey.keyX, control: true):
+          cutSelection,
+      const SingleActivator(LogicalKeyboardKey.keyX, meta: true): cutSelection,
+      const SingleActivator(LogicalKeyboardKey.keyV, control: true): paste,
+      const SingleActivator(LogicalKeyboardKey.keyV, meta: true): paste,
       const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
       const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
       const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,

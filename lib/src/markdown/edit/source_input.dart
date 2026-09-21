@@ -270,6 +270,11 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   @override
   void performAction(TextInputAction action) {
     switch (action) {
+      // There is no `TextInputAction.paste`: an IME's paste arrives as the text
+      // it pastes (an edit, through the deltas above), and a desktop Ctrl+V is
+      // the surface's own shortcut. The clipboard is the surface's business,
+      // not
+      // the connection's.
       case TextInputAction.newline:
         final caret = selection();
         _replace(
