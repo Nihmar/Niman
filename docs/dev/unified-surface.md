@@ -9194,6 +9194,44 @@ Two options, to be decided by measurement:
   proven one, keep the custom sliver as the escape hatch, and make
   `HeightMap` the seam that both satisfy** so the swap is local.
 
+**Found on a device, 2026-09-21 — this is the escape hatch.** The first real read
+of the geometry note on an Android phone, with the engine set to `unified` (the
+debug log records the switch at 17:46 and the way back at 17:52:46, eight
+seconds after the screenshot), shows both halves of one failure at once: long
+wrapped paragraphs and display maths **cut off** — a paragraph of Geometria is
+one source line and thirty visual ones — and generous empty **gaps** where a
+block's estimate exceeds what it draws.
+
+The cause is the first bullet, and `SliverVariedExtentList`'s own documentation
+says so: "Each child is **forced** to have the returned extent of
+`itemExtentBuilder`", and the class is "appropriate for sliver lists ... whose
+extent is **already determined**". Three consequences, in the order they bite:
+
+- the estimate is a **constraint, not a guess**: a block taller than its estimate
+  is clipped rather than overflowing, which is the cut-off text;
+- `_RenderMeasured.performLayout` reports the size the sliver *imposed*, so
+  `BlockHeightMap.measured` writes the estimate back, `applyMeasurements` finds
+  the difference below `epsilon` and does nothing. The estimate → measure →
+  correct loop is **dead code**, which is why the gaps never close;
+- the estimate is in *source* lines (`block.lineCount * lineHeight`), and that is
+  exactly wrong for the two kinds that matter here: a paragraph wrapping to
+  thirty visual lines is estimated at one, and a multi-line `$$…$$` block at 1.6
+  lines each while its typeset height has nothing to do with its line count.
+
+So the recommendation above rested on a false premise — that a forced extent
+could be corrected — and the escape hatch is now the plan: the read view needs a
+sliver that **measures** its children (`SliverList` does; a custom
+`RenderSliverMarkdownBlocks` does, laying each child out with unbounded
+main-axis constraints), with the height map demoted from "the extents" to "the
+estimator `estimateMaxScrollOffset` uses for the part of the note no frame has
+laid out" — which is what §8.4.1's Fenwick tree was for.
+
+**Two gates missed it, and both are named rather than mended quietly.** The
+engine comparison reads `toPlainText()`, and clipped content is still in the
+widget tree, so the words matched; and this phase's own exit criteria asked for a
+**golden-image test per fixture** (§10.4, phase 2), which was never built. A
+device, not a test, is what found this — and the fix wants the test first.
+
 Data to build while measuring: per-3-second rolling average of
 `build + layout` time per block kind, blocks laid out per frame, and the
 p90 of `editsPerSecond`. These become the regression tests of [§9](#9-the-performance-budget).
@@ -10737,6 +10775,11 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
 4. **`SliverVariedExtentList` vs a custom `RenderSliver`** when heights above
    the viewport change. Test: 5 000 blocks, edit one near the top, scroll far
    down, measure scroll jumps and assertions.
+   **Answered the hard way, on a device, 2026-09-21: the first option cannot work
+   at all.** `SliverVariedExtentList` *forces* each child to its extent, so the
+   estimate is a constraint rather than a guess, no measurement can correct it,
+   and the read view clips every block taller than its estimate. The measurement
+   is in §8.4.4, with the screenshot and the log's engine switch behind it.
 5. **Math golden files.** Test: render every distinct math expression in a
    corpus with `katex_dart` today, save the boxes as goldens, then render with
    the new typesetter and diff. This tells you the real required subset before
