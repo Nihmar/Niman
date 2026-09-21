@@ -68,8 +68,9 @@ void main() {
     SyncItem? agreed,
     WebDavCapabilities? caps,
     String? remoteSha,
+    String path = 'a.md',
   }) => reconcilePath(
-    path: 'a.md',
+    path: path,
     local: local,
     remote: remote,
     row: agreed,
@@ -271,6 +272,32 @@ void main() {
       final d = decide(local: disk(), agreed: row(), caps: full);
       expect(d.kind, SyncActionKind.trashLocal);
       expect(d.isDestructive, isTrue);
+    });
+
+    test('a library file the remote lost is uploaded, never trashed', () {
+      // #258: `.niman/settings.json` is written by every device, so a deletion
+      // on the remote is a sync accident rather than an instruction — and
+      // trashing the local copy resets the library to defaults without a word.
+      final d = decide(
+        local: disk(),
+        agreed: row(path: '.niman/settings.json'),
+        caps: full,
+        path: '.niman/settings.json',
+      );
+      expect(d.kind, SyncActionKind.upload);
+      expect(d.isDestructive, isFalse);
+    });
+
+    test('a note the remote lost is still trashed', () {
+      // The rule above is narrow on purpose: for a note the table's answer
+      // stands, and the test below this one is the one that says so.
+      final d = decide(
+        local: disk(),
+        agreed: row(path: 'folder/a.md'),
+        caps: full,
+        path: 'folder/a.md',
+      );
+      expect(d.kind, SyncActionKind.trashLocal);
     });
 
     test('deleted | changed → download again: the edit wins', () {
