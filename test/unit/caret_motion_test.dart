@@ -1,0 +1,106 @@
+// Where the caret goes when a key is pressed (#245, phase 3): the logical
+// motions, which are pure functions of the note and therefore testable here —
+// no device, no widget, no keyboard.
+import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
+
+/// The caret [at] over [text], moved by [motion].
+int _moved(String text, int at, CaretMotion motion, {bool extend = false}) {
+  final buffer = SourceBuffer.fromText(text);
+  return moveCaret(
+    SelectionModel.at(at),
+    motion,
+    buffer: buffer,
+    extend: extend,
+  ).extent;
+}
+
+void main() {
+  test('a character at a time, over grapheme clusters', () {
+    // An emoji is one press, not two: moving by code units would land inside
+    // it.
+    const text = 'a👨‍👩‍👧b';
+    expect(_moved(text, 0, CaretMotion.characterRight), 'a'.length);
+    expect(
+      _moved(text, 'a'.length, CaretMotion.characterRight),
+      'a👨‍👩‍👧'.length,
+      reason: 'the whole family is one cluster',
+    );
+    expect(
+      _moved(text, text.length, CaretMotion.characterLeft),
+      'a👨‍👩‍👧'.length,
+    );
+  });
+
+  test('the ends are walls, not errors', () {
+    expect(_moved('ciao', 0, CaretMotion.characterLeft), 0);
+    expect(_moved('ciao', 4, CaretMotion.characterRight), 4);
+    expect(_moved('', 0, CaretMotion.wordLeft), 0);
+    expect(_moved('', 0, CaretMotion.lineEnd), 0);
+  });
+
+  test('a word at a time, the way editors do it', () {
+    const text = 'due parole, snake_case_name fine';
+    // From the end of `parole`: back over the space, onto the word's start.
+    expect(_moved(text, 10, CaretMotion.wordLeft), 4);
+    // From the start of `parole`: forward to the end of the word, not its
+    // start.
+    expect(_moved(text, 4, CaretMotion.wordRight), 10);
+    // Punctuation is skipped rather than landed on, and `_` is a word
+    // character.
+    expect(_moved(text, 11, CaretMotion.wordRight), 27);
+    // `snake_case_name` starts at 12: the comma and the space are skipped, and
+    // the underscores keep the word together.
+    expect(_moved(text, 27, CaretMotion.wordLeft), 12);
+    expect(_moved(text, text.length, CaretMotion.wordLeft), 28);
+  });
+
+  test('the line motions respect the note, not the screen', () {
+    const text = 'prima riga\n    indentata\nultima';
+    expect(_moved(text, 5, CaretMotion.lineEnd), 10);
+    expect(_moved(text, 20, CaretMotion.lineStart), 11);
+    expect(
+      _moved(text, 20, CaretMotion.lineTextStart),
+      15,
+      reason: 'past the four spaces the line is indented by',
+    );
+    expect(_moved(text, 5, CaretMotion.documentStart), 0);
+    expect(_moved(text, 5, CaretMotion.documentEnd), text.length);
+    // The last line has no terminator, and lineEnd knows it.
+    expect(_moved(text, text.length, CaretMotion.lineEnd), text.length);
+  });
+
+  test('extend holds the anchor, which is what shift is', () {
+    const text = 'una riga di testo';
+    final buffer = SourceBuffer.fromText(text);
+    final selected = moveCaret(
+      const SelectionModel.at(4),
+      CaretMotion.wordRight,
+      buffer: buffer,
+      extend: true,
+    );
+    expect(selected.anchor, 4);
+    expect(selected.extent, 8, reason: 'the end of `riga`, before the space');
+    expect(selected.isCollapsed, isFalse);
+    expect(selected.start, 4);
+    expect(selected.end, 8);
+  });
+
+  test('a motion from a selection moves its moving end', () {
+    const text = 'una riga di testo';
+    final buffer = SourceBuffer.fromText(text);
+    final selected = moveCaret(
+      const SelectionModel(anchor: 4, extent: 9),
+      CaretMotion.characterLeft,
+      buffer: buffer,
+    );
+    expect(
+      selected.extent,
+      8,
+      reason: 'the caret moves and the selection collapses to it',
+    );
+    expect(selected.isCollapsed, isTrue);
+  });
+}
