@@ -11,6 +11,8 @@ import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
+import '../../tool/spec_suite.dart';
+
 /// A cache that renders in-line, as the preview's own tests do.
 MathCache _syncCache() => MathCache(
   renderer: (tex, {required displayMode}) =>
@@ -183,5 +185,142 @@ void main() {
     await tester.pump();
     expect(state.blockCount, greaterThan(before));
     expect(tester.takeException(), isNull);
+  });
+
+  // The preview's own widget tests, ported to the engine that replaces it. What
+  // was ported is deliberate: the behaviours belong to the *renderer* — does a
+  // note with every construct draw, do task boxes appear, does a formula that
+  // fails take the screen down — and what was left behind is the preview's
+  // asynchronous machinery (the skeleton before the first parse lands, the
+  // line-keyed scroll map), which the read view does not have because it draws
+  // its first frame synchronously.
+  group("ported from the preview's tests", () {
+    testWidgets('a note with every extra renders', (tester) async {
+      tester.view.physicalSize = const Size(900, 2000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(
+        tester,
+        '# Heading\n\n'
+        'Paragraph with **bold**, *italic*, `code` and a '
+        '[link](https://example.com).\n\n'
+        '> A quote to end all quotes.\n\n'
+        '- a bullet\n'
+        '- [x] a checked box\n'
+        '- [ ] an unchecked box\n\n'
+        '| a | b |\n|---|---|\n| 1 | 2 |\n\n'
+        r'Inline $x^2$ and a display block:'
+        '\n\n'
+        r'$$\int_0^1 x\,dx$$'
+        '\n\n'
+        '~~~dart\nfinal x = 1;\n~~~\n',
+      );
+      expect(tester.takeException(), isNull);
+      final screen = StringBuffer();
+      for (final widget in tester.allWidgets) {
+        if (widget is Text) {
+          final data = widget.data;
+          if (data != null) screen.write(' $data');
+          final span = widget.textSpan;
+          if (span != null) screen.write(' ${span.toPlainText()}');
+        }
+      }
+      final text = screen.toString();
+      for (final wanted in <String>[
+        'Heading',
+        'Paragraph with bold',
+        'A quote to end all quotes',
+        'a bullet',
+        'final x = 1;',
+      ]) {
+        expect(text, contains(wanted), reason: wanted);
+      }
+      expect(text, isNot(contains('**')));
+      expect(text, isNot(contains('```')));
+    });
+
+    testWidgets('task boxes are drawn, in a tight and a loose list', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(tester, '- [x] tight checked\n- [ ] tight unchecked\n');
+      expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+
+      await _pump(tester, '- [x] loose checked\n\n- [ ] loose unchecked\n');
+      expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('display math renders inside a list', (tester) async {
+      tester.view.physicalSize = const Size(900, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(
+        tester,
+        '- an item\n\n  '
+        r'$$x^2 + y^2 = z^2$$'
+        '\n',
+      );
+      expect(tester.takeException(), isNull);
+      // Typeset rather than shown: the tex is nowhere on screen.
+      final screen = StringBuffer();
+      for (final widget in tester.allWidgets) {
+        if (widget is Text) {
+          final span = widget.textSpan;
+          if (span != null) screen.write(' ${span.toPlainText()}');
+        }
+      }
+      expect(screen.toString(), isNot(contains(r'$$')));
+      expect(screen.toString(), contains('an item'));
+    });
+
+    testWidgets('a formula that cannot be typeset does not take the screen', (
+      tester,
+    ) async {
+      // The cache's renderer throws, as a malformed expression makes it.
+      final cache = MathCache(
+        renderer: (tex, {required displayMode}) => throw StateError('bad tex'),
+      );
+      final parser = BlockParser();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText(r'a $\frac{1}{$ b'),
+              parser: parser,
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      // The note's other words survive, which is the property that matters: one
+      // bad formula must not cost a reader the paragraph.
+      expect(find.textContaining('a', findRichText: true), findsWidgets);
+    });
+
+    testWidgets('every CommonMark example builds without an exception', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final suite = loadSpecSuites().first;
+      for (final example in suite.examples) {
+        await _pump(tester, example.markdown);
+        final failure = tester.takeException();
+        expect(
+          failure,
+          isNull,
+          reason:
+              '${suite.name}/${example.number} '
+              '@${example.section} threw $failure',
+        );
+      }
+    });
   });
 }
