@@ -4,6 +4,7 @@
 // grow when the viewport moves, or the windowing would just be a way of not
 // rendering.
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -348,6 +349,43 @@ void main() {
       );
       // 600 minus the 16-pixel page margin on either side.
       expect(box.center.dx, closeTo(300, 0.5));
+    });
+
+    testWidgets('a fenced block is coloured by its language', (tester) async {
+      // Phase 2's own exit criteria ask for code colouring, and neither surface
+      // had it: the preview's `syntaxHighlighter` was never wired (only a test
+      // passed one), so a code block was one monospace colour everywhere.
+      tester.view.physicalSize = const Size(600, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(tester, '```dart\nfinal x = 1; // a comment\n```\n');
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere(
+            (paragraph) => paragraph.text.toPlainText().contains('final x = 1'),
+          );
+      // A manual walk, not `visitChildren`: that one skips a span with no text
+      // of its own, and the *colours* live on the wrapper spans the token tree
+      // puts around each token.
+      final colours = <Color>{};
+      void walk(InlineSpan span) {
+        final colour = span.style?.color;
+        if (colour != null) colours.add(colour);
+        final children = span is TextSpan ? span.children : null;
+        children?.forEach(walk);
+      }
+
+      walk(paragraph.text);
+      expect(
+        colours.length,
+        greaterThan(1),
+        reason: 'a keyword and a comment are not the same colour: $colours',
+      );
+      expect(
+        paragraph.text.toPlainText(),
+        contains('final x = 1; // a comment'),
+        reason: 'the code itself is untouched',
+      );
     });
 
     testWidgets('a table cell with inline math lays out', (tester) async {

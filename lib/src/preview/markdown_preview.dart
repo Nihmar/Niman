@@ -62,7 +62,7 @@ final class MarkdownPreview extends StatefulWidget {
   /// Style overrides merged over the theme-derived defaults.
   final MarkdownStyleSheet? styleSheet;
 
-  /// Code-block highlighter (use the `PreviewCodeHighlighter` from
+  /// Code-block highlighter (use the `CodeHighlighter` from
   /// `code_highlight.dart`).
   final SyntaxHighlighter? syntaxHighlighter;
 

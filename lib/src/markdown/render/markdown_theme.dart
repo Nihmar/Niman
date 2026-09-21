@@ -20,6 +20,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
+import 'package:flutter_highlight/themes/atom-one-light.dart';
 
 /// The typography and block metrics a note is drawn with.
 @immutable
@@ -42,6 +44,7 @@ final class MarkdownTheme {
     required this.tag,
     required this.marker,
     required this.rule,
+    required this.codeHighlight,
     required this.codeBackground,
     required this.quoteBar,
     required this.tableBorder,
@@ -105,6 +108,13 @@ final class MarkdownTheme {
   final Color rule;
 
   /// The background of a code block.
+  /// The colour scheme fenced code is tokenised with (`highlight`'s own theme
+  /// maps): the read view colours a block by its fence's language, which is a
+  /// phase 2 exit criterion and something the preview never did — its
+  /// `syntaxHighlighter` was never wired (only a test passed one).
+  final Map<String, TextStyle> codeHighlight;
+
+  /// The filled box a code block is drawn in.
   final Color codeBackground;
 
   /// The colour of a blockquote's bar.
@@ -192,6 +202,9 @@ MarkdownTheme markdownThemeOf(BuildContext context) {
     tag: body.copyWith(color: colors.tertiary),
     marker: body.copyWith(color: colors.onSurfaceVariant),
     rule: colors.outlineVariant,
+    codeHighlight: theme.brightness == Brightness.dark
+        ? atomOneDarkTheme
+        : atomOneLightTheme,
     codeBackground: colors.surfaceContainerHighest,
     quoteBar: colors.outlineVariant,
     tableBorder: colors.outlineVariant,
