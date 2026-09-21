@@ -70,7 +70,7 @@ final class VisibleText {
 
   /// Reads [block] into visible segments.
   factory of(ParsedBlock block) {
-    final hidden = _hiddenRanges(block);
+    final hidden = hiddenRangesOf(block);
     final replaced = block.extensions;
     for (final span in replaced) {
       hidden.add((span.start, span.end));
@@ -188,7 +188,12 @@ bool _sameRun(List<StyleRun> runs, int offset, StyleRun? run) =>
 /// construct's range over its markers in the first place. A rule that cannot
 /// recognise its own construct hides nothing, so a malformed construct shows as
 /// written rather than losing characters.
-List<(int, int)> _hiddenRanges(ParsedBlock block) {
+///
+/// Public because this list has a second reader: the editable surface makes
+/// these the ranges a caret steps over rather than stopping inside (§8.6.0's
+/// atomic ranges, `edit/selection_model.dart`). One rule for what is hidden,
+/// rather than one per reader.
+List<(int, int)> hiddenRangesOf(ParsedBlock block) {
   final text = block.text;
   final hidden = <(int, int)>[];
   for (final run in block.runs) {

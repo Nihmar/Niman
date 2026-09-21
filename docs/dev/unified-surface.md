@@ -9524,6 +9524,14 @@ the line box.
      edge. Outside the caret's block, a hidden marker is therefore skipped by
      one key press, which is what a writer expects from `**bold**` that reads
      as *bold*.
+     Implemented: `SelectionModel.snap`
+     (`lib/src/markdown/edit/selection_model.dart`) takes the runs
+     `hiddenRangesOf` already reports for painting and snaps a destination in
+     the direction of travel. Worth knowing before the keys are wired: only a
+     marker **with an interior** can trap a caret. `**` and `~~` have one; a
+     single backtick or `$` does not, so nothing ever snaps inside a code span —
+     its text is walked one character at a time and its two markers occupy no
+     width at all (`test/unit/selection_model_test.dart`).
    - **The reveal policy for editing** ([§8.6.2](#862-the-marker-reveal-policy)),
      because a marker the user *cannot* see is a marker the user cannot
      correct. Inside the caret's block the markers are visible — and
@@ -9738,6 +9746,12 @@ placeholder's width across it (`see $x^2$ here` is 14 source units and 10 in the
 paragraph, and the caret moves the 40 px box). What the correction table below
 has to carry is the **arithmetic** — one code unit stands for a source range —
 while measuring the child so those dimensions are right stays the surface's job.
+
+The model is `lib/src/markdown/edit/selection_model.dart`: source offsets, the
+two ends and how they normalize, and the atomic motion above. The arithmetic
+around a drawn span is `lib/src/markdown/edit/placeholder_map.dart` — the
+identity for every block of `source` mode, and the table only for blocks with a
+formula, an image or a checkbox drawn in them.
 
 ### 8.7.3 Undo is a stack of source splices
 
