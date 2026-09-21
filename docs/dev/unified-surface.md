@@ -9696,6 +9696,19 @@ spellcheck squiggles → decorations (bullets, checkboxes, bars, rules) → care
 IME composing underline. All of it inside the block's `RepaintBoundary`, so
 a caret blink repaints one block, not the viewport.
 
+The caret's own geometry comes from the same laid-out `TextPainter` that painted
+the line — `getOffsetForCaret(position, prototype)` for where it starts and
+`getFullHeightForCaret` for how tall it is (§6.3,
+`painting/text_painter.dart:1447`, `:1496`) — never from line metrics the
+surface computes for itself. That is the distinction a first attempt at this
+surface got wrong: it had its own `row_text_metrics.dart`, and the caret's
+*rendered* position is what it was replaced over (`12d9f4a`; Phase 3's exit
+criteria and §10.4's spike 2 carry it as a criterion now). Two spots are where
+it goes wrong even with the right call: the prototype supplies the height, so an
+empty line or one that has just relaid out is where a stale one shows, and a
+block holding an inline widget is where the offset goes off by that widget's
+width — which is what the correction table above exists for.
+
 ### 8.7.3 Undo is a stack of source splices
 
 Today undo lives inside `re_editor` and inside `flutter_quill`, which is why
@@ -10554,6 +10567,14 @@ This is the phase where the **editing core** is built and de-risked.
 - IME works on: Android (Gboard and at least one other IME, including
   composition and autocorrect), Linux (fcitx/ibus is acceptable to mark as
   out-of-scope but must be recorded), Windows.
+- **The caret is painted where the character is — and this is the criterion a
+  previous attempt at this surface failed on.** The rectangle has to come from
+  this surface's own layout, because `EditableText` will not compute it: it has
+  to be right at the start and the end of a line, over a hidden zero-width run,
+  after a wrap, on a line whose height just changed, in a bidi run, and under
+  the phone's selection handles. It is a criterion of its own because a clean
+  IME pass says nothing about where the caret was drawn — see the evidence
+  under spike 2 in [§10.4](#104-what-to-spike-first-before-committing-to-the-plan).
 - Selection, mouse drag, double/triple click, shift+arrows, word-wise motion,
   Home/End, PageUp/Down and the existing remappable shortcuts all work; the
   `shortcuts.md` list is the test plan.
@@ -10626,7 +10647,18 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    markers collapsed to zero size, and typing across a span boundary on a real
    device with Gboard. Success = no lost characters, no caret jumps, no
    duplicated text, composition preserved, and the whole-value fallback
-   (`enableDeltaModel: false`) also working.
+   (`enableDeltaModel: false`) also working. **This repo has been here before,
+   and the lesson is unwritten.** The hand-built
+   caret/selection/IME/gesture/view stack that `12d9f4a` (2026-09-06) replaced
+   was sixteen files — `caret_geometry.dart`, `caret_painter.dart`,
+   `row_text_metrics.dart`, `hit_test.dart`, `virtualized_text_view.dart`,
+   `ime_bridge.dart` among them — and the author's account of why it went is the
+   caret's *rendered* position: the one quantity `EditableText` computes for you
+   and a surface that paints its own text has to compute from its own metrics.
+   Its commit message records the switch as a plan completed and verified, so
+   the reason survives only in the author's memory. That is what this spike is
+   for: to turn it into a test. Two questions, and the second is the harder —
+   does the IME survive, and **is the caret rectangle right?**
 3. ~~How conformant is `markdown` 7.3.1, really?~~ — **answered 2026-09-21:
    645/652 and 662/677, 22 examples, 8 to fix.** The gap is small and
    enumerable, so writing a parser is off the table for good
@@ -10676,7 +10708,7 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
 | # | Risk | Why it is real | Mitigation | Residual |
 |---|---|---|---|---|
 | K1 | **The parser never fully conforms** — *closed by measurement* | This was the largest technical risk in the document, with weeks of grind assumed behind it. It is not: the package scores **645/652 and 662/677**, and the whole gap is **22 enumerated examples**, two of which are whitespace ([§4.9](#49-the-markdown-package-measured)). | Done: the harness exists, the allowlist names every accepted example with a bucket and a reason, and `flutter test` fails if one outside it fails or one inside it starts passing. | **Closed.** What remains is a different risk — whether the engine's *AST* path is as conformant as the HTML path, which the number does not measure. |
-| K2 | **IME/editing on a custom text surface is harder than it looks** | `DeltaTextInputClient`, composition ranges, autocorrect full-value fallbacks, Android OEM IMEs, dead keys, CJK, RTL. The framework itself is no guide: **nothing in `packages/flutter/lib/` sets `enableDeltaModel: true`, and `EditableText` does not implement `DeltaTextInputClient`** — the delta path is not what Flutter's own text field exercises. Worse, `EditableText` echoes the whole text back to the platform on every keystroke (`editable_text.dart:4016`), which is untenable at 934 KB and must be engineered around by hand. This is where a "weeks" estimate becomes "quarters". | Spike 1 (§10.4) before committing. Keep the whole-`TextEditingValue` path working as a first-class fallback, not an afterthought. Keep the legacy source editor behind the flag until the new one survives a device round-trip with at least two IMEs. | **High.** The single biggest schedule risk. |
+| K2 | **IME/editing on a custom text surface is harder than it looks** | `DeltaTextInputClient`, composition ranges, autocorrect full-value fallbacks, Android OEM IMEs, dead keys, CJK, RTL. The framework itself is no guide: **nothing in `packages/flutter/lib/` sets `enableDeltaModel: true`, and `EditableText` does not implement `DeltaTextInputClient`** — the delta path is not what Flutter's own text field exercises. Worse, `EditableText` echoes the whole text back to the platform on every keystroke (`editable_text.dart:4016`), which is untenable at 934 KB and must be engineered around by hand. This is where a "weeks" estimate becomes "quarters". It has already cost this repo one editor: `12d9f4a` replaced a hand-built sixteen-file stack — `caret_geometry.dart`, `caret_painter.dart`, `row_text_metrics.dart`, `hit_test.dart` — whose author names the caret's painted position as the sticking point, and whose commit message does not. | Spike 1 (§10.4) before committing. Keep the whole-`TextEditingValue` path working as a first-class fallback, not an afterthought. Keep the legacy source editor behind the flag until the new one survives a device round-trip with at least two IMEs. | **High.** The single biggest schedule risk. |
 | K3 | **Visual quality regresses** | The app currently renders tables, math, images and code through packages with years of polish. A new renderer's first version will look worse in a hundred small ways. | Golden-image tests from Phase 2 onward; a written style checklist; the `MarkdownTheme` as the single place to fix all of them. | Medium. Recoverable, but only with an explicit visual QA round. |
 | K4 | **Performance is not actually better** | `re_editor` is a tuned large-text editor and the windowed preview is already good. The honest possibility is that the new surface matches rather than beats them. | Measure before/after on the same fixture with the same command in both harnesses; the baseline in [§2.2](#22-what-the-code-already-measured-and-what-it-says-to-keep) is the contract. Where it cannot beat, it must at least not regress — and the *uniformity* (no 200 KB cap, no blank wait, no 5–6 ms math block) is itself the win. | Medium. |
 | K5 | **Scope**: this is a 6–10 month project on an app at 0.0.8 | The app has a release cadence and a backlog of user-visible issues (#228, #45, #62, #72 …). A ground-up surface competes with all of them. | Phase-by-phase shipping: `read` mode alone removes the preview's blank wait and the math stutter and is useful even if the project stops there. | Medium. |
