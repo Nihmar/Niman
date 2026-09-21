@@ -86,9 +86,76 @@ final class BlockParser {
       block: block,
       text: text,
       masked: masked,
-      runs: walk.runs,
+      runs: _joinSchemeLinks(walk.runs, masked.text),
       approximate: walk.approximate,
     );
+  }
+
+  /// Joins a scheme the parser left behind to the link it belongs to.
+  ///
+  /// The package's autolink extension links the address but not the scheme, so
+  /// `mailto:foo@bar.baz` arrives as the text `mailto:` followed by a link over
+  /// `foo@bar.baz` whose own target *is* `mailto:foo@bar.baz`. GFM renders the
+  /// whole thing as one link with the scheme in its text, and this is the layer
+  /// that knows what the whole construct is — so the two runs become one.
+  ///
+  /// It is the only place the engine corrects the parser, and it is worth
+  /// saying why it is here rather than in the package: the scheme is part of
+  /// what the note *means*, the run model is ours, and a fix here cannot be
+  /// lost by a dependency bump.
+  static List<StyleRun> _joinSchemeLinks(List<StyleRun> runs, String text) {
+    final out = <StyleRun>[];
+    for (final run in runs) {
+      final previous = out.isEmpty ? null : out.last;
+      if (previous != null &&
+          previous.kind == StyleKind.plain &&
+          run.kind == StyleKind.link &&
+          run.start == previous.end &&
+          run.href != null) {
+        final scheme = _trailingScheme(text, previous);
+        if (scheme != null && run.href!.startsWith('$scheme:')) {
+          out
+            ..removeLast()
+            ..add(
+              StyleRun(
+                kind: StyleKind.link,
+                start: previous.start,
+                end: run.end,
+                depth: previous.depth,
+                href: run.href,
+              ),
+            );
+          continue;
+        }
+      }
+      out.add(run);
+    }
+    return out;
+  }
+
+  /// The `scheme:` a run ends with, or null.
+  static String? _trailingScheme(String text, StyleRun run) {
+    final slice = text.substring(run.start, run.end);
+    final colon = slice.lastIndexOf(':');
+    if (colon <= 0) return null;
+    var start = colon;
+    while (start > 0) {
+      final char = slice.codeUnitAt(start - 1);
+      final isSchemeChar =
+          (char >= 0x61 && char <= 0x7A) ||
+          (char >= 0x41 && char <= 0x5A) ||
+          (char >= 0x30 && char <= 0x39) ||
+          char == 0x2B ||
+          char == 0x2D ||
+          char == 0x2E;
+      if (!isSchemeChar) break;
+      start--;
+    }
+    if (start == colon) return null;
+    // Only a scheme the engine knows is a link: `note:something` in prose is
+    // not one, and treating it as one would join runs that do not belong.
+    final scheme = slice.substring(start, colon).toLowerCase();
+    return scheme == 'mailto' || scheme == 'xmpp' ? scheme : null;
   }
 
   /// The block's own text, its lines joined with `\n`.

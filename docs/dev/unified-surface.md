@@ -1409,7 +1409,54 @@ The gate runs **in both directions** (`test/unit/markdown_conformance_test.dart`
 everything outside the allowlist must pass, and everything inside it must still
 fail, so a fix cannot go unnoticed and cannot hide behind an old exemption.
 
-### 4.9.3 What it changes
+### 4.9.3 The engine's own number, which is the one that matters
+
+The table in §9.1 measures the **package**. What the app shows is what the
+*engine* produces: the block scanner decides the blocks, the masker sets the
+note's own constructs aside, and the package parses each block. So the
+successor question — named in the first version of this section as the honest
+next step — is what that path does on the same suites.
+
+`dart run tool/engine_spec.dart` and `test/unit/engine_parity_test.dart` answer
+it, and the answer is sharper than a second pass rate:
+
+| suite | blocks the engine does not mask | identical to the package's own answer |
+|---|---:|---:|
+| commonmark/0.31.2 | 1 745 | **1 745** |
+| gfm/0.29-gfm | 1 838 | **1 838** |
+
+**3 583 blocks, 3 583 identical.** Everywhere the engine does not intervene it
+reproduces the package byte for byte — so the block decomposition, the
+per-block parse and the concatenation add nothing and lose nothing, and the
+conformance number above is *inherited* rather than merely claimed. That is the
+property that matters, and it is now a test rather than an argument.
+
+Where the engine **does** mask, its answer differs by design: 155 blocks across
+the two suites, because those constructs are the app's own and the renderer
+draws them from the spans. Measured but not asserted: whole documents come out
+identical in 578 of 652 and 602 of 677, and the gap is two things the renderer
+owns rather than the parser — a list is several blocks here (one per item,
+because a block is a *layout* unit) and reference definitions and footnotes are
+document-scoped. Assembling those is Phase 2's job, and the number is the size
+of it.
+
+### 4.9.4 The eight, decided
+
+Phase 1's gate is the package's, so the eight examples it flagged were left as
+an explicit debt. Each is now decided, and none of them is a bug in the engine:
+
+| examples | decision |
+|---|---|
+| `commonmark/6`, `gfm/6` (a tab in a nested container) | **inherited, pinned.** The engine reproduces the package block for block, and the app's own worst note contains **zero tabs** — measured. |
+| `commonmark/207`, `gfm/176`, `gfm/188` (a lone link reference definition) | **inherited, pinned — and the app is right.** The package's *HTML* is whitespace where the spec asks for nothing; the engine's *runs* for that block are empty, so the app shows nothing. `engine_parity_test.dart` proves it. |
+| `gfm/633` (`mailto:`) | **fixed in the engine.** The package links the address but not the scheme; the bridge joins them back into one run with the scheme in its text, which is what GFM renders. |
+| `gfm/634`, `gfm/635` (`xmpp:` with a path) | **inherited, pinned with the reason.** The package links the address with the *wrong* scheme and stops before the path; taking the whole scheme-prefixed run is the masking layer's job, and it will have a span kind for it when the renderer can draw one. |
+
+So of the eight: one is fixed where the fix belongs — in the engine's own model,
+which a dependency bump cannot lose — and seven are inherited with the reason
+recorded, three of them proved to leave the app correct.
+
+### 4.9.5 What it changes
 
 - **Risk K1 collapses.** "The parser never fully conforms" was the largest
   technical risk in the design document, with weeks of grind behind it. It is
@@ -1422,11 +1469,8 @@ fail, so a fix cannot go unnoticed and cannot hide behind an old exemption.
   fourteen are pinned. The eight are cheap; what the number removes is the
   *fear* that the gap is unbounded, which is what made "write our own parser"
   look reasonable.
-- **The AST caveat is now the interesting question.** If the engine reads the
-  package's AST rather than its HTML, the engine's own conformance is a
-  different, unmeasured number — and the eight "fix" items would have to be
-  re-triaged against the AST path. Measuring *that* is Phase 1 work, and it is
-  the honest successor to this section.
+- **The AST caveat is answered** in §9.3: the engine's own number is the block
+  parity, 3 583 of 3 583, and the eight are decided in §9.4.
 
 
 ---
