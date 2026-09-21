@@ -144,6 +144,26 @@ void main() {
     expect(screen, isNot(contains('---')));
   });
 
+  testWidgets('a table cell renders its own inline markup', (tester) async {
+    await tester.pumpWidget(
+      _view(
+        '| **head** | `code` |\n|---|---|\n| a [link](u) | ~~gone~~ |',
+        _syncCache(),
+      ),
+    );
+    await tester.pump();
+    final screen = _screenText(tester);
+    // The cell's markup is rendered, not shown: the words are there, the
+    // markers are not, and the link's destination is gone.
+    expect(screen, contains('head'));
+    expect(screen, contains('code'));
+    expect(screen, contains('link'));
+    expect(screen, contains('gone'));
+    expect(screen, isNot(contains('**')));
+    expect(screen, isNot(contains('~~')));
+    expect(screen, isNot(contains('](u)')));
+  });
+
   testWidgets('the frontmatter is metadata, not prose', (tester) async {
     await tester.pumpWidget(
       _view('---\ntitle: A note\n---\n\nbody text', _syncCache()),
