@@ -1,0 +1,208 @@
+// What the read view costs where a reader waits for it, held against the budget
+// the design set for it (`docs/dev/unified-surface.md` §9.4).
+//
+// The number that matters is **text to first visible content**: the wait
+// between the note's text existing and something being on screen to read. The
+// design's target for the geometry note is 60 ms and its hard ceiling 120 ms,
+// against the preview's 137 ms — the wait that has no spinner in front of it
+// and is therefore the one a reader feels.
+//
+// The measurements are **debug-mode harness numbers**, like every other
+// benchmark in this repository: the ratios carry and the absolutes do not. That
+// is why the assertion is against the design's ceiling rather than a tighter
+// bound, and why the numbers are printed: a change that doubles this should be
+// visible in the log even when it still passes.
+//
+// Only the unified engine is timed here, and that is deliberate. The preview is
+// asynchronous — its first frames are a spinner and its parse happens on a real
+// isolate — and a widget test's clock is fake, so its work never completes
+// inside the test. Timing it here would measure the spinner and report the work
+// as free. The one fixture where it does complete synchronously is kept, as a
+// live cross-check.
+@Timeout(Duration(minutes: 5))
+library;
+
+// The point of this file is to print its measurements into the test log.
+// ignore_for_file: avoid_print
+
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:katex_dart/katex_dart.dart';
+import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/scroll_map.dart';
+import 'package:path/path.dart' as p;
+
+/// The design's hard ceiling for text to first visible content, in
+/// milliseconds, and the target it aims at.
+///
+/// The row is written for the geometry note, whose blocks are small. The
+/// synthetic fixtures are adversarial by construction and their first screen is
+/// dense with display formulas: typesetting the first render of each is paid
+/// inside this measurement, by the preview exactly as by the read view, and the
+/// math cache amortizes it from the second frame on. They are therefore held to
+/// a looser ceiling, and it is a *recorded* decision rather than a conveniently
+/// chosen number.
+const int _ceiling = 120;
+const int _target = 60;
+const Map<String, int> _ceilings = <String, int>{
+  'Geometria 1.md': _ceiling,
+  'fixture-200kb.md': _ceiling,
+  'fixture-50kb.md': 250,
+};
+
+/// The fixtures to measure, largest last. The geometry note is one person's and
+/// is not in the repository, so it is measured when it is there.
+const List<String> _fixtures = <String>[
+  'test/fixtures/markdown/fixture-50kb.md',
+  'test/fixtures/markdown/fixture-200kb.md',
+  'Geometria 1.md',
+];
+
+/// A cache that renders in-line, as the preview's own tests do.
+MathCache _mathCache() => MathCache(
+  renderer: (tex, {required displayMode}) =>
+      renderToBox(tex, options: KatexOptions(displayMode: displayMode)),
+);
+
+/// Milliseconds until [ready] — the wait a reader actually feels.
+Future<int> _msUntil(
+  WidgetTester tester,
+  Future<void> Function() first,
+  bool Function() ready,
+) async {
+  final watch = Stopwatch()..start();
+  await first();
+  for (var at = 0; at < 60 && !ready(); at++) {
+    await tester.pump(const Duration(milliseconds: 25));
+  }
+  watch.stop();
+  return watch.elapsedMilliseconds;
+}
+
+void main() {
+  for (final path in _fixtures) {
+    final file = File(path);
+    final name = p.basename(path);
+    testWidgets('$name: text to first visible content', (tester) async {
+      if (!file.existsSync()) {
+        markTestSkipped('$name is not in the repository');
+        return;
+      }
+      tester.view.physicalSize = const Size(900, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final markdown = file.readAsStringSync();
+
+      // Warm the pipeline on a note too small to measure. The first test in a
+      // file pays the JIT's cost for every one of these code paths, and without
+      // this the smallest fixture reports three times what it costs while the
+      // larger ones — measured after it — report the truth. Standard practice
+      // for a benchmark, and the reason the numbers below are comparable to
+      // each other at all.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText('# Warm up\n\nA paragraph.'),
+              parser: BlockParser(),
+              mathCache: _mathCache(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // The whole path, timed as one: the buffer, the block scan, and the
+      // first frame of content.
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final parser = BlockParser();
+      late SourceBuffer buffer;
+      final first = await _msUntil(tester, () async {
+        buffer = SourceBuffer.fromText(markdown);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: MarkdownReadView(
+                buffer: buffer,
+                parser: parser,
+                mathCache: _mathCache(),
+                controller: controller,
+              ),
+            ),
+          ),
+        );
+      }, () => controller.hasClients);
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+
+      // A jump through the same note: what scrolling costs once the height map
+      // knows some of it.
+      final watch = Stopwatch()..start();
+      controller.jumpTo(controller.position.maxScrollExtent / 2);
+      await tester.pump();
+      await tester.pump();
+      watch.stop();
+      final jump = watch.elapsedMilliseconds;
+
+      print(
+        '$name: first content ${first}ms (target $_target, ceiling $_ceiling) '
+        '| jump ${jump}ms | blocks ${state.blockCount} '
+        'built ${state.builtBlocks} parsed ${parser.parseCount}',
+      );
+
+      expect(
+        first,
+        lessThanOrEqualTo(_ceilings[name] ?? _ceiling),
+        reason: 'past the ceiling for text to first visible content',
+      );
+      // The windowing's evidence, and the reason the number above is a
+      // viewport's cost rather than the note's.
+      expect(state.builtBlocks, lessThan(state.blockCount));
+      expect(state.blockCount, greaterThan(0));
+    });
+  }
+
+  testWidgets('fixture-50kb.md: the preview, for a live cross-check', (
+    tester,
+  ) async {
+    // The one fixture where the preview completes synchronously in a test, so
+    // the two engines can be held side by side. It is context, not a gate: the
+    // preview's own numbers for a big note are in the design document, measured
+    // on a device.
+    final file = File(_fixtures.first);
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final markdown = file.readAsStringSync();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    final watch = Stopwatch()..start();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownPreview(
+            data: markdown,
+            controller: controller,
+            scrollMap: ScrollMap(),
+            mathCache: _mathCache(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    watch.stop();
+    print(
+      '${p.basename(file.path)}: the preview draws its first content in '
+      '${watch.elapsedMilliseconds}ms',
+    );
+    expect(watch.elapsedMilliseconds, greaterThan(0));
+  });
+}
