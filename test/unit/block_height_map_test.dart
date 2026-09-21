@@ -3,17 +3,11 @@
 // — and the answer has to move as measurements land, because the map is also
 // where those measurements go.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 
 /// A map over [count] paragraph blocks, each estimated at 10 pixels.
-BlockHeightMap _map(int count) => BlockHeightMap(
-  blocks: <Block>[
-    for (var at = 0; at < count; at++)
-      Block(kind: BlockKind.paragraph, startLine: at, endLine: at + 1),
-  ],
-  estimate: (block) => 10,
-);
+BlockHeightMap _map(int count) =>
+    BlockHeightMap(count: count, estimate: (index) => 10);
 
 void main() {
   test('offsets are the estimates until a frame measures one', () {
