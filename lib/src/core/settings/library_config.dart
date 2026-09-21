@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
@@ -787,13 +788,42 @@ final class LibraryConfigStore {
   /// The settings file: `<library>/.niman/settings.json`.
   File get file => File(p.join(_libraryPath, '.niman', 'settings.json'));
 
+  /// The settings logger: the fallback to defaults used to be silent, and that
+  /// silence is half of how #258 went unnoticed for days.
+  static const AppLogger _log = AppLogger(name: 'settings');
+
   /// Reads the library's settings; defaults when the file is missing,
   /// unreadable or malformed.
+  ///
+  /// The fallback stays — a library must open whatever its settings file says —
+  /// but it **says which** of the three happened, because the defaults are not
+  /// neutral: the Markdown engine, which editors are on, the toolbar, the tree
+  /// sort and width all revert, and nothing on screen mentions it. A missing
+  /// file in a library that has been written to before is a `warning` (that is
+  /// the shape of a lost or trashed file); a library with no `.niman/` at all is
+  /// an `info`, because that is simply a new one.
   Future<LibraryConfig> read() async {
+    String raw;
     try {
-      final raw = await file.readAsString();
+      raw = await file.readAsString();
+    } on Object catch (error) {
+      if (file.parent.existsSync()) {
+        _log.warning(
+          'settings.json is missing or unreadable in ${file.parent.path} '
+          '($error): this library is on defaults',
+        );
+      } else {
+        _log.info('no settings.json yet: a new library, on defaults');
+      }
+      return LibraryConfig.defaults;
+    }
+    try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map) {
+        _log.warning(
+          'settings.json is not an object in ${file.parent.path}: '
+          'this library is on defaults',
+        );
         return LibraryConfig.defaults;
       }
       // jsonDecode yields `Map<String, dynamic>`; bridge to the typed view.
@@ -801,7 +831,11 @@ final class LibraryConfigStore {
         for (final entry in decoded.entries) entry.key.toString(): entry.value,
       };
       return LibraryConfig.fromJsonMap(json);
-    } on Object catch (_) {
+    } on Object catch (error) {
+      _log.warning(
+        'settings.json could not be parsed in ${file.parent.path} ($error): '
+        'this library is on defaults',
+      );
       return LibraryConfig.defaults;
     }
   }
