@@ -245,6 +245,24 @@ final class BlockScanner {
       while (end < to && _mergesInto(kind, line, end)) {
         end++;
       }
+      // An ordered list counts from its first item on, wherever the list
+      // starts; a list written `1. 1. 1.` renders 1, 2, 3, which is CommonMark
+      // and what the preview draws. The count lives here because this is where
+      // the *list* is still visible: a block knows only its own item.
+      // The previous *item*, not merely the previous block: a blank line
+      // between two items is a `blank` block, and looking only one back would
+      // reset the count on every loose list — which is exactly the shape a
+      // numbered list takes in a note written with air in it.
+      Block? previous;
+      for (var back = blocks.length - 1; back >= 0; back--) {
+        if (blocks[back].kind != BlockKind.blank) {
+          previous = blocks[back];
+          break;
+        }
+      }
+      final ordinal = kind == BlockKind.listItem
+          ? _ordinalOf(line, listIndent, previous)
+          : 0;
       blocks.add(
         Block(
           kind: kind,
@@ -252,6 +270,7 @@ final class BlockScanner {
           endLine: end,
           quoteDepth: quoteDepth,
           listIndent: listIndent,
+          listOrdinal: ordinal,
           headingLevel: kind == BlockKind.heading
               ? _headingLevel(_text(line))
               : 0,
@@ -564,6 +583,34 @@ final class BlockScanner {
     if (own > 0) return own;
     if (state.quoteDepth > 0 && text.trim().isNotEmpty) return state.quoteDepth;
     return 0;
+  }
+
+  /// Where the item starting at [line] sits in its list.
+  ///
+  /// A continuation of the list already in progress — the previous block was an
+  /// item at the same indent, and both are written as ordered items — keeps
+  /// counting. Anything else starts a list, and starts it at the number the
+  /// note wrote.
+  int _ordinalOf(int line, int listIndent, Block? previous) {
+    final written = _writtenOrdinal(_text(line));
+    if (previous != null &&
+        previous.kind == BlockKind.listItem &&
+        previous.listIndent == listIndent &&
+        previous.listOrdinal > 0 &&
+        written > 0) {
+      return previous.listOrdinal + 1;
+    }
+    return written;
+  }
+
+  /// The number an ordered marker was written with, or 0 for an unordered one.
+  static int _writtenOrdinal(String text) {
+    final marker = _listMarker(text);
+    if (marker == null) return 0;
+    final (start, width, _) = marker;
+    final slice = text.substring(start, start + width).trim();
+    final digits = int.tryParse(slice.replaceAll(RegExp('[^0-9]'), ''));
+    return digits ?? 0;
   }
 
   /// The list marker on [text], or null: its start, width and content indent.

@@ -41,17 +41,16 @@ import 'package:path/path.dart' as p;
 /// is raised.
 const Map<String, int> _agreedUpTo = <String, int>{
   'fixture-1kb.md': -1,
-  // A Markdown image again, and the last thing this fixture disagrees on:
-  // everything before it — links, footnotes, quotes, task lists, tables, math —
-  // matches. This test builds neither engine with a resolver and the fixtures
-  // point at picture files that are not in the repository, so the unified
-  // engine draws the alt text where the preview draws a broken image.
-  'fixture-10kb.md': 5527,
-  // A Markdown image. This test builds neither engine with a resolver, so the
-  // unified engine draws the alt text where the preview draws a broken image;
-  // with a resolver it is a picture (block_view_test covers that). The fixture
-  // points at files that are not in the repository.
-  'fixture-50kb.md': 603,
+  // A footnote *definition*, shown as the text the note wrote instead of being
+  // consumed into the footnote list the preview ends the document with. The
+  // reference resolves — the document scope seeds it — while the definition's
+  // own block does not, and finding out why is the next piece of work.
+  // Everything before this point matches: links, footnotes in prose, quotes and
+  // nested quotes, task lists, ordered and unordered lists, tables, math,
+  // fences, images.
+  'fixture-10kb.md': 8278,
+  // The same footnote definition, much later in this fixture.
+  'fixture-50kb.md': 43483,
 };
 
 /// The fixtures to compare.
@@ -62,6 +61,39 @@ MathCache _mathCache() => MathCache(
   renderer: (tex, {required displayMode}) =>
       renderToBox(tex, options: KatexOptions(displayMode: displayMode)),
 );
+
+/// A one-pixel PNG, so the fixtures' pictures exist without being committed.
+final List<int> _onePixelPng = <int>[
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
+  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+  0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+  0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+  0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+  0x42, 0x60, 0x82,
+];
+
+/// Writes every picture [markdown] refers to into [root], so both engines can
+/// draw a real image instead of an alt text or a broken one.
+///
+/// The comparison is about what a reader sees, and a picture that neither
+/// engine can load is a difference in *error handling* rather than in
+/// rendering. Synchronous on purpose: a widget test's clock is fake, so a real
+/// `await` on file IO inside a test body never completes.
+void _writePictures(String markdown, Directory root) {
+  for (final match in RegExp(r'!\[[^\]]*\]\(([^)]+)\)').allMatches(markdown)) {
+    final path = match.group(1)!;
+    if (path.startsWith('http')) continue;
+    final file = File(p.join(root.path, path))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(_onePixelPng);
+    if (!file.existsSync()) {
+      throw StateError('could not write ${file.path}');
+    }
+  }
+}
 
 /// Everything a reader can see in the tree, whitespace collapsed.
 String _visibleText(WidgetTester tester) {
@@ -124,6 +156,9 @@ void main() {
       addTearDown(tester.view.reset);
       final markdown = File(p.join('test', 'fixtures', 'markdown', name))
           .readAsStringSync();
+      final pictures = Directory.systemTemp.createTempSync('niman_fixture');
+      addTearDown(() => pictures.deleteSync(recursive: true));
+      _writePictures(markdown, pictures);
 
       // The preview, exactly as the app builds it.
       await tester.pumpWidget(
@@ -134,6 +169,8 @@ void main() {
               controller: ScrollController(),
               scrollMap: ScrollMap(),
               mathCache: _mathCache(),
+              // The package concatenates this with the uri and no separator.
+              imageDirectory: '${pictures.path}${p.separator}',
             ),
           ),
         ),
@@ -149,6 +186,10 @@ void main() {
               buffer: SourceBuffer.fromText(markdown),
               parser: BlockParser(),
               mathCache: _mathCache(),
+              embedResolver: (target) async {
+                final file = File(p.join(pictures.path, target));
+                return file.existsSync() ? file.path : null;
+              },
             ),
           ),
         ),
