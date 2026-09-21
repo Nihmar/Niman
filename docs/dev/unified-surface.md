@@ -1549,7 +1549,7 @@ Delta ops took a **2 100 ms frame**, two seconds before the flip. The user's
 own open is 18-47 ms, and it is measured now rather than argued about. The
 WYSIWYG's own cost is the legacy editor's and phase 4 is its answer, but the
 number is worth carrying there: 2 100 ms of `build` for one note, twice in one
-session, on the same device.
+session, on the same device (#254).
 
 **A smaller residual the trace also exposes.** After a shell remount the settings
 read has not landed yet, so `_editorSettings` is still
@@ -1559,7 +1559,7 @@ mounts for the big note, starts an isolate parse and is replaced by the read vie
 when the setting lands: `parse async: pane gone before the parse landed (rev 1),
 dropped`, ~150 ms of hidden work per kind switch. It costs nothing on screen and
 it is tracked rather than patched here, because the honest fix is to know the
-engine before building a preview pane at all (phase 5 removes the branch).
+engine before building a preview pane at all (phase 5 removes the branch). #255.
 
 It now emits three lines, all of them through the existing seams and none of them
 per-frame: `[read] scan: N blocks, M lines in Xms` when the scanner runs,
