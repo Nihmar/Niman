@@ -50,6 +50,7 @@ final class BlockView extends StatelessWidget {
     required this.parsed,
     required this.theme,
     required this.mathCache,
+    this.availableWidth,
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
@@ -64,6 +65,11 @@ final class BlockView extends StatelessWidget {
 
   /// The math render cache, one per surface.
   final MathCache mathCache;
+
+  /// How wide the pane is, so a display formula wider than it can be broken
+  /// across lines instead of cut (#257). Null when the caller does not know —
+  /// a test, an intrinsic pass — and the formula is drawn whole.
+  final double? availableWidth;
 
   /// Called when a link is tapped.
   final void Function(String text, String? href)? onTapLink;
@@ -116,6 +122,7 @@ final class BlockView extends StatelessWidget {
       visible: visible,
       theme: theme,
       mathCache: mathCache,
+      availableWidth: availableWidth,
       onTapLink: onTapLink,
       onTapWikiLink: onTapWikiLink,
       embedResolver: embedResolver,
@@ -183,6 +190,7 @@ final class BlockView extends StatelessWidget {
             visible: VisibleText.of(parsed),
             theme: theme,
             mathCache: mathCache,
+            availableWidth: availableWidth,
             onTapLink: onTapLink,
             onTapWikiLink: onTapWikiLink,
             embedResolver: embedResolver,
@@ -233,6 +241,7 @@ final class BlockView extends StatelessWidget {
   Widget _blockMath(BuildContext context) => Center(
     child: BlockMathView(
       cache: mathCache,
+      maxWidth: availableWidth,
       tex: _displayTex(parsed.text),
       style: MathStyle(
         fontSize: theme.body.fontSize ?? 14,
@@ -413,6 +422,7 @@ final class _InlineBuilder {
     required this.visible,
     required this.theme,
     required this.mathCache,
+    this.availableWidth,
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
@@ -421,6 +431,9 @@ final class _InlineBuilder {
   final VisibleText visible;
   final MarkdownTheme theme;
   final MathCache mathCache;
+
+  /// The pane's width, for a display formula that has to be broken (#257).
+  final double? availableWidth;
   final void Function(String text, String? href)? onTapLink;
   final void Function(ExtensionSpan span)? onTapWikiLink;
   final Future<String?> Function(String target)? embedResolver;
@@ -547,6 +560,7 @@ final class _InlineBuilder {
           alignment: PlaceholderAlignment.middle,
           child: BlockMathView(
             cache: mathCache,
+            maxWidth: availableWidth,
             tex: span.inner,
             style: MathStyle(
               fontSize: theme.body.fontSize ?? 14,

@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:katex/katex.dart' show KatexBoxPainter;
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
@@ -605,6 +606,64 @@ void main() {
             .map((view) => view.tex),
         <String>['a', 'b'],
       );
+    });
+
+    testWidgets('a formula wider than the pane is broken, not cut', (
+      tester,
+    ) async {
+      // #257: a third of the geometry note's 824 display formulas are wider
+      // than a phone pane, and they were clamped to it and cut — a reader
+      // studying from a phone could not see the end of the equation. Full size
+      // on two lines beats shrunk onto one.
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      const tex =
+          '2(x_1 + x_2) - 3(y_1 + y_2) + (z_1 + z_2) = (2x_1 - 3y_1 + z_1) + '
+          '(2x_2 - 3y_2 + z_2) = 0;';
+      final cache = _syncCache();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText('\$\$\n$tex\n\$\$\n'),
+              parser: BlockParser(),
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(cache.boxFor(tex, displayMode: true), isNotNull);
+      final painted = tester
+          .widgetList<CustomPaint>(
+            find.descendant(
+              of: find.byType(BlockMathView),
+              matching: find.byType(CustomPaint),
+            ),
+          )
+          .where((paint) => paint.painter is KatexBoxPainter)
+          .toList();
+      expect(
+        painted.length,
+        greaterThan(1),
+        reason: 'one box means the formula was drawn whole, which is the cut',
+      );
+      for (final paint in painted) {
+        expect(
+          paint.size.width,
+          lessThanOrEqualTo(400 - 32),
+          reason: 'every piece fits the pane',
+        );
+      }
+      // The whole formula is still there: no glyph was dropped by the split.
+      final drawn = tester
+          .widgetList<BlockMathView>(find.byType(BlockMathView))
+          .map((view) => view.tex)
+          .join();
+      expect(drawn, contains('2(x_1'));
+      expect(drawn.trim(), endsWith('0;'));
     });
 
     testWidgets('a formula that cannot be typeset does not take the screen', (
