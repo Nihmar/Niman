@@ -328,7 +328,7 @@ final class ShellTemplateFlow {
     final from = origin();
     final selected = from.selected;
     if (selected == null || from.isDir) return '';
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
     if (narrow && from.treeVisible) return '';
     if (templateFolder.isNotEmpty && isUnder(templateFolder, selected)) {
       return '';

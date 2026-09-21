@@ -85,30 +85,6 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _previewModeMeta = const VerificationMeta(
-    'previewMode',
-  );
-  @override
-  late final GeneratedColumn<String> previewMode = GeneratedColumn<String>(
-    'preview_mode',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('auto'),
-  );
-  static const VerificationMeta _splitRatioMeta = const VerificationMeta(
-    'splitRatio',
-  );
-  @override
-  late final GeneratedColumn<double> splitRatio = GeneratedColumn<double>(
-    'split_ratio',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.55),
-  );
   static const VerificationMeta _languageMeta = const VerificationMeta(
     'language',
   );
@@ -196,8 +172,6 @@ class $AppSettingsTable extends AppSettings
     autoUpdateEnabled,
     closeToTray,
     lastUpdateCheckMs,
-    previewMode,
-    splitRatio,
     language,
     themeBrightness,
     themePalette,
@@ -264,21 +238,6 @@ class $AppSettingsTable extends AppSettings
           data['last_update_check_ms']!,
           _lastUpdateCheckMsMeta,
         ),
-      );
-    }
-    if (data.containsKey('preview_mode')) {
-      context.handle(
-        _previewModeMeta,
-        previewMode.isAcceptableOrUnknown(
-          data['preview_mode']!,
-          _previewModeMeta,
-        ),
-      );
-    }
-    if (data.containsKey('split_ratio')) {
-      context.handle(
-        _splitRatioMeta,
-        splitRatio.isAcceptableOrUnknown(data['split_ratio']!, _splitRatioMeta),
       );
     }
     if (data.containsKey('language')) {
@@ -371,14 +330,6 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.int,
         data['${effectivePrefix}last_update_check_ms'],
       ),
-      previewMode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}preview_mode'],
-      )!,
-      splitRatio: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}split_ratio'],
-      )!,
       language: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}language'],
@@ -445,17 +396,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// first check runs (issue #81).
   final int? lastUpdateCheckMs;
 
-  /// The preview layout mode: `auto` (width-based), `split` or `switch`
-  /// (forced; default `auto`).
-  ///
-  /// App-wide, with the split ratio: unlike the editor settings T-ML-10
-  /// moved into the library folder, these two follow the screen. Carrying
-  /// them in the folder would move a tablet's layout onto a phone.
-  final String previewMode;
-
-  /// The editor|preview split fraction (0..1; default 0.55).
-  final double splitRatio;
-
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
   final String language;
@@ -506,8 +446,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.autoUpdateEnabled,
     required this.closeToTray,
     this.lastUpdateCheckMs,
-    required this.previewMode,
-    required this.splitRatio,
     required this.language,
     required this.themeBrightness,
     required this.themePalette,
@@ -529,8 +467,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     if (!nullToAbsent || lastUpdateCheckMs != null) {
       map['last_update_check_ms'] = Variable<int>(lastUpdateCheckMs);
     }
-    map['preview_mode'] = Variable<String>(previewMode);
-    map['split_ratio'] = Variable<double>(splitRatio);
     map['language'] = Variable<String>(language);
     map['theme_brightness'] = Variable<String>(themeBrightness);
     map['theme_palette'] = Variable<String>(themePalette);
@@ -559,8 +495,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       lastUpdateCheckMs: lastUpdateCheckMs == null && nullToAbsent
           ? const Value.absent()
           : Value(lastUpdateCheckMs),
-      previewMode: Value(previewMode),
-      splitRatio: Value(splitRatio),
       language: Value(language),
       themeBrightness: Value(themeBrightness),
       themePalette: Value(themePalette),
@@ -589,8 +523,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       autoUpdateEnabled: serializer.fromJson<bool>(json['autoUpdateEnabled']),
       closeToTray: serializer.fromJson<bool>(json['closeToTray']),
       lastUpdateCheckMs: serializer.fromJson<int?>(json['lastUpdateCheckMs']),
-      previewMode: serializer.fromJson<String>(json['previewMode']),
-      splitRatio: serializer.fromJson<double>(json['splitRatio']),
       language: serializer.fromJson<String>(json['language']),
       themeBrightness: serializer.fromJson<String>(json['themeBrightness']),
       themePalette: serializer.fromJson<String>(json['themePalette']),
@@ -614,8 +546,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'autoUpdateEnabled': serializer.toJson<bool>(autoUpdateEnabled),
       'closeToTray': serializer.toJson<bool>(closeToTray),
       'lastUpdateCheckMs': serializer.toJson<int?>(lastUpdateCheckMs),
-      'previewMode': serializer.toJson<String>(previewMode),
-      'splitRatio': serializer.toJson<double>(splitRatio),
       'language': serializer.toJson<String>(language),
       'themeBrightness': serializer.toJson<String>(themeBrightness),
       'themePalette': serializer.toJson<String>(themePalette),
@@ -633,8 +563,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     bool? autoUpdateEnabled,
     bool? closeToTray,
     Value<int?> lastUpdateCheckMs = const Value.absent(),
-    String? previewMode,
-    double? splitRatio,
     String? language,
     String? themeBrightness,
     String? themePalette,
@@ -651,8 +579,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     lastUpdateCheckMs: lastUpdateCheckMs.present
         ? lastUpdateCheckMs.value
         : this.lastUpdateCheckMs,
-    previewMode: previewMode ?? this.previewMode,
-    splitRatio: splitRatio ?? this.splitRatio,
     language: language ?? this.language,
     themeBrightness: themeBrightness ?? this.themeBrightness,
     themePalette: themePalette ?? this.themePalette,
@@ -683,12 +609,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       lastUpdateCheckMs: data.lastUpdateCheckMs.present
           ? data.lastUpdateCheckMs.value
           : this.lastUpdateCheckMs,
-      previewMode: data.previewMode.present
-          ? data.previewMode.value
-          : this.previewMode,
-      splitRatio: data.splitRatio.present
-          ? data.splitRatio.value
-          : this.splitRatio,
       language: data.language.present ? data.language.value : this.language,
       themeBrightness: data.themeBrightness.present
           ? data.themeBrightness.value
@@ -718,8 +638,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('autoUpdateEnabled: $autoUpdateEnabled, ')
           ..write('closeToTray: $closeToTray, ')
           ..write('lastUpdateCheckMs: $lastUpdateCheckMs, ')
-          ..write('previewMode: $previewMode, ')
-          ..write('splitRatio: $splitRatio, ')
           ..write('language: $language, ')
           ..write('themeBrightness: $themeBrightness, ')
           ..write('themePalette: $themePalette, ')
@@ -739,8 +657,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     autoUpdateEnabled,
     closeToTray,
     lastUpdateCheckMs,
-    previewMode,
-    splitRatio,
     language,
     themeBrightness,
     themePalette,
@@ -759,8 +675,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.autoUpdateEnabled == this.autoUpdateEnabled &&
           other.closeToTray == this.closeToTray &&
           other.lastUpdateCheckMs == this.lastUpdateCheckMs &&
-          other.previewMode == this.previewMode &&
-          other.splitRatio == this.splitRatio &&
           other.language == this.language &&
           other.themeBrightness == this.themeBrightness &&
           other.themePalette == this.themePalette &&
@@ -777,8 +691,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<bool> autoUpdateEnabled;
   final Value<bool> closeToTray;
   final Value<int?> lastUpdateCheckMs;
-  final Value<String> previewMode;
-  final Value<double> splitRatio;
   final Value<String> language;
   final Value<String> themeBrightness;
   final Value<String> themePalette;
@@ -793,8 +705,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.autoUpdateEnabled = const Value.absent(),
     this.closeToTray = const Value.absent(),
     this.lastUpdateCheckMs = const Value.absent(),
-    this.previewMode = const Value.absent(),
-    this.splitRatio = const Value.absent(),
     this.language = const Value.absent(),
     this.themeBrightness = const Value.absent(),
     this.themePalette = const Value.absent(),
@@ -810,8 +720,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.autoUpdateEnabled = const Value.absent(),
     this.closeToTray = const Value.absent(),
     this.lastUpdateCheckMs = const Value.absent(),
-    this.previewMode = const Value.absent(),
-    this.splitRatio = const Value.absent(),
     this.language = const Value.absent(),
     this.themeBrightness = const Value.absent(),
     this.themePalette = const Value.absent(),
@@ -827,8 +735,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<bool>? autoUpdateEnabled,
     Expression<bool>? closeToTray,
     Expression<int>? lastUpdateCheckMs,
-    Expression<String>? previewMode,
-    Expression<double>? splitRatio,
     Expression<String>? language,
     Expression<String>? themeBrightness,
     Expression<String>? themePalette,
@@ -844,8 +750,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (autoUpdateEnabled != null) 'auto_update_enabled': autoUpdateEnabled,
       if (closeToTray != null) 'close_to_tray': closeToTray,
       if (lastUpdateCheckMs != null) 'last_update_check_ms': lastUpdateCheckMs,
-      if (previewMode != null) 'preview_mode': previewMode,
-      if (splitRatio != null) 'split_ratio': splitRatio,
       if (language != null) 'language': language,
       if (themeBrightness != null) 'theme_brightness': themeBrightness,
       if (themePalette != null) 'theme_palette': themePalette,
@@ -865,8 +769,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<bool>? autoUpdateEnabled,
     Value<bool>? closeToTray,
     Value<int?>? lastUpdateCheckMs,
-    Value<String>? previewMode,
-    Value<double>? splitRatio,
     Value<String>? language,
     Value<String>? themeBrightness,
     Value<String>? themePalette,
@@ -882,8 +784,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       autoUpdateEnabled: autoUpdateEnabled ?? this.autoUpdateEnabled,
       closeToTray: closeToTray ?? this.closeToTray,
       lastUpdateCheckMs: lastUpdateCheckMs ?? this.lastUpdateCheckMs,
-      previewMode: previewMode ?? this.previewMode,
-      splitRatio: splitRatio ?? this.splitRatio,
       language: language ?? this.language,
       themeBrightness: themeBrightness ?? this.themeBrightness,
       themePalette: themePalette ?? this.themePalette,
@@ -915,12 +815,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     }
     if (lastUpdateCheckMs.present) {
       map['last_update_check_ms'] = Variable<int>(lastUpdateCheckMs.value);
-    }
-    if (previewMode.present) {
-      map['preview_mode'] = Variable<String>(previewMode.value);
-    }
-    if (splitRatio.present) {
-      map['split_ratio'] = Variable<double>(splitRatio.value);
     }
     if (language.present) {
       map['language'] = Variable<String>(language.value);
@@ -959,8 +853,6 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('autoUpdateEnabled: $autoUpdateEnabled, ')
           ..write('closeToTray: $closeToTray, ')
           ..write('lastUpdateCheckMs: $lastUpdateCheckMs, ')
-          ..write('previewMode: $previewMode, ')
-          ..write('splitRatio: $splitRatio, ')
           ..write('language: $language, ')
           ..write('themeBrightness: $themeBrightness, ')
           ..write('themePalette: $themePalette, ')
@@ -3943,8 +3835,6 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<bool> autoUpdateEnabled,
       Value<bool> closeToTray,
       Value<int?> lastUpdateCheckMs,
-      Value<String> previewMode,
-      Value<double> splitRatio,
       Value<String> language,
       Value<String> themeBrightness,
       Value<String> themePalette,
@@ -3961,8 +3851,6 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<bool> autoUpdateEnabled,
       Value<bool> closeToTray,
       Value<int?> lastUpdateCheckMs,
-      Value<String> previewMode,
-      Value<double> splitRatio,
       Value<String> language,
       Value<String> themeBrightness,
       Value<String> themePalette,
@@ -4008,16 +3896,6 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<int> get lastUpdateCheckMs => $composableBuilder(
     column: $table.lastUpdateCheckMs,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get previewMode => $composableBuilder(
-    column: $table.previewMode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get splitRatio => $composableBuilder(
-    column: $table.splitRatio,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4096,16 +3974,6 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get previewMode => $composableBuilder(
-    column: $table.previewMode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get splitRatio => $composableBuilder(
-    column: $table.splitRatio,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get language => $composableBuilder(
     column: $table.language,
     builder: (column) => ColumnOrderings(column),
@@ -4179,16 +4047,6 @@ class $$AppSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get previewMode => $composableBuilder(
-    column: $table.previewMode,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get splitRatio => $composableBuilder(
-    column: $table.splitRatio,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<String> get language =>
       $composableBuilder(column: $table.language, builder: (column) => column);
 
@@ -4258,8 +4116,6 @@ class $$AppSettingsTableTableManager
                 Value<bool> autoUpdateEnabled = const Value.absent(),
                 Value<bool> closeToTray = const Value.absent(),
                 Value<int?> lastUpdateCheckMs = const Value.absent(),
-                Value<String> previewMode = const Value.absent(),
-                Value<double> splitRatio = const Value.absent(),
                 Value<String> language = const Value.absent(),
                 Value<String> themeBrightness = const Value.absent(),
                 Value<String> themePalette = const Value.absent(),
@@ -4274,8 +4130,6 @@ class $$AppSettingsTableTableManager
                 autoUpdateEnabled: autoUpdateEnabled,
                 closeToTray: closeToTray,
                 lastUpdateCheckMs: lastUpdateCheckMs,
-                previewMode: previewMode,
-                splitRatio: splitRatio,
                 language: language,
                 themeBrightness: themeBrightness,
                 themePalette: themePalette,
@@ -4292,8 +4146,6 @@ class $$AppSettingsTableTableManager
                 Value<bool> autoUpdateEnabled = const Value.absent(),
                 Value<bool> closeToTray = const Value.absent(),
                 Value<int?> lastUpdateCheckMs = const Value.absent(),
-                Value<String> previewMode = const Value.absent(),
-                Value<double> splitRatio = const Value.absent(),
                 Value<String> language = const Value.absent(),
                 Value<String> themeBrightness = const Value.absent(),
                 Value<String> themePalette = const Value.absent(),
@@ -4308,8 +4160,6 @@ class $$AppSettingsTableTableManager
                 autoUpdateEnabled: autoUpdateEnabled,
                 closeToTray: closeToTray,
                 lastUpdateCheckMs: lastUpdateCheckMs,
-                previewMode: previewMode,
-                splitRatio: splitRatio,
                 language: language,
                 themeBrightness: themeBrightness,
                 themePalette: themePalette,

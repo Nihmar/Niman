@@ -128,11 +128,6 @@ final class CzechStrings extends Strings {
   @override
   String get settingsToggleOff => 'Vypnuto';
   @override
-  String get settingsPreviewEnabledTitle => 'Náhled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Zobrazí renderovanou poznámku vedle zdrojového editoru';
-  @override
   String get switchToWysiwygTooltip => 'Přepnout na editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Přepnout na zdrojový Markdown';
@@ -273,20 +268,6 @@ final class CzechStrings extends Strings {
   String get noteTextScaleSubtitle => 'Editor a náhled, vždy v souladu';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Režim náhledu';
-  @override
-  String get previewModeSubtitle =>
-      'Zda náhled sdílí obrazovku s editorem nebo ho nahrazuje';
-  @override
-  String get previewModeAuto => 'Po bocích';
-  @override
-  String get previewModeSwitch => 'Celá obrazovka';
-  @override
-  String get splitRatioTitle => 'Šířka rozdělení';
-  @override
-  String get splitRatioSubtitle => 'Podíl editoru, když je náhled po bocích';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formát odkazu';
@@ -546,11 +527,6 @@ final class CzechStrings extends Strings {
   String get showPreviewTooltip => 'Zobrazit náhled';
   @override
   String get showEditorTooltip => 'Zobrazit editor';
-  @override
-  String get enterFullScreenTooltip => 'Celá obrazovka';
-  @override
-  String get exitFullScreenTooltip => 'Opuštět celou obrazovku';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(surová HTML tabulka)';

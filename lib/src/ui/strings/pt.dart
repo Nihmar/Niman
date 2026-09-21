@@ -126,11 +126,6 @@ final class PortugueseStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desativado';
   @override
-  String get settingsPreviewEnabledTitle => 'Pré-visualização';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Mostra a nota renderizada ao lado do editor de fonte';
-  @override
   String get switchToWysiwygTooltip => 'Trocar para o editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Trocar para a fonte Markdown';
@@ -273,21 +268,6 @@ final class PortugueseStrings extends Strings {
       'O editor e a pré-visualização, que sempre coincidem';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modo de pré-visualização';
-  @override
-  String get previewModeSubtitle =>
-      'Se a pré-visualização divide a tela com o editor ou o substitui';
-  @override
-  String get previewModeAuto => 'Lado a lado';
-  @override
-  String get previewModeSwitch => 'Tela cheia';
-  @override
-  String get splitRatioTitle => 'Largura da divisão';
-  @override
-  String get splitRatioSubtitle =>
-      'A parte do editor quando a pré-visualização está lado a lado';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formato do link';
@@ -544,11 +524,6 @@ final class PortugueseStrings extends Strings {
   String get showPreviewTooltip => 'Mostrar pré-visualização';
   @override
   String get showEditorTooltip => 'Mostrar editor';
-  @override
-  String get enterFullScreenTooltip => 'Tela cheia';
-  @override
-  String get exitFullScreenTooltip => 'Sair da tela cheia';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabela HTML bruta)';

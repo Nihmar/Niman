@@ -145,7 +145,6 @@ void main() {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       expect((await store.read()).editorKind, EditorKind.source);
-      expect((await store.read()).previewEnabled, isTrue);
       // The unified engine is opt-in: an older file must read back as the
       // surfaces the app has always shipped.
       expect((await store.read()).markdownEngine, MarkdownEngine.legacy);
@@ -173,7 +172,7 @@ void main() {
       expect((await store.read()).markdownEngine, MarkdownEngine.legacy);
     });
 
-    test('round trips the editor kind and the preview switch', () async {
+    test('round trips the editor kind', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       const config = LibraryConfig(
@@ -182,12 +181,31 @@ void main() {
         quickNotePath: null,
         listNoteFolder: 'Lists',
         editorKind: EditorKind.wysiwyg,
-        previewEnabled: false,
       );
       await store.write(config);
       final read = await store.read();
       expect(read.editorKind, EditorKind.wysiwyg);
-      expect(read.previewEnabled, isFalse);
+      expect(read, config);
+    });
+
+    test('the dropped preview switch is read but never written back', () async {
+      // The key stays understood — a file that carries it must not have it
+      // handed back as an unknown one to preserve forever — and the preview
+      // is part of the app now, so nothing writes it again.
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.file.parent.create(recursive: true);
+      await store.file.writeAsString(
+        '{"previewEnabled": false, "lineNumbers": false}',
+      );
+      final read = await store.read();
+      expect(read.extra, isNot(contains('previewEnabled')));
+      expect(read.lineNumbers, isFalse);
+      await store.write(read);
+      expect(
+        await store.file.readAsString(),
+        isNot(contains('previewEnabled')),
+      );
     });
 
     test('round trips a single enabled editor', () async {

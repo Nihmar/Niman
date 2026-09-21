@@ -182,7 +182,6 @@ void main() {
               showLineNumbers: true,
               autofocusEditor: false,
               showPreview: preview,
-              splitPreview: preview,
               readNote: (_) async => '# Hello',
             ),
           ),
@@ -221,13 +220,16 @@ void main() {
       await pumpNotePane(tester, preview: true);
 
       // The editor's size and the preview's scale agree — 1.2 either way
-      // — and the interface's 1.8 reaches neither.
+      // — and the interface's 1.8 reaches neither. The editor stays
+      // mounted behind the preview, out of the default finders' reach.
       expect(
         scalerAt(tester, find.byType(MarkdownPreview)).scale(10),
         closeTo(12, 1e-9),
       );
       expect(
-        tester.widget<NoteEditor>(find.byType(NoteEditor)).fontSize,
+        tester
+            .widget<NoteEditor>(find.byType(NoteEditor, skipOffstage: false))
+            .fontSize,
         closeTo(baseNoteFontSize * 1.2, 1e-9),
       );
     });

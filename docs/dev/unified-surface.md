@@ -1577,92 +1577,89 @@ available check that no line was double-counted or dropped:
 
 ---
 
-### 4.9.7 The removal that was planned, measured, and not taken
+### 4.9.7 The removal, taken
 
-Everything the phase set out to build is built, tested and behind a flag that is
-off by default. What remains is one removal, and it is written here because the
-next person to pick it up will read this document rather than a commit log.
+This section first recorded a removal that had been planned, measured — 176 sites
+across 56 files, cut three independent ways — and then **not** taken: on
+2026-09-21 the split was kept. The same day, with those numbers in hand, the
+decision was reversed and the removal was run. What follows is what it actually
+took, written down for the same reason the plan was: whoever touches this
+surface next should find its shape here rather than reconstruct it from a diff.
 
-**The removal, in one pass, in this order:**
+**What went, in the order the plan set out:**
 
-1. `previewEnabled` — the setting, the session accessor, the appearance row, the
-   search entry, and the shell's conditionals. The preview stops being optional
-   and becomes part of the app.
-2. The split ratio — `splitRatio`/`splitFraction`, `PreviewLayoutMode`'s third
-   value and the draggable divider's persistence. The pane keeps a fixed share.
+1. `previewEnabled` — the library setting, the session accessor, the Editor
+   settings switch, the settings-search entry, the `LibraryConfig` field, and
+   the shell's conditionals. The preview is part of the app now, so
+   `_previewToggleVisible` is only about the note: a kind GUI hides the eye
+   unless the note is being edited raw.
+2. The split ratio and the layout override — `PreviewLayoutMode`,
+   `previewSplits`, `splitRatio`/`splitFraction`, `defaultSplitRatio`,
+   `minSplitRatio`, `maxSplitRatio`, the app-bar picker, the Appearance row
+   and the drag persistence. **The database columns went too**, against this
+   document's own advice to leave them: `ALTER TABLE ... DROP COLUMN` is two
+   lines at v27, the chain already does exactly that at v17, and a settings
+   field nothing reads is a lie about what the app does. `splitBreakpoint`
+   kept its job and lost its name — it is `wideBreakpoint` now, because what
+   it decides is whether the shell is the rail-tree-note shape or the
+   phone's.
+3. The split itself — `EditorPreviewSplit` (deleted, with its file),
+   `_previewVisible`, `_previewFullScreen`, `ExitFullScreenButton`,
+   `PreviewLayoutModeAction`, the shell's `previewSplitsHere` /
+   `previewFullScreen` / `previewVisible` props and `onLeaveFullScreenPreview`,
+   `DetailTab.splitPreview`, `NoteStatusRow.splitPreview`, and `NoteView`'s
+   four split parameters. The note is one pane: `NoteView.showPreview` picks
+   which of the two it holds, and the other stays mounted `Offstage`, where it
+   already was.
+4. `docs/user/editing.md` and `docs/user/settings.md`, in the same commit:
+   both described a screen and three settings that no longer exist.
 
-   **Measured before starting, because the shape of this step is not what it
-   looks like.** 176 sites across 56 files, and they are not 176 edits of the
-   same kind:
+**Four things the removal changed rather than deleted**, each a decision:
 
-   | where | sites | what it means |
-   |---|---:|---|
-   | `db/app_database*.dart` | 44 | **a settings column**, so this step carries a schema migration — and `AppDatabase` is the database with the long migration chain |
-   | `ui/strings/*.dart` | 76 | the label and its description, in **38 locales**, two strings each |
-   | `ui/settings_appearance.dart` | 12 | the row, its picker and its loader |
-   | everything else in `lib/` | 33 | the config field, the session accessor, the shell, the split widget |
-   | `test/` | 11 | in five files |
+- **The phone's preview flag became the tab's.** `_previewVisible` was the
+  phone's own boolean, so the preview was on for the *screen*: opening the
+  next note kept it. The flag now lives in the note's tab memento, as it
+  always did on a wide window, so a note comes back the way it was left and
+  the next one opens in the editor. Both layouts read it through one
+  `_notePreview`, and `_mementoOf` answers with an empty memento for a note
+  whose tab this build has not made yet — the transition frame — instead of
+  the note before it.
+- **A template's `open: preview` now works on both layouts.** It used to set
+  `_previewVisible`, which the wide layout never reads, so the directive did
+  nothing there. It is applied to the filed note's tab, queued behind the
+  follow that makes the tab (`ShellWorkspace.showPreviewWhenOpen`).
+- **`previewEnabled` was a known `settings.json` key.** It stays in
+  `_knownKeys` as a legacy key that is read and never written, the way
+  `spellDictionary` is: a library whose file still says `false` gets the key
+  dropped on the next write rather than preserved forever as an unknown one.
+- **The immersive full-screen preview went with the split**, rather than
+  staying as chrome-less reading: one pane, one mode, and the phone's note is
+  a normal page with its app bar either way. That was a product decision
+  taken with the removal, not a consequence of it.
 
-   Two consequences worth deciding *before* the removal rather than during it:
-   the column does not have to go — a settings field that is no longer read costs
-   nothing and avoids a migration on the database that has the longest chain in
-   the project, and that is the cheaper and safer half of this step; and the
-   localized strings are the largest single block of edits for the smallest
-   visible change, so they may reasonably wait until the removal is proven
-   rather than being rewritten twice.
-3. The split itself — `EditorPreviewSplit`, `_previewVisible`,
-   `_previewFullScreen` and the status row's switch. One pane, one mode.
-4. `docs/user/editing.md`, in the **same commit**: it describes the split and
-   the preview today, and would describe a screen that no longer exists.
+**The words.** The two settings' strings were removed rather than left dead:
+ten getters from `base.dart` and from each of the 37 locales — 380
+declarations — plus the ten accessors and `splitRatioValue` from
+`strings.dart`. One string stayed: `commandNeedPreview` still labels
+`CommandNeed.previewToggle`, whose only remaining condition is that the note
+is text, so its wording ("With the preview on, on a text note") is now half a
+sentence about a setting that no longer exists. Rewording it means rewording
+it in 38 languages, which is a translation task, not this one.
 
-It is one pass and not four commits because the sites are interdependent —
-settings, session, shell, `note_view.dart` and their tests — and nothing
-compiles until the last of them is consistent. There is no green intermediate
-state, which is why it wants a session with room to run it rather than the tail
-of one.
+**What the measurement got wrong.** The plan's two feared costs were the
+migration and the strings, and it recommended leaving both. Both turned out to
+be the cheap half: the migration is a `DROP COLUMN` with a precedent ten
+versions back, and the strings are 380 mechanical deletions a script did. What
+the measurement got right was the reason there is no green intermediate state,
+and it was never the count: settings, session, the shell, the note view, the
+database and their tests had to move in one commit because nothing compiles
+until the last of them agrees.
 
-**Two corrections to this document's own plan**, both found by starting the
-removal rather than reading it:
-
-- **`preview/editor_lines.dart` and the `onIndicator` contract do not go.** This
-  document listed them with the scroll sync. They are not its: the sync was
-  their first reader and **typewriter mode** is their other, asking
-  `caretRowCenter` where the cursor's line is. Removing them means
-  reimplementing typewriter centring first — a piece of work of its own. Both
-  files now say so where they are declared;
-- **`preview/scroll_sync.dart` is already gone** (commit `f0bcd09`), with its
-  test. It was safe to take first because no user could see it and no
-  documentation mentioned it.
-
-**What is already satisfied**, so that the removal is a removal and not a
-gamble: the engine renders the same words as the preview on every fixture the
-harness can drive, at a viewport tall enough that neither windows anything; the
-geometry note reaches first content in 91 ms against the preview's recorded
-137 ms, laying out 85 blocks of 7 530; the preview's widget tests live on the
-new engine, including 652 CommonMark examples pumped without an exception. The
-numbers are in §4.9.5.
-
-**Decided, 2026-09-21: the split stays.** The removal above is not pending work
-but a rejected option, and it is recorded as a decision because the alternative
-is a real product change — it takes a screen away from people who have it — and
-because the measurements make re-litigating it expensive in the wrong direction.
-Three independent ways of cutting it were measured before choosing: the split
-ratio is 176 sites across 56 files, the pane alone 66 across 25, `previewEnabled`
-48 across 12. None of them is a slice; each is a pass through the shell's layout,
-chrome, actions and Zen, with no green intermediate state.
-
-So Phase 2 ends here, and it ends **complete as designed**: one engine, one
-theme, one pipeline, three modes — with the `read` mode built, measured and
-behind `MarkdownEngine.unified` rather than turned on. What the phase bought is
-that turning it on is now a decision about a surface that has been *shown* to
-match the one it replaces: identical rendering on every fixture the harness can
-drive, 91 ms to first content against 137, and the preview's own tests running
-against it.
-
-The one line that remains, whenever it is wanted, is the default in
-`LibraryConfig` — `MarkdownEngine.legacy` becomes `unified` — together with
-whatever the split's future then is. §4.9.5 has the numbers that should decide
-it.
+**Where it left the phase.** `markdownEngine` still defaults to `legacy`, so
+the eye shows the old preview until someone turns the unified engine on; the
+numbers that should decide that are §4.9.5. What the split's departure removes
+is the surface the two engines were being compared *in*, which is why the
+comparison had to come first and did.
 
 ## 5.1 Global stats
 

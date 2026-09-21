@@ -53,8 +53,6 @@ abstract base class Strings {
   String settingsSearchResults(int count);
   String get settingsToggleOn;
   String get settingsToggleOff;
-  String get settingsPreviewEnabledTitle;
-  String get settingsPreviewEnabledSubtitle;
   String get switchToWysiwygTooltip;
   String get switchToSourceTooltip;
   String get switchToSourceLabel;
@@ -131,13 +129,6 @@ abstract base class Strings {
   String get noteTextScaleSubtitle;
 
   // Settings: preview mode.
-  String get previewModeTitle;
-  String get previewModeSubtitle;
-  String get previewModeAuto;
-  String get previewModeSwitch;
-  String get splitRatioTitle;
-  String get splitRatioSubtitle;
-
   // Settings: editor formatting.
   String get linkTypeTitle;
   String get linkTypeSubtitle;
@@ -276,9 +267,6 @@ abstract base class Strings {
   // Preview switch (phone mode).
   String get showPreviewTooltip;
   String get showEditorTooltip;
-  String get enterFullScreenTooltip;
-  String get exitFullScreenTooltip;
-
   // Raw-HTML table fallback.
   String get htmlTableFallback;
 

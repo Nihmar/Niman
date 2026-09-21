@@ -3,21 +3,6 @@ import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
 
-/// The preview layout mode (settings, T-M2-08): follow the width, or
-/// keep one pane at any width.
-///
-/// A third value used to force the split at any width. Once a narrow
-/// screen stopped honouring it (T-CL-05) it did the same as [auto]
-/// everywhere, so T-CL-07 dropped it; a stored `split` reads back as
-/// [auto], which is what it now means.
-enum PreviewLayoutMode {
-  /// Side by side at >= 600 dp, one pane below it.
-  auto,
-
-  /// One pane with the top switch, at any width.
-  fullScreen,
-}
-
 /// Which editor a library writes in (T-WYS-03, default source).
 enum EditorKind {
   /// The Markdown source editor (re_editor).
@@ -62,32 +47,14 @@ enum LinkType {
   markdown,
 }
 
-/// Below this width the shell is single-pane (spec: phones are
-/// full-screen tree or editor, the split lands at 600 dp and up).
-const double splitBreakpoint = 600;
-
-/// Whether the editor and the preview actually sit side by side.
+/// At and above this width the shell is wide: the rail, the tree and the
+/// note share the screen (spec: at 600 dp and up). Below it the phone
+/// layout, where the tree and the note are two full-screen panes.
 ///
-/// A narrow screen never splits, whatever the mode says: two panes of a
-/// Markdown editor at phone width are two unusable panes, and the spec
-/// puts the split at 600 dp for that reason. Above it, the mode decides.
-///
-/// It lives here rather than in the shell because the settings screen
-/// asks the same question: neither the layout row nor the split-ratio row
-/// means anything where the panes cannot share a screen (T-CL-05).
-bool previewSplits(
-  PreviewLayoutMode mode, {
-  required bool narrow,
-  EditorKind editor = EditorKind.source,
-  bool previewEnabled = true,
-}) =>
-    previewEnabled &&
-    editor == EditorKind.source &&
-    !narrow &&
-    mode == PreviewLayoutMode.auto;
-
-/// The default editor share of the split.
-const double defaultSplitRatio = 0.55;
+/// It used to be named for the editor|preview split, which landed here
+/// and is gone: the width still decides the shell's shape, which is what
+/// every reader of it was actually asking.
+const double wideBreakpoint = 600;
 
 /// The default folder (library-relative) of the list notes (T-TK-06).
 const String defaultListFolder = 'Lists';
@@ -99,12 +66,6 @@ const String defaultTemplateFolder = 'Templates';
 /// The default folder (library-relative) holding the attachments: images
 /// copied in by the editor and voice-note clips alike (issue #56).
 const String defaultAttachmentsFolder = 'assets';
-
-/// The lower bound of the allowed split range.
-const double minSplitRatio = 0.2;
-
-/// The upper bound of the allowed split range.
-const double maxSplitRatio = 0.8;
 
 /// Global app settings, a single row (id 1).
 final class AppSettingsRepo {
@@ -188,44 +149,6 @@ final class AppSettingsRepo {
       AppSettingsCompanion(
         lastUpdateCheckMs: Value(time.millisecondsSinceEpoch),
       ),
-    );
-  }
-
-  /// The preview layout mode (default [PreviewLayoutMode.auto]).
-  Future<PreviewLayoutMode> previewMode() async {
-    final rows = await _db.select(_db.appSettings).get();
-    if (rows.isEmpty) return PreviewLayoutMode.auto;
-    return switch (rows.first.previewMode) {
-      'switch' || 'fullScreen' => PreviewLayoutMode.fullScreen,
-      // 'split' included: it is what auto already does (T-CL-07).
-      _ => PreviewLayoutMode.auto,
-    };
-  }
-
-  /// Persists the preview layout mode.
-  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(previewMode: Value(mode.name)),
-    );
-  }
-
-  /// The editor|preview split ratio (0..1; default [defaultSplitRatio]).
-  Future<double> splitRatio() async {
-    final rows = await _db.select(_db.appSettings).get();
-    return rows.isEmpty ? defaultSplitRatio : rows.first.splitRatio;
-  }
-
-  /// Persists the split ratio (clamped to the allowed range).
-  Future<void> setSplitRatio(double ratio) async {
-    await _ensureRow();
-    final clamped = ratio < minSplitRatio
-        ? minSplitRatio
-        : ratio > maxSplitRatio
-        ? maxSplitRatio
-        : ratio;
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(splitRatio: Value(clamped)),
     );
   }
 

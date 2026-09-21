@@ -130,11 +130,6 @@ final class RomanianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Dezactivat';
   @override
-  String get settingsPreviewEnabledTitle => 'Previzualizare';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Afișează nota renderizată lângă editorul de sursă';
-  @override
   String get switchToWysiwygTooltip => 'Comută la editorul WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Comută la sursa Markdown';
@@ -277,21 +272,6 @@ final class RomanianStrings extends Strings {
       'Editorul și previzualizarea, mereu de acord';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modul de previzualizare';
-  @override
-  String get previewModeSubtitle =>
-      'Dacă previzualizarea împarte ecranul cu editorul sau îl înlocuiește';
-  @override
-  String get previewModeAuto => 'Pe lângă';
-  @override
-  String get previewModeSwitch => 'Ecran întreg';
-  @override
-  String get splitRatioTitle => 'Lățimea diviziunii';
-  @override
-  String get splitRatioSubtitle =>
-      'Cota editorului când previzualizarea este pe lângă';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formatul linkului';
@@ -553,11 +533,6 @@ final class RomanianStrings extends Strings {
   String get showPreviewTooltip => 'Afișează previzualizarea';
   @override
   String get showEditorTooltip => 'Afișează editorul';
-  @override
-  String get enterFullScreenTooltip => 'Ecran întreg';
-  @override
-  String get exitFullScreenTooltip => 'Ieși din ecranul întreg';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabel HTML brut)';

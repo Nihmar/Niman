@@ -115,10 +115,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get settingsToggleOff => 'オフ';
   @override
-  String get settingsPreviewEnabledTitle => 'プレビュー';
-  @override
-  String get settingsPreviewEnabledSubtitle => 'ソースエディタの横にレンダリング済みノートを表示する';
-  @override
   String get switchToWysiwygTooltip => 'WYSIWYG エディタに切り替え';
   @override
   String get switchToSourceTooltip => 'Markdown ソースに切り替え';
@@ -249,19 +245,6 @@ final class JapaneseStrings extends Strings {
   String get noteTextScaleSubtitle => 'エディタとプレビューは常に同じです';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'プレビューモード';
-  @override
-  String get previewModeSubtitle => 'プレビューが画面をエディタと分かち合うか置き換えるか';
-  @override
-  String get previewModeAuto => '並列表示';
-  @override
-  String get previewModeSwitch => '全画面';
-  @override
-  String get splitRatioTitle => '分割幅';
-  @override
-  String get splitRatioSubtitle => 'プレビューが横にあるときのエディタの比率';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'リンクの形式';
@@ -509,11 +492,6 @@ final class JapaneseStrings extends Strings {
   String get showPreviewTooltip => 'プレビューを表示';
   @override
   String get showEditorTooltip => 'エディタを表示';
-  @override
-  String get enterFullScreenTooltip => '全画面';
-  @override
-  String get exitFullScreenTooltip => '全画面を終了';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '（生の HTML テーブル）';

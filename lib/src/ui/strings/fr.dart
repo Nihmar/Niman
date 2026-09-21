@@ -129,11 +129,6 @@ final class FrenchStrings extends Strings {
   @override
   String get settingsToggleOff => 'Désactivé';
   @override
-  String get settingsPreviewEnabledTitle => 'Aperçu';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Affiche la note rendue à côté de l’éditeur source';
-  @override
   String get switchToWysiwygTooltip => 'Passer à l’éditeur WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Passer à la source Markdown';
@@ -279,21 +274,6 @@ final class FrenchStrings extends Strings {
       'L’éditeur et l’aperçu, qui restent d’accord';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Mode aperçu';
-  @override
-  String get previewModeSubtitle =>
-      'Si l’aperçu partage l’écran avec l’éditeur ou le remplace';
-  @override
-  String get previewModeAuto => 'Côte à côte';
-  @override
-  String get previewModeSwitch => 'Plein écran';
-  @override
-  String get splitRatioTitle => 'Largeur de la division';
-  @override
-  String get splitRatioSubtitle =>
-      'La part de l’éditeur quand l’aperçu est côte à côte';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format du lien';
@@ -551,11 +531,6 @@ final class FrenchStrings extends Strings {
   String get showPreviewTooltip => 'Afficher l’aperçu';
   @override
   String get showEditorTooltip => 'Afficher l’éditeur';
-  @override
-  String get enterFullScreenTooltip => 'Plein écran';
-  @override
-  String get exitFullScreenTooltip => 'Quitter le plein écran';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tableau HTML brut)';

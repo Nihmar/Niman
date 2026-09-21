@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -157,8 +156,6 @@ void main() {
   });
 
   testWidgets('each tab keeps its own preview', (tester) async {
-    // One pane at a time, so the eye toggles it (side by side has none).
-    await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
     await pumpShell(tester);
     await tester.tap(noteRow('alpha.md'));
     await settle(tester);

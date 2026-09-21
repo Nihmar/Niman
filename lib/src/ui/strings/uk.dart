@@ -129,11 +129,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Вимк.';
   @override
-  String get settingsPreviewEnabledTitle => 'Перегляд';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Показує оформлену нотатку поруч із редактором джерела';
-  @override
   String get switchToWysiwygTooltip => 'Перемкнути на WYSIWYG-редактор';
   @override
   String get switchToSourceTooltip => 'Перемкнути на Markdown-джерело';
@@ -274,20 +269,6 @@ final class UkrainianStrings extends Strings {
       'Редактор і перегляд завжди синхронізовані';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Режим перегляду';
-  @override
-  String get previewModeSubtitle =>
-      'Чи перегляд ділить екран з редактором, чи заміняє його';
-  @override
-  String get previewModeAuto => 'Поруч';
-  @override
-  String get previewModeSwitch => 'Весь екран';
-  @override
-  String get splitRatioTitle => 'Співвідношення розділу';
-  @override
-  String get splitRatioSubtitle => 'Частка редактора, коли перегляд поруч';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат посилання';
@@ -548,11 +529,6 @@ final class UkrainianStrings extends Strings {
   String get showPreviewTooltip => 'Показати перегляд';
   @override
   String get showEditorTooltip => 'Показати редактор';
-  @override
-  String get enterFullScreenTooltip => 'Весь екран';
-  @override
-  String get exitFullScreenTooltip => 'Вийти з режиму всього екрана';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(необроблена HTML-таблиця)';

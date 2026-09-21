@@ -86,6 +86,17 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 27) {
+    // The editor|preview split columns lived here from v5 through v26.
+    await db.customStatement(
+      'ALTER TABLE app_settings ADD COLUMN preview_mode '
+      "TEXT NOT NULL DEFAULT 'auto'",
+    );
+    await db.customStatement(
+      'ALTER TABLE app_settings ADD COLUMN split_ratio '
+      'REAL NOT NULL DEFAULT 0.55',
+    );
+  }
   if (version < 26) await drop('app_settings', 'close_to_tray');
   if (version < 25) await drop('app_settings', 'pinned_commands');
   if (version < 24) await drop('app_settings', 'key_map');
@@ -192,8 +203,6 @@ void main() {
       expect(row.id, 1);
       expect(row.libraryPath, '/old/root');
       expect(row.debugLogsEnabled, true);
-      expect(row.previewMode, 'auto');
-      expect(row.splitRatio, 0.55);
       await db.close();
     },
   );
@@ -235,31 +244,32 @@ void main() {
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.id, 1);
       expect(row.libraryPath, '/old/root');
-      expect(row.previewMode, 'auto');
-      expect(row.splitRatio, 0.55);
       await db.close();
     },
   );
 
-  test('v4 databases gain preview_mode and split_ratio on upgrade, keeping '
-      'values', () async {
-    {
-      final db = AppDatabase(NativeDatabase(dbFile));
-      await _rewindTo(db, 4);
-      await db.customStatement(
-        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
-      );
-      await db.close();
-    }
+  test(
+    'v4 databases arrive at the current schema with their row intact',
+    () async {
+      // v5 added `preview_mode` + `split_ratio` here and v27 took them away
+      // again, so what a database this old has to prove is that the whole
+      // chain leaves the one row that cannot be rebuilt alone.
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 4);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+        );
+        await db.close();
+      }
 
-    final db = AppDatabase(NativeDatabase(dbFile));
-    final row = (await db.select(db.appSettings).get()).single;
-    expect(row.id, 1);
-    expect(row.libraryPath, '/old/root');
-    expect(row.previewMode, 'auto');
-    expect(row.splitRatio, 0.55);
-    await db.close();
-  });
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final row = (await db.select(db.appSettings).get()).single;
+      expect(row.id, 1);
+      expect(row.libraryPath, '/old/root');
+      await db.close();
+    },
+  );
 
   test('v5 databases gain quick_note_path on upgrade, keeping library '
       'settings', () async {
@@ -667,9 +677,10 @@ void main() {
       final names = columns.map((r) => r.read<String>('name'));
       expect(names, isNot(contains('line_numbers')));
       expect(names, isNot(contains('editor_toolbar')));
-      // The two that follow the screen rather than the library stay.
-      expect(names, contains('preview_mode'));
-      expect(names, contains('split_ratio'));
+      // The two that followed the screen rather than the library outlived
+      // this migration by eleven versions, and are gone with the split.
+      expect(names, isNot(contains('preview_mode')));
+      expect(names, isNot(contains('split_ratio')));
       await db.close();
     });
 
@@ -759,13 +770,29 @@ void main() {
     });
   });
 
-  test('a stored "split" layout reads back as side by side', () async {
-    // T-CL-07 dropped the third mode; what it did is what auto does.
+  test('v26 databases lose the split columns on upgrade', () async {
+    {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      await _rewindTo(db, 26);
+      await db.customStatement(
+        'INSERT INTO app_settings (id, library_path) VALUES '
+        "(1, '/old/root')",
+      );
+      await db.close();
+    }
+
     final db = AppDatabase(NativeDatabase(dbFile));
-    await db.customStatement(
-      "INSERT INTO app_settings (id, preview_mode) VALUES (1, 'split')",
+    final columns = await db
+        .customSelect("SELECT name FROM pragma_table_info('app_settings')")
+        .get();
+    final names = columns.map((r) => r.read<String>('name'));
+    expect(names, isNot(contains('preview_mode')));
+    expect(names, isNot(contains('split_ratio')));
+    // The row itself cannot be rebuilt, and the drop must not take it.
+    expect(
+      (await db.select(db.appSettings).get()).single.libraryPath,
+      '/old/root',
     );
-    expect(await AppSettingsRepo(db).previewMode(), PreviewLayoutMode.auto);
     await db.close();
   });
 

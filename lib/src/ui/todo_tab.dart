@@ -86,7 +86,7 @@ final class _TodoTabState extends State<TodoTab> {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
+    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (context, _) {
@@ -168,7 +168,7 @@ final class _TodoTabState extends State<TodoTab> {
   /// what the chips are. On the desktop it opens as a dialog over the
   /// tab: a pushed screen would hide the rail and the list (T-PP-22).
   Future<void> _openHelp() async {
-    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
+    if (MediaQuery.sizeOf(context).width < wideBreakpoint) {
       await Navigator.push(
         context,
         MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),

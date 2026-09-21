@@ -132,9 +132,9 @@ stays visible: this is a writing mode, not a fullscreen.
   the nearest thing first: a find bar closes, a selection collapses, a
   dialog or the palette shuts, and the next `Esc` leaves Zen.
 - **The preview** stays yours: a note read rather than written can be
-  read in Zen in its preview. A split comes apart; the note shows its
-  editor or its preview, as its tab says, and the eye in Zen's bar (or
-  *Show preview* / *Show editor* in the palette) flips between them.
+  read in Zen in its preview. The note shows its editor or its preview,
+  as its tab says, and the eye in Zen's bar (or *Show preview* / *Show
+  editor* in the palette) flips between them.
 - **Split panes.** Zen shows the pane you were in; the other waits
   behind it, notes, undo and all, and comes back on the way out.
 - **Moving between notes.** `Ctrl+Tab`, `Ctrl+O` and the palette work
@@ -299,10 +299,14 @@ yours to do.
 
 ## Preview
 
-Side by side with the editor at 600 dp and up (`auto` mode), one pane on
-narrow screens. Per-library toggles: `previewEnabled`, split ratio
-(0.2–0.8, default 0.55). The preview renders Markdown + math + code
-highlighting.
+The note is one pane, and it holds one of the two: the editor you write
+in, or the rendered note you read. The eye flips between them — in the
+note's status row on a wide window, in the app bar on a phone, or *Show
+preview* / *Show editor* in the palette anywhere. What you leave behind
+keeps its place: the caret, the undo history, the scroll, the typeset
+math and the images are all there when you come back.
+
+The preview renders Markdown + math + code highlighting.
 
 Extras: word count, heading outline, heading folding.
 

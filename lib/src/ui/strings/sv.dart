@@ -127,11 +127,6 @@ final class SwedishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Av';
   @override
-  String get settingsPreviewEnabledTitle => 'Förhandsvisning';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Visa den renderade anteckningen bredvid källtexteditorn';
-  @override
   String get switchToWysiwygTooltip => 'Byt till WYSIWYG-editorn';
   @override
   String get switchToSourceTooltip => 'Byt till Markdown-källan';
@@ -275,22 +270,6 @@ final class SwedishStrings extends Strings {
       'Editorn och förhandsvisningen, som alltid håller ihop';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Förhandsvisningsläge';
-  @override
-  String get previewModeSubtitle =>
-      'Huru förhandsvisningen delar skärmen med editorn eller ersätter '
-      'den';
-  @override
-  String get previewModeAuto => 'Sida vid sida';
-  @override
-  String get previewModeSwitch => 'Helskärm';
-  @override
-  String get splitRatioTitle => 'Utdelningsbredd';
-  @override
-  String get splitRatioSubtitle =>
-      'Editorns andel när förhandsvisningen är sida vid sida';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Länkformat';
@@ -548,11 +527,6 @@ final class SwedishStrings extends Strings {
   String get showPreviewTooltip => 'Visa förhandsvisning';
   @override
   String get showEditorTooltip => 'Visa editor';
-  @override
-  String get enterFullScreenTooltip => 'Helskärm';
-  @override
-  String get exitFullScreenTooltip => 'Lämnar helskärm';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rå HTML-tabell)';

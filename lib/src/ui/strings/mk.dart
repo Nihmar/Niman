@@ -129,11 +129,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Исклучено';
   @override
-  String get settingsPreviewEnabledTitle => 'Преглед';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Го прикажува форматираното белешко покрај уредникот на изворот';
-  @override
   String get switchToWysiwygTooltip => 'Префрли на WYSIWYG уредник';
   @override
   String get switchToSourceTooltip => 'Префрли на Markdown изворот';
@@ -275,20 +270,6 @@ final class MacedonianStrings extends Strings {
       'Уредникот и прегледот, кои секогаш се усогласени';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Начин на преглед';
-  @override
-  String get previewModeSubtitle =>
-      'Дали прегледот го дели екранот со уредникот или го заменува';
-  @override
-  String get previewModeAuto => 'Еден до друг';
-  @override
-  String get previewModeSwitch => 'Цел екран';
-  @override
-  String get splitRatioTitle => 'Ширина на поделба';
-  @override
-  String get splitRatioSubtitle => 'Удел на уредникот кога прегледот е до него';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат на врска';
@@ -548,11 +529,6 @@ final class MacedonianStrings extends Strings {
   String get showPreviewTooltip => 'Прикажи преглед';
   @override
   String get showEditorTooltip => 'Прикажи уредник';
-  @override
-  String get enterFullScreenTooltip => 'Цел екран';
-  @override
-  String get exitFullScreenTooltip => 'Изијди од цел екран';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(сурва HTML табела)';

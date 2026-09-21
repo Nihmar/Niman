@@ -44,7 +44,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     EditorKind.source,
     EditorKind.wysiwyg,
   };
-  bool _previewEnabled = true;
   bool? _lineNumbers;
   bool _readableLineLength = true;
   double _noteColumnWidth = defaultNoteColumnWidth;
@@ -84,7 +83,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final indentWidth = await controller.indentWidth;
     final spellDictionaries = await controller.spellDictionaries;
     final enabledEditors = await controller.enabledEditors;
-    final previewEnabled = await controller.previewEnabled;
     if (!mounted) return;
     setState(() {
       _lineNumbers = lineNumbers;
@@ -98,7 +96,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _indentWidth = indentWidth;
       _spellDictionaries = spellDictionaries;
       _enabledEditors = {...enabledEditors};
-      _previewEnabled = previewEnabled;
     });
   }
 
@@ -287,13 +284,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) setState(() => _enabledEditors = next);
   }
 
-  /// Persists the preview switch (T-WYS-03).
-  Future<void> _togglePreviewEnabled(bool value) async {
-    await widget.controller.setPreviewEnabled(enabled: value);
-    widget.controller.notify();
-    if (mounted) setState(() => _previewEnabled = value);
-  }
-
   /// Asks which hunspell dictionaries the editor should use (T-PP-09,
   /// revised): every one found on the machine, any number of them at once.
   /// Choosing none means the locale default.
@@ -422,15 +412,6 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
                   : (value) => unawaited(
                       _toggleEditorEnabled(EditorKind.wysiwyg, value),
                     ),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.previewEnabled,
-            child: SettingsSwitchRow(
-              title: AppStrings.settingsPreviewEnabledTitle,
-              description: AppStrings.settingsPreviewEnabledSubtitle,
-              value: _previewEnabled,
-              onChanged: _togglePreviewEnabled,
             ),
           ),
           // Switches keep their subtitle: a switch has no dialog to move

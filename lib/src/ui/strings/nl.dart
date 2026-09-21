@@ -126,11 +126,6 @@ final class DutchStrings extends Strings {
   @override
   String get settingsToggleOff => 'Uit';
   @override
-  String get settingsPreviewEnabledTitle => 'Voorbeeld';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Toon de gerenderde notitie naast de brontekst-editor';
-  @override
   String get switchToWysiwygTooltip => 'Over naar de WYSIWYG-editor';
   @override
   String get switchToSourceTooltip => 'Over naar de Markdown-brontekst';
@@ -275,21 +270,6 @@ final class DutchStrings extends Strings {
       'De editor en het voorbeeld, die altijd overeenkomen';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Voorbeeldmodus';
-  @override
-  String get previewModeSubtitle =>
-      'Of het voorbeeld het scherm deelt met de editor, of hem vervangt';
-  @override
-  String get previewModeAuto => 'Naast elkaar';
-  @override
-  String get previewModeSwitch => 'Volledig scherm';
-  @override
-  String get splitRatioTitle => 'Indelingsbreedte';
-  @override
-  String get splitRatioSubtitle =>
-      'Het aandeel van de editor als het voorbeeld naast elkaar staat';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkformaat';
@@ -547,11 +527,6 @@ final class DutchStrings extends Strings {
   String get showPreviewTooltip => 'Voorbeeld tonen';
   @override
   String get showEditorTooltip => 'Editor tonen';
-  @override
-  String get enterFullScreenTooltip => 'Volledig scherm';
-  @override
-  String get exitFullScreenTooltip => 'Volledig scherm verlaten';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(ruwe HTML-tabel)';

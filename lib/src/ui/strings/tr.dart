@@ -123,11 +123,6 @@ final class TurkishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Kapalı';
   @override
-  String get settingsPreviewEnabledTitle => 'Önizleme';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Biçimlendirilmiş notu kaynak düzenleyicinin yanında gösterir';
-  @override
   String get switchToWysiwygTooltip => 'WYSIWYG düzenleyicisine geç';
   @override
   String get switchToSourceTooltip => 'Markdown kaynağına geç';
@@ -266,21 +261,6 @@ final class TurkishStrings extends Strings {
       'Düzenleyici ve önizleme, her zaman senkronize';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Önizleme modu';
-  @override
-  String get previewModeSubtitle =>
-      'Önizleme, ekranı düzenleyiciyle paylaşır mı yoksa onun yerini '
-      'alır mı';
-  @override
-  String get previewModeAuto => 'Yan yana';
-  @override
-  String get previewModeSwitch => 'Tam ekran';
-  @override
-  String get splitRatioTitle => 'Bölme oranı';
-  @override
-  String get splitRatioSubtitle => 'Önizleme yanındayken düzenleyicinin payı';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Bağlantı biçimi';
@@ -540,11 +520,6 @@ final class TurkishStrings extends Strings {
   String get showPreviewTooltip => 'Önizlemeyi göster';
   @override
   String get showEditorTooltip => 'Düzenleyiciyi göster';
-  @override
-  String get enterFullScreenTooltip => 'Tam ekran';
-  @override
-  String get exitFullScreenTooltip => 'Tam ekrandan çık';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(çözümlenmemiş HTML tablo)';

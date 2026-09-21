@@ -129,12 +129,6 @@ final class GreekStrings extends Strings {
   @override
   String get settingsToggleOff => 'Ανενεργό';
   @override
-  String get settingsPreviewEnabledTitle => 'Προεπισκόπηση';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Εμφανίζει τη μορφοποιημένη σημείωση δίπλα στον επεξεργαστή '
-      'πηγής';
-  @override
   String get switchToWysiwygTooltip => 'Μετάβαση στον επεξεργαστή WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Μετάβαση στην πηγή Markdown';
@@ -278,22 +272,6 @@ final class GreekStrings extends Strings {
       'Επεξεργαστής και προεπισκόπηση, πάντα συγχρονισμένοι';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Λειτουργία προεπισκόπησης';
-  @override
-  String get previewModeSubtitle =>
-      'Αν η προεπισκόπηση μοιράζεται την οθόνη με τον επεξεργαστή ή '
-      'την αντικαθιστά';
-  @override
-  String get previewModeAuto => 'Παράλληλα';
-  @override
-  String get previewModeSwitch => 'Πλήρης οθόνη';
-  @override
-  String get splitRatioTitle => 'Ρυθμός διαίρεσης';
-  @override
-  String get splitRatioSubtitle =>
-      'Μέρος του επεξεργαστή όταν η προεπισκόπηση είναι δίπλα του';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Μορφή συνδέσμου';
@@ -555,11 +533,6 @@ final class GreekStrings extends Strings {
   String get showPreviewTooltip => 'Εμφάνιση προεπισκόπησης';
   @override
   String get showEditorTooltip => 'Εμφάνιση επεξεργαστή';
-  @override
-  String get enterFullScreenTooltip => 'Πλήρης οθόνη';
-  @override
-  String get exitFullScreenTooltip => 'Έξοδος από πλήρη οθόνη';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(μη αναλυμένος HTML πίνακας)';

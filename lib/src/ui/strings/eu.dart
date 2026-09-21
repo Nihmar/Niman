@@ -124,11 +124,6 @@ final class BasqueStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desaktibatuta';
   @override
-  String get settingsPreviewEnabledTitle => 'Aurrebista';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Erakutsi errenderatutako oharra iturri-erreditoraren ondoan';
-  @override
   String get switchToWysiwygTooltip => 'Pasatu WYSIWYG erreditorra';
   @override
   String get switchToSourceTooltip => 'Pasatu Markdown-iturrira';
@@ -269,22 +264,6 @@ final class BasqueStrings extends Strings {
       'Erreditorra eta aurrebista, beti bat etorritakoak';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Aurrebista-eredua';
-  @override
-  String get previewModeSubtitle =>
-      'Aurrebistak pantaila erreditorarekin banatzen du edo ordezkatzen '
-      'du';
-  @override
-  String get previewModeAuto => 'Bata bestearen ondoan';
-  @override
-  String get previewModeSwitch => 'Pantaila osoa';
-  @override
-  String get splitRatioTitle => 'Banaketa-zabalera';
-  @override
-  String get splitRatioSubtitle =>
-      'Erreditorearen partea aurrebista bat bestearrekin ondoan badu';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Esteka-forma';
@@ -542,11 +521,6 @@ final class BasqueStrings extends Strings {
   String get showPreviewTooltip => 'Erakutsi aurrebista';
   @override
   String get showEditorTooltip => 'Erakutsi erreditorra';
-  @override
-  String get enterFullScreenTooltip => 'Pantaila osoa';
-  @override
-  String get exitFullScreenTooltip => 'Irten pantaila osoetik';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(HTML taula krudoa)';

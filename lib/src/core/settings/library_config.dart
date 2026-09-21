@@ -282,8 +282,8 @@ String cleanAttachmentsFolder(String folder) =>
 /// tree order, the reminder markers. There is no notion of a library
 /// "overriding" the app — a library simply has its own answers, seeded
 /// from the defaults the first time it is opened. What stays app-wide is
-/// what does not depend on the library at all: the language, the debug
-/// switch, and the preview layout, which follows the screen.
+/// what does not depend on the library at all: the language and the debug
+/// switch.
 @immutable
 final class LibraryConfig {
   /// Creates a library config. [extra] holds keys this build does not
@@ -316,7 +316,6 @@ final class LibraryConfig {
     this.editorKind = EditorKind.source,
     this.markdownEngine = MarkdownEngine.legacy,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
-    this.previewEnabled = true,
     this.extra = const {},
   });
 
@@ -408,7 +407,6 @@ final class LibraryConfig {
       // on. An empty or all-unknown list reads back the same way — the
       // file must never resolve to no editor.
       enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
-      previewEnabled: _boolOr(json['previewEnabled'], true),
       extra: extra,
     );
   }
@@ -499,9 +497,8 @@ final class LibraryConfig {
   /// How much larger than shipped the interface text is (default 1.0).
   ///
   /// Per library rather than per install (user, 2026-09-09): the size a
-  /// library wants to be read at is a property of what is in it, and the
-  /// tablet-vs-phone argument that keeps the preview layout app-wide does
-  /// not apply — a library read on both wants the same text on both.
+  /// library wants to be read at is a property of what is in it, and a
+  /// library read on a tablet and on a phone wants the same text on both.
   final double uiTextScale;
 
   /// How much larger than shipped the note text is, in the editor and in
@@ -531,9 +528,6 @@ final class LibraryConfig {
   /// enables source, WYSIWYG, or both, never none; the note's status row
   /// switches between them only when both are enabled.
   final Set<EditorKind> enabledEditors;
-
-  /// Whether the preview exists at all (default true).
-  final bool previewEnabled;
 
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
@@ -568,7 +562,6 @@ final class LibraryConfig {
     EditorKind? editorKind,
     MarkdownEngine? markdownEngine,
     Set<EditorKind>? enabledEditors,
-    bool? previewEnabled,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -601,7 +594,6 @@ final class LibraryConfig {
       editorKind: editorKind ?? this.editorKind,
       markdownEngine: markdownEngine ?? this.markdownEngine,
       enabledEditors: enabledEditors ?? this.enabledEditors,
-      previewEnabled: previewEnabled ?? this.previewEnabled,
       extra: extra,
     );
   }
@@ -635,6 +627,9 @@ final class LibraryConfig {
     'editorKind',
     'markdownEngine',
     'enabledEditors',
+    // Legacy preview switch, read never written: the preview is part of
+    // the app now, and a file that still carries the key must not have it
+    // handed back as an unknown one to preserve forever.
     'previewEnabled',
   };
 
@@ -680,7 +675,6 @@ final class LibraryConfig {
         for (final kind in EditorKind.values)
           if (enabledEditors.contains(kind)) kind.name,
       ],
-      'previewEnabled': previewEnabled,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -766,7 +760,6 @@ final class LibraryConfig {
         markdownEngine == other.markdownEngine &&
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
-        previewEnabled == other.previewEnabled &&
         _deepEquals(extra, other.extra);
   }
 

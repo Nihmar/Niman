@@ -128,11 +128,6 @@ final class GermanStrings extends Strings {
   @override
   String get settingsToggleOff => 'Aus';
   @override
-  String get settingsPreviewEnabledTitle => 'Vorschau';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Zeigt die gerenderte Notiz neben dem Quelltext-Editor';
-  @override
   String get switchToWysiwygTooltip => 'Zum WYSIWYG-Editor wechseln';
   @override
   String get switchToSourceTooltip => 'Zum Markdown-Quelltext wechseln';
@@ -276,22 +271,6 @@ final class GermanStrings extends Strings {
       'Der Editor und die Vorschau, die immer übereinstimmen';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Vorschau-Modus';
-  @override
-  String get previewModeSubtitle =>
-      'Ob die Vorschau den Bildschirm mit dem Editor teilt oder ihn '
-      'ersetzt';
-  @override
-  String get previewModeAuto => 'Nebeneinander';
-  @override
-  String get previewModeSwitch => 'Vollbild';
-  @override
-  String get splitRatioTitle => 'Teilungsbreite';
-  @override
-  String get splitRatioSubtitle =>
-      'Der Anteil des Editors, wenn die Vorschau daneben steht';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkformat';
@@ -548,11 +527,6 @@ final class GermanStrings extends Strings {
   String get showPreviewTooltip => 'Vorschau zeigen';
   @override
   String get showEditorTooltip => 'Editor zeigen';
-  @override
-  String get enterFullScreenTooltip => 'Vollbild';
-  @override
-  String get exitFullScreenTooltip => 'Vollbild beenden';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rohe HTML-Tabelle)';

@@ -20,14 +20,12 @@ NoteView _view({
   bool showLineNumbers = true,
   bool autofocusEditor = false,
   bool showPreview = false,
-  bool splitPreview = false,
   ValueChanged<EditorKind>? onEditorKindChanged,
   int? initialCaretOffset,
 }) => NoteView(
   showLineNumbers: showLineNumbers,
   autofocusEditor: autofocusEditor,
   showPreview: showPreview,
-  splitPreview: splitPreview,
   onEditorKindChanged: onEditorKindChanged,
   path: path,
   readNote: readNote,
@@ -60,6 +58,50 @@ void main() {
       // CRLF is normalized to LF on load.
       expect(_editorText(tester), '# Hello\nworld');
       expect(find.text('Saved'), findsOneWidget);
+    });
+
+    testWidgets('the preview takes the pane and the editor steps aside', (
+      tester,
+    ) async {
+      // One pane, one of the two in it: the eye is the whole layout now,
+      // and the pane it leaves stays mounted offstage.
+      var preview = false;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) => MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: [
+                  IconButton(
+                    key: const Key('editor-preview-toggle'),
+                    icon: const Icon(Icons.visibility),
+                    onPressed: () => setState(() => preview = !preview),
+                  ),
+                  Expanded(
+                    child: _view(
+                      path: '/notes/a.md',
+                      showPreview: preview,
+                      readNote: (_) async => '# Head\n\nbody text',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(NoteEditor), findsOneWidget);
+      expect(find.byType(MarkdownPreview), findsNothing);
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+      await tester.pump();
+      expect(find.byType(MarkdownPreview), findsOneWidget);
+      expect(find.byType(NoteEditor), findsNothing);
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+      await tester.pump();
+      expect(find.byType(NoteEditor), findsOneWidget);
+      expect(find.byType(MarkdownPreview), findsNothing);
     });
 
     testWidgets('autosaves ~500 ms after the last edit', (tester) async {
@@ -463,12 +505,11 @@ void main() {
     ) async {
       // Preview-only has no editor showing, so there are not two of
       // them to be between (device report, 2026-09-18).
-      Widget view({required bool preview, bool split = false}) => _app(
+      Widget view({required bool preview}) => _app(
         _view(
           path: '/notes/a.md',
           readNote: (_) async => 'one two three',
           showPreview: preview,
-          splitPreview: split,
           onEditorKindChanged: (_) {},
         ),
       );
@@ -491,11 +532,6 @@ void main() {
       expect(toggle, findsNothing);
       expect(tester.getTopLeft(findButton), findAt);
       expect(tester.getSize(find.byKey(const Key('status-row'))), row);
-
-      // Side by side, the editor is on screen and so is the switch.
-      await tester.pumpWidget(view(preview: true, split: true));
-      await tester.pump();
-      expect(toggle, findsOneWidget);
     });
 
     testWidgets('the preview keeps its scroll offset across the switch', (

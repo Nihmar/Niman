@@ -128,11 +128,6 @@ final class SlovakStrings extends Strings {
   @override
   String get settingsToggleOff => 'Vypnuté';
   @override
-  String get settingsPreviewEnabledTitle => 'Náhľad';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Zobraziť vykreslenú poznámku vedľa zdrojového editora';
-  @override
   String get switchToWysiwygTooltip => 'Prepnúť na WYSIWYG editor';
   @override
   String get switchToSourceTooltip => 'Prepnúť na Markdown zdroj';
@@ -274,20 +269,6 @@ final class SlovakStrings extends Strings {
   String get noteTextScaleSubtitle => 'Editor a náhľad sú vždy v súlade';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Režim náhľadu';
-  @override
-  String get previewModeSubtitle =>
-      'Ci náhľad zdieľa obrazovku s editorom, alebo ho nahradí';
-  @override
-  String get previewModeAuto => 'Vedľa';
-  @override
-  String get previewModeSwitch => 'Celá obrazovka';
-  @override
-  String get splitRatioTitle => 'Šírka rozdeľovania';
-  @override
-  String get splitRatioSubtitle => 'Podiel editora, keď je náhľad vedľa';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formát odkazu';
@@ -547,11 +528,6 @@ final class SlovakStrings extends Strings {
   String get showPreviewTooltip => 'Zobraziť náhľad';
   @override
   String get showEditorTooltip => 'Zobraziť editor';
-  @override
-  String get enterFullScreenTooltip => 'Celá obrazovka';
-  @override
-  String get exitFullScreenTooltip => 'Opustiť celú obrazovku';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(hrubá HTML tabuľka)';

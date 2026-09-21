@@ -52,7 +52,6 @@ import 'package:niman/src/preview/scroll_map.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
-import 'package:niman/src/ui/editor_preview_split.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
@@ -92,10 +91,8 @@ typedef NoteSaver = Future<void> Function(
 /// deferred refinement (record it per note).
 ///
 /// [showLineNumbers] and [autofocusEditor] are the settings toggles,
-/// passed through to the editor. T-M2-08: [splitPreview] resolves the layout
-/// (true = editor|preview side by side, false = one full-screen pane with a
-/// top switch); [splitFraction]/[onSplitFractionChanged]-[onSplitDragEnd]
-/// drive the draggable divider and its persistence.
+/// passed through to the editor. The note is one pane: [showPreview] says
+/// which of the two it holds — the editor or the read surface.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
   const new({
@@ -109,15 +106,11 @@ final class NoteView extends StatefulWidget {
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.indentWidth = 2,
     this.toolbarLayout = ToolbarLayout.defaults,
-    this.splitPreview = false,
     this.showPreview = false,
     this.unifiedMarkdown = false,
     this.showWysiwyg = false,
     this.onWysiwygChanged,
     this.onEditorKindChanged,
-    this.splitFraction = defaultSplitRatio,
-    this.onSplitFractionChanged,
-    this.onSplitDragEnd,
     this.libraryRoot,
     this.pickImagePath,
     this.importImage,
@@ -180,9 +173,6 @@ final class NoteView extends StatefulWidget {
   /// show and in what order.
   final ToolbarLayout toolbarLayout;
 
-  /// Whether the preview sits side by side (split) or behind a switch.
-  final bool splitPreview;
-
   /// Preview visibility (T-UI-06): the shared app bar owns the switch
   /// and passes the state down; NoteView just follows it.
   final bool showPreview;
@@ -204,15 +194,6 @@ final class NoteView extends StatefulWidget {
   /// T-WYS-12); null hides the toggle, which is what a library with a
   /// single enabled editor passes.
   final ValueChanged<EditorKind>? onEditorKindChanged;
-
-  /// The editor's share of the split (0..1).
-  final double splitFraction;
-
-  /// Live divider-fraction changes (the shell keeps the settings value).
-  final ValueChanged<double>? onSplitFractionChanged;
-
-  /// The divider drag lifted (the shell persists the ratio).
-  final VoidCallback? onSplitDragEnd;
 
   /// The library root (T-M2-09): relative image links in the preview
   /// resolve under it, and inserted images are copied into
@@ -647,10 +628,8 @@ final class _NoteViewState extends State<NoteView>
     }
     // Coming back to the editor no longer remounts it (both panes stay
     // mounted below), so the source editor's autofocus no longer fires on
-    // its own — request it like a fresh mount did. Split mode never
-    // remounted either, so focus stays untouched there.
-    final splitNow = _splitIn(widget) && !widget.showWysiwyg;
-    if (!splitNow && _previewIn(oldWidget) && !_previewIn(widget)) {
+    // its own — request it like a fresh mount did.
+    if (_previewIn(oldWidget) && !_previewIn(widget)) {
       if (widget.autofocusEditor) {
         if (widget.showWysiwyg) {
           _wysiwygFocus.requestFocus();
@@ -661,7 +640,7 @@ final class _NoteViewState extends State<NoteView>
     }
     // The preview has no editable: a note opening in it, or the switch
     // flipping to it, dismisses the keyboard instead of leaving it up.
-    final wasPreviewOnly = !_splitIn(oldWidget) && _previewIn(oldWidget);
+    final wasPreviewOnly = _previewIn(oldWidget);
     if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
       _dismissKeyboardForPreview();
     }
@@ -1084,16 +1063,11 @@ final class _NoteViewState extends State<NoteView>
 
   /// Whether only the preview is on screen (the editor hidden): the IME
   /// has no editable target, so it must go.
-  bool get _previewOnly => !_splitIn(widget) && _previewIn(widget);
+  bool get _previewOnly => _previewIn(widget);
 
   /// Whether [view] shows its preview. In Zen (#69) too: a note read
   /// rather than written is read there in its preview (0.0.8 test round).
-  /// Zen only takes the split apart, and the tab's own flag then says
-  /// which of the two it shows.
   static bool _previewIn(NoteView view) => view.showPreview;
-
-  /// Whether [view] sets editor and preview side by side; never in Zen.
-  static bool _splitIn(NoteView view) => view.splitPreview && !view.zen;
 
   /// Dismisses the keyboard when the preview is the only pane: a note
   /// opening in preview, or the switch flipping to it, must not leave
@@ -1739,18 +1713,15 @@ final class _NoteViewState extends State<NoteView>
   @override
   Widget build(BuildContext context) {
     final error = _error;
-    // The WYSIWYG surface is never split: it already is a rendering, and the
-    // shell's previewSplits agrees — this is the belt to its braces.
-    final split = _splitIn(widget) && !widget.showWysiwyg;
     final showPreview = _previewIn(widget);
-    // The toolbar formats the editor: it stays in split mode (the editor
-    // is on screen) and hides in full-screen preview mode. On the phone
-    // it also rides the keyboard (it shows only while the keyboard is
-    // up); on desktop it never does.
+    // The toolbar formats the editor: it hides while the preview holds
+    // the pane, which has nothing to format. On the phone it also rides
+    // the keyboard (it shows only while the keyboard is up); on desktop
+    // it never does.
     // Hiding every button hides the toolbar itself; the editor keeps its
     // keyboard shortcuts.
     final showToolbar =
-        (split || !showPreview) &&
+        !showPreview &&
         (widget.toolbarTop || _keyboardUp) &&
         widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
@@ -1788,17 +1759,6 @@ final class _NoteViewState extends State<NoteView>
                     ? const Center(child: CircularProgressIndicator())
                     : kindBody
                     ? kindChild!
-                    : split
-                    ? EditorPreviewSplit(
-                        editor: _editorPane(),
-                        preview: _buildPreview(context),
-                        editorScroll: _scroll.verticalScroller,
-                        previewScroll: _previewScroll,
-                        fraction: widget.splitFraction,
-                        onFractionChanged:
-                            widget.onSplitFractionChanged ?? (_) {},
-                        onDragEnd: widget.onSplitDragEnd,
-                      )
                     // Both panes stay mounted and only one is on stage:
                     // coming back to the preview finds its parse, scroll
                     // offset, typeset math and images where they were
@@ -1849,7 +1809,6 @@ final class _NoteViewState extends State<NoteView>
                   column: widget.noteColumn,
                   child: NoteStatusRow(
                     loading: _loading,
-                    splitPreview: _splitIn(widget),
                     showPreview: showPreview,
                     showWysiwyg: widget.showWysiwyg,
                     spellCheckAvailable:

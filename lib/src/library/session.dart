@@ -368,9 +368,6 @@ abstract interface class LibrarySession {
   /// the library must never resolve to no editor.
   Future<void> setEnabledEditors(Set<EditorKind> editors);
 
-  /// Whether the preview exists at all (default true).
-  Future<bool> get previewEnabled;
-
   /// Which engine draws a note (default [MarkdownEngine.legacy]).
   ///
   /// Opt-in: the unified surface is compared against the preview before it
@@ -380,22 +377,6 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the markdown engine.
   Future<void> setMarkdownEngine(MarkdownEngine engine);
-
-  /// Sets (and persists) the preview switch.
-  Future<void> setPreviewEnabled({required bool enabled});
-
-  /// The preview layout mode (default `auto`: split on wide screens,
-  /// full-screen switch on phones).
-  Future<PreviewLayoutMode> get previewMode;
-
-  /// Sets (and persists) the preview layout mode.
-  Future<void> setPreviewMode(PreviewLayoutMode mode);
-
-  /// The editor|preview split ratio (0..1, default 0.55).
-  Future<double> get splitRatio;
-
-  /// Sets (and persists) the split ratio.
-  Future<void> setSplitRatio(double ratio);
 
   /// The library tree sort order (default [TreeSort.nameAsc]).
   Future<TreeSort> get treeSort;

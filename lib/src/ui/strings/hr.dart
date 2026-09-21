@@ -130,11 +130,6 @@ final class CroatianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Isključeno';
   @override
-  String get settingsPreviewEnabledTitle => 'Pregled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Prikaži renderiranu napomenu pored izvornog uređivača';
-  @override
   String get switchToWysiwygTooltip => 'Prebaci na WYSIWYG uređivač';
   @override
   String get switchToSourceTooltip => 'Prebaci na Markdown izvor';
@@ -274,20 +269,6 @@ final class CroatianStrings extends Strings {
   String get noteTextScaleSubtitle => 'Uređivač i pregled su uvijek usklađeni';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Način pregleda';
-  @override
-  String get previewModeSubtitle =>
-      'Podijeli li pregled zaslon s uređivačem ili ga zamijeni';
-  @override
-  String get previewModeAuto => 'Pored';
-  @override
-  String get previewModeSwitch => 'Cijeli zaslon';
-  @override
-  String get splitRatioTitle => 'Širina omjera podjele';
-  @override
-  String get splitRatioSubtitle => 'Udio uređivača kada je pregled pored';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format veze';
@@ -544,11 +525,6 @@ final class CroatianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži pregled';
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
-  @override
-  String get enterFullScreenTooltip => 'Cijeli zaslon';
-  @override
-  String get exitFullScreenTooltip => 'Izadi iz celog zaslona';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(sirova HTML tablica)';

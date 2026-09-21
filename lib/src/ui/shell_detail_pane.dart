@@ -32,9 +32,6 @@ final class ShellDetailPane extends StatelessWidget {
     required this.indentWidth,
     required this.toolbarLayout,
     required this.onEditorKindChanged,
-    required this.splitFraction,
-    required this.onSplitFractionChanged,
-    required this.onSplitDragEnd,
     required this.linkSource,
     required this.onOpenNote,
     required this.kindMode,
@@ -104,15 +101,6 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// The arranged formatting toolbar.
   final ToolbarLayout toolbarLayout;
-
-  /// The editor/preview width share.
-  final double splitFraction;
-
-  /// Persists the dragged divider share.
-  final ValueChanged<double> onSplitFractionChanged;
-
-  /// Persists the divider share on drag end.
-  final VoidCallback onSplitDragEnd;
 
   /// The status row's editor switch (T-WYS-12); null hides it, which is
   /// what a library with a single enabled editor passes.
@@ -217,13 +205,9 @@ final class ShellDetailPane extends StatelessWidget {
     zen: zen,
     typewriter: typewriter,
     onToggleTypewriter: onToggleTypewriter,
-    splitPreview: tab.splitPreview,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,
     onEditorKindChanged: onEditorKindChanged,
-    splitFraction: splitFraction,
-    onSplitFractionChanged: onSplitFractionChanged,
-    onSplitDragEnd: onSplitDragEnd,
     libraryRoot: root,
     linkSource: linkSource,
     onOpenNote: onOpenNote,
@@ -253,7 +237,6 @@ final class DetailTab {
     required this.memento,
     required this.showWysiwyg,
     required this.showPreview,
-    required this.splitPreview,
     this.key,
     this.focused = true,
     this.anchor,
@@ -279,9 +262,6 @@ final class DetailTab {
 
   /// Whether the tab shows its preview.
   final bool showPreview;
-
-  /// Whether editor and preview sit side by side.
-  final bool splitPreview;
 
   /// A heading to land on as it loads (a link's anchor).
   final String? anchor;

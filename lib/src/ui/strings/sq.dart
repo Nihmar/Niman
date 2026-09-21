@@ -125,11 +125,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Joaktiv';
   @override
-  String get settingsPreviewEnabledTitle => 'Parapamja';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Tregon shënimin e formatuar pranë redaktorit të burimit';
-  @override
   String get switchToWysiwygTooltip => 'Kalo te redaktori WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Kalo te burimi Markdown';
@@ -271,21 +266,6 @@ final class AlbanianStrings extends Strings {
       'Redaktori dhe parapamja, gjithmonë të bashkërenditura';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modi i parapamjes';
-  @override
-  String get previewModeSubtitle =>
-      'A e ndan parapamja ekranin me redaktorin apo e zëvendëson';
-  @override
-  String get previewModeAuto => 'Ngjitur';
-  @override
-  String get previewModeSwitch => 'Ekran i plotë';
-  @override
-  String get splitRatioTitle => 'Gjerësia e ndarjes';
-  @override
-  String get splitRatioSubtitle =>
-      'Pjesa e redaktorit kur parapamja është ngjitur me të';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formati i lidhjes';
@@ -541,11 +521,6 @@ final class AlbanianStrings extends Strings {
   String get showPreviewTooltip => 'Shfaq parapamjen';
   @override
   String get showEditorTooltip => 'Shfaq redaktorin';
-  @override
-  String get enterFullScreenTooltip => 'Ekran i plotë';
-  @override
-  String get exitFullScreenTooltip => 'Dil nga ekran i plotë';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabela HTML e thjeshtë)';

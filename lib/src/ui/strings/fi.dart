@@ -126,11 +126,6 @@ final class FinnishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Pois';
   @override
-  String get settingsPreviewEnabledTitle => 'Esikatselu';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Näytä renderöity muistiinpano lähdekoodin muokkainnin vieressä';
-  @override
   String get switchToWysiwygTooltip => 'Vaihda WYSIWYG-muokkainniin';
   @override
   String get switchToSourceTooltip => 'Vaihda Markdown-lähdekoodiin';
@@ -271,21 +266,6 @@ final class FinnishStrings extends Strings {
   String get noteTextScaleSubtitle => 'Muokkain ja esikatselu aina samassa';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Esikatselutila';
-  @override
-  String get previewModeSubtitle =>
-      'Jakoiko esikatselu ruudun muokkainnin kanssa vai korvaa se sen';
-  @override
-  String get previewModeAuto => 'Vierekkäin';
-  @override
-  String get previewModeSwitch => 'Koko näyttö';
-  @override
-  String get splitRatioTitle => 'Jako-osuuden leveys';
-  @override
-  String get splitRatioSubtitle =>
-      'Muokkainnin osa, kun esikatselu on vierekkäin';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkin muoto';
@@ -545,11 +525,6 @@ final class FinnishStrings extends Strings {
   String get showPreviewTooltip => 'Näytä esikatselu';
   @override
   String get showEditorTooltip => 'Näytä muokkain';
-  @override
-  String get enterFullScreenTooltip => 'Koko näyttö';
-  @override
-  String get exitFullScreenTooltip => 'Poistu kokonäytöstä';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(raaka HTML-taulukko)';
