@@ -9370,6 +9370,22 @@ most of the way down a 1 200-block note. The milliseconds carry a 250 ms ceiling
 there — the design's 25/60 ms row (§9.2) is a *release* build's target, and a
 debug jump pays a cold first content where it lands.
 
+**What the sliver makes visible, and does not fix.** A jump *offset* is now as
+good as the map: into a region no frame has visited it lands where the estimates
+say, and the frame that lands there corrects them. That is the price named above,
+and one path pays it visibly — an **anchor** jump (`[[note#Heading]]`, the
+outline, opening at an anchor) arrives as a source *line* and becomes pixels
+through `ScrollMap.previewOffsetForLine`, a uniform line *fraction* of
+`maxScrollExtent`. On the geometry note, whose paragraphs are one source line and
+up to thirty visual ones, a fraction and a block-placed offset disagree by a lot
+in unvisited territory: the jump lands within a screen rather than on the
+heading. It was already an estimate before this sliver (the list's
+`estimateMaxScrollOffset` answered for the same unvisited part) and so is not a
+regression — but the read view now owns what would fix it, `offsetOf` per block
+plus the scanner's line→block mapping, with the correction a frame later. Filed
+as #256, and best done when the read pane is a mode of the surface rather than a
+pane beside an editor (phase 3).
+
 Data to build while measuring: per-3-second rolling average of
 `build + layout` time per block kind, blocks laid out per frame, and the
 p90 of `editsPerSecond`. These become the regression tests of [§9](#9-the-performance-budget).
