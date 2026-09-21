@@ -200,6 +200,14 @@ Tables, task lists, footnotes, strikethrough, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
+One thing to know when a note came from somewhere else: **a list marker has
+to start a line.** `- c)` written inside a sentence — after a formula, or
+wherever the text happened to wrap — is a hyphen and a letter, not an item,
+and no renderer can turn it into one. Put it on a line of its own and it
+becomes an item; a blank line is not needed, because a list can interrupt a
+paragraph. Indentation is what makes a sublist: a marker under an item's own
+text is that item's child, one at the same column is its sibling.
+
 **Tidy the Markdown** — the note's ⋮ menu, or *Editor: Tidy the
 Markdown* in the palette — puts a note's own text in order without
 changing what it says:
