@@ -138,10 +138,6 @@ final class CroatianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ova napomena je prevelika za WYSIWYG uređivač. Otvori je kao '
-      'Markdown izvor.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Izgled';

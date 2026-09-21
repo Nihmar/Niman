@@ -134,10 +134,6 @@ final class DutchStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Deze notitie is te groot voor de WYSIWYG-editor. Open hem in de '
-      'Markdown-brontekst.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Uiterlijk';

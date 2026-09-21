@@ -134,10 +134,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Þetta minnisblað er of stórt fyrir WYSIWYG-ritilinn. Opnaðu það í '
-      'Markdown upprunatexta.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Útlit';

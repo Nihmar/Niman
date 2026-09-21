@@ -138,10 +138,6 @@ final class BosnianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ova bilješka je prevelika za WYSIWYG uređivač. Otvorite je u '
-      'Markdown izvoru.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Izgled';

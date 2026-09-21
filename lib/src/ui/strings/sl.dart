@@ -140,10 +140,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ta opomba je prevelika za urejevalnik WYSIWYG. Odprite jo kot '
-      'Markdown vir.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Videz';

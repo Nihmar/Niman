@@ -147,7 +147,6 @@ final class AppStrings {
   static String get switchToSourceTooltip => _s.switchToSourceTooltip;
   static String get switchToSourceLabel => _s.switchToSourceLabel;
   static String get switchToWysiwygLabel => _s.switchToWysiwygLabel;
-  static String get wysiwygTooLarge => _s.wysiwygTooLarge;
 
   // Settings: the section headings the list is grouped under.
   static String get settingsSectionAppearance => _s.settingsSectionAppearance;

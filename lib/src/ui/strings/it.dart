@@ -137,10 +137,6 @@ final class ItalianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Questa nota è troppo grande per l’editor WYSIWYG. Aprila nel sorgente '
-      'Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aspetto';

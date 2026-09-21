@@ -132,10 +132,6 @@ final class EnglishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'This note is too large for the WYSIWYG editor. Open it in the Markdown '
-      'source.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Appearance';

@@ -123,8 +123,6 @@ final class ChineseStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge => '此笔记对所见即所得编辑器来说太大了。请在 Markdown 源码中打开。';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => '外观';

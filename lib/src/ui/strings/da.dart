@@ -133,10 +133,6 @@ final class DanishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Denne note er for stor til WYSIWYG-editoren. Åbn den i '
-      'Markdown-kilden.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Udseende';

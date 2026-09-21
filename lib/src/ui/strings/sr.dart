@@ -138,10 +138,6 @@ final class SerbianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ова белешка је превелика за WYSIWYG уредитељ. Отворите је у '
-      'Markdown извору.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Изглед';

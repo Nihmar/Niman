@@ -136,10 +136,6 @@ final class SlovakStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Táto poznámka je príliš veľká na WYSIWYG editor. Otvorte ju ako '
-      'Markdown zdroj.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Vzhľad';

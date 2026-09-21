@@ -133,10 +133,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Kjo shënim është tepër i madh për redaktorin WYSIWYG. Hape te '
-      'burimi Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Paraqitja';

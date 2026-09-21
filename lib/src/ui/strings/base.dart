@@ -57,7 +57,6 @@ abstract base class Strings {
   String get switchToSourceTooltip;
   String get switchToSourceLabel;
   String get switchToWysiwygLabel;
-  String get wysiwygTooLarge;
 
   // Settings: the section headings the list is grouped under.
   String get settingsSectionAppearance;

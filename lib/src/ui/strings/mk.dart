@@ -137,10 +137,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Оваа белешка е премногу голема за WYSIWYG уредникот. Отвори ја во '
-      'Markdown изворот.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Изглед';
