@@ -69,10 +69,16 @@ void main() {
       )..start();
       await Future<void>.delayed(const Duration(milliseconds: 300));
       scheduler.stop();
+      // A check already past its gate finishes after the stop — that is what
+      // `checkOnce` does, and it is not a leak — so let it land before
+      // counting. Reading the count immediately made this fail under load: one
+      // tick of the 50 ms timer was in flight and the suite saw 6 where it
+      // wanted 5 (2026-09-21, with a build running beside it).
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       final ran = checks;
       expect(ran, greaterThanOrEqualTo(2));
       await Future<void>.delayed(const Duration(milliseconds: 150));
-      expect(checks, ran);
+      expect(checks, ran, reason: 'the periodic timer really stopped');
     });
 
     test('a failing check is quiet and records nothing', () async {
