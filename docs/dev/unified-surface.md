@@ -11007,9 +11007,28 @@ collapsed caret at a real offset, only the viewport's lines are built out of
 (`lib/src/markdown/edit/input_buffer.dart`) is beside it, with the three rules the
 IME probe established.
 
-What is *not* built yet in this phase: the `TextInputConnection` that feeds
-`InputBuffer` (the probe's machinery, moved into the surface), selection and the
-keyboard beyond the caret, undo/redo and the shortcut table.
+`SourceInput` (`lib/src/markdown/edit/source_input.dart`) is the keyboard: one
+`TextInputConnection`, attached on focus and detached when it leaves, speaking the
+delta model the probe proved out, translating what arrives into
+`SourceBuffer.replaceRange`. It is deliberately not part of the view's state — the
+view can be wrong about pixels without being wrong about text — and eight unit
+tests drive it directly, with no connection and no widget. Two of them are the
+device's own findings turned into behaviour: a delta whose `oldText` is behind is
+recovered onto the platform's text (`abd`, not `abc`), and a selection the note
+cannot hold does not move the caret (and a ping that changes nothing no longer
+rebuilds the note).
+
+`caret_motion.dart` is the caret's arithmetic: the *logical* motions — one
+grapheme cluster at a time, one word at a time by the rule editors share, the line
+and note ends — as pure functions of the note and the caret, with `extend` for
+what shift does. The *visual* motions (up and down over wrapped rows) need the
+layout that drew the line, so they belong to the surface, which has the
+`RenderParagraph` to ask.
+
+What is *not* built yet in this phase: the visual motions and the key bindings
+that call either set, mouse drag and double/triple click, undo/redo, the clipboard,
+find, folding, and the `MarkdownSurface` itself — the widget the shell will switch
+to, and the flag that lets a device try it.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
