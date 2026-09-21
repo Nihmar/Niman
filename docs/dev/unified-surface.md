@@ -1549,9 +1549,14 @@ bug cost an afternoon of chasing a parse that had nothing to do with the symptom
 Where that legacy preview came from is a real gap, and the trace is what named it:
 `NoteView.unifiedMarkdown` defaults to `false` and
 `lib/src/ui/outside_file_screen.dart` never passes it, so a file opened from
-outside the library is drawn by the **old** engine while the same file inside the
-library is drawn by the new one — with the engine setting on, and no hint on
-screen. Fixed in the same round.
+outside the library was drawn by the **old** engine while the same file inside
+the library was drawn by the new one — with the engine setting on, and no hint on
+screen. The setting belongs to a *library* (`LibraryConfig.markdownEngine`), so a
+file outside one has none to read; the shell now hands down the engine of the
+library it is showing (`openOutsideFile(…, unifiedMarkdown:)`), and the two paths
+that run with no library at all — the home screen's launch-with-a-file and its
+Open file — keep the default with a comment saying why. Both spellings disappear
+when the setting does (phase 5).
 
 ### 4.9.6 What it changes
 

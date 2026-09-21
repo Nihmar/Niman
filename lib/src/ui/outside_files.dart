@@ -107,18 +107,28 @@ Future<String?> pickOutsideFile() async {
 ///
 /// [documentFor] opens the next file the screen is asked for (the tests
 /// hand in files that are not on disk).
+///
+/// [unifiedMarkdown] is the caller's engine setting: a file outside a library
+/// belongs to no library, so there is no setting of its own to read, and the
+/// shell hands down the one the user has been looking at. The welcome screen,
+/// with no library open at all, leaves it at the default.
 Future<void> openOutsideFile(
   BuildContext context,
   OutsideFiles files,
   EditorOnlyDocument document, {
   EditorOnlyDocument Function(String path) documentFor = EditorOnlyDocument.new,
+  bool unifiedMarkdown = false,
 }) async {
   final first = files.isEmpty;
   files.open(document);
   if (!first) return;
   await Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => OutsideFileScreen(files: files, documentFor: documentFor),
+      builder: (_) => OutsideFileScreen(
+        files: files,
+        documentFor: documentFor,
+        unifiedMarkdown: unifiedMarkdown,
+      ),
     ),
   );
   // Back, or the last tab closed: either way nothing stays open behind
