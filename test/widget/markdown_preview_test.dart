@@ -91,7 +91,7 @@ void main() {
         _app(
           const MarkdownPreview(
             data: _extras,
-            syntaxHighlighter: PreviewCodeHighlighter(
+            syntaxHighlighter: CodeHighlighter(
               language: 'dart',
               theme: atomOneLightTheme,
             ),

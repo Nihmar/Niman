@@ -318,7 +318,8 @@ preview* / *Show editor* in the palette anywhere. What you leave behind
 keeps its place: the caret, the undo history, the scroll, the typeset
 math and the images are all there when you come back.
 
-The preview renders Markdown + math + code highlighting.
+The rendered note shows Markdown, math, and fenced code coloured by the
+language its fence names.
 
 Extras: word count, heading outline, heading folding.
 

@@ -9302,6 +9302,22 @@ main-axis constraints), with the height map demoted from "the extents" to "the
 estimator `estimateMaxScrollOffset` uses for the part of the note no frame has
 laid out" — which is what §8.4.1's Fenwick tree was for.
 
+**Code colouring, which phase 2's criteria ask for and nobody had (2026-09-21).**
+The read view now colours a fenced block by the language its fence names,
+through the same `highlight` core the preview's highlighter used — and wiring it
+turned up why that highlighter had never coloured anything: the preview's
+`syntaxHighlighter` hook was never passed one in production (only a test did, and
+that test asserts nothing about colour), and its token walk tested `node.value !=
+null` **before** `node.children`, so every token under a wrapper node was dropped.
+The grammar wraps tokens exactly that way — `value="" class=null` around
+`value=null class=keyword` — so a "highlighted" block came out in one monospace
+colour. `_convert` walks children first now, and the read view's test walks the
+span tree by hand (`visitChildren` skips a span with no text of its own, which is
+where the colours live — a test-inspection trap worth the comment it got).
+The palette travels in the read view's theme, chosen by brightness
+(`atomOneLightTheme` / `atomOneDarkTheme`); the engine's own line-state lexer
+(§8.8.2) remains the design's replacement for the whole-block regex.
+
 **The gate that was missing is built (#257's neighbourhood, §10.4).**
 `test/widget/read_view_geometry_test.dart` sweeps every fixture from top to
 bottom — eleven steps, jumps included — and checks three properties of the render

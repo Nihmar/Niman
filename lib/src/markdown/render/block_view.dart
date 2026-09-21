@@ -39,6 +39,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/style_run.dart';
+import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
@@ -192,7 +193,13 @@ final class BlockView extends StatelessWidget {
     );
   }
 
-  /// A code block: a filled box of monospace lines, the fence taken out.
+  /// A code block: a filled box of monospace lines, the fence taken out, the
+  /// code coloured by the language the fence names.
+  ///
+  /// The tokens come from the same `highlight` core the preview's highlighter
+  /// uses, one block at a time and only for the blocks a frame draws. The
+  /// engine's own line-state lexer (§8.8.2) is the design's replacement when
+  /// the whole-block regex stops being enough.
   Widget _code(BuildContext context, String? language) {
     final text = _fenceContent(parsed.text);
     return Container(
@@ -202,7 +209,17 @@ final class BlockView extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       padding: EdgeInsets.all(theme.codePadding),
-      child: Text(text, style: theme.code),
+      child: language == null || language.isEmpty
+          ? Text(text, style: theme.code)
+          : Text.rich(
+              CodeHighlighter(
+                language: language,
+                theme: theme.codeHighlight,
+              ).format(text),
+              // A fence with no palette (the fallback theme, before the first
+              // build) still gets the monospace metrics.
+              style: theme.code,
+            ),
     );
   }
 

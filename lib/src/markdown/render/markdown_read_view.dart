@@ -204,6 +204,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     tag: TextStyle(fontSize: 14),
     marker: TextStyle(fontSize: 14),
     rule: Color(0xFF888888),
+    codeHighlight: <String, TextStyle>{},
     codeBackground: Color(0xFFEEEEEE),
     quoteBar: Color(0xFFCCCCCC),
     tableBorder: Color(0xFFCCCCCC),
