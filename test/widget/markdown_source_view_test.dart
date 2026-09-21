@@ -9,6 +9,7 @@
 // built.
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -238,6 +239,77 @@ void main() {
       lessThan(200),
       reason: '$built lines of 4000 were built for one viewport',
     );
+  });
+
+  testWidgets('an arrow key moves the caret, and shift extends it', (
+    tester,
+  ) async {
+    // Uncontrolled on purpose: with a caller holding the selection, the caller
+    // is the only one who moves it, and this test is about the surface moving
+    // it.
+    final state = await pump(tester, 'una riga di testo\n');
+    await tester.pump();
+    // The surface answers the logical motions itself, so a desktop user's arrow
+    // keys do not depend on the shell's command table.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.pump();
+    expect(state.caretRect, isNotNull);
+    final after = state.caretRect!.left;
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.pump();
+    expect(
+      state.caretRect!.left,
+      greaterThan(after),
+      reason: 'a second press moves the caret on',
+    );
+  });
+
+  testWidgets('Ctrl+Z takes back what the keyboard typed', (tester) async {
+    final buffer = SourceBuffer.fromText('ciao\n');
+    var selection = const SelectionModel.at(0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) => MarkdownSourceView(
+              buffer: buffer,
+              theme: _theme,
+              selection: selection,
+              onSelection: (next) => selection = next,
+              showLineNumbers: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // The connection exists only while the surface has focus: tapping it is
+    // what
+    // raises the keyboard, so the test taps it too.
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    expect(state.isKeyboardAttached, isTrue);
+    // Type through the platform's own path, which is what the real keyboard
+    // does.
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: 'Xciao\n',
+        selection: TextSelection.collapsed(offset: 1),
+      ),
+    );
+    await tester.pump();
+    expect(buffer.text, 'Xciao\n');
+    expect(state.canUndo, isTrue);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(buffer.text, 'ciao\n', reason: 'undo took the X back');
   });
 
   testWidgets('a jump to a line brings it to the top', (tester) async {

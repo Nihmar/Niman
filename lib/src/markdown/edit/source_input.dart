@@ -15,6 +15,7 @@
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/input_buffer.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -32,6 +33,7 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     required this.selection,
     required this.onSelection,
     required this.onTokenizer,
+    this.onRecord,
   }) : _input = InputBuffer(text: buffer.text);
 
   /// The frames this surface's edits are logged under.
@@ -42,6 +44,11 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
 
   /// Called after every edit the platform asked for, so the view can repaint.
   final SourceEdited onEdited;
+
+  /// Called before an edit is applied, with the text it is about to replace, so
+  /// a history can undo it (and coalesce the typing, which needs to know what
+  /// was there).
+  final void Function(EditRecord record)? onRecord;
 
   /// Where the caret is now.
   final SelectionModel Function() selection;
@@ -137,6 +144,13 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
       onSelection(caret.clampTo(buffer.text.length));
       return;
     }
+    onRecord?.call(
+      EditRecord(
+        start: start,
+        removed: buffer.substring(start, end),
+        inserted: text,
+      ),
+    );
     _apply(buffer.replaceRange(start, end, text), caret);
   }
 
@@ -160,6 +174,9 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     // the note is replaced by what it sent (whatever the reason — no delta
     // support, an autocorrect, a paste).
     final caret = _caretOfValue(value);
+    onRecord?.call(
+      EditRecord(start: 0, removed: buffer.text, inserted: value.text),
+    );
     buffer.replaceRange(0, buffer.length, value.text);
     _apply(
       SourceEdit(
@@ -181,6 +198,13 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
       // The platform's copy was behind: its text is the base, and the deltas
       // are
       // replayed onto it (see `InputBuffer.applyDeltas`).
+      onRecord?.call(
+        EditRecord(
+          start: 0,
+          removed: buffer.text,
+          inserted: deltas.last.oldText,
+        ),
+      );
       buffer.replaceRange(0, buffer.length, deltas.last.oldText);
     }
     for (final delta in deltas) {
