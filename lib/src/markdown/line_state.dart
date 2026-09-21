@@ -82,7 +82,7 @@ final class LineState {
     this.html,
     this.htmlClosing,
     this.quoteDepth = 0,
-    this.listIndent = -1,
+    this.listStack = const <({int marker, int content})>[],
     this.table = false,
   });
 
@@ -111,8 +111,22 @@ final class LineState {
   /// How many blockquote levels the line sits in.
   final int quoteDepth;
 
-  /// The content indentation of the innermost list item, or -1 outside a list.
-  final int listIndent;
+  /// The list items this line sits inside, outermost first.
+  ///
+  /// Each open item is kept as the column its marker *starts* at and the
+  /// column its content starts at, because the two answer different
+  /// questions: a marker is a child when it starts at or past the open item's
+  /// content column, and a sibling when it starts at the same column as that
+  /// item's own marker — which is how `9. ` and `10. ` stay one list however
+  /// much their content columns differ.
+  final List<({int marker, int content})> listStack;
+
+  /// The content indentation of the innermost open item, or -1 outside a list.
+  int get listIndent => listStack.isEmpty ? -1 : listStack.last.content;
+
+  /// How many list levels deep the innermost open item is (0 at the top
+  /// level), or -1 outside a list.
+  int get listDepth => listStack.isEmpty ? -1 : listStack.length - 1;
 
   /// Whether a GFM table is running.
   final bool table;
@@ -133,8 +147,22 @@ final class LineState {
       other.html == html &&
       other.htmlClosing == htmlClosing &&
       other.quoteDepth == quoteDepth &&
-      other.listIndent == listIndent &&
+      _sameStack(other.listStack, listStack) &&
       other.table == table;
+
+  /// Whether two stacks hold the same items: records compare by value, so a
+  /// plain element-wise walk is the whole of it (the engine has no
+  /// `package:collection`).
+  static bool _sameStack(
+    List<({int marker, int content})> a,
+    List<({int marker, int content})> b,
+  ) {
+    if (a.length != b.length) return false;
+    for (var at = 0; at < a.length; at++) {
+      if (a[at] != b[at]) return false;
+    }
+    return true;
+  }
 
   @override
   int get hashCode => Object.hash(
@@ -145,7 +173,7 @@ final class LineState {
     html,
     htmlClosing,
     quoteDepth,
-    listIndent,
+    Object.hashAll(listStack),
     table,
   );
 
@@ -153,5 +181,5 @@ final class LineState {
   String toString() =>
       'LineState(fence: $fence, math: $math, frontmatter: $frontmatter, '
       'code: $indentedCode, html: $html, quote: $quoteDepth, '
-      'list: $listIndent, table: $table)';
+      'list: $listDepth at $listIndent, table: $table)';
 }

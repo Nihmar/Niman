@@ -241,7 +241,13 @@ final class BlockScanner {
       // every quote block at depth 0 — which made the renderer draw it as an
       // unnested quote and the parser read the `>` as text.
       final quoteDepth = _quoteDepthAfter(line, _text(line), _entering[line]);
-      final listIndent = _entering[line].listIndent;
+      // The depth *on* the line, like the quote's: the state entering a marker
+      // line describes the item before it, so a block that took its depth from
+      // there was drawn at the previous item's indent — siblings at different
+      // indents, the item after a sublist pushed right (device report,
+      // 2026-09-21).
+      final listStack = _listAfter(_text(line), _entering[line]);
+      final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
       var end = line + 1;
       while (end < to && _mergesInto(kind, line, end)) {
         end++;
@@ -262,7 +268,7 @@ final class BlockScanner {
         }
       }
       final ordinal = kind == BlockKind.listItem
-          ? _ordinalOf(line, listIndent, previous)
+          ? _ordinalOf(line, listDepth, previous)
           : 0;
       blocks.add(
         Block(
@@ -270,7 +276,7 @@ final class BlockScanner {
           startLine: line,
           endLine: end,
           quoteDepth: quoteDepth,
-          listIndent: listIndent,
+          listDepth: listDepth,
           listOrdinal: ordinal,
           headingLevel: kind == BlockKind.heading
               ? _headingLevel(_text(line))
@@ -401,10 +407,10 @@ final class BlockScanner {
       return LineState(html: html.$1, htmlClosing: html.$2);
     }
     final quoteDepth = _quoteDepthAfter(line, text, state);
-    final listIndent = _listIndentAfter(text, state);
+    final listStack = _listAfter(text, state);
     return LineState(
       quoteDepth: quoteDepth,
-      listIndent: listIndent,
+      listStack: listStack,
       table: _tableContinues(line, state),
       indentedCode: _indentedCodeContinues(line, text, state),
     );
@@ -607,11 +613,11 @@ final class BlockScanner {
   /// item at the same indent, and both are written as ordered items — keeps
   /// counting. Anything else starts a list, and starts it at the number the
   /// note wrote.
-  int _ordinalOf(int line, int listIndent, Block? previous) {
+  int _ordinalOf(int line, int listDepth, Block? previous) {
     final written = _writtenOrdinal(_text(line));
     if (previous != null &&
         previous.kind == BlockKind.listItem &&
-        previous.listIndent == listIndent &&
+        previous.listDepth == listDepth &&
         previous.listOrdinal > 0 &&
         written > 0) {
       return previous.listOrdinal + 1;
@@ -667,14 +673,32 @@ final class BlockScanner {
     return (at, width, after + padding);
   }
 
-  /// The list item's content indentation after the line, or -1.
-  static int _listIndentAfter(String text, LineState state) {
+  /// The open list items after [text], given those entering it.
+  ///
+  /// A marker opens an item: it keeps every open item whose content column it
+  /// starts at or past, and closes the rest — an item written to the left of
+  /// an open one's content is outside it. What survives is its parents.
+  static List<({int marker, int content})> _listAfter(
+    String text,
+    LineState state,
+  ) {
     final marker = _listMarker(text);
-    if (marker != null) return marker.$3;
-    if (text.trim().isEmpty) return state.listIndent;
-    if (state.listIndent < 0) return -1;
+    if (marker != null) {
+      final (start, _, content) = marker;
+      final open = <({int marker, int content})>[];
+      for (final item in state.listStack) {
+        if (item.content > start) break;
+        open.add(item);
+      }
+      open.add((marker: start, content: content));
+      return open;
+    }
+    if (text.trim().isEmpty) return state.listStack;
+    if (state.listStack.isEmpty) return const <({int marker, int content})>[];
     final indent = text.length - text.trimLeft().length;
-    return indent >= state.listIndent ? state.listIndent : -1;
+    return indent >= state.listIndent
+        ? state.listStack
+        : const <({int marker, int content})>[];
   }
 
   /// Whether [line] is inside a GFM table.

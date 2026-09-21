@@ -135,8 +135,10 @@ final class BlockView extends StatelessWidget {
   /// screen shows what it means.
   Widget _listItem(BuildContext context) {
     final marker = _listMarker(parsed.text, parsed.block.listOrdinal);
-    final indent = parsed.block.listIndent;
-    final offset = indent < 0 ? 0.0 : indent * theme.body.fontSize! * 0.5;
+    final depth = parsed.block.listDepth;
+    // One marker column per level, so a sublist's marker sits exactly where its
+    // parent's text starts.
+    final offset = depth <= 0 ? 0.0 : depth * theme.listIndentPerLevel;
     return Padding(
       padding: EdgeInsets.only(left: offset),
       child: Row(

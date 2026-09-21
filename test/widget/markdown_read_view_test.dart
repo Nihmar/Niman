@@ -346,6 +346,32 @@ void main() {
       expect(box.center.dx, closeTo(300, 0.5));
     });
 
+    testWidgets('sibling items share an indent, a sublist steps in', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(600, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      // The depth used to be the content column of the item *before*, so the
+      // second item of a list was drawn 14 px right of the first and the item
+      // after a sublist further still (device report, 2026-09-21: "il punto b
+      // non dovrebbe essere doppiamente indentato").
+      await _pump(tester, '- one\n  - nested\n- two\n');
+      final markers = find.text('\u2022');
+      expect(markers, findsNWidgets(3));
+      final xs = <double>[
+        for (final marker in markers.evaluate())
+          (marker.renderObject! as RenderBox).localToGlobal(Offset.zero).dx,
+      ];
+      expect(xs[1], greaterThan(xs[0]), reason: 'the sublist steps in');
+      expect(xs[2], xs[0], reason: 'a sibling is not pushed past the first');
+      expect(
+        xs[1],
+        tester.getTopLeft(find.text('one', findRichText: true)).dx,
+        reason: "a sublist starts where its parent's text does",
+      );
+    });
+
     testWidgets('a one-line display is a block, not a span in the prose', (
       tester,
     ) async {
