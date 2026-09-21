@@ -95,7 +95,7 @@ void main() {
     expect(screen.toString(), isNot(contains('**')));
   });
 
-  testWidgets('scrolling builds more, and only what it reaches', (
+  testWidgets('a far jump builds a viewport, not what it passes', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 600);
@@ -106,22 +106,26 @@ void main() {
     addTearDown(controller.dispose);
     final state = await _pump(tester, _note(400), controller: controller);
     final atStart = state.builtBlocks;
+    expect(atStart, lessThan(120), reason: 'a viewport at the top');
 
-    controller.jumpTo(4000);
+    // Jumping most of the way down the note. `SliverList` built every block it
+    // passed — 2 772 ms and 3 156 of 7 530 blocks on the geometry note (#251) —
+    // because it cannot place a child it has not laid out. This sliver places
+    // them from the height map, so it builds what the viewport shows.
+    controller.jumpTo(controller.position.maxScrollExtent * 0.9);
     await tester.pump();
     await tester.pump();
-    final mid = state.builtBlocks;
-    expect(mid, greaterThan(atStart), reason: 'the window moved');
+    expect(
+      state.builtBlocks - atStart,
+      lessThan(120),
+      reason: 'built ${state.builtBlocks - atStart} blocks for one jump',
+    );
 
+    // And it really is the end of the note down there.
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pump();
     await tester.pump();
-    // A far jump reaches further — on this note it reaches every block, because
-    // `SliverList` cannot place a child it has not laid out. The windowed
-    // *positions* that made a jump cheap were `SliverVariedExtentList`'s, and
-    // it bought them by forcing every height: the trade #250 records, with a
-    // custom sliver that owns both as the way out (§8.4.4).
-    expect(state.builtBlocks, greaterThan(mid));
+    expect(find.textContaining('Paragraph 399'), findsWidgets);
   });
 
   testWidgets('a block taller than its estimate is drawn whole', (

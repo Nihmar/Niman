@@ -16,7 +16,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/markdown/block.dart';
@@ -26,6 +25,7 @@ import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
+import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -93,12 +93,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// How many blocks the note has.
   int get blockCount => _blocks.length;
 
-  /// The document's height as the last layout estimated it: what it laid out
-  /// real, plus an estimate for the part no frame has reached. Null before the
-  /// first layout.
-  double? get totalExtent => _estimatedTotal;
-
-  double? _estimatedTotal;
+  /// The document's height: what a frame has drawn for real, plus an estimate
+  /// for the part no frame has reached. Null before the first layout.
+  double? get totalExtent => _heights?.totalExtent;
 
   /// How many blocks a frame has laid out and measured.
   ///
@@ -142,9 +139,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// The editor has had `note open first frame` since T-PP-22 and the read pane
   /// had nothing, so a device report of "the preview was slow to open" could
-  /// not be split into scan, layout and wait. Called from [_blockAt], which
-  /// `SliverList` runs during layout, so the callback lands at the end of the
-  /// frame that drew these blocks.
+  /// not be split into scan, layout and wait. Called from [_blockAt], which the
+  /// sliver runs during layout, so the callback lands at the end of the frame
+  /// that drew these blocks.
   void _traceFirstContent() {
     if (_traced || _built == 0) return;
     _traced = true;
@@ -233,17 +230,16 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       slivers: <Widget>[
         SliverPadding(
           padding: widget.padding,
-          // A **measuring** sliver: `SliverList` lays each block out with
-          // unbounded main-axis constraints, so a block is as tall as what it
-          // draws. The sliver that instead *forces* an extent —
-          // `SliverVariedExtentList` — is what clipped every block taller than
-          // its estimate, and reported the forced size back as a measurement
-          // (#250).
-          sliver: SliverList(
-            delegate: _BlockDelegate(
-              heights: heights,
-              build: _blockAt,
-              onEstimate: (total) => _estimatedTotal = total,
+          // A sliver that places its children from the height map and measures
+          // the ones it lays out: `SliverVariedExtentList` forced every extent
+          // and clipped what was taller than its estimate (#250), and
+          // `SliverList` measured them all and made a far jump cost the note
+          // (#251).
+          sliver: SliverMarkdownBlocks(
+            heights: heights,
+            delegate: SliverChildBuilderDelegate(
+              _blockAt,
+              childCount: heights.length,
             ),
           ),
         ),
@@ -277,93 +273,20 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   }
 
   /// Draws block [index], parsing it for the first time if need be.
+  ///
+  /// How tall it comes out is the sliver's business: a `RenderSliver` lays its
+  /// own children out, and this one records what it measures (#251).
   Widget _blockAt(BuildContext context, int index) {
     final block = _blocks[index];
     _built++;
     _traceFirstContent();
-    return _Measured(
-      onSize: (size) => _measure(index, size.height),
-      child: BlockView(
-        parsed: widget.parser.of(block, widget.buffer),
-        theme: _theme ?? _fallbackTheme,
-        mathCache: widget.mathCache,
-        onTapLink: widget.onTapLink,
-        onTapWikiLink: widget.onTapWikiLink,
-        embedResolver: widget.embedResolver,
-      ),
+    return BlockView(
+      parsed: widget.parser.of(block, widget.buffer),
+      theme: _theme ?? _fallbackTheme,
+      mathCache: widget.mathCache,
+      onTapLink: widget.onTapLink,
+      onTapWikiLink: widget.onTapWikiLink,
+      embedResolver: widget.embedResolver,
     );
-  }
-
-  /// Records what a frame drew for block [index].
-  ///
-  /// The estimator's only feed, and the reason it is recorded outside a frame:
-  /// an extent that moved while the sliver was walking its children is an
-  /// assertion, and nothing here needs a rebuild — the sliver asks again on its
-  /// next layout.
-  void _measure(int index, double height) => _heights?.measured(index, height);
-}
-
-/// The sliver's children, with the document's estimated height attached.
-///
-/// A lazy list otherwise guesses its scrollable extent from the children it has
-/// laid out, and on a long note that guess is a fraction of the truth — every
-/// jump beyond it is clamped, which is what once pulled the preview away from
-/// the editor. The height map knows a height for every block, so it can say:
-/// what this layout has behind it for real, plus an estimate for the part no
-/// frame has reached.
-final class _BlockDelegate extends SliverChildBuilderDelegate {
-  /// Creates the delegate.
-  new({
-    required this.heights,
-    required Widget Function(BuildContext context, int index) build,
-    this.onEstimate,
-  }) : super(build, childCount: heights.length);
-
-  /// The heights, for the estimate.
-  final BlockHeightMap heights;
-
-  /// Told the document's height as this layout estimated it.
-  final ValueChanged<double>? onEstimate;
-
-  @override
-  double? estimateMaxScrollOffset(
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  ) {
-    final total = trailingScrollOffset + heights.estimateAfter(lastIndex);
-    onEstimate?.call(total);
-    return total;
-  }
-}
-
-/// Reports a child's size after the frame that laid it out.
-final class _Measured extends SingleChildRenderObjectWidget {
-  const new({required this.onSize, required super.child});
-
-  final void Function(Size size) onSize;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderMeasured(onSize);
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderMeasured renderObject) {
-    renderObject.onSize = onSize;
-  }
-}
-
-/// The render object behind [_Measured].
-final class _RenderMeasured extends RenderProxyBox {
-  new(this.onSize);
-
-  void Function(Size size) onSize;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    final measured = size;
-    WidgetsBinding.instance.addPostFrameCallback((_) => onSize(measured));
   }
 }
