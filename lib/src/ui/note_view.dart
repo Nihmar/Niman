@@ -40,6 +40,9 @@ import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/editor_lines.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -108,6 +111,7 @@ final class NoteView extends StatefulWidget {
     this.toolbarLayout = ToolbarLayout.defaults,
     this.splitPreview = false,
     this.showPreview = false,
+    this.unifiedMarkdown = false,
     this.showWysiwyg = false,
     this.onWysiwygChanged,
     this.onEditorKindChanged,
@@ -182,6 +186,12 @@ final class NoteView extends StatefulWidget {
   /// Preview visibility (T-UI-06): the shared app bar owns the switch
   /// and passes the state down; NoteView just follows it.
   final bool showPreview;
+
+  /// Whether this note is drawn by the unified engine instead of the preview
+  /// (docs/dev/unified-surface.md): one parse, one theme, three modes over the
+  /// same pipeline. Off by default — the render has to be shown to agree with
+  /// the preview before it replaces it.
+  final bool unifiedMarkdown;
 
   /// Whether this note opens in the WYSIWYG surface instead of the source
   /// editor (T-WYS-05).
@@ -443,6 +453,28 @@ final class _NoteViewState extends State<NoteView>
   late final ScrollController _previewScroll = ScrollController();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
+
+  /// The unified engine's parser: one for the view's life, so its per-block
+  /// cache survives a rebuild and invalidates itself when the text changes.
+  final BlockParser _unifiedParser = BlockParser();
+
+  /// The unified engine's buffer, rebuilt only when the text changes.
+  ///
+  /// A `SourceBuffer` is a line array with a prefix index: building one per
+  /// frame would cost 1.2 ms of `text` and a 7 ms scan on a 930 KB note, which
+  /// is exactly what the windowed read view exists to avoid. The preview
+  /// refreshes on a 500 ms debounce, so this is rebuilt at that cadence.
+  SourceBuffer? _unifiedBuffer;
+  String _unifiedBufferText = '';
+
+  /// The buffer the unified engine draws, built once per text change.
+  SourceBuffer get _unifiedSource {
+    if (_unifiedBuffer == null || _unifiedBufferText != _previewText) {
+      _unifiedBufferText = _previewText;
+      _unifiedBuffer = SourceBuffer.fromText(_previewText);
+    }
+    return _unifiedBuffer!;
+  }
 
   /// The source lines the editor has on screen — the scroll sync's editor
   /// side (T-M2-06). The editor fills it as the package builds its
@@ -1158,19 +1190,43 @@ final class _NoteViewState extends State<NoteView>
   Widget _buildPreview(BuildContext context) => MediaQuery(
     data: MediaQuery.of(context)
         .copyWith(textScaler: noteTextScalerOf(context)),
-    child: MarkdownPreview(
-      data: _previewText,
-      controller: _previewScroll,
-      scrollMap: _previewMap,
-      mathCache: _mathCache,
-      imageDirectory: widget.libraryRoot,
-      onTapLink: (text, href, title) =>
-          unawaited(openHref(context, href ?? '', _linkTargets)),
-      onWikiLink: (ref, display) =>
-          unawaited(openWiki(context, ref, _linkTargets)),
-      embedResolver: _resolveEmbed,
-      column: widget.noteColumn,
+    child: widget.unifiedMarkdown
+        ? _buildUnifiedPreview(context)
+        : _buildLegacyPreview(context),
+  );
+
+  /// The unified surface's read mode: one engine, the same theme as the editor
+  /// (docs/dev/unified-surface.md). Opt-in behind `MarkdownEngine.unified`,
+  /// because its render has to be shown to agree with the preview below before
+  /// it can replace it.
+  Widget _buildUnifiedPreview(BuildContext context) => MarkdownReadView(
+    buffer: _unifiedSource,
+    parser: _unifiedParser,
+    mathCache: _mathCache,
+    controller: _previewScroll,
+    onTapLink: (text, href) =>
+        unawaited(openHref(context, href ?? '', _linkTargets)),
+    onTapWikiLink: (span) => unawaited(
+      // The same rule the masker and the preview use, so a wikilink means one
+      // thing however it is drawn.
+      openWiki(context, parseWikiRef(span.text), _linkTargets),
     ),
+  );
+
+  /// The preview the app has always had, kept until the unified render is
+  /// shown to match it.
+  Widget _buildLegacyPreview(BuildContext context) => MarkdownPreview(
+    data: _previewText,
+    controller: _previewScroll,
+    scrollMap: _previewMap,
+    mathCache: _mathCache,
+    imageDirectory: widget.libraryRoot,
+    onTapLink: (text, href, title) =>
+        unawaited(openHref(context, href ?? '', _linkTargets)),
+    onWikiLink: (ref, display) =>
+        unawaited(openWiki(context, ref, _linkTargets)),
+    embedResolver: _resolveEmbed,
+    column: widget.noteColumn,
   );
 
   /// Schedules the caret-link check for the end of a frame; the caret the
