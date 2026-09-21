@@ -9131,11 +9131,11 @@ convergence check the current tokenizer uses to stop re-tokenizing.
 
 | fixture | lines | blocks | cold scan | keystroke | **lines re-scanned** | Enter | lines re-scanned |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| `fixture-200kb.md` | 6 339 | 4 301 | 3.82 ms | 290 µs | **5** | 244 µs | 51 |
-| `fixture-1mb.md` | 32 151 | 22 326 | 12.08 ms | 1.23 ms | **3** | 1.85 ms | 52 |
-| `Geometria 1.md` | 10 382 | 7 530 | 6.77 ms | 236 µs | **7** | 352 µs | 51 |
+| `fixture-200kb.md` | 6 339 | 4 301 | 3.81 ms | 86 µs | **5** | 114 µs | 51 |
+| `fixture-1mb.md` | 32 151 | 22 326 | 12.27 ms | **85 µs** | **3** | 545 µs | 52 |
+| `Geometria 1.md` | 10 382 | 7 530 | 6.79 ms | **29 µs** | **7** | 144 µs | 51 |
 
-Three things that table says, including one that is not flattering:
+Three things that table says:
 
 - **The convergence rule works as designed.** A keystroke in a 10 382-line note
   recomputes the state of **7 lines**. That is the O(change) property, and it is
@@ -9144,15 +9144,17 @@ Three things that table says, including one that is not flattering:
   convergence point has to be a block boundary, so joining or splitting inside a
   paragraph re-parses the rest of that paragraph. The bound is the paragraph,
   which is the unit a caller already thinks in.
-- **The wall clock is not O(change) yet**, and the number most likely to be
-  misread: 236 µs for 7 lines of work. The state machine is O(change); the
-  *block list* is not. `edited` filters and rebuilds a `List<Block>` of 7 530
-  entries (three passes) and `_buildBlocks` allocates a fresh list per re-scan,
-  so the constant is per *block*, not per changed line. It fits the 0.5 ms
-  keystroke budget on the geometry note and does not on the synthetic 32 151-line
-  fixture (1.23 ms). The fix is a growable block structure with a prefix index
-  rather than a rebuilt list; the number is what makes that a decision to take
-  later rather than a surprise to discover then.
+- **The wall clock is O(change) too, and it took a second pass to get there.**
+  The first version of `edited` filtered and rebuilt a `List<Block>` of 22 326
+  entries in three passes, which made the cost per *block* rather than per
+  changed line: 290 µs → 1.23 ms as the document grew from 6 339 to 32 151
+  lines. It now finds the head, the tail and the convergence boundary by binary
+  search and splices the survivors back with one `replaceRange`, and the
+  keystroke is **flat at 29–86 µs from 6 339 lines to 32 151** — a 14×
+  improvement on the largest fixture and the property the design claimed.
+  What stays document-shaped is Enter (545 µs on the 32 151-line fixture),
+  because 51 lines are genuinely re-parsed: the bound there is the paragraph,
+  not the bookkeeping.
 - Cold scan is 6.77 ms on the geometry note, against the design's 20 ms budget,
   and it is the one-off cost of opening a note.
 
