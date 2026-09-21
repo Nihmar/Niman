@@ -20,6 +20,7 @@ import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -197,8 +198,33 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
               ),
             ),
           ),
+          // The definitions a note ends with. They are not blocks — no block
+          // can draw them, because the definitions never reach the block that
+          // cites them — so the section is appended, and through a *lazy* list
+          // for the same reason the note itself is: a section that lays out
+          // every footnote at the top of the frame costs the frame. Measured:
+          // appending it whole took first content from 76 ms to 112 ms on the
+          // geometry note and the jump from 9 ms to 56.
+          SliverPadding(padding: widget.padding, sliver: _footnoteSliver()),
         ],
       ),
+    );
+  }
+
+  /// The footnotes, one row per sliver child.
+  Widget _footnoteSliver() {
+    final notes = widget.parser.footnotesOf(widget.buffer);
+    return SliverList.builder(
+      itemCount: notes.isEmpty ? 0 : notes.length + 1,
+      itemBuilder: (context, index) {
+        final theme = _theme ?? _fallbackTheme;
+        if (index == 0) return FootnoteDivider(theme: theme);
+        return FootnoteRow(
+          footnote: notes[index - 1],
+          number: index,
+          theme: theme,
+        );
+      },
     );
   }
 

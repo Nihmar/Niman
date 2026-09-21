@@ -1469,19 +1469,33 @@ words are what a reader sees.
 | fixture | the two engines agree |
 |---|---|
 | `fixture-1kb.md` | **identical** |
-| `fixture-10kb.md` | up to offset 5 527 |
-| `fixture-50kb.md` | up to offset 603 |
+| `fixture-10kb.md` | **identical** |
+| `fixture-50kb.md` | **identical** |
 
-Both remaining differences are the same thing and are the test's, not the
-engine's: a Markdown image whose picture file is not in the repository, where
-the comparison builds neither engine with a resolver, so the unified engine
-draws the alt text and the preview draws a broken image. Everything else in
-those fixtures matches — links, footnotes, quotes and nested quotes, task
-lists, tables, math, fences, reference definitions. The gate found six real
-bugs on the way, which is what a gate is for: container syntax drawn as text,
-list markers read instead of drawn, a quote block built at depth zero, a
-`Display` formula keeping a stray `$`, footnotes resolving to nothing, and
-Markdown images shown as their alt text.
+All three render the same words in the same order. The gate found **eight** real
+bugs on the way there, which is what a gate is for:
+
+- container syntax drawn as text — a list item's `- `, a quote's `> `, a task
+  box's `[x] `, which the parser strips and no run covers;
+- a list marker read from the text instead of drawn, so a task list showed
+  `[x]` where the preview drew a checkbox;
+- an ordered list showing the number the note *wrote* rather than the item's
+  place in the list — CommonMark ignores those numbers except the first, so
+  `1. 1. 1.` is a list of three;
+- a quote block built at depth zero, because the scanner took its depth from the
+  state *entering* the first line — which is before that line's own `>`;
+- a `Display` formula keeping a stray `$` at each end, from a delimiter rule
+  that assumed one character rather than two;
+- Markdown images drawn as their alt text;
+- footnotes that resolved to nothing: a reference and a definition are written
+  in different blocks and the engine parses per block;
+- a block the parser *consumed* — a reference definition — drawn as the text it
+  did not cover.
+
+The last thing to fall was the section the package ends a document with: the
+definitions listed with their backlinks. It is drawn through a lazy sliver for
+the same reason the note is — appending it whole took first content from 76 ms
+to 112 ms on the geometry note and the jump from 9 ms to 56.
 
 And the timings, from `test/perf/read_view_timing_test.dart`, held against this
 document's own budget of **≤ 60 ms target / 120 ms ceiling** for text to first
@@ -1489,14 +1503,14 @@ visible content:
 
 | fixture | blocks | laid out | parsed | first content | jump |
 |---|---:|---:|---:|---:|---:|
-| `fixture-50kb.md` | 1 092 | 45 | 45 | 164 ms | 22 ms |
-| `fixture-200kb.md` | 4 301 | 42 | 42 | **66 ms** | 15 ms |
-| `Geometria 1.md` | 7 530 | 71 | 71 | **76 ms** | 9 ms |
+| `fixture-50kb.md` | 1 092 | 57 | 57 | 175 ms | 43 ms |
+| `fixture-200kb.md` | 4 301 | 69 | 69 | **82 ms** | 32 ms |
+| `Geometria 1.md` | 7 530 | 85 | 85 | **91 ms** | 31 ms |
 
-The geometry note — 934 KB, 13 845 formulas — reaches first content in **76 ms**
-against the preview's recorded 137 ms, and lays out **71 blocks of 7 530**:
-the windowing is what the number is made of. The 50 KB fixture is slower than
-the 200 KB one and the reason is worth recording: its first screen is dense with
+The geometry note — 934 KB, 13 845 formulas — reaches first content in **91 ms**
+against the preview's recorded 137 ms, and lays out **85 blocks of 7 530**: the
+windowing is what the number is made of. The 50 KB fixture is slower than the
+200 KB one and the reason is worth recording: its first screen is dense with
 display formulas, and the first render of each is typeset inside this
 measurement — by the preview exactly as by the read view — with the math cache
 amortizing it from the second frame on. Its ceiling is 250 ms in the test, a

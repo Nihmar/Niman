@@ -21,6 +21,7 @@
 library;
 
 import 'package:markdown/markdown.dart' as md;
+import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/masked_block.dart';
@@ -167,6 +168,14 @@ final class BlockParser {
     final scheme = slice.substring(start, colon).toLowerCase();
     return scheme == 'mailto' || scheme == 'xmpp' ? scheme : null;
   }
+
+  /// The footnotes of [buffer], in citation order.
+  ///
+  /// The renderer needs the definitions as well as the references: the package
+  /// ends a document with a list of them, and the read view draws that list as
+  /// a section of its own — so unlike the references, these are not merely
+  /// seeded into a document and forgotten.
+  List<Footnote> footnotesOf(SourceBuffer buffer) => _scopeOf(buffer).footnotes;
 
   /// The document-scoped definitions, scanned once per revision.
   DocumentScope _scopeOf(SourceBuffer buffer) {
@@ -489,6 +498,7 @@ final class DocumentScope {
     required this.links,
     required this.footnoteCounts,
     required this.footnoteLabels,
+    required this.footnotes,
     required this.source,
     required this.revision,
   });
@@ -510,19 +520,31 @@ final class DocumentScope {
     }
 
     final counts = <String, int>{};
+    final bodies = <String, String>{};
     for (final match in _footnoteDefinition.allMatches(text)) {
       final label = match.group(1)!;
       counts[label] = (counts[label] ?? 0) + 1;
+      final body = (match.group(2) ?? '').trim();
+      if (body.isNotEmpty) bodies.putIfAbsent(label, () => body);
     }
     final labels = <String>[];
     for (final match in _footnoteReference.allMatches(text)) {
       final label = match.group(1)!;
       if (!labels.contains(label)) labels.add(label);
     }
+    // The section a note ends with, in the order the references are cited —
+    // which is the order the package numbers them in, and the order a reader
+    // meets them.
+    final notes = <Footnote>[];
+    for (final label in labels) {
+      if (!counts.containsKey(label)) continue;
+      notes.add(Footnote(label: label, body: bodies[label] ?? ''));
+    }
     return DocumentScope(
       links: links,
       footnoteCounts: counts,
       footnoteLabels: labels,
+      footnotes: notes,
       source: source,
       revision: revision,
     );
@@ -535,9 +557,9 @@ final class DocumentScope {
     multiLine: true,
   );
 
-  /// A footnote definition, in its single-line form.
+  /// A footnote definition, in its single-line form: its label and its body.
   static final RegExp _footnoteDefinition = RegExp(
-    r'^ {0,3}\[\^([^\]]+)\]:',
+    r'^ {0,3}\[\^([^\]]+)\]:[ \t]*(.*)$',
     multiLine: true,
   );
 
@@ -554,9 +576,28 @@ final class DocumentScope {
   /// the package numbers them in.
   final List<String> footnoteLabels;
 
+  /// The definitions, in citation order, for the section a note ends with.
+  final List<Footnote> footnotes;
+
   /// The buffer this was scanned from.
   final SourceBuffer source;
 
   /// Its revision.
   final int revision;
+}
+
+/// One footnote: the label it was defined with, and its body.
+@immutable
+final class Footnote {
+  /// Creates a footnote.
+  const new({required this.label, required this.body});
+
+  /// The label, without its brackets.
+  final String label;
+
+  /// What the definition said, in its single-line form.
+  final String body;
+
+  @override
+  String toString() => 'Footnote($label: $body)';
 }
