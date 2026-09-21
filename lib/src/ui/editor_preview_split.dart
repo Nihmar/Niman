@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:niman/src/preview/editor_lines.dart';
-import 'package:niman/src/preview/scroll_map.dart';
-import 'package:niman/src/preview/scroll_sync.dart';
 
 /// The editor | preview split (T-M2-08): a draggable divider between the
 /// two panes, with the bidirectional scroll sync wrapped around both.
 final class EditorPreviewSplit extends StatefulWidget {
   /// Creates the split with [editor] and [preview] panes.
   ///
-  /// [editorScroll]/[previewScroll] are the controllers the scroll sync
-  /// links; [map] is the shared scroll map the preview feeds. [fraction] is
-  /// the editor's share (0..1, clamped to the allowed range); dragging the
-  /// divider calls [onFractionChanged] continuously and [onDragEnd] when
-  /// the drag lifts (the owner persists it).
+  /// [fraction] is the editor's share (0..1, clamped to the allowed range);
+  /// dragging the divider calls [onFractionChanged] continuously and
+  /// [onDragEnd] when the drag lifts (the owner persists it).
+  ///
+  /// The panes used to be linked: scrolling one scrolled the other, through a
+  /// shared line map. That is gone with the unified surface, and its departure
+  /// is the point rather than a loss — one engine and one scroll position
+  /// cannot be out of step, which is why the feature existed.
   const new({
     required this.editor,
     required this.preview,
     required this.editorScroll,
     required this.previewScroll,
-    required this.map,
-    required this.lines,
     required this.fraction,
     required this.onFractionChanged,
     this.onDragEnd,
@@ -40,12 +38,6 @@ final class EditorPreviewSplit extends StatefulWidget {
 
   /// The preview's scroll controller.
   final ScrollController previewScroll;
-
-  /// The scroll map the preview feeds.
-  final ScrollMap map;
-
-  /// The editor's visible source lines (the sync's editor side).
-  final EditorLineView lines;
 
   /// The editor's share of the split (before clamping).
   final double fraction;
@@ -107,40 +99,31 @@ final class _EditorPreviewSplitState extends State<EditorPreviewSplit> {
   @override
   Widget build(BuildContext context) {
     final fraction = _fraction;
-    return EditorPreviewScrollSync(
-      editorScroll: widget.editorScroll,
-      previewScroll: widget.previewScroll,
-      map: widget.map,
-      lines: widget.lines,
-      child: Row(
-        children: [
-          Expanded(flex: (1000 * fraction).round(), child: widget.editor),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragUpdate: (details) =>
-                _onDragUpdate(details.globalPosition),
-            onHorizontalDragEnd: (_) => widget.onDragEnd?.call(),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.resizeColumn,
-              child: SizedBox(
-                // The visual divider stays 1 px; the hit box is wider so
-                // fingers (and pointers) can actually grab it.
-                width: widget.dividerWidth + 12,
-                child: Center(
-                  child: Container(
-                    width: widget.dividerWidth,
-                    color: Theme.of(context).dividerColor,
-                  ),
+    return Row(
+      children: [
+        Expanded(flex: (1000 * fraction).round(), child: widget.editor),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragUpdate: (details) =>
+              _onDragUpdate(details.globalPosition),
+          onHorizontalDragEnd: (_) => widget.onDragEnd?.call(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.resizeColumn,
+            child: SizedBox(
+              // The visual divider stays 1 px; the hit box is wider so
+              // fingers (and pointers) can actually grab it.
+              width: widget.dividerWidth + 12,
+              child: Center(
+                child: Container(
+                  width: widget.dividerWidth,
+                  color: Theme.of(context).dividerColor,
                 ),
               ),
             ),
           ),
-          Expanded(
-            flex: (1000 * (1 - fraction)).round(),
-            child: widget.preview,
-          ),
-        ],
-      ),
+        ),
+        Expanded(flex: (1000 * (1 - fraction)).round(), child: widget.preview),
+      ],
     );
   }
 }
