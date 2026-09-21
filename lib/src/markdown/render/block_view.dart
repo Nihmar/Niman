@@ -125,7 +125,7 @@ final class BlockView extends StatelessWidget {
   /// than the `[x]` it was written as — the text says what the note said, the
   /// screen shows what it means.
   Widget _listItem(BuildContext context) {
-    final marker = _listMarker(parsed.text);
+    final marker = _listMarker(parsed.text, parsed.block.listOrdinal);
     final indent = parsed.block.listIndent;
     final offset = indent < 0 ? 0.0 : indent * theme.body.fontSize! * 0.5;
     return Padding(
@@ -271,6 +271,7 @@ final class BlockView extends StatelessWidget {
   /// business: the block carries it and the caller applies it.
   static ({String display, bool isTask, bool checked}) _listMarker(
     String text,
+    int ordinal,
   ) {
     final line = text.split('\n').first;
     var at = 0;
@@ -301,8 +302,15 @@ final class BlockView extends StatelessWidget {
         checked: rest[1] == 'x' || rest[1] == 'X',
       );
     }
+    // An ordered item shows its *position* in the list, not the number the note
+    // happened to write: `1. 1. 1.` is a list of three. The delimiter the note
+    // used is kept, because `.` and `)` are the author's choice and the number
+    // is the list's.
+    final delimiter = ordered && at > start ? line[at - 1] : '.';
     return (
-      display: ordered ? line.substring(start, at) : '\u2022',
+      display: ordered
+          ? '${ordinal > 0 ? ordinal : line.substring(start, at - 1)}$delimiter'
+          : '\u2022',
       isTask: false,
       checked: false,
     );

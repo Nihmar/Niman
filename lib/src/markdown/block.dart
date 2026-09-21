@@ -59,6 +59,7 @@ final class Block {
     required this.endLine,
     this.quoteDepth = 0,
     this.listIndent = -1,
+    this.listOrdinal = 0,
     this.headingLevel = 0,
     this.fenceInfo,
   });
@@ -77,6 +78,14 @@ final class Block {
 
   /// The content indentation of the list item it is, or -1.
   final int listIndent;
+
+  /// Where this item sits in its list, counting from one, for an ordered list.
+  ///
+  /// CommonMark ignores the numbers a note writes except the first: a list
+  /// written `1. 1. 1.` renders 1, 2, 3. That makes the number a property of
+  /// the *list* rather than of the item, and the item is all a block knows — so
+  /// the scanner counts it while it walks, where the list is still visible.
+  final int listOrdinal;
 
   /// The heading level, when [kind] is [BlockKind.heading].
   final int headingLevel;
@@ -103,6 +112,7 @@ final class Block {
       endLine: endLine + delta,
       quoteDepth: quoteDepth,
       listIndent: listIndent,
+      listOrdinal: listOrdinal,
       headingLevel: headingLevel,
       fenceInfo: fenceInfo,
     );
