@@ -67,6 +67,14 @@ const Map<String, int> _ceilings = <String, int>{
   'fixture-50kb.md': 250,
 };
 
+/// The jump's ceiling: 250, the loosest first-content ceiling in this file, and
+/// deliberately not the design's own 25/60 ms (§9.2, "prefix sums, only landed
+/// blocks laid out") — that row is a release build's target, and a jump in this
+/// harness pays a **cold first content where it lands**, which on the geometry
+/// note is a denser screen than its first (139 ms against 72). Recorded rather
+/// than convenient: 2 772 ms is what the row replaced (#251).
+const int _jumpCeiling = 250;
+
 /// Whether this run holds the design's ceiling rather than the backstop: the
 /// reference host's run, asked for explicitly.
 final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
@@ -172,10 +180,12 @@ void main() {
 
       final ceiling = _ceilings[name] ?? _ceiling;
       final bar = _referenceHost ? ceiling : ceiling * _backstop;
+      final jumpBar = _referenceHost ? _jumpCeiling : _jumpCeiling * _backstop;
       print(
         '$name: first content ${first}ms (target $_target, ceiling $ceiling, '
-        'bar $bar) | jump ${jump}ms | blocks ${state.blockCount} '
-        'built ${state.builtBlocks} parsed ${parser.parseCount}',
+        'bar $bar) | jump ${jump}ms (ceiling $_jumpCeiling, bar $jumpBar) | '
+        'blocks ${state.blockCount} built ${state.builtBlocks} '
+        'parsed ${parser.parseCount}',
       );
 
       expect(
@@ -187,9 +197,24 @@ void main() {
                   'against $bar. Run with NIMAN_PERF=1 to hold it to the '
                   'design ceiling of $ceiling ms',
       );
-      // The windowing's evidence, and the reason the number above is a
-      // viewport's cost rather than the note's.
-      expect(state.builtBlocks, lessThan(state.blockCount));
+      expect(
+        jump,
+        lessThanOrEqualTo(jumpBar),
+        reason: _referenceHost
+            ? 'past the ceiling for a jump to land'
+            : 'past the backstop for a jump: $jump ms against $jumpBar. Run '
+                  'with NIMAN_PERF=1 to hold it to the ceiling of '
+                  '$_jumpCeiling ms',
+      );
+      // The gate that is machine-independent, and the one #251 is about: the
+      // jump landed on blocks no frame had reached and built a viewport of
+      // them, not every block it passed (3 156 of 7 530 before).
+      expect(state.builtBlocks, greaterThan(0));
+      expect(
+        state.builtBlocks,
+        lessThan(state.blockCount ~/ 5),
+        reason: 'built ${state.builtBlocks} of ${state.blockCount} blocks',
+      );
       expect(state.blockCount, greaterThan(0));
     });
   }

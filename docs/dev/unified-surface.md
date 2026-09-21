@@ -1503,12 +1503,17 @@ visible content:
 
 | fixture | blocks | laid out | parsed | first content | jump |
 |---|---:|---:|---:|---:|---:|
-| `fixture-50kb.md` | 1 092 | 57 | 57 | 175 ms | 43 ms |
-| `fixture-200kb.md` | 4 301 | 69 | 69 | **82 ms** | 32 ms |
-| `Geometria 1.md` | 7 530 | 85 | 85 | **91 ms** | 31 ms |
+| `fixture-50kb.md` | 1 092 | 84 | 84 | 155 ms | 97 ms |
+| `fixture-200kb.md` | 4 301 | 82 | 82 | **70 ms** | 47 ms |
+| `Geometria 1.md` | 7 530 | 88 | 88 | **70 ms** | 149 ms |
 
-The geometry note — 934 KB, 13 845 formulas — reaches first content in **91 ms**
-against the preview's recorded 137 ms, and lays out **85 blocks of 7 530**: the
+(The jump column is the custom sliver's: it read 43/32/31 ms when
+`SliverVariedExtentList` *forced* every extent — cheap, and clipping every block
+taller than its estimate — then 347/935/**2 772** ms when `SliverList` measured
+them all. §8.4.4 carries the three columns side by side.)
+
+The geometry note — 934 KB, 13 845 formulas — reaches first content in **70 ms**
+against the preview's recorded 137 ms, and lays out **88 blocks of 7 530**: the
 windowing is what the number is made of. The 50 KB fixture is slower than the
 200 KB one and the reason is worth recording: its first screen is dense with
 display formulas, and the first render of each is typeset inside this
@@ -9321,6 +9326,49 @@ the geometry note reads 2 604 ms and builds 3 156 of its 7 530 blocks (386 ms an
 bought them with the clipping. Having both is the custom
 `RenderSliverMarkdownBlocks` above — positions from the map, heights from
 measurement — and that is now the next piece of work rather than a hypothesis.
+
+**Both, taken: `SliverMarkdownBlocks` (#251).** The sliver the paragraph above
+described is the one the read view now uses, and it does the two halves in that
+order: it asks the map where the block under the cache origin starts, lays out
+from there until the cache end is covered, and **writes each measured height back
+before placing the next block**, so the rest of the same frame already follows the
+height the note really has. Whatever falls outside `[first, last]` is dropped
+first — which is what makes a jump cheap in *both* directions: a sliver that walks
+to its target pays for every block it passes (the 2 772 ms), and one that only
+grows at its ends pays for the blocks in between.
+
+Three things the implementation had to learn, all of them now in the code's own
+comments. The total is `max(estimate, what this frame laid out)`, because a sliver
+may not paint more than its own maximum and an estimate is allowed to be wrong in
+both directions — and at the note's end the estimate steps aside for the measured
+end, which is what stops `maxScrollExtent` creeping as measurements land.
+`BlockHeightMap` became the Fenwick tree §8.4.1 asked for, because a frame asks
+for an offset per block it places (`totalExtent`, `offsetOf`, `indexAt`, and one
+update per measurement). And the **estimator is asked exactly once**, when the map
+is built: asking it again at measurement time was a real bug, caught by the test
+that a paragraph taller than its estimate broke by 0.5 px — the read view builds
+the map in `initState`, *before* the theme arrives, so the second answer was
+computed against a different theme than the first, and the tree drifted from the
+extents it had been built from.
+
+Measured on this host's debug harness, beside the table in §4.9.5:
+
+| fixture | jump before | jump now | blocks built before | now |
+|---|---:|---:|---:|---:|
+| `fixture-50kb.md` | 347 ms | **97 ms** | 471 | **84** |
+| `fixture-200kb.md` | 935 ms | **47 ms** | 1 876 | **82** |
+| `Geometria 1.md` | 2 772 ms | **149 ms** | 3 156 | **88** |
+
+A jump costs what a first content costs — a viewport of cold blocks, math
+included — instead of the note. The gate is the property and not the
+milliseconds, because the property is what holds on any machine:
+`test/perf/read_view_timing_test.dart` holds `builtBlocks` under a fifth of
+`blockCount` after a jump (88 of 7 530) and checks that the end of the note is
+really on screen when a jump lands there, and
+`test/widget/markdown_read_view_test.dart` holds the same at 800 × 600 with a jump
+most of the way down a 1 200-block note. The milliseconds carry a 250 ms ceiling
+there — the design's 25/60 ms row (§9.2) is a *release* build's target, and a
+debug jump pays a cold first content where it lands.
 
 Data to build while measuring: per-3-second rolling average of
 `build + layout` time per block kind, blocks laid out per frame, and the
