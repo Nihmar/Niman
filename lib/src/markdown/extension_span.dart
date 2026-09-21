@@ -65,12 +65,19 @@ final class ExtensionSpan {
 
   /// The text without its delimiters, for the kinds that have them.
   ///
-  /// `$x$` gives `x`, `[[a|b]]` gives `a|b`, `![[a]]` gives `a`, `` `x` ``
-  /// gives `x`. A tag has no delimiter to strip, so it gives itself.
+  /// `$x$` gives `x`, `$$x$$` gives `x`, `[[a|b]]` gives `a|b`, `![[a]]` gives
+  /// `a`, `` `x` `` gives `x`. A tag has no delimiter to strip, so it gives
+  /// itself.
+  ///
+  /// Display math strips **two** on each side, not one: `$$x$$` read as a
+  /// single-`$` construct leaves a stray `$` at each end of the tex, which is
+  /// what put `$ \begin{pmatrix}…$` on screen where the preview drew a
+  /// formula.
   String get inner => switch (kind) {
     ExtensionKind.inlineMath ||
-    ExtensionKind.displayMath ||
     ExtensionKind.codeSpan => text.substring(1, text.length - 1),
+    ExtensionKind.displayMath =>
+      text.length >= 4 ? text.substring(2, text.length - 2) : '',
     ExtensionKind.wikilink => text.substring(2, text.length - 2),
     ExtensionKind.embed => text.substring(3, text.length - 2),
     ExtensionKind.tag => text,
