@@ -72,6 +72,28 @@ void main() {
     expect(_moved(text, text.length, CaretMotion.lineEnd), text.length);
   });
 
+  test('a double click selects the word under the offset', () {
+    const text = 'due parole, snake_case_name fine';
+    expect(wordRangeAt(text, 5), (4, 10), reason: 'inside `parole`');
+    expect(wordRangeAt(text, 4), (4, 10), reason: 'at its first letter');
+    expect(wordRangeAt(text, 9), (4, 10), reason: 'at its last letter');
+    expect(wordRangeAt(text, 13), (
+      12,
+      27,
+    ), reason: 'an underscore is a word character, so the name selects whole');
+    expect(
+      wordRangeAt(text, 10),
+      (10, 11),
+      reason:
+          'a comma is not a word: it selects itself, not the nothing after it',
+    );
+    expect(wordRangeAt(text, text.length), (28, 32), reason: 'the last word');
+    expect(wordRangeAt('', 0), (
+      0,
+      1,
+    ), reason: 'an empty note selects nothing much');
+  });
+
   test('extend holds the anchor, which is what shift is', () {
     const text = 'una riga di testo';
     final buffer = SourceBuffer.fromText(text);

@@ -56,6 +56,40 @@ enum CaretMotion {
 bool _wordChar(String unit) =>
     RegExp(r'^[\p{L}\p{N}_]$', unicode: true).hasMatch(unit);
 
+/// The range of the word [offset] is in, as `(start, end)`.
+///
+/// What a double click selects, and the same word rule the word motions use: a
+/// letter, a digit or an underscore is a word character, so `snake_case_name`
+/// selects whole. An offset that sits on no word character — a space, a comma —
+/// selects that one character, which is what editors do rather than selecting
+/// the nothing between two words.
+(int, int) wordRangeAt(String text, int offset) {
+  final at = offset.clamp(0, text.length);
+  if (at >= text.length && at > 0) {
+    // Past the last character: the word ends here, so expand from the end.
+    return _expand(text, at - 1, fallback: at - 1);
+  }
+  return _expand(text, at, fallback: at);
+}
+
+/// Expands around [at] over the word characters that touch it.
+(int, int) _expand(String text, int at, {required int fallback}) {
+  if (at < 0 || at >= text.length) return (fallback, fallback + 1);
+  final unit = String.fromCharCode(text.codeUnitAt(at));
+  if (!_wordChar(unit)) return (at, at + 1);
+  var start = at;
+  var end = at + 1;
+  while (start > 0 &&
+      _wordChar(String.fromCharCode(text.codeUnitAt(start - 1)))) {
+    start--;
+  }
+  while (end < text.length &&
+      _wordChar(String.fromCharCode(text.codeUnitAt(end)))) {
+    end++;
+  }
+  return (start, end);
+}
+
 /// The caret [selection] moved by [motion] through [buffer].
 ///
 /// With [extend] the anchor stays where it was, which is what shift does;

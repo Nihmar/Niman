@@ -424,6 +424,53 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _ensureCaretVisible();
   }
 
+  /// How many taps have landed inside [_clickWindow], and when the last did.
+  int _clicks = 0;
+  DateTime? _lastClick;
+
+  /// How long two taps may be apart and still be one gesture.
+  static const Duration _clickWindow = Duration(milliseconds: 400);
+
+  /// A tap: one places the caret, two take the word under it, three take the
+  /// line.
+  ///
+  /// Counted here rather than with `onDoubleTap`, because a triple click is a
+  /// *third* tap and not a second double one, and because the count has to
+  /// survive
+  /// the caret moving between taps — which is exactly what happens.
+  void _tapUp(Offset position) {
+    final offset = offsetAt(position);
+    if (offset == null) return;
+    final now = DateTime.now();
+    final last = _lastClick;
+    _clicks = last != null && now.difference(last) <= _clickWindow
+        ? _clicks + 1
+        : 1;
+    _lastClick = now;
+    switch (_clicks) {
+      case 1:
+        placeCaret(offset);
+      case 2:
+        final (start, end) = wordRangeAt(widget.buffer.text, offset);
+        _select(start, end);
+      default:
+        final line = widget.buffer.lineOf(offset);
+        _select(
+          widget.buffer.offsetOfLine(line),
+          widget.buffer.offsetOfLine(line) + widget.buffer.lineAt(line).length,
+        );
+        _clicks = 0;
+    }
+  }
+
+  void _select(int start, int end) {
+    final next = SelectionModel(anchor: start, extent: end);
+    setState(() => _ownSelection = next);
+    widget.onSelection?.call(next);
+    _input.sendSelection();
+    _scheduleCaret();
+  }
+
   /// Selects everything.
   void selectAll() {
     final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
@@ -594,10 +641,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (details) => _focus.requestFocus(),
-                onTapUp: (details) {
-                  final offset = offsetAt(details.globalPosition);
-                  if (offset != null) placeCaret(offset);
-                },
+                onTapUp: (details) => _tapUp(details.globalPosition),
                 child: CustomScrollView(
                   controller: _scroll,
                   slivers: <Widget>[
