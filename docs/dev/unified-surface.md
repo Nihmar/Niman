@@ -9552,9 +9552,14 @@ the line box.
    box exactly where the source is. Two consequences to record honestly:
    - a block containing inline widgets needs a small **correction table**
      (the placeholder's width and text offset) so hit-testing and
-     `getBoxesForSelection` are right around it — this is the residual of
-     Flutter's known limitation that `TextPainter` position queries do not see
-     `WidgetSpan` placeholders ([§6.9](#69-traps-and-known-flutter-pitfalls));
+     `getBoxesForSelection` are right around it — the residual of Flutter's
+     limitation that a `WidgetSpan` is one code unit in the paragraph
+     ([§6.9](#69-traps-and-known-flutter-pitfalls)). Measured, that correction
+     turns out to be **arithmetic rather than geometric**: with the placeholder's
+     dimensions supplied, `getOffsetForCaret` steps exactly the placeholder's
+     width across it, so what the table carries is "this text offset is that
+     source range", and what stays the surface's own job is measuring the child
+     so those dimensions are right (`test/unit/caret_rectangle_test.dart`);
    - the correction table is *only* needed for blocks with inline widgets,
      which on `Geometria 1.md` means the math-heavy ones — so the widget path
      must be measured, not assumed.
@@ -9703,11 +9708,36 @@ the line — `getOffsetForCaret(position, prototype)` for where it starts and
 surface computes for itself. That is the distinction a first attempt at this
 surface got wrong: it had its own `row_text_metrics.dart`, and the caret's
 *rendered* position is what it was replaced over (`12d9f4a`; Phase 3's exit
-criteria and §10.4's spike 2 carry it as a criterion now). Two spots are where
-it goes wrong even with the right call: the prototype supplies the height, so an
-empty line or one that has just relaid out is where a stale one shows, and a
-block holding an inline widget is where the offset goes off by that widget's
-width — which is what the correction table above exists for.
+criteria and §10.4's spike 2 carry it as a criterion now).
+
+`test/unit/caret_rectangle_test.dart` measures the three things the call leaves
+to the caller, and two of them are not what they look like. (An earlier draft of
+this section guessed at the first and got it backwards; the measurement is the
+correction.)
+
+- **The prototype's height is inert.** `getFullHeightForCaret` answers with the
+  line's own full height — 19.2 px for a 16 px strut at height 1.2 — for a
+  zero-height prototype, a 20 px one and a 100 px one alike, and
+  `getOffsetForCaret` does not move either. The parameter is documented as
+  supplying the caret's height; deriving the caret's height from a box the
+  surface keeps is therefore wrong in both directions.
+- **The prototype's width is not inert, and only on the right-to-left side.** A
+  caret before an RTL character is drawn on that character's right, so the
+  returned top-left is the character's edge minus the caret's own width: 48 →
+  46.5 → 45 → 38 for prototype widths 0, 1.5, 3 and 10, while an LTR run answers
+  the same x for all four. The returned `Offset` does **not** say which side to
+  draw on — that is the caller's problem, which is §6.9's warning measured
+  instead of cited.
+- **An empty block has no line metrics.** `computeLineMetrics()` is empty on an
+  empty paragraph, and the caret still has its full height: nothing may index
+  the first line metric, and every note ends with an empty paragraph.
+
+A block holding an inline widget no longer looks like a geometric problem. With
+the placeholder's dimensions supplied, `getOffsetForCaret` steps exactly the
+placeholder's width across it (`see $x^2$ here` is 14 source units and 10 in the
+paragraph, and the caret moves the 40 px box). What the correction table below
+has to carry is the **arithmetic** — one code unit stands for a source range —
+while measuring the child so those dimensions are right stays the surface's job.
 
 ### 8.7.3 Undo is a stack of source splices
 
@@ -10659,6 +10689,14 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    the reason survives only in the author's memory. That is what this spike is
    for: to turn it into a test. Two questions, and the second is the harder —
    does the IME survive, and **is the caret rectangle right?**
+   **The second is answered for the test font, 2026-09-21.**
+   `test/unit/caret_rectangle_test.dart`: the caret's height over a hidden run
+   is the line's at every offset, including the end of the text; a prototype's
+   height changes nothing while its width moves the caret on the RTL side only;
+   an empty block has no line metrics and still has a caret; a placeholder costs
+   one code unit and the caret steps its width; and a wrapped line moves the
+   caret by the strut's advance, not by `LineMetrics.height`. What the device
+   pass still owes is the platform fonts, the IME, and a real bidi paragraph.
 3. ~~How conformant is `markdown` 7.3.1, really?~~ — **answered 2026-09-21:
    645/652 and 662/677, 22 examples, 8 to fix.** The gap is small and
    enumerable, so writing a parser is off the table for good
