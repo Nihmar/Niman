@@ -118,7 +118,10 @@ void main() {
     await tester.pumpWidget(_view('- one\n- two\n\n1. three', _syncCache()));
     await tester.pump();
     final screen = _screenText(tester);
-    expect(screen, contains('-'));
+    // The marker is drawn as the preview draws it: a bullet whatever the note
+    // wrote, and an ordered item keeps its number.
+    expect(screen, contains('\u2022'));
+    expect(screen, contains('1.'));
     expect(screen, contains('one'));
     expect(screen, contains('two'));
     expect(screen, contains('three'));

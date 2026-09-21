@@ -117,9 +117,15 @@ final class BlockView extends StatelessWidget {
   }
 
   /// A list item: its marker, then its content at the item's own indent.
+  /// A list item: its marker, then its content at the item's own indent.
+  ///
+  /// The marker is drawn, not read from the text, and it agrees with the
+  /// preview on purpose: a bullet is `\u2022` whatever the note wrote (`-`, `*`
+  /// or `+`), an ordered item keeps its number, and a task item is a box rather
+  /// than the `[x]` it was written as — the text says what the note said, the
+  /// screen shows what it means.
   Widget _listItem(BuildContext context) {
-    final visible = VisibleText.of(parsed);
-    final marker = _listMarker(visible.text);
+    final marker = _listMarker(parsed.text);
     final indent = parsed.block.listIndent;
     final offset = indent < 0 ? 0.0 : indent * theme.body.fontSize! * 0.5;
     return Padding(
@@ -129,7 +135,18 @@ final class BlockView extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: theme.listIndentPerLevel,
-            child: Text(marker.$1, style: theme.marker),
+            child: marker.isTask
+                ? Padding(
+                    padding: EdgeInsets.only(top: theme.body.fontSize! * 0.15),
+                    child: Icon(
+                      marker.checked
+                          ? Icons.check_box_outlined
+                          : Icons.check_box_outline_blank,
+                      size: theme.body.fontSize! * 0.95,
+                      color: theme.marker.color,
+                    ),
+                  )
+                : Text(marker.display, style: theme.marker),
           ),
           Expanded(child: _rich(context, style: theme.body)),
         ],
@@ -247,14 +264,21 @@ final class BlockView extends StatelessWidget {
     return Text.rich(TextSpan(children: spans, style: style));
   }
 
-  /// The list marker and its trailing space, from the item's first line.
-  static (String, int) _listMarker(String text) {
+  /// What to draw in a list item's marker column.
+  ///
+  /// The `display` field is the text of the marker, and a task item has none:
+  /// it draws a box. The indent the item was written at is not this function's
+  /// business: the block carries it and the caller applies it.
+  static ({String display, bool isTask, bool checked}) _listMarker(
+    String text,
+  ) {
     final line = text.split('\n').first;
     var at = 0;
     while (at < line.length && (line[at] == ' ' || line[at] == '\t')) {
       at++;
     }
     final start = at;
+    var ordered = false;
     if (at < line.length && '+-*'.contains(line[at])) {
       at++;
     } else {
@@ -263,15 +287,25 @@ final class BlockView extends StatelessWidget {
           line[at].compareTo('9') <= 0) {
         at++;
       }
-      if (at < line.length && (line[at] == '.' || line[at] == ')')) at++;
+      if (at < line.length && (line[at] == '.' || line[at] == ')')) {
+        at++;
+        ordered = true;
+      }
     }
-    if (at == start) return ('', 0);
-    // A task box is part of the marker: `- [x] item`.
+    if (at == start) return (display: '', isTask: false, checked: false);
     final rest = line.substring(at).trimLeft();
     if (rest.startsWith('[') && rest.length > 2 && rest[2] == ']') {
-      return (rest.substring(0, 3), at);
+      return (
+        display: '',
+        isTask: true,
+        checked: rest[1] == 'x' || rest[1] == 'X',
+      );
     }
-    return (line.substring(start, at), at);
+    return (
+      display: ordered ? line.substring(start, at) : '\u2022',
+      isTask: false,
+      checked: false,
+    );
   }
 
   /// The lines inside a fence, or the block's own text for indented code.
