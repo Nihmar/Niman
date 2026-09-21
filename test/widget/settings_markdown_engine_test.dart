@@ -21,6 +21,11 @@ void main() {
 
     final row = find.byKey(SettingsKeys.markdownEngine);
     await tester.scrollUntilVisible(row, 200);
+    // Built is not the same as on screen: the drag stops as soon as the
+    // row enters the cache extent, and the switch's centre can land just
+    // under the fold, where the tap misses it.
+    await tester.ensureVisible(row);
+    await tester.pumpAndSettle();
     final toggle = find.descendant(of: row, matching: find.byType(Switch));
     // The shipped behaviour is the default: the switch starts off.
     expect(tester.widget<Switch>(toggle).value, isFalse);
@@ -33,17 +38,5 @@ void main() {
     await tester.tap(toggle);
     await tester.pumpAndSettle();
     expect(await controller.markdownEngine, MarkdownEngine.legacy);
-  });
-
-  testWidgets('the row is hidden with the preview it replaces', (tester) async {
-    final controller = FakeLibrarySession();
-    await controller.setPreviewEnabled(enabled: false);
-    await tester.pumpWidget(
-      MaterialApp(home: SettingsAppearanceScreen(controller: controller)),
-    );
-    await tester.pumpAndSettle();
-    // No preview means no engine to choose between: the row says what the
-    // note is drawn with, and with no preview there is nothing to say.
-    expect(find.byKey(SettingsKeys.markdownEngine), findsNothing);
   });
 }

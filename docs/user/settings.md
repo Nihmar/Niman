@@ -48,7 +48,6 @@ choices.
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
-| `previewEnabled` | true | Whether the preview exists at all |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `treeSort` | `nameAsc` | Tree order (`nameAsc`, `nameDesc`) |
@@ -80,8 +79,7 @@ takes the app down. Writes are atomic (temp file + rename).
 ## App settings (on device)
 
 Brightness (day / night / system) × palette (system or Catppuccin),
-preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
-ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
+UI language, last opened library, debug
 log toggle (default on), the keyboard shortcuts and the formatting keys,
 the commands pinned in the palette, and — on the desktops — *Close to the
 tray* (default on: the window's × hides Niman and leaves it running).

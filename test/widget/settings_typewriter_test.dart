@@ -21,6 +21,11 @@ void main() {
     await tester.pumpAndSettle();
     final row = find.byKey(SettingsKeys.typewriter);
     await tester.scrollUntilVisible(row, 200);
+    // Built is not the same as on screen: the drag stops as soon as the
+    // row enters the cache extent, and the switch's centre can land just
+    // under the fold, where the tap misses it.
+    await tester.ensureVisible(row);
+    await tester.pumpAndSettle();
     final toggle = find.descendant(of: row, matching: find.byType(Switch));
     expect(tester.widget<Switch>(toggle).value, isFalse);
 

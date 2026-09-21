@@ -920,17 +920,6 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(enabledEditors: {...editors}));
   }
 
-  /// Whether the preview exists at all (default true).
-  @override
-  Future<bool> get previewEnabled async => (await _library).previewEnabled;
-
-  /// Sets (and persists) the preview switch.
-  @override
-  Future<void> setPreviewEnabled({required bool enabled}) async {
-    _log.info('preview enabled set to $enabled');
-    await _editLibrary((c) => c.copyWith(previewEnabled: enabled));
-  }
-
   /// Which engine draws a note (default [MarkdownEngine.legacy]).
   @override
   Future<MarkdownEngine> get markdownEngine async =>
@@ -941,33 +930,6 @@ final class LibraryController implements LibrarySession {
   Future<void> setMarkdownEngine(MarkdownEngine engine) async {
     _log.info('markdown engine set to ${engine.name}');
     await _editLibrary((c) => c.copyWith(markdownEngine: engine));
-  }
-
-  /// The preview layout mode.
-  ///
-  /// App-wide, with the split ratio: both follow the screen rather than
-  /// the library, so carrying them in the library folder would move a
-  /// tablet's layout onto a phone.
-  @override
-  Future<PreviewLayoutMode> get previewMode async =>
-      await AppSettingsRepo(await appDatabase).previewMode();
-
-  /// Sets (and persists) the preview layout mode.
-  @override
-  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
-    _log.info('preview mode set to ${mode.name}');
-    await AppSettingsRepo(await appDatabase).setPreviewMode(mode);
-  }
-
-  /// The editor|preview split ratio.
-  @override
-  Future<double> get splitRatio async =>
-      await AppSettingsRepo(await appDatabase).splitRatio();
-
-  /// Sets (and persists) the split ratio.
-  @override
-  Future<void> setSplitRatio(double ratio) async {
-    await AppSettingsRepo(await appDatabase).setSplitRatio(ratio);
   }
 
   /// The library tree sort order.

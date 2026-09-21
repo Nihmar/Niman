@@ -24,7 +24,6 @@ abstract final class SettingsKeys {
   static const brightness = Key('theme-brightness-setting');
   static const palette = Key('theme-palette-setting');
   static const uiTextScale = Key('ui-text-scale-setting');
-  static const splitRatio = Key('split-ratio-setting');
   static const closeToTray = Key('close-to-tray-setting');
 
   /// The note's engine, in the appearance screen.
@@ -34,7 +33,6 @@ abstract final class SettingsKeys {
   static const toolbar = Key('toolbar-setting');
   static const editorSource = Key('editor-source-setting');
   static const editorWysiwyg = Key('editor-wysiwyg-setting');
-  static const previewEnabled = Key('preview-enabled-setting');
   static const lineNumbers = Key('line-numbers-setting');
   static const readableLineLength = Key('readable-line-length-setting');
   static const noteColumnWidth = Key('note-column-width-setting');

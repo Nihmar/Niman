@@ -125,11 +125,6 @@ final class DanishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Fra';
   @override
-  String get settingsPreviewEnabledTitle => 'Forhåndsvisning';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Vis den renderede note ved siden af kildeeditoren';
-  @override
   String get switchToWysiwygTooltip => 'Skift til WYSIWYG-editoren';
   @override
   String get switchToSourceTooltip => 'Skift til Markdown-kilden';
@@ -272,22 +267,6 @@ final class DanishStrings extends Strings {
       'Editoren og forhåndsvisningen, som altid er enige';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Forhåndsvisningstilstand';
-  @override
-  String get previewModeSubtitle =>
-      'Om forhåndsvisningen deler skærmen med editoren eller erstatter '
-      'den';
-  @override
-  String get previewModeAuto => 'Side ved side';
-  @override
-  String get previewModeSwitch => 'Hel skærm';
-  @override
-  String get splitRatioTitle => 'Opdelingens bredde';
-  @override
-  String get splitRatioSubtitle =>
-      'Editors andel, når forhåndsvisningen er side ved side';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkformat';
@@ -542,11 +521,6 @@ final class DanishStrings extends Strings {
   String get showPreviewTooltip => 'Vis forhåndsvisning';
   @override
   String get showEditorTooltip => 'Vis editor';
-  @override
-  String get enterFullScreenTooltip => 'Hel skærm';
-  @override
-  String get exitFullScreenTooltip => 'Forlad hel skærm';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rå HTML-tabel)';

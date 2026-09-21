@@ -119,11 +119,6 @@ final class HindiStrings extends Strings {
   @override
   String get settingsToggleOff => 'बंद';
   @override
-  String get settingsPreviewEnabledTitle => 'पूर्वावलोकन';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'स्रोत एडिटर के बगल में रेंडर किया गया नोट दिखाएँ';
-  @override
   String get switchToWysiwygTooltip => 'WYSIWYG एडिटर पर जाएँ';
   @override
   String get switchToSourceTooltip => 'Markdown स्रोत पर जाएँ';
@@ -261,20 +256,6 @@ final class HindiStrings extends Strings {
       'एडिटर और पूर्वावलोकन, जो हमेशा एक-दूसरे से मिलते हैं';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'पूर्वावलोकन मोड';
-  @override
-  String get previewModeSubtitle =>
-      'पूर्वावलोकन स्क्रीन एडिटर के साथ बाँटता है या उसकी जगह लेता है';
-  @override
-  String get previewModeAuto => 'साथ-साथ';
-  @override
-  String get previewModeSwitch => 'फुल स्क्रीन';
-  @override
-  String get splitRatioTitle => 'विभाजन की चौड़ाई';
-  @override
-  String get splitRatioSubtitle => 'पूर्वावलोकन साथ-साथ है तो एडिटर का हिस्सा';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'लिंक का फ़ॉर्मेट';
@@ -530,11 +511,6 @@ final class HindiStrings extends Strings {
   String get showPreviewTooltip => 'पूर्वावलोकन दिखाएँ';
   @override
   String get showEditorTooltip => 'एडिटर दिखाएँ';
-  @override
-  String get enterFullScreenTooltip => 'फुल स्क्रीन';
-  @override
-  String get exitFullScreenTooltip => 'फुल स्क्रीन से बाहर';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(कच्चा HTML तालिका)';

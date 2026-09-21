@@ -125,11 +125,6 @@ final class HungarianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Ki';
   @override
-  String get settingsPreviewEnabledTitle => 'Előnézet';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'A renderelt jegyzet megjelenítése a forrásszerkesztő mellett';
-  @override
   String get switchToWysiwygTooltip => 'Váltás WYSIWYG szerkesztőre';
   @override
   String get switchToSourceTooltip => 'Váltás Markdown forrásra';
@@ -271,22 +266,6 @@ final class HungarianStrings extends Strings {
       'A szerkesztő és az előnézet mindig azonos';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Előnézeti mód';
-  @override
-  String get previewModeSubtitle =>
-      'Hogy az előnézet megosztja-e a képernyőt a szerkesztővel, vagy '
-      'lecseréli';
-  @override
-  String get previewModeAuto => 'Mellette';
-  @override
-  String get previewModeSwitch => 'Teljes képernyő';
-  @override
-  String get splitRatioTitle => 'Osztási arány szélessége';
-  @override
-  String get splitRatioSubtitle =>
-      'A szerkesztő aránya, amikor az előnézet mellette van';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Hivatkozás formátuma';
@@ -544,11 +523,6 @@ final class HungarianStrings extends Strings {
   String get showPreviewTooltip => 'Előnézet megjelenítése';
   @override
   String get showEditorTooltip => 'Szerkesztő megjelenítése';
-  @override
-  String get enterFullScreenTooltip => 'Teljes képernyő';
-  @override
-  String get exitFullScreenTooltip => 'Kilépés teljes képernyőből';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(nyers HTML táblázat)';

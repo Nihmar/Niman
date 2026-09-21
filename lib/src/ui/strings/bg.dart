@@ -129,11 +129,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Изкл.';
   @override
-  String get settingsPreviewEnabledTitle => 'Преглед';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Показва оформения бележка до редактора на източника';
-  @override
   String get switchToWysiwygTooltip => 'Превключване към WYSIWYG редактор';
   @override
   String get switchToSourceTooltip =>
@@ -278,20 +273,6 @@ final class BulgarianStrings extends Strings {
       'Редакторът и прегледът винаги са синхронизирани';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Режим на преглед';
-  @override
-  String get previewModeSubtitle =>
-      'Прегледът споделя екрана с редактора или го замества';
-  @override
-  String get previewModeAuto => 'Редом';
-  @override
-  String get previewModeSwitch => 'Цял екран';
-  @override
-  String get splitRatioTitle => 'Съотношение на разделението';
-  @override
-  String get splitRatioSubtitle => 'Дял на редактора, когато прегледът е редом';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат на връзката';
@@ -546,11 +527,6 @@ final class BulgarianStrings extends Strings {
   String get showPreviewTooltip => 'Покажи преглед';
   @override
   String get showEditorTooltip => 'Покажи редактор';
-  @override
-  String get enterFullScreenTooltip => 'Цял екран';
-  @override
-  String get exitFullScreenTooltip => 'Изход от цял екран';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(неоформена HTML таблица)';

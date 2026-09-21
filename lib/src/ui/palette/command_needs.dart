@@ -31,8 +31,8 @@ enum CommandNeed {
   /// or Zen is on already, to leave it.
   zenRoom,
 
-  /// The note has a preview to switch to: the preview is on, and the
-  /// note is text, not a list or a voice note in its own view.
+  /// The note can be read as well as written: it is text, not a list or
+  /// a voice note in its own view.
   previewToggle,
 
   /// Both editors are enabled, so there is another to switch to.

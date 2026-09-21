@@ -30,7 +30,7 @@ Future<DiffSummary> computeDiff(String oldText, String newText) {
 
 /// Below this width the diff reads better stacked: two monospace columns
 /// need more room than the shell's split does, so this is not
-/// `splitBreakpoint`.
+/// `wideBreakpoint`.
 const double diffSideBySideMinWidth = 720;
 
 /// A read-only line diff (issue #67): removed lines red, added lines

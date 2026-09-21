@@ -143,10 +143,6 @@ final class AppStrings {
       _s.settingsSearchResults(count);
   static String get settingsToggleOn => _s.settingsToggleOn;
   static String get settingsToggleOff => _s.settingsToggleOff;
-  static String get settingsPreviewEnabledTitle =>
-      _s.settingsPreviewEnabledTitle;
-  static String get settingsPreviewEnabledSubtitle =>
-      _s.settingsPreviewEnabledSubtitle;
   static String get switchToWysiwygTooltip => _s.switchToWysiwygTooltip;
   static String get switchToSourceTooltip => _s.switchToSourceTooltip;
   static String get switchToSourceLabel => _s.switchToSourceLabel;
@@ -210,9 +206,6 @@ final class AppStrings {
   /// The indent width as a row's value, e.g. "4 spaces".
   static String indentWidthValue(int spaces) => _s.indentWidthValue(spaces);
 
-  /// The editor's share of a split, as a row's value, e.g. "50%".
-  static String splitRatioValue(double ratio) => '${(ratio * 100).round()}%';
-
   // Settings: theme (T-M6-05).
   static String get themeBrightnessTitle => _s.themeBrightnessTitle;
   static String get themeBrightnessSubtitle => _s.themeBrightnessSubtitle;
@@ -244,14 +237,6 @@ final class AppStrings {
 
   /// A text size as a row's value, e.g. "120%".
   static String textScaleValue(double scale) => '${(scale * 100).round()}%';
-
-  // Settings: preview mode.
-  static String get previewModeTitle => _s.previewModeTitle;
-  static String get previewModeSubtitle => _s.previewModeSubtitle;
-  static String get previewModeAuto => _s.previewModeAuto;
-  static String get previewModeSwitch => _s.previewModeSwitch;
-  static String get splitRatioTitle => _s.splitRatioTitle;
-  static String get splitRatioSubtitle => _s.splitRatioSubtitle;
 
   // Settings: editor formatting.
   static String get linkTypeTitle => _s.linkTypeTitle;
@@ -429,9 +414,6 @@ final class AppStrings {
   // Preview switch (phone mode).
   static String get showPreviewTooltip => _s.showPreviewTooltip;
   static String get showEditorTooltip => _s.showEditorTooltip;
-  static String get enterFullScreenTooltip => _s.enterFullScreenTooltip;
-  static String get exitFullScreenTooltip => _s.exitFullScreenTooltip;
-
   // Raw-HTML table fallback.
   static String get htmlTableFallback => _s.htmlTableFallback;
 

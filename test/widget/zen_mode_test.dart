@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -237,7 +236,6 @@ void main() {
   testWidgets('the bar flips the note between editor and preview', (
     tester,
   ) async {
-    await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
     await pumpAt(tester);
     await press(tester, LogicalKeyboardKey.f11);
     bool preview() =>

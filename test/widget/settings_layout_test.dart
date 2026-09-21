@@ -67,14 +67,13 @@ void main() {
   });
 
   testWidgets('no setting is a SegmentedButton any more', (tester) async {
-    // The four inline segmented blocks are what made the screen a wall:
-    // each cost three lines where a switch cost one. The home has no
-    // setting rows at all (issue #104): the areas hold the switches and
-    // the dialogs.
+    // The inline segmented blocks are what made the screen a wall: each
+    // cost three lines where a switch cost one. The home has no setting
+    // rows at all (issue #104): the areas hold the switches and the
+    // dialogs.
     await pump(tester);
     expect(find.byType(SegmentedButton<int>), findsNothing);
     expect(find.byType(SegmentedButton<LinkType>), findsNothing);
-    expect(find.byType(SegmentedButton<PreviewLayoutMode>), findsNothing);
   });
 
   testWidgets('a choice row reads its current value', (tester) async {
@@ -214,22 +213,6 @@ void main() {
       ),
       findsOne,
     );
-  });
-
-  testWidgets('the split width is a row over a slider dialog', (tester) async {
-    await pump(tester);
-    await openArea(tester, const Key('settings-area-appearance'));
-    await tester.tap(find.byKey(const Key('split-ratio-setting')));
-    await tester.pumpAndSettle();
-
-    final slider = find.byKey(const Key('split-ratio'));
-    expect(slider, findsOne);
-    await tester.drag(slider, const Offset(60, 0));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('settings-slider-save')));
-    await tester.pumpAndSettle();
-
-    expect(await controller.splitRatio, greaterThan(defaultSplitRatio));
   });
 
   testWidgets('the toolbar row sits under Editor, not Appearance', (
@@ -378,72 +361,6 @@ void main() {
     await tester.tap(tile, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tapped, isFalse);
-  });
-
-  group('the split-ratio row appears only where the panes can split', () {
-    /// Pumps the settings body at [width], the way a phone or a tablet
-    /// would show it, then opens the appearance area (issue #104): the
-    /// row under test sits there, so the visibility gates live there too.
-    Future<void> pumpAt(WidgetTester tester, double width) async {
-      tester.view.physicalSize = Size(width, 2800);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: SettingsBody(controller: controller)),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await openArea(tester, const Key('settings-area-appearance'));
-    }
-
-    final row = find.byKey(const Key('split-ratio-setting'));
-
-    testWidgets('hidden on a phone, where auto never splits', (tester) async {
-      await pumpAt(tester, 400);
-      expect(row, findsNothing);
-    });
-
-    testWidgets('shown on a tablet, where auto does split', (tester) async {
-      await pumpAt(tester, 900);
-      expect(row, findsOne);
-    });
-
-    testWidgets('no layout row is offered on a phone, whatever the mode', (
-      tester,
-    ) async {
-      // Below 600 dp the layout is settled: one pane, and no control
-      // that could say otherwise. The split/switch choice lives in the
-      // editor's app bar now (user, 2026-09-09), not here.
-      await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
-      await pumpAt(tester, 400);
-      expect(row, findsNothing);
-    });
-
-    testWidgets('the full-screen mode hides the ratio on a tablet too', (
-      tester,
-    ) async {
-      await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
-      await pumpAt(tester, 900);
-      expect(row, findsNothing);
-    });
-
-    testWidgets('hidden on a tablet when the switch layout is forced', (
-      tester,
-    ) async {
-      await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
-      await pumpAt(tester, 900);
-      expect(row, findsNothing);
-    });
-
-    testWidgets('the stored ratio survives being hidden', (tester) async {
-      // Hiding the control must not reset the value: plugging in a
-      // monitor brings back the split the user chose.
-      await controller.setSplitRatio(0.7);
-      await pumpAt(tester, 400);
-      expect(row, findsNothing);
-      expect(await controller.splitRatio, 0.7);
-    });
   });
 
   group('the settings search', () {

@@ -531,7 +531,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   /// stretches to the window and laid all twenty-six chips on one line
   /// (user, 2026-09-10). The phone keeps the sheet-like dialog.
   Future<void> _pickOtherPriority() async {
-    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
+    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     final picked = wide
         ? await showDialog<String>(
             context: context,

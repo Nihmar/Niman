@@ -31,7 +31,6 @@ NoteTabBar _tabs(List<String> paths) => NoteTabBar(
 
 NoteStatusRow _status() => NoteStatusRow(
   loading: false,
-  splitPreview: false,
   showPreview: false,
   showWysiwyg: false,
   spellCheckAvailable: true,

@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/todo/todo_source.dart';
@@ -278,43 +277,6 @@ void main() {
     await tester.tap(find.byKey(const Key('menu-new-note')));
     await settle(tester);
     expect(find.byType(AlertDialog), findsOne);
-  });
-
-  testWidgets('wide: the layout menu switches split and single', (
-    tester,
-  ) async {
-    await pumpWide(tester);
-    await controller.createNote(parentPath: '', name: 'alpha');
-    await settle(tester);
-    await tester.tap(noteRow('alpha.md'));
-    await settle(tester);
-
-    // Auto on wide = side by side, so no editor/preview eye toggle. (The
-    // note body itself still loads off-isolate, which the fake session
-    // cannot drive — the eye toggle is the load-independent signal of
-    // the effective layout.)
-    expect(find.byKey(const Key('layout-mode')), findsOne);
-    expect(find.byKey(const Key('editor-preview-toggle')), findsNothing);
-
-    await tester.tap(find.byKey(const Key('layout-mode')));
-    // No pumpAndSettle here: the note body still shows its loading
-    // spinner, which animates forever.
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text(AppStrings.previewModeSwitch));
-    await settle(tester);
-
-    expect(find.byKey(const Key('editor-preview-toggle')), findsOne);
-    expect(await controller.previewMode, PreviewLayoutMode.fullScreen);
-
-    await tester.tap(find.byKey(const Key('layout-mode')));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text(AppStrings.previewModeAuto));
-    await settle(tester);
-
-    expect(find.byKey(const Key('editor-preview-toggle')), findsNothing);
-    expect(await controller.previewMode, PreviewLayoutMode.auto);
   });
 
   testWidgets('wide: quick-note chooser is inline, rail persists', (

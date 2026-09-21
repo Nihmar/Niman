@@ -126,11 +126,6 @@ final class LatvianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Izslēgts';
   @override
-  String get settingsPreviewEnabledTitle => 'Priekšskatījums';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Rāda izveidoto piezīmi blakus avota redaktoram';
-  @override
   String get switchToWysiwygTooltip => 'Pārslēgt uz WYSIWYG redaktoru';
   @override
   String get switchToSourceTooltip => 'Pārslēgt uz Markdown avotu';
@@ -270,21 +265,6 @@ final class LatvianStrings extends Strings {
       'Redaktors un priekšskatījums vienmēr ir saskaņā';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Priekšskatījuma režīms';
-  @override
-  String get previewModeSubtitle =>
-      'Vai priekšskatījums dala ekrānu ar redaktoru vai to aizvieto';
-  @override
-  String get previewModeAuto => 'Blakus';
-  @override
-  String get previewModeSwitch => 'Pilnekrāns';
-  @override
-  String get splitRatioTitle => 'Dalījuma attiecība';
-  @override
-  String get splitRatioSubtitle =>
-      'Redaktora daļa, kad priekšskatījums ir blakus';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Saites formāts';
@@ -545,11 +525,6 @@ final class LatvianStrings extends Strings {
   String get showPreviewTooltip => 'Rādīt priekšskatījumu';
   @override
   String get showEditorTooltip => 'Rādīt redaktoru';
-  @override
-  String get enterFullScreenTooltip => 'Pilnekrāns';
-  @override
-  String get exitFullScreenTooltip => 'Iziet no pilnekrāna';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(neapstrādāta HTML tabula)';

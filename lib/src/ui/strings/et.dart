@@ -124,11 +124,6 @@ final class EstonianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Väljas';
   @override
-  String get settingsPreviewEnabledTitle => 'Eelvaade';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Kuvab kujundatud märgise allika redaktori kõrval';
-  @override
   String get switchToWysiwygTooltip => 'Lülita WYSIWYG-redaktorile';
   @override
   String get switchToSourceTooltip => 'Lülita Markdowni allikale';
@@ -269,20 +264,6 @@ final class EstonianStrings extends Strings {
       'Redaktor ja eelvaade on alati sünkroonis';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Eelvaate režiim';
-  @override
-  String get previewModeSubtitle =>
-      'Kas eelvaade jagab ekraani redaktoriga või asendab selle';
-  @override
-  String get previewModeAuto => 'Kõrval';
-  @override
-  String get previewModeSwitch => 'Täisekraan';
-  @override
-  String get splitRatioTitle => 'Jagunisuhe';
-  @override
-  String get splitRatioSubtitle => 'Redaktori osa, kui eelvaade on kõrval';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Viide formaat';
@@ -537,11 +518,6 @@ final class EstonianStrings extends Strings {
   String get showPreviewTooltip => 'Kuva eelvaadet';
   @override
   String get showEditorTooltip => 'Kuva redaktorit';
-  @override
-  String get enterFullScreenTooltip => 'Täisekraan';
-  @override
-  String get exitFullScreenTooltip => 'Välju täisekraanist';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(toore HTML-tabel)';

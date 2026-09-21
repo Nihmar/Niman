@@ -129,11 +129,6 @@ final class GalicianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desactivado';
   @override
-  String get settingsPreviewEnabledTitle => 'Previsualización';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Mostra a nota renderizada ao lado do editor de fonte';
-  @override
   String get switchToWysiwygTooltip => 'Cambiar ao editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Cambiar á fonte Markdown';
@@ -277,22 +272,6 @@ final class GalicianStrings extends Strings {
       'O editor e a previsualización, sempre de acordo';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modo de previsualización';
-  @override
-  String get previewModeSubtitle =>
-      'Se a previsualización comparte a pantalla co editor ou a '
-      'substitúe';
-  @override
-  String get previewModeAuto => 'Lado a lado';
-  @override
-  String get previewModeSwitch => 'Pantalla completa';
-  @override
-  String get splitRatioTitle => 'Amplitud da división';
-  @override
-  String get splitRatioSubtitle =>
-      'A parte do editor cando a previsualización é lado a lado';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formato do enlace';
@@ -550,11 +529,6 @@ final class GalicianStrings extends Strings {
   String get showPreviewTooltip => 'Mostrar a previsualización';
   @override
   String get showEditorTooltip => 'Mostrar o editor';
-  @override
-  String get enterFullScreenTooltip => 'Pantalla completa';
-  @override
-  String get exitFullScreenTooltip => 'Saír da pantalla completa';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(táboa HTML a bruto)';

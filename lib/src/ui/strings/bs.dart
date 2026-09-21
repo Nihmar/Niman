@@ -130,11 +130,6 @@ final class BosnianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Isključeno';
   @override
-  String get settingsPreviewEnabledTitle => 'Pregled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Prikazuje oblikovanu bilješku pored uređivača izvora';
-  @override
   String get switchToWysiwygTooltip => 'Pređi na WYSIWYG uređivač';
   @override
   String get switchToSourceTooltip => 'Pređi na Markdown izvor';
@@ -276,20 +271,6 @@ final class BosnianStrings extends Strings {
       'Uređivač i pregled, koji su uvijek u skladu';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Način pregleda';
-  @override
-  String get previewModeSubtitle =>
-      'Da li pregled dijeli ekran s uređivačem ili ga zamjenjuje';
-  @override
-  String get previewModeAuto => 'Jedan pored drugog';
-  @override
-  String get previewModeSwitch => 'Cijeli ekran';
-  @override
-  String get splitRatioTitle => 'Širina podjele';
-  @override
-  String get splitRatioSubtitle => 'Udio uređivača kada je pregled pored njega';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format veze';
@@ -547,11 +528,6 @@ final class BosnianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži pregled';
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
-  @override
-  String get enterFullScreenTooltip => 'Cijeli ekran';
-  @override
-  String get exitFullScreenTooltip => 'Izađi iz cijelog ekrana';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tablica sirovog HTML-a)';

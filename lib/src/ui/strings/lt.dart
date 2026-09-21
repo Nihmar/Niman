@@ -131,11 +131,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Išjungta';
   @override
-  String get settingsPreviewEnabledTitle => 'Peržiūra';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Rodys sukurtą pastabą šalia šaltinio redaktoriaus';
-  @override
   String get switchToWysiwygTooltip => 'Perjungti į WYSIWYG redaktorių';
   @override
   String get switchToSourceTooltip => 'Perjungti į Markdown šaltinį';
@@ -274,20 +269,6 @@ final class LithuanianStrings extends Strings {
       'Redaktorius ir peržiūra visada suderinami';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Peržiūros režimas';
-  @override
-  String get previewModeSubtitle =>
-      'Ar peržiūra dalija ekraną su redaktoriumi, ar jį pakeičia';
-  @override
-  String get previewModeAuto => 'Šalia';
-  @override
-  String get previewModeSwitch => 'Visas ekranas';
-  @override
-  String get splitRatioTitle => 'Padalinimo santykis';
-  @override
-  String get splitRatioSubtitle => 'Redaktoriaus dalis, kai peržiūra yra šalia';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Nuorodos formatas';
@@ -548,11 +529,6 @@ final class LithuanianStrings extends Strings {
   String get showPreviewTooltip => 'Rodyti peržiūrą';
   @override
   String get showEditorTooltip => 'Rodyti redaktorių';
-  @override
-  String get enterFullScreenTooltip => 'Visas ekranas';
-  @override
-  String get exitFullScreenTooltip => 'Išeiti iš viso ekrano';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(neapdorota HTML lentelė)';

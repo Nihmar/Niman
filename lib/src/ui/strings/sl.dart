@@ -132,11 +132,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Izklopljeno';
   @override
-  String get settingsPreviewEnabledTitle => 'Predogled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Prikaži izrisano opombo poleg urejevalnika vira';
-  @override
   String get switchToWysiwygTooltip => 'Preklopi na urejevalnik WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Preklopi na Markdown vir';
@@ -276,21 +271,6 @@ final class SlovenianStrings extends Strings {
       'Urejevalnik in predogled sta vedno v koraku';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Način predogleda';
-  @override
-  String get previewModeSubtitle =>
-      'Ali predogled deli zaslon z urejevalnikom ali ga nadomesti';
-  @override
-  String get previewModeAuto => 'Ob strani';
-  @override
-  String get previewModeSwitch => 'Celozaslonski';
-  @override
-  String get splitRatioTitle => 'Razmerje razdelitve';
-  @override
-  String get splitRatioSubtitle =>
-      'Delež urejevalnika, ko je predogled ob strani';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Oblika povezave';
@@ -548,11 +528,6 @@ final class SlovenianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži predogled';
   @override
   String get showEditorTooltip => 'Prikaži urejevalnik';
-  @override
-  String get enterFullScreenTooltip => 'Celozaslonsko';
-  @override
-  String get exitFullScreenTooltip => 'Zapusti celozaslonski način';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(neobdelana HTML tabela)';

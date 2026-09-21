@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/palette/palette_swipe.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
-import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -30,15 +29,11 @@ final class ShellLayoutProps {
     required this.selectedPath,
     required this.selectedIsDir,
     required this.treeVisible,
-    required this.previewFullScreen,
-    required this.previewSplitsHere,
-    required this.previewVisible,
     required this.previewToggleVisible,
     required this.noteHidingTabs,
     required this.noteFade,
     required this.shortcutBindings,
     required this.onCloseFullScreenNote,
-    required this.onLeaveFullScreenPreview,
     required this.isQuickNote,
     required this.noteBarActions,
     required this.buildTabShell,
@@ -75,16 +70,6 @@ final class ShellLayoutProps {
   /// Phone only: whether the tree, not the note, is the pane on screen.
   final bool treeVisible;
 
-  /// Whether the preview asked for the whole screen.
-  final bool previewFullScreen;
-
-  /// Whether the preview shares this layout's screen with the editor
-  /// instead of replacing it.
-  final bool previewSplitsHere;
-
-  /// Whether the preview is the pane showing.
-  final bool previewVisible;
-
   /// Whether this note can toggle a preview at all.
   final bool previewToggleVisible;
 
@@ -100,9 +85,6 @@ final class ShellLayoutProps {
 
   /// Leaves the full-screen note, back to the tab it opened from.
   final VoidCallback onCloseFullScreenNote;
-
-  /// Leaves the full-screen *preview*, keeping the note.
-  final VoidCallback onLeaveFullScreenPreview;
 
   /// Whether the open note is the library's quick note: the app bar's
   /// label says so (the tabs no longer do, issue #73, item 1).
@@ -179,17 +161,6 @@ final class ShellLayoutProps {
 
   /// Phone only: whether that note is the thing on screen.
   bool get fullNote => noteOpen && !treeVisible;
-
-  /// Whether the preview shows without its chrome.
-  ///
-  /// Only a note that is actually previewing — not split, not a kind GUI
-  /// — can get there, so the full-screen flag alone never decides it.
-  bool get immersive =>
-      fullNote &&
-      previewFullScreen &&
-      previewVisible &&
-      previewToggleVisible &&
-      !previewSplitsHere;
 }
 
 /// The phone: the selected note opens full-screen, from any tab, as a
@@ -241,7 +212,6 @@ final class NarrowShellLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedPath = props.selectedPath;
     final fullNote = props.fullNote;
-    final immersive = props.immersive;
     // The same accelerators as the wide layout, but without the focus
     // claim: a field keeps the software keyboard (T-PP-10).
     return CallbackShortcuts(
@@ -250,13 +220,6 @@ final class NarrowShellLayout extends StatelessWidget {
         canPop: !fullNote,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          // Back leaves fullscreen before it leaves the note: one
-          // gesture, one layer of chrome, the way every other fullscreen
-          // behaves.
-          if (immersive) {
-            props.onLeaveFullScreenPreview();
-            return;
-          }
           props.onCloseFullScreenNote();
         },
         child: PaletteSwipe(
@@ -296,38 +259,14 @@ final class NarrowShellLayout extends StatelessWidget {
                       ? KeyedSubtree(
                           key: const ValueKey('full-note'),
                           child: Scaffold(
-                            appBar: immersive
-                                ? null
-                                : AppBar(
-                                    leading: BackButton(
-                                      onPressed: props.onCloseFullScreenNote,
-                                    ),
-                                    title: _noteTitle(context, selectedPath),
-                                    actions: props.noteBarActions,
-                                  ),
-                            body: Stack(
-                              children: [
-                                // Stable subtree across the immersive
-                                // toggle: only the top inset flips, so
-                                // entering or leaving fullscreen never
-                                // reparents (and disposes) the open note's
-                                // state, focus and scroll. The all-false
-                                // SafeArea is a layout no-op.
-                                Positioned.fill(
-                                  child: SafeArea(
-                                    top: immersive,
-                                    bottom: false,
-                                    left: false,
-                                    right: false,
-                                    child: props.buildFullNote(selectedPath),
-                                  ),
-                                ),
-                                if (immersive)
-                                  ExitFullScreenButton(
-                                    onExit: props.onLeaveFullScreenPreview,
-                                  ),
-                              ],
+                            appBar: AppBar(
+                              leading: BackButton(
+                                onPressed: props.onCloseFullScreenNote,
+                              ),
+                              title: _noteTitle(context, selectedPath),
+                              actions: props.noteBarActions,
                             ),
+                            body: props.buildFullNote(selectedPath),
                           ),
                         )
                       : null,

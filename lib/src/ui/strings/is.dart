@@ -126,11 +126,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get settingsToggleOff => 'Slökkt';
   @override
-  String get settingsPreviewEnabledTitle => 'Forsýning';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Sýnir formgerða athugasraðuna við hlið ritara upprunatextans';
-  @override
   String get switchToWysiwygTooltip => 'Skipta yfir í WYSIWYG ritara';
   @override
   String get switchToSourceTooltip => 'Skipta yfir í Markdown upprunatexta';
@@ -270,21 +265,6 @@ final class IcelandicStrings extends Strings {
   String get noteTextScaleSubtitle => 'Ritari og forsýning, alltaf samstilltir';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Forsýningarhamur';
-  @override
-  String get previewModeSubtitle =>
-      'Hvort forsýningin deilir skjánum við ritara eða tekur sæti hans';
-  @override
-  String get previewModeAuto => 'Hlið við hlið';
-  @override
-  String get previewModeSwitch => 'Heilskjár';
-  @override
-  String get splitRatioTitle => 'Skilhlutfall';
-  @override
-  String get splitRatioSubtitle =>
-      'Hluti ritara þegar forsýningin er við hlið hans';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Tengjaform';
@@ -543,11 +523,6 @@ final class IcelandicStrings extends Strings {
   String get showPreviewTooltip => 'Sýna forsýningu';
   @override
   String get showEditorTooltip => 'Sýna ritara';
-  @override
-  String get enterFullScreenTooltip => 'Heilskjár';
-  @override
-  String get exitFullScreenTooltip => 'Hætta í heilskjá';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(hálfraðinn HTML borð)';

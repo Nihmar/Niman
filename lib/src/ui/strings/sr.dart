@@ -130,11 +130,6 @@ final class SerbianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Искључено';
   @override
-  String get settingsPreviewEnabledTitle => 'Преглед';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Приказује обележану белешку поред уредитеља извора';
-  @override
   String get switchToWysiwygTooltip => 'Пређи на WYSIWYG уредитељ';
   @override
   String get switchToSourceTooltip => 'Пређи на Markdown извор';
@@ -276,20 +271,6 @@ final class SerbianStrings extends Strings {
       'Уредитељ и преглед, који су увек у складу';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Начин прегледа';
-  @override
-  String get previewModeSubtitle =>
-      'Да ли преглед дели екран са уредитељем или га замењује';
-  @override
-  String get previewModeAuto => 'Један поред другог';
-  @override
-  String get previewModeSwitch => 'Цели екран';
-  @override
-  String get splitRatioTitle => 'Ширина поделе';
-  @override
-  String get splitRatioSubtitle => 'Удео уредитеља када је преглед поред њега';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат везе';
@@ -547,11 +528,6 @@ final class SerbianStrings extends Strings {
   String get showPreviewTooltip => 'Прикажи преглед';
   @override
   String get showEditorTooltip => 'Прикажи уредитељ';
-  @override
-  String get enterFullScreenTooltip => 'Цели екран';
-  @override
-  String get exitFullScreenTooltip => 'Изађи из целог екрана';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(HTML табела извора)';

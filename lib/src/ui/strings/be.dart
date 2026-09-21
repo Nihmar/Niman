@@ -127,11 +127,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Выкл.';
   @override
-  String get settingsPreviewEnabledTitle => 'Прагляд';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Паказвае афармленую заўвагу побач з рэдактарам крыніцы';
-  @override
   String get switchToWysiwygTooltip => 'Пераключыць на WYSIWYG-рэдактар';
   @override
   String get switchToSourceTooltip => 'Пераключыць на Markdown-крэйс';
@@ -272,20 +267,6 @@ final class BelarusianStrings extends Strings {
       'Рэдактар і прагляд заўсёды сінхранізаваны';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Рэжым прагляду';
-  @override
-  String get previewModeSubtitle =>
-      'Ці прагляд дзеліць экран з рэдактаром, ці замяняе яго';
-  @override
-  String get previewModeAuto => 'Побач';
-  @override
-  String get previewModeSwitch => 'Увесь экран';
-  @override
-  String get splitRatioTitle => 'Спавношэнне падзелу';
-  @override
-  String get splitRatioSubtitle => 'Частка рэдактара, калі прагляд побач';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Фармат спасылкі';
@@ -545,11 +526,6 @@ final class BelarusianStrings extends Strings {
   String get showPreviewTooltip => 'Паказаць прагляд';
   @override
   String get showEditorTooltip => 'Паказаць рэдактар';
-  @override
-  String get enterFullScreenTooltip => 'Увесь экран';
-  @override
-  String get exitFullScreenTooltip => 'Выйсці з рэжыму ўсяго экрана';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(HTML-табліца без апрацоўкі)';

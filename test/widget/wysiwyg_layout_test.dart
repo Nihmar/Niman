@@ -1,17 +1,15 @@
-// T-WYS-05: the WYSIWYG surface replaces the source editor, never sits
-// beside the preview, and hides the source-only controls.
+// T-WYS-05: the WYSIWYG surface replaces the source editor and hides the
+// source-only controls.
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill/quill_delta.dart' as delta;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
-import 'package:niman/src/ui/editor_preview_split.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -35,19 +33,15 @@ final class _SpellFixChecker implements SpellChecker {
   void dispose() {}
 }
 
-NoteView _view({
-  bool showWysiwyg = false,
-  bool showPreview = false,
-  bool splitPreview = false,
-}) => NoteView(
-  path: '/notes/a.md',
-  showLineNumbers: true,
-  autofocusEditor: true,
-  showWysiwyg: showWysiwyg,
-  showPreview: showPreview,
-  splitPreview: splitPreview,
-  readNote: (_) async => '# Head\n\nbody text',
-);
+NoteView _view({bool showWysiwyg = false, bool showPreview = false}) =>
+    NoteView(
+      path: '/notes/a.md',
+      showLineNumbers: true,
+      autofocusEditor: true,
+      showWysiwyg: showWysiwyg,
+      showPreview: showPreview,
+      readNote: (_) async => '# Head\n\nbody text',
+    );
 
 Future<void> _open(WidgetTester tester, Widget view) async {
   await tester.pumpWidget(_app(view));
@@ -58,17 +52,6 @@ Future<void> _open(WidgetTester tester, Widget view) async {
 }
 
 void main() {
-  testWidgets('WYSIWYG replaces the source editor and never splits', (
-    tester,
-  ) async {
-    await _open(tester, _view(showWysiwyg: true, splitPreview: true));
-    expect(tester.takeException(), isNull);
-    expect(find.byType(WysiwygEditor), findsOneWidget);
-    expect(find.byType(NoteEditor), findsNothing);
-    expect(find.byType(EditorPreviewSplit), findsNothing);
-    expect(find.byType(MarkdownPreview), findsNothing);
-  });
-
   testWidgets('the eye switches the WYSIWYG surface to the preview', (
     tester,
   ) async {

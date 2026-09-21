@@ -129,11 +129,6 @@ final class ItalianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Non attivo';
   @override
-  String get settingsPreviewEnabledTitle => 'Anteprima';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Mostra la nota renderizzata accanto all’editor sorgente';
-  @override
   String get switchToWysiwygTooltip => 'Passa all’editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Passa al sorgente Markdown';
@@ -277,21 +272,6 @@ final class ItalianStrings extends Strings {
       'L’editor e l’anteprima, che restano d’accordo';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modalità anteprima';
-  @override
-  String get previewModeSubtitle =>
-      'Se l’anteprima divide lo schermo con l’editor o lo sostituisce';
-  @override
-  String get previewModeAuto => 'Affiancata';
-  @override
-  String get previewModeSwitch => 'A tutto schermo';
-  @override
-  String get splitRatioTitle => 'Larghezza divisione';
-  @override
-  String get splitRatioSubtitle =>
-      'La quota dell’editor quando l’anteprima è affiancata';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formato dei link';
@@ -549,11 +529,6 @@ final class ItalianStrings extends Strings {
   String get showPreviewTooltip => 'Mostra anteprima';
   @override
   String get showEditorTooltip => 'Mostra editor';
-  @override
-  String get enterFullScreenTooltip => 'Schermo intero';
-  @override
-  String get exitFullScreenTooltip => 'Esci da schermo intero';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabella HTML grezza)';

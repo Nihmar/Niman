@@ -115,10 +115,6 @@ final class ChineseStrings extends Strings {
   @override
   String get settingsToggleOff => '关';
   @override
-  String get settingsPreviewEnabledTitle => '预览';
-  @override
-  String get settingsPreviewEnabledSubtitle => '在源码编辑器旁边显示渲染后的笔记';
-  @override
   String get switchToWysiwygTooltip => '切换到所见即所得编辑器';
   @override
   String get switchToSourceTooltip => '切换到 Markdown 源码';
@@ -249,19 +245,6 @@ final class ChineseStrings extends Strings {
   String get noteTextScaleSubtitle => '编辑器与预览，两者始终一致';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => '预览模式';
-  @override
-  String get previewModeSubtitle => '预览是与编辑器分屏还是替换编辑器';
-  @override
-  String get previewModeAuto => '分屏';
-  @override
-  String get previewModeSwitch => '全屏';
-  @override
-  String get splitRatioTitle => '分屏宽度';
-  @override
-  String get splitRatioSubtitle => '预览与编辑器并排时编辑器所占的比例';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => '链接格式';
@@ -508,11 +491,6 @@ final class ChineseStrings extends Strings {
   String get showPreviewTooltip => '显示预览';
   @override
   String get showEditorTooltip => '显示编辑器';
-  @override
-  String get enterFullScreenTooltip => '全屏';
-  @override
-  String get exitFullScreenTooltip => '退出全屏';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '（原始 HTML 表格）';

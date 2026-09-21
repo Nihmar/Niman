@@ -129,11 +129,6 @@ final class SpanishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desactivado';
   @override
-  String get settingsPreviewEnabledTitle => 'Vista previa';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Muestra la nota renderizada junto al editor de fuente';
-  @override
   String get switchToWysiwygTooltip => 'Cambiar al editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Cambiar a la fuente Markdown';
@@ -277,22 +272,6 @@ final class SpanishStrings extends Strings {
       'El editor y la vista previa, que siempre coinciden';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modo de vista previa';
-  @override
-  String get previewModeSubtitle =>
-      'Si la vista previa comparte la pantalla con el editor o lo '
-      'sustituye';
-  @override
-  String get previewModeAuto => 'Lado a lado';
-  @override
-  String get previewModeSwitch => 'Pantalla completa';
-  @override
-  String get splitRatioTitle => 'Anchura de la división';
-  @override
-  String get splitRatioSubtitle =>
-      'La parte del editor cuando la vista previa está lado a lado';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formato del enlace';
@@ -550,11 +529,6 @@ final class SpanishStrings extends Strings {
   String get showPreviewTooltip => 'Mostrar vista previa';
   @override
   String get showEditorTooltip => 'Mostrar editor';
-  @override
-  String get enterFullScreenTooltip => 'Pantalla completa';
-  @override
-  String get exitFullScreenTooltip => 'Salir de pantalla completa';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabla HTML en bruto)';

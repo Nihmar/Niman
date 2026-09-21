@@ -414,42 +414,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<bool> get previewEnabled async => _config.previewEnabled;
-
-  @override
-  Future<void> setPreviewEnabled({required bool enabled}) async {
-    _config = _config.copyWith(previewEnabled: enabled);
-    _bump();
-  }
-
-  @override
   Future<MarkdownEngine> get markdownEngine async => _config.markdownEngine;
 
   @override
   Future<void> setMarkdownEngine(MarkdownEngine engine) async {
     _config = _config.copyWith(markdownEngine: engine);
     _bump();
-  }
-
-  // The preview layout is app-wide: it follows the screen, not the
-  // library.
-  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
-  double _splitRatio = defaultSplitRatio;
-
-  @override
-  Future<PreviewLayoutMode> get previewMode async => _previewMode;
-
-  @override
-  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
-    _previewMode = mode;
-  }
-
-  @override
-  Future<double> get splitRatio async => _splitRatio;
-
-  @override
-  Future<void> setSplitRatio(double ratio) async {
-    _splitRatio = ratio;
   }
 
   @override

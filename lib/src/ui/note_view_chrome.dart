@@ -68,7 +68,6 @@ final class NoteStatusRow extends StatelessWidget {
   /// Creates the row; every tap leaves through a callback.
   const new({
     required this.loading,
-    required this.splitPreview,
     required this.showPreview,
     required this.showWysiwyg,
     required this.spellCheckAvailable,
@@ -87,9 +86,6 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// Whether a note is still loading (hides the buttons).
   final bool loading;
-
-  /// Whether editor and preview sit side by side.
-  final bool splitPreview;
 
   /// Whether the preview is the visible pane.
   final bool showPreview;
@@ -209,7 +205,7 @@ final class NoteStatusRow extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                onPressed: splitPreview || !showPreview ? onFind : null,
+                onPressed: !showPreview ? onFind : null,
               ),
             ),
           ),
@@ -242,9 +238,7 @@ final class NoteStatusRow extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              onPressed: splitPreview || !showPreview
-                  ? onToggleTypewriter
-                  : null,
+              onPressed: !showPreview ? onToggleTypewriter : null,
             ),
           ),
         // The quick way between the two editors (T-WYS-12): the setting
@@ -265,7 +259,7 @@ final class NoteStatusRow extends StatelessWidget {
         // that is already on them, and this one is the last thing
         // before the Spacer, so nothing to its left moves and what is
         // to its right is anchored to the other edge.
-        if (!loading && canSwitchEditorKind && (splitPreview || !showPreview))
+        if (!loading && canSwitchEditorKind && !showPreview)
           Padding(
             padding: iconPadding,
             child: Tooltip(

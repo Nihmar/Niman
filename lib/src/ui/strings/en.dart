@@ -124,11 +124,6 @@ final class EnglishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Off';
   @override
-  String get settingsPreviewEnabledTitle => 'Preview';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Show the rendered note beside the source editor';
-  @override
   String get switchToWysiwygTooltip => 'Switch to the WYSIWYG editor';
   @override
   String get switchToSourceTooltip => 'Switch to the Markdown source';
@@ -273,22 +268,6 @@ final class EnglishStrings extends Strings {
       'The editor and the preview, which always agree';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Preview mode';
-  @override
-  String get previewModeSubtitle =>
-      'Whether the preview shares the screen with the editor, or replaces '
-      'it';
-  @override
-  String get previewModeAuto => 'Side by side';
-  @override
-  String get previewModeSwitch => 'Full screen';
-  @override
-  String get splitRatioTitle => 'Split width';
-  @override
-  String get splitRatioSubtitle =>
-      'The editor’s share when the preview is side by side';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Link format';
@@ -543,11 +522,6 @@ final class EnglishStrings extends Strings {
   String get showPreviewTooltip => 'Show preview';
   @override
   String get showEditorTooltip => 'Show editor';
-  @override
-  String get enterFullScreenTooltip => 'Full screen';
-  @override
-  String get exitFullScreenTooltip => 'Exit full screen';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(raw HTML table)';

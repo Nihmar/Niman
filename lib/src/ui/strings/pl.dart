@@ -129,11 +129,6 @@ final class PolishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Wyłączone';
   @override
-  String get settingsPreviewEnabledTitle => 'Podgląd';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Pokaż wyrenderowaną notatkę obok edytora źródła';
-  @override
   String get switchToWysiwygTooltip => 'Przełącz na edytor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Przełącz na źródło Markdown';
@@ -276,20 +271,6 @@ final class PolishStrings extends Strings {
       'Edytor i podgląd, zawsze zsynchronizowane';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Tryb podglądu';
-  @override
-  String get previewModeSubtitle =>
-      'Czy podgląd dzieli ekran z edytorem, czy go zastępuje';
-  @override
-  String get previewModeAuto => 'Obok siebie';
-  @override
-  String get previewModeSwitch => 'Pełny ekran';
-  @override
-  String get splitRatioTitle => 'Szerokość podziału';
-  @override
-  String get splitRatioSubtitle => 'Część edytora, gdy podgląd jest obok';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format linku';
@@ -552,11 +533,6 @@ final class PolishStrings extends Strings {
   String get showPreviewTooltip => 'Pokaż podgląd';
   @override
   String get showEditorTooltip => 'Pokaż edytor';
-  @override
-  String get enterFullScreenTooltip => 'Pełny ekran';
-  @override
-  String get exitFullScreenTooltip => 'Opuść pełny ekran';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(surowa tabela HTML)';

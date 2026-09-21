@@ -128,11 +128,6 @@ final class CatalanStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desactivat';
   @override
-  String get settingsPreviewEnabledTitle => 'Previsualització';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Mostra la nota renderitzada al costat de l’editor de font';
-  @override
   String get switchToWysiwygTooltip => 'Canvia a l’editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Canvia a la font Markdown';
@@ -276,23 +271,6 @@ final class CatalanStrings extends Strings {
       'L’editor i la previsualització, sempre d’acord';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Mode de previsualització';
-  @override
-  String get previewModeSubtitle =>
-      'Si la previsualització comparteix la pantalla amb l’editor o '
-      'la substitueix';
-  @override
-  String get previewModeAuto => 'Costat a costat';
-  @override
-  String get previewModeSwitch => 'Pantalla completa';
-  @override
-  String get splitRatioTitle => 'Amplitud de la divisió';
-  @override
-  String get splitRatioSubtitle =>
-      'La part de l’editor quan la previsualització és costat a '
-      'costat';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format de l’enllaç';
@@ -553,11 +531,6 @@ final class CatalanStrings extends Strings {
   String get showPreviewTooltip => 'Mostra la previsualització';
   @override
   String get showEditorTooltip => 'Mostra l’editor';
-  @override
-  String get enterFullScreenTooltip => 'Pantalla completa';
-  @override
-  String get exitFullScreenTooltip => 'Surt de la pantalla completa';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(taula HTML en brut)';
