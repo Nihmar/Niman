@@ -11069,10 +11069,18 @@ and only a desktop Ctrl+V is the app's business. The test owns the channel
 (`Clipboard.setData`/`getData` on `SystemChannels.platform`) and drives copy, cut,
 paste and the undo of the paste.
 
-What is *not* built yet in this phase: double and triple click, find, folding, the
-shell's remappable command table dispatching into the surface, and the
-`MarkdownSurface` widget itself — the thing the shell switches to, and the flag that
-lets a device try it.
+**A tap places the caret, two take the word, three take the line.** The taps are
+counted in the surface rather than with `onDoubleTap`, because a triple click is a
+*third* tap and not a second double one — and because the count has to survive the
+caret moving between taps, which is exactly what happens. `wordRangeAt`
+(`edit/caret_motion.dart`) is the pure half: the same word rule the word motions use,
+so an underscore keeps a name whole, and an offset that sits on no word character
+selects *that character* rather than the nothing between two words. The line a
+triple click takes is the line's text without its terminator.
+
+What is *not* built yet in this phase: find, folding, the shell's remappable command
+table dispatching into the surface, and the `MarkdownSurface` widget itself — the
+thing the shell switches to, and the flag that lets a device try it.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 

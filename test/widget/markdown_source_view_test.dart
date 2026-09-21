@@ -526,6 +526,41 @@ void main() {
     expect(buffer.text, '', reason: 'the paste is undoable like any edit');
   });
 
+  testWidgets('two taps take the word, three take the line', (tester) async {
+    final buffer = SourceBuffer.fromText('due parole, fine\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onSelection: carets.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    // Inside `parole`, which starts at x = 4 * the advance of the test font.
+    const inside = Offset(16 + 14 * 5, 16);
+    await tester.tapAt(inside);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(carets.last.isCollapsed, isTrue, reason: 'one tap is a caret');
+    await tester.tapAt(inside);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(carets.last.start, 4);
+    expect(carets.last.end, 10, reason: 'the word under the second tap');
+    await tester.tapAt(inside);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(carets.last.start, 0);
+    expect(
+      carets.last.end,
+      buffer.lineAt(0).length,
+      reason: "the line's text, without the terminator that ends it",
+    );
+  });
+
   testWidgets('a jump to a line brings it to the top', (tester) async {
     final note = StringBuffer();
     for (var at = 0; at < 500; at++) {
