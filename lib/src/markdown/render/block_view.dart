@@ -30,10 +30,13 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/style_run.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
@@ -203,15 +206,44 @@ final class BlockView extends StatelessWidget {
               for (final cell in rows[at])
                 Padding(
                   padding: theme.tableCellPadding,
-                  child: Text(
+                  child: _cell(
                     cell,
-                    style: at == 0 ? theme.tableHeader : theme.tableCell,
+                    at == 0 ? theme.tableHeader : theme.tableCell,
                   ),
                 ),
             ],
           ),
       ],
     );
+  }
+
+  /// A table cell, with its own inline markup rendered.
+  ///
+  /// A cell is a block's worth of Markdown that the scanner never sees as one:
+  /// it lives inside a line, between pipes, so it is parsed here, on its own,
+  /// through the same engine everything else goes through. Doing it any other
+  /// way — a second inline scanner inside the renderer — is how two surfaces
+  /// start disagreeing about what `**bold**` means.
+  ///
+  /// The cost is a scan and a parse per cell, which matters only because a
+  /// table can have many; a cell is one line, and a note's tables are small.
+  /// Anything larger belongs in the block scanner, which is where a cell would
+  /// become a block if it ever needs to.
+  Widget _cell(String text, TextStyle style) {
+    if (text.isEmpty) return Text('', style: style);
+    final buffer = SourceBuffer.fromText(text);
+    final scanner = BlockScanner(buffer);
+    if (scanner.index.blocks.isEmpty) return Text(text, style: style);
+    final cell = BlockParser().parse(scanner.index.blocks.first, buffer);
+    final spans = _InlineBuilder(
+      visible: VisibleText.of(cell),
+      theme: theme,
+      mathCache: mathCache,
+      onTapLink: onTapLink,
+      onTapWikiLink: onTapWikiLink,
+      embedResolver: embedResolver,
+    ).build();
+    return Text.rich(TextSpan(children: spans, style: style));
   }
 
   /// The list marker and its trailing space, from the item's first line.
