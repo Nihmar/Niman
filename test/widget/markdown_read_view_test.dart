@@ -11,6 +11,7 @@ import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/math_widget.dart';
 
 import '../../tool/spec_suite.dart';
 
@@ -305,6 +306,110 @@ void main() {
       }
       expect(screen.toString(), isNot(contains(r'$$')));
       expect(screen.toString(), contains('an item'));
+    });
+
+    testWidgets('a display formula sits in the middle of the column', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(600, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      const tex = 'x^2 + y^2 = z^2';
+      final cache = _syncCache();
+      final parser = BlockParser();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText('\$\$\n$tex\n\$\$\n'),
+              parser: parser,
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      // Typeset rather than still waiting: a placeholder would satisfy the
+      // geometry below without a formula ever having been drawn.
+      expect(cache.boxFor(tex, displayMode: true), isNotNull);
+      final box = tester.getRect(find.byType(BlockMathView));
+      // A block is laid out on the sliver's cross axis with a *tight* width,
+      // and the katex painter always starts its ink at the canvas origin — so
+      // a box as wide as the column is a formula painted at the column's left
+      // edge, however wide the formula itself is.
+      expect(
+        box.width,
+        lessThan(200),
+        reason: 'the formula, not the column it sits in',
+      );
+      // 600 minus the 16-pixel page margin on either side.
+      expect(box.center.dx, closeTo(300, 0.5));
+    });
+
+    testWidgets('a one-line display is a block, not a span in the prose', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(600, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      const tex = 'x^2 + y^2 = z^2';
+      final cache = _syncCache();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText('\$\$$tex\$\$\n'),
+              parser: BlockParser(),
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(cache.boxFor(tex, displayMode: true), isNotNull);
+      // A block, not a `WidgetSpan` inside a paragraph: a span leaves the
+      // object replacement character in its paragraph's text, and a line the
+      // preview draws as a centered block would be a box at the left margin
+      // (#252).
+      final prose = tester.allWidgets
+          .whereType<Text>()
+          .map((widget) => widget.textSpan?.toPlainText() ?? '')
+          .join();
+      expect(prose, isNot(contains('\uFFFC')));
+      expect(
+        tester.getRect(find.byType(BlockMathView)).center.dx,
+        closeTo(300, 0.5),
+      );
+    });
+
+    testWidgets('two display blocks in a row are two formulas', (tester) async {
+      tester.view.physicalSize = const Size(600, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final cache = _syncCache();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              // The line that closes the first block starts with `$$`, and so
+              // does the line that opens the second: the scanner read the run
+              // as one block and the view drew one formula holding both texes.
+              buffer: SourceBuffer.fromText('\$\$\na\n\$\$\n\$\$\nb\n\$\$\n'),
+              parser: BlockParser(),
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(cache.boxFor('a', displayMode: true), isNotNull);
+      expect(cache.boxFor('b', displayMode: true), isNotNull);
+      expect(
+        tester
+            .widgetList<BlockMathView>(find.byType(BlockMathView))
+            .map((view) => view.tex),
+        <String>['a', 'b'],
+      );
     });
 
     testWidgets('a formula that cannot be typeset does not take the screen', (

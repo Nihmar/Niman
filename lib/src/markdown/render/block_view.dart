@@ -204,13 +204,21 @@ final class BlockView extends StatelessWidget {
     );
   }
 
-  /// A display formula.
-  Widget _blockMath(BuildContext context) => BlockMathView(
-    cache: mathCache,
-    tex: _displayTex(parsed.text),
-    style: MathStyle(
-      fontSize: theme.body.fontSize ?? 14,
-      color: theme.body.color,
+  /// A display formula, centered like the preview's.
+  ///
+  /// The [Center] is load-bearing, not decoration. A block is laid out on the
+  /// sliver's cross axis with a **tight** width, so a bare [BlockMathView] is
+  /// stretched to the whole column — and the katex painter starts its ink at
+  /// the canvas origin whatever size it is handed, which put every formula at
+  /// the column's left edge (#252). Center hands the view its own width back.
+  Widget _blockMath(BuildContext context) => Center(
+    child: BlockMathView(
+      cache: mathCache,
+      tex: _displayTex(parsed.text),
+      style: MathStyle(
+        fontSize: theme.body.fontSize ?? 14,
+        color: theme.body.color,
+      ),
     ),
   );
 

@@ -134,6 +134,27 @@ void main() {
       expect(inline, <BlockKind>[BlockKind.paragraph]);
     });
 
+    test('two display blocks in a row are two blocks', () {
+      // The line that closes a block starts with `$$` as much as the line that
+      // opens one does, and a run of them was read as a single block whose tex
+      // was both formulas on two lines (#252).
+      final kinds = _kinds('\$\$\na\n\$\$\n\$\$\nb\n\$\$');
+      expect(kinds, <BlockKind>[BlockKind.math, BlockKind.math]);
+    });
+
+    test('a one-line display is a block, as the preview reads it', () {
+      // `math_rule.dart` is the shared definition: a line whose trimmed text
+      // is `$$…$$` is single-line *display*, and the preview's MathBlockSyntax
+      // parses it as a display block. The scanner alone called it inline.
+      expect(_kinds(r'$$x$$'), <BlockKind>[BlockKind.math]);
+      expect(_kinds('\$\$x\$\$\n\$\$y\$\$'), <BlockKind>[
+        BlockKind.math,
+        BlockKind.math,
+      ]);
+      // A prose line that merely contains one is still a paragraph.
+      expect(_kinds(r'a $$x$$ b'), <BlockKind>[BlockKind.paragraph]);
+    });
+
     test('frontmatter is only the leading block', () {
       expect(_kinds('---\na\n---'), <BlockKind>[BlockKind.frontmatter]);
       // A `---` further down is a thematic break, or a setext underline; here
@@ -195,6 +216,22 @@ void main() {
     test('an indented code block needs a blank line before it', () {
       expect(_kinds('para\n    not code'), <BlockKind>[BlockKind.paragraph]);
       expect(_kinds('para\n\n    code'), <BlockKind>[
+        BlockKind.paragraph,
+        BlockKind.blank,
+        BlockKind.indentedCode,
+      ]);
+    });
+
+    test(r'an indented `$$` line is code, not a formula', () {
+      // The preview's parser runs its indented-code syntax before its math
+      // one, so a `$$` line four spaces in never opens a formula — either
+      // form of it.
+      expect(_kinds('para\n\n    code\n    \$\$\n    x\n    \$\$'), <BlockKind>[
+        BlockKind.paragraph,
+        BlockKind.blank,
+        BlockKind.indentedCode,
+      ]);
+      expect(_kinds('para\n\n    code\n    \$\$x\$\$'), <BlockKind>[
         BlockKind.paragraph,
         BlockKind.blank,
         BlockKind.indentedCode,
