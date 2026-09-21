@@ -11,7 +11,11 @@ status row switches only when both are enabled.
   tokenizer for highlighting. Line numbers and indent width (2–8, default
   2) are per-library settings.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
-  round-trip codec. What you see is the same `.md` file on disk.
+  round-trip codec. What you see is the same `.md` file on disk. It opens
+  notes up to **200 KB**: past that it says so and asks for the source
+  editor, because a formatted surface of a novel-length note is not usable
+  on a phone. The cap is the WYSIWYG's own — the source editor has none, and
+  the unified read mode is being built to remove it.
 
 ### Open notes and tabs
 
