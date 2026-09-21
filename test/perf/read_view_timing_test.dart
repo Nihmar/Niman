@@ -8,10 +8,21 @@
 // and is therefore the one a reader feels.
 //
 // The measurements are **debug-mode harness numbers**, like every other
-// benchmark in this repository: the ratios carry and the absolutes do not. That
-// is why the assertion is against the design's ceiling rather than a tighter
-// bound, and why the numbers are printed: a change that doubles this should be
-// visible in the log even when it still passes.
+// benchmark in this repository: the ratios carry and the absolutes do not. The
+// numbers are printed, so a change that doubles this is visible in the log even
+// when it passes.
+//
+// CI proved the second half of that sentence the hard way, on #249's first
+// runs: the shared runner read 365 ms for the fixture this host reads at 165,
+// and 222 for the one it reads at 88 — and neither was a regression, because
+// the preview on that same runner read 338 ms. An *absolute* ceiling is
+// therefore not something a shared machine can hold, and asserting it there
+// fails a build for the hardware it ran on. So the ceiling is asserted by a run
+// that asks for it —
+// `NIMAN_PERF=1 flutter test test/perf/read_view_timing_test.dart` — which is
+// where §9's budget is meaningful and where §4.9.5's numbers came from; every
+// run asserts a **backstop** instead — ten times the ceiling — which is what a
+// real regression looks like and no calibration explains away.
 //
 // Only the unified engine is timed here, and that is deliberate. The preview is
 // asynchronous — its first frames are a spinner and its parse happens on a real
@@ -55,6 +66,13 @@ const Map<String, int> _ceilings = <String, int>{
   'fixture-200kb.md': _ceiling,
   'fixture-50kb.md': 250,
 };
+
+/// Whether this run holds the design's ceiling rather than the backstop: the
+/// reference host's run, asked for explicitly.
+final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
+
+/// What a ceiling is multiplied by on a machine that is not the reference one.
+const int _backstop = 10;
 
 /// The fixtures to measure, largest last. The geometry note is one person's and
 /// is not in the repository, so it is measured when it is there.
@@ -152,16 +170,22 @@ void main() {
       watch.stop();
       final jump = watch.elapsedMilliseconds;
 
+      final ceiling = _ceilings[name] ?? _ceiling;
+      final bar = _referenceHost ? ceiling : ceiling * _backstop;
       print(
-        '$name: first content ${first}ms (target $_target, ceiling $_ceiling) '
-        '| jump ${jump}ms | blocks ${state.blockCount} '
+        '$name: first content ${first}ms (target $_target, ceiling $ceiling, '
+        'bar $bar) | jump ${jump}ms | blocks ${state.blockCount} '
         'built ${state.builtBlocks} parsed ${parser.parseCount}',
       );
 
       expect(
         first,
-        lessThanOrEqualTo(_ceilings[name] ?? _ceiling),
-        reason: 'past the ceiling for text to first visible content',
+        lessThanOrEqualTo(bar),
+        reason: _referenceHost
+            ? 'past the ceiling for text to first visible content'
+            : 'past the backstop for text to first visible content: $first ms '
+                  'against $bar. Run with NIMAN_PERF=1 to hold it to the '
+                  'design ceiling of $ceiling ms',
       );
       // The windowing's evidence, and the reason the number above is a
       // viewport's cost rather than the note's.
