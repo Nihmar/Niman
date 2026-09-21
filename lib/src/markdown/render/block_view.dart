@@ -100,7 +100,16 @@ final class BlockView extends StatelessWidget {
   }
 
   /// The block's visible text as rich text.
+  ///
+  /// A block the parser consumed and gave nothing back draws nothing — a link
+  /// reference definition and a footnote definition are syntax, not prose, and
+  /// the parser files them elsewhere and returns an empty node list. Drawing
+  /// "the text it did not cover" instead put `[^1]: fetch free fog national.`
+  /// on screen where the preview draws a footnote.
   Widget _rich(BuildContext context, {TextStyle? style}) {
+    if (parsed.runs.isEmpty && parsed.extensions.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final visible = VisibleText.of(parsed);
     final spans = _InlineBuilder(
       visible: visible,

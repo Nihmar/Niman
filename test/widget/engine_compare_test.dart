@@ -41,16 +41,25 @@ import 'package:path/path.dart' as p;
 /// is raised.
 const Map<String, int> _agreedUpTo = <String, int>{
   'fixture-1kb.md': -1,
-  // A footnote *definition*, shown as the text the note wrote instead of being
-  // consumed into the footnote list the preview ends the document with. The
-  // reference resolves — the document scope seeds it — while the definition's
-  // own block does not, and finding out why is the next piece of work.
+  // Footnote definitions. The reference resolves and the definition's own block
+  // is now consumed rather than drawn — so the text the note wrote is gone from
+  // the screen — but the preview *ends the document* with a list of the
+  // definitions and their backlinks, and the unified engine does not render one
+  // yet. That missing list is the difference, and it is the next piece of work:
+  // the definitions are already scanned (`DocumentScope.footnoteCounts`), so it
+  // is a matter of collecting their bodies and appending the section.
+  //
   // Everything before this point matches: links, footnotes in prose, quotes and
   // nested quotes, task lists, ordered and unordered lists, tables, math,
   // fences, images.
-  'fixture-10kb.md': 8278,
-  // The same footnote definition, much later in this fixture.
-  'fixture-50kb.md': 43483,
+  //
+  // A note on the number itself: it is the offset of the first divergence, and
+  // it can *fall* when text is removed from either side — it fell by one here,
+  // because dropping the raw definition shortened the unified text. It is a
+  // ratchet against a change that makes the two disagree sooner, not a score.
+  'fixture-10kb.md': 8277,
+  // The same footnote definitions, much later in this fixture.
+  'fixture-50kb.md': 43482,
 };
 
 /// The fixtures to compare.
