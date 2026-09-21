@@ -9302,6 +9302,31 @@ main-axis constraints), with the height map demoted from "the extents" to "the
 estimator `estimateMaxScrollOffset` uses for the part of the note no frame has
 laid out" — which is what §8.4.1's Fenwick tree was for.
 
+**The gate that was missing is built (#257's neighbourhood, §10.4).**
+`test/widget/read_view_geometry_test.dart` sweeps every fixture from top to
+bottom — eleven steps, jumps included — and checks three properties of the render
+tree itself, with no second engine's tree to compare against (that comparison is
+where brittleness lives): a `RenderParagraph` is at least as tall as
+`computeMaxIntrinsicHeight(width)` says its text wants, which is #250 exactly;
+two `BlockView`s do not overlap; and a display formula that *fits* is neither
+stretched nor off centre, which is #252 exactly. Each check is proven to fire on
+a tree built to break it — a clipped `Text`, a `BlockView` pair in a `Stack`, a
+`BlockMathView` stretched to a `SizedBox` — because a check nobody has seen fail
+is not a gate. The "fits" half matters: without the formula's intrinsic width a
+stretched box and a formula genuinely wider than the pane are the same 568
+pixels, and only one of them is a bug.
+
+It found two things on its first run. One is a latent crash: `_RenderInlineMath`
+implemented `computeDistanceToActualBaseline` and not `computeDryBaseline`, which
+Flutter treats as a broken render object, so **a table cell holding inline math
+asserted in debug and mis-baselined in release** — `IntrinsicColumnWidth` is what
+asks. The other is not a bug in the code but in the book: a display formula wider
+than the pane is clamped to it and cut, in both surfaces, and **306 of the
+geometry note's 824 display formulas are wider than a phone pane's 368 pixels**
+(median 316, p90 495, widest 712). The gate records that case instead of failing
+on it — it is parity with the preview and a product decision, filed as #257 with
+the three options and their trades.
+
 **Two gates missed it, and both are named rather than mended quietly.** The
 engine comparison reads `toPlainText()`, and clipped content is still in the
 widget tree, so the words matched; and this phase's own exit criteria asked for a
