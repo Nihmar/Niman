@@ -7,6 +7,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        MarkdownEngine,
         TreeSort,
         defaultAttachmentsFolder,
         defaultListFolder,
@@ -313,6 +314,7 @@ final class LibraryConfig {
     this.treeWidth = defaultTreeWidth,
     this.spellDictionaries = const <String>[],
     this.editorKind = EditorKind.source,
+    this.markdownEngine = MarkdownEngine.legacy,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
     this.previewEnabled = true,
     this.extra = const {},
@@ -393,6 +395,13 @@ final class LibraryConfig {
       editorKind: switch (json['editorKind']) {
         'wysiwyg' => EditorKind.wysiwyg,
         _ => EditorKind.source,
+      },
+      // Opt-in, and anything unrecognised reads back as the shipped behaviour:
+      // a settings file written by a newer build must not leave a note drawn by
+      // an engine this one does not have.
+      markdownEngine: switch (json['markdownEngine']) {
+        'unified' => MarkdownEngine.unified,
+        _ => MarkdownEngine.legacy,
       },
       // Absent on files written before the switch existed: both editors
       // were offered then (the status row always switched), so both stay
@@ -512,6 +521,12 @@ final class LibraryConfig {
   /// Which editor this library writes in (default source).
   final EditorKind editorKind;
 
+  /// Which engine draws the note (`docs/dev/unified-surface.md`).
+  ///
+  /// Defaults to [MarkdownEngine.legacy], so a build without the flag set
+  /// behaves exactly as the one before it did.
+  final MarkdownEngine markdownEngine;
+
   /// Which editors the library offers (default both): the settings screen
   /// enables source, WYSIWYG, or both, never none; the note's status row
   /// switches between them only when both are enabled.
@@ -551,6 +566,7 @@ final class LibraryConfig {
     double? treeWidth,
     List<String>? spellDictionaries,
     EditorKind? editorKind,
+    MarkdownEngine? markdownEngine,
     Set<EditorKind>? enabledEditors,
     bool? previewEnabled,
   }) {
@@ -583,6 +599,7 @@ final class LibraryConfig {
       treeWidth: treeWidth ?? this.treeWidth,
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
       editorKind: editorKind ?? this.editorKind,
+      markdownEngine: markdownEngine ?? this.markdownEngine,
       enabledEditors: enabledEditors ?? this.enabledEditors,
       previewEnabled: previewEnabled ?? this.previewEnabled,
       extra: extra,
@@ -616,6 +633,7 @@ final class LibraryConfig {
     'spellDictionary', // Legacy single-dictionary key (read, never written).
     'spellDictionaries',
     'editorKind',
+    'markdownEngine',
     'enabledEditors',
     'previewEnabled',
   };
@@ -655,6 +673,7 @@ final class LibraryConfig {
       'noteTextScale': noteTextScale,
       'treeWidth': treeWidth,
       'editorKind': editorKind.name,
+      'markdownEngine': markdownEngine.name,
       // Canonical order, so the file does not churn when the set is
       // rebuilt insertion-ordered differently.
       'enabledEditors': [
@@ -744,6 +763,7 @@ final class LibraryConfig {
         treeWidth == other.treeWidth &&
         _deepEquals(spellDictionaries, other.spellDictionaries) &&
         editorKind == other.editorKind &&
+        markdownEngine == other.markdownEngine &&
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
         previewEnabled == other.previewEnabled &&

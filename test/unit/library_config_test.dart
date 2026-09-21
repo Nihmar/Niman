@@ -6,6 +6,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        MarkdownEngine,
         TreeSort,
         defaultAttachmentsFolder,
         defaultListFolder;
@@ -145,6 +146,31 @@ void main() {
       final store = LibraryConfigStore(lib.path);
       expect((await store.read()).editorKind, EditorKind.source);
       expect((await store.read()).previewEnabled, isTrue);
+      // The unified engine is opt-in: an older file must read back as the
+      // surfaces the app has always shipped.
+      expect((await store.read()).markdownEngine, MarkdownEngine.legacy);
+    });
+
+    test('round trips the markdown engine', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      const config = LibraryConfig(
+        trashEnabled: true,
+        historyVersions: 10,
+        quickNotePath: null,
+        listNoteFolder: 'Lists',
+        markdownEngine: MarkdownEngine.unified,
+      );
+      await store.write(config);
+      expect((await store.read()).markdownEngine, MarkdownEngine.unified);
+    });
+
+    test('an unknown engine reads back as the shipped one', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.file.create(recursive: true);
+      store.file.writeAsStringSync('{"markdownEngine": "something-newer"}');
+      expect((await store.read()).markdownEngine, MarkdownEngine.legacy);
     });
 
     test('round trips the editor kind and the preview switch', () async {
