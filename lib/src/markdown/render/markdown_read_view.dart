@@ -305,6 +305,12 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     if (heights == null || _blocks.isEmpty) {
       return const SizedBox.shrink();
     }
+    // Measured here, once, rather than by a `LayoutBuilder` per formula: a
+    // `LayoutBuilder` cannot answer an intrinsic query, and a display formula
+    // inside a table cell (a column sized by `IntrinsicColumnWidth`) is asked
+    // for one.
+    final pane = MediaQuery.sizeOf(context).width;
+    final availableWidth = pane - widget.padding.horizontal;
     return CustomScrollView(
       controller: widget.controller,
       slivers: <Widget>[
@@ -318,7 +324,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
           sliver: SliverMarkdownBlocks(
             heights: heights,
             delegate: SliverChildBuilderDelegate(
-              _blockAt,
+              (context, index) => _blockAt(context, index, availableWidth),
               childCount: heights.length,
             ),
           ),
@@ -356,7 +362,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// How tall it comes out is the sliver's business: a `RenderSliver` lays its
   /// own children out, and this one records what it measures (#251).
-  Widget _blockAt(BuildContext context, int index) {
+  Widget _blockAt(BuildContext context, int index, double availableWidth) {
     final block = _blocks[index];
     _built++;
     _traceFirstContent();
@@ -364,6 +370,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       parsed: widget.parser.of(block, widget.buffer),
       theme: _theme ?? _fallbackTheme,
       mathCache: widget.mathCache,
+      availableWidth: availableWidth,
       onTapLink: widget.onTapLink,
       onTapWikiLink: widget.onTapWikiLink,
       embedResolver: widget.embedResolver,

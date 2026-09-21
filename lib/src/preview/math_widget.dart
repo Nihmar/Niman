@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -6,6 +7,7 @@ import 'package:katex/katex.dart';
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
 import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/math_line_break.dart';
 
 /// Defers math typesetting while the preview is scrolling (T-PP-22).
 ///
@@ -118,6 +120,10 @@ final class MathBlockBuilder extends MarkdownElementBuilder {
       child: Center(
         child: BlockMathView(
           cache: cache,
+          // The package hands a builder no width, and the pane's own is the
+          // best a builder can know: a formula wider than it is broken across
+          // lines rather than cut (#257).
+          maxWidth: MediaQuery.sizeOf(context).width - 32,
           tex: _latexOf(element),
           style: style,
         ),
@@ -257,6 +263,7 @@ final class BlockMathView extends StatefulWidget {
     required this.cache,
     required this.tex,
     required this.style,
+    this.maxWidth,
     super.key,
   });
 
@@ -268,6 +275,15 @@ final class BlockMathView extends StatefulWidget {
 
   /// The math style (size/color).
   final MathStyle style;
+
+  /// How wide a pane this formula has to fit, or null for "as wide as it
+  /// needs".
+  ///
+  /// A display formula wider than the pane is broken at its own operators
+  /// (`preview/math_line_break.dart`, #257); null keeps the old behaviour of
+  /// drawing it whole, which is what a caller that does not know a width — a
+  /// test, an intrinsic pass — is asking for.
+  final double? maxWidth;
 
   @override
   State<BlockMathView> createState() => _BlockMathViewState();
@@ -296,6 +312,54 @@ class _BlockMathViewState extends State<BlockMathView> {
     }
   }
 
+  /// The smallest a formula is shrunk to before it is drawn as it is: half the
+  /// note's own size, which is 7.5 px for the default 15. It is a floor rather
+  /// than a rule because the measurements say it is enough — of the geometry
+  /// note's 824 display formulas, the widest *piece* left over after breaking
+  /// needs 1.45× a phone pane, i.e. 0.69 of the size it was written at.
+  static const double minimumDisplayScale = 0.5;
+
+  /// The formula, broken across lines when the pane is narrower than it is and
+  /// shrunk when breaking was not enough.
+  ///
+  /// Full size on two lines beats shrunk onto one: a reader studying from a
+  /// phone can follow `a =` / `b + c`, and 60 % of a 15 px formula cannot be
+  /// read at all. What breaking cannot help with is the tail — a matrix, an
+  /// `aligned` block, a stretched delimiter pair — and there the answer is to
+  /// shrink the whole formula until it fits, floored at
+  /// [minimumDisplayScale], rather than to cut it (#257).
+  Widget _fitted(BuildContext context, BoxNode box) {
+    final available = widget.maxWidth;
+    if (available == null || !available.isFinite || available <= 0) {
+      return _mathBoxFromCache(context, box: box, style: widget.style);
+    }
+    var style = widget.style;
+    final pad = kInkOverflowPadEm * style.fontSize;
+    final lines = boxSizePxPadded(box, style.fontSize).width <= available
+        ? <BoxNode>[box]
+        : breakDisplayMath(box, maxEm: (available - 2 * pad) / style.fontSize);
+    final widest = lines
+        .map((line) => boxSizePxPadded(line, style.fontSize).width)
+        .reduce(math.max);
+    if (widest > available) {
+      final scale = (available / widest).clamp(minimumDisplayScale, 1.0);
+      style = MathStyle(fontSize: style.fontSize * scale, color: style.color);
+    }
+    if (lines.length < 2) {
+      return _mathBoxFromCache(context, box: lines.single, style: style);
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        for (var at = 0; at < lines.length; at++) ...<Widget>[
+          if (at > 0) SizedBox(height: style.fontSize * 0.4),
+          _mathBoxFromCache(context, box: lines[at], style: style),
+        ],
+      ],
+    );
+  }
+
   /// See [_InlineMathViewState._request]: one render, one rebuild of the
   /// view that asked for it.
   void _request() {
@@ -316,7 +380,7 @@ class _BlockMathViewState extends State<BlockMathView> {
   Widget build(BuildContext context) {
     final box = widget.cache.boxFor(widget.tex, displayMode: true);
     if (box != null) {
-      return _mathBoxFromCache(context, box: box, style: widget.style);
+      return _fitted(context, box);
     }
     if (widget.cache.isError(widget.tex, displayMode: true)) {
       return Text(widget.tex, style: const TextStyle(color: Color(0xFFCC0000)));

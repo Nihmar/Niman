@@ -9343,6 +9343,29 @@ geometry note's 824 display formulas are wider than a phone pane's 368 pixels**
 on it — it is parity with the preview and a product decision, filed as #257 with
 the three options and their trades.
 
+**#257 is answered the way a book answers it: break at the formula's own
+operators, and shrink only what breaking cannot reach.** The box tree carries
+what a break needs — the top level of a formula is a row of atoms in source
+order — and what makes breaking *safe*: a script is a `VList` and a stretched
+delimiter is not a glyph, so no break can land inside `x^{-1}` or between
+`\left(` and its content. `preview/math_line_break.dart` splits the row greedily
+at the last operator that keeps a line inside the pane, **after** the operator as
+TeX does, and rebuilds every line through the wrappers it descended, so a
+`\color{red}` three levels up is still red. `BlockMathView` asks for it only when
+it has been told a width (`BlockView.availableWidth`, measured once at the read
+view's root — a `LayoutBuilder` per formula cannot answer the intrinsic query a
+table cell's column makes) and only when the formula does not fit; what breaking
+cannot reach is shrunk to fit, floored at half size.
+
+Measured on the note itself, at a phone pane's 361 pixels and 15 px formulas:
+of 841 display blocks, **323 are wider than the pane** — and 235 of those break
+into lines that fit at full size. The remaining 88 have nothing to break at (56
+of them `aligned` or `matrix` bodies, which are grids rather than rows of
+atoms), and there the shrink takes over: the widest piece left over needs 1.45×
+the pane, i.e. 0.69 of the written size, so the floor is never reached on this
+note. Nothing is cut, which is what the reader asked for: *"avere formule tagliate
+non avrebbe senso (metti caso che l'utente stia studiando da telefono)"*.
+
 **Two gates missed it, and both are named rather than mended quietly.** The
 engine comparison reads `toPlainText()`, and clipped content is still in the
 widget tree, so the words matched; and this phase's own exit criteria asked for a

@@ -25,7 +25,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:katex/katex.dart' show boxSizePxPadded;
+import 'package:katex/katex.dart' show KatexBoxPainter, boxSizePxPadded;
 import 'package:katex_dart/katex_dart.dart' show KatexOptions, renderToBox;
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -100,6 +100,13 @@ List<Failure> geometryFailures(
   }
 
   final column = pane - 32;
+  // The size the note is set in: a formula drawn below it was shrunk to fit.
+  // Null when there is no read view to ask — the teeth tests build their own
+  // trees — and then nothing is treated as shrunk.
+  final readView = find.byType(MarkdownReadView).evaluate();
+  final baseFontSize = readView.isEmpty
+      ? null
+      : markdownThemeOf(readView.first).body.fontSize;
   for (final element in find.byType(BlockMathView).evaluate()) {
     if (element.renderObject case final RenderBox box
         when box.attached && box.hasSize) {
@@ -114,6 +121,28 @@ List<Failure> geometryFailures(
       final intrinsic = rendered == null
           ? null
           : boxSizePxPadded(rendered, view.style.fontSize).width;
+      // A formula the pane is too narrow for must be **broken or shrunk** —
+      // never drawn at full size into a box it cannot fit, which is the cut
+      // (#257). Both answers are visible from the tree: the pieces the painter
+      // draws, and the size the view was drawn at against the theme's.
+      if (intrinsic != null && intrinsic > column) {
+        final pieces = find
+            .descendant(
+              of: find.byWidget(view),
+              matching: find.byType(CustomPaint),
+            )
+            .evaluate()
+            .where((e) => (e.widget as CustomPaint).painter is KatexBoxPainter)
+            .length;
+        final shrunk =
+            baseFontSize != null && view.style.fontSize < baseFontSize - 0.01;
+        if (pieces < 2 && !shrunk) {
+          failures.add(
+            'a formula wider than the pane is drawn whole at '
+            '${view.style.fontSize} px: "$shown"',
+          );
+        }
+      }
       if (intrinsic != null && intrinsic <= column) {
         if (rect.width > intrinsic + 1) {
           failures.add(
