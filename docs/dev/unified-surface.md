@@ -10071,6 +10071,32 @@ script-level spacing about 17 % too wide; and the `sup1/sup2/sup3` shifts are
 KaTeX also uses *thick* (5mu) spacing for punct→rel where real TeX uses *thin*
 (3mu) — a divergence to match or not, deliberately.
 
+**What the read view draws for a display formula, measured against the preview
+(#252).** A device report — the formulas of `Geometria 1.md`, "me li aspetterei
+centrati orizzontalmente" — is a rendering bug no gate in this phase could see:
+the comparison reads `toPlainText()` (§8.4.4), and a formula's position is not a
+word. A probe that rendered one `$$…$$` block in a 600-pixel pane and printed the
+geometry of its `BlockMathView` found the box was **568 px wide** — the whole
+column — with the formula painted at x = 16, the left page margin. Two constants
+explain it, and both are load-bearing. A sliver lays a block out on the cross axis
+with a *tight* width, so `BlockMathView`'s `SizedBox.fromSize` (77.3 × 17.1 for
+`x^2 + y^2 = z^2` at 15 px) is `constrain`ed to the column instead of keeping its
+own size; and `KatexBoxPainter` always starts its ink at the canvas origin whatever
+size it is handed, so the extra width is empty space to the right of the formula
+rather than a centred one. The preview has wrapped its display box in `Center`
+since the package path (`MathBlockBuilder`, "centered, as its own block widget");
+the read view passed its constraints straight through. One `Center` in
+`BlockView._blockMath` gives the view its own width back — the box measures 77.3 px
+and sits centred at 300 — and `MarkdownExportView`, which stretches its column the
+same way, inherits the fix.
+
+The test states the property rather than the number: the box is **typeset**
+(`cache.boxFor(tex, displayMode: true) != null` — the pending placeholder is
+centred too, and a weaker assertion would have passed on the ellipsis, which is
+exactly how `display math renders inside a list` passed while asserting only that
+the tex was nowhere on screen), narrower than the column, and centred
+(`test/widget/markdown_read_view_test.dart`).
+
 ### 8.8.2 Code: a line-state lexer, not a whole-block regex
 
 `preview/code_highlight.dart` uses the pure-Dart `highlight` package, which

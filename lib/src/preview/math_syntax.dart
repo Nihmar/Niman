@@ -20,10 +20,10 @@ final class MathBlockSyntax extends md.BlockSyntax {
   RegExp get pattern => RegExp(r'^\s*\$\$');
 
   @override
-  bool canParse(md.BlockParser parser) {
-    final trimmed = parser.current.content.trim();
-    return trimmed.startsWith(r'$$');
-  }
+  bool canParse(md.BlockParser parser) =>
+      // The shared rule, so the two parsers cannot disagree about which lines
+      // are display math (#252).
+      isDisplayLine(parser.current.content.trim());
 
   @override
   md.Node? parse(md.BlockParser parser) {

@@ -17,6 +17,7 @@
 /// change, and `index` for the answer.
 library;
 
+import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/line_state.dart';
@@ -299,14 +300,34 @@ final class BlockScanner {
       case BlockKind.paragraph:
       case BlockKind.fencedCode:
       case BlockKind.indentedCode:
-      case BlockKind.math:
       case BlockKind.frontmatter:
       case BlockKind.html:
       case BlockKind.table:
       case BlockKind.blank:
         return _kindOf(end) == kind;
+      case BlockKind.math:
+        // A display block runs while it is open, and the state entering the
+        // line is the only thing that knows: the line that *closes* a block
+        // starts with `$$` as much as the line that opens one does. Asking
+        // the line instead of the state stitched two neighbouring formulas
+        // into one block whose tex was both of them (#252).
+        return _entering[end].math;
     }
   }
+
+  /// Whether [line] is display math — either form — rather than code.
+  ///
+  /// Two rules, both of them the preview's rather than the scanner's own:
+  ///
+  /// * **The shared rule says what a display line is** (`math_rule.dart`):
+  ///   a `$$…$$` that opens and closes on one line is a display block too.
+  ///   Keeping a private copy here is what made `$$x$$` a paragraph in the
+  ///   read view and a centered block in the preview (#252).
+  /// * **An indented `$$` line is code.** The preview's parser runs its
+  ///   indented-code syntax before the math one, so a `$$` line indented four
+  ///   spaces never opens a formula; display math is otherwise indent-blind.
+  bool _isDisplayLineAt(int line, String text, LineState state) =>
+      !_indentedCodeContinues(line, text, state) && isDisplayLine(text.trim());
 
   /// What line [line] is.
   BlockKind _kindOf(int line) {
@@ -315,7 +336,9 @@ final class BlockScanner {
     if (state.fence != null || _fenceOpen(text) != null) {
       return BlockKind.fencedCode;
     }
-    if (state.math || _opensMath(text)) return BlockKind.math;
+    if (state.math || _isDisplayLineAt(line, text, state)) {
+      return BlockKind.math;
+    }
     if (state.frontmatter || _opensFrontmatter(line, text)) {
       return BlockKind.frontmatter;
     }
@@ -367,7 +390,12 @@ final class BlockScanner {
     }
     final fence = _fenceOpen(text);
     if (fence != null) return LineState(fence: fence);
-    if (_opensMath(text)) return const LineState(math: true);
+    // Only the multi-line form opens a state: a `$$…$$` written on one line
+    // is over on that line, and leaving the state open swallowed whatever
+    // followed it.
+    if (_isDisplayLineAt(line, text, state) && isDisplayOpen(text.trim())) {
+      return const LineState(math: true);
+    }
     final html = _htmlOpen(text);
     if (html != null) {
       return LineState(html: html.$1, htmlClosing: html.$2);
@@ -455,20 +483,8 @@ final class BlockScanner {
     return rest.isEmpty ? null : rest.split(RegExp(r'\s+')).first;
   }
 
-  /// Whether a `$$` block opens on [text].
-  static bool _opensMath(String text) {
-    final trimmed = text.trim();
-    return trimmed.startsWith(r'$$') && !_isSingleLineMath(trimmed);
-  }
-
   /// Whether [text] closes a `$$` block.
-  static bool _closesMath(String text) => text.trim().startsWith(r'$$');
-
-  /// A `$$…$$` that opens and closes on one line is inline, not a block.
-  static bool _isSingleLineMath(String trimmed) =>
-      trimmed.length > 4 &&
-      trimmed.endsWith(r'$$') &&
-      !trimmed.substring(2, trimmed.length - 2).contains(r'$$');
+  static bool _closesMath(String text) => isDisplayClose(text.trim());
 
   /// Whether line [line] opens the frontmatter block: only the first line can.
   static bool _opensFrontmatter(int line, String text) =>
