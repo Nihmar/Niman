@@ -58,7 +58,7 @@ final class Block {
     required this.startLine,
     required this.endLine,
     this.quoteDepth = 0,
-    this.listIndent = -1,
+    this.listDepth = -1,
     this.listOrdinal = 0,
     this.headingLevel = 0,
     this.fenceInfo,
@@ -76,8 +76,9 @@ final class Block {
   /// How many blockquote levels it sits in.
   final int quoteDepth;
 
-  /// The content indentation of the list item it is, or -1.
-  final int listIndent;
+  /// How many list levels deep the item sits (0 at the top level), or -1 when
+  /// it is not a list item.
+  final int listDepth;
 
   /// Where this item sits in its list, counting from one, for an ordered list.
   ///
@@ -111,7 +112,7 @@ final class Block {
       startLine: startLine + delta,
       endLine: endLine + delta,
       quoteDepth: quoteDepth,
-      listIndent: listIndent,
+      listDepth: listDepth,
       listOrdinal: listOrdinal,
       headingLevel: headingLevel,
       fenceInfo: fenceInfo,
@@ -122,5 +123,5 @@ final class Block {
   String toString() =>
       'Block(${kind.name} $startLine..$endLine'
       '${quoteDepth > 0 ? ' quote:$quoteDepth' : ''}'
-      '${listIndent >= 0 ? ' list:$listIndent' : ''})';
+      '${listDepth >= 0 ? ' list:$listDepth' : ''})';
 }

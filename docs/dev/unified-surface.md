@@ -1527,7 +1527,39 @@ build. The harness above reads 91 ms for the same note. Both can be true, and
 which one it was could not be told from the log, because **the read pane had no
 trace of its own**: the editor has had `note open first frame` since T-PP-22, the
 legacy preview logs its parse, and the pane the user was waiting for logged
-nothing. The missing instrument is the finding; the cause is still open.
+nothing. The missing instrument was the finding.
+
+The traces answered it, on the next device run and not in the pane's favour:
+`preview: read pane first frame: first frame 18.63ms after call`, and
+`[read] first content: 7602 blocks, 36 built, 47ms after the view was created`
+with `[read] scan: 7602 blocks, 10414 lines in 13ms` — thirty blocks laid out,
+the whole 10 414-line note scanned in 13 ms, and 270 frames in the 2.5-second
+window after the flip with **one** over budget (worst build 13.4 ms). The second
+was never the read pane. What the same log shows one line earlier is:
+
+```
+18:03:14.792 DEBUG [wysiwyg] open: 931852 chars, 7036 delta ops, 2934 preserved blocks
+18:03:15.806 WARNING [frames] slow frame: total 2100.4 ms (build 2012.3 ms, raster 4.7 ms, vsync 83.4 ms)
+18:03:17.954 INFO  [preview] toggle → preview
+```
+
+— the note was opened in **WYSIWYG**, and converting a 931 KB note into 7 036
+Delta ops took a **2 100 ms frame**, two seconds before the flip. The user's
+"lentina ad aprirsi" was the pipeline still draining that frame; the read pane's
+own open is 18-47 ms, and it is measured now rather than argued about. The
+WYSIWYG's own cost is the legacy editor's and phase 4 is its answer, but the
+number is worth carrying there: 2 100 ms of `build` for one note, twice in one
+session, on the same device.
+
+**A smaller residual the trace also exposes.** After a shell remount the settings
+read has not landed yet, so `_editorSettings` is still
+`ShellEditorSettings.defaults` (engine: legacy) for the first builds — and the
+preview pane is built offstage even when it is hidden, so a `MarkdownPreview`
+mounts for the big note, starts an isolate parse and is replaced by the read view
+when the setting lands: `parse async: pane gone before the parse landed (rev 1),
+dropped`, ~150 ms of hidden work per kind switch. It costs nothing on screen and
+it is tracked rather than patched here, because the honest fix is to know the
+engine before building a preview pane at all (phase 5 removes the branch).
 
 It now emits three lines, all of them through the existing seams and none of them
 per-frame: `[read] scan: N blocks, M lines in Xms` when the scanner runs,
@@ -9392,6 +9424,42 @@ final class LineState {
   final TableRun? table;       // GFM table continuation
 }
 ```
+
+**The list half of that stack was built as a single int, and a device found the
+difference (2026-09-21).** `LineState` carried `listIndent` — *the content column
+of the item before* — and `_buildBlocks` gave a block the state **entering** it,
+so an item's indent was whatever its predecessor's content column happened to be.
+The sketch above says `(kind, indent, marker)` for a reason, and the marker
+column is the half that was missing: measured with a probe over the geometry
+note's own list and a nested fixture (600 px pane, marker and text x of every
+item), the read view drew
+
+| source | read view, before | read view, now | preview |
+|---|---|---|---|
+| `- a) …` then `- b) …` | bullet at 16, then at **30** | 16 and 16 | 16 and 16 |
+| `- one` / `  - nested` / `- two` | 16, **30**, **44** | 16, 38.4, 16 | 16, 44, 16 |
+| `1. first` / `2. second` | 30, **37** | 16, 16 | 16, 16 |
+
+Siblings at different indents, and an item after a sublist pushed right: the
+report was "il punto b non dovrebbe essere doppiamente indentato", and the cause
+was the same class of mistake the quote depth had already been fixed for — the
+state entering a line describes the line *before* it.
+
+`LineState` now carries the stack the design asked for, as `(marker, content)`
+column pairs: a marker keeps every open item whose content column it starts at or
+past and closes the rest, and what survives is its parents. The marker column is
+what makes `9. ` and `10. ` one list (same start column, content columns a column
+apart) while `  - x` under `- x` is a child. `Block.listIndent` became
+`Block.listDepth` (0 at the top level, -1 when the block is not an item), because
+that is what layout wants and what the field's name kept implying; the renderer
+indents by `depth × theme.listIndentPerLevel`, so a sublist's marker lands exactly
+where its parent's text starts. Three scanner tests and one widget test hold it
+(the widget one asserts siblings share an x and a sublist does not).
+
+What is left different, measured and not mended: the preview's own marker column
+is 28 px where the read view's `listIndentPerLevel` is `fontSize × 1.6` = 22.4, so
+a top-level item's text starts at 44 there and 38.4 here. It is a constant in the
+read view's typography, not a depth, and changing it moves every list 6 px.
 
 ### 8.5.2 Incrementality: reparse until the state converges
 

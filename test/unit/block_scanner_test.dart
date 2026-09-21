@@ -62,6 +62,12 @@ List<BlockKind> _kinds(String text) {
   return <BlockKind>[for (final block in scanner.index.blocks) block.kind];
 }
 
+/// The list depth of every item block in the scanner, in order.
+List<int> _depths(BlockScanner scanner) => <int>[
+  for (final block in scanner.index.blocks)
+    if (block.kind == BlockKind.listItem) block.listDepth,
+];
+
 void main() {
   group('classification', () {
     test('one of everything, in order', () {
@@ -193,6 +199,38 @@ void main() {
         BlockKind.listItem,
         BlockKind.listItem,
       ]);
+    });
+
+    test('sibling items share a depth, a sublist is one deeper', () {
+      // The depth used to be the *content column of the item before*, so
+      // siblings came out at different indents — the second item of a list was
+      // drawn 14 px right of the first, and the item after a sublist further
+      // still (device report, 2026-09-21).
+      final scanner = BlockScanner(
+        SourceBuffer.fromText(
+          '- one\n  - nested\n  - nested two\n- two\n\n1. first\n2. second',
+        ),
+      );
+      expect(_depths(scanner), <int>[0, 1, 1, 0, 0, 0]);
+    });
+
+    test('a marker at the parent column is a child, not a sibling', () {
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('- one\n  - child\n- two'),
+      );
+      expect(_depths(scanner), <int>[0, 1, 0]);
+    });
+
+    test('a growing ordered marker stays one level', () {
+      // `9. ` and `10. ` start at the same column: same list, same depth,
+      // however much their content columns differ.
+      final scanner = BlockScanner(SourceBuffer.fromText('9. a\n10. b\n11. c'));
+      expect(_depths(scanner), <int>[0, 0, 0]);
+      final ordinals = <int>[
+        for (final block in scanner.index.blocks)
+          if (block.kind == BlockKind.listItem) block.listOrdinal,
+      ];
+      expect(ordinals, <int>[9, 10, 11]);
     });
 
     test('an HTML block ends at its own rule', () {
