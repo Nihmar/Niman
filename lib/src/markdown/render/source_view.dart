@@ -27,6 +27,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -307,6 +308,98 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _ensureCaretVisible();
   }
 
+  /// Moves the caret [rows] visual rows up (negative) or down, keeping its
+  /// horizontal place.
+  ///
+  /// This is the motion that needs the *layout* and not the note: a wrapped
+  /// paragraph is one source line and many screen rows, and which row a press
+  /// of
+  /// the down key lands on depends on where every character was drawn. So the
+  /// answer comes from the same two questions the caret itself does — where the
+  /// caret is (`getOffsetForCaret`) and which offset a point lands on
+  /// (`getPositionForOffset`) — asked of the paragraphs that drew the rows,
+  /// with
+  /// the height map saying which line a y falls in.
+  void moveCaretVertically(int rows, {bool extend = false}) {
+    final line = _caretLineIndex;
+    final paragraph = _paragraphAt(line);
+    if (paragraph == null) return;
+    final offsetInLine = (_selection.extent - widget.buffer.offsetOfLine(line))
+        .clamp(0, paragraph.text.toPlainText().length);
+    final caret = paragraph.getOffsetForCaret(
+      TextPosition(offset: offsetInLine),
+      const Rect.fromLTWH(0, 0, 1.5, 0),
+    );
+    // Half a row down, so a point on the boundary belongs to the row below it
+    // rather than to whichever side the map's floor happens to fall.
+    final y =
+        _heights.offsetOf(line) +
+        caret.dy +
+        rows * widget.theme.lineHeight +
+        widget.theme.lineHeight / 2;
+    final targetLine = _heights.indexAt(y);
+    final target = targetLine == null ? null : _paragraphAt(targetLine);
+    if (targetLine == null || target == null) return;
+    final position = target.getPositionForOffset(
+      Offset(caret.dx, y - _heights.offsetOf(targetLine)),
+    );
+    final next = SelectionModel(
+      anchor: extend
+          ? _selection.anchor
+          : widget.buffer.offsetOfLine(targetLine) + position.offset,
+      extent: widget.buffer.offsetOfLine(targetLine) + position.offset,
+    );
+    setState(() => _ownSelection = next);
+    widget.onSelection?.call(next);
+    _input.sendSelection();
+    _scheduleCaret();
+    _ensureCaretVisible();
+  }
+
+  /// Selects everything.
+  void selectAll() {
+    final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
+    setState(() => _ownSelection = next);
+    widget.onSelection?.call(next);
+    _input.sendSelection();
+    _scheduleCaret();
+  }
+
+  /// The offset a mouse drag started from, or null when no drag is running.
+  int? _dragAnchor;
+
+  /// [child] with mouse dragging selecting text.
+  ///
+  /// Mouse only, deliberately: on a phone a vertical drag on the text *scrolls*
+  /// the note, and stealing that gesture to select would break the way people
+  /// read. Selection by touch belongs to the platform's own handles, which is a
+  /// separate piece of work.
+  Widget _mouseSelection(Widget child) => Listener(
+    onPointerDown: (event) {
+      if (event.kind != PointerDeviceKind.mouse) return;
+      if (event.buttons != kPrimaryMouseButton) return;
+      final offset = offsetAt(event.position);
+      if (offset == null) return;
+      _dragAnchor = offset;
+      placeCaret(offset);
+    },
+    onPointerMove: (event) {
+      final anchor = _dragAnchor;
+      if (anchor == null) return;
+      if (event.kind != PointerDeviceKind.mouse) return;
+      final offset = offsetAt(event.position);
+      if (offset == null) return;
+      final next = SelectionModel(anchor: anchor, extent: offset);
+      setState(() => _ownSelection = next);
+      widget.onSelection?.call(next);
+      _input.sendSelection();
+      _scheduleCaret();
+    },
+    onPointerUp: (_) => _dragAnchor = null,
+    onPointerCancel: (_) => _dragAnchor = null,
+    child: child,
+  );
+
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
   void placeCaret(int offset) {
     final next = _selection.collapsedTo(offset).clampTo(widget.buffer.length);
@@ -429,37 +522,39 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final available = constraints.maxWidth - widget.padding.horizontal;
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTapDown: (details) => _focus.requestFocus(),
-              onTapUp: (details) {
-                final offset = offsetAt(details.globalPosition);
-                if (offset != null) placeCaret(offset);
-              },
-              child: CustomScrollView(
-                controller: _scroll,
-                slivers: <Widget>[
-                  SliverPadding(
-                    padding: widget.padding,
-                    sliver: SliverMarkdownBlocks(
-                      heights: _heights,
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return _Line(
-                          key: ValueKey<int>(index),
-                          paragraphKey: _keyFor(index),
-                          styled: _tokens.lineAt(index),
-                          number: widget.showLineNumbers ? index + 1 : null,
-                          theme: widget.theme,
-                          syntax: syntax,
-                          dark: widget.dark,
-                          width: available,
-                          caret: index == caretLine ? _caretRect : null,
-                          caretOn: _caretOn,
-                        );
-                      }, childCount: _tokens.lineCount),
+            return _mouseSelection(
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (details) => _focus.requestFocus(),
+                onTapUp: (details) {
+                  final offset = offsetAt(details.globalPosition);
+                  if (offset != null) placeCaret(offset);
+                },
+                child: CustomScrollView(
+                  controller: _scroll,
+                  slivers: <Widget>[
+                    SliverPadding(
+                      padding: widget.padding,
+                      sliver: SliverMarkdownBlocks(
+                        heights: _heights,
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _Line(
+                            key: ValueKey<int>(index),
+                            paragraphKey: _keyFor(index),
+                            styled: _tokens.lineAt(index),
+                            number: widget.showLineNumbers ? index + 1 : null,
+                            theme: widget.theme,
+                            syntax: syntax,
+                            dark: widget.dark,
+                            width: available,
+                            caret: index == caretLine ? _caretRect : null,
+                            caretOn: _caretOn,
+                          );
+                        }, childCount: _tokens.lineCount),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -478,6 +573,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// wins.
   Widget _shortcuts(Widget child) => CallbackShortcuts(
     bindings: <ShortcutActivator, VoidCallback>{
+      const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
+          moveCaretVertically(-1),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
+          moveCaretVertically(1),
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): () =>
+          moveCaretVertically(-1, extend: true),
+      const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): () =>
+          moveCaretVertically(1, extend: true),
       const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
           moveCaretBy(CaretMotion.characterLeft),
       const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
@@ -510,6 +613,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           moveCaretBy(CaretMotion.documentStart),
       const SingleActivator(LogicalKeyboardKey.end, control: true): () =>
           moveCaretBy(CaretMotion.documentEnd),
+      const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
+      const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
       const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
       const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
       const SingleActivator(
