@@ -1590,6 +1590,26 @@ next person to pick it up will read this document rather than a commit log.
    and becomes part of the app.
 2. The split ratio — `splitRatio`/`splitFraction`, `PreviewLayoutMode`'s third
    value and the draggable divider's persistence. The pane keeps a fixed share.
+
+   **Measured before starting, because the shape of this step is not what it
+   looks like.** 176 sites across 56 files, and they are not 176 edits of the
+   same kind:
+
+   | where | sites | what it means |
+   |---|---:|---|
+   | `db/app_database*.dart` | 44 | **a settings column**, so this step carries a schema migration — and `AppDatabase` is the database with the long migration chain |
+   | `ui/strings/*.dart` | 76 | the label and its description, in **38 locales**, two strings each |
+   | `ui/settings_appearance.dart` | 12 | the row, its picker and its loader |
+   | everything else in `lib/` | 33 | the config field, the session accessor, the shell, the split widget |
+   | `test/` | 11 | in five files |
+
+   Two consequences worth deciding *before* the removal rather than during it:
+   the column does not have to go — a settings field that is no longer read costs
+   nothing and avoids a migration on the database that has the longest chain in
+   the project, and that is the cheaper and safer half of this step; and the
+   localized strings are the largest single block of edits for the smallest
+   visible change, so they may reasonably wait until the removal is proven
+   rather than being rewritten twice.
 3. The split itself — `EditorPreviewSplit`, `_previewVisible`,
    `_previewFullScreen` and the status row's switch. One pane, one mode.
 4. `docs/user/editing.md`, in the **same commit**: it describes the split and
