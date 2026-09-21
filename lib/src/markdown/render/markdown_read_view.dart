@@ -205,7 +205,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final clock = Stopwatch()..start();
     _scanner = BlockScanner(widget.buffer);
     _blocks = _scanner.index.blocks;
-    _heights = BlockHeightMap(blocks: _blocks, estimate: _estimateOf);
+    _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
     _built = 0;
     _log.debug(
       'scan: ${_blocks.length} blocks, ${widget.buffer.lineCount} lines in '
@@ -239,14 +239,15 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// Whether the first content was logged (once per view, not once per frame).
   bool _traced = false;
 
-  /// A block's height before it has ever been drawn.
+  /// Block [index]'s height before it has ever been drawn.
   ///
   /// Per kind rather than one global "pixels per line", because the kinds
   /// differ by more than their line count: a fence carries its padding, a rule
   /// is one line whatever its text, and the frontmatter takes no room at all.
   /// A wrong estimate only costs a jump that lands slightly off before the
   /// block is measured.
-  double _estimateOf(Block block) {
+  double _estimateOf(int index) {
+    final block = _blocks[index];
     final theme = _theme ?? _fallbackTheme;
     final spacing = theme.blockSpacing;
     return switch (block.kind) {

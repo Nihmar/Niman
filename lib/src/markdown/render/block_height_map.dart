@@ -21,24 +21,21 @@
 /// question is exactly the shape of cost this engine exists to avoid.
 library;
 
-import 'package:niman/src/markdown/block.dart';
-
 /// The height of every block of a note.
 final class BlockHeightMap {
-  /// Creates a map over [blocks], estimating with `estimate`.
-  new({
-    required List<Block> blocks,
-    required double Function(Block block) estimate,
-  }) : _measured = List<double>.filled(blocks.length, 0),
-       _extent = List<double>.filled(blocks.length, 0),
-       _tree = List<double>.filled(blocks.length + 1, 0) {
+  /// Creates a map over [count] items, estimating item `index` with
+  /// `estimate`.
+  new({required int count, required double Function(int index) estimate})
+    : _measured = List<double>.filled(count, 0),
+      _extent = List<double>.filled(count, 0),
+      _tree = List<double>.filled(count + 1, 0) {
     // The estimator is asked **once**, here. Asking it again when a block is
     // measured would compute today's answer against a map seeded with an
     // earlier one — the read view builds this in `initState`, before the theme
     // arrives, so the two answers differ — and the tree and the extents would
     // drift by whatever changed.
-    for (var at = 0; at < blocks.length; at++) {
-      final value = estimate(blocks[at]);
+    for (var at = 0; at < count; at++) {
+      final value = estimate(at);
       _extent[at] = value;
       _add(at, value);
     }

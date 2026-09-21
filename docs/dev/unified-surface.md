@@ -10980,6 +10980,37 @@ This is the phase where the **editing core** is built and de-risked.
   tab-move-keeps-undo promise holds.
 - The 38 surface test files that are not Quill-specific are ported and green.
 
+### Phase 3, in progress — the source surface exists
+
+`MarkdownSourceView` (`lib/src/markdown/render/source_view.dart`, 2026-09-22) is
+the phase's first piece of surface: the note's own text, styled by the engine's
+tokenizer, editable, **windowed by the read view's own machinery** — the same
+`SliverMarkdownBlocks` and the same height map, which stopped knowing what a
+`Block` is in the process (a count and an estimator were the whole of its
+contract all along). A source line is the unit of layout, drawn by one
+`Text.rich` of the tokenizer's runs and wrapping like prose, because the note's
+paragraphs are one long line each and a source view that did not wrap would need
+horizontal scrolling to read a sentence.
+
+The caret comes from the line's own `RenderParagraph`
+(`getOffsetForCaret`, with the paragraph reached through a key the surface keeps
+per built line), which is phase 3's own exit criterion and the reason a previous
+attempt at this surface went: the rectangle has to be this surface's answer, not
+a metric computed beside it. A tap lands the same way, through the same
+paragraph's `getPositionForOffset`, so the two agree by construction.
+
+Seven widget tests hold the properties that can be held without a device: the
+markers are *not* hidden, a wrapped line is drawn at its wrapped height, the
+caret is inside its line and follows an offset to the last line, a tap is a
+collapsed caret at a real offset, only the viewport's lines are built out of
+4 000, and a jump to line 400 puts line 400 on screen. `InputBuffer`
+(`lib/src/markdown/edit/input_buffer.dart`) is beside it, with the three rules the
+IME probe established.
+
+What is *not* built yet in this phase: the `TextInputConnection` that feeds
+`InputBuffer` (the probe's machinery, moved into the surface), selection and the
+keyboard beyond the caret, undo/redo and the shortcut table.
+
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
 **Deliverable:** `MarkdownSurface(mode: live)` — approach B's style-based
