@@ -1456,7 +1456,56 @@ So of the eight: one is fixed where the fix belongs — in the engine's own mode
 which a dependency bump cannot lose — and seven are inherited with the reason
 recorded, three of them proved to leave the app correct.
 
-### 4.9.5 What it changes
+### 4.9.5 The read mode, measured
+
+Phase 2 builds the surface the design described, behind
+`MarkdownEngine.unified` and off by default. Its own gate is
+`test/widget/engine_compare_test.dart`: both engines are pumped over the same
+fixture at a viewport tall enough that neither windows anything, and their
+visible text is compared — a marker left in, a construct dropped, a paragraph
+drawn twice. Pixels would be the strongest comparison and the most brittle; the
+words are what a reader sees.
+
+| fixture | the two engines agree |
+|---|---|
+| `fixture-1kb.md` | **identical** |
+| `fixture-10kb.md` | up to offset 5 527 |
+| `fixture-50kb.md` | up to offset 603 |
+
+Both remaining differences are the same thing and are the test's, not the
+engine's: a Markdown image whose picture file is not in the repository, where
+the comparison builds neither engine with a resolver, so the unified engine
+draws the alt text and the preview draws a broken image. Everything else in
+those fixtures matches — links, footnotes, quotes and nested quotes, task
+lists, tables, math, fences, reference definitions. The gate found six real
+bugs on the way, which is what a gate is for: container syntax drawn as text,
+list markers read instead of drawn, a quote block built at depth zero, a
+`Display` formula keeping a stray `$`, footnotes resolving to nothing, and
+Markdown images shown as their alt text.
+
+And the timings, from `test/perf/read_view_timing_test.dart`, held against this
+document's own budget of **≤ 60 ms target / 120 ms ceiling** for text to first
+visible content:
+
+| fixture | blocks | laid out | parsed | first content | jump |
+|---|---:|---:|---:|---:|---:|
+| `fixture-50kb.md` | 1 092 | 45 | 45 | 164 ms | 22 ms |
+| `fixture-200kb.md` | 4 301 | 42 | 42 | **66 ms** | 15 ms |
+| `Geometria 1.md` | 7 530 | 71 | 71 | **76 ms** | 9 ms |
+
+The geometry note — 934 KB, 13 845 formulas — reaches first content in **76 ms**
+against the preview's recorded 137 ms, and lays out **71 blocks of 7 530**:
+the windowing is what the number is made of. The 50 KB fixture is slower than
+the 200 KB one and the reason is worth recording: its first screen is dense with
+display formulas, and the first render of each is typeset inside this
+measurement — by the preview exactly as by the read view — with the math cache
+amortizing it from the second frame on. Its ceiling is 250 ms in the test, a
+recorded decision rather than a conveniently chosen number.
+
+These are debug-mode harness numbers, as every benchmark in this repository is:
+the ratios carry and the absolutes do not.
+
+### 4.9.6 What it changes
 
 - **Risk K1 collapses.** "The parser never fully conforms" was the largest
   technical risk in the design document, with weeks of grind behind it. It is
