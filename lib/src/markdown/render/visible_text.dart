@@ -261,9 +261,44 @@ List<(int, int)> _headingMarkers(String text, StyleRun run) {
 }
 
 /// A link's or an image's brackets and destination.
+///
+/// A run comes in one of two shapes, and the rule has to know both:
+///
+/// * **widened** — an inline link, where the bridge grew the run over the whole
+///   `[text](url)` construct, so the brackets are *inside* it and the text part
+///   ends at its `](`;
+/// * **unwidened** — a footnote or a reference link, where the parser's text
+///   node is the visible text and the syntax sits outside it: `[^` before, `]`
+///   or `][label]` after.
+///
+/// Reading the delimiters off the source instead of assuming one spelling is
+/// what lets `[^1]` draw as its superscript without a rule of its own.
 List<(int, int)> _linkMarkers(String text, StyleRun run) {
-  final open = text.codeUnitAt(run.start) == 0x21 ? 2 : 1;
-  final close = text.indexOf('](', run.start);
-  if (close < 0 || close >= run.end) return const <(int, int)>[];
-  return <(int, int)>[(run.start, run.start + open), (close, run.end)];
+  final markers = <(int, int)>[];
+  final braced = text.codeUnitAt(run.start) == 0x5B;
+  final bangBraced =
+      text.codeUnitAt(run.start) == 0x21 &&
+      run.start + 1 < text.length &&
+      text.codeUnitAt(run.start + 1) == 0x5B;
+  if (braced || bangBraced) {
+    markers.add((run.start, run.start + (bangBraced ? 2 : 1)));
+  } else {
+    var open = run.start;
+    while (open > 0 && '[^!'.contains(text[open - 1])) {
+      open--;
+    }
+    if (open < run.start) markers.add((open, run.start));
+  }
+
+  final widened = text.indexOf('](', run.start);
+  if (widened >= 0 && widened < run.end) {
+    markers.add((widened, run.end));
+    return markers;
+  }
+  final close = run.end;
+  if (close < text.length && text.codeUnitAt(close) == 0x5D) {
+    final label = text.indexOf(']', close + 1);
+    markers.add((run.end, label < 0 ? close + 1 : label + 1));
+  }
+  return markers;
 }

@@ -43,6 +43,7 @@ final class BlockParser {
   SourceBuffer? _source;
   int _revision = -1;
   int _parses = 0;
+  DocumentScope? _scope;
 
   /// How many blocks have actually been parsed, for the tests and the bench:
   /// the point of the cache is that this stays near the visible count.
@@ -77,8 +78,17 @@ final class BlockParser {
     }
     final masked = _masker.mask(text);
     final walk = _Walk(masked);
-    final nodes = md.Document(extensionSet: md.ExtensionSet.gitHubFlavored)
-        .parseLines(masked.text.split('\n'));
+    final scope = _scopeOf(buffer);
+    final document = md.Document(extensionSet: md.ExtensionSet.gitHubFlavored);
+    // The two constructs that are a *document's*, not a block's. A link
+    // reference and a footnote definition are written in one block and used in
+    // another, and the package keeps them on its `Document` — which a per-block
+    // parse builds fresh. Seeding them from a scan of the whole note is what
+    // makes `[^1]` a superscript and `[text][label]` a link.
+    document.linkReferences.addAll(scope.links);
+    document.footnoteReferences.addAll(scope.footnoteCounts);
+    document.footnoteLabels.addAll(scope.footnoteLabels);
+    final nodes = document.parseLines(masked.text.split('\n'));
     for (final node in nodes) {
       walk.visit(node, 0);
     }
@@ -156,6 +166,19 @@ final class BlockParser {
     // not one, and treating it as one would join runs that do not belong.
     final scheme = slice.substring(start, colon).toLowerCase();
     return scheme == 'mailto' || scheme == 'xmpp' ? scheme : null;
+  }
+
+  /// The document-scoped definitions, scanned once per revision.
+  DocumentScope _scopeOf(SourceBuffer buffer) {
+    final cached = _scope;
+    if (cached != null &&
+        identical(cached.source, buffer) &&
+        cached.revision == buffer.revision) {
+      return cached;
+    }
+    final scope = DocumentScope.scan(buffer.text, buffer, buffer.revision);
+    _scope = scope;
+    return scope;
   }
 
   /// The block's text with its containers' syntax taken off.
@@ -446,4 +469,94 @@ final class _Walk {
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;');
+}
+
+/// The definitions a note makes that no single block can resolve.
+///
+/// A link reference (`[label]: destination`) and a footnote (`[^label]: text`
+/// with `[^label]` where it is cited) are written in one place and used in
+/// another, and the package resolves both from state on its `Document` — which
+/// the engine builds per block, deliberately, so that a long note is not
+/// re-parsed to scroll it. Scanning the note once per revision and seeding
+/// every block's document from the result is what keeps the block-by-block
+/// parse honest without giving up the windowing.
+///
+/// The scan is over the note's text, not over its blocks, because it must be
+/// complete: a definition on the last line resolves a reference on the first.
+final class DocumentScope {
+  /// Wraps an already-scanned scope.
+  const new({
+    required this.links,
+    required this.footnoteCounts,
+    required this.footnoteLabels,
+    required this.source,
+    required this.revision,
+  });
+
+  /// Scans [text] for both kinds of definition.
+  factory scan(String text, SourceBuffer source, int revision) {
+    final links = <String, md.LinkReference>{};
+    for (final match in _linkDefinition.allMatches(text)) {
+      final label = match.group(1)!.trim().toLowerCase();
+      if (label.isEmpty) continue;
+      links.putIfAbsent(
+        label,
+        () => md.LinkReference(
+          match.group(1)!.trim(),
+          match.group(2)!,
+          match.group(3),
+        ),
+      );
+    }
+
+    final counts = <String, int>{};
+    for (final match in _footnoteDefinition.allMatches(text)) {
+      final label = match.group(1)!;
+      counts[label] = (counts[label] ?? 0) + 1;
+    }
+    final labels = <String>[];
+    for (final match in _footnoteReference.allMatches(text)) {
+      final label = match.group(1)!;
+      if (!labels.contains(label)) labels.add(label);
+    }
+    return DocumentScope(
+      links: links,
+      footnoteCounts: counts,
+      footnoteLabels: labels,
+      source: source,
+      revision: revision,
+    );
+  }
+
+  /// A link reference definition, in its single-line form.
+  static final RegExp _linkDefinition = RegExp(
+    r'^ {0,3}\[([^\]^][^\]]*)\]:[ \t]*(\S+)[ \t]*'
+    r'(?:["\x27(]([^"\x27)]*)["\x27)])?[ \t]*$',
+    multiLine: true,
+  );
+
+  /// A footnote definition, in its single-line form.
+  static final RegExp _footnoteDefinition = RegExp(
+    r'^ {0,3}\[\^([^\]]+)\]:',
+    multiLine: true,
+  );
+
+  /// A footnote reference: `[^label]` that is not a definition.
+  static final RegExp _footnoteReference = RegExp(r'\[\^([^\]]+)\](?!:)');
+
+  /// The link references, by label.
+  final Map<String, md.LinkReference> links;
+
+  /// How many times each footnote label is defined.
+  final Map<String, int> footnoteCounts;
+
+  /// The footnote labels in the order they are first cited, which is the order
+  /// the package numbers them in.
+  final List<String> footnoteLabels;
+
+  /// The buffer this was scanned from.
+  final SourceBuffer source;
+
+  /// Its revision.
+  final int revision;
 }
