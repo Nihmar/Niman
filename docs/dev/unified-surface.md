@@ -9751,7 +9751,23 @@ The model is `lib/src/markdown/edit/selection_model.dart`: source offsets, the
 two ends and how they normalize, and the atomic motion above. The arithmetic
 around a drawn span is `lib/src/markdown/edit/placeholder_map.dart` — the
 identity for every block of `source` mode, and the table only for blocks with a
-formula, an image or a checkbox drawn in them.
+formula, an image or a checkbox drawn in them. The seam itself is
+`lib/src/markdown/edit/caret_geometry.dart`: given a block's laid-out painter and
+the document's selection, it answers the caret's rectangle, a selection's boxes
+and the offset a tap lands on — every one of them asked of the painter, none
+computed from metrics it keeps.
+
+Two things its tests hold it to, both measured rather than reasoned:
+
+- **Which mode hides what decides whether anything snaps.** `source` mode's
+  render map is the identity, so its markers are ordinary characters, every
+  offset has its own place on screen, and no tap is ever moved. It is the modes
+  that hide a marker *by style* whose interior positions collapse to one place,
+  and there a tap leaves through the same rule the arrow keys use
+  (`test/unit/caret_geometry_test.dart`);
+- **the advance a caret steps by and the height it is drawn at are two different
+  numbers** — 19 and 19.2 for a 16 px strut at height 1.2. A surface that treats
+  them as one drifts by the difference on every line.
 
 ### 8.7.3 Undo is a stack of source splices
 
