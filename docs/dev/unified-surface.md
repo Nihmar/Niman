@@ -1577,6 +1577,57 @@ available check that no line was double-counted or dropped:
 
 ---
 
+### 4.9.7 What is left of Phase 2, and in what order
+
+Everything the phase set out to build is built, tested and behind a flag that is
+off by default. What remains is one removal, and it is written here because the
+next person to pick it up will read this document rather than a commit log.
+
+**The removal, in one pass, in this order:**
+
+1. `previewEnabled` — the setting, the session accessor, the appearance row, the
+   search entry, and the shell's conditionals. The preview stops being optional
+   and becomes part of the app.
+2. The split ratio — `splitRatio`/`splitFraction`, `PreviewLayoutMode`'s third
+   value and the draggable divider's persistence. The pane keeps a fixed share.
+3. The split itself — `EditorPreviewSplit`, `_previewVisible`,
+   `_previewFullScreen` and the status row's switch. One pane, one mode.
+4. `docs/user/editing.md`, in the **same commit**: it describes the split and
+   the preview today, and would describe a screen that no longer exists.
+
+It is one pass and not four commits because the sites are interdependent —
+settings, session, shell, `note_view.dart` and their tests — and nothing
+compiles until the last of them is consistent. There is no green intermediate
+state, which is why it wants a session with room to run it rather than the tail
+of one.
+
+**Two corrections to this document's own plan**, both found by starting the
+removal rather than reading it:
+
+- **`preview/editor_lines.dart` and the `onIndicator` contract do not go.** This
+  document listed them with the scroll sync. They are not its: the sync was
+  their first reader and **typewriter mode** is their other, asking
+  `caretRowCenter` where the cursor's line is. Removing them means
+  reimplementing typewriter centring first — a piece of work of its own. Both
+  files now say so where they are declared;
+- **`preview/scroll_sync.dart` is already gone** (commit `f0bcd09`), with its
+  test. It was safe to take first because no user could see it and no
+  documentation mentioned it.
+
+**What is already satisfied**, so that the removal is a removal and not a
+gamble: the engine renders the same words as the preview on every fixture the
+harness can drive, at a viewport tall enough that neither windows anything; the
+geometry note reaches first content in 91 ms against the preview's recorded
+137 ms, laying out 85 blocks of 7 530; the preview's widget tests live on the
+new engine, including 652 CommonMark examples pumped without an exception. The
+numbers are in §4.9.5.
+
+**And the alternative, stated plainly**: leaving the split in place is a
+legitimate outcome rather than an incomplete one. Two engines behind a flag with
+`legacy` as the default is what ships today, it is green, and no user is
+touched by any of the work above. The removal is a decision about the product,
+not a debt — and it should be taken as one.
+
 ## 5.1 Global stats
 
 Produced by `scripts/gen_global_stats.py` (`global.json`). Lines are `\n`-delimited;
