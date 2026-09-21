@@ -351,6 +351,9 @@ final class AppStrings {
   static String get trayQuit => _s.trayQuit;
   static String get closeToTrayTitle => _s.closeToTrayTitle;
   static String get closeToTraySubtitle => _s.closeToTraySubtitle;
+  static String get markdownEngineTitle => _s.markdownEngineTitle;
+  static String get markdownEngineLegacy => _s.markdownEngineLegacy;
+  static String get markdownEngineUnified => _s.markdownEngineUnified;
   static String get shortcutNewTodo => _s.shortcutNewTodo;
   static String get shortcutNewNote => _s.shortcutNewNote;
   static String get shortcutNewList => _s.shortcutNewList;

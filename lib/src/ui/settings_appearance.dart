@@ -52,6 +52,7 @@ final class _SettingsAppearanceScreenState
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   EditorKind _editorKind = EditorKind.source;
   bool _previewEnabled = true;
+  MarkdownEngine _markdownEngine = MarkdownEngine.legacy;
   bool _closeToTray = true;
 
   /// The tray is the desktops': elsewhere there is nothing to close into.
@@ -68,6 +69,25 @@ final class _SettingsAppearanceScreenState
     unawaited(_load());
   }
 
+  /// The engine choice, as a two-way switch rather than a list for now: two
+  /// engines exist and the second is opt-in, so the row says which one is
+  /// drawing the note and lets a reader go back.
+  Widget _markdownEngineRow() => HighlightRow(
+    key: SettingsKeys.markdownEngine,
+    child: SettingsSwitchRow(
+      title: AppStrings.markdownEngineTitle,
+      description: _markdownEngine == MarkdownEngine.unified
+          ? AppStrings.markdownEngineUnified
+          : AppStrings.markdownEngineLegacy,
+      value: _markdownEngine == MarkdownEngine.unified,
+      onChanged: (value) => unawaited(
+        _setMarkdownEngine(
+          value ? MarkdownEngine.unified : MarkdownEngine.legacy,
+        ),
+      ),
+    ),
+  );
+
   Future<void> _load() async {
     final controller = widget.controller;
     final language = await controller.language;
@@ -78,6 +98,7 @@ final class _SettingsAppearanceScreenState
     final previewMode = await controller.previewMode;
     final editorKind = await controller.editorKind;
     final previewEnabled = await controller.previewEnabled;
+    final markdownEngine = await controller.markdownEngine;
     final closeToTray = await controller.closeToTray;
     if (!mounted) return;
     setState(() {
@@ -91,6 +112,7 @@ final class _SettingsAppearanceScreenState
       _previewMode = previewMode;
       _editorKind = editorKind;
       _previewEnabled = previewEnabled;
+      _markdownEngine = markdownEngine;
     });
   }
 
@@ -198,6 +220,15 @@ final class _SettingsAppearanceScreenState
     if (mounted) setState(() => _uiTextScale = scale);
   }
 
+  /// Switches the note's engine and persists it.
+  ///
+  /// Not a switch but a choice of two engines, because the value is an enum
+  /// that already has room for the third surface the design describes.
+  Future<void> _setMarkdownEngine(MarkdownEngine engine) async {
+    await widget.controller.setMarkdownEngine(engine);
+    if (mounted) setState(() => _markdownEngine = engine);
+  }
+
   Future<void> _setCloseToTray({required bool enabled}) async {
     await widget.controller.setCloseToTray(enabled: enabled);
     CloseToTray.enabled.value = enabled;
@@ -296,6 +327,7 @@ final class _SettingsAppearanceScreenState
                 onTap: () => unawaited(_chooseSplitRatio()),
               ),
             ),
+          if (_previewEnabled) _markdownEngineRow(),
           // The window's × (#209): the desktops only, where there is a
           // tray to hide into.
           if (_hasTray)

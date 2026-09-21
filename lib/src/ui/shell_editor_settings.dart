@@ -32,6 +32,7 @@ final class ShellEditorSettings {
     this.editorKind = EditorKind.source,
     this.editorsEnabled = const {EditorKind.source, EditorKind.wysiwyg},
     this.previewEnabled = true,
+    this.markdownEngine = MarkdownEngine.legacy,
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
@@ -72,6 +73,9 @@ final class ShellEditorSettings {
 
   /// Whether the preview exists at all.
   final bool previewEnabled;
+
+  /// Which engine draws a note (default [MarkdownEngine.legacy]).
+  final MarkdownEngine markdownEngine;
 
   /// What the editor's link button inserts.
   final LinkType linkType;
@@ -121,6 +125,7 @@ final class ShellEditorSettings {
     final editorKind = await session.editorKind;
     final editorsEnabled = await session.enabledEditors;
     final previewEnabled = await session.previewEnabled;
+    final markdownEngine = await session.markdownEngine;
     final enabled = editorsEnabled.isEmpty
         ? const {EditorKind.source, EditorKind.wysiwyg}
         : editorsEnabled;
@@ -141,6 +146,7 @@ final class ShellEditorSettings {
           : EditorKind.wysiwyg,
       editorsEnabled: {...enabled},
       previewEnabled: previewEnabled,
+      markdownEngine: markdownEngine,
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
@@ -195,6 +201,7 @@ final class ShellEditorSettings {
         editorKind == other.editorKind &&
         setEquals(editorsEnabled, other.editorsEnabled) &&
         previewEnabled == other.previewEnabled &&
+        markdownEngine == other.markdownEngine &&
         linkType == other.linkType &&
         missingNoteLocation == other.missingNoteLocation &&
         attachmentsFolder == other.attachmentsFolder &&

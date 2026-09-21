@@ -931,6 +931,18 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(previewEnabled: enabled));
   }
 
+  /// Which engine draws a note (default [MarkdownEngine.legacy]).
+  @override
+  Future<MarkdownEngine> get markdownEngine async =>
+      (await _library).markdownEngine;
+
+  /// Sets (and persists) the markdown engine.
+  @override
+  Future<void> setMarkdownEngine(MarkdownEngine engine) async {
+    _log.info('markdown engine set to ${engine.name}');
+    await _editLibrary((c) => c.copyWith(markdownEngine: engine));
+  }
+
   /// The preview layout mode.
   ///
   /// App-wide, with the split ratio: both follow the screen rather than

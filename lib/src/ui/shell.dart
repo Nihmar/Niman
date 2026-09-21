@@ -982,6 +982,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         previewEnabled: _editorSettings.previewEnabled,
       ),
       showPreview: _editorSettings.previewEnabled && _previewVisible,
+      unifiedMarkdown: _editorSettings.markdownEngine == MarkdownEngine.unified,
       showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
       // A single enabled editor has nowhere to switch to: the note hides
       // its switch instead of offering a dead toggle.
@@ -3086,6 +3087,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         onToggleTypewriter: _toggleTypewriter,
         onLoaded: _workspace.noteLoaded,
         showLineNumbers: _editorSettings.lineNumbers,
+        unifiedMarkdown:
+            _editorSettings.markdownEngine == MarkdownEngine.unified,
         noteColumn: _editorSettings.noteColumn,
         // The kind toggles and ⋮ sit at the end of the note's
         // one row of chrome (#173); there is no header above.

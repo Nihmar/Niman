@@ -422,6 +422,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _bump();
   }
 
+  @override
+  Future<MarkdownEngine> get markdownEngine async => _config.markdownEngine;
+
+  @override
+  Future<void> setMarkdownEngine(MarkdownEngine engine) async {
+    _config = _config.copyWith(markdownEngine: engine);
+    _bump();
+  }
+
   // The preview layout is app-wide: it follows the screen, not the
   // library.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;

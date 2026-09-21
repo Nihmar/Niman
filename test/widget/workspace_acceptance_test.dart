@@ -41,6 +41,7 @@ Widget _deck(
   Future<void> Function(String, String)? write,
 }) => ShellDetailPane(
   root: '/lib',
+  unifiedMarkdown: false,
   tabs: [
     for (final path in ['a.md', 'b.md'])
       DetailTab(

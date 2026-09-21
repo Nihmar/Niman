@@ -22,6 +22,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.root,
     required this.tabs,
     required this.showLineNumbers,
+    required this.unifiedMarkdown,
     required this.noteColumn,
     required this.barActions,
     required this.autofocusEditor,
@@ -76,6 +77,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Editor setting forwards.
   final bool showLineNumbers;
+
+  /// Whether the note is drawn by the unified engine (docs/dev/unified-surface.md).
+  final bool unifiedMarkdown;
 
   /// Where the note's text sits across the pane (issue #171).
   final NoteColumn noteColumn;
@@ -197,6 +201,7 @@ final class ShellDetailPane extends StatelessWidget {
         ? null
         : (_, length) => onLoaded!(tab.path, length),
     showLineNumbers: showLineNumbers,
+    unifiedMarkdown: unifiedMarkdown,
     noteColumn: noteColumn,
     barActions: barActions,
     autofocusEditor: autofocusEditor,
