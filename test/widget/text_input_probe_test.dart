@@ -175,7 +175,7 @@ void main() {
       caret: 5,
     );
     expect(
-      tester.widget<Text>(find.byKey(const Key('input-probe-tally'))).data!,
+      tester.widget<Text>(find.byKey(const Key('input-probe-tally'))).data,
       contains('composing 1'),
       reason: 'a plain insertion is not a composition',
     );

@@ -314,8 +314,8 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
   /// A screenshot of this is the answer to "does the delta model work here" —
   /// and to "is a word ever composed" — without reading a log.
   String get _tally =>
-      'delta ${_deltaCount} · whole ${_wholeCount} · '
-      'composing ${_composingCount} · replace ${_replaceCount}';
+      'delta $_deltaCount · whole $_wholeCount · '
+      'composing $_composingCount · replace $_replaceCount';
 
   int _deltaCount = 0;
   int _wholeCount = 0;
