@@ -1794,8 +1794,6 @@ final class _NoteViewState extends State<NoteView>
                         preview: _buildPreview(context),
                         editorScroll: _scroll.verticalScroller,
                         previewScroll: _previewScroll,
-                        map: _previewMap,
-                        lines: _editorLines,
                         fraction: widget.splitFraction,
                         onFractionChanged:
                             widget.onSplitFractionChanged ?? (_) {},
