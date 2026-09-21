@@ -7,6 +7,7 @@
 // rather
 // than from a metric computed beside it, and only the viewport's lines are
 // built.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -310,6 +311,156 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
     expect(buffer.text, 'ciao\n', reason: 'undo took the X back');
+  });
+
+  testWidgets('down moves a visual row, not a source line', (tester) async {
+    // The property that separates this motion from the logical ones: a wrapped
+    // paragraph is *one* source line and many screen rows, and the caret has to
+    // walk the rows.
+    tester.view.physicalSize = const Size(300, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final long = List.filled(30, 'parola').join(' ');
+    final buffer = SourceBuffer.fromText('$long\nseconda\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onSelection: carets.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // Start a few characters in, so the caret has an x to keep. Not a cascade
+    // with the move below: the caret's rectangle comes from a post-frame
+    // callback, so the pumps between the two calls are the point.
+    // ignore: cascade_invocations
+    state.placeCaret(8);
+    await tester.pump();
+    await tester.pump();
+    final before = state.caretRect!.top;
+    state.moveCaretVertically(1);
+    await tester.pump();
+    expect(
+      carets.last.extent,
+      greaterThan(8),
+      reason: 'down moved forward inside the same source line',
+    );
+    expect(
+      buffer.lineOf(carets.last.extent),
+      0,
+      reason: 'still the first source line, one row lower',
+    );
+    expect(
+      state.caretRect!.top,
+      greaterThan(before),
+      reason: 'and the caret is drawn a row lower',
+    );
+  });
+
+  testWidgets('down at the last row of a line crosses into the next', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('prima\nseconda\nterza\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onSelection: carets.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // The same reason as above: the pumps between placing and moving are what
+    // the caret's rectangle is measured between.
+    // ignore: cascade_invocations
+    state.placeCaret(2);
+    await tester.pump();
+    await tester.pump();
+    state.moveCaretVertically(1);
+    await tester.pump();
+    expect(buffer.lineOf(carets.last.extent), 1, reason: 'the next line');
+    state.moveCaretVertically(-1);
+    await tester.pump();
+    expect(buffer.lineOf(carets.last.extent), 0, reason: 'and back up');
+  });
+
+  testWidgets('a mouse drag selects, and a tap does not', (tester) async {
+    // Mouse only, deliberately: on a phone a vertical drag on the text scrolls
+    // the note, and stealing that gesture to select would break reading.
+    final buffer = SourceBuffer.fromText('una riga di testo\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onSelection: carets.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final gesture = await tester.startGesture(
+      const Offset(16, 16),
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.moveTo(const Offset(120, 16));
+    await gesture.up();
+    await tester.pump();
+    final selection = carets.last;
+    expect(selection.isCollapsed, isFalse, reason: 'the drag selected');
+    expect(selection.start, 0, reason: 'from where the mouse went down');
+    expect(selection.end, greaterThan(0));
+  });
+
+  testWidgets('Ctrl+A selects the whole note', (tester) async {
+    final buffer = SourceBuffer.fromText('una\ndue\ntre\n');
+    final carets = <SelectionModel>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onSelection: carets.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    // The keys reach the surface through the focus it owns: without a tap there
+    // is no focus to travel to, which is the same rule that makes the
+    // connection
+    // exist only while the keyboard is up.
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(carets, isNotEmpty);
+    expect(carets.last.start, 0);
+    expect(carets.last.end, buffer.length);
   });
 
   testWidgets('a jump to a line brings it to the top', (tester) async {

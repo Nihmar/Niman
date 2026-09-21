@@ -11043,11 +11043,27 @@ round**: a `CallbackShortcuts` only sees a key travelling through it on the way 
 the focused node, so one *below* the `Focus` it belongs to never fires. That cost
 one red test to learn. Eleven widget tests now hold the surface.
 
-What is *not* built yet in this phase: the visual motions (up and down over wrapped
-rows, which need the line's own layout), mouse drag and double/triple click, the
-clipboard, find, folding, the shell's remappable command table dispatching into the
-surface, and the `MarkdownSurface` widget itself — the thing the shell switches to,
-and the flag that lets a device try it.
+The **visual motions** are in, and they are the ones that need the layout rather
+than the note: a wrapped paragraph is one source line and many screen rows, and
+which row the down key lands on depends on where every character was drawn. Both
+questions are asked of the paragraphs that drew the rows — `getOffsetForCaret` for
+where the caret is, `getPositionForOffset` for what a point lands on — with the
+height map saying which line a y falls in, and half a row added so a point on a
+boundary belongs to the row below rather than to whichever side a floor falls. Two
+tests hold it: down inside a wrapped line stays on the *same source line* and moves
+a row lower, and down at a line's last row crosses into the next line and back.
+
+**Mouse dragging selects** (`Listener`, mouse only, deliberately: on a phone a
+vertical drag on the text *scrolls*, and stealing that gesture to select would break
+the way people read — selection by touch belongs to the platform's handles and is a
+separate piece of work), and **Ctrl+A selects the note**. A test for each; the Ctrl+A
+one needed a tap first, which is the same rule that makes the connection exist only
+while the keyboard is up: a key reaches the surface through the focus it owns.
+
+What is *not* built yet in this phase: double and triple click, the clipboard, find,
+folding, the shell's remappable command table dispatching into the surface, and the
+`MarkdownSurface` widget itself — the thing the shell switches to, and the flag that
+lets a device try it.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
