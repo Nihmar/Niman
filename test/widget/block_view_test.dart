@@ -230,6 +230,44 @@ void main() {
     expect(find.byType(Image), findsNothing);
   });
 
+  testWidgets('a Markdown image is a picture when it resolves', (tester) async {
+    final directory = Directory.systemTemp.createTempSync('niman_image');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final file = File(p.join(directory.path, 'pixel.png'))
+      ..writeAsBytesSync(_onePixelPng);
+
+    await tester.pumpWidget(
+      _view(
+        'before ![the alt](pixel.png) after',
+        _syncCache(),
+        resolve: (target) async => target == 'pixel.png' ? file.path : null,
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(Image), findsWidgets);
+    // The alt text stands in for a picture only when there is no picture.
+    expect(_screenText(tester), isNot(contains('the alt')));
+    expect(_screenText(tester), contains('before'));
+  });
+
+  testWidgets("a Markdown image with nothing to draw keeps the note's words", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _view(
+        'before ![the alt](missing.png) after',
+        _syncCache(),
+        resolve: (target) async => null,
+      ),
+    );
+    await tester.pump();
+    // `![alt](src)` as it was written, not `![[alt]]`: a Markdown image shows
+    // the spelling the note used.
+    expect(_screenText(tester), contains('![the alt](missing.png)'));
+    expect(_screenText(tester), contains('after'));
+  });
+
   testWidgets('the frontmatter is metadata, not prose', (tester) async {
     await tester.pumpWidget(
       _view('---\ntitle: A note\n---\n\nbody text', _syncCache()),

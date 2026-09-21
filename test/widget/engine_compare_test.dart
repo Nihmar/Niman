@@ -41,7 +41,16 @@ import 'package:path/path.dart' as p;
 /// is raised.
 const Map<String, int> _agreedUpTo = <String, int>{
   'fixture-1kb.md': -1,
-  'fixture-10kb.md': 2524,
+  // A footnote reference: `[^1]` where the preview draws a superscript `1`.
+  // Footnote definitions are document-scoped and the engine parses per block,
+  // so the reference has nothing to resolve against — the same limitation as
+  // link reference definitions, and the pre-pass that fixes both is the next
+  // piece of work.
+  'fixture-10kb.md': 3911,
+  // A Markdown image. This test builds neither engine with a resolver, so the
+  // unified engine draws the alt text where the preview draws a broken image;
+  // with a resolver it is a picture (block_view_test covers that). The fixture
+  // points at files that are not in the repository.
   'fixture-50kb.md': 603,
 };
 

@@ -30,6 +30,7 @@ final class EmbedView extends StatefulWidget {
     required this.target,
     required this.display,
     this.onResolve,
+    this.placeholder,
     super.key,
   });
 
@@ -38,6 +39,11 @@ final class EmbedView extends StatefulWidget {
 
   /// What to show when the target is not an image that can be drawn.
   final String display;
+
+  /// What to show instead of the picture, when the note wrote something other
+  /// than an embed: a Markdown image shows `![alt](src)` as it was written, and
+  /// an embed shows `![[target]]`.
+  final String? placeholder;
 
   /// Resolves [target] to an absolute path, or null. Null resolver = nothing
   /// can be resolved, so the placeholder is drawn without asking.
@@ -117,7 +123,7 @@ final class EmbedViewState extends State<EmbedView> {
   Widget _placeholder(BuildContext context) {
     final theme = Theme.of(context);
     return Text(
-      '![[${widget.display}]]',
+      widget.placeholder ?? '![[${widget.display}]]',
       style: theme.textTheme.bodySmall?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
