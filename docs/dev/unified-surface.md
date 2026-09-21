@@ -10986,7 +10986,20 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    markers collapsed to zero size, and typing across a span boundary on a real
    device with Gboard. Success = no lost characters, no caret jumps, no
    duplicated text, composition preserved, and the whole-value fallback
-   (`enableDeltaModel: false`) also working. **This repo has been here before,
+   (`enableDeltaModel: false`) also working.
+   **The instrument exists, 2026-09-21 (`lib/src/editor/text_input_probe.dart`,
+   Settings → Diagnostics → *Text input probe*; its own test drives it through
+   the platform channel so the probe itself is verified).** It owns a bare
+   `TextInputConnection` and records every event on screen and in the log under
+   `[input]`: each delta with its kind, range, text and composing range, each
+   whole-value update **with its character count** (the number that says the
+   echo is untenable at note size), the last `setEditingState` cost, `ACTION`,
+   `CLOSED`, and a `STALE delta` line when a delta's `oldText` is not what the
+   buffer holds — the case that writes the wrong bytes to disk. A switch flips
+   `enableDeltaModel` and reconnects, and a button fills 900 KB so one keystroke
+   demonstrates the whole-value path at size. The screen carries the seven steps
+   to perform; the answers are owed by a device, and that is the round trip this
+   phase is gated on. **This repo has been here before,
    and the lesson is unwritten.** The hand-built
    caret/selection/IME/gesture/view stack that `12d9f4a` (2026-09-06) replaced
    was sixteen files — `caret_geometry.dart`, `caret_painter.dart`,
