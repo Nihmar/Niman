@@ -34,6 +34,7 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
+import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -417,11 +418,35 @@ final class _InlineBuilder {
         return TextSpan(text: span.text, style: theme.tag);
       case ExtensionKind.codeSpan:
         return TextSpan(text: span.inner, style: theme.code);
-      case ExtensionKind.embed || ExtensionKind.displayMath:
-        // Drawn for real in the round that resolves images and display boxes
-        // inside a paragraph; until then the alt text is shown rather than
-        // nothing, so a note never silently loses a line.
-        return TextSpan(text: span.inner, style: theme.marker);
+      case ExtensionKind.embed:
+        // An embed is a picture in the middle of a line, so it is a widget
+        // span rather than text. Without a resolver there is nothing to
+        // resolve, and the note's own words stand in for the picture.
+        if (embedResolver == null) {
+          return TextSpan(text: '![[${span.inner}]]', style: theme.marker);
+        }
+        return WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: EmbedView(
+            target: span.inner.split('|').first,
+            display: span.inner,
+            onResolve: embedResolver,
+          ),
+        );
+      case ExtensionKind.displayMath:
+        // A display box inside a paragraph: the same typesetter, laid out as
+        // its own line rather than inline.
+        return WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: BlockMathView(
+            cache: mathCache,
+            tex: span.inner,
+            style: MathStyle(
+              fontSize: theme.body.fontSize ?? 14,
+              color: theme.body.color,
+            ),
+          ),
+        );
     }
   }
 

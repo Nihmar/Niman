@@ -2,6 +2,8 @@
 // assertions are mostly about *text* — a marker left in, or a line lost, is
 // what a reader would see — plus one per widget kind that has no text of its
 // own (a rule, a code box, a table).
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
@@ -11,6 +13,7 @@ import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:path/path.dart' as p;
 
 /// A cache that renders in-line, as the preview's own tests do.
 MathCache _syncCache() => MathCache(
@@ -19,7 +22,11 @@ MathCache _syncCache() => MathCache(
 );
 
 /// The document drawn as a column of blocks, the way the read view will.
-Widget _view(String document, MathCache cache) {
+Widget _view(
+  String document,
+  MathCache cache, {
+  Future<String?> Function(String target)? resolve,
+}) {
   final buffer = SourceBuffer.fromText(document);
   final scanner = BlockScanner(buffer);
   final parser = BlockParser();
@@ -37,6 +44,7 @@ Widget _view(String document, MathCache cache) {
                     parsed: parser.of(block, buffer),
                     theme: theme,
                     mathCache: cache,
+                    embedResolver: resolve,
                   ),
               ],
             ),
@@ -164,6 +172,61 @@ void main() {
     expect(screen, isNot(contains('](u)')));
   });
 
+  testWidgets('an embed is a picture when it resolves', (tester) async {
+    // Synchronous on purpose: a widget test's clock is fake, so a real
+    // `await` on file IO never completes inside the test body.
+    final directory = Directory.systemTemp.createTempSync('niman_embed');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final file = File(p.join(directory.path, 'pixel.png'))
+      ..writeAsBytesSync(_onePixelPng);
+
+    await tester.pumpWidget(
+      _view(
+        'before ![[pixel.png]] after',
+        _syncCache(),
+        resolve: (target) async => target == 'pixel.png' ? file.path : null,
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    // Resolved and drawn: the image is in the tree, and the note's own words
+    // are not standing in for it.
+    expect(find.byType(Image), findsWidgets);
+    expect(_screenText(tester), isNot(contains('![[pixel.png]]')));
+  });
+
+  testWidgets("an embed that resolves to nothing keeps the note's words", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _view(
+        'before ![[missing.png]] after',
+        _syncCache(),
+        resolve: (target) async => null,
+      ),
+    );
+    await tester.pump();
+    final screen = _screenText(tester);
+    expect(screen, contains('![[missing.png]]'));
+    // The rest of the paragraph is still there: an unresolvable embed is not
+    // a reason to lose the line.
+    expect(screen, contains('before'));
+    expect(screen, contains('after'));
+  });
+
+  testWidgets('an embed of a note is not a broken image', (tester) async {
+    await tester.pumpWidget(
+      _view(
+        'see ![[another-note.md]] here',
+        _syncCache(),
+        resolve: (target) async => '/nowhere/another-note.md',
+      ),
+    );
+    await tester.pump();
+    expect(_screenText(tester), contains('![[another-note.md]]'));
+    expect(find.byType(Image), findsNothing);
+  });
+
   testWidgets('the frontmatter is metadata, not prose', (tester) async {
     await tester.pumpWidget(
       _view('---\ntitle: A note\n---\n\nbody text', _syncCache()),
@@ -183,3 +246,16 @@ void main() {
     expect(screen, isNot(contains(']]')));
   });
 }
+
+/// A one-pixel PNG, so an embed test needs no fixture on disk.
+final List<int> _onePixelPng = <int>[
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
+  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+  0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+  0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+  0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+  0x42, 0x60, 0x82,
+];

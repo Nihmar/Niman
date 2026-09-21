@@ -35,6 +35,7 @@ final class MarkdownReadView extends StatefulWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.onTapLink,
     this.onTapWikiLink,
+    this.embedResolver,
     super.key,
   });
 
@@ -58,6 +59,9 @@ final class MarkdownReadView extends StatefulWidget {
 
   /// Called when a wikilink is tapped.
   final void Function(ExtensionSpan span)? onTapWikiLink;
+
+  /// Resolves an embed's target to an absolute path, or null.
+  final Future<String?> Function(String target)? embedResolver;
 
   @override
   State<MarkdownReadView> createState() => MarkdownReadViewState();
@@ -210,6 +214,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         mathCache: widget.mathCache,
         onTapLink: widget.onTapLink,
         onTapWikiLink: widget.onTapWikiLink,
+        embedResolver: widget.embedResolver,
       ),
     );
   }
