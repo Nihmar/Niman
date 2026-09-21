@@ -17,6 +17,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -73,6 +75,10 @@ final class MarkdownReadView extends StatefulWidget {
 
 /// The read view's state, so a shell can ask what it shows.
 final class MarkdownReadViewState extends State<MarkdownReadView> {
+  /// The read pane's own trace, distinct from the legacy preview's `preview`
+  /// logger so a device log says which of the two was slow.
+  static const AppLogger _log = AppLogger(name: 'read');
+
   late BlockScanner _scanner;
   late List<Block> _blocks;
   BlockHeightMap? _heights;
@@ -115,12 +121,47 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   }
 
   /// Rebuilds the block list and the height map for the current text.
+  ///
+  /// The scan is O(document) by nature — its incrementality is for edits, not
+  /// for the first look — so it is the first thing to measure when the pane is
+  /// slow to appear, and it now says what it cost.
   void _rescan() {
+    final clock = Stopwatch()..start();
     _scanner = BlockScanner(widget.buffer);
     _blocks = _scanner.index.blocks;
     _heights = BlockHeightMap(blocks: _blocks, estimate: _estimateOf);
     _built = 0;
+    _log.debug(
+      'scan: ${_blocks.length} blocks, ${widget.buffer.lineCount} lines in '
+      '${clock.elapsedMilliseconds}ms',
+    );
   }
+
+  /// Logs the frame that first put content on screen: how many blocks the scan
+  /// found, how many that frame built, and how long the whole open took.
+  ///
+  /// The editor has had `note open first frame` since T-PP-22 and the read pane
+  /// had nothing, so a device report of "the preview was slow to open" could
+  /// not be split into scan, layout and wait. Called from [_blockAt], which
+  /// `SliverList` runs during layout, so the callback lands at the end of the
+  /// frame that drew these blocks.
+  void _traceFirstContent() {
+    if (_traced || _built == 0) return;
+    _traced = true;
+    final elapsed = _opened.elapsedMilliseconds;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _log.info(
+        'first content: ${_blocks.length} blocks, $_built built, '
+        '${elapsed}ms after the view was created',
+      );
+    });
+  }
+
+  /// Started when the view is created: the open the trace above reports.
+  final Stopwatch _opened = Stopwatch()..start();
+
+  /// Whether the first content was logged (once per view, not once per frame).
+  bool _traced = false;
 
   /// A block's height before it has ever been drawn.
   ///
@@ -239,6 +280,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   Widget _blockAt(BuildContext context, int index) {
     final block = _blocks[index];
     _built++;
+    _traceFirstContent();
     return _Measured(
       onSize: (size) => _measure(index, size.height),
       child: BlockView(

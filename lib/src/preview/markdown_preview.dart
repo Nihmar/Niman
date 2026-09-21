@@ -255,11 +255,18 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     unawaited(
       PreviewWork.run('parse', source).then((result) {
         if (!mounted || revision != _parseRevision) {
-          // Device trace (preview toggle needs two presses on huge notes)
-          // — temporary: remove once the trace is in.
+          // Two different things, named separately: a pane that is gone is the
+          // ordinary end of a flip away, and it is not a result that arrived
+          // after a newer parse. The old line called both "stale" and printed
+          // "stale rev 1 (current 1)" — the numbers equal because the revision
+          // was not the reason, and reading it as one sent an afternoon after a
+          // parse that had nothing to do with the symptom (2026-09-21).
           const AppLogger(name: 'preview').info(
-            'parse async: stale rev $revision '
-            '(current $_parseRevision), dropped',
+            mounted
+                ? 'parse async: stale rev $revision '
+                      '(current $_parseRevision), dropped'
+                : 'parse async: pane gone before the parse landed '
+                      '(rev $revision), dropped',
           );
           return;
         }
