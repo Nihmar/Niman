@@ -141,6 +141,46 @@ void main() {
     expect(_loggedWith(tester, 'DELTA ', 'comp 0..4'), isTrue);
   });
 
+  testWidgets('a composing range is shown, and counted', (tester) async {
+    // The one question the first device run could not answer: the IME may be
+    // composing a word while the app is told nothing about it. The probe shows
+    // the range underlined and counts the ones it has seen, so a screenshot
+    // says which of the two is happening.
+    await _pumpProbe(tester);
+    await tester.tap(find.byKey(const Key('input-probe-area')));
+    await tester.pump();
+    await _sendDelta(
+      tester,
+      oldText: '',
+      start: 0,
+      end: 0,
+      text: 'ciao',
+      caret: 4,
+      composingStart: 0,
+      composingEnd: 4,
+    );
+    final tally = tester
+        .widget<Text>(find.byKey(const Key('input-probe-tally')))
+        .data!;
+    expect(tally, contains('composing 1'));
+
+    // And without a composing range it stays zero, which is what the device
+    // reported for fifty-six keystrokes.
+    await _sendDelta(
+      tester,
+      oldText: 'ciao',
+      start: 4,
+      end: 4,
+      text: '!',
+      caret: 5,
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('input-probe-tally'))).data!,
+      contains('composing 1'),
+      reason: 'a plain insertion is not a composition',
+    );
+  });
+
   testWidgets('a whole-value update is applied and its size recorded', (
     tester,
   ) async {

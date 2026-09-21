@@ -91,7 +91,8 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
             '3. Let autocorrect change a word: DELTA or WHOLE?\n'
             '4. Delete a letter, then a whole word (backspace held).\n'
             '5. Move the caret by tapping inside a word, and by dragging.\n'
-            '6. Press Enter, then close the keyboard with the back gesture.\n'
+            '6. Press Enter (an ACTION line), then close the keyboard with the '
+            'back gesture (a CLOSED line).\n'
             '7. Turn "delta model" off and do 1-3 again — the whole-value path '
             'is the fallback and has to work too.\n'
             '8. Tap "fill 900 KB" and type one character: the WHOLE lines then '
@@ -142,6 +143,12 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
             key: const Key('input-probe-state'),
             style: theme.textTheme.bodySmall,
           ),
+          const SizedBox(height: 4),
+          Text(
+            _tally,
+            key: const Key('input-probe-tally'),
+            style: theme.textTheme.bodySmall,
+          ),
           const SizedBox(height: 8),
           GestureDetector(
             key: const Key('input-probe-area'),
@@ -159,13 +166,14 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
                 ),
               ),
               child: SingleChildScrollView(
-                child: Text(
-                  _value.text.isEmpty
-                      ? 'tap here and type'
-                      : _value.text.substring(
-                          0,
-                          _value.text.length > 4000 ? 4000 : _value.text.length,
-                        ),
+                // The text, with the **composing range underlined** when the
+                // platform reports one: if the keyboard underlines the word
+                // being typed and this does not, the IME is composing and the
+                // range is not reaching the app — which is the one question the
+                // first device run could not answer by reading event lines
+                // alone (2026-09-21: 56 deltas, not one composing range).
+                child: Text.rich(
+                  _display(),
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
                 ),
               ),
@@ -278,6 +286,42 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
     );
   }
 
+  /// The buffer as it is shown, with the composing range underlined.
+  TextSpan _display() {
+    if (_value.text.isEmpty) return const TextSpan(text: 'tap here and type');
+    final text = _value.text;
+    final shown = text.length > 4000 ? text.substring(0, 4000) : text;
+    final composing = _value.composing;
+    if (!composing.isValid ||
+        composing.isCollapsed ||
+        composing.end > shown.length) {
+      return TextSpan(text: shown);
+    }
+    return TextSpan(
+      children: <TextSpan>[
+        TextSpan(text: shown.substring(0, composing.start)),
+        TextSpan(
+          text: shown.substring(composing.start, composing.end),
+          style: const TextStyle(decoration: TextDecoration.underline),
+        ),
+        TextSpan(text: shown.substring(composing.end)),
+      ],
+    );
+  }
+
+  /// One line under the text: how many of each kind of update has arrived.
+  ///
+  /// A screenshot of this is the answer to "does the delta model work here" —
+  /// and to "is a word ever composed" — without reading a log.
+  String get _tally =>
+      'delta ${_deltaCount} · whole ${_wholeCount} · '
+      'composing ${_composingCount} · replace ${_replaceCount}';
+
+  int _deltaCount = 0;
+  int _wholeCount = 0;
+  int _composingCount = 0;
+  int _replaceCount = 0;
+
   /// Writes [line] on screen and in the app log.
   void _record(String line) {
     _log.info(line);
@@ -329,6 +373,10 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
 
   @override
   void updateEditingValue(TextEditingValue value) {
+    _wholeCount += 1;
+    if (value.composing.isValid && !value.composing.isCollapsed) {
+      _composingCount += 1;
+    }
     _record(_describeValue(value));
     _setValue(value);
   }
@@ -337,6 +385,11 @@ final class _TextInputProbeScreenState extends State<TextInputProbeScreen>
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     var value = _value;
     for (final delta in deltas) {
+      _deltaCount += 1;
+      if (delta is TextEditingDeltaReplacement) _replaceCount += 1;
+      if (delta.composing.isValid && !delta.composing.isCollapsed) {
+        _composingCount += 1;
+      }
       _record(_describe(delta));
       // The design's staleness guard, and the reason it is worth watching on a
       // device: a delta describes the platform's copy, not ours (`oldText`),
