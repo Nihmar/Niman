@@ -132,10 +132,6 @@ final class EstonianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'See märge on WYSIWYG-redaktoriks liiga suur. Ava see Markdowni '
-      'allikana.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Välimus';

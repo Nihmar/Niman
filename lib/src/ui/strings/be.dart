@@ -135,10 +135,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Гэтая заўвага занадта вялікая для WYSIWYG-рэдактара. Адкрыйце яе як '
-      'Markdown-крэйс.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Знешні выгляд';

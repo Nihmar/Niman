@@ -136,10 +136,6 @@ final class GermanStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Diese Notiz ist für den WYSIWYG-Editor zu groß. Öffne sie im '
-      'Markdown-Quelltext.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Erscheinungsbild';

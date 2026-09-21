@@ -139,10 +139,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Тази бележка е твърде голяма за WYSIWYG редактора. Отворете я като '
-      'изходен Markdown код.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Външен вид';

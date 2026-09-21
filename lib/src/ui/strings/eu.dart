@@ -132,9 +132,6 @@ final class BasqueStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ohar honek ez du WYSIWYG erreditorrentzat. Ireki Markdown-iturrian.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Itxura';

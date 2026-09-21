@@ -137,10 +137,6 @@ final class FrenchStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Cette note est trop grande pour l’éditeur WYSIWYG. Ouvrez-la dans la '
-      'source Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Apparence';

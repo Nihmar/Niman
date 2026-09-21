@@ -131,10 +131,6 @@ final class TurkishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Bu not WYSIWYG düzenleyicisi için çok büyük. Markdown kaynağında '
-      'açın.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Görünüm';

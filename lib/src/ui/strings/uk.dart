@@ -137,10 +137,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ця нотатка занадто велика для WYSIWYG-редактора. Відкрийте її як '
-      'Markdown-джерело.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Зовнішній вигляд';

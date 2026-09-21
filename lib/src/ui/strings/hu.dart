@@ -133,10 +133,6 @@ final class HungarianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ez a jegyzet túl nagy a WYSIWYG szerkesztőhöz. Nyisd meg Markdown '
-      'forrásként.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Megjelenés';

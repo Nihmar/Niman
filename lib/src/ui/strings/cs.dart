@@ -136,10 +136,6 @@ final class CzechStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Tato poznámka je příliš velká pro editor WYSIWYG. Otevřete ji ve '
-      'zdrojovém Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Vzhled';

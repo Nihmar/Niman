@@ -8,7 +8,6 @@ import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
-import 'package:niman/src/ui/strings.dart';
 
 /// A checker whose only misspelling is 'wrold'.
 final class _FakeChecker implements SpellChecker {
@@ -394,9 +393,13 @@ void main() {
     expect(codeLines(), 1, reason: 'only hello keeps the code attribute');
   });
 
-  testWidgets('a novel-length note offers the source editor', (tester) async {
-    // Quill builds the whole document; above the guard the surface refuses
-    // rather than stalls (T-WYS-07).
+  testWidgets('a novel-length note opens here too', (tester) async {
+    // There is no size cap any more: the note that stresses the surface is the
+    // note that has to be testable in it, and a formatted surface that refuses
+    // a novel is a surface the stress test cannot reach (2026-09-21). What it
+    // costs is time, not correctness — the conversion of a 931 KB note is a
+    // ~2 s frame (#254) — so the assertion here is that the editor is really
+    // built, not that the note is fast.
     final large = 'word ' * 50000;
     await tester.pumpWidget(
       MaterialApp(
@@ -406,7 +409,6 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text(AppStrings.wysiwygTooLarge), findsOneWidget);
-    expect(find.byType(quill.QuillEditor), findsNothing);
+    expect(find.byType(quill.QuillEditor), findsOneWidget);
   });
 }

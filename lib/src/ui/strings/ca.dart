@@ -136,10 +136,6 @@ final class CatalanStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Aquesta nota és massa gran per a l’editor WYSIWYG. Obre-la a '
-      'la font Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aparença';

@@ -137,10 +137,6 @@ final class SpanishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Esta nota es demasiado grande para el editor WYSIWYG. Ábrela en la '
-      'fuente Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Apariencia';

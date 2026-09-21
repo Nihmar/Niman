@@ -135,10 +135,6 @@ final class SwedishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Denna anteckning är för stor för WYSIWYG-editorn. Öppna den i '
-      'Markdown-källan.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Utseende';

@@ -134,10 +134,6 @@ final class PortugueseStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Esta nota é grande demais para o editor WYSIWYG. Abra-a na fonte '
-      'Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aparência';

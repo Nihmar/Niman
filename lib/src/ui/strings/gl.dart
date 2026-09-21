@@ -137,10 +137,6 @@ final class GalicianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Esta nota é demasiado grande para o editor WYSIWYG. Ábrea na '
-      'fonte Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aparencia';

@@ -137,10 +137,6 @@ final class PolishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ta notatka jest zbyt duża dla edytora WYSIWYG. Otwórz ją w '
-      'źródle Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Wygląd';

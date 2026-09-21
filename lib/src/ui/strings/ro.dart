@@ -138,10 +138,6 @@ final class RomanianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Această notă este prea mare pentru editorul WYSIWYG. Deschide-o în '
-      'sursa Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aspect';

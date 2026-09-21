@@ -134,10 +134,6 @@ final class FinnishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Tämä muistiinpano on liian suuri WYSIWYG-muokkainille. Avaa se '
-      'Markdown-lähdekoodina.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Ulkoasu';

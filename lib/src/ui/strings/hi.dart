@@ -127,9 +127,6 @@ final class HindiStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'यह नोट WYSIWYG एडिटर के लिए बहुत बड़ा है। इसे Markdown स्रोत में खोलें।';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'दिखावट';

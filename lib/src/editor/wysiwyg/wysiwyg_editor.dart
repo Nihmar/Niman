@@ -22,7 +22,6 @@ import 'package:niman/src/editor/wysiwyg/wysiwyg_clipboard.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_find_panel.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/ui/strings.dart';
 
 /// The WYSIWYG writing surface: a Quill editor over the note's Markdown.
 ///
@@ -86,11 +85,6 @@ final class WysiwygEditor extends StatefulWidget {
 final class WysiwygEditorState extends State<WysiwygEditor> {
   static const MarkdownDocumentCodec _codec = MarkdownDocumentCodec();
   static const AppLogger _log = AppLogger(name: 'wysiwyg');
-
-  /// Above this size Quill builds a document the note does not pay for; the
-  /// source editor is offered instead (T-WYS-07). Quill has no windowing,
-  /// unlike the preview.
-  static const int _maxWysiwygBytes = 200 * 1024;
 
   final FocusNode _internalFocus = FocusNode();
   FocusNode get _focus => widget.focusNode ?? _internalFocus;
@@ -522,14 +516,6 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.data.length > _maxWysiwygBytes) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(AppStrings.wysiwygTooLarge, textAlign: TextAlign.center),
-        ),
-      );
-    }
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.keyF, control: true): () =>

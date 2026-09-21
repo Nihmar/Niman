@@ -123,9 +123,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'このノートは WYSIWYG エディタが大きすぎます。Markdown ソースで開いてください。';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => '外観';
