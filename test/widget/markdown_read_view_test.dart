@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -114,28 +115,56 @@ void main() {
     controller.jumpTo(controller.position.maxScrollExtent);
     await tester.pump();
     await tester.pump();
+    // A far jump reaches further — on this note it reaches every block, because
+    // `SliverList` cannot place a child it has not laid out. The windowed
+    // *positions* that made a jump cheap were `SliverVariedExtentList`'s, and
+    // it bought them by forcing every height: the trade #250 records, with a
+    // custom sliver that owns both as the way out (§8.4.4).
     expect(state.builtBlocks, greaterThan(mid));
+  });
+
+  testWidgets('a block taller than its estimate is drawn whole', (
+    tester,
+  ) async {
+    // One paragraph, one source line, a dozen visual ones at this width: the
+    // shape a source-line estimate gets wrong, and what a device found (#250) —
+    // the sliver *forced* each child to the estimate, so this paragraph showed
+    // its first line and lost the rest, with a gap where the next block begins.
+    tester.view.physicalSize = const Size(400, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final long = List.filled(20, 'wrapping words').join(' ');
+    await _pump(tester, '$long\n\nAfter.');
+
+    final blocks = find.byType(BlockView);
+    expect(blocks, findsWidgets);
+    final first = tester.getSize(blocks.at(0));
     expect(
-      state.builtBlocks,
-      lessThan(state.blockCount),
-      reason: 'still not the whole note',
+      first.height,
+      greaterThan(150),
+      reason: 'the wrapped paragraph is drawn ${first.height} px tall',
+    );
+    // And the block after it starts below it rather than over it.
+    expect(
+      tester.getTopLeft(blocks.at(1)).dy,
+      greaterThanOrEqualTo(tester.getTopLeft(blocks.at(0)).dy + first.height),
     );
   });
 
-  testWidgets('the measured heights correct the estimates', (tester) async {
+  testWidgets('what a frame laid out is remembered', (tester) async {
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
     final state = await _pump(tester, _note(40));
-    final before = state.totalExtent;
-    // Let the post-frame measurements land and be applied.
+    expect(state.builtBlocks, greaterThan(0));
+    // The measurements are the estimator's only feed: without them, the height
+    // of the part of the note no frame has laid out is pure guesswork.
     for (var at = 0; at < 3; at++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
-    expect(state.totalExtent, isNotNull);
-    expect(before, isNotNull);
-    expect(state.builtBlocks, greaterThan(0));
+    expect(state.measuredBlocks, greaterThan(0));
+    expect(state.totalExtent, greaterThan(0));
   });
 
   testWidgets('an empty note draws nothing rather than failing', (

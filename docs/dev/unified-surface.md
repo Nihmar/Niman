@@ -9232,6 +9232,25 @@ widget tree, so the words matched; and this phase's own exit criteria asked for 
 **golden-image test per fixture** (§10.4, phase 2), which was never built. A
 device, not a test, is what found this — and the fix wants the test first.
 
+**Fixed, the same day: `SliverList` measures, and the jump pays for it.** The read
+view now lays its blocks out through `SliverList` — every child measured with
+unbounded main-axis constraints — and `BlockHeightMap` is demoted to what its
+name always said: an estimator whose `estimateAfter` feeds
+`estimateMaxScrollOffset` with the height of the part of the note no frame has
+reached. `test/widget/markdown_read_view_test.dart` holds the property a device
+found missing: a paragraph that wraps is drawn at its own height (31.5 px before
+the fix, against the ~300 it needs), and the block after it starts below it.
+
+The trade is measured rather than hidden. First content *improved* — 60 ms on the
+geometry note against the 88 that forcing extents cost, because the first frame
+no longer lays anything out to a guess — but a **far jump now walks the list**: a
+`SliverList` cannot place a child it has not laid out, so jumping to the middle of
+the geometry note reads 2 604 ms and builds 3 156 of its 7 530 blocks (386 ms and
+470 of 1 092 on the 50 KB fixture). Cheap jumps were the forcing sliver's, and it
+bought them with the clipping. Having both is the custom
+`RenderSliverMarkdownBlocks` above — positions from the map, heights from
+measurement — and that is now the next piece of work rather than a hypothesis.
+
 Data to build while measuring: per-3-second rolling average of
 `build + layout` time per block kind, blocks laid out per frame, and the
 p90 of `editsPerSecond`. These become the regression tests of [§9](#9-the-performance-budget).

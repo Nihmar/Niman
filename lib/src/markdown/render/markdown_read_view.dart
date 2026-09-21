@@ -7,9 +7,12 @@
 /// the view asks the parser for a block only when the sliver hands it one, and
 /// the height map answers for the ones it has never seen.
 ///
-/// The seam between the two is `BlockHeightMap`: the sliver needs an extent
-/// for every block to place any of them, and the map gives a frozen estimate
-/// until a block is drawn and its real height measured between frames.
+/// The seam between the two is `BlockHeightMap`, and it is an **estimator**:
+/// the sliver measures its children for real, and the map answers the one
+/// question a scrollable cannot avoid — how long the whole note is — with
+/// measurements where a frame has been and estimates where none has. It used to
+/// hand the sliver a *forced* extent per block instead, which clipped every
+/// block taller than its estimate (#250, §8.4.4).
 library;
 
 import 'package:flutter/material.dart';
@@ -84,8 +87,17 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// How many blocks the note has.
   int get blockCount => _blocks.length;
 
-  /// The document's height, as the height map currently knows it.
-  double? get totalExtent => _heights?.totalExtent;
+  /// The document's height as the last layout estimated it: what it laid out
+  /// real, plus an estimate for the part no frame has reached. Null before the
+  /// first layout.
+  double? get totalExtent => _estimatedTotal;
+
+  double? _estimatedTotal;
+
+  /// How many blocks a frame has laid out and measured.
+  ///
+  /// The estimator's evidence, as [builtBlocks] is the windowing's.
+  int get measuredBlocks => _heights?.measuredCount ?? 0;
 
   @override
   void initState() {
@@ -175,39 +187,34 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     if (heights == null || _blocks.isEmpty) {
       return const SizedBox.shrink();
     }
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollEndNotification ||
-            notification is ScrollUpdateNotification) {
-          _applyMeasurements();
-        }
-        return false;
-      },
-      child: CustomScrollView(
-        controller: widget.controller,
-        slivers: <Widget>[
-          SliverPadding(
-            padding: widget.padding,
-            sliver: SliverVariedExtentList(
-              itemExtentBuilder: (index, dimensions) =>
-                  heights.extentFor(index),
-              delegate: _BlockDelegate(
-                count: _blocks.length,
-                heights: heights,
-                build: _blockAt,
-              ),
+    return CustomScrollView(
+      controller: widget.controller,
+      slivers: <Widget>[
+        SliverPadding(
+          padding: widget.padding,
+          // A **measuring** sliver: `SliverList` lays each block out with
+          // unbounded main-axis constraints, so a block is as tall as what it
+          // draws. The sliver that instead *forces* an extent —
+          // `SliverVariedExtentList` — is what clipped every block taller than
+          // its estimate, and reported the forced size back as a measurement
+          // (#250).
+          sliver: SliverList(
+            delegate: _BlockDelegate(
+              heights: heights,
+              build: _blockAt,
+              onEstimate: (total) => _estimatedTotal = total,
             ),
           ),
-          // The definitions a note ends with. They are not blocks — no block
-          // can draw them, because the definitions never reach the block that
-          // cites them — so the section is appended, and through a *lazy* list
-          // for the same reason the note itself is: a section that lays out
-          // every footnote at the top of the frame costs the frame. Measured:
-          // appending it whole took first content from 76 ms to 112 ms on the
-          // geometry note and the jump from 9 ms to 56.
-          SliverPadding(padding: widget.padding, sliver: _footnoteSliver()),
-        ],
-      ),
+        ),
+        // The definitions a note ends with. They are not blocks — no block
+        // can draw them, because the definitions never reach the block that
+        // cites them — so the section is appended, and through a *lazy* list
+        // for the same reason the note itself is: a section that lays out
+        // every footnote at the top of the frame costs the frame. Measured:
+        // appending it whole took first content from 76 ms to 112 ms on the
+        // geometry note and the jump from 9 ms to 56.
+        SliverPadding(padding: widget.padding, sliver: _footnoteSliver()),
+      ],
     );
   }
 
@@ -245,41 +252,36 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     );
   }
 
-  void _measure(int index, double height) {
-    final block = _blocks[index];
-    _heights?.measured(index, height, block.lineCount);
-    _applyMeasurements();
-  }
-
-  /// Applies what has been measured, between frames.
-  void _applyMeasurements() {
-    final heights = _heights;
-    if (heights == null || !heights.hasPending) return;
-    if (heights.applyMeasurements() && mounted) {
-      setState(() {});
-    }
-  }
+  /// Records what a frame drew for block [index].
+  ///
+  /// The estimator's only feed, and the reason it is recorded outside a frame:
+  /// an extent that moved while the sliver was walking its children is an
+  /// assertion, and nothing here needs a rebuild — the sliver asks again on its
+  /// next layout.
+  void _measure(int index, double height) => _heights?.measured(index, height);
 }
 
-/// The sliver's children, with the document's real height attached.
+/// The sliver's children, with the document's estimated height attached.
 ///
 /// A lazy list otherwise guesses its scrollable extent from the children it has
 /// laid out, and on a long note that guess is a fraction of the truth — every
 /// jump beyond it is clamped, which is what once pulled the preview away from
-/// the editor. The height map holds an extent for every block, so it can say.
+/// the editor. The height map knows a height for every block, so it can say:
+/// what this layout has behind it for real, plus an estimate for the part no
+/// frame has reached.
 final class _BlockDelegate extends SliverChildBuilderDelegate {
   /// Creates the delegate.
   new({
-    required this.count,
     required this.heights,
     required Widget Function(BuildContext context, int index) build,
-  }) : super(build, childCount: count);
+    this.onEstimate,
+  }) : super(build, childCount: heights.length);
 
-  /// How many blocks there are.
-  final int count;
-
-  /// The heights, for the total extent.
+  /// The heights, for the estimate.
   final BlockHeightMap heights;
+
+  /// Told the document's height as this layout estimated it.
+  final ValueChanged<double>? onEstimate;
 
   @override
   double? estimateMaxScrollOffset(
@@ -287,7 +289,11 @@ final class _BlockDelegate extends SliverChildBuilderDelegate {
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
-  ) => heights.totalExtent;
+  ) {
+    final total = trailingScrollOffset + heights.estimateAfter(lastIndex);
+    onEstimate?.call(total);
+    return total;
+  }
 }
 
 /// Reports a child's size after the frame that laid it out.
