@@ -350,6 +350,26 @@ void main() {
       expect(box.center.dx, closeTo(300, 0.5));
     });
 
+    testWidgets('a table cell with inline math lays out', (tester) async {
+      // A table's columns are `IntrinsicColumnWidth`, so a cell paragraph is
+      // asked for its intrinsic size — and that asks its `WidgetSpan` children
+      // for a **dry baseline**. `_RenderInlineMath` implements the laid-out one
+      // and not the dry one, which Flutter treats as a broken render object: an
+      // assertion in debug, a wrong baseline in release. The engine's own gate
+      // found it (§8.4.4's geometry test), not a device.
+      tester.view.physicalSize = const Size(600, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(
+        tester,
+        '| a | b |\n|---|---|\n| '
+        r'$x^2$'
+        ' | plain |\n',
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('plain', findRichText: true), findsWidgets);
+    });
+
     testWidgets('sibling items share an indent, a sublist steps in', (
       tester,
     ) async {

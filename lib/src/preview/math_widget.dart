@@ -414,6 +414,21 @@ final class _RenderInlineMath extends RenderBox {
   double? computeDistanceToActualBaseline(TextBaseline baseline) =>
       box.height * style.fontSize;
 
+  /// The same baseline, without laying out — the question a `WidgetSpan` is
+  /// asked wherever sizes are intrinsic.
+  ///
+  /// A table's `IntrinsicColumnWidth` asks a cell's paragraph for its intrinsic
+  /// size, and that asks its placeholders for a *dry* baseline. Flutter treats
+  /// a `RenderBox` that answers only the laid-out one as broken:
+  /// an assertion in debug, a wrong baseline in release. So a table cell
+  /// holding inline math threw — the engine's geometry gate found it (§8.4.4),
+  /// and this is the half that was missing.
+  @override
+  double? computeDryBaseline(
+    BoxConstraints constraints,
+    TextBaseline baseline,
+  ) => computeDistanceToActualBaseline(baseline);
+
   @override
   void paint(PaintingContext context, Offset offset) {
     context.canvas
