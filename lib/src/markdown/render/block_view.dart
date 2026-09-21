@@ -524,11 +524,19 @@ final class _InlineBuilder {
         if (embedResolver == null) {
           return TextSpan(text: '![[${span.inner}]]', style: theme.marker);
         }
+        // `![[target|alias]]`: the alias is what the reader asked to see, and
+        // it is what the preview drew when a binary or a missing target had to
+        // stand in for itself (`preview/wikilink.dart`). The read view passed
+        // the raw inner instead, so the same note read `![[book.epub|The
+        // book]]` in one surface and `![[The book]]` in the other.
+        final pipe = span.inner.indexOf('|');
+        final target = pipe >= 0 ? span.inner.substring(0, pipe) : span.inner;
+        final alias = pipe >= 0 ? span.inner.substring(pipe + 1).trim() : '';
         return WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: EmbedView(
-            target: span.inner.split('|').first,
-            display: span.inner,
+            target: target,
+            display: alias.isEmpty ? target : alias,
             onResolve: embedResolver,
           ),
         );
