@@ -16,7 +16,15 @@
 // posted to it after. The menu is still nativeapi's `HMENU` with its items; the
 // choice comes back from `TrackPopupMenu` itself (`TPM_RETURNCMD`), so no
 // `WM_COMMAND` goes anywhere and the caller runs the item.
+//
+// A classic menu draws in the light theme unless the process asks otherwise,
+// and the only way to ask is uxtheme's `SetPreferredAppMode` (ordinal 135,
+// Windows 10 1903 and later), with `FlushMenuThemes` (136) so a menu already
+// drawn once is drawn again in the new mode. Both are exported by ordinal only
+// — Explorer and the browsers use them for their own dark menus — and the
+// mode is the *app's* theme, not the system's, so the menu matches the window.
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
@@ -25,9 +33,29 @@ import 'package:ffi/ffi.dart';
 /// dismissed, and a line for the log.
 typedef TrayMenuChoice = ({int chosen, String report});
 
+/// The theme a menu is drawn in: the app's own choice, or the system's.
+enum TrayMenuTheme {
+  /// Whatever Windows is set to.
+  system(1),
+
+  /// Dark, whatever Windows is set to.
+  dark(2),
+
+  /// Light, whatever Windows is set to.
+  light(3);
+
+  new(this.appMode);
+
+  /// uxtheme's `PreferredAppMode`: `AllowDark`, `ForceDark`, `ForceLight`.
+  final int appMode;
+}
+
 /// Opens the menu [menuAddress] (an `HMENU`'s address) at the cursor, on a
-/// thread of its own, and completes with the choice.
-Future<TrayMenuChoice> openWindowsTrayMenu(int menuAddress) {
+/// thread of its own, drawn in [theme], and completes with the choice.
+Future<TrayMenuChoice> openWindowsTrayMenu(
+  int menuAddress, {
+  TrayMenuTheme theme = TrayMenuTheme.system,
+}) {
   // The cursor where the click was, read here: by the time the isolate runs,
   // the pointer may have moved.
   final getCursorPos = DynamicLibrary.open('user32.dll')
@@ -36,11 +64,50 @@ Future<TrayMenuChoice> openWindowsTrayMenu(int menuAddress) {
   getCursorPos(point);
   final (x, y) = (point.ref.x, point.ref.y);
   calloc.free(point);
-  return Isolate.run(() => _track(menuAddress, x, y), debugName: 'tray menu');
+  final mode = theme.appMode;
+  final themed = _windowsBuild() >= 18362;
+  return Isolate.run(
+    () => _track(menuAddress, x, y, themed ? mode : null),
+    debugName: 'tray menu',
+  );
 }
 
-/// Makes an owner window on this thread and tracks the menu from it.
-TrayMenuChoice _track(int menuAddress, int x, int y) {
+/// The Windows build number, or 0 when it cannot be read.
+int _windowsBuild() {
+  final match = RegExp(r'Build (\d+)')
+      .firstMatch(Platform.operatingSystemVersion);
+  return int.tryParse(match?.group(1) ?? '') ?? 0;
+}
+
+/// Asks uxtheme for [mode] and redraws the menus in it; false when the two
+/// ordinals are not there.
+bool _setMenuTheme(int mode) {
+  final kernel32 = DynamicLibrary.open('kernel32.dll');
+  final loadLibrary = kernel32.lookupFunction<_LoadLibraryC, _LoadLibraryDart>(
+    'LoadLibraryW',
+  );
+  final getProc = kernel32.lookupFunction<_GetProcC, _GetProcDart>(
+    'GetProcAddress',
+  );
+  final name = 'uxtheme.dll'.toNativeUtf16();
+  final uxtheme = loadLibrary(name);
+  calloc.free(name);
+  if (uxtheme == nullptr) return false;
+  // By ordinal: the "name" is the number itself (`MAKEINTRESOURCEA`).
+  final setMode = getProc(uxtheme, Pointer<Utf8>.fromAddress(135));
+  final flush = getProc(uxtheme, Pointer<Utf8>.fromAddress(136));
+  if (setMode == nullptr || flush == nullptr) return false;
+  setMode.cast<NativeFunction<_SetAppModeC>>().asFunction<_SetAppModeDart>()(
+    mode,
+  );
+  flush.cast<NativeFunction<_FlushC>>().asFunction<_FlushDart>()();
+  return true;
+}
+
+/// Makes an owner window on this thread and tracks the menu from it, drawn in
+/// uxtheme's app [mode] when there is one to ask for.
+TrayMenuChoice _track(int menuAddress, int x, int y, int? mode) {
+  final themed = mode != null && _setMenuTheme(mode);
   final user32 = DynamicLibrary.open('user32.dll');
   final createWindow = user32
       .lookupFunction<_CreateWindowExC, _CreateWindowExDart>('CreateWindowExW');
@@ -99,7 +166,9 @@ TrayMenuChoice _track(int menuAddress, int x, int y) {
     post(owner, _wmNull, 0, 0);
     return (
       chosen: chosen,
-      report: 'at $x,$y, foreground $foreground, result $chosen, error $error',
+      report:
+          'at $x,$y, theme ${themed ? 'mode $mode' : 'default'}, '
+          'foreground $foreground, result $chosen, error $error',
     );
   } finally {
     destroyWindow(owner);
@@ -119,6 +188,20 @@ typedef _GetCursorPosC = Int32 Function(Pointer<_Point> point);
 typedef _GetCursorPosDart = int Function(Pointer<_Point> point);
 typedef _HwndC = Int32 Function(Pointer<Void> hwnd);
 typedef _HwndDart = int Function(Pointer<Void> hwnd);
+typedef _LoadLibraryC = Pointer<Void> Function(Pointer<Utf16> name);
+typedef _LoadLibraryDart = Pointer<Void> Function(Pointer<Utf16> name);
+typedef _GetProcC = Pointer<Void> Function(
+  Pointer<Void> module,
+  Pointer<Utf8> name,
+);
+typedef _GetProcDart = Pointer<Void> Function(
+  Pointer<Void> module,
+  Pointer<Utf8> name,
+);
+typedef _SetAppModeC = Int32 Function(Int32 mode);
+typedef _SetAppModeDart = int Function(int mode);
+typedef _FlushC = Void Function();
+typedef _FlushDart = void Function();
 typedef _LastErrorC = Uint32 Function();
 typedef _LastErrorDart = int Function();
 typedef _TrackPopupMenuC = Int32 Function(
