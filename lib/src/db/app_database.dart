@@ -383,6 +383,17 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
     onUpgrade: (m, from, to) async {
+      // Drift calls this for a downgrade too, and then writes the older
+      // version over the newer one: a release opening a testing build's
+      // database would run none of the steps, stamp it with its own number,
+      // and leave the next upgrade to redo steps already done. Refused
+      // instead: the database belongs to a newer Niman.
+      if (from > to) {
+        throw StateError(
+          'this database is schema v$from, newer than this Niman (v$to): '
+          'it was opened by a newer build',
+        );
+      }
       if (from == 1) {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN debug_logs_enabled '
@@ -542,7 +553,11 @@ class AppDatabase extends _$AppDatabase {
         );
       }
       if (from < 27) {
+        // Only the ones still there: a database stamped back down by an
+        // older build (see above) has already lost them.
+        final existing = await _columnsOf('app_settings');
         for (final column in ['preview_mode', 'split_ratio']) {
+          if (!existing.contains(column)) continue;
           await m.database.customStatement(
             'ALTER TABLE app_settings DROP COLUMN $column',
           );
@@ -550,6 +565,12 @@ class AppDatabase extends _$AppDatabase {
       }
     },
   );
+
+  /// The column names of [table] as the database has them.
+  Future<Set<String>> _columnsOf(String table) async {
+    final rows = await customSelect('PRAGMA table_info($table)').get();
+    return <String>{for (final row in rows) row.read<String>('name')};
+  }
 
   /// The columns v17 hands to the libraries (T-ML-10).
   ///

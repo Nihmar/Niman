@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
@@ -72,7 +73,7 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         AppThemes.revision,
       ]),
       builder: (context, _) => MaterialApp(
-        title: 'Niman',
+        title: isTestingBuild ? 'Niman (testing)' : 'Niman',
         theme: buildAppTheme(AppThemes.palette, Brightness.light),
         darkTheme: buildAppTheme(AppThemes.palette, Brightness.dark),
         themeMode: AppThemes.mode,

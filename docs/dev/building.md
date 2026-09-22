@@ -28,6 +28,7 @@ Terse output; full logs in `/tmp/niman/niman-<cmd>.log`
 ./scripts/niman.sh apk       # Android release APK
 ./scripts/niman.sh apk beta  # Android testing build (issue #106)
 ./scripts/niman.sh linux     # Linux release bundle
+./scripts/niman.sh linux beta  # Linux testing build (its own data folder)
 scripts\niman.bat check      # Windows equivalent
 scripts\niman.bat integration  # the headless integration_test/ files (sync_e2e needs Linux)
 scripts\niman.bat apk beta   # Android testing build, from Windows
@@ -77,6 +78,30 @@ the `beta` product flavor.
   install too).
 - AGP forbids flavor names starting with `test` (reserved for test
   variants), hence `beta`.
+
+## The desktop testing build
+
+On Windows and Linux both builds are one `niman` executable under one
+product name, so without help they share one support folder — one
+settings database, one set of indexes, one single-instance claim. A
+testing build that migrated the database to a newer schema broke the
+installed release, which took the version back down and left the next
+migration to redo what was done (2026-09-22). So the testing build keeps
+its own folder:
+
+- `scripts
+iman.bat windows beta` (`./scripts/niman.sh linux beta`)
+  passes `--dart-define=APP_CHANNEL=testing`.
+- `appSupportDirectory()` (`lib/src/core/app_channel.dart`) answers a
+  sibling of the platform folder, `…\dev.niman
+iman-testing` on
+  Windows, for everything the app keeps: `niman.db`, `indexes/`, the log,
+  the single-instance claim. Libraries have to be opened once again in
+  the testing build; the notes themselves are the same files.
+- The window and the tray say "Niman (testing)", and the two can run at
+  the same time.
+- The settings database refuses to be opened by a build older than the
+  one that last migrated it, rather than let drift stamp it back down.
 
 CI (`.github/workflows/release.yml`) publishes the testing APK from
 every release tag as `niman-<version>-android-testing.apk`.

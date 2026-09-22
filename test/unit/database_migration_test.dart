@@ -1086,4 +1086,37 @@ void main() {
       await db.close();
     });
   });
+
+  group('a database two builds shared (2026-09-22)', () {
+    test('stamped back to v26 by an older build, it opens again', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/W')",
+        );
+        // What a v26 release leaves after opening a v27 database: the
+        // number taken back down, the columns already gone.
+        await db.customStatement('PRAGMA user_version = 26');
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/W',
+      );
+      await db.close();
+    });
+
+    test('one from a newer build is refused, not stamped down', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await db.customStatement('SELECT 1');
+        await db.customStatement('PRAGMA user_version = 99');
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      await expectLater(db.select(db.appSettings).get(), throwsStateError);
+      await db.close();
+    });
+  });
 }

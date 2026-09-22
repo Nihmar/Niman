@@ -105,6 +105,6 @@ case "$cmd" in
   check) analyze && test_all ;;
   integration) integration ;;
   apk) apk "${2:-}" ;;
-  linux) linux_build ;;
+  linux) linux_build "${2:-}" ;;
   *) usage; exit 1 ;;
 esac

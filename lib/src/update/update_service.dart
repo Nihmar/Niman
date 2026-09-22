@@ -11,6 +11,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/update/app_version.dart';
 import 'package:niman/src/update/release_asset.dart';
@@ -136,7 +137,7 @@ Future<Directory> downloadDirectory() async {
 /// through FileProvider (see `file_provider_paths.xml`).
 Future<Directory> updateDownloadDirectory() {
   if (Platform.isAndroid) {
-    return getApplicationSupportDirectory().then(
+    return appSupportDirectory().then(
       (support) =>
           Directory(p.join(support.path, 'updates')).create(recursive: true),
     );
