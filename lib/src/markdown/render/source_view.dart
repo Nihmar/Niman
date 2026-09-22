@@ -38,6 +38,7 @@ import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
@@ -129,7 +130,7 @@ final class MarkdownSourceView extends StatefulWidget {
   /// It does not carry the text: joining the note is O(n), and the shell
   /// needs the text only when its debounce fires, not at every keystroke. The
   /// buffer is the shell's own object; it reads the text from it then.
-  final VoidCallback? onChanged;
+  final ValueChanged<SourceEdit>? onChanged;
 
   /// The keyboard focus, when the caller owns it (the shell does).
   final FocusNode? focusNode;
@@ -270,6 +271,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Where the caret is, and what it has selected.
   SelectionModel get selection => _selection;
 
+  /// The note's headings, as the scan behind the colours has them, or null
+  /// while there is no scan yet (a long note reads in the background, see
+  /// [_restyle]).
+  ///
+  /// The outline the note view publishes, from an answer it already holds.
+  List<OutlineEntry>? get headings => _styler?.headings;
+
   /// The paragraph of each line a frame has built, so a tap can ask the line it
   /// landed on where an offset is, and the caret can ask its own line for the
   /// rectangle. Only mounted lines keep a key: a long scroll forgets the lines
@@ -360,7 +368,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       });
       _scheduleCaret();
       _ensureCaretVisible();
-      _notifyChanged();
+      _notifyChanged(edit);
     },
   );
 
@@ -614,6 +622,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _restyle();
     }
     _syncLines(edit);
+    // The word count follows the same edit; the undo record is the one it
+    // has, or a rebuild when there is none (a restyle after a reload).
     // Undo puts the caret after what it restored (where it was before a
     // deletion, at the start of typing it took back); redo after what it did.
     final caret = forwards ? record.end : record.start + record.removed.length;
@@ -626,7 +636,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
-    _notifyChanged();
+    if (edit != null) _notifyChanged(edit);
     return true;
   }
 
@@ -783,9 +793,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
-    // The shell saves what it is told about: a cut, a paste or a backspace is
-    // as much an edit as a keystroke.
-    _notifyChanged();
+    // The shell saves and counts what it is told about: a cut, a paste or a
+    // backspace is as much an edit as a keystroke, and the edit says which
+    // lines moved so the word count pays for those and not for the note.
+    _notifyChanged(edit);
   }
 
   /// Deletes the selection, or what is before the caret: one character, or a
@@ -1149,7 +1160,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The note changed, so the shell can save it.
-  void _notifyChanged() => widget.onChanged?.call();
+  void _notifyChanged(SourceEdit edit) => widget.onChanged?.call(edit);
 
   /// How many taps have landed inside [_clickWindow], and when and where the
   /// last did.

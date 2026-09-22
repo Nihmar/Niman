@@ -76,7 +76,7 @@ Future<double> _perKeystroke(WidgetTester tester, int lines) async {
           buffer: buffer,
           theme: _theme,
           showLineNumbers: false,
-          onChanged: () {},
+          onChanged: (_) {},
         ),
       ),
     ),

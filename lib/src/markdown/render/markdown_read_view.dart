@@ -21,8 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
@@ -124,6 +126,20 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// How many blocks the note has.
   int get blockCount => _blocks.length;
+
+  /// The note's headings, read off the blocks this pane already scanned for
+  /// the page, or null before the first scan lands.
+  ///
+  /// The note view's outline: a heading is a block, and these are the blocks
+  /// on screen — no second walk of the text (see [outlineOfBlocks]).
+  List<OutlineEntry>? get headings {
+    final shown = _shown;
+    if (shown == null || _blocks.isEmpty) return null;
+    return outlineOfBlocks(
+      BlockIndex(blocks: _blocks, revision: shown.revision),
+      shown.lineAt,
+    );
+  }
 
   /// The document's height: what a frame has drawn for real, plus an estimate
   /// for the part no frame has reached. Null before the first layout.
