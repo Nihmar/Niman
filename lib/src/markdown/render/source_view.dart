@@ -51,6 +51,7 @@ final class MarkdownSourceView extends StatefulWidget {
     required this.theme,
     this.selection,
     this.onSelection,
+    this.onChanged,
     this.focusNode,
     this.controller,
     this.history,
@@ -73,6 +74,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// Called when a tap, or the platform, moves the caret — and when an edit
   /// moves it for them.
   final ValueChanged<SelectionModel>? onSelection;
+
+  /// Called after every edit with the note's text, so the shell can save it —
+  /// and with nothing else: the debounce, the memento, the statistics and the
+  /// preview all belong to whoever owns the note.
+  final ValueChanged<String>? onChanged;
 
   /// The keyboard focus, when the caller owns it (the shell does).
   final FocusNode? focusNode;
@@ -178,6 +184,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         });
         _scheduleCaret();
         _ensureCaretVisible();
+        _notifyChanged();
       },
     );
     _blink = Timer.periodic(const Duration(milliseconds: 550), (_) {
@@ -290,6 +297,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
+    _notifyChanged();
     return true;
   }
 
@@ -423,6 +431,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _scheduleCaret();
     _ensureCaretVisible();
   }
+
+  /// The note changed, so the shell can save it.
+  void _notifyChanged() => widget.onChanged?.call(widget.buffer.text);
 
   /// How many taps have landed inside [_clickWindow], and when the last did.
   int _clicks = 0;

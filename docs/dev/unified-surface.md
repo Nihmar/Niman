@@ -11078,9 +11078,20 @@ so an underscore keeps a name whole, and an offset that sits on no word characte
 selects *that character* rather than the nothing between two words. The line a
 triple click takes is the line's text without its terminator.
 
+`onChanged` is the one thing the shell needs from the surface — the note's text after
+every edit, whether it came from the keyboard, the clipboard or an undo — and nothing
+else: the debounce, the memento, the statistics and the preview belong to whoever owns
+the note. **What the wiring itself needs, written down before it is attempted:** the
+shell's source pane is built in `NoteView._editorPane`, over the `_unifiedSource`
+buffer the read mode already uses, behind the `unifiedMarkdown` flag that already
+exists; but the legacy editor's whole save path hangs off one controller listener
+(`_onValueChanged`: highlight sync, `_unsaved.noteChanged`, the save debounce, the
+statistics and preview timers), so the honest way in is to lift that body into a
+`_noteChanged(text, caretLine)` both panes call, rather than to fork it.
+
 What is *not* built yet in this phase: find, folding, the shell's remappable command
-table dispatching into the surface, and the `MarkdownSurface` widget itself — the
-thing the shell switches to, and the flag that lets a device try it.
+table dispatching into the surface, and the flag that puts the surface in front of a
+device — for which the paragraph above is the plan.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
