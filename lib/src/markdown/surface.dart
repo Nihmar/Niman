@@ -27,6 +27,7 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
 /// What the surface is showing.
@@ -62,6 +63,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.focusNode,
     this.controller,
     this.history,
+    this.surface,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
     this.indentWidth = 2,
@@ -96,6 +98,10 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// The undo history, when the caller keeps it per note.
   final EditHistory? history;
+
+  /// The shell's hold on the note (its commands, its history, the caret to
+  /// start with).
+  final MarkdownSurfaceController? surface;
 
   /// Where the note's text sits across the pane.
   final NoteColumn column;
@@ -135,6 +141,7 @@ final class MarkdownSurface extends StatelessWidget {
     focusNode: focusNode,
     controller: controller,
     history: history,
+    surface: surface,
     column: column,
     padding: padding,
     showLineNumbers: showLineNumbers,
