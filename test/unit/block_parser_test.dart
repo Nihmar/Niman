@@ -113,6 +113,38 @@ void main() {
     });
   });
 
+  group('a run knows its markers from its text', () {
+    /// The run of [kind] in [source] as `open|text|close`.
+    String split(String source, StyleKind kind) {
+      final parsed = _parse(source);
+      final run = _run(parsed, kind)!;
+      final text = parsed.text;
+      return '${text.substring(run.start, run.innerStart)}|'
+          '${text.substring(run.innerStart, run.innerEnd)}|'
+          '${text.substring(run.innerEnd, run.end)}';
+    }
+
+    test('emphasis, strong and strikethrough', () {
+      expect(split('a **bold** b', StyleKind.strong), '**|bold|**');
+      expect(split('a _it_ b', StyleKind.emphasis), '_|it|_');
+      expect(split('a ~~gone~~ b', StyleKind.strikethrough), '~~|gone|~~');
+    });
+
+    test('a link, an image and a heading', () {
+      expect(split('see [the note](u) now', StyleKind.link), '[|the note|](u)');
+      expect(
+        split('an ![alt](a.png) here', StyleKind.image),
+        '![|alt|](a.png)',
+      );
+      expect(split('## A title', StyleKind.heading), '## |A title|');
+    });
+
+    test('a plain run has none', () {
+      final parsed = _parse('just words');
+      expect(parsed.runs.single.hasMarkers, isFalse);
+    });
+  });
+
   group('nesting is a depth', () {
     test('emphasis inside strong', () {
       final parsed = _parse('**a *b* c**');

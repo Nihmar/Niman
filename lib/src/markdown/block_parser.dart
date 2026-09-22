@@ -138,6 +138,8 @@ final class BlockParser {
                 end: run.end,
                 depth: previous.depth,
                 href: run.href,
+                innerStart: previous.start,
+                innerEnd: run.end,
               ),
             );
           continue;
@@ -311,12 +313,25 @@ final class _Walk {
     }
     // An image has no children — its alt text is an attribute — so the range
     // comes from its own target in the text instead.
-    covered ??= kind == StyleKind.image || kind == StyleKind.link
-        ? _locateByHref(node)
-        : null;
+    var inner = covered;
+    if (covered == null &&
+        (kind == StyleKind.image || kind == StyleKind.link)) {
+      final located = _locateByHref(node);
+      if (located != null) {
+        covered = located;
+        // `[` or `![` to `](`: the text between them, which an image's alt is.
+        final open = masked.text.codeUnitAt(located.$1) == 0x21 ? 2 : 1;
+        final close = masked.text.lastIndexOf('](', located.$2);
+        inner = (
+          located.$1 + open,
+          close < located.$1 + open ? located.$1 + open : close,
+        );
+      }
+    }
     if (covered == null) return null;
 
     final widened = _widen(node.tag, covered);
+    final text = inner ?? covered;
     runs
       ..add(
         StyleRun(
@@ -325,6 +340,8 @@ final class _Walk {
           end: widened.$2,
           depth: depth,
           href: _href(node),
+          innerStart: text.$1,
+          innerEnd: text.$2,
         ),
       )
       ..addAll(childRuns);
