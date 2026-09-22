@@ -21,8 +21,12 @@ String _line(Random random) => switch (random.nextInt(12)) {
   _ => 'plain words ${random.nextInt(100)}',
 };
 
-String _describe(StyledLine line) =>
-    '${line.text}: ${[for (final t in line.tokens) '${t.kind.name}@${t.start}-${t.end}'].join(' ')}';
+String _describe(StyledLine line) {
+  final tokens = [
+    for (final t in line.tokens) '${t.kind.name}@${t.start}-${t.end}',
+  ];
+  return '${line.text}: ${tokens.join(' ')}';
+}
 
 void _same(HighlightDocument lazy, List<String> lines, Random random) {
   final eager = HighlightDocument.fromText(lines.join('\n'));
@@ -71,7 +75,7 @@ void main() {
   test('the last line of a long note is asked for without the rest', () {
     final lines = [
       for (var at = 0; at < 300000; at++)
-        at % 50 == 0 ? '# Section $at' : 'a **line** with `code` and $at',
+        if (at % 50 == 0) '# Section $at' else 'a **line** with `code` and $at',
     ];
     final lazy = HighlightDocument.fromLines(lines);
     final clock = Stopwatch()..start();
