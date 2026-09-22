@@ -10,6 +10,12 @@ status row switches only when both are enabled.
 - **Source editor** (`re_editor`): Markdown text with Niman's incremental
   tokenizer for highlighting. Line numbers and indent width (2–8, default
   2) are per-library settings.
+- **Source editor font**: the source pane is set in a **monospace** face —
+  `monospace`, with `Consolas` / `DejaVu Sans Mono` / `Roboto Mono` as
+  fallbacks — because the source is read as text: its markers, its indents and
+  its columns. The line numbers use the same face at the same size, dimmed, so
+  they line up with the characters they count. Making the face and size a
+  setting is issue #259.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk. It opens a
   note of **any size** — the 934 KB geometry note included — and the price of

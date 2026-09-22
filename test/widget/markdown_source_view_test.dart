@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -718,6 +719,85 @@ void main() {
     final marker = live.firstWhere((span) => span.text == '##');
     expect(marker.style?.fontSize, lessThan(1));
     expect(marker.style?.color, const Color(0x00000000));
+  });
+
+  testWidgets('the selection is painted, not just remembered', (tester) async {
+    // "Selection does not work" on a device is a selection nobody can see: the
+    // model was right and the screen said nothing.
+    await pump(
+      tester,
+      'una riga di testo\n',
+      selection: const SelectionModel(anchor: 4, extent: 9),
+    );
+    await tester.pump();
+    final highlighted = <String>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.style?.background != null) {
+          highlighted.add(span.text ?? '');
+        }
+        return true;
+      });
+    }
+    expect(
+      highlighted.join(),
+      'riga ',
+      reason: 'exactly the selected characters carry a background',
+    );
+  });
+
+  testWidgets('Enter inserts one line, not two', (tester) async {
+    final buffer = SourceBuffer.fromText('una\ndue\n');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            selection: const SelectionModel.at(3),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(buffer.text, 'una\n\ndue\n', reason: 'one press, one line');
+  });
+
+  testWidgets('the note column moves the text in, not the pane', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: SourceBuffer.fromText('una riga\n'),
+            theme: _theme,
+            showLineNumbers: false,
+            column: const NoteColumn(width: 300),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // The side space is (600 - 300 - 32) / 2 = 134, plus the 16 px inset: a tap
+    // at the text's own left edge is offset 0, and a tap nearer the pane's edge
+    // is
+    // *before* it — which is what a column means.
+    final rect = tester.getRect(find.byType(MarkdownSourceView));
+    // Ten pixels into the first line: the y has to be *in* it, or the tap lands
+    // on the empty line the trailing newline makes.
+    expect(state.offsetAt(Offset(rect.left + 150, rect.top + 18)), 0);
   });
 
   testWidgets('a jump to a line brings it to the top', (tester) async {

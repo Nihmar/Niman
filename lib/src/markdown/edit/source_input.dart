@@ -12,6 +12,8 @@
 //
 // It is deliberately not part of the view's state. The view can be wrong about
 // pixels without being wrong about text, and this is the text.
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/logging.dart';
@@ -86,6 +88,7 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   /// Opens the connection, if it is not already open.
   void attach() {
     if (isAttached) return;
+    _log.info('attach: connecting the keyboard to the note');
     _ensureSeeded();
     _input.echoSent();
     _echoScheduled = false;
@@ -101,6 +104,8 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
 
   /// Closes the connection.
   void detach() {
+    _echoTimer?.cancel();
+    if (_connection != null) _log.info('detach: the surface lost focus');
     _connection?.close();
     _connection = null;
   }
@@ -123,6 +128,11 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   }
 
   bool _echoScheduled = false;
+  Timer? _echoTimer;
+
+  /// Whether *this side* moved the caret since the platform last heard about
+  /// it.
+  bool _movedSelection = false;
 
   /// The note and the caret, as the platform should hear them.
   TextEditingValue _value() {
@@ -139,7 +149,9 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   /// Sends the buffer's value when the platform's copy is behind, and nothing
   /// otherwise — the rule that keeps a keystroke from carrying the whole note.
   void _send() {
-    if (!_input.needsEcho || !isAttached) return;
+    if (!isAttached) return;
+    _movedSelection = false;
+    if (!_input.needsEcho) return;
     _connection!.setEditingState(_value());
     _input.echoSent();
   }
@@ -249,11 +261,20 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
       deltaCount++;
       switch (delta) {
         case TextEditingDeltaInsertion():
+          // The platform's caret is authoritative *unless we moved it
+          // ourselves*:
+          // a tap or an arrow key moves the caret here, the platform hears
+          // about
+          // it late (an echo of a whole note is not free), and an insertion
+          // that
+          // lands where the platform last thought the caret was is text in the
+          // wrong place. When we moved it, ours is the newer truth.
+          final caret = _movedSelection ? selection() : _caretOfDelta(delta);
           _replace(
             delta.insertionOffset,
             delta.insertionOffset,
             delta.textInserted,
-            _caretOfDelta(delta),
+            caret,
           );
         case TextEditingDeltaDeletion():
           _replace(

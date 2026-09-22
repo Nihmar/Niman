@@ -161,6 +161,60 @@ final class MarkdownTheme {
   };
 }
 
+/// The source mode's typography: a copy of [theme] in a monospace face.
+///
+/// The source editor is read as *text* — its markers, its indents, its columns
+/// —
+/// and a proportional face makes the columns drift. The legacy editor set the
+/// note
+/// in `monospace` with these fallbacks, for the platforms where the generic
+/// alias
+/// does not resolve (`note_editor.dart`), and the numbers in the same face at
+/// the
+/// same size, dimmed.
+///
+/// The face is a *documentation* matter as much as a code one: set, for now,
+/// and
+/// meant to become a setting — see the issue "the source editor's font should
+/// be a
+/// setting" and `docs/user/editing.md`.
+MarkdownTheme monospaceTheme(MarkdownTheme theme) {
+  const fallback = <String>['Consolas', 'DejaVu Sans Mono', 'Roboto Mono'];
+  TextStyle mono(TextStyle style) =>
+      style.copyWith(fontFamily: 'monospace', fontFamilyFallback: fallback);
+  return MarkdownTheme(
+    body: mono(theme.body),
+    heading1: mono(theme.heading1),
+    heading2: mono(theme.heading2),
+    heading3: mono(theme.heading3),
+    heading4: mono(theme.heading4),
+    heading5: mono(theme.heading5),
+    heading6: mono(theme.heading6),
+    code: mono(theme.code),
+    quote: mono(theme.quote),
+    tableCell: mono(theme.tableCell),
+    tableHeader: mono(theme.tableHeader),
+    link: mono(theme.link),
+    wikilink: mono(theme.wikilink),
+    tag: mono(theme.tag),
+    marker: mono(theme.marker),
+    codeHighlight: theme.codeHighlight,
+    rule: theme.rule,
+    codeBackground: theme.codeBackground,
+    quoteBar: theme.quoteBar,
+    tableBorder: theme.tableBorder,
+    markerDim: theme.markerDim,
+    blockSpacing: theme.blockSpacing,
+    listIndentPerLevel: theme.listIndentPerLevel,
+    quoteIndentPerLevel: theme.quoteIndentPerLevel,
+    codePadding: theme.codePadding,
+    quoteBarWidth: theme.quoteBarWidth,
+    ruleThickness: theme.ruleThickness,
+    tableCellPadding: theme.tableCellPadding,
+    lineHeight: theme.lineHeight,
+  );
+}
+
 /// The note's theme for the nearest application theme.
 ///
 /// A function rather than a factory, as `noteTextScalerOf` is: it reads
