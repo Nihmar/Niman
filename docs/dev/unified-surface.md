@@ -11332,10 +11332,77 @@ say the same thing after every step.
 - *No selection by touch* — a long press, Material's handles and the adaptive
   toolbar (`edit/touch_selection.dart`).
 
-**Not built yet, in the order they come next:** the desktop context menu,
-find/replace, the spelling underline and its menu (the scan runs, with no
-skip ranges from the tokenizer yet), Ctrl+click on a link, typewriter mode and
-the Zen caret, folding, semantics. The flag stays experimental until they are.
+### The rest of the contract, and the phase closed (2026-09-22)
+
+What the round above left for later, built in the order it listed, one commit
+each:
+
+- **The context menu** — a right click opens the legacy menu (`EditorContextMenu`:
+  the clipboard, the toolbar's formats, the spelling's entries) at the click; a
+  click on the selection keeps it, anywhere else puts the caret there first. The
+  menu key and Shift+F10 open it at the caret, Escape closes it. The phone's
+  selection toolbar is the same menu, formats in its overflow.
+- **The spelling** — the same `EditorSpellCheck` and the same skip ranges as the
+  legacy editor, from the surface's own tokenizer: a wavy underline on the lines
+  drawn, the checker's suggestions and Add to dictionary in the menu, and the
+  spelling panel's pass skipping code and links here too.
+- **Find and replace** — `SourceFindController` over the buffer: a literal,
+  whole-note search on this isolate (a native scan; a note past a megabyte is
+  searched once the query rests), the matches painted in the note, the current one
+  the selection. The WYSIWYG's bar became `FindBar` over a `FindBarModel`, so the
+  two surfaces share one face; Ctrl+F, Ctrl+H/Ctrl+Alt+F, F3, the page keys and
+  Escape answer as re_editor's did. Replace all is one edit and one undo step.
+- **Ctrl+click on a link** — wikilinks and Markdown links, through the door the
+  legacy editor's T-M3-07 used.
+- **Typewriter and Zen** — the caret's row glides to the middle while the note or
+  its find bar has the focus, lit faintly, with room under the last line; Zen
+  thickens the caret and hides the numbers.
+- **Folding** — the gutter's arrows fold a heading's section, capped at 20 000
+  lines as the legacy analyzer was. The decision worth recording: **the view draws
+  rows, not lines** (`render/source_folds.dart`). A folded line is not a
+  zero-height child — the sliver would build and walk every one of them, and an
+  element rebuild fills every index between its first and last child — it is
+  simply not in the list. With nothing folded the mapping is the identity. A caret
+  that goes into a fold opens it; an edit above a fold moves it with the lines; one
+  that touches what it hides lets it go.
+- **Semantics** — the note is one multiline text field to the platform: its value
+  the note within 4 000 characters of the caret (the tree is sent whole on every
+  change, and the note can be megabytes), its selection, the character and word
+  moves, the clipboard. `Semantics` cannot say where the selection is, so a small
+  render object says it, as `RenderEditable` does; the lines under it are
+  excluded, or a reader would read the note twice.
+
+**The exit criteria, one by one.**
+
+- *0.507 ms a keystroke*: 0.078 ms (`source_edit_timing_test.dart`), and the whole
+  path from a delta to its frame does not grow with the note
+  (`source_keystroke_path_test.dart`, ×0.8 for fifty times the lines).
+- *23.95 ms cold tokenize*: the tokenizer is the legacy editor's own, so its number
+  is its number (21.3 ms on the legacy fixture, §13.2); and the surface does not
+  pay it on open, because it tokenizes lazily, as lines are drawn.
+- *IME on the three platforms*: `FakeEmbedder` for all three profiles; on the
+  devices Android and Windows were checked by hand, Linux in the round before.
+  A second Android IME besides Gboard is still to be tried.
+- *The caret where the character is*, at a line's ends, after a wrap, on a line
+  whose height changed and under the handles: from the line's own paragraph, by
+  construction, and pinned by `markdown_source_view_test.dart` and
+  `source_touch_selection_test.dart`.
+- *Selection, clicks, motions, the shortcuts*: `shortcuts.md` is the list, and every
+  key on it answers on the surface.
+- *Undo, clipboard, the unsaved dot, undo that moves with a tab*: the history is the
+  shell's (`MarkdownSurfaceController`), and the note's state moves with its tab's
+  `GlobalKey`.
+- *The surface tests ported*: `note_view_unified_port_test.dart` runs the legacy
+  editor's shell tests with the flag on — undo after open, the unsaved dot, the
+  format keys, Escape, the outline, the memento, images, Ctrl+click, the anchor,
+  chosen keys, the clipboard, kinds, the frontmatter check, the toolbar's focus,
+  the column. Porting them found two gaps the feature list had not: the surface
+  took no focus on open (the keyboard-on-open setting, a template's `{{cursor}}`),
+  and Escape did not collapse a selection before reaching the app.
+
+Phase 3 is done. The flag can stop being experimental once a device round with it
+on as the default comes back clean; that is the user's call, and phase 4 starts on
+this surface either way.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
