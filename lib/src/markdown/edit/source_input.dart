@@ -41,6 +41,7 @@ final class SourceInput implements DeltaTextInputClient {
     required this.onSelection,
     required this.onTokenizer,
     this.onRecord,
+    this.onNewline,
   });
 
   /// The frames this surface's edits are logged under.
@@ -60,6 +61,12 @@ final class SourceInput implements DeltaTextInputClient {
   /// Called before an edit is applied, with the text it is about to replace,
   /// so a history can undo it.
   final void Function(EditRecord record)? onRecord;
+
+  /// Asked when the platform types a line break over `[start, end)`: true when
+  /// the surface put in something of its own instead (the next list marker),
+  /// in which case the platform's line break is not applied and the platform
+  /// is told what the note now says.
+  final bool Function(int start, int end)? onNewline;
 
   /// Where the caret is now.
   final SelectionModel Function() selection;
@@ -331,6 +338,8 @@ final class SourceInput implements DeltaTextInputClient {
         break;
       } else if (start == end && inserted.isEmpty) {
         _reportSelection(_caretOf(delta.selection));
+      } else if (inserted == '\n' && (onNewline?.call(start, end) ?? false)) {
+        exact = false;
       } else if (!_replace(start, end, inserted, _caretOf(delta.selection))) {
         exact = false;
       }

@@ -1251,6 +1251,7 @@ final class _NoteViewState extends State<NoteView>
       mode: MarkdownSurfaceMode.source,
       theme: markdownThemeOf(context),
       showLineNumbers: widget.showLineNumbers,
+      indentWidth: widget.indentWidth,
       column: widget.noteColumn,
       onChanged: (text) =>
           _noteChanged(text: text, caretLine: _surfaceCaretLine ?? _caretLine),
