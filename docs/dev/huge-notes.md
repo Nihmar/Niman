@@ -182,28 +182,38 @@ written next to it.
    whose merge rule is not the paragraph's (frontmatter runs to its closing
    line, not to the next blank) has to be merged the way the scan merges it.
 
-   **Sixth attempt.** Both edges fixed — the prefix is kept only when the
-   rebuild really starts inside the block (`narrowed`), and the join uses
+   **Sixth attempt, kept.** Both edges fixed — the prefix is kept only when
+   the rebuild really starts inside the block (`narrowed`) and the join uses
    `_mergesInto(prefix.kind, …)`, the scanner's own rule — and the narrowing
-   was widened from "the block was entered at the top level" to "every line
-   of the block is entered in the block's state" (`_holdsOneState`: every
-   kind but a quote and a list item). With that, **every test in
-   `block_scanner_test` and `worst_note_test` passes**, the keystroke in the
-   9 000-line note re-scans two lines, and a same-line-count edit inside a
-   `$$…$$` block at 25 % of the 246 MB note re-scans two lines where it
-   re-scanned 2 068 158 before.
+   is widened from "the block was entered at the top level" to "every line of
+   the block is entered in the block's state" (`_holdsOneState`: every kind
+   but a quote and a list item). The join also *checks its work*: the states
+   between the block's first line and the edit are recomputed, and the
+   narrowing only happens when the state that walk arrives at is the one the
+   note recorded for the edit's line (`_entering[from] == probing`). That
+   check is what `source_styler_test` demanded — without it a `$$` line came
+   out as `codeFence` after some random edits, a state right per line and
+   wrong per block.
 
-   What it still gets wrong is in `source_styler_test` ("edits follow the
-   note as a fresh styler would read it"): after some random edits a `$$`
-   line comes out as `codeFence` where a fresh read says `mathBlock`. That is
-   the end-to-end gate, and the one to satisfy next — the block's own tests
-   cannot see a state that is right per line and wrong per block.
+   With it, **the whole suite is green** (4 758 tests), including
+   `block_scanner_test`'s 40-round random-edit property and
+   `source_styler_test`'s.
 
-   The convergence point is also still the block's own end: an edit inside a
-   `$$…$$` block of 137 k lines narrows the *rebuild* but the scan still runs
-   to the block's close before it stops, so the 50 % number above does not
-   move. The next step after the styler gate is to let a narrowed scan stop
-   where the state agrees, without waiting for a block boundary.
+   **The performance gain did not follow, and the measurements above are why
+   it was thought to.** `scanner_edit_bench.dart` and the same-line-count
+   probe still read 2 068 158 lines for an edit inside the `$$…$$` block at
+   25 % of the 246 MB note, and 137 8772 at 50 %. What those numbers are
+   measuring is not the walk the fix removes: the scan still has to run to
+   the *block's close* before the convergence rule fires, because that rule
+   wants a block boundary (`_isBlockBoundary`) and a boundary in the old
+   block list (`_hasBoundaryAt`), and inside one long block there is neither
+   until it ends. Narrowing the rebuild moved work that was not the cost.
+
+   So item 3 stands as it did: the scan's cost is still the containing block,
+   and a note whose block is the note is still O(note) per keystroke. The
+   next step is not the rebuild — it is the convergence rule: let a narrowed
+   scan stop where the *state* agrees, rather than where the block list has a
+   boundary.
 
    **What is left, stated plainly.** The scan's cost is the containing block,
    and a whole note can be one block, so the path is not gone for a note

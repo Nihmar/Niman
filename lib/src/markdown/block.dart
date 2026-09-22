@@ -8,6 +8,7 @@
 library;
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/markdown/line_state.dart';
 
 /// What a block is.
 enum BlockKind {
@@ -62,6 +63,7 @@ final class Block {
     this.listOrdinal = 0,
     this.headingLevel = 0,
     this.fenceInfo,
+    this.entering,
   });
 
   /// What the block is.
@@ -94,6 +96,14 @@ final class Block {
   /// The fence's info string (its language), when the block is fenced code.
   final String? fenceInfo;
 
+  /// The state entering the block's first line, when the scanner kept it.
+  ///
+  /// What a rebuild that starts inside the block works from: the lines before
+  /// the edit are the same lines, entered in this state, so their states are
+  /// recomputed rather than walked (`BlockScanner._rescanFrom`, and
+  /// `docs/dev/huge-notes.md` item 3). Null for a `Block` built by hand.
+  final LineState? entering;
+
   /// How many lines it covers.
   int get lineCount => endLine - startLine;
 
@@ -116,6 +126,7 @@ final class Block {
       listOrdinal: listOrdinal,
       headingLevel: headingLevel,
       fenceInfo: fenceInfo,
+      entering: entering,
     );
   }
 
