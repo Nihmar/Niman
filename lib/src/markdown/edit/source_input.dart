@@ -122,6 +122,9 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   void sendSelection() {
     if (!isAttached) return;
     _input.editedLocally(_value());
+    // Until the echo lands, the platform's caret is the old one: a keystroke
+    // in between is placed at ours (see `updateEditingValueWithDeltas`).
+    _movedSelection = true;
     // One echo per frame, however many taps, arrow keys or drags happened
     // inside
     // it: a whole `TextEditingValue` at note size is not something to send
@@ -285,24 +288,37 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
       );
       buffer.replaceRange(0, buffer.length, deltas.last.oldText);
     }
+    // Whether an edit landed somewhere other than where the platform put it,
+    // so its copy has to be told what the note now says.
+    var diverged = false;
     for (final delta in deltas) {
       deltaCount++;
       switch (delta) {
-        case TextEditingDeltaInsertion():
+        case TextEditingDeltaInsertion() when _movedSelection:
           // The platform's caret is authoritative *unless we moved it
-          // ourselves*:
-          // a tap or an arrow key moves the caret here, the platform hears
-          // about
-          // it late (an echo of a whole note is not free), and an insertion
-          // that
-          // lands where the platform last thought the caret was is text in the
-          // wrong place. When we moved it, ours is the newer truth.
-          final caret = _movedSelection ? selection() : _caretOfDelta(delta);
+          // ourselves*: a tap or an arrow key moves the caret here, the
+          // platform hears about it a frame later, and an insertion that lands
+          // where the platform last thought the caret was is text in the wrong
+          // place. When we moved it, ours is the newer truth — for the offset
+          // the text goes to, not only for where the caret ends up.
+          final ours = selection().clampTo(buffer.length);
+          _log.debug(
+            'insertion at the platform caret ${delta.insertionOffset} '
+            'placed at ours ${ours.start}',
+          );
+          _replace(
+            ours.start,
+            ours.end,
+            delta.textInserted,
+            SelectionModel.at(ours.start + delta.textInserted.length),
+          );
+          diverged = true;
+        case TextEditingDeltaInsertion():
           _replace(
             delta.insertionOffset,
             delta.insertionOffset,
             delta.textInserted,
-            caret,
+            _caretOfDelta(delta),
           );
         case TextEditingDeltaDeletion():
           _replace(
@@ -333,6 +349,10 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
             _reportSelection(_caretOfDelta(delta));
           }
       }
+    }
+    if (diverged) {
+      _input.editedLocally(_value());
+      _send();
     }
   }
 
@@ -375,13 +395,13 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
       // not
       // the connection's.
       case TextInputAction.newline:
-        final caret = selection();
-        _replace(
-          caret.start,
-          caret.end,
-          '\n',
-          SelectionModel.at(caret.end + 1),
-        );
+        // Nothing to insert: the line break has already arrived as text. The
+        // Linux embedder inserts `\n` into its model, sends it as a delta and
+        // *then* calls this action (`fl_text_input_handler.cc`), and an IME
+        // commits it the same way — so inserting here as well is one Enter
+        // becoming two lines. `EditableText` does nothing here for a
+        // multiline field either.
+        _log.debug('action: newline (already inserted by the platform)');
       case TextInputAction.done:
       case TextInputAction.go:
       case TextInputAction.send:
