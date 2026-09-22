@@ -569,9 +569,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The note changed, so the shell can save it.
   void _notifyChanged() => widget.onChanged?.call(widget.buffer.text);
 
-  /// How many taps have landed inside [_clickWindow], and when the last did.
+  /// How many taps have landed inside [_clickWindow], and when and where the
+  /// last did.
   int _clicks = 0;
   DateTime? _lastClick;
+  Offset? _lastClickAt;
 
   /// How long two taps may be apart and still be one gesture.
   static const Duration _clickWindow = Duration(milliseconds: 400);
@@ -588,10 +590,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (offset == null) return;
     final now = DateTime.now();
     final last = _lastClick;
-    _clicks = last != null && now.difference(last) <= _clickWindow
+    final lastAt = _lastClickAt;
+    // Near in time *and* in place: two quick taps on different words are two
+    // carets, not a double click — counting time alone selected a word under
+    // the second tap and the next keystroke replaced it.
+    _clicks =
+        last != null &&
+            lastAt != null &&
+            now.difference(last) <= _clickWindow &&
+            (position - lastAt).distance <= kDoubleTapSlop
         ? _clicks + 1
         : 1;
     _lastClick = now;
+    _lastClickAt = position;
     switch (_clicks) {
       case 1:
         placeCaret(offset);
