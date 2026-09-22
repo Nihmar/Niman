@@ -3099,6 +3099,12 @@ final class _LibraryShellState extends State<_LibraryShell>
               showWysiwyg: editor == EditorKind.wysiwyg,
               showPreview: tab.memento.preview ?? false,
               anchor: focused && tab.path == showing ? _pendingAnchor : null,
+              // The wide deck's own door for it: the phone's single note
+              // view took it, and the tabs never did, so a template's
+              // `{{cursor}}` landed nowhere on the desktop.
+              caret: focused && tab.path == showing
+                  ? _pendingCaretOffset
+                  : null,
             );
           }(),
     ];
