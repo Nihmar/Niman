@@ -104,6 +104,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.onOpenLink,
     this.caretWidth,
     this.typewriter = false,
+    this.autofocus = false,
     super.key,
   });
 
@@ -204,6 +205,10 @@ final class MarkdownSourceView extends StatefulWidget {
   /// pane, lit faintly, and the note leaves room below its last line so that
   /// row can reach the middle there too.
   final bool typewriter;
+
+  /// Whether the note takes the focus — and the keyboard — as it opens (the
+  /// keyboard-on-open setting, and a template's `{{cursor}}`).
+  final bool autofocus;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -1708,6 +1713,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     var note = _shortcuts(
       Focus(
         focusNode: _focus,
+        autofocus: widget.autofocus,
         onKeyEvent: _menuKey,
         onFocusChange: (hasFocus) {
           if (hasFocus) {
@@ -1936,7 +1942,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The keys the menu answers while the note has the focus: Escape closes
-  /// it, and the menu key or Shift+F10 opens it at the caret. Everything else
+  /// it (or the touch selection, or collapses a selection), and the menu key
+  /// or Shift+F10 opens it at the caret. Everything else
   /// goes on to the note's shortcuts.
   KeyEventResult _menuKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
@@ -1948,6 +1955,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       }
       if (_touchHandles || _touchToolbar) {
         _hideTouch();
+        return KeyEventResult.handled;
+      }
+      // A selection takes the first press, as it did in the legacy editor;
+      // with nothing left to cancel the key goes on to the app (Zen mode).
+      if (!_selection.isCollapsed) {
+        placeCaret(_selection.extent);
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;

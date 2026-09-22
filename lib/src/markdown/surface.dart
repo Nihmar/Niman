@@ -78,6 +78,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.onOpenLink,
     this.caretWidth,
     this.typewriter = false,
+    this.autofocus = false,
     super.key,
   });
 
@@ -148,6 +149,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// Typewriter mode: the row being written keeps to the middle.
   final bool typewriter;
 
+  /// Whether the note takes the focus as it opens.
+  final bool autofocus;
+
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
@@ -182,5 +186,6 @@ final class MarkdownSurface extends StatelessWidget {
     onOpenLink: onOpenLink,
     caretWidth: caretWidth,
     typewriter: typewriter,
+    autofocus: autofocus,
   );
 }
