@@ -26,6 +26,7 @@ import 'package:nativeapi/nativeapi.dart'
         TrayIconRightClickedEvent;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/windows_tray_menu.dart';
 
 /// The tray menu's own entries (#209), beside the quick actions.
 enum TrayCommand {
@@ -73,7 +74,7 @@ abstract interface class TrayService {
   Future<void> dispose();
 }
 
-/// Which gesture opens the tray menu.
+/// Which gesture has nativeapi open the tray menu.
 ///
 /// Linux: the click *is* the menu. A StatusNotifier item has no right
 /// click of its own, and nativeapi tells the desktop where the menu
@@ -81,14 +82,18 @@ abstract interface class TrayService {
 /// answers the SNI `Menu` property with "/", and KDE, told the item has
 /// no menu, showed nothing at all (0.0.8 test round).
 ///
-/// Windows keeps the right click, where the left one brings the window
-/// back — the convention there, and the reason the two differ.
+/// Windows: none — the right click is answered by [WindowsTrayMenu], because
+/// nativeapi's own popup is owned by a message-only window, which cannot take
+/// the foreground, and the menu flashed and closed. The left click still
+/// brings the window back, the convention there.
 ///
-/// [isLinux] overrides the host platform for the test.
-ContextMenuTrigger trayContextMenuTrigger({bool? isLinux}) {
-  return (isLinux ?? Platform.isLinux)
-      ? ContextMenuTrigger.clicked
-      : ContextMenuTrigger.rightClicked;
+/// Elsewhere (macOS): the right click.
+///
+/// [isLinux] and [isWindows] override the host platform for the test.
+ContextMenuTrigger trayContextMenuTrigger({bool? isLinux, bool? isWindows}) {
+  if (isLinux ?? Platform.isLinux) return ContextMenuTrigger.clicked;
+  if (isWindows ?? Platform.isWindows) return ContextMenuTrigger.none;
+  return ContextMenuTrigger.rightClicked;
 }
 
 /// Creates the platform service: a real tray on the desktops, a no-op
@@ -132,6 +137,13 @@ final class PlatformTrayService implements TrayService {
   Menu? _menu;
   Image? _icon;
   final List<MenuItem> _items = [];
+
+  /// What each item does, by the item's native id: nativeapi's click event
+  /// carries it, and so does the choice [WindowsTrayMenu] returns.
+  final Map<int, void Function()> _runs = {};
+
+  /// The Windows popup, made on the first right click.
+  WindowsTrayMenu? _windowsMenu;
 
   @override
   Stream<ShortcutAction> get actions => _actions.stream;
@@ -192,6 +204,7 @@ final class PlatformTrayService implements TrayService {
               'tray: right click (trigger ${tray.getContextMenuTrigger()}, '
               'menu ${tray.getContextMenu() != null})',
             );
+            if (Platform.isWindows) _openWindowsMenu();
           }
         });
       // Windows adds the icon to the notification area only here
@@ -218,6 +231,21 @@ final class PlatformTrayService implements TrayService {
       // missing convenience, not a reason to fail the launch.
       _log.warning('tray init failed ($error)');
     }
+  }
+
+  /// Opens the menu from an owner that can take the foreground, and runs what
+  /// was chosen (Windows; see [WindowsTrayMenu]).
+  void _openWindowsMenu() {
+    final menu = _menu;
+    if (menu == null) return;
+    final popup = _windowsMenu ??= WindowsTrayMenu.create();
+    if (popup == null) {
+      _log.warning('tray: no window to own the menu');
+      return;
+    }
+    final chosen = popup.open(menu.nativeObject);
+    _log.debug('tray: menu closed (chose $chosen)');
+    if (chosen != 0) _runs[chosen]?.call();
   }
 
   /// Hangs a fresh menu on the icon and lets the old one go.
@@ -248,6 +276,7 @@ final class PlatformTrayService implements TrayService {
       _ends = ends;
       old?.dispose();
       for (final item in oldItems) {
+        _runs.remove(item.id);
         item.dispose();
       }
       _log.info('tray relabelled (${labels.length} actions)');
@@ -270,6 +299,7 @@ final class PlatformTrayService implements TrayService {
     void add(String label, void Function() run) {
       final item = MenuItem.createWithLabelAndType(label, MenuItemType.normal);
       if (item == null) return;
+      _runs[item.id] = run;
       item.addListener((event) {
         if (event is! MenuItemClickedEvent || event.itemId != item.id) return;
         run();
@@ -310,6 +340,9 @@ final class PlatformTrayService implements TrayService {
       item.dispose();
     }
     _icon?.dispose();
+    _windowsMenu?.dispose();
+    _windowsMenu = null;
+    _runs.clear();
     _tray = null;
     _menu = null;
     _icon = null;
