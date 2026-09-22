@@ -19,6 +19,35 @@ List<int> _naiveOffsets(String text) {
 }
 
 void main() {
+  group('snapshot', () {
+    test('holds the text as it was, whatever the buffer does next', () {
+      final buffer = SourceBuffer.fromText('uno\r\ndue\ntre');
+      final snapshot = buffer.snapshot();
+      buffer
+        ..replaceRange(0, 3, 'UNO\nnuova')
+        ..replaceRange(buffer.length, buffer.length, '\nquattro');
+      expect(snapshot.text, 'uno\r\ndue\ntre');
+      expect(snapshot.lineCount, 3);
+      expect(snapshot.offsetOfLine(2), 9);
+      expect(buffer.text, 'UNO\nnuova\r\ndue\ntre\nquattro');
+    });
+
+    test('is the same buffer as reading its text again', () {
+      final buffer = SourceBuffer.fromText('# a\n\nb\r\nc');
+      final snapshot = buffer.snapshot();
+      final again = SourceBuffer.fromText(buffer.text);
+      expect(snapshot.text, again.text);
+      expect(snapshot.lineCount, again.lineCount);
+      for (var line = 0; line < again.lineCount; line++) {
+        expect(snapshot.lineAt(line), again.lineAt(line));
+        expect(snapshot.offsetOfLine(line), again.offsetOfLine(line));
+      }
+      // And editing the snapshot leaves the buffer alone.
+      snapshot.replaceRange(0, 0, 'x');
+      expect(buffer.text, '# a\n\nb\r\nc');
+    });
+  });
+
   group('reading', () {
     test('an empty string is one empty line', () {
       final buffer = SourceBuffer.fromText('');
