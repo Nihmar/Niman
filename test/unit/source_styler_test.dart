@@ -134,10 +134,7 @@ void main() {
     test('a fence: every line code, the opening one with its language', () {
       const note = '```dart\nvar a = **b**;\n```';
       final styler = SourceStyler(SourceBuffer.fromText(note));
-      expect(_describe(styler, 0), [
-        'codeFence[```dart]',
-        'codeLanguage[dart]',
-      ]);
+      expect(_describe(styler, 0), ['codeFence[```]', 'codeLanguage[dart]']);
       expect(_describe(styler, 1), ['codeFence[var a = **b**;]']);
       expect(_describe(styler, 2), ['codeFence[```]']);
     });

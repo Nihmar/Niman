@@ -158,16 +158,22 @@ final class SourceStyler {
   // ----------------------------------------------------------------- structure
 
   /// A fence's line: all of it code, and the opening line's language.
+  ///
+  /// Disjoint, as every line's tokens are: the language cuts the fence line
+  /// in three rather than lying on top of it.
   static List<Token> _fenceTokens(Block block, int line, String text) {
-    final tokens = <Token>[Token(TokenKind.codeFence, 0, text.length)];
-    if (line != block.startLine) return tokens;
+    final whole = <Token>[Token(TokenKind.codeFence, 0, text.length)];
+    if (line != block.startLine) return whole;
     final info = block.fenceInfo;
-    if (info == null) return tokens;
+    if (info == null) return whole;
     final at = text.indexOf(info);
-    if (at >= 0) {
-      tokens.add(Token(TokenKind.codeLanguage, at, at + info.length));
-    }
-    return tokens;
+    if (at < 0) return whole;
+    final end = at + info.length;
+    return <Token>[
+      Token(TokenKind.codeFence, 0, at),
+      Token(TokenKind.codeLanguage, at, end),
+      if (end < text.length) Token(TokenKind.codeFence, end, text.length),
+    ];
   }
 
   /// The structural marks at the start of [text] — quote marks, a list

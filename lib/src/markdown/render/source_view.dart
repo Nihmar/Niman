@@ -51,6 +51,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
+import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
@@ -216,10 +217,15 @@ final class MarkdownSourceView extends StatefulWidget {
 
 /// The source view's state, so a caller can ask where the caret is.
 final class MarkdownSourceViewState extends State<MarkdownSourceView> {
-  /// The tokenizer, kept across rebuilds: an edit re-tokenizes from the edit
-  /// point on and nothing else (the 0.507 ms incremental-edit number the phase
-  /// has to meet is this object's).
-  late HighlightDocument _tokens;
+  /// The colours: the read view's engine put on the source lines, kept
+  /// across rebuilds and moved along by every edit — O(change).
+  ///
+  /// Null while a long note is read in the background ([_restyle]): the
+  /// lines are drawn plain until it lands.
+  SourceStyler? _styler;
+
+  /// Counts the readings started, so one a later one overtook is dropped.
+  int _stylings = 0;
 
   /// The heights the sliver places the rows with: one per line nobody has
   /// folded away.
@@ -312,7 +318,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @override
   void initState() {
     super.initState();
-    _tokens = _tokenize();
+    _restyle();
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
@@ -339,8 +345,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: widget.buffer,
     onRecord: _history.record,
     onNewline: _newline,
-    onTokenizer: (edit, buffer) =>
-        SourceInput.retokenize(_tokens, edit, buffer),
+    onTokenizer: (edit, buffer) => _styleEdited(edit),
     selection: () => _selection,
     onSelection: (next) {
       setState(() => _ownSelection = next);
@@ -387,16 +392,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ownSelection =
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
-      _tokens = _tokenize();
+      _restyle();
       _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
       if (attached) _input.attach(viewId: View.of(context).viewId);
     } else if (widget.buffer.revision != _seenRevision) {
-      // An edit this view did not make (a command, a revert): the tokenizer is
-      // rebuilt rather than adjusted, because there is no `SourceEdit` to
+      // An edit this view did not make (a command, a revert): the colours are
+      // read again rather than adjusted, because there is no `SourceEdit` to
       // follow.
-      _tokens = _tokenize();
+      _restyle();
       _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
@@ -435,7 +440,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// How many source lines the note has.
-  int get lineCount => _tokens.lineCount;
+  int get lineCount => widget.buffer.lineCount;
 
   /// The spelling changed its mind (a dictionary loaded, a word added, the
   /// underline switched off), or the find bar found something else: the
@@ -444,8 +449,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (mounted) setState(() {});
   }
 
-  /// The tokenizer's runs on line [index], or none when it has fallen behind
-  /// the buffer there — for the spelling's pass, which skips what is not
+  /// The runs on line [index], or none while a long note's colours are
+  /// still being read — for the spelling's pass, which skips what is not
   /// prose.
   List<Token> tokensOf(int index) {
     if (index < 0 || index >= widget.buffer.lineCount) return const <Token>[];
@@ -538,7 +543,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Scrolls so [line] is at the top, as far as the map knows.
   void jumpToLine(int line) {
-    if (line < 0 || line >= _tokens.lineCount || !_scroll.hasClients) return;
+    if (line < 0 || line >= lineCount || !_scroll.hasClients) return;
     _reshapeRows(() => _folds.reveal(line));
     _scroll.jumpTo(
       _heights
@@ -570,7 +575,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final buffer = widget.buffer;
     buffer.replaceRange(0, buffer.length, text);
     _history.clear();
-    _tokens = _tokenize();
+    _restyle();
     _folds.clear();
     _heights = _map();
     _seenRevision = buffer.revision;
@@ -604,9 +609,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // touched, and the tokenizer and the map follow those lines.
     final edit = _history.lastEdit;
     if (edit != null) {
-      SourceInput.retokenize(_tokens, edit, widget.buffer);
+      _styleEdited(edit);
     } else {
-      _tokens = _tokenize();
+      _restyle();
     }
     _syncLines(edit);
     // Undo puts the caret after what it restored (where it was before a
@@ -768,7 +773,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         inserted: buffer.substring(start, start + stored),
       ),
     );
-    SourceInput.retokenize(_tokens, edit, buffer);
+    _styleEdited(edit);
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
@@ -846,11 +851,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Whether line [index] is ordinary Markdown — not fenced code, display
   /// maths or frontmatter, where a dash starts nothing. Answered by the
-  /// tokenizer the view already keeps, as the legacy editor's `_isPlainLine`
-  /// is, so the two cannot disagree about what a list is.
+  /// colours the view already keeps, so the two cannot disagree about what a
+  /// list is.
   bool _isPlainLine(int index) {
-    if (index < 0 || index >= _tokens.lineCount) return true;
-    for (final token in _tokens.lineAt(index).tokens) {
+    if (index < 0 || index >= lineCount) return true;
+    for (final token in _lineAt(index).tokens) {
       if (token.kind == TokenKind.codeFence ||
           token.kind == TokenKind.mathBlock ||
           token.kind == TokenKind.frontmatter) {
@@ -990,7 +995,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _syncLines([SourceEdit? edit]) {
     _seenRevision = widget.buffer.revision;
     final lines = widget.buffer.lineCount;
-    if (_tokens.lineCount != lines) _tokens = _tokenize();
     if (!_folds.isEmpty) {
       // The folds follow the edit; when what they hide changed shape, the
       // rows are measured again rather than spliced.
@@ -1066,7 +1070,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final old = _heights;
     if (!change()) return;
     _heights = BlockHeightMap(
-      count: _folds.rowCount(_tokens.lineCount),
+      count: _folds.rowCount(lineCount),
       estimate: (row) {
         final line = _folds.lineOf(row);
         if (!before.isHidden(line)) {
@@ -1303,13 +1307,27 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
     final local = offset - buffer.offsetOfLine(line);
     final styled = _lineAt(line);
-    for (final token in styled.tokens) {
+    final tokens = styled.tokens;
+    for (var at = 0; at < tokens.length; at++) {
+      final token = tokens[at];
       if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
         continue;
       }
-      if (local >= token.start && local <= token.end) {
-        return (token.kind, styled.text.substring(token.start, token.end));
+      // A link comes as its markers and its text, one token each: the link
+      // is the run of them.
+      var end = at;
+      while (end + 1 < tokens.length &&
+          tokens[end + 1].kind == token.kind &&
+          tokens[end + 1].start == tokens[end].end) {
+        end++;
       }
+      if (local >= token.start && local <= tokens[end].end) {
+        return (
+          token.kind,
+          styled.text.substring(token.start, tokens[end].end),
+        );
+      }
+      at = end;
     }
     return null;
   }
@@ -1411,10 +1429,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// drifted.
   StyledLine _lineAt(int index) {
     final text = widget.buffer.lineAt(index);
-    if (index < _tokens.lineCount && _tokens.lineAt(index).text == text) {
-      return _tokens.lineAt(index);
+    final styler = _styler;
+    if (styler == null || index < 0 || index >= lineCount) {
+      return StyledLine(text, const <Token>[]);
     }
-    return StyledLine(text, const <Token>[]);
+    return StyledLine(text, styler.tokensOf(index));
   }
 
   /// The part of the selection that falls inside line [index], as offsets local
@@ -1484,22 +1503,48 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The line the caret sits on, or -1.
   int get _caretLineIndex {
     final line = widget.buffer.lineOf(_selection.extent);
-    return line < 0 || line >= _tokens.lineCount ? -1 : line;
+    return line < 0 || line >= lineCount ? -1 : line;
   }
 
-  /// The tokenizer over the buffer's own lines — split on the note's own line
-  /// endings, so a CRLF note's lines carry no `\r` — tokenized lazily.
-  HighlightDocument _tokenize() {
+  /// From how many lines on a note's colours are read in the background.
+  ///
+  /// Below it the reading costs a frame or less and is done in place, so
+  /// the first frame is already coloured.
+  @visibleForTesting
+  static int backgroundLines = 50000;
+
+  /// Reads the note's colours again, from the top.
+  ///
+  /// A long note is read in an isolate ([SourceStyler.inBackground]): the
+  /// block scan of a 246 MB note is 2 s of a frozen window. Its lines are
+  /// drawn plain until the reading lands, and one that lands on a note that
+  /// moved on meanwhile is started again.
+  void _restyle() {
     final buffer = widget.buffer;
-    return HighlightDocument.fromLines(<String>[
-      for (var line = 0; line < buffer.lineCount; line++) buffer.lineAt(line),
-    ]);
+    final reading = ++_stylings;
+    if (buffer.lineCount < backgroundLines) {
+      _styler = SourceStyler(buffer);
+      return;
+    }
+    _styler = null;
+    unawaited(
+      SourceStyler.inBackground(buffer).then((styler) {
+        if (!mounted || reading != _stylings) return;
+        if (!identical(widget.buffer, buffer)) return;
+        if (styler.revision != buffer.revision) {
+          _restyle();
+          return;
+        }
+        setState(() => _styler = styler);
+      }),
+    );
   }
 
-  BlockHeightMap _map() => BlockHeightMap(
-    count: _folds.rowCount(_tokens.lineCount),
-    estimate: _estimateRow,
-  );
+  /// Moves the colours along [edit], already made to the buffer.
+  void _styleEdited(SourceEdit edit) => _styler?.edited(edit);
+
+  BlockHeightMap _map() =>
+      BlockHeightMap(count: _folds.rowCount(lineCount), estimate: _estimateRow);
 
   /// Row [row]'s height before a frame has drawn it: its line's.
   double _estimateRow(int row) => _estimate(_folds.lineOf(row));
@@ -2670,7 +2715,7 @@ final class _Line extends StatelessWidget {
         spans,
         token.start,
         token.end,
-        hideMarkers && _isMarker(token.kind)
+        hideMarkers && (token.marker || _isMarker(token.kind))
             ? _hiddenMarker
             : markdownTokenStyle(token.kind, syntax, dark: dark),
       );
