@@ -32,6 +32,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
@@ -39,7 +40,9 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
+import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
@@ -105,6 +108,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.spellCheck,
     this.findMatches,
     this.onOpenLink,
+    this.activeItems,
     this.caretWidth,
     this.typewriter = false,
     this.autofocus = false,
@@ -199,6 +203,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// Called when a link is Ctrl+clicked (Cmd+clicked on a Mac); null leaves
   /// the click a click.
   final SourceLinkTap? onOpenLink;
+
+  /// Which formats are on at the caret, for the toolbar's pressed state
+  /// (#246). The surface owns the answer — it has the tokens — and writes it
+  /// here, so the shell reads one notifier whichever engine draws the pane.
+  final ValueNotifier<Set<ToolbarItem>>? activeItems;
 
   /// The caret's width; null keeps the surface's own (Zen mode, #69,
   /// thickens it).
@@ -1565,6 +1574,44 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @visibleForTesting
   ValueListenable<CaretSpot> get caretSpot => _caretSpot;
 
+  /// Publishes the formats on at [spot] to the shell's toolbar (#246).
+  ///
+  /// The answer is read off the caret's line — the same tokens the colours are
+  /// drawn from — and written into the shell's notifier, which is the shape the
+  /// legacy WYSIWYG published through, so the toolbar reads one thing whichever
+  /// engine draws the pane (`active_formats.dart`).
+  ///
+  /// Deferred out of a build: the toolbar is not a descendant of this surface,
+  /// so notifying it while the framework is building is a `markNeedsBuild` it
+  /// refuses. The answer is the same one frame later, and the caret's own value
+  /// is read again then rather than carried.
+  void _publishActive(CaretSpot spot) {
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _publishActiveNow(_caretSpot.value);
+      });
+      return;
+    }
+    _publishActiveNow(spot);
+  }
+
+  void _publishActiveNow(CaretSpot spot) {
+    final notifier = widget.activeItems;
+    if (notifier == null) return;
+    final active = spot.line < 0 || spot.line >= lineCount
+        ? const <ToolbarItem>{}
+        : activeFormatsOf(
+            text: widget.buffer.lineAt(spot.line),
+            tokens: tokensOf(spot.line),
+            run: (spot.runStart, spot.runEnd),
+          );
+    // Equal sets are not a change: the toolbar is not told to rebuild when the
+    // caret moves inside a run whose formats are the same.
+    if (setEquals(active, notifier.value)) return;
+    notifier.value = active;
+  }
+
   /// From how many lines on a note's colours are read in the background.
   ///
   /// Below it the reading costs a frame or less and is done in place, so
@@ -1595,6 +1642,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           return;
         }
         setState(() => _styler = styler);
+        // The colours landing is also the formats landing: until they are
+        // read, the caret's line has no tokens and the toolbar would show
+        // every button dark on a note whose syntax the writer is inside.
+        _publishActive(_caretSpot.value);
       }),
     );
   }
@@ -1759,8 +1810,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _measureCaret() {
     final line = _caretLineIndex;
     // Every selection change comes through here, so this is the one place the
-    // lines hear which of them holds the caret, and which of its words.
-    _caretSpot.value = _spotOf();
+    // lines hear which of them holds the caret and which of its words, and the
+    // toolbar hears which formats are on at it.
+    final spot = _spotOf();
+    _caretSpot.value = spot;
+    _publishActive(spot);
     final paragraph = _paragraphAt(line);
     if (paragraph == null || line < 0) {
       _caretRect.value = null;

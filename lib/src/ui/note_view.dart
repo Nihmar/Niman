@@ -517,8 +517,13 @@ final class _NoteViewState extends State<NoteView>
   final GlobalKey<WysiwygEditorState> _wysiwygKey =
       GlobalKey<WysiwygEditorState>();
 
-  /// The formats on at the WYSIWYG caret: the toolbar's pressed state.
-  final ValueNotifier<Set<ToolbarItem>> _wysiwygActive =
+  /// The formats on at the caret: the toolbar's pressed state.
+  ///
+  /// Written by whichever engine draws the pane — the Quill surface computes
+  /// its own, the unified surface reads them off the caret's line
+  /// (`MarkdownSurface.activeItems`) — so the toolbar and the context menu read
+  /// one notifier in every mode (T-WYS-06, #246).
+  final ValueNotifier<Set<ToolbarItem>> _activeFormats =
       ValueNotifier<Set<ToolbarItem>>(const <ToolbarItem>{});
   late final ScrollController _previewScroll = ScrollController();
 
@@ -798,7 +803,7 @@ final class _NoteViewState extends State<NoteView>
     _scroll.verticalScroller.addListener(_scheduleMemento);
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
-    _wysiwygActive.addListener(_scheduleMemento);
+    _activeFormats.addListener(_scheduleMemento);
     unawaited(_load());
   }
 
@@ -961,7 +966,7 @@ final class _NoteViewState extends State<NoteView>
     _handMemento(widget.path);
     _mementoTimer?.cancel();
     _scroll.verticalScroller.removeListener(_scheduleMemento);
-    _wysiwygActive.removeListener(_scheduleMemento);
+    _activeFormats.removeListener(_scheduleMemento);
     _saveTimer?.cancel();
     _statsTimer?.cancel();
     _previewTimer?.cancel();
@@ -975,7 +980,7 @@ final class _NoteViewState extends State<NoteView>
     _findController.dispose();
     _sourceFind.dispose();
     _outlineNotifier.dispose();
-    _wysiwygActive.dispose();
+    _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
     _wysiwygFocus.dispose();
@@ -1559,7 +1564,7 @@ final class _NoteViewState extends State<NoteView>
           onChanged: _onWysiwygChanged,
           autoFocus: widget.autofocusEditor,
           spellCheck: widget.spellCheck,
-          activeItems: _wysiwygActive,
+          activeItems: _activeFormats,
           focusNode: _wysiwygFocus,
           column: widget.noteColumn,
           formatMenu: _formatMenu,
@@ -1613,6 +1618,7 @@ final class _NoteViewState extends State<NoteView>
         column: widget.noteColumn,
         formatMenu: _formatMenu,
         spellCheck: widget.spellCheck,
+        activeItems: _activeFormats,
         findMatches: _sourceFind,
         onOpenLink: (kind, raw) => unawaited(_openLinkToken(kind, raw)),
         onChanged: (edit) {
@@ -2741,29 +2747,29 @@ final class _NoteViewState extends State<NoteView>
   /// region and tapping it keeps the editor focused.
   Widget _toolbar(BuildContext context, {bool dense = false}) {
     final actions = _toolbarActions();
-    // The re_editor tap region keeps the keyboard up for the source editor;
-    // the WYSIWYG surface has its own focus handling, and publishes which
-    // formats are on at the caret so a pressed button stays pressed until
-    // it is toggled off (T-WYS-06).
-    if (!widget.showWysiwyg || _unified) {
-      return CodeEditorTapRegion(
-        child: NoteToolbarBar(
-          dense: dense,
-          actions: actions,
-          active: const <ToolbarItem>{},
-          layout: widget.toolbarLayout,
-        ),
-      );
-    }
-    return ValueListenableBuilder<Set<ToolbarItem>>(
-      valueListenable: _wysiwygActive,
-      builder: (context, active, _) => NoteToolbarBar(
-        dense: dense,
-        actions: actions,
-        active: active,
-        layout: widget.toolbarLayout,
-      ),
+    Widget bar(Set<ToolbarItem> active) => NoteToolbarBar(
+      dense: dense,
+      actions: actions,
+      active: active,
+      layout: widget.toolbarLayout,
     );
+    // The legacy source editor has no formats to be *inside*: it is the note's
+    // text with its markers showing, and its buttons are commands. The two
+    // engines that do have formats publish them into one notifier, so a pressed
+    // button stays pressed until it is toggled off (T-WYS-06, #246): Quill
+    // computes them, the unified surface reads them off the caret's line.
+    if (!widget.showWysiwyg && !_unified) {
+      return CodeEditorTapRegion(child: bar(const <ToolbarItem>{}));
+    }
+    final listening = ValueListenableBuilder<Set<ToolbarItem>>(
+      valueListenable: _activeFormats,
+      builder: (context, active, _) => bar(active),
+    );
+    // The re_editor-style tap region keeps the keyboard up for the unified
+    // pane, in either of its modes; the Quill surface keeps its own.
+    return widget.showWysiwyg && !_unified
+        ? listening
+        : CodeEditorTapRegion(child: listening);
   }
 
   /// What each toolbar button does. The catalogue and the order live in
@@ -2774,8 +2780,8 @@ final class _NoteViewState extends State<NoteView>
   /// pressed state — read when the menu opens, so it is the caret's now.
   List<FormatMenuEntry> _formatMenu() {
     final actions = _toolbarActions();
-    final active = widget.showWysiwyg && !_unified
-        ? _wysiwygActive.value
+    final active = widget.showWysiwyg || _unified
+        ? _activeFormats.value
         : const <ToolbarItem>{};
     return [
       for (final item in widget.toolbarLayout.visible)
