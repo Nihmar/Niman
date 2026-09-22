@@ -420,8 +420,10 @@ void main() {
       ),
     );
     await tester.pump();
+    // The text starts at the legacy field inset, so the *first* character is at
+    // x = 5: a drag has to begin on it to begin at offset 0.
     final gesture = await tester.startGesture(
-      const Offset(16, 16),
+      const Offset(6, 16),
       kind: PointerDeviceKind.mouse,
     );
     await gesture.moveTo(const Offset(120, 16));
@@ -746,7 +748,13 @@ void main() {
     );
   });
 
-  testWidgets('Enter inserts one line, not two', (tester) async {
+  testWidgets('Enter does not insert a second newline', (tester) async {
+    // One press, one line: the platform sends the line break as text (an IME
+    // commits it, the Linux embedder inserts it), so a surface that also
+    // inserts
+    // on the key turns one press into two lines — which is what a device
+    // showed,
+    // and the log has no `action:` line at all to say otherwise.
     final buffer = SourceBuffer.fromText('una\ndue\n');
     await tester.pumpWidget(
       MaterialApp(
@@ -765,7 +773,20 @@ void main() {
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
-    expect(buffer.text, 'una\n\ndue\n', reason: 'one press, one line');
+    expect(
+      buffer.text,
+      'una\ndue\n',
+      reason: 'the surface adds nothing of its own',
+    );
+    // And what the platform sends is one line, exactly.
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: 'una\n\ndue\n',
+        selection: TextSelection.collapsed(offset: 4),
+      ),
+    );
+    await tester.pump();
+    expect(buffer.text, 'una\n\ndue\n');
   });
 
   testWidgets('the note column moves the text in, not the pane', (
@@ -795,9 +816,10 @@ void main() {
     // is
     // *before* it — which is what a column means.
     final rect = tester.getRect(find.byType(MarkdownSourceView));
-    // Ten pixels into the first line: the y has to be *in* it, or the tap lands
-    // on the empty line the trailing newline makes.
-    expect(state.offsetAt(Offset(rect.left + 150, rect.top + 18)), 0);
+    // The text's own left edge is `side + 16` = 150 here, and the tap has to be
+    // *in* the first line or it lands on the empty line a trailing newline
+    // makes.
+    expect(state.offsetAt(Offset(rect.left + 151, rect.top + 18)), 0);
   });
 
   testWidgets('a jump to a line brings it to the top', (tester) async {
