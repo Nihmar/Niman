@@ -131,12 +131,21 @@ written next to it.
    in the synthetic case, but only because the convergence is cheap there; the
    real note's cost is 78–166 ms for the scan itself).
 
-   **What the fix has to be.** Not chunked line storage, which the numbers
-   above rule out. The scan has to be able to start at the edit without the
-   block's first line: the state a block is entered in as it is now, kept with
-   the block, is what a rebuild that starts mid-block needs, and it is the one
-   thing the scan currently recomputes by walking. That is a change to
-   `Block` and `BlockScanner`, not to a list.
+   **What the fix has to be, and what was tried (2026-09-22).** Not chunked
+   line storage, which the numbers above rule out. The scan has to be able to
+   start at the edit instead of at the block's first line, and the state a
+   block is entered in — kept with the block — is what a rebuild that starts
+   there needs. That much was built and it is not enough on its own: the
+   rebuilt range has to *end* where the old block did for the splice to be
+   able to keep the run that ended at the edit, and the convergence rule
+   stops at the first block boundary after the edit, which inside one block
+   is the block's own end. A narrowed rebuild therefore produced two blocks
+   where there should be one (a paragraph split in two, a quote losing the
+   depth its first line carries). Doing this properly is a change to how
+   `_rescanFrom` splices (the rebuilt range's end, not only its start) and to
+   `Block`/`BlockScanner`, and the random-edit property test
+   (`block_scanner_test`, 40 rounds by 12 edits against a fresh scan) is what
+   caught every attempt: it is the gate for the next one.
 
 4. ~~**A reload from disk compares the whole text.**~~ Done, and not with a
    hash: the watcher is what asks for the reload, and a watcher reports that
