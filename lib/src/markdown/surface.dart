@@ -21,6 +21,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -56,6 +57,7 @@ final class MarkdownSurface extends StatelessWidget {
     required this.theme,
     this.selection,
     this.onSelection,
+    this.column = NoteColumn.off,
     this.onChanged,
     this.focusNode,
     this.controller,
@@ -94,6 +96,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// The undo history, when the caller keeps it per note.
   final EditHistory? history;
 
+  /// Where the note's text sits across the pane.
+  final NoteColumn column;
+
   /// The page margins.
   final EdgeInsets padding;
 
@@ -109,16 +114,24 @@ final class MarkdownSurface extends StatelessWidget {
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
+  /// The typography this mode is set in: `source` is monospace, `live` is the
+  /// note's own theme, because that is the difference between reading the file
+  /// and
+  /// reading the note.
+  MarkdownTheme get effectiveTheme =>
+      mode == MarkdownSurfaceMode.source ? monospaceTheme(theme) : theme;
+
   @override
   Widget build(BuildContext context) => MarkdownSourceView(
     buffer: buffer,
-    theme: theme,
+    theme: effectiveTheme,
     selection: selection,
     onSelection: onSelection,
     onChanged: onChanged,
     focusNode: focusNode,
     controller: controller,
     history: history,
+    column: column,
     padding: padding,
     showLineNumbers: showLineNumbers,
     syntax: syntax,

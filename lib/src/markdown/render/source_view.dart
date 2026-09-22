@@ -33,6 +33,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -43,12 +44,19 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
+/// The colour a selected run is painted with.
+const Color _selectionColor = Color(0x553B82F6);
+
 /// The gap between the line numbers and the text.
 ///
 /// A decision rather than leftover space: the numbers are right-aligned against
 /// it,
 /// so it is what keeps the text from touching them.
-const double _gutterGap = 10;
+/// The gap between the numbers and the text: the room the legacy gutter kept
+/// for
+/// the fold arrows, which is why the old editor's text never touched its
+/// numbers.
+const double _gutterGap = 14;
 
 /// The source surface: the note's text, its caret, and where a tap lands.
 final class MarkdownSourceView extends StatefulWidget {
@@ -62,6 +70,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.focusNode,
     this.controller,
     this.history,
+    this.column = NoteColumn.off,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
     this.hideMarkers = false,
@@ -93,6 +102,16 @@ final class MarkdownSourceView extends StatefulWidget {
 
   /// The scroll position, when the caller owns one (an anchor jump does).
   final ScrollController? controller;
+
+  /// Where the note's text sits across the pane.
+  ///
+  /// The shell's note column, the same object the read mode and the legacy
+  /// editor
+  /// use, so switching panes does not move the text sideways — and it is the
+  /// *text* that moves, not the pane: the side space is padding inside the
+  /// scroll
+  /// view, which keeps one coordinate system for the caret and the hit test.
+  final NoteColumn column;
 
   /// The undo history, when the caller owns one (the shell keeps it per note,
   /// so
@@ -259,6 +278,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The count of deltas that had to be recovered onto the platform's text.
   int get recoveredDeltas => _input.recoveredDeltas;
 
+  /// The box the note is drawn in, which is what a global point is measured
+  /// against — not the state's own context, which may be wider (a centred
+  /// column).
+  RenderBox? get _noteBox {
+    final object = _scrollKey.currentContext?.findRenderObject();
+    return object is RenderBox && object.hasSize ? object : null;
+  }
+
+  final GlobalKey _scrollKey = GlobalKey();
+
   /// The caret's rectangle in the note's own coordinates, or null before the
   /// frame that measured it.
   Rect? get caretRect {
@@ -271,9 +300,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The offset a tap at [global] lands on, or null when it lands outside a
   /// line.
   int? offsetAt(Offset global) {
-    final box = context.findRenderObject();
-    if (box is! RenderBox || !box.hasSize) return null;
-    final local = box.globalToLocal(global) - widget.padding.topLeft;
+    final box = _noteBox;
+    if (box == null) return null;
+    final local =
+        box.globalToLocal(global) -
+        widget.padding.topLeft -
+        Offset(_sideSpace, 0);
     final line = _heights.indexAt(local.dy + _scroll.offset);
     if (line == null) return null;
     final paragraph = _paragraphAt(line);
@@ -528,6 +560,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _scheduleCaret();
   }
 
+  /// Inserts a line break at the caret.
+  ///
+  /// The *keyboard's* Enter, not the platform's action: an IME that commits a
+  /// newline sends it as text, and doing both is how a note grows two lines for
+  /// one press (`SourceInput.performAction` no longer inserts for that reason).
+  void _newline() {
+    final selection = _selection;
+    _replaceRange(
+      selection.start,
+      selection.end,
+      widget.buffer.eol,
+      SelectionModel.at(selection.start + widget.buffer.eol.length),
+    );
+  }
+
   /// Selects everything.
   void selectAll() {
     final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
@@ -602,6 +649,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
   }
 
+  /// The part of the selection that falls inside line [index], as offsets local
+  /// to that line, or null when none of it does.
+  ///
+  /// The selection is painted as a *background on the runs it covers* rather
+  /// than
+  /// as rectangles over them: the runs already know how to wrap, and a
+  /// rectangle
+  /// would have to be recomputed from the layout on every frame that moved
+  /// anything.
+  (int, int)? _selectionIn(int index) {
+    final selection = _selection;
+    if (selection.isCollapsed) return null;
+    final start = widget.buffer.offsetOfLine(index);
+    final end = start + widget.buffer.lineAt(index).length;
+    final from = selection.start < start ? start : selection.start;
+    final to = selection.end > end ? end : selection.end;
+    if (from >= to) return null;
+    return (from - start, to - start);
+  }
+
   /// The paragraph of line [line], when a frame has built it.
   RenderParagraph? _paragraphAt(int line) {
     final object = _lineKeys[line]?.currentContext?.findRenderObject();
@@ -634,16 +701,27 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// gap between the numbers and the text is a decision, not leftover space.
   double get _gutterWidth {
     if (!widget.showLineNumbers) return 0;
+    // The legacy editor's own numbers: the editor's text style, same size and
+    // same
+    // (monospace) face, dimmed when the field is not focused — so the width is
+    // the
+    // digits' advance in that face, which is 0.6 em each.
     final digits = _tokens.lineCount.toString().length;
-    final size = widget.theme.marker.fontSize ?? 12;
-    return digits * size * 0.7 + _gutterGap;
+    final size = widget.theme.body.fontSize ?? 14;
+    return digits * size * 0.6 + _gutterGap;
   }
 
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
   /// and is corrected by the sliver's own measurement.
   double _estimate(int index) {
-    final text = _tokens.lineAt(index).text;
+    // The *buffer*, never the tokenizer: `HighlightDocument.lineAt`
+    // materializes
+    // the line, so asking it for every line of a 10 000-line note to fill the
+    // height map is a whole-note tokenize on every keystroke. The buffer's line
+    // is
+    // O(1) and its length is all an estimate needs.
+    final text = widget.buffer.lineAt(index);
     final columns = _columnsPerLine;
     final visual = text.isEmpty ? 1 : (text.length / columns).ceil();
     return visual * widget.theme.lineHeight;
@@ -659,8 +737,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   double get _columnsPerLine {
     final size = widget.theme.body.fontSize ?? 14;
     final advance = size * 0.6;
-    return advance <= 0 ? 1 : 320 / advance;
+    if (advance <= 0) return 1;
+    // The pane's real width once a frame has measured it; before that a guess,
+    // which the sliver replaces with measured heights as it draws each line.
+    final width = _paneWidth ?? 360;
+    return (width - _gutterWidth) / advance;
   }
+
+  /// The width the text has, from the last frame that laid it out.
+  double? _paneWidth;
+
+  /// The space the note column puts on each side of the text.
+  double _sideSpace = 0;
 
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
@@ -702,14 +790,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // only sees a key that travels through it on the way to the focused node,
     // so
     // one *below* the `Focus` it belongs to never fires.
-    return _shortcuts(
+    final note = _shortcuts(
       Focus(
         focusNode: _focus,
         onFocusChange: (hasFocus) =>
             hasFocus ? _input.attach() : _input.detach(),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final available = constraints.maxWidth - widget.padding.horizontal;
+            _paneWidth = constraints.maxWidth;
+            _sideSpace = widget.column.sideSpaceIn(constraints.maxWidth);
+            final available =
+                constraints.maxWidth -
+                widget.padding.horizontal -
+                2 * _sideSpace;
             return _mouseSelection(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -720,10 +813,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 onTapDown: (details) => _focus.requestFocus(),
                 onTapUp: (details) => _tapUp(details.globalPosition),
                 child: CustomScrollView(
+                  key: _scrollKey,
                   controller: _scroll,
                   slivers: <Widget>[
                     SliverPadding(
-                      padding: widget.padding,
+                      padding: widget.padding.copyWith(
+                        left: widget.padding.left + _sideSpace,
+                        right: widget.padding.right + _sideSpace,
+                      ),
                       sliver: SliverMarkdownBlocks(
                         heights: _heights,
                         delegate: SliverChildBuilderDelegate((context, index) {
@@ -737,6 +834,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             syntax: syntax,
                             dark: widget.dark,
                             hideMarkers: widget.hideMarkers,
+                            selected: _selectionIn(index),
                             width: available,
                             caret: index == caretLine ? _caretRect : null,
                             caretOn: _caretOn,
@@ -752,6 +850,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ),
       ),
     );
+    return note;
   }
 
   /// The keys the surface answers itself.
@@ -814,6 +913,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       const SingleActivator(LogicalKeyboardKey.keyV, meta: true): paste,
       const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
       const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
+      const SingleActivator(LogicalKeyboardKey.enter): _newline,
+      const SingleActivator(LogicalKeyboardKey.numpadEnter): _newline,
       const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
       const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
       const SingleActivator(
@@ -840,6 +941,7 @@ final class _Line extends StatelessWidget {
     required this.syntax,
     required this.dark,
     required this.hideMarkers,
+    required this.selected,
     required this.width,
     required this.caret,
     required this.caretOn,
@@ -863,6 +965,9 @@ final class _Line extends StatelessWidget {
   /// Whether the structural markers are drawn invisibly.
   final bool hideMarkers;
 
+  /// The selected range, as offsets local to this line, or null.
+  final (int, int)? selected;
+
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
 
@@ -885,9 +990,12 @@ final class _Line extends StatelessWidget {
                 child: Text(
                   '$number',
                   textAlign: TextAlign.right,
-                  style: theme.marker.copyWith(
-                    fontSize: (theme.body.fontSize ?? 14) * 0.8,
-                  ),
+                  // The text's own face and size, dimmed: what the legacy
+                  // editor's
+                  // `DefaultCodeLineNumber` does, so the numbers line up with
+                  // the
+                  // characters they count instead of drifting from them.
+                  style: theme.body.copyWith(color: theme.markerDim),
                 ),
               ),
             ),
@@ -989,24 +1097,55 @@ final class _Line extends StatelessWidget {
   TextSpan _span() {
     final spans = <InlineSpan>[];
     var at = 0;
+    // The runs are the tokenizer's; the selection cuts them where it starts and
+    // ends, so a highlighted range is the same text with a background.
     for (final token in styled.tokens) {
       if (token.start > at) {
-        spans.add(TextSpan(text: styled.text.substring(at, token.start)));
+        _add(spans, at, token.start, null);
       }
-      spans.add(
-        TextSpan(
-          text: styled.text.substring(token.start, token.end),
-          style: hideMarkers && _isMarker(token.kind)
-              ? _hiddenMarker
-              : markdownTokenStyle(token.kind, syntax, dark: dark),
-        ),
+      _add(
+        spans,
+        token.start,
+        token.end,
+        hideMarkers && _isMarker(token.kind)
+            ? _hiddenMarker
+            : markdownTokenStyle(token.kind, syntax, dark: dark),
       );
       at = token.end;
     }
-    if (at < styled.text.length) {
-      spans.add(TextSpan(text: styled.text.substring(at)));
-    }
+    if (at < styled.text.length) _add(spans, at, styled.text.length, null);
     return TextSpan(children: spans);
+  }
+
+  /// Adds `[start, end)` to [spans], cut at the selection's edges so the
+  /// covered
+  /// part carries the highlight and the rest keeps the run's own style.
+  void _add(List<InlineSpan> spans, int start, int end, TextStyle? style) {
+    final selection = selected;
+    if (selection == null || end <= selection.$1 || start >= selection.$2) {
+      spans.add(
+        TextSpan(text: styled.text.substring(start, end), style: style),
+      );
+      return;
+    }
+    final from = start < selection.$1 ? selection.$1 : start;
+    final to = end > selection.$2 ? selection.$2 : end;
+    if (from > start) {
+      spans.add(
+        TextSpan(text: styled.text.substring(start, from), style: style),
+      );
+    }
+    spans.add(
+      TextSpan(
+        text: styled.text.substring(from, to),
+        style: (style ?? const TextStyle()).copyWith(
+          background: Paint()..color = _selectionColor,
+        ),
+      ),
+    );
+    if (to < end) {
+      spans.add(TextSpan(text: styled.text.substring(to, end), style: style));
+    }
   }
 }
 

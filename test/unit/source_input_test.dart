@@ -49,6 +49,11 @@ TextEditingDeltaInsertion _insert(String oldText, int at, String text) =>
     );
 
 void main() {
+  // `TextInput.attach` needs the binding: this file is not a widget test, but
+  // the
+  // connection it drives is a platform channel.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('a keystroke is one character, and the note and caret follow it', () {
     final surface = _wire('ciao\n');
     surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
@@ -139,6 +144,37 @@ void main() {
     surface.input.performAction(TextInputAction.newline);
     expect(surface.buffer.text, 'uno\nfine\n');
     expect(surface.carets.last.extent, 4);
+  });
+
+  test('an insertion after our own caret move lands at our caret', () {
+    // The device's lesson: a whole-value echo is 931 KB at note size, so the
+    // platform hears about a tap late — and an insertion that lands where the
+    // platform last thought the caret was is text in the wrong place. When *we*
+    // moved the caret, ours is the newer truth.
+    final surface = _wire('ciao mondo\n');
+    surface.input.attach();
+    surface.input.sendSelection();
+    // The platform's copy still has the caret at 0, and sends its delta from
+    // there; the app's caret is where the tap put it.
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      _insert('ciao mondo\n', 0, 'X'),
+    ]);
+    expect(
+      surface.buffer.text,
+      'Xciao mondo\n',
+      reason: 'a delta that agrees about the text but not the caret uses ours',
+    );
+    expect(surface.carets.last.extent, 1);
+  });
+
+  test('a delta the platform computed from its own caret is left alone', () {
+    // The other half of the rule: until we move the caret ourselves, the
+    // platform's offsets are the ones that count.
+    final surface = _wire('ciao mondo\n', caret: 4);
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      _insert('ciao mondo\n', 4, 'X'),
+    ]);
+    expect(surface.buffer.text, 'ciaoX mondo\n');
   });
 
   test('the tokenizer follows the edit, and only the edited lines', () {
