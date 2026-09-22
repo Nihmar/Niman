@@ -1435,6 +1435,9 @@ final class _NoteViewState extends State<NoteView>
         showLineNumbers: widget.showLineNumbers && !widget.zen,
         caretWidth: widget.zen ? zenCaretWidth : null,
         typewriter: widget.typewriter,
+        // As the legacy editor: the keyboard-on-open setting, and a template
+        // `{{cursor}}` landing, which always takes the focus (#53).
+        autofocus: widget.autofocusEditor || widget.initialCaretOffset != null,
         indentWidth: widget.indentWidth,
         column: widget.noteColumn,
         formatMenu: _formatMenu,
