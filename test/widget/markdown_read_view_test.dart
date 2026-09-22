@@ -96,7 +96,8 @@ void main() {
             .text
             .toPlainText();
         expect(text, startsWith('var line0 = 0;'), reason: 'the fence is out');
-        expect(text.split('\n'), hasLength(MarkdownReadViewState.pieceLines - 1));
+        const lines = MarkdownReadViewState.pieceLines;
+        expect(text.split('\n'), hasLength(lines - 1));
         expect(state.mounted, isTrue);
       },
     );
