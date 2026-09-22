@@ -390,6 +390,46 @@ void main() {
       }
     });
 
+    test('lines added and removed here and there, read without settling', () {
+      // `index` pays every owed shift, so the test above never sees one
+      // owed; `blockAt` reads through them. Edits that add and remove lines
+      // at points above and below each other are what owes a shift on top of
+      // a shift, in both directions.
+      final random = Random(20260922);
+      for (var round = 0; round < 40; round++) {
+        final lines = <String>[
+          for (var at = 0; at < 80; at++)
+            switch (random.nextInt(6)) {
+              0 => '',
+              1 => '# h$at',
+              2 => '- item',
+              3 => '> quote',
+              _ => 'text $at',
+            },
+        ];
+        final buffer = SourceBuffer.fromText(lines.join('\n'));
+        final scanner = BlockScanner(buffer);
+        for (var step = 0; step < 12; step++) {
+          final line = random.nextInt(buffer.lineCount);
+          final at = buffer.offsetOfLine(line);
+          final edit = switch (random.nextInt(3)) {
+            0 => buffer.replaceRange(at, at, '\n\n'),
+            1 when line > 0 => buffer.replaceRange(at - 1, at, ''),
+            _ => buffer.replaceRange(at, at, 'x\n'),
+          };
+          scanner.edited(edit);
+          final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+          for (var probe = 0; probe < buffer.lineCount; probe++) {
+            expect(
+              scanner.blockAt(probe).toString(),
+              fresh.blockAt(probe).toString(),
+              reason: 'round $round step $step line $probe',
+            );
+          }
+        }
+      }
+    });
+
     test('a keystroke in a 10 000-line note re-scans a handful of lines', () {
       // Geometria's size and shape: 2 500 paragraphs of three lines, each
       // followed by a blank, which is the app's worst real note in miniature.

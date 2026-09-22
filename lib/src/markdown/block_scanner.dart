@@ -36,9 +36,11 @@ final class BlockScanner {
   ///
   /// The two must hold the same lines, which is the caller's to promise.
   new rebound(BlockScanner scanned, this.buffer) {
+    scanned._settle(scanned._blocks.length);
     _entering.addAll(scanned._entering);
     _blocks.addAll(scanned._blocks);
     _lineCount = scanned._lineCount;
+    _shiftFrom = _blocks.length;
   }
 
   /// The text being scanned.
@@ -52,13 +54,63 @@ final class BlockScanner {
   /// Final, and spliced in place: the list is the one structure here whose size
   /// is the document's, so an edit replaces a range of it rather than building
   /// a new one.
+  ///
+  /// The blocks from [_shiftFrom] on are stored [_shift] lines above where
+  /// they are: read them through [_at].
   final List<Block> _blocks = <Block>[];
 
+  /// Where the blocks still owed a shift start, and by how many lines.
+  ///
+  /// An edit that adds or removes lines moves every block after it, and
+  /// moving them — a new block each — was an Enter's cost on a note of
+  /// millions of blocks: 170 ms on a 246 MB one. So the move is owed rather
+  /// than made: one shift for everything past a point, paid only over the
+  /// blocks between that point and the next edit's, which for a writer is
+  /// the few blocks between two keystrokes.
+  int _shiftFrom = 0;
+  int _shift = 0;
+
+  /// Block [index] where it is now.
+  Block _at(int index) {
+    final block = _blocks[index];
+    return index >= _shiftFrom && _shift != 0 ? block.shifted(_shift) : block;
+  }
+
+  /// Pays the owed shift on the blocks before [upTo].
+  void _settle(int upTo) {
+    if (_shift != 0) {
+      for (var at = _shiftFrom; at < upTo; at++) {
+        _blocks[at] = _blocks[at].shifted(_shift);
+      }
+    }
+    if (upTo > _shiftFrom) _shiftFrom = upTo;
+  }
+
+  /// Owes [delta] more lines to every block from [from] on.
+  void _owe(int from, int delta) {
+    if (from >= _shiftFrom) {
+      _settle(from);
+    } else {
+      // These are where they are; stored against the shift owed from [from]
+      // on, so that reading them adds [delta] and nothing else.
+      if (_shift != 0) {
+        for (var at = from; at < _shiftFrom; at++) {
+          _blocks[at] = _blocks[at].shifted(-_shift);
+        }
+      }
+      _shiftFrom = from;
+    }
+    _shift += delta;
+  }
+
   /// The blocks as of [SourceBuffer.revision], for a reader that wants them.
-  BlockIndex get index => BlockIndex(
-    blocks: List<Block>.unmodifiable(_blocks),
-    revision: buffer.revision,
-  );
+  BlockIndex get index {
+    _settle(_blocks.length);
+    return BlockIndex(
+      blocks: List<Block>.unmodifiable(_blocks),
+      revision: buffer.revision,
+    );
+  }
 
   /// How many lines have a recorded state. Everything up to here is current.
   int get scannedLines => _entering.length;
@@ -83,7 +135,7 @@ final class BlockScanner {
     if (_blocks.isEmpty || line < 0) return null;
     final at = _firstIndexWhere(0, (block) => block.startLine > line) - 1;
     if (at < 0) return null;
-    final block = _blocks[at];
+    final block = _at(at);
     return block.contains(line) ? block : null;
   }
 
@@ -122,27 +174,19 @@ final class BlockScanner {
     if (edit != null) {
       final untouched = edit.firstUntouchedLine;
       if (edit.firstLine < _entering.length) {
-        _entering.removeRange(
+        _replaceStates(
           edit.firstLine,
-          untouched > _entering.length ? _entering.length : untouched,
+          (untouched > _entering.length ? _entering.length : untouched) -
+              edit.firstLine,
+          edit.insertedLines,
         );
-        if (edit.insertedLines > 0) {
-          _entering.insertAll(
-            edit.firstLine,
-            List<LineState>.filled(edit.insertedLines, LineState.initial),
-          );
-        }
       }
       headEnd = _firstIndexWhere(0, (block) => block.endLine > edit.firstLine);
       tailStart = _firstIndexWhere(0, (block) => block.startLine >= untouched);
       // The survivors after the edit are the same blocks, moved by however
-      // many lines the document gained or lost. They are shifted in place:
-      // everything below compares line numbers.
-      if (edit.lineDelta != 0) {
-        for (var at = tailStart; at < _blocks.length; at++) {
-          _blocks[at] = _blocks[at].shifted(edit.lineDelta);
-        }
-      }
+      // many lines the document gained or lost — owed, not moved ([_owe]):
+      // everything below reads them where they are now.
+      if (edit.lineDelta != 0) _owe(tailStart, edit.lineDelta);
     }
 
     // The block that ends where the rebuild begins has to be rebuilt too.
@@ -152,9 +196,9 @@ final class BlockScanner {
     // belongs. Widening by one block costs one block's lines and removes the
     // whole class of boundary bugs.
     var start = from;
-    if (headEnd > 0 && _blocks[headEnd - 1].endLine == from) {
+    if (headEnd > 0 && _at(headEnd - 1).endLine == from) {
       headEnd--;
-      start = _blocks[headEnd].startLine;
+      start = _at(headEnd).startLine;
     }
 
     var line = start;
@@ -186,7 +230,12 @@ final class BlockScanner {
       tailStart,
       (block) => block.startLine >= line,
     );
+    // The dropped blocks are the ones between the head and the kept tail;
+    // anything owed a shift among them is paid first, so what is owed after
+    // the splice is owed from the kept tail on, exactly.
+    if (_shiftFrom < keepFrom) _settle(keepFrom);
     _blocks.replaceRange(headEnd, keepFrom, rebuilt);
+    _shiftFrom += rebuilt.length - (keepFrom - headEnd);
     // The states recorded after the convergence point are *kept*: convergence
     // means they are what they were, and a later edit down there needs the
     // state entering its block. Only the entries past the document's end go,
@@ -207,7 +256,7 @@ final class BlockScanner {
     var high = _blocks.length;
     while (low < high) {
       final middle = (low + high) >> 1;
-      if (test(_blocks[middle])) {
+      if (test(_at(middle))) {
         high = middle;
       } else {
         low = middle + 1;
@@ -224,7 +273,32 @@ final class BlockScanner {
   bool _hasBoundaryAt(int line, int fromIndex) {
     if (line == 0) return true;
     final at = _firstIndexWhere(fromIndex, (block) => block.startLine >= line);
-    return at < _blocks.length && _blocks[at].startLine == line;
+    return at < _blocks.length && _at(at).startLine == line;
+  }
+
+  /// Replaces [removed] line states from [first] with [inserted] fresh ones.
+  ///
+  /// In place: a keystroke replaces a line with a line, and removing and
+  /// inserting it moved the whole list twice — a note's worth of states per
+  /// key, the most of a keystroke's cost on a 246 MB note.
+  void _replaceStates(int first, int removed, int inserted) {
+    final kept = removed < inserted ? removed : inserted;
+    for (var at = first; at < first + kept; at++) {
+      _entering[at] = LineState.initial;
+    }
+    if (removed > inserted) {
+      _entering.removeRange(first + inserted, first + removed);
+    } else if (inserted > removed) {
+      final at = first + removed;
+      final more = inserted - removed;
+      final length = _entering.length;
+      _entering.addAll(List<LineState>.filled(more, LineState.initial));
+      // One move of the tail, overlapping ranges copied as the list promises.
+      _entering.setRange(at + more, length + more, _entering, at);
+      for (var fill = at; fill < at + more; fill++) {
+        _entering[fill] = LineState.initial;
+      }
+    }
   }
 
   /// Records [state] as entering [line], growing the list as it goes.
