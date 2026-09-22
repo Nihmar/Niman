@@ -11433,6 +11433,32 @@ correction table, and the reveal policy chosen in
   find bar behave identically to source mode — verified by running *the same*
   widget tests against both modes.
 
+### Phase 4, in progress — the reveal is in
+
+`MarkdownSourceView` hides the structural markers by style (transparent, a
+hundredth of a size) and **reveals the line the caret is in**
+(`_Line.hidden(token, revealed:)`), which is policy A of §8.6.2. The reveal
+is a style and never the text: the marker keeps its offset, its string and
+its advance, so the caret, the hit test and the selection know nothing about
+it, and the paragraph's cache key does not move when the caret does. The
+line's own size stays the hiding's — a heading is drawn at the heading's
+size whether its hashes are shown or not.
+
+`test/widget/markdown_surface_test.dart` holds it
+(*live reveals the markers of the line the caret is in*), together with the
+invariant that the two lines say the same thing with and without the reveal.
+
+What the design asks for next, in the order it names them:
+
+- **Per-word reveal** as the refinement, and the row-wise reveal that follows
+  a wrap: the current granularity is the *line*, because a line is the unit
+  the surface builds.
+- The table-driven test over every span kind, for typing at the end of a
+  bold/italic/code/link run (§10.4, phase 4's first exit criterion).
+- The budget: the reveal must cost one block re-layout (≤ 3 ms) and never
+  fire more than once per caret row change.
+- The 200 KB cap gone, so `Geometria 1.md` opens and edits in `live` mode.
+
 ### Phase 5 — Delete the old world
 
 **Deliverable:** `re_editor`, `flutter_quill`, `flutter_markdown_plus`,
