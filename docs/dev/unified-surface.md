@@ -11625,14 +11625,35 @@ What the design asks for next, in the order it names them:
      editor: the flag is on, but a library that has not switched it still opens
      Quill.
   2. **The row-wise reveal** that follows a wrap.
-  3. **The parity run the criterion asks for literally**: *the same* widget
-     tests over both unified modes, rather than the pair of tests the toolbar
-     has today. What exists now is a live-mode test for the toolbar and the
-     span-typing table; the find bar, the context menu, the tools sheet and the
-     spelling panel are covered in `source` only.
+  3. **The parity run the criterion asks for**: the same widget tests over both
+     unified modes, rather than a live-mode copy of each. **Three files are
+     done** (2026-09-22): the find bar (`source_find_bar_test.dart`), the
+     spelling (`source_spelling_test.dart`) and the context menu
+     (`source_context_menu_test.dart`) each run *every* test twice, once per
+     mode, through a small `both(...)` helper — so the criterion is held by
+     construction rather than by a second test that says the same thing. The
+     toolbar has a live-mode test in the shell; what is left unpaired is the
+     tools sheet, folding, the typewriter, Ctrl+click and the semantics, all of
+     which are covered in `source` only.
   4. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
      and per word, no visible thrash — which is the only criterion on this list
      that needs a phone rather than a host.
+  5. **The row-wise reveal, reconsidered and dropped.** It was on this list as
+     "the refinement that follows a wrap", on the reading of policy A that a
+     wrapped paragraph should show the syntax of the row the caret is on. With
+     the per-word reveal in, that refinement no longer buys anything and costs
+     something:
+     * the *inline* syntax of another row is already hidden, because it is
+       another word's (that is what per-word means);
+     * what is left line-wide is the **structural** marks — a heading's
+       hashes, a list's `-`, a quote's `>` — and those are drawn on the line's
+       *first* row. Hiding them because the caret wrapped down to the fourth
+       row would take away the very thing the reveal exists for: the writer
+       could no longer see the marker of the item they are writing in.
+     A per-row implementation would also lag a frame, because the rows are
+     known only from the paragraph the spans are the *input* of. Recorded as a
+     decision rather than left as a to-do: the unit is the line, and the word
+     inside it is the refinement that pays.
 
 ### Phase 5 — Delete the old world
 

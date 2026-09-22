@@ -339,6 +339,16 @@ out of a build, because the toolbar is not a descendant of the surface and
 notifying it mid-build is a `markNeedsBuild` the framework refuses — it did,
 in two tests that had nothing to do with toolbars.
 
+**The parity run is on**: the find bar, the spelling and the context menu each
+run *every* one of their tests twice, once per unified mode, through a small
+`both(...)` helper — the criterion asks for the same tests in both, and a
+second test that says the same thing is not that. What is still paired only in
+`source`: the tools sheet, folding, the typewriter, Ctrl+click, the semantics.
+The row-wise reveal was dropped rather than built, with the reasoning written
+down in `unified-surface.md`: with per-word in, hiding a line's structural
+marks because the caret wrapped to another row would take away the marker of
+the item being written.
+
 ## The testing builds
 
 `scripts\niman.bat windows beta` and `scripts\niman.bat apk beta` were built
