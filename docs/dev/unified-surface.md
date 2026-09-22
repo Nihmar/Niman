@@ -11448,13 +11448,25 @@ size whether its hashes are shown or not.
 (*live reveals the markers of the line the caret is in*), together with the
 invariant that the two lines say the same thing with and without the reveal.
 
+The table-driven test over every span kind is in
+(`test/widget/live_span_typing_test.dart`): bold, italic, strikethrough,
+inline code, a link, an image, a wikilink, inline maths, a heading, a list
+item and a quote, each with the caret at the end of the run's text, each
+typed through the platform's own path. It holds that the character lands
+*inside* the run and that exactly one character was added — the zero-size
+marker runs shifted nothing.
+
 What the design asks for next, in the order it names them:
 
 - **Per-word reveal** as the refinement, and the row-wise reveal that follows
   a wrap: the current granularity is the *line*, because a line is the unit
-  the surface builds.
-- The table-driven test over every span kind, for typing at the end of a
-  bold/italic/code/link run (§10.4, phase 4's first exit criterion).
+  the surface builds. A per-word version was tried and reverted: the range it
+  revealed was right (`revealRange` returns the caret's run of
+  non-whitespace, one character past it at a run's end) and the line the
+  caret is in was right, but the marker of a word the caret sits at the
+  *start* of stayed hidden — `#` before `Titolo` with the caret at the
+  title's first letter. The next attempt starts by proving, in one test,
+  which `Token` and which `(start, end)` the view computes for that case.
 - The budget: the reveal must cost one block re-layout (≤ 3 ms) and never
   fire more than once per caret row change.
 - The 200 KB cap gone, so `Geometria 1.md` opens and edits in `live` mode.
