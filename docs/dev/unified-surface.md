@@ -11535,16 +11535,37 @@ What the design asks for next, in the order it names them:
   therefore shows the syntax of every row it spans while the caret is in it —
   the fallback B the design already sanctions, and the next refinement.
 - The budget: the reveal must cost one block re-layout (≤ 3 ms) and never
-  fire more than once per caret row change. **Measured for the move, not yet
-  for the re-layout**: the lines listen to one value, `CaretSpot(line,
-  runStart, runEnd)`, so a caret move inside a run produces an equal value and
-  *notifies no line at all*, while crossing a run boundary notifies the two
-  lines involved once (`a caret move inside a word rebuilds no line`). With
-  per-word rather than per-row granularity the honest statement of the rule is
-  **once per run change**, not once per row change. What is still to measure is
-  the other half: that the resulting re-layout of one line stays under 3 ms on
-  a 200 KB note.
-- The 200 KB cap gone, so `Geometria 1.md` opens and edits in `live` mode.
+  fire more than once per caret row change. **Both halves are held, with the
+  honest wording of the second changed.** The move: the lines listen to one
+  value, `CaretSpot(line, runStart, runEnd)`, so a caret move inside a run
+  produces an equal value and *notifies no line at all*, while crossing a run
+  boundary notifies the two lines involved once (`a caret move inside a word
+  rebuilds no line`, `test/widget/markdown_surface_test.dart`). With per-word
+  granularity the rule is **once per run change**, not once per row change —
+  per-row is a different refinement (§8.6.2's policy A on a wrapped line), not
+  a stronger version of this one.
+
+  The cost: `test/perf/live_reveal_budget_test.dart` times the *frame* a move
+  across a word boundary causes, in `live` mode, at 2 000 lines (≈ 100 KB) and
+  20 000 lines (≈ 1 MB) — **2.6 ms and 2.2 ms, ×0.8** on this host, so the
+  frame does not follow the note, and it is under §9.2's 3 ms ceiling
+  (`NIMAN_PERF=1` asserts that ceiling; the default run asserts the ratio and a
+  visible-frame backstop, per `AGENTS.md`). The frame is an upper bound on the
+  re-layout inside it.
+- The 200 KB cap is gone already: `_maxWysiwygBytes` was removed on
+  2026-09-21, before this phase, because a cap no other mode has is exactly the
+  non-uniformity R3 forbids and because the stress-test note is the note it
+  refused. What remains of the criterion is the *device* half — that the
+  geometry note really opens and edits in `live` — and `live` is not yet the
+  surface the WYSIWYG editor uses, so that half waits for the wiring below.
+- **`live` is not wired into the app yet.** `MarkdownSurface(mode: live)` is
+  reachable only from tests: the WYSIWYG editor in a library is still
+  `flutter_quill`, and the unified pane opens `mode: source`
+  (`lib/src/ui/note_view.dart`). Phase 4's deliverable — `live` *replaces*
+  `flutter_quill` — is therefore not reached either, and it is the largest
+  thing left in the phase. The device validation the design asks for (policy A
+  at 200 KB and on `Geometria 1.md`, per-line and per-word, no visible thrash)
+  belongs with that wiring, not before it.
 
 ### Phase 5 — Delete the old world
 

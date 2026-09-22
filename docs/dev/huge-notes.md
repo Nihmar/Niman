@@ -314,9 +314,12 @@ now.
 
 The lines listen to one value — `CaretSpot(line, runStart, runEnd)` — so a
 caret move *inside* a run notifies no line and a move across a run boundary
-notifies the two lines involved once. The row-wise reveal that follows a wrap
-is still open: the unit is the line, so a wrapped paragraph shows the syntax
-of every row it spans while the caret is in it.
+notifies the two lines involved once. The frame such a move causes costs
+**2.6 ms at 2 000 lines and 2.2 ms at 20 000 (×0.8)**, measured by
+`test/perf/live_reveal_budget_test.dart` — flat in the note's size, and inside
+§9.2's 3 ms ceiling. The row-wise reveal that follows a wrap is still open:
+the unit is the line, so a wrapped paragraph shows the syntax of every row it
+spans while the caret is in it.
 
 ## The testing builds
 
