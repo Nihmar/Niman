@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
@@ -44,6 +45,7 @@ NoteView _note({
   String? libraryRoot,
   FakeLinkSource? links,
   List<String>? opened,
+  String? initialAnchor,
   Future<String?> Function()? pickImagePath,
   Future<String> Function(String root, String source)? importImage,
   NoteColumn column = NoteColumn.off,
@@ -63,6 +65,7 @@ NoteView _note({
   libraryRoot: libraryRoot,
   linkSource: links,
   onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
+  initialAnchor: initialAnchor,
   pickImagePath: pickImagePath,
   importImage: importImage,
   noteColumn: column,
@@ -364,6 +367,70 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
     expect(opened, <String>['Target.md|null']);
+  }, variant: _desktop);
+
+  testWidgets('an anchor to open on lands on its heading '
+      '(link_navigation_test)', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'intro\n## My Heading\nbody\n',
+          path: '/notes/current.md',
+          libraryRoot: '/notes',
+          links: FakeLinkSource(notes: <String>['current.md']),
+          initialAnchor: 'My Heading',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(_surface(tester).selection, const SelectionModel.at(6));
+  });
+
+  testWidgets('a key the user chose wins over the note’s own '
+      '(chosen_keys_test)', (tester) async {
+    AppKeyMap.current.value = KeyMap.defaults.withBinding(
+      AppCommand.toggleDock,
+      const SingleActivator(LogicalKeyboardKey.keyZ, control: true),
+    );
+    var ran = 0;
+    final keys = ChosenKeys(
+      handlers: () => {AppCommand.toggleDock: () => ran++},
+      active: () => true,
+    )..attach();
+    addTearDown(keys.detach);
+    await tester.pumpWidget(_app(_note(text: 'hello', autofocus: true)));
+    await tester.pumpAndSettle();
+    final surface = _surface(tester)..replaceText(0, 0, '!');
+    await tester.pump();
+    await _ctrl(tester, LogicalKeyboardKey.keyZ);
+    expect(ran, 1);
+    expect(surface.widget.buffer.text, '!hello', reason: 'no undo heard it');
+    await tester.pump(const Duration(seconds: 1));
+  }, variant: _desktop);
+
+  testWidgets('Ctrl+A then Ctrl+C copies the whole note '
+      '(editor_copy_paths_test)', (tester) async {
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await tester.pumpWidget(_app(_note(text: 'uno\ndue\n', autofocus: true)));
+    await tester.pumpAndSettle();
+    await _ctrl(tester, LogicalKeyboardKey.keyA);
+    await _ctrl(tester, LogicalKeyboardKey.keyC);
+    expect(copied, 'uno\ndue\n');
   }, variant: _desktop);
 
   testWidgets('a kind note goes back to its GUI and its edits save '
