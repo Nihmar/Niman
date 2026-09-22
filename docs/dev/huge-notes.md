@@ -135,17 +135,35 @@ written next to it.
    line storage, which the numbers above rule out. The scan has to be able to
    start at the edit instead of at the block's first line, and the state a
    block is entered in — kept with the block — is what a rebuild that starts
-   there needs. That much was built and it is not enough on its own: the
-   rebuilt range has to *end* where the old block did for the splice to be
-   able to keep the run that ended at the edit, and the convergence rule
-   stops at the first block boundary after the edit, which inside one block
-   is the block's own end. A narrowed rebuild therefore produced two blocks
-   where there should be one (a paragraph split in two, a quote losing the
-   depth its first line carries). Doing this properly is a change to how
-   `_rescanFrom` splices (the rebuilt range's end, not only its start) and to
-   `Block`/`BlockScanner`, and the random-edit property test
-   (`block_scanner_test`, 40 rounds by 12 edits against a fresh scan) is what
-   caught every attempt: it is the gate for the next one.
+   there needs.
+
+   That was built, three times, and it is not enough on its own. A narrowed
+   rebuild produces the blocks for `[edit, convergence)` and leaves the old
+   block's prefix in the list, so the splice has to keep that prefix — and a
+   *rebuilt* block directly after a *kept* one is two blocks where the merge
+   would have made one:
+
+   * a two-line paragraph edited on its second line rebuilt as
+     `Block(paragraph 1..2)` after `Block(paragraph 0..1)` where the fresh
+     scan says `Block(paragraph 0..2)`;
+   * a lazily continued quote rebuilt from its second line lost the
+     `quoteDepth` its first line carries, and split in two.
+
+   Merging the prefix with the first rebuilt block would fix the first and
+   not the second (the quote's depth comes from the lines *before* the
+   prefix). So the splice has to move its *end* as well as its start, or the
+   rebuild has to cover the whole block — which is the O(block) this is
+   about.
+
+   **What is left, stated plainly.** The scan's cost is the containing block,
+   and a whole note can be one block, so the path is not gone for a note
+   whose head is a `$$…$$` block of a million lines or a paragraph with no
+   blank line. The buffer is not the cost and neither is `_entering`; the
+   walk from the block's first line is, and the fix is a change to how
+   `_rescanFrom` splices and to `Block`/`BlockScanner` together. The
+   random-edit property test (`block_scanner_test`, 40 rounds by 12 edits
+   against a fresh scan, plus the test that reads through unpaid shifts) is
+   the gate: it caught every attempt.
 
 4. ~~**A reload from disk compares the whole text.**~~ Done, and not with a
    hash: the watcher is what asks for the reload, and a watcher reports that
