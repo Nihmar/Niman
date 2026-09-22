@@ -1238,7 +1238,7 @@ final class _NoteViewState extends State<NoteView>
     // Word count + outline (T-M2-07): the O(n) passes live behind a
     // debounce, never on the keystroke path.
     _statsTimer?.cancel();
-    _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+    _statsTimer = Timer(_statsDelay, _refreshStats);
     // Preview text (T-M2-08): the same dry-run cadence as saves.
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
@@ -1265,7 +1265,7 @@ final class _NoteViewState extends State<NoteView>
         : const Duration(milliseconds: 500);
     _saveTimer = Timer(debounce, _save);
     _statsTimer?.cancel();
-    _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+    _statsTimer = Timer(_statsDelay, _refreshStats);
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
@@ -1319,7 +1319,7 @@ final class _NoteViewState extends State<NoteView>
         : const Duration(milliseconds: 500);
     _saveTimer = Timer(debounce, _save);
     _statsTimer?.cancel();
-    _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+    _statsTimer = Timer(_statsDelay, _refreshStats);
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
     widget.onWysiwygChanged?.call(markdown);
@@ -1802,6 +1802,22 @@ final class _NoteViewState extends State<NoteView>
   }
 
   static const int _syncWorkLimit = 64 * 1024;
+
+  /// How long the writer has to pause before the word count and the outline
+  /// are worked out again.
+  ///
+  /// They read the whole note — joined, sent to an isolate, scanned — so a
+  /// note of hundreds of megabytes waits for a real pause rather than for
+  /// every breath between words (0.0.9 stress test: a 246 MB note paid 12 s
+  /// of isolate time after each one).
+  Duration get _statsDelay {
+    final length = _usesUnifiedSource
+        ? _surface?.buffer.length ?? 0
+        : _lastStatsText?.length ?? 0;
+    if (length > 16 << 20) return const Duration(seconds: 5);
+    if (length > 2 << 20) return const Duration(seconds: 2);
+    return const Duration(milliseconds: 350);
+  }
 
   int _statsRevision = 0;
 
