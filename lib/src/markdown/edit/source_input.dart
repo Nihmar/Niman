@@ -1,25 +1,28 @@
 // The surface's connection to the platform's keyboard (#245, phase 3).
 //
-// This is the machinery the IME probe proved out, moved into the surface that
-// needs it: a `TextInputClient` that speaks the delta model, edits the note's
-// `SourceBuffer` with what arrives, and sends back only what the platform does
-// not already know. `InputBuffer` holds the rules — a delta's `oldText` wins
-// when
-// it disagrees, a selection outside the text does not become the caret, and the
-// document is not echoed per keystroke — and this file is the plumbing around
-// them: one connection, attach and detach on focus, and a translation from
-// `TextEditingDelta` to `SourceBuffer.replaceRange`.
+// A `DeltaTextInputClient` over the note's `SourceBuffer`, and the one rule
+// that keeps the two copies of the note — ours and the platform's — saying the
+// same thing: **the platform is told every local change at once**, the way
+// `EditableText` tells it (`_updateRemoteEditingValueIfNeeded`).
 //
-// It is deliberately not part of the view's state. The view can be wrong about
-// pixels without being wrong about text, and this is the text.
-import 'dart:async';
-
+// That rule replaces an earlier one that tried to spare the platform channel
+// the note's text by not echoing, and every device bug the surface had came
+// from the difference: a tap the platform never heard of was a keystroke typed
+// at the old caret and a backspace that deleted nothing; a local deletion the
+// platform had not heard of came back with its next delta. And the saving was
+// not real: Android's `TextEditingDelta.toJSON` sends `oldText` — the whole
+// note — with every delta anyway, so a delta is never "one character" on the
+// channel. What the rule costs is one `setEditingState` per *local* change (a
+// tap, a key the surface handles, an undo); what arrives from the platform is
+// never sent back unless the note stored something else (a `\n` written as the
+// note's `\r\n`).
+//
+// "What the platform has" is tracked as a revision, a selection and a composing
+// range — three comparisons, no copy of the text.
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
-import 'package:niman/src/markdown/edit/input_buffer.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -28,7 +31,7 @@ import 'package:niman/src/markdown/source_edit.dart';
 typedef SourceEdited = void Function(SourceEdit edit);
 
 /// The keyboard, wired to one note.
-final class SourceInput implements TextInputClient, DeltaTextInputClient {
+final class SourceInput implements DeltaTextInputClient {
   /// Wires [buffer] to the platform, reporting edits and caret moves outward.
   new({
     required this.buffer,
@@ -38,7 +41,7 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     required this.onSelection,
     required this.onTokenizer,
     this.onRecord,
-  }) : _input = InputBuffer();
+  });
 
   /// The frames this surface's edits are logged under.
   static const AppLogger _log = AppLogger(name: 'edit');
@@ -50,14 +53,12 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   final SourceEdited onEdited;
 
   /// The note's whole text, asked for only when the platform has to be told a
-  /// whole value. It is a *callback* rather than a string because joining a
-  /// note
-  /// is O(n) and a caret move must not pay it.
+  /// whole value — a callback, because joining the note is O(n) and the view
+  /// keeps it joined once per revision.
   final String Function() text;
 
-  /// Called before an edit is applied, with the text it is about to replace, so
-  /// a history can undo it (and coalesce the typing, which needs to know what
-  /// was there).
+  /// Called before an edit is applied, with the text it is about to replace,
+  /// so a history can undo it.
   final void Function(EditRecord record)? onRecord;
 
   /// Where the caret is now.
@@ -70,108 +71,123 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   /// the edited lines and nothing else.
   final void Function(SourceEdit edit, SourceBuffer buffer) onTokenizer;
 
-  final InputBuffer _input;
   TextInputConnection? _connection;
 
   /// Whether the platform currently has this surface attached.
   bool get isAttached => _connection?.attached ?? false;
 
-  /// The size a `WHOLE` update carried last, for the perf trace and for tests.
+  /// The range the IME is composing, in note offsets, or empty.
+  ///
+  /// The platform's to set: it arrives with a delta and goes back with every
+  /// echo, because an echo without it ends the composition (§6.3.3). A local
+  /// caret move ends it on this side too.
+  TextRange get composing => _composing;
+  TextRange _composing = TextRange.empty;
+
+  /// The size the last whole-value update carried, for the perf trace.
   int lastWholeLength = 0;
 
-  /// How many deltas have been applied through the delta model.
+  /// How many deltas have been applied.
   int deltaCount = 0;
 
-  /// How many arrived with an `oldText` that disagreed with the buffer.
-  int recoveredDeltas = 0;
+  /// How many times the platform's copy had to be told the note again because
+  /// it disagreed — a stored line ending, a range outside the note.
+  int resyncs = 0;
 
-  /// Opens the connection, if it is not already open, for the view [viewId]
-  /// the surface is drawn in.
+  /// Whether local changes are held back (a mouse drag in progress: the
+  /// platform needs the selection it ends with, not every one on the way).
+  bool get holdSync => _holdSync;
+  set holdSync(bool hold) {
+    _holdSync = hold;
+    if (!hold) _sync();
+  }
+
+  bool _holdSync = false;
+
+  // What the platform's copy holds, as far as this side knows.
+  int _remoteRevision = -1;
+  SelectionModel? _remoteSelection;
+  TextRange _remoteComposing = TextRange.empty;
+
+  /// Opens the connection for the view [viewId] the surface is drawn in, or,
+  /// when it is open, asks for the keyboard again.
   ///
   /// The view is not optional in practice: the Windows embedder refuses a
   /// client without one ("Could not set client, view ID is null") and every
-  /// `setEditingState` after that fails, so the note cannot be typed in at
-  /// all. `EditableText` always passes `View.of(context).viewId`.
+  /// `setEditingState` after that fails. And `show` on every call, because a
+  /// keyboard the user put away (Android's back button) leaves the connection
+  /// open: attaching once is not asking every time.
   void attach({int? viewId}) {
-    if (isAttached) return;
+    if (isAttached) {
+      _connection!.show();
+      return;
+    }
     _log.info('attach: connecting the keyboard to the note (view $viewId)');
-    _ensureSeeded();
-    _input.echoSent();
-    _echoScheduled = false;
-    _connection =
-        TextInput.attach(
-            this,
-            TextInputConfiguration(
-              viewId: viewId,
-              inputType: TextInputType.multiline,
-              inputAction: TextInputAction.newline,
-              enableDeltaModel: true,
-            ),
-          )
-          // `attach` opens the connection; **`show` is the request for the
-          // keyboard**, and `EditableText` always makes it. Without it the log
-          // shows a surface attached and a keyboard that never appears, which
-          // is
-          // exactly what a device reported.
-          ..show()
-          ..setEditingState(_value());
+    _composing = TextRange.empty;
+    _connection = TextInput.attach(
+      this,
+      TextInputConfiguration(
+        viewId: viewId,
+        inputType: TextInputType.multiline,
+        inputAction: TextInputAction.newline,
+        enableDeltaModel: true,
+      ),
+    )..show();
+    _remoteRevision = -1;
+    _sync();
   }
 
   /// Closes the connection.
   void detach() {
-    _echoTimer?.cancel();
     if (_connection != null) _log.info('detach: the surface lost focus');
     _connection?.close();
     _connection = null;
+    _composing = TextRange.empty;
   }
 
-  /// Tells the platform where to put the caret, when the app moved it.
+  /// Tells the platform about a change this side made — a caret move, an edit
+  /// the surface applied itself, an undo, a note replaced underneath.
+  ///
+  /// Sent **now**, before the platform can speak again, so its next delta is
+  /// built on a copy that already has the change. Sending the same state twice
+  /// costs nothing: `_sync` compares what the platform has and stays silent.
   void sendSelection() {
-    if (!isAttached) return;
-    _input.editedLocally(_value());
-    // Until the echo lands, the platform's caret is the old one: a keystroke
-    // in between is placed at ours (see `updateEditingValueWithDeltas`).
-    _movedSelection = true;
-    // One echo per frame, however many taps, arrow keys or drags happened
-    // inside
-    // it: a whole `TextEditingValue` at note size is not something to send
-    // twice
-    // for one frame's worth of caret.
-    if (_echoScheduled) return;
-    _echoScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _echoScheduled = false;
-      _send();
-    });
+    _composing = TextRange.empty;
+    _sync();
   }
 
-  bool _echoScheduled = false;
-  Timer? _echoTimer;
-
-  /// Whether *this side* moved the caret since the platform last heard about
-  /// it.
-  bool _movedSelection = false;
-
-  /// The note and the caret, as the platform should hear them.
-  TextEditingValue _value() {
-    final caret = selection().clampTo(buffer.text.length);
-    return TextEditingValue(
-      text: text(),
-      selection: TextSelection(
-        baseOffset: caret.anchor,
-        extentOffset: caret.extent,
+  /// Sends the note when the platform's copy is not what it holds.
+  void _sync() {
+    if (!isAttached || _holdSync) return;
+    final caret = selection().clampTo(buffer.length);
+    final composing = _validComposing();
+    if (_remoteRevision == buffer.revision &&
+        _remoteSelection == caret &&
+        _remoteComposing == composing) {
+      return;
+    }
+    _connection!.setEditingState(
+      TextEditingValue(
+        text: text(),
+        selection: TextSelection(
+          baseOffset: caret.anchor,
+          extentOffset: caret.extent,
+        ),
+        composing: composing,
       ),
     );
+    _remoteRevision = buffer.revision;
+    _remoteSelection = caret;
+    _remoteComposing = composing;
   }
 
-  /// Sends the buffer's value when the platform's copy is behind, and nothing
-  /// otherwise — the rule that keeps a keystroke from carrying the whole note.
-  void _send() {
-    if (!isAttached) return;
-    _movedSelection = false;
-    if (!_input.needsEcho) return;
-    _connection!.setEditingState(_value());
-    _input.echoSent();
+  /// The composing range, when it is still inside the note.
+  TextRange _validComposing() {
+    final range = _composing;
+    if (!range.isValid || range.isCollapsed || range.end > buffer.length) {
+      return TextRange.empty;
+    }
+    return range;
   }
 
   /// A delta, short enough for a log line.
@@ -189,234 +205,194 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     _ => 'delta',
   };
 
-  /// Gives the buffer the note's text the first time anything needs it.
-  ///
-  /// A surface is built before its note is read, so its buffer starts empty
-  /// while
-  /// the note does not: without this the very first delta's `oldText` would be
-  /// compared against nothing and every first keystroke would look like a
-  /// platform
-  /// that had fallen behind.
-  void _ensureSeeded() {
-    if (_seeded) return;
-    _seeded = true;
-    _input.seed(text());
-  }
-
-  bool _seeded = false;
-
-  /// Applies one edit to the note, the tokenizer and the caret.
-  void _apply(SourceEdit edit, SelectionModel caret) {
-    onTokenizer(edit, buffer);
-    onSelection(caret.clampTo(buffer.text.length));
-    onEdited(edit);
-  }
-
-  /// The platform replaced `[start, end)` with [text].
-  void _replace(int start, int end, String text, SelectionModel caret) {
-    if (start < 0 || end < start || end > buffer.length) {
-      // The platform's indices do not address this note: it is out of step, so
-      // the whole value goes back rather than a range that would corrupt it.
-      _log.warning('edit $start..$end outside the note (${buffer.length})');
-      _send();
-      return;
-    }
-    if (start == end && text.isEmpty) {
-      onSelection(caret.clampTo(buffer.text.length));
-      return;
-    }
+  /// Applies `[start, end)` → [inserted] to the note, and says whether the
+  /// note now holds exactly what the platform does (it does not when a line
+  /// break was stored as the note's own line ending).
+  bool _replace(int start, int end, String inserted, SelectionModel caret) {
+    final before = buffer.length;
     onRecord?.call(
       EditRecord(
         start: start,
         removed: buffer.substring(start, end),
-        inserted: text,
+        inserted: inserted,
       ),
     );
-    _apply(buffer.replaceRange(start, end, text), caret);
+    final edit = buffer.replaceRange(start, end, inserted);
+    onTokenizer(edit, buffer);
+    final exact = buffer.length - before == inserted.length - (end - start);
+    // A caret the platform computed against its own copy is off by what the
+    // note stored differently; the note's own arithmetic is not.
+    final landed = exact
+        ? caret
+        : SelectionModel.at(start + (buffer.length - before) + (end - start));
+    onSelection(landed.clampTo(buffer.length));
+    onEdited(edit);
+    return exact;
   }
 
   // -------------------------------------------------------- TextInputClient
 
   @override
-  TextEditingValue? get currentTextEditingValue => _value();
+  TextEditingValue? get currentTextEditingValue {
+    final caret = selection().clampTo(buffer.length);
+    return TextEditingValue(
+      text: text(),
+      selection: TextSelection(
+        baseOffset: caret.anchor,
+        extentOffset: caret.extent,
+      ),
+      composing: _validComposing(),
+    );
+  }
 
   @override
   AutofillScope? get currentAutofillScope => null;
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    _ensureSeeded();
+    // The whole-value path: an embedder that does not speak deltas. The note
+    // is changed by the smallest range the two texts differ in, so a keystroke
+    // is still one edit and one undo step rather than a whole note replaced.
     lastWholeLength = value.text.length;
     _log.debug('whole value: ${value.text.length} chars');
-    final kind = _input.applyValue(value);
-    if (kind == InputKind.unchanged) {
-      _reportSelection(_caretOfValue(value));
-      return;
+    final ours = text();
+    final theirs = value.text;
+    var exact = true;
+    if (ours != theirs) {
+      var prefix = 0;
+      final shortest = ours.length < theirs.length
+          ? ours.length
+          : theirs.length;
+      while (prefix < shortest &&
+          ours.codeUnitAt(prefix) == theirs.codeUnitAt(prefix)) {
+        prefix++;
+      }
+      var suffix = 0;
+      while (suffix < shortest - prefix &&
+          ours.codeUnitAt(ours.length - 1 - suffix) ==
+              theirs.codeUnitAt(theirs.length - 1 - suffix)) {
+        suffix++;
+      }
+      exact = _replace(
+        prefix,
+        ours.length - suffix,
+        theirs.substring(prefix, theirs.length - suffix),
+        _caretOf(value.selection),
+      );
+    } else {
+      _reportSelection(_caretOf(value.selection));
     }
-    // A whole value is the fallback path: the platform sent the entire note, so
-    // the note is replaced by what it sent (whatever the reason — no delta
-    // support, an autocorrect, a paste).
-    final caret = _caretOfValue(value);
-    onRecord?.call(
-      EditRecord(start: 0, removed: buffer.text, inserted: value.text),
-    );
-    buffer.replaceRange(0, buffer.length, value.text);
-    _apply(
-      SourceEdit(
-        firstLine: 0,
-        removedLines: buffer.lineCount,
-        insertedLines: buffer.lineCount,
-        revision: buffer.revision,
-      ),
-      caret,
-    );
+    _composing = value.composing;
+    _platformNowHas(value.selection, value.composing, exact: exact);
   }
 
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     if (deltas.isEmpty) return;
-    _ensureSeeded();
     _log.debug(
       'deltas: ${deltas.map(_short).join(", ")} '
       '(ours ${buffer.length}, caret ${selection().extent})',
     );
-    final kind = _input.applyDeltas(deltas);
-    if (kind == InputKind.deltasRecovered) {
-      recoveredDeltas++;
-      // The platform's copy was behind: its text is the base, and the deltas
-      // are
-      // replayed onto it (see `InputBuffer.applyDeltas`).
-      onRecord?.call(
-        EditRecord(
-          start: 0,
-          removed: buffer.text,
-          inserted: deltas.last.oldText,
-        ),
-      );
-      buffer.replaceRange(0, buffer.length, deltas.last.oldText);
-    }
-    // Whether an edit landed somewhere other than where the platform put it,
-    // so its copy has to be told what the note now says.
-    var diverged = false;
+    var exact = true;
     for (final delta in deltas) {
       deltaCount++;
-      switch (delta) {
-        case TextEditingDeltaInsertion() when _movedSelection:
-          // The platform's caret is authoritative *unless we moved it
-          // ourselves*: a tap or an arrow key moves the caret here, the
-          // platform hears about it a frame later, and an insertion that lands
-          // where the platform last thought the caret was is text in the wrong
-          // place. When we moved it, ours is the newer truth — for the offset
-          // the text goes to, not only for where the caret ends up.
-          final ours = selection().clampTo(buffer.length);
-          _log.debug(
-            'insertion at the platform caret ${delta.insertionOffset} '
-            'placed at ours ${ours.start}',
-          );
-          _replace(
-            ours.start,
-            ours.end,
-            delta.textInserted,
-            SelectionModel.at(ours.start + delta.textInserted.length),
-          );
-          diverged = true;
-        case TextEditingDeltaInsertion():
-          _replace(
-            delta.insertionOffset,
-            delta.insertionOffset,
-            delta.textInserted,
-            _caretOfDelta(delta),
-          );
-        case TextEditingDeltaDeletion():
-          _replace(
-            delta.deletedRange.start,
-            delta.deletedRange.end,
-            '',
-            _caretOfDelta(delta),
-          );
-        case TextEditingDeltaReplacement():
-          _replace(
-            delta.replacedRange.start,
-            delta.replacedRange.end,
-            delta.replacementText,
-            _caretOfDelta(delta),
-          );
-        case TextEditingDeltaNonTextUpdate():
-          // A platform caret update while *we* hold an un-echoed one is the
-          // platform's stale copy talking — the device log shows exactly this:
-          // a tap
-          // put the caret at 46, the first keystroke arrived as `sel 0,
-          // ins@0+1`,
-          // and the text went to the top of the note. Ours is the newer truth
-          // until
-          // the echo lands.
-          if (_movedSelection) {
-            _log.debug('ignored a stale caret ${delta.selection.start}');
-          } else {
-            _reportSelection(_caretOfDelta(delta));
-          }
+      if (delta.oldText.length != buffer.length) {
+        // The platform built this delta on a copy that is not ours. Its range
+        // is applied to ours — as `EditableText` applies it to its own value —
+        // and the platform is told the result afterwards.
+        _log.warning(
+          'platform copy ${delta.oldText.length} chars, ours ${buffer.length}',
+        );
+        exact = false;
       }
+      final (start, end, inserted) = switch (delta) {
+        TextEditingDeltaInsertion() => (
+          delta.insertionOffset,
+          delta.insertionOffset,
+          delta.textInserted,
+        ),
+        TextEditingDeltaDeletion() => (
+          delta.deletedRange.start,
+          delta.deletedRange.end,
+          '',
+        ),
+        TextEditingDeltaReplacement() => (
+          delta.replacedRange.start,
+          delta.replacedRange.end,
+          delta.replacementText,
+        ),
+        _ => (-1, -1, ''),
+      };
+      if (delta is TextEditingDeltaNonTextUpdate) {
+        _reportSelection(_caretOf(delta.selection));
+      } else if (start < 0 || end < start || end > buffer.length) {
+        _log.warning('edit $start..$end outside the note (${buffer.length})');
+        exact = false;
+        break;
+      } else if (start == end && inserted.isEmpty) {
+        _reportSelection(_caretOf(delta.selection));
+      } else if (!_replace(start, end, inserted, _caretOf(delta.selection))) {
+        exact = false;
+      }
+      _composing = delta.composing;
     }
-    if (diverged) {
-      _input.editedLocally(_value());
-      _send();
+    _platformNowHas(deltas.last.selection, deltas.last.composing, exact: exact);
+  }
+
+  /// Records what the platform's copy holds after an update it sent, and tells
+  /// it the note when that is not what the note holds.
+  void _platformNowHas(
+    TextSelection selection,
+    TextRange composing, {
+    required bool exact,
+  }) {
+    if (exact) {
+      _remoteRevision = buffer.revision;
+      _remoteSelection = selection.isValid
+          ? SelectionModel(
+              anchor: selection.baseOffset,
+              extent: selection.extentOffset,
+            ).clampTo(buffer.length)
+          : null;
+      _remoteComposing = composing.isValid && !composing.isCollapsed
+          ? composing
+          : TextRange.empty;
+    } else {
+      resyncs++;
+      _remoteRevision = -1;
     }
+    // Sends only what differs — nothing, for an update applied as it came.
+    _sync();
   }
 
   /// Reports [next] when the caret really moved.
-  ///
-  /// A platform ping that changes nothing — a caret update with an unusable
-  /// range, a repeat of where the caret already is — must not rebuild the note,
-  /// and the count of what arrived is already on the probe's tally for anyone
-  /// who needs it.
   void _reportSelection(SelectionModel next) {
     final current = selection();
     if (next.anchor == current.anchor && next.extent == current.extent) return;
-    onSelection(next);
+    onSelection(next.clampTo(buffer.length));
   }
 
-  /// The caret a platform update carries, when it carries a usable one.
-  SelectionModel _caretOfValue(TextEditingValue value) =>
-      value.selection.isValid
+  /// The caret a platform update carries, when it carries a usable one — the
+  /// platform sends `-1..-1` in its non-text updates, and that is not a caret.
+  SelectionModel _caretOf(TextSelection selection) =>
+      selection.isValid &&
+          selection.baseOffset <= buffer.length &&
+          selection.extentOffset <= buffer.length
       ? SelectionModel(
-          anchor: value.selection.baseOffset,
-          extent: value.selection.extentOffset,
+          anchor: selection.baseOffset,
+          extent: selection.extentOffset,
         )
-      : selection();
-
-  /// The caret a delta carries, when it carries a usable one.
-  SelectionModel _caretOfDelta(TextEditingDelta delta) =>
-      delta.selection.isValid
-      ? SelectionModel(
-          anchor: delta.selection.baseOffset,
-          extent: delta.selection.extentOffset,
-        )
-      : selection();
+      : this.selection();
 
   @override
   void performAction(TextInputAction action) {
-    switch (action) {
-      // There is no `TextInputAction.paste`: an IME's paste arrives as the text
-      // it pastes (an edit, through the deltas above), and a desktop Ctrl+V is
-      // the surface's own shortcut. The clipboard is the surface's business,
-      // not
-      // the connection's.
-      case TextInputAction.newline:
-        // Nothing to insert: the line break has already arrived as text. The
-        // Linux embedder inserts `\n` into its model, sends it as a delta and
-        // *then* calls this action (`fl_text_input_handler.cc`), and an IME
-        // commits it the same way — so inserting here as well is one Enter
-        // becoming two lines. `EditableText` does nothing here for a
-        // multiline field either.
-        _log.debug('action: newline (already inserted by the platform)');
-      case TextInputAction.done:
-      case TextInputAction.go:
-      case TextInputAction.send:
-      case TextInputAction.search:
-        detach();
-      case _:
-        break;
-    }
+    // Nothing to do for `newline`: the line break has already arrived as text.
+    // The Linux and Windows embedders insert `\n`, send it as a delta and
+    // *then* call this action (`fl_text_input_handler.cc`,
+    // `text_input_plugin.cc`), and an IME commits it the same way — so
+    // inserting here as well is one Enter becoming two lines. `EditableText`
+    // does nothing here for a multiline field either.
+    _log.debug('action: $action');
   }
 
   @override
@@ -439,15 +415,16 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
 
   @override
   void insertContent(KeyboardInsertedContent content) {
-    // A hardware keyboard's rich content arrives as bytes and a MIME type, not
-    // as text: a note is text, so what lands is the URI the platform offered.
-    final caret = selection();
+    // A keyboard's rich content arrives as bytes and a MIME type, not as text:
+    // a note is text, so what lands is the URI the platform offered.
+    final caret = selection().clampTo(buffer.length);
     _replace(
       caret.start,
       caret.end,
       content.uri,
       SelectionModel.at(caret.start + content.uri.length),
     );
+    sendSelection();
   }
 
   @override
@@ -467,9 +444,33 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
 
   @override
   void connectionClosed() {
+    // The next tap opens it again (`attach` answers a closed connection by
+    // opening a new one) — once the framework has let go of this one, which
+    // it does only when told, the way `EditableText` tells it.
+    _connection?.connectionClosedReceived();
     _connection = null;
+    _composing = TextRange.empty;
     _log.info('the platform closed the input connection');
   }
+
+  /// Tells the IME where the note is on screen and where the caret is in it,
+  /// so its candidate window and the phone's handles sit by the text.
+  void setGeometry(Size size, Matrix4 transform, Rect caret) {
+    if (!isAttached) return;
+    if (size != _geometrySize || transform != _geometryTransform) {
+      _geometrySize = size;
+      _geometryTransform = transform;
+      _connection!.setEditableSizeAndTransform(size, transform);
+    }
+    if (caret != _geometryCaret) {
+      _geometryCaret = caret;
+      _connection!.setCaretRect(caret);
+    }
+  }
+
+  Size? _geometrySize;
+  Matrix4? _geometryTransform;
+  Rect? _geometryCaret;
 
   /// The tokenizer's view of an edit: the lines that changed, and nothing else.
   ///

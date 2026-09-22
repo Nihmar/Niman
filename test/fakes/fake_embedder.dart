@@ -237,6 +237,50 @@ final class FakeEmbedder {
     }
   }
 
+  /// Composes [word] one keystroke at a time, the way an IME with a composing
+  /// region does it (a Windows IME, Android keyboards other than Gboard): each
+  /// step replaces the whole region, and the region travels with the delta.
+  Future<void> compose(String word) async {
+    final start = selection.start;
+    for (var length = 1; length <= word.length; length++) {
+      final old = text;
+      final end = composing.isValid ? composing.end : start;
+      final piece = word.substring(0, length);
+      text = old.replaceRange(start, end, piece);
+      selection = TextSelection.collapsed(offset: start + length);
+      composing = TextRange(start: start, end: start + length);
+      await _send(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'oldText': old,
+          'deltaStart': start,
+          'deltaEnd': end,
+          'deltaText': piece,
+          'selectionBase': selection.baseOffset,
+          'selectionExtent': selection.extentOffset,
+          'composingBase': composing.start,
+          'composingExtent': composing.end,
+        },
+      ]);
+    }
+  }
+
+  /// Ends a composition: the text stays, the region goes.
+  Future<void> commit() async {
+    composing = TextRange.empty;
+    await _send(<Map<String, dynamic>>[
+      <String, dynamic>{
+        'oldText': text,
+        'deltaStart': -1,
+        'deltaEnd': -1,
+        'deltaText': '',
+        'selectionBase': selection.baseOffset,
+        'selectionExtent': selection.extentOffset,
+        'composingBase': -1,
+        'composingExtent': -1,
+      },
+    ]);
+  }
+
   /// Presses Enter.
   Future<void> enter() async {
     if (profile == EmbedderProfile.android) {

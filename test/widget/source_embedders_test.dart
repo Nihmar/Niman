@@ -7,6 +7,7 @@
 // is right about its own text and wrong about the platform's is a surface whose
 // next keystroke lands in the wrong place.
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -157,6 +158,109 @@ void main() {
         rig.agree('uno\nfine\n');
         await rig.platform.type('Z');
         rig.agree('uno\nZfine\n', reason: 'the caret is on the new line');
+      });
+
+      testWidgets('a deletion survives the keystroke that follows it', (
+        tester,
+      ) async {
+        // No frame between the two: the surface's own edit has to reach the
+        // platform before the platform's next delta is built on its copy, or
+        // that delta carries the deleted character back.
+        final rig = _Rig(tester, profile, 'ciao mondo\n');
+        await rig.pump();
+        await rig.tapAt(0, 4);
+        await rig.platform.backspace();
+        await rig.platform.type('!');
+        rig.agree('cia! mondo\n');
+      });
+
+      testWidgets('a keystroke right after a tap lands at the tap', (
+        tester,
+      ) async {
+        final rig = _Rig(tester, profile, 'uno due\n\n\n\n\n\ntre\n');
+        await rig.pump();
+        await rig.tapAt(0, 3);
+        await rig.platform.type('X');
+        // The tap, and then a keystroke before any frame is drawn.
+        await tester.tapAt(
+          const Offset(_left + 14.0 + 1, _top + 6 * 21.0 + 10),
+        );
+        await rig.platform.type('Y');
+        rig.agree('unoX due\n\n\n\n\n\ntYre\n');
+      });
+
+      testWidgets('a CRLF note stays in step through an Enter', (tester) async {
+        // The note keeps its own line endings, so the platform's `\n` is
+        // written as `\r\n` — one code unit more than the platform thinks it
+        // typed. Unless it is told, every offset after it is one off.
+        final rig = _Rig(tester, profile, 'unofine\r\naltro\r\n');
+        await rig.pump();
+        await rig.tapAt(0, 3);
+        await rig.platform.enter();
+        await tester.pump();
+        rig.agree('uno\r\nfine\r\naltro\r\n');
+        await rig.platform.type('Z');
+        rig.agree('uno\r\nZfine\r\naltro\r\n');
+      });
+
+      testWidgets('a connection the platform closed is opened again', (
+        tester,
+      ) async {
+        final rig = _Rig(tester, profile, 'ciao\n\n\n\n\n\nfine\n');
+        await rig.pump();
+        await rig.tapAt(0, 2);
+        await rig.platform.closeConnection();
+        await tester.pump();
+        await rig.tapAt(6, 4);
+        expect(rig.platform.attached, isTrue, reason: 'the tap reconnects');
+        await rig.platform.type('!');
+        rig.agree('ciao\n\n\n\n\n\nfine!\n');
+      });
+
+      testWidgets('every tap asks for the keyboard', (tester) async {
+        // A keyboard the user put away (Android's back button) comes back on
+        // the next tap: attaching once is not the same as asking.
+        final rig = _Rig(tester, profile, 'uno due\n\n\n\n\n\ntre\n');
+        await rig.pump();
+        await rig.tapAt(0, 2);
+        final before = rig.platform.shows;
+        await rig.tapAt(6, 1);
+        expect(rig.platform.shows, greaterThan(before));
+      });
+
+      testWidgets('a composition is left to the IME, and underlined', (
+        tester,
+      ) async {
+        // An echo in the middle of a word ends the composition: while the
+        // platform is the one editing, nothing is sent back.
+        final rig = _Rig(tester, profile, 'ciao \n');
+        await rig.pump();
+        await rig.tapAt(0, 5);
+        final echoes = rig.platform.editingStates;
+        await rig.platform.compose('mondo');
+        await tester.pump();
+        rig.agree('ciao mondo\n');
+        expect(rig.platform.editingStates, echoes, reason: 'no echo mid-word');
+        expect(rig.platform.composing, const TextRange(start: 5, end: 10));
+        final underlined = tester
+            .renderObjectList<RenderParagraph>(find.byType(RichText))
+            .expand((paragraph) {
+              final spans = <TextSpan>[];
+              paragraph.text.visitChildren((span) {
+                if (span is TextSpan &&
+                    span.style?.decoration == TextDecoration.underline) {
+                  spans.add(span);
+                }
+                return true;
+              });
+              return spans;
+            })
+            .map((span) => span.text)
+            .join();
+        expect(underlined, 'mondo', reason: 'the word being composed');
+        await rig.platform.commit();
+        await rig.platform.type('!');
+        rig.agree('ciao mondo!\n');
       });
 
       testWidgets('an edit reaches the shell', (tester) async {
