@@ -16,6 +16,14 @@ status row switches only when both are enabled.
   its columns. The line numbers use the same face at the same size, dimmed, so
   they line up with the characters they count. Making the face and size a
   setting is issue #259.
+- **The unified source pane** (experimental, behind the unified engine
+  setting): the same note in Niman's own editing surface instead of
+  `re_editor`. Enter carries a list on, **Tab and Shift+Tab indent and
+  outdent** (the note keeps the focus), PageUp/PageDown page, and on a phone a
+  **long press selects a word**, with handles to adjust it and a toolbar to
+  cut, copy, paste or select all. Not there yet: find and replace, the
+  spelling underline, the desktop context menu, Ctrl+click on links,
+  typewriter mode and folding.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk. It opens a
   note of **any size** — the 934 KB geometry note included — and the price of
