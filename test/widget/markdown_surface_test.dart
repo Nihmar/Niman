@@ -82,8 +82,12 @@ void main() {
   });
 
   testWidgets('live hides the marker, source shows it', (tester) async {
+    // The caret is *off* the heading's line: the markers are hidden
+    // everywhere except where the writer is, which is the policy
+    // (`docs/dev/unified-surface.md` §8.6.2) and is tested by the reveal test
+    // below.
     Future<List<TextSpan>> spansAfter(MarkdownSurfaceMode mode) async {
-      await pumpMode(tester, mode);
+      await pumpMode(tester, mode, caret: 10);
       final spans = <TextSpan>[];
       for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
         widget.text.visitChildren((span) {
@@ -112,7 +116,12 @@ void main() {
     tester,
   ) async {
     Future<List<TextSpan>> spansOf(MarkdownSurfaceMode mode) async {
-      await pumpMode(tester, mode, text: 'a **bold** and [a link](u)\n');
+      await pumpMode(
+        tester,
+        mode,
+        caret: 30,
+        text: 'a **bold** and [a link](u)\n\nsecond line\n',
+      );
       final spans = <TextSpan>[];
       for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
         widget.text.visitChildren((span) {
@@ -143,6 +152,44 @@ void main() {
     }
     final source = await spansOf(MarkdownSurfaceMode.source);
     expect(source.where((span) => span.text == '**').any(hidden), isFalse);
+  });
+
+  testWidgets('live reveals the markers of the line the caret is in', (
+    tester,
+  ) async {
+    // Policy A: the line being written shows its syntax, and nothing else
+    // does. The reveal is a style, so the text is the same either way — which
+    // is what keeps the caret's offset true while the line is revealed.
+    Future<List<TextSpan>> spansAt(int caret) async {
+      await pumpMode(tester, MarkdownSurfaceMode.live, caret: caret);
+      final spans = <TextSpan>[];
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (span is TextSpan && span.text != null) spans.add(span);
+          return true;
+        });
+      }
+      return spans;
+    }
+
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+    final away = await spansAt(10);
+    expect(
+      away.where((span) => span.text == '#').every(hidden),
+      isTrue,
+      reason: 'the caret is on another line, so the hash is hidden',
+    );
+    final on = await spansAt(3);
+    expect(
+      on.any((span) => span.text == '#' && !hidden(span)),
+      isTrue,
+      reason: 'the caret is in the heading, so the hash is drawn',
+    );
+    // Revealing is not a content change: the two lines say the same thing.
+    expect(
+      away.map((span) => span.text).join(),
+      on.map((span) => span.text).join(),
+    );
   });
 
   testWidgets('a long note is coloured once its reading lands', (tester) async {
@@ -208,18 +255,24 @@ void main() {
     // move
     // a single text offset, so the caret is asked of the paragraph and lands in
     // the same place in the note in either mode.
-    final source = await pumpMode(tester, MarkdownSurfaceMode.source);
+    // The caret is on the note's plain line, so nothing live mode hides is
+    // beside it: the two modes draw that run identically, and what the test
+    // compares is the caret's own geometry rather than the line's height —
+    // the heading above it is set at the heading's size in live mode and at
+    // the body's in source, so the two lines do not start at the same y
+    // (measured: 50.0 against 65.0).
+    final source = await pumpMode(
+      tester,
+      MarkdownSurfaceMode.source,
+      caret: 10,
+    );
     final sourceRect = source.caretRect!;
-    final live = await pumpMode(tester, MarkdownSurfaceMode.live);
+    final live = await pumpMode(tester, MarkdownSurfaceMode.live, caret: 10);
     final liveRect = live.caretRect!;
     expect(liveRect.left, closeTo(sourceRect.left, 0.01));
-    expect(liveRect.top, closeTo(sourceRect.top, 0.01));
     expect(source.placeCaret, isNotNull);
-    // The hit test agrees with the caret it drew: a point just right of offset
-    // 3
-    // is still inside the character that offset sits on — the heading is drawn
-    // at
-    // its own size, so that character is wider than the body's.
-    expect(live.offsetAt(Offset(liveRect.left + 1, liveRect.top + 2)), 3);
+    // The hit test agrees with the caret it drew: a point just right of the
+    // caret's offset is still inside the character that offset sits on.
+    expect(live.offsetAt(Offset(liveRect.left + 1, liveRect.top + 2)), 10);
   });
 }

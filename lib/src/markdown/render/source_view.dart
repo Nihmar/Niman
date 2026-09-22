@@ -2583,12 +2583,15 @@ final class _Line extends StatelessWidget {
             ),
           Expanded(
             child: _caretBox(
-              Padding(
-                padding: EdgeInsets.only(left: _indent()),
-                child: Text.rich(
-                  _span(),
-                  key: paragraphKey,
-                  style: _lineStyle(),
+              ValueListenableBuilder<int>(
+                valueListenable: caretLine,
+                builder: (context, line, _) => Padding(
+                  padding: EdgeInsets.only(left: _indent()),
+                  child: Text.rich(
+                    _span(revealed: line == index),
+                    key: paragraphKey,
+                    style: _lineStyle(revealed: line == index),
+                  ),
                 ),
               ),
             ),
@@ -2677,7 +2680,12 @@ final class _Line extends StatelessWidget {
   /// as
   /// written and keeps one size for everything, so the markers keep their own
   /// advance there.
-  TextStyle _lineStyle() {
+  TextStyle _lineStyle({required bool revealed}) {
+    // The line's own size is the *hiding*'s, not the reveal's: a heading is
+    // drawn as a heading whether its hashes are shown or not, because what the
+    // mode is about is reading the note with the syntax out of the way — and
+    // revealing a marker is not a reason to restyle the line under the caret
+    // (`docs/dev/unified-surface.md` §8.6.2, and the test that holds it).
     if (!hideMarkers) return theme.body;
     final text = styled.text;
     var level = 0;
@@ -2722,7 +2730,7 @@ final class _Line extends StatelessWidget {
   /// size
   /// or the height, so a line keeps the surface's metrics whatever it contains
   /// (`highlight_style.dart`).
-  TextSpan _span() {
+  TextSpan _span({required bool revealed}) {
     final spans = <InlineSpan>[];
     var at = 0;
     // The runs are the tokenizer's; the selection cuts them where it starts and
@@ -2735,7 +2743,7 @@ final class _Line extends StatelessWidget {
         spans,
         token.start,
         token.end,
-        hideMarkers && (token.marker || _isMarker(token.kind))
+        hidden(token, revealed: revealed)
             ? _hiddenMarker
             : markdownTokenStyle(token.kind, syntax, dark: dark),
       );
@@ -2743,6 +2751,24 @@ final class _Line extends StatelessWidget {
     }
     if (at < styled.text.length) _add(spans, at, styled.text.length, null);
     return TextSpan(children: spans);
+  }
+
+  /// Whether [token]'s marker is hidden rather than drawn.
+  ///
+  /// Policy A of `docs/dev/unified-surface.md` §8.6.2: the markers are hidden
+  /// everywhere except on the line the caret is in, which is what makes `live`
+  /// mode an interactive preview — you see the syntax of the line you are
+  /// writing and none of the rest. Per *row* would be the refinement that
+  /// follows a wrap; per line is one `TextSpan` build either way, because a
+  /// line is the unit this widget is given.
+  ///
+  /// The reveal is a **style**, never the text: the marker keeps its offset and
+  /// its string, so the caret, the hit test and the selection know nothing
+  /// about it, and the paragraph's cache key does not move when the caret does.
+  bool hidden(Token token, {required bool revealed}) {
+    if (!hideMarkers) return false;
+    if (!token.marker && !_isMarker(token.kind)) return false;
+    return !revealed;
   }
 
   /// Adds `[start, end)` to [spans], cut at the selection's and the composing

@@ -277,6 +277,31 @@ numbers, and that is the property `word_count_index_test` holds: counting
 the lines an edit touched answers what counting the whole text answers, for
 a character, an Enter, a join, and a line taken off the end.
 
+## Phase 4 has started: the marker reveal
+
+`live` mode hid its markers and showed none of them back, which made it a
+preview rather than somewhere to write: the writer could not see the `#` or
+the `-` they were editing. The reveal policy is now
+`docs/dev/unified-surface.md` §8.6.2's **policy A** — the markers are hidden
+everywhere except on the line the caret is in.
+
+It is a *style*, never the text: `_Line.hidden(token, revealed:)` decides
+between `_hiddenMarker` and `markdownTokenStyle`, and the marker keeps its
+offset, its string and its advance, so the caret, the hit test and the
+selection know nothing about it. The line's own size stays the hiding's,
+too: a heading is drawn at the heading's size whether its hashes are shown or
+not.
+
+Four tests changed with it and one is new: the tests that measured a hidden
+marker now put the caret on another line (`the caret is in the heading, so
+the hash is drawn` is the new one, and the two `caretRect` comparisons were
+narrowed to the horizontal, since a heading above the caret is a different
+height in the two modes — 50.0 against 65.0, measured).
+
+Per-word reveal is the refinement the design asks for next, and the row-wise
+reveal that follows a wrap is the other: this is per *line*, because a line
+is the unit the surface builds.
+
 ## The testing builds
 
 `scripts\niman.bat windows beta` and `scripts\niman.bat apk beta` were built
