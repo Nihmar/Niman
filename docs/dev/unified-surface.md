@@ -11400,9 +11400,42 @@ each:
   took no focus on open (the keyboard-on-open setting, a template's `{{cursor}}`),
   and Escape did not collapse a selection before reaching the app.
 
-Phase 3 is done. The flag can stop being experimental once a device round with it
-on as the default comes back clean; that is the user's call, and phase 4 starts on
-this surface either way.
+**Phase 3 is not closed, and calling it done would file three real debts as
+somebody else's problem.** What is checked above is checked — every criterion
+has its own answer — but the phase's *deliverable* is not reached, and two of
+its criteria are only half answered:
+
+- **The deliverable is "`source` mode *replaces* `re_editor`", and it does
+  not.** `editorKind: source` still opens `re_editor`, and the unified surface
+  is reached only through `markdownEngine: unified`, whose default is `legacy`
+  (`lib/src/core/settings/library_config.dart`). So the phase has a surface,
+  not a replacement: both source panes are compiled, tested and shipped, and
+  what a user gets without touching a setting is the old one. The flag stops
+  being experimental when a device round with it *on as the default* comes
+  back clean; that round has not been run, and it is the user's call.
+- **A second Android IME is still to be tried** (Gboard is the one that
+  answered), and the TalkBack / desktop screen-reader pass risk K9 asks for is
+  not recorded either. The semantics exist and are held headless
+  (`source_semantics_test.dart`, and the render object that says where the
+  selection is); what is owed is the device check that they are *usable*, which
+  is exactly what a headless test cannot say.
+- **Source mode is not sound on the note the stress test is about.** An Enter
+  or a line join inside a block that spans the note still costs O(note) on the
+  UI thread — one edit at 50 % of `Quicknote.md` re-scans 1 378 781 lines
+  (`huge-notes.md` item 3, still the one open item there). That is a
+  source-surface path, on the surface this phase declares finished, and it is
+  the reason a device round is not yet worth running: the build under test is
+  not one to hand over.
+
+The user-facing half is stale for the same reason: `docs/user/editing.md` still
+lists find and replace, the spelling underline, the context menu, Ctrl+click,
+typewriter mode and folding as missing from the unified source pane, and they
+are all in (see "The rest of the contract", above). That list is corrected in
+this commit.
+
+Phase 4 therefore starts on a surface that is *usable and wrong in one known
+place*, not on a finished one; and phase 4's own work — `live` mode — does not
+close item 3 either, because `live` is the same surface with the markers hidden.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
