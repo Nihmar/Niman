@@ -185,7 +185,7 @@ final class BlockParser {
         cached.revision == buffer.revision) {
       return cached;
     }
-    final scope = DocumentScope.scan(buffer.text, buffer, buffer.revision);
+    final scope = DocumentScope.scan(buffer, buffer.revision);
     _scope = scope;
     return scope;
   }
@@ -503,34 +503,48 @@ final class DocumentScope {
     required this.revision,
   });
 
-  /// Scans [text] for both kinds of definition.
-  factory scan(String text, SourceBuffer source, int revision) {
+  /// Scans [source]'s lines for both kinds of definition.
+  ///
+  /// Line by line, and only the lines that can hold one: a definition opens
+  /// with `[` after at most three spaces, a reference contains `[^`. The
+  /// scan used to run three multi-line patterns over the note's joined text
+  /// — 8.5 s on the first frame of a 246 MB note's preview (0.0.9 stress
+  /// test) — for definitions a few lines of it make.
+  factory scan(SourceBuffer source, int revision) {
     final links = <String, md.LinkReference>{};
-    for (final match in _linkDefinition.allMatches(text)) {
-      final label = match.group(1)!.trim().toLowerCase();
+    final counts = <String, int>{};
+    final bodies = <String, String>{};
+    final labels = <String>[];
+    final cited = <String>{};
+    for (var at = 0; at < source.lineCount; at++) {
+      final line = source.lineAt(at);
+      if (line.contains('[^')) {
+        for (final match in _footnoteReference.allMatches(line)) {
+          final label = match.group(1)!;
+          if (cited.add(label)) labels.add(label);
+        }
+      }
+      if (!_opensWithBracket(line)) continue;
+      final footnote = _footnoteDefinition.firstMatch(line);
+      if (footnote != null) {
+        final label = footnote.group(1)!;
+        counts[label] = (counts[label] ?? 0) + 1;
+        final body = (footnote.group(2) ?? '').trim();
+        if (body.isNotEmpty) bodies.putIfAbsent(label, () => body);
+        continue;
+      }
+      final link = _linkDefinition.firstMatch(line);
+      if (link == null) continue;
+      final label = link.group(1)!.trim().toLowerCase();
       if (label.isEmpty) continue;
       links.putIfAbsent(
         label,
         () => md.LinkReference(
-          match.group(1)!.trim(),
-          match.group(2)!,
-          match.group(3),
+          link.group(1)!.trim(),
+          link.group(2)!,
+          link.group(3),
         ),
       );
-    }
-
-    final counts = <String, int>{};
-    final bodies = <String, String>{};
-    for (final match in _footnoteDefinition.allMatches(text)) {
-      final label = match.group(1)!;
-      counts[label] = (counts[label] ?? 0) + 1;
-      final body = (match.group(2) ?? '').trim();
-      if (body.isNotEmpty) bodies.putIfAbsent(label, () => body);
-    }
-    final labels = <String>[];
-    for (final match in _footnoteReference.allMatches(text)) {
-      final label = match.group(1)!;
-      if (!labels.contains(label)) labels.add(label);
     }
     // The section a note ends with, in the order the references are cited —
     // which is the order the package numbers them in, and the order a reader
@@ -550,17 +564,25 @@ final class DocumentScope {
     );
   }
 
+  /// Whether [line] opens with `[` after at most three spaces: the only
+  /// lines a definition can be.
+  static bool _opensWithBracket(String line) {
+    var at = 0;
+    while (at < 3 && at < line.length && line.codeUnitAt(at) == 0x20) {
+      at++;
+    }
+    return at < line.length && line.codeUnitAt(at) == 0x5B;
+  }
+
   /// A link reference definition, in its single-line form.
   static final RegExp _linkDefinition = RegExp(
     r'^ {0,3}\[([^\]^][^\]]*)\]:[ \t]*(\S+)[ \t]*'
     r'(?:["\x27(]([^"\x27)]*)["\x27)])?[ \t]*$',
-    multiLine: true,
   );
 
   /// A footnote definition, in its single-line form: its label and its body.
   static final RegExp _footnoteDefinition = RegExp(
     r'^ {0,3}\[\^([^\]]+)\]:[ \t]*(.*)$',
-    multiLine: true,
   );
 
   /// A footnote reference: `[^label]` that is not a definition.
