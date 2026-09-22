@@ -72,6 +72,10 @@ const Color _currentMatchColor = Color(0xAAFF8F00);
 /// numbers.
 const double _gutterGap = 14;
 
+/// A link the writer Ctrl+clicked: its token's kind (a wikilink or a Markdown
+/// link) and its text as written, brackets and all.
+typedef SourceLinkTap = void Function(TokenKind kind, String raw);
+
 /// The source surface: the note's text, its caret, and where a tap lands.
 final class MarkdownSourceView extends StatefulWidget {
   /// Shows [buffer] with [selection], styled with [theme].
@@ -95,6 +99,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.formatMenu,
     this.spellCheck,
     this.findMatches,
+    this.onOpenLink,
     super.key,
   });
 
@@ -182,6 +187,10 @@ final class MarkdownSourceView extends StatefulWidget {
 
   /// What the find bar found, painted over the lines; null finds nothing.
   final SourceMatches? findMatches;
+
+  /// Called when a link is Ctrl+clicked (Cmd+clicked on a Mac); null leaves
+  /// the click a click.
+  final SourceLinkTap? onOpenLink;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -1048,6 +1057,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.buttons != kPrimaryMouseButton) return;
       final offset = offsetAt(event.position);
       if (offset == null) return;
+      if (_openLinkAt(offset)) return;
       _dragAnchor = offset;
       placeCaret(offset);
       // The platform needs the selection the drag ends with, not every one on
@@ -1071,6 +1081,43 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onPointerCancel: (_) => _endDrag(),
     child: child,
   );
+
+  /// A Ctrl+click (Cmd on a Mac) on a link at [offset]: the caret goes there
+  /// and the link opens, the legacy editor's T-M3-07. True when it did.
+  bool _openLinkAt(int offset) {
+    final open = widget.onOpenLink;
+    if (open == null) return false;
+    final keyboard = HardwareKeyboard.instance;
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    if (!(mac ? keyboard.isMetaPressed : keyboard.isControlPressed)) {
+      return false;
+    }
+    final link = linkAt(offset);
+    if (link == null) return false;
+    placeCaret(offset);
+    open(link.$1, link.$2);
+    return true;
+  }
+
+  /// The wikilink or Markdown link under [offset] — its kind and its text as
+  /// written — or null. An offset on either edge of the link is on it: a
+  /// click lands between characters, and a click on the first or the last
+  /// one lands on the edge.
+  (TokenKind, String)? linkAt(int offset) {
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(offset.clamp(0, buffer.length));
+    final local = offset - buffer.offsetOfLine(line);
+    final styled = _lineAt(line);
+    for (final token in styled.tokens) {
+      if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
+        continue;
+      }
+      if (local >= token.start && local <= token.end) {
+        return (token.kind, styled.text.substring(token.start, token.end));
+      }
+    }
+    return null;
+  }
 
   void _endDrag() {
     _dragAnchor = null;

@@ -75,6 +75,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.formatMenu,
     this.spellCheck,
     this.findMatches,
+    this.onOpenLink,
     super.key,
   });
 
@@ -136,6 +137,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// What the find bar found, painted over the lines.
   final SourceMatches? findMatches;
 
+  /// Called when a link is Ctrl+clicked.
+  final SourceLinkTap? onOpenLink;
+
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
@@ -167,5 +171,6 @@ final class MarkdownSurface extends StatelessWidget {
     formatMenu: formatMenu,
     spellCheck: spellCheck,
     findMatches: findMatches,
+    onOpenLink: onOpenLink,
   );
 }
