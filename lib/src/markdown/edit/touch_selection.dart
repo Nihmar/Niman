@@ -17,6 +17,7 @@ library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/editor_context_menu.dart';
 
 /// Which end of the selection a handle holds.
 enum SelectionHandle {
@@ -40,6 +41,9 @@ final class TouchSelectionOverlay extends StatelessWidget {
     required this.buttons,
     required this.onHandleDrag,
     required this.onHandleDragEnd,
+    this.formats = const <FormatMenuEntry>[],
+    this.extras = const <ContextMenuButtonItem>[],
+    this.onDismiss,
     super.key,
   });
 
@@ -55,8 +59,17 @@ final class TouchSelectionOverlay extends StatelessWidget {
   /// Whether the toolbar is drawn.
   final bool showToolbar;
 
-  /// What the toolbar offers.
+  /// What the toolbar offers: the clipboard.
   final List<ContextMenuButtonItem> buttons;
+
+  /// The toolbar's formatting actions, in the toolbar's overflow.
+  final List<FormatMenuEntry> formats;
+
+  /// What follows them: the spelling's entries.
+  final List<ContextMenuButtonItem> extras;
+
+  /// Closes the toolbar before a formatting action runs.
+  final VoidCallback? onDismiss;
 
   /// A handle was dragged to a point — the middle of the line the finger is
   /// pointing at, in global coordinates.
@@ -101,13 +114,16 @@ final class TouchSelectionOverlay extends StatelessWidget {
       final right = toOverlay(bottom.bottomRight);
       final middle = (left.dx + right.dx) / 2;
       children.add(
-        AdaptiveTextSelectionToolbar.buttonItems(
+        EditorContextMenu(
           anchors: TextSelectionToolbarAnchors(
             primaryAnchor: Offset(middle, left.dy - 8),
             // Below the handles when there is no room above.
             secondaryAnchor: Offset(middle, right.dy + 32),
           ),
-          buttonItems: buttons,
+          clipboard: buttons,
+          formats: formats,
+          extras: extras,
+          onDismiss: onDismiss ?? () {},
         ),
       );
     }
