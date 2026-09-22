@@ -57,6 +57,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.history,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
+    this.hideMarkers = false,
     this.syntax,
     this.dark = false,
     super.key,
@@ -96,6 +97,18 @@ final class MarkdownSourceView extends StatefulWidget {
 
   /// Whether the gutter shows line numbers.
   final bool showLineNumbers;
+
+  /// Whether the structural markers are hidden.
+  ///
+  /// Hidden **by style**, never removed: the runs stay in the layout with their
+  /// advance, so an offset in the text is an offset on the screen and the
+  /// caret,
+  /// the hit test and the selection need to know nothing about what is
+  /// invisible.
+  /// That is the whole reason `live` mode (phase 4) can be this surface with a
+  /// flag rather than a second renderer — the marker's width is paid for, and
+  /// what it buys is that every offset stays true.
+  final bool hideMarkers;
 
   /// The token palette; null takes it from the ambient theme.
   final SyntaxColors? syntax;
@@ -669,6 +682,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             theme: widget.theme,
                             syntax: syntax,
                             dark: widget.dark,
+                            hideMarkers: widget.hideMarkers,
                             width: available,
                             caret: index == caretLine ? _caretRect : null,
                             caretOn: _caretOn,
@@ -770,6 +784,7 @@ final class _Line extends StatelessWidget {
     required this.theme,
     required this.syntax,
     required this.dark,
+    required this.hideMarkers,
     required this.width,
     required this.caret,
     required this.caretOn,
@@ -785,6 +800,9 @@ final class _Line extends StatelessWidget {
   final MarkdownTheme theme;
   final SyntaxColors syntax;
   final bool dark;
+
+  /// Whether the structural markers are drawn invisibly.
+  final bool hideMarkers;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -861,7 +879,9 @@ final class _Line extends StatelessWidget {
       spans.add(
         TextSpan(
           text: styled.text.substring(token.start, token.end),
-          style: markdownTokenStyle(token.kind, syntax, dark: dark),
+          style: hideMarkers && _isMarker(token.kind)
+              ? const TextStyle(color: Color(0x00000000))
+              : markdownTokenStyle(token.kind, syntax, dark: dark),
         ),
       );
       at = token.end;
@@ -872,6 +892,24 @@ final class _Line extends StatelessWidget {
     return TextSpan(children: spans);
   }
 }
+
+/// Whether [kind] is a marker a formatted surface hides rather than shows.
+///
+/// The structural ones, which the tokenizer emits as runs of their own. The
+/// inline
+/// ones — the `**` around a bold word, the `$` around a formula — are part of
+/// the
+/// run they mark today, so hiding those means splitting them in the tokenizer
+/// first; that is the next step, and this list is where it will show up.
+bool _isMarker(TokenKind kind) => switch (kind) {
+  TokenKind.headingMarker ||
+  TokenKind.listMarker ||
+  TokenKind.blockquote ||
+  TokenKind.codeFence ||
+  TokenKind.codeLanguage ||
+  TokenKind.taskBox => true,
+  _ => false,
+};
 
 /// Draws the caret: a thin vertical bar at the rectangle the line's own layout
 /// answered with.
