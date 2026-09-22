@@ -33,6 +33,7 @@ scripts\niman.bat check      # Windows equivalent
 scripts\niman.bat integration  # the headless integration_test/ files (sync_e2e needs Linux)
 scripts\niman.bat apk beta   # Android testing build, from Windows
 scripts\niman.bat windows    # Windows build (on a Windows host)
+scripts\niman.bat windows beta  # Windows testing build (its own data folder)
 ```
 
 `check` (`.github/workflows/check.yml`) runs analyze, `flutter test`
@@ -89,12 +90,10 @@ installed release, which took the version back down and left the next
 migration to redo what was done (2026-09-22). So the testing build keeps
 its own folder:
 
-- `scripts
-iman.bat windows beta` (`./scripts/niman.sh linux beta`)
+- `scripts\niman.bat windows beta` (`./scripts/niman.sh linux beta`)
   passes `--dart-define=APP_CHANNEL=testing`.
 - `appSupportDirectory()` (`lib/src/core/app_channel.dart`) answers a
-  sibling of the platform folder, `…\dev.niman
-iman-testing` on
+  sibling of the platform folder, `…\dev.niman\niman-testing` on
   Windows, for everything the app keeps: `niman.db`, `indexes/`, the log,
   the single-instance claim. Libraries have to be opened once again in
   the testing build; the notes themselves are the same files.
