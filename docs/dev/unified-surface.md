@@ -11275,14 +11275,19 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
      keystroke, and treat a delta's `oldText` as authoritative when it
      disagrees** — the probe recovered on that rule and the text stayed coherent.
 
-   What is still open is one question, and the probe now asks it on screen: **no
-   composing range has been reported in either run** (0 of 435 lines, with 208
-   insertions and 6 replacements), while Gboard was typing words. The probe
-   underlines the range it is given and counts what it has seen, so the next
-   screenshot separates "the IME does not compose here" from "it composes and
-   the range is dropped". Enter, backspace and the platform closing the
-   connection were not exercised at all (no `ACTION`, no `DELTA delete`, no
-   `CLOSED`).
+   **And the composing question, the phase's last unknown, is answered by its
+   absence.** A third run (422 lines) reports **no composing range either** — 0 of
+   947 lines across the three runs, with 448 insertions and 14 replacements — and the
+   person running the probe reported independently that no underline appeared while
+   typing. Both are the same answer, and it is a complete one: **on Android with
+   Gboard there is no composing range to preserve.** Gboard does its word work and
+   reports the *result* — an autocorrect arrives as `DELTA replace`, which the delta
+   path and the whole-value path both carry — so the surface's composing handling is
+   a **tolerance**, not a requirement: it is correct when a range arrives and equally
+   correct when none ever does, which is what its tests hold. What remains unexercised
+   is backspace, Enter (no `DELTA delete`, no newline insertion, no `ACTION` in any
+   run) and the platform closing the connection; none of the three is a design
+   unknown, and the delete path has unit tests.
    **The instrument is `lib/src/editor/text_input_probe.dart`**
    (Settings → Diagnostics → *Text input probe*; its own test drives it through
    the platform channel so the probe itself is verified). It owns a bare
