@@ -266,6 +266,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _seenRevision = widget.buffer.revision;
     _input = _makeInput();
     widget.surface?.attachView(this);
+    widget.spellCheck?.addListener(_onSpellingChanged);
     _scheduleCaret();
     final scroll = widget.surface?.takePendingScroll();
     if (scroll != null) {
@@ -312,6 +313,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       oldWidget.surface?.detachView(this);
       widget.surface?.attachView(this);
     }
+    if (!identical(oldWidget.spellCheck, widget.spellCheck)) {
+      oldWidget.spellCheck?.removeListener(_onSpellingChanged);
+      widget.spellCheck?.addListener(_onSpellingChanged);
+    }
     if (!identical(oldWidget.buffer, widget.buffer)) {
       // Another note: the keyboard, the history and the caret were this one's.
       final attached = _input.isAttached;
@@ -346,6 +351,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @override
   void dispose() {
     widget.surface?.detachView(this);
+    widget.spellCheck?.removeListener(_onSpellingChanged);
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
@@ -358,6 +364,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// How many source lines the note has.
   int get lineCount => _tokens.lineCount;
+
+  /// The spelling changed its mind (a dictionary loaded, a word added, the
+  /// underline switched off): the lines on screen are drawn again.
+  void _onSpellingChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// The tokenizer's runs on line [index], or none when it has fallen behind
+  /// the buffer there — for the spelling's pass, which skips what is not
+  /// prose.
+  List<Token> tokensOf(int index) {
+    if (index < 0 || index >= widget.buffer.lineCount) return const <Token>[];
+    return _lineAt(index).tokens;
+  }
 
   /// The keyboard focus, for a shell that wants to raise the keyboard.
   FocusNode get focusNode => _focus;
@@ -1160,6 +1180,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return _rangeIn(index, composing.start, composing.end);
   }
 
+  /// The words the checker flags on line [index], as offsets local to it.
+  List<TextRange> _misspelledIn(int index) {
+    if (widget.spellCheck == null) return const <TextRange>[];
+    return _spellRanges(index, widget.buffer.lineAt(index));
+  }
+
   /// `[from, to)` of the note, as offsets local to line [index], or null.
   (int, int)? _rangeIn(int index, int from, int to) {
     final start = widget.buffer.offsetOfLine(index);
@@ -1473,6 +1499,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             hideMarkers: widget.hideMarkers,
                             selected: _selectionIn(index),
                             composing: _composingIn(index),
+                            misspelled: _misspelledIn(index),
+                            misspelledColor: Theme.of(context)
+                                .colorScheme
+                                .error,
                             width: available,
                             index: index,
                             caretLine: _caretLine,
@@ -2016,6 +2046,8 @@ final class _Line extends StatelessWidget {
     required this.selected,
     required this.composing,
     required this.width,
+    required this.misspelled,
+    required this.misspelledColor,
     required this.index,
     required this.caretLine,
     required this.caret,
@@ -2045,6 +2077,12 @@ final class _Line extends StatelessWidget {
 
   /// The range the IME is composing, as offsets local to this line, or null.
   final (int, int)? composing;
+
+  /// The words the spelling flags, as offsets local to this line.
+  final List<TextRange> misspelled;
+
+  /// The colour their wavy underline is drawn in.
+  final Color misspelledColor;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -2218,7 +2256,11 @@ final class _Line extends StatelessWidget {
   /// the underline, and the rest keeps the run's own style.
   void _add(List<InlineSpan> spans, int start, int end, TextStyle? style) {
     final cuts = <int>{start, end};
-    for (final range in <(int, int)?>[selected, composing]) {
+    for (final range in <(int, int)?>[
+      selected,
+      composing,
+      for (final word in misspelled) (word.start, word.end),
+    ]) {
       if (range == null) continue;
       if (range.$1 > start && range.$1 < end) cuts.add(range.$1);
       if (range.$2 > start && range.$2 < end) cuts.add(range.$2);
@@ -2238,6 +2280,16 @@ final class _Line extends StatelessWidget {
       if (inside(composing)) {
         piece = (piece ?? const TextStyle()).copyWith(
           decoration: TextDecoration.underline,
+        );
+      } else if (misspelled.any(
+        (word) => from >= word.start && to <= word.end,
+      )) {
+        // The word being composed is not judged yet: its underline is the
+        // IME's.
+        piece = (piece ?? const TextStyle()).copyWith(
+          decoration: TextDecoration.underline,
+          decorationStyle: TextDecorationStyle.wavy,
+          decorationColor: misspelledColor,
         );
       }
       spans.add(TextSpan(text: styled.text.substring(from, to), style: piece));
