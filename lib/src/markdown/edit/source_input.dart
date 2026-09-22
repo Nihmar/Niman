@@ -13,6 +13,7 @@
 // It is deliberately not part of the view's state. The view can be wrong about
 // pixels without being wrong about text, and this is the text.
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
@@ -30,11 +31,12 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   new({
     required this.buffer,
     required this.onEdited,
+    required this.text,
     required this.selection,
     required this.onSelection,
     required this.onTokenizer,
     this.onRecord,
-  }) : _input = InputBuffer(text: buffer.text);
+  }) : _input = InputBuffer();
 
   /// The frames this surface's edits are logged under.
   static const AppLogger _log = AppLogger(name: 'edit');
@@ -44,6 +46,12 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
 
   /// Called after every edit the platform asked for, so the view can repaint.
   final SourceEdited onEdited;
+
+  /// The note's whole text, asked for only when the platform has to be told a
+  /// whole value. It is a *callback* rather than a string because joining a
+  /// note
+  /// is O(n) and a caret move must not pay it.
+  final String Function() text;
 
   /// Called before an edit is applied, with the text it is about to replace, so
   /// a history can undo it (and coalesce the typing, which needs to know what
@@ -78,9 +86,9 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   /// Opens the connection, if it is not already open.
   void attach() {
     if (isAttached) return;
-    _input
-      ..editedLocally(_value())
-      ..echoSent();
+    _ensureSeeded();
+    _input.echoSent();
+    _echoScheduled = false;
     _connection = TextInput.attach(
       this,
       const TextInputConfiguration(
@@ -101,14 +109,26 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   void sendSelection() {
     if (!isAttached) return;
     _input.editedLocally(_value());
-    _send();
+    // One echo per frame, however many taps, arrow keys or drags happened
+    // inside
+    // it: a whole `TextEditingValue` at note size is not something to send
+    // twice
+    // for one frame's worth of caret.
+    if (_echoScheduled) return;
+    _echoScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _echoScheduled = false;
+      _send();
+    });
   }
+
+  bool _echoScheduled = false;
 
   /// The note and the caret, as the platform should hear them.
   TextEditingValue _value() {
     final caret = selection().clampTo(buffer.text.length);
     return TextEditingValue(
-      text: buffer.text,
+      text: text(),
       selection: TextSelection(
         baseOffset: caret.anchor,
         extentOffset: caret.extent,
@@ -123,6 +143,22 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     _connection!.setEditingState(_value());
     _input.echoSent();
   }
+
+  /// Gives the buffer the note's text the first time anything needs it.
+  ///
+  /// A surface is built before its note is read, so its buffer starts empty
+  /// while
+  /// the note does not: without this the very first delta's `oldText` would be
+  /// compared against nothing and every first keystroke would look like a
+  /// platform
+  /// that had fallen behind.
+  void _ensureSeeded() {
+    if (_seeded) return;
+    _seeded = true;
+    _input.seed(text());
+  }
+
+  bool _seeded = false;
 
   /// Applies one edit to the note, the tokenizer and the caret.
   void _apply(SourceEdit edit, SelectionModel caret) {
@@ -164,6 +200,7 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
 
   @override
   void updateEditingValue(TextEditingValue value) {
+    _ensureSeeded();
     lastWholeLength = value.text.length;
     final kind = _input.applyValue(value);
     if (kind == InputKind.unchanged) {
@@ -192,6 +229,7 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     if (deltas.isEmpty) return;
+    _ensureSeeded();
     final kind = _input.applyDeltas(deltas);
     if (kind == InputKind.deltasRecovered) {
       recoveredDeltas++;
