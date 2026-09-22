@@ -2590,17 +2590,24 @@ final class _NoteViewState extends State<NoteView>
   /// screen.
   String get _editText => _usesUnifiedSource ? _unifiedText : _controller.text;
 
-  /// The selection a command works on, in offsets of [_editText].
-  TextSelection get _editSelection {
+  /// Runs a Markdown [command] on the source pane on screen.
+  ///
+  /// On the unified surface it is handed the lines the selection touches,
+  /// not the note ([MarkdownSurfaceController.applyLineCommand]); the legacy
+  /// editor hands it its whole text, as it always has.
+  void _runCommand(
+    MarkdownEdit Function(String text, TextSelection selection) command,
+  ) {
     final surface = _surface;
     if (_usesUnifiedSource && surface != null) {
-      final selection = surface.selection;
-      return TextSelection(
-        baseOffset: selection.anchor,
-        extentOffset: selection.extent,
-      );
+      surface.applyLineCommand(command);
+      _focus.requestFocus();
+      return;
     }
-    return textSelection(_controller.text, _controller.selection);
+    final text = _controller.text;
+    _applyMarkdownEdit(
+      command(text, textSelection(text, _controller.selection)),
+    );
   }
 
   /// The line the command's caret is on (0-based).
@@ -2613,10 +2620,10 @@ final class _NoteViewState extends State<NoteView>
   }
 
   void _wrapSelection({required String left, required String right}) {
-    _applyMarkdownEdit(
-      wrapSelection(
-        text: _editText,
-        selection: _editSelection,
+    _runCommand(
+      (text, selection) => wrapSelection(
+        text: text,
+        selection: selection,
         left: left,
         right: right,
       ),
@@ -2624,12 +2631,15 @@ final class _NoteViewState extends State<NoteView>
   }
 
   void _insertCodeBlock() {
-    _applyMarkdownEdit(codeBlock(text: _editText, selection: _editSelection));
+    _runCommand(
+      (text, selection) => codeBlock(text: text, selection: selection),
+    );
   }
 
   void _prefixLines({required String prefix}) {
-    _applyMarkdownEdit(
-      prefixLines(text: _editText, selection: _editSelection, prefix: prefix),
+    _runCommand(
+      (text, selection) =>
+          prefixLines(text: text, selection: selection, prefix: prefix),
     );
   }
 
@@ -2637,10 +2647,10 @@ final class _NoteViewState extends State<NoteView>
   /// or markdown `[…](…)`).
   void _insertLink() {
     final markdown = widget.linkType == LinkType.markdown;
-    _applyMarkdownEdit(
-      wrapSelection(
-        text: _editText,
-        selection: _editSelection,
+    _runCommand(
+      (text, selection) => wrapSelection(
+        text: text,
+        selection: selection,
         left: markdown ? '[' : '[[',
         right: markdown ? '](...)' : ']]',
       ),
@@ -2649,16 +2659,18 @@ final class _NoteViewState extends State<NoteView>
 
   /// Numbers the selected line(s) as an ordered list.
   void _insertOrderedList() {
-    _applyMarkdownEdit(orderedList(text: _editText, selection: _editSelection));
+    _runCommand(
+      (text, selection) => orderedList(text: text, selection: selection),
+    );
   }
 
   /// Indents (or outdents, [outdent] true) the selected line(s) by the
   /// width chosen in settings.
   void _indentLines({required bool outdent}) {
-    _applyMarkdownEdit(
-      indentLines(
-        text: _editText,
-        selection: _editSelection,
+    _runCommand(
+      (text, selection) => indentLines(
+        text: text,
+        selection: selection,
         width: widget.indentWidth,
         outdent: outdent,
       ),
@@ -2670,8 +2682,9 @@ final class _NoteViewState extends State<NoteView>
   Future<void> _showHeadingDialog() async {
     final level = await showHeadingLevelDialog(context);
     if (level == null) return;
-    _applyMarkdownEdit(
-      setHeading(text: _editText, selection: _editSelection, level: level),
+    _runCommand(
+      (text, selection) =>
+          setHeading(text: text, selection: selection, level: level),
     );
   }
 

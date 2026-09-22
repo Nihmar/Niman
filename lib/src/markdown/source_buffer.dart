@@ -174,6 +174,16 @@ final class SourceBuffer {
     return _terminators[line];
   }
 
+  /// [offset] as a caret can stand: inside the note, and never between the
+  /// two characters of a `\r\n` — the pair is one line end, and an offset
+  /// inside it is the end of the line's text. O(log n).
+  int caretOffset(int offset) {
+    final clamped = offset < 0 ? 0 : (offset > _length ? _length : offset);
+    final line = lineOf(clamped);
+    final end = offsetOfLine(line) + _lines[line].length;
+    return clamped > end ? end : clamped;
+  }
+
   /// The line [offset] falls in.
   ///
   /// O(log n). An offset inside a line's terminator belongs to that line, and
