@@ -82,6 +82,13 @@ void main() {
     await tester.pump();
     expect(find.text('2/2'), findsOneWidget);
     expect(state.selection.start, 14);
+    // The page keys walk them too, from the bar.
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(find.text('1/2'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(find.text('2/2'), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
