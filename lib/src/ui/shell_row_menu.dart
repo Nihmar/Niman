@@ -70,6 +70,58 @@ Future<String?> showRowMenuAt(
   required Offset position,
   bool offersNewTab = false,
 }) {
+  return _showEntriesAt(
+    context,
+    position: position,
+    groups: rowMenuGroups(
+      note,
+      isQuickNote: isQuickNote,
+      offersNewTab: offersNewTab,
+    ),
+  );
+}
+
+/// The right-click menu on the tree's empty space: what can be made at the
+/// library's root. Resolves to `note`, `template` or `folder`, or null.
+Future<String?> showTreeBackgroundMenuAt(
+  BuildContext context, {
+  required Offset position,
+}) => _showEntriesAt(
+  context,
+  position: position,
+  groups: <List<RowMenuEntry>>[
+    <RowMenuEntry>[
+      (
+        key: const Key('tree-menu-new-note'),
+        icon: Icons.note_add_outlined,
+        label: AppStrings.newNoteHere,
+        value: 'note',
+        destructive: false,
+      ),
+      (
+        key: const Key('tree-menu-new-from-template'),
+        icon: Icons.file_copy_outlined,
+        label: AppStrings.newFromTemplateHere,
+        value: 'template',
+        destructive: false,
+      ),
+      (
+        key: const Key('tree-menu-new-folder'),
+        icon: Icons.create_new_folder_outlined,
+        label: AppStrings.newFolderHere,
+        value: 'folder',
+        destructive: false,
+      ),
+    ],
+  ],
+);
+
+/// [groups] as a menu at [position], a divider between groups.
+Future<String?> _showEntriesAt(
+  BuildContext context, {
+  required Offset position,
+  required List<List<RowMenuEntry>> groups,
+}) {
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
   final theme = Theme.of(context);
   return showMenu<String>(
@@ -79,11 +131,7 @@ Future<String?> showRowMenuAt(
       Offset.zero & overlay.size,
     ),
     items: [
-      for (final (index, group) in rowMenuGroups(
-        note,
-        isQuickNote: isQuickNote,
-        offersNewTab: offersNewTab,
-      ).indexed) ...[
+      for (final (index, group) in groups.indexed) ...[
         if (index > 0) const PopupMenuDivider(),
         for (final entry in group)
           PopupMenuItem(
