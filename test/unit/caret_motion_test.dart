@@ -94,6 +94,40 @@ void main() {
     ), reason: 'an empty note selects nothing much');
   });
 
+  test("the reveal's word is the run of non-whitespace, markers and all", () {
+    // Deliberately not `wordRangeAt`: the run is what the per-word reveal
+    // compares a marker against, and it has to *contain* the syntax that
+    // delimits the word — otherwise the `**` a writer is editing stays hidden
+    // while the caret is inside the word they mark.
+    expect(runAround('a **bold** b', 5), (2, 10), reason: 'inside `bold`');
+    expect(runAround('a **bold** b', 4), (
+      2,
+      10,
+    ), reason: 'at the first letter, past the markers');
+    expect(runAround('a **bold** b', 8), (
+      2,
+      10,
+    ), reason: 'at the closing pair, which is part of the run');
+    expect(runAround('# Titolo', 3), (2, 8), reason: 'the title, `#` or not');
+    expect(runAround('due parole', 2), (
+      0,
+      3,
+    ), reason: 'the run before the space ends at it');
+    expect(runAround('due parole', 3), (
+      3,
+      4,
+    ), reason: 'a space itself is the one-character run to be in');
+    expect(runAround('due parole', 10), (
+      4,
+      10,
+    ), reason: 'at the end, the run the caret just finished');
+    expect(runAround('', 0), (0, 0), reason: 'an empty line has no run');
+    expect(runAround('  ', 1), (
+      1,
+      2,
+    ), reason: 'whitespace is not a word, but it is a range');
+  });
+
   test('extend holds the anchor, which is what shift is', () {
     const text = 'una riga di testo';
     final buffer = SourceBuffer.fromText(text);

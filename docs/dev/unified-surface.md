@@ -11468,18 +11468,22 @@ correction table, and the reveal policy chosen in
 
 ### Phase 4, in progress — the reveal is in
 
-`MarkdownSourceView` hides the structural markers by style (transparent, a
-hundredth of a size) and **reveals the line the caret is in**
-(`_Line.hidden(token, revealed:)`), which is policy A of §8.6.2. The reveal
-is a style and never the text: the marker keeps its offset, its string and
-its advance, so the caret, the hit test and the selection know nothing about
-it, and the paragraph's cache key does not move when the caret does. The
-line's own size stays the hiding's — a heading is drawn at the heading's
-size whether its hashes are shown or not.
+`MarkdownSourceView` hides the markers by style (transparent, a hundredth of a
+size) and **reveals the ones where the writer is** — policy A of §8.6.2 with
+its per-word refinement: a structural mark (a quote's `>`, a list's `-`, a
+heading's hashes) shows on the caret's line, an inline mark (a `**`, a
+backtick, a link's brackets) shows only when it is inside the run the caret is
+in (`_Line.hidden(token, revealed:, run:)`). The reveal is a style and never
+the text: the marker keeps its offset, its string and its advance, so the
+caret, the hit test and the selection know nothing about it, and the
+paragraph's cache key does not move when the caret does. The line's own size
+stays the hiding's — a heading is drawn at the heading's size whether its
+hashes are shown or not.
 
-`test/widget/markdown_surface_test.dart` holds it
-(*live reveals the markers of the line the caret is in*), together with the
-invariant that the two lines say the same thing with and without the reveal.
+`test/widget/markdown_surface_test.dart` holds it (*live reveals the markers of
+the line the caret is in* and *...of the word the caret is in*), together with
+the invariant that the two lines say the same thing with and without the
+reveal.
 
 The table-driven test over every span kind is in
 (`test/widget/live_span_typing_test.dart`): bold, italic, strikethrough,
@@ -11491,35 +11495,55 @@ marker runs shifted nothing.
 
 What the design asks for next, in the order it names them:
 
-- **Per-word reveal** as the refinement, and the row-wise reveal that follows
-  a wrap: the current granularity is the *line*, because a line is the unit
-  the surface builds.
+- **Per-word reveal** — **in** (2026-09-22). The two attempts before it are
+  worth a paragraph, because what was wrong was not the rule.
 
-  A per-word version was tried twice and reverted twice. What the second
-  attempt settled, and what the next one should not re-litigate:
+  The rule is a pure function and stayed: `runAround(text, offset)` in
+  `caret_motion.dart` answers the run of non-whitespace the offset is in —
+  `(2, 10)` for offset 5 in `a **bold** b`, `(2, 8)` for offset 3 in
+  `# Titolo`, the whitespace itself for an offset inside it. It is
+  deliberately *not* `wordRangeAt`: that one answers what a double click
+  selects, so it stops at the markers, and the `**` the writer is editing
+  would stay hidden while the caret is inside the word they mark.
+  **The run contains the syntax**, and that is the whole reason it is the run
+  and not the word.
 
-  * The *rule* is now a pure function and is right: `runAround(text, offset)`
-    in `caret_motion.dart` answers the run of non-whitespace the offset is in
-    — `(2, 10)` for offset 5 in `a **bold** b`, `(2, 8)` for offset 3 in
-    `# Titolo`, the whitespace itself for an offset inside it. It is
-    deliberately *not* `wordRangeAt`, which answers what a double click
-    selects: a marker touching the word it marks belongs to the reveal's
-    word, and to nothing else.
-  * The predicate is right, and it is what the design asks for: a marker is
-    drawn when it touches the caret's word, `token.end <= start ||
-    token.start >= end`. For `#` at `[0, 1]` and the word `(2, 8)` that is
-    true, so the hash *must* be drawn with the caret at the title's first
-    letter.
-  * The widget draws it hidden anyway. That is where the next attempt
-    starts: not in the rule, and not in the predicate, but in what the line
-    under the caret receives. The probe to write first prints, inside
-    `_span`, the `(start, end)` it was given and the `Token.start`/`end` it
-    compared — one line of output settles it.
+  The mistake in both attempts was the *comparison*: the marker was tested
+  against the run with a predicate that hid the pair the caret was between, so
+  the writer's own `**` stayed invisible while the syntax of the word next
+  door — or of a heading three lines down — was drawn. The fix is a
+  containment test, `token.start >= run.$1 && token.end <= run.$2`, and it
+  makes both pairs of `**bold**` appear together, which is what reading the
+  sentence needs.
 
-  The two reverts left the tree green (4 770 tests, `niman.sh linux`
-  artefact rebuilt), and the line-based reveal of policy A is what ships.
+  There are **two granularities**, and the second is why the failed attempts
+  looked right in one case and wrong in the other: a **structural** mark —
+  a quote's `>`, a list's `-`, a heading's hashes, a fence — is the shape of
+  the *line* and follows the line, so a writer in a heading sees its hashes;
+  an **inline** mark is the shape of a *word* and follows the run. The split
+  is `_isMarker(kind)` against `Token.marker`, and it is what makes "the hash
+  must be drawn" and "a plain word reveals no link's brackets" both true.
+
+  It is held by `test/widget/markdown_surface_test.dart` (*live reveals the
+  markers of the word the caret is in*: both `**` drawn with the caret inside
+  `bold`, hidden with the caret in the plain word beside it, the heading's
+  hash drawn wherever the caret is in the title) and by the `runAround` table
+  in `test/unit/caret_motion_test.dart`.
+
+  The row-wise reveal that follows a wrap is **not** in: the unit is still the
+  line, because a line is what the surface builds. A wrapped paragraph
+  therefore shows the syntax of every row it spans while the caret is in it —
+  the fallback B the design already sanctions, and the next refinement.
 - The budget: the reveal must cost one block re-layout (≤ 3 ms) and never
-  fire more than once per caret row change.
+  fire more than once per caret row change. **Measured for the move, not yet
+  for the re-layout**: the lines listen to one value, `CaretSpot(line,
+  runStart, runEnd)`, so a caret move inside a run produces an equal value and
+  *notifies no line at all*, while crossing a run boundary notifies the two
+  lines involved once (`a caret move inside a word rebuilds no line`). With
+  per-word rather than per-row granularity the honest statement of the rule is
+  **once per run change**, not once per row change. What is still to measure is
+  the other half: that the resulting re-layout of one line stays under 3 ms on
+  a 200 KB note.
 - The 200 KB cap gone, so `Geometria 1.md` opens and edits in `live` mode.
 
 ### Phase 5 — Delete the old world

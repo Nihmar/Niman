@@ -46,7 +46,7 @@ void main() {
   Future<MarkdownSourceViewState> pumpMode(
     WidgetTester tester,
     MarkdownSurfaceMode mode, {
-    int caret = 3,
+    int? caret = 3,
     String text = '# Titolo\n\ntesto\n',
   }) async {
     await tester.pumpWidget(
@@ -56,7 +56,10 @@ void main() {
             buffer: SourceBuffer.fromText(text),
             mode: mode,
             theme: _theme,
-            selection: SelectionModel.at(caret),
+            // A caret the caller holds, or `null` for a surface that owns its
+            // own — the two contracts a caller can have, and the reveal has to
+            // hold for both.
+            selection: caret == null ? null : SelectionModel.at(caret),
             showLineNumbers: false,
           ),
         ),
@@ -190,6 +193,88 @@ void main() {
       away.map((span) => span.text).join(),
       on.map((span) => span.text).join(),
     );
+  });
+
+  testWidgets('live reveals the markers of the word the caret is in', (
+    tester,
+  ) async {
+    // The per-word refinement of policy A (D9): the syntax of the word being
+    // written shows, and the syntax of the words around it does not — while a
+    // *structural* mark, which is the shape of the line rather than of a word,
+    // still follows the line.
+    const text = 'a **bold** c\n\n# Titolo\n';
+    Future<List<TextSpan>> spansAt(int caret) async {
+      await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: caret,
+        text: text,
+      );
+      final spans = <TextSpan>[];
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (span is TextSpan && span.text != null) spans.add(span);
+          return true;
+        });
+      }
+      return spans;
+    }
+
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+
+    // The caret is inside `bold`: the run is `**bold**`, so *both* pairs are
+    // drawn — the one behind the caret and the one it has not reached yet.
+    final inBold = await spansAt(6);
+    final pairs = inBold.where((span) => span.text == '**').toList();
+    expect(pairs, hasLength(2), reason: 'one pair per side of the word');
+    expect(pairs.every((span) => !hidden(span)), isTrue);
+
+    // The caret is in the plain `a`: the bold word's syntax is hidden, because
+    // the writer is not in it.
+    final inA = await spansAt(0);
+    expect(
+      inA.where((span) => span.text == '**').every(hidden),
+      isTrue,
+      reason: 'the caret is in another word, so `**` is syntax, not text',
+    );
+
+    // The heading's hash is the shape of its *line*: it is drawn wherever the
+    // caret is in the title, which is what keeps a heading a heading.
+    final inHeading = await spansAt(18);
+    expect(
+      inHeading.any((span) => span.text == '#' && !hidden(span)),
+      isTrue,
+      reason: 'a structural mark follows the line, not the word',
+    );
+  });
+
+  testWidgets('a caret move inside a word rebuilds no line', (tester) async {
+    // The budget: the reveal may not fire more than once per caret row change.
+    // The lines listen to a *value* (line and run), so a move that stays in the
+    // run is the same value and tells nobody; crossing a boundary tells the two
+    // lines involved. This is the property the per-word reveal was allowed to
+    // have, and it is worth holding with a test rather than by reading.
+    // The surface owns its own caret here (`caret: null`), which is what a
+    // `placeCaret` call needs to be able to move: a caller that holds the
+    // selection hears the move through `onSelection` and hands it back.
+    final state = await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: null,
+      text: 'a **bold** c\n\nsecond\n',
+    );
+    state.placeCaret(6);
+    await tester.pump();
+    var told = 0;
+    state.caretSpot.addListener(() => told++);
+
+    state.placeCaret(7);
+    await tester.pump();
+    expect(told, 0, reason: 'still inside `**bold**`: the spot did not change');
+
+    state.placeCaret(0);
+    await tester.pump();
+    expect(told, 1, reason: 'another word: the spot changed, once');
   });
 
   testWidgets('a long note is coloured once its reading lands', (tester) async {

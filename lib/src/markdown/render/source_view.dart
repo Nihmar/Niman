@@ -298,9 +298,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// the blink nor the measurement may rebuild the note.
   final ValueNotifier<Rect?> _caretRect = ValueNotifier<Rect?>(null);
 
-  /// The line the caret is on, so that moving the caret repaints two lines
-  /// rather than the viewport: the delegate no longer depends on the caret.
-  final ValueNotifier<int> _caretLine = ValueNotifier<int>(0);
+  /// Where the caret is, as the lines that draw it care: which line holds it,
+  /// and the run of non-whitespace it sits in on that line.
+  ///
+  /// One value rather than two notifiers, so a caret move that crosses a word
+  /// boundary repaints the two lines involved at once and a move *inside* a
+  /// run repaints nothing: a `ValueNotifier` whose new value compares equal
+  /// does not notify, and a run's own coordinates do not change while the
+  /// caret stays in it. That is what keeps the per-word reveal off the frame
+  /// budget — a keystroke inside a word tells no line anything.
+  final ValueNotifier<CaretSpot> _caretSpot = ValueNotifier<CaretSpot>(
+    const CaretSpot(0, 0, 0),
+  );
 
   /// Whether the caret is drawn (it blinks).
   final ValueNotifier<bool> _caretOn = ValueNotifier<bool>(true);
@@ -450,7 +459,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _typewriter.dispose();
     _semanticsTick.dispose();
     _caretRect.dispose();
-    _caretLine.dispose();
+    _caretSpot.dispose();
     _caretOn.dispose();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
@@ -1386,7 +1395,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!next.isCollapsed || wasRange) {
       setState(() {});
     }
-    _caretLine.value = widget.buffer.lineOf(next.extent);
+    _caretSpot.value = _spotOf(next.extent);
   }
 
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
@@ -1525,6 +1534,36 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final line = widget.buffer.lineOf(_selection.extent);
     return line < 0 || line >= lineCount ? -1 : line;
   }
+
+  /// The caret's line and the run of non-whitespace it is in on that line, as
+  /// the lines are told it ([CaretSpot]).
+  ///
+  /// [offset] is the caret asked about, defaulting to the selection's own end.
+  /// It is passed explicitly where the caller already knows where the caret is
+  /// going — a move publishes the *destination*, and the widget's own
+  /// selection may still be the old one until the shell that owns it rebuilds.
+  ///
+  /// The run is read from the line's own text rather than off the styled
+  /// tokens: the reveal compares a *marker* against it, and the markers belong
+  /// to the run (`runAround`), so the two agree by construction.
+  CaretSpot _spotOf([int? offset]) {
+    final at = offset ?? _selection.extent;
+    final line = widget.buffer.lineOf(at);
+    if (line < 0 || line >= lineCount) return const CaretSpot(-1, 0, 0);
+    final text = widget.buffer.lineAt(line);
+    final column = (at - widget.buffer.offsetOfLine(line)).clamp(
+      0,
+      text.length,
+    );
+    final (from, to) = runAround(text, column);
+    return CaretSpot(line, from, to);
+  }
+
+  /// The caret's spot, exposed so a test can hold that a move inside a run
+  /// tells no line anything. Exposed as a listenable rather than as a value
+  /// because *not* notifying is the property.
+  @visibleForTesting
+  ValueListenable<CaretSpot> get caretSpot => _caretSpot;
 
   /// From how many lines on a note's colours are read in the background.
   ///
@@ -1720,8 +1759,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _measureCaret() {
     final line = _caretLineIndex;
     // Every selection change comes through here, so this is the one place the
-    // lines hear which of them holds the caret.
-    _caretLine.value = line;
+    // lines hear which of them holds the caret, and which of its words.
+    _caretSpot.value = _spotOf();
     final paragraph = _paragraphAt(line);
     if (paragraph == null || line < 0) {
       _caretRect.value = null;
@@ -1885,7 +1924,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   .error,
                               width: available,
                               index: index,
-                              caretLine: _caretLine,
+                              spot: _caretSpot,
                               caret: _caretRect,
                               caretOn: _caretOn,
                               rowColor: widget.typewriter
@@ -2493,7 +2532,7 @@ final class _Line extends StatelessWidget {
     required this.onFold,
     required this.onFoldDown,
     required this.index,
-    required this.caretLine,
+    required this.spot,
     required this.caret,
     required this.caretOn,
     super.key,
@@ -2547,11 +2586,11 @@ final class _Line extends StatelessWidget {
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
 
-  /// This line's index, to compare with [caretLine].
+  /// This line's index, to compare with [spot].
   final int index;
 
-  /// The line the caret is on.
-  final ValueListenable<int> caretLine;
+  /// Where the caret is: its line, and the run it sits in on that line.
+  final ValueListenable<CaretSpot> spot;
 
   /// The caret rectangle, in the caret line's coordinates.
   final ValueListenable<Rect?> caret;
@@ -2583,16 +2622,22 @@ final class _Line extends StatelessWidget {
             ),
           Expanded(
             child: _caretBox(
-              ValueListenableBuilder<int>(
-                valueListenable: caretLine,
-                builder: (context, line, _) => Padding(
-                  padding: EdgeInsets.only(left: _indent()),
-                  child: Text.rich(
-                    _span(revealed: line == index),
-                    key: paragraphKey,
-                    style: _lineStyle(revealed: line == index),
-                  ),
-                ),
+              ValueListenableBuilder<CaretSpot>(
+                valueListenable: spot,
+                builder: (context, at, _) {
+                  final mine = at.line == index;
+                  return Padding(
+                    padding: EdgeInsets.only(left: _indent()),
+                    child: Text.rich(
+                      _span(
+                        revealed: mine,
+                        run: mine ? (at.runStart, at.runEnd) : null,
+                      ),
+                      key: paragraphKey,
+                      style: _lineStyle(revealed: mine),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -2659,13 +2704,13 @@ final class _Line extends StatelessWidget {
   /// the note. The rectangle and the blink repaint the painter only, never the
   /// line, and the tree keeps its shape either way so the paragraph is never
   /// re-mounted.
-  Widget _caretBox(Widget child) => ValueListenableBuilder<int>(
-    valueListenable: caretLine,
-    builder: (context, line, child) => CustomPaint(
-      painter: line == index && rowColor != null
+  Widget _caretBox(Widget child) => ValueListenableBuilder<CaretSpot>(
+    valueListenable: spot,
+    builder: (context, at, child) => CustomPaint(
+      painter: at.line == index && rowColor != null
           ? _RowPainter(rect: caret, color: rowColor!)
           : null,
-      foregroundPainter: line == index
+      foregroundPainter: at.line == index
           ? _CaretPainter(rect: caret, on: caretOn)
           : null,
       child: child,
@@ -2730,7 +2775,7 @@ final class _Line extends StatelessWidget {
   /// size
   /// or the height, so a line keeps the surface's metrics whatever it contains
   /// (`highlight_style.dart`).
-  TextSpan _span({required bool revealed}) {
+  TextSpan _span({required bool revealed, (int, int)? run}) {
     final spans = <InlineSpan>[];
     var at = 0;
     // The runs are the tokenizer's; the selection cuts them where it starts and
@@ -2743,7 +2788,7 @@ final class _Line extends StatelessWidget {
         spans,
         token.start,
         token.end,
-        hidden(token, revealed: revealed)
+        hidden(token, revealed: revealed, run: run)
             ? _hiddenMarker
             : markdownTokenStyle(token.kind, syntax, dark: dark),
       );
@@ -2755,20 +2800,31 @@ final class _Line extends StatelessWidget {
 
   /// Whether [token]'s marker is hidden rather than drawn.
   ///
-  /// Policy A of `docs/dev/unified-surface.md` §8.6.2: the markers are hidden
-  /// everywhere except on the line the caret is in, which is what makes `live`
-  /// mode an interactive preview — you see the syntax of the line you are
-  /// writing and none of the rest. Per *row* would be the refinement that
-  /// follows a wrap; per line is one `TextSpan` build either way, because a
-  /// line is the unit this widget is given.
+  /// Policy A of `docs/dev/unified-surface.md` §8.6.2 — the markers are hidden
+  /// everywhere except where the writer is — with the per-word refinement D9
+  /// asks for. The two granularities are the two things a marker can be the
+  /// shape of:
+  ///
+  /// * **a structural mark** — a quote's `>`, a list's `-`, a heading's hashes,
+  ///   a fence — is the shape of the *line*, so it is drawn when the caret is
+  ///   anywhere on that line ([revealed]). A writer in a heading's title has to
+  ///   see the hashes, or a heading is indistinguishable from a bold line.
+  /// * **an inline mark** — a `**`, a backtick, a link's brackets — is the
+  ///   shape of one *word*, so it is drawn only when it is inside the run the
+  ///   caret is in ([run]). The run is the caret's non-whitespace run, markers
+  ///   and all (`runAround`), so `**bold**` reveals *both* of its pairs and not
+  ///   just the one the caret stands next to, and a plain word in a paragraph
+  ///   full of links reveals none of them.
   ///
   /// The reveal is a **style**, never the text: the marker keeps its offset and
   /// its string, so the caret, the hit test and the selection know nothing
   /// about it, and the paragraph's cache key does not move when the caret does.
-  bool hidden(Token token, {required bool revealed}) {
+  bool hidden(Token token, {required bool revealed, (int, int)? run}) {
     if (!hideMarkers) return false;
     if (!token.marker && !_isMarker(token.kind)) return false;
-    return !revealed;
+    if (_isMarker(token.kind)) return !revealed;
+    if (run == null) return true;
+    return token.start < run.$1 || token.end > run.$2;
   }
 
   /// Adds `[start, end)` to [spans], cut at the selection's and the composing
@@ -2940,14 +2996,50 @@ const TextStyle _hiddenMarker = TextStyle(
   fontSize: 0.01,
 );
 
-/// Whether [kind] is a marker a formatted surface hides rather than shows.
+/// Where the caret is, for the lines that draw it and the reveal that follows
+/// it: its line, and the run of non-whitespace it sits in on that line.
 ///
-/// The structural ones, which the tokenizer emits as runs of their own. The
-/// inline
-/// ones — the `**` around a bold word, the `$` around a formula — are part of
-/// the
-/// run they mark today, so hiding those means splitting them in the tokenizer
-/// first; that is the next step, and this list is where it will show up.
+/// One value rather than a line and a word kept apart, because the property
+/// that matters is *equality*: a caret that moves inside a run produces an
+/// equal [CaretSpot], so no line rebuilds, and one that crosses a run boundary
+/// produces a different one, so exactly the two lines involved do
+/// (`docs/dev/unified-surface.md` §8.6.2's budget).
+@immutable
+final class CaretSpot {
+  /// The caret's line and its run on it.
+  const new(this.line, this.runStart, this.runEnd);
+
+  /// The line the caret is on, or -1 for a caret the note cannot hold.
+  final int line;
+
+  /// Where the run of non-whitespace the caret is in starts.
+  final int runStart;
+
+  /// Where that run ends, exclusive.
+  final int runEnd;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CaretSpot &&
+      other.line == line &&
+      other.runStart == runStart &&
+      other.runEnd == runEnd;
+
+  @override
+  int get hashCode => Object.hash(line, runStart, runEnd);
+
+  @override
+  String toString() => 'CaretSpot($line, $runStart..$runEnd)';
+}
+
+/// Whether [kind] is a *structural* marker: a mark that is the shape of the
+/// line rather than of a word.
+///
+/// A quote's `>`, a list's `-`, a heading's hashes, a fence and its language,
+/// a task's box — the marks `SourceStyler._structure` lays down at the start of
+/// a line. They are revealed with the line. Everything else the surface hides
+/// is an *inline* mark, carried by `Token.marker` and revealed with the
+/// caret's own run (`hidden`).
 bool _isMarker(TokenKind kind) => switch (kind) {
   TokenKind.headingMarker ||
   TokenKind.listMarker ||
