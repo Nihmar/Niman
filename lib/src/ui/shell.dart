@@ -3237,6 +3237,23 @@ final class _LibraryShellState extends State<_LibraryShell>
       onLongPress: _showRowMenu,
       onSecondaryTapDown: (note, details) =>
           _showRowMenuAt(note, details.globalPosition),
+      onBackgroundSecondaryTapDown: (details) =>
+          unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
     );
+  }
+
+  /// The right-click menu on the tree's empty space: a note, a note from a
+  /// template or a folder, at the library's root.
+  Future<void> _showTreeBackgroundMenuAt(Offset position) async {
+    final action = await showTreeBackgroundMenuAt(context, position: position);
+    if (!mounted) return;
+    switch (action) {
+      case 'note':
+        await _createFlow.createNote(context, parent: '');
+      case 'template':
+        await _templateFlow.createFromTemplate(context, parent: '');
+      case 'folder':
+        await _createFlow.createFolder(context, parent: '');
+    }
   }
 }

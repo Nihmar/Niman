@@ -279,6 +279,45 @@ void main() {
     expect(find.byType(AlertDialog), findsOne);
   });
 
+  testWidgets(
+    'wide: right-clicking the tree\'s empty space creates at the root',
+    (tester) async {
+      await pumpWide(tester);
+      await controller.createFolder(parentPath: '', name: 'Docs');
+      await settle(tester);
+
+      // Well below the one row: the tree's background.
+      final tree = tester.getRect(noteTree());
+      await tester.tapAt(
+        Offset(tree.center.dx, tree.top + tree.height * 0.7),
+        buttons: kSecondaryMouseButton,
+      );
+      await settle(tester);
+      expect(find.byKey(const Key('tree-menu-new-note')), findsOne);
+      expect(find.byKey(const Key('tree-menu-new-folder')), findsOne);
+      expect(find.byKey(const Key('menu-new-note')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('tree-menu-new-folder')));
+      await settle(tester);
+      expect(find.byType(AlertDialog), findsOne);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Radice',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      await settle(tester);
+      expect(noteRow('Radice'), findsOne, reason: 'at the root, beside Docs');
+    },
+  );
+
   testWidgets('wide: quick-note chooser is inline, rail persists', (
     tester,
   ) async {

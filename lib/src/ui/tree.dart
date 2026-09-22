@@ -43,6 +43,7 @@ final class NoteTree extends StatefulWidget {
     this.onLongPress,
     this.onSecondaryTapDown,
     this.onOpenInNewTab,
+    this.onBackgroundSecondaryTapDown,
     this.nameDesc = false,
     super.key,
   });
@@ -76,6 +77,10 @@ final class NoteTree extends StatefulWidget {
   /// Called with a note's row on a middle click: the note in a tab of its
   /// own, as a browser opens a link (0.0.8 test round).
   final void Function(Note note)? onOpenInNewTab;
+
+  /// Called on a right click on the tree's empty space, below or between
+  /// the rows: where a new note or folder at the root is asked for.
+  final void Function(TapDownDetails details)? onBackgroundSecondaryTapDown;
 
   @override
   State<NoteTree> createState() => _NoteTreeState();
@@ -183,6 +188,20 @@ final class _NoteTreeState extends State<NoteTree> {
 
   @override
   Widget build(BuildContext context) {
+    final background = widget.onBackgroundSecondaryTapDown;
+    final tree = _tree(context);
+    if (background == null) return tree;
+    // The rows answer their own right click (theirs is the inner detector);
+    // anywhere else in the pane is the tree's background.
+    return GestureDetector(
+      key: const Key('note-tree-background'),
+      behavior: HitTestBehavior.translucent,
+      onSecondaryTapDown: background,
+      child: tree,
+    );
+  }
+
+  Widget _tree(BuildContext context) {
     return StreamBuilder<int>(
       stream: widget.controller.events,
       initialData: widget.controller.revision,
