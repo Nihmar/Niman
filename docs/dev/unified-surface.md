@@ -9059,7 +9059,7 @@ Why a line array beats a rope here:
   mixed-EOL file keeps its mixed EOLs by storing the separator per line — a
   decision to take deliberately and test).
 
-**Built, and measured** (`lib/src/markdown/{fenwick_tree,source_buffer}.dart`,
+**Built, and measured** (`lib/src/markdown/source_buffer.dart`, then with `fenwick_tree.dart`,
 `dart run tool/source_buffer_bench.dart`, debug mode, best of many batches —
 the numbers are read as ratios, not absolutes):
 
@@ -9084,6 +9084,17 @@ What that says, and what it does not:
   256 lines over a second tree — which turns the rebuild into
   O(256 + log blocks). It was not built because the measurement says it is not
   needed yet, and this table is what makes that a decision rather than a habit.
+
+  **Built 2026-09-22** (`lib/src/markdown/prefix_sums.dart`, replacing
+  `fenwick_tree.dart`). A 22 MB, million-line note on Windows lagged on every
+  Enter, 110–170 ms. The height map rebuilt its own Fenwick tree on each
+  line-count change (59 ms), and so did the buffer. `PrefixSums` keeps the
+  values in chunks of 1 024, each with its own prefix sums, under two Fenwick
+  trees over the chunks (their totals and their sizes). An insertion rewrites
+  the chunks it touches and rebuilds the chunk trees, a thousandth of the note.
+  At a million lines an Enter now costs 2.5 ms in the buffer (what is left is
+  the line array's own copy) and 1 ms in the height map, asserts off. Both the
+  buffer and `BlockHeightMap` use it.
 - `lineOf` and `lineAt` are 20–30 ns and 4 ns: the queries the parser and the
   caret make thousands of times are not a cost at all.
 - `text` is O(n) — 1.2 ms on the geometry note — which is why it is the
