@@ -1,21 +1,110 @@
-// The tray menu on Windows, opened the way the platform needs it opened.
+// The tray menu on Windows, opened where it can stay open.
 //
-// nativeapi opens the tray's menu with `TrackPopupMenu` owned by its host
-// window, and that window is message-only (`HWND_MESSAGE`): it can never be the
-// foreground window. A menu whose owner is not in the foreground is closed the
-// moment the foreground changes — and a click on the tray leaves the taskbar
-// there — so the menu flashed its border and was gone (0.0.8, Windows). What
-// Microsoft documents for a notification-area menu is an owner that *can* take
-// the foreground: `SetForegroundWindow` on it, then `TrackPopupMenu`, then a
-// `WM_NULL` posted to it so the menu closes when the user clicks elsewhere.
+// nativeapi opens the tray's menu with `TrackPopupMenu` on the thread the tray
+// event arrives on, which is Flutter's. The menu's modal loop then runs the
+// engine's own messages and tasks too, and one of them dismisses it: the menu
+// flashed its border and closed (0.0.8, Windows). Opened the same way from
+// the same thread with an owner of its own, it still closed, 11 ms after the
+// click with no error (`result 0, error 0` in the log) — the menu came up and
+// was cancelled — while the same call in a process with no Flutter in it stays
+// open until the user chooses.
 //
-// The menu is still nativeapi's (its `HMENU`, its items); only the owner and
-// the call are this file's. The choice comes back from `TrackPopupMenu` itself
-// (`TPM_RETURNCMD`), so no `WM_COMMAND` goes anywhere and the caller runs the
-// item.
+// So the menu is opened on a thread of its own: a background isolate, which
+// the VM runs on its own OS thread, makes an owner window there and runs
+// `TrackPopupMenu` against it. What Microsoft documents for a notification-
+// area menu is kept: `SetForegroundWindow` on the owner first, a `WM_NULL`
+// posted to it after. The menu is still nativeapi's `HMENU` with its items; the
+// choice comes back from `TrackPopupMenu` itself (`TPM_RETURNCMD`), so no
+// `WM_COMMAND` goes anywhere and the caller runs the item.
 import 'dart:ffi';
+import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
+
+/// What opening the menu gave: the chosen item's id, or 0 when it was
+/// dismissed, and a line for the log.
+typedef TrayMenuChoice = ({int chosen, String report});
+
+/// Opens the menu [menuAddress] (an `HMENU`'s address) at the cursor, on a
+/// thread of its own, and completes with the choice.
+Future<TrayMenuChoice> openWindowsTrayMenu(int menuAddress) {
+  // The cursor where the click was, read here: by the time the isolate runs,
+  // the pointer may have moved.
+  final getCursorPos = DynamicLibrary.open('user32.dll')
+      .lookupFunction<_GetCursorPosC, _GetCursorPosDart>('GetCursorPos');
+  final point = calloc<_Point>();
+  getCursorPos(point);
+  final (x, y) = (point.ref.x, point.ref.y);
+  calloc.free(point);
+  return Isolate.run(() => _track(menuAddress, x, y), debugName: 'tray menu');
+}
+
+/// Makes an owner window on this thread and tracks the menu from it.
+TrayMenuChoice _track(int menuAddress, int x, int y) {
+  final user32 = DynamicLibrary.open('user32.dll');
+  final createWindow = user32
+      .lookupFunction<_CreateWindowExC, _CreateWindowExDart>('CreateWindowExW');
+  final destroyWindow = user32.lookupFunction<_HwndC, _HwndDart>(
+    'DestroyWindow',
+  );
+  final setForeground = user32.lookupFunction<_HwndC, _HwndDart>(
+    'SetForegroundWindow',
+  );
+  final track = user32.lookupFunction<_TrackPopupMenuC, _TrackPopupMenuDart>(
+    'TrackPopupMenu',
+  );
+  final post = user32.lookupFunction<_PostMessageC, _PostMessageDart>(
+    'PostMessageW',
+  );
+  final lastError = DynamicLibrary.open('kernel32.dll')
+      .lookupFunction<_LastErrorC, _LastErrorDart>('GetLastError');
+  final className = 'STATIC'.toNativeUtf16();
+  final name = ''.toNativeUtf16();
+  // A top-level window, never shown: a tool window stays off the taskbar, and
+  // a predefined class needs no window procedure of its own.
+  final owner = createWindow(
+    _wsExToolWindow,
+    className,
+    name,
+    _wsPopup,
+    0,
+    0,
+    0,
+    0,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+  );
+  calloc
+    ..free(className)
+    ..free(name);
+  if (owner == nullptr) {
+    return (chosen: 0, report: 'no owner window (error ${lastError()})');
+  }
+  try {
+    final foreground = setForeground(owner);
+    final chosen = track(
+      Pointer<Void>.fromAddress(menuAddress),
+      _tpmRightButton | _tpmBottomAlign | _tpmNoNotify | _tpmReturnCmd,
+      x,
+      y,
+      0,
+      owner,
+      nullptr,
+    );
+    final error = lastError();
+    // So the next click outside a menu closes it (the `TrackPopupMenu`
+    // remarks).
+    post(owner, _wmNull, 0, 0);
+    return (
+      chosen: chosen,
+      report: 'at $x,$y, foreground $foreground, result $chosen, error $error',
+    );
+  } finally {
+    destroyWindow(owner);
+  }
+}
 
 /// A cursor position, as `GetCursorPos` fills it.
 final class _Point extends Struct {
@@ -30,6 +119,8 @@ typedef _GetCursorPosC = Int32 Function(Pointer<_Point> point);
 typedef _GetCursorPosDart = int Function(Pointer<_Point> point);
 typedef _HwndC = Int32 Function(Pointer<Void> hwnd);
 typedef _HwndDart = int Function(Pointer<Void> hwnd);
+typedef _LastErrorC = Uint32 Function();
+typedef _LastErrorDart = int Function();
 typedef _TrackPopupMenuC = Int32 Function(
   Pointer<Void> menu,
   Uint32 flags,
@@ -96,91 +187,3 @@ const int _tpmBottomAlign = 0x0020;
 const int _tpmNoNotify = 0x0080;
 const int _tpmReturnCmd = 0x0100;
 const int _wmNull = 0x0000;
-
-/// Opens a menu at the cursor from an owner that can take the foreground.
-final class WindowsTrayMenu {
-  new _(
-    this._owner,
-    this._getCursorPos,
-    this._setForeground,
-    this._track,
-    this._post,
-    this._destroy,
-  );
-
-  /// The popup for this process, or null when user32 could not give one.
-  static WindowsTrayMenu? create() {
-    final user32 = DynamicLibrary.open('user32.dll');
-    final createWindow = user32
-        .lookupFunction<_CreateWindowExC, _CreateWindowExDart>(
-          'CreateWindowExW',
-        );
-    final className = 'STATIC'.toNativeUtf16();
-    final name = ''.toNativeUtf16();
-    // A top-level window, never shown: a tool window stays off the taskbar,
-    // and a predefined class needs no window procedure of its own.
-    final owner = createWindow(
-      _wsExToolWindow,
-      className,
-      name,
-      _wsPopup,
-      0,
-      0,
-      0,
-      0,
-      nullptr,
-      nullptr,
-      nullptr,
-      nullptr,
-    );
-    calloc
-      ..free(className)
-      ..free(name);
-    if (owner == nullptr) return null;
-    return WindowsTrayMenu._(
-      owner,
-      user32.lookupFunction<_GetCursorPosC, _GetCursorPosDart>('GetCursorPos'),
-      user32.lookupFunction<_HwndC, _HwndDart>('SetForegroundWindow'),
-      user32.lookupFunction<_TrackPopupMenuC, _TrackPopupMenuDart>(
-        'TrackPopupMenu',
-      ),
-      user32.lookupFunction<_PostMessageC, _PostMessageDart>('PostMessageW'),
-      user32.lookupFunction<_HwndC, _HwndDart>('DestroyWindow'),
-    );
-  }
-
-  final Pointer<Void> _owner;
-  final _GetCursorPosDart _getCursorPos;
-  final _HwndDart _setForeground;
-  final _TrackPopupMenuDart _track;
-  final _PostMessageDart _post;
-  final _HwndDart _destroy;
-
-  /// Opens [menu] (an `HMENU`) at the cursor and waits for the choice: the
-  /// chosen item's id, or 0 when the menu was dismissed.
-  int open(Pointer<Void> menu) {
-    final point = calloc<_Point>();
-    try {
-      _getCursorPos(point);
-      _setForeground(_owner);
-      final chosen = _track(
-        menu,
-        _tpmRightButton | _tpmBottomAlign | _tpmNoNotify | _tpmReturnCmd,
-        point.ref.x,
-        point.ref.y,
-        0,
-        _owner,
-        nullptr,
-      );
-      // So the next click outside the menu closes it (the `TrackPopupMenu`
-      // remarks).
-      _post(_owner, _wmNull, 0, 0);
-      return chosen;
-    } finally {
-      calloc.free(point);
-    }
-  }
-
-  /// Releases the owner window.
-  void dispose() => _destroy(_owner);
-}

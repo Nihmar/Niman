@@ -82,10 +82,10 @@ abstract interface class TrayService {
 /// answers the SNI `Menu` property with "/", and KDE, told the item has
 /// no menu, showed nothing at all (0.0.8 test round).
 ///
-/// Windows: none — the right click is answered by [WindowsTrayMenu], because
-/// nativeapi's own popup is owned by a message-only window, which cannot take
-/// the foreground, and the menu flashed and closed. The left click still
-/// brings the window back, the convention there.
+/// Windows: none — the right click is answered by [openWindowsTrayMenu],
+/// because nativeapi's own popup, opened on Flutter's thread, flashed and
+/// closed. The left click still brings the window back, the convention
+/// there.
 ///
 /// Elsewhere (macOS): the right click.
 ///
@@ -139,11 +139,12 @@ final class PlatformTrayService implements TrayService {
   final List<MenuItem> _items = [];
 
   /// What each item does, by the item's native id: nativeapi's click event
-  /// carries it, and so does the choice [WindowsTrayMenu] returns.
+  /// carries it, and so does the choice [openWindowsTrayMenu] returns.
   final Map<int, void Function()> _runs = {};
 
-  /// The Windows popup, made on the first right click.
-  WindowsTrayMenu? _windowsMenu;
+  /// Whether the Windows popup is up: a second right click while it is
+  /// waits for it rather than opening another.
+  bool _windowsMenuOpen = false;
 
   @override
   Stream<ShortcutAction> get actions => _actions.stream;
@@ -204,7 +205,7 @@ final class PlatformTrayService implements TrayService {
               'tray: right click (trigger ${tray.getContextMenuTrigger()}, '
               'menu ${tray.getContextMenu() != null})',
             );
-            if (Platform.isWindows) _openWindowsMenu();
+            if (Platform.isWindows) unawaited(_openWindowsMenu());
           }
         });
       // Windows adds the icon to the notification area only here
@@ -234,18 +235,20 @@ final class PlatformTrayService implements TrayService {
   }
 
   /// Opens the menu from an owner that can take the foreground, and runs what
-  /// was chosen (Windows; see [WindowsTrayMenu]).
-  void _openWindowsMenu() {
+  /// was chosen (Windows; see [openWindowsTrayMenu]).
+  Future<void> _openWindowsMenu() async {
     final menu = _menu;
-    if (menu == null) return;
-    final popup = _windowsMenu ??= WindowsTrayMenu.create();
-    if (popup == null) {
-      _log.warning('tray: no window to own the menu');
-      return;
+    if (menu == null || _windowsMenuOpen) return;
+    _windowsMenuOpen = true;
+    try {
+      final choice = await openWindowsTrayMenu(menu.nativeObject.address);
+      _log.info('tray: menu closed (chose ${choice.chosen}; ${choice.report})');
+      if (choice.chosen != 0) _runs[choice.chosen]?.call();
+    } on Object catch (error) {
+      _log.warning('tray: the menu could not be opened ($error)');
+    } finally {
+      _windowsMenuOpen = false;
     }
-    final chosen = popup.open(menu.nativeObject);
-    _log.debug('tray: menu closed (chose $chosen)');
-    if (chosen != 0) _runs[chosen]?.call();
   }
 
   /// Hangs a fresh menu on the icon and lets the old one go.
@@ -340,8 +343,6 @@ final class PlatformTrayService implements TrayService {
       item.dispose();
     }
     _icon?.dispose();
-    _windowsMenu?.dispose();
-    _windowsMenu = null;
     _runs.clear();
     _tray = null;
     _menu = null;
