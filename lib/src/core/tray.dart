@@ -24,6 +24,7 @@ import 'package:nativeapi/nativeapi.dart'
         TrayIcon,
         TrayIconClickedEvent,
         TrayIconRightClickedEvent;
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/theme.dart';
@@ -184,7 +185,7 @@ final class PlatformTrayService implements TrayService {
         return;
       }
       tray
-        ..setTooltip('Niman')
+        ..setTooltip(isTestingBuild ? 'Niman (testing)' : 'Niman')
         ..setContextMenuTrigger(trayContextMenuTrigger());
       final icon = ImageAsset.fromAsset(iconAsset);
       if (icon != null) {
