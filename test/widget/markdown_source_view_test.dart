@@ -789,6 +789,18 @@ void main() {
     expect(buffer.text, 'una\n\ndue\n');
   });
 
+  testWidgets('the keyboard is attached for the view the note is in', (
+    tester,
+  ) async {
+    // The Windows embedder refuses a client without a view ("Could not set
+    // client, view ID is null"), and then nothing can be typed at all.
+    await pump(tester, 'ciao\n');
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    final config = tester.testTextInput.setClientArgs!;
+    expect(config['viewId'], tester.view.viewId);
+  });
+
   testWidgets("Backspace and Delete are the surface's own keys", (
     tester,
   ) async {

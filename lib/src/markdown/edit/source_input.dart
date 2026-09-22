@@ -85,17 +85,24 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   /// How many arrived with an `oldText` that disagreed with the buffer.
   int recoveredDeltas = 0;
 
-  /// Opens the connection, if it is not already open.
-  void attach() {
+  /// Opens the connection, if it is not already open, for the view [viewId]
+  /// the surface is drawn in.
+  ///
+  /// The view is not optional in practice: the Windows embedder refuses a
+  /// client without one ("Could not set client, view ID is null") and every
+  /// `setEditingState` after that fails, so the note cannot be typed in at
+  /// all. `EditableText` always passes `View.of(context).viewId`.
+  void attach({int? viewId}) {
     if (isAttached) return;
-    _log.info('attach: connecting the keyboard to the note');
+    _log.info('attach: connecting the keyboard to the note (view $viewId)');
     _ensureSeeded();
     _input.echoSent();
     _echoScheduled = false;
     _connection =
         TextInput.attach(
             this,
-            const TextInputConfiguration(
+            TextInputConfiguration(
+              viewId: viewId,
               inputType: TextInputType.multiline,
               inputAction: TextInputAction.newline,
               enableDeltaModel: true,
