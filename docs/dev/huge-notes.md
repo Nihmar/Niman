@@ -36,6 +36,7 @@ for first: **one reading of the note for the editor and the preview.**
 | `cee783e` | The save of a note past 2 MB waits 2 s, past 16 MB 5 s | a 0.4 s stall after every half-second pause | the stall only after a real pause (a mitigation, see below) |
 | `95ffa00` | A format command (bold, list, heading, indent…) is handed the lines its selection touches (`MarkdownSurfaceController.applyLineCommand`); a property test holds every command to its whole-note answer, LF and CRLF. `SourceBuffer.caretOffset`: an offset inside a CRLF is its line's end | seconds for a bold (join, formatted copy, compare) | the touched lines only |
 | the streaming save | The save hands the note over in slices instead of joining it: `SourceBuffer.sliceText`, the producer the editor feeds, and a writing isolate that takes the bytes as they are made (`note_write_stream.dart`) | 671 ms of one-go work per save (190 ms join + 481 ms isolate copy and encode) | 169 slices, worst 20 ms — the frames keep coming, and no full copy of the note exists |
+| the kept statistics | The word count follows the edits (`WordCount`, per line, chunked like the spans) and the outline is read off the scan the pane already holds (`outlineOfBlocks`), instead of joining the note and walking it twice in an isolate | 2151 ms per statistics refresh (280 ms join on the UI isolate + 772 ms count + 1099 ms outline walk) | 29 ms per refresh, and an edit pays 11–33 ms for the lines it touched |
 
 ### The streaming save, measured on the 247 MB note
 
@@ -99,10 +100,10 @@ written next to it.
    (`note_write_stream.dart`; see the table above). The debounce of
    `cee783e` stays — a save is still disk work worth batching — but what it
    was hiding is gone.
-2. **The statistics join the note too.** The word count and the outline wait
-   for the pause (`_statsDelay`), then join and copy to an isolate. The
-   outline is the headings, which the block index already has; the word count
-   can be kept per line and updated by the edits.
+2. ~~**The statistics join the note too.**~~ Done: the word count is kept
+   per line and follows the edits (`editor/word_count_index.dart`), and the
+   outline is read off the blocks the pane's own scan already produced
+   (`editor/outline.dart`, `outlineOfBlocks`). See the table above.
 3. **An Enter or a line join costs O(lines).** `SourceBuffer.replaceRange`
    moves `_lines` and `_terminators` through `ListBase.replaceRange` (the
    generic element-by-element path), and the scanner moves `_entering` and
@@ -118,6 +119,23 @@ written next to it.
    notes are small; worth a guard rather than a rewrite.
 7. **The read view's definitions are rescanned per revision** when it shows
    a note that is being edited; in the background, but O(note) each time.
+
+## The statistics, measured on the 247 MB note
+
+`dart run tool/stats_bench.dart "Quicknote.md"` (246 867 656 chars,
+2 757 545 lines), JIT, the real `SourceBuffer`. One refresh, before and
+after:
+
+| | Old (join, copy, walk twice) | New (kept, not recomputed) |
+|---|---|---|
+| A refresh | 280 ms join on the UI isolate + 772 ms word count + 1099 ms outline walk in the isolate = **2151 ms**, all of it after every pause | **29 ms**: the count is O(1), the headings come off the scan the pane already holds (18 ms), and the frontmatter check reads the note's first 8 KB |
+| One edit | the same 2151 ms at the next pause | a character 17–31 ms, an Enter 16–33 ms, a line join 11–21 ms — the lines it touched |
+| Building the count | — | 1077 ms once, in the background (`countInBackground`) for a note over 64 KB; a 2 MB one is counted at load |
+
+The 41 452 363 words and 22 260 headings the two ways report are the same
+numbers, and that is the property `word_count_index_test` holds: counting
+the lines an edit touched answers what counting the whole text answers, for
+a character, an Enter, a join, and a line taken off the end.
 
 ## The testing builds
 

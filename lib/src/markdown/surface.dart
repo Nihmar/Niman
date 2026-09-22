@@ -29,6 +29,7 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
@@ -97,8 +98,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// Called when a tap, a key or the platform moves the caret.
   final ValueChanged<SelectionModel>? onSelection;
 
-  /// Called after every edit, so the shell can save the note.
-  final VoidCallback? onChanged;
+  /// Called after every edit with the edit itself, so the shell can save the
+  /// note and count its words without re-reading the text.
+  final ValueChanged<SourceEdit>? onChanged;
 
   /// The keyboard focus, when the caller owns it.
   final FocusNode? focusNode;

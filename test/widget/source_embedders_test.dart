@@ -79,7 +79,7 @@ final class _Rig {
             buffer: buffer,
             theme: _theme,
             showLineNumbers: false,
-            onChanged: () => saved.add(buffer.text),
+            onChanged: (_) => saved.add(buffer.text),
           ),
         ),
       ),

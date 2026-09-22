@@ -17,16 +17,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show TextSelection;
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_edit.dart';
+import 'package:niman/src/markdown/source_styler.dart';
 
 /// A note on the unified surface, as the shell drives it.
 final class MarkdownSurfaceController {
   /// Controls [buffer], with the caret at [caret].
-  new(this.buffer, {int caret = 0, EditHistory? history})
+  ///
+  /// [words] is the note's word count already worked out, for a caller that
+  /// built it off the UI isolate; without it the count is empty and
+  /// [buildWords] fills it in.
+  new(this.buffer, {int caret = 0, EditHistory? history, WordCount? words})
     : history = history ?? EditHistory(),
+      words = words ?? WordCount(),
       _pending = SelectionModel.at(caret.clamp(0, buffer.length));
 
   /// The note.
@@ -35,8 +44,46 @@ final class MarkdownSurfaceController {
   /// Its undo history — the shell's, so it survives the view.
   final EditHistory history;
 
+  /// The note's word count, kept current by its edits: no pass over the text
+  /// when a reader asks, and none after a pause in the typing
+  /// ([WordCount]).
+  final WordCount words;
+
+  /// The revision [buffer] is at: what a caller compares to know whether
+  /// what it derived from the note is still current.
+  int get revision => buffer.revision;
+
+  /// The note's headings, read off a scan this controller keeps for itself.
+  ///
+  /// The fallback for a pane that is not on screen: a mounted source pane
+  /// or read pane answers its own, and this is what a hidden tab, a kind
+  /// GUI in front of the note, or a pane that has not scanned yet gets
+  /// instead. Cached by revision — the scan is O(note), and the caller asks
+  /// on every statistics refresh.
+  List<OutlineEntry>? get headings {
+    final styler = _styler;
+    if (styler != null && _stylerRevision == styler.revision) return _headings;
+    return null;
+  }
+
+  /// Scans the note here and now, for [headings].
+  ///
+  /// O(note) on this isolate, so only for a note small enough that the
+  /// caller took that path deliberately (see [SourceStyler.inBackground] for
+  /// the big ones).
+  void scanHere() {
+    final styler = SourceStyler(buffer);
+    _styler = styler;
+    _stylerRevision = styler.revision;
+    _headings = styler.headings;
+  }
+
+  SourceStyler? _styler;
+  int _stylerRevision = -1;
+  List<OutlineEntry>? _headings;
+
   /// Called when an edit lands while no view is mounted to report it.
-  VoidCallback? onChanged;
+  ValueChanged<SourceEdit>? onChanged;
 
   MarkdownSourceViewState? _view;
   SelectionModel _pending;
@@ -116,6 +163,22 @@ final class MarkdownSurfaceController {
     );
   }
 
+  /// Counts the note's words in an isolate, when it has not been counted:
+  /// 675 ms on a 246 MB note, so never on the UI isolate.
+  ///
+  /// The answer is dropped when the note moved on while it was being
+  /// worked out — the next [buildWords] starts again — and [words] is
+  /// swapped whole, so a reader never sees half a count.
+  Future<void> buildWords() async {
+    if (words.isCounted) return;
+    final revision = buffer.revision;
+    await countInBackground(buffer);
+    // The note was typed in while the count was worked out: what came back
+    // is not its count. The next call starts again.
+    if (buffer.revision != revision) return;
+    words.adopt(buffer);
+  }
+
   /// [selection] with both ends where a caret can stand
   /// ([SourceBuffer.caretOffset]).
   SelectionModel _caretSelection(SelectionModel selection) => SelectionModel(
@@ -164,7 +227,7 @@ final class MarkdownSurfaceController {
     if (start < 0 || end < start || end > buffer.length) return;
     final before = buffer.length;
     final removed = buffer.substring(start, end);
-    buffer.replaceRange(start, end, text);
+    final edit = buffer.replaceRange(start, end, text);
     final stored = buffer.length - before + (end - start);
     history.record(
       EditRecord(
@@ -176,7 +239,7 @@ final class MarkdownSurfaceController {
     _pending = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
-    onChanged?.call();
+    onChanged?.call(edit);
   }
 
   /// Replaces the selection with [text] — an image's link, an inserted

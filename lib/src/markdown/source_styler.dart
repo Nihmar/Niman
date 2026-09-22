@@ -29,6 +29,7 @@ import 'dart:collection';
 import 'dart:isolate';
 
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -120,6 +121,22 @@ final class SourceStyler {
       _scope = scope;
     }
   }
+
+  /// The note's headings, read off the scan this styler already keeps.
+  ///
+  /// What the note view publishes as its outline, from the blocks the
+  /// colouring is drawn by rather than from a second walk of the text: see
+  /// [outlineOfBlocks]. O(blocks), so it is the note's heading count and
+  /// never its length.
+  List<OutlineEntry> get headings =>
+      outlineOfBlocks(_scanner.index, buffer.lineAt);
+
+  /// The note's blocks, as the scan behind the colours has them, or null
+  /// before a scan has read this revision.
+  ///
+  /// The same answer the colours are drawn from, for a caller that wants the
+  /// blocks themselves. O(blocks): [BlockScanner.index] copies its list.
+  List<Block>? get blocks => _revision == null ? null : _scanner.index.blocks;
 
   /// Line [line]'s tokens, disjoint and sorted.
   List<Token> tokensOf(int line) {

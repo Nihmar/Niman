@@ -31,6 +31,8 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
+import 'package:niman/src/editor/word_count.dart';
+import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
 import 'package:niman/src/editor/wysiwyg/quill_tally.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
@@ -42,11 +44,15 @@ import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/editor_lines.dart';
@@ -170,6 +176,14 @@ final class NoteView extends StatefulWidget {
   /// editors, the preview, the toolbar, the find bars and the status row
   /// keep to it.
   final NoteColumn noteColumn;
+
+  /// How long a note waits after the last edit before its word count and
+  /// outline are refreshed, or null to wait for nothing.
+  ///
+  /// A test sets it to zero so the count is on screen by the frame after a
+  /// keystroke; nothing in the app sets it.
+  @visibleForTesting
+  static Duration? statsDelayOverride;
 
   /// The note's own controls at the right end of the desktop's top row
   /// (#173): the kind toggles and the ⋮ menu the shell builds.
@@ -420,6 +434,15 @@ final class _NoteViewState extends State<NoteView>
   int _wordCount = 0;
   List<OutlineEntry> _outline = const <OutlineEntry>[];
 
+  /// The note's word count, kept current by the edits
+  /// ([MarkdownSurfaceController.words]).
+  ///
+  /// The last [_noteLength] whose count is in [_wordCount]. The unified
+  /// surface's own counter is authoritative and answers O(1); the legacy
+  /// controller has no counter, so its text is counted — but only when its
+  /// length says it actually changed.
+  int _wordCountLength = -1;
+
   /// [_outline], published for the panels beside the note (#175).
   final ValueNotifier<List<OutlineEntry>> _outlineNotifier = ValueNotifier(
     const <OutlineEntry>[],
@@ -433,7 +456,11 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void jumpToHeading(int line) => _jumpToHeading(line);
-  String? _lastStatsText;
+
+  /// The unified note's revision the word count and the outline were last
+  /// read at, or -1 before the first read. Comparing revisions is what says
+  /// a note changed, where the statistics used to compare its whole text.
+  int _unifiedStatsRevision = -1;
 
   /// Why the note's frontmatter block does not parse, or null when it
   /// does (or when there is no block). Refreshed on the stats debounce.
@@ -483,6 +510,11 @@ final class _NoteViewState extends State<NoteView>
   final ValueNotifier<Set<ToolbarItem>> _wysiwygActive =
       ValueNotifier<Set<ToolbarItem>>(const <ToolbarItem>{});
   late final ScrollController _previewScroll = ScrollController();
+
+  /// The source pane's state, for its headings: the outline is read off the
+  /// blocks the colours are already drawn from.
+  final GlobalKey<MarkdownSourceViewState> _sourceViewKey =
+      GlobalKey<MarkdownSourceViewState>();
 
   /// The read mode's own state, so an anchor jump can ask it for a line: the
   /// read view knows which block a line belongs to and where that block starts,
@@ -566,10 +598,31 @@ final class _NoteViewState extends State<NoteView>
   SourceBuffer? get _unifiedSurfaceBuffer => _surface?.buffer;
 
   /// A controller over [text], reporting its edits the way the surface does.
-  MarkdownSurfaceController _surfaceFor(String text, {int caret = 0}) =>
-      MarkdownSurfaceController(SourceBuffer.fromText(text), caret: caret)
-        ..onChanged = () =>
-            _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine);
+  MarkdownSurfaceController _surfaceFor(String text, {int caret = 0}) {
+    final surface =
+        MarkdownSurfaceController(SourceBuffer.fromText(text), caret: caret)
+          ..onChanged = (edit) => _noteChanged(
+            caretLine: _surfaceCaretLine ?? _caretLine,
+            edit: edit,
+          );
+    _adoptWords(surface);
+    return surface;
+  }
+
+  /// Gives [surface] its word count, here for a note small enough to walk
+  /// and in the background for one that is not (see [WordCount]).
+  ///
+  /// It has to be there before the first edit: the count follows the lines
+  /// an edit touched, and one that is not built yet has no lines to follow.
+  void _adoptWords(MarkdownSurfaceController surface) {
+    if (surface.words.isCounted) return;
+    final buffer = surface.buffer;
+    if (buffer.length > _syncWorkLimit) {
+      unawaited(surface.buildWords());
+      return;
+    }
+    surface.words.adopt(buffer);
+  }
 
   /// Whether the *source* pane is the unified surface rather than re_editor.
   ///
@@ -1269,7 +1322,12 @@ final class _NoteViewState extends State<NoteView>
   /// `onSelection`,
   /// and everything downstream — the save debounce, the unsaved marker, the
   /// statistics, the preview text — is the same code for both.
-  void _noteChanged({required int caretLine}) {
+  void _noteChanged({required int caretLine, SourceEdit? edit}) {
+    if (edit != null) {
+      // Before the revision moves: the count follows the edit's own lines,
+      // which is the whole point of keeping it per line.
+      _surface?.words.edited(edit, _surface!.buffer);
+    }
     _revision++;
     _unsaved?.noteChanged();
     _caretLine = caretLine;
@@ -1481,6 +1539,7 @@ final class _NoteViewState extends State<NoteView>
       data: MediaQuery.of(context)
           .copyWith(textScaler: noteTextScalerOf(context)),
       child: MarkdownSurface(
+        key: _sourceViewKey,
         buffer: buffer,
         surface: surface,
         // The shell's own focus node, the one the legacy editor held: the
@@ -1501,9 +1560,9 @@ final class _NoteViewState extends State<NoteView>
         spellCheck: widget.spellCheck,
         findMatches: _sourceFind,
         onOpenLink: (kind, raw) => unawaited(_openLinkToken(kind, raw)),
-        onChanged: () {
+        onChanged: (edit) {
           _sourceFind.noteEdited();
-          _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine);
+          _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine, edit: edit);
         },
         onSelection: (selection) {
           _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
@@ -1770,55 +1829,154 @@ final class _NoteViewState extends State<NoteView>
     return file?.path;
   }
 
+  /// Refreshes the word count and the outline (T-M2-07).
+  ///
+  /// Neither reads the note any more, which is what this used to cost: the
+  /// statistics joined the whole text (190 ms on the 246 MB note), compared
+  /// it to the last one for equality, copied it to an isolate and walked it
+  /// twice there (1.2 s). Now the count is kept by the edits
+  /// ([MarkdownSurfaceController.words]) and the outline is read off the
+  /// blocks the styling is already drawn from, so this is O(blocks) at
+  /// worst — and the frontmatter check, which only ever wanted the leading
+  /// block, gets the note's first lines rather than the whole note.
   void _refreshStats() {
     if (!mounted || _loading) return;
-    final text = _currentText;
-    if (text == _lastStatsText) return;
-    _lastStatsText = text;
-    final revision = ++_statsRevision;
-    // The frontmatter check rides the stats debounce (T-M4-01: parsed on
-    // edit, debounced). It reads only the leading block, so it stays on
-    // this isolate whatever the note's size.
+    final surface = _surface;
+    final unified = _usesUnifiedSource && surface != null;
+    if (unified) {
+      // The surface counts its own words as it is edited. A note whose
+      // count is not there yet (a big one, counted in the background) keeps
+      // the count it has and takes the next refresh's.
+      final revision = surface.revision;
+      if (revision == _unifiedStatsRevision && surface.words.isCounted) return;
+      _unifiedStatsRevision = revision;
+      final counted = surface.words.isCounted ? surface.words.words : null;
+      final headings = _outlineNow(surface);
+      final frontmatter = _frontmatterErrorOf(surface.buffer);
+      setState(() {
+        if (counted != null) _wordCount = counted;
+        if (headings != null) _outline = headings;
+        _frontmatterError = frontmatter;
+      });
+      if (headings != null) _outlineNotifier.value = _outline;
+      if (!surface.words.isCounted) unawaited(surface.buildWords());
+      return;
+    }
+    // The legacy editor has no counter of its own: its text is counted
+    // here, and only when the length says it changed.
+    final text = _editText;
+    if (text.length != _wordCountLength) {
+      _wordCountLength = text.length;
+      _wordCount = countWords(text);
+    }
     final frontmatterError = frontmatterErrorIn(text);
     if (frontmatterError != _frontmatterError) {
       setState(() => _frontmatterError = frontmatterError);
     }
-    void apply(Object? result) {
-      if (!mounted || revision != _statsRevision) return;
-      final stats = PreviewWork.statsOf(result);
-      if (stats == null) return;
+    final headings = _outlineNow(surface);
+    if (headings != null) {
+      setState(() => _outline = headings);
+      _outlineNotifier.value = _outline;
+      return;
+    }
+    if (text.length <= _syncWorkLimit) {
+      final result = statsFor(text);
       setState(() {
-        _wordCount = stats.words;
-        _outline = stats.outline
+        _wordCount = result.$1;
+        _outline = result.$2
             .map(parseOutlineRow)
             .whereType<OutlineEntry>()
             .toList();
       });
       _outlineNotifier.value = _outline;
-    }
-
-    // Word count + outline are O(n) pure passes. Notes above the threshold
-    // run them on an isolate (a 931K note costs ~400 ms — never on the
-    // main thread, that was the 1.2 s open stall); small ones stay
-    // synchronous (deterministic for tests).
-    if (text.length <= _syncWorkLimit) {
-      final result = statsFor(text);
-      apply((result.$1, result.$2));
       return;
     }
-    unawaited(PreviewWork.run('stats', text).then(apply));
+    unawaited(
+      PreviewWork.run('stats', text).then((result) {
+        if (!mounted) return;
+        final stats = PreviewWork.statsOf(result);
+        if (stats == null) return;
+        setState(() {
+          _wordCount = stats.words;
+          _outline = stats.outline
+              .map(parseOutlineRow)
+              .whereType<OutlineEntry>()
+              .toList();
+        });
+        _outlineNotifier.value = _outline;
+      }),
+    );
   }
+
+  /// The note's headings, from a scan something already paid for, or worked
+  /// out here for a note small enough to walk now.
+  ///
+  /// The source pane's own reading of the blocks, the read pane's — scanned
+  /// for the page — or the surface's, for a note whose pane is hidden or has
+  /// not scanned yet. The first three cost nothing; the last is
+  /// [outlineOfText] over the note's text, which is why it is behind
+  /// [_syncWorkLimit] and nothing larger takes it.
+  List<OutlineEntry>? _outlineNow(MarkdownSurfaceController? surface) {
+    final source = _sourceViewKey.currentState;
+    if (source != null) {
+      final headings = source.headings;
+      if (headings != null) return headings;
+    }
+    final read = _readViewKey.currentState;
+    if (read != null) {
+      final headings = read.headings;
+      if (headings != null) return headings;
+    }
+    final scanned = surface?.headings;
+    if (scanned != null) return scanned;
+    if (surface == null) return null;
+    // Nothing has scanned this note yet — a note just opened, or one whose
+    // pane is off stage — and only a small one may be walked for its
+    // headings here. A big one keeps the outline it has until a pane's own
+    // scan lands ([_refreshStats] asks again).
+    if (surface.buffer.length > _syncWorkLimit) return null;
+    return outlineOfBlocks(
+      BlockIndex(
+        blocks: BlockScanner(surface.buffer).index.blocks,
+        revision: surface.revision,
+      ),
+      surface.buffer.lineAt,
+    );
+  }
+
+  /// The frontmatter's error, from the note's first lines only.
+  ///
+  /// [frontmatterErrorIn] reads the leading block and stops; a note's
+  /// frontmatter is its first handful of lines, so it is handed those
+  /// rather than the joined note.
+  String? _frontmatterErrorOf(SourceBuffer buffer) {
+    if (buffer.lineCount == 0) return null;
+    final buffer0 = StringBuffer();
+    for (
+      var line = 0;
+      line < buffer.lineCount && buffer0.length < _frontmatterLookahead;
+      line++
+    ) {
+      buffer0
+        ..write(buffer.lineAt(line))
+        ..write(buffer.terminatorAt(line));
+    }
+    return frontmatterErrorIn(buffer0.toString());
+  }
+
+  /// How much of a note's head the frontmatter check is given.
+  static const int _frontmatterLookahead = 8 * 1024;
 
   static const int _syncWorkLimit = 64 * 1024;
 
-  /// How long the writer has to pause before the word count and the outline
-  /// are worked out again.
   ///
   /// They read the whole note — joined, sent to an isolate, scanned — so a
   /// note of hundreds of megabytes waits for a real pause rather than for
   /// every breath between words (0.0.9 stress test: a 246 MB note paid 12 s
   /// of isolate time after each one).
   Duration get _statsDelay {
+    final override = NoteView.statsDelayOverride;
+    if (override != null) return override;
     final length = _noteLength;
     if (length > 16 << 20) return const Duration(seconds: 5);
     if (length > 2 << 20) return const Duration(seconds: 2);
@@ -1845,9 +2003,9 @@ final class _NoteViewState extends State<NoteView>
   /// The note's length, without joining it.
   int get _noteLength => _usesUnifiedSource
       ? _surface?.buffer.length ?? 0
-      : _lastStatsText?.length ?? 0;
-
-  int _statsRevision = 0;
+      : _wordCountLength < 0
+      ? 0
+      : _wordCountLength;
 
   /// Opens the outline sheet and jumps to whatever was picked.
   Future<void> _openOutline() async {
