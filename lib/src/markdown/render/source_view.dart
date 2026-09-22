@@ -35,6 +35,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
@@ -75,6 +76,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.column = NoteColumn.off,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
+    this.indentWidth = 2,
     this.hideMarkers = false,
     this.syntax,
     this.dark = false,
@@ -125,6 +127,9 @@ final class MarkdownSourceView extends StatefulWidget {
 
   /// Whether the gutter shows line numbers.
   final bool showLineNumbers;
+
+  /// How many spaces Tab indents by (the library's own setting).
+  final int indentWidth;
 
   /// Whether the structural markers are hidden.
   ///
@@ -182,6 +187,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The caret, from the caller when it holds one.
   SelectionModel get _selection => widget.selection ?? _ownSelection;
 
+  /// Where the caret is, and what it has selected.
+  SelectionModel get selection => _selection;
+
   /// The paragraph of each line a frame has built, so a tap can ask the line it
   /// landed on where an offset is, and the caret can ask its own line for the
   /// rectangle. Only mounted lines keep a key: a long scroll forgets the lines
@@ -214,6 +222,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input = SourceInput(
       buffer: widget.buffer,
       onRecord: _history.record,
+      onNewline: _newline,
       onTokenizer: (edit, buffer) =>
           SourceInput.retokenize(_tokens, edit, buffer),
       text: () => _wholeText,
@@ -233,9 +242,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _notifyChanged();
       },
     );
-    _blink = Timer.periodic(const Duration(milliseconds: 550), (_) {
-      _caretOn.value = !_caretOn.value;
-    });
     _scheduleCaret();
   }
 
@@ -532,6 +538,186 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final start = math.min(other, selection.extent);
     final end = math.max(other, selection.extent);
     _replaceRange(start, end, '', SelectionModel.at(start));
+  }
+
+  /// A line break typed over `[start, end)`, when it means more than a line
+  /// break: inside a list item it carries the list on, and on an empty item it
+  /// ends the list (#142, the legacy editor's `applyNewLine`). Answers whether
+  /// it did either; otherwise the platform's line break is applied as typed.
+  ///
+  /// It hangs off the *line break arriving*, not off the Enter key, because
+  /// that is the one place every embedder meets: an IME commits the break as
+  /// text and the desktop embedders insert it themselves, so there is no key
+  /// to bind that all of them send.
+  bool _newline(int start, int end) {
+    if (start != end) return false;
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(start);
+    if (!_isPlainLine(line)) return false;
+    final text = buffer.lineAt(line);
+    final head = listItemHead(text);
+    if (head == null) return false;
+    final lineStart = buffer.offsetOfLine(line);
+    if (head.isEmpty) {
+      // Enter on an item with nothing in it takes the marker away instead of
+      // adding another empty item — the second Enter everybody presses to get
+      // out of a list.
+      _replaceRange(
+        lineStart,
+        lineStart + text.length,
+        '',
+        SelectionModel.at(lineStart),
+      );
+      return true;
+    }
+    // A caret inside the marker is not "in the item": leave it to the platform.
+    if (start - lineStart < text.length - head.content.length) return false;
+    final inserted = '\n${head.continuation}';
+    // One edit, not a line break and then a marker: one undo step, and no
+    // frame where the marker is missing.
+    _replaceRange(
+      start,
+      end,
+      inserted,
+      SelectionModel.at(start + inserted.length),
+    );
+    return true;
+  }
+
+  /// Whether line [index] is ordinary Markdown — not fenced code, display
+  /// maths or frontmatter, where a dash starts nothing. Answered by the
+  /// tokenizer the view already keeps, as the legacy editor's `_isPlainLine`
+  /// is, so the two cannot disagree about what a list is.
+  bool _isPlainLine(int index) {
+    if (index < 0 || index >= _tokens.lineCount) return true;
+    for (final token in _tokens.lineAt(index).tokens) {
+      if (token.kind == TokenKind.codeFence ||
+          token.kind == TokenKind.mathBlock ||
+          token.kind == TokenKind.frontmatter) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Tab: moves the lines the selection touches in by `indentWidth` spaces —
+  /// or, on a plain line with a collapsed caret, inserts them at the caret.
+  ///
+  /// The surface's own key: left to the app, Tab moves the focus to the next
+  /// widget and takes the keyboard away from the note.
+  void indent() {
+    final selection = _selection.clampTo(widget.buffer.length);
+    final line = widget.buffer.lineOf(selection.start);
+    final pad = ' ' * widget.indentWidth;
+    if (selection.isCollapsed &&
+        listItemHead(widget.buffer.lineAt(line)) == null) {
+      _replaceRange(
+        selection.start,
+        selection.end,
+        pad,
+        SelectionModel.at(selection.start + pad.length),
+      );
+      return;
+    }
+    _shiftLines(selection, (text) => '$pad$text');
+  }
+
+  /// Shift+Tab: moves the lines the selection touches out by up to
+  /// `indentWidth` spaces, never taking anything but spaces.
+  void outdent() {
+    final selection = _selection.clampTo(widget.buffer.length);
+    _shiftLines(selection, (text) {
+      var spaces = 0;
+      while (spaces < widget.indentWidth &&
+          spaces < text.length &&
+          text.codeUnitAt(spaces) == 0x20) {
+        spaces++;
+      }
+      return text.substring(spaces);
+    });
+  }
+
+  /// Rewrites every line [selection] touches with [shift], as one edit, and
+  /// keeps each end of the selection on its own line and character.
+  void _shiftLines(SelectionModel selection, String Function(String) shift) {
+    final buffer = widget.buffer;
+    final first = buffer.lineOf(selection.start);
+    final last = buffer.lineOf(selection.end);
+    final start = buffer.offsetOfLine(first);
+    final end = buffer.offsetOfLine(last) + buffer.lineAt(last).length;
+    final lines = <String>[];
+    final deltas = <int>[];
+    for (var at = first; at <= last; at++) {
+      final before = buffer.lineAt(at);
+      final after = shift(before);
+      lines.add(after);
+      deltas.add(after.length - before.length);
+    }
+    final eol = buffer.substring(start, end).contains('\r\n') ? '\r\n' : '\n';
+    final replaced = lines.join(eol);
+    if (replaced == buffer.substring(start, end)) return;
+    int moved(int offset) {
+      final line = buffer.lineOf(offset);
+      final column = offset - buffer.offsetOfLine(line);
+      var shiftBefore = 0;
+      for (var at = first; at < line; at++) {
+        shiftBefore += deltas[at - first];
+      }
+      final delta = deltas[line - first];
+      // A column the shift removed collapses onto the line's new start.
+      final newColumn = math.max(0, column + delta);
+      return buffer.offsetOfLine(line) + shiftBefore + newColumn;
+    }
+
+    final next = SelectionModel(
+      anchor: moved(selection.anchor),
+      extent: moved(selection.extent),
+    );
+    _replaceRange(start, end, replaced, next);
+  }
+
+  /// PageUp and PageDown: the note moves a viewport, and the caret moves with
+  /// it by as many rows, the way every editor pages.
+  void _page(int direction, {bool extend = false}) {
+    if (!_scroll.hasClients) return;
+    final viewport = _scroll.position.viewportDimension;
+    final rows = (viewport / widget.theme.lineHeight).floor() - 1;
+    if (rows <= 0) return;
+    final from = _scroll.offset;
+    final to = (from + direction * rows * widget.theme.lineHeight).clamp(
+      0.0,
+      _scroll.position.maxScrollExtent,
+    );
+    if (to == from) {
+      // Nothing left to page through: the caret goes to that end of the note.
+      moveCaretBy(
+        direction < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
+        extend: extend,
+      );
+      return;
+    }
+    // The caret keeps its place *on the screen* while the note moves under
+    // it, and that place is asked of whatever line is there after the jump —
+    // the caret's own line may no longer be built at all.
+    final box = _noteBox;
+    final point =
+        caretRect?.center ??
+        box?.localToGlobal(Offset(0, viewport / 2)) ??
+        Offset.zero;
+    _scroll.jumpTo(to);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final offset = offsetAt(point);
+      if (offset == null) return;
+      final next = extend
+          ? SelectionModel(anchor: _selection.anchor, extent: offset)
+          : SelectionModel.at(offset);
+      _publishSelection(next);
+      widget.onSelection?.call(next);
+      _input.sendSelection();
+      _scheduleCaret();
+    });
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   /// Keeps the tokenizer and the height map at the buffer's line count.
@@ -905,6 +1091,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
+    _restartBlink();
     // Measured *now*, from the layout the last frame left, and again after the
     // next frame: a caret that moved because of a tap or a key is on screen
     // immediately, and the frame that may have re-laid its line corrects it.
@@ -914,6 +1101,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _measureCaret();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _measureCaret();
+    });
+  }
+
+  /// Shows the caret and starts its blink over.
+  ///
+  /// Every move does this, the way every text field does: a caret that moved
+  /// during the half of the blink it spends hidden stays invisible for up to
+  /// 550 ms, which reads as a tap that took that long to land.
+  void _restartBlink() {
+    _caretOn.value = true;
+    _blink?.cancel();
+    _blink = Timer.periodic(const Duration(milliseconds: 550), (_) {
+      _caretOn.value = !_caretOn.value;
     });
   }
 
@@ -1102,10 +1302,36 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           moveCaretBy(CaretMotion.lineTextStart),
       const SingleActivator(LogicalKeyboardKey.end): () =>
           moveCaretBy(CaretMotion.lineEnd),
+      const SingleActivator(LogicalKeyboardKey.home, shift: true): () =>
+          moveCaretBy(CaretMotion.lineTextStart, extend: true),
+      const SingleActivator(LogicalKeyboardKey.end, shift: true): () =>
+          moveCaretBy(CaretMotion.lineEnd, extend: true),
       const SingleActivator(LogicalKeyboardKey.home, control: true): () =>
           moveCaretBy(CaretMotion.documentStart),
       const SingleActivator(LogicalKeyboardKey.end, control: true): () =>
           moveCaretBy(CaretMotion.documentEnd),
+      const SingleActivator(
+        LogicalKeyboardKey.home,
+        control: true,
+        shift: true,
+      ): () =>
+          moveCaretBy(CaretMotion.documentStart, extend: true),
+      const SingleActivator(
+        LogicalKeyboardKey.end,
+        control: true,
+        shift: true,
+      ): () =>
+          moveCaretBy(CaretMotion.documentEnd, extend: true),
+      const SingleActivator(LogicalKeyboardKey.pageUp): () => _page(-1),
+      const SingleActivator(LogicalKeyboardKey.pageDown): () => _page(1),
+      const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): () =>
+          _page(-1, extend: true),
+      const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): () =>
+          _page(1, extend: true),
+      // Tab is the note's: left to the app it moves the focus away, and the
+      // keyboard with it.
+      const SingleActivator(LogicalKeyboardKey.tab): indent,
+      const SingleActivator(LogicalKeyboardKey.tab, shift: true): outdent,
       const SingleActivator(LogicalKeyboardKey.keyC, control: true):
           copySelection,
       const SingleActivator(LogicalKeyboardKey.keyC, meta: true): copySelection,

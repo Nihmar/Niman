@@ -268,6 +268,43 @@ void main() {
     );
   });
 
+  testWidgets('Shift+End selects to the line end, Shift+Home back', (
+    tester,
+  ) async {
+    final state = await pump(tester, 'una riga di testo\n');
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    state.placeCaret(4);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+    expect(state.selectedText, 'riga di testo');
+  });
+
+  testWidgets('PageDown moves the caret a page, and the note with it', (
+    tester,
+  ) async {
+    final note = List<String>.generate(200, (i) => 'riga $i').join('\n');
+    final state = await pump(tester, note);
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    state.placeCaret(0);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    await tester.pump();
+    final buffer = SourceBuffer.fromText(note);
+    final line = buffer.lineOf(state.selection.extent);
+    // 400 px of viewport at 21 px a row is 19 rows, one kept for context.
+    expect(line, greaterThanOrEqualTo(15));
+    expect(line, lessThanOrEqualTo(19));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    await tester.pump();
+    expect(buffer.lineOf(state.selection.extent), 0);
+  });
+
   testWidgets('Ctrl+Z takes back what the keyboard typed', (tester) async {
     final buffer = SourceBuffer.fromText('ciao\n');
     var selection = const SelectionModel.at(0);

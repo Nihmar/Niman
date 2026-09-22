@@ -263,6 +263,83 @@ void main() {
         rig.agree('ciao mondo!\n');
       });
 
+      testWidgets('Enter carries a list on, and an empty item ends it', (
+        tester,
+      ) async {
+        // The line break arrives from the platform like any other; what the
+        // note gets is the list's next marker as well, and the platform is
+        // told, so the next keystroke lands after it.
+        final rig = _Rig(tester, profile, '- latte\n');
+        await rig.pump();
+        await rig.tapAt(0, 7);
+        await rig.platform.enter();
+        await tester.pump();
+        rig.agree('- latte\n- \n');
+        await rig.platform.type('pane');
+        rig.agree('- latte\n- pane\n');
+        await rig.platform.enter();
+        await tester.pump();
+        await rig.platform.enter();
+        await tester.pump();
+        rig.agree(
+          '- latte\n- pane\n\n',
+          reason: 'Enter on an empty item takes the marker away',
+        );
+      });
+
+      testWidgets('an ordered list counts on, a fence does not continue', (
+        tester,
+      ) async {
+        // The two taps are far enough apart not to be a double tap.
+        final rig = _Rig(
+          tester,
+          profile,
+          '1. uno\n\n\n\n\n```\n- dentro\n```\n',
+        );
+        await rig.pump();
+        await rig.tapAt(0, 6);
+        await rig.platform.enter();
+        await tester.pump();
+        rig.agree('1. uno\n2. \n\n\n\n\n```\n- dentro\n```\n');
+        await rig.tapAt(7, 8);
+        await rig.platform.enter();
+        await tester.pump();
+        rig.agree(
+          '1. uno\n2. \n\n\n\n\n```\n- dentro\n\n```\n',
+          reason: 'a dash inside a fence starts nothing',
+        );
+      });
+
+      testWidgets('Tab indents and keeps the keyboard', (tester) async {
+        // The app's default Tab moves the focus to the next widget, which
+        // took the keyboard away from the note.
+        final rig = _Rig(tester, profile, '- uno\n\n\n\n\n\nprosa\n');
+        await rig.pump();
+        await rig.tapAt(0, 5);
+        await rig.platform.press(LogicalKeyboardKey.tab);
+        await tester.pump();
+        rig.agree(
+          '  - uno\n\n\n\n\n\nprosa\n',
+          reason: 'a list item moves in whole',
+        );
+        expect(rig.platform.attached, isTrue, reason: 'the focus stayed');
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+        await rig.platform.press(LogicalKeyboardKey.tab);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+        await tester.pump();
+        rig.agree(
+          '- uno\n\n\n\n\n\nprosa\n',
+          reason: 'and Shift+Tab takes it back',
+        );
+        await rig.tapAt(6, 2);
+        await rig.platform.press(LogicalKeyboardKey.tab);
+        await tester.pump();
+        rig.agree(
+          '- uno\n\n\n\n\n\npr  osa\n',
+          reason: 'prose gets spaces at the caret',
+        );
+      });
+
       testWidgets('an edit reaches the shell', (tester) async {
         final rig = _Rig(tester, profile, 'a\n');
         await rig.pump();

@@ -64,6 +64,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.history,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
+    this.indentWidth = 2,
     this.syntax,
     this.dark = false,
     super.key,
@@ -105,6 +106,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// Whether the gutter shows line numbers.
   final bool showLineNumbers;
 
+  /// How many spaces Tab indents by.
+  final int indentWidth;
+
   /// The token palette; null takes it from the ambient theme.
   final SyntaxColors? syntax;
 
@@ -134,6 +138,7 @@ final class MarkdownSurface extends StatelessWidget {
     column: column,
     padding: padding,
     showLineNumbers: showLineNumbers,
+    indentWidth: indentWidth,
     syntax: syntax,
     dark: dark,
     hideMarkers: hidesMarkers,
