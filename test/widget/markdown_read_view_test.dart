@@ -317,6 +317,97 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  group('a long note is scanned in the background', () {
+    setUp(() => MarkdownReadViewState.backgroundLines = 20);
+    tearDown(() => MarkdownReadViewState.backgroundLines = 50000);
+
+    /// Waits for the isolate, then for the frame that draws its answer.
+    Future<void> settle(WidgetTester tester) async {
+      for (var round = 0; round < 50; round++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+        final state = tester.state<MarkdownReadViewState>(
+          find.byType(MarkdownReadView),
+        );
+        // The answer can land during the pump, after its build: one more.
+        if (!state.scanning) {
+          await tester.pump();
+          return;
+        }
+      }
+    }
+
+    Widget view(SourceBuffer buffer, BlockParser parser) => MaterialApp(
+      home: Scaffold(
+        body: MarkdownReadView(
+          buffer: buffer,
+          parser: parser,
+          mathCache: _syncCache(),
+        ),
+      ),
+    );
+
+    testWidgets('the first look waits for the scan, then draws it', (
+      tester,
+    ) async {
+      final parser = BlockParser();
+      await tester.pumpWidget(
+        view(SourceBuffer.fromText('${_note(20)}[^1]\n\n[^1]: a note'), parser),
+      );
+      expect(find.byKey(const Key('read-view-scanning')), findsOneWidget);
+      await settle(tester);
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(state.blockCount, greaterThan(20));
+      expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
+      // The definitions came back with the blocks, and belong to the note.
+      expect(parser.scope?.footnotes.single.body, 'a note');
+    });
+
+    testWidgets('the revision before stays on screen meanwhile', (
+      tester,
+    ) async {
+      final parser = BlockParser();
+      await tester.pumpWidget(view(SourceBuffer.fromText(_note(20)), parser));
+      await settle(tester);
+      await tester.pumpWidget(
+        view(SourceBuffer.fromText('# Now\n\n${_note(20)}'), parser),
+      );
+      expect(find.byKey(const Key('read-view-scanning')), findsNothing);
+      expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
+      await settle(tester);
+      expect(find.textContaining('Now', findRichText: true), findsOne);
+    });
+
+    testWidgets('a jump asked for before the scan lands is taken after', (
+      tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText(_note(200)),
+              parser: BlockParser(),
+              mathCache: _syncCache(),
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+      tester
+          .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+          .jumpToLine(450);
+      await settle(tester);
+      await tester.pumpAndSettle();
+      expect(controller.offset, greaterThan(0));
+    });
+  });
+
   // The preview's own widget tests, ported to the engine that replaces it. What
   // was ported is deliberate: the behaviours belong to the *renderer* — does a
   // note with every construct draw, do task boxes appear, does a formula that

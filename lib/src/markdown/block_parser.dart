@@ -44,7 +44,11 @@ final class BlockParser {
   SourceBuffer? _source;
   int _revision = -1;
   int _parses = 0;
-  DocumentScope? _scope;
+
+  /// The definitions last scanned, or null before the first. Set from
+  /// outside when they were scanned elsewhere (in the background), so the
+  /// parse does not scan for them again.
+  DocumentScope? scope;
 
   /// How many blocks have actually been parsed, for the tests and the bench:
   /// the point of the cache is that this stays near the visible count.
@@ -179,15 +183,13 @@ final class BlockParser {
 
   /// The document-scoped definitions, scanned once per revision.
   DocumentScope _scopeOf(SourceBuffer buffer) {
-    final cached = _scope;
+    final cached = scope;
     if (cached != null &&
         identical(cached.source, buffer) &&
         cached.revision == buffer.revision) {
       return cached;
     }
-    final scope = DocumentScope.scan(buffer, buffer.revision);
-    _scope = scope;
-    return scope;
+    return scope = DocumentScope.scan(buffer, buffer.revision);
   }
 
   /// The block's text with its containers' syntax taken off.
@@ -606,6 +608,18 @@ final class DocumentScope {
 
   /// Its revision.
   final int revision;
+
+  /// The same definitions, as scanned from [buffer] at [revision]: a scope
+  /// scanned from a copy of the note, in the background, handed to the note
+  /// itself.
+  DocumentScope on(SourceBuffer buffer, int revision) => DocumentScope(
+    links: links,
+    footnoteCounts: footnoteCounts,
+    footnoteLabels: footnoteLabels,
+    footnotes: footnotes,
+    source: buffer,
+    revision: revision,
+  );
 }
 
 /// One footnote: the label it was defined with, and its body.
