@@ -42,7 +42,9 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/preview/editor_lines.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -421,8 +423,11 @@ final class _NoteViewState extends State<NoteView>
   String? _wysiwygText;
 
   /// The note's current text, whichever surface holds it.
-  String get _currentText =>
-      widget.showWysiwyg ? _wysiwygText ?? '' : _controller.text;
+  String get _currentText => _usesUnifiedSource
+      ? _unifiedText
+      : widget.showWysiwyg
+      ? _wysiwygText ?? ''
+      : _controller.text;
 
   /// The WYSIWYG surface's state (the toolbar's Quill commands need it).
   final GlobalKey<WysiwygEditorState> _wysiwygKey =
@@ -454,6 +459,26 @@ final class _NoteViewState extends State<NoteView>
   /// refreshes on a 500 ms debounce, so this is rebuilt at that cadence.
   SourceBuffer? _unifiedBuffer;
   String _unifiedBufferText = '';
+
+  /// The note's text as the unified source surface has it. Written by
+  /// [_noteChanged] and read by [_currentText], which is where saving, the
+  /// preview and the statistics all get their text from — so this pane reaches
+  /// every one of them through the same door the legacy editor uses.
+  String _unifiedText = '';
+
+  /// The buffer the unified source surface edits. Its own, not the read pane's:
+  /// the read pane's is rebuilt from the preview text on a debounce, and a pane
+  /// cannot edit an object that another part of the shell replaces underneath
+  /// it.
+  SourceBuffer? _unifiedSurfaceBuffer;
+
+  /// Whether the *source* pane is the unified surface rather than re_editor.
+  ///
+  /// Off by default and behind the same flag as the read mode, because a
+  /// surface
+  /// being shown has to be shown to agree with what it replaces before it can
+  /// replace it.
+  bool get _usesUnifiedSource => widget.unifiedMarkdown && !widget.showWysiwyg;
 
   /// The buffer the unified engine draws, built once per text change.
   SourceBuffer get _unifiedSource {
@@ -839,6 +864,8 @@ final class _NoteViewState extends State<NoteView>
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
       _controller.text = text;
+      _unifiedSurfaceBuffer = SourceBuffer.fromText(text);
+      _unifiedText = text;
       // Loading is not an edit: without this the first Ctrl+Z took the
       // buffer back to what it held before — nothing — and the save that
       // followed wrote an empty note.
@@ -1020,6 +1047,36 @@ final class _NoteViewState extends State<NoteView>
     _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
 
+  /// The note changed, from either source pane: the text, and where the caret
+  /// is
+  /// in it (a line, which is what the preview's sync speaks in).
+  ///
+  /// This is the one door the unified surface needs. The legacy editor's
+  /// numbers
+  /// are gathered by its own controller listener, which reports them here; the
+  /// unified surface reports the same pair through `onChanged` and
+  /// `onSelection`,
+  /// and everything downstream — the save debounce, the unsaved marker, the
+  /// statistics, the preview text — is the same code for both.
+  void _noteChanged({required String text, required int caretLine}) {
+    _unifiedText = text;
+    _revision++;
+    _unsaved?.noteChanged();
+    _caretLine = caretLine;
+    _saveTimer?.cancel();
+    final debounce = _saving
+        ? const Duration(seconds: 1)
+        : const Duration(milliseconds: 500);
+    _saveTimer = Timer(debounce, _save);
+    _statsTimer?.cancel();
+    _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+    _previewTimer?.cancel();
+    _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
+  }
+
+  /// Where the caret is, in the preview's own terms.
+  int _caretLine = 0;
+
   void _refreshPreview() {
     if (!mounted || _loading) return;
     final text = _currentText;
@@ -1172,7 +1229,40 @@ final class _NoteViewState extends State<NoteView>
           formatMenu: _formatMenu,
           typewriter: widget.typewriter,
         )
+      : _usesUnifiedSource
+      ? _unifiedSurfacePane()
       : _sourcePane();
+
+  /// The source pane as the unified surface (#245).
+  ///
+  /// The same widget the read mode's engine is built from, in `source` mode:
+  /// the
+  /// note as written, with the caret, the motions, the undo history and the
+  /// windowing that the surface has. It reports the text and the caret line
+  /// through [_noteChanged], which is the same door the legacy editor's numbers
+  /// come through — so saving, the preview and the statistics do not know which
+  /// pane is on screen.
+  Widget _unifiedSurfacePane() {
+    final buffer = _unifiedSurfaceBuffer ?? SourceBuffer.fromText(_currentText);
+    _unifiedSurfaceBuffer = buffer;
+    _unifiedText = buffer.text;
+    return MarkdownSurface(
+      buffer: buffer,
+      mode: MarkdownSurfaceMode.source,
+      theme: markdownThemeOf(context),
+      showLineNumbers: widget.showLineNumbers,
+      onChanged: (text) =>
+          _noteChanged(text: text, caretLine: _surfaceCaretLine ?? _caretLine),
+      onSelection: (selection) {
+        _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
+      },
+    );
+  }
+
+  /// The line the unified surface's caret is on (1-based), or null before it
+  /// has
+  /// reported one.
+  int? _surfaceCaretLine;
 
   /// The preview, at the *note* text size rather than the interface one
   /// (T-M6-12).
