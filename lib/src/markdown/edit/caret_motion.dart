@@ -93,6 +93,55 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
   return (start, end);
 }
 
+/// The run of non-whitespace the caret [offset] is in, as `(start, end)`.
+///
+/// This is what `live` mode's per-word reveal calls the caret's *word*, and it
+/// is deliberately **not** [wordRangeAt]: that one answers what a double click
+/// selects, so it stops at a marker — `**bold**` would give you `bold`, and
+/// the `**` the writer is editing would stay hidden. A run is everything the
+/// caret can reach without crossing a space, so it *contains* the syntax that
+/// delimits the word, which is exactly what has to be drawn while the caret is
+/// in it (`docs/dev/unified-surface.md` §8.6.2, the per-word refinement).
+///
+/// An offset that sits on whitespace is that one character: there is no run to
+/// be in, and the caller wants a range either way.
+(int, int) runAround(String text, int offset) {
+  if (text.isEmpty) return (0, 0);
+  final at = offset.clamp(0, text.length);
+  // A caret at or past the end belongs to the last character's run, the way a
+  // caret typed at the end of a line is in the word it just finished.
+  return _runAt(text, at >= text.length ? text.length - 1 : at);
+}
+
+/// The run [at] is in, or [at] alone when it is whitespace.
+(int, int) _runAt(String text, int at) {
+  if (_isBlank(text.codeUnitAt(at))) return (at, at + 1);
+  var start = at;
+  var end = at + 1;
+  while (start > 0 && !_isBlank(text.codeUnitAt(start - 1))) {
+    start--;
+  }
+  while (end < text.length && !_isBlank(text.codeUnitAt(end))) {
+    end++;
+  }
+  return (start, end);
+}
+
+/// Whether [char] is whitespace a run breaks at.
+///
+/// The space and the tab are the ones a note is written with; the rest are the
+/// line's own terminator and the non-breaking space a paste can bring in, kept
+/// for the same reason `\r\n` is one line break rather than a character in the
+/// middle of a word.
+bool _isBlank(int char) =>
+    char == 0x20 || // space
+    char == 0x09 || // tab
+    char == 0x0A || // line feed
+    char == 0x0D || // carriage return
+    char == 0x0B || // vertical tab
+    char == 0x0C || // form feed
+    char == 0xA0; // no-break space
+
 /// The caret [selection] moved by [motion] through [buffer].
 ///
 /// With [extend] the anchor stays where it was, which is what shift does;

@@ -20,10 +20,13 @@ for first: **one reading of the note for the editor and the preview.**
 - Each `StyleRun` knows its markers from its text (`innerStart`/`innerEnd`),
   and a `Token` can be a marker (`Token.marker`). `live` mode already draws a
   marker token invisible and taking no room.
-- **Live mode is on hold.** It is not to be worked on until the source mode
-  has been tried on the real executables and found sound. The next steps,
-  when it resumes, are the reveal policy and the typography listed under
-  phase 4 in `unified-surface.md` §10.3.
+- **Live mode is being worked on** (phase 4, the WYSIWYG that replaces
+  `flutter_quill`), and its first piece — the marker reveal, per line and per
+  word — is in; see the section at the end of this file. The "on hold" this
+  used to say is gone, because the reason for it had been overtaken: source
+  mode is not *sound* on this note yet (item 3 below), and that is now written
+  where it belongs, as phase 3's own open debt in `unified-surface.md`, rather
+  than as a hold on the mode that comes after it.
 
 ## What changed, measured on the 246 MB note
 
@@ -285,7 +288,7 @@ the `-` they were editing. The reveal policy is now
 `docs/dev/unified-surface.md` §8.6.2's **policy A** — the markers are hidden
 everywhere except on the line the caret is in.
 
-It is a *style*, never the text: `_Line.hidden(token, revealed:)` decides
+It is a *style*, never the text: `_Line.hidden(token, revealed:, run:)` decides
 between `_hiddenMarker` and `markdownTokenStyle`, and the marker keeps its
 offset, its string and its advance, so the caret, the hit test and the
 selection know nothing about it. The line's own size stays the hiding's,
@@ -298,9 +301,22 @@ the hash is drawn` is the new one, and the two `caretRect` comparisons were
 narrowed to the horizontal, since a heading above the caret is a different
 height in the two modes — 50.0 against 65.0, measured).
 
-Per-word reveal is the refinement the design asks for next, and the row-wise
-reveal that follows a wrap is the other: this is per *line*, because a line
-is the unit the surface builds.
+**The per-word refinement is in too** (same day). A marker is now tested
+against the caret's *run of non-whitespace* (`runAround`, `caret_motion.dart`),
+which contains the markers — so `**bold**` reveals both of its pairs while the
+caret is inside `bold`, and a plain word reveals no syntax at all. Two
+granularities, split by `_isMarker`: a structural mark is the shape of the
+*line* and follows the line (a writer in a heading still sees its hashes),
+an inline mark is the shape of a *word* and follows the run. Two attempts
+before this one got the comparison wrong and hid the pair the caret was
+between; the note in `unified-surface.md` says what was wrong and what holds
+now.
+
+The lines listen to one value — `CaretSpot(line, runStart, runEnd)` — so a
+caret move *inside* a run notifies no line and a move across a run boundary
+notifies the two lines involved once. The row-wise reveal that follows a wrap
+is still open: the unit is the line, so a wrapped paragraph shows the syntax
+of every row it spans while the caret is in it.
 
 ## The testing builds
 
