@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
 /// External-change reloads (home-screen widget toggles edit the note in
@@ -30,6 +34,120 @@ String _editorText(WidgetTester tester) =>
     tester.widget<NoteEditor>(find.byType(NoteEditor)).controller.text;
 
 void main() {
+  // The gate in front of the read (docs/dev/huge-notes.md item 4): a watcher
+  // reports that something happened to a path, and a reload asks the file
+  // what it looks like before it reads it. These two use a real file, since
+  // the read they are about is the real one — `readNote` is null and the view
+  // reads through the same path production does.
+  group('NoteView reload gate', () {
+    late Directory dir;
+    late String path;
+
+    setUp(() async {
+      dir = await Directory.current.createTemp('niman_reload_');
+      path = p.join(dir.path, 'note.md');
+    });
+
+    tearDown(() => dir.delete(recursive: true));
+
+    testWidgets('a bump with the file untouched does not read it again', (
+      tester,
+    ) async {
+      File(path).writeAsStringSync('one two three');
+      await tester.pumpWidget(
+        _app(
+          NoteView(
+            path: path,
+            showLineNumbers: false,
+            autofocusEditor: false,
+            unifiedMarkdown: true,
+          ),
+        ),
+      );
+      // The real read is an isolate: give it its turn.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(MarkdownSourceView), findsOneWidget);
+      final buffer = tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .widget
+          .buffer;
+      expect(buffer.text, 'one two three');
+      // The test's own edit: what is on screen is not what is on disk, and a
+      // reload that actually read would replace it.
+      final at = buffer.length;
+      buffer.insert(at, ' AND MORE');
+      await tester.pump();
+
+      await tester.pumpWidget(
+        _app(
+          NoteView(
+            path: path,
+            showLineNumbers: false,
+            autofocusEditor: false,
+            unifiedMarkdown: true,
+            reloadToken: 1,
+          ),
+        ),
+      );
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump();
+      expect(
+        buffer.text,
+        'one two three AND MORE',
+        reason: 'the file did not change, so nothing was read',
+      );
+    });
+
+    testWidgets('a bump after the file changed adopts it', (tester) async {
+      File(path).writeAsStringSync('one two three');
+      await tester.pumpWidget(
+        _app(
+          NoteView(
+            path: path,
+            showLineNumbers: false,
+            autofocusEditor: false,
+            unifiedMarkdown: true,
+          ),
+        ),
+      );
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // A different size and a new time: what a real external write looks
+      // like, and what the gate has to let through.
+      File(path).writeAsStringSync('changed on disk, and longer');
+      await tester.pumpWidget(
+        _app(
+          NoteView(
+            path: path,
+            showLineNumbers: false,
+            autofocusEditor: false,
+            unifiedMarkdown: true,
+            reloadToken: 1,
+          ),
+        ),
+      );
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)),
+      );
+      await tester.pump();
+      final buffer = tester
+          .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          .widget
+          .buffer;
+      expect(buffer.text, 'changed on disk, and longer');
+    });
+  });
+
   group('NoteView reloadToken', () {
     testWidgets('a token bump re-reads the file when clean', (tester) async {
       var disk = '- [ ] one';

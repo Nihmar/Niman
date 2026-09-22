@@ -40,6 +40,7 @@ import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -277,6 +278,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   ///
   /// The outline the note view publishes, from an answer it already holds.
   List<OutlineEntry>? get headings => _styler?.headings;
+
+  /// The note's blocks, as the scan behind the colours has them, or null
+  /// while there is no scan yet.
+  ///
+  /// What the shell asks when it needs to know whether the note holds
+  /// something the scan already found — a list to count, so far. O(blocks):
+  /// [SourceStyler.blocks] copies the list.
+  List<Block>? get blocks => _styler?.blocks;
 
   /// The paragraph of each line a frame has built, so a tap can ask the line it
   /// landed on where an offset is, and the caret can ask its own line for the

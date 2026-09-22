@@ -16,6 +16,9 @@ import 'package:meta/meta.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 
 /// The list a tally would count and the block it would write.
 @immutable
@@ -78,6 +81,29 @@ final class TallyTarget {
 /// what lets a re-run count the list rather than count the counts.
 bool _isSourceRow(StyledLine line) =>
     _itemStart(line).isItem && parseTallyLine(line.text) == null;
+
+/// Whether [blocks] hold a list item at all.
+///
+/// The question the tools sheet asks before it offers the count: the sheet
+/// lists every tool and greys the ones that cannot run, so answering it by
+/// reading the note meant joining it and tokenizing it whole
+/// ([tallyTargetsIn]) every time the sheet opened — 190 ms of join and a
+/// whole `HighlightDocument` on the 246 MB note, for a yes or a no. The
+/// blocks are the pane's own scan, and the scanner already knows a list item
+/// when it makes one ([BlockKind.listItem]).
+bool blockList(Iterable<Block> blocks) {
+  for (final block in blocks) {
+    if (block.kind == BlockKind.listItem) return true;
+  }
+  return false;
+}
+
+/// The blocks of [text], for [blockList].
+///
+/// The fallback for a note whose pane is not on screen and has no scan of
+/// its own: O(note), so only the legacy path takes it.
+List<Block> scannedBlocksOf(String text) =>
+    BlockScanner(SourceBuffer.fromText(text)).index.blocks;
 
 /// Every list in [text] that can be counted, in document order.
 ///

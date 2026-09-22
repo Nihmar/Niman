@@ -462,6 +462,17 @@ final class _NoteViewState extends State<NoteView>
   /// a note changed, where the statistics used to compare its whole text.
   int _unifiedStatsRevision = -1;
 
+  /// What the note's file looked like when it was last read or written.
+  ///
+  /// A reload is asked for by a watcher, and a watcher is not a promise: a
+  /// touch, a rescan, or a change to a file that was already saved all arrive
+  /// as "the note changed". Knowing the file's size and time is O(1), and it
+  /// is what tells a real change from an event — the read, the normalize and
+  /// the comparison against the pane's text are what cost on a 246 MB note
+  /// (208 ms to join the pane's text, 734 ms to normalize a fresh read, 44 ms
+  /// to compare; measured 2026-09-22).
+  DiskStamp? _diskStat;
+
   /// Why the note's frontmatter block does not parse, or null when it
   /// does (or when there is no block). Refreshed on the stats debounce.
   String? _frontmatterError;
@@ -1177,6 +1188,7 @@ final class _NoteViewState extends State<NoteView>
         jumpToAnchor(context, anchor, _linkTargets);
       }
       widget.onLoaded?.call(path, text.length);
+      _recordDiskStat(path);
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -1221,6 +1233,14 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final path = widget.path;
+    // What the file looked like when it was last read or written, before the
+    // read: O(1) against 250 ms of joining and comparing, and O(1) against
+    // the read itself. The test seam reads nothing, so it has no stat to
+    // check and reads on.
+    if (widget.readNote == null && _unchangedOnDisk(path)) {
+      _log.debug('reload skipped (the file did not change): $path');
+      return;
+    }
     final String content;
     try {
       if (widget.readNote != null) {
@@ -2007,6 +2027,19 @@ final class _NoteViewState extends State<NoteView>
       ? 0
       : _wordCountLength;
 
+  /// Records what the note's file looks like now, for [_unchangedOnDisk].
+  ///
+  /// Best effort: a file that cannot be stat'ed (gone, or on a filesystem
+  /// that will not answer) records nothing, and the next reload reads and
+  /// compares the way it always did.
+  void _recordDiskStat(String path) => _diskStat = DiskStamp.of(path);
+
+  /// Whether the file at [path] is the one [_diskStat] recorded.
+  ///
+  /// A file that cannot be stat'ed, or one nothing recorded, is read: the
+  /// fallback is the comparison this stands in front of.
+  bool _unchangedOnDisk(String path) => _diskStat?.matches(path) ?? false;
+
   /// Opens the outline sheet and jumps to whatever was picked.
   Future<void> _openOutline() async {
     final line = await showOutlineSheet(context, entries: _outline);
@@ -2220,6 +2253,7 @@ final class _NoteViewState extends State<NoteView>
       await _write(target, text, session);
       if (target == widget.path) {
         _lastSavedRevision = revision;
+        _recordDiskStat(target);
         _unsaved?.noteChanged();
       }
       _log.info(
@@ -2260,6 +2294,7 @@ final class _NoteViewState extends State<NoteView>
       );
       if (target == widget.path) {
         _lastSavedRevision = revision;
+        _recordDiskStat(target);
         _unsaved?.noteChanged();
       }
       _log.info(
@@ -2757,11 +2792,28 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// Whether the note has a list the count could run on.
+  ///
+  /// Asks the pane's own scan rather than reading the note: the tool sheet
+  /// lists every tool and greys the ones that cannot run, so this used to
+  /// join a 246 MB note and tokenize it every time the sheet opened
+  /// (`tallyTargetsIn` builds a whole `HighlightDocument`). The scan is what
+  /// the colours are drawn from, and it already knows a list item when it
+  /// makes one (see `blockList`).
   bool get _hasListToCount {
-    if (!widget.showWysiwyg) return tallyTargetsIn(_editText).isNotEmpty;
-    final state = _wysiwygKey.currentState;
-    if (state == null) return false;
-    return quillTallyTargets(state.controller.document).isNotEmpty;
+    if (widget.showWysiwyg) {
+      final state = _wysiwygKey.currentState;
+      if (state == null) return false;
+      return quillTallyTargets(state.controller.document).isNotEmpty;
+    }
+    // The pane on screen has the note scanned; a hidden one does not, and
+    // then the source pane's own copy is asked for its blocks rather than
+    // the text being read again.
+    final source = _sourceViewKey.currentState;
+    final scanned = source?.blocks ?? _readViewKey.currentState?.blocks;
+    final buffer = _usesUnifiedSource ? _unifiedSurfaceBuffer : null;
+    if (scanned != null) return blockList(scanned);
+    if (buffer != null) return blockList(BlockScanner(buffer).index.blocks);
+    return blockList(scannedBlocksOf(_editText));
   }
 
   /// Counts a list into a checklist, on whichever surface is showing.
