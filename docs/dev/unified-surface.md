@@ -9987,6 +9987,25 @@ Practically:
   `setEditingState` only when the platform's copy is genuinely stale — the
   composing range and the selection being the two things that legitimately need
   it.
+
+  **Corrected 2026-09-22, and the correction is the design now.** The premise
+  above does not hold: a delta is not "one small map" on the wire. Android's
+  `TextEditingDelta.toJSON` (`shell/platform/android/.../TextEditingDelta.java`)
+  puts `oldText` — the **whole note** — in every delta, so the channel carries
+  the note per keystroke whether the surface echoes or not. What suppressing
+  the echo bought was nothing on the wire and every bug the first device rounds
+  found: a tap the platform never heard of was a keystroke at the old caret and
+  a backspace that deleted nothing, a local deletion came back with the
+  platform's next delta, and every echo without the composing range ended a
+  composition. `SourceInput` therefore follows `EditableText` exactly: deltas
+  are applied to the note by their range; **every local change** (a tap, a key
+  the surface handles, an undo, a note replaced underneath) is sent **at once**;
+  what the platform has is tracked as `(revision, selection, composing)`, so the
+  decision is three comparisons and no copy of the text; and an update from the
+  platform is echoed back only when the note stored something else (a `\n`
+  written as a CRLF note's `\r\n`). The race the probe measured at 921 KB came
+  from the probe echoing after *every platform update*, which neither design
+  does.
 - **Composition** (`TextRange.composing`) is preserved and mapped like any other
   range. Note the consequence of the point above: a composing-only change still
   requires a full `setEditingState`, so it should be coalesced to at most one per
