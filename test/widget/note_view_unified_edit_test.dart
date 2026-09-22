@@ -7,6 +7,7 @@
 // ends: in the text handed to `writeNote`.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -242,5 +243,37 @@ void main() {
     );
     await _settleSave(tester);
     expect(writes.last, 'prima e dopo');
+  });
+
+  testWidgets('the toolbar lights the format the caret is in, in live mode', (
+    tester,
+  ) async {
+    // #246: the pressed state is published by the surface, read off the caret's
+    // own line, so the toolbar says what is on where the writer is — the same
+    // answer the legacy WYSIWYG gave, from the engine that replaces it.
+    final writes = <String>[];
+    await _pump(
+      tester,
+      _view(
+        readNote: (_) async => 'a **bold** b\n',
+        writes: writes,
+        showWysiwyg: true,
+      ),
+    );
+    EditorToolbarButton button() => tester
+        .widget<EditorToolbar>(find.byType(EditorToolbar))
+        .buttons
+        .firstWhere((item) => item.key == const Key('toolbar-bold'));
+    expect(
+      button().active,
+      isFalse,
+      reason: 'the caret is at the start, in the plain word',
+    );
+    _surface(tester).placeCaret(5);
+    await tester.pump();
+    expect(button().active, isTrue, reason: 'the caret is inside `**bold**`');
+    _surface(tester).placeCaret(0);
+    await tester.pump();
+    expect(button().active, isFalse, reason: 'and one word back, it is off');
   });
 }

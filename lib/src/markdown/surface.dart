@@ -23,6 +23,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
@@ -77,6 +78,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.spellCheck,
     this.findMatches,
     this.onOpenLink,
+    this.activeItems,
     this.caretWidth,
     this.typewriter = false,
     this.autofocus = false,
@@ -145,6 +147,11 @@ final class MarkdownSurface extends StatelessWidget {
   /// Called when a link is Ctrl+clicked.
   final SourceLinkTap? onOpenLink;
 
+  /// Which formats are on at the caret, written by the surface for the
+  /// toolbar's pressed state (#246). The same notifier the legacy WYSIWYG
+  /// published through, so the shell reads one thing in either mode.
+  final ValueNotifier<Set<ToolbarItem>>? activeItems;
+
   /// The caret's width; null keeps the surface's own.
   final double? caretWidth;
 
@@ -186,6 +193,7 @@ final class MarkdownSurface extends StatelessWidget {
     spellCheck: spellCheck,
     findMatches: findMatches,
     onOpenLink: onOpenLink,
+    activeItems: activeItems,
     caretWidth: caretWidth,
     typewriter: typewriter,
     autofocus: autofocus,

@@ -11588,13 +11588,48 @@ What the design asks for next, in the order it names them:
   pressed state is empty in the unified pane, in `live` as in `source`, because
   the surface publishes nothing for it. That is the next piece, and the
   criterion it belongs to is the parity one above.
+- **`activeFormats` is in, in both unified modes** (2026-09-22). The toolbar's
+  pressed state was empty in the unified pane — and had been since phase 3 —
+  because nothing published it. What publishes it now is the surface itself,
+  through the same notifier the legacy WYSIWYG wrote to, so the shell reads one
+  thing whichever engine draws the pane.
+
+  The answer is a property of the *caret*, and it is read from what the reveal
+  already reads: the caret line's tokens, the ones the colours are drawn from
+  (`lib/src/markdown/active_formats.dart`). Two granularities, as the reveal
+  has two, and **one deliberate difference**: a structural mark — a heading's
+  hashes, a list's marker, a quote's `>`, a fence — is the shape of the line and
+  lights wherever the caret is on it; an inline run lights when the caret's run
+  of non-whitespace **overlaps** it, not when it contains it. Containment is
+  the reveal's rule, and it is the wrong one here: a bold phrase is one run of
+  several words, and the button has to say "you are writing in bold" from
+  anywhere inside it, where the reveal only shows the markers of the word being
+  edited. `image`, `indent`, `outdent` and `tools` are actions rather than
+  states and stay dark, as the legacy WYSIWYG's own answer keeps them; `underline`
+  and `superscript` have no token of their own — they are the `<u>`/`<sup>`
+  extensions, unmarked by the tokenizer — so they stay dark rather than lie.
+
+  Held by `test/unit/active_formats_test.dart` (the table: every span kind, the
+  word next door dark, the phrase lit from its middle, a quote holding a
+  heading lit twice) and, in the shell,
+  `note_view_unified_edit_test.dart`'s *the toolbar lights the format the caret
+  is in, in live mode*.
+
+  One implementation note worth keeping: the publish **defers out of a build**
+  (`SchedulerPhase.persistentCallbacks`). The toolbar is not a descendant of the
+  surface, so notifying it while the framework builds is a `markNeedsBuild` it
+  refuses — and it did, on the first run, in two tests that had nothing to do
+  with toolbars.
 - What is still owed by this phase, in the order it should be taken:
   1. **`live` as the default WYSIWYG**, the way `source` is not yet the default
      editor: the flag is on, but a library that has not switched it still opens
      Quill.
-  2. **`activeFormats`** for the unified surface, so the toolbar and the
-     context menu light up in both modes.
-  3. **The row-wise reveal** that follows a wrap.
+  2. **The row-wise reveal** that follows a wrap.
+  3. **The parity run the criterion asks for literally**: *the same* widget
+     tests over both unified modes, rather than the pair of tests the toolbar
+     has today. What exists now is a live-mode test for the toolbar and the
+     span-typing table; the find bar, the context menu, the tools sheet and the
+     spelling panel are covered in `source` only.
   4. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
      and per word, no visible thrash — which is the only criterion on this list
      that needs a phone rather than a host.

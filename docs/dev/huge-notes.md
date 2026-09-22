@@ -328,8 +328,16 @@ with the mode: its text, caret, commands, save, statistics and memento are the
 same question in both, which is why the shell's predicate is "who is drawing
 this note" rather than "is this the source pane". The wiring fixed three
 hand-off bugs it exposed, all of them data loss on a mode or engine switch;
-`unified-surface.md` names them. What it does not give yet is `activeFormats`:
-the toolbar's pressed state is still empty in the unified pane.
+`unified-surface.md` names them.
+
+**The toolbar's pressed state is published by the surface too**
+(`active_formats.dart`): read off the caret line's tokens — the same ones the
+colours come from — with the reveal's two granularities and one deliberate
+difference (a structural mark follows the line; an inline one lights on
+*overlap*, so a bold phrase reads as bold from its middle). The publish defers
+out of a build, because the toolbar is not a descendant of the surface and
+notifying it mid-build is a `markNeedsBuild` the framework refuses — it did,
+in two tests that had nothing to do with toolbars.
 
 ## The testing builds
 
