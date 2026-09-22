@@ -3,6 +3,7 @@
 // one widget: the same note, the same offsets, one flag between them.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -46,12 +47,13 @@ void main() {
     WidgetTester tester,
     MarkdownSurfaceMode mode, {
     int caret = 3,
+    String text = '# Titolo\n\ntesto\n',
   }) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: MarkdownSurface(
-            buffer: SourceBuffer.fromText('# Titolo\n\ntesto\n'),
+            buffer: SourceBuffer.fromText(text),
             mode: mode,
             theme: _theme,
             selection: SelectionModel.at(caret),
@@ -103,6 +105,64 @@ void main() {
       hidden.any((span) => span.text == '#' && span.style?.fontSize == 0.01),
       isTrue,
       reason: 'live draws it invisible and taking no room',
+    );
+  });
+
+  testWidgets('live hides the inline markers, and keeps what they mark', (
+    tester,
+  ) async {
+    Future<List<TextSpan>> spansOf(MarkdownSurfaceMode mode) async {
+      await pumpMode(tester, mode, text: 'a **bold** and [a link](u)\n');
+      final spans = <TextSpan>[];
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (span is TextSpan && span.text != null) spans.add(span);
+          return true;
+        });
+      }
+      return spans;
+    }
+
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+    final live = await spansOf(MarkdownSurfaceMode.live);
+    for (final marker in ['**', '[', '](u)']) {
+      final drawn = live.where((span) => span.text == marker);
+      expect(drawn, isNotEmpty, reason: '"$marker" is drawn');
+      expect(
+        drawn.every(hidden),
+        isTrue,
+        reason: '"$marker" is syntax, and live hides it',
+      );
+    }
+    for (final text in ['bold', 'a link']) {
+      expect(
+        live.any((span) => span.text == text && !hidden(span)),
+        isTrue,
+        reason: '"$text" is what the syntax marks, and stays',
+      );
+    }
+    final source = await spansOf(MarkdownSurfaceMode.source);
+    expect(source.where((span) => span.text == '**').any(hidden), isFalse);
+  });
+
+  testWidgets('a long note is coloured once its reading lands', (tester) async {
+    MarkdownSourceViewState.backgroundLines = 2;
+    addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+    final state = await pumpMode(
+      tester,
+      MarkdownSurfaceMode.source,
+      text: 'a **bold** line\n\nmore\n',
+    );
+    expect(state.tokensOf(0), isEmpty, reason: 'drawn plain meanwhile');
+    for (var round = 0; round < 50 && state.tokensOf(0).isEmpty; round++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(
+      state.tokensOf(0).map((token) => token.kind),
+      contains(TokenKind.bold),
     );
   });
 
