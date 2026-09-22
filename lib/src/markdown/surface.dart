@@ -21,6 +21,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -28,6 +29,7 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
 /// What the surface is showing.
@@ -69,6 +71,8 @@ final class MarkdownSurface extends StatelessWidget {
     this.indentWidth = 2,
     this.syntax,
     this.dark = false,
+    this.formatMenu,
+    this.spellCheck,
     super.key,
   });
 
@@ -121,6 +125,12 @@ final class MarkdownSurface extends StatelessWidget {
   /// Whether bold is drawn a step lighter.
   final bool dark;
 
+  /// The toolbar's formatting actions, for the context menu.
+  final FormatMenuBuilder? formatMenu;
+
+  /// The note's spelling: its underline and its menu entries.
+  final EditorSpellCheck? spellCheck;
+
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
@@ -149,5 +159,7 @@ final class MarkdownSurface extends StatelessWidget {
     syntax: syntax,
     dark: dark,
     hideMarkers: hidesMarkers,
+    formatMenu: formatMenu,
+    spellCheck: spellCheck,
   );
 }

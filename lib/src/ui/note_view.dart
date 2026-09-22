@@ -1423,6 +1423,8 @@ final class _NoteViewState extends State<NoteView>
         showLineNumbers: widget.showLineNumbers,
         indentWidth: widget.indentWidth,
         column: widget.noteColumn,
+        formatMenu: _formatMenu,
+        spellCheck: widget.spellCheck,
         onChanged: () =>
             _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine),
         onSelection: (selection) {
