@@ -160,6 +160,32 @@ final class SourceBuffer {
     return buffer.toString();
   }
 
+  /// Lines `[first, last)` with their terminators, for a writer that takes
+  /// the note a slice at a time: what fits once the text reaches
+  /// [charLimit] is left for the next call, unless it is the first line,
+  /// which is taken whole so a slice is never empty.
+  ///
+  /// O(the slice). [text] is the one-call version of this, and it is what a
+  /// save must not do to a note of hundreds of megabytes — it builds the
+  /// whole note as one string for the writer to copy and encode in one go.
+  /// Slicing it keeps each turn of the caller's loop to a few milliseconds,
+  /// which is what lets the frames through during a save (see
+  /// `docs/dev/huge-notes.md`).
+  String sliceText(int first, int last, int charLimit) {
+    assert(first >= 0 && first < _lines.length, 'line $first out of range');
+    final end = last > _lines.length ? _lines.length : last;
+    final buffer = StringBuffer();
+    var at = first;
+    while (at < end) {
+      buffer
+        ..write(_lines[at])
+        ..write(_terminators[at]);
+      at++;
+      if (buffer.length >= charLimit) break;
+    }
+    return buffer.toString();
+  }
+
   /// Line [line]'s text, without its terminator.
   String lineAt(int line) {
     assert(line >= 0 && line < _lines.length, 'line $line out of range');
