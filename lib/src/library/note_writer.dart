@@ -44,6 +44,16 @@ final class NoteWriter {
   /// Re-index jobs not finished yet.
   final Set<Future<void>> _indexing = {};
 
+  /// The notes whose reindex is running, and those saved again meanwhile.
+  ///
+  /// A reindex reads the note from disk when it runs, so a save that lands
+  /// while one is running needs one more, after it, and never one per save:
+  /// saving a 100 MB note four times queued four reindexes of 6 to 20 s each,
+  /// every one of them for text the next had already replaced (0.0.9 stress
+  /// test).
+  final Set<String> _reindexing = <String>{};
+  final Set<String> _reindexAgain = <String>{};
+
   /// Writes [content] to the note at library-relative [path], creating
   /// the file when it is not there.
   ///
@@ -230,6 +240,11 @@ final class NoteWriter {
   /// "nothing happened". A new file has no row to rescan, so it goes
   /// through `applyEvents`, which creates it.
   void _reindex(String path, String abs, {required bool created}) {
+    if (_reindexing.contains(path)) {
+      _reindexAgain.add(path);
+      return;
+    }
+    _reindexing.add(path);
     final clock = Stopwatch()..start();
     late final Future<void> job;
     job =
@@ -243,7 +258,15 @@ final class NoteWriter {
               onError: (Object e) =>
                   _log.warning('reindex failed: "$path": $e'),
             )
-            .whenComplete(() => _indexing.remove(job));
+            .whenComplete(() {
+              _indexing.remove(job);
+              _reindexing.remove(path);
+              // Saved again while this one ran: once more, for what the
+              // disk holds now.
+              if (_reindexAgain.remove(path)) {
+                _reindex(path, abs, created: false);
+              }
+            });
     _indexing.add(job);
   }
 }

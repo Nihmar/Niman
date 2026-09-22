@@ -61,6 +61,17 @@ void main() {
     expect(row!.size, '# Title\n\nbody words'.length);
   });
 
+  test('saves while a reindex runs leave the index on the last one', () async {
+    // The reindexes are folded — one running, one more after it — so what
+    // matters is that the one after reads what the last save wrote.
+    final saves = [
+      for (var i = 0; i < 20; i++) writer.save('Busy.md', 'x' * (i + 1)),
+    ];
+    await Future.wait(saves);
+    await writer.indexed;
+    expect((await indexer.dao.find('Busy.md'))!.size, 20);
+  });
+
   test('an equal-size edit in the same second still re-indexes', () async {
     await writer.save('Same.md', 'aaaa');
     await writer.indexed;

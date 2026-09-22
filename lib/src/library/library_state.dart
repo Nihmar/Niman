@@ -1304,10 +1304,20 @@ Future<AppDatabase> defaultAppDatabase() async {
   );
 }
 
-/// Opens the index of the library at [libraryPath].
+/// Opens the index of the library at [libraryPath], on drift's background
+/// isolate.
+///
+/// Every write of the index — a saved note's text into the full-text table,
+/// its tags, stems and links — ran on the UI isolate: sqlite is synchronous,
+/// and a 100 MB note held the frame for seconds while its body went in, the
+/// tree's menu waiting behind it (0.0.9 stress test). The search connection
+/// was moved off first (T-M3-09); the index follows it.
 Future<IndexDatabase> defaultIndexDatabase(String libraryPath) async {
   return IndexDatabase(
-    NativeDatabase(await libraryIndexFile(libraryPath), setup: _databaseSetup),
+    NativeDatabase.createInBackground(
+      await libraryIndexFile(libraryPath),
+      setup: _databaseSetup,
+    ),
   );
 }
 
