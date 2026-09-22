@@ -914,8 +914,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final note = _shortcuts(
       Focus(
         focusNode: _focus,
-        onFocusChange: (hasFocus) =>
-            hasFocus ? _input.attach() : _input.detach(),
+        onFocusChange: (hasFocus) => hasFocus
+            ? _input.attach(viewId: View.of(context).viewId)
+            : _input.detach(),
         child: LayoutBuilder(
           builder: (context, constraints) {
             _paneWidth = constraints.maxWidth;
