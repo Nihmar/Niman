@@ -109,6 +109,17 @@ written next to it.
    generic element-by-element path), and the scanner moves `_entering` and
    `_blocks`. The fix: chunked storage of the lines, as `PrefixSums` already
    chunks the spans, so an insertion moves one chunk.
+
+   **Measured on the 246 MB note (2026-09-22), because it changes what the
+   fix has to be.** The buffer is not the cost: a character edit moves its
+   two lists in under a millisecond, and the state list's own tail move
+   measured a millisecond at 2.7 M lines. The scanner is. An Enter in the
+   middle converges at once — 33 ms for 14 lines re-scanned — but a
+   *character* edit in the same note re-scans up to two million lines
+   (85–878 ms, depending how far the paragraph continuity and the paragraph's
+   boundary agreement carry). So chunked storage alone would not fix this:
+   the scanner's convergence on an edit that does not change the line count
+   is what has to improve first.
 4. **A reload from disk compares the whole text** (`text == _currentText` in
    `_reloadIfChanged`): compare the length and a hash first, or the disk's
    bytes against the last saved ones.
