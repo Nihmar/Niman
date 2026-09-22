@@ -195,10 +195,49 @@ final class BlockScanner {
     // starts at a block's end would produce a second block where the first
     // belongs. Widening by one block costs one block's lines and removes the
     // whole class of boundary bugs.
+    // The rebuild begins at the first line of the block the edit is in, since
+    // starting at the edit would make the rest of that block a block of its
+    // own. Unless the block holds one state throughout: then the lines
+    // between its first line and the edit are the same lines still entered in
+    // that state, their states are recomputed rather than walked, and the
+    // rebuild starts at the edit — with the block's prefix kept and joined to
+    // what the rebuild makes, so the list goes on tiling the note
+    // (docs/dev/huge-notes.md item 3: a keystroke inside a 137 k-line `$$…$$`
+    // block re-scanned all 137 k).
     var start = from;
-    if (headEnd > 0 && _at(headEnd - 1).endLine == from) {
-      headEnd--;
-      start = _at(headEnd).startLine;
+    Block? prefix;
+    var narrowed = false;
+    if (headEnd > 0) {
+      final candidate = _at(headEnd - 1);
+      if (candidate.endLine == from) {
+        headEnd--;
+        start = candidate.startLine;
+        final inside =
+            edit != null &&
+            edit.lineDelta == 0 &&
+            start < from &&
+            _holdsOneState(candidate.kind);
+        if (inside) {
+          // The lines between the block's first line and the edit, given the
+          // state each of them is entered in. The result has to be the state
+          // the note recorded for the edit's own line — that is what says the
+          // lines before the edit really are the same lines, and it is the
+          // only check that can catch a block whose shape the edit changed
+          // without the block being rebuilt.
+          var probing = _exitOf(start);
+          for (var at = start + 1; at < from; at++) {
+            _setEntering(at, probing);
+            probing = _exitOf(at);
+          }
+          if (from < _entering.length && _entering[from] == probing) {
+            prefix = candidate;
+            start = from;
+            narrowed = true;
+          } else if (from > 0) {
+            _setEntering(from, probing);
+          }
+        }
+      }
     }
 
     var line = start;
@@ -221,7 +260,38 @@ final class BlockScanner {
     }
     _scannedLineTotal += line - start;
 
-    final rebuilt = _buildBlocks(start, line);
+    var rebuilt = _buildBlocks(start, line);
+    // The block that was already there before the edit, joined to what the
+    // rebuild made of the rest when the two make one block — a paragraph's
+    // second line, a quote's lazy continuation. The splice takes the old
+    // block's place either way, so the list keeps tiling the note.
+    if (narrowed && prefix != null) {
+      if (rebuilt.isNotEmpty) {
+        final first = rebuilt.first;
+        if (first.kind == prefix.kind &&
+            _mergesInto(prefix.kind, from - 1, from)) {
+          rebuilt = <Block>[
+            Block(
+              kind: prefix.kind,
+              startLine: prefix.startLine,
+              endLine: first.endLine,
+              quoteDepth: prefix.quoteDepth,
+              listDepth: prefix.listDepth,
+              listOrdinal: prefix.listOrdinal,
+              headingLevel: prefix.headingLevel,
+              fenceInfo: prefix.fenceInfo,
+              entering: prefix.entering,
+            ),
+            ...rebuilt.skip(1),
+          ];
+        } else {
+          rebuilt = <Block>[_prefixOf(prefix, from), ...rebuilt];
+        }
+      } else {
+        rebuilt = <Block>[_prefixOf(prefix, from)];
+      }
+    }
+
     // Everything from the convergence point on is what it was, so the
     // survivors are spliced back in place instead of being copied into a new
     // list: one range replacement, and the blocks inside the edit — the ones
@@ -245,6 +315,31 @@ final class BlockScanner {
     }
     _lineCount = buffer.lineCount;
   }
+
+  /// Whether every line of a [kind] block is entered in the state the block
+  /// was: the shapes whose merge rule is "the next line is the same kind".
+  ///
+  /// A quote counts its depth per line and a list item its own marker, so a
+  /// line inside one of those is not the block's state and a rebuild cannot
+  /// give it one.
+  static bool _holdsOneState(BlockKind kind) => switch (kind) {
+    BlockKind.quote || BlockKind.listItem => false,
+    _ => true,
+  };
+
+  /// [block] as it was before [end]: the run it covered up to a line inside
+  /// it, which is what an edit leaves of the block it landed in.
+  static Block _prefixOf(Block block, int end) => Block(
+    kind: block.kind,
+    startLine: block.startLine,
+    endLine: end,
+    quoteDepth: block.quoteDepth,
+    listDepth: block.listDepth,
+    listOrdinal: block.listOrdinal,
+    headingLevel: block.headingLevel,
+    fenceInfo: block.fenceInfo,
+    entering: block.entering,
+  );
 
   /// The first block index at or after [fromIndex] whose `test` holds, or the
   /// list's length when none does.
@@ -372,6 +467,7 @@ final class BlockScanner {
               ? _headingLevel(_text(line))
               : 0,
           fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
+          entering: _entering[line],
         ),
       );
       line = end;
