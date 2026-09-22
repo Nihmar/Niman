@@ -146,8 +146,14 @@ written next to it.
    (`_changedRange`), so an unchanged head and tail are only compared and the
    replacement is the part that actually differs. A handback of what the note
    already says is not an edit at all: no revision bump, no save.
-7. **The read view's definitions are rescanned per revision** when it shows
-   a note that is being edited; in the background, but O(note) each time.
+7. ~~**The read view's definitions are rescanned per revision.**~~ Done: the
+   scope is reused when the lines that can hold a definition are what they
+   were, which is what decides whether a scan could find anything different.
+   The check folds those lines into one number
+   (`MarkdownReadViewState._definitionsKey`), so a definition moved by a
+   paragraph added above it is still the same definition — the key is over
+   content, not line numbers. 21 ms on the 246 MB note against 618 ms for
+   the scan it saves (measured 2026-09-22).
 
 ## The statistics, measured on the 247 MB note
 
