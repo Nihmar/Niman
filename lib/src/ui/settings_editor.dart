@@ -284,11 +284,12 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) setState(() => _enabledEditors = next);
   }
 
-  /// Asks which hunspell dictionaries the editor should use (T-PP-09,
-  /// revised): every one found on the machine, any number of them at once.
+  /// Asks which dictionaries the editor should use (T-PP-09, revised): every
+  /// one found on the machine — Windows's languages there — any number of
+  /// them at once.
   /// Choosing none means the locale default.
   Future<void> _chooseSpellDictionaries(EditorSpellCheck spell) async {
-    final names = discoverDictionaries().keys.toList()..sort();
+    final names = availableSpellDictionaries();
     final selected = _spellDictionaries.toSet();
     final choice = await showDialog<List<String>>(
       context: context,
