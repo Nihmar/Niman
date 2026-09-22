@@ -11218,6 +11218,69 @@ source pane at `MarkdownSurface(mode: MarkdownSurfaceMode.source)` behind the fl
 flag that skipped `_noteChanged` would save nothing; a fork would be two save paths to
 keep in step.
 
+### The second device round, and one model instead of one fix at a time (2026-09-22)
+
+Logs from Linux, Windows and Android after the wiring showed text typed in the
+wrong place, deletions that did not happen or came undone, Enter making two
+lines, a slow caret, numbers beside the wrong lines, and nothing typed at all on
+Windows. Five commits had each fixed a symptom; the analysis that followed found
+a handful of causes behind all of them, and the round fixed the causes.
+
+**What each embedder does with a key, read from its source.** A key reaches the
+framework first on all three; what an embedder does with one the framework left
+alone:
+
+| Key | Linux (`fl_text_input_handler.cc`) | Windows (`text_input_plugin.cc`) | Android |
+|---|---|---|---|
+| Enter | inserts `\n` as a delta, **then** calls `performAction(newline)` | the same | the IME commits `\n` as text |
+| Backspace / Delete | nothing ("already handled inside the framework") | nothing | the IME deletes at *its* selection |
+| Arrows | nothing | nothing | — |
+| Home / End | moves its own caret to the text's ends | nothing | — |
+| `setClient` without `viewId` | accepted | **refused**, and every `setEditingState` after it fails | accepted |
+
+So the surface binds Backspace, Delete, the arrows, Home/End, PageUp/Down and
+Tab itself; `performAction(newline)` inserts nothing; a line break *arriving* is
+where list continuation hangs (it is the one place all three meet); and the
+connection carries the view.
+
+**`FakeEmbedder`** (`test/fakes/fake_embedder.dart`) is the test that would have
+caught every one of these: a platform text input with its **own copy** of the
+text, selection and composing range, sending deltas computed from that copy
+(`oldText` in full), routing keys the way the table says, refusing a client
+without a view. Every test in `test/widget/source_embedders_test.dart` runs on
+all three profiles and holds one invariant: the note and the platform's copy
+say the same thing after every step.
+
+**What changed, cause by cause:**
+
+- *The platform was not told what this side did* — §8.7.1's correction:
+  `SourceInput` now works like `EditableText`, and `InputBuffer` is gone.
+- *Keys nobody handled* — the table above.
+- *Line endings and undo* — the history records what the buffer *stored*, undo
+  and redo put text back verbatim, an offset inside a `\r\n` is moved out, and
+  the tokenizer is fed the buffer's own lines (a CRLF note was drawn plain).
+- *The layout forgot itself* — `BlockHeightMap.splice` keeps every measured
+  height through an edit that adds or removes lines (a line joined moved the
+  screen by 55 px where the row is 21); a tap and a vertical motion are asked
+  of the lines that were drawn; the pane is drawn at the note's text size.
+- *O(n) on a keystroke* — the note is no longer joined per edit, per move or
+  per double click, the hidden read pane no longer re-parses while the writer
+  pauses, and the caret motions look at a window, not at the note up to the
+  caret. `test/perf/source_keystroke_path_test.dart` times a delta to its frame
+  at 400 and at 20 000 lines: ×2.7 for fifty times the note, and what is left
+  is the platform message itself.
+- *The shell edited a controller nobody saw* — `MarkdownSurfaceController`
+  (§8.7.6) is the door for the toolbar, the format keys, an image, a spelling
+  fix, a list count, a kind GUI's edit, a reload, the WYSIWYG hand-over and the
+  memento; the surface takes the shell's own focus node.
+- *No selection by touch* — a long press, Material's handles and the adaptive
+  toolbar (`edit/touch_selection.dart`).
+
+**Not built yet, in the order they come next:** the desktop context menu,
+find/replace, the spelling underline and its menu (the scan runs, with no
+skip ranges from the tokenizer yet), Ctrl+click on a link, typewriter mode and
+the Zen caret, folding, semantics. The flag stays experimental until they are.
+
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
 **Deliverable:** `MarkdownSurface(mode: live)` — approach B's style-based
@@ -11304,7 +11367,9 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
    A second run (316 lines) settled the rest, and it is the measurement the
    design's central claim needed. At a **921 600-character buffer**:
    * **the delta path carries one character**: `DELTA insert @921600 +"j" sel
-     921601..921601`;
+     921601..921601` — *of change*; the message itself also carries the whole
+     `oldText`, which the probe compared and did not count (corrected
+     2026-09-22, see §8.7.1);
    * **the whole-value fallback carries the file**: with the model off, each
      keystroke arrives as `WHOLE 921601 chars`, `WHOLE 921602 chars`, … — 921 KB
      of text across the platform channel per key. "Untenable at 934 KB" was an
