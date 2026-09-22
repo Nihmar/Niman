@@ -1062,13 +1062,13 @@ The npm `commonmark-spec` package exposes the same objects but names the number 
 
 ### 4.5.5 The `spec.txt` example format (and its `→` convention)
 
-````
+~~~~
 ```````````````````````````````` example <space-separated extension tags>
 Markdown source, with → standing for a literal tab
 .
 Expected HTML output
 ````````````````````````````````
-````
+~~~~
 
 Rules from [`spec_tests.py`](https://raw.githubusercontent.com/github/cmark-gfm/master/test/spec_tests.py):
 
