@@ -1027,14 +1027,18 @@ final class _NoteViewState extends State<NoteView>
       // A template `{{cursor}}` landing (#53): the offset was measured in
       // this same text, so placing it is a line walk, not a guess. The
       // selection-only change schedules no save (see _onValueChanged).
-      if (widget.initialCaretOffset case final caret?
-          when !widget.unifiedMarkdown) {
-        final at = caret.clamp(0, text.length);
-        final pos = linePosition(text, at);
-        _controller.selection = CodeLineSelection.collapsed(
-          index: pos.line,
-          offset: pos.offset,
-        );
+      // The unified surface was given the caret with its buffer, above; a
+      // memento must not take it back (a note created at a path that had
+      // one lost its `{{cursor}}`).
+      if (widget.initialCaretOffset case final caret?) {
+        if (!widget.unifiedMarkdown) {
+          final at = caret.clamp(0, text.length);
+          final pos = linePosition(text, at);
+          _controller.selection = CodeLineSelection.collapsed(
+            index: pos.line,
+            offset: pos.offset,
+          );
+        }
       } else if (widget.initialAnchor == null) {
         _restoreMemento();
       }
