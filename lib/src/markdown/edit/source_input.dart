@@ -167,7 +167,9 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   /// A delta, short enough for a log line.
   static String _short(TextEditingDelta delta) => switch (delta) {
     TextEditingDeltaInsertion() =>
-      'ins@${delta.insertionOffset}+${delta.textInserted.length}',
+      'ins@${delta.insertionOffset}'
+          '+${delta.textInserted.length} '
+          '"${delta.textInserted.replaceAll('\n', '⏎')}"',
     TextEditingDeltaDeletion() =>
       'del ${delta.deletedRange.start}..${delta.deletedRange.end}',
     TextEditingDeltaReplacement() =>
@@ -317,7 +319,19 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
             _caretOfDelta(delta),
           );
         case TextEditingDeltaNonTextUpdate():
-          _reportSelection(_caretOfDelta(delta));
+          // A platform caret update while *we* hold an un-echoed one is the
+          // platform's stale copy talking — the device log shows exactly this:
+          // a tap
+          // put the caret at 46, the first keystroke arrived as `sel 0,
+          // ins@0+1`,
+          // and the text went to the top of the note. Ours is the newer truth
+          // until
+          // the echo lands.
+          if (_movedSelection) {
+            _log.debug('ignored a stale caret ${delta.selection.start}');
+          } else {
+            _reportSelection(_caretOfDelta(delta));
+          }
       }
     }
   }

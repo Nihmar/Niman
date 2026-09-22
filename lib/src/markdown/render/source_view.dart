@@ -192,6 +192,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// the blink nor the measurement may rebuild the note.
   final ValueNotifier<Rect?> _caretRect = ValueNotifier<Rect?>(null);
 
+  /// The line the caret is on, so that moving the caret repaints two lines
+  /// rather than the viewport: the delegate no longer depends on the caret.
+  final ValueNotifier<int> _caretLine = ValueNotifier<int>(0);
+
   /// Whether the caret is drawn (it blinks).
   final ValueNotifier<bool> _caretOn = ValueNotifier<bool>(true);
   Timer? _blink;
@@ -315,8 +319,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (box == null) return null;
     final local =
         box.globalToLocal(global) -
-        widget.padding.topLeft -
-        Offset(_sideSpace, 0);
+        Offset(_leftInset + _gutter, widget.padding.top);
     final line = _heights.indexAt(local.dy + _scroll.offset);
     if (line == null) return null;
     final paragraph = _paragraphAt(line);
@@ -379,7 +382,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       buffer: widget.buffer,
       extend: extend,
     );
-    setState(() => _ownSelection = next);
+    _publishSelection(next);
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
@@ -427,7 +430,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           : widget.buffer.offsetOfLine(targetLine) + position.offset,
       extent: widget.buffer.offsetOfLine(targetLine) + position.offset,
     );
-    setState(() => _ownSelection = next);
+    _publishSelection(next);
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
@@ -571,21 +574,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _scheduleCaret();
   }
 
-  /// Inserts a line break at the caret.
-  ///
-  /// The *keyboard's* Enter, not the platform's action: an IME that commits a
-  /// newline sends it as text, and doing both is how a note grows two lines for
-  /// one press (`SourceInput.performAction` no longer inserts for that reason).
-  void _newline() {
-    final selection = _selection;
-    _replaceRange(
-      selection.start,
-      selection.end,
-      widget.buffer.eol,
-      SelectionModel.at(selection.start + widget.buffer.eol.length),
-    );
-  }
-
   /// Selects everything.
   void selectAll() {
     final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
@@ -633,10 +621,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     child: child,
   );
 
+  /// Publishes [next] as the caret, repainting only what changed.
+  ///
+  /// A caret that stays collapsed moves no text: the two lines involved — the
+  /// one
+  /// that lost it and the one that gained it — repaint through the notifier,
+  /// and
+  /// nothing else does. A move that creates or clears a *range* repaints the
+  /// note,
+  /// because a range is a background on the runs it covers.
+  void _publishSelection(SelectionModel next) {
+    final wasRange = !_selection.isCollapsed;
+    _ownSelection = next;
+    if (!next.isCollapsed || wasRange) {
+      setState(() {});
+    }
+    _caretLine.value = widget.buffer.lineOf(next.extent);
+  }
+
   /// Puts the caret at [offset], tells the platform, and keeps it on screen.
   void placeCaret(int offset) {
     final next = _selection.collapsedTo(offset).clampTo(widget.buffer.length);
-    setState(() => _ownSelection = next);
+    _publishSelection(next);
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
@@ -658,6 +664,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         (bottom - viewport).clamp(0.0, _scroll.position.maxScrollExtent),
       );
     }
+  }
+
+  /// Line [index] as the view draws it: the **buffer's** text, with the
+  /// tokenizer's runs when the two agree about that line.
+  ///
+  /// The buffer is the note; the tokenizer is a decoration of it. Drawing the
+  /// buffer's lines and numbering them by index means a tokenizer that has
+  /// fallen
+  /// behind can make a line *plain*, and cannot make the numbers count
+  /// something
+  /// the note does not have — which is what a device showed when the two
+  /// drifted.
+  StyledLine _lineAt(int index) {
+    final text = widget.buffer.lineAt(index);
+    if (index < _tokens.lineCount && _tokens.lineAt(index).text == text) {
+      return _tokens.lineAt(index);
+    }
+    return StyledLine(text, const <Token>[]);
   }
 
   /// The part of the selection that falls inside line [index], as offsets local
@@ -761,35 +785,69 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The space the note column puts on each side of the text.
   double _sideSpace = 0;
 
+  /// The gutter's width this frame: the numbers, and with a note column the
+  /// legacy `side + 16 - 5`, so the text starts exactly on the column's edge.
+  double _gutter = 0;
+
+  /// The field's inset on the left: the legacy editor's own number.
+  static const double _fieldInset = 5;
+
+  /// The field's inset on the right: the field inset, or the column's edge.
+  double get _rightInset =>
+      _sideSpace == 0 ? _fieldInset : _sideSpace + NoteColumn.textInset;
+
+  /// The field's inset on the left.
+  double get _leftInset => _fieldInset;
+
+  /// How wide the numbers are in the note's own face.
+  double get _numbersWidth {
+    if (!widget.showLineNumbers) return 0;
+    final digits = widget.buffer.lineCount.toString().length;
+    final size = widget.theme.body.fontSize ?? 14;
+    return digits * size * 0.6 + _gutterGap;
+  }
+
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
+    // Measured *now*, from the layout the last frame left, and again after the
+    // next frame: a caret that moved because of a tap or a key is on screen
+    // immediately, and the frame that may have re-laid its line corrects it.
+    // Waiting only for the post-frame callback makes the caret a frame late,
+    // which
+    // is how a cursor feels slow when it is doing nothing slow.
+    _measureCaret();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final line = _caretLineIndex;
-      final paragraph = _paragraphAt(line);
-      if (paragraph == null || line < 0) {
-        _caretRect.value = null;
-        return;
-      }
-      final local = _selection.extent - widget.buffer.offsetOfLine(line);
-      final length = paragraph.text.toPlainText().length;
-      final position = TextPosition(offset: local.clamp(0, length));
-      // The caret is the *surface's* answer, not a metric computed beside it:
-      // the painter reports the offset the way it paints it, over the run it is
-      // really over. The prototype's width matters only on the RTL side and its
-      // height not at all (the phase-1 spike), so the height comes from the
-      // line.
-      final rect = paragraph.getOffsetForCaret(
-        position,
-        const Rect.fromLTWH(0, 0, 1.5, 0),
-      );
-      _caretRect.value = Rect.fromLTWH(
-        rect.dx,
-        rect.dy,
-        1.5,
-        paragraph.getFullHeightForCaret(position),
-      );
+      if (mounted) _measureCaret();
     });
+  }
+
+  /// Where the caret is, from the caret line's own layout.
+  void _measureCaret() {
+    final line = _caretLineIndex;
+    final paragraph = _paragraphAt(line);
+    if (paragraph == null || line < 0) {
+      _caretRect.value = null;
+      return;
+    }
+    final local = _selection.extent - widget.buffer.offsetOfLine(line);
+    final length = paragraph.text.toPlainText().length;
+    final position = TextPosition(offset: local.clamp(0, length));
+    // The caret is the *surface's* answer, not a metric computed beside it: the
+    // painter reports the offset the way it paints it, over the run it is
+    // really
+    // over. The prototype's width matters only on the RTL side and its height
+    // not
+    // at all (the phase-1 spike), so the height comes from the line.
+    final rect = paragraph.getOffsetForCaret(
+      position,
+      const Rect.fromLTWH(0, 0, 1.5, 0),
+    );
+    _caretRect.value = Rect.fromLTWH(
+      rect.dx,
+      rect.dy,
+      1.5,
+      paragraph.getFullHeightForCaret(position),
+    );
   }
 
   @override
@@ -809,22 +867,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             _paneWidth = constraints.maxWidth;
-            // The gutter is room the *text* does not get, so it comes out of
-            // the
-            // side space rather than out of the column: the text keeps the
-            // width
-            // the note column promises it, which is what the legacy editor did
-            // by
-            // hanging its numbers outside the field.
-            _sideSpace = math.max(
-              0,
-              widget.column.sideSpaceIn(constraints.maxWidth + _gutterWidth) -
-                  _gutterWidth / 2,
+            // The legacy editor's box, to the pixel (`note_editor.dart`):
+            // `side` is the note column's side space, the gutter is
+            // `side + 16 - 5` when there is a column (and never narrower than
+            // the numbers), the field is inset by 5 on the left and by
+            // `side + 16` on the right. The text therefore measures exactly
+            // `column.width` and sits centred — which is what the column means,
+            // and what a gutter eating into it made narrower.
+            _sideSpace = widget.column.sideSpaceIn(constraints.maxWidth);
+            // The gutter is the numbers *or* the column's own indentation: the
+            // legacy editor reserved `side + 16 - 5` even with the numbers
+            // turned
+            // off, which is what keeps a column centred when the gutter is
+            // empty.
+            _gutter = math.max(
+              _numbersWidth,
+              _sideSpace == 0 ? 0 : _sideSpace + 11,
             );
             final available =
-                constraints.maxWidth -
-                widget.padding.horizontal -
-                2 * _sideSpace;
+                constraints.maxWidth - _leftInset - _rightInset - _gutter;
             return _mouseSelection(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -839,9 +900,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   controller: _scroll,
                   slivers: <Widget>[
                     SliverPadding(
-                      padding: widget.padding.copyWith(
-                        left: widget.padding.left + _sideSpace,
-                        right: widget.padding.right + _sideSpace,
+                      padding: EdgeInsets.only(
+                        left: _leftInset,
+                        right: _rightInset,
+                        top: widget.padding.top,
+                        bottom: widget.padding.bottom,
                       ),
                       sliver: SliverMarkdownBlocks(
                         heights: _heights,
@@ -849,9 +912,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                           return _Line(
                             key: ValueKey<int>(index),
                             paragraphKey: _keyFor(index),
-                            styled: _tokens.lineAt(index),
+                            styled: _lineAt(index),
                             number: widget.showLineNumbers ? index + 1 : null,
-                            gutterWidth: _gutterWidth,
+                            gutterWidth: _gutter,
                             theme: widget.theme,
                             syntax: syntax,
                             dark: widget.dark,
@@ -861,7 +924,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             caret: index == caretLine ? _caretRect : null,
                             caretOn: _caretOn,
                           );
-                        }, childCount: _tokens.lineCount),
+                        }, childCount: widget.buffer.lineCount),
                       ),
                     ),
                   ],
@@ -935,8 +998,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       const SingleActivator(LogicalKeyboardKey.keyV, meta: true): paste,
       const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
       const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
-      const SingleActivator(LogicalKeyboardKey.enter): _newline,
-      const SingleActivator(LogicalKeyboardKey.numpadEnter): _newline,
+      // Enter is deliberately *not* bound here. The platform already sends the
+      // line break as text — an IME commits it, and the Linux embedder inserts
+      // it
+      // — so binding the key as well is one press becoming two lines, which is
+      // what a device showed (and the log has no `action:` line at all, which
+      // says
+      // the platform never asks us to insert it).
       const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
       const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
       const SingleActivator(
