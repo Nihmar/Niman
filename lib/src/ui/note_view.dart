@@ -460,11 +460,40 @@ final class _NoteViewState extends State<NoteView>
   SourceBuffer? _unifiedBuffer;
   String _unifiedBufferText = '';
 
-  /// The note's text as the unified source surface has it. Written by
-  /// [_noteChanged] and read by [_currentText], which is where saving, the
-  /// preview and the statistics all get their text from — so this pane reaches
-  /// every one of them through the same door the legacy editor uses.
-  String _unifiedText = '';
+  /// The note's text as the unified source surface has it, read by
+  /// [_currentText], which is where saving, the preview and the statistics all
+  /// get their text from — so this pane reaches every one of them through the
+  /// same door the legacy editor uses.
+  ///
+  /// Joined from the surface's buffer when it is asked for, once per revision:
+  /// the surface reports an edit without its text, because joining the note on
+  /// every keystroke is O(n) for a text only the save debounce needs.
+  String get _unifiedText {
+    final buffer = _unifiedSurfaceBuffer;
+    if (buffer == null) return _unifiedTextCache;
+    if (!identical(buffer, _unifiedTextBuffer) ||
+        buffer.revision != _unifiedTextRevision) {
+      _unifiedTextCache = buffer.text;
+      _unifiedTextBuffer = buffer;
+      _unifiedTextRevision = buffer.revision;
+    }
+    return _unifiedTextCache;
+  }
+
+  /// Seeds [_unifiedText] with the text [_unifiedSurfaceBuffer] was read from.
+  set _unifiedText(String text) {
+    _unifiedTextCache = text;
+    _unifiedTextBuffer = _unifiedSurfaceBuffer;
+    _unifiedTextRevision = _unifiedSurfaceBuffer?.revision ?? -1;
+  }
+
+  String _unifiedTextCache = '';
+  SourceBuffer? _unifiedTextBuffer;
+  int _unifiedTextRevision = -1;
+
+  /// Whether the preview's text is behind the note because the preview was
+  /// not on screen when the note changed (see [_refreshPreview]).
+  bool _previewStale = false;
 
   /// The buffer the unified source surface edits. Its own, not the read pane's:
   /// the read pane's is rebuilt from the preview text on a debounce, and a pane
@@ -626,6 +655,10 @@ final class _NoteViewState extends State<NoteView>
         'flip showPreview=${widget.showPreview} '
         'chars=${_previewText.length} scroll=$scroll',
       );
+      if (widget.showPreview && _previewStale) {
+        _previewStale = false;
+        _previewText = _currentText;
+      }
       if (widget.showPreview) {
         // What the flip costs to reach the pixels, and what the frames after
         // it cost. The line above says when it started; without these two,
@@ -1058,8 +1091,7 @@ final class _NoteViewState extends State<NoteView>
   /// `onSelection`,
   /// and everything downstream — the save debounce, the unsaved marker, the
   /// statistics, the preview text — is the same code for both.
-  void _noteChanged({required String text, required int caretLine}) {
-    _unifiedText = text;
+  void _noteChanged({required int caretLine}) {
     _revision++;
     _unsaved?.noteChanged();
     _caretLine = caretLine;
@@ -1079,6 +1111,13 @@ final class _NoteViewState extends State<NoteView>
 
   void _refreshPreview() {
     if (!mounted || _loading) return;
+    if (_usesUnifiedSource && !_previewIn(widget)) {
+      // The read pane is off stage behind the source pane, and bringing it up
+      // to date means re-reading and re-parsing the whole note: done when it
+      // is shown, not every time the writer pauses.
+      _previewStale = true;
+      return;
+    }
     final text = _currentText;
     if (text == _previewText) return;
     setState(() => _previewText = text);
@@ -1243,9 +1282,14 @@ final class _NoteViewState extends State<NoteView>
   /// come through — so saving, the preview and the statistics do not know which
   /// pane is on screen.
   Widget _unifiedSurfacePane() {
-    final buffer = _unifiedSurfaceBuffer ?? SourceBuffer.fromText(_currentText);
-    _unifiedSurfaceBuffer = buffer;
-    _unifiedText = buffer.text;
+    var existing = _unifiedSurfaceBuffer;
+    if (existing == null) {
+      final text = _currentText;
+      existing = SourceBuffer.fromText(text);
+      _unifiedSurfaceBuffer = existing;
+      _unifiedText = text;
+    }
+    final buffer = existing;
     // At the *note* text size, as the preview is (T-M6-12): the legacy editor
     // took `AppTextScales.noteFontSize`, and the surface without this drew the
     // note at the interface size, so the note's size setting did nothing.
@@ -1259,10 +1303,8 @@ final class _NoteViewState extends State<NoteView>
         showLineNumbers: widget.showLineNumbers,
         indentWidth: widget.indentWidth,
         column: widget.noteColumn,
-        onChanged: (text) => _noteChanged(
-          text: text,
-          caretLine: _surfaceCaretLine ?? _caretLine,
-        ),
+        onChanged: () =>
+            _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine),
         onSelection: (selection) {
           _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
         },

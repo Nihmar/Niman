@@ -97,10 +97,14 @@ final class MarkdownSourceView extends StatefulWidget {
   /// moves it for them.
   final ValueChanged<SelectionModel>? onSelection;
 
-  /// Called after every edit with the note's text, so the shell can save it —
-  /// and with nothing else: the debounce, the memento, the statistics and the
-  /// preview all belong to whoever owns the note.
-  final ValueChanged<String>? onChanged;
+  /// Called after every edit, so the shell can save the note — and with
+  /// nothing else: the debounce, the memento, the statistics and the preview
+  /// all belong to whoever owns the note.
+  ///
+  /// It does not carry the text: joining the note is O(n), and the shell
+  /// needs the text only when its debounce fires, not at every keystroke. The
+  /// buffer is the shell's own object; it reads the text from it then.
+  final VoidCallback? onChanged;
 
   /// The keyboard focus, when the caller owns it (the shell does).
   final FocusNode? focusNode;
@@ -802,7 +806,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   int _textRevision = -1;
 
   /// The note changed, so the shell can save it.
-  void _notifyChanged() => widget.onChanged?.call(widget.buffer.text);
+  void _notifyChanged() => widget.onChanged?.call();
 
   /// How many taps have landed inside [_clickWindow], and when and where the
   /// last did.
@@ -842,8 +846,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       case 1:
         placeCaret(offset);
       case 2:
-        final (start, end) = wordRangeAt(widget.buffer.text, offset);
-        _select(start, end);
+        // A word never crosses a line: the line's text, not the note's.
+        final line = widget.buffer.lineOf(offset);
+        final lineStart = widget.buffer.offsetOfLine(line);
+        final text = widget.buffer.lineAt(line);
+        final (start, end) = wordRangeAt(text, offset - lineStart);
+        _select(
+          lineStart + math.min(start, text.length),
+          lineStart + math.min(end, text.length),
+        );
       default:
         final line = widget.buffer.lineOf(offset);
         _select(
