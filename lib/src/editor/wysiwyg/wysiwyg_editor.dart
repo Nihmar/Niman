@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
+import 'package:niman/src/editor/find_bar.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
@@ -20,7 +21,6 @@ import 'package:niman/src/editor/wysiwyg/opaque_embed.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_clipboard.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
-import 'package:niman/src/editor/wysiwyg/wysiwyg_find_panel.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 
 /// The WYSIWYG writing surface: a Quill editor over the note's Markdown.
@@ -531,7 +531,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
           AnimatedBuilder(
             animation: _find,
             builder: (context, _) =>
-                WysiwygFindPanel(controller: _find, column: widget.column),
+                FindBar(controller: _find, column: widget.column),
           ),
           Expanded(
             // Copy and cut from the keyboard (#165). Quill builds its own
