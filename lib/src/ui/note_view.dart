@@ -1246,18 +1246,27 @@ final class _NoteViewState extends State<NoteView>
     final buffer = _unifiedSurfaceBuffer ?? SourceBuffer.fromText(_currentText);
     _unifiedSurfaceBuffer = buffer;
     _unifiedText = buffer.text;
-    return MarkdownSurface(
-      buffer: buffer,
-      mode: MarkdownSurfaceMode.source,
-      theme: markdownThemeOf(context),
-      showLineNumbers: widget.showLineNumbers,
-      indentWidth: widget.indentWidth,
-      column: widget.noteColumn,
-      onChanged: (text) =>
-          _noteChanged(text: text, caretLine: _surfaceCaretLine ?? _caretLine),
-      onSelection: (selection) {
-        _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
-      },
+    // At the *note* text size, as the preview is (T-M6-12): the legacy editor
+    // took `AppTextScales.noteFontSize`, and the surface without this drew the
+    // note at the interface size, so the note's size setting did nothing.
+    return MediaQuery(
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: noteTextScalerOf(context)),
+      child: MarkdownSurface(
+        buffer: buffer,
+        mode: MarkdownSurfaceMode.source,
+        theme: markdownThemeOf(context),
+        showLineNumbers: widget.showLineNumbers,
+        indentWidth: widget.indentWidth,
+        column: widget.noteColumn,
+        onChanged: (text) => _noteChanged(
+          text: text,
+          caretLine: _surfaceCaretLine ?? _caretLine,
+        ),
+        onSelection: (selection) {
+          _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
+        },
+      ),
     );
   }
 

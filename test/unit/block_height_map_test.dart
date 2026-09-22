@@ -20,6 +20,32 @@ void main() {
     expect(map.measuredCount, 0);
   });
 
+  test('a splice keeps the measurements of the blocks it does not touch', () {
+    // An Enter adds a line: the heights a frame measured above and below it
+    // are still true, and throwing them away moved everything on screen.
+    final map = _map(4)
+      ..measured(0, 30)
+      ..measured(3, 50)
+      ..splice(1, 1, 2, (index) => 7);
+    expect(map.length, 5);
+    expect(map.extentFor(0), 30, reason: 'measured, above the edit');
+    expect(map.extentFor(1), 7, reason: 'new, estimated');
+    expect(map.extentFor(2), 7);
+    expect(map.extentFor(3), 10, reason: 'untouched, still estimated');
+    expect(map.extentFor(4), 50, reason: 'measured, below the edit');
+    expect(map.offsetOf(4), 30 + 7 + 7 + 10);
+    expect(map.measuredCount, 2);
+    expect(map.indexAt(43), 2);
+    expect(map.indexAt(44), 3, reason: 'the boundary belongs to the next one');
+    expect(map.indexAt(54), 4);
+    // And a line removed takes its measurement with it.
+    map.splice(0, 1, 0, (index) => 0);
+    expect(map.length, 4);
+    expect(map.measuredCount, 1);
+    expect(map.offsetOf(0), 0);
+    expect(map.totalExtent, 7 + 7 + 10 + 50);
+  });
+
   test('indexAt finds the block an offset lands in', () {
     final map = _map(4);
     expect(map.indexAt(0), 0);

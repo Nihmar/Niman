@@ -41,7 +41,7 @@ final class SliverMarkdownBlocks extends SliverMultiBoxAdaptorWidget {
     return RenderSliverMarkdownBlocks(
       childManager: context as SliverMultiBoxAdaptorElement,
       heights: heights,
-    );
+    )..generation = heights.generation;
   }
 
   @override
@@ -49,9 +49,15 @@ final class SliverMarkdownBlocks extends SliverMultiBoxAdaptorWidget {
     BuildContext context,
     RenderSliverMarkdownBlocks renderObject,
   ) {
-    if (identical(renderObject.heights, heights)) return;
+    // The same map spliced (a line added or removed) is a layout out of date
+    // just as much as a new map is.
+    if (identical(renderObject.heights, heights) &&
+        renderObject.generation == heights.generation) {
+      return;
+    }
     renderObject
       ..heights = heights
+      ..generation = heights.generation
       ..markNeedsLayout();
   }
 }
@@ -65,6 +71,9 @@ final class RenderSliverMarkdownBlocks extends RenderSliverMultiBoxAdaptor {
   /// measured — set from [SliverMarkdownBlocks.updateRenderObject], which also
   /// asks for the layout that reads it.
   BlockHeightMap heights;
+
+  /// The map's generation this render object last laid out against.
+  int generation = 0;
 
   @override
   void performLayout() {
@@ -85,10 +94,20 @@ final class RenderSliverMarkdownBlocks extends RenderSliverMultiBoxAdaptor {
     // is laid out from its own top, so a partially visible paragraph shows its
     // beginning rather than its middle.
     final rangeStart = constraints.scrollOffset + constraints.cacheOrigin;
+    // `cacheOrigin` is negative or zero, and the cache extent is counted from
+    // it — the framework's own list adds it the same way, and leaving it out
+    // laid out a cache extent more than the frame needed.
     final rangeEnd =
-        constraints.scrollOffset + constraints.remainingCacheExtent;
+        constraints.scrollOffset +
+        constraints.cacheOrigin +
+        constraints.remainingCacheExtent;
 
-    final first = heights.indexAt(rangeStart) ?? count - 1;
+    // Above the note's top is the note's first block, not its last: `indexAt`
+    // has no block for a negative offset, and falling back to the end put a
+    // frame's worth of layout at the wrong end of the note.
+    final first = rangeStart <= 0
+        ? 0
+        : heights.indexAt(rangeStart) ?? count - 1;
     final last = heights.indexAt(rangeEnd) ?? count - 1;
 
     // Whatever is outside the range is not this frame's business, and dropping
