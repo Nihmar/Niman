@@ -340,6 +340,17 @@ void main() {
         );
       });
 
+      testWidgets('typing at the very end of the note', (tester) async {
+        // The caret a delta carries is one past the text as it stood, and it
+        // was checked against that length — so it was dropped, and every
+        // character typed at the note's end landed before the one before it.
+        final rig = _Rig(tester, profile, 'ciao');
+        await rig.pump();
+        await rig.tapAt(0, 4);
+        await rig.platform.type(' mondo');
+        rig.agree('ciao mondo');
+      });
+
       testWidgets('an edit reaches the shell', (tester) async {
         final rig = _Rig(tester, profile, 'a\n');
         await rig.pump();

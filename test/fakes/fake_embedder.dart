@@ -215,9 +215,11 @@ final class FakeEmbedder {
   }
 
   Future<void> _fromPlatform(MethodCall call) async {
-    // The platform's direction: `channelBuffers.push`, which is what the
-    // engine does (the messenger's mock handlers are the other direction).
-    ServicesBinding.instance.channelBuffers.push(
+    // The platform's direction, delivered through the test messenger so the
+    // handler runs in the test's own zone: a timer the handler starts — the
+    // shell's save debounce — is then one `tester.pump` can run out, which a
+    // message pushed from outside that zone left pending for ever.
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       const JSONMethodCodec().encodeMethodCall(call),
       (_) {},
