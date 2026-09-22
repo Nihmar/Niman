@@ -1407,6 +1407,7 @@ final class _NoteViewState extends State<NoteView>
       openWiki(context, parseWikiRef(span.text), _linkTargets),
     ),
     embedResolver: _resolveEmbed,
+    column: widget.noteColumn,
   );
 
   /// The preview the app has always had, kept until the unified render is
