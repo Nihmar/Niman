@@ -110,6 +110,20 @@ void main() {
     await tester.pump();
     await _ctrl(tester, LogicalKeyboardKey.keyH);
     await tester.enterText(find.byKey(const Key('source-find-input')), 'gatto');
+    // Tab goes from the query to the replacement, and back, and never out.
+    EditableText field(String key) => tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(Key(key)),
+        matching: find.byType(EditableText),
+      ),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(field('source-replace-input').focusNode.hasFocus, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(field('source-find-input').focusNode.hasFocus, isTrue);
+    expect(state.widget.buffer.text, 'uno gatto\ndue gatto\n');
     await tester.enterText(
       find.byKey(const Key('source-replace-input')),
       'cane',
