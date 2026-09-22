@@ -17,8 +17,21 @@
 // never sent back unless the note stored something else (a `\n` written as the
 // note's `\r\n`).
 //
-// "What the platform has" is tracked as a revision, a selection and a composing
-// range — three comparisons, no copy of the text.
+// And the platform does not hold the note: it holds a **window** of it, a few
+// thousand characters of whole lines around the caret (§8.7.1). An IME reads
+// the words around the caret and nothing else, and a whole note on the channel
+// is a whole note encoded, sent, decoded and — on Android and Windows, whose
+// deltas carry `oldText` — sent back, per keystroke: 7 ms of encoding alone at
+// the 1 MB target, and a stress test at 22 MB spent 650 ms a keystroke. The
+// window moves when the caret nears its edge; what the platform says is in
+// window offsets, and is moved into the note's by the window's start.
+//
+// "What the platform has" is that window, kept as the value the platform was
+// last told or last reported; it agrees with the note when the note's text over
+// the same range is the same — a comparison the size of the window, not of the
+// note.
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -36,7 +49,6 @@ final class SourceInput implements DeltaTextInputClient {
   new({
     required this.buffer,
     required this.onEdited,
-    required this.text,
     required this.selection,
     required this.onSelection,
     required this.onTokenizer,
@@ -52,11 +64,6 @@ final class SourceInput implements DeltaTextInputClient {
 
   /// Called after every edit the platform asked for, so the view can repaint.
   final SourceEdited onEdited;
-
-  /// The note's whole text, asked for only when the platform has to be told a
-  /// whole value — a callback, because joining the note is O(n) and the view
-  /// keeps it joined once per revision.
-  final String Function() text;
 
   /// Called after an edit is applied, with what it replaced and what the note
   /// stored in its place, so a history can undo it.
@@ -111,10 +118,31 @@ final class SourceInput implements DeltaTextInputClient {
 
   bool _holdSync = false;
 
-  // What the platform's copy holds, as far as this side knows.
-  int _remoteRevision = -1;
-  SelectionModel? _remoteSelection;
-  TextRange _remoteComposing = TextRange.empty;
+  /// How far the platform's window reaches on each side of the caret, before
+  /// it is widened to whole lines.
+  static const int windowReach = 2048;
+
+  /// How near the window's edge the caret may come before the window moves.
+  static const int windowMargin = 256;
+
+  /// Where the platform's window starts in the note.
+  int get windowStart => _windowStart;
+  int _windowStart = 0;
+
+  /// What the platform holds, in window offsets, or null when that is not
+  /// known (never told, or told something this side has lost track of).
+  TextEditingValue? get remote => _remote;
+  TextEditingValue? _remote;
+
+  /// The note's revision when [_remote] was last seen to agree with it: until
+  /// the note changes, there is nothing to compare.
+  int _agreedRevision = -1;
+
+  /// The window before the last move, for a delta the platform built before
+  /// it heard of the move: it names that window's text, and its offsets are
+  /// that window's.
+  int _previousStart = 0;
+  String? _previousText;
 
   /// Opens the connection for the view [viewId] the surface is drawn in, or,
   /// when it is open, asks for the keyboard again.
@@ -140,7 +168,7 @@ final class SourceInput implements DeltaTextInputClient {
         enableDeltaModel: true,
       ),
     )..show();
-    _remoteRevision = -1;
+    _remote = null;
     _sync();
   }
 
@@ -163,29 +191,128 @@ final class SourceInput implements DeltaTextInputClient {
     _sync();
   }
 
-  /// Sends the note when the platform's copy is not what it holds.
+  /// Tells the platform what it should hold, when that is not what it holds.
   void _sync() {
     if (!isAttached || _holdSync) return;
+    final value = _valueToSend();
+    if (value == null) return;
+    _connection!.setEditingState(value);
+  }
+
+  /// The value the platform should be told, or null when it already holds it;
+  /// the value is taken as what it holds from here on.
+  TextEditingValue? _valueToSend() {
     final caret = selection().clampTo(buffer.length);
-    final composing = _validComposing();
-    if (_remoteRevision == buffer.revision &&
-        _remoteSelection == caret &&
-        _remoteComposing == composing) {
-      return;
+    final current = _remote;
+    int start;
+    String text;
+    if (current != null && _agrees(current) && _keeps(caret)) {
+      start = _windowStart;
+      text = current.text;
+    } else {
+      final (from, to) = _windowAround(caret);
+      start = from;
+      text = buffer.substring(from, to);
     }
-    _connection!.setEditingState(
-      TextEditingValue(
-        text: text(),
-        selection: TextSelection(
-          baseOffset: caret.anchor,
-          extentOffset: caret.extent,
-        ),
-        composing: composing,
-      ),
+    final value = TextEditingValue(
+      text: text,
+      selection: _toWindow(caret, start, text.length),
+      composing: _composingIn(start, text.length),
     );
-    _remoteRevision = buffer.revision;
-    _remoteSelection = caret;
-    _remoteComposing = composing;
+    if (current != null && start == _windowStart && current == value) {
+      return null;
+    }
+    if (current != null && start != _windowStart) {
+      _previousStart = _windowStart;
+      _previousText = current.text;
+    }
+    _windowStart = start;
+    _remote = value;
+    _agreedRevision = buffer.revision;
+    return value;
+  }
+
+  /// Whether [value] still says what the note says over the window.
+  bool _agrees(TextEditingValue value) {
+    if (_agreedRevision == buffer.revision) return true;
+    final end = _windowStart + value.text.length;
+    if (end > buffer.length) return false;
+    if (buffer.substring(_windowStart, end) != value.text) return false;
+    _agreedRevision = buffer.revision;
+    return true;
+  }
+
+  /// Whether the window can stay where it is for [caret]: the caret is inside
+  /// it, away from an edge that is not the note's — or the IME is composing,
+  /// and moving the window under a composition ends it.
+  bool _keeps(SelectionModel caret) {
+    final end = _windowStart + (_remote?.text.length ?? 0);
+    final at = caret.extent;
+    if (at < _windowStart || at > end) return false;
+    if (_validComposing().isValid && !_validComposing().isCollapsed) {
+      return true;
+    }
+    final roomBefore = _windowStart == 0 || at - _windowStart >= windowMargin;
+    final roomAfter = end == buffer.length || end - at >= windowMargin;
+    return roomBefore && roomAfter;
+  }
+
+  /// The window for [caret]: [windowReach] on each side of it, the selection's
+  /// other end too when it is near, widened to whole lines when they are not
+  /// long, and never splitting a line break or a surrogate pair.
+  (int, int) _windowAround(SelectionModel caret) {
+    final length = buffer.length;
+    if (length <= 2 * windowReach) return (0, length);
+    var from = caret.extent - windowReach;
+    var to = caret.extent + windowReach;
+    if ((caret.anchor - caret.extent).abs() <= 2 * windowReach) {
+      from = math.min(from, caret.anchor - windowReach ~/ 4);
+      to = math.max(to, caret.anchor + windowReach ~/ 4);
+    }
+    from = math.max(0, from);
+    to = math.min(length, to);
+    // Whole lines, when the line's start is not far: an IME reading the words
+    // before the caret should find a line's start there, not half a word.
+    final lineStart = buffer.offsetOfLine(buffer.lineOf(from));
+    if (from - lineStart <= windowReach ~/ 2) from = lineStart;
+    final nextLine = buffer.lineOf(to) + 1;
+    if (to < length && nextLine < buffer.lineCount) {
+      final lineEnd = buffer.offsetOfLine(nextLine);
+      if (lineEnd - to <= windowReach ~/ 2) to = lineEnd;
+    }
+    from = _snapUnit(buffer.snapOutOfTerminator(from), back: true);
+    to = _snapUnit(buffer.snapOutOfTerminator(to, forward: true), back: false);
+    return (from, to);
+  }
+
+  /// [offset], moved off the middle of a surrogate pair.
+  int _snapUnit(int offset, {required bool back}) {
+    if (offset <= 0 || offset >= buffer.length) return offset;
+    final unit = buffer.substring(offset, offset + 1).codeUnitAt(0);
+    if (unit < 0xDC00 || unit > 0xDFFF) return offset;
+    return back ? offset - 1 : offset + 1;
+  }
+
+  /// [caret] in the offsets of a window at [start], [length] long, each end
+  /// clamped into it: the platform cannot hold a selection it has not the text
+  /// of.
+  static TextSelection _toWindow(SelectionModel caret, int start, int length) {
+    int inside(int offset) => (offset - start).clamp(0, length);
+    return TextSelection(
+      baseOffset: inside(caret.anchor),
+      extentOffset: inside(caret.extent),
+    );
+  }
+
+  /// The composing range in the offsets of a window at [start], when it lies
+  /// in the window.
+  TextRange _composingIn(int start, int length) {
+    final range = _validComposing();
+    if (!range.isValid) return TextRange.empty;
+    if (range.start < start || range.end > start + length) {
+      return TextRange.empty;
+    }
+    return TextRange(start: range.start - start, end: range.end - start);
   }
 
   /// The composing range, when it is still inside the note.
@@ -245,17 +372,21 @@ final class SourceInput implements DeltaTextInputClient {
 
   // -------------------------------------------------------- TextInputClient
 
+  /// The window the platform holds — or, when that is not known, the one it
+  /// will be told (the framework asks for this to tell it).
   @override
   TextEditingValue? get currentTextEditingValue {
-    final caret = selection().clampTo(buffer.length);
-    return TextEditingValue(
-      text: text(),
-      selection: TextSelection(
-        baseOffset: caret.anchor,
-        extentOffset: caret.extent,
-      ),
-      composing: _validComposing(),
-    );
+    _valueToSend();
+    return _remote;
+  }
+
+  /// What the platform's copy says, as this side knows it — the window it was
+  /// told or reported, or the one it would be told.
+  TextEditingValue get _platformValue {
+    final current = _remote;
+    if (current != null) return current;
+    _valueToSend();
+    return _remote!;
   }
 
   @override
@@ -268,9 +399,9 @@ final class SourceInput implements DeltaTextInputClient {
     // is still one edit and one undo step rather than a whole note replaced.
     lastWholeLength = value.text.length;
     _log.debug('whole value: ${value.text.length} chars');
-    final ours = text();
+    final ours = _platformValue.text;
+    final start = _windowStart;
     final theirs = value.text;
-    var exact = true;
     if (ours != theirs) {
       var prefix = 0;
       final shortest = ours.length < theirs.length
@@ -286,17 +417,17 @@ final class SourceInput implements DeltaTextInputClient {
               theirs.codeUnitAt(theirs.length - 1 - suffix)) {
         suffix++;
       }
-      exact = _replace(
-        prefix,
-        ours.length - suffix,
+      _replace(
+        start + prefix,
+        start + ours.length - suffix,
         theirs.substring(prefix, theirs.length - suffix),
-        _caretOf(value.selection),
+        _caretOf(value.selection, start),
       );
     } else {
-      _reportSelection(_caretOf(value.selection));
+      _reportSelection(_caretOf(value.selection, start));
     }
-    _composing = value.composing;
-    _platformNowHas(value.selection, value.composing, exact: exact);
+    _composing = _shifted(value.composing, start);
+    _platformNowHas(value);
   }
 
   @override
@@ -306,19 +437,27 @@ final class SourceInput implements DeltaTextInputClient {
       'deltas: ${deltas.map(_short).join(", ")} '
       '(ours ${buffer.length}, caret ${selection().extent})',
     );
-    var exact = true;
+    var known = true;
+    var value = _platformValue;
     for (final delta in deltas) {
       deltaCount++;
-      if (delta.oldText.length != buffer.length) {
-        // The platform built this delta on a copy that is not ours. Its range
-        // is applied to ours — as `EditableText` applies it to its own value —
-        // and the platform is told the result afterwards.
-        _log.warning(
-          'platform copy ${delta.oldText.length} chars, ours ${buffer.length}',
-        );
-        exact = false;
+      // Which window the platform built this delta on: the one it holds, or
+      // the one before a move it had not heard of yet.
+      var origin = _windowStart;
+      if (delta.oldText != value.text) {
+        if (delta.oldText == _previousText) {
+          origin = _previousStart;
+        } else {
+          // Neither: its range is applied to our window — as `EditableText`
+          // applies it to its own value — and the platform is told the result.
+          _log.warning(
+            'platform copy ${delta.oldText.length} chars, '
+            'ours ${value.text.length}',
+          );
+        }
+        known = false;
       }
-      final (start, end, inserted) = switch (delta) {
+      final (from, to, inserted) = switch (delta) {
         TextEditingDeltaInsertion() => (
           delta.insertionOffset,
           delta.insertionOffset,
@@ -336,46 +475,57 @@ final class SourceInput implements DeltaTextInputClient {
         ),
         _ => (-1, -1, ''),
       };
+      var (start, end) = (origin + from, origin + to);
+      // A selection wider than the window reaches the platform clamped, and
+      // what it types over is the part it holds: over the whole of it, in the
+      // note — select all and type is the note replaced, not a window of it.
+      final wide = selection().clampTo(buffer.length);
+      final held = _toWindow(wide, origin, delta.oldText.length);
+      if (!wide.isCollapsed &&
+          delta is! TextEditingDeltaNonTextUpdate &&
+          from == held.start &&
+          to == held.end) {
+        (start, end) = (wide.start, wide.end);
+      }
       if (delta is TextEditingDeltaNonTextUpdate) {
-        _reportSelection(_caretOf(delta.selection));
-      } else if (start < 0 || end < start || end > buffer.length) {
+        _reportSelection(_caretOf(delta.selection, origin));
+      } else if (from < 0 || end < start || end > buffer.length) {
         _log.warning('edit $start..$end outside the note (${buffer.length})');
-        exact = false;
+        known = false;
         break;
       } else if (start == end && inserted.isEmpty) {
-        _reportSelection(_caretOf(delta.selection));
+        _reportSelection(_caretOf(delta.selection, origin));
       } else if (inserted == '\n' && (onNewline?.call(start, end) ?? false)) {
-        exact = false;
-      } else if (!_replace(start, end, inserted, _caretOf(delta.selection))) {
-        exact = false;
+        known = false;
+      } else {
+        _replace(start, end, inserted, _caretOf(delta.selection, origin));
       }
-      _composing = delta.composing;
+      _composing = _shifted(delta.composing, origin);
+      if (known) value = delta.apply(value);
     }
-    _platformNowHas(deltas.last.selection, deltas.last.composing, exact: exact);
+    _platformNowHas(known ? value : null);
   }
 
-  /// Records what the platform's copy holds after an update it sent, and tells
-  /// it the note when that is not what the note holds.
-  void _platformNowHas(
-    TextSelection selection,
-    TextRange composing, {
-    required bool exact,
-  }) {
-    if (exact) {
-      _remoteRevision = buffer.revision;
-      _remoteSelection = selection.isValid
-          ? SelectionModel(
-              anchor: selection.baseOffset,
-              extent: selection.extentOffset,
-            ).clampTo(buffer.length)
-          : null;
-      _remoteComposing = composing.isValid && !composing.isCollapsed
-          ? composing
-          : TextRange.empty;
-    } else {
+  /// [range], a platform range in a window at [origin], in note offsets.
+  static TextRange _shifted(TextRange range, int origin) =>
+      range.isValid && !range.isCollapsed
+      ? TextRange(start: origin + range.start, end: origin + range.end)
+      : TextRange.empty;
+
+  /// Records what the platform's copy holds after an update it sent — [value],
+  /// or null when this side cannot say — and tells it the note where that is
+  /// not what the note holds: a line break stored as `\r\n`, a list marker the
+  /// surface added, a delta built on a copy that was not ours.
+  void _platformNowHas(TextEditingValue? value) {
+    _remote = value;
+    _agreedRevision = -1;
+    if (value == null) {
       resyncs++;
-      _remoteRevision = -1;
+      _sync();
+      return;
     }
+    final agreed = _agrees(value);
+    if (!agreed) resyncs++;
     // Sends only what differs — nothing, for an update applied as it came.
     _sync();
   }
@@ -395,10 +545,11 @@ final class SourceInput implements DeltaTextInputClient {
   /// keystroke at the end of the note carries a caret one past the text as it
   /// stands, and throwing that away left the caret behind every character
   /// typed there. It is clamped once the edit is in.
-  SelectionModel _caretOf(TextSelection selection) => selection.isValid
+  SelectionModel _caretOf(TextSelection selection, int origin) =>
+      selection.isValid
       ? SelectionModel(
-          anchor: selection.baseOffset,
-          extent: selection.extentOffset,
+          anchor: origin + selection.baseOffset,
+          extent: origin + selection.extentOffset,
         )
       : this.selection();
 

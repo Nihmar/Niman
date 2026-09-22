@@ -264,7 +264,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onNewline: _newline,
     onTokenizer: (edit, buffer) =>
         SourceInput.retokenize(_tokens, edit, buffer),
-    text: () => _wholeText,
     selection: () => _selection,
     onSelection: (next) {
       setState(() => _ownSelection = next);
@@ -354,6 +353,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// How many times the platform's copy had to be told the note again.
   int get resyncs => _input.resyncs;
+
+  /// Where the platform's window of the note starts: it holds the note from
+  /// here, as long as its own text is.
+  int get platformWindowStart => _input.windowStart;
 
   /// The box the note is drawn in, which is what a global point is measured
   /// against — not the state's own context, which may be wider (a centred
@@ -885,25 +888,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _heights = _map();
     }
   }
-
-  /// The note's whole text, as of the revision it was joined at.
-  ///
-  /// The platform is told a `TextEditingValue`, which means the text — and
-  /// joining
-  /// a 931 KB note to move a caret is the difference between a cursor that
-  /// follows
-  /// the finger and one that lags behind it. One join per *edit*, none per
-  /// move.
-  String get _wholeText {
-    if (_textCache == null || _textRevision != widget.buffer.revision) {
-      _textCache = widget.buffer.text;
-      _textRevision = widget.buffer.revision;
-    }
-    return _textCache!;
-  }
-
-  String? _textCache;
-  int _textRevision = -1;
 
   /// The note changed, so the shell can save it.
   void _notifyChanged() => widget.onChanged?.call();

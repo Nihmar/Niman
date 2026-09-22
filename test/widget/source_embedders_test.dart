@@ -351,6 +351,89 @@ void main() {
         rig.agree('ciao mondo');
       });
 
+      group('a long note, of which the platform holds a window', () {
+        // 3 000 lines: far more than a window, so offsets are the window's
+        // and have to be moved into the note's.
+        final note = List<String>.generate(3000, (at) => 'riga $at').join('\n');
+        int lineStart(SourceBuffer buffer, int line) =>
+            buffer.offsetOfLine(line);
+
+        MarkdownSourceViewState view(WidgetTester tester) => tester
+            .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
+
+        /// The platform's copy is the note over its window, and a window.
+        void windowAgrees(_Rig rig, WidgetTester tester) {
+          final from = view(tester).platformWindowStart;
+          expect(
+            rig.platform.text,
+            rig.buffer.substring(from, from + rig.platform.text.length),
+            reason: 'the platform holds the note over its window',
+          );
+          expect(rig.platform.text.length, lessThan(rig.buffer.length ~/ 5));
+        }
+
+        testWidgets('typing far down lands at the caret', (tester) async {
+          final rig = _Rig(tester, profile, note);
+          await rig.pump();
+          await rig.tapAt(0, 1);
+          view(tester).placeCaret(lineStart(rig.buffer, 2000) + 2);
+          await tester.pump();
+          await rig.platform.type('X');
+          expect(rig.buffer.lineAt(2000), 'riXga 2000');
+          windowAgrees(rig, tester);
+          await rig.platform.backspace();
+          expect(rig.buffer.lineAt(2000), 'riga 2000');
+          windowAgrees(rig, tester);
+        });
+
+        testWidgets('the window follows the caret down the note', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, note);
+          await rig.pump();
+          await rig.tapAt(0, 1);
+          await rig.platform.type('A');
+          view(tester).placeCaret(lineStart(rig.buffer, 2900));
+          await tester.pump();
+          await rig.platform.type('B');
+          expect(rig.buffer.lineAt(0), 'rAiga 0');
+          expect(rig.buffer.lineAt(2900), 'Briga 2900');
+          windowAgrees(rig, tester);
+        });
+
+        testWidgets('select all and type is the note replaced', (tester) async {
+          final rig = _Rig(tester, profile, note);
+          await rig.pump();
+          await rig.tapAt(0, 1);
+          view(tester).selectAll();
+          await tester.pump();
+          await rig.platform.type('x');
+          rig.agree('x');
+        });
+
+        testWidgets('a keystroke built on the window before a move', (
+          tester,
+        ) async {
+          // The caret moves far and the platform types before it has heard:
+          // the delta names the old window, and its offsets are that
+          // window's — read as the new one's, the letter would land a
+          // thousand lines away from anything.
+          final rig = _Rig(tester, profile, note);
+          await rig.pump();
+          await rig.tapAt(0, 1);
+          rig.platform.holdEchoes = true;
+          view(tester).placeCaret(lineStart(rig.buffer, 2900));
+          await rig.platform.type('Y');
+          rig.platform
+            ..holdEchoes = false
+            ..flush();
+          await tester.pump();
+          expect(rig.buffer.lineAt(0), 'rYiga 0');
+          expect(rig.buffer.lineAt(2900), 'riga 2900');
+          windowAgrees(rig, tester);
+        });
+      });
+
       testWidgets('an edit reaches the shell', (tester) async {
         final rig = _Rig(tester, profile, 'a\n');
         await rig.pump();

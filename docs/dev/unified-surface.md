@@ -10006,6 +10006,32 @@ Practically:
   written as a CRLF note's `\r\n`). The race the probe measured at 921 KB came
   from the probe echoing after *every platform update*, which neither design
   does.
+
+  **And the platform holds a window, not the note (2026-09-22, the Windows
+  stress round).** Telling every change at once with the whole text costs the
+  note per keystroke twice over: `setEditingState` encodes it (7 ms at the 1 MB
+  target, 68 ms at 22 MB, measured on `JSONMethodCodec`), and on Android and
+  Windows the next delta brings it back as `oldText`. A stress test pasting a
+  note up to 22 MB spent up to 650 ms a keystroke outside the frame. So
+  `SourceInput` gives the platform `SourceInput.windowReach` (2 048) characters
+  on each side of the caret, widened to whole lines when they are short, and
+  never a split `\r\n` or surrogate pair. An IME reads the words around the
+  caret and nothing more. The rules:
+  - Platform offsets are the window's; `windowStart` moves them into the note's.
+  - What the platform holds is kept as the `TextEditingValue` it was told or
+    reported (each delta `apply`d to it). It agrees with the note when the
+    note's text over the same range is the same — a comparison the size of the
+    window, skipped while the revision has not moved.
+  - The window moves when the caret comes within `windowMargin` (256) of an
+    edge that is not the note's, and not while the IME is composing.
+  - A delta whose `oldText` is the window *before* the last move is read in
+    that window's offsets: the platform typed before it heard of the move.
+  - A selection wider than the window reaches the platform clamped; a delta
+    over exactly that clamped range is applied over the whole selection, so
+    select-all-and-type replaces the note.
+
+  The keystroke path now costs the same at 400 and 20 000 lines
+  (`test/perf/source_keystroke_path_test.dart`, ×0.8, was ×2.7).
 - **Composition** (`TextRange.composing`) is preserved and mapped like any other
   range. Note the consequence of the point above: a composing-only change still
   requires a full `setEditingState`, so it should be coalesced to at most one per
