@@ -430,6 +430,26 @@ final class _NoteViewState extends State<NoteView>
       ? _wysiwygText ?? ''
       : _controller.text;
 
+  /// Whether the legacy editor's controller is behind the note.
+  ///
+  /// It is not given the note while the unified engine is on: nothing shows
+  /// it, and filling it is the legacy editor's whole open — its line model and
+  /// its highlighter over every line, 3.8 s of a 4.2 s open at 8 MB, and a
+  /// 22 MB note that froze the app at start. It takes the note when the
+  /// engine is switched back ([didUpdateWidget]).
+  bool _legacyBehind = false;
+
+  /// Gives the legacy controller [text], or, while the unified engine is on,
+  /// notes that it has not been given it.
+  void _setLegacyText(String text) {
+    if (widget.unifiedMarkdown) {
+      _legacyBehind = true;
+      return;
+    }
+    _legacyBehind = false;
+    _controller.text = text;
+  }
+
   /// The WYSIWYG surface's state (the toolbar's Quill commands need it).
   final GlobalKey<WysiwygEditorState> _wysiwygKey =
       GlobalKey<WysiwygEditorState>();
@@ -734,6 +754,14 @@ final class _NoteViewState extends State<NoteView>
     if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
       _dismissKeyboardForPreview();
     }
+    // The engine switched under an open note: the side that takes over takes
+    // the note as the other side left it.
+    if (oldWidget.unifiedMarkdown != widget.unifiedMarkdown && _ready) {
+      _switchEngine(
+        toUnified: widget.unifiedMarkdown,
+        wysiwyg: widget.showWysiwyg,
+      );
+    }
     // Hand the buffer over when the editor kind changes (T-WYS-05): the
     // WYSIWYG surface opens with what the source editor holds, and the
     // source editor takes back what WYSIWYG serialized.
@@ -743,7 +771,11 @@ final class _NoteViewState extends State<NoteView>
         // surface's text is not in the legacy controller.
         _wysiwygText = widget.unifiedMarkdown ? _unifiedText : _controller.text;
       } else if (_wysiwygText case final text?) {
-        if (text != _controller.text) _controller.text = text;
+        if (widget.unifiedMarkdown) {
+          _setLegacyText(text);
+        } else if (text != _controller.text) {
+          _controller.text = text;
+        }
         if (widget.unifiedMarkdown && text != _unifiedText) {
           // And back: the unified buffer takes what the WYSIWYG serialized,
           // or its next edit would write the note from before it.
@@ -751,6 +783,33 @@ final class _NoteViewState extends State<NoteView>
         }
       }
     }
+  }
+
+  /// Hands the note from one markdown engine to the other.
+  ///
+  /// To the legacy editor: its controller, left empty while the unified engine
+  /// was on, takes the note — from the WYSIWYG when that is on screen, since it
+  /// holds the latest text. To the unified engine: its buffer takes what the
+  /// legacy controller holds, which the edits since the last switch went into.
+  void _switchEngine({required bool toUnified, required bool wysiwyg}) {
+    _loading = true;
+    if (toUnified) {
+      final text = wysiwyg
+          ? _wysiwygText ?? _controller.text
+          : _controller.text;
+      if (_surface == null) {
+        _surface = _surfaceFor(text);
+      } else if (text != _unifiedText) {
+        _surface!.replaceAll(text);
+      }
+      _unifiedText = text;
+    } else if (_legacyBehind) {
+      _legacyBehind = false;
+      _controller.text = wysiwyg ? _wysiwygText ?? _unifiedText : _unifiedText;
+      _controller.clearHistory();
+      _lastLines = _controller.codeLines;
+    }
+    _loading = false;
   }
 
   @override
@@ -838,7 +897,9 @@ final class _NoteViewState extends State<NoteView>
     final sameEditor =
         memento.editorKind == (wysiwyg ? wysiwygEditorKind : sourceEditorKind);
     if (!wysiwyg) {
-      if (sameEditor) restoreSourceSelection(_controller, memento);
+      if (sameEditor && !widget.unifiedMarkdown) {
+        restoreSourceSelection(_controller, memento);
+      }
       restoreScroll(_scroll.verticalScroller, memento.scrollOffset);
       if (widget.unifiedMarkdown) {
         _surface?.restore(
@@ -940,7 +1001,7 @@ final class _NoteViewState extends State<NoteView>
       // (kind GUI or plain editor); detection scans the leading block
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
-      _controller.text = text;
+      _setLegacyText(text);
       _surface = _surfaceFor(
         text,
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
@@ -955,7 +1016,8 @@ final class _NoteViewState extends State<NoteView>
       // A template `{{cursor}}` landing (#53): the offset was measured in
       // this same text, so placing it is a line walk, not a guess. The
       // selection-only change schedules no save (see _onValueChanged).
-      if (widget.initialCaretOffset case final caret?) {
+      if (widget.initialCaretOffset case final caret?
+          when !widget.unifiedMarkdown) {
         final at = caret.clamp(0, text.length);
         final pos = linePosition(text, at);
         _controller.selection = CodeLineSelection.collapsed(
@@ -1071,7 +1133,7 @@ final class _NoteViewState extends State<NoteView>
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
     _loading = true;
-    _controller.text = text;
+    _setLegacyText(text);
     // The unified buffer adopts the disk's text too; its history goes with
     // the legacy one below, for the same reason.
     _surface?.replaceAll(text);
@@ -1959,7 +2021,7 @@ final class _NoteViewState extends State<NoteView>
   /// highlighter, stats and preview follow it as with any edit) and the
   /// note is saved immediately.
   void _applyKindEdit(String newText) {
-    _controller.text = newText;
+    _setLegacyText(newText);
     final surface = _surface;
     if (_usesUnifiedSource && surface != null && newText != _unifiedText) {
       // The kind GUI stands in front of the surface, so there may be no view:

@@ -19,12 +19,13 @@ NoteView _view({
   required List<String> writes,
   int reloadToken = 0,
   bool showWysiwyg = false,
+  bool unified = true,
 }) => NoteView(
   path: '/notes/a.md',
   showLineNumbers: false,
   autofocusEditor: false,
   toolbarTop: true,
-  unifiedMarkdown: true,
+  unifiedMarkdown: unified,
   showWysiwyg: showWysiwyg,
   readNote: readNote,
   writeNote: (_, text) async => writes.add(text),
@@ -130,5 +131,30 @@ void main() {
     );
     await _settleSave(tester);
     if (writes.isNotEmpty) expect(writes.last, 'prima e dopo');
+  });
+
+  testWidgets('the legacy editor takes the note when the engine goes back', (
+    tester,
+  ) async {
+    // The legacy controller is left empty under the unified engine — filling
+    // it froze the app on a 22 MB note — so switching back has to fill it
+    // with what the unified pane holds, edits included.
+    final writes = <String>[];
+    await _pump(tester, _view(readNote: (_) async => 'prima', writes: writes));
+    _surface(tester)
+      ..placeCaret(5)
+      ..replaceText(5, 5, ' e dopo');
+    await tester.pump();
+    await _pump(
+      tester,
+      _view(readNote: (_) async => 'prima', writes: writes, unified: false),
+    );
+    expect(find.byType(MarkdownSourceView), findsNothing);
+    // And forward again: the unified buffer takes what the legacy controller
+    // holds, so the edit is still there only if the legacy editor got it.
+    await _pump(tester, _view(readNote: (_) async => 'prima', writes: writes));
+    expect(_surface(tester).widget.buffer.text, 'prima e dopo');
+    await _settleSave(tester);
+    expect(writes.last, 'prima e dopo');
   });
 }
