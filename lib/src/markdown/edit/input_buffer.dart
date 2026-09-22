@@ -141,6 +141,20 @@ final class InputBuffer {
     _composingStale = false;
   }
 
+  /// Sets the note's text without changing what the platform has been told.
+  ///
+  /// What a surface that was built before its note was read needs: the buffer
+  /// starts empty, the note arrives, and the first delta's `oldText` has to be
+  /// compared against the note and not against nothing.
+  void seed(String text) {
+    _value = TextEditingValue(
+      text: text,
+      selection: _value.selection.isValid
+          ? _value.selection
+          : const TextSelection.collapsed(offset: 0),
+    );
+  }
+
   /// Records that the platform has been handed the buffer's value.
   void echoSent() {
     _platformText = _value.text;

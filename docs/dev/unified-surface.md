@@ -11182,6 +11182,31 @@ pane now also unified, that scrape saw a source view's markers and failed. The t
 now scoped to the read pane, which is what it was always about — the read mode takes
 the markers out — and the source pane showing them is by design.
 
+**The first device run found five things, and four of them were one kind of mistake
+— mine.** (2026-09-22, the source pane behind the flag, on Android.)
+
+* *The caret did not land where the finger did.* `offsetAt` mapped the tap into the
+  paragraph's coordinates without subtracting the **gutter**: the pointer's x was
+  read as if the text started at the left edge of the pane, so the caret landed as
+  many characters right of the finger as the gutter is wide. The gutter's width is
+  now computed from the numbers the note actually has (a fixed 44 is either too wide
+  for three digits or too narrow for ten thousand) and is a decision with a gap in it,
+  which is the second thing the run asked for: *the text was touching the column*.
+* *The keyboard did not appear.* Focus was asked for in `onTapDown`, and the scroll
+  view competes for that same gesture — a tap the scroll wins is a keyboard that never
+  comes up. It is now asked for **when the pointer goes down**, which no arena can
+  take away.
+* *The caret was slow to move.* Every move built a whole `TextEditingValue`, which
+  means joining the note — 931 KB — and sending it across the channel. The text is now
+  joined **once per revision** rather than once per move, and the echo is **coalesced
+  to one per frame**, so a drag or a run of arrow keys costs one echo rather than one
+  per step. That was the design's own rule ("one echo per frame"); the run is what
+  made it matter.
+
+The lesson worth keeping: none of the four was a design question. They were all found
+by a finger on a phone in the first ten minutes, which is the argument for putting a
+surface in front of a device as early as it can be typed into.
+
 **The next step, in one paragraph, with the names.** `NoteView._editorPane` builds the
 source pane over the `_unifiedSource` buffer the read mode already uses; the flag is
 `widget.unifiedMarkdown`, which already exists. The whole save path hangs off one

@@ -43,6 +43,13 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
+/// The gap between the line numbers and the text.
+///
+/// A decision rather than leftover space: the numbers are right-aligned against
+/// it,
+/// so it is what keeps the text from touching them.
+const double _gutterGap = 10;
+
 /// The source surface: the note's text, its caret, and where a tap lands.
 final class MarkdownSourceView extends StatefulWidget {
   /// Shows [buffer] with [selection], styled with [theme].
@@ -184,6 +191,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       onRecord: _history.record,
       onTokenizer: (edit, buffer) =>
           SourceInput.retokenize(_tokens, edit, buffer),
+      text: () => _wholeText,
       selection: () => _selection,
       onSelection: (next) {
         setState(() => _ownSelection = next);
@@ -271,7 +279,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final paragraph = _paragraphAt(line);
     if (paragraph == null) return null;
     final lineTop = _heights.offsetOf(line) - _scroll.offset;
-    final position = paragraph.getPositionForOffset(local - Offset(0, lineTop));
+    // The paragraph's own coordinates start *after* the gutter, and the tap is
+    // in
+    // the view's: without this the caret lands as many characters right of the
+    // finger as the gutter is wide.
+    final position = paragraph.getPositionForOffset(
+      Offset(local.dx - _gutterWidth, local.dy - lineTop),
+    );
     return widget.buffer.offsetOfLine(line) + position.offset;
   }
 
@@ -445,6 +459,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _ensureCaretVisible();
   }
 
+  /// The note's whole text, as of the revision it was joined at.
+  ///
+  /// The platform is told a `TextEditingValue`, which means the text — and
+  /// joining
+  /// a 931 KB note to move a caret is the difference between a cursor that
+  /// follows
+  /// the finger and one that lags behind it. One join per *edit*, none per
+  /// move.
+  String get _wholeText {
+    if (_textCache == null || _textRevision != widget.buffer.revision) {
+      _textCache = widget.buffer.text;
+      _textRevision = widget.buffer.revision;
+    }
+    return _textCache!;
+  }
+
+  String? _textCache;
+  int _textRevision = -1;
+
   /// The note changed, so the shell can save it.
   void _notifyChanged() => widget.onChanged?.call(widget.buffer.text);
 
@@ -515,6 +548,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// separate piece of work.
   Widget _mouseSelection(Widget child) => Listener(
     onPointerDown: (event) {
+      // Any pointer, not only a mouse: this is also where the keyboard is asked
+      // for, and a finger has to be able to ask.
+      _focus.requestFocus();
       if (event.kind != PointerDeviceKind.mouse) return;
       if (event.buttons != kPrimaryMouseButton) return;
       final offset = offsetAt(event.position);
@@ -590,6 +626,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   BlockHeightMap _map() =>
       BlockHeightMap(count: _tokens.lineCount, estimate: _estimate);
 
+  /// The gutter's width: the widest number the note has, plus a gap.
+  ///
+  /// Computed rather than fixed, because a fixed one is either too wide for a
+  /// three-digit note or too narrow for a ten-thousand-line one — and because
+  /// the
+  /// gap between the numbers and the text is a decision, not leftover space.
+  double get _gutterWidth {
+    if (!widget.showLineNumbers) return 0;
+    final digits = _tokens.lineCount.toString().length;
+    final size = widget.theme.marker.fontSize ?? 12;
+    return digits * size * 0.7 + _gutterGap;
+  }
+
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
   /// and is corrected by the sliver's own measurement.
@@ -664,6 +713,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             return _mouseSelection(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
+                // Focus on the *pointer going down*, not on a tap being
+                // recognized: the scroll view competes for the same gesture,
+                // and a
+                // tap that the scroll wins is a keyboard that never appears.
                 onTapDown: (details) => _focus.requestFocus(),
                 onTapUp: (details) => _tapUp(details.globalPosition),
                 child: CustomScrollView(
@@ -679,6 +732,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             paragraphKey: _keyFor(index),
                             styled: _tokens.lineAt(index),
                             number: widget.showLineNumbers ? index + 1 : null,
+                            gutterWidth: _gutterWidth,
                             theme: widget.theme,
                             syntax: syntax,
                             dark: widget.dark,
@@ -781,6 +835,7 @@ final class _Line extends StatelessWidget {
     required this.paragraphKey,
     required this.styled,
     required this.number,
+    required this.gutterWidth,
     required this.theme,
     required this.syntax,
     required this.dark,
@@ -797,6 +852,10 @@ final class _Line extends StatelessWidget {
 
   final StyledLine styled;
   final int? number;
+
+  /// How wide the gutter is, computed from the numbers the note has.
+  final double gutterWidth;
+
   final MarkdownTheme theme;
   final SyntaxColors syntax;
   final bool dark;
@@ -820,12 +879,15 @@ final class _Line extends StatelessWidget {
         children: <Widget>[
           if (number != null)
             SizedBox(
-              width: 44,
-              child: Text(
-                '$number',
-                textAlign: TextAlign.right,
-                style: theme.marker.copyWith(
-                  fontSize: (theme.body.fontSize ?? 14) * 0.8,
+              width: gutterWidth,
+              child: Padding(
+                padding: const EdgeInsets.only(right: _gutterGap),
+                child: Text(
+                  '$number',
+                  textAlign: TextAlign.right,
+                  style: theme.marker.copyWith(
+                    fontSize: (theme.body.fontSize ?? 14) * 0.8,
+                  ),
                 ),
               ),
             ),
