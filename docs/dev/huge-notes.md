@@ -159,13 +159,29 @@ written next to it.
    convergence point are dropped with it — the rebuilt range covers less than
    the old block did, so the list stops tiling the document.
 
-   **The whole shape of the fix, then.** Keep the containing block's prefix
-   (`start..from`), rebuild `from..convergence`, and *merge the two when the
-   block they make merges* — a paragraph's second line, a quote's lazy
-   continuation. The merge is what makes the block count come out right, and
-   it is the piece none of the four attempts had. `_rescanFrom` splices a
-   range of blocks with a range of blocks; what it needs is a range of blocks
-   plus a prefix it may have to join to the first of them.
+   **The whole shape of the fix, then, and how far it got (fifth attempt).**
+   Keep the containing block's prefix (`start..from`), rebuild
+   `from..convergence`, and *merge the two when the block they make merges* —
+   a paragraph's second line, a quote's lazy continuation. That merge is what
+   makes the block count come out right, and with it the 9 000-line note of
+   three-line paragraphs counts 5 000 blocks against a fresh scan's 5 000, and
+   the keystroke costs a handful of lines (that test passed for the first
+   time).
+
+   Two things it still got wrong, both in `block_cliff_test`'s
+   "an edit at the top, the middle and the end":
+
+   * an edit that starts *at* a block's first line (the blank line at 4) kept
+     the block that ended there and rebuilt the same line, so the list had
+     `Block(blank 4..5)` twice;
+   * an edit *inside* the frontmatter rebuilt `Block(frontmatter 0..5)` where
+     a fresh scan says `Block(frontmatter 0..4), Block(blank 4..5)`.
+
+   So the direction is right and the splice's edges are not: a prefix may not
+   be kept when the edit starts at the block's own first line, and a block
+   whose merge rule is not the paragraph's (frontmatter runs to its closing
+   line, not to the next blank) has to be merged the way the scan merges it.
+   The next attempt starts from that, with the property test as the gate.
 
    **What is left, stated plainly.** The scan's cost is the containing block,
    and a whole note can be one block, so the path is not gone for a note
