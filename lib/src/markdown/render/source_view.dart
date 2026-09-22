@@ -291,6 +291,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// finger is a touch gesture, by a mouse it is not.
   PointerDeviceKind? _lastPointerKind;
 
+  /// Ticks on every caret move, so the note's semantics — its text around the
+  /// caret, and the selection in it — follow without rebuilding the note.
+  final ValueNotifier<int> _semanticsTick = ValueNotifier<int>(0);
+
   /// Typewriter mode's glide to the caret, one per burst of moves.
   late final TypewriterFollow _typewriter = TypewriterFollow(_centerCaret);
 
@@ -417,6 +421,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
     _typewriter.dispose();
+    _semanticsTick.dispose();
     _caretRect.dispose();
     _caretLine.dispose();
     _caretOn.dispose();
@@ -1592,6 +1597,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
+    _semanticsTick.value++;
     _revealCaret();
     _restartBlink();
     _followCaret();
@@ -1699,7 +1705,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // only sees a key that travels through it on the way to the focused node,
     // so
     // one *below* the `Focus` it belongs to never fires.
-    final note = _shortcuts(
+    var note = _shortcuts(
       Focus(
         focusNode: _focus,
         onKeyEvent: _menuKey,
@@ -1831,6 +1837,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The touch selection draws above everything, handles and toolbar alike,
     // and follows the note as it scrolls; the desktop's menu stays where the
     // click was.
+    note = _semantics(note);
     return OverlayPortal(
       controller: _menuOverlay,
       overlayChildBuilder: _desktopMenu,
@@ -1844,6 +1851,52 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       ),
     );
   }
+
+  // ------------------------------------------------------------- semantics
+
+  /// How much of the note, around the caret, a screen reader is given: the
+  /// note itself can be megabytes, and the semantics tree is sent whole to
+  /// the platform on every change.
+  static const int _semanticsReach = 4000;
+
+  /// [child] as the platform's accessibility sees it: one multiline text
+  /// field, whose value is the note around the caret and whose selection is
+  /// the note's, with the moves and the clipboard a screen reader asks for.
+  ///
+  /// The lines under it are excluded: each is a `Text`, and a reader would
+  /// otherwise read the note twice — as a field, and as the lines inside it.
+  Widget _semantics(Widget child) => ValueListenableBuilder<int>(
+    valueListenable: _semanticsTick,
+    child: ExcludeSemantics(child: child),
+    builder: (context, _, child) {
+      if (!SemanticsBinding.instance.semanticsEnabled) return child!;
+      final buffer = widget.buffer;
+      final selection = _selection.clampTo(buffer.length);
+      final start = math.max(0, selection.start - _semanticsReach);
+      final end = math.min(buffer.length, selection.end + _semanticsReach);
+      int local(int offset) => (offset - start).clamp(0, end - start);
+      return _NoteSemantics(
+        value: buffer.substring(start, end),
+        selection: TextSelection(
+          baseOffset: local(selection.anchor),
+          extentOffset: local(selection.extent),
+        ),
+        focused: _focus.hasFocus,
+        onTap: _requestKeyboard,
+        onSetSelection: (next) => select(
+          SelectionModel(
+            anchor: start + next.baseOffset,
+            extent: start + next.extentOffset,
+          ),
+        ),
+        onMove: moveCaretBy,
+        onCopy: selection.isCollapsed ? null : () => unawaited(copySelection()),
+        onCut: selection.isCollapsed ? null : () => unawaited(cutSelection()),
+        onPaste: () => unawaited(paste()),
+        child: child,
+      );
+    },
+  );
 
   // ---------------------------------------------------------- context menu
 
@@ -2668,6 +2721,92 @@ final class _Line extends StatelessWidget {
       }
       spans.add(TextSpan(text: styled.text.substring(from, to), style: piece));
     }
+  }
+}
+
+/// The note as a text field to the platform's accessibility: what
+/// `RenderEditable` tells it about a `TextField`, which the `Semantics`
+/// widget has no way to say — the selection inside the value above all.
+final class _NoteSemantics extends SingleChildRenderObjectWidget {
+  const new({
+    required this.value,
+    required this.selection,
+    required this.focused,
+    required this.onTap,
+    required this.onSetSelection,
+    required this.onMove,
+    required this.onCopy,
+    required this.onCut,
+    required this.onPaste,
+    super.child,
+  });
+
+  final String value;
+  final TextSelection selection;
+  final bool focused;
+  final VoidCallback onTap;
+  final ValueChanged<TextSelection> onSetSelection;
+  final void Function(CaretMotion motion, {required bool extend}) onMove;
+  final VoidCallback? onCopy;
+  final VoidCallback? onCut;
+  final VoidCallback onPaste;
+
+  @override
+  _RenderNoteSemantics createRenderObject(BuildContext context) =>
+      _RenderNoteSemantics(this);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderNoteSemantics renderObject,
+  ) {
+    renderObject.semantics = this;
+  }
+}
+
+final class _RenderNoteSemantics extends RenderProxyBox {
+  new(this._semantics);
+
+  _NoteSemantics _semantics;
+
+  // A setter the widget pairs with, as every render object's are.
+  // ignore: avoid_setters_without_getters
+  set semantics(_NoteSemantics value) {
+    _semantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    final note = _semantics;
+    MoveCursorHandler move(CaretMotion motion) =>
+        (extend) => note.onMove(motion, extend: extend);
+    // Named first: a closure written in the cascade would swallow the rest of
+    // it into its body.
+    final characterRight = move(CaretMotion.characterRight);
+    final characterLeft = move(CaretMotion.characterLeft);
+    final wordRight = move(CaretMotion.wordRight);
+    final wordLeft = move(CaretMotion.wordLeft);
+    config
+      ..isSemanticBoundary = true
+      ..isTextField = true
+      ..isMultiline = true
+      ..isFocused = note.focused
+      ..isEnabled = true
+      ..value = note.value
+      // The note is written left to right, as every line of it is laid out.
+      ..textDirection = TextDirection.ltr
+      ..textSelection = note.selection
+      ..onTap = note.onTap
+      ..onSetSelection = note.onSetSelection
+      ..onPaste = note.onPaste
+      ..onMoveCursorForwardByCharacter = characterRight
+      ..onMoveCursorBackwardByCharacter = characterLeft
+      ..onMoveCursorForwardByWord = wordRight
+      ..onMoveCursorBackwardByWord = wordLeft;
+    if (note.onCopy != null) config.onCopy = note.onCopy;
+    if (note.onCut != null) config.onCut = note.onCut;
   }
 }
 

@@ -162,7 +162,7 @@ void main() {
     expect(state.widget.buffer.lineOf(state.selection.extent), 4);
   });
 
-  testWidgets('Ctrl+Home with a fold keeps working', (tester) async {
+  testWidgets('Ctrl+End with a fold keeps working', (tester) async {
     final state = await _pump(tester);
     state.focusNode.requestFocus();
     await tester.pump();
