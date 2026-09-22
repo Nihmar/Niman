@@ -38,6 +38,7 @@ import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -100,6 +101,8 @@ final class MarkdownSourceView extends StatefulWidget {
     this.spellCheck,
     this.findMatches,
     this.onOpenLink,
+    this.caretWidth,
+    this.typewriter = false,
     super.key,
   });
 
@@ -192,6 +195,15 @@ final class MarkdownSourceView extends StatefulWidget {
   /// the click a click.
   final SourceLinkTap? onOpenLink;
 
+  /// The caret's width; null keeps the surface's own (Zen mode, #69,
+  /// thickens it).
+  final double? caretWidth;
+
+  /// Typewriter mode (#70): the row being written keeps to the middle of the
+  /// pane, lit faintly, and the note leaves room below its last line so that
+  /// row can reach the middle there too.
+  final bool typewriter;
+
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
 }
@@ -264,6 +276,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The kind of the pointer that last went down: a long press or a tap by a
   /// finger is a touch gesture, by a mouse it is not.
   PointerDeviceKind? _lastPointerKind;
+
+  /// Typewriter mode's glide to the caret, one per burst of moves.
+  late final TypewriterFollow _typewriter = TypewriterFollow(_centerCaret);
 
   /// The overlay the desktop context menu is drawn in.
   final OverlayPortalController _menuOverlay = OverlayPortalController();
@@ -364,7 +379,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // And the platform's copy is now of a note that is not there any more.
       _input.sendSelection();
     }
-    if (oldWidget.selection != widget.selection) _scheduleCaret();
+    if (oldWidget.selection != widget.selection ||
+        oldWidget.caretWidth != widget.caretWidth) {
+      _scheduleCaret();
+    }
+    // Switched on while writing: the caret goes to the middle at once.
+    if (widget.typewriter && !oldWidget.typewriter) _followCaret();
     if (oldWidget.controller != widget.controller) {
       if (_ownsScroll) _scroll.dispose();
       _scroll = widget.controller ?? ScrollController();
@@ -380,6 +400,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
+    _typewriter.dispose();
     _caretRect.dispose();
     _caretLine.dispose();
     _caretOn.dispose();
@@ -1402,6 +1423,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
     _restartBlink();
+    _followCaret();
     // Measured *now*, from the layout the last frame left, and again after the
     // next frame: a caret that moved because of a tap or a key is on screen
     // immediately, and the frame that may have re-laid its line corrects it.
@@ -1412,6 +1434,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _measureCaret();
     });
+  }
+
+  /// The caret moved, or the text under it did: typewriter mode brings its
+  /// row to the middle. Only while someone is writing here — the note or its
+  /// find bar has the focus — so a note loading, or its place being put back,
+  /// stays where it was put.
+  void _followCaret() {
+    if (!widget.typewriter) return;
+    if (!_focus.hasFocus && !(widget.findMatches?.visible ?? false)) return;
+    _typewriter.caretMoved();
+  }
+
+  /// Glides the note so the caret's row is in the middle of the pane; false
+  /// while that row is not laid out yet, so the follow asks again next frame.
+  bool _centerCaret() {
+    final caret = caretRect;
+    final box = _noteBox;
+    if (caret == null || box == null || !_scroll.hasClients) return false;
+    centerCaret(_scroll, box.globalToLocal(caret.center).dy);
+    return true;
   }
 
   /// Shows the caret and starts its blink over.
@@ -1449,16 +1491,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // at all (the phase-1 spike), so the height comes from the line.
     final rect = paragraph.getOffsetForCaret(
       position,
-      const Rect.fromLTWH(0, 0, 1.5, 0),
+      Rect.fromLTWH(0, 0, _caretWidth, 0),
     );
     _caretRect.value = Rect.fromLTWH(
       rect.dx,
       rect.dy,
-      1.5,
+      _caretWidth,
       paragraph.getFullHeightForCaret(position),
     );
     _sendGeometry();
   }
+
+  /// How wide the caret is drawn.
+  double get _caretWidth => widget.caretWidth ?? 1.5;
 
   /// Tells the IME where the note is and where the caret is in it, so its
   /// candidate window (and a phone's handles) sit by the text rather than at
@@ -1556,7 +1601,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                         left: _leftInset,
                         right: _rightInset,
                         top: widget.padding.top,
-                        bottom: widget.padding.bottom,
+                        // Typewriter mode: room for the last row to reach the
+                        // middle.
+                        bottom:
+                            widget.padding.bottom +
+                            (widget.typewriter
+                                ? typewriterSlack(constraints.maxHeight)
+                                : 0),
                       ),
                       sliver: SliverMarkdownBlocks(
                         heights: _heights,
@@ -1583,6 +1634,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             caretLine: _caretLine,
                             caret: _caretRect,
                             caretOn: _caretOn,
+                            rowColor: widget.typewriter
+                                ? typewriterLineColor(context)
+                                : null,
                           );
                         }, childCount: widget.buffer.lineCount),
                       ),
@@ -2124,6 +2178,7 @@ final class _Line extends StatelessWidget {
     required this.misspelled,
     required this.misspelledColor,
     required this.found,
+    required this.rowColor,
     required this.index,
     required this.caretLine,
     required this.caret,
@@ -2163,6 +2218,9 @@ final class _Line extends StatelessWidget {
   /// The find bar's matches on this line, local, and whether each is the
   /// current one.
   final List<(int, int, bool)> found;
+
+  /// The light behind the caret's row (typewriter mode), or null.
+  final Color? rowColor;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -2248,6 +2306,9 @@ final class _Line extends StatelessWidget {
   Widget _caretBox(Widget child) => ValueListenableBuilder<int>(
     valueListenable: caretLine,
     builder: (context, line, child) => CustomPaint(
+      painter: line == index && rowColor != null
+          ? _RowPainter(rect: caret, color: rowColor!)
+          : null,
       foregroundPainter: line == index
           ? _CaretPainter(rect: caret, on: caretOn)
           : null,
@@ -2419,6 +2480,30 @@ bool _isMarker(TokenKind kind) => switch (kind) {
   TokenKind.taskBox => true,
   _ => false,
 };
+
+/// Lights the caret's row across the line, behind the text: typewriter mode's
+/// row being written. The row is the caret's own — its top and its height —
+/// so a wrapped paragraph lights the row the caret is on, not the paragraph.
+final class _RowPainter extends CustomPainter {
+  new({required this.rect, required this.color}) : super(repaint: rect);
+
+  final ValueListenable<Rect?> rect;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final value = rect.value;
+    if (value == null) return;
+    canvas.drawRect(
+      Rect.fromLTRB(0, value.top, size.width, value.bottom),
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RowPainter oldDelegate) =>
+      oldDelegate.rect != rect || oldDelegate.color != color;
+}
 
 /// Draws the caret: a thin vertical bar at the rectangle the line's own layout
 /// answered with.
