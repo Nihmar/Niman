@@ -46,6 +46,7 @@ NoteView _note({
   FakeLinkSource? links,
   List<String>? opened,
   String? initialAnchor,
+  int? initialCaret,
   Future<String?> Function()? pickImagePath,
   Future<String> Function(String root, String source)? importImage,
   NoteColumn column = NoteColumn.off,
@@ -66,6 +67,7 @@ NoteView _note({
   linkSource: links,
   onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
   initialAnchor: initialAnchor,
+  initialCaretOffset: initialCaret,
   pickImagePath: pickImagePath,
   importImage: importImage,
   noteColumn: column,
@@ -384,6 +386,36 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(_surface(tester).selection, const SelectionModel.at(6));
+  });
+
+  group('a template’s {{cursor}} (#53)', () {
+    testWidgets('lands the caret, with the focus', (tester) async {
+      await tester.pumpWidget(
+        _app(_note(text: '# Titolo\n\ncorpo\n', initialCaret: 10)),
+      );
+      await tester.pumpAndSettle();
+      final surface = _surface(tester);
+      expect(surface.selection, const SelectionModel.at(10));
+      expect(surface.focusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('wins over a memento', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: '# Titolo\n\ncorpo\n',
+            initialCaret: 10,
+            memento: const NoteMemento(
+              selectionBase: 2,
+              selectionExtent: 2,
+              editorKind: 'source',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(_surface(tester).selection, const SelectionModel.at(10));
+    });
   });
 
   testWidgets('a key the user chose wins over the note’s own '
