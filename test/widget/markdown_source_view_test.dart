@@ -305,6 +305,67 @@ void main() {
     expect(buffer.lineOf(state.selection.extent), 0);
   });
 
+  testWidgets('joining two lines moves what is below by one row, no more', (
+    tester,
+  ) async {
+    // The lines above were measured by scrolling past them; an edit that
+    // changes the line count used to rebuild the height map and forget those
+    // measurements, so everything on screen jumped by the estimates' error.
+    final long = List.filled(30, 'parola').join(' ');
+    // The three short lines sit in the middle of the note: at its end, the
+    // scroll offset clamps to the shorter note and nothing on screen moves.
+    final note = [
+      ...List<String>.filled(40, long),
+      'alfa',
+      'beta',
+      'gamma',
+      ...List<String>.filled(40, long),
+    ].join('\n');
+    final buffer = SourceBuffer.fromText(note);
+    tester.view.physicalSize = const Size(500, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // Scroll down in steps, so every line on the way is measured, until the
+    // three short lines are on screen.
+    for (var step = 0; step < 200; step++) {
+      final gamma = find.text('gamma');
+      if (gamma.evaluate().isNotEmpty && tester.getTopLeft(gamma).dy < 250) {
+        break;
+      }
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+      await tester.pump();
+    }
+    expect(find.text('gamma'), findsOneWidget);
+    final before = tester.getTopLeft(find.text('gamma')).dy;
+    state
+      ..placeCaret(buffer.offsetOfLine(41))
+      ..deleteBackward();
+    await tester.pump();
+    await tester.pump();
+    expect(buffer.lineAt(40), 'alfabeta');
+    final after = tester.getTopLeft(find.text('gamma')).dy;
+    expect(
+      before - after,
+      closeTo(_theme.lineHeight, 0.5),
+      reason: 'one row went, and only one',
+    );
+  });
+
   testWidgets('Ctrl+Z takes back what the keyboard typed', (tester) async {
     final buffer = SourceBuffer.fromText('ciao\n');
     var selection = const SelectionModel.at(0);

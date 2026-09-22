@@ -26,20 +26,78 @@ final class BlockHeightMap {
   /// Creates a map over [count] items, estimating item `index` with
   /// `estimate`.
   new({required int count, required double Function(int index) estimate})
-    : _measured = List<double>.filled(count, 0),
-      _extent = List<double>.filled(count, 0),
-      _tree = List<double>.filled(count + 1, 0) {
+    : _measured = List<double>.filled(count, 0, growable: true),
+      _extent = List<double>.filled(count, 0, growable: true),
+      _tree = List<double>.filled(count + 1, 0, growable: true) {
     // The estimator is asked **once**, here. Asking it again when a block is
     // measured would compute today's answer against a map seeded with an
     // earlier one — the read view builds this in `initState`, before the theme
     // arrives, so the two answers differ — and the tree and the extents would
     // drift by whatever changed.
     for (var at = 0; at < count; at++) {
-      final value = estimate(at);
-      _extent[at] = value;
-      _add(at, value);
+      _extent[at] = estimate(at);
+    }
+    _rebuild();
+  }
+
+  /// Replaces [removed] blocks from [first] on with [inserted] new ones,
+  /// estimated by [estimate] (asked with the blocks' *new* indices), and keeps
+  /// every other block's measurement.
+  ///
+  /// What an edit that adds or removes lines needs: rebuilding the map instead
+  /// forgot every height a frame had measured, so the lines on screen moved by
+  /// the difference between the estimates and the truth for every line above
+  /// them — on each Enter, each line joined, each paste and each undo.
+  void splice(
+    int first,
+    int removed,
+    int inserted,
+    double Function(int index) estimate,
+  ) {
+    final start = first.clamp(0, _extent.length);
+    final end = (start + removed).clamp(start, _extent.length);
+    var gone = 0;
+    for (var at = start; at < end; at++) {
+      if (_measured[at] > 0) gone++;
+    }
+    _measuredCount -= gone;
+    _extent.replaceRange(start, end, <double>[
+      for (var at = 0; at < inserted; at++) estimate(start + at),
+    ]);
+    _measured.replaceRange(start, end, List<double>.filled(inserted, 0));
+    _rebuild();
+    _generation++;
+  }
+
+  /// Bumped whenever the blocks themselves change (a [splice]), so a sliver
+  /// holding this same map knows its layout is out of date.
+  int get generation => _generation;
+  int _generation = 0;
+
+  /// Rebuilds the tree over [_extent], in O(n): each node takes its own value
+  /// and hands its sum to its parent, as `FenwickTree.reset` does.
+  void _rebuild() {
+    final count = _extent.length;
+    if (_tree.length != count + 1) {
+      _tree
+        ..clear()
+        ..addAll(List<double>.filled(count + 1, 0));
+    } else {
+      _tree.fillRange(0, count + 1, 0);
+    }
+    for (var at = 1; at <= count; at++) {
+      _tree[at] += _extent[at - 1];
+      final parent = at + (at & -at);
+      if (parent <= count) _tree[parent] += _tree[at];
+    }
+    _highestPower = 1;
+    while (_highestPower * 2 <= count) {
+      _highestPower *= 2;
     }
   }
+
+  /// The largest power of two at or below [length], for [indexAt]'s descent.
+  int _highestPower = 1;
 
   /// The height a frame laid each block out at, or 0 while none has.
   final List<double> _measured;
@@ -83,17 +141,19 @@ final class BlockHeightMap {
   int? indexAt(double offset) {
     if (_measured.isEmpty || offset < 0) return null;
     if (offset >= totalExtent) return null;
-    var low = 0;
-    var high = _measured.length - 1;
-    while (low < high) {
-      final middle = (low + high + 1) >> 1;
-      if (_prefix(middle) <= offset) {
-        low = middle;
-      } else {
-        high = middle - 1;
+    // Binary lifting down the tree: O(log n), where a binary search over
+    // prefix sums is O(log² n). The largest index whose start is at or before
+    // [offset] — which is the block that starts there, on a boundary.
+    var index = 0;
+    var remaining = offset;
+    for (var power = _highestPower; power > 0; power >>= 1) {
+      final next = index + power;
+      if (next <= _measured.length && _tree[next] <= remaining) {
+        remaining -= _tree[next];
+        index = next;
       }
     }
-    return low;
+    return index < _measured.length ? index : _measured.length - 1;
   }
 
   /// Block [index]'s height: what a frame laid it out at, or the estimator's

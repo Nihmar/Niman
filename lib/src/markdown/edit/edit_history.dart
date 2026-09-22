@@ -20,6 +20,7 @@
 //   entries go before the memory does. What is dropped is the *oldest*, so undo
 //   reaches far enough back to matter and then stops, as every editor's does.
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_edit.dart';
 
 /// One edit, as an undo needs to see it.
 final class EditRecord {
@@ -87,6 +88,11 @@ final class EditHistory {
   /// How many undo steps are held.
   int get length => _done.length;
 
+  /// The buffer's own account of the last undo or redo, so the caller can
+  /// follow it line by line instead of rebuilding what depends on the lines.
+  SourceEdit? get lastEdit => _lastEdit;
+  SourceEdit? _lastEdit;
+
   /// Whether the next edit starts a step of its own whatever it continues.
   bool _sealed = false;
 
@@ -130,7 +136,12 @@ final class EditHistory {
   EditRecord? undo(SourceBuffer buffer) {
     if (_done.isEmpty) return null;
     final last = _done.removeLast();
-    buffer.replaceRange(last.start, last.end, last.removed, verbatim: true);
+    _lastEdit = buffer.replaceRange(
+      last.start,
+      last.end,
+      last.removed,
+      verbatim: true,
+    );
     _undone.add(last);
     _sealed = true;
     return last;
@@ -140,7 +151,7 @@ final class EditHistory {
   EditRecord? redo(SourceBuffer buffer) {
     if (_undone.isEmpty) return null;
     final next = _undone.removeLast();
-    buffer.replaceRange(
+    _lastEdit = buffer.replaceRange(
       next.start,
       next.start + next.removed.length,
       next.inserted,

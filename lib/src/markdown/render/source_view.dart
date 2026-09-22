@@ -45,6 +45,7 @@ import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The colour a selected run is painted with.
@@ -232,8 +233,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         widget.onSelection?.call(next);
         _scheduleCaret();
       },
-      onEdited: (_) {
-        _syncLines();
+      onEdited: (edit) {
+        _syncLines(edit);
         setState(() {
           _ownSelection = _ownSelection.clampTo(widget.buffer.length);
         });
@@ -314,7 +315,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The offset a tap at [global] lands on, or null when it lands outside a
   /// line.
-  int? offsetAt(Offset global) {
+  int? offsetAt(Offset global) =>
+      _paintedOffsetAt(global) ?? _mappedOffsetAt(global);
+
+  /// The offset under [global] on a line a frame has drawn, asked of the lines
+  /// themselves — their paragraphs know where they were painted, so no map
+  /// has to agree with them — or null when no drawn line is under it.
+  int? _paintedOffsetAt(Offset global) {
+    for (final entry in _lineKeys.entries) {
+      final object = entry.value.currentContext?.findRenderObject();
+      if (object is! RenderParagraph || !object.attached || !object.hasSize) {
+        continue;
+      }
+      if (entry.key >= widget.buffer.lineCount) continue;
+      final local = object.globalToLocal(global);
+      if (local.dy < 0 || local.dy >= object.size.height) continue;
+      return widget.buffer.offsetOfLine(entry.key) +
+          object.getPositionForOffset(local).offset;
+    }
+    return null;
+  }
+
+  /// The offset under [global] as the height map places the lines: for a
+  /// point no drawn line is under — above the first, below the last.
+  int? _mappedOffsetAt(Offset global) {
     final box = _noteBox;
     if (box == null || _heights.length == 0) return null;
     // The map says which line a y falls in — above the first line is the
@@ -355,15 +379,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// does.
   bool _applyHistory(EditRecord? record, {required bool forwards}) {
     if (record == null) return false;
-    // The tokenizer is rebuilt rather than patched: an undo can be a page away
-    // from the last edit. Rebuilding it is a list of the buffer's lines — the
-    // tokenizing is lazy, from the lines a frame asks for.
-    _tokens = _tokenize();
+    // An undo is an edit like any other: the buffer says which lines it
+    // touched, and the tokenizer and the map follow those lines.
+    final edit = _history.lastEdit;
+    if (edit != null) {
+      SourceInput.retokenize(_tokens, edit, widget.buffer);
+    } else {
+      _tokens = _tokenize();
+    }
+    _syncLines(edit);
     // Undo puts the caret after what it restored (where it was before a
     // deletion, at the start of typing it took back); redo after what it did.
     final caret = forwards ? record.end : record.start + record.removed.length;
     setState(() {
-      _heights = _map();
       _ownSelection = _selection
           .collapsedTo(caret)
           .clampTo(widget.buffer.length);
@@ -404,36 +432,54 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// with
   /// the height map saying which line a y falls in.
   void moveCaretVertically(int rows, {bool extend = false}) {
-    final line = _caretLineIndex;
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null) return;
-    final offsetInLine = (_selection.extent - widget.buffer.offsetOfLine(line))
-        .clamp(0, paragraph.text.toPlainText().length);
-    final caret = paragraph.getOffsetForCaret(
-      TextPosition(offset: offsetInLine),
-      const Rect.fromLTWH(0, 0, 1.5, 0),
+    final caret = caretRect;
+    if (caret == null || rows == 0) return;
+    // The caret's own row is the row height — its line's, at the scale it is
+    // drawn at — and the point is the middle of the row [rows] away, so a
+    // boundary never decides which row it is.
+    final point = Offset(
+      caret.center.dx,
+      caret.center.dy + rows * caret.height,
     );
-    // Half a row down, so a point on the boundary belongs to the row below it
-    // rather than to whichever side the map's floor happens to fall.
-    final y =
-        _heights.offsetOf(line) +
-        caret.dy +
-        rows * widget.theme.lineHeight +
-        widget.theme.lineHeight / 2;
-    final targetLine = _heights.indexAt(y);
-    final target = targetLine == null ? null : _paragraphAt(targetLine);
-    if (targetLine == null || target == null) return;
-    final position = target.getPositionForOffset(
-      Offset(caret.dx, y - _heights.offsetOf(targetLine)),
+    final offset = _paintedOffsetAt(point);
+    if (offset != null) {
+      _moveCaretTo(offset, extend: extend);
+      return;
+    }
+    // The row is not drawn: move the note under the caret by as much, and ask
+    // the line that is there once the frame has built it.
+    if (!_scroll.hasClients) return;
+    final from = _scroll.offset;
+    final to = (from + rows * caret.height).clamp(
+      0.0,
+      _scroll.position.maxScrollExtent,
     );
-    final next = SelectionModel(
-      anchor: extend
-          ? _selection.anchor
-          : widget.buffer.offsetOfLine(targetLine) + position.offset,
-      extent: widget.buffer.offsetOfLine(targetLine) + position.offset,
-    );
-    _publishSelection(next);
-    widget.onSelection?.call(next);
+    if (to == from) {
+      // Nothing further in that direction: the caret goes to the note's end.
+      moveCaretBy(
+        rows < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
+        extend: extend,
+      );
+      return;
+    }
+    _scroll.jumpTo(to);
+    final shifted = point - Offset(0, to - from);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final landed = _paintedOffsetAt(shifted) ?? _mappedOffsetAt(shifted);
+      if (landed != null) _moveCaretTo(landed, extend: extend);
+    });
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
+  /// Puts the caret at [offset] — extending the selection with [extend] — and
+  /// tells everyone who needs to know.
+  void _moveCaretTo(int offset, {bool extend = false}) {
+    final next = extend
+        ? SelectionModel(anchor: _selection.anchor, extent: offset)
+        : SelectionModel.at(offset);
+    _publishSelection(next.clampTo(widget.buffer.length));
+    widget.onSelection?.call(_selection);
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
@@ -504,7 +550,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
-    _syncLines();
+    _syncLines(edit);
     setState(() => _ownSelection = next);
     widget.onSelection?.call(next);
     _input.sendSelection();
@@ -671,10 +717,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _page(int direction, {bool extend = false}) {
     if (!_scroll.hasClients) return;
     final viewport = _scroll.position.viewportDimension;
-    final rows = (viewport / widget.theme.lineHeight).floor() - 1;
+    final rows = (viewport / _rowHeight).floor() - 1;
     if (rows <= 0) return;
     final from = _scroll.offset;
-    final to = (from + direction * rows * widget.theme.lineHeight).clamp(
+    final to = (from + direction * rows * _rowHeight).clamp(
       0.0,
       _scroll.position.maxScrollExtent,
     );
@@ -710,17 +756,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.scheduleFrame();
   }
 
-  /// Keeps the tokenizer and the height map at the buffer's line count.
+  /// Keeps the tokenizer and the height map at the buffer's line count, after
+  /// [edit].
   ///
   /// The view draws the buffer's lines and places them with the map, so the
-  /// three have to agree about how many there are. The map is rebuilt only
-  /// when the count changed: a keystroke inside a line is corrected by the
-  /// sliver's own measurement.
-  void _syncLines() {
-    if (_tokens.lineCount != widget.buffer.lineCount) {
-      _tokens = _tokenize();
-      _heights = _map();
-    } else if (_heights.length != _tokens.lineCount) {
+  /// three have to agree about how many there are. When the count changed the
+  /// map is **spliced** — the lines the edit replaced go, the ones it added
+  /// come in estimated, and every other line keeps the height a frame measured
+  /// — because rebuilding it moved everything on screen on every Enter. A
+  /// keystroke inside a line is corrected by the sliver's own measurement.
+  void _syncLines([SourceEdit? edit]) {
+    final lines = widget.buffer.lineCount;
+    if (_tokens.lineCount != lines) _tokens = _tokenize();
+    if (_heights.length == lines) return;
+    if (edit != null &&
+        _heights.length - edit.removedLines + edit.insertedLines == lines) {
+      _heights.splice(
+        edit.firstLine,
+        edit.removedLines,
+        edit.insertedLines,
+        _estimate,
+      );
+    } else {
       _heights = _map();
     }
   }
@@ -1020,7 +1077,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final text = widget.buffer.lineAt(index);
     final columns = _columnsPerLine;
     final visual = text.isEmpty ? 1 : (text.length / columns).ceil();
-    return visual * widget.theme.lineHeight;
+    return visual * _rowHeight;
   }
 
   /// Roughly how many monospace characters fit a line at this width and size.
@@ -1031,7 +1088,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// replaces every estimate with the line's own height as soon as it draws it,
   /// and only a jump made before that first frame can see the difference.
   double get _columnsPerLine {
-    final size = widget.theme.body.fontSize ?? 14;
+    final size = _textScaler.scale(widget.theme.body.fontSize ?? 14);
     final advance = size * 0.6;
     if (advance <= 0) return 1;
     // The pane's real width once a frame has measured it; before that a guess,
@@ -1042,6 +1099,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// The width the text has, from the last frame that laid it out.
   double? _paneWidth;
+
+  /// The text scale the lines are drawn at, from the last frame.
+  TextScaler _textScaler = TextScaler.noScaling;
+
+  /// One row's height as the lines are drawn: the theme's, at the note's
+  /// text scale. The theme's own number is the unscaled one, and paging or
+  /// estimating with it put the caret short of where a page ends at any size
+  /// but 100 %.
+  double get _rowHeight => _textScaler.scale(widget.theme.lineHeight);
 
   /// The space the note column puts on each side of the text.
   double _sideSpace = 0;
@@ -1187,6 +1253,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             _paneWidth = constraints.maxWidth;
+            _textScaler = MediaQuery.textScalerOf(context);
             // The legacy editor's box, to the pixel (`note_editor.dart`):
             // `side` is the note column's side space, the gutter is
             // `side + 16 - 5` when there is a column (and never narrower than
