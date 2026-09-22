@@ -1928,13 +1928,15 @@ final class _NoteViewState extends State<NoteView>
     }
     final surface = _surface;
     if (_usesUnifiedSource && surface != null) {
-      // The surface's own lines. Its tokenizer is the view's, so the code and
-      // link ranges the legacy highlighter lets the scan skip are not to hand
-      // here; the words in them are checked like prose.
+      // The surface's own lines, and its own tokenizer's runs: code, maths,
+      // links and markers are skipped as they are in the underline.
       final buffer = surface.buffer;
       return spell.startScan(
         lineCount: buffer.lineCount,
-        lineAt: (i) => (text: buffer.lineAt(i), skip: const <TextRange>[]),
+        lineAt: (i) => (
+          text: buffer.lineAt(i),
+          skip: spellSkipRanges(surface.tokensOf(i)),
+        ),
       );
     }
     final lines = _controller.codeLines;

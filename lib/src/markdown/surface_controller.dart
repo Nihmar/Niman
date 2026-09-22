@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show TextSelection;
+import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -48,6 +49,10 @@ final class MarkdownSurfaceController {
 
   /// The selection a view starts with, when it mounts.
   SelectionModel get initialSelection => _pending.clampTo(buffer.length);
+
+  /// The tokenizer's runs on line [line], as the view has them; none without
+  /// a view.
+  List<Token> tokensOf(int line) => _view?.tokensOf(line) ?? const <Token>[];
 
   /// How far the view is scrolled, or null without one.
   double? get scrollOffset => _view?.scrollOffset;
