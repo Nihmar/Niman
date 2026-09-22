@@ -348,6 +348,34 @@ void main() {
     },
   );
 
+  // A server (or its proxy) that leaves dot entries out of a folder listing
+  // but serves them by path: the scan never saw `.niman/`, the look before the
+  // PUT found `.niman/settings.json`, and the upload was skipped as "changed
+  // during the sync" on every run — reported as failing, N runs in a row.
+  test(
+    'library settings sync on a server whose listing hides dot folders',
+    () async {
+      server
+        ..hideDotEntries = true
+        ..preconditions = false;
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      var report = await a.sync();
+      expect(report.skipped, isEmpty, reason: report.summary());
+      expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+
+      b.write('.niman/settings.json', '{"historyVersions": 7}');
+      report = await b.sync();
+      expect(report.skipped, isEmpty, reason: report.summary());
+      expect(remoteText('.niman/settings.json'), '{"historyVersions": 7}');
+
+      report = await a.sync();
+      expect(report.skipped, isEmpty, reason: report.summary());
+      expect(a.read('.niman/settings.json'), '{"historyVersions": 7}');
+      expect((await a.sync()).summary(), 'nothing to do');
+      expect((await b.sync()).summary(), 'nothing to do');
+    },
+  );
+
   group('a bare server (no ETags, no preconditions, no MOVE)', () {
     setUp(() {
       server
