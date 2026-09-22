@@ -139,32 +139,45 @@ void main() {
     expect(surface.input.lastWholeLength, 14);
   });
 
-  test('Enter inserts a newline at the caret', () {
+  test('Enter is one line: the newline action adds nothing of its own', () {
+    // The Linux embedder inserts `\n`, sends it as a delta and *then* calls
+    // the newline action (`fl_text_input_handler.cc`). Inserting on the action
+    // as well is one Enter becoming two lines.
     final surface = _wire('unofine\n', caret: 3);
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      _insert('unofine\n', 3, '\n'),
+    ]);
     surface.input.performAction(TextInputAction.newline);
     expect(surface.buffer.text, 'uno\nfine\n');
     expect(surface.carets.last.extent, 4);
   });
 
   test('an insertion after our own caret move lands at our caret', () {
-    // The device's lesson: a whole-value echo is 931 KB at note size, so the
-    // platform hears about a tap late — and an insertion that lands where the
-    // platform last thought the caret was is text in the wrong place. When *we*
-    // moved the caret, ours is the newer truth.
-    final surface = _wire('ciao mondo\n');
-    surface.input.attach();
-    surface.input.sendSelection();
-    // The platform's copy still has the caret at 0, and sends its delta from
-    // there; the app's caret is where the tap put it.
-    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
-      _insert('ciao mondo\n', 0, 'X'),
-    ]);
-    expect(
-      surface.buffer.text,
-      'Xciao mondo\n',
-      reason: 'a delta that agrees about the text but not the caret uses ours',
-    );
-    expect(surface.carets.last.extent, 1);
+    // The device's lesson: the platform hears about a tap a frame late, and an
+    // insertion that lands where the platform last thought the caret was is
+    // text in the wrong place. When *we* moved the caret, ours is the newer
+    // truth — for where the text goes, not only for where the caret ends up.
+    final wired = _wire('ciao mondo\n');
+    var caret = const SelectionModel.at(0);
+    final buffer = wired.buffer;
+    final input = SourceInput(
+      buffer: buffer,
+      text: () => buffer.text,
+      onTokenizer: (edit, buffer) =>
+          SourceInput.retokenize(wired.tokens, edit, buffer),
+      selection: () => caret,
+      onSelection: (next) => caret = next,
+      onEdited: (_) {},
+    )..attach();
+    // A tap puts the caret at 5; the platform has not heard yet.
+    caret = const SelectionModel.at(5);
+    input
+      ..sendSelection()
+      ..updateEditingValueWithDeltas(<TextEditingDelta>[
+        _insert('ciao mondo\n', 0, 'X'),
+      ]);
+    expect(buffer.text, 'ciao Xmondo\n');
+    expect(caret.extent, 6);
   });
 
   test('a delta the platform computed from its own caret is left alone', () {

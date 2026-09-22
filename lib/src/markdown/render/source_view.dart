@@ -28,6 +28,7 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -223,17 +224,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _scheduleCaret();
       },
       onEdited: (_) {
-        // The tokenizer and the buffer have to agree about how many lines there
-        // are: the view draws one line per *tokenizer* line and numbers them by
-        // index, so a drift between them is a column of numbers that stops
-        // matching the text. Checking it here costs a comparison and turns a
-        // drift into a rescan rather than into a wrong screen.
-        if (_tokens.lineCount != widget.buffer.lineCount) {
-          _tokens = HighlightDocument.fromText(widget.buffer.text);
-          _heights = _map();
-        } else if (_heights.length != _tokens.lineCount) {
-          _heights = _map();
-        }
+        _syncLines();
         setState(() {
           _ownSelection = _ownSelection.clampTo(widget.buffer.length);
         });
@@ -272,6 +263,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
     _caretRect.dispose();
+    _caretLine.dispose();
     _caretOn.dispose();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
@@ -316,21 +308,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// line.
   int? offsetAt(Offset global) {
     final box = _noteBox;
-    if (box == null) return null;
-    final local =
-        box.globalToLocal(global) -
-        Offset(_leftInset + _gutter, widget.padding.top);
-    final line = _heights.indexAt(local.dy + _scroll.offset);
-    if (line == null) return null;
+    if (box == null || _heights.length == 0) return null;
+    // The map says which line a y falls in — above the first line is the
+    // first, below the last is the last, so a tap under a short note puts the
+    // caret at its end rather than nowhere.
+    final y =
+        box.globalToLocal(global).dy - widget.padding.top + _scroll.offset;
+    final line = y < 0 ? 0 : _heights.indexAt(y) ?? _heights.length - 1;
     final paragraph = _paragraphAt(line);
-    if (paragraph == null) return null;
-    final lineTop = _heights.offsetOf(line) - _scroll.offset;
-    // The paragraph's own coordinates start *after* the gutter, and the tap is
-    // in
-    // the view's: without this the caret lands as many characters right of the
-    // finger as the gutter is wide.
+    if (paragraph == null || !paragraph.attached) return null;
+    // The point in the *paragraph's own* coordinates, from its own transform:
+    // the insets, the gutter and a live-mode indent are all in that transform,
+    // so none of them has to be subtracted by hand. (Doing it by hand
+    // subtracted the gutter twice, and the caret landed a gutter's width left
+    // of the finger.)
     final position = paragraph.getPositionForOffset(
-      Offset(local.dx - _gutterWidth, local.dy - lineTop),
+      paragraph.globalToLocal(global),
     );
     return widget.buffer.offsetOfLine(line) + position.offset;
   }
@@ -495,14 +488,63 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final edit = widget.buffer.replaceRange(start, end, text);
     SourceInput.retokenize(_tokens, edit, widget.buffer);
     final next = caret.clampTo(widget.buffer.length);
-    setState(() {
-      _heights = _map();
-      _ownSelection = next;
-    });
+    _syncLines();
+    setState(() => _ownSelection = next);
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
+    // The shell saves what it is told about: a cut, a paste or a backspace is
+    // as much an edit as a keystroke.
+    _notifyChanged();
+  }
+
+  /// Deletes the selection, or what is before the caret: one character, or a
+  /// word with [word].
+  ///
+  /// The surface's own key, not the platform's: the Linux embedder leaves
+  /// Backspace and Delete to the framework (`fl_text_input_handler.cc`:
+  /// "already handled inside the framework"), which is `EditableText`'s job and
+  /// therefore this surface's. An IME's own delete key still arrives as a
+  /// deletion delta.
+  void deleteBackward({bool word = false}) =>
+      _delete(word ? CaretMotion.wordLeft : CaretMotion.characterLeft);
+
+  /// Deletes the selection, or what is after the caret.
+  void deleteForward({bool word = false}) =>
+      _delete(word ? CaretMotion.wordRight : CaretMotion.characterRight);
+
+  void _delete(CaretMotion motion) {
+    final selection = _selection.clampTo(widget.buffer.length);
+    if (!selection.isCollapsed) {
+      _replaceRange(
+        selection.start,
+        selection.end,
+        '',
+        SelectionModel.at(selection.start),
+      );
+      return;
+    }
+    final other = moveCaret(selection, motion, buffer: widget.buffer).extent;
+    if (other == selection.extent) return;
+    final start = math.min(other, selection.extent);
+    final end = math.max(other, selection.extent);
+    _replaceRange(start, end, '', SelectionModel.at(start));
+  }
+
+  /// Keeps the tokenizer and the height map at the buffer's line count.
+  ///
+  /// The view draws the buffer's lines and places them with the map, so the
+  /// three have to agree about how many there are. The map is rebuilt only
+  /// when the count changed: a keystroke inside a line is corrected by the
+  /// sliver's own measurement.
+  void _syncLines() {
+    if (_tokens.lineCount != widget.buffer.lineCount) {
+      _tokens = HighlightDocument.fromText(widget.buffer.text);
+      _heights = _map();
+    } else if (_heights.length != _tokens.lineCount) {
+      _heights = _map();
+    }
   }
 
   /// The note's whole text, as of the revision it was joined at.
@@ -728,24 +770,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   BlockHeightMap _map() =>
       BlockHeightMap(count: _tokens.lineCount, estimate: _estimate);
 
-  /// The gutter's width: the widest number the note has, plus a gap.
-  ///
-  /// Computed rather than fixed, because a fixed one is either too wide for a
-  /// three-digit note or too narrow for a ten-thousand-line one — and because
-  /// the
-  /// gap between the numbers and the text is a decision, not leftover space.
-  double get _gutterWidth {
-    if (!widget.showLineNumbers) return 0;
-    // The legacy editor's own numbers: the editor's text style, same size and
-    // same
-    // (monospace) face, dimmed when the field is not focused — so the width is
-    // the
-    // digits' advance in that face, which is 0.6 em each.
-    final digits = _tokens.lineCount.toString().length;
-    final size = widget.theme.body.fontSize ?? 14;
-    return digits * size * 0.6 + _gutterGap;
-  }
-
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
   /// and is corrected by the sliver's own measurement.
@@ -776,7 +800,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // The pane's real width once a frame has measured it; before that a guess,
     // which the sliver replaces with measured heights as it draws each line.
     final width = _paneWidth ?? 360;
-    return (width - _gutterWidth) / advance;
+    return (width - _gutter) / advance;
   }
 
   /// The width the text has, from the last frame that laid it out.
@@ -799,13 +823,39 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The field's inset on the left.
   double get _leftInset => _fieldInset;
 
-  /// How wide the numbers are in the note's own face.
-  double get _numbersWidth {
+  /// How wide the numbers are in the note's own face, plus the gap.
+  ///
+  /// **Measured**, not estimated: the numbers are set in the note's face at
+  /// the ambient text scale, and "0.6 em per digit" is only nearly true of a
+  /// monospace face — DejaVu Sans Mono, Linux's usual one, is 0.602 em, so two
+  /// digits did not fit the room for two and every number from 10 on wrapped
+  /// onto a second row, making each of its lines two rows tall.
+  double _numbersWidth(TextScaler scaler) {
     if (!widget.showLineNumbers) return 0;
     final digits = widget.buffer.lineCount.toString().length;
-    final size = widget.theme.body.fontSize ?? 14;
-    return digits * size * 0.6 + _gutterGap;
+    final style = widget.theme.body;
+    final cached = _digits;
+    if (cached != null &&
+        cached.digits == digits &&
+        cached.style == style &&
+        cached.scaler == scaler) {
+      return cached.width + _gutterGap;
+    }
+    final painter = TextPainter(
+      text: TextSpan(text: '0' * digits, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    // A pixel of slack: a width that is exactly the text's can still wrap on
+    // rounding.
+    final width = painter.width.ceilToDouble() + 1;
+    painter.dispose();
+    _digits = (digits: digits, style: style, scaler: scaler, width: width);
+    return width + _gutterGap;
   }
+
+  ({int digits, TextStyle style, TextScaler scaler, double width})? _digits;
 
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
@@ -824,6 +874,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Where the caret is, from the caret line's own layout.
   void _measureCaret() {
     final line = _caretLineIndex;
+    // Every selection change comes through here, so this is the one place the
+    // lines hear which of them holds the caret.
+    _caretLine.value = line;
     final paragraph = _paragraphAt(line);
     if (paragraph == null || line < 0) {
       _caretRect.value = null;
@@ -853,7 +906,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @override
   Widget build(BuildContext context) {
     final syntax = widget.syntax ?? SyntaxColors.of(context);
-    final caretLine = _caretLineIndex;
     // The shortcuts wrap the focus, not the other way round: a
     // `CallbackShortcuts`
     // only sees a key that travels through it on the way to the focused node,
@@ -881,7 +933,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             // off, which is what keeps a column centred when the gutter is
             // empty.
             _gutter = math.max(
-              _numbersWidth,
+              _numbersWidth(MediaQuery.textScalerOf(context)),
               _sideSpace == 0 ? 0 : _sideSpace + 11,
             );
             final available =
@@ -921,7 +973,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             hideMarkers: widget.hideMarkers,
                             selected: _selectionIn(index),
                             width: available,
-                            caret: index == caretLine ? _caretRect : null,
+                            index: index,
+                            caretLine: _caretLine,
+                            caret: _caretRect,
                             caretOn: _caretOn,
                           );
                         }, childCount: widget.buffer.lineCount),
@@ -998,13 +1052,27 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       const SingleActivator(LogicalKeyboardKey.keyV, meta: true): paste,
       const SingleActivator(LogicalKeyboardKey.keyA, control: true): selectAll,
       const SingleActivator(LogicalKeyboardKey.keyA, meta: true): selectAll,
+      // Backspace and Delete *are* bound: no embedder edits the text for them
+      // (Linux says so in its source, and Android's hardware key reaches the
+      // framework first), so a surface that leaves them to the platform is one
+      // that cannot delete. Handling the key stops it here, so it is never
+      // applied twice.
+      const SingleActivator(LogicalKeyboardKey.backspace): deleteBackward,
+      const SingleActivator(LogicalKeyboardKey.backspace, shift: true):
+          deleteBackward,
+      const SingleActivator(LogicalKeyboardKey.backspace, control: true): () =>
+          deleteBackward(word: true),
+      const SingleActivator(LogicalKeyboardKey.backspace, alt: true): () =>
+          deleteBackward(word: true),
+      const SingleActivator(LogicalKeyboardKey.delete): deleteForward,
+      const SingleActivator(LogicalKeyboardKey.delete, control: true): () =>
+          deleteForward(word: true),
+      const SingleActivator(LogicalKeyboardKey.delete, alt: true): () =>
+          deleteForward(word: true),
       // Enter is deliberately *not* bound here. The platform already sends the
       // line break as text — an IME commits it, and the Linux embedder inserts
-      // it
-      // — so binding the key as well is one press becoming two lines, which is
-      // what a device showed (and the log has no `action:` line at all, which
-      // says
-      // the platform never asks us to insert it).
+      // it and then calls the newline action, which inserts nothing (see
+      // `SourceInput.performAction`) — so the delta is the only source.
       const SingleActivator(LogicalKeyboardKey.keyZ, control: true): undo,
       const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): undo,
       const SingleActivator(
@@ -1033,6 +1101,8 @@ final class _Line extends StatelessWidget {
     required this.hideMarkers,
     required this.selected,
     required this.width,
+    required this.index,
+    required this.caretLine,
     required this.caret,
     required this.caretOn,
     super.key,
@@ -1061,9 +1131,15 @@ final class _Line extends StatelessWidget {
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
 
-  /// The caret rectangle, for the line that holds the caret.
-  final ValueNotifier<Rect?>? caret;
-  final ValueNotifier<bool> caretOn;
+  /// This line's index, to compare with [caretLine].
+  final int index;
+
+  /// The line the caret is on.
+  final ValueListenable<int> caretLine;
+
+  /// The caret rectangle, in the caret line's coordinates.
+  final ValueListenable<Rect?> caret;
+  final ValueListenable<bool> caretOn;
 
   @override
   Widget build(BuildContext context) {
@@ -1072,21 +1148,32 @@ final class _Line extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (number != null)
+          // The gutter is there whenever it has a width, numbers or not: with
+          // them off it is the note column's own indentation, and leaving it
+          // out put the text at the pane's edge while the right side still
+          // kept the column's room.
+          if (gutterWidth > 0)
             SizedBox(
               width: gutterWidth,
               child: Padding(
                 padding: const EdgeInsets.only(right: _gutterGap),
-                child: Text(
-                  '$number',
-                  textAlign: TextAlign.right,
-                  // The text's own face and size, dimmed: what the legacy
-                  // editor's
-                  // `DefaultCodeLineNumber` does, so the numbers line up with
-                  // the
-                  // characters they count instead of drifting from them.
-                  style: theme.body.copyWith(color: theme.markerDim),
-                ),
+                child: number == null
+                    ? null
+                    : Text(
+                        '$number',
+                        textAlign: TextAlign.right,
+                        // One row, whatever the measurement said: a number
+                        // that wraps makes its line two rows tall and every
+                        // number below it sits beside the wrong text.
+                        softWrap: false,
+                        maxLines: 1,
+                        overflow: TextOverflow.visible,
+                        // The text's own face and size, dimmed: what the
+                        // legacy editor's `DefaultCodeLineNumber` does, so the
+                        // numbers line up with the characters they count
+                        // instead of drifting from them.
+                        style: theme.body.copyWith(color: theme.markerDim),
+                      ),
               ),
             ),
           Expanded(
@@ -1115,22 +1202,23 @@ final class _Line extends StatelessWidget {
   /// and a `Stack` needs a bound it cannot have here. The painter draws on top
   /// of
   /// the text it belongs to, which is also what a caret is.
-  Widget _caretBox(Widget child) {
-    final rect = caret;
-    if (rect == null) return child;
-    return ValueListenableBuilder<Rect?>(
-      valueListenable: rect,
-      builder: (context, value, child) => ValueListenableBuilder<bool>(
-        valueListenable: caretOn,
-        builder: (context, on, child) => CustomPaint(
-          foregroundPainter: on && value != null ? _CaretPainter(value) : null,
-          child: child,
-        ),
-        child: child,
-      ),
+  ///
+  /// Every line listens to *which* line holds the caret, so a tap that moves
+  /// it to another line repaints the two lines involved at once — without
+  /// that, the caret stayed drawn on its old line until something else rebuilt
+  /// the note. The rectangle and the blink repaint the painter only, never the
+  /// line, and the tree keeps its shape either way so the paragraph is never
+  /// re-mounted.
+  Widget _caretBox(Widget child) => ValueListenableBuilder<int>(
+    valueListenable: caretLine,
+    builder: (context, line, child) => CustomPaint(
+      foregroundPainter: line == index
+          ? _CaretPainter(rect: caret, on: caretOn)
+          : null,
       child: child,
-    );
-  }
+    ),
+    child: child,
+  );
 
   /// The style the line is set in.
   ///
@@ -1273,19 +1361,24 @@ bool _isMarker(TokenKind kind) => switch (kind) {
 
 /// Draws the caret: a thin vertical bar at the rectangle the line's own layout
 /// answered with.
+///
+/// It reads the rectangle and the blink at *paint* time and repaints when
+/// either changes, so neither rebuilds the line it is drawn over.
 final class _CaretPainter extends CustomPainter {
-  const new(this.rect);
+  new({required this.rect, required this.on})
+    : super(repaint: Listenable.merge(<Listenable>[rect, on]));
 
-  final Rect rect;
+  final ValueListenable<Rect?> rect;
+  final ValueListenable<bool> on;
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-      Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height),
-      Paint()..color = const Color(0xFF7AA2F7),
-    );
+    final value = rect.value;
+    if (!on.value || value == null) return;
+    canvas.drawRect(value, Paint()..color = const Color(0xFF7AA2F7));
   }
 
   @override
-  bool shouldRepaint(_CaretPainter oldDelegate) => oldDelegate.rect != rect;
+  bool shouldRepaint(_CaretPainter oldDelegate) =>
+      oldDelegate.rect != rect || oldDelegate.on != on;
 }

@@ -49,7 +49,8 @@ final class InputBuffer {
         text: text,
         selection: TextSelection.collapsed(offset: caret),
       ),
-      _platformText = text;
+      _platformText = text,
+      _platformSelection = TextSelection.collapsed(offset: caret);
 
   TextEditingValue _value;
 
@@ -57,6 +58,13 @@ final class InputBuffer {
   /// last value it was handed, moved forward by every delta it sent. A local
   /// edit is what makes the two disagree, and [needsEcho] is that disagreement.
   String _platformText;
+
+  /// Where the platform's copy has the caret, as far as this side knows.
+  ///
+  /// A caret move is a disagreement too: the platform inserts a keystroke at
+  /// *its* caret and deletes before it, so a tap it never heard about is text
+  /// typed where the caret used to be and a backspace that deletes nothing.
+  TextSelection _platformSelection;
 
   /// Whether the composing range the platform's copy carries is out of date.
   bool _composingStale = false;
@@ -78,7 +86,10 @@ final class InputBuffer {
   /// is
   /// true for a local edit and for a composing change, and false after a
   /// platform update that the platform already knows about.
-  bool get needsEcho => _composingStale || _value.text != _platformText;
+  bool get needsEcho =>
+      _composingStale ||
+      _value.text != _platformText ||
+      _value.selection != _platformSelection;
 
   /// Applies the platform's whole value — the fallback path, and what an IME
   /// that does not do deltas sends.
@@ -88,6 +99,7 @@ final class InputBuffer {
     // The platform sent this, so its copy is current by definition — including
     // the composing range, which is the one thing only it can know.
     _platformText = _value.text;
+    _platformSelection = _value.selection;
     _composingStale = false;
     return changed ? InputKind.value : InputKind.unchanged;
   }
@@ -123,6 +135,7 @@ final class InputBuffer {
     // The deltas came from the platform's copy, so it is current — unless this
     // side had a composing range it has not told it about.
     _platformText = _value.text;
+    _platformSelection = _value.selection;
     return changed || recovered
         ? (recovered ? InputKind.deltasRecovered : InputKind.deltas)
         : InputKind.unchanged;
@@ -158,6 +171,7 @@ final class InputBuffer {
   /// Records that the platform has been handed the buffer's value.
   void echoSent() {
     _platformText = _value.text;
+    _platformSelection = _value.selection;
     _composingStale = false;
   }
 

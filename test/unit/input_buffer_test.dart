@@ -108,6 +108,22 @@ void main() {
     expect(buffer.needsEcho, isFalse);
   });
 
+  test('a caret move is what needs an echo too', () {
+    // The platform types at *its* caret and deletes before it: a tap it never
+    // heard about is a keystroke in the wrong place and a backspace that
+    // deletes nothing — what both devices showed.
+    final buffer = InputBuffer(text: 'ciao mondo')
+      ..editedLocally(
+        const TextEditingValue(
+          text: 'ciao mondo',
+          selection: TextSelection.collapsed(offset: 5),
+        ),
+      );
+    expect(buffer.needsEcho, isTrue);
+    buffer.echoSent();
+    expect(buffer.needsEcho, isFalse);
+  });
+
   test('a composing change needs an echo of its own', () {
     // The one thing only the platform can know about the text it sent: the
     // range it is composing. Coalesced by the caller to one echo per frame.

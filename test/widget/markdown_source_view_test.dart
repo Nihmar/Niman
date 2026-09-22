@@ -789,6 +789,79 @@ void main() {
     expect(buffer.text, 'una\n\ndue\n');
   });
 
+  testWidgets("Backspace and Delete are the surface's own keys", (
+    tester,
+  ) async {
+    // The Linux embedder leaves both to the framework ("already handled inside
+    // the framework"), so a surface that waits for a deletion delta is one
+    // that cannot delete: the device log had not a single `del` in it.
+    final buffer = SourceBuffer.fromText('ciao mondo\n');
+    final changed = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onChanged: changed.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    state.placeCaret(4);
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(buffer.text, 'cia mondo\n');
+    expect(changed.last, 'cia mondo\n', reason: 'the shell saves it');
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pump();
+    expect(buffer.text, 'ciamondo\n');
+    state.selectAll();
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(buffer.text, '', reason: 'a selection goes as one');
+  });
+
+  testWidgets('a two-digit line number stays on one row', (tester) async {
+    // Linux's monospace face is 0.602 em a digit, not 0.6: a gutter sized by
+    // the estimate wrapped "10" onto two rows, and every line from there on
+    // was two rows tall beside numbers that no longer matched it.
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: SourceBuffer.fromText(
+              List<String>.generate(12, (i) => 'riga $i').join('\n'),
+            ),
+            theme: _theme,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    double top(String number) => tester.getTopLeft(find.text(number)).dy;
+    expect(
+      tester.getSize(find.text('10')).height,
+      tester.getSize(find.text('9')).height,
+      reason: 'one row, like every other',
+    );
+    expect(
+      top('11') - top('10'),
+      top('10') - top('9'),
+      reason: 'the lines keep one pitch past the ninth',
+    );
+  });
+
   testWidgets('the note column moves the text in, not the pane', (
     tester,
   ) async {
