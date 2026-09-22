@@ -62,6 +62,84 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  group('a code block too long to lay out whole', () {
+    /// A fence of [lines] numbered lines, between two paragraphs.
+    String fence(int lines) {
+      final out = StringBuffer('before\n\n```dart\n');
+      for (var at = 0; at < lines; at++) {
+        out.writeln('var line$at = $at;');
+      }
+      out.write('```\n\nafter\n');
+      return out.toString();
+    }
+
+    testWidgets(
+      'is drawn in pieces, fences out, as the viewport reaches them',
+      (tester) async {
+        final state = await _pump(tester, fence(5000));
+        // Only the pieces on screen are built, not five thousand lines.
+        final pieces = tester.widgetList<CodePieceView>(
+          find.byType(CodePieceView),
+        );
+        expect(pieces, isNotEmpty);
+        expect(pieces.length, lessThan(5));
+        final first = pieces.first;
+        expect(first.first, isTrue);
+        final text = tester
+            .widgetList<RichText>(
+              find.descendant(
+                of: find.byWidget(first),
+                matching: find.byType(RichText),
+              ),
+            )
+            .single
+            .text
+            .toPlainText();
+        expect(text, startsWith('var line0 = 0;'), reason: 'the fence is out');
+        expect(text.split('\n'), hasLength(MarkdownReadViewState.pieceLines - 1));
+        expect(state.mounted, isTrue);
+      },
+    );
+
+    testWidgets(
+      'its last piece ends at the closing fence, and the note goes on',
+      (tester) async {
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+        await _pump(tester, fence(5000), controller: controller);
+        final clock = Stopwatch()..start();
+        for (var pass = 0; pass < 20; pass++) {
+          controller.jumpTo(controller.position.maxScrollExtent);
+          await tester.pump();
+        }
+        clock.stop();
+        final last = tester
+            .widgetList<CodePieceView>(find.byType(CodePieceView))
+            .where((piece) => piece.last)
+            .single;
+        final text = tester
+            .widgetList<RichText>(
+              find.descendant(
+                of: find.byWidget(last),
+                matching: find.byType(RichText),
+              ),
+            )
+            .single
+            .text
+            .toPlainText();
+        expect(text, endsWith('var line4999 = 4999;'), reason: 'fence out');
+        expect(find.text('after', findRichText: true), findsOneWidget);
+        // Generous for a test host; the whole block laid out took seconds.
+        expect(clock.elapsedMilliseconds, lessThan(5000));
+      },
+    );
+
+    testWidgets('a short block is still one block', (tester) async {
+      await _pump(tester, fence(50));
+      expect(find.byType(CodePieceView), findsNothing);
+    });
+  });
+
   testWidgets('the note column centres the text, as the preview does', (
     tester,
   ) async {

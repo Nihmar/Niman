@@ -211,7 +211,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   void _rescan() {
     final clock = Stopwatch()..start();
     _scanner = BlockScanner(widget.buffer);
-    _blocks = _scanner.index.blocks;
+    _blocks = _pieced(_scanner.index.blocks);
     _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
     _built = 0;
     _log.debug(
@@ -219,6 +219,61 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       '${clock.elapsedMilliseconds}ms',
     );
   }
+
+  /// The lines a code block is drawn in pieces of, past twice as many.
+  ///
+  /// A block is the sliver's unit of layout, and a code block is one
+  /// paragraph: a fence of 12 000 lines — a log pasted in, or a note whose
+  /// fence never closes — was laid out whole the moment any of it scrolled
+  /// into view, and one such frame took 74 s (0.0.9 stress test). Pieces of
+  /// this many lines are laid out as the viewport reaches them, like any
+  /// other block.
+  static const int pieceLines = 200;
+
+  /// Which entries of the block list are pieces of a longer code block, and
+  /// where in it: the first carries the opening fence, the last the closing
+  /// one.
+  final Map<int, ({bool first, bool last})> _pieces =
+      <int, ({bool first, bool last})>{};
+
+  /// [blocks] with every code block longer than twice [pieceLines] cut into
+  /// pieces of that many lines, each an entry of its own.
+  List<Block> _pieced(List<Block> blocks) {
+    _pieces.clear();
+    if (!blocks.any(_isLongCode)) return blocks;
+    final out = <Block>[];
+    for (final block in blocks) {
+      if (!_isLongCode(block)) {
+        out.add(block);
+        continue;
+      }
+      for (var at = block.startLine; at < block.endLine; at += pieceLines) {
+        final end = at + pieceLines < block.endLine
+            ? at + pieceLines
+            : block.endLine;
+        _pieces[out.length] = (
+          first: at == block.startLine,
+          last: end == block.endLine,
+        );
+        out.add(
+          Block(
+            kind: block.kind,
+            startLine: at,
+            endLine: end,
+            quoteDepth: block.quoteDepth,
+            listDepth: block.listDepth,
+            fenceInfo: block.fenceInfo,
+          ),
+        );
+      }
+    }
+    return out;
+  }
+
+  static bool _isLongCode(Block block) =>
+      (block.kind == BlockKind.fencedCode ||
+          block.kind == BlockKind.indentedCode) &&
+      block.lineCount > 2 * pieceLines;
 
   /// Logs the frame that first put content on screen: how many blocks the scan
   /// found, how many that frame built, and how long the whole open took.
@@ -263,7 +318,11 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       BlockKind.thematicBreak => theme.ruleThickness + spacing,
       BlockKind.heading => theme.lineHeight * 1.3 + spacing,
       BlockKind.fencedCode || BlockKind.indentedCode =>
-        block.lineCount * theme.lineHeight + 2 * theme.codePadding + spacing,
+        _pieces.containsKey(index)
+            ? block.lineCount * theme.lineHeight
+            : block.lineCount * theme.lineHeight +
+                  2 * theme.codePadding +
+                  spacing,
       BlockKind.math => block.lineCount * theme.lineHeight * 1.6 + spacing,
       BlockKind.table ||
       BlockKind.html => block.lineCount * theme.lineHeight + spacing,
@@ -391,6 +450,16 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final block = _blocks[index];
     _built++;
     _traceFirstContent();
+    final piece = _pieces[index];
+    if (piece != null) {
+      return CodePieceView(
+        buffer: widget.buffer,
+        block: block,
+        first: piece.first,
+        last: piece.last,
+        theme: _theme ?? _fallbackTheme,
+      );
+    }
     return BlockView(
       parsed: widget.parser.of(block, widget.buffer),
       theme: _theme ?? _fallbackTheme,
