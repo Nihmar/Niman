@@ -106,6 +106,43 @@ void main() {
     );
   });
 
+  testWidgets('a hidden bullet leaves an indent, not a word at the margin', (
+    tester,
+  ) async {
+    Future<Rect> textRect(MarkdownSurfaceMode mode) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: SourceBuffer.fromText('- una voce\ntesto\n'),
+              mode: mode,
+              theme: _theme,
+              showLineNumbers: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      return tester.getRect(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is RichText &&
+                  widget.text.toPlainText().startsWith('-'),
+            )
+            .first,
+      );
+    }
+
+    final source = await textRect(MarkdownSurfaceMode.source);
+    final live = await textRect(MarkdownSurfaceMode.live);
+    expect(
+      live.left,
+      closeTo(source.left + _theme.listIndentPerLevel, 0.01),
+      reason: 'the item is indented by the level its marker was',
+    );
+  });
+
   testWidgets('the caret is at the same offset in both modes', (tester) async {
     // The property the whole arrangement rests on: hiding a marker does not
     // move
