@@ -41,6 +41,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
@@ -54,6 +55,11 @@ import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The colour a selected run is painted with.
 const Color _selectionColor = Color(0x553B82F6);
+
+/// The colours the find bar's matches are painted with: every match, and the
+/// one the bar is on.
+const Color _matchColor = Color(0x55FFB300);
+const Color _currentMatchColor = Color(0xAAFF8F00);
 
 /// The gap between the line numbers and the text.
 ///
@@ -88,6 +94,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.dark = false,
     this.formatMenu,
     this.spellCheck,
+    this.findMatches,
     super.key,
   });
 
@@ -172,6 +179,9 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The note's spelling: the words it underlines, and the context menu's
   /// suggestions and Add to dictionary. Null checks nothing.
   final EditorSpellCheck? spellCheck;
+
+  /// What the find bar found, painted over the lines; null finds nothing.
+  final SourceMatches? findMatches;
 
   @override
   State<MarkdownSourceView> createState() => MarkdownSourceViewState();
@@ -267,6 +277,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input = _makeInput();
     widget.surface?.attachView(this);
     widget.spellCheck?.addListener(_onSpellingChanged);
+    widget.findMatches?.addListener(_onSpellingChanged);
     _scheduleCaret();
     final scroll = widget.surface?.takePendingScroll();
     if (scroll != null) {
@@ -317,6 +328,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       oldWidget.spellCheck?.removeListener(_onSpellingChanged);
       widget.spellCheck?.addListener(_onSpellingChanged);
     }
+    if (!identical(oldWidget.findMatches, widget.findMatches)) {
+      oldWidget.findMatches?.removeListener(_onSpellingChanged);
+      widget.findMatches?.addListener(_onSpellingChanged);
+    }
     if (!identical(oldWidget.buffer, widget.buffer)) {
       // Another note: the keyboard, the history and the caret were this one's.
       final attached = _input.isAttached;
@@ -352,6 +367,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void dispose() {
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
+    widget.findMatches?.removeListener(_onSpellingChanged);
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
@@ -366,7 +382,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   int get lineCount => _tokens.lineCount;
 
   /// The spelling changed its mind (a dictionary loaded, a word added, the
-  /// underline switched off): the lines on screen are drawn again.
+  /// underline switched off), or the find bar found something else: the
+  /// lines on screen are drawn again.
   void _onSpellingChanged() {
     if (mounted) setState(() {});
   }
@@ -1186,6 +1203,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return _spellRanges(index, widget.buffer.lineAt(index));
   }
 
+  /// The find bar's matches on line [index], as offsets local to it.
+  List<(int, int, bool)> _foundIn(int index) {
+    final matches = widget.findMatches;
+    if (matches == null) return const <(int, int, bool)>[];
+    final start = widget.buffer.offsetOfLine(index);
+    return matches
+        .within(start, start + widget.buffer.lineAt(index).length)
+        .toList();
+  }
+
   /// `[from, to)` of the note, as offsets local to line [index], or null.
   (int, int)? _rangeIn(int index, int from, int to) {
     final start = widget.buffer.offsetOfLine(index);
@@ -1500,6 +1527,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             selected: _selectionIn(index),
                             composing: _composingIn(index),
                             misspelled: _misspelledIn(index),
+                            found: _foundIn(index),
                             misspelledColor: Theme.of(context)
                                 .colorScheme
                                 .error,
@@ -2048,6 +2076,7 @@ final class _Line extends StatelessWidget {
     required this.width,
     required this.misspelled,
     required this.misspelledColor,
+    required this.found,
     required this.index,
     required this.caretLine,
     required this.caret,
@@ -2083,6 +2112,10 @@ final class _Line extends StatelessWidget {
 
   /// The colour their wavy underline is drawn in.
   final Color misspelledColor;
+
+  /// The find bar's matches on this line, local, and whether each is the
+  /// current one.
+  final List<(int, int, bool)> found;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -2260,6 +2293,7 @@ final class _Line extends StatelessWidget {
       selected,
       composing,
       for (final word in misspelled) (word.start, word.end),
+      for (final match in found) (match.$1, match.$2),
     ]) {
       if (range == null) continue;
       if (range.$1 > start && range.$1 < end) cuts.add(range.$1);
@@ -2276,6 +2310,16 @@ final class _Line extends StatelessWidget {
         piece = (piece ?? const TextStyle()).copyWith(
           background: Paint()..color = _selectionColor,
         );
+      }
+      // A match is drawn over the selection: the current one *is* the
+      // selection, and it has to read as the one the bar is on.
+      for (final match in found) {
+        if (from >= match.$1 && to <= match.$2) {
+          piece = (piece ?? const TextStyle()).copyWith(
+            background: Paint()
+              ..color = match.$3 ? _currentMatchColor : _matchColor,
+          );
+        }
       }
       if (inside(composing)) {
         piece = (piece ?? const TextStyle()).copyWith(

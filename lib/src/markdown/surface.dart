@@ -25,6 +25,7 @@ import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -73,6 +74,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.dark = false,
     this.formatMenu,
     this.spellCheck,
+    this.findMatches,
     super.key,
   });
 
@@ -131,6 +133,9 @@ final class MarkdownSurface extends StatelessWidget {
   /// The note's spelling: its underline and its menu entries.
   final EditorSpellCheck? spellCheck;
 
+  /// What the find bar found, painted over the lines.
+  final SourceMatches? findMatches;
+
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
@@ -161,5 +166,6 @@ final class MarkdownSurface extends StatelessWidget {
     hideMarkers: hidesMarkers,
     formatMenu: formatMenu,
     spellCheck: spellCheck,
+    findMatches: findMatches,
   );
 }

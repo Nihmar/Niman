@@ -17,6 +17,7 @@ import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/editor_tool.dart';
+import 'package:niman/src/editor/find_bar.dart';
 import 'package:niman/src/editor/find_panel.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -41,6 +42,7 @@ import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -358,6 +360,12 @@ final class _NoteViewState extends State<NoteView>
   /// The in-editor find & replace state (the classic bar): re_editor's
   /// find machinery over [_controller], driven by `NimanFindPanel`.
   late final CodeFindController _findController;
+
+  /// The unified source pane's find & replace, over [_surface]'s buffer.
+  late final SourceFindController _sourceFind = SourceFindController(
+    surface: () => _surface,
+    onClose: _focus.requestFocus,
+  );
 
   /// The `CodeLines` the last processed text edit produced. A controller
   /// change that reuses the same instance is selection-only (no save).
@@ -829,6 +837,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _findController.dispose();
+    _sourceFind.dispose();
     _outlineNotifier.dispose();
     _wysiwygActive.dispose();
     _formatKeys.detach();
@@ -1002,6 +1011,8 @@ final class _NoteViewState extends State<NoteView>
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
       _setLegacyText(text);
+      // What the bar found was in the note that went.
+      _sourceFind.close(refocus: false);
       _surface = _surfaceFor(
         text,
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
@@ -1408,7 +1419,8 @@ final class _NoteViewState extends State<NoteView>
     // At the *note* text size, as the preview is (T-M6-12): the legacy editor
     // took `AppTextScales.noteFontSize`, and the surface without this drew the
     // note at the interface size, so the note's size setting did nothing.
-    return MediaQuery(
+    // The find bar above it keeps the interface's.
+    final note = MediaQuery(
       data: MediaQuery.of(context)
           .copyWith(textScaler: noteTextScalerOf(context)),
       child: MarkdownSurface(
@@ -1425,13 +1437,84 @@ final class _NoteViewState extends State<NoteView>
         column: widget.noteColumn,
         formatMenu: _formatMenu,
         spellCheck: widget.spellCheck,
-        onChanged: () =>
-            _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine),
+        findMatches: _sourceFind,
+        onChanged: () {
+          _sourceFind.noteEdited();
+          _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine);
+        },
         onSelection: (selection) {
           _surfaceCaretLine = buffer.lineOf(selection.extent) + 1;
         },
       ),
     );
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onKeyEvent: _sourceFindKey,
+      child: Column(
+        children: <Widget>[
+          ListenableBuilder(
+            listenable: _sourceFind,
+            builder: (context, _) => FindBar(
+              controller: _sourceFind,
+              column: widget.noteColumn,
+              keyPrefix: 'source',
+            ),
+          ),
+          Expanded(child: note),
+        ],
+      ),
+    );
+  }
+
+  /// The find keys the legacy editor answered (re_editor's, and Niman's
+  /// Ctrl+H), for the note and its bar: Ctrl+F finds, Ctrl+H and Ctrl+Alt+F
+  /// replace, F3 and Shift+F3 walk the matches, Escape closes the bar.
+  ///
+  /// A key handler rather than shortcuts, so that a key it has nothing to do
+  /// with — Escape with the bar closed — goes on to the shell.
+  KeyEventResult _sourceFindKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final keyboard = HardwareKeyboard.instance;
+    bool pressed(SingleActivator key) => key.accepts(event, keyboard);
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    final find = SingleActivator(
+      LogicalKeyboardKey.keyF,
+      control: !mac,
+      meta: mac,
+    );
+    final replace = SingleActivator(
+      LogicalKeyboardKey.keyF,
+      control: !mac,
+      meta: mac,
+      alt: true,
+    );
+    if (pressed(replace) ||
+        (!mac &&
+            pressed(
+              const SingleActivator(LogicalKeyboardKey.keyH, control: true),
+            ))) {
+      _sourceFind.open(replace: true);
+      return KeyEventResult.handled;
+    }
+    if (pressed(find)) {
+      _sourceFind.open();
+      return KeyEventResult.handled;
+    }
+    if (!_sourceFind.visible) return KeyEventResult.ignored;
+    if (pressed(const SingleActivator(LogicalKeyboardKey.f3))) {
+      _sourceFind.nextMatch();
+      return KeyEventResult.handled;
+    }
+    if (pressed(const SingleActivator(LogicalKeyboardKey.f3, shift: true))) {
+      _sourceFind.previousMatch();
+      return KeyEventResult.handled;
+    }
+    if (pressed(const SingleActivator(LogicalKeyboardKey.escape))) {
+      _sourceFind.close();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   /// The line the unified surface's caret is on (1-based), or null before it
@@ -2168,6 +2251,8 @@ final class _NoteViewState extends State<NoteView>
                     onOutline: _openOutline,
                     onFind: widget.showWysiwyg
                         ? () => _wysiwygKey.currentState?.openFind()
+                        : _usesUnifiedSource
+                        ? () => _sourceFind.open()
                         : _findController.findMode,
                     onSpellCheck: _openSpellCheck,
                     onToggleEditorKind: _toggleEditorKind,

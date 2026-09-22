@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:niman/src/editor/find_bar.dart';
 
 /// Find & replace over the WYSIWYG document (T-WYS-08).
 ///
@@ -9,7 +10,8 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 /// match offsets, keeps the current match selected, and replaces through the
 /// normal undoable [quill.QuillController.replaceText] path. The panel edits
 /// [findInput] and [replaceInput]; this holds the state and the actions.
-final class WysiwygFindController extends ChangeNotifier {
+final class WysiwygFindController extends ChangeNotifier
+    implements FindBarModel {
   /// Creates the controller over the open document.
   new(this._controller) {
     _changes = _controller.changes.listen((_) => _onDocumentChanged());
@@ -19,10 +21,15 @@ final class WysiwygFindController extends ChangeNotifier {
   late final StreamSubscription<quill.DocChange> _changes;
 
   /// The query the panel edits.
+  @override
   final TextEditingController findInput = TextEditingController();
 
   /// The replacement the panel edits.
+  @override
   final TextEditingController replaceInput = TextEditingController();
+
+  @override
+  FocusNode? get findFocus => null;
 
   bool _visible = false;
   bool _replaceMode = false;
@@ -31,18 +38,23 @@ final class WysiwygFindController extends ChangeNotifier {
   int _index = -1;
 
   /// Whether the bar is open.
+  @override
   bool get visible => _visible;
 
   /// Whether the bar shows its replace row.
+  @override
   bool get replaceMode => _replaceMode;
 
   /// Whether the query is matched case-sensitively.
+  @override
   bool get caseSensitive => _caseSensitive;
 
   /// How many matches the query has.
+  @override
   int get matchCount => _matches.length;
 
   /// The 0-based index of the selected match, or -1.
+  @override
   int get matchIndex => _index;
 
   String get _query => findInput.text;
@@ -56,6 +68,7 @@ final class WysiwygFindController extends ChangeNotifier {
   }
 
   /// Closes the bar and drops the matches.
+  @override
   void close() {
     _visible = false;
     _replaceMode = false;
@@ -65,12 +78,14 @@ final class WysiwygFindController extends ChangeNotifier {
   }
 
   /// Flips the replace row.
+  @override
   void toggleMode() {
     _replaceMode = !_replaceMode;
     notifyListeners();
   }
 
   /// Flips case sensitivity and re-searches.
+  @override
   void toggleCaseSensitive() {
     _caseSensitive = !_caseSensitive;
     _search();
@@ -78,12 +93,14 @@ final class WysiwygFindController extends ChangeNotifier {
   }
 
   /// Re-runs the search (the query field changed).
+  @override
   void search() {
     _search();
     notifyListeners();
   }
 
   /// Selects the next match, wrapping around.
+  @override
   void nextMatch() {
     if (_matches.isEmpty) return;
     _index = (_index + 1) % _matches.length;
@@ -92,6 +109,7 @@ final class WysiwygFindController extends ChangeNotifier {
   }
 
   /// Selects the previous match, wrapping around.
+  @override
   void previousMatch() {
     if (_matches.isEmpty) return;
     _index = (_index - 1 + _matches.length) % _matches.length;
@@ -100,6 +118,7 @@ final class WysiwygFindController extends ChangeNotifier {
   }
 
   /// Replaces the selected match and re-searches.
+  @override
   void replaceMatch() {
     if (_index < 0 || _index >= _matches.length) return;
     final offset = _matches[_index];
@@ -115,6 +134,7 @@ final class WysiwygFindController extends ChangeNotifier {
   }
 
   /// Replaces every match, from the end so the offsets keep.
+  @override
   void replaceAllMatches() {
     if (_matches.isEmpty) return;
     final replacement = replaceInput.text;

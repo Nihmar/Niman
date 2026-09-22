@@ -154,6 +154,17 @@ final class MarkdownSurfaceController {
     _pending = _pending.clampTo(buffer.length);
   }
 
+  /// Selects [selection] and brings its end into view.
+  void select(SelectionModel selection) {
+    final next = selection.clampTo(buffer.length);
+    final view = _view;
+    if (view != null) {
+      view.select(next);
+      return;
+    }
+    _pending = next;
+  }
+
   /// Puts the caret at [offset] and brings its line into view.
   void placeCaret(int offset) {
     final view = _view;

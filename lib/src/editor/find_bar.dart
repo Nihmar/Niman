@@ -1,24 +1,86 @@
+/// The find & replace bar over a surface's own find state (T-WYS-08, #245).
+///
+/// The same face as the legacy source editor's panel, over whichever
+/// [FindBarModel] the surface keeps — the WYSIWYG's over the Quill document,
+/// the unified surface's over its buffer — instead of re_editor's find
+/// machinery: the query row, the replace row, the match counter and the
+/// navigation buttons.
+library;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// The WYSIWYG find & replace bar (T-WYS-08).
-///
-/// The same face as the source editor's panel, over [WysiwygFindController]
-/// instead of re_editor's find machinery: the query row, the replace row,
-/// the match counter and the navigation buttons.
-final class WysiwygFindPanel extends StatelessWidget
-    implements PreferredSizeWidget {
-  /// Creates the panel over [controller].
+/// What a find bar shows and drives: the state and the actions of one
+/// surface's find.
+abstract interface class FindBarModel implements Listenable {
+  /// Whether the bar is open.
+  bool get visible;
+
+  /// Whether the bar shows its replace row.
+  bool get replaceMode;
+
+  /// Whether the query is matched case-sensitively.
+  bool get caseSensitive;
+
+  /// How many matches the query has.
+  int get matchCount;
+
+  /// The 0-based index of the current match, or -1.
+  int get matchIndex;
+
+  /// The query the bar edits.
+  TextEditingController get findInput;
+
+  /// The query field's focus, when the model moves it itself; null lets the
+  /// field take the focus as it appears.
+  FocusNode? get findFocus;
+
+  /// The replacement the bar edits.
+  TextEditingController get replaceInput;
+
+  /// Runs the search again: the query changed.
+  void search();
+
+  /// Flips the replace row.
+  void toggleMode();
+
+  /// Flips case sensitivity.
+  void toggleCaseSensitive();
+
+  /// Goes to the next match, wrapping around.
+  void nextMatch();
+
+  /// Goes to the previous match, wrapping around.
+  void previousMatch();
+
+  /// Replaces the current match.
+  void replaceMatch();
+
+  /// Replaces every match.
+  void replaceAllMatches();
+
+  /// Closes the bar.
+  void close();
+}
+
+/// The bar over [controller].
+final class FindBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates the bar over [controller]; [keyPrefix] names its fields and
+  /// buttons (`wysiwyg-find-input`, …).
   const new({
     required this.controller,
     this.column = NoteColumn.off,
+    this.keyPrefix = 'wysiwyg',
     super.key,
   });
 
   /// The find state and actions.
-  final WysiwygFindController controller;
+  final FindBarModel controller;
+
+  /// What the bar's keys start with.
+  final String keyPrefix;
 
   /// The note's column: the bar's rows keep to it (issue #171).
   final NoteColumn column;
@@ -36,6 +98,22 @@ final class WysiwygFindPanel extends StatelessWidget
   Widget build(BuildContext context) {
     if (!controller.visible) return const SizedBox.shrink();
     final theme = Theme.of(context);
+    // The keys every find bar answers from its fields: Escape closes it,
+    // Shift+Enter and F3 walk the matches.
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.escape): controller.close,
+        const SingleActivator(LogicalKeyboardKey.enter, shift: true):
+            controller.previousMatch,
+        const SingleActivator(LogicalKeyboardKey.f3): controller.nextMatch,
+        const SingleActivator(LogicalKeyboardKey.f3, shift: true):
+            controller.previousMatch,
+      },
+      child: _bar(theme),
+    );
+  }
+
+  Widget _bar(ThemeData theme) {
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
       child: Column(
@@ -66,7 +144,7 @@ final class WysiwygFindPanel extends StatelessWidget
         children: [
           const SizedBox(width: 4),
           IconButton(
-            key: const Key('wysiwyg-find-mode'),
+            key: Key('$keyPrefix-find-mode'),
             tooltip: controller.replaceMode
                 ? AppStrings.editorFindCloseTooltip
                 : AppStrings.editorFindReplaceModeTooltip,
@@ -81,8 +159,9 @@ final class WysiwygFindPanel extends StatelessWidget
           ),
           Expanded(
             child: TextField(
-              key: const Key('wysiwyg-find-input'),
+              key: Key('$keyPrefix-find-input'),
               controller: controller.findInput,
+              focusNode: controller.findFocus,
               autofocus: true,
               style: theme.textTheme.bodyMedium,
               decoration: InputDecoration(
@@ -98,7 +177,7 @@ final class WysiwygFindPanel extends StatelessWidget
           Text(label, style: theme.textTheme.bodySmall),
           const SizedBox(width: 8),
           _iconButton(
-            key: const Key('wysiwyg-find-case'),
+            key: Key('$keyPrefix-find-case'),
             tooltip: AppStrings.editorFindCaseTooltip,
             icon: Icons.text_fields,
             active: controller.caseSensitive,
@@ -106,21 +185,21 @@ final class WysiwygFindPanel extends StatelessWidget
             onPressed: controller.toggleCaseSensitive,
           ),
           _iconButton(
-            key: const Key('wysiwyg-find-prev'),
+            key: Key('$keyPrefix-find-prev'),
             tooltip: AppStrings.editorFindPreviousTooltip,
             icon: Icons.keyboard_arrow_up,
             theme: theme,
             onPressed: count == 0 ? null : controller.previousMatch,
           ),
           _iconButton(
-            key: const Key('wysiwyg-find-next'),
+            key: Key('$keyPrefix-find-next'),
             tooltip: AppStrings.editorFindNextTooltip,
             icon: Icons.keyboard_arrow_down,
             theme: theme,
             onPressed: count == 0 ? null : controller.nextMatch,
           ),
           _iconButton(
-            key: const Key('wysiwyg-find-close'),
+            key: Key('$keyPrefix-find-close'),
             tooltip: AppStrings.editorFindCloseTooltip,
             icon: Icons.close,
             theme: theme,
@@ -138,7 +217,7 @@ final class WysiwygFindPanel extends StatelessWidget
         const SizedBox(width: 48),
         Expanded(
           child: TextField(
-            key: const Key('wysiwyg-replace-input'),
+            key: Key('$keyPrefix-replace-input'),
             controller: controller.replaceInput,
             style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
@@ -150,7 +229,7 @@ final class WysiwygFindPanel extends StatelessWidget
           ),
         ),
         _iconButton(
-          key: const Key('wysiwyg-replace-one'),
+          key: Key('$keyPrefix-replace-one'),
           tooltip: AppStrings.editorReplaceOneTooltip,
           icon: Icons.find_replace,
           theme: theme,
@@ -159,7 +238,7 @@ final class WysiwygFindPanel extends StatelessWidget
               : controller.replaceMatch,
         ),
         _iconButton(
-          key: const Key('wysiwyg-replace-all'),
+          key: Key('$keyPrefix-replace-all'),
           tooltip: AppStrings.editorReplaceAllTooltip,
           icon: Icons.done_all,
           theme: theme,
