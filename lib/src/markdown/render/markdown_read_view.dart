@@ -18,6 +18,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -39,6 +40,7 @@ final class MarkdownReadView extends StatefulWidget {
     required this.mathCache,
     this.controller,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.column = NoteColumn.off,
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
@@ -59,6 +61,11 @@ final class MarkdownReadView extends StatefulWidget {
 
   /// The inset around the content.
   final EdgeInsets padding;
+
+  /// The shell's note column: the text set in a centred column of its
+  /// width, as the legacy preview and the source pane set it. Without it
+  /// the read view ran from the pane's left edge on a wide window.
+  final NoteColumn column;
 
   /// Called when a link is tapped.
   final void Function(String text, String? href)? onTapLink;
@@ -309,14 +316,31 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     // Measured here, once, rather than by a `LayoutBuilder` per formula: a
     // `LayoutBuilder` cannot answer an intrinsic query, and a display formula
     // inside a table cell (a column sized by `IntrinsicColumnWidth`) is asked
-    // for one.
-    final pane = MediaQuery.sizeOf(context).width;
-    final availableWidth = pane - widget.padding.horizontal;
+    // for one. This one is the pane's, around a scroll view nobody asks.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pane = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final side = widget.column.sideSpaceIn(pane);
+        return _scrollView(
+          heights,
+          widget.padding + EdgeInsets.symmetric(horizontal: side),
+          pane,
+        );
+      },
+    );
+  }
+
+  /// The note's blocks, then its footnotes, inset by [padding] in a pane
+  /// [pane] wide.
+  Widget _scrollView(BlockHeightMap heights, EdgeInsets padding, double pane) {
+    final availableWidth = pane - padding.horizontal;
     return CustomScrollView(
       controller: widget.controller,
       slivers: <Widget>[
         SliverPadding(
-          padding: widget.padding,
+          padding: padding,
           // A sliver that places its children from the height map and measures
           // the ones it lays out: `SliverVariedExtentList` forced every extent
           // and clipped what was taller than its estimate (#250), and
@@ -337,7 +361,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         // every footnote at the top of the frame costs the frame. Measured:
         // appending it whole took first content from 76 ms to 112 ms on the
         // geometry note and the jump from 9 ms to 56.
-        SliverPadding(padding: widget.padding, sliver: _footnoteSliver()),
+        SliverPadding(padding: padding, sliver: _footnoteSliver()),
       ],
     );
   }

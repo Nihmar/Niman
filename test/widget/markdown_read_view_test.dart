@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex/katex.dart' show KatexBoxPainter;
 import 'package:katex_dart/katex_dart.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
@@ -40,6 +41,7 @@ Future<MarkdownReadViewState> _pump(
   WidgetTester tester,
   String document, {
   ScrollController? controller,
+  NoteColumn column = NoteColumn.off,
 }) async {
   final parser = BlockParser();
   await tester.pumpWidget(
@@ -50,6 +52,7 @@ Future<MarkdownReadViewState> _pump(
           parser: parser,
           mathCache: _syncCache(),
           controller: controller,
+          column: column,
         ),
       ),
     ),
@@ -59,6 +62,18 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets('the note column centres the text, as the preview does', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(tester, 'a paragraph\n', column: const NoteColumn(width: 600));
+    final left = tester.getTopLeft(find.textContaining('a paragraph')).dx;
+    // (1400 - 600 - 2 * 16) / 2 of side space, then the 16 px inset.
+    expect(left, 384 + 16);
+  });
+
   testWidgets('a long note lays out a viewport, not the note', (tester) async {
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1;
