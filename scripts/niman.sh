@@ -75,7 +75,11 @@ apk() {
 }
 
 linux_build() {
-  flutter build linux --release >"$log" 2>&1
+  # beta: the testing build, with a support folder of its own (niman-testing)
+  # so it never shares a database with the installed release.
+  local channel=()
+  if [ "${1:-}" = "beta" ]; then channel=(--dart-define=APP_CHANNEL=testing); fi
+  flutter build linux --release "${channel[@]}" >"$log" 2>&1
   local status=$?
   tail -n 3 "$log"
   if [ $status -eq 0 ]; then
@@ -94,7 +98,8 @@ usage: ./scripts/niman.sh <analyze|test|check|integration|apk|linux>
              sync_e2e needs a Linux display
   apk [beta]      flutter build apk --release
                   (beta: the testing build, app ID dev.niman.niman.beta)
-  linux    flutter build linux --release
+  linux [beta]    flutter build linux --release
+                  (beta: the testing build, its own data folder niman-testing)
 Full logs: /tmp/niman/niman-<cmd>.log
 EOF
 }
