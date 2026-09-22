@@ -974,6 +974,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       spellCheck: widget.spellCheck,
       reloadToken: _noteReloadToken,
       saveNote: _noteSaver(controller),
+      saveNoteStream: _noteStreamSaver(controller),
       createMissingNote: _missingNoteCreator(controller),
     );
   }
@@ -1202,6 +1203,28 @@ final class _LibraryShellState extends State<_LibraryShell>
         return writeNoteOffIsolate(path, content).then((_) {});
       }
       return ops.saveNote(
+        relPath(path, root),
+        content,
+        editSession: editSession,
+      );
+    };
+  }
+
+  /// The same write path for a note handed over in slices
+  /// ([NoteView.saveNoteStream]): the joined twin above, without the join.
+  ///
+  /// Null for a note outside the library root as well, which is the one
+  /// case the streaming write does not cover — [NoteView] then joins the
+  /// note and saves it through [_noteSaver].
+  NoteStreamSaver? _noteStreamSaver(LibrarySession controller) {
+    final ops = controller.ops;
+    final root = controller.root;
+    if (ops == null || root == null) return null;
+    return (path, content, {required editSession}) {
+      if (!p.isWithin(root, path)) {
+        return Future<void>.error(StateError('"$path" is outside the library'));
+      }
+      return ops.saveNoteStream(
         relPath(path, root),
         content,
         editSession: editSession,
@@ -3045,6 +3068,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         spellCheck: widget.spellCheck,
         reloadToken: _noteReloadToken,
         saveNote: _noteSaver(controller),
+        saveNoteStream: _noteStreamSaver(controller),
         createMissingNote: _missingNoteCreator(controller),
         statusActions: _statusActionsFor(pane),
       ),

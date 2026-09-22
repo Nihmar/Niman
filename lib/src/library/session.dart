@@ -9,6 +9,7 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
@@ -84,6 +85,18 @@ abstract interface class NoteOperations {
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
   Future<void> saveNote(String path, String content, {int? editSession});
+
+  /// Saves a note whose text is never joined: [content] makes the bytes one
+  /// slice at a time and the write takes them as they arrive.
+  ///
+  /// The same save as [saveNote] in every other way — the same history
+  /// step, the same bytes on disk, the same reindex behind it — for a note
+  /// too long to join on the UI isolate (see `docs/dev/huge-notes.md`).
+  Future<void> saveNoteStream(
+    String path,
+    NoteContentProducer content, {
+    int? editSession,
+  });
 
   /// The kept history of the note at [path]: its versions, oldest first,
   /// and the pinned ones (issue #55).

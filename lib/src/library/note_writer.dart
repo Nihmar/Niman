@@ -11,6 +11,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:path/path.dart' as p;
 
 /// Saves note text to disk: the one write path the editor goes through.
@@ -61,17 +62,33 @@ final class NoteWriter {
   /// note opened once, however many autosaves follow): its first save
   /// keeps the note's previous text as a version. [forced] keeps one
   /// whatever the interval (a restore, a sync download).
+  ///
+  /// [content] is the note's text, already joined — or a
+  /// [NoteContentProducer], which makes its bytes a slice at a time so a
+  /// note too long to join on the UI isolate is never joined at all (see
+  /// [saveNoteStream]); [contentLength] is then its length in characters,
+  /// for the sizes the log reports.
   Future<void> save(
     String path,
-    String content, {
+    NoteText content, {
     int? editSession,
     HistoryReason? forced,
+    int? contentLength,
   }) {
     final queuedAt = Stopwatch()..start();
     final previous = _tails[path] ?? Future<void>.value();
     final run = previous
         .then<void>((_) {}, onError: (Object _) {})
-        .then((_) => _write(path, content, editSession, forced, queuedAt));
+        .then(
+          (_) => _write(
+            path,
+            content,
+            editSession,
+            forced,
+            queuedAt,
+            contentLength,
+          ),
+        );
     final tail = run.then<void>((_) {}, onError: (Object _) {});
     _tails[path] = tail;
     unawaited(
@@ -156,17 +173,19 @@ final class NoteWriter {
 
   Future<void> _write(
     String path,
-    String content,
+    NoteText content,
     int? editSession,
     HistoryReason? forced,
     Stopwatch queuedAt,
+    int? contentLength,
   ) async {
     final waitMs = queuedAt.elapsedMilliseconds;
     final abs = p.join(root, path);
     final session = editSession == null ? '' : ', session $editSession';
     final force = forced == null ? '' : ', forced ${forced.name}';
+    final length = content is String ? content.length : contentLength ?? 0;
     _log.debug(
-      'save start: "$path" (${content.length} chars$session$force, '
+      'save start: "$path" ($length chars$session$force, '
       'waited $waitMs ms)',
     );
     final request = await history?.requestFor(
@@ -174,13 +193,24 @@ final class NoteWriter {
       editSession: editSession,
       forced: forced,
     );
-    final NoteWriteResult result;
+    final NoteWriteResult? result;
     try {
-      result = await _writeOffIsolate(root, path, content, request);
+      result = content is String
+          ? await _writeOffIsolate(root, path, content, request)
+          : await saveNoteStream(
+              root: root,
+              rel: path,
+              produce: content as NoteContentProducer,
+              snapshot: request,
+            );
     } catch (e) {
       _log.error('save failed: "$path": $e');
       rethrow;
     }
+    // A save the producer abandoned: the disk was not touched, so there is
+    // nothing to report, log or reindex — the caller's next save writes the
+    // note as it then stands.
+    if (result == null) return;
     history?.report(path, result.snapshot, result.snapshotError);
     _log.info(
       'saved: "$path" (${result.bytes} bytes, '
@@ -270,6 +300,10 @@ final class NoteWriter {
     _indexing.add(job);
   }
 }
+
+/// What a save writes: the note's text, joined, or the producer that makes
+/// its bytes a slice at a time ([saveNoteStream]).
+typedef NoteText = Object;
 
 /// What [writeNoteFile] did: the bytes written, whether the file is new,
 /// where the time went, and the history snapshot taken before the write

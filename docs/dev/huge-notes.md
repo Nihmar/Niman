@@ -35,6 +35,39 @@ for first: **one reading of the note for the editor and the preview.**
 | `1f15406` | `BlockScanner`: a line edited in place has its state replaced in place, and the blocks after a line added or removed are *owed* the shift rather than moved (`_shiftFrom`/`_shift`, paid between one edit and the next) | a character ~20 ms, an Enter ~170 ms (JIT bench) | a character 0.2 ms, an Enter 25 ms |
 | `cee783e` | The save of a note past 2 MB waits 2 s, past 16 MB 5 s | a 0.4 s stall after every half-second pause | the stall only after a real pause (a mitigation, see below) |
 | `95ffa00` | A format command (bold, list, heading, indent…) is handed the lines its selection touches (`MarkdownSurfaceController.applyLineCommand`); a property test holds every command to its whole-note answer, LF and CRLF. `SourceBuffer.caretOffset`: an offset inside a CRLF is its line's end | seconds for a bold (join, formatted copy, compare) | the touched lines only |
+| the streaming save | The save hands the note over in slices instead of joining it: `SourceBuffer.sliceText`, the producer the editor feeds, and a writing isolate that takes the bytes as they are made (`note_write_stream.dart`) | 671 ms of one-go work per save (190 ms join + 481 ms isolate copy and encode) | 169 slices, worst 20 ms — the frames keep coming, and no full copy of the note exists |
+
+### The streaming save, measured on the 247 MB note
+
+`dart run tool/save_stream_bench.dart "Quicknote.md"` (246 867 656 chars,
+2 757 545 lines), JIT, the real `SourceBuffer`:
+
+| | Old (join, then one isolate) | New (slice, encode, send) |
+|---|---|---|
+| UI-isolate work per save | 190 ms join + 481 ms isolate copy and encode = **671 ms in one go** | 169 slices, longest 1.5 MB in 4 ms, **worst slice 20 ms** |
+| The note copied whole | yes — a string is copied between isolates, never shared | no — only the slice in flight exists |
+| Save wall-clock | — | 1149 ms (the writer takes the bytes while the next slice is made) |
+
+The wall-clock got longer (the per-slice `StringBuffer` and the message cost
+are real), and that is the point: the same work is no longer one 671 ms
+blocking turn of the UI isolate but 169 turns under 20 ms, so the frames
+land between them. The slices are 16 384 lines or 4 MB of characters,
+whichever comes first, and the loop yields between them
+(`note_view.dart`, `kSaveSliceLines`/`kSaveSliceChars`).
+
+Two traps found on the way, both in `note_write_stream.dart`:
+
+- **A message between isolates may carry one port, not two.** A spawn
+  message holding two `SendPort`s starts an isolate whose ports then
+  deliver nothing at all, with no error anywhere. So the writer is handed
+  one port, announces the port it made for itself, and is sent the port its
+  result goes to as the first message of the conversation. The rule is
+  written at the top of that file.
+- **A long-lived spawned isolate does not finish awaited file work under
+  `flutter test`.** The same awaits complete in a plain `dart run` isolate;
+  under the test harness the writer sat on the first `await` until the test
+  timed out. The writer's file work is therefore synchronous, which costs a
+  frame nothing — it is the writing isolate.
 
 ### The interactive test (profile build, `APP_CHANNEL=testing`)
 
@@ -61,18 +94,11 @@ Every item is a path that still reads the whole note on the UI thread, or a
 cost that grows with it. None is a shortcut to take: each has its proper fix
 written next to it.
 
-1. **The save joins the note and copies it.** `_performSave` joins the buffer
-   (300–530 ms) and `NoteWriter._writeOffIsolate` sends the string to an
-   isolate, which copies it (about 100 ms for 246 MB: strings are copied
-   between isolates, not shared — measured). The debounce of `cee783e` only
-   moves the stall to a pause. The fix: the history snapshot and the reindex
-   read the disk, so nothing on the way needs the joined string. Take a
-   snapshot of the line lists (pointer copies, O(lines)), encode them in
-   slices of a few milliseconds that yield to the frames, and write the
-   chunks with async file I/O to the temp file that is then renamed (or hand
-   the bytes over as `TransferableTypedData`). `NoteWriter` gains a save that
-   takes bytes; `writeNoteFile` and the history request stay as they are. The
-   close guard's save may stay synchronous.
+1. ~~**The save joins the note and copies it.**~~ Done: the note is handed
+   over in slices and the writer takes the bytes as they are made
+   (`note_write_stream.dart`; see the table above). The debounce of
+   `cee783e` stays — a save is still disk work worth batching — but what it
+   was hiding is gone.
 2. **The statistics join the note too.** The word count and the outline wait
    for the pause (`_statsDelay`), then join and copy to an isolate. The
    outline is the headings, which the block index already has; the word count

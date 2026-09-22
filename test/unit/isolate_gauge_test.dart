@@ -28,6 +28,21 @@ void main() {
     expect(IsolateGauge.inFlight, before);
   });
 
+  test('a long-running job is counted from begin to finishJob', () {
+    final before = IsolateGauge.inFlight;
+
+    final job = IsolateGauge.begin('stream "Notes/a.md"');
+    expect(IsolateGauge.inFlight, before + 1);
+
+    IsolateGauge.finishJob(job);
+    expect(IsolateGauge.inFlight, before);
+
+    // A second finish for the same ticket is a no-op: a caller that tidies
+    // up twice must not count somebody else's job out.
+    IsolateGauge.finishJob(job);
+    expect(IsolateGauge.inFlight, before);
+  });
+
   test('concurrent jobs raise the peak and all come back', () async {
     final before = IsolateGauge.peak;
 

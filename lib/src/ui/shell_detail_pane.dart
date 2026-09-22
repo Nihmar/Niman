@@ -48,6 +48,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.readNote,
     this.writeNote,
     this.saveNote,
+    this.saveNoteStream,
     this.createMissingNote,
     super.key,
   });
@@ -145,6 +146,10 @@ final class ShellDetailPane extends StatelessWidget {
   /// open library) lets the editor write directly.
   final NoteSaver? saveNote;
 
+  /// See [NoteView.saveNoteStream]: the save a note too long to join goes
+  /// through.
+  final NoteStreamSaver? saveNoteStream;
+
   /// The dead-link note-creation path (issue #78); null (no open
   /// library) keeps the dead-link snackbar instead of the offer.
   final Future<String> Function(String path)? createMissingNote;
@@ -222,6 +227,7 @@ final class ShellDetailPane extends StatelessWidget {
     spellCheck: spellCheck,
     reloadToken: reloadToken,
     saveNote: saveNote,
+    saveNoteStream: saveNoteStream,
     createMissingNote: createMissingNote,
     readNote: readNote,
     writeNote: writeNote,

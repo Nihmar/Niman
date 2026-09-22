@@ -37,6 +37,7 @@ import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/image_import.dart';
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
@@ -84,6 +85,15 @@ typedef NoteSaver = Future<void> Function(
   required int editSession,
 });
 
+/// Saves a note whose text the editor never joins: [content] makes the
+/// bytes a slice at a time, and the save answers when the disk holds them.
+/// See [NoteView.saveNoteStream].
+typedef NoteStreamSaver = Future<void> Function(
+  String path,
+  NoteContentProducer content, {
+  required int editSession,
+});
+
 /// Opens a note file in the source editor and keeps disk in sync.
 ///
 /// The file is the source of truth (design.md): the initial read happens
@@ -122,6 +132,7 @@ final class NoteView extends StatefulWidget {
     this.readNote,
     this.writeNote,
     this.saveNote,
+    this.saveNoteStream,
     this.controller,
     this.linkSource,
     this.onOpenNote,
@@ -227,6 +238,12 @@ final class NoteView extends StatefulWidget {
   /// with the editor session the save belongs to. Takes precedence over
   /// [writeNote]; null (no open library) falls back to a direct write.
   final NoteSaver? saveNote;
+
+  /// Saves a note whose text is too long to join (a [NoteStreamSaver]):
+  /// the producer it is handed makes the bytes one slice at a time and the
+  /// write takes them as they come. Null — no library, or a note outside
+  /// its root — joins the note and saves it through [saveNote] as before.
+  final NoteStreamSaver? saveNoteStream;
 
   /// The editor's controller (a test seam; one is created by default).
   final CodeLineEditingController? controller;
@@ -1811,11 +1828,11 @@ final class _NoteViewState extends State<NoteView>
   /// How long after the last edit the note is saved.
   ///
   /// Half a second, or a second while a save is in flight (typing fast: one
-  /// trailing save, not a queue). A save joins the whole note on the UI
-  /// isolate and copies it to the one that writes it — 0.4 s on a 246 MB
-  /// note (0.0.9 stress test), which after every breath between words was
-  /// typing that stuttered — so a note that size waits for a real pause, as
-  /// the statistics do.
+  /// trailing save, not a queue). A note that size waits for a real pause, as
+  /// the statistics do: the save no longer stalls the frames — it goes over
+  /// in slices (see [_performSave]) — but it is still a write of hundreds of
+  /// megabytes, and there is no reason to make one for every breath between
+  /// words.
   Duration get _saveDelay {
     final length = _noteLength;
     if (length > 16 << 20) return const Duration(seconds: 5);
@@ -2014,8 +2031,20 @@ final class _NoteViewState extends State<NoteView>
 
   /// The actual write for [_save]; a write error reaches every caller
   /// awaiting the returned future.
+  ///
+  /// On the unified surface the note is handed over in slices and never
+  /// joined whole: the join and the encode of a 246 MB note cost the UI
+  /// isolate 300–530 ms in one go (see `docs/dev/huge-notes.md`), and both
+  /// are cut here into turns of a few milliseconds that leave the frames
+  /// their gaps. The legacy editor, and a note with no streaming writer (a
+  /// note outside a library, a test), join and save as before.
   Future<void> _performSave(int revision, String target) async {
     final clock = Stopwatch()..start();
+    final stream = _takeStreamSave();
+    if (stream != null) {
+      unawaited(_saveStreamed(stream, revision, target, clock));
+      return;
+    }
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
     final joinClock = Stopwatch()..start();
@@ -2040,13 +2069,108 @@ final class _NoteViewState extends State<NoteView>
         '${clock.elapsedMilliseconds} ms)',
       );
     } finally {
-      _saving = false;
-      final trailing = _savePending;
-      _savePending = false;
-      if (mounted) setState(() {});
-      if (trailing) unawaited(_save());
+      _finishSave();
     }
   }
+
+  /// Saves with the note handed over in slices, off the join.
+  ///
+  /// The write is away from this isolate, so this only awaits it — after
+  /// reading the trailing-save flag the write's own edits may have set,
+  /// which is what keeps an edit that landed mid-save from being the one
+  /// nobody writes.
+  Future<void> _saveStreamed(
+    _StreamSave stream,
+    int revision,
+    String target,
+    Stopwatch clock,
+  ) async {
+    final buffer = stream.buffer;
+    // Read with the buffer, before the first await: a note switch that
+    // saves the outgoing note is followed by a _load that starts the next
+    // session, and this save belongs to the one it came from.
+    final session = _editSession;
+    _log.info(
+      'save start: $target (${buffer.length} chars in '
+      '${stream.slices} slices, session $session)',
+    );
+    try {
+      await widget.saveNoteStream!(
+        target,
+        (index) => _nextSlice(stream, index),
+        editSession: session,
+      );
+      if (target == widget.path) {
+        _lastSavedRevision = revision;
+        _unsaved?.noteChanged();
+      }
+      _log.info(
+        'note saved: $target (${buffer.length} chars, '
+        '${clock.elapsedMilliseconds} ms)',
+      );
+    } on Object catch (error) {
+      _log.error('note save failed: $target ($error)');
+      rethrow;
+    } finally {
+      _finishSave();
+    }
+  }
+
+  /// The save is over, however it ended: the flag goes, the pane repaints,
+  /// and a save that arrived meanwhile runs its own turn.
+  void _finishSave() {
+    _saving = false;
+    final trailing = _savePending;
+    _savePending = false;
+    if (mounted) setState(() {});
+    if (trailing) unawaited(_save());
+  }
+
+  /// The note as this save will write it, or null when there is nothing to
+  /// stream (no seam, no unified buffer, an empty note).
+  ///
+  /// The buffer is taken whole — a copy of the two line lists, O(lines) of
+  /// pointers, the strings themselves shared — so an edit that lands
+  /// between two slices cannot make the note it writes a different note
+  /// from the one it started. It is what a save of a note being typed in
+  /// has to be: the writer's own text at one moment, never half of one and
+  /// half of another.
+  _StreamSave? _takeStreamSave() {
+    if (widget.saveNoteStream == null) return null;
+    final buffer = _unifiedSurfaceBuffer;
+    if (buffer == null || !_usesUnifiedSource || buffer.lineCount == 0) {
+      return null;
+    }
+    return _StreamSave(buffer.snapshot());
+  }
+
+  /// The next slice of [stream]'s buffer, or null when the note is out.
+  ///
+  /// Each slice is built and encoded here, on the UI isolate, because that
+  /// is where the note's strings are — a string is copied between
+  /// isolates, never shared, and one copy of the whole note is what this
+  /// exists to avoid. Each is small enough that the frame after it is on
+  /// time.
+  Future<NoteBytes?> _nextSlice(_StreamSave stream, int index) async {
+    final first = index * kSaveSliceLines;
+    if (first >= stream.buffer.lineCount) return null;
+    final text = stream.buffer.sliceText(
+      first,
+      first + kSaveSliceLines,
+      kSaveSliceChars,
+    );
+    // Building the first slice is what starts the save; the gap the frames
+    // need is the one after it, not before it.
+    if (index > 0) await Future<void>.delayed(Duration.zero);
+    return utf8.encode(text);
+  }
+
+  /// Lines one slice of a streaming save asks for, and the character count
+  /// that cuts it short — a note of very long lines would otherwise build
+  /// a slice of megabytes. Around four milliseconds of join and encode per
+  /// slice at these figures, measured on the 2.7 M-line fixture.
+  static const int kSaveSliceLines = 16384;
+  static const int kSaveSliceChars = 4 << 20;
 
   /// The close guard's save (T-PP-11): writes until the disk holds the
   /// latest revision — waiting out a save that was already in flight — and
@@ -2785,4 +2909,19 @@ final class _NoteViewState extends State<NoteView>
     );
     state.requestEditorFocus();
   }
+}
+
+/// What a streaming save holds of the note while it runs: the lines as they
+/// were when the save started, which no later edit reaches.
+final class _StreamSave {
+  /// Saves [buffer]'s lines, slice by slice.
+  const new(this.buffer);
+
+  /// The note's lines, at the moment the save began.
+  final SourceBuffer buffer;
+
+  /// How many slices the save will hand over; for the log only.
+  int get slices =>
+      (buffer.lineCount + _NoteViewState.kSaveSliceLines - 1) ~/
+      _NoteViewState.kSaveSliceLines;
 }
