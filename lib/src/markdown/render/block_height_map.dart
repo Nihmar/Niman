@@ -16,10 +16,14 @@
 /// cannot do that: the worst a wrong estimate costs is a viewport that lands
 /// slightly off, and one frame's measurements fixing it.
 ///
-/// The sums are a Fenwick tree (§8.4.1): a frame measures dozens of blocks and
+/// The sums are [PrefixSums] (§8.4.1): a frame measures dozens of blocks and
 /// asks for an offset for each of them, and a pass over 7 530 blocks per
-/// question is exactly the shape of cost this engine exists to avoid.
+/// question is exactly the shape of cost this engine exists to avoid. And an
+/// edit that adds or removes lines splices them, where a Fenwick tree had to be
+/// rebuilt — 59 ms per Enter at a million lines.
 library;
+
+import 'package:niman/src/markdown/prefix_sums.dart';
 
 /// The height of every block of a note.
 final class BlockHeightMap {
@@ -27,18 +31,14 @@ final class BlockHeightMap {
   /// `estimate`.
   new({required int count, required double Function(int index) estimate})
     : _measured = List<double>.filled(count, 0, growable: true),
-      _extent = List<double>.filled(count, 0, growable: true),
-      _tree = List<double>.filled(count + 1, 0, growable: true) {
-    // The estimator is asked **once**, here. Asking it again when a block is
-    // measured would compute today's answer against a map seeded with an
-    // earlier one — the read view builds this in `initState`, before the theme
-    // arrives, so the two answers differ — and the tree and the extents would
-    // drift by whatever changed.
-    for (var at = 0; at < count; at++) {
-      _extent[at] = estimate(at);
-    }
-    _rebuild();
-  }
+      // The estimator is asked **once**, here. Asking it again when a block is
+      // measured would compute today's answer against a map seeded with an
+      // earlier one — the read view builds this in `initState`, before the
+      // theme arrives, so the two answers differ — and the sums would drift by
+      // whatever changed.
+      _extents = PrefixSums(<double>[
+        for (var at = 0; at < count; at++) estimate(at),
+      ]);
 
   /// Replaces [removed] blocks from [first] on with [inserted] new ones,
   /// estimated by [estimate] (asked with the blocks' *new* indices), and keeps
@@ -54,18 +54,17 @@ final class BlockHeightMap {
     int inserted,
     double Function(int index) estimate,
   ) {
-    final start = first.clamp(0, _extent.length);
-    final end = (start + removed).clamp(start, _extent.length);
+    final start = first.clamp(0, _measured.length);
+    final end = (start + removed).clamp(start, _measured.length);
     var gone = 0;
     for (var at = start; at < end; at++) {
       if (_measured[at] > 0) gone++;
     }
     _measuredCount -= gone;
-    _extent.replaceRange(start, end, <double>[
+    _measured.replaceRange(start, end, List<double>.filled(inserted, 0));
+    _extents.splice(start, end - start, <double>[
       for (var at = 0; at < inserted; at++) estimate(start + at),
     ]);
-    _measured.replaceRange(start, end, List<double>.filled(inserted, 0));
-    _rebuild();
     _generation++;
   }
 
@@ -74,44 +73,12 @@ final class BlockHeightMap {
   int get generation => _generation;
   int _generation = 0;
 
-  /// Rebuilds the tree over [_extent], in O(n): each node takes its own value
-  /// and hands its sum to its parent, as `FenwickTree.reset` does.
-  void _rebuild() {
-    final count = _extent.length;
-    if (_tree.length != count + 1) {
-      _tree
-        ..clear()
-        ..addAll(List<double>.filled(count + 1, 0));
-    } else {
-      _tree.fillRange(0, count + 1, 0);
-    }
-    for (var at = 1; at <= count; at++) {
-      _tree[at] += _extent[at - 1];
-      final parent = at + (at & -at);
-      if (parent <= count) _tree[parent] += _tree[at];
-    }
-    _highestPower = 1;
-    while (_highestPower * 2 <= count) {
-      _highestPower *= 2;
-    }
-  }
-
-  /// The largest power of two at or below [length], for [indexAt]'s descent.
-  int _highestPower = 1;
-
   /// The height a frame laid each block out at, or 0 while none has.
   final List<double> _measured;
 
-  /// The best height known for each block: the estimate until a frame measures
-  /// it, the measurement after. Kept alongside the tree because a measurement
-  /// is a *difference* from this, and `_measured` cannot answer that for the
-  /// blocks no frame has drawn.
-  final List<double> _extent;
-
-  /// The Fenwick tree over the extents: `_tree[i]` is the sum of the extents in
-  /// the range that ends at `i`, so a prefix sum and a single update are both
-  /// O(log n).
-  final List<double> _tree;
+  /// The best height known for each block, summed: the estimate until a frame
+  /// measures it, the measurement after.
+  final PrefixSums _extents;
 
   /// How many blocks the map covers.
   int get length => _measured.length;
@@ -122,7 +89,7 @@ final class BlockHeightMap {
 
   /// The height of the whole note: what has been drawn for real, and the
   /// estimator's answer for the rest.
-  double get totalExtent => _prefix(_measured.length);
+  double get totalExtent => _extents.total;
 
   /// Where block [index] starts, from the note's own top.
   ///
@@ -131,7 +98,7 @@ final class BlockHeightMap {
   double offsetOf(int index) {
     if (index <= 0) return 0;
     if (index >= _measured.length) return totalExtent;
-    return _prefix(index);
+    return _extents.offsetOf(index);
   }
 
   /// The block an offset lands in, or null when it is past the note's end.
@@ -141,26 +108,14 @@ final class BlockHeightMap {
   int? indexAt(double offset) {
     if (_measured.isEmpty || offset < 0) return null;
     if (offset >= totalExtent) return null;
-    // Binary lifting down the tree: O(log n), where a binary search over
-    // prefix sums is O(log² n). The largest index whose start is at or before
-    // [offset] — which is the block that starts there, on a boundary.
-    var index = 0;
-    var remaining = offset;
-    for (var power = _highestPower; power > 0; power >>= 1) {
-      final next = index + power;
-      if (next <= _measured.length && _tree[next] <= remaining) {
-        remaining -= _tree[next];
-        index = next;
-      }
-    }
-    return index < _measured.length ? index : _measured.length - 1;
+    return _extents.indexOf(offset);
   }
 
   /// Block [index]'s height: what a frame laid it out at, or the estimator's
   /// answer while none has.
   double extentFor(int index) {
-    if (index < 0 || index >= _extent.length) return 0;
-    return _extent[index];
+    if (index < 0 || index >= _measured.length) return 0;
+    return _extents.valueAt(index);
   }
 
   /// Records that block [index] was drawn [height] pixels tall.
@@ -172,24 +127,6 @@ final class BlockHeightMap {
     if (index < 0 || index >= _measured.length || height <= 0) return;
     if (_measured[index] <= 0) _measuredCount++;
     _measured[index] = height;
-    _add(index, height - _extent[index]);
-    _extent[index] = height;
-  }
-
-  /// The sum of the extents of the first [count] blocks.
-  double _prefix(int count) {
-    var total = 0.0;
-    for (var at = count; at > 0; at -= at & -at) {
-      total += _tree[at];
-    }
-    return total;
-  }
-
-  /// Adds [delta] to block [index]'s extent, in O(log n).
-  void _add(int index, double delta) {
-    if (delta == 0) return;
-    for (var at = index + 1; at <= _measured.length; at += at & -at) {
-      _tree[at] += delta;
-    }
+    _extents.setValue(index, height);
   }
 }

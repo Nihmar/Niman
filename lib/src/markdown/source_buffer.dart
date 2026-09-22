@@ -12,17 +12,17 @@
 /// decision except fenced code, HTML blocks and indented code is a per-line
 /// decision, and those three are still decided per line with a carried state. A
 /// rope would be more general than the parser can use, and would charge an
-/// `offsetToLine` for every access the parser makes. The [FenwickTree] restores
-/// the one thing a rope gives for free.
+/// `offsetToLine` for every access the parser makes. [PrefixSums] restores the
+/// one thing a rope gives for free.
 ///
 /// **Cost, stated honestly.** Typing inside a line resizes one span:
-/// [FenwickTree.setSpan], O(log n). An edit that changes *how many* lines there
-/// are — Enter, a paste with newlines, a line joined — moves every index after
-/// it and rebuilds the tree: O(lines) in a flat loop, with no allocation and a
-/// small constant. That is inherent to an array-shaped line store, and it is
-/// the
-/// exception rather than the rule. `source_buffer_test.dart` measures both, and
-/// the numbers are in the design document.
+/// [PrefixSums.setValue], O(chunk). An edit that changes *how many* lines there
+/// are — Enter, a paste with newlines, a line joined — splices the index, which
+/// rewrites one chunk of it rather than the note (a rebuilt Fenwick tree was
+/// 41 ms per Enter at a million lines); what is left is the line array's own
+/// move of the lines after the edit, a memory copy.
+/// `source_buffer_test.dart` measures both, and the numbers are in the design
+/// document.
 ///
 /// **What is preserved, exactly.** Each line's terminator is stored separately,
 /// so a file read as CRLF comes back as CRLF, a file with mixed terminators
@@ -39,7 +39,7 @@
 /// terminator, because nothing in the app has ever produced one.
 library;
 
-import 'package:niman/src/markdown/fenwick_tree.dart';
+import 'package:niman/src/markdown/prefix_sums.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
 /// The text of a note, split into lines, with an index over it.
@@ -50,7 +50,7 @@ final class SourceBuffer {
   /// edit path can promise that.
   new _(this._lines, this._terminators, this._index)
     : _dominantEol = _detectEol(_terminators),
-      _length = _index.total;
+      _length = _index.total.toInt();
 
   /// Reads [text] into lines, keeping each line's own terminator.
   ///
@@ -78,7 +78,7 @@ final class SourceBuffer {
     return SourceBuffer._(
       lines,
       terminators,
-      FenwickTree.fromSpans(_spansOf(lines, terminators)),
+      PrefixSums(_spansOf(lines, terminators)),
     );
   }
 
@@ -92,7 +92,7 @@ final class SourceBuffer {
   final List<String> _terminators;
 
   /// The prefix sums of `line.length + terminator.length`.
-  final FenwickTree _index;
+  final PrefixSums _index;
 
   /// The terminator newlines are rewritten to on insert.
   final String _dominantEol;
@@ -165,7 +165,7 @@ final class SourceBuffer {
   /// offset at [length] belongs to the last one.
   int lineOf(int offset) {
     assert(offset >= 0 && offset <= _length, 'offset $offset out of range');
-    return _index.indexOf(offset);
+    return _index.indexOf(offset.toDouble());
   }
 
   /// The offset at which line [line] starts.
@@ -173,7 +173,7 @@ final class SourceBuffer {
   /// O(log n). [lineCount] is accepted and answers [length].
   int offsetOfLine(int line) {
     assert(line >= 0 && line <= _lines.length, 'line $line out of range');
-    return _index.offsetOf(line);
+    return _index.offsetOf(line).toInt();
   }
 
   /// How far into its line [offset] is, in UTF-16 code units.
@@ -311,14 +311,18 @@ final class SourceBuffer {
     if (merged.length == removedCount) {
       // Same line count: one span resized per line, O(log n) each.
       for (var i = 0; i < merged.length; i++) {
-        _index.setSpan(startLine + i, _spanOf(startLine + i));
+        _index.setValue(startLine + i, _spanOf(startLine + i).toDouble());
       }
     } else {
-      // The line count moved, so every index after it did too.
-      _index.reset(_spansOf(_lines, _terminators));
+      // The line count moved: the index takes the new lines' spans in place
+      // of the old ones, and every offset after them follows.
+      _index.splice(startLine, removedCount, <double>[
+        for (var i = 0; i < merged.length; i++)
+          _spanOf(startLine + i).toDouble(),
+      ]);
     }
 
-    _length = _index.total;
+    _length = _index.total.toInt();
     _revision++;
     assert(_validate(), 'buffer invariants broken after the edit');
     return SourceEdit(
@@ -379,7 +383,9 @@ final class SourceBuffer {
       sum += _spanOf(i);
       if (_index.offsetOf(i) != sum - _spanOf(i)) return false;
     }
-    return sum == _length && _index.total == _length;
+    return sum == _length &&
+        _index.total == _length &&
+        _index.length == _lines.length;
   }
 
   /// The dominant terminator of [terminators]: CRLF only if it is the majority.
@@ -397,9 +403,9 @@ final class SourceBuffer {
   }
 
   /// The spans of every line, for building or rebuilding the index.
-  static List<int> _spansOf(List<String> lines, List<String> terminators) =>
-      <int>[
+  static List<double> _spansOf(List<String> lines, List<String> terminators) =>
+      <double>[
         for (var i = 0; i < lines.length; i++)
-          lines[i].length + terminators[i].length,
+          (lines[i].length + terminators[i].length).toDouble(),
       ];
 }
