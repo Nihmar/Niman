@@ -21,9 +21,11 @@ status row switches only when both are enabled.
   `re_editor`. Enter carries a list on, **Tab and Shift+Tab indent and
   outdent** (the note keeps the focus), PageUp/PageDown page, and on a phone a
   **long press selects a word**, with handles to adjust it and a toolbar to
-  cut, copy, paste or select all. Not there yet: find and replace, the
-  spelling underline, the desktop context menu, Ctrl+click on links,
-  typewriter mode and folding.
+  cut, copy, paste or select all. It also has the find and replace bar, the
+  spelling underline and its panel, the desktop context menu, Ctrl+click on
+  links, folding, typewriter mode and Zen, and line numbers. It is still
+  behind the flag: `editorKind: source` opens `re_editor`, and the unified
+  surface needs the unified engine setting.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk. It opens a
   note of **any size** — the 934 KB geometry note included — and the price of
