@@ -69,7 +69,47 @@ String _screenText(WidgetTester tester) {
   return buffer.toString();
 }
 
+/// The style [text] is drawn in, as the paragraph resolves it: each span's
+/// own style over the ones above it.
+TextStyle _styleOf(WidgetTester tester, String text) {
+  for (final widget in tester.allWidgets) {
+    if (widget is! Text || widget.textSpan == null) continue;
+    TextStyle? found;
+    void visit(InlineSpan span, TextStyle inherited) {
+      final style = inherited.merge(span.style);
+      if (span is TextSpan) {
+        if (found == null && (span.text ?? '').contains(text)) found = style;
+        for (final child in span.children ?? const <InlineSpan>[]) {
+          visit(child, style);
+        }
+      }
+    }
+
+    visit(widget.textSpan!, widget.style ?? const TextStyle());
+    if (found != null) return found!;
+  }
+  throw StateError('"$text" is not on screen');
+}
+
 void main() {
+  testWidgets("a heading's words are drawn at the heading's size", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _view('# A title with *stress*\n\nbody text', _syncCache()),
+    );
+    await tester.pump();
+    final context = tester.element(find.byType(Scaffold));
+    final theme = markdownThemeOf(context);
+    final title = _styleOf(tester, 'A title');
+    expect(title.fontSize, theme.heading1.fontSize);
+    expect(title.fontWeight, theme.heading1.fontWeight);
+    final stress = _styleOf(tester, 'stress');
+    expect(stress.fontSize, theme.heading1.fontSize);
+    expect(stress.fontStyle, FontStyle.italic);
+    expect(_styleOf(tester, 'body text').fontSize, theme.body.fontSize);
+  });
+
   testWidgets('the markers are not on screen', (tester) async {
     await tester.pumpWidget(
       _view(

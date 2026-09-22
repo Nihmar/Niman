@@ -118,9 +118,11 @@ final class BlockView extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final visible = VisibleText.of(parsed);
+    final base = style ?? theme.body;
     final spans = _InlineBuilder(
       visible: visible,
       theme: theme,
+      base: base,
       mathCache: mathCache,
       availableWidth: availableWidth,
       onTapLink: onTapLink,
@@ -128,7 +130,7 @@ final class BlockView extends StatelessWidget {
       embedResolver: embedResolver,
     ).build();
     return Text.rich(
-      TextSpan(children: spans, style: style ?? theme.body),
+      TextSpan(children: spans, style: base),
       textAlign: TextAlign.start,
     );
   }
@@ -189,6 +191,7 @@ final class BlockView extends StatelessWidget {
           children: _InlineBuilder(
             visible: VisibleText.of(parsed),
             theme: theme,
+            base: style,
             mathCache: mathCache,
             availableWidth: availableWidth,
             onTapLink: onTapLink,
@@ -301,6 +304,7 @@ final class BlockView extends StatelessWidget {
     final spans = _InlineBuilder(
       visible: VisibleText.of(cell),
       theme: theme,
+      base: style,
       mathCache: mathCache,
       onTapLink: onTapLink,
       onTapWikiLink: onTapWikiLink,
@@ -421,6 +425,7 @@ final class _InlineBuilder {
   new({
     required this.visible,
     required this.theme,
+    required this.base,
     required this.mathCache,
     this.availableWidth,
     this.onTapLink,
@@ -430,7 +435,34 @@ final class _InlineBuilder {
 
   final VisibleText visible;
   final MarkdownTheme theme;
+
+  /// The style the block's text is drawn in — the body's, a heading's, a
+  /// quote's, a table header's. Every run is this plus what the run adds:
+  /// runs drawn in [MarkdownTheme.body] instead put a heading's words back at
+  /// the body's size and weight, and the preview's `# Title` read as a
+  /// paragraph.
+  final TextStyle base;
   final MathCache mathCache;
+
+  /// [accent]'s colour and decoration, on the block's own size and weight.
+  TextStyle _tinted(TextStyle accent) => base.copyWith(
+    color: accent.color,
+    backgroundColor: accent.backgroundColor,
+    decoration: accent.decoration,
+    decorationColor: accent.decorationColor,
+    decorationStyle: accent.decorationStyle,
+  );
+
+  /// The code face, scaled as the block is to the body.
+  TextStyle get _code {
+    final body = theme.body.fontSize;
+    final size = base.fontSize;
+    final code = theme.code.fontSize;
+    if (body == null || size == null || code == null || size == body) {
+      return theme.code;
+    }
+    return theme.code.copyWith(fontSize: code * size / body);
+  }
 
   /// The pane's width, for a display formula that has to be broken (#257).
   final double? availableWidth;
@@ -461,16 +493,16 @@ final class _InlineBuilder {
   InlineSpan _textSpan(VisibleSegment segment) {
     final text = visible.text.substring(segment.start, segment.end);
     final style = switch (segment.kind) {
-      StyleKind.emphasis => theme.body.copyWith(fontStyle: FontStyle.italic),
-      StyleKind.strong => theme.body.copyWith(fontWeight: FontWeight.w700),
-      StyleKind.strikethrough => theme.body.copyWith(
+      StyleKind.emphasis => base.copyWith(fontStyle: FontStyle.italic),
+      StyleKind.strong => base.copyWith(fontWeight: FontWeight.w700),
+      StyleKind.strikethrough => base.copyWith(
         decoration: TextDecoration.lineThrough,
       ),
-      StyleKind.code => theme.code,
-      StyleKind.link => theme.link,
-      StyleKind.image => theme.marker,
-      StyleKind.heading => theme.body,
-      StyleKind.plain || StyleKind.hardBreak => theme.body,
+      StyleKind.code => _code,
+      StyleKind.link => _tinted(theme.link),
+      StyleKind.image => _tinted(theme.marker),
+      StyleKind.heading => base,
+      StyleKind.plain || StyleKind.hardBreak => base,
     };
     if (segment.kind == StyleKind.image && segment.href != null) {
       // A Markdown image is a picture, and its alt text is what stands in for
@@ -478,7 +510,7 @@ final class _InlineBuilder {
       // because they are the same problem. Without a resolver there is nothing
       // to resolve and the alt text is the honest thing to draw.
       if (embedResolver == null) {
-        return TextSpan(text: text, style: theme.marker);
+        return TextSpan(text: text, style: _tinted(theme.marker));
       }
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
@@ -513,29 +545,29 @@ final class _InlineBuilder {
           child: InlineMathView(
             cache: mathCache,
             tex: span.inner,
-            style: MathStyle(
-              fontSize: theme.body.fontSize ?? 14,
-              color: theme.body.color,
-            ),
+            style: MathStyle(fontSize: base.fontSize ?? 14, color: base.color),
           ),
         );
       case ExtensionKind.wikilink:
         return TextSpan(
           text: _wikiDisplay(span),
-          style: theme.wikilink,
+          style: _tinted(theme.wikilink),
           recognizer: TapGestureRecognizer()
             ..onTap = () => onTapWikiLink?.call(span),
         );
       case ExtensionKind.tag:
-        return TextSpan(text: span.text, style: theme.tag);
+        return TextSpan(text: span.text, style: _tinted(theme.tag));
       case ExtensionKind.codeSpan:
-        return TextSpan(text: span.inner, style: theme.code);
+        return TextSpan(text: span.inner, style: _code);
       case ExtensionKind.embed:
         // An embed is a picture in the middle of a line, so it is a widget
         // span rather than text. Without a resolver there is nothing to
         // resolve, and the note's own words stand in for the picture.
         if (embedResolver == null) {
-          return TextSpan(text: '![[${span.inner}]]', style: theme.marker);
+          return TextSpan(
+            text: '![[${span.inner}]]',
+            style: _tinted(theme.marker),
+          );
         }
         // `![[target|alias]]`: the alias is what the reader asked to see, and
         // it is what the preview drew when a binary or a missing target had to
@@ -562,10 +594,7 @@ final class _InlineBuilder {
             cache: mathCache,
             maxWidth: availableWidth,
             tex: span.inner,
-            style: MathStyle(
-              fontSize: theme.body.fontSize ?? 14,
-              color: theme.body.color,
-            ),
+            style: MathStyle(fontSize: base.fontSize ?? 14, color: base.color),
           ),
         );
     }
