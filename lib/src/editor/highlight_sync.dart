@@ -51,15 +51,13 @@ final class EditorHighlightSync {
     if (previous == null || previous.length == 0 && current.length != 0) {
       first = 0;
       removed = 0;
-      replacement = _texts(current);
+      replacement = _texts(current, 0, current.length);
     } else {
       first = _firstChangedLine(previous, current);
       final suffix = _commonSuffix(previous, current, first);
       removed = previous.length - suffix - first;
       final count = current.length - suffix - first;
-      replacement = <String>[
-        for (var i = first; i < first + count; i++) current[i].text,
-      ];
+      replacement = _texts(current, first, count);
     }
     if (removed > 0 || replacement.isNotEmpty) {
       _doc.replaceLines(first, removed, replacement);
@@ -202,9 +200,33 @@ final class EditorHighlightSync {
     return suffix > maxSuffix ? maxSuffix : suffix;
   }
 
-  static List<String> _texts(CodeLines lines) => <String>[
-    for (var i = 0; i < lines.length; i++) lines[i].text,
-  ];
+  /// The texts of [count] lines of [lines] from [first], walked segment by
+  /// segment.
+  ///
+  /// Not `lines[i]` in a loop: `CodeLines.length` folds over every segment
+  /// and `lines[i]` walks them to find the line, so a loop over the lines is
+  /// O(lines × segments) — opening a 22 MB note spent more than a minute here
+  /// before it drew.
+  static List<String> _texts(CodeLines lines, int first, int count) {
+    final texts = <String>[];
+    if (count <= 0) return texts;
+    final end = first + count;
+    var offset = 0;
+    for (final segment in lines.segments) {
+      final segmentLines = segment.codeLines;
+      final segmentEnd = offset + segmentLines.length;
+      if (segmentEnd > first) {
+        final from = first > offset ? first - offset : 0;
+        final to = end < segmentEnd ? end - offset : segmentLines.length;
+        for (var i = from; i < to; i++) {
+          texts.add(segmentLines[i].text);
+        }
+      }
+      offset = segmentEnd;
+      if (offset >= end) break;
+    }
+    return texts;
+  }
 
   /// Splits one line into non-overlapping styled spans: every maximal run
   /// between token boundaries gets the covering token's style; the unmarked
