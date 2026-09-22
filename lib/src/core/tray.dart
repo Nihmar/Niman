@@ -22,7 +22,8 @@ import 'package:nativeapi/nativeapi.dart'
         MenuItemClickedEvent,
         MenuItemType,
         TrayIcon,
-        TrayIconClickedEvent;
+        TrayIconClickedEvent,
+        TrayIconRightClickedEvent;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
 
@@ -186,6 +187,12 @@ final class PlatformTrayService implements TrayService {
         ..setContextMenu(built.menu)
         ..addListener((event) {
           if (event is TrayIconClickedEvent) _activated.add(null);
+          if (event is TrayIconRightClickedEvent) {
+            _log.info(
+              'tray: right click (trigger ${tray.getContextMenuTrigger()}, '
+              'menu ${tray.getContextMenu() != null})',
+            );
+          }
         });
       // Windows adds the icon to the notification area only here
       // (`NIM_ADD` lives in `SetVisible`); without it the tray existed,
