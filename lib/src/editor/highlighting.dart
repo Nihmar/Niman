@@ -208,6 +208,10 @@ final class _Line {
   _State? entering;
   _State? exit;
   List<Token>? tokens;
+
+  /// Whether [tokens] were made for the note's first line, which alone can
+  /// open a frontmatter: a line moved to or from line 0 is tokenized again.
+  bool tokensAtZero = false;
 }
 
 /// Incremental highlighter over a plain-text buffer.
@@ -276,18 +280,42 @@ final class HighlightDocument {
       throw RangeError.range(line, 0, _lines.length - 1, 'line');
     }
     _materialize(line);
-    return StyledLine(_lines[line].text, _lines[line].tokens!);
+    return StyledLine(_lines[line].text, _tokensOf(line));
+  }
+
+  /// Line [index]'s tokens, made the first time they are asked for: the
+  /// block state carried into it is already known ([_materialize]).
+  List<Token> _tokensOf(int index) {
+    final line = _lines[index];
+    final tokens = line.tokens;
+    if (tokens != null && line.tokensAtZero == (index == 0)) return tokens;
+    line.tokensAtZero = index == 0;
+    return line.tokens = _lineTokens(line.text, line.entering!, index);
   }
 
   /// The styled lines (all of them; O(lineCount) — materializes the whole
   /// document).
   List<StyledLine> get lines {
     if (_lines.isNotEmpty) _materialize(_lines.length - 1);
-    return _lines.map((l) => StyledLine(l.text, l.tokens!)).toList();
+    return <StyledLine>[
+      for (var at = 0; at < _lines.length; at++)
+        StyledLine(_lines[at].text, _tokensOf(at)),
+    ];
   }
 
-  /// Tokenizes lines up to [upTo] (inclusive) — only the gap since the last
-  /// materialized line, walking forward so the carried state is exact.
+  /// Carries the block state through lines up to [upTo] (inclusive) — only
+  /// the gap since the last materialized line, walking forward so the state
+  /// is exact.
+  ///
+  /// The state, not the tokens. What a line's colours depend on from the
+  /// lines above it is the block it is in — a fence, display maths, the
+  /// frontmatter — and that is a few comparisons a line; its inline tokens
+  /// are the costly part and depend on nothing above it but that state. A
+  /// note reopened at its end asked for line 2.7 million and inline-scanned
+  /// every line before it: 163 s and 2.8 GB of tokens nobody drew (0.0.9
+  /// stress test). Now the walk carries the state, and a line's tokens are
+  /// made when it is drawn ([_tokensOf]) — kept while the state entering it
+  /// stays what it was.
   void _materialize(int upTo) {
     // Already tokenized: asking for a line above the watermark must not pull
     // the watermark *down*, or every line below it is tokenized again on the
@@ -295,7 +323,12 @@ final class HighlightDocument {
     if (upTo < _materializedUntil) return;
     var i = _materializedUntil;
     while (i <= upTo) {
-      _tokenizeAt(_lines, i, _lines[i]);
+      final line = _lines[i];
+      final entering = i == 0 ? _State.initial : _lines[i - 1].exit!;
+      if (line.entering != entering) line.tokens = null;
+      line
+        ..entering = entering
+        ..exit = _stateAfter(line.text, entering, i);
       i++;
     }
     _materializedUntil = upTo + 1;
@@ -406,6 +439,7 @@ final class HighlightDocument {
     line.entering = entering;
     line.exit = _stateAfter(line.text, entering, index);
     line.tokens = _lineTokens(line.text, entering, index);
+    line.tokensAtZero = index == 0;
   }
 
   List<int> _lineStarts() {
