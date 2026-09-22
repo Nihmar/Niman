@@ -58,8 +58,8 @@ final class SourceInput implements DeltaTextInputClient {
   /// keeps it joined once per revision.
   final String Function() text;
 
-  /// Called before an edit is applied, with the text it is about to replace,
-  /// so a history can undo it.
+  /// Called after an edit is applied, with what it replaced and what the note
+  /// stored in its place, so a history can undo it.
   final void Function(EditRecord record)? onRecord;
 
   /// Asked when the platform types a line break over `[start, end)`: true when
@@ -215,23 +215,29 @@ final class SourceInput implements DeltaTextInputClient {
   /// Applies `[start, end)` → [inserted] to the note, and says whether the
   /// note now holds exactly what the platform does (it does not when a line
   /// break was stored as the note's own line ending).
-  bool _replace(int start, int end, String inserted, SelectionModel caret) {
+  bool _replace(int from, int to, String inserted, SelectionModel caret) {
+    // The platform addresses the whole text, line endings included, and an
+    // edit that starts between a `\r` and its `\n` would split the pair.
+    final start = buffer.snapOutOfTerminator(from);
+    final end = buffer.snapOutOfTerminator(to, forward: true);
     final before = buffer.length;
+    final removed = buffer.substring(start, end);
+    final edit = buffer.replaceRange(start, end, inserted);
+    onTokenizer(edit, buffer);
+    final stored = buffer.length - before + (end - start);
+    // The history gets what the note *stored* — a line break as the note's
+    // own `\r\n` — or an undo takes away the wrong number of characters.
     onRecord?.call(
       EditRecord(
         start: start,
-        removed: buffer.substring(start, end),
-        inserted: inserted,
+        removed: removed,
+        inserted: buffer.substring(start, start + stored),
       ),
     );
-    final edit = buffer.replaceRange(start, end, inserted);
-    onTokenizer(edit, buffer);
-    final exact = buffer.length - before == inserted.length - (end - start);
+    final exact = start == from && end == to && stored == inserted.length;
     // A caret the platform computed against its own copy is off by what the
     // note stored differently; the note's own arithmetic is not.
-    final landed = exact
-        ? caret
-        : SelectionModel.at(start + (buffer.length - before) + (end - start));
+    final landed = exact ? caret : SelectionModel.at(start + stored);
     onSelection(landed.clampTo(buffer.length));
     onEdited(edit);
     return exact;

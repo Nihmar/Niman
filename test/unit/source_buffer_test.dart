@@ -162,6 +162,28 @@ void main() {
   });
 
   group('editing', () {
+    test('a verbatim replacement keeps its own line endings', () {
+      // What an undo puts back is what the note held, mixed endings and all.
+      final buffer = SourceBuffer.fromText('a\r\nz\r\n')
+        ..replaceRange(3, 4, 'b\nc', verbatim: true);
+      expect(buffer.text, 'a\r\nb\nc\r\n');
+      final normalised = SourceBuffer.fromText('a\r\nz\r\n')
+        ..replaceRange(3, 4, 'b\nc');
+      expect(
+        normalised.text,
+        'a\r\nb\r\nc\r\n',
+        reason: 'the default rewrites',
+      );
+    });
+
+    test('an offset inside a CRLF is moved out of it', () {
+      final buffer = SourceBuffer.fromText('ab\r\ncd');
+      expect(buffer.snapOutOfTerminator(3), 2, reason: 'back to the line end');
+      expect(buffer.snapOutOfTerminator(3, forward: true), 4);
+      expect(buffer.snapOutOfTerminator(2), 2, reason: 'a line end is fine');
+      expect(buffer.snapOutOfTerminator(4), 4, reason: 'a line start is too');
+    });
+
     test('an insertion inside a line', () {
       final buffer = SourceBuffer.fromText('hello world')..insert(5, ',');
       expect(buffer.text, 'hello, world');

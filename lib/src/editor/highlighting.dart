@@ -237,7 +237,22 @@ final class HighlightDocument {
       .._materializedUntil = lines.length;
     return doc;
   }
-  List<_Line> _lines = const [];
+
+  /// A document over [lines] (each without its terminator), tokenized lazily:
+  /// a line is tokenized the first time something asks for it, in order, so
+  /// building one over a whole note costs a list and no tokenizing.
+  ///
+  /// The source surface's constructor: it hands over its buffer's own lines,
+  /// which are already split — and split on the note's *own* line endings, so
+  /// a CRLF note's lines carry no `\r` that the tokenizer's patterns trip on.
+  factory fromLines(List<String> lines) {
+    final raw = lines.isEmpty ? const <String>[''] : lines;
+    return HighlightDocument._()
+      .._lines = <_Line>[for (final text in raw) _Line(text)]
+      .._materializedUntil = 0;
+  }
+
+  List<_Line> _lines = <_Line>[];
 
   /// The count of *materialized* leading lines: lines below this index keep
   /// valid tokens/state for the current buffer; at and above it they are
@@ -274,6 +289,10 @@ final class HighlightDocument {
   /// Tokenizes lines up to [upTo] (inclusive) — only the gap since the last
   /// materialized line, walking forward so the carried state is exact.
   void _materialize(int upTo) {
+    // Already tokenized: asking for a line above the watermark must not pull
+    // the watermark *down*, or every line below it is tokenized again on the
+    // next ask — which is what a viewport rebuilt from its top line did.
+    if (upTo < _materializedUntil) return;
     var i = _materializedUntil;
     while (i <= upTo) {
       _tokenizeAt(_lines, i, _lines[i]);
@@ -369,11 +388,12 @@ final class HighlightDocument {
     final end = first + removed > _lines.length
         ? _lines.length
         : first + removed;
-    _lines = <_Line>[
-      ..._lines.sublist(0, first),
+    // In place: a keystroke replaces one line, and copying the whole list to
+    // do it was O(lineCount) on every one. (Every list this document holds is
+    // one it built, so it is growable.)
+    _lines.replaceRange(first, end, <_Line>[
       for (final text in replacement) _Line(text),
-      ..._lines.sublist(end),
-    ];
+    ]);
     // The materialized prefix ends at `first`: everything at/above it is
     // (re)tokenized lazily on the next lineAt, in order, so stale tokens
     // are overwritten before they are ever read — no eager invalidation

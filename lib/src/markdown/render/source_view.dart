@@ -212,7 +212,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @override
   void initState() {
     super.initState();
-    _tokens = HighlightDocument.fromText(widget.buffer.text);
+    _tokens = _tokenize();
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
     _focus = widget.focusNode ?? FocusNode();
@@ -252,7 +252,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // An edit this view did not make (a command, a revert): the tokenizer is
       // rebuilt rather than adjusted, because there is no `SourceEdit` to
       // follow.
-      _tokens = HighlightDocument.fromText(widget.buffer.text);
+      _tokens = _tokenize();
       _heights = _map();
       // And the platform's copy is now of a note that is not there any more.
       _input.sendSelection();
@@ -355,12 +355,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// does.
   bool _applyHistory(EditRecord? record, {required bool forwards}) {
     if (record == null) return false;
-    // The whole tokenizer and the map are rebuilt rather than patched: an undo
-    // can be a page away from the last edit, and `SourceEdit` describes a
-    // change
-    // the history record no longer has.
-    _tokens = HighlightDocument.fromText(widget.buffer.text);
-    final caret = forwards ? record.end : record.start;
+    // The tokenizer is rebuilt rather than patched: an undo can be a page away
+    // from the last edit. Rebuilding it is a list of the buffer's lines — the
+    // tokenizing is lazy, from the lines a frame asks for.
+    _tokens = _tokenize();
+    // Undo puts the caret after what it restored (where it was before a
+    // deletion, at the start of typing it took back); redo after what it did.
+    final caret = forwards ? record.end : record.start + record.removed.length;
     setState(() {
       _heights = _map();
       _ownSelection = _selection
@@ -458,12 +459,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (text == null) return;
     await Clipboard.setData(ClipboardData(text: text));
     final selection = _selection;
-    _replaceRange(
-      selection.start,
-      selection.end,
-      '',
-      SelectionModel.at(selection.start),
-    );
+    _replaceRange(selection.start, selection.end, '');
   }
 
   /// Inserts the clipboard's text at the caret, replacing the selection.
@@ -472,30 +468,42 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final text = data?.text;
     if (text == null || text.isEmpty) return;
     final selection = _selection;
-    _replaceRange(
-      selection.start,
-      selection.end,
-      text,
-      SelectionModel.at(selection.start + text.length),
-    );
+    // The caret goes after what the note *stored*: a Windows clipboard's
+    // `\r\n` pasted into an LF note is shorter than the text that was copied.
+    _replaceRange(selection.start, selection.end, text);
   }
 
   /// Replaces `[start, end)` with [text] because the *app* asked, not the
   /// platform: the history records it, the tokenizer follows it, and the
-  /// platform
-  /// is told where the caret went.
-  void _replaceRange(int start, int end, String text, SelectionModel caret) {
+  /// platform is told where the caret went — [caret], or after what the note
+  /// stored when none is given.
+  ///
+  /// With [verbatim] the text's own line endings are kept (see
+  /// `SourceBuffer.replaceRange`).
+  void _replaceRange(
+    int start,
+    int end,
+    String text, {
+    SelectionModel? caret,
+    bool verbatim = false,
+  }) {
     if (start < 0 || end < start || end > widget.buffer.length) return;
+    final buffer = widget.buffer;
+    final before = buffer.length;
+    final removed = buffer.substring(start, end);
+    final edit = buffer.replaceRange(start, end, text, verbatim: verbatim);
+    final stored = buffer.length - before + (end - start);
     _history.record(
       EditRecord(
         start: start,
-        removed: widget.buffer.substring(start, end),
-        inserted: text,
+        removed: removed,
+        inserted: buffer.substring(start, start + stored),
       ),
     );
-    final edit = widget.buffer.replaceRange(start, end, text);
-    SourceInput.retokenize(_tokens, edit, widget.buffer);
-    final next = caret.clampTo(widget.buffer.length);
+    SourceInput.retokenize(_tokens, edit, buffer);
+    final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
+      buffer.length,
+    );
     _syncLines();
     setState(() => _ownSelection = next);
     widget.onSelection?.call(next);
@@ -525,19 +533,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _delete(CaretMotion motion) {
     final selection = _selection.clampTo(widget.buffer.length);
     if (!selection.isCollapsed) {
-      _replaceRange(
-        selection.start,
-        selection.end,
-        '',
-        SelectionModel.at(selection.start),
-      );
+      _replaceRange(selection.start, selection.end, '');
       return;
     }
     final other = moveCaret(selection, motion, buffer: widget.buffer).extent;
     if (other == selection.extent) return;
     final start = math.min(other, selection.extent);
     final end = math.max(other, selection.extent);
-    _replaceRange(start, end, '', SelectionModel.at(start));
+    _replaceRange(start, end, '');
   }
 
   /// A line break typed over `[start, end)`, when it means more than a line
@@ -562,25 +565,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // Enter on an item with nothing in it takes the marker away instead of
       // adding another empty item — the second Enter everybody presses to get
       // out of a list.
-      _replaceRange(
-        lineStart,
-        lineStart + text.length,
-        '',
-        SelectionModel.at(lineStart),
-      );
+      _replaceRange(lineStart, lineStart + text.length, '');
       return true;
     }
     // A caret inside the marker is not "in the item": leave it to the platform.
     if (start - lineStart < text.length - head.content.length) return false;
-    final inserted = '\n${head.continuation}';
     // One edit, not a line break and then a marker: one undo step, and no
     // frame where the marker is missing.
-    _replaceRange(
-      start,
-      end,
-      inserted,
-      SelectionModel.at(start + inserted.length),
-    );
+    _replaceRange(start, end, '\n${head.continuation}');
     return true;
   }
 
@@ -611,12 +603,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final pad = ' ' * widget.indentWidth;
     if (selection.isCollapsed &&
         listItemHead(widget.buffer.lineAt(line)) == null) {
-      _replaceRange(
-        selection.start,
-        selection.end,
-        pad,
-        SelectionModel.at(selection.start + pad.length),
-      );
+      _replaceRange(selection.start, selection.end, pad);
       return;
     }
     _shiftLines(selection, (text) => '$pad$text');
@@ -645,17 +632,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final last = buffer.lineOf(selection.end);
     final start = buffer.offsetOfLine(first);
     final end = buffer.offsetOfLine(last) + buffer.lineAt(last).length;
-    final lines = <String>[];
+    final block = StringBuffer();
     final deltas = <int>[];
+    var changed = false;
     for (var at = first; at <= last; at++) {
       final before = buffer.lineAt(at);
       final after = shift(before);
-      lines.add(after);
+      // Each line keeps its own terminator: the block goes back verbatim.
+      block.write(after);
+      if (at < last) block.write(buffer.terminatorAt(at));
       deltas.add(after.length - before.length);
+      changed = changed || after != before;
     }
-    final eol = buffer.substring(start, end).contains('\r\n') ? '\r\n' : '\n';
-    final replaced = lines.join(eol);
-    if (replaced == buffer.substring(start, end)) return;
+    if (!changed) return;
+    final replaced = block.toString();
     int moved(int offset) {
       final line = buffer.lineOf(offset);
       final column = offset - buffer.offsetOfLine(line);
@@ -673,7 +663,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       anchor: moved(selection.anchor),
       extent: moved(selection.extent),
     );
-    _replaceRange(start, end, replaced, next);
+    _replaceRange(start, end, replaced, caret: next, verbatim: true);
   }
 
   /// PageUp and PageDown: the note moves a viewport, and the caret moves with
@@ -728,7 +718,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// sliver's own measurement.
   void _syncLines() {
     if (_tokens.lineCount != widget.buffer.lineCount) {
-      _tokens = HighlightDocument.fromText(widget.buffer.text);
+      _tokens = _tokenize();
       _heights = _map();
     } else if (_heights.length != _tokens.lineCount) {
       _heights = _map();
@@ -809,6 +799,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   void _select(int start, int end) {
     final next = SelectionModel(anchor: start, extent: end);
+    _history.seal();
     setState(() => _ownSelection = next);
     widget.onSelection?.call(next);
     _input.sendSelection();
@@ -818,6 +809,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Selects everything.
   void selectAll() {
     final next = SelectionModel(anchor: 0, extent: widget.buffer.length);
+    _history.seal();
     setState(() => _ownSelection = next);
     widget.onSelection?.call(next);
     _input.sendSelection();
@@ -856,6 +848,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final offset = offsetAt(event.position);
       if (offset == null) return;
       final next = SelectionModel(anchor: anchor, extent: offset);
+      _history.seal();
       setState(() => _ownSelection = next);
       widget.onSelection?.call(next);
       _input.sendSelection();
@@ -892,6 +885,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// note,
   /// because a range is a background on the runs it covers.
   void _publishSelection(SelectionModel next) {
+    // A caret the writer moved ends the typing step: what is typed next is
+    // undone on its own.
+    _history.seal();
     final wasRange = !_selection.isCollapsed;
     _ownSelection = next;
     if (!next.isCollapsed || wasRange) {
@@ -997,6 +993,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   int get _caretLineIndex {
     final line = widget.buffer.lineOf(_selection.extent);
     return line < 0 || line >= _tokens.lineCount ? -1 : line;
+  }
+
+  /// The tokenizer over the buffer's own lines — split on the note's own line
+  /// endings, so a CRLF note's lines carry no `\r` — tokenized lazily.
+  HighlightDocument _tokenize() {
+    final buffer = widget.buffer;
+    return HighlightDocument.fromLines(<String>[
+      for (var line = 0; line < buffer.lineCount; line++) buffer.lineAt(line),
+    ]);
   }
 
   BlockHeightMap _map() =>
