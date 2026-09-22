@@ -53,8 +53,11 @@ enum CaretMotion {
 /// The rule editors share, and the one a writer expects: `snake_case_name`
 /// moves
 /// as one word, `due parole` as two, and punctuation belongs to neither side.
-bool _wordChar(String unit) =>
-    RegExp(r'^[\p{L}\p{N}_]$', unicode: true).hasMatch(unit);
+bool _wordChar(String unit) => _wordPattern.hasMatch(unit);
+
+/// Compiled once: a keystroke-rate caller compiling it per character was the
+/// most expensive part of a word motion.
+final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
 
 /// The range of the word [offset] is in, as `(start, end)`.
 ///
@@ -122,15 +125,13 @@ SelectionModel moveCaret(
 /// One grapheme cluster left of [at].
 int _characterLeft(SourceBuffer buffer, int at) {
   if (at <= 0) return 0;
-  final before = buffer.substring(0, at);
-  return at - before.characters.last.length;
+  return at - _lastUnit(buffer, at).length;
 }
 
 /// One grapheme cluster right of [at].
 int _characterRight(SourceBuffer buffer, int at) {
   if (at >= buffer.length) return buffer.length;
-  final after = buffer.substring(at, buffer.length);
-  return at + after.characters.first.length;
+  return at + _firstUnit(buffer, at).length;
 }
 
 /// The start of the word before [at]: back over punctuation and space, then
@@ -179,13 +180,26 @@ int _textStart(SourceBuffer buffer, int at) {
   return start + index;
 }
 
+/// How far either side of the caret a grapheme cluster is looked for.
+///
+/// A cluster is a handful of code units — an emoji with its modifiers, a
+/// letter with its accents, a `\r\n` — so a window this wide always holds the
+/// whole of the one next to the caret. What it replaces copied the note from
+/// its start to the caret (or from the caret to its end) on every press, and
+/// several times per character of a word motion.
+const int _window = 64;
+
 /// The grapheme cluster ending at [at].
-String _lastUnit(SourceBuffer buffer, int at) =>
-    buffer.substring(0, at).characters.last;
+String _lastUnit(SourceBuffer buffer, int at) {
+  final from = at - _window < 0 ? 0 : at - _window;
+  return buffer.substring(from, at).characters.last;
+}
 
 /// The grapheme cluster starting at [at].
-String _firstUnit(SourceBuffer buffer, int at) =>
-    buffer.substring(at, buffer.length).characters.first;
+String _firstUnit(SourceBuffer buffer, int at) {
+  final to = at + _window > buffer.length ? buffer.length : at + _window;
+  return buffer.substring(at, to).characters.first;
+}
 
 /// How many code units the grapheme cluster ending at [at] takes.
 int _unitLengthBefore(SourceBuffer buffer, int at) =>

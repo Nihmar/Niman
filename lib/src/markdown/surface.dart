@@ -86,7 +86,7 @@ final class MarkdownSurface extends StatelessWidget {
   final ValueChanged<SelectionModel>? onSelection;
 
   /// Called after every edit, so the shell can save the note.
-  final ValueChanged<String>? onChanged;
+  final VoidCallback? onChanged;
 
   /// The keyboard focus, when the caller owns it.
   final FocusNode? focusNode;
