@@ -50,6 +50,26 @@ Future<void> _settleSave(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('a note of tens of megabytes waits for a real pause to save', (
+    tester,
+  ) async {
+    // Its save stalls the window for 0.4 s: after every half-second breath
+    // that was typing that stuttered.
+    final line = '${List.filled(180, 'word').join(' ')}\n';
+    final note = line * 20000;
+    expect(note.length, greaterThan(16 << 20));
+    final writes = <String>[];
+    await _pump(tester, _view(readNote: (_) async => note, writes: writes));
+    _surface(tester).select(const SelectionModel(anchor: 0, extent: 4));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('toolbar-bold')));
+    await tester.pump(const Duration(seconds: 2));
+    expect(writes, isEmpty, reason: 'two seconds is not a pause here');
+    await tester.pump(const Duration(seconds: 4));
+    expect(writes, hasLength(1));
+    expect(writes.single, startsWith('**word** word'));
+  });
+
   testWidgets('a toolbar command edits the note and the note is saved', (
     tester,
   ) async {

@@ -1231,10 +1231,7 @@ final class _NoteViewState extends State<NoteView>
     // lengthens while a save is in flight (typing fast: one trailing save,
     // not a queue).
     _saveTimer?.cancel();
-    final debounce = _saving
-        ? const Duration(seconds: 1)
-        : const Duration(milliseconds: 500);
-    _saveTimer = Timer(debounce, _save);
+    _saveTimer = Timer(_saveDelay, _save);
     // Word count + outline (T-M2-07): the O(n) passes live behind a
     // debounce, never on the keystroke path.
     _statsTimer?.cancel();
@@ -1260,10 +1257,7 @@ final class _NoteViewState extends State<NoteView>
     _unsaved?.noteChanged();
     _caretLine = caretLine;
     _saveTimer?.cancel();
-    final debounce = _saving
-        ? const Duration(seconds: 1)
-        : const Duration(milliseconds: 500);
-    _saveTimer = Timer(debounce, _save);
+    _saveTimer = Timer(_saveDelay, _save);
     _statsTimer?.cancel();
     _statsTimer = Timer(_statsDelay, _refreshStats);
     _previewTimer?.cancel();
@@ -1314,10 +1308,7 @@ final class _NoteViewState extends State<NoteView>
     _revision++;
     _unsaved?.noteChanged();
     _saveTimer?.cancel();
-    final debounce = _saving
-        ? const Duration(seconds: 1)
-        : const Duration(milliseconds: 500);
-    _saveTimer = Timer(debounce, _save);
+    _saveTimer = Timer(_saveDelay, _save);
     _statsTimer?.cancel();
     _statsTimer = Timer(_statsDelay, _refreshStats);
     _previewTimer?.cancel();
@@ -1811,13 +1802,33 @@ final class _NoteViewState extends State<NoteView>
   /// every breath between words (0.0.9 stress test: a 246 MB note paid 12 s
   /// of isolate time after each one).
   Duration get _statsDelay {
-    final length = _usesUnifiedSource
-        ? _surface?.buffer.length ?? 0
-        : _lastStatsText?.length ?? 0;
+    final length = _noteLength;
     if (length > 16 << 20) return const Duration(seconds: 5);
     if (length > 2 << 20) return const Duration(seconds: 2);
     return const Duration(milliseconds: 350);
   }
+
+  /// How long after the last edit the note is saved.
+  ///
+  /// Half a second, or a second while a save is in flight (typing fast: one
+  /// trailing save, not a queue). A save joins the whole note on the UI
+  /// isolate and copies it to the one that writes it — 0.4 s on a 246 MB
+  /// note (0.0.9 stress test), which after every breath between words was
+  /// typing that stuttered — so a note that size waits for a real pause, as
+  /// the statistics do.
+  Duration get _saveDelay {
+    final length = _noteLength;
+    if (length > 16 << 20) return const Duration(seconds: 5);
+    if (length > 2 << 20) return const Duration(seconds: 2);
+    return _saving
+        ? const Duration(seconds: 1)
+        : const Duration(milliseconds: 500);
+  }
+
+  /// The note's length, without joining it.
+  int get _noteLength => _usesUnifiedSource
+      ? _surface?.buffer.length ?? 0
+      : _lastStatsText?.length ?? 0;
 
   int _statsRevision = 0;
 
