@@ -75,11 +75,15 @@ Iterable<String> _wavy(InlineSpan span) sync* {
   }
 }
 
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
 Future<void> _pump(
   WidgetTester tester,
   String text,
-  EditorSpellCheck check,
-) async {
+  EditorSpellCheck check, {
+  bool live = false,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -88,6 +92,10 @@ Future<void> _pump(
           theme: _theme,
           showLineNumbers: false,
           spellCheck: check,
+          // The same tests in both unified modes (#246): hiding a marker is a
+          // style, and the spelling's skip ranges are read off the tokens, so
+          // the underline must not know which mode drew the line.
+          hideMarkers: live,
         ),
       ),
     ),
@@ -96,33 +104,45 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('a misspelled word is underlined, and only that word', (
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('a misspelled word is underlined, and only that word', (
     tester,
+    mode,
   ) async {
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
-    await _pump(tester, 'hello wrold\n', check);
+    await _pump(tester, 'hello wrold\n', check, live: mode == _Mode.live);
     expect(_underlined(tester), <String>['wrold']);
   });
 
-  testWidgets('code and links are not prose', (tester) async {
+  both('code and links are not prose', (tester, mode) async {
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
     await _pump(
       tester,
       'a `wrold` in code, [wrold](x) linked, and wrold alone\n',
       check,
+      live: mode == _Mode.live,
     );
     // Once, for the word alone: the code span and the link are skipped.
     expect(_underlined(tester), <String>['wrold']);
   });
 
-  testWidgets('switching the checker off takes the underline away', (
+  both('switching the checker off takes the underline away', (
     tester,
+    mode,
   ) async {
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
-    await _pump(tester, 'hello wrold\n', check);
+    await _pump(tester, 'hello wrold\n', check, live: mode == _Mode.live);
     expect(_underlined(tester), isNotEmpty);
     check.setEnabled(enabled: false);
     await tester.pump();

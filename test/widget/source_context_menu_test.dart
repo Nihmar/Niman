@@ -71,11 +71,15 @@ final class _FakeChecker implements SpellChecker {
   void dispose() {}
 }
 
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
 Future<MarkdownSourceViewState> _pump(
   WidgetTester tester,
   String text, {
   FormatMenuBuilder? formatMenu,
   EditorSpellCheck? spellCheck,
+  bool live = false,
 }) async {
   tester.view.physicalSize = const Size(700, 500);
   tester.view.devicePixelRatio = 1;
@@ -89,6 +93,11 @@ Future<MarkdownSourceViewState> _pump(
           showLineNumbers: false,
           formatMenu: formatMenu,
           spellCheck: spellCheck,
+          // The same tests in both unified modes (#246). The fixtures here
+          // carry no markers, so a click at a column lands on the same
+          // character either way — which is what lets one click test hold for
+          // both.
+          hideMarkers: live,
         ),
       ),
     ),
@@ -135,10 +144,32 @@ final TargetPlatformVariant _desktop = TargetPlatformVariant.only(
 );
 
 void main() {
-  testWidgets('a right click puts the caret there and opens the menu', (
+  /// The same test in `source` and in `live`: the criterion is that the menu
+  /// behaves identically in both, so it is run in both.
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body, {
+    TestVariant<Object?>? variant,
+  }) {
+    final desktop = variant ?? _desktop;
+    for (final mode in _Mode.values) {
+      testWidgets(
+        '$name (${mode.name})',
+        (tester) => body(tester, mode),
+        variant: desktop,
+      );
+    }
+  }
+
+  both('a right click puts the caret there and opens the menu', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester, 'una parola sola\n');
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
     await _rightClick(tester, _at(0, 6));
     expect(state.selection.extent, 6);
     expect(state.isContextMenuShown, isTrue);
@@ -154,11 +185,16 @@ void main() {
     expect(find.text('Paste'), findsNothing, reason: 'Escape closes it');
   }, variant: _desktop);
 
-  testWidgets('a right click on the selection keeps it, and Copy copies it', (
+  both('a right click on the selection keeps it, and Copy copies it', (
     tester,
+    mode,
   ) async {
     _mockClipboard(tester);
-    final state = await _pump(tester, 'una parola sola\n');
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
     state.select(const SelectionModel(anchor: 4, extent: 10));
     await tester.pump();
     await _rightClick(tester, _at(0, 6));
@@ -170,8 +206,9 @@ void main() {
     expect(state.isContextMenuShown, isFalse);
   }, variant: _desktop);
 
-  testWidgets('a click beside the menu closes it and does nothing else', (
+  both('a click beside the menu closes it and does nothing else', (
     tester,
+    mode,
   ) async {
     final state = await _pump(tester, 'una parola sola\n\n\n\nfine\n');
     await _rightClick(tester, _at(0, 6));
@@ -181,8 +218,9 @@ void main() {
     expect(state.selection.extent, 6, reason: 'the click went to the barrier');
   }, variant: _desktop);
 
-  testWidgets('the toolbar formats follow the clipboard and run', (
+  both('the toolbar formats follow the clipboard and run', (
     tester,
+    mode,
   ) async {
     var bolded = 0;
     await _pump(
@@ -191,6 +229,7 @@ void main() {
       formatMenu: () => <FormatMenuEntry>[
         FormatMenuEntry(item: ToolbarItem.bold, onPressed: () => bolded++),
       ],
+      live: mode == _Mode.live,
     );
     await _rightClick(tester, _at(0, 6));
     final bold = find.byKey(const Key('context-bold'));
@@ -205,12 +244,18 @@ void main() {
     expect(find.byKey(const Key('context-bold')), findsNothing);
   }, variant: _desktop);
 
-  testWidgets('a misspelled word offers what the checker suggests', (
+  both('a misspelled word offers what the checker suggests', (
     tester,
+    mode,
   ) async {
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
-    final state = await _pump(tester, 'hello wrold\n', spellCheck: check);
+    final state = await _pump(
+      tester,
+      'hello wrold\n',
+      spellCheck: check,
+      live: mode == _Mode.live,
+    );
     await _rightClick(tester, _at(0, 8));
     expect(find.text('world'), findsOneWidget);
     expect(find.text('wold'), findsOneWidget);
@@ -224,17 +269,26 @@ void main() {
     expect(state.widget.buffer.text, 'hello wrold\n');
   }, variant: _desktop);
 
-  testWidgets('a correct word offers no suggestions', (tester) async {
+  both('a correct word offers no suggestions', (tester, mode) async {
     final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(check.dispose);
-    await _pump(tester, 'hello wrold\n', spellCheck: check);
+    await _pump(
+      tester,
+      'hello wrold\n',
+      spellCheck: check,
+      live: mode == _Mode.live,
+    );
     await _rightClick(tester, _at(0, 2));
     expect(find.text('world'), findsNothing);
     expect(find.text('Paste'), findsOneWidget);
   }, variant: _desktop);
 
-  testWidgets('the menu key opens the menu at the caret', (tester) async {
-    final state = await _pump(tester, 'una parola sola\n');
+  both('the menu key opens the menu at the caret', (tester, mode) async {
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
     await tester.tapAt(_at(0, 3), kind: PointerDeviceKind.mouse);
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
@@ -243,8 +297,9 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   }, variant: _desktop);
 
-  testWidgets('in the note, Bold from the menu wraps the selection', (
+  both('in the note, Bold from the menu wraps the selection', (
     tester,
+    mode,
   ) async {
     String? saved;
     await tester.pumpWidget(
@@ -256,6 +311,8 @@ void main() {
             autofocusEditor: true,
             toolbarTop: true,
             unifiedMarkdown: true,
+            // The WYSIWYG pane: the same menu over the `live` surface.
+            showWysiwyg: mode == _Mode.live,
             readNote: (_) async => 'hello',
             writeNote: (_, text) async => saved = text,
           ),

@@ -34,6 +34,7 @@ Future<MarkdownSourceViewState> _open(
   WidgetTester tester,
   String note, {
   void Function(String text)? onSave,
+  bool live = false,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -43,6 +44,10 @@ Future<MarkdownSourceViewState> _open(
           showLineNumbers: false,
           autofocusEditor: true,
           unifiedMarkdown: true,
+          // The same tests in both unified modes: `source` is the pane as
+          // written, `live` the pane with the markers hidden and the caret's
+          // own shown. The shell around them does not change.
+          showWysiwyg: live,
           readNote: (_) async => note,
           writeNote: (_, text) async => onSave?.call(text),
         ),
@@ -60,11 +65,32 @@ Future<void> _ctrl(WidgetTester tester, LogicalKeyboardKey key) async {
   await tester.pump();
 }
 
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
 void main() {
-  testWidgets('Ctrl+F opens the bar, and the matches are painted', (
+  // Both unified modes (#246): the find bar is the shell's, over a surface that
+  // is one widget in `source` and in `live`, and the criterion is that it
+  // behaves identically in both — so the bar's own tests run in both rather
+  // than being described twice.
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('Ctrl+F opens the bar, and the matches are painted', (
     tester,
+    mode,
   ) async {
-    final state = await _open(tester, 'uno gatto\ndue gatto\ntre\n');
+    final state = await _open(
+      tester,
+      'uno gatto\ndue gatto\ntre\n',
+      live: mode == _Mode.live,
+    );
     state.focusNode.requestFocus();
     await tester.pump();
     await _ctrl(tester, LogicalKeyboardKey.keyF);
@@ -97,14 +123,13 @@ void main() {
     expect(state.focusNode.hasFocus, isTrue, reason: 'the note has it back');
   });
 
-  testWidgets('Ctrl+H replaces them all, and the note is saved', (
-    tester,
-  ) async {
+  both('Ctrl+H replaces them all, and the note is saved', (tester, mode) async {
     String? saved;
     final state = await _open(
       tester,
       'uno gatto\ndue gatto\n',
       onSave: (text) => saved = text,
+      live: mode == _Mode.live,
     );
     state.focusNode.requestFocus();
     await tester.pump();
@@ -135,10 +160,11 @@ void main() {
     expect(find.text('0'), findsOneWidget, reason: 'nothing left to find');
   });
 
-  testWidgets('Escape in the note with the bar closed is not taken', (
+  both('Escape in the note with the bar closed is not taken', (
     tester,
+    mode,
   ) async {
-    final state = await _open(tester, 'testo\n');
+    final state = await _open(tester, 'testo\n', live: mode == _Mode.live);
     state.focusNode.requestFocus();
     await tester.pump();
     final result = await tester.sendKeyEvent(LogicalKeyboardKey.escape);
