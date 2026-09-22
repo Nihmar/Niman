@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -47,6 +48,7 @@ NoteView _note({
   List<String>? opened,
   String? initialAnchor,
   int? initialCaret,
+  bool showPreview = false,
   Future<String?> Function()? pickImagePath,
   Future<String> Function(String root, String source)? importImage,
   NoteColumn column = NoteColumn.off,
@@ -68,6 +70,7 @@ NoteView _note({
   onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
   initialAnchor: initialAnchor,
   initialCaretOffset: initialCaret,
+  showPreview: showPreview,
   pickImagePath: pickImagePath,
   importImage: importImage,
   noteColumn: column,
@@ -416,6 +419,38 @@ void main() {
       await tester.pumpAndSettle();
       expect(_surface(tester).selection, const SelectionModel.at(10));
     });
+  });
+
+  testWidgets('the preview shows what the editor holds, from its own lines', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_note(text: 'uno')));
+    await tester.pumpAndSettle();
+    final surface = _surface(tester)..replaceText(3, 3, ' due');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(_app(_note(text: 'uno', showPreview: true)));
+    await tester.pumpAndSettle();
+    final read = tester.widget<MarkdownReadView>(find.byType(MarkdownReadView));
+    expect(read.buffer.text, 'uno due');
+    // A snapshot of the editor's buffer, not the buffer itself: the editor
+    // goes on editing its own.
+    expect(identical(read.buffer, surface.widget.buffer), isFalse);
+    expect(find.textContaining('uno due', findRichText: true), findsWidgets);
+
+    // Back to the editor, another edit, and the preview again follows it.
+    await tester.pumpWidget(_app(_note(text: 'uno')));
+    await tester.pumpAndSettle();
+    _surface(tester).replaceText(7, 7, ' tre');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(_app(_note(text: 'uno', showPreview: true)));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<MarkdownReadView>(find.byType(MarkdownReadView))
+          .buffer
+          .text,
+      'uno due tre',
+    );
   });
 
   testWidgets('a key the user chose wins over the note’s own '

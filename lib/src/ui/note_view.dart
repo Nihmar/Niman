@@ -489,6 +489,18 @@ final class _NoteViewState extends State<NoteView>
   SourceBuffer? _unifiedBuffer;
   String _unifiedBufferText = '';
 
+  /// The editor's buffer and its revision the read pane should show, while
+  /// the source pane is the unified surface: the pane is given a snapshot of
+  /// that buffer's lines ([SourceBuffer.snapshot]) rather than a buffer read
+  /// again from the note's joined text.
+  SourceBuffer? _previewOf;
+  int _previewRevision = -1;
+
+  /// Whether [_unifiedBuffer] is such a snapshot, and of which revision.
+  bool _bufferIsSnapshot = false;
+  SourceBuffer? _snapshotFrom;
+  int _snapshotRevision = -1;
+
   /// The note's text as the unified source surface has it, read by
   /// [_currentText], which is where saving, the preview and the statistics all
   /// get their text from — so this pane reaches every one of them through the
@@ -552,9 +564,25 @@ final class _NoteViewState extends State<NoteView>
 
   /// The buffer the unified engine draws, built once per text change.
   SourceBuffer get _unifiedSource {
-    if (_unifiedBuffer == null || _unifiedBufferText != _previewText) {
+    final live = _previewOf;
+    if (_usesUnifiedSource && live != null) {
+      if (_unifiedBuffer == null ||
+          !_bufferIsSnapshot ||
+          !identical(_snapshotFrom, live) ||
+          _snapshotRevision != _previewRevision) {
+        _unifiedBuffer = live.snapshot();
+        _bufferIsSnapshot = true;
+        _snapshotFrom = live;
+        _snapshotRevision = _previewRevision;
+      }
+      return _unifiedBuffer!;
+    }
+    if (_unifiedBuffer == null ||
+        _bufferIsSnapshot ||
+        _unifiedBufferText != _previewText) {
       _unifiedBufferText = _previewText;
       _unifiedBuffer = SourceBuffer.fromText(_previewText);
+      _bufferIsSnapshot = false;
     }
     return _unifiedBuffer!;
   }
@@ -698,7 +726,12 @@ final class _NoteViewState extends State<NoteView>
       );
       if (widget.showPreview && _previewStale) {
         _previewStale = false;
-        _previewText = _currentText;
+        if (_usesUnifiedSource) {
+          _previewOf = _surface?.buffer;
+          _previewRevision = _previewOf?.revision ?? -1;
+        } else {
+          _previewText = _currentText;
+        }
       }
       if (widget.showPreview) {
         // What the flip costs to reach the pixels, and what the frames after
@@ -1247,6 +1280,18 @@ final class _NoteViewState extends State<NoteView>
       // to date means re-reading and re-parsing the whole note: done when it
       // is shown, not every time the writer pauses.
       _previewStale = true;
+      return;
+    }
+    final live = _surface?.buffer;
+    if (_usesUnifiedSource && live != null) {
+      // The editor's own lines, by revision: no text joined, no text compared.
+      if (identical(live, _previewOf) && live.revision == _previewRevision) {
+        return;
+      }
+      setState(() {
+        _previewOf = live;
+        _previewRevision = live.revision;
+      });
       return;
     }
     final text = _currentText;

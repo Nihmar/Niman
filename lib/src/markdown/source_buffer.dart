@@ -85,6 +85,22 @@ final class SourceBuffer {
   /// An empty buffer: one empty line, LF.
   factory empty() => SourceBuffer.fromText('');
 
+  /// A buffer holding what this one holds now, which this one's edits no
+  /// longer reach.
+  ///
+  /// The lines are the same strings — a string never changes, so sharing it
+  /// is free — and only the two lists and the line index are new: O(lines),
+  /// where [SourceBuffer.fromText] over the joined text is O(characters)
+  /// twice. It is how the read pane gets the editor's note without a copy of
+  /// its text: a
+  /// 114 MB note took seconds to join, compare and split again for a preview
+  /// that already had every line in memory (0.0.9 stress test).
+  SourceBuffer snapshot() => SourceBuffer._(
+    List<String>.of(_lines),
+    List<String>.of(_terminators),
+    PrefixSums(_spansOf(_lines, _terminators)),
+  );
+
   /// The lines, without their terminators.
   final List<String> _lines;
 
