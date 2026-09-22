@@ -321,6 +321,16 @@ notifies the two lines involved once. The frame such a move causes costs
 the unit is the line, so a wrapped paragraph shows the syntax of every row it
 spans while the caret is in it.
 
+**`live` now draws the WYSIWYG pane** when the unified engine is on
+(`note_view.dart`): one widget, two modes, one flag — `source` for the source
+pane, `live` for the pane Quill used to draw. Nothing about the note changed
+with the mode: its text, caret, commands, save, statistics and memento are the
+same question in both, which is why the shell's predicate is "who is drawing
+this note" rather than "is this the source pane". The wiring fixed three
+hand-off bugs it exposed, all of them data loss on a mode or engine switch;
+`unified-surface.md` names them. What it does not give yet is `activeFormats`:
+the toolbar's pressed state is still empty in the unified pane.
+
 ## The testing builds
 
 `scripts\niman.bat windows beta` and `scripts\niman.bat apk beta` were built

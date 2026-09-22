@@ -487,7 +487,7 @@ final class _NoteViewState extends State<NoteView>
   String? _wysiwygText;
 
   /// The note's current text, whichever surface holds it.
-  String get _currentText => _usesUnifiedSource
+  String get _currentText => _unified
       ? _unifiedText
       : widget.showWysiwyg
       ? _wysiwygText ?? ''
@@ -635,18 +635,29 @@ final class _NoteViewState extends State<NoteView>
     surface.words.adopt(buffer);
   }
 
-  /// Whether the *source* pane is the unified surface rather than re_editor.
+  /// Whether the unified surface draws the pane — in **either** of its modes.
+  ///
+  /// The WYSIWYG pane and the source pane are one widget told apart by the mode
+  /// it is built in (`live` hides the markers, `source` shows them), so
+  /// everything about *the note the pane holds* — its text, its caret, its
+  /// commands, its save, its statistics — is the same question in both: who is
+  /// drawing this note. What differs is only what is asked of the widget.
   ///
   /// Off by default and behind the same flag as the read mode, because a
-  /// surface
-  /// being shown has to be shown to agree with what it replaces before it can
-  /// replace it.
-  bool get _usesUnifiedSource => widget.unifiedMarkdown && !widget.showWysiwyg;
+  /// surface being shown has to be shown to agree with what it replaces before
+  /// it can replace it.
+  bool get _unified => widget.unifiedMarkdown;
+
+  /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
+  /// source pane is `source` (`docs/dev/unified-surface.md` §8.6.3).
+  MarkdownSurfaceMode get _unifiedMode => widget.showWysiwyg
+      ? MarkdownSurfaceMode.live
+      : MarkdownSurfaceMode.source;
 
   /// The buffer the unified engine draws, built once per text change.
   SourceBuffer get _unifiedSource {
     final live = _previewOf;
-    if (_usesUnifiedSource && live != null) {
+    if (_unified && live != null) {
       if (_unifiedBuffer == null ||
           !_bufferIsSnapshot ||
           !identical(_snapshotFrom, live) ||
@@ -807,7 +818,7 @@ final class _NoteViewState extends State<NoteView>
       );
       if (widget.showPreview && _previewStale) {
         _previewStale = false;
-        if (_usesUnifiedSource) {
+        if (_unified) {
           _previewOf = _surface?.buffer;
           _previewRevision = _previewOf?.revision ?? -1;
         } else {
@@ -863,7 +874,7 @@ final class _NoteViewState extends State<NoteView>
     // its own — request it like a fresh mount did.
     if (_previewIn(oldWidget) && !_previewIn(widget)) {
       if (widget.autofocusEditor) {
-        if (widget.showWysiwyg) {
+        if (widget.showWysiwyg && !_unified) {
           _wysiwygFocus.requestFocus();
         } else {
           _focus.requestFocus();
@@ -882,27 +893,23 @@ final class _NoteViewState extends State<NoteView>
       _switchEngine(
         toUnified: widget.unifiedMarkdown,
         wysiwyg: widget.showWysiwyg,
+        fromUnified: oldWidget.unifiedMarkdown,
       );
     }
     // Hand the buffer over when the editor kind changes (T-WYS-05): the
     // WYSIWYG surface opens with what the source editor holds, and the
     // source editor takes back what WYSIWYG serialized.
-    if (oldWidget.showWysiwyg != widget.showWysiwyg) {
+    //
+    // Only between the *legacy* panes. Under the unified engine both kinds are
+    // one surface in two modes, holding one buffer: there is nothing to hand
+    // over, and handing `_wysiwygText` over — a copy taken when `live` opened
+    // and never updated since, because `live` edits the buffer directly —
+    // would write the note from before the writer's edits.
+    if (oldWidget.showWysiwyg != widget.showWysiwyg && !_unified) {
       if (widget.showWysiwyg) {
-        // What the *source* pane holds, whichever one it was: the unified
-        // surface's text is not in the legacy controller.
-        _wysiwygText = widget.unifiedMarkdown ? _unifiedText : _controller.text;
-      } else if (_wysiwygText case final text?) {
-        if (widget.unifiedMarkdown) {
-          _setLegacyText(text);
-        } else if (text != _controller.text) {
-          _controller.text = text;
-        }
-        if (widget.unifiedMarkdown && text != _unifiedText) {
-          // And back: the unified buffer takes what the WYSIWYG serialized,
-          // or its next edit would write the note from before it.
-          _surface?.replaceAll(text);
-        }
+        _wysiwygText = _controller.text;
+      } else if (_wysiwygText case final text? when text != _controller.text) {
+        _controller.text = text;
       }
     }
   }
@@ -910,10 +917,18 @@ final class _NoteViewState extends State<NoteView>
   /// Hands the note from one markdown engine to the other.
   ///
   /// To the legacy editor: its controller, left empty while the unified engine
-  /// was on, takes the note — from the WYSIWYG when that is on screen, since it
-  /// holds the latest text. To the unified engine: its buffer takes what the
+  /// was on, takes the note. To the unified engine: its buffer takes what the
   /// legacy controller holds, which the edits since the last switch went into.
-  void _switchEngine({required bool toUnified, required bool wysiwyg}) {
+  ///
+  /// [fromUnified] says which engine is being *left*, which decides what "the
+  /// note" is on the way out: a unified pane — in either mode — keeps it in
+  /// [_unifiedText], and the Quill surface's own copy is only the truth when
+  /// Quill is what was on screen.
+  void _switchEngine({
+    required bool toUnified,
+    required bool wysiwyg,
+    bool fromUnified = false,
+  }) {
     _loading = true;
     if (toUnified) {
       final text = wysiwyg
@@ -925,9 +940,16 @@ final class _NoteViewState extends State<NoteView>
         _surface!.replaceAll(text);
       }
       _unifiedText = text;
+      // The legacy controller has the text *before* the switch and will not
+      // get what is written after it, so it is behind from here on: that is
+      // what makes the way back refill it.
+      _legacyBehind = true;
     } else if (_legacyBehind) {
       _legacyBehind = false;
-      _controller.text = wysiwyg ? _wysiwygText ?? _unifiedText : _unifiedText;
+      final text = !fromUnified && wysiwyg
+          ? _wysiwygText ?? _unifiedText
+          : _unifiedText;
+      _controller.text = text;
       _controller.clearHistory();
       _lastLines = _controller.codeLines;
     }
@@ -971,6 +993,25 @@ final class _NoteViewState extends State<NoteView>
   void _handMemento(String path) {
     final receive = widget.onMemento;
     if (receive == null || !_ready) return;
+    final surface = _surface;
+    if (_unified && surface != null) {
+      // Source offsets either way: `live` draws the same text, so an offset
+      // means what it means in `source`, and a tab switch between the two
+      // panes keeps the caret. The *editor kind* is the pane's, so the switch
+      // comes back to the mode the note was left in.
+      final selection = surface.selection;
+      receive(
+        path,
+        NoteMemento(
+          selectionBase: selection.anchor,
+          selectionExtent: selection.extent,
+          scrollOffset: surface.scrollOffset,
+          editorKind: widget.showWysiwyg ? wysiwygEditorKind : sourceEditorKind,
+          preview: widget.showPreview,
+        ),
+      );
+      return;
+    }
     if (widget.showWysiwyg) {
       final state = _wysiwygKey.currentState;
       if (state == null) return;
@@ -982,23 +1023,6 @@ final class _NoteViewState extends State<NoteView>
           selectionExtent: selection.extentOffset,
           scrollOffset: state.scrollOffset,
           editorKind: wysiwygEditorKind,
-          preview: widget.showPreview,
-        ),
-      );
-      return;
-    }
-    final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
-      // Source offsets, the same thing the legacy editor's memento counts, so
-      // a memento taken in either source pane restores in the other.
-      final selection = surface.selection;
-      receive(
-        path,
-        NoteMemento(
-          selectionBase: selection.anchor,
-          selectionExtent: selection.extent,
-          scrollOffset: surface.scrollOffset,
-          editorKind: sourceEditorKind,
           preview: widget.showPreview,
         ),
       );
@@ -1019,18 +1043,23 @@ final class _NoteViewState extends State<NoteView>
     final wysiwyg = widget.showWysiwyg;
     final sameEditor =
         memento.editorKind == (wysiwyg ? wysiwygEditorKind : sourceEditorKind);
+    if (_unified) {
+      // One surface, two modes, the same text and the same offsets: the
+      // selection is restored whenever the memento was taken in this pane,
+      // and the scroll either way. The buffer is already built (the load made
+      // it), so this is the same call the source pane has always made.
+      _surface?.restore(
+        base: sameEditor ? memento.selectionBase : null,
+        extent: sameEditor ? memento.selectionExtent : null,
+        scroll: memento.scrollOffset,
+      );
+      return;
+    }
     if (!wysiwyg) {
-      if (sameEditor && !widget.unifiedMarkdown) {
+      if (sameEditor) {
         restoreSourceSelection(_controller, memento);
       }
       restoreScroll(_scroll.verticalScroller, memento.scrollOffset);
-      if (widget.unifiedMarkdown) {
-        _surface?.restore(
-          base: sameEditor ? memento.selectionBase : null,
-          extent: sameEditor ? memento.selectionExtent : null,
-          scroll: memento.scrollOffset,
-        );
-      }
       return;
     }
     // The surface is built from the text on the next frame.
@@ -1228,7 +1257,7 @@ final class _NoteViewState extends State<NoteView>
       _log.debug('reload skipped (unsaved edits): ${widget.path}');
       return;
     }
-    if (widget.showWysiwyg) {
+    if (widget.showWysiwyg && !_unified) {
       _log.debug('reload skipped (wysiwyg): ${widget.path}');
       return;
     }
@@ -1364,7 +1393,7 @@ final class _NoteViewState extends State<NoteView>
 
   void _refreshPreview() {
     if (!mounted || _loading) return;
-    if (_usesUnifiedSource && !_previewIn(widget)) {
+    if (_unified && !_previewIn(widget)) {
       // The read pane is off stage behind the source pane, and bringing it up
       // to date means re-reading and re-parsing the whole note: done when it
       // is shown, not every time the writer pauses.
@@ -1372,7 +1401,7 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final live = _surface?.buffer;
-    if (_usesUnifiedSource && live != null) {
+    if (_unified && live != null) {
       // The editor's own lines, by revision: no text joined, no text compared.
       if (identical(live, _previewOf) && live.revision == _previewRevision) {
         return;
@@ -1421,7 +1450,11 @@ final class _NoteViewState extends State<NoteView>
   /// the editor or its find bar has the focus — so a note loading, or its
   /// place being put back, stays where it was put.
   void _followCaret() {
-    if (!widget.typewriter || widget.showWysiwyg || !widget.active) return;
+    if (!widget.typewriter ||
+        (widget.showWysiwyg && !_unified) ||
+        !widget.active) {
+      return;
+    }
     if (!_focus.hasFocus && _findController.value == null) return;
     _typewriter.caretMoved();
   }
@@ -1517,7 +1550,9 @@ final class _NoteViewState extends State<NoteView>
   ///
   /// The switch mode handles the eye for both: the WYSIWYG surface and the
   /// source editor are one pane, never two.
-  Widget _editorPane() => widget.showWysiwyg
+  Widget _editorPane() => _unified
+      ? _unifiedSurfacePane()
+      : widget.showWysiwyg
       ? WysiwygEditor(
           key: _wysiwygKey,
           data: _currentText,
@@ -1530,19 +1565,19 @@ final class _NoteViewState extends State<NoteView>
           formatMenu: _formatMenu,
           typewriter: widget.typewriter,
         )
-      : _usesUnifiedSource
-      ? _unifiedSurfacePane()
       : _sourcePane();
 
-  /// The source pane as the unified surface (#245).
+  /// The editor pane as the unified surface (#245, #246).
   ///
-  /// The same widget the read mode's engine is built from, in `source` mode:
-  /// the
-  /// note as written, with the caret, the motions, the undo history and the
-  /// windowing that the surface has. It reports the text and the caret line
-  /// through [_noteChanged], which is the same door the legacy editor's numbers
-  /// come through — so saving, the preview and the statistics do not know which
-  /// pane is on screen.
+  /// The same widget the read mode's engine is built from, in one of its
+  /// modes:
+  /// `source` is the note as written, `live` is the same note with the
+  /// markers hidden and the caret's own revealed — the WYSIWYG the phase 4
+  /// round is about. Both hold the caret, the motions, the undo history and
+  /// the windowing, and both report the text and the caret line through
+  /// [_noteChanged], which is the same door the legacy editor's numbers come
+  /// through — so saving, the preview and the statistics do not know which
+  /// pane is on screen, or which mode it is in.
   Widget _unifiedSurfacePane() {
     var surface = _surface;
     if (surface == null) {
@@ -1566,7 +1601,7 @@ final class _NoteViewState extends State<NoteView>
         // phone toolbar, the format keys, save-on-blur and the refocus when
         // the preview goes all ask *it* whether the editor has the focus.
         focusNode: _focus,
-        mode: MarkdownSurfaceMode.source,
+        mode: _unifiedMode,
         theme: markdownThemeOf(context),
         showLineNumbers: widget.showLineNumbers && !widget.zen,
         caretWidth: widget.zen ? zenCaretWidth : null,
@@ -1829,7 +1864,7 @@ final class _NoteViewState extends State<NoteView>
       linkType: widget.linkType,
     );
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       surface.replaceSelection(snippet);
     } else {
       _controller.replaceSelection(snippet);
@@ -1862,7 +1897,7 @@ final class _NoteViewState extends State<NoteView>
   void _refreshStats() {
     if (!mounted || _loading) return;
     final surface = _surface;
-    final unified = _usesUnifiedSource && surface != null;
+    final unified = _unified && surface != null;
     if (unified) {
       // The surface counts its own words as it is edited. A note whose
       // count is not there yet (a big one, counted in the background) keeps
@@ -2021,7 +2056,7 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// The note's length, without joining it.
-  int get _noteLength => _usesUnifiedSource
+  int get _noteLength => _unified
       ? _surface?.buffer.length ?? 0
       : _wordCountLength < 0
       ? 0
@@ -2055,7 +2090,7 @@ final class _NoteViewState extends State<NoteView>
   void _jumpToHeading(int line) {
     const AppLogger(name: 'links').debug('jump to source line $line');
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       surface.jumpToLine(line);
     } else {
       _controller.selection = CodeLineSelection.collapsed(
@@ -2331,7 +2366,7 @@ final class _NoteViewState extends State<NoteView>
   _StreamSave? _takeStreamSave() {
     if (widget.saveNoteStream == null) return null;
     final buffer = _unifiedSurfaceBuffer;
-    if (buffer == null || !_usesUnifiedSource || buffer.lineCount == 0) {
+    if (buffer == null || !_unified || buffer.lineCount == 0) {
       return null;
     }
     return _StreamSave(buffer.snapshot());
@@ -2405,7 +2440,7 @@ final class _NoteViewState extends State<NoteView>
   /// gets to it (#61).
   SpellScan _scanSpelling() {
     final spell = widget.spellCheck!;
-    if (widget.showWysiwyg) {
+    if (widget.showWysiwyg && !_unified) {
       final lines =
           _wysiwygKey.currentState?.plainTextLines ?? const <String>[];
       return spell.startScan(
@@ -2414,7 +2449,7 @@ final class _NoteViewState extends State<NoteView>
       );
     }
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       // The surface's own lines, and its own tokenizer's runs: code, maths,
       // links and markers are skipped as they are in the underline.
       final buffer = surface.buffer;
@@ -2436,7 +2471,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// Replaces one issue's word in the controller (the panel's fix).
   void _applySpelling(SpellIssue issue, String replacement) {
-    if (widget.showWysiwyg) {
+    if (widget.showWysiwyg && !_unified) {
       _wysiwygKey.currentState?.replaceDocumentRange(
         issue.line,
         issue.start,
@@ -2446,7 +2481,7 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       final buffer = surface.buffer;
       if (issue.line >= buffer.lineCount) return;
       final start = buffer.offsetOfLine(issue.line);
@@ -2514,7 +2549,7 @@ final class _NoteViewState extends State<NoteView>
   void _applyKindEdit(String newText) {
     _setLegacyText(newText);
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null && newText != _unifiedText) {
+    if (_unified && surface != null && newText != _unifiedText) {
       // The kind GUI stands in front of the surface, so there may be no view:
       // the controller edits the buffer itself, and it is that buffer the save
       // below writes.
@@ -2541,8 +2576,9 @@ final class _NoteViewState extends State<NoteView>
   /// "the keyboard is up": the formatting toolbar shows only while the
   /// keyboard is up (it is the keyboard's row, and in preview there is
   /// nothing to format), so it rides this focus.
-  bool get _keyboardUp =>
-      widget.showWysiwyg ? _wysiwygFocus.hasFocus : _focus.hasFocus;
+  bool get _keyboardUp => widget.showWysiwyg && !_unified
+      ? _wysiwygFocus.hasFocus
+      : _focus.hasFocus;
 
   @override
   Widget build(BuildContext context) {
@@ -2653,10 +2689,10 @@ final class _NoteViewState extends State<NoteView>
                     statusText: _status,
                     statusActions: widget.statusActions,
                     onOutline: _openOutline,
-                    onFind: widget.showWysiwyg
-                        ? () => _wysiwygKey.currentState?.openFind()
-                        : _usesUnifiedSource
+                    onFind: _unified
                         ? () => _sourceFind.open()
+                        : widget.showWysiwyg
+                        ? () => _wysiwygKey.currentState?.openFind()
                         : _findController.findMode,
                     onSpellCheck: _openSpellCheck,
                     onToggleEditorKind: _toggleEditorKind,
@@ -2709,7 +2745,7 @@ final class _NoteViewState extends State<NoteView>
     // the WYSIWYG surface has its own focus handling, and publishes which
     // formats are on at the caret so a pressed button stays pressed until
     // it is toggled off (T-WYS-06).
-    if (!widget.showWysiwyg) {
+    if (!widget.showWysiwyg || _unified) {
       return CodeEditorTapRegion(
         child: NoteToolbarBar(
           dense: dense,
@@ -2738,7 +2774,7 @@ final class _NoteViewState extends State<NoteView>
   /// pressed state — read when the menu opens, so it is the caret's now.
   List<FormatMenuEntry> _formatMenu() {
     final actions = _toolbarActions();
-    final active = widget.showWysiwyg
+    final active = widget.showWysiwyg && !_unified
         ? _wysiwygActive.value
         : const <ToolbarItem>{};
     return [
@@ -2753,7 +2789,7 @@ final class _NoteViewState extends State<NoteView>
   }
 
   Map<ToolbarItem, VoidCallback> _toolbarActions() {
-    if (widget.showWysiwyg) return _quillToolbarActions();
+    if (widget.showWysiwyg && !_unified) return _quillToolbarActions();
     return {
       ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
       ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
@@ -2800,7 +2836,7 @@ final class _NoteViewState extends State<NoteView>
   /// the colours are drawn from, and it already knows a list item when it
   /// makes one (see `blockList`).
   bool get _hasListToCount {
-    if (widget.showWysiwyg) {
+    if (widget.showWysiwyg && !_unified) {
       final state = _wysiwygKey.currentState;
       if (state == null) return false;
       return quillTallyTargets(state.controller.document).isNotEmpty;
@@ -2810,15 +2846,16 @@ final class _NoteViewState extends State<NoteView>
     // the text being read again.
     final source = _sourceViewKey.currentState;
     final scanned = source?.blocks ?? _readViewKey.currentState?.blocks;
-    final buffer = _usesUnifiedSource ? _unifiedSurfaceBuffer : null;
+    final buffer = _unified ? _unifiedSurfaceBuffer : null;
     if (scanned != null) return blockList(scanned);
     if (buffer != null) return blockList(BlockScanner(buffer).index.blocks);
     return blockList(scannedBlocksOf(_editText));
   }
 
   /// Counts a list into a checklist, on whichever surface is showing.
-  Future<void> _countList() =>
-      widget.showWysiwyg ? _countListWysiwyg() : _countListSource();
+  Future<void> _countList() => widget.showWysiwyg && !_unified
+      ? _countListWysiwyg()
+      : _countListSource();
 
   Future<void> _countListSource() async {
     final text = _editText;
@@ -2907,7 +2944,7 @@ final class _NoteViewState extends State<NoteView>
   /// defensively.
   void _applyMarkdownEdit(MarkdownEdit edit) {
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       // Through the surface: one undoable edit, the platform told, the save
       // scheduled — the legacy controller is not on screen, and an edit to it
       // was a command whose work was lost.
@@ -2922,7 +2959,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// The source text a command works on, from whichever source pane is on
   /// screen.
-  String get _editText => _usesUnifiedSource ? _unifiedText : _controller.text;
+  String get _editText => _unified ? _unifiedText : _controller.text;
 
   /// Runs a Markdown [command] on the source pane on screen.
   ///
@@ -2933,7 +2970,7 @@ final class _NoteViewState extends State<NoteView>
     MarkdownEdit Function(String text, TextSelection selection) command,
   ) {
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       surface.applyLineCommand(command);
       _focus.requestFocus();
       return;
@@ -2947,7 +2984,7 @@ final class _NoteViewState extends State<NoteView>
   /// The line the command's caret is on (0-based).
   int get _editCaretLine {
     final surface = _surface;
-    if (_usesUnifiedSource && surface != null) {
+    if (_unified && surface != null) {
       return surface.buffer.lineOf(surface.selection.anchor);
     }
     return _controller.selection.baseIndex;
