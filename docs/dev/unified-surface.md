@@ -11460,13 +11460,31 @@ What the design asks for next, in the order it names them:
 
 - **Per-word reveal** as the refinement, and the row-wise reveal that follows
   a wrap: the current granularity is the *line*, because a line is the unit
-  the surface builds. A per-word version was tried and reverted: the range it
-  revealed was right (`revealRange` returns the caret's run of
-  non-whitespace, one character past it at a run's end) and the line the
-  caret is in was right, but the marker of a word the caret sits at the
-  *start* of stayed hidden — `#` before `Titolo` with the caret at the
-  title's first letter. The next attempt starts by proving, in one test,
-  which `Token` and which `(start, end)` the view computes for that case.
+  the surface builds.
+
+  A per-word version was tried twice and reverted twice. What the second
+  attempt settled, and what the next one should not re-litigate:
+
+  * The *rule* is now a pure function and is right: `runAround(text, offset)`
+    in `caret_motion.dart` answers the run of non-whitespace the offset is in
+    — `(2, 10)` for offset 5 in `a **bold** b`, `(2, 8)` for offset 3 in
+    `# Titolo`, the whitespace itself for an offset inside it. It is
+    deliberately *not* `wordRangeAt`, which answers what a double click
+    selects: a marker touching the word it marks belongs to the reveal's
+    word, and to nothing else.
+  * The predicate is right, and it is what the design asks for: a marker is
+    drawn when it touches the caret's word, `token.end <= start ||
+    token.start >= end`. For `#` at `[0, 1]` and the word `(2, 8)` that is
+    true, so the hash *must* be drawn with the caret at the title's first
+    letter.
+  * The widget draws it hidden anyway. That is where the next attempt
+    starts: not in the rule, and not in the predicate, but in what the line
+    under the caret receives. The probe to write first prints, inside
+    `_span`, the `(start, end)` it was given and the `Token.start`/`end` it
+    compared — one line of output settles it.
+
+  The two reverts left the tree green (4 770 tests, `niman.sh linux`
+  artefact rebuilt), and the line-based reveal of policy A is what ships.
 - The budget: the reveal must cost one block re-layout (≤ 3 ms) and never
   fire more than once per caret row change.
 - The 200 KB cap gone, so `Geometria 1.md` opens and edits in `live` mode.
