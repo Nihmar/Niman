@@ -46,6 +46,7 @@ import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
+import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The colour a selected run is painted with.
@@ -74,6 +75,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.focusNode,
     this.controller,
     this.history,
+    this.surface,
     this.column = NoteColumn.off,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
@@ -126,6 +128,10 @@ final class MarkdownSourceView extends StatefulWidget {
   /// so
   /// moving a note between tabs does not lose it). Null keeps one here.
   final EditHistory? history;
+
+  /// The shell's hold on the note: its history, the selection to start with,
+  /// and the door its commands come in through. Its buffer is [buffer].
+  final MarkdownSurfaceController? surface;
 
   /// The page margins.
   final EdgeInsets padding;
@@ -223,42 +229,77 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _focus = widget.focusNode ?? FocusNode();
     _ownsFocus = widget.focusNode == null;
     _heights = _map();
-    _history = widget.history ?? EditHistory();
-    _input = SourceInput(
-      buffer: widget.buffer,
-      onRecord: _history.record,
-      onNewline: _newline,
-      onTokenizer: (edit, buffer) =>
-          SourceInput.retokenize(_tokens, edit, buffer),
-      text: () => _wholeText,
-      selection: () => _selection,
-      onSelection: (next) {
-        setState(() => _ownSelection = next);
-        widget.onSelection?.call(next);
-        _scheduleCaret();
-      },
-      onEdited: (edit) {
-        _syncLines(edit);
-        setState(() {
-          _ownSelection = _ownSelection.clampTo(widget.buffer.length);
-        });
-        _scheduleCaret();
-        _ensureCaretVisible();
-        _notifyChanged();
-      },
-    );
+    _history = widget.history ?? widget.surface?.history ?? EditHistory();
+    _ownSelection = widget.surface?.initialSelection ?? _ownSelection;
+    _seenRevision = widget.buffer.revision;
+    _input = _makeInput();
+    widget.surface?.attachView(this);
     _scheduleCaret();
+    final scroll = widget.surface?.takePendingScroll();
+    if (scroll != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) jumpToOffset(scroll);
+      });
+    }
   }
+
+  /// The keyboard for the buffer this view shows.
+  SourceInput _makeInput() => SourceInput(
+    buffer: widget.buffer,
+    onRecord: _history.record,
+    onNewline: _newline,
+    onTokenizer: (edit, buffer) =>
+        SourceInput.retokenize(_tokens, edit, buffer),
+    text: () => _wholeText,
+    selection: () => _selection,
+    onSelection: (next) {
+      setState(() => _ownSelection = next);
+      widget.onSelection?.call(next);
+      _scheduleCaret();
+    },
+    onEdited: (edit) {
+      _syncLines(edit);
+      setState(() {
+        _ownSelection = _ownSelection.clampTo(widget.buffer.length);
+      });
+      _scheduleCaret();
+      _ensureCaretVisible();
+      _notifyChanged();
+    },
+  );
+
+  /// The buffer revision this view last drew or edited, so an edit made
+  /// behind its back is seen. (Comparing the old widget's buffer with the new
+  /// one's could not see it: it is the same object.)
+  int _seenRevision = 0;
 
   @override
   void didUpdateWidget(MarkdownSourceView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.buffer.revision != widget.buffer.revision) {
+    if (!identical(oldWidget.surface, widget.surface)) {
+      oldWidget.surface?.detachView(this);
+      widget.surface?.attachView(this);
+    }
+    if (!identical(oldWidget.buffer, widget.buffer)) {
+      // Another note: the keyboard, the history and the caret were this one's.
+      final attached = _input.isAttached;
+      _input.detach();
+      _history = widget.history ?? widget.surface?.history ?? EditHistory();
+      _ownSelection =
+          widget.surface?.initialSelection ?? const SelectionModel.at(0);
+      _input = _makeInput();
+      _tokens = _tokenize();
+      _heights = _map();
+      _seenRevision = widget.buffer.revision;
+      if (attached) _input.attach(viewId: View.of(context).viewId);
+    } else if (widget.buffer.revision != _seenRevision) {
       // An edit this view did not make (a command, a revert): the tokenizer is
       // rebuilt rather than adjusted, because there is no `SourceEdit` to
       // follow.
       _tokens = _tokenize();
       _heights = _map();
+      _seenRevision = widget.buffer.revision;
+      _ownSelection = _ownSelection.clampTo(widget.buffer.length);
       // And the platform's copy is now of a note that is not there any more.
       _input.sendSelection();
     }
@@ -272,6 +313,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   @override
   void dispose() {
+    widget.surface?.detachView(this);
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
@@ -371,6 +413,47 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _heights.offsetOf(line).clamp(0.0, _scroll.position.maxScrollExtent),
     );
     _scheduleCaret();
+  }
+
+  /// How far the note is scrolled, for a memento.
+  double get scrollOffset => _scroll.hasClients ? _scroll.offset : 0;
+
+  /// Scrolls to [offset], as far as the note reaches.
+  void jumpToOffset(double offset) {
+    if (!_scroll.hasClients) return;
+    _scroll.jumpTo(offset.clamp(0.0, _scroll.position.maxScrollExtent));
+    _scheduleCaret();
+  }
+
+  /// Replaces `[start, end)` with [text] for the shell — a command, an image,
+  /// a spelling fixed — as one undoable edit, caret at [caret] or after it.
+  void replaceText(int start, int end, String text, {SelectionModel? caret}) =>
+      _replaceRange(start, end, text, caret: caret);
+
+  /// Makes the note say [text] because it changed elsewhere (the disk, the
+  /// WYSIWYG): the history goes, since undoing past it would write the old
+  /// text back over the other change, and nothing is reported as an edit.
+  void replaceAll(String text) {
+    final buffer = widget.buffer;
+    buffer.replaceRange(0, buffer.length, text);
+    _history.clear();
+    _tokens = _tokenize();
+    _heights = _map();
+    _seenRevision = buffer.revision;
+    setState(() => _ownSelection = _ownSelection.clampTo(buffer.length));
+    _input.sendSelection();
+    _scheduleCaret();
+  }
+
+  /// Selects [next], and tells whoever needs to know.
+  void select(SelectionModel next) {
+    final clamped = next.clampTo(widget.buffer.length);
+    _history.seal();
+    setState(() => _ownSelection = clamped);
+    widget.onSelection?.call(clamped);
+    _input.sendSelection();
+    _scheduleCaret();
+    _ensureCaretVisible();
   }
 
   /// Undoes the last edit, and says whether there was one.
@@ -770,6 +853,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// — because rebuilding it moved everything on screen on every Enter. A
   /// keystroke inside a line is corrected by the sliver's own measurement.
   void _syncLines([SourceEdit? edit]) {
+    _seenRevision = widget.buffer.revision;
     final lines = widget.buffer.lineCount;
     if (_tokens.lineCount != lines) _tokens = _tokenize();
     if (_heights.length == lines) return;

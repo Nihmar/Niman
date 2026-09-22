@@ -45,6 +45,7 @@ import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/editor_lines.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -495,11 +496,23 @@ final class _NoteViewState extends State<NoteView>
   /// not on screen when the note changed (see [_refreshPreview]).
   bool _previewStale = false;
 
+  /// The note on the unified source surface: its buffer, its undo history and
+  /// the door every command comes in through (the toolbar, an image, a
+  /// spelling fix, a reload). One per open note, so the history survives the
+  /// pane being rebuilt.
+  MarkdownSurfaceController? _surface;
+
   /// The buffer the unified source surface edits. Its own, not the read pane's:
   /// the read pane's is rebuilt from the preview text on a debounce, and a pane
   /// cannot edit an object that another part of the shell replaces underneath
   /// it.
-  SourceBuffer? _unifiedSurfaceBuffer;
+  SourceBuffer? get _unifiedSurfaceBuffer => _surface?.buffer;
+
+  /// A controller over [text], reporting its edits the way the surface does.
+  MarkdownSurfaceController _surfaceFor(String text, {int caret = 0}) =>
+      MarkdownSurfaceController(SourceBuffer.fromText(text), caret: caret)
+        ..onChanged = () =>
+            _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine);
 
   /// Whether the *source* pane is the unified surface rather than re_editor.
   ///
@@ -726,9 +739,16 @@ final class _NoteViewState extends State<NoteView>
     // source editor takes back what WYSIWYG serialized.
     if (oldWidget.showWysiwyg != widget.showWysiwyg) {
       if (widget.showWysiwyg) {
-        _wysiwygText = _controller.text;
-      } else if (_wysiwygText != null && _wysiwygText != _controller.text) {
-        _controller.text = _wysiwygText!;
+        // What the *source* pane holds, whichever one it was: the unified
+        // surface's text is not in the legacy controller.
+        _wysiwygText = widget.unifiedMarkdown ? _unifiedText : _controller.text;
+      } else if (_wysiwygText case final text?) {
+        if (text != _controller.text) _controller.text = text;
+        if (widget.unifiedMarkdown && text != _unifiedText) {
+          // And back: the unified buffer takes what the WYSIWYG serialized,
+          // or its next edit would write the note from before it.
+          _surface?.replaceAll(text);
+        }
       }
     }
   }
@@ -785,6 +805,23 @@ final class _NoteViewState extends State<NoteView>
       );
       return;
     }
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      // Source offsets, the same thing the legacy editor's memento counts, so
+      // a memento taken in either source pane restores in the other.
+      final selection = surface.selection;
+      receive(
+        path,
+        NoteMemento(
+          selectionBase: selection.anchor,
+          selectionExtent: selection.extent,
+          scrollOffset: surface.scrollOffset,
+          editorKind: sourceEditorKind,
+          preview: widget.showPreview,
+        ),
+      );
+      return;
+    }
     receive(
       path,
       sourceMemento(_controller, _scroll, preview: widget.showPreview),
@@ -803,6 +840,13 @@ final class _NoteViewState extends State<NoteView>
     if (!wysiwyg) {
       if (sameEditor) restoreSourceSelection(_controller, memento);
       restoreScroll(_scroll.verticalScroller, memento.scrollOffset);
+      if (widget.unifiedMarkdown) {
+        _surface?.restore(
+          base: sameEditor ? memento.selectionBase : null,
+          extent: sameEditor ? memento.selectionExtent : null,
+          scroll: memento.scrollOffset,
+        );
+      }
       return;
     }
     // The surface is built from the text on the next frame.
@@ -897,7 +941,11 @@ final class _NoteViewState extends State<NoteView>
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
       _controller.text = text;
-      _unifiedSurfaceBuffer = SourceBuffer.fromText(text);
+      _surface = _surfaceFor(
+        text,
+        caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
+      );
+      _surfaceCaretLine = null;
       _unifiedText = text;
       // Loading is not an edit: without this the first Ctrl+Z took the
       // buffer back to what it held before — nothing — and the save that
@@ -1016,11 +1064,17 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
-    if (text == _controller.text) return;
+    // Against what the pane on screen holds: the unified surface's text is not
+    // in the legacy controller, and comparing with it made every reload look
+    // like an external change after any unified edit — or none at all.
+    if (text == _currentText) return;
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
     _loading = true;
     _controller.text = text;
+    // The unified buffer adopts the disk's text too; its history goes with
+    // the legacy one below, for the same reason.
+    _surface?.replaceAll(text);
     // The disk's text is where undo starts from now: undoing past it
     // would write the replaced text back over the other program's change.
     _controller.clearHistory();
@@ -1282,14 +1336,13 @@ final class _NoteViewState extends State<NoteView>
   /// come through — so saving, the preview and the statistics do not know which
   /// pane is on screen.
   Widget _unifiedSurfacePane() {
-    var existing = _unifiedSurfaceBuffer;
-    if (existing == null) {
+    var surface = _surface;
+    if (surface == null) {
       final text = _currentText;
-      existing = SourceBuffer.fromText(text);
-      _unifiedSurfaceBuffer = existing;
+      surface = _surface = _surfaceFor(text);
       _unifiedText = text;
     }
-    final buffer = existing;
+    final buffer = surface.buffer;
     // At the *note* text size, as the preview is (T-M6-12): the legacy editor
     // took `AppTextScales.noteFontSize`, and the surface without this drew the
     // note at the interface size, so the note's size setting did nothing.
@@ -1298,6 +1351,11 @@ final class _NoteViewState extends State<NoteView>
           .copyWith(textScaler: noteTextScalerOf(context)),
       child: MarkdownSurface(
         buffer: buffer,
+        surface: surface,
+        // The shell's own focus node, the one the legacy editor held: the
+        // phone toolbar, the format keys, save-on-blur and the refocus when
+        // the preview goes all ask *it* whether the editor has the focus.
+        focusNode: _focus,
         mode: MarkdownSurfaceMode.source,
         theme: markdownThemeOf(context),
         showLineNumbers: widget.showLineNumbers,
@@ -1475,10 +1533,15 @@ final class _NoteViewState extends State<NoteView>
       label: label,
       linkType: widget.linkType,
     );
-    _controller.replaceSelection(snippet);
-    _scroll.makeCenterIfInvisible(
-      CodeLinePosition(index: _controller.selection.extentIndex, offset: 0),
-    );
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      surface.replaceSelection(snippet);
+    } else {
+      _controller.replaceSelection(snippet);
+      _scroll.makeCenterIfInvisible(
+        CodeLinePosition(index: _controller.selection.extentIndex, offset: 0),
+      );
+    }
     _focus.requestFocus();
     _refreshStats();
     _refreshPreview();
@@ -1548,8 +1611,16 @@ final class _NoteViewState extends State<NoteView>
   /// so the jump is visible in every layout.
   void _jumpToHeading(int line) {
     const AppLogger(name: 'links').debug('jump to source line $line');
-    _controller.selection = CodeLineSelection.collapsed(index: line, offset: 0);
-    _scroll.makeCenterIfInvisible(CodeLinePosition(index: line, offset: 0));
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      surface.jumpToLine(line);
+    } else {
+      _controller.selection = CodeLineSelection.collapsed(
+        index: line,
+        offset: 0,
+      );
+      _scroll.makeCenterIfInvisible(CodeLinePosition(index: line, offset: 0));
+    }
     _syncPreviewToLine(line);
   }
 
@@ -1790,6 +1861,17 @@ final class _NoteViewState extends State<NoteView>
         lineAt: (i) => (text: lines[i], skip: const <TextRange>[]),
       );
     }
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      // The surface's own lines. Its tokenizer is the view's, so the code and
+      // link ranges the legacy highlighter lets the scan skip are not to hand
+      // here; the words in them are checked like prose.
+      final buffer = surface.buffer;
+      return spell.startScan(
+        lineCount: buffer.lineCount,
+        lineAt: (i) => (text: buffer.lineAt(i), skip: const <TextRange>[]),
+      );
+    }
     final lines = _controller.codeLines;
     return spell.startScan(
       lineCount: lines.length,
@@ -1807,6 +1889,14 @@ final class _NoteViewState extends State<NoteView>
         issue.end,
         replacement,
       );
+      return;
+    }
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      final buffer = surface.buffer;
+      if (issue.line >= buffer.lineCount) return;
+      final start = buffer.offsetOfLine(issue.line);
+      surface.replaceRange(start + issue.start, start + issue.end, replacement);
       return;
     }
     _controller.replaceSelection(
@@ -1869,6 +1959,18 @@ final class _NoteViewState extends State<NoteView>
   /// note is saved immediately.
   void _applyKindEdit(String newText) {
     _controller.text = newText;
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null && newText != _unifiedText) {
+      // The kind GUI stands in front of the surface, so there may be no view:
+      // the controller edits the buffer itself, and it is that buffer the save
+      // below writes.
+      surface.applyEdit(
+        newText,
+        TextSelection.collapsed(
+          offset: surface.selection.extent.clamp(0, newText.length),
+        ),
+      );
+    }
     _wysiwygText = newText;
     setState(() {});
     unawaited(_save());
@@ -2135,7 +2237,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// Whether the note has a list the count could run on.
   bool get _hasListToCount {
-    if (!widget.showWysiwyg) return tallyTargetsIn(_controller.text).isNotEmpty;
+    if (!widget.showWysiwyg) return tallyTargetsIn(_editText).isNotEmpty;
     final state = _wysiwygKey.currentState;
     if (state == null) return false;
     return quillTallyTargets(state.controller.document).isNotEmpty;
@@ -2146,10 +2248,10 @@ final class _NoteViewState extends State<NoteView>
       widget.showWysiwyg ? _countListWysiwyg() : _countListSource();
 
   Future<void> _countListSource() async {
-    final text = _controller.text;
+    final text = _editText;
     final targets = tallyTargetsIn(text);
     if (targets.isEmpty) return;
-    final here = tallyTargetAt(text, _controller.selection.baseIndex);
+    final here = tallyTargetAt(text, _editCaretLine);
     final choice = await showListTallySheet(
       context,
       candidates: <TallyCandidate>[
@@ -2231,16 +2333,51 @@ final class _NoteViewState extends State<NoteView>
   /// keeps its focus (the IME stays up); focus is re-requested
   /// defensively.
   void _applyMarkdownEdit(MarkdownEdit edit) {
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      // Through the surface: one undoable edit, the platform told, the save
+      // scheduled — the legacy controller is not on screen, and an edit to it
+      // was a command whose work was lost.
+      surface.applyEdit(edit.text, edit.selection);
+      _focus.requestFocus();
+      return;
+    }
     _controller.text = edit.text;
     _controller.selection = codeLineSelection(_controller.text, edit.selection);
     _focus.requestFocus();
   }
 
+  /// The source text a command works on, from whichever source pane is on
+  /// screen.
+  String get _editText => _usesUnifiedSource ? _unifiedText : _controller.text;
+
+  /// The selection a command works on, in offsets of [_editText].
+  TextSelection get _editSelection {
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      final selection = surface.selection;
+      return TextSelection(
+        baseOffset: selection.anchor,
+        extentOffset: selection.extent,
+      );
+    }
+    return textSelection(_controller.text, _controller.selection);
+  }
+
+  /// The line the command's caret is on (0-based).
+  int get _editCaretLine {
+    final surface = _surface;
+    if (_usesUnifiedSource && surface != null) {
+      return surface.buffer.lineOf(surface.selection.anchor);
+    }
+    return _controller.selection.baseIndex;
+  }
+
   void _wrapSelection({required String left, required String right}) {
     _applyMarkdownEdit(
       wrapSelection(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
+        text: _editText,
+        selection: _editSelection,
         left: left,
         right: right,
       ),
@@ -2248,21 +2385,12 @@ final class _NoteViewState extends State<NoteView>
   }
 
   void _insertCodeBlock() {
-    _applyMarkdownEdit(
-      codeBlock(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
-      ),
-    );
+    _applyMarkdownEdit(codeBlock(text: _editText, selection: _editSelection));
   }
 
   void _prefixLines({required String prefix}) {
     _applyMarkdownEdit(
-      prefixLines(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
-        prefix: prefix,
-      ),
+      prefixLines(text: _editText, selection: _editSelection, prefix: prefix),
     );
   }
 
@@ -2272,8 +2400,8 @@ final class _NoteViewState extends State<NoteView>
     final markdown = widget.linkType == LinkType.markdown;
     _applyMarkdownEdit(
       wrapSelection(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
+        text: _editText,
+        selection: _editSelection,
         left: markdown ? '[' : '[[',
         right: markdown ? '](...)' : ']]',
       ),
@@ -2282,12 +2410,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// Numbers the selected line(s) as an ordered list.
   void _insertOrderedList() {
-    _applyMarkdownEdit(
-      orderedList(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
-      ),
-    );
+    _applyMarkdownEdit(orderedList(text: _editText, selection: _editSelection));
   }
 
   /// Indents (or outdents, [outdent] true) the selected line(s) by the
@@ -2295,8 +2418,8 @@ final class _NoteViewState extends State<NoteView>
   void _indentLines({required bool outdent}) {
     _applyMarkdownEdit(
       indentLines(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
+        text: _editText,
+        selection: _editSelection,
         width: widget.indentWidth,
         outdent: outdent,
       ),
@@ -2309,11 +2432,7 @@ final class _NoteViewState extends State<NoteView>
     final level = await showHeadingLevelDialog(context);
     if (level == null) return;
     _applyMarkdownEdit(
-      setHeading(
-        text: _controller.text,
-        selection: textSelection(_controller.text, _controller.selection),
-        level: level,
-      ),
+      setHeading(text: _editText, selection: _editSelection, level: level),
     );
   }
 
