@@ -91,28 +91,36 @@ void main() {
     expect(surface.buffer.text, 'sono Alessandro \n');
   });
 
-  test(
-    'a delta with an oldText behind is recovered onto the platform text',
-    () {
-      // The device sent this four times at a 921 600-character note: the
-      // platform's copy was a keystroke behind the app's. Applying the delta to
-      // the *buffer* would repeat or drop a character here.
-      final surface = _wire('ab\n');
-      surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
-        _insert('ab\n', 2, 'c'),
-      ]);
-      expect(surface.buffer.text, 'abc\n');
-      surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
-        _insert('ab\n', 2, 'd'),
-      ]);
-      expect(surface.input.recoveredDeltas, 1);
-      expect(
-        surface.buffer.text,
-        'abd\n',
-        reason: 'the platform text is the base, then its delta lands on it',
-      );
-    },
-  );
+  test('a delta built on another copy is applied by its range and resyncs', () {
+    // The platform's copy is not the note's (it missed a change): its range is
+    // applied to the note — the note is never replaced by the platform's text,
+    // which is what silently undid a local deletion — and the platform is
+    // then told the note.
+    final surface = _wire('ab\n');
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      _insert('abXYZ\n', 2, 'c'),
+    ]);
+    expect(surface.buffer.text, 'abc\n');
+    expect(surface.input.resyncs, 1);
+  });
+
+  test('two deltas in one update are applied once each', () {
+    // An autocorrect arrives as a batch: the word replaced, then a space. The
+    // earlier recovery replayed the whole batch onto the last delta's base.
+    final surface = _wire('ciao mondo\n', caret: 10);
+    surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
+      const TextEditingDeltaReplacement(
+        oldText: 'ciao mondo\n',
+        replacementText: 'Mondo',
+        replacedRange: TextRange(start: 5, end: 10),
+        selection: TextSelection.collapsed(offset: 10),
+        composing: TextRange.empty,
+      ),
+      _insert('ciao Mondo\n', 10, ' '),
+    ]);
+    expect(surface.buffer.text, 'ciao Mondo \n');
+    expect(surface.input.resyncs, 0);
+  });
 
   test('a selection the note cannot hold does not move the caret', () {
     final surface = _wire('ciao\n', caret: 2);
@@ -152,37 +160,9 @@ void main() {
     expect(surface.carets.last.extent, 4);
   });
 
-  test('an insertion after our own caret move lands at our caret', () {
-    // The device's lesson: the platform hears about a tap a frame late, and an
-    // insertion that lands where the platform last thought the caret was is
-    // text in the wrong place. When *we* moved the caret, ours is the newer
-    // truth — for where the text goes, not only for where the caret ends up.
-    final wired = _wire('ciao mondo\n');
-    var caret = const SelectionModel.at(0);
-    final buffer = wired.buffer;
-    final input = SourceInput(
-      buffer: buffer,
-      text: () => buffer.text,
-      onTokenizer: (edit, buffer) =>
-          SourceInput.retokenize(wired.tokens, edit, buffer),
-      selection: () => caret,
-      onSelection: (next) => caret = next,
-      onEdited: (_) {},
-    )..attach();
-    // A tap puts the caret at 5; the platform has not heard yet.
-    caret = const SelectionModel.at(5);
-    input
-      ..sendSelection()
-      ..updateEditingValueWithDeltas(<TextEditingDelta>[
-        _insert('ciao mondo\n', 0, 'X'),
-      ]);
-    expect(buffer.text, 'ciao Xmondo\n');
-    expect(caret.extent, 6);
-  });
-
   test('a delta the platform computed from its own caret is left alone', () {
-    // The other half of the rule: until we move the caret ourselves, the
-    // platform's offsets are the ones that count.
+    // The platform is told every caret move as it happens, so its offsets are
+    // the ones that count.
     final surface = _wire('ciao mondo\n', caret: 4);
     surface.input.updateEditingValueWithDeltas(<TextEditingDelta>[
       _insert('ciao mondo\n', 4, 'X'),

@@ -248,6 +248,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // follow.
       _tokens = HighlightDocument.fromText(widget.buffer.text);
       _heights = _map();
+      // And the platform's copy is now of a note that is not there any more.
+      _input.sendSelection();
     }
     if (oldWidget.selection != widget.selection) _scheduleCaret();
     if (oldWidget.controller != widget.controller) {
@@ -282,8 +284,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// `oldText` that disagreed with the buffer.
   int get deltaCount => _input.deltaCount;
 
-  /// The count of deltas that had to be recovered onto the platform's text.
-  int get recoveredDeltas => _input.recoveredDeltas;
+  /// How many times the platform's copy had to be told the note again.
+  int get resyncs => _input.resyncs;
 
   /// The box the note is drawn in, which is what a global point is measured
   /// against — not the state's own context, which may be wider (a centred
@@ -647,15 +649,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// separate piece of work.
   Widget _mouseSelection(Widget child) => Listener(
     onPointerDown: (event) {
-      // Any pointer, not only a mouse: this is also where the keyboard is asked
-      // for, and a finger has to be able to ask.
-      _focus.requestFocus();
+      // A mouse asks for the keyboard as it goes down, which is where a click
+      // starts a drag; a finger asks on the tap (`onTapUp`), so a finger that
+      // only scrolls the note does not bring the keyboard up.
       if (event.kind != PointerDeviceKind.mouse) return;
+      _requestKeyboard();
       if (event.buttons != kPrimaryMouseButton) return;
       final offset = offsetAt(event.position);
       if (offset == null) return;
       _dragAnchor = offset;
       placeCaret(offset);
+      // The platform needs the selection the drag ends with, not every one on
+      // the way: a whole note per mouse move is what a drag must not cost.
+      _input.holdSync = true;
     },
     onPointerMove: (event) {
       final anchor = _dragAnchor;
@@ -669,10 +675,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _input.sendSelection();
       _scheduleCaret();
     },
-    onPointerUp: (_) => _dragAnchor = null,
-    onPointerCancel: (_) => _dragAnchor = null,
+    onPointerUp: (_) => _endDrag(),
+    onPointerCancel: (_) => _endDrag(),
     child: child,
   );
+
+  void _endDrag() {
+    _dragAnchor = null;
+    _input.holdSync = false;
+  }
+
+  /// Takes the focus, or — when the surface has it — opens the connection
+  /// again if the platform closed it, and asks for the keyboard either way.
+  void _requestKeyboard() {
+    if (!_focus.hasFocus) {
+      // The focus change attaches (see `onFocusChange`).
+      _focus.requestFocus();
+      return;
+    }
+    _input.attach(viewId: View.of(context).viewId);
+  }
 
   /// Publishes [next] as the caret, repainting only what changed.
   ///
@@ -749,12 +771,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   (int, int)? _selectionIn(int index) {
     final selection = _selection;
     if (selection.isCollapsed) return null;
+    return _rangeIn(index, selection.start, selection.end);
+  }
+
+  /// The part of the IME's composing range inside line [index], underlined
+  /// the way every text field shows the word being composed.
+  (int, int)? _composingIn(int index) {
+    final composing = _input.composing;
+    if (!composing.isValid || composing.isCollapsed) return null;
+    return _rangeIn(index, composing.start, composing.end);
+  }
+
+  /// `[from, to)` of the note, as offsets local to line [index], or null.
+  (int, int)? _rangeIn(int index, int from, int to) {
     final start = widget.buffer.offsetOfLine(index);
     final end = start + widget.buffer.lineAt(index).length;
-    final from = selection.start < start ? start : selection.start;
-    final to = selection.end > end ? end : selection.end;
-    if (from >= to) return null;
-    return (from - start, to - start);
+    final a = from < start ? start : from;
+    final b = to > end ? end : to;
+    if (a >= b) return null;
+    return (a - start, b - start);
   }
 
   /// The paragraph of line [line], when a frame has built it.
@@ -912,6 +947,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       1.5,
       paragraph.getFullHeightForCaret(position),
     );
+    _sendGeometry();
+  }
+
+  /// Tells the IME where the note is and where the caret is in it, so its
+  /// candidate window (and a phone's handles) sit by the text rather than at
+  /// the window's corner.
+  void _sendGeometry() {
+    if (!_input.isAttached) return;
+    final box = _noteBox;
+    final caret = caretRect;
+    if (box == null || caret == null) return;
+    _input.setGeometry(
+      box.size,
+      box.getTransformTo(null),
+      box.globalToLocal(caret.topLeft) & caret.size,
+    );
   }
 
   @override
@@ -953,12 +1004,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             return _mouseSelection(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                // Focus on the *pointer going down*, not on a tap being
-                // recognized: the scroll view competes for the same gesture,
-                // and a
-                // tap that the scroll wins is a keyboard that never appears.
-                onTapDown: (details) => _focus.requestFocus(),
-                onTapUp: (details) => _tapUp(details.globalPosition),
+                // The keyboard is asked for on the *tap*: a drag the scroll
+                // view wins is someone reading, not someone about to type.
+                onTapUp: (details) {
+                  _requestKeyboard();
+                  _tapUp(details.globalPosition);
+                },
                 child: CustomScrollView(
                   key: _scrollKey,
                   controller: _scroll,
@@ -984,6 +1035,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             dark: widget.dark,
                             hideMarkers: widget.hideMarkers,
                             selected: _selectionIn(index),
+                            composing: _composingIn(index),
                             width: available,
                             index: index,
                             caretLine: _caretLine,
@@ -1112,6 +1164,7 @@ final class _Line extends StatelessWidget {
     required this.dark,
     required this.hideMarkers,
     required this.selected,
+    required this.composing,
     required this.width,
     required this.index,
     required this.caretLine,
@@ -1139,6 +1192,9 @@ final class _Line extends StatelessWidget {
 
   /// The selected range, as offsets local to this line, or null.
   final (int, int)? selected;
+
+  /// The range the IME is composing, as offsets local to this line, or null.
+  final (int, int)? composing;
 
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
@@ -1307,34 +1363,34 @@ final class _Line extends StatelessWidget {
     return TextSpan(children: spans);
   }
 
-  /// Adds `[start, end)` to [spans], cut at the selection's edges so the
-  /// covered
-  /// part carries the highlight and the rest keeps the run's own style.
+  /// Adds `[start, end)` to [spans], cut at the selection's and the composing
+  /// range's edges: the selected part carries the highlight, the composed part
+  /// the underline, and the rest keeps the run's own style.
   void _add(List<InlineSpan> spans, int start, int end, TextStyle? style) {
-    final selection = selected;
-    if (selection == null || end <= selection.$1 || start >= selection.$2) {
-      spans.add(
-        TextSpan(text: styled.text.substring(start, end), style: style),
-      );
-      return;
+    final cuts = <int>{start, end};
+    for (final range in <(int, int)?>[selected, composing]) {
+      if (range == null) continue;
+      if (range.$1 > start && range.$1 < end) cuts.add(range.$1);
+      if (range.$2 > start && range.$2 < end) cuts.add(range.$2);
     }
-    final from = start < selection.$1 ? selection.$1 : start;
-    final to = end > selection.$2 ? selection.$2 : end;
-    if (from > start) {
-      spans.add(
-        TextSpan(text: styled.text.substring(start, from), style: style),
-      );
-    }
-    spans.add(
-      TextSpan(
-        text: styled.text.substring(from, to),
-        style: (style ?? const TextStyle()).copyWith(
+    final points = cuts.toList()..sort();
+    for (var at = 0; at < points.length - 1; at++) {
+      final from = points[at];
+      final to = points[at + 1];
+      bool inside((int, int)? range) =>
+          range != null && from >= range.$1 && to <= range.$2;
+      var piece = style;
+      if (inside(selected)) {
+        piece = (piece ?? const TextStyle()).copyWith(
           background: Paint()..color = _selectionColor,
-        ),
-      ),
-    );
-    if (to < end) {
-      spans.add(TextSpan(text: styled.text.substring(to, end), style: style));
+        );
+      }
+      if (inside(composing)) {
+        piece = (piece ?? const TextStyle()).copyWith(
+          decoration: TextDecoration.underline,
+        );
+      }
+      spans.add(TextSpan(text: styled.text.substring(from, to), style: piece));
     }
   }
 }
