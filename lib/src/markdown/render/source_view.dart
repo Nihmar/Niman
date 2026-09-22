@@ -48,6 +48,7 @@ import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
@@ -215,8 +216,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// has to meet is this object's).
   late HighlightDocument _tokens;
 
-  /// The heights the sliver places lines with.
+  /// The heights the sliver places the rows with: one per line nobody has
+  /// folded away.
   late BlockHeightMap _heights;
+
+  /// The folded heading sections; the rows are the lines they leave.
+  final SourceFolds _folds = SourceFolds();
+
+  /// Where each heading's section ends, as far as it has been asked, for the
+  /// buffer revision [_sectionEndsRevision].
+  final Map<int, int?> _sectionEnds = <int, int?>{};
+  int _sectionEndsRevision = -1;
+
+  /// A press on a fold arrow, so the pointer going down under it places no
+  /// caret.
+  bool _foldPress = false;
 
   /// The keyboard, wired to the buffer this view draws.
   late SourceInput _input;
@@ -365,6 +379,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
       _tokens = _tokenize();
+      _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
       if (attached) _input.attach(viewId: View.of(context).viewId);
@@ -373,6 +388,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // rebuilt rather than adjusted, because there is no `SourceEdit` to
       // follow.
       _tokens = _tokenize();
+      _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
       _ownSelection = _ownSelection.clampTo(widget.buffer.length);
@@ -495,7 +511,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // caret at its end rather than nowhere.
     final y =
         box.globalToLocal(global).dy - widget.padding.top + _scroll.offset;
-    final line = y < 0 ? 0 : _heights.indexAt(y) ?? _heights.length - 1;
+    final row = y < 0 ? 0 : _heights.indexAt(y) ?? _heights.length - 1;
+    final line = _folds.lineOf(row);
     final paragraph = _paragraphAt(line);
     if (paragraph == null || !paragraph.attached) return null;
     // The point in the *paragraph's own* coordinates, from its own transform:
@@ -512,8 +529,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Scrolls so [line] is at the top, as far as the map knows.
   void jumpToLine(int line) {
     if (line < 0 || line >= _tokens.lineCount || !_scroll.hasClients) return;
+    _reshapeRows(() => _folds.reveal(line));
     _scroll.jumpTo(
-      _heights.offsetOf(line).clamp(0.0, _scroll.position.maxScrollExtent),
+      _heights
+          .offsetOf(_folds.rowOf(line))
+          .clamp(0.0, _scroll.position.maxScrollExtent),
     );
     _scheduleCaret();
   }
@@ -541,6 +561,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer.replaceRange(0, buffer.length, text);
     _history.clear();
     _tokens = _tokenize();
+    _folds.clear();
     _heights = _map();
     _seenRevision = buffer.revision;
     setState(() => _ownSelection = _ownSelection.clampTo(buffer.length));
@@ -960,18 +981,157 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _seenRevision = widget.buffer.revision;
     final lines = widget.buffer.lineCount;
     if (_tokens.lineCount != lines) _tokens = _tokenize();
-    if (_heights.length == lines) return;
+    if (!_folds.isEmpty) {
+      // The folds follow the edit; when what they hide changed shape, the
+      // rows are measured again rather than spliced.
+      final reshaped = edit == null || _folds.edited(edit, lines, _sectionEnd);
+      if (edit == null) _folds.clear();
+      if (reshaped) {
+        _heights = _map();
+        return;
+      }
+    }
+    final rows = _folds.rowCount(lines);
+    if (_heights.length == rows) return;
     if (edit != null &&
-        _heights.length - edit.removedLines + edit.insertedLines == lines) {
+        _heights.length - edit.removedLines + edit.insertedLines == rows) {
       _heights.splice(
-        edit.firstLine,
+        _folds.rowOf(edit.firstLine),
         edit.removedLines,
         edit.insertedLines,
-        _estimate,
+        _estimateRow,
       );
     } else {
       _heights = _map();
     }
+  }
+
+  // --------------------------------------------------------------- folding
+
+  /// Notes longer than this fold nothing: finding where a section ends walks
+  /// the lines after its heading, and the legacy editor drew no fold arrows
+  /// past the same size either.
+  static const int _foldLineLimit = 20000;
+
+  /// Whether the gutter offers fold arrows.
+  bool get _foldingEnabled =>
+      widget.showLineNumbers && widget.buffer.lineCount <= _foldLineLimit;
+
+  /// Whether the heading on [line] is folded.
+  bool isFolded(int line) => _folds.isFolded(line);
+
+  /// Folds the section under the heading on [line], or unfolds it.
+  ///
+  /// A caret inside the section goes to the heading's end: the caret is never
+  /// on a line nobody can see.
+  void toggleFold(int line) {
+    if (line < 0 || line >= widget.buffer.lineCount) return;
+    if (_folds.isFolded(line)) {
+      _reshapeRows(() {
+        _folds.unfold(line);
+        return true;
+      });
+    } else {
+      final end = _foldableEnd(line);
+      if (end == null) return;
+      _reshapeRows(() {
+        _folds.fold(line, end);
+        return true;
+      });
+      final caret = widget.buffer.lineOf(_selection.extent);
+      if (_folds.isHidden(caret)) {
+        placeCaret(
+          widget.buffer.offsetOfLine(line) + widget.buffer.lineAt(line).length,
+        );
+      }
+    }
+    setState(() {});
+  }
+
+  /// Runs [change] on the folds and, when it says it changed them, gives the
+  /// rows new heights — each line that was drawn before keeps the height it
+  /// was drawn at, so unfolding a section does not move the rest.
+  void _reshapeRows(bool Function() change) {
+    final before = _folds.copy();
+    final old = _heights;
+    if (!change()) return;
+    _heights = BlockHeightMap(
+      count: _folds.rowCount(_tokens.lineCount),
+      estimate: (row) {
+        final line = _folds.lineOf(row);
+        if (!before.isHidden(line)) {
+          final was = before.rowOf(line);
+          if (was < old.length) return old.extentFor(was);
+        }
+        return _estimate(line);
+      },
+    );
+  }
+
+  /// Unfolds what hides the caret, when an edit, a find or a motion took it
+  /// there.
+  void _revealCaret() {
+    if (_folds.isEmpty) return;
+    final line = widget.buffer.lineOf(
+      _selection.extent.clamp(0, widget.buffer.length),
+    );
+    var revealed = false;
+    _reshapeRows(() => revealed = _folds.reveal(line));
+    if (revealed && mounted) setState(() {});
+  }
+
+  /// The heading level of line [line], or null when it is not a heading.
+  int? _headingLevel(int line) {
+    if (!widget.buffer.lineAt(line).startsWith('#')) return null;
+    final tokens = _lineAt(line).tokens;
+    if (tokens.isEmpty ||
+        tokens.first.kind != TokenKind.headingMarker ||
+        tokens.first.start != 0) {
+      return null;
+    }
+    // The outline's own rule (`outline.dart`): the marker's length.
+    return tokens.first.end - tokens.first.start;
+  }
+
+  /// Where the section under the heading on [line] ends — the next heading
+  /// of its level or above, or the note's end — or null when [line] is not a
+  /// heading.
+  int? _sectionEnd(int line) {
+    final revision = widget.buffer.revision;
+    if (revision != _sectionEndsRevision) {
+      _sectionEnds.clear();
+      _sectionEndsRevision = revision;
+    }
+    if (_sectionEnds.containsKey(line)) return _sectionEnds[line];
+    final level = _headingLevel(line);
+    int? end;
+    if (level != null) {
+      final count = widget.buffer.lineCount;
+      end = count;
+      for (var at = line + 1; at < count; at++) {
+        final other = _headingLevel(at);
+        if (other != null && other <= level) {
+          end = at;
+          break;
+        }
+      }
+    }
+    return _sectionEnds[line] = end;
+  }
+
+  /// Where the heading on [line] would fold to, when it has a section worth
+  /// folding: two lines or more under it, the legacy editor's rule.
+  int? _foldableEnd(int line) {
+    final end = _sectionEnd(line);
+    if (end == null || end - line - 1 < 2) return null;
+    return end;
+  }
+
+  /// What the gutter shows beside line [line].
+  _FoldMark _foldMarkOf(int line) {
+    if (!_foldingEnabled) return _FoldMark.none;
+    if (_folds.isFolded(line)) return _FoldMark.closed;
+    return _foldableEnd(line) == null ? _FoldMark.none : _FoldMark.open;
   }
 
   /// The note changed, so the shell can save it.
@@ -1071,6 +1231,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       if (event.kind != PointerDeviceKind.mouse) return;
       _hideTouch();
       _requestKeyboard();
+      if (_foldPress) {
+        _foldPress = false;
+        return;
+      }
       if (event.buttons == kSecondaryMouseButton) {
         _secondaryClick(event.position);
         return;
@@ -1203,10 +1367,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // In the scroll view's coordinates: the map starts below the top padding,
     // and the last line takes the bottom padding with it. Without them every
     // jump down stopped the padding short, the caret's row cut by it.
-    final top = widget.padding.top + _heights.offsetOf(line);
-    final last = line == _heights.length - 1;
+    final row = _folds.rowOf(line);
+    final top = widget.padding.top + _heights.offsetOf(row);
+    final last = row == _heights.length - 1;
     final bottom =
-        top + _heights.extentFor(line) + (last ? widget.padding.bottom : 0);
+        top + _heights.extentFor(row) + (last ? widget.padding.bottom : 0);
     final viewport = _scroll.position.viewportDimension;
     final double target;
     if (top < _scroll.offset) {
@@ -1321,8 +1486,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     ]);
   }
 
-  BlockHeightMap _map() =>
-      BlockHeightMap(count: _tokens.lineCount, estimate: _estimate);
+  BlockHeightMap _map() => BlockHeightMap(
+    count: _folds.rowCount(_tokens.lineCount),
+    estimate: _estimateRow,
+  );
+
+  /// Row [row]'s height before a frame has drawn it: its line's.
+  double _estimateRow(int row) => _estimate(_folds.lineOf(row));
 
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
@@ -1422,6 +1592,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
+    _revealCaret();
     _restartBlink();
     _followCaret();
     // Measured *now*, from the layout the last frame left, and again after the
@@ -1611,34 +1782,42 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                       ),
                       sliver: SliverMarkdownBlocks(
                         heights: _heights,
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return _Line(
-                            key: ValueKey<int>(index),
-                            paragraphKey: _keyFor(index),
-                            styled: _lineAt(index),
-                            number: widget.showLineNumbers ? index + 1 : null,
-                            gutterWidth: _gutter,
-                            theme: widget.theme,
-                            syntax: syntax,
-                            dark: widget.dark,
-                            hideMarkers: widget.hideMarkers,
-                            selected: _selectionIn(index),
-                            composing: _composingIn(index),
-                            misspelled: _misspelledIn(index),
-                            found: _foundIn(index),
-                            misspelledColor: Theme.of(context)
-                                .colorScheme
-                                .error,
-                            width: available,
-                            index: index,
-                            caretLine: _caretLine,
-                            caret: _caretRect,
-                            caretOn: _caretOn,
-                            rowColor: widget.typewriter
-                                ? typewriterLineColor(context)
-                                : null,
-                          );
-                        }, childCount: widget.buffer.lineCount),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, row) {
+                            // A row is a line nobody folded away.
+                            final index = _folds.lineOf(row);
+                            return _Line(
+                              key: ValueKey<int>(index),
+                              fold: _foldMarkOf(index),
+                              onFold: () => toggleFold(index),
+                              onFoldDown: () => _foldPress = true,
+                              paragraphKey: _keyFor(index),
+                              styled: _lineAt(index),
+                              number: widget.showLineNumbers ? index + 1 : null,
+                              gutterWidth: _gutter,
+                              theme: widget.theme,
+                              syntax: syntax,
+                              dark: widget.dark,
+                              hideMarkers: widget.hideMarkers,
+                              selected: _selectionIn(index),
+                              composing: _composingIn(index),
+                              misspelled: _misspelledIn(index),
+                              found: _foundIn(index),
+                              misspelledColor: Theme.of(context)
+                                  .colorScheme
+                                  .error,
+                              width: available,
+                              index: index,
+                              caretLine: _caretLine,
+                              caret: _caretRect,
+                              caretOn: _caretOn,
+                              rowColor: widget.typewriter
+                                  ? typewriterLineColor(context)
+                                  : null,
+                            );
+                          },
+                          childCount: _folds.rowCount(widget.buffer.lineCount),
+                        ),
                       ),
                     ),
                   ],
@@ -2179,6 +2358,9 @@ final class _Line extends StatelessWidget {
     required this.misspelledColor,
     required this.found,
     required this.rowColor,
+    required this.fold,
+    required this.onFold,
+    required this.onFoldDown,
     required this.index,
     required this.caretLine,
     required this.caret,
@@ -2222,6 +2404,15 @@ final class _Line extends StatelessWidget {
   /// The light behind the caret's row (typewriter mode), or null.
   final Color? rowColor;
 
+  /// The fold arrow beside the line, if it has one.
+  final _FoldMark fold;
+
+  /// Folds or unfolds the line's section.
+  final VoidCallback onFold;
+
+  /// A pointer went down on the arrow (before the note hears it).
+  final VoidCallback onFoldDown;
+
   /// The width the line's text wraps at (the pane minus the gutter).
   final double width;
 
@@ -2249,25 +2440,14 @@ final class _Line extends StatelessWidget {
           if (gutterWidth > 0)
             SizedBox(
               width: gutterWidth,
-              child: Padding(
-                padding: const EdgeInsets.only(right: _gutterGap),
-                child: number == null
-                    ? null
-                    : Text(
-                        '$number',
-                        textAlign: TextAlign.right,
-                        // One row, whatever the measurement said: a number
-                        // that wraps makes its line two rows tall and every
-                        // number below it sits beside the wrong text.
-                        softWrap: false,
-                        maxLines: 1,
-                        overflow: TextOverflow.visible,
-                        // The text's own face and size, dimmed: what the
-                        // legacy editor's `DefaultCodeLineNumber` does, so the
-                        // numbers line up with the characters they count
-                        // instead of drifting from them.
-                        style: theme.body.copyWith(color: theme.markerDim),
-                      ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(child: _number() ?? const SizedBox.shrink()),
+                  // The gap between the numbers and the text is where the
+                  // fold arrows live, as in the legacy gutter.
+                  SizedBox(width: _gutterGap, child: _foldArrow(context)),
+                ],
               ),
             ),
           Expanded(
@@ -2283,6 +2463,48 @@ final class _Line extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The line's number, dimmed, or nothing.
+  Widget? _number() => number == null
+      ? null
+      : Text(
+          '$number',
+          textAlign: TextAlign.right,
+          // One row, whatever the measurement said: a number
+          // that wraps makes its line two rows tall and every
+          // number below it sits beside the wrong text.
+          softWrap: false,
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          // The text's own face and size, dimmed: what the
+          // legacy editor's `DefaultCodeLineNumber` does, so the
+          // numbers line up with the characters they count
+          // instead of drifting from them.
+          style: theme.body.copyWith(color: theme.markerDim),
+        );
+
+  /// The fold arrow: pointing down over a section that can fold, right over
+  /// one that is folded, nothing elsewhere.
+  Widget? _foldArrow(BuildContext context) {
+    if (fold == _FoldMark.none) return null;
+    final row = MediaQuery.textScalerOf(context).scale(theme.lineHeight);
+    return Listener(
+      onPointerDown: (_) => onFoldDown(),
+      child: GestureDetector(
+        key: ValueKey<String>('fold-$index'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onFold,
+        child: SizedBox(
+          height: row,
+          child: Icon(
+            fold == _FoldMark.closed ? Icons.chevron_right : Icons.expand_more,
+            size: _gutterGap,
+            color: theme.markerDim,
+          ),
+        ),
       ),
     );
   }
@@ -2447,6 +2669,18 @@ final class _Line extends StatelessWidget {
       spans.add(TextSpan(text: styled.text.substring(from, to), style: piece));
     }
   }
+}
+
+/// What a line's gutter shows for folding.
+enum _FoldMark {
+  /// Nothing: not a heading, or nothing under it to fold.
+  none,
+
+  /// A section that can fold.
+  open,
+
+  /// A folded section.
+  closed,
 }
 
 /// The style a hidden marker is drawn with: invisible, and small enough that
