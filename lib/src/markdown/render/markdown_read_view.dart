@@ -15,13 +15,15 @@
 /// block taller than its estimate (#250, §8.4.4).
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
-import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
@@ -86,8 +88,31 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// logger so a device log says which of the two was slow.
   static const AppLogger _log = AppLogger(name: 'read');
 
-  late BlockScanner _scanner;
-  late List<Block> _blocks;
+  List<Block> _blocks = const <Block>[];
+
+  /// The buffer [_blocks] were scanned from: the widget's, or — while a
+  /// long note's next revision is scanned in the background — the one
+  /// before it, drawn until the scan comes back.
+  SourceBuffer? _shown;
+
+  /// Counts the scans started, so an answer that a later one overtook is
+  /// dropped.
+  int _scans = 0;
+
+  /// Whether a background scan is running.
+  bool get scanning => _scanning;
+  bool _scanning = false;
+
+  /// A line asked for by [jumpToLine] while there were no blocks to jump
+  /// into, taken once the scan lands.
+  int? _pendingJump;
+
+  /// From how many lines on a note is scanned in the background.
+  ///
+  /// Below it the scan costs a frame or less (35 ms for 50 000 lines) and
+  /// is done in place, so the first frame already has the blocks.
+  @visibleForTesting
+  static int backgroundLines = 50000;
   BlockHeightMap? _heights;
   int _built = 0;
 
@@ -124,6 +149,10 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// Does nothing without a controller, or for a line past the last block.
   void jumpToLine(int line) {
+    if (_blocks.isEmpty && _scanning) {
+      _pendingJump = line;
+      return;
+    }
     final index = _blockIndexAt(line);
     if (index == null) return;
     _jumpToIndex(index, attempt: 0);
@@ -207,17 +236,71 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// The scan is O(document) by nature — its incrementality is for edits, not
   /// for the first look — so it is the first thing to measure when the pane is
-  /// slow to appear, and it now says what it cost.
+  /// slow to appear, and it says what it cost.
+  ///
+  /// A long note is scanned in an isolate ([scanInBackground]): 2.9 s of a
+  /// frozen window on a 246 MB note (0.0.9 stress test). Meanwhile the
+  /// revision before it stays on screen when there is one — a buffer the
+  /// editor handed over as a copy does not change under it — and nothing
+  /// when the buffer is one that changed in place, whose old blocks no
+  /// longer match its lines.
   void _rescan() {
+    final buffer = widget.buffer;
+    final scan = ++_scans;
     final clock = Stopwatch()..start();
-    _scanner = BlockScanner(widget.buffer);
-    _blocks = _pieced(_scanner.index.blocks);
+    if (buffer.lineCount < backgroundLines) {
+      _scanning = false;
+      _show(buffer, DocumentScan.of(buffer));
+      _log.debug(
+        'scan: ${_blocks.length} blocks, ${buffer.lineCount} lines in '
+        '${clock.elapsedMilliseconds}ms',
+      );
+      return;
+    }
+    _scanning = true;
+    if (identical(_shown, buffer)) _clear();
+    unawaited(
+      scanInBackground(buffer).then((result) {
+        if (!mounted || scan != _scans) return;
+        if (!identical(widget.buffer, buffer) ||
+            buffer.revision != result.revision) {
+          return;
+        }
+        _log.debug(
+          'scan: ${result.blocks.length} blocks, ${buffer.lineCount} lines '
+          'in ${clock.elapsedMilliseconds}ms, in the background',
+        );
+        setState(() {
+          _scanning = false;
+          _show(buffer, result);
+        });
+        final jump = _pendingJump;
+        _pendingJump = null;
+        if (jump != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) jumpToLine(jump);
+          });
+        }
+      }),
+    );
+  }
+
+  /// Draws [scan], the blocks of [buffer].
+  void _show(SourceBuffer buffer, DocumentScan scan) {
+    _shown = buffer;
+    widget.parser.scope = scan.scope;
+    _blocks = _pieced(scan.blocks);
     _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
     _built = 0;
-    _log.debug(
-      'scan: ${_blocks.length} blocks, ${widget.buffer.lineCount} lines in '
-      '${clock.elapsedMilliseconds}ms',
-    );
+  }
+
+  /// Draws nothing until the next scan lands.
+  void _clear() {
+    _shown = null;
+    _blocks = const <Block>[];
+    _pieces.clear();
+    _heights = null;
+    _built = 0;
   }
 
   /// The lines a code block is drawn in pieces of, past twice as many.
@@ -369,7 +452,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   Widget build(BuildContext context) {
     _theme = markdownThemeOf(context);
     final heights = _heights;
-    if (heights == null || _blocks.isEmpty) {
+    if (heights == null || _blocks.isEmpty || _shown == null) {
+      if (_scanning) {
+        return const Align(
+          alignment: Alignment.topCenter,
+          child: LinearProgressIndicator(key: Key('read-view-scanning')),
+        );
+      }
       return const SizedBox.shrink();
     }
     // Measured here, once, rather than by a `LayoutBuilder` per formula: a
@@ -427,7 +516,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// The footnotes, one row per sliver child.
   Widget _footnoteSliver() {
-    final notes = widget.parser.footnotesOf(widget.buffer);
+    final notes = widget.parser.footnotesOf(_shown!);
     return SliverList.builder(
       itemCount: notes.isEmpty ? 0 : notes.length + 1,
       itemBuilder: (context, index) {
@@ -453,7 +542,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final piece = _pieces[index];
     if (piece != null) {
       return CodePieceView(
-        buffer: widget.buffer,
+        buffer: _shown!,
         block: block,
         first: piece.first,
         last: piece.last,
@@ -461,7 +550,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       );
     }
     return BlockView(
-      parsed: widget.parser.of(block, widget.buffer),
+      parsed: widget.parser.of(block, _shown!),
       theme: _theme ?? _fallbackTheme,
       mathCache: widget.mathCache,
       availableWidth: availableWidth,
