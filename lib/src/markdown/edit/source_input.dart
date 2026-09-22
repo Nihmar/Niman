@@ -92,14 +92,22 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     _ensureSeeded();
     _input.echoSent();
     _echoScheduled = false;
-    _connection = TextInput.attach(
-      this,
-      const TextInputConfiguration(
-        inputType: TextInputType.multiline,
-        inputAction: TextInputAction.newline,
-        enableDeltaModel: true,
-      ),
-    )..setEditingState(_value());
+    _connection =
+        TextInput.attach(
+            this,
+            const TextInputConfiguration(
+              inputType: TextInputType.multiline,
+              inputAction: TextInputAction.newline,
+              enableDeltaModel: true,
+            ),
+          )
+          // `attach` opens the connection; **`show` is the request for the
+          // keyboard**, and `EditableText` always makes it. Without it the log
+          // shows a surface attached and a keyboard that never appears, which
+          // is
+          // exactly what a device reported.
+          ..show()
+          ..setEditingState(_value());
   }
 
   /// Closes the connection.
@@ -155,6 +163,19 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
     _connection!.setEditingState(_value());
     _input.echoSent();
   }
+
+  /// A delta, short enough for a log line.
+  static String _short(TextEditingDelta delta) => switch (delta) {
+    TextEditingDeltaInsertion() =>
+      'ins@${delta.insertionOffset}+${delta.textInserted.length}',
+    TextEditingDeltaDeletion() =>
+      'del ${delta.deletedRange.start}..${delta.deletedRange.end}',
+    TextEditingDeltaReplacement() =>
+      'repl ${delta.replacedRange.start}..${delta.replacedRange.end}'
+          '+${delta.replacementText.length}',
+    TextEditingDeltaNonTextUpdate() => 'sel ${delta.selection.start}',
+    _ => 'delta',
+  };
 
   /// Gives the buffer the note's text the first time anything needs it.
   ///
@@ -214,6 +235,7 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   void updateEditingValue(TextEditingValue value) {
     _ensureSeeded();
     lastWholeLength = value.text.length;
+    _log.debug('whole value: ${value.text.length} chars');
     final kind = _input.applyValue(value);
     if (kind == InputKind.unchanged) {
       _reportSelection(_caretOfValue(value));
@@ -242,6 +264,10 @@ final class SourceInput implements TextInputClient, DeltaTextInputClient {
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     if (deltas.isEmpty) return;
     _ensureSeeded();
+    _log.debug(
+      'deltas: ${deltas.map(_short).join(", ")} '
+      '(ours ${buffer.length}, caret ${selection().extent})',
+    );
     final kind = _input.applyDeltas(deltas);
     if (kind == InputKind.deltasRecovered) {
       recoveredDeltas++;

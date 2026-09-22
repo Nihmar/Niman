@@ -26,6 +26,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -218,8 +219,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _scheduleCaret();
       },
       onEdited: (_) {
-        setState(() {
+        // The tokenizer and the buffer have to agree about how many lines there
+        // are: the view draws one line per *tokenizer* line and numbers them by
+        // index, so a drift between them is a column of numbers that stops
+        // matching the text. Checking it here costs a comparison and turns a
+        // drift into a rescan rather than into a wrong screen.
+        if (_tokens.lineCount != widget.buffer.lineCount) {
+          _tokens = HighlightDocument.fromText(widget.buffer.text);
           _heights = _map();
+        } else if (_heights.length != _tokens.lineCount) {
+          _heights = _map();
+        }
+        setState(() {
           _ownSelection = _ownSelection.clampTo(widget.buffer.length);
         });
         _scheduleCaret();
@@ -798,7 +809,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             _paneWidth = constraints.maxWidth;
-            _sideSpace = widget.column.sideSpaceIn(constraints.maxWidth);
+            // The gutter is room the *text* does not get, so it comes out of
+            // the
+            // side space rather than out of the column: the text keeps the
+            // width
+            // the note column promises it, which is what the legacy editor did
+            // by
+            // hanging its numbers outside the field.
+            _sideSpace = math.max(
+              0,
+              widget.column.sideSpaceIn(constraints.maxWidth + _gutterWidth) -
+                  _gutterWidth / 2,
+            );
             final available =
                 constraints.maxWidth -
                 widget.padding.horizontal -
