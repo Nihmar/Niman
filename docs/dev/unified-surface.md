@@ -11162,6 +11162,26 @@ The rest of live's body typography (paragraph spacing, a quote's bar) is the rea
 view's theme, waiting to be spent. The shell's remappable command table does not reach
 the surface yet.
 
+**The wiring is done** (2026-09-22). `NoteView._editorPane` builds `MarkdownSurface`
+in `source` mode when `unifiedMarkdown` is on and the preview is not the WYSIWYG —
+the same flag that already chose the read mode — and the surface reports the text and
+the caret line through `_noteChanged`, which is the one door the legacy editor's
+numbers come through too, so saving, the preview, the statistics and the unsaved
+marker are the same code for both panes. Two things the plan above got wrong, found
+by reading the code rather than by running it: `_currentText` is where the save, the
+preview *and* the statistics get their text, so the surface's text had to reach
+`_currentText` rather than the preview alone; and the read pane's buffer is a getter
+rebuilt from the preview text on a debounce, so the editing pane needed a buffer of
+its own — a pane cannot edit an object another part of the shell replaces underneath
+it. Two widget tests hold it: with the flag on the pane is the surface and re_editor is
+gone, with it off the reverse.
+
+**What the wiring exposed in an existing test, and why that was right.** "The unified
+mode shows the note, markers out" scraped every `Text` in the tree; with the editor
+pane now also unified, that scrape saw a source view's markers and failed. The test is
+now scoped to the read pane, which is what it was always about — the read mode takes
+the markers out — and the source pane showing them is by design.
+
 **The next step, in one paragraph, with the names.** `NoteView._editorPane` builds the
 source pane over the `_unifiedSource` buffer the read mode already uses; the flag is
 `widget.unifiedMarkdown`, which already exists. The whole save path hangs off one

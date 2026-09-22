@@ -5,9 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
+import 'package:re_editor/re_editor.dart';
 
 /// The note the editor is handed.
 const String _note = '''
@@ -116,14 +118,22 @@ void main() {
   testWidgets('the unified mode shows the note, markers out', (tester) async {
     await tester.pumpWidget(_app(unified: true));
     await tester.pumpAndSettle();
+    // Scoped to the read pane: with the flag on, the *editor* pane is the
+    // unified
+    // surface too, and a source view shows its markers by design. What this
+    // test
+    // is about is that the read mode takes them out.
     final screen = StringBuffer();
-    for (final widget in tester.allWidgets) {
-      if (widget is Text) {
-        final data = widget.data;
-        if (data != null) screen.write(data);
-        final span = widget.textSpan;
-        if (span != null) screen.write(span.toPlainText());
-      }
+    for (final widget in tester.widgetList<Text>(
+      find.descendant(
+        of: find.byType(MarkdownReadView),
+        matching: find.byType(Text),
+      ),
+    )) {
+      final data = widget.data;
+      if (data != null) screen.write(data);
+      final span = widget.textSpan;
+      if (span != null) screen.write(span.toPlainText());
     }
     final text = screen.toString();
     expect(text, contains('A title'));
@@ -134,6 +144,30 @@ void main() {
     expect(text, isNot(contains('**')));
     expect(text, isNot(contains('# A title')));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the flag on turns the source pane into the surface', (
+    tester,
+  ) async {
+    // The wiring's property: with the flag on and the preview hidden, the
+    // editor
+    // pane is the unified surface rather than re_editor — and the note it shows
+    // is
+    // the note the file has.
+    await tester.pumpWidget(_app(unified: true, showPreview: false));
+    await tester.pumpAndSettle();
+    expect(find.byType(MarkdownSurface), findsOneWidget);
+    expect(find.byType(CodeEditor), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('without the flag the source pane is still re_editor', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(unified: false, showPreview: false));
+    await tester.pumpAndSettle();
+    expect(find.byType(MarkdownSurface), findsNothing);
+    expect(find.byType(CodeEditor), findsOneWidget);
   });
 
   testWidgets('flipping the flag over a live note does not throw', (
