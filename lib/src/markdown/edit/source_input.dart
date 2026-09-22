@@ -389,10 +389,13 @@ final class SourceInput implements DeltaTextInputClient {
 
   /// The caret a platform update carries, when it carries a usable one — the
   /// platform sends `-1..-1` in its non-text updates, and that is not a caret.
-  SelectionModel _caretOf(TextSelection selection) =>
-      selection.isValid &&
-          selection.baseOffset <= buffer.length &&
-          selection.extentOffset <= buffer.length
+  ///
+  /// Not checked against the note's length here: a delta's caret is where it
+  /// lands *after* the edit, and this is asked before the edit is applied — a
+  /// keystroke at the end of the note carries a caret one past the text as it
+  /// stands, and throwing that away left the caret behind every character
+  /// typed there. It is clamped once the edit is in.
+  SelectionModel _caretOf(TextSelection selection) => selection.isValid
       ? SelectionModel(
           anchor: selection.baseOffset,
           extent: selection.extentOffset,
