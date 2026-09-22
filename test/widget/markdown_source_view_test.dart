@@ -561,6 +561,47 @@ void main() {
     );
   });
 
+  testWidgets('an edit tells the shell what the note says now', (tester) async {
+    // The one thing the shell needs from the surface: the text, after every
+    // edit.
+    // The debounce, the memento, the statistics and the preview are the
+    // shell's.
+    final buffer = SourceBuffer.fromText('ciao\n');
+    final told = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            onChanged: told.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: 'ciao!\n',
+        selection: TextSelection.collapsed(offset: 5),
+      ),
+    );
+    await tester.pump();
+    expect(told, isNotEmpty);
+    expect(told.last, 'ciao!\n');
+    // And an app-driven edit reports too, including the one an undo makes.
+    told.clear();
+    state.undo();
+    await tester.pump();
+    expect(told.last, 'ciao\n');
+  });
+
   testWidgets('a jump to a line brings it to the top', (tester) async {
     final note = StringBuffer();
     for (var at = 0; at < 500; at++) {
