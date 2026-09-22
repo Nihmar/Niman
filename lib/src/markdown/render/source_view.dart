@@ -831,7 +831,7 @@ final class _Line extends StatelessWidget {
             ),
           Expanded(
             child: _caretBox(
-              Text.rich(_span(), key: paragraphKey, style: theme.body),
+              Text.rich(_span(), key: paragraphKey, style: _lineStyle()),
             ),
           ),
         ],
@@ -865,6 +865,33 @@ final class _Line extends StatelessWidget {
     );
   }
 
+  /// The style the line is set in.
+  ///
+  /// In live mode a heading is drawn at its own size, which is the difference
+  /// between hiding a hash and *being* a heading; a source view shows the note
+  /// as
+  /// written and keeps one size for everything, so the markers keep their own
+  /// advance there.
+  TextStyle _lineStyle() {
+    if (!hideMarkers) return theme.body;
+    final text = styled.text;
+    var level = 0;
+    while (level < text.length && level < 6 && text[level] == '#') {
+      level++;
+    }
+    if (level == 0 || (level < text.length && text[level] != ' ')) {
+      return theme.body;
+    }
+    return switch (level) {
+      1 => theme.heading1,
+      2 => theme.heading2,
+      3 => theme.heading3,
+      4 => theme.heading4,
+      5 => theme.heading5,
+      _ => theme.heading6,
+    };
+  }
+
   /// The line's tokens as styled runs. A token's override never changes the
   /// size
   /// or the height, so a line keeps the surface's metrics whatever it contains
@@ -880,7 +907,7 @@ final class _Line extends StatelessWidget {
         TextSpan(
           text: styled.text.substring(token.start, token.end),
           style: hideMarkers && _isMarker(token.kind)
-              ? const TextStyle(color: Color(0x00000000))
+              ? _hiddenMarker
               : markdownTokenStyle(token.kind, syntax, dark: dark),
         ),
       );
@@ -892,6 +919,20 @@ final class _Line extends StatelessWidget {
     return TextSpan(children: spans);
   }
 }
+
+/// The style a hidden marker is drawn with: invisible, and small enough that
+/// the
+/// room it takes is nothing a reader notices.
+///
+/// The marker is still *there* — still a character at its own offset — which is
+/// what keeps every text offset true; it is the room it takes that is given up,
+/// so
+/// a heading reads as a heading instead of starting with a gap the width of a
+/// hash.
+const TextStyle _hiddenMarker = TextStyle(
+  color: Color(0x00000000),
+  fontSize: 0.01,
+);
 
 /// Whether [kind] is a marker a formatted surface hides rather than shows.
 ///
