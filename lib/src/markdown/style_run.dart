@@ -59,7 +59,10 @@ final class StyleRun {
     required this.end,
     this.depth = 0,
     this.href,
-  });
+    int? innerStart,
+    int? innerEnd,
+  }) : innerStart = innerStart ?? start,
+       innerEnd = innerEnd ?? end;
 
   /// What it is.
   final StyleKind kind;
@@ -77,6 +80,21 @@ final class StyleRun {
   /// [StyleKind.image].
   final String? href;
 
+  /// Where the text the construct marks starts: past its opening marker —
+  /// the `**` of a bold run, the `[` of a link, a heading's `# `. [start]
+  /// for a run that has none.
+  ///
+  /// `[start, innerStart)` and `[innerEnd, end)` are the markers, which is
+  /// what `live` mode hides and what source mode dims.
+  final int innerStart;
+
+  /// Where the text the construct marks ends: before its closing marker —
+  /// the `**`, or the `](href)` of a link. [end] for a run that has none.
+  final int innerEnd;
+
+  /// Whether the run has markers of its own around its text.
+  bool get hasMarkers => innerStart > start || innerEnd < end;
+
   /// How many characters it covers.
   int get length => end - start;
 
@@ -86,5 +104,6 @@ final class StyleRun {
   @override
   String toString() =>
       '${kind.name}[$start..$end${depth > 0 ? ' d$depth' : ''}'
+      '${hasMarkers ? ' inner $innerStart..$innerEnd' : ''}'
       '${href != null ? ' -> $href' : ''}]';
 }

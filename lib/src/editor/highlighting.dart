@@ -89,10 +89,15 @@ enum TokenKind {
 @immutable
 final class Token {
   /// Creates a token of [kind] covering [start]..[end).
-  const new(this.kind, this.start, this.end);
+  const new(this.kind, this.start, this.end, {this.marker = false});
 
   /// The style of the run.
   final TokenKind kind;
+
+  /// Whether the run is the syntax of a construct rather than its text: the
+  /// `**` of a bold run, a link's `](href)`. What `live` mode hides. Only the
+  /// unified surface's styler tells them apart; this tokenizer never does.
+  final bool marker;
 
   /// Offset of the first character of the run.
   final int start;
@@ -109,10 +114,11 @@ final class Token {
       other is Token &&
       other.kind == kind &&
       other.start == start &&
-      other.end == end;
+      other.end == end &&
+      other.marker == marker;
 
   @override
-  int get hashCode => Object.hash(kind, start, end);
+  int get hashCode => Object.hash(kind, start, end, marker);
 }
 
 /// One line of the display text with its tokens; anything not covered by a
