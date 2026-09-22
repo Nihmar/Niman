@@ -60,6 +60,10 @@ final class SourceFindController extends ChangeNotifier
   @override
   final FocusNode findFocus = FocusNode(debugLabel: 'source find');
 
+  /// The replacement field's focus: Tab goes there from the query.
+  @override
+  final FocusNode replaceFocus = FocusNode(debugLabel: 'source replace');
+
   bool _visible = false;
   bool _replaceMode = false;
   bool _caseSensitive = false;
@@ -339,6 +343,7 @@ final class SourceFindController extends ChangeNotifier
     findInput.dispose();
     replaceInput.dispose();
     findFocus.dispose();
+    replaceFocus.dispose();
     super.dispose();
   }
 }

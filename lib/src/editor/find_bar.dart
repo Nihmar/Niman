@@ -40,6 +40,10 @@ abstract interface class FindBarModel implements Listenable {
   /// The replacement the bar edits.
   TextEditingController get replaceInput;
 
+  /// The replacement field's focus, when the model keeps one: with both
+  /// fields' nodes, Tab goes from one to the other and never out of the bar.
+  FocusNode? get replaceFocus;
+
   /// Runs the search again: the query changed.
   void search();
 
@@ -113,9 +117,24 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
             controller.nextMatch,
         const SingleActivator(LogicalKeyboardKey.pageUp):
             controller.previousMatch,
+        if (controller.findFocus != null && controller.replaceFocus != null)
+          for (final shift in <bool>[false, true])
+            SingleActivator(LogicalKeyboardKey.tab, shift: shift): _cycle,
       },
       child: _bar(theme),
     );
+  }
+
+  /// Tab: from the query to the replacement and back, while the replace row
+  /// is open; the query keeps it otherwise.
+  void _cycle() {
+    final find = controller.findFocus!;
+    final replace = controller.replaceFocus!;
+    if (!controller.replaceMode) {
+      find.requestFocus();
+      return;
+    }
+    (find.hasFocus ? replace : find).requestFocus();
   }
 
   Widget _bar(ThemeData theme) {
@@ -148,19 +167,21 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
       child: Row(
         children: [
           const SizedBox(width: 4),
-          IconButton(
-            key: Key('$keyPrefix-find-mode'),
-            tooltip: controller.replaceMode
-                ? AppStrings.editorFindCloseTooltip
-                : AppStrings.editorFindReplaceModeTooltip,
-            icon: Icon(
-              controller.replaceMode
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
-              size: 20,
+          _unfocusable(
+            IconButton(
+              key: Key('$keyPrefix-find-mode'),
+              tooltip: controller.replaceMode
+                  ? AppStrings.editorFindCloseTooltip
+                  : AppStrings.editorFindReplaceModeTooltip,
+              icon: Icon(
+                controller.replaceMode
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                size: 20,
+              ),
+              visualDensity: VisualDensity.compact,
+              onPressed: controller.toggleMode,
             ),
-            visualDensity: VisualDensity.compact,
-            onPressed: controller.toggleMode,
           ),
           Expanded(
             child: TextField(
@@ -224,6 +245,7 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
           child: TextField(
             key: Key('$keyPrefix-replace-input'),
             controller: controller.replaceInput,
+            focusNode: controller.replaceFocus,
             style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
               hintText: AppStrings.editorReplaceHint,
@@ -263,15 +285,22 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
     required ThemeData theme,
     VoidCallback? onPressed,
     bool active = false,
-  }) => IconButton(
-    key: key,
-    tooltip: tooltip,
-    icon: Icon(
-      icon,
-      size: 18,
-      color: active ? theme.colorScheme.primary : null,
+  }) => _unfocusable(
+    IconButton(
+      key: key,
+      tooltip: tooltip,
+      icon: Icon(
+        icon,
+        size: 18,
+        color: active ? theme.colorScheme.primary : null,
+      ),
+      visualDensity: VisualDensity.compact,
+      onPressed: onPressed,
     ),
-    visualDensity: VisualDensity.compact,
-    onPressed: onPressed,
   );
+
+  /// [button], left out of the Tab order: Tab goes from the query to the
+  /// replacement and back, the fields a keyboard types in, and the buttons
+  /// have their keys (Enter, F3, Escape) already.
+  static Widget _unfocusable(Widget button) => ExcludeFocus(child: button);
 }

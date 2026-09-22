@@ -31,6 +31,9 @@ final class WysiwygFindController extends ChangeNotifier
   @override
   FocusNode? get findFocus => null;
 
+  @override
+  FocusNode? get replaceFocus => null;
+
   bool _visible = false;
   bool _replaceMode = false;
   bool _caseSensitive = false;
