@@ -76,6 +76,8 @@ final class MarkdownSurface extends StatelessWidget {
     this.spellCheck,
     this.findMatches,
     this.onOpenLink,
+    this.caretWidth,
+    this.typewriter = false,
     super.key,
   });
 
@@ -140,6 +142,12 @@ final class MarkdownSurface extends StatelessWidget {
   /// Called when a link is Ctrl+clicked.
   final SourceLinkTap? onOpenLink;
 
+  /// The caret's width; null keeps the surface's own.
+  final double? caretWidth;
+
+  /// Typewriter mode: the row being written keeps to the middle.
+  final bool typewriter;
+
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
@@ -172,5 +180,7 @@ final class MarkdownSurface extends StatelessWidget {
     spellCheck: spellCheck,
     findMatches: findMatches,
     onOpenLink: onOpenLink,
+    caretWidth: caretWidth,
+    typewriter: typewriter,
   );
 }

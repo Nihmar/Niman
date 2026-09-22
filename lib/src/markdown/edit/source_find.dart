@@ -28,6 +28,10 @@ import 'package:niman/src/markdown/surface_controller.dart';
 
 /// The matches a view paints, line by line.
 abstract interface class SourceMatches implements Listenable {
+  /// Whether the bar is open: the caret it moves is followed as the writer's
+  /// is.
+  bool get visible;
+
   /// The matches overlapping `[start, end)` of the note, clipped to it and
   /// made local to [start], each with whether it is the current one.
   Iterable<(int, int, bool)> within(int start, int end);
