@@ -11145,10 +11145,33 @@ hash and live draws it invisible and taking no room, and **the caret lands at th
 place in the note in either mode**, which is the property the whole arrangement rests
 on.
 
-What is *not* built yet: find, folding, the shell's remappable command table
-dispatching into the surface, the body's typography in `live`, the inline markers, and
-the flag that puts the surface in front of a device — for which the paragraph above is
-the plan.
+### Where the two phases stand, at the end of the work round
+
+**Built, tested and measured.** `MarkdownSourceView` and `MarkdownSurface` (source and
+live), the caret from the line's own layout, the hit test and the click counting, the
+keyboard through `InputBuffer` and `SourceInput`, `caret_motion` (logical *and* visual),
+`edit_history`, mouse-drag selection, the clipboard, `onChanged`, marker hiding by
+style, heading sizes and list indents in live. **0.075 ms a keystroke against the
+0.507 ms ceiling**, and a keystroke two orders of magnitude cheaper than opening the
+note. 4 502 tests, `flutter analyze --fatal-infos` clean, integration green.
+
+**Not built.** Find and folding. The inline markers (`**`, `$`) need the tokenizer in
+`editor/highlighting.dart` to split a marker from the run it marks — it is shared with
+the legacy editor, so that is a change to make deliberately, with its colours in mind.
+The rest of live's body typography (paragraph spacing, a quote's bar) is the read
+view's theme, waiting to be spent. The shell's remappable command table does not reach
+the surface yet.
+
+**The next step, in one paragraph, with the names.** `NoteView._editorPane` builds the
+source pane over the `_unifiedSource` buffer the read mode already uses; the flag is
+`widget.unifiedMarkdown`, which already exists. The whole save path hangs off one
+controller listener, `_onValueChanged` (highlight sync, `_unsaved.noteChanged`, the save
+debounce, the statistics and preview timers), so the honest way in is to lift that body
+into a `_noteChanged(text, caretLine)` that both panes call — the surface already
+reports exactly that pair through `onChanged` and `onSelection` — and then point the
+source pane at `MarkdownSurface(mode: MarkdownSurfaceMode.source)` behind the flag. A
+flag that skipped `_noteChanged` would save nothing; a fork would be two save paths to
+keep in step.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
