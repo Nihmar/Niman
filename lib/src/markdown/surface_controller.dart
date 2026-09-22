@@ -16,6 +16,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show TextSelection;
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -81,8 +82,16 @@ final class MarkdownSurfaceController {
   ///
   /// Applied as the one range the two texts differ in, so it is one undo
   /// step and one edit for the tokenizer, however long the note is.
-  void applyEdit(String text, TextSelection selection) {
-    final ours = buffer.text;
+  ///
+  /// [text] may be of a part of the note only — `[start, end)` of it — and
+  /// [selection] is then in [text]'s offsets too ([applyLineCommand]).
+  void applyEdit(
+    String text,
+    TextSelection selection, {
+    int start = 0,
+    int? end,
+  }) {
+    final ours = buffer.substring(start, end ?? buffer.length);
     var prefix = 0;
     final shortest = ours.length < text.length ? ours.length : text.length;
     while (prefix < shortest &&
@@ -96,15 +105,52 @@ final class MarkdownSurfaceController {
       suffix++;
     }
     final caret = SelectionModel(
-      anchor: selection.baseOffset,
-      extent: selection.extentOffset,
+      anchor: start + selection.baseOffset,
+      extent: start + selection.extentOffset,
     );
     replaceRange(
-      prefix,
-      ours.length - suffix,
+      start + prefix,
+      start + ours.length - suffix,
       text.substring(prefix, text.length - suffix),
       caret: caret,
     );
+  }
+
+  /// [selection] with both ends where a caret can stand
+  /// ([SourceBuffer.caretOffset]).
+  SelectionModel _caretSelection(SelectionModel selection) => SelectionModel(
+    anchor: buffer.caretOffset(selection.anchor),
+    extent: buffer.caretOffset(selection.extent),
+  );
+
+  /// Runs [command] over the lines the selection touches, and applies what
+  /// it made.
+  ///
+  /// [command] is one of the pure Markdown commands (`md_editing.dart`), and
+  /// each of them reads and writes the lines its selection touches and
+  /// nothing else: a wrap, the selected range; a prefix, a heading, a number,
+  /// an indent, each touched line on its own. So those lines are everything
+  /// it looks at, and the answer is the one it gives over the whole note —
+  /// which `surface_controller_test.dart` holds for every command. Handing it
+  /// the note meant joining it, building its formatted copy and comparing
+  /// the two: seconds for a bold on a 246 MB note (0.0.9 stress test), for
+  /// two asterisks.
+  void applyLineCommand(
+    MarkdownEdit Function(String text, TextSelection selection) command,
+  ) {
+    final current = _caretSelection(selection);
+    final first = buffer.lineOf(current.start);
+    final last = buffer.lineOf(current.end);
+    final start = buffer.offsetOfLine(first);
+    final end = buffer.offsetOfLine(last) + buffer.lineAt(last).length;
+    final result = command(
+      buffer.substring(start, end),
+      TextSelection(
+        baseOffset: current.anchor - start,
+        extentOffset: current.extent - start,
+      ),
+    );
+    applyEdit(result.text, result.selection, start: start, end: end);
   }
 
   /// Replaces `[start, end)` with [text], as one undoable edit, leaving the
@@ -156,7 +202,7 @@ final class MarkdownSurfaceController {
 
   /// Selects [selection] and brings its end into view.
   void select(SelectionModel selection) {
-    final next = selection.clampTo(buffer.length);
+    final next = _caretSelection(selection);
     final view = _view;
     if (view != null) {
       view.select(next);

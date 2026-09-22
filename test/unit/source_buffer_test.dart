@@ -173,6 +173,23 @@ void main() {
     });
   });
 
+  group('caretOffset', () {
+    test('an offset inside a CRLF is the end of its line', () {
+      final buffer = SourceBuffer.fromText('ab\r\ncd\nef');
+      expect(buffer.caretOffset(2), 2, reason: 'before the pair');
+      expect(buffer.caretOffset(3), 2, reason: r'between \r and \n');
+      expect(buffer.caretOffset(4), 4, reason: 'the next line');
+      expect(buffer.caretOffset(6), 6, reason: 'before an LF');
+      expect(buffer.caretOffset(7), 7, reason: 'after it');
+    });
+
+    test('an offset outside the note is its nearest end', () {
+      final buffer = SourceBuffer.fromText('ab');
+      expect(buffer.caretOffset(-3), 0);
+      expect(buffer.caretOffset(9), 2);
+    });
+  });
+
   group('substring', () {
     test('inside a line, across lines, and over a terminator', () {
       final buffer = SourceBuffer.fromText(_mixed);
