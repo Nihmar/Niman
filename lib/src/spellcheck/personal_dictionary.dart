@@ -80,7 +80,7 @@ final class PersonalDictionary extends ChangeNotifier {
     try {
       // A library nobody has added a word to has no dictionary yet: that is
       // the normal start, not a failure worth a warning in every log.
-      if (!await _file.exists()) return;
+      if (!_file.existsSync()) return;
       final raw = await _file.readAsString();
       for (final line in raw.split('\n')) {
         final word = line.trim();
