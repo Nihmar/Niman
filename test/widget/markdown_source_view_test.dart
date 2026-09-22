@@ -268,6 +268,34 @@ void main() {
     );
   });
 
+  testWidgets('Ctrl+End shows the last line whole, estimates or not', (
+    tester,
+  ) async {
+    // Three twenty-letter words a line: by its length the estimate says two
+    // rows, the word wrap draws three. A jump planned on the estimates came
+    // up short, and only the wheel — once the rows were measured — reached
+    // the end.
+    const word = 'abcdefghijklmnopqrst';
+    const line = '$word $word $word';
+    final text = List.filled(400, line).join('\n');
+    final state = await pump(tester, '$text\nfine');
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    for (var i = 0; i < 5; i++) {
+      await tester.pump();
+    }
+    expect(state.selection.extent, text.length + 5);
+    final viewport = tester.getRect(find.byType(Scrollable).first);
+    final last = tester.getRect(
+      find.textContaining('fine', findRichText: true),
+    );
+    expect(last.bottom, lessThanOrEqualTo(viewport.bottom));
+    expect(last.top, greaterThanOrEqualTo(viewport.top));
+  });
+
   testWidgets('Shift+End selects to the line end, Shift+Home back', (
     tester,
   ) async {
