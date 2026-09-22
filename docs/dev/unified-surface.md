@@ -11103,6 +11103,19 @@ ratio — a keystroke two orders of magnitude cheaper than opening the note — 
 that is the property that carries across machines, which is the same rule the rest of
 `test/perf/` follows.
 
+**Phase 4 has started, and by the route the design promised: the same surface with a
+flag.** `MarkdownSourceView(hideMarkers: true)` draws the structural marker runs —
+headings' `#`, list bullets, quote bars, fence lines — with a transparent colour and
+nothing else changed. Hidden **by style**, never removed: the runs stay in the layout
+with their advance, so the marker's width is paid for and what it buys is that every
+offset stays true — the caret, the hit test and the selection need to know nothing
+about what is invisible. The test holds exactly that: the drawn text is identical with
+and without hiding, and the caret for an offset lands in the same place.
+
+The inline markers — the `**` around a bold word, the `$` around a formula — are part
+of the run they mark in today's tokenizer, so hiding those needs a split there first;
+`_isMarker` in the view is the list where that shows up, and it is the next step.
+
 What is *not* built yet in this phase: find, folding, the shell's remappable command
 table dispatching into the surface, and the flag that puts the surface in front of a
 device — for which the paragraph above is the plan.

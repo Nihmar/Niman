@@ -602,6 +602,68 @@ void main() {
     expect(told.last, 'ciao\n');
   });
 
+  testWidgets('hiding the markers hides them without moving anything', (
+    tester,
+  ) async {
+    // Phase 4's first piece, and the property that makes it affordable: the
+    // marker
+    // runs stay in the layout with their advance, so the caret, the hit test
+    // and
+    // the selection know nothing about what is invisible.
+    const text = '# Titolo\n\n- voce\n';
+    Future<({List<TextSpan> spans, Rect? caret})> render({
+      required bool hide,
+      required int caret,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSourceView(
+              buffer: SourceBuffer.fromText(text),
+              theme: _theme,
+              showLineNumbers: false,
+              hideMarkers: hide,
+              selection: SelectionModel.at(caret),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      final state = tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+      final spans = <TextSpan>[];
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (span is TextSpan) spans.add(span);
+          return true;
+        });
+      }
+      return (spans: spans, caret: state.caretRect);
+    }
+
+    final shown = await render(hide: false, caret: 3);
+    final hidden = await render(hide: true, caret: 3);
+    // The hash is a run of its own, and in live mode it is transparent.
+    final transparent = hidden.spans
+        .where((span) => span.style?.color == const Color(0x00000000))
+        .toList();
+    expect(transparent, isNotEmpty, reason: 'the markers are hidden by colour');
+    expect(
+      transparent.map((span) => span.text).join(),
+      contains('#'),
+      reason: 'the hash is one of them',
+    );
+    // Nothing moved: the same text is drawn, at the same offsets, and the caret
+    // for offset 3 is where it was.
+    expect(
+      hidden.spans.map((span) => span.text).join(),
+      shown.spans.map((span) => span.text).join(),
+    );
+    expect(hidden.caret!.left, closeTo(shown.caret!.left, 0.01));
+  });
+
   testWidgets('a jump to a line brings it to the top', (tester) async {
     final note = StringBuffer();
     for (var at = 0; at < 500; at++) {
