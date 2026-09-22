@@ -11112,9 +11112,19 @@ offset stays true — the caret, the hit test and the selection need to know not
 about what is invisible. The test holds exactly that: the drawn text is identical with
 and without hiding, and the caret for an offset lands in the same place.
 
+A hidden marker is drawn invisible **and** at a hundredth of a size, because hiding
+the hash is not the same as *being* a heading: the room the marker takes is what a
+reader would otherwise see as a gap the width of a hash before every title, and the
+heading's own size is what makes a title look like one. Both are style, so both leave
+every text offset exactly where it was, and the caret — which the paragraph answers —
+follows without knowing any of it.
+
 The inline markers — the `**` around a bold word, the `$` around a formula — are part
 of the run they mark in today's tokenizer, so hiding those needs a split there first;
 `_isMarker` in the view is the list where that shows up, and it is the next step.
+The typography of the *body* — a paragraph's spacing, a list's indents, a quote's bar
+— is the step after that: the read view's theme has all of it already, and live mode
+is what will spend it.
 
 What is *not* built yet in this phase: find, folding, the shell's remappable command
 table dispatching into the surface, and the flag that puts the surface in front of a

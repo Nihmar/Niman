@@ -664,6 +664,62 @@ void main() {
     expect(hidden.caret!.left, closeTo(shown.caret!.left, 0.01));
   });
 
+  testWidgets('in live mode a heading is drawn as a heading', (tester) async {
+    // Hiding the hash is not the same as *being* a heading: the line takes the
+    // heading's size, and the hash it is drawn from takes next to no room —
+    // which
+    // is what makes the text start at the margin instead of after a gap.
+    Future<List<TextSpan>> spansFor({required bool hide}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSourceView(
+              buffer: SourceBuffer.fromText('## Sezione\ntesto\n'),
+              theme: _theme,
+              showLineNumbers: false,
+              hideMarkers: hide,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final spans = <TextSpan>[];
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (span is TextSpan) spans.add(span);
+          return true;
+        });
+      }
+      return spans;
+    }
+
+    await spansFor(hide: false);
+    // The line's size lives on the paragraph, not on a run: `Text.rich`'s style
+    // is
+    // the base every run is merged into, so this is where a heading's size is
+    // decided.
+    double? lineSize() => tester
+        .widgetList<RichText>(find.byType(RichText))
+        .firstWhere((widget) => widget.text.toPlainText().startsWith('##'))
+        .text
+        .style
+        ?.fontSize;
+    expect(
+      lineSize(),
+      _theme.body.fontSize,
+      reason: 'a source view shows every line at one size',
+    );
+    final live = await spansFor(hide: true);
+    expect(
+      lineSize(),
+      _theme.heading2.fontSize,
+      reason: 'live mode draws the heading at the heading size',
+    );
+    final marker = live.firstWhere((span) => span.text == '##');
+    expect(marker.style?.fontSize, lessThan(1));
+    expect(marker.style?.color, const Color(0x00000000));
+  });
+
   testWidgets('a jump to a line brings it to the top', (tester) async {
     final note = StringBuffer();
     for (var at = 0; at < 500; at++) {
