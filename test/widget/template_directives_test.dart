@@ -70,6 +70,26 @@ void main() {
     expect(find.byType(NoteView), findsOneWidget);
   });
 
+  testWidgets('on the desktop the note opens with the caret on {{cursor}}', (
+    tester,
+  ) async {
+    // The wide layout's tabs, not the phone's single note view: the tabs
+    // were never handed the caret (0.0.9 test round).
+    setSurfaceSize(tester, const Size(1200, 900));
+    await openWith(
+      tester,
+      '---\nniman:\n  filename: "Fixed name"\n---\nciao {{cursor}}mondo\n',
+    );
+
+    await useTemplate(tester);
+
+    expect(controller.contentOf('Fixed name.md'), 'ciao mondo\n');
+    expect(
+      tester.widget<NoteView>(find.byType(NoteView)).initialCaretOffset,
+      5,
+    );
+  });
+
   testWidgets('the folder is made, however deep, and the note goes in it', (
     tester,
   ) async {

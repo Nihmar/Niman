@@ -212,6 +212,7 @@ final class ShellDetailPane extends StatelessWidget {
     linkSource: linkSource,
     onOpenNote: onOpenNote,
     initialAnchor: tab.anchor,
+    initialCaretOffset: tab.caret,
     kindMode: kindMode,
     // Only the note showing in the focused pane tells the shell what
     // kind it is.
@@ -240,6 +241,7 @@ final class DetailTab {
     this.key,
     this.focused = true,
     this.anchor,
+    this.caret,
   });
 
   /// The note's library-relative path.
@@ -265,4 +267,7 @@ final class DetailTab {
 
   /// A heading to land on as it loads (a link's anchor).
   final String? anchor;
+
+  /// Where the caret lands as it loads: a template's `{{cursor}}` (#53).
+  final int? caret;
 }
