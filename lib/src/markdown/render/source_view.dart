@@ -1077,20 +1077,40 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// Scrolls the caret's line into view when an edit or a jump left it out.
-  void _ensureCaretVisible() {
+  ///
+  /// The jump is planned on the height map, and far from the viewport that
+  /// is estimates: the frame that lands measures the rows it draws, and the
+  /// line — and the note's extent — can end up elsewhere than planned.
+  /// Ctrl+End left the last line half under the pane's edge until the
+  /// wheel, scrolling against the measured extent, went the rest of the
+  /// way. So a jump is checked again after the frames that follow it, for
+  /// as long as each one still has to move — [settle] of them at most.
+  void _ensureCaretVisible({int settle = 3}) {
     if (!_scroll.hasClients) return;
     final line = _caretLineIndex;
     if (line < 0) return;
-    final top = _heights.offsetOf(line);
-    final bottom = top + _heights.extentFor(line);
+    // In the scroll view's coordinates: the map starts below the top padding,
+    // and the last line takes the bottom padding with it. Without them every
+    // jump down stopped the padding short, the caret's row cut by it.
+    final top = widget.padding.top + _heights.offsetOf(line);
+    final last = line == _heights.length - 1;
+    final bottom =
+        top + _heights.extentFor(line) + (last ? widget.padding.bottom : 0);
     final viewport = _scroll.position.viewportDimension;
+    final double target;
     if (top < _scroll.offset) {
-      _scroll.jumpTo(top);
+      target = line == 0 ? 0 : top;
     } else if (bottom > _scroll.offset + viewport) {
-      _scroll.jumpTo(
-        (bottom - viewport).clamp(0.0, _scroll.position.maxScrollExtent),
-      );
+      target = (bottom - viewport).clamp(0.0, _scroll.position.maxScrollExtent);
+    } else {
+      return;
     }
+    if (target == _scroll.offset) return;
+    _scroll.jumpTo(target);
+    if (settle <= 0) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _ensureCaretVisible(settle: settle - 1);
+    });
   }
 
   /// Line [index] as the view draws it: the **buffer's** text, with the
