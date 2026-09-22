@@ -26,6 +26,7 @@ import 'package:nativeapi/nativeapi.dart'
         TrayIconRightClickedEvent;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/windows_tray_menu.dart';
 
 /// The tray menu's own entries (#209), beside the quick actions.
@@ -241,7 +242,14 @@ final class PlatformTrayService implements TrayService {
     if (menu == null || _windowsMenuOpen) return;
     _windowsMenuOpen = true;
     try {
-      final choice = await openWindowsTrayMenu(menu.nativeObject.address);
+      final choice = await openWindowsTrayMenu(
+        menu.nativeObject.address,
+        theme: switch (AppThemes.brightness) {
+          AppBrightness.system => TrayMenuTheme.system,
+          AppBrightness.day => TrayMenuTheme.light,
+          AppBrightness.night => TrayMenuTheme.dark,
+        },
+      );
       _log.info('tray: menu closed (chose ${choice.chosen}; ${choice.report})');
       if (choice.chosen != 0) _runs[choice.chosen]?.call();
     } on Object catch (error) {
