@@ -104,22 +104,40 @@ written next to it.
    per line and follows the edits (`editor/word_count_index.dart`), and the
    outline is read off the blocks the pane's own scan already produced
    (`editor/outline.dart`, `outlineOfBlocks`). See the table above.
-3. **An Enter or a line join costs O(lines).** `SourceBuffer.replaceRange`
-   moves `_lines` and `_terminators` through `ListBase.replaceRange` (the
-   generic element-by-element path), and the scanner moves `_entering` and
-   `_blocks`. The fix: chunked storage of the lines, as `PrefixSums` already
-   chunks the spans, so an insertion moves one chunk.
+3. **An Enter or a line join costs O(block), and O(note) when the block is the
+   note.** The buffer is not the cost: a character edit moves its two lists in
+   under a millisecond, and the state list's own tail move measured a
+   millisecond at 2.7 M lines. The scanner is. It re-scans from the first line
+   of the *block* the edit landed in — a rebuild that starts mid-block would
+   split a paragraph in two — and it stops where the state entering a line
+   agrees with what it was and the blocks after it are already right again.
 
-   **Measured on the 246 MB note (2026-09-22), because it changes what the
-   fix has to be.** The buffer is not the cost: a character edit moves its
-   two lists in under a millisecond, and the state list's own tail move
-   measured a millisecond at 2.7 M lines. The scanner is. An Enter in the
-   middle converges at once — 33 ms for 14 lines re-scanned — but a
-   *character* edit in the same note re-scans up to two million lines
-   (85–878 ms, depending how far the paragraph continuity and the paragraph's
-   boundary agreement carry). So chunked storage alone would not fix this:
-   the scanner's convergence on an edit that does not change the line count
-   is what has to improve first.
+   `dart run tool/scanner_edit_bench.dart "Quicknote.md"` (2 757 545 lines,
+   2 014 482 blocks) shows both halves of that:
+
+   | Where the edit lands | Lines re-scanned |
+   |---|---|
+   | in a one-line paragraph or a blank between blocks (10%) | 3 |
+   | a one-character edit that merges a blank line into the line below, inside a 137 k-line `$$…$$` block (50%) | 1 378 781 |
+   | inside another `$$…$$` block (75%, 90%) | 689 389, 275 756 |
+
+   The 50% number is the interesting one: the edit *removes a line* (the blank
+   line it starts in becomes part of the line after it), so the states after it
+   are the states of lines that have moved, and the scan cannot trust them. It
+   falls back to the block-boundary rule, and inside a `$$…$$` block there is
+   no boundary to stop at until the block closes — 137 k lines later. With the
+   line count unchanged the state alone is enough, and the same edit costs one
+   line (measured: a 200 000-line math block re-scans 200 000 lines at 3–5 ms
+   in the synthetic case, but only because the convergence is cheap there; the
+   real note's cost is 78–166 ms for the scan itself).
+
+   **What the fix has to be.** Not chunked line storage, which the numbers
+   above rule out. The scan has to be able to start at the edit without the
+   block's first line: the state a block is entered in as it is now, kept with
+   the block, is what a rebuild that starts mid-block needs, and it is the one
+   thing the scan currently recomputes by walking. That is a change to
+   `Block` and `BlockScanner`, not to a list.
+
 4. ~~**A reload from disk compares the whole text.**~~ Done, and not with a
    hash: the watcher is what asks for the reload, and a watcher reports that
    something happened to a path rather than that the note changed. So the
