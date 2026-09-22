@@ -94,7 +94,21 @@ Future<double> _perKeystroke(WidgetTester tester, int lines) async {
     await tester.pump();
   }
   clock.stop();
-  expect(platform.text, buffer.text, reason: 'the two copies stayed in step');
+  // The platform holds a window of the note, and that window is the note.
+  final view = tester.state<MarkdownSourceViewState>(
+    find.byType(MarkdownSourceView),
+  );
+  final from = view.platformWindowStart;
+  expect(
+    platform.text,
+    buffer.substring(from, from + platform.text.length),
+    reason: 'the two copies stayed in step',
+  );
+  expect(
+    platform.text.length,
+    lessThan(buffer.length ~/ 10),
+    reason: 'the platform holds a window, not the note',
+  );
   return clock.elapsedMicroseconds / keys;
 }
 
@@ -108,8 +122,8 @@ void main() {
       '(×${(large / small).toStringAsFixed(1)})',
     );
     // Fifty times the note. An O(n) step on the path would make this ratio
-    // follow the size; what is left is the platform message itself, whose
-    // `oldText` is the whole note, and that is the fake's cost, not ours.
-    expect(large / small, lessThan(12));
+    // follow the size — the platform message was one, `oldText` the whole
+    // note, until the platform was given a window of it.
+    expect(large / small, lessThan(4));
   });
 }
