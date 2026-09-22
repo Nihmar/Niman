@@ -64,6 +64,10 @@ abstract interface class TrayService {
   /// The menu's own entries: Open Niman, Quit (#209).
   Stream<TrayCommand> get commands;
 
+  /// Whether the icon is on screen: false before [init], and on a host
+  /// that declined it.
+  bool get shown;
+
   /// Releases the tray icon.
   Future<void> dispose();
 }
@@ -183,6 +187,19 @@ final class PlatformTrayService implements TrayService {
         ..addListener((event) {
           if (event is TrayIconClickedEvent) _activated.add(null);
         });
+      // Windows adds the icon to the notification area only here
+      // (`NIM_ADD` lives in `SetVisible`); without it the tray existed,
+      // said it was ready, and never appeared. Linux and macOS show it
+      // anyway, and take the call as a no-op.
+      if (!tray.setVisible(true)) {
+        _log.warning('tray icon could not be shown');
+        tray.dispose();
+        built.menu.dispose();
+        for (final item in built.items) {
+          item.dispose();
+        }
+        return;
+      }
       _tray = tray;
       _menu = built.menu;
       _items.addAll(built.items);
@@ -276,6 +293,9 @@ final class PlatformTrayService implements TrayService {
   }
 
   @override
+  bool get shown => _tray != null;
+
+  @override
   Future<void> dispose() async {
     _tray?.dispose();
     _menu?.dispose();
@@ -313,6 +333,9 @@ final class NoopTrayService implements TrayService {
 
   @override
   Stream<TrayCommand> get commands => const Stream<TrayCommand>.empty();
+
+  @override
+  bool get shown => false;
 
   @override
   Future<void> dispose() async {}

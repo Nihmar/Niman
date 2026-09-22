@@ -196,13 +196,13 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       ShortcutAction.newVoice: AppStrings.shortcutNewAudio,
     };
     await ref.read(shortcutServiceProvider).publish(labels);
-    await ref
-        .read(trayServiceProvider)
-        .init(
-          labels: labels,
-          openLabel: AppStrings.trayOpen,
-          quitLabel: AppStrings.trayQuit,
-        );
+    final tray = ref.read(trayServiceProvider);
+    await tray.init(
+      labels: labels,
+      openLabel: AppStrings.trayOpen,
+      quitLabel: AppStrings.trayQuit,
+    );
+    CloseToTray.trayShown.value = tray.shown;
   }
 
   /// Resumes the last library, unless Android is withholding the

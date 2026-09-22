@@ -25,6 +25,15 @@ final class CloseToTray {
   /// settings say on the desktops.
   static final ValueNotifier<bool> enabled = ValueNotifier(false);
 
+  /// Whether the tray icon is really on screen. The × hides the window
+  /// only when it is: hidden with no icon to bring it back, Niman kept
+  /// running out of sight, and the next launch handed itself to that
+  /// process and quit — a new build ran the old one's code.
+  static final ValueNotifier<bool> trayShown = ValueNotifier(true);
+
+  /// Whether the × hides the window right now.
+  static bool get active => enabled.value && trayShown.value;
+
   /// Bumped when the tray's Quit is chosen: the close guard closes the
   /// window for real, asking about unsaved notes first.
   static final ValueNotifier<int> quitRequests = ValueNotifier(0);
