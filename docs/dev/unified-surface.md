@@ -11126,9 +11126,22 @@ The typography of the *body* — a paragraph's spacing, a list's indents, a quot
 — is the step after that: the read view's theme has all of it already, and live mode
 is what will spend it.
 
-What is *not* built yet in this phase: find, folding, the shell's remappable command
-table dispatching into the surface, and the flag that puts the surface in front of a
-device — for which the paragraph above is the plan.
+**`MarkdownSurface` exists** (`lib/src/markdown/surface.dart`), and it is the widget
+the design's claim is made in: `MarkdownSurfaceMode.source` and `.live` are *the same
+widget* with one flag between them, so the caret, the hit test, the selection, the
+keyboard, the undo history and the windowing are one implementation in both. The
+third mode, `read`, is `MarkdownReadView` today and is deliberately not folded in yet:
+it takes a parser and a maths cache and has no editing, and saying so is better than
+pretending one widget already covers all three — phase 5 is where they meet. Three
+widget tests hold it: both modes are the source surface underneath, source draws the
+hash and live draws it invisible and taking no room, and **the caret lands at the same
+place in the note in either mode**, which is the property the whole arrangement rests
+on.
+
+What is *not* built yet: find, folding, the shell's remappable command table
+dispatching into the surface, the body's typography in `live`, the inline markers, and
+the flag that puts the surface in front of a device — for which the paragraph above is
+the plan.
 
 ### Phase 4 — `live` mode replaces `flutter_quill`
 
