@@ -1438,6 +1438,7 @@ final class _NoteViewState extends State<NoteView>
         formatMenu: _formatMenu,
         spellCheck: widget.spellCheck,
         findMatches: _sourceFind,
+        onOpenLink: (kind, raw) => unawaited(_openLinkToken(kind, raw)),
         onChanged: () {
           _sourceFind.noteEdited();
           _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine);
@@ -1643,8 +1644,13 @@ final class _NoteViewState extends State<NoteView>
       return;
     }
     final text = _controller.codeLines[line].text;
-    final raw = text.substring(token.start, token.end);
-    if (token.kind == TokenKind.wikilink) {
+    await _openLinkToken(token.kind, text.substring(token.start, token.end));
+  }
+
+  /// Opens a link token's target: [raw] is the token as written, `[[…]]` for
+  /// a wikilink and `[…](…)` for a Markdown link.
+  Future<void> _openLinkToken(TokenKind kind, String raw) async {
+    if (kind == TokenKind.wikilink) {
       await openWiki(
         context,
         parseWikiRef(raw.substring(2, raw.length - 2)),
