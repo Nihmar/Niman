@@ -147,13 +147,25 @@ written next to it.
      `Block(paragraph 1..2)` after `Block(paragraph 0..1)` where the fresh
      scan says `Block(paragraph 0..2)`;
    * a lazily continued quote rebuilt from its second line lost the
-     `quoteDepth` its first line carries, and split in two.
+     `quoteDepth` its first line carries, and split in two;
+   * a 9 000-line note of three-line paragraphs counted 4 999 blocks where a
+     fresh scan has 5 000.
 
-   Merging the prefix with the first rebuilt block would fix the first and
-   not the second (the quote's depth comes from the lines *before* the
-   prefix). So the splice has to move its *end* as well as its start, or the
-   rebuild has to cover the whole block — which is the O(block) this is
-   about.
+   Recomputing the states between the block and the edit (so a narrowed
+   rebuild of a *quote* would get its depth) and splicing from the block
+   before the edit was tried too, and fails the same way. The reason is in
+   the count: the narrowed rebuild replaces the containing block's suffix
+   with the rebuilt blocks, and the blocks between the rebuild's end and the
+   convergence point are dropped with it — the rebuilt range covers less than
+   the old block did, so the list stops tiling the document.
+
+   **The whole shape of the fix, then.** Keep the containing block's prefix
+   (`start..from`), rebuild `from..convergence`, and *merge the two when the
+   block they make merges* — a paragraph's second line, a quote's lazy
+   continuation. The merge is what makes the block count come out right, and
+   it is the piece none of the four attempts had. `_rescanFrom` splices a
+   range of blocks with a range of blocks; what it needs is a range of blocks
+   plus a prefix it may have to join to the first of them.
 
    **What is left, stated plainly.** The scan's cost is the containing block,
    and a whole note can be one block, so the path is not gone for a note
