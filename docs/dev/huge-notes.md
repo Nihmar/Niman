@@ -120,14 +120,32 @@ written next to it.
    boundary agreement carry). So chunked storage alone would not fix this:
    the scanner's convergence on an edit that does not change the line count
    is what has to improve first.
-4. **A reload from disk compares the whole text** (`text == _currentText` in
-   `_reloadIfChanged`): compare the length and a hash first, or the disk's
-   bytes against the last saved ones.
-5. **"Count list" scans the whole note** when the Tools sheet opens
-   (`_hasListToCount` → `tallyTargetsIn`): the list items are in the block
-   index.
-6. **A kind GUI's edit is whole-text by design** (`_applyKindEdit`). Kind
-   notes are small; worth a guard rather than a rewrite.
+4. ~~**A reload from disk compares the whole text.**~~ Done, and not with a
+   hash: the watcher is what asks for the reload, and a watcher reports that
+   something happened to a path rather than that the note changed. So the
+   file is stamped when it is read or written (`DiskStamp`: size and
+   modification time, O(1)) and a reload whose file still matches is not
+   read at all — against 208 ms to join the pane's text, 734 ms to normalize
+   a fresh read and 44 ms to compare it (measured on the 246 MB note,
+   2026-09-22). A file that changed is read, normalized and adopted exactly
+   as before; a file that is gone, or that nothing has stamped, is read.
+5. ~~**"Count list" scans the whole note.**~~ Done: the sheet lists every
+   tool and greys the ones that cannot run, so the question "does this note
+   hold a list?" is asked every time it opens — and it was answered by
+   reading the note and building a whole `HighlightDocument` for it
+   (`tallyTargetsIn`). It is now read off the blocks the pane already
+   scanned (`blockList`): 0.004 ms at a million lines against a 235 ms scan
+   (`tool`-style bench, `test/perf/list_count_check_test.dart`). The caret's
+   own list is still found by tokenizing the note (`_countListSource`), which
+   is one tokenize on a tap the writer asked for.
+6. ~~**A kind GUI's edit is whole-text by design.**~~ Done, as the guard
+   rather than the rewrite: `_applyKindEdit` still hands its whole note back,
+   but `MarkdownSurfaceController.applyEdit` no longer cuts the note out to
+   diff it — `substring` of a 246 MB note is a copy of the note on the UI
+   isolate for a checkbox ticking. The changed range is found line by line
+   (`_changedRange`), so an unchanged head and tail are only compared and the
+   replacement is the part that actually differs. A handback of what the note
+   already says is not an edit at all: no revision bump, no save.
 7. **The read view's definitions are rescanned per revision** when it shows
    a note that is being edited; in the background, but O(note) each time.
 

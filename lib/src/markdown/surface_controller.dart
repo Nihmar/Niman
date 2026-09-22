@@ -53,6 +53,22 @@ final class MarkdownSurfaceController {
   /// what it derived from the note is still current.
   int get revision => buffer.revision;
 
+  /// Counts the note's words in an isolate, when it has not been counted:
+  /// 675 ms on a 246 MB note, so never on the UI isolate.
+  ///
+  /// The answer is dropped when the note moved on while it was being worked
+  /// out — the next call starts again — and the count is adopted whole, so a
+  /// reader never sees half of one.
+  Future<void> buildWords() async {
+    if (words.isCounted) return;
+    final revision = buffer.revision;
+    await countInBackground(buffer);
+    // The note was typed in while the count was worked out: what came back
+    // is not its count. The next call starts again.
+    if (buffer.revision != revision) return;
+    words.adopt(buffer);
+  }
+
   /// The note's headings, read off a scan this controller keeps for itself.
   ///
   /// The fallback for a pane that is not on screen: a mounted source pane
@@ -138,45 +154,83 @@ final class MarkdownSurfaceController {
     int start = 0,
     int? end,
   }) {
-    final ours = buffer.substring(start, end ?? buffer.length);
-    var prefix = 0;
-    final shortest = ours.length < text.length ? ours.length : text.length;
-    while (prefix < shortest &&
-        ours.codeUnitAt(prefix) == text.codeUnitAt(prefix)) {
-      prefix++;
-    }
-    var suffix = 0;
-    while (suffix < shortest - prefix &&
-        ours.codeUnitAt(ours.length - 1 - suffix) ==
-            text.codeUnitAt(text.length - 1 - suffix)) {
-      suffix++;
-    }
+    final range = _changedRange(start, end ?? buffer.length, text);
+    if (range == null) return;
     final caret = SelectionModel(
       anchor: start + selection.baseOffset,
       extent: start + selection.extentOffset,
     );
-    replaceRange(
-      start + prefix,
-      start + ours.length - suffix,
-      text.substring(prefix, text.length - suffix),
-      caret: caret,
-    );
+    replaceRange(range.at, range.to, range.replacement, caret: caret);
   }
 
-  /// Counts the note's words in an isolate, when it has not been counted:
-  /// 675 ms on a 246 MB note, so never on the UI isolate.
+  /// The one range `[start, end)` of the note has to become [text], or null
+  /// when it already says it.
   ///
-  /// The answer is dropped when the note moved on while it was being
-  /// worked out — the next [buildWords] starts again — and [words] is
-  /// swapped whole, so a reader never sees half a count.
-  Future<void> buildWords() async {
-    if (words.isCounted) return;
-    final revision = buffer.revision;
-    await countInBackground(buffer);
-    // The note was typed in while the count was worked out: what came back
-    // is not its count. The next call starts again.
-    if (buffer.revision != revision) return;
-    words.adopt(buffer);
+  /// Found line by line rather than by cutting the note out and comparing the
+  /// two strings: a kind GUI hands its whole note back after every change,
+  /// and a `substring` of it is a copy of the whole note on the UI isolate —
+  /// 247 MB of copy for a checkbox ticking (0.0.9 stress test). This way the
+  /// unchanged head and tail are only ever compared, line by line, and the
+  /// replacement is the part that actually differs.
+  ({int at, int to, String replacement})? _changedRange(
+    int start,
+    int end,
+    String text,
+  ) {
+    final first = buffer.lineOf(start);
+    final last = buffer.lineOf(end);
+    var head = first;
+    var textAt = 0;
+    while (head < last + 1) {
+      final line = buffer.lineAt(head);
+      final terminator = buffer.terminatorAt(head);
+      final whole = line.length + terminator.length;
+      if (textAt + whole > text.length) break;
+      if (!_sameAt(text, textAt, line) ||
+          !_sameAt(text, textAt + line.length, terminator)) {
+        break;
+      }
+      textAt += whole;
+      head++;
+    }
+    if (head > last) {
+      // Every line is what it was, and so is the length: nothing changed.
+      return textAt == text.length
+          ? null
+          : (at: end, to: end, replacement: text.substring(textAt));
+    }
+    // The tail, from the ends back: the last line first, which settles the
+    // whole suffix for a note whose end did not move. What it finds is the
+    // first line the change did *not* reach, which is where the removal
+    // stops.
+    var tail = last + 1;
+    var textEnd = text.length;
+    while (tail - 1 >= head) {
+      final line = buffer.lineAt(tail - 1);
+      final terminator = buffer.terminatorAt(tail - 1);
+      final whole = line.length + terminator.length;
+      if (textEnd - whole < textAt) break;
+      final lineAt = textEnd - whole;
+      if (!_sameAt(text, lineAt, line) ||
+          !_sameAt(text, lineAt + line.length, terminator)) {
+        break;
+      }
+      textEnd = lineAt;
+      tail--;
+    }
+    final at = head == 0 ? 0 : buffer.offsetOfLine(head);
+    final to = tail > last ? end : buffer.offsetOfLine(tail);
+    if (at == to && textAt == textEnd) return null;
+    return (at: at, to: to, replacement: text.substring(textAt, textEnd));
+  }
+
+  /// Whether [text] says [part] at [at].
+  static bool _sameAt(String text, int at, String part) {
+    if (at < 0 || at + part.length > text.length) return false;
+    for (var i = 0; i < part.length; i++) {
+      if (text.codeUnitAt(at + i) != part.codeUnitAt(i)) return false;
+    }
+    return true;
   }
 
   /// [selection] with both ends where a caret can stand

@@ -117,6 +117,29 @@ void main() {
     });
   });
 
+  // The tools sheet's question: is there a list at all? Read off the pane's
+  // own scan rather than the note, so the sheet opening costs O(blocks) and
+  // not a whole `HighlightDocument`.
+  group('blockList', () {
+    for (final (text, expected) in <(String, bool)>[
+      ('just prose\n', false),
+      ('# Heading\n\nprose\n', false),
+      ('- a - x\n- b - y\n', true),
+      ('1. c - z\n2. d - z\n', true),
+      ('- [ ] x: 1\n', true),
+      ('  - indented item\n', true),
+      ('> quoted prose\n> more\n', false),
+      ('```\n- not a list, code\n```\n', false),
+      ('\n\n\n', false),
+      ('', false),
+    ]) {
+      test('${expected ? 'finds' : 'does not find'} one in '
+          '"${text.replaceAll('\n', r'\n')}"', () {
+        expect(blockList(scannedBlocksOf(text)), expected);
+      });
+    }
+  });
+
   group('applyTally', () {
     test('writes the block under the list, with a blank line between', () {
       expect(

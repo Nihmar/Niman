@@ -87,6 +87,59 @@ void main() {
     }
   });
 
+  group('applyEdit', () {
+    /// What a kind GUI does: hand back the whole note after one change.
+    void handBack(
+      MarkdownSurfaceController controller,
+      String text, {
+      int caret = 0,
+    }) => controller.applyEdit(text, TextSelection.collapsed(offset: caret));
+
+    test('the note becomes what was handed back, edit by edit', () {
+      const start = 'intro\n- [ ] one\n- [ ] two\noutro\n';
+      for (final (label, next, caret) in <(String, String, int)>[
+        ('a box ticked', 'intro\n- [x] one\n- [ ] two\noutro\n', 11),
+        ('a box unticked', 'intro\n- [ ] one\n- [ ] two\noutro\n', 11),
+        ('a row added', 'intro\n- [x] one\n- [ ] two\n- [ ] three\noutro\n', 0),
+        ('a row removed', 'intro\n- [x] one\noutro\n', 0),
+        ('the head changed', 'INTRO\n- [x] one\noutro\n', 0),
+        ('the tail changed', 'intro\n- [x] one\nOUTRO\n', 0),
+        ('it became empty', '', 0),
+        ('every line changed', 'a\nb\nc\n', 0),
+      ]) {
+        final controller = MarkdownSurfaceController(
+          SourceBuffer.fromText(start),
+        );
+        handBack(controller, next, caret: caret);
+        expect(controller.buffer.text, next, reason: label);
+      }
+    });
+
+    test('handing back what it already says is not an edit', () {
+      const text = 'intro\n- [ ] one\noutro\n';
+      final controller = MarkdownSurfaceController(SourceBuffer.fromText(text));
+      final revision = controller.buffer.revision;
+      handBack(controller, text, caret: 6);
+      expect(controller.buffer.revision, revision, reason: 'nothing changed');
+      expect(controller.buffer.text, text);
+    });
+
+    test('only the range that differs is replaced', () {
+      // A note long enough that the old path's `substring` of it would be
+      // the whole note: the controller must hand the buffer the change and
+      // not a copy of everything around it.
+      final lines = [for (var at = 0; at < 20000; at++) 'line $at'];
+      final text = lines.join('\n');
+      final controller = MarkdownSurfaceController(SourceBuffer.fromText(text));
+      final changed = text.replaceFirst('line 19999', 'line 19999 changed');
+      final before = controller.buffer.revision;
+      handBack(controller, changed);
+      expect(controller.buffer.revision, before + 1, reason: 'one edit');
+      expect(controller.buffer.lineCount, lines.length);
+      expect(controller.buffer.text, changed);
+    });
+  });
+
   test('the command sees the touched lines, not the note', () {
     final lines = [for (var at = 0; at < 1000; at++) 'line $at'];
     final controller = MarkdownSurfaceController(

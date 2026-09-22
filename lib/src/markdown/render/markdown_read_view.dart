@@ -127,6 +127,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// How many blocks the note has.
   int get blockCount => _blocks.length;
 
+  /// The blocks this pane scanned for the page, or null before the first
+  /// scan lands.
+  ///
+  /// What the shell asks when it needs something the scan already found —
+  /// a list to count, so far — rather than reading the note for it.
+  List<Block>? get blocks => _shown == null ? null : _blocks;
+
   /// The note's headings, read off the blocks this pane already scanned for
   /// the page, or null before the first scan lands.
   ///
