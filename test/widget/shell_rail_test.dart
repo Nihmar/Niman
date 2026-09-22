@@ -280,7 +280,7 @@ void main() {
   });
 
   testWidgets(
-    'wide: right-clicking the tree\'s empty space creates at the root',
+    "wide: right-clicking the tree's empty space creates at the root",
     (tester) async {
       await pumpWide(tester);
       await controller.createFolder(parentPath: '', name: 'Docs');
