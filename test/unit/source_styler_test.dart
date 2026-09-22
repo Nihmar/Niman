@@ -13,10 +13,13 @@ import 'package:niman/src/markdown/source_styler.dart';
 List<String> _describe(SourceStyler styler, int line) {
   final text = styler.buffer.lineAt(line);
   return <String>[
-    for (final token in styler.tokensOf(line))
-      '${token.kind.name}${token.marker ? '*' : ''}'
-          '[${text.substring(token.start, token.end)}]',
+    for (final token in styler.tokensOf(line)) _token(text, token),
   ];
+}
+
+String _token(String text, Token token) {
+  final mark = token.marker ? '*' : '';
+  return '${token.kind.name}$mark[${text.substring(token.start, token.end)}]';
 }
 
 List<String> _line(String document, [int line = 0]) =>
