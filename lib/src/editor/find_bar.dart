@@ -99,7 +99,7 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
     if (!controller.visible) return const SizedBox.shrink();
     final theme = Theme.of(context);
     // The keys every find bar answers from its fields: Escape closes it,
-    // Shift+Enter and F3 walk the matches.
+    // Shift+Enter, F3 and the page keys walk the matches.
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.escape): controller.close,
@@ -107,6 +107,11 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
             controller.previousMatch,
         const SingleActivator(LogicalKeyboardKey.f3): controller.nextMatch,
         const SingleActivator(LogicalKeyboardKey.f3, shift: true):
+            controller.previousMatch,
+        // The legacy bar's: the page keys walk the results.
+        const SingleActivator(LogicalKeyboardKey.pageDown):
+            controller.nextMatch,
+        const SingleActivator(LogicalKeyboardKey.pageUp):
             controller.previousMatch,
       },
       child: _bar(theme),
