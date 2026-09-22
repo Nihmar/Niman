@@ -831,7 +831,14 @@ final class _Line extends StatelessWidget {
             ),
           Expanded(
             child: _caretBox(
-              Text.rich(_span(), key: paragraphKey, style: _lineStyle()),
+              Padding(
+                padding: EdgeInsets.only(left: _indent()),
+                child: Text.rich(
+                  _span(),
+                  key: paragraphKey,
+                  style: _lineStyle(),
+                ),
+              ),
             ),
           ),
         ],
@@ -890,6 +897,27 @@ final class _Line extends StatelessWidget {
       5 => theme.heading5,
       _ => theme.heading6,
     };
+  }
+
+  /// How far the line is indented, in live mode.
+  ///
+  /// A list item's marker is hidden and takes no room, so without this its text
+  /// would start at the margin where the bullet used to be — the note would
+  /// read
+  /// as prose that happens to begin with a word. The indent is one level per
+  /// marker the line carries, which is the depth the tokenizer already worked
+  /// out.
+  ///
+  /// It is pure layout: no offset moves, because the text underneath is still
+  /// the
+  /// note's own text, character for character.
+  double _indent() {
+    if (!hideMarkers) return 0;
+    var levels = 0;
+    for (final token in styled.tokens) {
+      if (token.kind == TokenKind.listMarker) levels++;
+    }
+    return levels * theme.listIndentPerLevel;
   }
 
   /// The line's tokens as styled runs. A token's override never changes the

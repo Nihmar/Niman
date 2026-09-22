@@ -11122,9 +11122,16 @@ follows without knowing any of it.
 The inline markers — the `**` around a bold word, the `$` around a formula — are part
 of the run they mark in today's tokenizer, so hiding those needs a split there first;
 `_isMarker` in the view is the list where that shows up, and it is the next step.
-The typography of the *body* — a paragraph's spacing, a list's indents, a quote's bar
-— is the step after that: the read view's theme has all of it already, and live mode
-is what will spend it.
+A list item's marker is hidden and takes no room, so without anything else its text
+would start at the margin where the bullet used to be and the note would read as prose
+that happens to begin with a word. `live` therefore indents a line by one level per
+marker it carries — the depth the tokenizer has already worked out — and the test
+holds the number: the item's text starts exactly one `listIndentPerLevel` to the right
+of where source mode puts it. Pure layout, so no offset moves.
+
+The rest of the body's typography — a paragraph's spacing, a quote's bar — is the step
+after that: the read view's theme has all of it already, and live mode is what will
+spend it.
 
 **`MarkdownSurface` exists** (`lib/src/markdown/surface.dart`), and it is the widget
 the design's claim is made in: `MarkdownSurfaceMode.source` and `.live` are *the same
