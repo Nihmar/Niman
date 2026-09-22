@@ -31,6 +31,16 @@ final class BlockScanner {
     _rescanFrom(0);
   }
 
+  /// [scanned]'s answer, for [buffer]: a scan made of a copy of the note —
+  /// in an isolate — taken over by the note itself, without scanning again.
+  ///
+  /// The two must hold the same lines, which is the caller's to promise.
+  new rebound(BlockScanner scanned, this.buffer) {
+    _entering.addAll(scanned._entering);
+    _blocks.addAll(scanned._blocks);
+    _lineCount = scanned._lineCount;
+  }
+
   /// The text being scanned.
   final SourceBuffer buffer;
 
@@ -67,6 +77,16 @@ final class BlockScanner {
   /// The state entering [line]. O(1), and only valid below [scannedLines].
   LineState stateEntering(int line) => _entering[line];
 
+  /// The block holding [line], or null past the note's end. O(log blocks),
+  /// and without the copy [index] makes.
+  Block? blockAt(int line) {
+    if (_blocks.isEmpty || line < 0) return null;
+    final at = _firstIndexWhere(0, (block) => block.startLine > line) - 1;
+    if (at < 0) return null;
+    final block = _blocks[at];
+    return block.contains(line) ? block : null;
+  }
+
   /// Re-scans after [edit].
   ///
   /// Blocks entirely before the edit are kept, blocks entirely after the
@@ -78,13 +98,9 @@ final class BlockScanner {
     // Back up to the start of the block the edit landed in: the block list is
     // rebuilt from there, and a block spanning the edit would otherwise lose
     // the part of itself before it.
-    var from = edit.firstLine;
-    for (final block in _blocks) {
-      if (block.contains(edit.firstLine)) {
-        from = block.startLine;
-        break;
-      }
-    }
+    // By binary search: a walk over the blocks was a keystroke's cost on a
+    // note of millions of them.
+    final from = blockAt(edit.firstLine)?.startLine ?? edit.firstLine;
     _rescanFrom(from, edit);
   }
 
@@ -424,6 +440,14 @@ final class BlockScanner {
   }
 
   // ---------------------------------------------------------------- constructs
+
+  /// The list marker [text] opens with — its start, its width and where the
+  /// item's text begins — or null: the scanner's own rule, for a reader
+  /// that colours the marker.
+  static (int, int, int)? listMarkerOf(String text) => _listMarker(text);
+
+  /// How many `#` open a heading on [text], or 0.
+  static int headingLevelOf(String text) => _headingLevel(text);
 
   /// How many `#` open a heading on [text], or 0.
   static int _headingLevel(String text) {

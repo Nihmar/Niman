@@ -64,15 +64,27 @@ final class BlockParser {
     final key = Object.hash(block.startLine, block.endLine, block.kind);
     final cached = _cache[key];
     if (cached != null) return cached;
-    _parses++;
     final parsed = parse(block, buffer);
     _cache[key] = parsed;
     return parsed;
   }
 
   /// Parses [block] without consulting the cache.
-  ParsedBlock parse(Block block, SourceBuffer buffer) {
-    final text = _contentText(block, blockText(block, buffer));
+  ParsedBlock parse(Block block, SourceBuffer buffer) =>
+      parseText(block, blockText(block, buffer), () => _scopeOf(buffer));
+
+  /// Parses [block], whose source text is [raw], with the definitions
+  /// [scope] answers — asked only when the block has inline content.
+  ///
+  /// The source view's way in: it keeps the definitions itself, because
+  /// scanning the note for them is O(note) and a keystroke must not be.
+  ParsedBlock parseText(
+    Block block,
+    String raw,
+    DocumentScope Function() scope,
+  ) {
+    _parses++;
+    final text = _contentText(block, raw);
     if (!_hasInlineContent(block.kind)) {
       return ParsedBlock(
         block: block,
@@ -83,16 +95,16 @@ final class BlockParser {
     }
     final masked = _masker.mask(text);
     final walk = _Walk(masked);
-    final scope = _scopeOf(buffer);
+    final definitions = scope();
     final document = md.Document(extensionSet: md.ExtensionSet.gitHubFlavored);
     // The two constructs that are a *document's*, not a block's. A link
     // reference and a footnote definition are written in one block and used in
     // another, and the package keeps them on its `Document` — which a per-block
     // parse builds fresh. Seeding them from a scan of the whole note is what
     // makes `[^1]` a superscript and `[text][label]` a link.
-    document.linkReferences.addAll(scope.links);
-    document.footnoteReferences.addAll(scope.footnoteCounts);
-    document.footnoteLabels.addAll(scope.footnoteLabels);
+    document.linkReferences.addAll(definitions.links);
+    document.footnoteReferences.addAll(definitions.footnoteCounts);
+    document.footnoteLabels.addAll(definitions.footnoteLabels);
     final nodes = document.parseLines(masked.text.split('\n'));
     for (final node in nodes) {
       walk.visit(node, 0);
@@ -212,25 +224,29 @@ final class BlockParser {
     if (block.quoteDepth <= 0) return raw;
     final lines = raw.split('\n');
     for (var at = 0; at < lines.length; at++) {
-      var line = lines[at];
-      for (var level = 0; level < block.quoteDepth; level++) {
-        line = _withoutQuoteMark(line);
-      }
-      lines[at] = line;
+      final line = lines[at];
+      lines[at] = line.substring(quotePrefixLength(line, block.quoteDepth));
     }
     return lines.join('\n');
   }
 
-  /// [line] with one `>` and the space after it taken off, when it has them.
-  static String _withoutQuoteMark(String line) {
-    var at = 0;
-    while (at < line.length && at < 3 && line[at] == ' ') {
+  /// How much of [line] its [depth] quote marks take — each `>` with the up
+  /// to three spaces before it and the one after — as far as the line has
+  /// them: what the parse takes off a quote's lines, so a reader can put the
+  /// parse's offsets back on the line.
+  static int quotePrefixLength(String line, int depth) {
+    var from = 0;
+    for (var level = 0; level < depth; level++) {
+      var at = from;
+      while (at < line.length && at - from < 3 && line.codeUnitAt(at) == 0x20) {
+        at++;
+      }
+      if (at >= line.length || line.codeUnitAt(at) != 0x3E) return from;
       at++;
+      if (at < line.length && line.codeUnitAt(at) == 0x20) at++;
+      from = at;
     }
-    if (at >= line.length || line[at] != '>') return line;
-    at++;
-    if (at < line.length && line[at] == ' ') at++;
-    return line.substring(at);
+    return from;
   }
 
   /// The block's own text, its lines joined with `\n`.
