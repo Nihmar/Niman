@@ -117,6 +117,30 @@ void main() {
     expect(history.canUndo, isFalse);
   });
 
+  test('a sealed step is not continued by the typing after it', () {
+    // The caret moved away and came back: what is typed there next is its own
+    // undo step, even though it starts where the last one ended.
+    final buffer = SourceBuffer.fromText('x');
+    final history = EditHistory();
+    _typed(history, buffer, 1, 'a');
+    history.seal();
+    _typed(history, buffer, 2, 'b');
+    expect(history.length, 2);
+  });
+
+  test('undo puts back a mixed line ending exactly', () {
+    // A CRLF note with one LF line: deleting across the LF and undoing it
+    // must give the LF back, not the note's dominant CRLF.
+    final buffer = SourceBuffer.fromText('a\r\nb\nc\r\n');
+    final history = EditHistory();
+    final removed = buffer.substring(3, 6);
+    buffer.replaceRange(3, 6, '');
+    history
+      ..record(EditRecord(start: 3, removed: removed, inserted: ''))
+      ..undo(buffer);
+    expect(buffer.text, 'a\r\nb\nc\r\n');
+  });
+
   test('clear forgets both directions', () {
     final buffer = SourceBuffer.fromText('x');
     final history = EditHistory();

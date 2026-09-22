@@ -246,7 +246,17 @@ final class SourceBuffer {
   /// dominant one, so an edit cannot introduce a second line-ending style; the
   /// terminator the replaced range's *last* line had is kept, so the text after
   /// the edit is untouched.
-  SourceEdit replaceRange(int start, int end, String replacement) {
+  ///
+  /// With [verbatim], the replacement's terminators are kept as they are
+  /// rather than rewritten: what an undo needs, because it puts back text the
+  /// note held — a mixed-ending file's `\n` in a CRLF note included — and a
+  /// rewrite would make the undone text a different length from the record.
+  SourceEdit replaceRange(
+    int start,
+    int end,
+    String replacement, {
+    bool verbatim = false,
+  }) {
     assert(
       start >= 0 && end >= start && end <= _length,
       'bad range $start..$end',
@@ -275,6 +285,7 @@ final class SourceBuffer {
         : '';
 
     final inserted = _splitInserted(replacement);
+    final ownEols = verbatim ? _eolsOf(replacement) : null;
     final merged = <String>[];
     final terminators = <String>[];
     merged.add('$prefix${inserted.first}');
@@ -283,7 +294,7 @@ final class SourceBuffer {
     }
     if (inserted.length > 1) {
       for (var i = 0; i < inserted.length - 1; i++) {
-        terminators.add(_dominantEol);
+        terminators.add(ownEols?[i] ?? _dominantEol);
       }
       merged.add('${inserted.last}$suffix');
     } else {
@@ -316,6 +327,32 @@ final class SourceBuffer {
       insertedLines: merged.length,
       revision: _revision,
     );
+  }
+
+  /// The terminators [text] has, in order: `\r\n` or `\n`.
+  static List<String> _eolsOf(String text) {
+    final eols = <String>[];
+    var at = text.indexOf('\n');
+    while (at >= 0) {
+      eols.add(at > 0 && text.codeUnitAt(at - 1) == 0x0D ? '\r\n' : '\n');
+      at = text.indexOf('\n', at + 1);
+    }
+    return eols;
+  }
+
+  /// [offset], moved out of a `\r\n` it falls in the middle of: back to the
+  /// end of the line's text, or with [forward] on to the next line's start.
+  ///
+  /// Nothing the surface does puts an offset there — a tap, an arrow key and
+  /// the caret all stay on characters — but the platform addresses the whole
+  /// text, terminators and all, and an edit that starts between the two units
+  /// of a line break splits it.
+  int snapOutOfTerminator(int offset, {bool forward = false}) {
+    if (offset <= 0 || offset >= _length) return offset;
+    final line = lineOf(offset);
+    final textEnd = offsetOfLine(line) + _lines[line].length;
+    if (offset <= textEnd) return offset;
+    return forward ? offsetOfLine(line + 1) : textEnd;
   }
 
   /// The span of line [index]: its text plus its terminator.

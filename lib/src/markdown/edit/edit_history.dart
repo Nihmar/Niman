@@ -87,12 +87,27 @@ final class EditHistory {
   /// How many undo steps are held.
   int get length => _done.length;
 
+  /// Whether the next edit starts a step of its own whatever it continues.
+  bool _sealed = false;
+
+  /// Ends the current step: the next edit is undone on its own even when it
+  /// continues the last one (the caret moved away and came back — typing
+  /// there again is a new thought).
+  void seal() => _sealed = true;
+
   /// Records an edit that has already been applied to the buffer.
+  ///
+  /// [EditRecord.inserted] must be what the buffer *stored*, which is not
+  /// always what was typed: a line break is stored as the note's own line
+  /// ending. An undo removes `inserted.length` code units, so a record of the
+  /// typed text instead deleted one character too many per line break.
   void record(EditRecord record) {
     if (record.removed.isEmpty && record.inserted.isEmpty) return;
     // A new edit is a new branch: whatever was undone is no longer reachable.
     _undone.clear();
-    if (_done.isNotEmpty && _done.last.continuesWith(record)) {
+    final sealed = _sealed;
+    _sealed = false;
+    if (!sealed && _done.isNotEmpty && _done.last.continuesWith(record)) {
       final last = _done.removeLast();
       _done.add(
         EditRecord(
@@ -115,8 +130,9 @@ final class EditHistory {
   EditRecord? undo(SourceBuffer buffer) {
     if (_done.isEmpty) return null;
     final last = _done.removeLast();
-    buffer.replaceRange(last.start, last.end, last.removed);
+    buffer.replaceRange(last.start, last.end, last.removed, verbatim: true);
     _undone.add(last);
+    _sealed = true;
     return last;
   }
 
@@ -128,8 +144,10 @@ final class EditHistory {
       next.start,
       next.start + next.removed.length,
       next.inserted,
+      verbatim: true,
     );
     _done.add(next);
+    _sealed = true;
     return next;
   }
 
@@ -138,5 +156,6 @@ final class EditHistory {
   void clear() {
     _done.clear();
     _undone.clear();
+    _sealed = false;
   }
 }

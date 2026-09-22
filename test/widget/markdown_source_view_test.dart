@@ -566,6 +566,112 @@ void main() {
     expect(buffer.text, '', reason: 'the paste is undoable like any edit');
   });
 
+  testWidgets('a CRLF paste into an LF note undoes to exactly what was there', (
+    tester,
+  ) async {
+    // The note stores the paste with its own line endings, so the stored text
+    // is shorter than the clipboard's; the history has to hold the stored text,
+    // or the undo takes one character too many per line break.
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => call.method == 'Clipboard.getData'
+          ? <String, dynamic>{'text': 'a\r\nb\r\n'}
+          : null,
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    final buffer = SourceBuffer.fromText('xy\n');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    )..placeCaret(1);
+    await state.paste();
+    await tester.pump();
+    expect(buffer.text, 'xa\nb\ny\n', reason: "stored with the note's LF");
+    expect(state.selection.extent, 5, reason: 'the caret is after the paste');
+    state.undo();
+    await tester.pump();
+    expect(buffer.text, 'xy\n');
+  });
+
+  testWidgets('undoing a deletion puts the caret after what came back', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('ciao\n');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state =
+        tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+          ..placeCaret(4)
+          ..deleteBackward()
+          ..undo();
+    await tester.pump();
+    expect(buffer.text, 'ciao\n');
+    expect(state.selection.extent, 4, reason: 'where it was before the delete');
+  });
+
+  testWidgets('a CRLF note is highlighted like any other', (tester) async {
+    // The tokenizer used to be fed the joined text split on `\n`, so every
+    // line of a CRLF note ended in `\r` and matched none of the view's lines.
+    Future<List<TextStyle?>> runsOf(String text) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSourceView(
+              key: UniqueKey(),
+              buffer: SourceBuffer.fromText(text),
+              theme: _theme,
+              showLineNumbers: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final heading =
+          tester
+                  .renderObjectList<RenderParagraph>(find.byType(RichText))
+                  .first
+                  .text
+              as TextSpan;
+      final styles = <TextStyle?>[];
+      heading.visitChildren((span) {
+        if (span is TextSpan && span.text != null) styles.add(span.style);
+        return true;
+      });
+      return styles;
+    }
+
+    final lf = await runsOf('# Titolo\ntesto\n');
+    final crlf = await runsOf('# Titolo\r\ntesto\r\n');
+    expect(lf.whereType<TextStyle>(), isNotEmpty, reason: 'LF is styled');
+    expect(crlf, lf, reason: 'and CRLF is styled the same way');
+  });
+
   testWidgets('two taps take the word, three take the line', (tester) async {
     final buffer = SourceBuffer.fromText('due parole, fine\n');
     final carets = <SelectionModel>[];
