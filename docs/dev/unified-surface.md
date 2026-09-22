@@ -11556,16 +11556,48 @@ What the design asks for next, in the order it names them:
   2026-09-21, before this phase, because a cap no other mode has is exactly the
   non-uniformity R3 forbids and because the stress-test note is the note it
   refused. What remains of the criterion is the *device* half — that the
-  geometry note really opens and edits in `live` — and `live` is not yet the
-  surface the WYSIWYG editor uses, so that half waits for the wiring below.
-- **`live` is not wired into the app yet.** `MarkdownSurface(mode: live)` is
-  reachable only from tests: the WYSIWYG editor in a library is still
-  `flutter_quill`, and the unified pane opens `mode: source`
-  (`lib/src/ui/note_view.dart`). Phase 4's deliverable — `live` *replaces*
-  `flutter_quill` — is therefore not reached either, and it is the largest
-  thing left in the phase. The device validation the design asks for (policy A
-  at 200 KB and on `Geometria 1.md`, per-line and per-word, no visible thrash)
-  belongs with that wiring, not before it.
+  geometry note really opens and edits in `live` — which now belongs with the
+  wired pane below.
+- **`live` draws the WYSIWYG pane — behind the unified engine flag**
+  (2026-09-22). `NoteView` routes the WYSIWYG pane to the unified surface in
+  `live` mode when `markdownEngine: unified` is on, and to `flutter_quill`
+  otherwise: one widget, two modes, one flag, which is what §8.6.3 always said
+  the two modes were. The consequence worth stating plainly is that
+  **everything about the note is the same question in both modes** — its text,
+  its caret, its commands, its save, its statistics, its memento — so the
+  predicate the shell asks is now "who is drawing this note" (`_unified`)
+  rather than "is this the source pane", and only what is asked *of* the
+  widget changes: `mode: live` instead of `mode: source`, `hideMarkers: true`,
+  and the note's typography instead of monospace.
+
+  The wiring also fixed three hand-off bugs the old shape had hidden, all of
+  them data loss:
+  * the editor-kind switch used to hand `_wysiwygText` over — a copy taken when
+    `live` opened and never updated since, because `live` edits the buffer
+    directly — so an edit made in `live` and then switched to `source` was
+    written from before it. Under the unified engine the two modes share one
+    buffer, so the hand-off is skipped (`an edit made in live mode survives the
+    switch to source`);
+  * flipping the *engine* flag to unified while a note was open in the legacy
+    pane left `_legacyBehind` false, so flipping it back took the note from a
+    controller that had not seen the unified pane's edits;
+  * the memento of a `live` pane was recorded as a source one, so a tab
+    switched away from the WYSIWYG came back to the source pane.
+
+  What the wiring does **not** yet give: `activeFormats` — the toolbar's
+  pressed state is empty in the unified pane, in `live` as in `source`, because
+  the surface publishes nothing for it. That is the next piece, and the
+  criterion it belongs to is the parity one above.
+- What is still owed by this phase, in the order it should be taken:
+  1. **`live` as the default WYSIWYG**, the way `source` is not yet the default
+     editor: the flag is on, but a library that has not switched it still opens
+     Quill.
+  2. **`activeFormats`** for the unified surface, so the toolbar and the
+     context menu light up in both modes.
+  3. **The row-wise reveal** that follows a wrap.
+  4. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
+     and per word, no visible thrash — which is the only criterion on this list
+     that needs a phone rather than a host.
 
 ### Phase 5 — Delete the old world
 

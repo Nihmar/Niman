@@ -7,6 +7,7 @@
 // ends: in the text handed to `writeNote`.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -174,6 +175,71 @@ void main() {
     // holds, so the edit is still there only if the legacy editor got it.
     await _pump(tester, _view(readNote: (_) async => 'prima', writes: writes));
     expect(_surface(tester).widget.buffer.text, 'prima e dopo');
+    await _settleSave(tester);
+    expect(writes.last, 'prima e dopo');
+  });
+
+  testWidgets('the WYSIWYG pane is the unified surface in live mode', (
+    tester,
+  ) async {
+    // Phase 4's wiring (#246): with the unified engine on, the WYSIWYG pane is
+    // the *same* surface in `live` mode — the markers hidden by style and the
+    // caret's own revealed — and not the Quill editor it was. One engine, two
+    // modes, one flag between them.
+    final writes = <String>[];
+    await _pump(
+      tester,
+      _view(
+        readNote: (_) async => '# Titolo\n\ntesto\n',
+        writes: writes,
+        showWysiwyg: true,
+      ),
+    );
+    expect(
+      tester
+          .widget<MarkdownSourceView>(find.byType(MarkdownSourceView))
+          .hideMarkers,
+      isTrue,
+      reason: 'the WYSIWYG pane is live: the markers are hidden',
+    );
+    expect(
+      find.byType(WysiwygEditor),
+      findsNothing,
+      reason: 'and the Quill editor is not what drew it',
+    );
+    // A command from the shell reaches the pane it is looking at, as it does
+    // in source mode: the toolbar is the same toolbar over the same surface.
+    _surface(tester).select(const SelectionModel(anchor: 0, extent: 8));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('toolbar-bold')));
+    await tester.pump();
+    expect(_surface(tester).widget.buffer.text, '**# Titolo**\n\ntesto\n');
+    await _settleSave(tester);
+    expect(writes.last, '**# Titolo**\n\ntesto\n');
+  });
+
+  testWidgets('an edit made in live mode survives the switch to source', (
+    tester,
+  ) async {
+    // The two modes are one surface over one buffer, so a kind switch hands
+    // nothing over — and must hand nothing over: the Quill hand-off this used
+    // to run would copy `_wysiwygText`, taken when `live` opened and never
+    // updated since, over the writer's edits.
+    final writes = <String>[];
+    await _pump(
+      tester,
+      _view(readNote: (_) async => 'prima', writes: writes, showWysiwyg: true),
+    );
+    _surface(tester)
+      ..placeCaret(5)
+      ..replaceText(5, 5, ' e dopo');
+    await tester.pump();
+    await _pump(tester, _view(readNote: (_) async => 'prima', writes: writes));
+    expect(
+      _surface(tester).widget.buffer.text,
+      'prima e dopo',
+      reason: 'the source pane is the same buffer, with the edit still in it',
+    );
     await _settleSave(tester);
     expect(writes.last, 'prima e dopo');
   });
