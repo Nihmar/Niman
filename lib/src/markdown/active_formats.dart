@@ -77,9 +77,28 @@ Set<ToolbarItem> activeFormatsOf({
       case TokenKind.subscript:
         break;
     }
+    // The constructs around the caret's text are on too: in `<u>**x**</u>`
+    // the stretch is one bold token, and the underline is its outer one.
+    if (token.start < run.$2 && token.end > run.$1) {
+      for (final kind in token.outer) {
+        if (_inline.contains(kind)) active.add(_itemOf(kind));
+      }
+    }
   }
   return active;
 }
+
+/// The inline kinds a toolbar button stands for.
+const Set<TokenKind> _inline = <TokenKind>{
+  TokenKind.bold,
+  TokenKind.italic,
+  TokenKind.strike,
+  TokenKind.underline,
+  TokenKind.superscript,
+  TokenKind.codeInline,
+  TokenKind.link,
+  TokenKind.wikilink,
+};
 
 /// The toolbar button an inline token kind belongs to.
 ToolbarItem _itemOf(TokenKind kind) => switch (kind) {

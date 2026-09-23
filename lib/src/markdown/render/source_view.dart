@@ -3072,7 +3072,7 @@ final class _Line extends StatelessWidget {
         token.end,
         hidden(token, revealed: revealed, run: run)
             ? _hiddenMarker
-            : markdownTokenStyle(token.kind, syntax, dark: dark),
+            : nestedTokenStyle(token, syntax, dark: dark),
         concealed,
       );
       at = token.end;

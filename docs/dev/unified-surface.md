@@ -11777,6 +11777,15 @@ What remains of the shape: a nested format keeps only its innermost style
 disjoint — a limit the source view had already, now visible; and the
 checkbox is drawn but not yet clickable.
 
+- **Nested formats are drawn as all of them** (2026-09-23). The tokens stay
+  disjoint — everything that reads them, the reveal and the hit test
+  included, relies on that — and each one carries the inline constructs
+  around it (`Token.outer`, outermost first), read off the pieces the
+  styler flattens. The style lays each one's override over the one outside
+  it and **adds up the lines** (`nestedTokenStyle`): `<u>~~x~~</u>` is
+  underlined and struck through, where a merged style keeps one decoration.
+  The toolbar lights the outer ones too.
+
 ### Phase 5 — Delete the old world
 
 **Deliverable:** `re_editor`, `flutter_quill`, `flutter_markdown_plus`,

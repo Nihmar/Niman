@@ -76,6 +76,29 @@ void main() {
       expect(_line('a #tag b'), ['tag[#tag]']);
     });
 
+    test('a construct inside another keeps the ones around it', () {
+      // The tokens are disjoint, so a stretch is the innermost construct's;
+      // the ones around it ride along, or `<u>**x**</u>` was bold and not
+      // underlined.
+      List<String> outer(String line) {
+        final styler = SourceStyler(SourceBuffer.fromText(line));
+        String describe(Token token) =>
+            '${token.kind.name}[${line.substring(token.start, token.end)}]'
+            ' in ${token.outer.map((kind) => kind.name).join(',')}';
+        return <String>[
+          for (final token in styler.tokensOf(0))
+            if (!token.marker && token.outer.isNotEmpty) describe(token),
+        ];
+      }
+
+      expect(outer('<u>**x**</u>'), ['bold[x] in underline']);
+      expect(outer('**a ~~b~~ c**'), ['strike[b] in bold']);
+      expect(outer('<u>~~z~~</u>'), ['strike[z] in underline']);
+      expect(outer('**see [[Note]] now**'), ['wikilink[Note] in bold']);
+      expect(outer('_**both**_'), ['bold[both] in italic']);
+      expect(outer('**plain**'), isEmpty, reason: 'nothing around it');
+    });
+
     test('code inside strong stays code', () {
       expect(_line('**a `c`**'), [
         'bold*[**]',
