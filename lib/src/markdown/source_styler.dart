@@ -30,6 +30,7 @@ import 'dart:isolate';
 
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -52,10 +53,9 @@ typedef LinePicture = ({
 /// A note's lines, coloured by the engine's reading of them.
 final class SourceStyler {
   /// Reads [buffer] here, now.
-  new(this.buffer)
-    : _scanner = BlockScanner(buffer),
-      _scope = DocumentScope.scan(buffer, buffer.revision) {
+  new(this.buffer) : _scanner = BlockScanner(buffer) {
     _definers.addAll(_definersOf(buffer));
+    _scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
   }
 
   new _adopt(this.buffer, this._scanner, this._scope, List<int> definers) {
@@ -69,13 +69,14 @@ final class SourceStyler {
   /// it ([revision] says which it is).
   static Future<SourceStyler> inBackground(SourceBuffer buffer) async {
     final revision = buffer.revision;
-    final (scanner, scope, definers) = await Isolate.run(
-      () => (
+    final (scanner, scope, definers) = await Isolate.run(() {
+      final definers = _definersOf(buffer);
+      return (
         BlockScanner(buffer),
-        DocumentScope.scan(buffer, revision),
-        _definersOf(buffer),
-      ),
-    );
+        DocumentScope.ofLines(buffer, revision, definers),
+        definers,
+      );
+    });
     return SourceStyler._adopt(
       buffer,
       BlockScanner.rebound(scanner, buffer),
@@ -88,7 +89,7 @@ final class SourceStyler {
   final SourceBuffer buffer;
 
   final BlockScanner _scanner;
-  DocumentScope _scope;
+  late DocumentScope _scope;
   final BlockParser _parser = BlockParser();
 
   /// How many blocks have been parsed, for the test that proves a keystroke
@@ -108,9 +109,13 @@ final class SourceStyler {
   /// frame does per line, without joining the block's text to find it.
   final Map<int, _Parsed> _byStart = <int, _Parsed>{};
 
-  /// The lines that may hold a link or footnote definition, in order: what
-  /// an edit is checked against before the note is scanned for definitions
-  /// again.
+  /// The lines that may hold a link or footnote definition, or cite a
+  /// footnote, in order ([DocumentScope.mayHold]): what an edit is checked
+  /// against, and all that is read again when it touches one.
+  ///
+  /// The citations are here as much as the definitions: their order is the
+  /// footnotes' numbering and the order of the section a note ends with, and
+  /// a `[^1]` typed mid-sentence left a scope that said otherwise.
   final List<int> _definers = <int>[];
 
   static const int _parseCacheSize = 4096;
@@ -126,7 +131,7 @@ final class SourceStyler {
     _scanner.edited(edit);
     _byStart.clear();
     if (_touchesDefinitions(edit)) {
-      final scope = DocumentScope.scan(buffer, buffer.revision);
+      final scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
       if (!_sameDefinitions(scope, _scope)) _parses.clear();
       _scope = scope;
     }
@@ -168,6 +173,22 @@ final class SourceStyler {
   /// and every note after its first keystroke — had no blocks to give.
   List<Block>? get blocks =>
       revision == buffer.revision ? _scanner.index.blocks : null;
+
+  /// The note's blocks and definitions as of the buffer's revision, for a
+  /// reader that would otherwise scan the note for them — or null when this
+  /// styler does not have them whole: a scan of a revision the buffer has
+  /// moved on from, or one an edit left owed ([settled]), which finishing
+  /// here would put the rest of the note on the caller's frame.
+  ///
+  /// O(blocks): the list is copied, never the note read.
+  DocumentScan? get scan {
+    if (revision != buffer.revision || !settled) return null;
+    return DocumentScan(
+      blocks: _scanner.index.blocks,
+      scope: _scope.on(buffer, buffer.revision),
+      revision: buffer.revision,
+    );
+  }
 
   /// The block holding [line], scanned up to it when the scan still owes it.
   Block? blockOf(int line) => _scanner.blockAt(line);
@@ -513,23 +534,13 @@ final class SourceStyler {
 
   // --------------------------------------------------------------- definitions
 
-  /// Whether [line] can be a link or footnote definition: `[` after at most
-  /// three spaces, which is where [DocumentScope.scan] looks.
-  static bool _mayDefine(String line) {
-    var at = 0;
-    while (at < 3 && at < line.length && line.codeUnitAt(at) == 0x20) {
-      at++;
-    }
-    return at < line.length && line.codeUnitAt(at) == 0x5B;
-  }
-
   static List<int> _definersOf(SourceBuffer buffer) => <int>[
     for (var line = 0; line < buffer.lineCount; line++)
-      if (_mayDefine(buffer.lineAt(line))) line,
+      if (DocumentScope.mayHold(buffer.lineAt(line))) line,
   ];
 
-  /// Whether [edit] removed or wrote a line that can be a definition, with
-  /// [_definers] moved to the lines after it.
+  /// Whether [edit] removed or wrote a line that can be a definition or cite
+  /// a footnote, with [_definers] moved to the lines after it.
   bool _touchesDefinitions(SourceEdit edit) {
     final first = edit.firstLine;
     final untouched = edit.firstUntouchedLine;
@@ -550,7 +561,7 @@ final class SourceStyler {
     var touched = past > low;
     final written = <int>[
       for (var line = first; line < first + edit.insertedLines; line++)
-        if (_mayDefine(buffer.lineAt(line))) line,
+        if (DocumentScope.mayHold(buffer.lineAt(line))) line,
     ];
     if (written.isNotEmpty) touched = true;
     final delta = edit.lineDelta;
@@ -576,6 +587,10 @@ final class SourceStyler {
     }
     for (final entry in a.footnoteCounts.entries) {
       if (b.footnoteCounts[entry.key] != entry.value) return false;
+    }
+    if (a.footnoteLabels.length != b.footnoteLabels.length) return false;
+    for (var at = 0; at < a.footnoteLabels.length; at++) {
+      if (a.footnoteLabels[at] != b.footnoteLabels[at]) return false;
     }
     return true;
   }
