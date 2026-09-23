@@ -1994,10 +1994,6 @@ final class EnglishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Resolve conflict';
   @override
-  String get syncConflictLegend =>
-      "Lines marked − are the server's, lines marked + are this "
-      "device's.";
-  @override
   String get syncConflictBinary =>
       'Not a text file: choose which copy to keep.';
   @override
@@ -2007,8 +2003,6 @@ final class EnglishStrings extends Strings {
   String get syncKeepLocal => "Keep this device's";
   @override
   String get syncKeepRemote => "Keep the server's";
-  @override
-  String get syncConflictIdentical => 'The two versions are identical';
   @override
   String get syncConflictLoadFailed => 'Could not read both versions';
   @override
@@ -2083,7 +2077,8 @@ final class EnglishStrings extends Strings {
       'The two versions merge on their own: nothing overlaps.';
   @override
   String get syncMergeNoBase =>
-      'No shared version to merge on, so the whole file has to be chosen.';
+      'No shared version to merge on: every place the two copies differ is '
+      'yours to choose.';
   @override
   String syncMergeOverlap(int index, int total) => 'Overlap $index of $total';
   @override
@@ -2092,6 +2087,8 @@ final class EnglishStrings extends Strings {
   String get syncMergeFromRemote => 'From the server';
   @override
   String get syncMergeRemovedLines => 'Lines removed';
+  @override
+  String get syncMergeAbsentLines => 'Not in this copy';
   @override
   String get syncMergeKeepLocal => 'Mine';
   @override

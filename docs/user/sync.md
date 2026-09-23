@@ -119,10 +119,11 @@ If either copy changes while the screen is open (another device syncs
 again, or you keep typing in the note), nothing is written: the conflict
 is read again and you choose over what is there now.
 
-Files with no version in common — created on both devices, or an
-attachment — cannot be merged: there the two whole copies are shown as a
-diff (lines marked − are the server's, + are this device's) and you keep
-one.
+A note with no version in common (created on both devices, or synced
+so long ago that its history no longer has the shared version) still
+merges, but nothing is taken on its own. The lines both copies share
+stay, and every place they differ is a **Mine** / **Theirs** / **Both**
+choice. An attachment cannot be merged: you keep one whole copy.
 
 The task lists (`todo.txt` and `done.txt` at the top of the library)
 never ask: each line is one task, so they merge line by line. A task

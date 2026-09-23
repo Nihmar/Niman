@@ -507,12 +507,11 @@ re-reads the open note.
 - **Panel** (`showSyncPanel`): the last result, conflicts with
   **Resolve**, failed paths, **Sync now** / **Try again**, and
   **Settings** (**Update password** after an authentication failure).
-- **Conflicts** (`SyncConflictScreen`), whole-file for now:
-  `SyncEngine.conflictTexts` feeds a read-only `DiffView` (server −,
-  device +); **Keep this device's** uploads with `If-Match`, **Keep the
-  server's** downloads with a `sync` snapshot. Both record the row and
-  pin the base. Non-text files get the two buttons only. The hunk merge
-  (step 7) replaces the diff in the same screen.
+- **Conflicts** (`SyncConflictScreen`): `SyncEngine.conflictTexts`
+  feeds a `MergeView` (see "Conflicts" below); **Keep this device's**
+  uploads with `If-Match`, **Keep the server's** downloads with a `sync`
+  snapshot. Both record the row and pin the base. Non-text files get the
+  two buttons only.
 - `runSyncFromUi` saves open editors, answers the engine's `confirm`
   with the first-sync summary or the mass-deletion question, and shows a
   snackbar only when there is something to say (files trashed here,
@@ -690,8 +689,14 @@ conflict:
   overlap has a three-way segmented choice. **Save the merge** calls
   `SyncService.resolveMerged`, which writes the text here (again a `sync`
   version) and uploads it with `If-Match`. Keeping one whole copy stays
-  one tap away, and is the only option without a base, where the screen
-  falls back to the read-only `DiffView`.
+  one tap away, and is the only option for a file that is not text.
+- **Without a base** the screen merges two ways (`mergeTwoWay`,
+  `lib/src/diff/two_way_merge.dart`): the lines both copies share are
+  `unchanged`, and every place they differ is a `conflict` with an empty
+  base, since nothing says which side made the difference. `MergeView`
+  labels an empty side of such a conflict "Not in this copy" rather than
+  "Lines removed". The engine still never merges without a base on its
+  own (the task files aside): that choice is the user's.
 - **What the user saw is what gets resolved.** `conflictTexts` returns a
   `ConflictTexts` (`lib/src/sync/conflict_texts.dart`): the texts plus
   the sha256 of both sides and the listing's ETag. Every resolution

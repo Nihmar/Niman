@@ -2023,10 +2023,6 @@ final class SlovakStrings extends Strings {
   @override
   String get syncConflictTitle => 'Vyriešiť konflikt';
   @override
-  String get syncConflictLegend =>
-      'Riadky označené − sú zo servera, riadky označené + z '
-      'tohto zariadenia.';
-  @override
   String get syncConflictBinary =>
       'Nie je to textový súbor: vyberte, ktorú kópiu ponechať.';
   @override
@@ -2036,8 +2032,6 @@ final class SlovakStrings extends Strings {
   String get syncKeepLocal => 'Ponechať verziu zariadenia';
   @override
   String get syncKeepRemote => 'Ponechať verziu servera';
-  @override
-  String get syncConflictIdentical => 'Obe verzie sú rovnaké';
   @override
   String get syncConflictLoadFailed => 'Obe verzie sa nepodarilo načítať';
   @override
@@ -2119,7 +2113,8 @@ final class SlovakStrings extends Strings {
   String get syncMergeClean => 'Obe verzie sa zlúčia samy: nič sa neprekrýva.';
   @override
   String get syncMergeNoBase =>
-      'Nie je spoločná verzia, na ktorej zlúčiť, takže sa vyberá celý súbor.';
+      'Chýba spoločná verzia na zlúčenie: všade, kde sa obe kópie líšia, '
+      'vyberáte vy.';
   @override
   String syncMergeOverlap(int index, int total) => 'Prekryv $index z $total';
   @override
@@ -2128,6 +2123,8 @@ final class SlovakStrings extends Strings {
   String get syncMergeFromRemote => 'Zo servera';
   @override
   String get syncMergeRemovedLines => 'Odstránené riadky';
+  @override
+  String get syncMergeAbsentLines => 'Nie je v tejto kópii';
   @override
   String get syncMergeKeepLocal => 'Moje';
   @override

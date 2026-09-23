@@ -2011,10 +2011,6 @@ final class DanishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Løs konflikt';
   @override
-  String get syncConflictLegend =>
-      'Linjer markeret med − er serverens, linjer markeret med + '
-      'er denne enheds.';
-  @override
   String get syncConflictBinary =>
       'Ikke en tekstfil: vælg, hvilken kopi du vil beholde.';
   @override
@@ -2024,8 +2020,6 @@ final class DanishStrings extends Strings {
   String get syncKeepLocal => 'Behold denne enheds';
   @override
   String get syncKeepRemote => 'Behold serverens';
-  @override
-  String get syncConflictIdentical => 'De to versioner er ens';
   @override
   String get syncConflictLoadFailed => 'Kunne ikke læse begge versioner';
   @override
@@ -2104,7 +2098,8 @@ final class DanishStrings extends Strings {
       'De to versioner flettes af sig selv: intet overlapper.';
   @override
   String get syncMergeNoBase =>
-      'Der er ingen fælles version at flette på, så hele filen skal vælges.';
+      'Der er ingen fælles version at flette ud fra: hvor de to kopier er '
+      'forskellige, vælger du.';
   @override
   String syncMergeOverlap(int index, int total) => 'Overlap $index af $total';
   @override
@@ -2113,6 +2108,8 @@ final class DanishStrings extends Strings {
   String get syncMergeFromRemote => 'Fra serveren';
   @override
   String get syncMergeRemovedLines => 'Linjer fjernet';
+  @override
+  String get syncMergeAbsentLines => 'Ikke i denne kopi';
   @override
   String get syncMergeKeepLocal => 'Mine';
   @override

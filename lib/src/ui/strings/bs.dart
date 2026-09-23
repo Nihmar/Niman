@@ -2039,10 +2039,6 @@ final class BosnianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Riješi konflikt';
   @override
-  String get syncConflictLegend =>
-      'Redovi označeni s − su sa servera, redovi označeni s + s '
-      'ovog uređaja.';
-  @override
   String get syncConflictBinary =>
       'Nije tekstualna datoteka: odaberi koju kopiju zadržati.';
   @override
@@ -2052,8 +2048,6 @@ final class BosnianStrings extends Strings {
   String get syncKeepLocal => 'Zadrži verziju s ovog uređaja';
   @override
   String get syncKeepRemote => 'Zadrži verziju sa servera';
-  @override
-  String get syncConflictIdentical => 'Dvije verzije su identične';
   @override
   String get syncConflictLoadFailed => 'Obje verzije se ne mogu pročitati';
   @override
@@ -2136,7 +2130,8 @@ final class BosnianStrings extends Strings {
       'Dvije verzije se spajaju same: ništa se ne preklapa.';
   @override
   String get syncMergeNoBase =>
-      'Nema zajedničke verzije za spajanje, pa se bira cijela datoteka.';
+      'Nema zajedničke verzije za spajanje: gdje god se dvije kopije '
+      'razlikuju, biraš ti.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Preklapanje $index od $total';
@@ -2146,6 +2141,8 @@ final class BosnianStrings extends Strings {
   String get syncMergeFromRemote => 'Sa servera';
   @override
   String get syncMergeRemovedLines => 'Uklonjeni redovi';
+  @override
+  String get syncMergeAbsentLines => 'Nema u ovoj kopiji';
   @override
   String get syncMergeKeepLocal => 'Moji';
   @override
