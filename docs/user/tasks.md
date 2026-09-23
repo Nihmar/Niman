@@ -19,6 +19,8 @@ Add `rem:2026-09-20T09:00` to a task and Niman schedules an exact alarm
 in local wall-clock time. It fires with the screen off, the app in the
 background, or the process killed (Android). The app warns when
 notification or battery-optimization permissions could block delivery.
+On Android, the battery warning's **Open settings** goes straight to
+Niman's battery page: pick **Unrestricted**.
 
 Notification text is the task's prose without `key:value` tags (and
 without `+`/`@`/`#` markers unless the library's `reminderShowTokens`
