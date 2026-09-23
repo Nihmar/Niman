@@ -49,6 +49,7 @@ NoteView _note({
   String? initialAnchor,
   int? initialCaret,
   bool showPreview = false,
+  bool live = false,
   Future<String?> Function()? pickImagePath,
   Future<String> Function(String root, String source)? importImage,
   NoteColumn column = NoteColumn.off,
@@ -71,6 +72,7 @@ NoteView _note({
   initialAnchor: initialAnchor,
   initialCaretOffset: initialCaret,
   showPreview: showPreview,
+  showWysiwyg: live,
   pickImagePath: pickImagePath,
   importImage: importImage,
   noteColumn: column,
@@ -474,6 +476,46 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pump();
     expect(scroll.pixels, greaterThan(0));
+  });
+
+  testWidgets('source, live and the read view keep the line at the top', (
+    tester,
+  ) async {
+    // Headings among the paragraphs: taller in live and in the read view
+    // than in source, so an offset in pixels would land elsewhere.
+    final text = List<String>.generate(
+      400,
+      (i) => i % 10 == 0 ? '# Title $i' : 'Paragraph $i with a few words.',
+    ).join('\n\n');
+    await tester.pumpWidget(_app(_note(text: text, autofocus: true)));
+    await tester.pumpAndSettle();
+    final source = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    )..showAnchor((line: 401, fraction: 0.0));
+    await tester.pumpAndSettle();
+    expect(source.topAnchor?.line, 401);
+
+    Future<int?> topAfter({bool read = false, bool live = false}) async {
+      await tester.pumpWidget(
+        _app(_note(text: text, showPreview: read, live: live, autofocus: true)),
+      );
+      await tester.pumpAndSettle();
+      return read
+          ? tester
+                .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+                .topAnchor
+                ?.line
+          : tester
+                .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+                .topAnchor
+                ?.line;
+    }
+
+    expect(await topAfter(read: true), 401, reason: 'source to read');
+    expect(await topAfter(), 401, reason: 'read to source');
+    expect(await topAfter(live: true), 401, reason: 'source to live');
+    expect(await topAfter(read: true, live: true), 401, reason: 'live to read');
+    expect(await topAfter(live: true), 401, reason: 'read to live');
   });
 
   testWidgets('a key the user chose wins over the note’s own '

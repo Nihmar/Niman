@@ -664,6 +664,33 @@ final class _NoteViewState extends State<NoteView>
   /// it can replace it.
   bool get _unified => widget.unifiedMarkdown;
 
+  /// Keeps the note where it was read when it moves between `source`,
+  /// `live` and the read view: the line at the top of the pane going away,
+  /// shown at the top of the one taking over once it has drawn. Pixels are
+  /// no measure across them — a heading is taller in `live`, a definition
+  /// takes no room in the read view — and a pane that kept its own offset
+  /// showed wherever it had last been, the top of the note when it had not.
+  void _keepPlaceAcrossModes(NoteView oldWidget) {
+    if (!_unified || !oldWidget.unifiedMarkdown || !_ready) return;
+    if (oldWidget.path != widget.path) return;
+    final wasRead = oldWidget.showPreview;
+    final read = widget.showPreview;
+    final modeChanged = oldWidget.showWysiwyg != widget.showWysiwyg;
+    if (wasRead == read && (read || !modeChanged)) return;
+    final anchor = wasRead
+        ? _readViewKey.currentState?.topAnchor
+        : _sourceViewKey.currentState?.topAnchor;
+    if (anchor == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.showPreview) {
+        _readViewKey.currentState?.showAnchor(anchor);
+      } else {
+        _sourceViewKey.currentState?.showAnchor(anchor);
+      }
+    });
+  }
+
   /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
   /// source pane is `source` (`docs/dev/unified-surface.md` §8.6.3).
   MarkdownSurfaceMode get _unifiedMode => widget.showWysiwyg
@@ -821,6 +848,7 @@ final class _NoteViewState extends State<NoteView>
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _keepPlaceAcrossModes(oldWidget);
     // Device trace (preview toggle needs two presses on huge notes) —
     // temporary: remove once the trace is in.
     if (oldWidget.showPreview != widget.showPreview) {

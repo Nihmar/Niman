@@ -362,8 +362,11 @@ The note is one pane, and it holds one of the two: the editor you write
 in, or the rendered note you read. The eye flips between them — in the
 note's status row on a wide window, in the app bar on a phone, or *Show
 preview* / *Show editor* in the palette anywhere. What you leave behind
-keeps its place: the caret, the undo history, the scroll, the typeset
-math and the images are all there when you come back.
+keeps its place: the caret, the undo history, the typeset math and the
+images are all there when you come back. With the unified engine the note
+stays where you were reading it, too: flipping to the preview, back to
+the editor, or between source and live keeps the line at the top of the
+pane at its top, however differently the two draw what is above it.
 
 The rendered note shows Markdown, math, and fenced code coloured by the
 language its fence names.

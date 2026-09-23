@@ -35,6 +35,7 @@ import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
+import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -275,6 +276,75 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// Gives the view the keyboard, so its keys move it.
   void focus() => _focus.requestFocus();
 
+  /// The source line at the top of the view, and how far into it: a
+  /// block's lines share its height evenly, so a paragraph of one line is
+  /// that line and a code block of forty is cut in forty. Null while there
+  /// is nothing drawn to ask.
+  ScrollAnchor? get topAnchor {
+    final heights = _heights;
+    final scroll = _scroll;
+    if (heights == null || _blocks.isEmpty || !scroll.hasClients) return null;
+    final y = scroll.offset - widget.padding.top;
+    if (y <= 0) return (line: 0, fraction: 0.0);
+    final index = heights.indexAt(y);
+    if (index == null) {
+      // Past the blocks, in the footnotes: the note's last line, whole.
+      return (line: _blocks.last.endLine - 1, fraction: 1.0);
+    }
+    final block = _blocks[index];
+    final extent = heights.extentFor(index);
+    final lines = block.endLine - block.startLine;
+    final into = extent > 0 ? (y - heights.offsetOf(index)) / extent : 0.0;
+    final exact = into.clamp(0.0, 1.0) * lines;
+    final line = exact.floor().clamp(0, lines - 1);
+    return (line: block.startLine + line, fraction: exact - line);
+  }
+
+  /// Scrolls the view so [anchor]'s line is at its top, as far into it as
+  /// the anchor says — and again after each frame that measured the blocks
+  /// it landed among, as [jumpToLine] does. Taken once the scan lands, for
+  /// a note still being read.
+  void showAnchor(ScrollAnchor anchor) {
+    if (_blocks.isEmpty && _scanning) {
+      _pendingAnchor = anchor;
+      return;
+    }
+    _showAnchor(anchor, attempt: 0);
+  }
+
+  /// An anchor asked for while there were no blocks to show it in.
+  ScrollAnchor? _pendingAnchor;
+
+  void _showAnchor(ScrollAnchor anchor, {required int attempt}) {
+    final heights = _heights;
+    final scroll = _scroll;
+    if (heights == null || !scroll.hasClients) return;
+    final index = _blockIndexAt(anchor.line);
+    if (index == null) return;
+    final block = _blocks[index];
+    final lines = block.endLine - block.startLine;
+    final into = lines > 0
+        ? ((anchor.line - block.startLine) + anchor.fraction) / lines
+        : 0.0;
+    final atTop = anchor.line == 0 && anchor.fraction == 0;
+    final offset = atTop
+        ? 0.0
+        : (widget.padding.top +
+                  heights.offsetOf(index) +
+                  into * heights.extentFor(index))
+              .clamp(0.0, scroll.position.maxScrollExtent);
+    final moved = (scroll.position.pixels - offset).abs() > 0.5;
+    if (moved) {
+      scroll.jumpTo(offset);
+    } else if (attempt > 0) {
+      return;
+    }
+    if (attempt >= _maxJumpAttempts) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _showAnchor(anchor, attempt: attempt + 1);
+    });
+  }
+
   /// Goes to the note's end, and again after each frame that measured the
   /// rows it landed on and moved the end — as long as it moves.
   void _toEnd({int attempt = 0}) {
@@ -368,6 +438,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         if (jump != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) jumpToLine(jump);
+          });
+        }
+        final anchor = _pendingAnchor;
+        _pendingAnchor = null;
+        if (anchor != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) showAnchor(anchor);
           });
         }
       }),
