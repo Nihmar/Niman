@@ -5,6 +5,7 @@
 // rendering.
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex/katex.dart' show KatexBoxPainter;
 import 'package:katex_dart/katex_dart.dart';
@@ -67,6 +68,52 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets('the keys move the page: arrows, page keys, Home and End', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    final state = await _pump(tester, _note(300), controller: controller);
+    // A click gives the view the keyboard.
+    await tester.tap(find.byType(MarkdownReadView));
+    await tester.pump();
+    final position = controller.position;
+    final row = markdownThemeOf(tester.element(find.byType(MarkdownReadView)))
+        .lineHeight;
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(position.pixels, closeTo(row, 0.01));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(
+      position.pixels,
+      closeTo(row + position.viewportDimension - row, 0.01),
+      reason: 'a page is the viewport less the row kept for context',
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(position.pixels, closeTo(position.viewportDimension - row, 0.01));
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump();
+    }
+    expect(position.pixels, position.maxScrollExtent);
+    expect(state.mounted, isTrue);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.home);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(position.pixels, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(position.pixels, 0, reason: 'nothing above the top');
+  });
+
   testWidgets('a new text far down the pane does not loop the layout', (
     tester,
   ) async {

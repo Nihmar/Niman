@@ -1508,7 +1508,17 @@ final class _NoteViewState extends State<NoteView>
   /// opening in preview, or the switch flipping to it, must not leave
   /// the IME up over a pane with nothing editable.
   void _dismissKeyboardForPreview() {
-    if (_previewOnly) FocusManager.instance.primaryFocus?.unfocus();
+    if (!_previewOnly) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    // The read pane takes the keyboard instead, for the keys a page is read
+    // with (the arrows, the page keys, Home and End); a tab behind another
+    // leaves it where it is.
+    if (!_unified || !widget.active) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _previewOnly && widget.active) {
+        _readViewKey.currentState?.focus();
+      }
+    });
   }
 
   Widget _buildEditor() => Listener(

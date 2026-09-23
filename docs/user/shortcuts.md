@@ -49,6 +49,13 @@ Moving and selecting in the source editor, on Windows and Linux:
 - `Home` / `End` — start and end of the line, `Shift` to select
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
 
+Reading a note in the read view (Markdown notes, with the unified
+engine), which takes the keyboard when you switch to it or click it:
+
+- `↑` / `↓` — scroll a line
+- `PageUp` / `PageDown` — scroll a page, keeping a line of the last one
+- `Home` / `End`, with `Ctrl` or without — start and end of the note
+
 Editor find/replace follows the familiar bindings:
 
 - `Ctrl/⌘+F` — find
