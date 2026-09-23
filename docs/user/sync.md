@@ -124,6 +124,13 @@ attachment — cannot be merged: there the two whole copies are shown as a
 diff (lines marked − are the server's, + are this device's) and you keep
 one.
 
+The task lists (`todo.txt` and `done.txt` at the top of the library)
+never ask: each line is one task, so they merge line by line. A task
+added on either device is kept, one removed or checked on either device
+goes, and a task edited differently on both keeps both edits, for you
+to tidy. Two lists started separately on two devices become one list
+with the tasks of both.
+
 Library settings (`.niman/settings.json`) never conflict: the newer copy
 wins.
 
