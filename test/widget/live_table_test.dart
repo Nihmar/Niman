@@ -16,7 +16,11 @@ const String _note =
 
 /// Pumps [_note] in `live`, the caret held at [caret] — or left to the view,
 /// with none — and hands back the view.
-Future<MarkdownSourceViewState> _pump(WidgetTester tester, int? caret) async {
+Future<MarkdownSourceViewState> _pump(
+  WidgetTester tester,
+  int? caret, {
+  bool numbers = false,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -26,7 +30,7 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester, int? caret) async {
             mode: MarkdownSurfaceMode.live,
             theme: markdownThemeOf(context),
             selection: caret == null ? null : SelectionModel.at(caret),
-            showLineNumbers: false,
+            showLineNumbers: numbers,
           ),
         ),
       ),
@@ -74,6 +78,19 @@ void main() {
       closeTo(restTwo.dx, 0.5),
       reason: 'a cell with no mark showing stays on its column',
     );
+  });
+
+  testWidgets('the delimiter row takes no room with the line numbers on', (
+    tester,
+  ) async {
+    double gap() =>
+        _row(tester, 'one').localToGlobal(Offset.zero).dy -
+        _row(tester, 'b').localToGlobal(Offset.zero).dy;
+    await _pump(tester, 0);
+    final without = gap();
+    await _pump(tester, 0, numbers: true);
+    expect(gap(), closeTo(without, 0.5), reason: 'its number kept its row');
+    expect(find.text('4'), findsNothing, reason: 'the delimiter row is line 4');
   });
 
   testWidgets('the delimiter row takes no room, caret or not', (tester) async {
