@@ -2021,7 +2021,11 @@ final class _NoteViewState extends State<NoteView>
         _frontmatterError = frontmatter;
       });
       if (headings != null) _outlineNotifier.value = _outline;
-      if (!surface.words.isCounted) unawaited(surface.buildWords());
+      // Nothing else asks again once the count lands: a note nobody types
+      // in would keep showing none.
+      if (!surface.words.isCounted) {
+        unawaited(surface.buildWords().then((_) => _statsAgain(surface)));
+      }
       return;
     }
     // The legacy editor has no counter of its own: its text is counted
@@ -2068,6 +2072,15 @@ final class _NoteViewState extends State<NoteView>
         _outlineNotifier.value = _outline;
       }),
     );
+  }
+
+  /// Refreshes the statistics once [surface]'s count has landed, if it is
+  /// still the note on screen.
+  void _statsAgain(MarkdownSurfaceController surface) {
+    if (!mounted || !identical(_surface, surface)) return;
+    if (!surface.words.isCounted) return;
+    _unifiedStatsRevision = -1;
+    _refreshStats();
   }
 
   /// The note's headings, from a scan something already paid for, or worked
