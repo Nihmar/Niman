@@ -154,6 +154,30 @@ class Workspaces extends Table {
   Set<Column> get primaryKey => {libraryPath};
 }
 
+/// How a library is shown on this device: the settings of its
+/// `LibraryConfig` that describe the screen and the person rather than
+/// the library (`LibraryConfig.deviceKeys`) — the tree's width, the text
+/// scale, the editor and its toggles.
+///
+/// Kept here rather than in `.niman/settings.json`, which travels with
+/// the library: a width set on a desktop means nothing on a phone, and
+/// every tweak of one rewrote the shared file and synced it everywhere.
+/// Forgetting the library drops its row.
+@DataClassName('LibraryDeviceSettingsRow')
+class LibraryDeviceSettings extends Table {
+  /// Absolute, normalized path of the library root; the primary key.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// The device keys, as a JSON object in the `settings.json` format.
+  TextColumn get settings => text()();
+
+  /// When it was last written.
+  DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+
+  @override
+  Set<Column> get primaryKey => {libraryPath};
+}
+
 /// A library the app knows about: one row per entry on the home screen
 /// (T-ML-04).
 ///
@@ -333,6 +357,7 @@ class SyncOps extends Table {
     SyncItems,
     SyncOps,
     Workspaces,
+    LibraryDeviceSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -340,7 +365,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 26;
+  int get schemaVersion => 27;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -388,7 +413,9 @@ class AppDatabase extends _$AppDatabase {
   /// pre-v25 databases gain `pinned_commands` (issue #208), null: the
   /// palette opens on what was used lately, as it did, and pre-v26
   /// databases gain `close_to_tray` (issue #209), on: the window's × puts
-  /// Niman in the tray, where the reminders keep firing.
+  /// Niman in the tray, where the reminders keep firing, and pre-v27
+  /// databases gain `library_device_settings`, empty: each library fills
+  /// its row from its `settings.json` the first time it is opened.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -550,6 +577,9 @@ class AppDatabase extends _$AppDatabase {
           'ALTER TABLE app_settings ADD COLUMN close_to_tray '
           'BOOLEAN NOT NULL DEFAULT 1',
         );
+      }
+      if (from < 27) {
+        await m.createTable(libraryDeviceSettings);
       }
     },
   );

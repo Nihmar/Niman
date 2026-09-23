@@ -1,9 +1,12 @@
 # Settings reference
 
-Two levels. Library settings travel with the folder
+Three levels. Library settings travel with the folder
 (`<library>/.niman/settings.json`, hand-editable, unknown keys
-preserved); app settings (language, theme, layout, debug log) stay on the
-device.
+preserved). How a library looks on this screen — the tree's width, the
+text size, the editor and its toggles — is per library too, but kept on
+the device, so a phone and a desktop each keep their own. App settings
+(language, theme, layout, debug log) stay on the device for every
+library.
 
 ## The Settings screen
 
@@ -36,6 +39,9 @@ choices.
 
 ## Library settings (`LibraryConfig`)
 
+These describe the library itself, and travel with it (and with the
+sync) in `.niman/settings.json`.
+
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `trashEnabled` | true | Deletes move to `.trash/`; false = hard delete |
@@ -46,11 +52,25 @@ choices.
 | `listNoteFolder` | `Lists` | Where new list notes go |
 | `templateFolder` | `Templates` | Where note templates live |
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
+| `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
+| `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
+| `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
+| `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
+| `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
+
+## Library settings kept on this device
+
+Per library, but in the app's own storage rather than the folder: what
+suits a desktop's wide window does not suit a phone. The first time a
+library is opened by a version with this split, the device takes these
+values from `settings.json`; after that, it keeps its own, and they
+leave the file at its next write.
+
+| Key | Default | Meaning |
+|-----|---------|---------|
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
 | `previewEnabled` | true | Whether the preview exists at all |
-| `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
-| `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `treeSort` | `nameAsc` | Tree order (`nameAsc`, `nameDesc`) |
 | `pinnedCollapsed` | false | Tree's pinned section rolled up |
 | `lineNumbers` | true | Editor row-number column |
@@ -58,13 +78,10 @@ choices.
 | `noteColumnWidth` | 700 | That column's text width, px (480–1400, clamped) |
 | `typewriter` | false | Keep the line being written in the middle of the editor |
 | `editorAutofocus` | false | Raise the keyboard on note open |
-| `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `editorToolbar` | "" (= shipped) | Arranged toolbar layout |
 | `uiTextScale` | 1.0 | Interface text size (0.8–1.8) |
 | `noteTextScale` | 1.0 | Note text size, editor + preview (0.8–1.8) |
 | `treeWidth` | 340 | Tree pane width, px (200–600) |
-| `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
-| `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
 
 The three folder keys — `listNoteFolder`, `templateFolder`,
 `attachmentsFolder` — are paths under the library root, created the

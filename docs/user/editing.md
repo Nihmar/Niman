@@ -2,8 +2,8 @@
 
 ## Editors
 
-Each library writes in one editor (`editorKind` in
-`.niman/settings.json`): `source` (default) or `wysiwyg`. The settings
+Each library writes in one editor (`editorKind`, kept per library on
+each device): `source` (default) or `wysiwyg`. The settings
 screen can offer source, WYSIWYG, or both (`enabledEditors`); the note's
 status row switches only when both are enabled.
 

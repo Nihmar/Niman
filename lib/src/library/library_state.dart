@@ -10,6 +10,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -417,7 +418,10 @@ final class LibraryController implements LibrarySession {
       final indexer = Indexer(indexDb)..onChanged = _bump;
       // One reader of `.niman/settings.json` per session: the four
       // per-library settings and the overrides (T-ML-10) share its cache.
-      final config = LibraryConfigRepo(abs);
+      final config = LibraryConfigRepo(
+        abs,
+        device: DbDeviceSettingsStore(appDb),
+      );
       _configRepo = config;
       final ops = NoteOps(
         root: abs,
@@ -622,6 +626,9 @@ final class LibraryController implements LibrarySession {
     // What was left open in it goes too (#23): opened again, it starts
     // with nothing open, like a library the app has never seen.
     await WorkspaceStore(db).remove(libraryPath);
+    // So do the settings it kept on this device: opened again, it takes
+    // them from its settings file, like a library opened for the first time.
+    await DbDeviceSettingsStore(db).remove(libraryPath);
     try {
       await syncSecrets.delete(libraryPath);
     } on Exception catch (e) {

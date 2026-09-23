@@ -3908,6 +3908,292 @@ class WorkspacesCompanion extends UpdateCompanion<WorkspaceRow> {
   }
 }
 
+class $LibraryDeviceSettingsTable extends LibraryDeviceSettings
+    with TableInfo<$LibraryDeviceSettingsTable, LibraryDeviceSettingsRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LibraryDeviceSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _libraryPathMeta = const VerificationMeta(
+    'libraryPath',
+  );
+  @override
+  late final GeneratedColumn<String> libraryPath = GeneratedColumn<String>(
+    'library_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _settingsMeta = const VerificationMeta(
+    'settings',
+  );
+  @override
+  late final GeneratedColumn<String> settings = GeneratedColumn<String>(
+    'settings',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [libraryPath, settings, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'library_device_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LibraryDeviceSettingsRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('library_path')) {
+      context.handle(
+        _libraryPathMeta,
+        libraryPath.isAcceptableOrUnknown(
+          data['library_path']!,
+          _libraryPathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_libraryPathMeta);
+    }
+    if (data.containsKey('settings')) {
+      context.handle(
+        _settingsMeta,
+        settings.isAcceptableOrUnknown(data['settings']!, _settingsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_settingsMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {libraryPath};
+  @override
+  LibraryDeviceSettingsRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LibraryDeviceSettingsRow(
+      libraryPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}library_path'],
+      )!,
+      settings: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}settings'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LibraryDeviceSettingsTable createAlias(String alias) {
+    return $LibraryDeviceSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class LibraryDeviceSettingsRow extends DataClass
+    implements Insertable<LibraryDeviceSettingsRow> {
+  /// Absolute, normalized path of the library root; the primary key.
+  final String libraryPath;
+
+  /// The device keys, as a JSON object in the `settings.json` format.
+  final String settings;
+
+  /// When it was last written.
+  final DateTime updatedAt;
+  const LibraryDeviceSettingsRow({
+    required this.libraryPath,
+    required this.settings,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['library_path'] = Variable<String>(libraryPath);
+    map['settings'] = Variable<String>(settings);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  LibraryDeviceSettingsCompanion toCompanion(bool nullToAbsent) {
+    return LibraryDeviceSettingsCompanion(
+      libraryPath: Value(libraryPath),
+      settings: Value(settings),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory LibraryDeviceSettingsRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LibraryDeviceSettingsRow(
+      libraryPath: serializer.fromJson<String>(json['libraryPath']),
+      settings: serializer.fromJson<String>(json['settings']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'libraryPath': serializer.toJson<String>(libraryPath),
+      'settings': serializer.toJson<String>(settings),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  LibraryDeviceSettingsRow copyWith({
+    String? libraryPath,
+    String? settings,
+    DateTime? updatedAt,
+  }) => LibraryDeviceSettingsRow(
+    libraryPath: libraryPath ?? this.libraryPath,
+    settings: settings ?? this.settings,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  LibraryDeviceSettingsRow copyWithCompanion(
+    LibraryDeviceSettingsCompanion data,
+  ) {
+    return LibraryDeviceSettingsRow(
+      libraryPath: data.libraryPath.present
+          ? data.libraryPath.value
+          : this.libraryPath,
+      settings: data.settings.present ? data.settings.value : this.settings,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryDeviceSettingsRow(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('settings: $settings, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(libraryPath, settings, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LibraryDeviceSettingsRow &&
+          other.libraryPath == this.libraryPath &&
+          other.settings == this.settings &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LibraryDeviceSettingsCompanion
+    extends UpdateCompanion<LibraryDeviceSettingsRow> {
+  final Value<String> libraryPath;
+  final Value<String> settings;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const LibraryDeviceSettingsCompanion({
+    this.libraryPath = const Value.absent(),
+    this.settings = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LibraryDeviceSettingsCompanion.insert({
+    required String libraryPath,
+    required String settings,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : libraryPath = Value(libraryPath),
+       settings = Value(settings),
+       updatedAt = Value(updatedAt);
+  static Insertable<LibraryDeviceSettingsRow> custom({
+    Expression<String>? libraryPath,
+    Expression<String>? settings,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (libraryPath != null) 'library_path': libraryPath,
+      if (settings != null) 'settings': settings,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LibraryDeviceSettingsCompanion copyWith({
+    Value<String>? libraryPath,
+    Value<String>? settings,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return LibraryDeviceSettingsCompanion(
+      libraryPath: libraryPath ?? this.libraryPath,
+      settings: settings ?? this.settings,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (libraryPath.present) {
+      map['library_path'] = Variable<String>(libraryPath.value);
+    }
+    if (settings.present) {
+      map['settings'] = Variable<String>(settings.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryDeviceSettingsCompanion(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('settings: $settings, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3920,6 +4206,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncItemsTable syncItems = $SyncItemsTable(this);
   late final $SyncOpsTable syncOps = $SyncOpsTable(this);
   late final $WorkspacesTable workspaces = $WorkspacesTable(this);
+  late final $LibraryDeviceSettingsTable libraryDeviceSettings =
+      $LibraryDeviceSettingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3932,6 +4220,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncItems,
     syncOps,
     workspaces,
+    libraryDeviceSettings,
   ];
 }
 
@@ -5854,6 +6143,201 @@ typedef $$WorkspacesTableProcessedTableManager =
       WorkspaceRow,
       PrefetchHooks Function()
     >;
+typedef $$LibraryDeviceSettingsTableCreateCompanionBuilder =
+    LibraryDeviceSettingsCompanion Function({
+      required String libraryPath,
+      required String settings,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$LibraryDeviceSettingsTableUpdateCompanionBuilder =
+    LibraryDeviceSettingsCompanion Function({
+      Value<String> libraryPath,
+      Value<String> settings,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$LibraryDeviceSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $LibraryDeviceSettingsTable> {
+  $$LibraryDeviceSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get settings => $composableBuilder(
+    column: $table.settings,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LibraryDeviceSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LibraryDeviceSettingsTable> {
+  $$LibraryDeviceSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get settings => $composableBuilder(
+    column: $table.settings,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LibraryDeviceSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LibraryDeviceSettingsTable> {
+  $$LibraryDeviceSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get settings =>
+      $composableBuilder(column: $table.settings, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$LibraryDeviceSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LibraryDeviceSettingsTable,
+          LibraryDeviceSettingsRow,
+          $$LibraryDeviceSettingsTableFilterComposer,
+          $$LibraryDeviceSettingsTableOrderingComposer,
+          $$LibraryDeviceSettingsTableAnnotationComposer,
+          $$LibraryDeviceSettingsTableCreateCompanionBuilder,
+          $$LibraryDeviceSettingsTableUpdateCompanionBuilder,
+          (
+            LibraryDeviceSettingsRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LibraryDeviceSettingsTable,
+              LibraryDeviceSettingsRow
+            >,
+          ),
+          LibraryDeviceSettingsRow,
+          PrefetchHooks Function()
+        > {
+  $$LibraryDeviceSettingsTableTableManager(
+    _$AppDatabase db,
+    $LibraryDeviceSettingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LibraryDeviceSettingsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LibraryDeviceSettingsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LibraryDeviceSettingsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> libraryPath = const Value.absent(),
+                Value<String> settings = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LibraryDeviceSettingsCompanion(
+                libraryPath: libraryPath,
+                settings: settings,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String libraryPath,
+                required String settings,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LibraryDeviceSettingsCompanion.insert(
+                libraryPath: libraryPath,
+                settings: settings,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $LibraryDeviceSettingsTable,
+                    LibraryDeviceSettingsRow
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LibraryDeviceSettingsTable,
+                    LibraryDeviceSettingsRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LibraryDeviceSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LibraryDeviceSettingsTable,
+      LibraryDeviceSettingsRow,
+      $$LibraryDeviceSettingsTableFilterComposer,
+      $$LibraryDeviceSettingsTableOrderingComposer,
+      $$LibraryDeviceSettingsTableAnnotationComposer,
+      $$LibraryDeviceSettingsTableCreateCompanionBuilder,
+      $$LibraryDeviceSettingsTableUpdateCompanionBuilder,
+      (
+        LibraryDeviceSettingsRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LibraryDeviceSettingsTable,
+          LibraryDeviceSettingsRow
+        >,
+      ),
+      LibraryDeviceSettingsRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5872,4 +6356,6 @@ class $AppDatabaseManager {
       $$SyncOpsTableTableManager(_db, _db.syncOps);
   $$WorkspacesTableTableManager get workspaces =>
       $$WorkspacesTableTableManager(_db, _db.workspaces);
+  $$LibraryDeviceSettingsTableTableManager get libraryDeviceSettings =>
+      $$LibraryDeviceSettingsTableTableManager(_db, _db.libraryDeviceSettings);
 }
