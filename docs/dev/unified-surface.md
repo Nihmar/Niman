@@ -9383,6 +9383,18 @@ widget tree, so the words matched; and this phase's own exit criteria asked for 
 **golden-image test per fixture** (§10.4, phase 2), which was never built. A
 device, not a test, is what found this — and the fix wants the test first.
 
+**Built on 2026-09-23** (`test/widget/read_view_golden_test.dart`): the read
+view drawn, in the test font so the images pin the layout and not a font,
+over a note of every construct (`test/fixtures/markdown/constructs.md`, light,
+dark and at a phone's width), the 10 KB and 1 MB fixtures, the 1 MB one after a
+jump to its middle — the page this bug was on — and the adversarial note. The
+comparator forgives a faint difference on an edge and fails on more than a
+handful of pixels that really changed: a share of the pixels would have let a
+missing quote bar through, and it is the check the test was run against. The
+first images showed two things to look at: an ordered item's number breaking
+under its text in the test font, and a quote inside a quote drawn without a
+bar of its own.
+
 **Fixed, the same day: `SliverList` measures, and the jump pays for it.** The read
 view now lays its blocks out through `SliverList` — every child measured with
 unbounded main-axis constraints — and `BlockHeightMap` is demoted to what its
