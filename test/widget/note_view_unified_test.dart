@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -168,6 +169,58 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(MarkdownSurface), findsNothing);
     expect(find.byType(CodeEditor), findsOneWidget);
+  });
+
+  testWidgets('the read pane takes the blocks the editor already has', (
+    tester,
+  ) async {
+    // One reading of the note for both panes: opening the read pane after an
+    // edit used to scan the note again — in an isolate past a size, 3.3 s on
+    // a 246 MB note, after holding the frame to hand it over.
+    MarkdownReadViewState.backgroundLines = 20;
+    addTearDown(() => MarkdownReadViewState.backgroundLines = 50000);
+    final note = StringBuffer();
+    for (var at = 0; at < 30; at++) {
+      note.write('Paragraph $at, cited[^1].\n\n');
+    }
+    note.write('[^1]: the footnote\n');
+    Widget app({required bool showPreview}) => MaterialApp(
+      home: Scaffold(
+        body: NoteView(
+          path: '/tmp/niman-handover-test.md',
+          showLineNumbers: true,
+          autofocusEditor: false,
+          showPreview: showPreview,
+          unifiedMarkdown: true,
+          readNote: (_) async => note.toString(),
+          writeNote: (_, _) async {},
+        ),
+      ),
+    );
+    await tester.pumpWidget(app(showPreview: false));
+    await tester.pumpAndSettle();
+    tester
+        .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+        .replaceText(0, 0, '# Added\n\n');
+    // Past the preview's debounce, which finds the read pane off stage.
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.pumpWidget(app(showPreview: true));
+    final read = tester.state<MarkdownReadViewState>(
+      find.byType(MarkdownReadView),
+    );
+    expect(read.scanning, isFalse, reason: 'nothing was sent to scan');
+    expect(
+      find.descendant(
+        of: find.byType(MarkdownReadView),
+        matching: find.textContaining('Added', findRichText: true),
+      ),
+      findsWidgets,
+      reason: 'the edit is on the first frame',
+    );
+    expect(read.blockCount, greaterThan(60));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('flipping the flag over a live note does not throw', (

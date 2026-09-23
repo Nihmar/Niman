@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:katex/katex.dart' show KatexBoxPainter;
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
@@ -432,6 +433,69 @@ void main() {
         1,
         reason: 'a definition moved, so it was scanned',
       );
+    });
+
+    testWidgets('a scan someone already holds is drawn at once', (
+      tester,
+    ) async {
+      // The editor keeps its own reading of the note current: the pane takes
+      // it rather than scanning the note in an isolate again.
+      final parser = BlockParser();
+      final buffer = SourceBuffer.fromText('${_note(20)}[^1]\n\n[^1]: a note');
+      final held = DocumentScan.of(buffer);
+      var asked = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: buffer,
+              parser: parser,
+              mathCache: _syncCache(),
+              knownScan: (asking) {
+                asked++;
+                return identical(asking, buffer) ? held : null;
+              },
+            ),
+          ),
+        ),
+      );
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(asked, 1);
+      expect(state.scanning, isFalse, reason: 'nothing was sent to scan');
+      expect(find.byKey(const Key('read-view-scanning')), findsNothing);
+      expect(state.blockCount, held.blocks.length);
+      expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
+      expect(parser.scope?.footnotes.single.body, 'a note');
+    });
+
+    testWidgets('a held scan of another revision is not taken', (tester) async {
+      final parser = BlockParser();
+      final buffer = SourceBuffer.fromText(_note(20));
+      final stale = DocumentScan.of(buffer);
+      buffer.replaceRange(0, 0, '# Now\n\n');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: buffer,
+              parser: parser,
+              mathCache: _syncCache(),
+              knownScan: (_) => stale,
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester
+            .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+            .scanning,
+        isTrue,
+        reason: 'its blocks are of lines no longer there',
+      );
+      await settle(tester);
+      expect(find.textContaining('Now', findRichText: true), findsOne);
     });
 
     testWidgets('the revision before stays on screen meanwhile', (

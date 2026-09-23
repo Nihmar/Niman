@@ -43,6 +43,7 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/markdown/active_formats.dart';
+import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
@@ -317,6 +318,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// something the scan already found — a list to count, so far. O(blocks):
   /// [SourceStyler.blocks] copies the list.
   List<Block>? get blocks => _styler?.blocks;
+
+  /// The note's blocks and definitions as of [MarkdownSourceView.buffer]'s
+  /// revision, or null while there is no whole, current scan of it
+  /// ([SourceStyler.scan]): what the read pane takes instead of scanning the
+  /// note again.
+  DocumentScan? get scan => _styler?.scan;
 
   /// The paragraph of each line a frame has built, so a tap can ask the line it
   /// landed on where an offset is, and the caret can ask its own line for the
