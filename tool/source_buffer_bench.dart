@@ -51,6 +51,7 @@ void main(List<String> args) {
       ? args
       : <String>[..._defaults, if (File(_worstCase).existsSync()) _worstCase];
 
+  var jump = 0;
   final operations = <_Operation>[
     // The app's keystroke shape: one character replaced in place.
     _Operation('content edit', 'one character replaced in place', (buffer) {
@@ -86,9 +87,29 @@ void main(List<String> args) {
       'one line read',
       (buffer) => buffer.lineAt(buffer.lineCount ~/ 2),
     ),
+    // A frame reads the lines it draws, far from the last read: the chunk
+    // the line is in is searched for, not the one the last read landed in.
+    _Operation('lineAt, jumping', 'one line read far from the last', (buffer) {
+      jump = (jump + 7919) % buffer.lineCount;
+      buffer.lineAt(jump);
+    }),
     _Operation('substring', '64 characters read', (buffer) {
       final at = buffer.length ~/ 2;
       buffer.substring(at, at + 64 < buffer.length ? at + 64 : buffer.length);
+    }),
+    // What the read pane is handed, and what the editor's next keystroke
+    // pays for it: the chunk it lands in is copied before it is written.
+    _Operation('snapshot', 'a copy the edits do not reach', (buffer) {
+      buffer.snapshot();
+    }),
+    _Operation('snapshot + keystroke', 'a copy, then a character typed', (
+      buffer,
+    ) {
+      buffer.snapshot();
+      final at = _middleOffset(buffer);
+      buffer
+        ..insert(at, 'x')
+        ..delete(at, at + 1);
     }),
   ];
 

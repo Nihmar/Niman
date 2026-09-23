@@ -19,10 +19,10 @@
 /// [PrefixSums.setValue], O(chunk). An edit that changes *how many* lines there
 /// are — Enter, a paste with newlines, a line joined — splices the index, which
 /// rewrites one chunk of it rather than the note (a rebuilt Fenwick tree was
-/// 41 ms per Enter at a million lines); what is left is the line array's own
-/// move of the lines after the edit, a memory copy.
-/// `source_buffer_test.dart` measures both, and the numbers are in the design
-/// document.
+/// 41 ms per Enter at a million lines), and the lines, which are kept in
+/// chunks too ([LineStore]): moving every line after the edit was 20 ms per
+/// Enter on a 246 MB note. `source_buffer_test.dart` measures both, and the
+/// numbers are in the design document.
 ///
 /// **What is preserved, exactly.** Each line's terminator is stored separately,
 /// so a file read as CRLF comes back as CRLF, a file with mixed terminators
@@ -39,18 +39,19 @@
 /// terminator, because nothing in the app has ever produced one.
 library;
 
+import 'package:niman/src/markdown/line_store.dart';
 import 'package:niman/src/markdown/prefix_sums.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
 /// The text of a note, split into lines, with an index over it.
 final class SourceBuffer {
-  /// Wraps already-split lines and terminators.
+  /// Wraps already-split lines and terminators, their index and the
+  /// terminator an insert writes.
   ///
-  /// Private: the two lists must agree in length, and only `fromText` and the
-  /// edit path can promise that.
-  new _(this._lines, this._terminators, this._index)
-    : _dominantEol = _detectEol(_terminators),
-      _length = _index.total.toInt();
+  /// Private: the three must agree, and only `fromText` and [snapshot] can
+  /// promise that.
+  new _(this._store, this._index, this._dominantEol)
+    : _length = _index.total.toInt();
 
   /// Reads [text] into lines, keeping each line's own terminator.
   ///
@@ -76,9 +77,9 @@ final class SourceBuffer {
       start = at + 1;
     }
     return SourceBuffer._(
-      lines,
-      terminators,
+      LineStore(lines, terminators),
       PrefixSums(_spansOf(lines, terminators)),
+      _detectEol(terminators),
     );
   }
 
@@ -88,24 +89,22 @@ final class SourceBuffer {
   /// A buffer holding what this one holds now, which this one's edits no
   /// longer reach.
   ///
-  /// The lines are the same strings — a string never changes, so sharing it
-  /// is free — and only the two lists and the line index are new: O(lines),
-  /// where [SourceBuffer.fromText] over the joined text is O(characters)
-  /// twice. It is how the read pane gets the editor's note without a copy of
-  /// its text: a
-  /// 114 MB note took seconds to join, compare and split again for a preview
-  /// that already had every line in memory (0.0.9 stress test).
+  /// The two share their lines and their index chunk by chunk, and whichever
+  /// is written to copies the chunk it writes first ([LineStore.sharing],
+  /// [PrefixSums.sharing]): O(chunks), about 2 700 on a note of 2.76 M lines.
+  /// It is how the read pane gets the editor's note on the frame that opens
+  /// it. Joining the text and splitting it again took seconds on a 114 MB
+  /// note (0.0.9 stress test); copying the line arrays and summing every
+  /// line again, ~350 ms on a 246 MB one.
   SourceBuffer snapshot() => SourceBuffer._(
-    List<String>.of(_lines),
-    List<String>.of(_terminators),
-    PrefixSums(_spansOf(_lines, _terminators)),
+    LineStore.sharing(_store),
+    PrefixSums.sharing(_index),
+    _dominantEol,
   );
 
-  /// The lines, without their terminators.
-  final List<String> _lines;
-
-  /// Each line's terminator: `''`, `'\n'` or `'\r\n'`.
-  final List<String> _terminators;
+  /// The lines, without their terminators, and each line's terminator:
+  /// `''`, `'\n'` or `'\r\n'`.
+  final LineStore _store;
 
   /// The prefix sums of `line.length + terminator.length`.
   final PrefixSums _index;
@@ -134,7 +133,7 @@ final class SourceBuffer {
   int get length => _length;
 
   /// How many lines there are. Always at least one.
-  int get lineCount => _lines.length;
+  int get lineCount => _store.length;
 
   /// The terminator newlines are rewritten to when text is inserted.
   String get eol => _dominantEol;
@@ -144,7 +143,7 @@ final class SourceBuffer {
   /// The mark stays in the first line rather than being lifted out, so offsets
   /// stay absolute over the whole file; a reader that cares — the frontmatter
   /// check, for one — has to tolerate it.
-  bool get hasBom => _lines.first.startsWith('\uFEFF');
+  bool get hasBom => _store.lineAt(0).startsWith('\uFEFF');
 
   /// The whole text, exactly as it would be written to disk.
   ///
@@ -152,10 +151,10 @@ final class SourceBuffer {
   /// [substring] instead; saving a note is what this exists for.
   String get text {
     final buffer = StringBuffer();
-    for (var i = 0; i < _lines.length; i++) {
+    for (var i = 0; i < _store.length; i++) {
       buffer
-        ..write(_lines[i])
-        ..write(_terminators[i]);
+        ..write(_store.lineAt(i))
+        ..write(_store.terminatorAt(i));
     }
     return buffer.toString();
   }
@@ -172,14 +171,14 @@ final class SourceBuffer {
   /// which is what lets the frames through during a save (see
   /// `docs/dev/huge-notes.md`).
   String sliceText(int first, int last, int charLimit) {
-    assert(first >= 0 && first < _lines.length, 'line $first out of range');
-    final end = last > _lines.length ? _lines.length : last;
+    assert(first >= 0 && first < _store.length, 'line $first out of range');
+    final end = last > _store.length ? _store.length : last;
     final buffer = StringBuffer();
     var at = first;
     while (at < end) {
       buffer
-        ..write(_lines[at])
-        ..write(_terminators[at]);
+        ..write(_store.lineAt(at))
+        ..write(_store.terminatorAt(at));
       at++;
       if (buffer.length >= charLimit) break;
     }
@@ -188,16 +187,16 @@ final class SourceBuffer {
 
   /// Line [line]'s text, without its terminator.
   String lineAt(int line) {
-    assert(line >= 0 && line < _lines.length, 'line $line out of range');
-    return _lines[line];
+    assert(line >= 0 && line < _store.length, 'line $line out of range');
+    return _store.lineAt(line);
   }
 
   /// Line [line]'s terminator: `''` for the last line when the file does not
   /// end
   /// with one.
   String terminatorAt(int line) {
-    assert(line >= 0 && line < _lines.length, 'line $line out of range');
-    return _terminators[line];
+    assert(line >= 0 && line < _store.length, 'line $line out of range');
+    return _store.terminatorAt(line);
   }
 
   /// [offset] as a caret can stand: inside the note, and never between the
@@ -206,7 +205,7 @@ final class SourceBuffer {
   int caretOffset(int offset) {
     final clamped = offset < 0 ? 0 : (offset > _length ? _length : offset);
     final line = lineOf(clamped);
-    final end = offsetOfLine(line) + _lines[line].length;
+    final end = offsetOfLine(line) + _store.lineAt(line).length;
     return clamped > end ? end : clamped;
   }
 
@@ -224,7 +223,7 @@ final class SourceBuffer {
   ///
   /// O(log n). [lineCount] is accepted and answers [length].
   int offsetOfLine(int line) {
-    assert(line >= 0 && line <= _lines.length, 'line $line out of range');
+    assert(line >= 0 && line <= _store.length, 'line $line out of range');
     return _index.offsetOf(line).toInt();
   }
 
@@ -244,7 +243,7 @@ final class SourceBuffer {
   int offsetAt(int line, int column) {
     final start = offsetOfLine(line);
     final within = column < 0 ? 0 : column;
-    final text = _lines[line].length;
+    final text = _store.lineAt(line).length;
     return start + (within > text ? text : within);
   }
 
@@ -260,22 +259,22 @@ final class SourceBuffer {
     final buffer = StringBuffer();
     var line = lineOf(start);
     var offset = start;
-    while (offset < end && line < _lines.length) {
+    while (offset < end && line < _store.length) {
       final lineStart = offsetOfLine(line);
-      final lineEnd = lineStart + _lines[line].length;
+      final lineEnd = lineStart + _store.lineAt(line).length;
       if (offset < lineEnd) {
         final to = end < lineEnd ? end : lineEnd;
         buffer.write(
-          _lines[line].substring(offset - lineStart, to - lineStart),
+          _store.lineAt(line).substring(offset - lineStart, to - lineStart),
         );
         offset = to;
         if (offset >= end) break;
       }
-      final terminatorEnd = lineEnd + _terminators[line].length;
+      final terminatorEnd = lineEnd + _store.terminatorAt(line).length;
       if (offset < terminatorEnd) {
         final to = end < terminatorEnd ? end : terminatorEnd;
         buffer.write(
-          _terminators[line].substring(offset - lineEnd, to - lineEnd),
+          _store.terminatorAt(line).substring(offset - lineEnd, to - lineEnd),
         );
         offset = to;
       }
@@ -329,11 +328,11 @@ final class SourceBuffer {
 
     // A boundary inside a terminator swallows the terminator, so the prefix is
     // the whole line and the suffix is empty.
-    final prefix = startColumn < _lines[startLine].length
-        ? _lines[startLine].substring(0, startColumn)
-        : _lines[startLine];
-    final suffix = endColumn < _lines[endLine].length
-        ? _lines[endLine].substring(endColumn)
+    final prefix = startColumn < _store.lineAt(startLine).length
+        ? _store.lineAt(startLine).substring(0, startColumn)
+        : _store.lineAt(startLine);
+    final suffix = endColumn < _store.lineAt(endLine).length
+        ? _store.lineAt(endLine).substring(endColumn)
         : '';
 
     final inserted = _splitInserted(replacement);
@@ -354,11 +353,10 @@ final class SourceBuffer {
     }
     // The last merged line stands where `endLine` stood, so it inherits the
     // terminator that follows the edited region rather than inventing one.
-    terminators.add(_terminators[endLine]);
+    terminators.add(_store.terminatorAt(endLine));
 
     final removedCount = endLine - startLine + 1;
-    _lines.replaceRange(startLine, endLine + 1, merged);
-    _terminators.replaceRange(startLine, endLine + 1, terminators);
+    _store.replaceRange(startLine, endLine + 1, merged, terminators);
 
     if (merged.length == removedCount) {
       // Same line count: one span resized per line, O(log n) each.
@@ -406,13 +404,14 @@ final class SourceBuffer {
   int snapOutOfTerminator(int offset, {bool forward = false}) {
     if (offset <= 0 || offset >= _length) return offset;
     final line = lineOf(offset);
-    final textEnd = offsetOfLine(line) + _lines[line].length;
+    final textEnd = offsetOfLine(line) + _store.lineAt(line).length;
     if (offset <= textEnd) return offset;
     return forward ? offsetOfLine(line + 1) : textEnd;
   }
 
   /// The span of line [index]: its text plus its terminator.
-  int _spanOf(int index) => _lines[index].length + _terminators[index].length;
+  int _spanOf(int index) =>
+      _store.lineAt(index).length + _store.terminatorAt(index).length;
 
   /// [inserted] as lines, terminators rewritten to the dominant one.
   List<String> _splitInserted(String inserted) {
@@ -431,13 +430,13 @@ final class SourceBuffer {
   /// Whether the arrays, the index and [length] agree.
   bool _validate() {
     var sum = 0;
-    for (var i = 0; i < _lines.length; i++) {
+    for (var i = 0; i < _store.length; i++) {
       sum += _spanOf(i);
       if (_index.offsetOf(i) != sum - _spanOf(i)) return false;
     }
     return sum == _length &&
         _index.total == _length &&
-        _index.length == _lines.length;
+        _index.length == _store.length;
   }
 
   /// The dominant terminator of [terminators]: CRLF only if it is the majority.

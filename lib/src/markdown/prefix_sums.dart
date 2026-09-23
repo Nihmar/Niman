@@ -33,9 +33,31 @@ final class PrefixSums {
     }
     if (_chunks.isEmpty) _chunks.add(<double>[]);
     _prefixes.addAll(_chunks.map(_prefixOf));
+    _owned.addAll(List<bool>.filled(_chunks.length, true));
     _length = values.length;
     _rebuildTrees();
   }
+
+  /// Sums holding what [other] holds now, apart from it: a write to either
+  /// is not seen by the other. O(chunks): the chunks are shared until one
+  /// side writes to one, and that side copies it first.
+  ///
+  /// What a snapshot of the source buffer takes instead of summing every
+  /// line again (~200 ms of reading 2.76 M lines' lengths on a 246 MB note).
+  new sharing(PrefixSums other)
+    : _sumTree = List<double>.of(other._sumTree),
+      _sizeTree = List<int>.of(other._sizeTree),
+      _highestPower = other._highestPower,
+      _length = other._length {
+    _chunks.addAll(other._chunks);
+    _prefixes.addAll(other._prefixes);
+    _owned.addAll(List<bool>.filled(other._owned.length, false));
+    other._owned.fillRange(0, other._owned.length, false);
+  }
+
+  /// Whether chunk *c* may be written in place: false for one shared with a
+  /// copy.
+  final List<bool> _owned = <bool>[];
 
   /// How many values a chunk is cut to, and half of when it may grow before it
   /// is split again.
@@ -123,9 +145,14 @@ final class PrefixSums {
     assert(index >= 0 && index < _length, 'index $index out of range');
     assert(value >= 0, 'value $index would be negative: $value');
     final (chunk, local) = _locate(index);
+    if (_chunks[chunk][local] == value) return;
+    if (!_owned[chunk]) {
+      _chunks[chunk] = List<double>.of(_chunks[chunk]);
+      _prefixes[chunk] = List<double>.of(_prefixes[chunk]);
+      _owned[chunk] = true;
+    }
     final values = _chunks[chunk];
     final delta = value - values[local];
-    if (delta == 0) return;
     values[local] = value;
     final prefix = _prefixes[chunk];
     for (var at = local + 1; at < prefix.length; at++) {
@@ -148,23 +175,22 @@ final class PrefixSums {
         ? (_chunks.length - 1, _chunks.last.length)
         : _locate(first);
     final firstChunk = chunk;
+    // Where the removal ends: the chunk, and the place in it. Nothing is
+    // written in place, because a copy may share these chunks.
     var left = removed;
-    var at = local;
     var lastChunk = chunk;
-    while (left > 0) {
-      final values = _chunks[lastChunk];
-      final take = values.length - at < left ? values.length - at : left;
-      values.removeRange(at, at + take);
-      left -= take;
-      if (left > 0) {
-        lastChunk++;
-        at = 0;
-      }
+    var end = local;
+    while (left > _chunks[lastChunk].length - end) {
+      left -= _chunks[lastChunk].length - end;
+      lastChunk++;
+      end = 0;
     }
-    _chunks[firstChunk].insertAll(local, inserted);
+    end += left;
     // Every chunk the edit went through is recut, and the empty ones go.
     final touched = <double>[
-      for (var c = firstChunk; c <= lastChunk; c++) ..._chunks[c],
+      ..._chunks[firstChunk].take(local),
+      ...inserted,
+      ..._chunks[lastChunk].skip(end),
     ];
     final recut = <List<double>>[];
     if (touched.length <= 2 * _chunkSize) {
@@ -179,9 +205,15 @@ final class PrefixSums {
     }
     _chunks.replaceRange(firstChunk, lastChunk + 1, recut);
     _prefixes.replaceRange(firstChunk, lastChunk + 1, recut.map(_prefixOf));
+    _owned.replaceRange(
+      firstChunk,
+      lastChunk + 1,
+      List<bool>.filled(recut.length, true),
+    );
     if (_chunks.isEmpty) {
       _chunks.add(<double>[]);
       _prefixes.add(<double>[0]);
+      _owned.add(true);
     }
     _length += inserted.length - removed;
     _rebuildTrees();
