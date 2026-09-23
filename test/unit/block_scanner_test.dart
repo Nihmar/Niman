@@ -269,6 +269,31 @@ void main() {
       expect(html.endLine, 5);
     });
 
+    test('an HTML comment that closes on its own line is that line', () {
+      // CommonMark ends a comment — and a raw-text tag, a processing
+      // instruction, a declaration, a CDATA section — on the line with its
+      // end marker, which can be the line it opens on. Left open, one
+      // `<!-- note -->` made the rest of the note HTML.
+      for (final opener in <String>[
+        '<!-- a note -->',
+        '<script>x()</script>',
+        '<?php echo 1; ?>',
+        '<!DOCTYPE html>',
+        '<![CDATA[ x ]]>',
+      ]) {
+        expect(_kinds('$opener\n# Heading\n\ntext [[Note]]'), <BlockKind>[
+          BlockKind.html,
+          BlockKind.heading,
+          BlockKind.blank,
+          BlockKind.paragraph,
+        ], reason: opener);
+      }
+      expect(_kinds('<!-- opens\n# still inside\n-->\ntext'), <BlockKind>[
+        BlockKind.html,
+        BlockKind.paragraph,
+      ], reason: 'one that does not close on its line runs to its marker');
+    });
+
     test('a block-tag HTML block ends at a blank line', () {
       final scanner = BlockScanner(
         SourceBuffer.fromText('<div>\na\n</div>\n\nafter'),
