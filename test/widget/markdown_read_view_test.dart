@@ -122,13 +122,15 @@ void main() {
       expect(texts.any((text) => text.contains('*big*')), isFalse);
     },
   );
-  testWidgets("a tight list's items touch, and a blank line is one spacing", (
+  testWidgets("a tight list's items touch, and a blank line is live's row", (
     tester,
   ) async {
     // Every block left a spacing under it, and a blank line was a block of
     // its own that drew one and left one: a tight list's items stood apart
     // where `live` draws them one under the other, and two paragraphs a
-    // blank line apart were three spacings apart.
+    // blank line apart were three spacings apart. Then a blank line was
+    // 1 em, where `live` draws it as one of its rows, 1.5 em: every block
+    // under one stood higher than it did a pane flip before.
     tester.view.physicalSize = const Size(600, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -138,16 +140,15 @@ void main() {
         (widget) => widget is RichText && widget.text.toPlainText() == text,
       ),
     );
-    final spacing = markdownThemeOf(
-      tester.element(find.byType(MarkdownReadView)),
-    ).blockSpacing;
+    final row = markdownThemeOf(tester.element(find.byType(MarkdownReadView)))
+        .lineHeight;
     expect(rowOf('two').top, closeTo(rowOf('one').bottom, 0.01));
     expect(rowOf('three').top, closeTo(rowOf('two').bottom, 0.01));
-    expect(rowOf('para').top - rowOf('three').bottom, closeTo(spacing, 0.01));
+    expect(rowOf('para').top - rowOf('three').bottom, closeTo(row, 0.01));
     expect(
       rowOf('next').top - rowOf('para').bottom,
-      closeTo(spacing, 0.01),
-      reason: 'two blank lines are still one spacing',
+      closeTo(2 * row, 0.01),
+      reason: 'two blank lines are two rows',
     );
   });
   group('a code block too long to lay out whole', () {

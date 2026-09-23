@@ -92,7 +92,6 @@ final class FootnoteRow extends StatelessWidget {
               theme: theme.quoted,
               mathCache: mathCache,
               scope: scope,
-              spaced: false,
             ),
           ),
           // The package's own arrow, so the two renderings say the same
