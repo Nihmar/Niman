@@ -150,3 +150,6 @@ app.*.symbols
 
 # Kotlin compiler session state, written during a Gradle build.
 **/android/.kotlin/
+
+# Golden failure images the comparator writes beside a failing test.
+test/**/failures/
