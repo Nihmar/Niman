@@ -10,9 +10,13 @@
 /// given, `spacerStyleFor`), the delimiter row takes no room, and the lines
 /// of the grid are painted behind (`LiveTableGridPainter`).
 ///
-/// The columns are measured once a table, from every row's cells as they
-/// are drawn with their marks hidden, so they stay put when the caret
-/// moves from row to row — the caret's own row is drawn as written.
+/// The caret's row stays on the grid, as Obsidian keeps a table a table
+/// while it is written in: only the run the caret is in shows its marks, as
+/// a word of a paragraph does, and the columns are measured from every
+/// row's cells as they are drawn — that run's marks included, so a cell
+/// widens while its marks are showing. The delimiter row is never drawn,
+/// and the room between the cells is no place for the caret
+/// (`LiveTables.cellColumn`).
 library;
 
 import 'package:flutter/painting.dart';
@@ -51,7 +55,10 @@ typedef _Measured = ({double visible, int hidden, int lead});
 
 /// The tables of a note, laid out a table at a time.
 final class LiveTables {
-  final Map<int, List<LiveTableRow>> _tables = <int, List<LiveTableRow>>{};
+  /// Each table's rows, by its first line, and the caret's run they were
+  /// laid out with (null for none of its lines).
+  final Map<int, ({Object? reveal, List<LiveTableRow> rows})> _tables =
+      <int, ({Object? reveal, List<LiveTableRow> rows})>{};
 
   SourceBuffer? _buffer;
   int _revision = -1;
@@ -60,17 +67,22 @@ final class LiveTables {
 
   /// How line [line] of [buffer] is laid out, [block] being its block; null
   /// for a line of no table. [tokensOf] gives a line's tokens, of which the
-  /// ones [hiddenAtRest] says are marks are drawn as nothing and the rest in
-  /// [styleOf]'s style — as the line is drawn when the caret is elsewhere.
+  /// ones [hidden] says are marks are drawn as nothing and the rest in
+  /// [styleOf]'s style — as the line is drawn.
+  ///
+  /// [reveal] is what [hidden] shows of the table, the caret's run when it
+  /// is in one of the table's lines and null otherwise: the table is laid
+  /// out again when it changes, and only then.
   LiveTableRow? rowOf(
     int line,
     Block? block,
     SourceBuffer buffer, {
     required List<Token> Function(int line) tokensOf,
-    required bool Function(Token token) hiddenAtRest,
+    required bool Function(int line, Token token) hidden,
     required TextStyle? Function(Token token) styleOf,
     required MarkdownTheme theme,
     required TextScaler scaler,
+    Object? reveal,
   }) {
     if (block == null || block.kind != BlockKind.table) return null;
     if (!identical(buffer, _buffer) ||
@@ -83,18 +95,15 @@ final class LiveTables {
       _theme = theme;
       _scaler = scaler;
     }
-    final rows = _tables.putIfAbsent(
-      block.startLine,
-      () => _layOut(
-        block,
-        buffer,
-        tokensOf,
-        hiddenAtRest,
-        styleOf,
-        theme,
-        scaler,
-      ),
-    );
+    var table = _tables[block.startLine];
+    if (table == null || table.reveal != reveal) {
+      table = (
+        reveal: reveal,
+        rows: _layOut(block, buffer, tokensOf, hidden, styleOf, theme, scaler),
+      );
+      _tables[block.startLine] = table;
+    }
+    final rows = table.rows;
     final at = line - block.startLine;
     return at >= 0 && at < rows.length ? rows[at] : null;
   }
@@ -105,7 +114,7 @@ final class LiveTables {
     Block block,
     SourceBuffer buffer,
     List<Token> Function(int line) tokensOf,
-    bool Function(Token token) hiddenAtRest,
+    bool Function(int line, Token token) hidden,
     TextStyle? Function(Token token) styleOf,
     MarkdownTheme theme,
     TextScaler scaler,
@@ -134,7 +143,7 @@ final class LiveTables {
             end,
             style,
             scaler,
-            hiddenAtRest,
+            (token) => hidden(block.startLine + row, token),
             styleOf,
           ),
       ]);
@@ -223,6 +232,42 @@ final class LiveTables {
       gap(from, text.length, edges[last] - x);
     }
     return gaps;
+  }
+
+  /// Where the caret goes from [column] of table row [text]: [column]
+  /// itself when it is in a cell's text, and otherwise — the pipes and the
+  /// spaces round the cells, drawn as room nobody types in — the next
+  /// cell's start going forward ([direction] above zero), the previous
+  /// cell's end going back (below zero), or whichever is nearer (zero).
+  ///
+  /// Null when there is no cell that way, or none at all (the delimiter
+  /// row): the caret leaves the line.
+  static int? cellColumn(String text, int column, int direction) {
+    if (_isDelimiter(text)) return null;
+    final cells = _cellsOf(text);
+    int? before;
+    int? after;
+    for (final (start, end) in cells) {
+      if (column >= start && column <= end) return column;
+      if (end < column) before = end;
+      if (start > column) after ??= start;
+    }
+    if (direction > 0) return after;
+    if (direction < 0) return before;
+    if (before == null) return after;
+    if (after == null) return before;
+    return column - before <= after - column ? before : after;
+  }
+
+  /// The cell of table row [text] whose text [column] is in, from its
+  /// text's start to its end; null for none (the room between cells, or the
+  /// delimiter row).
+  static (int, int)? cellAround(String text, int column) {
+    if (_isDelimiter(text)) return null;
+    for (final (start, end) in _cellsOf(text)) {
+      if (column >= start && column <= end) return (start, end);
+    }
+    return null;
   }
 
   /// The ranges of [text]'s cells' text, trimmed: what is between its

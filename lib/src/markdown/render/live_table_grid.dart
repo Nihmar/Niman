@@ -8,17 +8,10 @@ import 'package:niman/src/markdown/render/live_tables.dart';
 /// Paints [row]'s part of its table's grid: the line above it, the lines
 /// between its columns, and, under the table's last row, the line below.
 ///
-/// The row's text starts [left] into what this paints over. The caret's
-/// row is drawn as written, its cells off their columns, so it gets the
-/// lines across it and not the ones between the columns ([revealed]).
+/// The row's text starts [left] into what this paints over.
 final class LiveTableGridPainter extends CustomPainter {
   /// Creates the painter.
-  const new({
-    required this.row,
-    required this.left,
-    required this.color,
-    required this.revealed,
-  });
+  const new({required this.row, required this.left, required this.color});
 
   /// The row, and its table's columns.
   final LiveTableRow row;
@@ -28,9 +21,6 @@ final class LiveTableGridPainter extends CustomPainter {
 
   /// The grid's colour: the read view's border.
   final Color color;
-
-  /// Whether the caret is on the row.
-  final bool revealed;
 
   /// The grid's thickness, the read view's (`BlockView._table`): a hairline,
   /// one device pixel wherever the measured columns put a line.
@@ -52,8 +42,6 @@ final class LiveTableGridPainter extends CustomPainter {
       );
     }
     for (var at = 0; at < edges.length; at++) {
-      // The table's own sides stay across the caret's row.
-      if (revealed && at != 0 && at != edges.length - 1) continue;
       final x = left + edges[at];
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
@@ -63,6 +51,5 @@ final class LiveTableGridPainter extends CustomPainter {
   bool shouldRepaint(LiveTableGridPainter oldDelegate) =>
       !identical(oldDelegate.row, row) ||
       oldDelegate.left != left ||
-      oldDelegate.color != color ||
-      oldDelegate.revealed != revealed;
+      oldDelegate.color != color;
 }

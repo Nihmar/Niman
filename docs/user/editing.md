@@ -43,8 +43,11 @@ status row switches only when both are enabled.
   instead. A quote gets its bar, and what is inside it — a heading, a
   list, a code block — is drawn as it is outside; `---` a rule; a code
   block (and an HTML block) its box, in monospace, the code coloured by the
-  language its fence names; a table its grid, the row the caret is on
-  written out with its pipes. Footnote and link definitions take no room
+  language its fence names; a table its grid, which stays a grid while
+  you write in it, as Obsidian's does: only the word the caret is in
+  shows its marks, the delimiter row never shows, the caret goes from
+  cell to cell rather than onto the pipes, and Backspace or Delete stop at
+  the cell's edge. Footnote and link definitions take no room
   where they are written: the note ends with its footnotes, as in the read
   view, and a tap on one puts the caret in its definition. The read view is
   the same page: a blank line is as tall in both, and flipping between
