@@ -3,7 +3,9 @@
 //
 // The height map is built on the frame that first draws the note, for every
 // row of it: 413 ms of a frozen window on the 246 MB note (profile build),
-// most of it allocating a boxed double per row.
+// most of it allocating a boxed double per row. And the buffer is read from
+// the note's text on the load: split into a string per line, it was ~600 ms
+// of the 246 MB note's load.
 //
 // Same shape as the other benchmarks in this repository: the numbers are
 // printed, a **backstop** is asserted on any host, and the design's ceiling
@@ -14,6 +16,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 
 /// Whether this run is the one that holds the design's ceilings.
 final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
@@ -53,6 +56,26 @@ void main() {
       '(held to $bar ms)',
     );
     expect(map.length, _rows);
+    expect(ms, lessThan(bar));
+  });
+
+  test('a buffer read from a million lines', () {
+    final text = List<String>.generate(
+      _rows,
+      (at) => 'line $at of a note that is long enough to be read',
+    ).join('\n');
+    late SourceBuffer buffer;
+    final ms = _best(3, () => buffer = SourceBuffer.fromText(text));
+    // A string per line: 135 ms here; views of the text: 60. Two runners
+    // apart differ by as much as that, so the backstop is a regression's
+    // and the ceiling, which the old reading fails, is the design's.
+    const ceiling = 80.0;
+    const backstop = 250.0;
+    final bar = _referenceHost ? ceiling : backstop;
+    print(
+      'buffer, $_rows lines: ${ms.toStringAsFixed(1)} ms (held to $bar ms)',
+    );
+    expect(buffer.lineCount, _rows);
     expect(ms, lessThan(bar));
   });
 }

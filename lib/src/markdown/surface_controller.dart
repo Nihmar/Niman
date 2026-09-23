@@ -261,7 +261,7 @@ final class MarkdownSurfaceController {
     final first = buffer.lineOf(current.start);
     final last = buffer.lineOf(current.end);
     final start = buffer.offsetOfLine(first);
-    final end = buffer.offsetOfLine(last) + buffer.lineAt(last).length;
+    final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
     final result = command(
       buffer.substring(start, end),
       TextSelection(
