@@ -115,10 +115,13 @@ final class LineShape {
         inner != null &&
         inner.kind == BlockKind.listItem &&
         at > inner.startLine;
+    // An HTML block is drawn in a code block's box too, as the read view
+    // draws it.
     final code =
         inner != null &&
             (inner.kind == BlockKind.fencedCode ||
-                inner.kind == BlockKind.indentedCode)
+                inner.kind == BlockKind.indentedCode ||
+                inner.kind == BlockKind.html)
         ? CodeRow.of(inner, at)
         : null;
     // A fence of a code block inside a quote: the styler reads the quote's

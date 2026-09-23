@@ -15,6 +15,7 @@
 /// | list item | the marker, then the item's own text, indented by its depth |
 /// | quote | a bar and the indented content |
 /// | fenced or indented code | a box of monospace lines, fences its padding |
+/// | HTML | its source in the same box, a row per line, as `live` draws it |
 /// | math | the display typesetter |
 /// | table | a real table, cells from the source rows |
 /// | thematic break | a row with a rule across its middle, as `live` draws it |
@@ -118,14 +119,14 @@ final class BlockView extends StatelessWidget {
       ),
       BlockKind.listItem => _listItem(context),
       BlockKind.quote => _quote(context),
-      BlockKind.fencedCode => _code(context, block.fenceInfo, fences: true),
-      BlockKind.indentedCode => _code(context, null, fences: true),
+      BlockKind.fencedCode => _code(context, block.fenceInfo),
+      BlockKind.indentedCode => _code(context, null),
       BlockKind.math => _blockMath(context),
       BlockKind.table => _table(context),
       BlockKind.thematicBreak => _rule(context),
       BlockKind.blank => SizedBox(height: block.lineCount * _row(context)),
       BlockKind.frontmatter => const SizedBox.shrink(),
-      BlockKind.html => _code(context, null, fences: false),
+      BlockKind.html => _html(),
     };
   }
 
@@ -370,16 +371,15 @@ final class BlockView extends StatelessWidget {
   /// A code block: a filled box of monospace lines, the fence taken out, the
   /// code coloured by the language the fence names.
   ///
-  /// With [fences] the box is `live`'s: its code a padding in from the sides,
-  /// and a fence's row above and below it — the rows `live` draws the fences
-  /// on, hidden, inside its box — so the code's rows land on `live`'s. An
-  /// HTML block has no fences, and keeps a padding all round.
+  /// The box is `live`'s: its code a padding in from the sides, and a
+  /// fence's row above and below it — the rows `live` draws the fences on,
+  /// hidden, inside its box — so the code's rows land on `live`'s.
   ///
   /// The tokens come from the same `highlight` core the preview's highlighter
   /// uses, one block at a time and only for the blocks a frame draws. The
   /// engine's own line-state lexer (§8.8.2) is the design's replacement when
   /// the whole-block regex stops being enough.
-  Widget _code(BuildContext context, String? language, {required bool fences}) {
+  Widget _code(BuildContext context, String? language) {
     final content = _fenceContent(parsed.text);
     final text = content.text;
     final row = _row(context);
@@ -389,14 +389,12 @@ final class BlockView extends StatelessWidget {
         color: theme.codeBackground,
         borderRadius: BorderRadius.circular(4),
       ),
-      padding: fences
-          ? EdgeInsets.fromLTRB(
-              theme.codePadding,
-              content.opened ? row : 0,
-              theme.codePadding,
-              content.closed ? row : 0,
-            )
-          : EdgeInsets.all(theme.codePadding),
+      padding: EdgeInsets.fromLTRB(
+        theme.codePadding,
+        content.opened ? row : 0,
+        theme.codePadding,
+        content.closed ? row : 0,
+      ),
       // A fence with nothing between its lines has no row of code.
       child: text == null
           ? null
@@ -413,6 +411,21 @@ final class BlockView extends StatelessWidget {
             ),
     );
   }
+
+  /// An HTML block: its source, as written, in a code block's box — a row
+  /// per line and a padding in from the sides, where `live` draws it.
+  ///
+  /// It had a padding all round and its lines four spaces short, as an
+  /// indented code block's are, and stood apart from `live`'s rows.
+  Widget _html() => Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: theme.codeBackground,
+      borderRadius: BorderRadius.circular(4),
+    ),
+    padding: EdgeInsets.symmetric(horizontal: theme.codePadding),
+    child: Text(parsed.text, style: theme.code),
+  );
 
   /// A display formula, centered like the preview's.
   ///
