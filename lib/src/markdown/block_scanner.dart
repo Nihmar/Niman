@@ -19,6 +19,7 @@ library;
 
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -32,6 +33,8 @@ final class BlockScanner {
   /// leaves the rest to [advance] (see [edited]).
   new(this.buffer, {this.budget = defaultBudget}) {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
+    // The changes are counted from the list a reader first takes.
+    _changes = BlockChanges();
   }
 
   /// [scanned]'s answer, for [buffer]: a scan made of a copy of the note —
@@ -113,6 +116,19 @@ final class BlockScanner {
     }
     _shift += delta;
   }
+
+  /// What the edits did to the block list since the last call — or since the
+  /// scan, the first time — and a fresh record from here on.
+  ///
+  /// For a reader that keeps something per block (the read pane's heights):
+  /// it replays these over what it had instead of starting again.
+  BlockChanges takeChanges() {
+    final taken = _changes;
+    _changes = BlockChanges();
+    return taken;
+  }
+
+  BlockChanges _changes = BlockChanges();
 
   /// The blocks as of [SourceBuffer.revision], for a reader that wants them.
   ///
@@ -398,6 +414,7 @@ final class BlockScanner {
     // the splice is owed from the kept tail on, exactly.
     if (_shiftFrom < keepFrom) _settle(keepFrom);
     _blocks.replaceRange(headEnd, keepFrom, rebuilt);
+    _changes.record(headEnd, keepFrom - headEnd, rebuilt.length);
     _shiftFrom += rebuilt.length - (keepFrom - headEnd);
     // The frontiers the rebuild passed are behind it; a converged one leaves
     // the ones below it, whose hints it did not reach, and one that stopped

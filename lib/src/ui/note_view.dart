@@ -1764,7 +1764,7 @@ final class _NoteViewState extends State<NoteView>
     }
     final editor = _sourceViewKey.currentState;
     if (editor == null || !identical(editor.widget.buffer, from)) return null;
-    final scan = editor.scan;
+    final scan = editor.handOver();
     if (scan == null || scan.revision != from.revision) return null;
     // The same lines, in a buffer of their own: the definitions are read
     // against it from now on.
@@ -1772,6 +1772,7 @@ final class _NoteViewState extends State<NoteView>
       blocks: scan.blocks,
       scope: scan.scope.on(buffer, buffer.revision),
       revision: buffer.revision,
+      changes: scan.changes,
     );
   }
 

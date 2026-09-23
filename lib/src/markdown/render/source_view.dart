@@ -320,10 +320,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   List<Block>? get blocks => _styler?.blocks;
 
   /// The note's blocks and definitions as of [MarkdownSourceView.buffer]'s
-  /// revision, or null while there is no whole, current scan of it
-  /// ([SourceStyler.scan]): what the read pane takes instead of scanning the
-  /// note again.
-  DocumentScan? get scan => _styler?.scan;
+  /// revision, with what changed since the last hand-over, or null while
+  /// there is no whole, current scan of it ([SourceStyler.handOver]): what
+  /// the read pane takes instead of scanning the note again.
+  DocumentScan? handOver() => _styler?.handOver();
 
   /// The paragraph of each line a frame has built, so a tap can ask the line it
   /// landed on where an offset is, and the caret can ask its own line for the

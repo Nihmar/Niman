@@ -15,9 +15,23 @@ library;
 import 'dart:isolate';
 
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+
+/// Where a scan handed over by the editor stands in the line of them: the
+/// hand-over it follows (`since`, null for the first), its own mark
+/// (`token`), and what the edits did to the block list in between — null
+/// when that was not worth keeping ([BlockChanges.limit]).
+///
+/// The marks are objects, compared by identity, so two editors' hand-overs
+/// can never be taken for one another.
+typedef ScanChanges = ({
+  Object? since,
+  Object token,
+  List<BlockChange>? stretches,
+});
 
 /// A note's blocks and definitions, as of one revision of its buffer.
 final class DocumentScan {
@@ -26,6 +40,7 @@ final class DocumentScan {
     required this.blocks,
     required this.scope,
     required this.revision,
+    this.changes,
   });
 
   /// Scans [buffer] here, now.
@@ -43,6 +58,10 @@ final class DocumentScan {
 
   /// The buffer revision scanned.
   final int revision;
+
+  /// For a scan the editor handed over, what changed since its last one;
+  /// null for a scan made from the text.
+  final ScanChanges? changes;
 }
 
 /// Scans [buffer] as it is now in an isolate, and answers with the scope's

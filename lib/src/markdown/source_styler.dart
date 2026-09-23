@@ -181,14 +181,29 @@ final class SourceStyler {
   /// here would put the rest of the note on the caller's frame.
   ///
   /// O(blocks): the list is copied, never the note read.
-  DocumentScan? get scan {
+  ///
+  /// Each hand-over carries what the edits did to the block list since the
+  /// one before ([DocumentScan.changes]), so a reader that keeps something
+  /// per block — the read pane's heights — updates what it has. Asking is
+  /// therefore taking: the next hand-over counts from this one.
+  DocumentScan? handOver() {
     if (revision != buffer.revision || !settled) return null;
+    final since = _handedOver;
+    final token = _handedOver = Object();
     return DocumentScan(
       blocks: _scanner.index.blocks,
       scope: _scope.on(buffer, buffer.revision),
       revision: buffer.revision,
+      changes: (
+        since: since,
+        token: token,
+        stretches: _scanner.takeChanges().stretches,
+      ),
     );
   }
+
+  /// The mark of the last hand-over, or null before the first.
+  Object? _handedOver;
 
   /// The block holding [line], scanned up to it when the scan still owes it.
   Block? blockOf(int line) => _scanner.blockAt(line);
