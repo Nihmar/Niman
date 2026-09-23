@@ -616,8 +616,8 @@ final class _NoteViewState extends State<NoteView>
   SourceBuffer? get _unifiedSurfaceBuffer => _surface?.buffer;
 
   /// A controller over [text], reporting its edits the way the surface does:
-  /// over [ready]'s buffer and count when the note came made ready, which
-  /// the UI isolate then neither splits nor counts.
+  /// over [ready]'s buffer when the note came made ready, which the UI
+  /// isolate then does not split.
   MarkdownSurfaceController _surfaceFor(
     String text, {
     int caret = 0,
@@ -627,7 +627,6 @@ final class _NoteViewState extends State<NoteView>
         MarkdownSurfaceController(
             ready?.buffer ?? SourceBuffer.fromText(text),
             caret: caret,
-            words: ready?.words,
           )
           ..onChanged = (edit) => _noteChanged(
             caretLine: _surfaceCaretLine ?? _caretLine,
@@ -1144,8 +1143,8 @@ final class _NoteViewState extends State<NoteView>
     final clock = Stopwatch()..start();
     try {
       final String content;
-      // The note made ready off the UI isolate — its buffer and its count
-      // with its text — for the unified surface, which is what it draws.
+      // The note made ready off the UI isolate — its buffer with its text —
+      // for the unified surface, which is what it draws.
       LoadedNote? ready;
       if (widget.readNote != null) {
         // The test seam: content per the injected reader.

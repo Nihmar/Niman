@@ -7,30 +7,32 @@
 /// it — all on the UI isolate. Here one isolate does all of it and answers
 /// through `Isolate.exit`, which hands the result over without copying it:
 /// the UI isolate receives a note it only has to draw.
+///
+/// The note's word count is not worked out here: it was ~1 s of the 246 MB
+/// note's load, with the note waiting behind it. The note is shown as soon
+/// as it is read, and the surface counts it in the background
+/// (`MarkdownSurfaceController.buildWords`), the count landing a moment
+/// later.
 library;
 
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/preview_work_failure.dart';
 
 /// A note as the unified surface takes it: its text with the line endings
-/// the editor holds, the buffer over that text, and its word count.
+/// the editor holds, and the buffer over that text.
 final class LoadedNote {
   /// Creates a loaded note.
-  const new({required this.text, required this.buffer, required this.words});
+  const new({required this.text, required this.buffer});
 
   /// The note's text, its line endings `\n`.
   final String text;
 
   /// The buffer over [text].
   final SourceBuffer buffer;
-
-  /// [buffer]'s word count, counted.
-  final WordCount words;
 }
 
 /// [text] with its line endings made `\n`, as the editor holds a note —
@@ -56,6 +58,5 @@ Object _loadNote(String path) {
     return PreviewWorkFailure('$path: $error', notText: true);
   }
   final text = normalizedLineEndings(decoded);
-  final buffer = SourceBuffer.fromText(text);
-  return LoadedNote(text: text, buffer: buffer, words: WordCount.of(buffer));
+  return LoadedNote(text: text, buffer: SourceBuffer.fromText(text));
 }
