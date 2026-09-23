@@ -131,6 +131,16 @@ TextStyle spacerStyleFor(InlineFormula formula, double lineHeight) {
 
 const double _tiny = 0.01;
 
+/// What a formula's source of [length] code units is laid out as: as many
+/// code units, none of them a place a row may end at.
+///
+/// The source has spaces, and a row that ended at one split the room in two
+/// while the formula was painted whole where the room starts — past the
+/// margin, with a gap where the rest of the room went. Its characters are
+/// invisible, so which ones they are is the layout's business alone; every
+/// offset stays where it was.
+String unbrokenSource(int length) => 'x' * length;
+
 /// Paints [formulas] over the room their source takes in [paragraph]'s
 /// layout, each on the baseline its room sits on.
 final class InlineMathPainter extends CustomPainter {

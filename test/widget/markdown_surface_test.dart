@@ -317,9 +317,11 @@ void main() {
       await tester.pump();
     }
 
-    RenderParagraph lineOf(String text) => tester
+    RenderParagraph lineOf(String prefix) => tester
         .renderObjectList<RenderParagraph>(find.byType(RichText))
-        .firstWhere((paragraph) => paragraph.text.toPlainText() == text);
+        .firstWhere(
+          (paragraph) => paragraph.text.toPlainText().startsWith(prefix),
+        );
 
     await pumpAt(0);
     final painter = tester
@@ -329,8 +331,10 @@ void main() {
         .single;
     final formula = painter.formulas.single;
     expect((formula.start, formula.end), (4, 9));
-    // The paragraph is the source, every character: nothing to correct.
-    final line = lineOf(r'sia $x^2$ qui');
+    // The paragraph is the source, every offset where it was: nothing to
+    // correct. Only the formula's hidden characters are laid out as others.
+    final line = lineOf('sia ');
+    expect(line.text.toPlainText(), 'sia xxxxx qui');
     final room = line
         .getBoxesForSelection(
           const TextSelection(baseOffset: 4, extentOffset: 9),
@@ -350,6 +354,63 @@ void main() {
           .whereType<InlineMathPainter>(),
       isEmpty,
       reason: 'with the caret in its word, the formula is its source',
+    );
+  });
+
+  testWidgets("an inline formula's room stays on one row", (tester) async {
+    // The source has spaces, and a row that ended at one of them split the
+    // room in two: the formula, painted whole where its room starts, ran
+    // past the margin, and the rest of the room was a gap on the next row.
+    final cache = MathCache();
+    addTearDown(cache.dispose);
+    const line = r'parole parole $a + b + c + d + e$ fine';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 320,
+              child: MarkdownSurface(
+                buffer: SourceBuffer.fromText('caret\n\n$line\n'),
+                mode: MarkdownSurfaceMode.live,
+                theme: _theme,
+                selection: const SelectionModel.at(0),
+                showLineNumbers: false,
+                mathCache: cache,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final paragraph = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((paragraph) => paragraph.text.toPlainText().length > 20);
+    final start = line.indexOf(r'$');
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(
+        baseOffset: start,
+        extentOffset: line.lastIndexOf(r'$') + 1,
+      ),
+    );
+    expect(
+      paragraph
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: line.length),
+          )
+          .map((box) => box.top)
+          .toSet()
+          .length,
+      greaterThan(1),
+      reason: 'the line wraps',
+    );
+    expect(
+      boxes.map((box) => box.top).toSet(),
+      hasLength(1),
+      reason: "the formula's room is one piece",
     );
   });
 
