@@ -90,6 +90,7 @@ Future<void> _pumpNote(
                   theme: markdownThemeOf(context),
                   selection: const SelectionModel.at(0),
                   showLineNumbers: false,
+                  mathCache: MathCache(),
                 ),
         ),
       ),
@@ -213,7 +214,8 @@ void main() {
         'after two\n\n- bullet\n- [ ] task\n  - nested\n\n- loose\n\n'
         '1. numbered\n\n---\n\nruled\n\n> quoted\n>\n> > deeper\n\n'
         '```dart\nfenced();\nsecond();\n```\nafter code\n\n```\n```\n'
-        'after empty\n\n```\nnever closed\n';
+        'after empty\n\n```\nnever closed\n```\n\n\$\$\nx^2\n\$\$\n\n'
+        'after math\n';
     const words = [
       'Heading one',
       'Heading two',
@@ -232,6 +234,7 @@ void main() {
       'after code',
       'after empty',
       'never closed',
+      'after math',
     ];
     Future<List<double>> tops({required bool read}) async {
       await _pumpNote(tester, note, read: read);
