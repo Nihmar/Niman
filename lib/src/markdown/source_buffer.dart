@@ -78,7 +78,10 @@ final class SourceBuffer {
     }
     return SourceBuffer._(
       LineStore(lines, terminators),
-      PrefixSums(_spansOf(lines, terminators)),
+      PrefixSums.generate(
+        lines.length,
+        (at) => (lines[at].length + terminators[at].length).toDouble(),
+      ),
       _detectEol(terminators),
     );
   }
@@ -452,11 +455,4 @@ final class SourceBuffer {
     }
     return crlf > lf ? '\r\n' : '\n';
   }
-
-  /// The spans of every line, for building or rebuilding the index.
-  static List<double> _spansOf(List<String> lines, List<String> terminators) =>
-      <double>[
-        for (var i = 0; i < lines.length; i++)
-          (lines[i].length + terminators[i].length).toDouble(),
-      ];
 }

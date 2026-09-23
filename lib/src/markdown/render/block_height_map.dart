@@ -38,9 +38,7 @@ final class BlockHeightMap {
       // earlier one — the read view builds this in `initState`, before the
       // theme arrives, so the two answers differ — and the sums would drift by
       // whatever changed.
-      _extents = PrefixSums(<double>[
-        for (var at = 0; at < count; at++) estimate(at),
-      ]);
+      _extents = PrefixSums.generate(count, estimate);
 
   /// Replaces [removed] blocks from [first] on with [inserted] new ones,
   /// estimated by [estimate] (asked with the blocks' *new* indices), and keeps
