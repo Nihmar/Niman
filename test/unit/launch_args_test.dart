@@ -12,6 +12,10 @@ void main() {
     expect(parseLaunchArgs(['--new-todo']).action, ShortcutAction.newTodo);
     expect(parseLaunchArgs(['--new-list']).action, ShortcutAction.newList);
     expect(parseLaunchArgs(['--new-voice']).action, ShortcutAction.newVoice);
+    expect(
+      parseLaunchArgs(['--journal-today']).action,
+      ShortcutAction.journalToday,
+    );
   });
 
   test('an ordinary start asks for nothing', () {

@@ -145,20 +145,22 @@ Long-press the app icon for dynamic shortcuts (labels localized,
 published at startup):
 
 - **Quick note** — opens the quick note
+- **Today's journal entry** — opens today's [journal](journal.md) entry,
+  made first when there is none
 - **New todo** — opens the Todo tab's add-task dialog
 - **New note** — the Files FAB's "New note" flow
-- **New list note** — the Files FAB's "New list note" flow
-- **New voice note** — the Files FAB's "New voice note" flow (desktop
-  tray only; Android launchers show the first four)
+- **New list note** — the Files FAB's "New list note" flow (desktop tray
+  and Linux launcher; Android launchers show the first four)
+- **New voice note** — the Files FAB's "New voice note" flow (likewise)
 
 Each shortcut runs the same flow as its in-app button, so the two can
 never drift.
 
 ## CLI launch flags (desktop)
 
-Desktop builds accept `--quick-note`, `--new-todo`, `--new-note`,
-`--new-list`, `--new-voice`, routed through the same handler as the
-launcher actions.
+Desktop builds accept `--quick-note`, `--journal-today`, `--new-todo`,
+`--new-note`, `--new-list`, `--new-voice`, routed through the same
+handler as the launcher actions — and the tray menu lists the same ones.
 
 A path opens that file: `niman ~/project/README.md` opens it the way
 **Open file** does (see

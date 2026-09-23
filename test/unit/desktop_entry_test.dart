@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p;
 
 const _expected = <String, ShortcutAction>{
   'quick-note': ShortcutAction.quickNote,
+  'journal-today': ShortcutAction.journalToday,
   'new-todo': ShortcutAction.newTodo,
   'new-note': ShortcutAction.newNote,
   'new-list': ShortcutAction.newList,
@@ -35,7 +36,7 @@ void main() {
     return null;
   }
 
-  test('the five actions are declared in the main entry', () {
+  test('every action is declared in the main entry', () {
     final declared = valueOf('Actions')!
         .split(';')
         .where((action) => action.isNotEmpty)

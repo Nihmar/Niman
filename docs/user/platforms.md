@@ -35,7 +35,8 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   a per-library personal dictionary (right-click *Add to dictionary*,
   `<library>/.niman/dictionary.txt`).
 - **The tray icon**, where the desktop provides one. Its menu has *Open
-  Niman* at the top, the five quick actions, and *Quit*. By default the
+  Niman* at the top, the quick actions (today's journal entry among
+  them), and *Quit*. By default the
   window's × **hides Niman to the tray** and leaves it running, so
   desktop reminders keep firing; Settings → Appearance → *Close to the
   tray* turns that off, and then the × quits as it used to. *Quit* asks
