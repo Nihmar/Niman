@@ -10,11 +10,30 @@ import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/surface_controller.dart';
 
 /// What counting the whole text would say.
 int joined(SourceBuffer buffer) => countWords(buffer.text);
 
 void main() {
+  test(
+    'a count worked out in the background is taken, not redone here',
+    () async {
+      // The controller counted the note in an isolate, threw the answer away
+      // and counted it again on the UI isolate: 246 MB of words, seconds with
+      // the window frozen, on every open of the stress note.
+      final buffer = SourceBuffer.fromText('one two\nthree\n' * 200);
+      final controller = MarkdownSurfaceController(buffer);
+      final before = WordCount.linesCountedHere;
+      await controller.buildWords();
+      expect(controller.words.words, joined(buffer));
+      expect(
+        WordCount.linesCountedHere,
+        before,
+        reason: 'no line was counted on this isolate',
+      );
+    },
+  );
   test('a buffer counted line by line is the whole text counted', () {
     for (final text in <String>[
       '',

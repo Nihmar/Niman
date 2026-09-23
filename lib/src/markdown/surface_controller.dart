@@ -62,11 +62,13 @@ final class MarkdownSurfaceController {
   Future<void> buildWords() async {
     if (words.isCounted) return;
     final revision = buffer.revision;
-    await countInBackground(buffer);
+    final counted = await countInBackground(buffer);
     // The note was typed in while the count was worked out: what came back
     // is not its count. The next call starts again.
     if (buffer.revision != revision) return;
-    words.adopt(buffer);
+    // Taken as it came back: counting the buffer again here was the whole
+    // pass the isolate was there to spare, on the UI isolate.
+    words.adoptCount(counted);
   }
 
   /// The note's headings, read off a scan this controller keeps for itself.
