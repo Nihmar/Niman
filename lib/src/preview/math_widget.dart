@@ -6,8 +6,10 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:katex/katex.dart';
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/math_box_painter.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_line_break.dart';
+import 'package:niman/src/preview/math_raster.dart';
 
 /// Defers math typesetting while the preview is scrolling (T-PP-22).
 ///
@@ -412,10 +414,11 @@ Widget _mathBoxFromCache(
     size: size,
     child: CustomPaint(
       size: size,
-      painter: KatexBoxPainter(
+      painter: MathBoxPainter(
         box,
         fontSize: style.fontSize,
         color: _resolveColor(context, style),
+        devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
         inkPadEm: kInkOverflowPadEm,
       ),
     ),
@@ -433,7 +436,8 @@ final class _InlineMathBox extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderInlineMath(box, style, _resolveColor(context, style));
+    return _RenderInlineMath(box, style, _resolveColor(context, style))
+      ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
   }
 
   @override
@@ -444,7 +448,8 @@ final class _InlineMathBox extends LeafRenderObjectWidget {
     renderObject
       ..box = box
       ..style = style
-      ..color = _resolveColor(context, style);
+      ..color = _resolveColor(context, style)
+      ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
   }
 }
 
@@ -493,16 +498,23 @@ final class _RenderInlineMath extends RenderBox {
     TextBaseline baseline,
   ) => computeDistanceToActualBaseline(baseline);
 
+  /// The screen's pixels per logical pixel, for a formula drawn through an
+  /// image (`paintMath`).
+  double devicePixelRatio = 1;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     context.canvas
       ..save()
       ..translate(offset.dx, offset.dy);
-    KatexBoxPainter(
+    paintMath(
+      context.canvas,
+      size,
       box,
       fontSize: style.fontSize,
       color: color,
-    ).paint(context.canvas, size);
+      devicePixelRatio: devicePixelRatio,
+    );
     context.canvas.restore();
   }
 }

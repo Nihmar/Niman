@@ -19,11 +19,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:katex/katex.dart' show KatexBoxPainter, boxSizePx;
+import 'package:katex/katex.dart' show boxSizePx;
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/math_raster.dart';
 
 /// An inline formula on a line: its source range, markers included, and its
 /// TeX.
@@ -145,13 +146,21 @@ String unbrokenSource(int length) => 'x' * length;
 /// layout, each on the baseline its room sits on.
 final class InlineMathPainter extends CustomPainter {
   /// Creates the painter.
-  const new({required this.paragraph, required this.formulas});
+  const new({
+    required this.paragraph,
+    required this.formulas,
+    this.devicePixelRatio = 1,
+  });
 
   /// The key of the text whose paragraph holds the formulas' source.
   final GlobalKey paragraph;
 
   /// The formulas to draw.
   final List<InlineFormula> formulas;
+
+  /// The screen's pixels per logical pixel, for a formula drawn through an
+  /// image (`paintMath`).
+  final double devicePixelRatio;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -170,11 +179,14 @@ final class InlineMathPainter extends CustomPainter {
       canvas
         ..save()
         ..translate(room.left, baseline - ascent);
-      KatexBoxPainter(
+      paintMath(
+        canvas,
+        boxSizePx(formula.box, formula.fontSize),
         formula.box,
         fontSize: formula.fontSize,
         color: formula.color ?? const Color(0xFF000000),
-      ).paint(canvas, boxSizePx(formula.box, formula.fontSize));
+        devicePixelRatio: devicePixelRatio,
+      );
       canvas.restore();
     }
   }
@@ -182,6 +194,7 @@ final class InlineMathPainter extends CustomPainter {
   @override
   bool shouldRepaint(InlineMathPainter oldDelegate) =>
       oldDelegate.paragraph != paragraph ||
+      oldDelegate.devicePixelRatio != devicePixelRatio ||
       !_same(oldDelegate.formulas, formulas);
 
   static bool _same(List<InlineFormula> a, List<InlineFormula> b) {

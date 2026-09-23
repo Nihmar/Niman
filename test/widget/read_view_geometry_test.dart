@@ -25,7 +25,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:katex/katex.dart' show KatexBoxPainter, boxSizePxPadded;
+import 'package:katex/katex.dart' show boxSizePxPadded;
 import 'package:katex_dart/katex_dart.dart' show KatexOptions, renderToBox;
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -33,6 +33,7 @@ import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/preview/math_box_painter.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
@@ -144,7 +145,7 @@ List<Failure> geometryFailures(
             )
             .evaluate()
             .map((e) => (e.widget as CustomPaint).painter)
-            .whereType<KatexBoxPainter>()
+            .whereType<MathBoxPainter>()
             .toList();
         final shrunk = painters.any(
           (painter) => painter.fontSize < view.style.fontSize - 0.01,
