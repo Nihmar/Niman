@@ -7,7 +7,9 @@
 /// that rewrite only their own slot ([withKeyValueTag] for `due:`/`rem:`),
 /// so unknown tags (`rec:`, `foo:bar`, …) survive verbatim. A picker the
 /// user never touches leaves its text exactly as typed. Resolves to the
-/// new raw line, or null on cancel.
+/// new raw line, or null on cancel. An edit can also delete the task:
+/// tap is how a row is opened on every platform, so the dialog is where
+/// deleting is found without knowing the long-press menu exists.
 library;
 
 import 'package:flutter/material.dart';
@@ -20,12 +22,14 @@ import 'package:niman/src/ui/strings.dart';
 ///
 /// [today] stamps the creation date of an added task and seeds the
 /// pickers. [knownTokens] (sigil-included: `+p`, `@c`, `#t`) completes
-/// the word under the caret.
+/// the word under the caret. [onDelete], given only with [initial],
+/// shows Delete: the dialog closes as a cancel, then it runs.
 Future<String?> showTodoTaskDialog(
   BuildContext context, {
   required DateTime today,
   TodoTask? initial,
   Set<String> knownTokens = const <String>{},
+  VoidCallback? onDelete,
 }) {
   return showDialog<String>(
     context: context,
@@ -33,23 +37,26 @@ Future<String?> showTodoTaskDialog(
       initial: initial,
       today: today,
       knownTokens: knownTokens,
+      onDelete: initial == null ? null : onDelete,
     ),
   );
 }
 
 /// Description field with token completion, priority dropdown, due and
 /// reminder pickers, Cancel/Save (Save stays disabled while the
-/// description is blank).
+/// description is blank), and Delete in the title bar when editing.
 final class _TodoTaskDialog extends StatefulWidget {
   const new({
     required this.initial,
     required this.today,
     required this.knownTokens,
+    required this.onDelete,
   });
 
   final TodoTask? initial;
   final DateTime today;
   final Set<String> knownTokens;
+  final VoidCallback? onDelete;
 
   @override
   State<_TodoTaskDialog> createState() => _TodoTaskDialogState();
@@ -285,7 +292,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     final adding = widget.initial == null;
     final tokens = _fieldTokens();
     return AlertDialog(
-      title: Text(adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle),
+      title: _title(adding),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -430,6 +437,36 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
         ),
       ],
     );
+  }
+
+  /// The title, with Delete at its far end when editing: up in the
+  /// corner, well away from Save, and out of the action row, which has
+  /// no room for a third button on a phone.
+  Widget _title(bool adding) {
+    final text = Text(
+      adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle,
+    );
+    final onDelete = widget.onDelete;
+    if (onDelete == null) return text;
+    return Row(
+      children: [
+        Expanded(child: text),
+        IconButton(
+          key: const Key('todo-dialog-delete'),
+          tooltip: AppStrings.todoDeleteAction,
+          color: Theme.of(context).colorScheme.error,
+          icon: const Icon(Icons.delete_outline),
+          onPressed: () => _delete(onDelete),
+        ),
+      ],
+    );
+  }
+
+  /// Closes the dialog as a cancel, then deletes: nothing is saved first.
+  void _delete(VoidCallback onDelete) {
+    _log.debug('todo dialog delete');
+    Navigator.pop(context);
+    onDelete();
   }
 
   /// The known tokens completing the word under the caret, capped so a huge
