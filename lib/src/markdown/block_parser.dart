@@ -96,7 +96,10 @@ final class BlockParser {
     final masked = _masker.mask(text);
     final walk = _Walk(masked);
     final definitions = scope();
-    final document = md.Document(extensionSet: md.ExtensionSet.gitHubFlavored);
+    final document = md.Document(
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+      inlineSyntaxes: _htmlStyleSyntaxes,
+    );
     // The two constructs that are a *document's*, not a block's. A link
     // reference and a footnote definition are written in one block and used in
     // another, and the package keeps them on its `Document` — which a per-block
@@ -411,9 +414,25 @@ final class _Walk {
         return _widenHeading(text, inner);
       case 'a' || 'img':
         return _overLink(text, inner);
+      case 'u' || 'sup' || 'sub':
+        return _overTags(text, inner, tag);
       default:
         return inner;
     }
+  }
+
+  /// Grows a range over the `<tag>` before it and the `</tag>` after it.
+  static (int, int) _overTags(String text, (int, int) inner, String tag) {
+    final open = '<$tag>';
+    final close = '</$tag>';
+    final start = inner.$1 - open.length;
+    final end = inner.$2 + close.length;
+    if (start < 0 || end > text.length) return inner;
+    if (text.substring(start, inner.$1).toLowerCase() != open ||
+        text.substring(inner.$2, end).toLowerCase() != close) {
+      return inner;
+    }
+    return (start, end);
   }
 
   /// Grows a range over a run of marker characters on each side, when one is
@@ -497,6 +516,9 @@ final class _Walk {
     'em' => StyleKind.emphasis,
     'strong' => StyleKind.strong,
     'del' => StyleKind.strikethrough,
+    'u' => StyleKind.underline,
+    'sup' => StyleKind.superscript,
+    'sub' => StyleKind.subscript,
     'code' => StyleKind.code,
     'a' => StyleKind.link,
     'img' => StyleKind.image,
@@ -669,4 +691,30 @@ final class Footnote {
 
   @override
   String toString() => 'Footnote($label: $body)';
+}
+
+/// The HTML tags a note uses for what Markdown has no syntax for, read as the
+/// constructs they are rather than as raw HTML.
+final List<md.InlineSyntax> _htmlStyleSyntaxes = <md.InlineSyntax>[
+  for (final tag in const <String>['u', 'sup', 'sub']) _HtmlStyleSyntax(tag),
+];
+
+/// `<tag>…</tag>` on one line, as an element whose contents are parsed like
+/// any other inline text — so `<u>**x**</u>` is bold and underlined.
+///
+/// The package reads inline HTML as text it passes through, which a renderer
+/// that draws runs cannot draw: the toolbar's underline wrote `<u>` into the
+/// note, and both the read view and `live` mode showed the tags.
+final class _HtmlStyleSyntax extends md.InlineSyntax {
+  new(this.tag)
+    : super('<$tag>(.+?)</$tag>', startCharacter: 0x3C, caseSensitive: false);
+
+  final String tag;
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    final children = md.InlineParser(match[1]!, parser.document).parse();
+    parser.addNode(md.Element(tag, children));
+    return true;
+  }
 }

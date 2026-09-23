@@ -39,6 +39,11 @@ void main() {
       expect(_visible('just words').plainText, 'just words');
     });
 
+    test('the tags of underline and superscript are markers', () {
+      expect(_visible('a <u>under</u> b').plainText, 'a under b');
+      expect(_segments('x<sup>2</sup>'), <String>['plain:x', 'superscript:2']);
+    });
+
     test('strong and emphasis, both spellings', () {
       for (final source in <String>[
         'a **bold** b',

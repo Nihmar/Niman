@@ -157,6 +157,37 @@ void main() {
     expect(source.where((span) => span.text == '**').any(hidden), isFalse);
   });
 
+  testWidgets('live hides the tags the toolbar writes, and draws them', (
+    tester,
+  ) async {
+    // `<u>` and `<sup>` are what the underline and superscript buttons
+    // write; `live` showed them as the tags they are.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\na <u>under</u> and x<sup>2</sup>\n',
+    );
+    final spans = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+    }
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+    for (final tag in ['<u>', '</u>', '<sup>', '</sup>']) {
+      expect(
+        spans.where((span) => span.text == tag).every(hidden),
+        isTrue,
+        reason: '"$tag" is syntax',
+      );
+    }
+    final under = spans.singleWhere((span) => span.text == 'under');
+    expect(under.style?.decoration, TextDecoration.underline);
+    expect(hidden(under), isFalse);
+  });
+
   testWidgets('live reveals the markers of the line the caret is in', (
     tester,
   ) async {

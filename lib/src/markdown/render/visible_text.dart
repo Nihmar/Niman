@@ -211,6 +211,14 @@ List<(int, int)> _markersOf(String text, StyleRun run) {
       return _delimiterRuns(text, run, <int>[0x2A, 0x5F, 0x7E]);
     case StyleKind.code:
       return _delimiterRuns(text, run, const <int>[0x60]);
+    case StyleKind.underline:
+    case StyleKind.superscript:
+    case StyleKind.subscript:
+      // `<u>` and `</u>`: the tags the parser measured the run over.
+      return <(int, int)>[
+        if (run.innerStart > run.start) (run.start, run.innerStart),
+        if (run.end > run.innerEnd) (run.innerEnd, run.end),
+      ];
     case StyleKind.heading:
       return _headingMarkers(text, run);
     case StyleKind.link:

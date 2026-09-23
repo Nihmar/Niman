@@ -81,6 +81,38 @@ void main() {
       );
     });
 
+    test('the HTML the toolbar writes: underline, superscript, subscript', () {
+      // The package passes inline HTML through as text, which a renderer
+      // that draws runs showed as tags; these three are read as the
+      // constructs they are, tags included in the run as its markers.
+      for (final (source, kind, slice, inner)
+          in <(String, StyleKind, String, String)>[
+            ('a <u>under</u> b', StyleKind.underline, '<u>under</u>', 'under'),
+            ('x<sup>2</sup> y', StyleKind.superscript, '<sup>2</sup>', '2'),
+            ('H<sub>2</sub>O', StyleKind.subscript, '<sub>2</sub>', '2'),
+            ('a <U>caps</U> b', StyleKind.underline, '<U>caps</U>', 'caps'),
+          ]) {
+        final parsed = _parse(source);
+        final run = _run(parsed, kind);
+        expect(run, isNotNull, reason: source);
+        expect(_slice(parsed, run!), slice, reason: source);
+        expect(
+          parsed.text.substring(run.innerStart, run.innerEnd),
+          inner,
+          reason: source,
+        );
+      }
+      expect(_runs('<u>**both**</u>'), <String>[
+        'underline:<u>**both**</u>',
+        'strong:**both**',
+      ], reason: 'the contents are parsed like any other inline text');
+      expect(
+        _run(_parse('a `<u>x</u>` b'), StyleKind.underline),
+        isNull,
+        reason: 'in a code span it is code',
+      );
+    });
+
     test('a code span is a masked span, not a parser run', () {
       // The masker sets code spans aside before the parser sees the block,
       // precisely so that a `$` or a `[[` inside one is not read as something
