@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -186,6 +187,59 @@ void main() {
     final under = spans.singleWhere((span) => span.text == 'under');
     expect(under.style?.decoration, TextDecoration.underline);
     expect(hidden(under), isFalse);
+  });
+
+  testWidgets('live draws what a line marker stood for, beside the text', (
+    tester,
+  ) async {
+    // A bullet, a number, a checkbox, a quote's bar and a rule: the markers
+    // are hidden by style, so what they meant is painted behind the line.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- item\n1. one\n- [x] done\n\n> quoted\n\n---\n',
+    );
+    final painters = <LiveDecorationPainter>[
+      for (final paint in tester.widgetList<CustomPaint>(
+        find.byType(CustomPaint),
+      ))
+        if (paint.painter case final LiveDecorationPainter painter) painter,
+    ];
+    final shapes = painters.map((painter) => painter.shape).toList();
+    expect(shapes, contains(const LineShape(marker: 0)));
+    expect(shapes.any((shape) => shape.ordinal == 1), isTrue);
+    expect(shapes.any((shape) => shape.task == true), isTrue);
+    expect(shapes.any((shape) => shape.quoteDepth == 1), isTrue);
+    expect(shapes.any((shape) => shape.rule), isTrue);
+    expect(
+      painters.every((painter) => !painter.revealed),
+      isTrue,
+      reason: 'the caret is on none of them',
+    );
+    final rule = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text == '---') rule.add(span);
+        return true;
+      });
+    }
+    expect(rule.single.style?.fontSize, 0.01, reason: 'the rule is drawn');
+
+    // The caret on the item: its marker is the source again, and nothing
+    // stands in for it.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 9,
+      text: 'caret\n\n- item\n',
+    );
+    final item = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((paint) => paint.painter)
+        .whereType<LiveDecorationPainter>()
+        .single;
+    expect(item.revealed, isTrue);
   });
 
   testWidgets('live reveals the markers of the line the caret is in', (

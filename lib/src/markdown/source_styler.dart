@@ -159,6 +159,9 @@ final class SourceStyler {
   List<Block>? get blocks =>
       revision == buffer.revision ? _scanner.index.blocks : null;
 
+  /// The block holding [line], scanned up to it when the scan still owes it.
+  Block? blockOf(int line) => _scanner.blockAt(line);
+
   /// Line [line]'s tokens, disjoint and sorted.
   List<Token> tokensOf(int line) {
     final block = _scanner.blockAt(line);
