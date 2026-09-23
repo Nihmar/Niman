@@ -400,6 +400,37 @@ void main() {
     expect(three - two, closeTo(_theme.listIndentPerLevel, 0.1));
   });
 
+  testWidgets("an item's next line starts under its text", (tester) async {
+    // A line the note wrote under an item — indented to its text, or lazy
+    // — was drawn at the margin with its spaces, left of the item's text.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- one\n  two\n  - [ ] three\n    four\nlazy\n',
+    );
+    // Where the glyph at [offset] is drawn: its box, not a caret — a caret
+    // mid-line stands at the glyph before, a hidden one with no spacing,
+    // and at a paragraph's start at the glyph's own box.
+    double textLeft(String line, int offset) {
+      final p = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText() == line);
+      final box = p
+          .getBoxesForSelection(
+            TextSelection(baseOffset: offset, extentOffset: offset + 1),
+          )
+          .first;
+      return p.localToGlobal(Offset(box.left, 0)).dx;
+    }
+
+    final one = textLeft('- one', 2);
+    expect(textLeft('  two', 2), closeTo(one, 0.01));
+    final three = textLeft('  - [ ] three', 8);
+    expect(textLeft('    four', 4), closeTo(three, 0.01));
+    expect(textLeft('lazy', 0), closeTo(three, 0.01), reason: 'lazy: the item');
+  });
+
   testWidgets("a wrapped item's next row starts under its text", (
     tester,
   ) async {
