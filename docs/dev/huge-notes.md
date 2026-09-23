@@ -107,126 +107,75 @@ written next to it.
    per line and follows the edits (`editor/word_count_index.dart`), and the
    outline is read off the blocks the pane's own scan already produced
    (`editor/outline.dart`, `outlineOfBlocks`). See the table above.
-3. **An Enter or a line join costs O(block), and O(note) when the block is the
-   note.** The buffer is not the cost: a character edit moves its two lists in
-   under a millisecond, and the state list's own tail move measured a
-   millisecond at 2.7 M lines. The scanner is. It re-scans from the first line
-   of the *block* the edit landed in — a rebuild that starts mid-block would
-   split a paragraph in two — and it stops where the state entering a line
-   agrees with what it was and the blocks after it are already right again.
+3. **An edit costs O(block), and O(note) when the block is the note — and an
+   edit that changes the rest of the note costs the rest of the note.** Two
+   different costs were filed here as one, and the second is the one the
+   stress note actually has.
 
-   `dart run tool/scanner_edit_bench.dart "Quicknote.md"` (2 757 545 lines,
-   2 014 482 blocks) shows both halves of that:
+   **The measurement, corrected (2026-09-23).** This item used to say that
+   `Quicknote.md`'s expensive edits land "inside a 137 k-line `$$…$$` block".
+   The bench's own report says otherwise: the note's **longest block is 36
+   lines** (a paragraph). What `tool/scanner_edit_bench.dart` edits at 25 %,
+   50 %, 75 % and 90 % is the blank line before a `$$` opener or the opener
+   itself, and replacing that character *destroys the opener*: every `$$`
+   after it now closes where it opened and opens where it closed, all the way
+   down. The rescan did not fail to converge — there was nothing to converge
+   to, and a fresh scan of the edited note agrees with every one of the
+   1 378 772 lines it re-read. So the two costs are:
 
-   | Where the edit lands | Lines re-scanned |
-   |---|---|
-   | in a one-line paragraph or a blank between blocks (10%) | 3 |
-   | a one-character edit that merges a blank line into the line below, inside a 137 k-line `$$…$$` block (50%) | 1 378 781 |
-   | inside another `$$…$$` block (75%, 90%) | 689 389, 275 756 |
+   | | What it is | Before | Now |
+   |---|---|---|---|
+   | a | a keystroke inside one huge block (a paragraph with no blank line, a formula or fence that never closes) | the block, per keystroke: 300 000 lines, 80 ms, for the synthetic 300 k-line paragraph | **2 lines** — fixed, below |
+   | b | a keystroke that changes what the rest of the note *is*: typing the second `$` of a `$$`, a fence's third backtick, the `---` that opens frontmatter | the rest of the note: 1 378 772 lines, 822 ms at 50 % of `Quicknote.md` | still the rest of the note — the next step, below |
 
-   The 50% number is the interesting one: the edit *removes a line* (the blank
-   line it starts in becomes part of the line after it), so the states after it
-   are the states of lines that have moved, and the scan cannot trust them. It
-   falls back to the block-boundary rule, and inside a `$$…$$` block there is
-   no boundary to stop at until the block closes — 137 k lines later. With the
-   line count unchanged the state alone is enough, and the same edit costs one
-   line (measured: a 200 000-line math block re-scans 200 000 lines at 3–5 ms
-   in the synthetic case, but only because the convergence is cheap there; the
-   real note's cost is 78–166 ms for the scan itself).
+   **(a) is fixed: the rescan starts at the edit and stops where the scan
+   agrees with what was there** (`BlockScanner._rescanFrom`). Both ends used
+   to be the block's: the rebuild began at the first line of the block the
+   edit was in, and stopped only at a blank line with a plain state and a kept
+   block starting under it — inside a block there is neither, so it ran to
+   the block's end. The six attempts recorded in this file's history tried to
+   narrow the start and keep the rule for the end; the start was not where the
+   cost was.
 
-   **What the fix has to be, and what was tried (2026-09-22).** Not chunked
-   line storage, which the numbers above rule out. The scan has to be able to
-   start at the edit instead of at the block's first line, and the state a
-   block is entered in — kept with the block — is what a rebuild that starts
-   there needs.
+   * **The start.** The lines before the edit are the same text entered in
+     the same states, so the block they are in is the block it was, up to the
+     edit. The rebuild takes that block *open* — cut at the edit — and asks of
+     the edited line what a fresh scan asks: does it go on with the open
+     block, or start one? The blocks are built line by line as the scan goes
+     (`_BlockBuilder`), so the open block is always known. The one exception is
+     a line before the edit that has a pipe in it: it asks the line under it
+     whether it heads a table, so it is not the line it was, and its block is
+     rebuilt with the edit.
+   * **The end.** A line's kind and exit state read its own text, its entering
+     state and at most one line either side, so once two unchanged lines are
+     entered in the states they had, every line after them is what it was.
+     What the state cannot say is which *block* the line is in, because that
+     is a question about the pair; so the scan also looks the old block up
+     (`_convergesAt`) and stops only when the fresh scan would make the same
+     one — either the old block starts on this line and the open one does not
+     take it, or the open block takes it and has the old block's shape
+     (`Block.sameShape`), in which case it ends where the old block did. Not on
+     a blank run and not on an item whose count would differ, because the
+     block after a blank run counts its items from the block before it.
 
-   That was built, three times, and it is not enough on its own. A narrowed
-   rebuild produces the blocks for `[edit, convergence)` and leaves the old
-   block's prefix in the list, so the splice has to keep that prefix — and a
-   *rebuilt* block directly after a *kept* one is two blocks where the merge
-   would have made one:
+   Held by `block_scanner_test.dart`: *a keystroke inside a block the size of
+   the note re-scans a line or two* (a 50 000-line paragraph and formula, a
+   character, an Enter and a line join, each under five lines), and
+   *line-shaped notes: random edits agree with a fresh scan* — 200 notes of up
+   to two hundred lines built from real constructs, twelve edits each, every
+   field of every block compared with a fresh scan. The older random test
+   compared `Block.toString`, which leaves out the list count, the heading
+   level and the fence's language; with those compared it found three bugs of
+   its own, all fixed first (`2c3ed44`): a list written `1. 1. 1.` renumbered
+   to 1, 1, 2 under a keystroke, a rescan that stopped on the second of two
+   blank lines split the run in two, and an item after a quote counted on from
+   the quote's list.
 
-   * a two-line paragraph edited on its second line rebuilt as
-     `Block(paragraph 1..2)` after `Block(paragraph 0..1)` where the fresh
-     scan says `Block(paragraph 0..2)`;
-   * a lazily continued quote rebuilt from its second line lost the
-     `quoteDepth` its first line carries, and split in two;
-   * a 9 000-line note of three-line paragraphs counted 4 999 blocks where a
-     fresh scan has 5 000.
-
-   Recomputing the states between the block and the edit (so a narrowed
-   rebuild of a *quote* would get its depth) and splicing from the block
-   before the edit was tried too, and fails the same way. The reason is in
-   the count: the narrowed rebuild replaces the containing block's suffix
-   with the rebuilt blocks, and the blocks between the rebuild's end and the
-   convergence point are dropped with it — the rebuilt range covers less than
-   the old block did, so the list stops tiling the document.
-
-   **The whole shape of the fix, then, and how far it got (fifth attempt).**
-   Keep the containing block's prefix (`start..from`), rebuild
-   `from..convergence`, and *merge the two when the block they make merges* —
-   a paragraph's second line, a quote's lazy continuation. That merge is what
-   makes the block count come out right, and with it the 9 000-line note of
-   three-line paragraphs counts 5 000 blocks against a fresh scan's 5 000, and
-   the keystroke costs a handful of lines (that test passed for the first
-   time).
-
-   Two things it still got wrong, both in `block_cliff_test`'s
-   "an edit at the top, the middle and the end":
-
-   * an edit that starts *at* a block's first line (the blank line at 4) kept
-     the block that ended there and rebuilt the same line, so the list had
-     `Block(blank 4..5)` twice;
-   * an edit *inside* the frontmatter rebuilt `Block(frontmatter 0..5)` where
-     a fresh scan says `Block(frontmatter 0..4), Block(blank 4..5)`.
-
-   So the direction is right and the splice's edges are not: a prefix may not
-   be kept when the edit starts at the block's own first line, and a block
-   whose merge rule is not the paragraph's (frontmatter runs to its closing
-   line, not to the next blank) has to be merged the way the scan merges it.
-
-   **Sixth attempt, kept.** Both edges fixed — the prefix is kept only when
-   the rebuild really starts inside the block (`narrowed`) and the join uses
-   `_mergesInto(prefix.kind, …)`, the scanner's own rule — and the narrowing
-   is widened from "the block was entered at the top level" to "every line of
-   the block is entered in the block's state" (`_holdsOneState`: every kind
-   but a quote and a list item). The join also *checks its work*: the states
-   between the block's first line and the edit are recomputed, and the
-   narrowing only happens when the state that walk arrives at is the one the
-   note recorded for the edit's line (`_entering[from] == probing`). That
-   check is what `source_styler_test` demanded — without it a `$$` line came
-   out as `codeFence` after some random edits, a state right per line and
-   wrong per block.
-
-   With it, **the whole suite is green** (4 758 tests), including
-   `block_scanner_test`'s 40-round random-edit property and
-   `source_styler_test`'s.
-
-   **The performance gain did not follow, and the measurements above are why
-   it was thought to.** `scanner_edit_bench.dart` and the same-line-count
-   probe still read 2 068 158 lines for an edit inside the `$$…$$` block at
-   25 % of the 246 MB note, and 137 8772 at 50 %. What those numbers are
-   measuring is not the walk the fix removes: the scan still has to run to
-   the *block's close* before the convergence rule fires, because that rule
-   wants a block boundary (`_isBlockBoundary`) and a boundary in the old
-   block list (`_hasBoundaryAt`), and inside one long block there is neither
-   until it ends. Narrowing the rebuild moved work that was not the cost.
-
-   So item 3 stands as it did: the scan's cost is still the containing block,
-   and a note whose block is the note is still O(note) per keystroke. The
-   next step is not the rebuild — it is the convergence rule: let a narrowed
-   scan stop where the *state* agrees, rather than where the block list has a
-   boundary.
-
-   **What is left, stated plainly.** The scan's cost is the containing block,
-   and a whole note can be one block, so the path is not gone for a note
-   whose head is a `$$…$$` block of a million lines or a paragraph with no
-   blank line. The buffer is not the cost and neither is `_entering`; the
-   walk from the block's first line is, and the fix is a change to how
-   `_rescanFrom` splices and to `Block`/`BlockScanner` together. The
-   random-edit property test (`block_scanner_test`, 40 rounds by 12 edits
-   against a fresh scan, plus the test that reads through unpaid shifts) is
-   the gate: it caught every attempt.
+   **(b) is still open, and it cannot be made O(change): the change is
+   O(note).** What can be bounded is how much of it one keystroke pays for.
+   The scan has to be current for the lines on screen and nowhere else, so
+   the rest of it can be carried on across frames — which is what editors
+   that parse Markdown incrementally do. That is the next step.
 
 4. ~~**A reload from disk compares the whole text.**~~ Done, and not with a
    hash: the watcher is what asks for the reload, and a watcher reports that

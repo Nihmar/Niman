@@ -407,6 +407,110 @@ void main() {
       }
     });
 
+    test('line-shaped notes: random edits agree with a fresh scan', () {
+      // The documents above are a few dozen characters, too short for a
+      // rebuild to stop anywhere but at the note's end. These are notes of
+      // up to two hundred lines made of real constructs, so a rebuild that
+      // starts at the edit and stops inside a block — the two ends a
+      // keystroke's cost is bounded by — is exercised on every shape.
+      const pieces = <String>[
+        '',
+        '',
+        'prose',
+        'more prose',
+        r'$$',
+        'x = 1',
+        r'$$x$$',
+        '```',
+        '```py',
+        '~~~',
+        '# h',
+        '## h2',
+        '- item',
+        '1. one',
+        '  - sub',
+        '   cont',
+        '> quote',
+        '> > deep',
+        'lazy',
+        '    code',
+        '| a | b |',
+        '|---|---|',
+        '---',
+        '<div>',
+        '</div>',
+        '2. two',
+        '- [ ] t',
+      ];
+      final random = Random(20260923);
+      String piece() => pieces[random.nextInt(pieces.length)];
+      for (var round = 0; round < 200; round++) {
+        final buffer = SourceBuffer.fromText(
+          List<String>.generate(
+            20 + random.nextInt(180),
+            (_) => piece(),
+          ).join('\n'),
+        );
+        final scanner = BlockScanner(buffer);
+        for (var step = 0; step < 12; step++) {
+          final line = random.nextInt(buffer.lineCount);
+          final at = buffer.offsetOfLine(line);
+          final end = at + buffer.lineAt(line).length;
+          final edit = switch (random.nextInt(6)) {
+            0 => buffer.replaceRange(at, at, '${piece()}\n'),
+            1 when line > 0 => buffer.replaceRange(at - 1, at, ''),
+            2 => buffer.replaceRange(at, end, piece()),
+            3 => buffer.replaceRange(at, at, 'x'),
+            4 when end > at => buffer.replaceRange(at, at + 1, ''),
+            _ => buffer.replaceRange(end, end, '\n${piece()}'),
+          };
+          scanner.edited(edit);
+          final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+          expect(
+            _described(scanner),
+            _described(fresh),
+            reason: 'round $round step $step on ${buffer.text}',
+          );
+        }
+      }
+    });
+
+    test('a keystroke inside a block the size of the note re-scans a line '
+        'or two', () {
+      // A paragraph with no blank line and a formula that never closes are
+      // each one block, and a rebuild that began at the block's first line
+      // re-scanned the note for every character (`docs/dev/huge-notes.md`
+      // item 3).
+      for (final (label, text) in <(String, String)>[
+        (
+          'paragraph',
+          List<String>.generate(50000, (at) => 'prose $at').join('\n'),
+        ),
+        (
+          'formula',
+          [r'$$', for (var at = 0; at < 50000; at++) 'x_$at', r'$$'].join('\n'),
+        ),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        for (final (start, end, inserted) in <(int, int, String)>[
+          (buffer.offsetOfLine(25000), buffer.offsetOfLine(25000), 'x'),
+          (buffer.offsetOfLine(30000), buffer.offsetOfLine(30000), 'new\n'),
+          (buffer.offsetOfLine(40000) - 1, buffer.offsetOfLine(40000), ''),
+        ]) {
+          final before = scanner.scannedLineTotal;
+          scanner.edited(buffer.replaceRange(start, end, inserted));
+          expect(
+            scanner.scannedLineTotal - before,
+            lessThan(5),
+            reason: '$label, edit at $start',
+          );
+        }
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(_described(scanner), _described(fresh), reason: label);
+      }
+    });
+
     test('an item typed in keeps its place in the count', () {
       // CommonMark numbers a list from its first item, so `1. 1. 1.` reads 1,
       // 2, 3; a rebuild that starts on an item's own line has to count on

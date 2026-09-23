@@ -222,11 +222,13 @@ void main() {
       expect(scanner.scannedLineTotal - before, lessThan(30));
     });
 
-    test('a keystroke in the 2 000-line paragraph costs that paragraph', () {
-      // The bound is the block, and this fixture has the worst block there is:
-      // one paragraph of 2 000 lines, where no convergence point exists until
-      // it ends. That is O(block) rather than O(document) — the other 8 000
-      // lines are untouched — and it is the number a caller has to plan for.
+    test('a keystroke in the 2 000-line paragraph costs a line or two', () {
+      // This fixture has the worst block there is: one paragraph of 2 000
+      // lines. The bound used to be that block — a rebuild began at its first
+      // line and found no place to stop until it ended. It begins at the edit
+      // now, and stops where the state and the block agree with what was
+      // there, which inside a paragraph is the line after the edit
+      // (`docs/dev/huge-notes.md` item 3).
       var start = -1;
       for (final block in scanner.index.blocks) {
         if (block.lineCount >= 2000) {
@@ -239,11 +241,11 @@ void main() {
       final edit = buffer.insert(buffer.offsetOfLine(start + 10), 'x');
       scanner.edited(edit);
       final cost = scanner.scannedLineTotal - before;
-      expect(cost, greaterThan(1000), reason: 'the whole paragraph is re-read');
+      expect(cost, lessThan(5), reason: 'the edit, not the paragraph');
+      final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
       expect(
-        cost,
-        lessThan(buffer.lineCount - 1000),
-        reason: 'not the document',
+        scanner.index.blocks.map((block) => block.toString()),
+        fresh.index.blocks.map((block) => block.toString()),
       );
     });
   });
