@@ -463,6 +463,14 @@ final class BlockView extends StatelessWidget {
     final rows = _tableRows(parsed.text);
     if (rows.isEmpty) return const SizedBox.shrink();
     final border = TableBorder.all(color: theme.tableBorder, width: 0.5);
+    // As wide as its columns, as `live` draws it: laid out on the pane's
+    // width, a table spread what its columns left over evenly across them,
+    // and a two-word column stood half the pane wide.
+    return Align(alignment: Alignment.topLeft, child: _grid(rows, border));
+  }
+
+  /// The table's grid: its [rows], their cells, and the [border].
+  Widget _grid(List<List<String>> rows, TableBorder border) {
     return Table(
       border: border,
       defaultColumnWidth: const IntrinsicColumnWidth(),
