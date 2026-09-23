@@ -3148,7 +3148,16 @@ final class _Line extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Expanded(child: _number() ?? const SizedBox.shrink()),
+                    Expanded(
+                      child: number == null
+                          ? const SizedBox.shrink()
+                          : ValueListenableBuilder<CaretSpot>(
+                              valueListenable: spot,
+                              builder: (context, at, _) => _takesNoRoom(at)
+                                  ? const SizedBox.shrink()
+                                  : _number()!,
+                            ),
+                    ),
                     // The gap between the numbers and the text is where the
                     // fold arrows live, as in the legacy gutter.
                     SizedBox(width: _gutterGap, child: _foldArrow(context)),
@@ -3182,6 +3191,25 @@ final class _Line extends StatelessWidget {
 
   /// The line with the caret at [at]: its text, and in `live` what stands in
   /// for the source it hides.
+  /// Whether the line takes no room with the caret at [at]: a typeset
+  /// formula's lines past its first (the formula is drawn under that one),
+  /// definitions out of the caret's reach, a table's delimiter row. Its
+  /// number takes none either, or the row would stay open around nothing.
+  bool _takesNoRoom(CaretSpot at) {
+    final math = formula;
+    if (math != null &&
+        mathCache != null &&
+        (at.line < math.start || at.line >= math.end) &&
+        index != math.start) {
+      return true;
+    }
+    final defined = definition;
+    if (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) {
+      return true;
+    }
+    return tableRow?.call(at)?.delimiter ?? false;
+  }
+
   Widget _content(BuildContext context, CaretSpot at) {
     final mine = at.line == index;
     final math = formula;
