@@ -1214,6 +1214,37 @@ final class CroatianStrings extends Strings {
       'Predložak dnevnika $path nije se mogao pročitati: unos je stvoren bez '
       'njega.';
   @override
+  String get journalIntro =>
+      'Jedna bilješka dnevno, stvorena iz predloška kad taj dan otvoriš prvi '
+      'put. Ove postavke putuju s knjižnicom.';
+  @override
+  String get journalFolderTitle => 'Mapa dnevnika';
+  @override
+  String get journalFolderSubtitle => 'Kamo idu unosi';
+  @override
+  String get journalEntryNameTitle => 'Naziv unosa';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM ili M, DD ili D za datum; / stvara mapu; tekst u '
+      "'navodnicima' ostaje kakav jest";
+  @override
+  String journalEntryNamePreview(String path) => 'Današnji unos: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Treba YYYY, mjesec (MM ili M) i dan (DD ili D), i ništa što naziv '
+      'datoteke ne smije sadržavati';
+  @override
+  String get journalTemplateTitle => 'Predložak';
+  @override
+  String get journalTemplateSubtitle => 'Čime počinje novi unos';
+  @override
+  String get journalTemplateNone => 'Nijedan: naslov s datumom';
+  @override
+  String get journalDayStartTitle => 'Novi dan počinje u';
+  @override
+  String get journalDayStartSubtitle =>
+      'Kasno liježeš? U 04:00 noć ostaje na prethodnom danu';
+  @override
   String get commandsTitle => 'Naredbe';
   @override
   String get commandsIntro =>

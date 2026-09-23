@@ -1224,6 +1224,37 @@ final class BasqueStrings extends Strings {
       'Ezin izan da $path egunkari-txantiloia irakurri: sarrera hura gabe '
       'sortu da.';
   @override
+  String get journalIntro =>
+      'Ohar bat egun bakoitzeko, txantiloi batetik sortua egun hori lehen '
+      'aldiz irekitzean. Ezarpen hauek liburutegiarekin bidaiatzen dute.';
+  @override
+  String get journalFolderTitle => 'Egunkariaren karpeta';
+  @override
+  String get journalFolderSubtitle => 'Sarrerak nora doazen';
+  @override
+  String get journalEntryNameTitle => 'Sarreraren izena';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM edo M, DD edo D datarako; / karpeta bat sortzen du; 'komatxo "
+      "arteko' testua dagoen bezala geratzen da";
+  @override
+  String journalEntryNamePreview(String path) => 'Gaurko sarrera: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'YYYY, hilabete bat (MM edo M) eta egun bat (DD edo D) behar ditu, eta '
+      'fitxategi-izen batek eduki ezin duen ezer ez';
+  @override
+  String get journalTemplateTitle => 'Txantiloia';
+  @override
+  String get journalTemplateSubtitle => 'Zerekin hasten den sarrera berri bat';
+  @override
+  String get journalTemplateNone => 'Bat ere ez: data duen izenburua';
+  @override
+  String get journalDayStartTitle => 'Egun berria ordu honetan hasten da';
+  @override
+  String get journalDayStartSubtitle =>
+      'Berandu? 04:00etan gaua aurreko egunean geratzen da';
+  @override
   String get commandsTitle => 'Komandoak';
   @override
   String get commandsIntro =>

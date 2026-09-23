@@ -1211,6 +1211,37 @@ final class EnglishStrings extends Strings {
       'The journal template $path could not be read: the entry was made '
       'without it.';
   @override
+  String get journalIntro =>
+      'One note per day, made from a template the first time you open that '
+      'day. These settings travel with the library.';
+  @override
+  String get journalFolderTitle => 'Journal folder';
+  @override
+  String get journalFolderSubtitle => 'Where the entries go';
+  @override
+  String get journalEntryNameTitle => 'Entry name';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM or M, DD or D for the date; / makes a folder; 'quoted' text "
+      'stays as it is';
+  @override
+  String journalEntryNamePreview(String path) => "Today's entry: $path";
+  @override
+  String get journalEntryNameInvalid =>
+      'Needs YYYY, a month (MM or M) and a day (DD or D), and nothing a file '
+      'name cannot hold';
+  @override
+  String get journalTemplateTitle => 'Template';
+  @override
+  String get journalTemplateSubtitle => 'What a new entry starts with';
+  @override
+  String get journalTemplateNone => 'None: a heading with the date';
+  @override
+  String get journalDayStartTitle => 'A new day starts at';
+  @override
+  String get journalDayStartSubtitle =>
+      'Up late? At 04:00 the night stays on the day before';
+  @override
   String get commandsTitle => 'Commands';
   @override
   String get commandsIntro =>

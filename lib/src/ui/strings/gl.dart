@@ -1232,6 +1232,37 @@ final class GalicianStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'Non se puido ler o modelo do diario $path: a entrada creouse sen el.';
   @override
+  String get journalIntro =>
+      'Unha nota ao día, creada a partir dun modelo a primeira vez que abres '
+      'ese día. Estes axustes viaxan coa biblioteca.';
+  @override
+  String get journalFolderTitle => 'Cartafol do diario';
+  @override
+  String get journalFolderSubtitle => 'Onde van as entradas';
+  @override
+  String get journalEntryNameTitle => 'Nome da entrada';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM ou M, DD ou D para a data; / crea un cartafol; o texto 'entre "
+      "comiñas' queda tal cal";
+  @override
+  String journalEntryNamePreview(String path) => 'Entrada de hoxe: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Precisa YYYY, un mes (MM ou M) e un día (DD ou D), e nada que un nome '
+      'de ficheiro non poida conter';
+  @override
+  String get journalTemplateTitle => 'Modelo';
+  @override
+  String get journalTemplateSubtitle => 'Con que comeza unha entrada nova';
+  @override
+  String get journalTemplateNone => 'Ningún: un título coa data';
+  @override
+  String get journalDayStartTitle => 'Un novo día comeza ás';
+  @override
+  String get journalDayStartSubtitle =>
+      'Deitaste tarde? Ás 04:00 a noite queda no día anterior';
+  @override
   String get commandsTitle => 'Ordes';
   @override
   String get commandsIntro =>

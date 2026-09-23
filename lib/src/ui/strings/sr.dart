@@ -1223,6 +1223,37 @@ final class SerbianStrings extends Strings {
       'Шаблон дневника $path није могао да се прочита: унос је направљен без '
       'њега.';
   @override
+  String get journalIntro =>
+      'Једна белешка дневно, направљена из шаблона када тај дан први пут '
+      'отвориш. Ова подешавања путују са библиотеком.';
+  @override
+  String get journalFolderTitle => 'Фасцикла дневника';
+  @override
+  String get journalFolderSubtitle => 'Где иду уноси';
+  @override
+  String get journalEntryNameTitle => 'Назив уноса';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM или M, DD или D за датум; / прави фасциклу; текст у '
+      "'наводницима' остаје какав јесте";
+  @override
+  String journalEntryNamePreview(String path) => 'Данашњи унос: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Потребни су YYYY, месец (MM или M) и дан (DD или D), и ништа што назив '
+      'датотеке не сме да садржи';
+  @override
+  String get journalTemplateTitle => 'Шаблон';
+  @override
+  String get journalTemplateSubtitle => 'Чиме почиње нови унос';
+  @override
+  String get journalTemplateNone => 'Ниједан: наслов са датумом';
+  @override
+  String get journalDayStartTitle => 'Нови дан почиње у';
+  @override
+  String get journalDayStartSubtitle =>
+      'Касно лежеш? У 04:00 ноћ остаје на претходном дану';
+  @override
   String get commandsTitle => 'Команде';
   @override
   String get commandsIntro =>

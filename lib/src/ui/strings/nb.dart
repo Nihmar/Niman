@@ -1211,6 +1211,37 @@ final class NorwegianStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'Dagbokmalen $path kunne ikke leses: innlegget ble opprettet uten.';
   @override
+  String get journalIntro =>
+      'Ett notat per dag, laget fra en mal første gang du åpner dagen. Disse '
+      'innstillingene følger biblioteket.';
+  @override
+  String get journalFolderTitle => 'Dagbokmappe';
+  @override
+  String get journalFolderSubtitle => 'Hvor innleggene legges';
+  @override
+  String get journalEntryNameTitle => 'Innleggets navn';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM eller M, DD eller D for datoen; / lager en mappe; tekst i '
+      "'anførselstegn' blir som den er";
+  @override
+  String journalEntryNamePreview(String path) => 'Dagens innlegg: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Krever YYYY, en måned (MM eller M) og en dag (DD eller D), og '
+      'ingenting et filnavn ikke kan inneholde';
+  @override
+  String get journalTemplateTitle => 'Mal';
+  @override
+  String get journalTemplateSubtitle => 'Hva et nytt innlegg begynner med';
+  @override
+  String get journalTemplateNone => 'Ingen: en overskrift med datoen';
+  @override
+  String get journalDayStartTitle => 'En ny dag begynner kl.';
+  @override
+  String get journalDayStartSubtitle =>
+      'Sent oppe? Kl. 04:00 hører natten fortsatt til dagen før';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

@@ -9,7 +9,7 @@ device.
 
 Settings is split into areas, grouped by what they change: **App**
 (appearance, editor, keyboard shortcuts, commands, updates, diagnostics),
-the open **Library** (folders, trash and history, sync, transcription,
+the open **Library** (folders, journal, trash and history, sync, transcription,
 reminders), and **Maintenance** (re-index, switch or close the library;
 in the settings window only re-index, since the rail's library window
 switches and closes).

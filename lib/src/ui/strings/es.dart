@@ -1246,6 +1246,37 @@ final class SpanishStrings extends Strings {
       'No se pudo leer la plantilla del diario $path: la entrada se creó sin '
       'ella.';
   @override
+  String get journalIntro =>
+      'Una nota al día, creada a partir de una plantilla la primera vez que '
+      'abres ese día. Estos ajustes viajan con la biblioteca.';
+  @override
+  String get journalFolderTitle => 'Carpeta del diario';
+  @override
+  String get journalFolderSubtitle => 'Dónde van las entradas';
+  @override
+  String get journalEntryNameTitle => 'Nombre de la entrada';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM o M, DD o D para la fecha; / crea una carpeta; el texto '
+      "'entre comillas' se queda tal cual";
+  @override
+  String journalEntryNamePreview(String path) => 'Entrada de hoy: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Necesita YYYY, un mes (MM o M) y un día (DD o D), y nada que un nombre '
+      'de archivo no pueda contener';
+  @override
+  String get journalTemplateTitle => 'Plantilla';
+  @override
+  String get journalTemplateSubtitle => 'Con qué empieza una entrada nueva';
+  @override
+  String get journalTemplateNone => 'Ninguna: un título con la fecha';
+  @override
+  String get journalDayStartTitle => 'Un nuevo día empieza a las';
+  @override
+  String get journalDayStartSubtitle =>
+      '¿Trasnochas? A las 04:00 la noche sigue en el día anterior';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

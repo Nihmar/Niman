@@ -582,6 +582,18 @@ abstract base class Strings {
   String get commandNeedJournalEntry;
   String journalCreateAsk(String day);
   String journalTemplateMissing(String path);
+  String get journalIntro;
+  String get journalFolderTitle;
+  String get journalFolderSubtitle;
+  String get journalEntryNameTitle;
+  String get journalEntryNameSubtitle;
+  String journalEntryNamePreview(String path);
+  String get journalEntryNameInvalid;
+  String get journalTemplateTitle;
+  String get journalTemplateSubtitle;
+  String get journalTemplateNone;
+  String get journalDayStartTitle;
+  String get journalDayStartSubtitle;
   String get commandsTitle;
   String get commandsIntro;
   String get commandNeedNone;

@@ -1216,6 +1216,37 @@ final class LatvianStrings extends Strings {
       'Dienasgrāmatas veidni $path neizdevās nolasīt: ieraksts izveidots bez '
       'tās.';
   @override
+  String get journalIntro =>
+      'Viena piezīme dienā, izveidota no veidnes, kad pirmo reizi atver '
+      'attiecīgo dienu. Šie iestatījumi ceļo kopā ar bibliotēku.';
+  @override
+  String get journalFolderTitle => 'Dienasgrāmatas mape';
+  @override
+  String get journalFolderSubtitle => 'Kur nonāk ieraksti';
+  @override
+  String get journalEntryNameTitle => 'Ieraksta nosaukums';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM vai M, DD vai D datumam; / izveido mapi; teksts 'pēdiņās' "
+      'paliek, kā ir';
+  @override
+  String journalEntryNamePreview(String path) => 'Šodienas ieraksts: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Vajag YYYY, mēnesi (MM vai M) un dienu (DD vai D), un neko, ko faila '
+      'nosaukums nevar saturēt';
+  @override
+  String get journalTemplateTitle => 'Veidne';
+  @override
+  String get journalTemplateSubtitle => 'Ar ko sākas jauns ieraksts';
+  @override
+  String get journalTemplateNone => 'Nav: virsraksts ar datumu';
+  @override
+  String get journalDayStartTitle => 'Jauna diena sākas plkst.';
+  @override
+  String get journalDayStartSubtitle =>
+      'Ilgi nomodā? Plkst. 04:00 nakts vēl pieder iepriekšējai dienai';
+  @override
   String get commandsTitle => 'Komandas';
   @override
   String get commandsIntro =>

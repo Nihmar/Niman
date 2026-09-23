@@ -1249,6 +1249,37 @@ final class CatalanStrings extends Strings {
       'No s’ha pogut llegir la plantilla del diari $path: l’entrada s’ha '
       'creat sense.';
   @override
+  String get journalIntro =>
+      'Una nota al dia, creada a partir d’una plantilla la primera vegada que '
+      'obres aquell dia. Aquests paràmetres viatgen amb la biblioteca.';
+  @override
+  String get journalFolderTitle => 'Carpeta del diari';
+  @override
+  String get journalFolderSubtitle => 'On van les entrades';
+  @override
+  String get journalEntryNameTitle => 'Nom de l’entrada';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM o M, DD o D per a la data; / crea una carpeta; el text 'entre "
+      "cometes' es queda tal qual";
+  @override
+  String journalEntryNamePreview(String path) => 'Entrada d’avui: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Cal YYYY, un mes (MM o M) i un dia (DD o D), i res que un nom de '
+      'fitxer no pugui contenir';
+  @override
+  String get journalTemplateTitle => 'Plantilla';
+  @override
+  String get journalTemplateSubtitle => 'Amb què comença una entrada nova';
+  @override
+  String get journalTemplateNone => 'Cap: un títol amb la data';
+  @override
+  String get journalDayStartTitle => 'Un dia nou comença a les';
+  @override
+  String get journalDayStartSubtitle =>
+      'Et fas tard? A les 04:00 la nit queda en el dia anterior';
+  @override
   String get commandsTitle => 'Ordres';
   @override
   String get commandsIntro =>

@@ -1229,6 +1229,37 @@ final class RomanianStrings extends Strings {
       'Șablonul jurnalului $path nu a putut fi citit: intrarea a fost creată '
       'fără el.';
   @override
+  String get journalIntro =>
+      'O notă pe zi, creată dintr-un șablon prima dată când deschizi ziua '
+      'respectivă. Aceste setări călătoresc cu biblioteca.';
+  @override
+  String get journalFolderTitle => 'Dosarul jurnalului';
+  @override
+  String get journalFolderSubtitle => 'Unde merg intrările';
+  @override
+  String get journalEntryNameTitle => 'Numele intrării';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM sau M, DD sau D pentru dată; / creează un dosar; textul între '
+      "'ghilimele' rămâne cum este";
+  @override
+  String journalEntryNamePreview(String path) => 'Intrarea de azi: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Necesită YYYY, o lună (MM sau M) și o zi (DD sau D), și nimic ce un '
+      'nume de fișier nu poate conține';
+  @override
+  String get journalTemplateTitle => 'Șablon';
+  @override
+  String get journalTemplateSubtitle => 'Cu ce începe o intrare nouă';
+  @override
+  String get journalTemplateNone => 'Niciunul: un titlu cu data';
+  @override
+  String get journalDayStartTitle => 'O zi nouă începe la';
+  @override
+  String get journalDayStartSubtitle =>
+      'Stai până târziu? La 04:00 noaptea rămâne în ziua dinainte';
+  @override
   String get commandsTitle => 'Comenzi';
   @override
   String get commandsIntro =>

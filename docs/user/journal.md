@@ -4,8 +4,11 @@ One note per day, made the first time you open that day.
 
 An entry is an ordinary note: it lives in the library like any other,
 syncs, is found by search and links to and from other notes. What makes
-it an entry is where it is and what it is called, set in the library's
-settings (see [settings](settings.md)):
+it an entry is where it is and what it is called, set in **Settings →
+Library → Journal** and kept in the library's `settings.json`, so they
+travel with it (see [settings](settings.md)). The entry name shows today's
+entry as you type it, and a name that cannot make one entry per day is
+not saved:
 
 - **Folder** (`journalFolder`, default `Journal`).
 - **Entry name** (`journalEntryName`, default `YYYY/MM/YYYY-MM-DD`):

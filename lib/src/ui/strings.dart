@@ -772,6 +772,19 @@ final class AppStrings {
   static String journalCreateAsk(String day) => _s.journalCreateAsk(day);
   static String journalTemplateMissing(String path) =>
       _s.journalTemplateMissing(path);
+  static String get journalIntro => _s.journalIntro;
+  static String get journalFolderTitle => _s.journalFolderTitle;
+  static String get journalFolderSubtitle => _s.journalFolderSubtitle;
+  static String get journalEntryNameTitle => _s.journalEntryNameTitle;
+  static String get journalEntryNameSubtitle => _s.journalEntryNameSubtitle;
+  static String journalEntryNamePreview(String path) =>
+      _s.journalEntryNamePreview(path);
+  static String get journalEntryNameInvalid => _s.journalEntryNameInvalid;
+  static String get journalTemplateTitle => _s.journalTemplateTitle;
+  static String get journalTemplateSubtitle => _s.journalTemplateSubtitle;
+  static String get journalTemplateNone => _s.journalTemplateNone;
+  static String get journalDayStartTitle => _s.journalDayStartTitle;
+  static String get journalDayStartSubtitle => _s.journalDayStartSubtitle;
   static String get commandsTitle => _s.commandsTitle;
   static String get commandsIntro => _s.commandsIntro;
   static String get commandNeedNone => _s.commandNeedNone;

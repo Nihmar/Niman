@@ -1226,6 +1226,37 @@ final class PortugueseStrings extends Strings {
       'Não foi possível ler o modelo do diário $path: a entrada foi criada '
       'sem ele.';
   @override
+  String get journalIntro =>
+      'Uma nota por dia, criada a partir de um modelo na primeira vez que '
+      'abres esse dia. Estas definições viajam com a biblioteca.';
+  @override
+  String get journalFolderTitle => 'Pasta do diário';
+  @override
+  String get journalFolderSubtitle => 'Para onde vão as entradas';
+  @override
+  String get journalEntryNameTitle => 'Nome da entrada';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM ou M, DD ou D para a data; / cria uma pasta; o texto 'entre "
+      "aspas' fica como está";
+  @override
+  String journalEntryNamePreview(String path) => 'Entrada de hoje: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Precisa de YYYY, um mês (MM ou M) e um dia (DD ou D), e nada que um '
+      'nome de ficheiro não possa conter';
+  @override
+  String get journalTemplateTitle => 'Modelo';
+  @override
+  String get journalTemplateSubtitle => 'Com o que começa uma entrada nova';
+  @override
+  String get journalTemplateNone => 'Nenhum: um título com a data';
+  @override
+  String get journalDayStartTitle => 'Um novo dia começa às';
+  @override
+  String get journalDayStartSubtitle =>
+      'Deitas-te tarde? Às 04:00 a noite fica no dia anterior';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>
