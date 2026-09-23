@@ -141,6 +141,11 @@ final class ShellEditorSettings {
   /// A copy with the given fields replaced: what the controls that change
   /// one setting on the spot (the tree sort, the editor switch) hand back
   /// to the shell.
+  ///
+  /// Every other field is carried over — and one that was not, the Markdown
+  /// engine, came back as its default: switching typewriter on in the
+  /// unified WYSIWYG put the legacy one in its place, which then read the
+  /// whole note (a 246 MB one froze the app).
   ShellEditorSettings copyWith({
     EditorKind? editorKind,
     TreeSort? treeSort,
@@ -154,6 +159,7 @@ final class ShellEditorSettings {
       autofocusEditor: autofocusEditor,
       editorKind: editorKind ?? this.editorKind,
       editorsEnabled: editorsEnabled,
+      markdownEngine: markdownEngine,
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
@@ -194,6 +200,7 @@ final class ShellEditorSettings {
     autofocusEditor,
     editorKind,
     Object.hashAllUnordered(editorsEnabled),
+    markdownEngine,
     linkType,
     missingNoteLocation,
     attachmentsFolder,
