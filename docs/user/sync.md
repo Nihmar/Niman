@@ -123,8 +123,11 @@ attachment — cannot be merged: there the two whole copies are shown as a
 diff (lines marked − are the server's, + are this device's) and you keep
 one.
 
-Library settings (`.niman/settings.json`) never conflict: the newer copy
-wins.
+Library settings (`.niman/settings.json`) never conflict: they merge
+setting by setting. A setting changed on one device only is kept; the
+same setting changed differently on both takes the device that saved
+last. Template counters (`.niman/counters.json`) keep the highest number
+either device reached, so a number is never handed out twice.
 
 ### When something goes wrong
 

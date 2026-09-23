@@ -10,6 +10,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/reconcile.dart';
+import 'package:niman/src/sync/state_merge.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
@@ -1167,6 +1168,7 @@ final class SyncEngine {
       }
     }
     return SyncItem(
+      baseText: await _agreedStateText(path, sha),
       libraryPath: root,
       path: path,
       localSha256: sha,
@@ -1180,6 +1182,20 @@ final class SyncEngine {
       baseVersion: base,
       syncedAtMs: _now().millisecondsSinceEpoch,
     );
+  }
+
+  /// For a library state file, its text on disk when it still is the
+  /// agreed content [sha] — the base of the next key-by-key merge; null
+  /// for every other file, or when the file moved on already.
+  Future<String?> _agreedStateText(String path, String sha) async {
+    if (!libraryStateFiles.contains(path)) return null;
+    try {
+      final bytes = await File(p.join(root, path)).readAsBytes();
+      if (sha256.convert(bytes).toString() != sha) return null;
+      return utf8.decode(bytes, allowMalformed: true);
+    } on FileSystemException {
+      return null;
+    }
   }
 
   Future<_Outcome> _guarded(Future<_Outcome> Function() action) async {
@@ -1376,9 +1392,18 @@ final class SyncEngine {
     }
 
     if (d.path.startsWith('.niman/')) {
-      // Settings and counters are JSON: a line merge could break them,
-      // so the newer side wins whole.
+      // Settings and counters are JSON: merged key by key, not by line,
+      // which could break them. Only a side that does not parse falls
+      // back to the newer file, whole.
       final remoteMs = remote.modified?.millisecondsSinceEpoch ?? 0;
+      final merged = await _mergeState(
+        c,
+        d,
+        fetched.temp,
+        remote,
+        localNewer: local.mtimeMs >= remoteMs,
+      );
+      if (merged) return _Outcome.done;
       if (remoteMs > local.mtimeMs) {
         await _localStillAsPlanned(c, d.path);
         await ops.syncReplace(d.path, fetched.temp.path);
@@ -1432,6 +1457,75 @@ final class SyncEngine {
     );
     return _Outcome.conflict;
   });
+
+  /// Merges a library state file key by key ([mergeSettingsJson], or
+  /// [mergeCountersJson]) and writes the result on whichever side lacks
+  /// it; false, touching nothing, when a side does not parse.
+  Future<bool> _mergeState(
+    _RunContext c,
+    SyncDecision d,
+    File remoteCopy,
+    WebDavResource remote, {
+    required bool localNewer,
+  }) async {
+    final file = File(p.join(root, d.path));
+    final localText = utf8.decode(
+      await file.readAsBytes(),
+      allowMalformed: true,
+    );
+    final remoteText = utf8.decode(
+      await remoteCopy.readAsBytes(),
+      allowMalformed: true,
+    );
+    final base = c.rows[d.path]?.baseText;
+    final text = d.path == NoteOps.settingsFilePath
+        ? mergeSettingsJson(
+            base: base,
+            local: localText,
+            remote: remoteText,
+            localNewer: localNewer,
+          )
+        : mergeCountersJson(local: localText, remote: remoteText);
+    if (text == null) {
+      _log.info('merge ${d.path}: a side is not a JSON object');
+      return false;
+    }
+    final changedLocally = text != localText;
+    if (changedLocally) {
+      // Through the temp the download left: syncReplace swaps it in the
+      // way a download goes, reloading the settings.
+      await remoteCopy.writeAsString(text);
+      await _localStillAsPlanned(c, d.path);
+      await ops.syncReplace(d.path, remoteCopy.path);
+      c.report.changedLocally.add(d.path);
+    } else {
+      await remoteCopy.delete();
+    }
+    var listed = remote;
+    if (text != remoteText) {
+      await c.client.uploadFile(
+        d.path,
+        file,
+        ifMatch: c.capabilities.ifMatch ? remote.etag : null,
+      );
+      listed =
+          await c.client.stat(d.path) ??
+          (throw const _StepFailure('merged but not listed'));
+    }
+    final after = await _stat(d.path);
+    if (after == null) throw const _StepFailure('merged but not on disk');
+    final sha = (await _hashLocal(root, [d.path]))[d.path];
+    if (sha == null) throw const _StepFailure('merged but not hashed');
+    await store.putItems([
+      await _row(c, d.path, sha: sha, local: after, remote: listed),
+    ]);
+    _log.info(
+      'merge ${d.path}: key by key, ${base == null ? 'no base' : 'on the base'}'
+      '${changedLocally ? ', written here' : ''}'
+      '${text != remoteText ? ', uploaded' : ''}',
+    );
+    return true;
+  }
 
   /// Merges both sides of [d] over the pinned base and writes the result
   /// on both, or returns null when there is no base, the file is not

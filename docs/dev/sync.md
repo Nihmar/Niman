@@ -227,6 +227,7 @@ every file look new on both sides.
 | `remote_file_id` | text, nullable | `oc:fileid` when offered |
 | `remote_unverified` | bool | the listing could not rule out a same-second rewrite (no ETags, mtime = the server's current second): the next reconcile hashes the remote |
 | `base_version` | int, nullable | the `.history` version pinned as `syncBase`; null for attachments and when history is off |
+| `base_text` | text, nullable | for the library state files only (schema v28): the agreed content itself, since they keep no history — the base of their key-by-key merge |
 | `synced_at_ms` | int | |
 
 Folders get no rows: a folder exists remotely when a file under it
@@ -466,10 +467,15 @@ one runs joins it.
      not to support it gets `move: false` stored. *moveLocal*:
      `NoteOps.syncMove`, history included.
    - *conflict*: the remote is downloaded and hashed. Equal content is
-     recorded. For `.niman/*.json` the newer side (local mtime vs remote
-     `getlastmodified`) wins whole, since a line merge could break JSON.
-     Anything else is left untouched on both sides and reported, with the
-     pinned base, for the merge (step 7).
+     recorded. The library state files merge as JSON
+     (`lib/src/sync/state_merge.dart`), since a line merge could break
+     them: `settings.json` key by key over `base_text` — a key one side
+     changed takes that side, a key both changed takes the newer file
+     (local mtime vs remote `getlastmodified`), and without a base a key
+     either side has is kept; `counters.json` takes the highest value per
+     counter. Only a side that does not parse falls back to the newer file
+     whole. Anything else is left untouched on both sides and reported,
+     with the pinned base, for the merge (step 7).
 6. **Rows:** every success records local sha/size/mtime, remote ETag/
    size/mtime/file id, `remote_unverified` (no file ETags and the mtime
    within 2 s of the server's `Date`, never this device's clock), and —

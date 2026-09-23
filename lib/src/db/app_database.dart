@@ -291,6 +291,11 @@ class SyncItems extends Table {
   /// attachments and when history is off.
   IntColumn get baseVersion => integer().named('base_version').nullable()();
 
+  /// For the library state files (`.niman/settings.json`, `counters.json`),
+  /// which keep no history: the agreed content itself, the base of their
+  /// key-by-key merge. Null for every other file.
+  TextColumn get baseText => text().named('base_text').nullable()();
+
   /// When this agreement was recorded, ms.
   IntColumn get syncedAtMs => integer().named('synced_at_ms')();
 
@@ -365,7 +370,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 27;
+  int get schemaVersion => 28;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -415,7 +420,9 @@ class AppDatabase extends _$AppDatabase {
   /// databases gain `close_to_tray` (issue #209), on: the window's × puts
   /// Niman in the tray, where the reminders keep firing, and pre-v27
   /// databases gain `library_device_settings`, empty: each library fills
-  /// its row from its `settings.json` the first time it is opened.
+  /// its row from its `settings.json` the first time it is opened, and
+  /// pre-v28 databases gain `sync_items.base_text`, null: the settings
+  /// files merge without a base until their next agreement records one.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -580,6 +587,13 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 27) {
         await m.createTable(libraryDeviceSettings);
+      }
+      // Only on a table that was already there: below v22 it was just
+      // created, with the column.
+      if (from >= 22 && from < 28) {
+        await m.database.customStatement(
+          'ALTER TABLE sync_items ADD COLUMN base_text TEXT',
+        );
       }
     },
   );
