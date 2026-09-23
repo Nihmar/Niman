@@ -36,6 +36,7 @@ import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
+import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
@@ -166,20 +167,23 @@ final class BlockView extends StatelessWidget {
 
   /// A list item: its marker, then its content at the item's own indent.
   ///
-  /// The marker is drawn, not read from the text, and it agrees with the
-  /// preview on purpose: a bullet is `\u2022` whatever the note wrote (`-`, `*`
-  /// or `+`), an ordered item keeps its number, and a task item is a box rather
-  /// than the `[x]` it was written as — the text says what the note said, the
-  /// screen shows what it means.
+  /// The marker is drawn, not read from the text, and it agrees with `live`
+  /// on purpose: a bullet is a dot whatever the note wrote (`-`, `*` or `+`),
+  /// an ordered item keeps its number, and a task item is a box rather than
+  /// the `[x]` it was written as — the text says what the note said, the
+  /// screen shows what it means. The dot and the box are `live`'s own
+  /// (`item_marks.dart`), in the same room: centred in the marker column,
+  /// on the item's first row.
   Widget _listItem(BuildContext context) {
     final marker = _listMarker(parsed.text, parsed.block.listOrdinal);
     final depth = parsed.block.listDepth;
     // One marker column per level, so a sublist's marker sits exactly where its
     // parent's text starts.
     final offset = depth <= 0 ? 0.0 : depth * theme.listIndentPerLevel;
-    // The size the item's text is read at: its box and its number's gap
+    // The size the item's text is read at: its marks and its number's gap
     // grow with the note's text, which is scaled as it is laid out.
-    final em = MediaQuery.textScalerOf(context).scale(theme.body.fontSize!);
+    final scaler = MediaQuery.textScalerOf(context);
+    final em = scaler.scale(theme.body.fontSize!);
     return Padding(
       padding: EdgeInsets.only(left: offset),
       child: Row(
@@ -187,11 +191,13 @@ final class BlockView extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: theme.listIndentPerLevel,
-            child: marker.isTask
-                ? _taskBox(marker.checked, em)
-                : marker.ordered
+            child: marker.ordered
                 ? _number(marker.display, em)
-                : Text(marker.display, style: theme.marker),
+                : _mark(
+                    em,
+                    _firstRow(scaler),
+                    task: marker.isTask ? marker.checked : null,
+                  ),
           ),
           Expanded(child: _rich(context, style: theme.body)),
         ],
@@ -199,10 +205,23 @@ final class BlockView extends StatelessWidget {
     );
   }
 
+  /// How tall the item's first row is: one line of its text, at [scaler].
+  double _firstRow(TextScaler scaler) {
+    final painter = TextPainter(
+      text: TextSpan(text: ' ', style: theme.body),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+    )..layout();
+    final row = painter.height;
+    painter.dispose();
+    return row;
+  }
+
   /// An ordered item's number: on one row, ending a few pixels before the
   /// item's text, and running out to the left when it is wider than the
   /// column — a `10.` wrapped to two rows in it, and the numbers of a list
-  /// did not line up. It is where `live` draws it (`live_decorations.dart`).
+  /// did not line up. It is where `live` draws it (`live_decorations.dart`),
+  /// in its colour.
   Widget _number(String display, double em) => Padding(
     padding: EdgeInsets.only(right: em * numberGapEm),
     child: OverflowBox(
@@ -210,34 +229,41 @@ final class BlockView extends StatelessWidget {
       // As tall as the number: the column's height is the item's to set.
       fit: OverflowBoxFit.deferToChild,
       alignment: Alignment.topRight,
-      child: Text(display, style: theme.marker, maxLines: 1, softWrap: false),
+      child: Text(
+        display,
+        style: theme.marker.copyWith(color: theme.markerDim),
+        maxLines: 1,
+        softWrap: false,
+      ),
     ),
   );
 
-  /// A task item's checkbox — ticked by a tap when [onToggleTask] is given,
-  /// the whole marker column being the target, so a finger need not find
-  /// the box's own few pixels.
-  Widget _taskBox(bool checked, double em) {
-    final box = Padding(
-      padding: EdgeInsets.only(top: em * 0.15),
-      child: Icon(
-        checked ? Icons.check_box_outlined : Icons.check_box_outline_blank,
-        size: em * 0.95,
-        color: theme.marker.color,
+  /// A bullet, or a task item's checkbox when [task] says whether it is
+  /// ticked — the box ticked by a tap when [onToggleTask] is given, the
+  /// whole marker column being the target, so a finger need not find the
+  /// box's own few pixels.
+  Widget _mark(double em, double row, {required bool? task}) {
+    final mark = CustomPaint(
+      size: Size(theme.listIndentPerLevel, row),
+      painter: ItemMarkPainter(
+        em: em,
+        row: row,
+        color: theme.markerDim,
+        task: task,
       ),
     );
     final toggle = onToggleTask;
-    if (toggle == null) return box;
+    if (task == null || toggle == null) return mark;
     final line = parsed.block.startLine;
     return Semantics(
-      checked: checked,
+      checked: task,
       onTap: () => toggle(line),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => toggle(line),
-          child: Align(alignment: Alignment.topLeft, child: box),
+          child: Align(alignment: Alignment.topLeft, child: mark),
         ),
       ),
     );

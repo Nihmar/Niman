@@ -93,7 +93,9 @@ String _visibleText(WidgetTester tester) {
   for (final widget in tester.allWidgets) {
     if (widget is Text) {
       final data = widget.data;
-      if (data != null) buffer.write(' $data');
+      // A bullet is a mark, as a checkbox is: the preview writes it as a
+      // glyph, the read view paints it, and neither is text a reader reads.
+      if (data != null && data != '•') buffer.write(' $data');
       final span = widget.textSpan;
       if (span != null) buffer.write(' ${span.toPlainText()}');
     }

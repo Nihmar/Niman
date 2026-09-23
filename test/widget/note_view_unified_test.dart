@@ -12,6 +12,8 @@ import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:re_editor/re_editor.dart';
 
+import '../fakes/item_mark_finder.dart';
+
 /// The note the editor is handed.
 const String _note = '''
 # A title
@@ -244,22 +246,22 @@ void main() {
     final editor = tester.state<MarkdownSourceViewState>(
       find.byType(MarkdownSourceView, skipOffstage: false),
     );
-    Finder inRead(IconData icon) => find.descendant(
+    Finder inRead({required bool ticked}) => find.descendant(
       of: find.byType(MarkdownReadView),
-      matching: find.byIcon(icon),
+      matching: findCheckbox(ticked: ticked),
     );
-    expect(inRead(Icons.check_box_outline_blank), findsOneWidget);
+    expect(inRead(ticked: false), findsOneWidget);
 
-    await tester.tap(inRead(Icons.check_box_outline_blank));
+    await tester.tap(inRead(ticked: false));
     await tester.pump();
     expect(editor.widget.buffer.text, 'Tasks\n\n- [x] one\n- [x] two\n');
     expect(
-      inRead(Icons.check_box_outlined),
+      inRead(ticked: true),
       findsNWidgets(2),
       reason: 'the pane shows the tick on the next frame, not after a debounce',
     );
 
-    await tester.tap(inRead(Icons.check_box_outlined).last);
+    await tester.tap(inRead(ticked: true).last);
     await tester.pump();
     expect(editor.widget.buffer.text, 'Tasks\n\n- [x] one\n- [ ] two\n');
     expect(editor.undo(), isTrue);

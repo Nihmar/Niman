@@ -15,6 +15,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 
 /// The shape a line has in its block: what `live` draws beside its text.
@@ -277,7 +278,13 @@ final class LiveDecorationPainter extends CustomPainter {
     final em = box.textScaler.scale(theme.body.fontSize!);
     final task = shape.task;
     if (task != null) {
-      _paintCheckbox(canvas, place.left + slot / 2, middle, em, ticked: task);
+      paintCheckbox(
+        canvas,
+        Offset(place.left + slot / 2, middle),
+        em,
+        color,
+        ticked: task,
+      );
       return;
     }
     final ordinal = shape.ordinal;
@@ -285,51 +292,7 @@ final class LiveDecorationPainter extends CustomPainter {
       _paintText(canvas, '$ordinal.', right - em * numberGapEm, middle, box);
       return;
     }
-    canvas.drawCircle(
-      Offset(right - slot / 2, middle),
-      em * 0.18,
-      Paint()..color = color,
-    );
-  }
-
-  /// A checkbox [em] in size, centred on ([centre], [middle]).
-  void _paintCheckbox(
-    Canvas canvas,
-    double centre,
-    double middle,
-    double em, {
-    required bool ticked,
-  }) {
-    final side = em * 0.86;
-    final rect = Rect.fromCenter(
-      center: Offset(centre, middle),
-      width: side,
-      height: side,
-    );
-    final frame = RRect.fromRectAndRadius(rect, Radius.circular(em * 0.14));
-    if (ticked) {
-      canvas.drawRRect(frame, Paint()..color = color);
-      final inset = em * 0.18;
-      final tick = Path()
-        ..moveTo(rect.left + inset, rect.center.dy)
-        ..lineTo(rect.left + side * 0.42, rect.bottom - em * 0.21)
-        ..lineTo(rect.right - inset, rect.top + em * 0.21);
-      canvas.drawPath(
-        tick,
-        Paint()
-          ..color = const Color(0xFFFFFFFF)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = em * 0.11,
-      );
-      return;
-    }
-    canvas.drawRRect(
-      frame,
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = em * 0.1,
-    );
+    paintBullet(canvas, Offset(right - slot / 2, middle), em, color);
   }
 
   /// Paints [text] ending at [right], centred on [middle], at the size and

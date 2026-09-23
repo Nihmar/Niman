@@ -16,6 +16,8 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:path/path.dart' as p;
 
+import '../fakes/item_mark_finder.dart';
+
 /// A cache that renders in-line, as the preview's own tests do.
 MathCache _syncCache() => MathCache(
   renderer: (tex, {required displayMode}) =>
@@ -167,9 +169,9 @@ void main() {
     await tester.pumpWidget(_view('- one\n- two\n\n1. three', _syncCache()));
     await tester.pump();
     final screen = _screenText(tester);
-    // The marker is drawn as the preview draws it: a bullet whatever the note
-    // wrote, and an ordered item keeps its number.
-    expect(screen, contains('\u2022'));
+    // The marker is drawn as `live` draws it: a painted bullet whatever the
+    // note wrote, and an ordered item keeps its number.
+    expect(findBullet(), findsNWidgets(2));
     expect(screen, contains('1.'));
     expect(screen, contains('one'));
     expect(screen, contains('two'));
@@ -203,7 +205,7 @@ void main() {
         _view('- [ ] task\n\n1. one', _syncCache(), scale: scale),
       );
       await tester.pump();
-      final box = tester.getSize(find.byType(Icon)).width;
+      final box = itemMarkOf(tester.widget(findCheckbox(ticked: false)))!.em;
       final number = tester.getRect(find.text('1.'));
       final text = tester
           .renderObjectList<RenderParagraph>(find.byType(RichText))
@@ -219,6 +221,36 @@ void main() {
     expect(bigGap, closeTo(gap * 2, 0.01));
     expect(bigColumn, closeTo(column * 2, 0.01));
   });
+
+  testWidgets("a bullet and a box sit mid-column, on their text's first row", (
+    tester,
+  ) async {
+    // Where `live` puts them: centred in the column that ends where the
+    // item's text begins, on the row of its first line — a glyph and an
+    // icon stood at the column's left, each at its own baseline.
+    await tester.pumpWidget(_view('- one\n- [x] two', _syncCache()));
+    await tester.pump();
+    for (final (mark, text) in [
+      (findBullet(), 'one'),
+      (findCheckbox(ticked: true), 'two'),
+    ]) {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText() == text);
+      final left = paragraph.localToGlobal(Offset.zero).dx;
+      final column = tester.getRect(mark);
+      expect(column.right, closeTo(left, 0.01), reason: text);
+      expect(
+        itemMarkOf(tester.widget(mark))!.row,
+        closeTo(
+          paragraph.getFullHeightForCaret(const TextPosition(offset: 0)),
+          0.01,
+        ),
+        reason: text,
+      );
+    }
+  });
+
   testWidgets("a list's numbers end at one edge, clear of the text", (
     tester,
   ) async {
