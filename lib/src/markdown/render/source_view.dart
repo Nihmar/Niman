@@ -57,6 +57,7 @@ import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_inline_math.dart';
+import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
@@ -258,6 +259,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The colours of the code blocks `live` draws, highlighted a block at a
   /// time as the read view highlights them.
   final LiveCodeColors _codeColors = LiveCodeColors();
+
+  /// A quote's content read again as blocks, so `live` draws a quote's lines
+  /// as the blocks they are inside it, as the read view does.
+  final LiveQuoteContent _quotes = LiveQuoteContent();
 
   /// The folded heading sections; the rows are the lines they leave.
   final SourceFolds _folds = SourceFolds();
@@ -1299,7 +1304,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         continue;
       }
       final styled = _lineAt(index);
-      final shape = LineShape.of(styled, _styler?.blockOf(index), index);
+      final block = _styler?.blockOf(index);
+      final shape = LineShape.of(
+        styled,
+        block,
+        index,
+        quoted: _quotes.of(index, block, widget.buffer),
+      );
       final ticked = shape.task;
       if (shape.marker == null || ticked == null) continue;
       final slot = liveItemSlot(paragraph, shape, widget.theme);
@@ -2106,6 +2117,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                             // A row is a line nobody folded away.
                             final index = _folds.lineOf(row);
                             final styled = _lineAt(index);
+                            final block = _styler?.blockOf(index);
+                            final quoted = widget.hideMarkers
+                                ? _quotes.of(index, block, widget.buffer)
+                                : null;
                             return _Line(
                               key: ValueKey<int>(index),
                               fold: _foldMarkOf(index),
@@ -2116,8 +2131,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                               shape: widget.hideMarkers
                                   ? LineShape.of(
                                       styled,
-                                      _styler?.blockOf(index),
+                                      block,
                                       index,
+                                      quoted: quoted,
                                     )
                                   : LineShape.none,
                               pictures:
@@ -2132,14 +2148,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   ? _formulaOf(index)
                                   : null,
                               mathCache: widget.mathCache,
-                              codeRuns: widget.hideMarkers
-                                  ? _codeColors.of(
-                                      index,
-                                      _styler?.blockOf(index),
+                              codeRuns: !widget.hideMarkers
+                                  ? null
+                                  : quoted != null
+                                  ? _codeColors.ofQuoted(
+                                      quoted,
+                                      block!.startLine,
                                       widget.buffer,
                                       widget.theme.codeHighlight,
                                     )
-                                  : null,
+                                  : _codeColors.of(
+                                      index,
+                                      block,
+                                      widget.buffer,
+                                      widget.theme.codeHighlight,
+                                    ),
                               number: widget.showLineNumbers ? index + 1 : null,
                               gutterWidth: _gutter,
                               // Past the numbers, only the gap the fold arrows
@@ -3131,6 +3154,8 @@ final class _Line extends StatelessWidget {
     if (!hideMarkers) return theme.body;
     // Code reads as the read view draws it: in monospace, fences and all.
     if (shape.code != null) return theme.code;
+    // A heading inside a quote is set at its size, as the read view sets it.
+    if (shape.heading > 0) return theme.heading(shape.heading);
     // Quoted prose reads as the read view draws it: in the quote's own style.
     if (shape.quoteDepth > 0) return theme.body.merge(theme.quote);
     final text = styled.text;
@@ -3203,7 +3228,17 @@ final class _Line extends StatelessWidget {
   /// between them. Zero for a line that is none of these, whose leading
   /// spaces are its own.
   int get _prefixEnd {
-    if (shape.codeIndented) return _codeIndentEnd(styled.text);
+    if (shape.code != null) {
+      // A code line's prefix is its quote's marks and, in an indented
+      // block, the block's indent: the spaces past them are the code's.
+      final text = styled.text;
+      final marks = shape.quoteDepth > 0
+          ? BlockParser.quotePrefixLength(text, shape.quoteDepth)
+          : 0;
+      return shape.codeIndented
+          ? marks + _codeIndentEnd(text.substring(marks))
+          : marks;
+    }
     if (!shape.listed && shape.quoteDepth == 0 && !_heading) return 0;
     final text = styled.text;
     var at = 0;
@@ -3323,6 +3358,9 @@ final class _Line extends StatelessWidget {
     (int, int)? run,
     List<_Concealed> concealed = const <_Concealed>[],
   }) {
+    if (hideMarkers && shape.code != null && shape.quoteDepth > 0) {
+      return _quotedCode(revealed: revealed, concealed: concealed);
+    }
     final spans = <InlineSpan>[];
     // A hidden line's prefix is hidden whole, its spaces with its marks: the
     // text then starts at the indent, where its wrapped rows start too.
@@ -3376,6 +3414,54 @@ final class _Line extends StatelessWidget {
     if (at < styled.text.length) {
       _add(spans, at, styled.text.length, null, concealed);
     }
+    return TextSpan(children: spans);
+  }
+
+  /// A line of a code block inside a quote.
+  ///
+  /// The styler reads a quote's lines as the quote's prose, so their tokens
+  /// say nothing of the code in it: the quote's marks are drawn as its
+  /// marks, and the rest as code — a fence hidden as a fence is, the code
+  /// in its block's colours ([codeRuns], whose offsets start past the
+  /// marks).
+  TextSpan _quotedCode({
+    required bool revealed,
+    required List<_Concealed> concealed,
+  }) {
+    final text = styled.text;
+    final spans = <InlineSpan>[];
+    final marks = BlockParser.quotePrefixLength(text, shape.quoteDepth);
+    var at = 0;
+    if (!revealed) {
+      final hidden = shape.codeFence ? text.length : _prefixEnd;
+      _add(spans, 0, hidden, _hiddenMarker, concealed);
+      at = hidden;
+    } else {
+      for (final token in styled.tokens) {
+        if (token.start >= marks) break;
+        if (token.start > at) _add(spans, at, token.start, null, concealed);
+        final end = token.end > marks ? marks : token.end;
+        _add(
+          spans,
+          token.start,
+          end,
+          nestedTokenStyle(token, syntax, dark: dark),
+          concealed,
+        );
+        at = end;
+      }
+      if (at < marks) _add(spans, at, marks, null, concealed);
+      at = marks;
+    }
+    for (final run in codeRuns ?? const <CodeRun>[]) {
+      final start = marks + run.start < at ? at : marks + run.start;
+      final end = marks + run.end > text.length ? text.length : marks + run.end;
+      if (end <= start) continue;
+      if (start > at) _add(spans, at, start, null, concealed);
+      _add(spans, start, end, run.style, concealed);
+      at = end;
+    }
+    if (at < text.length) _add(spans, at, text.length, null, concealed);
     return TextSpan(children: spans);
   }
 

@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
+import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 
 /// Where a line stands in a code block's box: which of its corners are the
@@ -69,10 +70,14 @@ final class LineShape {
     this.rule = false,
     this.code,
     this.codeIndented = false,
+    this.codeFence = false,
+    this.heading = 0,
   });
 
-  /// The shape of [line], whose block is [block] and whose index is [index].
-  factory of(StyledLine line, Block? block, int index) {
+  /// The shape of [line], whose block is [block] and whose index is [index];
+  /// [quoted] is what the line is inside its quote, for a quote's line —
+  /// which is drawn as that block, as the read view draws it.
+  factory of(StyledLine line, Block? block, int index, {QuotedLine? quoted}) {
     var markers = 0;
     int? marker;
     int? box;
@@ -94,30 +99,45 @@ final class LineShape {
     }
     // A lazy line of a quote carries no `>` of its own, and is still quoted.
     final quoteDepth = markers > 0 ? markers : (block?.quoteDepth ?? 0);
+    // Inside a quote, the block the line is in there, and its index in it.
+    final inner = quoted?.block ?? block;
+    final at = quoted?.line ?? index;
     final ordinal =
         marker != null &&
-            block != null &&
-            block.startLine == index &&
-            block.listOrdinal > 0
-        ? block.listOrdinal
+            inner != null &&
+            inner.startLine == at &&
+            inner.listOrdinal > 0
+        ? inner.listOrdinal
         : null;
     // A line the item's block goes on to: under the item's text, lazy or not.
     final continued =
         marker == null &&
-        block != null &&
-        block.kind == BlockKind.listItem &&
-        index > block.startLine;
+        inner != null &&
+        inner.kind == BlockKind.listItem &&
+        at > inner.startLine;
     final code =
-        block != null &&
-            (block.kind == BlockKind.fencedCode ||
-                block.kind == BlockKind.indentedCode)
-        ? CodeRow.of(block, index)
+        inner != null &&
+            (inner.kind == BlockKind.fencedCode ||
+                inner.kind == BlockKind.indentedCode)
+        ? CodeRow.of(inner, at)
         : null;
+    // A fence of a code block inside a quote: the styler reads the quote's
+    // lines as its prose, so what is a fence there is said here.
+    final codeFence =
+        quoted != null &&
+        inner!.kind == BlockKind.fencedCode &&
+        (at == inner.startLine ||
+            (at == inner.endLine - 1 &&
+                _closesFence(quoted.lines[at].trimLeft())));
+    final heading = quoted != null && inner!.kind == BlockKind.heading
+        ? inner.headingLevel
+        : 0;
     if (quoteDepth == 0 &&
         marker == null &&
         !continued &&
         !rule &&
-        code == null) {
+        code == null &&
+        heading == 0) {
       return none;
     }
     return LineShape(
@@ -126,16 +146,21 @@ final class LineShape {
       // A line the scan has not reached yet is at the top level.
       listDepth: marker == null && !continued
           ? 0
-          : math.max(0, block?.listDepth ?? 0),
+          : math.max(0, inner?.listDepth ?? 0),
       continued: continued,
       box: box,
       ordinal: ordinal,
       task: task,
       rule: rule,
       code: code,
-      codeIndented: block?.kind == BlockKind.indentedCode,
+      codeIndented: inner?.kind == BlockKind.indentedCode,
+      codeFence: codeFence,
+      heading: heading,
     );
   }
+
+  static bool _closesFence(String text) =>
+      text.startsWith('```') || text.startsWith('~~~');
 
   /// How many quote levels the line is in.
   final int quoteDepth;
@@ -177,6 +202,14 @@ final class LineShape {
   /// are the block's indent, hidden as a list's marker is, and not code.
   final bool codeIndented;
 
+  /// Whether the line is a fence of a code block inside a quote, drawn
+  /// hidden as a fence is.
+  final bool codeFence;
+
+  /// The level of the heading the line is inside its quote, or 0: a quoted
+  /// heading is set at its size, as the read view sets it.
+  final int heading;
+
   /// A line with no shape to draw.
   static const LineShape none = LineShape();
 
@@ -192,7 +225,9 @@ final class LineShape {
       other.task == task &&
       other.rule == rule &&
       other.code == code &&
-      other.codeIndented == codeIndented;
+      other.codeIndented == codeIndented &&
+      other.codeFence == codeFence &&
+      other.heading == heading;
 
   @override
   int get hashCode => Object.hash(
@@ -206,6 +241,8 @@ final class LineShape {
     rule,
     code,
     codeIndented,
+    codeFence,
+    heading,
   );
 }
 
