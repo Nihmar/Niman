@@ -7,23 +7,25 @@ them together, the decisions taken on what is left, and where opening the
 246 MB stress note stands.
 
 The alignments are held by `test/widget/read_live_page_test.dart`: each one
-compares where a construct's first glyph lands in both modes, so they cannot
-drift apart again unnoticed.
+compares where a construct's first glyph lands in both modes — across and
+down — and where a code block's box and a rule stand, so they cannot drift
+apart again unnoticed.
 
 ## Where the constructs stand
 
-Measured with the platform font (Segoe UI), a 520 px pane, no line numbers,
-no column: the first glyph of each construct, read view minus `live`.
+The first glyph of each construct, read view minus `live`, no line numbers,
+no column: the table's row measured with the platform font (Segoe UI) in a
+520 px pane, the rest as `read_live_page_test` holds them.
 
 | construct | dx | dy |
 |---|---|---|
-| headings, paragraphs, lists, task lists, quotes | **0.0** | owed — see below |
-| fenced code | +8.4 | owed |
+| headings, paragraphs, lists, task lists, quotes, rules | **0.0** | **0.0** |
+| fenced code, its box | **0.0** | **0.0** |
+| indented code | its four spaces: `live` shows them | **0.0** |
 | table | −0.7 | `live` draws tables as source (#261) |
 
-Horizontally everything but code and tables is aligned to the pixel.
-Vertically the two differ by the rows each mode gives a blank line and the
-space around headings: the decision is taken, the work owed (below).
+Everything but tables and indented code is aligned to the pixel, across and
+down, however far down the note it is.
 
 ## Done
 
@@ -37,10 +39,14 @@ space around headings: the decision is taken, the work owed (below).
 | `259bb3a` | **Bug:** `live` hid a code block's code — its content lines were tokens of the fence, and the fence is a marker. The content is now `TokenKind.codeBlock` and drawn. |
 | `3d49b98` | Footnotes are drawn as prose (formulas typeset, emphasis stressed); the way back is the arrow alone, where a button's minimum height stood a blank row between footnotes. |
 | `a51e52f` | **Bug:** a footnote or link definition with a formula or a wikilink in it was drawn, in pieces, in the note's body. |
+| `6da307a` | Decision 1: a blank line is one of `live`'s rows in the read view, a block leaves no spacing of its own, and a rule is a row with the rule across its middle. |
+| `be23473` | **Bug:** a line less than four spaces in, after an indented code block, was scanned as code and drawn in a box, in both modes. |
+| `e55f6f8` | **Bug:** a row of `live` whose text is all hidden — a rule, a quote's empty line — was laid out as nothing: the rule stood at the top of its row and a quote's bar broke off at every empty line. |
+| `a05639e` | Decision 2: a code block is `live`'s box in both modes, in monospace, the fences' rows its top and bottom padding. |
 
 ## Decisions (2026-09-23)
 
-### 1. A blank line is 1.5 em, in both modes
+### 1. A blank line is 1.5 em, in both modes — done (`6da307a`)
 
 To align vertically the two modes need the same rows. In `live` a blank line
 is a text row, 1.5 em; the read view gave it 1 em. **Decided: 1.5 em in
@@ -49,23 +55,52 @@ block leaves no spacing of its own under it: the space between two
 paragraphs is the blank line the note has between them, as tall as `live`
 draws it. The 1 em spacing of `09ec542` goes with it.
 
-Headings go with it: the read view left a spacing under a heading, `live`
-leaves nothing. Still a proposal, to confirm: the same room above a heading
-in both modes.
+Headings went with it: neither mode leaves a spacing under a heading now,
+and none above it. Still a proposal, to confirm: some room above a heading,
+the same in both modes.
 
-### 2. A code block is a box, in both modes
+### 2. A code block is a box, in both modes — done (`a05639e`)
 
 The read view draws a filled box with an inner padding; `live` drew the code
 as plain rows, its fences hidden. **Decided: the box in both.** In `live` a
 background and an inset behind the block's rows, the fence rows becoming the
 box's top and bottom padding; in the read view the same geometry, so the
-code's rows land on `live`'s.
+code's rows land on `live`'s. `live` now sets the code in monospace, as the
+read view does, so a line of code wraps at the same place in both.
+
 ### Still to align after these
 
 - Tables: `live` has to draw them as tables first (#261).
 - Display formulas: their margins in the two modes.
 - A list inside a quote: its continuation lines in `live` stay on the
   quote's column rather than the item's — the scanner sees one quote block.
+  A code block inside a quote is the same case: `live` draws its lines as
+  the quote's, with no box.
+- Indented code: the read view takes its four spaces off, `live` shows them
+  — they are the line's own text, not a prefix it hides.
+- The colours of code: the read view highlights by the fence's language,
+  `live` draws code in one muted colour.
+- An HTML block: a box with a padding all round in the read view, source in
+  `live`.
+- Footnote and link definitions: `live` draws them as their source, the read
+  view as nothing — the blank lines around them are still rows, so the read
+  view leaves a few empty rows where the definitions stand.
+
+### Found on the way: a layout loop on one note
+
+`read_view_geometry_test` sweeps the fixtures and, when it is on the
+machine, `Geometria 1.md` (one person's note, not in the repository). On
+that note, the jump to the very end has thrown *RenderViewport exceeded its
+maximum number of layout cycles* since `3d49b98` (footnotes drawn as prose),
+before this round's changes: bisected. The fixtures in the repository are
+clean, and CI does not have the note.
+
+What the trace shows: the blocks sliver is laid out once, the footnotes'
+`SliverList` asks for no scroll correction, and the viewport goes round
+again nineteen times without laying either out — a position adjusted by
+less than a double can tell at 266 800 px, so no sliver's constraints
+change. Not fixed yet; the next step is to log the position's
+`applyContentDimensions` in that frame.
 
 ## Opening the 246 MB note
 
