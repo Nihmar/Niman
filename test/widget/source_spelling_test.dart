@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
@@ -58,21 +59,43 @@ final class _FakeChecker implements SpellChecker {
   void dispose() {}
 }
 
-/// The runs of every line on screen drawn with the wavy underline.
+/// The words of every line on screen the spelling's squiggle is under.
+///
+/// The squiggle is painted over the line (`SquigglePainter`), not written
+/// into its style, so it is read from the painters and the text they paint
+/// over.
 List<String> _underlined(WidgetTester tester) => <String>[
-  for (final text in tester.widgetList<RichText>(find.byType(RichText)))
-    ..._wavy(text.text),
+  for (final paint in tester.widgetList<CustomPaint>(find.byType(CustomPaint)))
+    if (paint.foregroundPainter case final SquigglePainter squiggle)
+      for (final range in squiggle.ranges)
+        range.textInside(
+          tester
+              .widget<RichText>(
+                find.descendant(
+                  of: find.byWidget(paint),
+                  matching: find.byType(RichText),
+                ),
+              )
+              .text
+              .toPlainText(),
+        ),
 ];
 
-Iterable<String> _wavy(InlineSpan span) sync* {
-  if (span is! TextSpan) return;
-  if (span.style?.decorationStyle == TextDecorationStyle.wavy &&
-      span.text != null) {
-    yield span.text!;
+/// Whether some run of a line on screen is [text] struck through.
+bool _struck(WidgetTester tester, String text) {
+  var found = false;
+  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+    rich.text.visitChildren((span) {
+      if (span is TextSpan &&
+          span.text == text &&
+          (span.style?.decoration?.contains(TextDecoration.lineThrough) ??
+              false)) {
+        found = true;
+      }
+      return true;
+    });
   }
-  for (final child in span.children ?? const <InlineSpan>[]) {
-    yield* _wavy(child);
-  }
+  return found;
 }
 
 /// Which unified mode a body is being run in: the same tests, twice.
@@ -121,6 +144,20 @@ void main() {
     addTearDown(check.dispose);
     await _pump(tester, 'hello wrold\n', check, live: mode == _Mode.live);
     expect(_underlined(tester), <String>['wrold']);
+  });
+
+  both('a struck-through misspelled word keeps its strike', (
+    tester,
+    mode,
+  ) async {
+    // The squiggle used to be the word's style, and a style has one
+    // decoration: the strike went, and in `live` — where the strike is all
+    // that is left of `~~` — the word read as plain text.
+    final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
+    addTearDown(check.dispose);
+    await _pump(tester, 'hello ~~wrold~~\n', check, live: mode == _Mode.live);
+    expect(_underlined(tester), <String>['wrold']);
+    expect(_struck(tester, 'wrold'), isTrue);
   });
 
   both('code and links are not prose', (tester, mode) async {
