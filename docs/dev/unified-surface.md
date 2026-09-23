@@ -11624,10 +11624,10 @@ What the design asks for next, in the order it names them:
   1. **`live` as the default WYSIWYG**, the way `source` is not yet the default
      editor: the flag is on, but a library that has not switched it still opens
      Quill.
-  2. **The row-wise reveal** that follows a wrap.
-  3. **The parity run the criterion asks for**: the same widget tests over both
-     unified modes, rather than a live-mode copy of each. **Seven files are
-     done** (2026-09-22): the find bar (`source_find_bar_test.dart`), the
+  2. **The parity run the criterion asks for**: the same widget tests over both
+     unified modes, rather than a live-mode copy of each. **Done**: every
+     surface test that ran in `source` only now runs in both modes. Seven
+     files first (2026-09-22): the find bar (`source_find_bar_test.dart`), the
      spelling (`source_spelling_test.dart`), the context menu
      (`source_context_menu_test.dart`), folding (`source_folding_test.dart`),
      the typewriter and Zen (`source_typewriter_test.dart`), the semantics
@@ -11647,15 +11647,29 @@ What the design asks for next, in the order it names them:
        fixture's mapping is written out (`_atOffset`, plus the four and five
        characters the note hides before the wikilink and the Markdown link), and
        the click lands on the same offsets in both modes.
-     What is still paired in `source` only: `source_embedders_test.dart`, whose
-     tests tap at computed columns on notes that carry markers — the same
-     column arithmetic would be needed per fixture, and its subject is the
-     platform path rather than the reveal — and `source_touch_selection_test.dart`,
-     the phone's long press and handles.
-  4. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
+     The last two followed (2026-09-23):
+     * `source_embedders_test.dart` runs every test per profile *and* per
+       mode — 57 tests become 114, over Linux, Windows and Android — because
+       the invariant it holds, the note and the platform's copy saying the
+       same thing, is exactly what a hidden marker must not disturb. Four taps
+       were aimed at a line's last column counted from the margin; in `live` a
+       list line is indented a level (`_indent`), its marker shown or not, so
+       the column was two glyphs short and the Enter split the word (`- lat` /
+       `- te`). The hit test was right — it answered for the text as drawn —
+       and the taps now go past the line's end (`tapEnd`), which is the end in
+       either mode. One thing for the device round to look at, since this is
+       where it showed: the indent stays when the marker is revealed, so a list
+       item's text moves right by the marker's width as the caret comes in.
+     * `source_touch_selection_test.dart` runs in both, and gains the case
+       that is `live`'s own: a long press on `**parola**` takes the word while
+       its markers are hidden, and taking it puts the caret in its run, which
+       draws them and moves the word right. The end handle is held to where
+       `source` puts it for the same selection — the layout *after* the reveal,
+       not the one the press was aimed at.
+  3. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
      and per word, no visible thrash — which is the only criterion on this list
      that needs a phone rather than a host.
-  5. **The row-wise reveal, reconsidered and dropped.** It was on this list as
+  4. **The row-wise reveal, reconsidered and dropped.** It was on this list as
      "the refinement that follows a wrap", on the reading of policy A that a
      wrapped paragraph should show the syntax of the row the caret is on. With
      the per-word reveal in, that refinement no longer buys anything and costs
