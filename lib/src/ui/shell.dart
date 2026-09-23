@@ -44,6 +44,7 @@ import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
+import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/library_window.dart';
@@ -960,6 +961,18 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The phone full-screen note body (one builder for both the chromed
   /// and the immersive variants: only the Scaffold around it changes).
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
+    final view = _phoneNoteView(controller, selectedPath);
+    final above = _journalHeader(selectedPath, compact: true);
+    if (above == null) return view;
+    return Column(
+      children: [
+        above,
+        Expanded(child: view),
+      ],
+    );
+  }
+
+  Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
     return NoteView(
       key: _phoneNoteKey,
       path: p.join(controller.root ?? '', selectedPath),
@@ -3159,9 +3172,25 @@ final class _LibraryShellState extends State<_LibraryShell>
         saveNote: _noteSaver(controller),
         createMissingNote: _missingNoteCreator(controller),
         statusActions: _statusActionsFor(pane),
+        header: _journalHeader,
       ),
     ),
   );
+
+  /// The journal's strip over [path] when it is an entry (#7), else null.
+  Widget? _journalHeader(String path, {bool compact = false}) {
+    final day = _journal.dayOfPath(path);
+    if (day == null) return null;
+    return JournalStrip(
+      day: day,
+      today: _journal.today(DateTime.now()),
+      entryDays: _journalFlow.entryDays,
+      onPrevious: () => unawaited(_journalFlow.openPrevious(context, day)),
+      onNext: () => unawaited(_journalFlow.openNext(context, day)),
+      revision: widget.controller.revision,
+      compact: compact,
+    );
+  }
 
   /// The view controls in [pane]'s status row (T-PP-22): for the note
   /// that pane shows, so each pane's eye says what its own tab does.

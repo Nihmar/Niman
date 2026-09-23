@@ -95,6 +95,9 @@ void main() {
     await settle(tester);
     expect(controller.contentOf(path), startsWith('# '));
     expect(find.text(path.split('/').last.replaceAll('.md', '')), findsWidgets);
+    // An entry wears the journal's strip, with today's badge.
+    expect(find.byKey(const Key('journal-strip')), findsOne);
+    expect(find.byKey(const Key('journal-today-badge')), findsOne);
     await close();
   });
 }
