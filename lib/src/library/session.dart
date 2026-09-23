@@ -7,6 +7,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -146,6 +147,16 @@ abstract interface class NoteOperations {
 
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});
+
+  /// The journal's settings (#7).
+  Future<JournalSettings> get journal;
+
+  /// Keeps [settings] as the journal's.
+  Future<void> setJournal(JournalSettings settings);
+
+  /// The paths of the notes under [folder], at any depth (every note's
+  /// for the root): an index seek, not a walk of the disk.
+  Future<List<String>> notePathsUnder(String folder);
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   Future<void> setTrashEnabled({required bool enabled});
