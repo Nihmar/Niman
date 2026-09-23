@@ -45,7 +45,14 @@ const MarkdownTheme _theme = MarkdownTheme(
 Offset _at(int line, int column) =>
     Offset(5 + column * 14.0 + 7, 8 + line * 21.0 + 10);
 
-Future<MarkdownSourceViewState> _pump(WidgetTester tester, String text) async {
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
+Future<MarkdownSourceViewState> _pump(
+  WidgetTester tester,
+  String text, {
+  bool live = false,
+}) async {
   tester.view.physicalSize = const Size(700, 500);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -56,6 +63,7 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester, String text) async {
           buffer: SourceBuffer.fromText(text),
           theme: _theme,
           showLineNumbers: false,
+          hideMarkers: live,
         ),
       ),
     ),
@@ -65,10 +73,25 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester, String text) async {
 }
 
 void main() {
-  testWidgets('a long press takes the word, and shows the handles', (
+  /// The same test in `source` and in `live` (#246).
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('a long press takes the word, and shows the handles', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester, 'una parola sola\n');
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
     await tester.longPressAt(_at(0, 6));
     await tester.pumpAndSettle();
     expect(state.selectedText, 'parola');
@@ -77,10 +100,15 @@ void main() {
     expect(find.text('Copy'), findsOneWidget, reason: 'the toolbar is up');
   });
 
-  testWidgets('dragging the end handle moves the end of the selection', (
+  both('dragging the end handle moves the end of the selection', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester, 'una parola sola\n');
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
     await tester.longPressAt(_at(0, 6));
     await tester.pumpAndSettle();
     // Five glyphs to the right: over " sola".
@@ -92,7 +120,7 @@ void main() {
     expect(state.selectedText, 'parola sola');
   });
 
-  testWidgets('Copy puts the selection on the clipboard', (tester) async {
+  both('Copy puts the selection on the clipboard', (tester, mode) async {
     String? clipboard;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -109,7 +137,7 @@ void main() {
         null,
       ),
     );
-    await _pump(tester, 'una parola sola\n');
+    await _pump(tester, 'una parola sola\n', live: mode == _Mode.live);
     await tester.longPressAt(_at(0, 6));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
@@ -118,8 +146,12 @@ void main() {
     expect(find.text('Copy'), findsNothing, reason: 'the toolbar went');
   });
 
-  testWidgets('a tap elsewhere puts the handles away', (tester) async {
-    final state = await _pump(tester, 'una parola sola\n\n\n\n\n\n\nfine\n');
+  both('a tap elsewhere puts the handles away', (tester, mode) async {
+    final state = await _pump(
+      tester,
+      'una parola sola\n\n\n\n\n\n\nfine\n',
+      live: mode == _Mode.live,
+    );
     await tester.longPressAt(_at(0, 6));
     await tester.pumpAndSettle();
     await tester.tapAt(_at(7, 2));
@@ -127,5 +159,28 @@ void main() {
     expect(state.selection.isCollapsed, isTrue);
     expect(find.byKey(const ValueKey(SelectionHandle.end)), findsNothing);
     expect(find.text('Copy'), findsNothing);
+  });
+
+  testWidgets('in live the handles follow the word the press revealed', (
+    tester,
+  ) async {
+    // The press lands on `parola` while its `**` are hidden and take no room;
+    // taking the word puts the caret in its run, which draws them, and the
+    // word moves right by their width. The handles are read from the layout,
+    // so they must be read from the one drawn *after* the reveal — which is
+    // the line as `source` draws it.
+    const note = 'una **parola** sola\n';
+    Future<Rect> handleAfterPress(int column, {required bool live}) async {
+      final state = await _pump(tester, note, live: live);
+      await tester.longPressAt(_at(0, column));
+      await tester.pumpAndSettle();
+      expect(state.selectedText, 'parola');
+      return tester.getRect(find.byKey(const ValueKey(SelectionHandle.end)));
+    }
+
+    final source = await handleAfterPress(8, live: false);
+    // Two glyphs to the left: where `parola` is while its markers are hidden.
+    final live = await handleAfterPress(6, live: true);
+    expect(live.left, closeTo(source.left, 1), reason: 'the drawn word');
   });
 }
