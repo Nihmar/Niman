@@ -53,6 +53,7 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
@@ -2133,6 +2134,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 child: CustomScrollView(
                   key: _scrollKey,
                   controller: _scroll,
+                  physics: const ContentClampPhysics(),
                   slivers: <Widget>[
                     SliverPadding(
                       padding: EdgeInsets.only(

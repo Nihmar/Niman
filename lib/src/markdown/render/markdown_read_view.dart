@@ -29,6 +29,7 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -615,6 +616,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final availableWidth = pane - padding.horizontal;
     return CustomScrollView(
       controller: widget.controller,
+      physics: const ContentClampPhysics(),
       slivers: <Widget>[
         SliverPadding(
           padding: padding,
