@@ -185,4 +185,48 @@ void main() {
       expect(read[at], closeTo(live[at], 0.01), reason: words[at]);
     }
   });
+
+  testWidgets("each construct's text stands as far down as it does in live", (
+    tester,
+  ) async {
+    // The read view gave a blank line 1 em and left a spacing of 1 em under
+    // every block, where `live` draws a blank line as one of its rows, 1.5 em,
+    // and leaves nothing under a block: every construct past the first stood
+    // higher or lower than it did a pane flip before, and further off the
+    // further down the note it was. A rule, one pixel in the read view, is a
+    // row in `live` with the rule across its middle.
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note =
+        'caret\n\n# Heading one\n\n## Heading two\npara under\n\n\n'
+        'after two\n\n- bullet\n- [ ] task\n  - nested\n\n- loose\n\n'
+        '1. numbered\n\n---\n\nruled\n\n> quoted\n>\n> > deeper\n\nlast\n';
+    const words = [
+      'Heading one',
+      'Heading two',
+      'para under',
+      'after two',
+      'bullet',
+      'task',
+      'nested',
+      'loose',
+      'numbered',
+      'ruled',
+      'quoted',
+      'deeper',
+      'last',
+    ];
+    Future<List<double>> tops({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      final origin = _glyphOf(tester, 'caret').dy;
+      return [for (final word in words) _glyphOf(tester, word).dy - origin];
+    }
+
+    final live = await tops(read: false);
+    final read = await tops(read: true);
+    for (var at = 0; at < words.length; at++) {
+      expect(read[at], closeTo(live[at], 0.01), reason: words[at]);
+    }
+  });
 }

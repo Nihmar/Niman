@@ -17,9 +17,13 @@
 /// | fenced or indented code | a filled box of monospace lines |
 /// | math | the display typesetter |
 /// | table | a real table, cells from the source rows |
-/// | thematic break | a rule |
+/// | thematic break | a row with a rule across its middle, as `live` draws it |
 /// | frontmatter | nothing: it is metadata, and the preview hides it too |
-/// | blank | the space a blank line takes |
+/// | blank | one of `live`'s rows per blank line |
+///
+/// A block leaves no room of its own around it: the space between two blocks
+/// is the blank lines the note has between them, drawn as `live` draws them,
+/// so the two modes are one page and a glyph does not move when it flips.
 ///
 /// The kinds not yet drawn as they will be: an embed is not yet an image and a
 /// table cell does not yet render its inline markup, because both need the
@@ -59,7 +63,6 @@ final class BlockView extends StatelessWidget {
     this.embedResolver,
     this.onToggleTask,
     this.scope,
-    this.spaced = true,
     this.quoteNesting = 0,
     super.key,
   });
@@ -73,23 +76,9 @@ final class BlockView extends StatelessWidget {
   /// the quote's own.
   final DocumentScope? scope;
 
-  /// Whether the block leaves the spacing between blocks under it: all but
-  /// the last block inside a quote do, whose bar would otherwise run on past
-  /// its text.
-  final bool spaced;
-
   /// How many quotes this block is inside, which bounds how deep a quote's
   /// content is read again as blocks.
   final int quoteNesting;
-
-  /// Whether [block] leaves the spacing between blocks under it, with [next]
-  /// after it: all but an item a next item follows at once — a tight list's
-  /// items sit one under the other, as `live` draws them.
-  static bool spacedBefore(Block block, Block? next) =>
-      !(block.kind == BlockKind.listItem &&
-          next != null &&
-          next.kind == BlockKind.listItem &&
-          next.startLine == block.endLine);
 
   /// Past this many quotes inside one another, a quote's content is drawn as
   /// its text rather than read again.
@@ -121,7 +110,7 @@ final class BlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final block = parsed.block;
-    final child = switch (block.kind) {
+    return switch (block.kind) {
       BlockKind.paragraph => _rich(context),
       BlockKind.heading => _rich(
         context,
@@ -134,18 +123,16 @@ final class BlockView extends StatelessWidget {
       BlockKind.math => _blockMath(context),
       BlockKind.table => _table(context),
       BlockKind.thematicBreak => _rule(context),
-      // A blank line is the spacing between the blocks around it, which the
-      // one above leaves: drawn again here, it counted twice more.
-      BlockKind.blank => const SizedBox.shrink(),
+      BlockKind.blank => SizedBox(height: block.lineCount * _row(context)),
       BlockKind.frontmatter => const SizedBox.shrink(),
       BlockKind.html => _code(context, null),
     };
-    if (!spaced || block.kind == BlockKind.blank) return child;
-    return Padding(
-      padding: EdgeInsets.only(bottom: theme.blockSpacing),
-      child: child,
-    );
   }
+
+  /// How tall one of `live`'s rows is: a line of prose, at the size the
+  /// note's text is read at.
+  double _row(BuildContext context) =>
+      MediaQuery.textScalerOf(context).scale(theme.lineHeight);
 
   /// The block's visible text as rich text.
   ///
@@ -330,9 +317,6 @@ final class BlockView extends StatelessWidget {
                     ? null
                     : (line) => toggle(start + line),
                 scope: scope,
-                spaced:
-                    at < inner.length - 1 &&
-                    spacedBefore(inner[at].block, inner[at + 1].block),
                 quoteNesting: quoteNesting + 1,
               ),
           ],
@@ -429,9 +413,14 @@ final class BlockView extends StatelessWidget {
     ),
   );
 
-  /// A thematic break.
-  Widget _rule(BuildContext context) =>
-      Container(height: theme.ruleThickness, color: theme.rule);
+  /// A thematic break: a row, the rule across its middle, where `live` draws
+  /// it.
+  Widget _rule(BuildContext context) => SizedBox(
+    height: _row(context),
+    child: Center(
+      child: Container(height: theme.ruleThickness, color: theme.rule),
+    ),
+  );
 
   /// A table, its cells read from the source rows.
   Widget _table(BuildContext context) {
@@ -793,8 +782,8 @@ final class _InlineBuilder {
 
 /// One piece of a code block too long to lay out whole (see
 /// `MarkdownReadViewState.pieceLines`): its lines, in the block's box, with the
-/// box's rounded ends, padding and spacing only where the block starts and
-/// ends, so the pieces read as one block.
+/// box's rounded ends and padding only where the block starts and ends, so
+/// the pieces read as one block.
 ///
 /// Each piece is highlighted on its own: a construct that spans two pieces
 /// (a long string, a block comment) is coloured from where the piece
@@ -833,35 +822,32 @@ final class CodePieceView extends StatelessWidget {
     final language = block.fenceInfo;
     final radius = Radius.circular(first || last ? 4 : 0);
     final text = _text();
-    return Padding(
-      padding: EdgeInsets.only(bottom: last ? theme.blockSpacing : 0),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: theme.codeBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: first ? radius : Radius.zero,
-            topRight: first ? radius : Radius.zero,
-            bottomLeft: last ? radius : Radius.zero,
-            bottomRight: last ? radius : Radius.zero,
-          ),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.codeBackground,
+        borderRadius: BorderRadius.only(
+          topLeft: first ? radius : Radius.zero,
+          topRight: first ? radius : Radius.zero,
+          bottomLeft: last ? radius : Radius.zero,
+          bottomRight: last ? radius : Radius.zero,
         ),
-        padding: EdgeInsets.fromLTRB(
-          theme.codePadding,
-          first ? theme.codePadding : 0,
-          theme.codePadding,
-          last ? theme.codePadding : 0,
-        ),
-        child: language == null || language.isEmpty
-            ? Text(text, style: theme.code)
-            : Text.rich(
-                CodeHighlighter(
-                  language: language,
-                  theme: theme.codeHighlight,
-                ).format(text),
-                style: theme.code,
-              ),
       ),
+      padding: EdgeInsets.fromLTRB(
+        theme.codePadding,
+        first ? theme.codePadding : 0,
+        theme.codePadding,
+        last ? theme.codePadding : 0,
+      ),
+      child: language == null || language.isEmpty
+          ? Text(text, style: theme.code)
+          : Text.rich(
+              CodeHighlighter(
+                language: language,
+                theme: theme.codeHighlight,
+              ).format(text),
+              style: theme.code,
+            ),
     );
   }
 

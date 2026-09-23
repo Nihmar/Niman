@@ -505,37 +505,29 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// Per kind rather than one global "pixels per line", because the kinds
   /// differ by more than their line count: a fence carries its padding, a rule
-  /// is one line whatever its text, and the frontmatter takes no room at all.
+  /// is one row whatever its text, and the frontmatter takes no room at all.
   /// A wrong estimate only costs a jump that lands slightly off before the
   /// block is measured.
   double _estimateOf(int index) {
     final block = _blocks[index];
     final theme = _theme ?? _fallbackTheme;
-    final spacing = theme.blockSpacing;
     // A line at the size the text is read at: the theme's is the text's own.
     final line = _textScaler.scale(theme.lineHeight);
     return switch (block.kind) {
       BlockKind.frontmatter => 0,
-      // The spacing a blank line stands for is the block above's.
-      BlockKind.blank => 0,
-      BlockKind.thematicBreak => theme.ruleThickness + spacing,
-      BlockKind.heading => line * 1.3 + spacing,
+      BlockKind.thematicBreak => line,
+      BlockKind.heading => line * 1.3,
       BlockKind.fencedCode || BlockKind.indentedCode =>
         _pieces.containsKey(index)
             ? block.lineCount * line
-            : block.lineCount * line + 2 * theme.codePadding + spacing,
-      BlockKind.math => block.lineCount * line * 1.6 + spacing,
-      BlockKind.table || BlockKind.html => block.lineCount * line + spacing,
-      BlockKind.listItem =>
-        block.lineCount * line +
-            (BlockView.spacedBefore(
-                  block,
-                  index + 1 < _blocks.length ? _blocks[index + 1] : null,
-                )
-                ? spacing
-                : 0),
+            : block.lineCount * line + 2 * theme.codePadding,
+      BlockKind.math => block.lineCount * line * 1.6,
+      BlockKind.blank ||
+      BlockKind.table ||
+      BlockKind.html ||
+      BlockKind.listItem ||
       BlockKind.paragraph ||
-      BlockKind.quote => block.lineCount * line + spacing,
+      BlockKind.quote => block.lineCount * line,
     };
   }
 
@@ -700,10 +692,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
       scope: widget.parser.scope,
-      spaced: BlockView.spacedBefore(
-        block,
-        index + 1 < _blocks.length ? _blocks[index + 1] : null,
-      ),
     );
   }
 }
