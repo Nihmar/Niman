@@ -464,6 +464,41 @@ void main() {
       expect(read[at].dy, closeTo(live[at].dy, 0.01), reason: words[at]);
     }
   });
+
+  testWidgets("a table's cells stand where they do in live", (tester) async {
+    // `live` drew a table as its source, pipes and dashes and all, where
+    // the read view draws a grid: every cell moved when the pane flipped.
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note =
+        'caret\n\n| Name | Qty | Notes |\n|---|:-:|---|\n'
+        '| apple | 3 | **fresh** |\n| a much longer name | 12 |  |\n\n'
+        'after table\n';
+    const words = [
+      'Name',
+      'Qty',
+      'Notes',
+      'apple',
+      '3',
+      'fresh',
+      'a much',
+      '12',
+      'after table',
+    ];
+    Future<List<Offset>> places({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      final origin = _glyphOf(tester, 'caret');
+      return [for (final word in words) _glyphOf(tester, word) - origin];
+    }
+
+    final live = await places(read: false);
+    final read = await places(read: true);
+    for (var at = 0; at < words.length; at++) {
+      expect(read[at].dx, closeTo(live[at].dx, 0.01), reason: words[at]);
+      expect(read[at].dy, closeTo(live[at].dy, 0.01), reason: words[at]);
+    }
+  });
 }
 
 /// The colour the character at [offset] of [root]'s text is drawn in, the
