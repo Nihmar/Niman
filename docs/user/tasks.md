@@ -17,7 +17,7 @@ The Todo tab reads `todo.txt` files (todo.txt grammar: `x (A)
 
 Tap a task to edit it; the trash icon in the dialog's title deletes it.
 Long-press a row (right-click on desktop) for the same Edit / Delete as
-a menu. Deleting removes the line from `todo.txt` (or `done.txt`, in the
+a menu, or swipe it to the left (drag it, with a mouse) and confirm. Deleting removes the line from `todo.txt` (or `done.txt`, in the
 Done view) outright: there is no trash for tasks. To keep a finished
 task, check it instead.
 

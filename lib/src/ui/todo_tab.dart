@@ -6,7 +6,7 @@
 /// the same list shape, and routes row gestures: checkbox toggles
 /// check/uncheck, tap edits (the dialog can also delete), long-press or
 /// right-click opens the bottom sheet (the app's menu pattern) with
-/// edit/delete.
+/// edit/delete, and a swipe towards the start deletes after asking.
 library;
 
 import 'dart:async';
@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
@@ -74,11 +75,26 @@ final class _TodoTabState extends State<TodoTab> {
   /// The list filter (due range + token chips + sort key).
   TodoFilter _filter = const TodoFilter();
 
+  /// Rows swiped away whose delete has not published yet. A dismissed
+  /// [Dismissible] must leave the tree at once, while the controller's
+  /// snapshot arrives after the file write; the next publish (the delete,
+  /// or its failure) clears this, and a failed delete brings the row back.
+  final Set<TodoEntry> _swiped = {};
+
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_onPublished);
     unawaited(widget.controller.open());
   }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onPublished);
+    super.dispose();
+  }
+
+  void _onPublished() => _swiped.clear();
 
   DateTime get _today {
     final now = widget.clock?.call() ?? DateTime.now();
@@ -247,7 +263,10 @@ final class _TodoTabState extends State<TodoTab> {
       for (final entry in (_showDone ? snapshot.done : snapshot.todo))
         if (entry.task.raw.trim().isNotEmpty) entry,
     ];
-    final visible = applyTodoFilter(fileEntries, _filter, _today);
+    final visible = [
+      for (final entry in applyTodoFilter(fileEntries, _filter, _today))
+        if (!_swiped.contains(entry)) entry,
+    ];
     return Column(
       children: [
         TodoFilterBar(
@@ -285,19 +304,78 @@ final class _TodoTabState extends State<TodoTab> {
                   itemBuilder: (context, index) {
                     final entry = visible[index];
                     final view = _showDone ? 'done' : 'open';
-                    return TodoRow(
-                      key: Key('todo-row-$view-${entry.lineIndex}'),
-                      entry: entry,
-                      today: _today,
-                      onToggle: (checked) => _toggle(entry, checked),
-                      onEdit: () => _edit(entry),
-                      onShowMenu: () => _showRowMenu(entry),
+                    return _swipeToDelete(
+                      entry,
+                      TodoRow(
+                        key: Key('todo-row-$view-${entry.lineIndex}'),
+                        entry: entry,
+                        today: _today,
+                        onToggle: (checked) => _toggle(entry, checked),
+                        onEdit: () => _edit(entry),
+                        onShowMenu: () => _showRowMenu(entry),
+                      ),
                     );
                   },
                 ),
         ),
       ],
     );
+  }
+
+  /// [row] made swipeable towards the start, which deletes [entry] once
+  /// the user confirms: a stray swipe on a phone must not lose a task,
+  /// since a deleted line has no trash.
+  Widget _swipeToDelete(TodoEntry entry, Widget row) {
+    final scheme = Theme.of(context).colorScheme;
+    return Dismissible(
+      // Per entry object, never per line index: once a line goes, the
+      // next one takes its index, and must not inherit a dismissed state.
+      key: ObjectKey(entry),
+      direction: DismissDirection.endToStart,
+      background: ColoredBox(
+        color: scheme.errorContainer,
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(end: 24),
+            child: Icon(Icons.delete_outline, color: scheme.onErrorContainer),
+          ),
+        ),
+      ),
+      confirmDismiss: (_) => _confirmDelete(entry),
+      onDismissed: (_) {
+        setState(() => _swiped.add(entry));
+        unawaited(_delete(entry));
+      },
+      child: row,
+    );
+  }
+
+  /// Asks before a swipe deletes [entry]; true deletes.
+  Future<bool> _confirmDelete(TodoEntry entry) async {
+    _log.debug('todo swipe: line ${entry.lineIndex}, asking');
+    final display = taskDisplayText(entry.task.description);
+    final name = '“${display.isEmpty ? entry.task.raw : display}”';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppStrings.todoDeleteAction),
+        content: Text(AppStrings.deleteForeverConfirm(name)),
+        actions: [
+          TextButton(
+            key: const Key('todo-swipe-cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          TextButton(
+            key: const Key('todo-swipe-confirm'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppStrings.actionDelete),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 
   /// Opens the token + sort sheet (T-TDM-03) over the visible file.

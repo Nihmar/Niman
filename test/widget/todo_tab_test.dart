@@ -229,6 +229,35 @@ void main() {
     expect(source.todoLines, ['kept']);
   });
 
+  testWidgets('a swipe deletes the row once confirmed', (tester) async {
+    await pumpTab(tester, todo: ['doomed', 'kept', 'last']);
+    await tester.drag(find.text('doomed'), const Offset(-600, 0));
+    await settle(tester);
+    expect(find.text('“doomed” will be permanently deleted'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('todo-swipe-confirm')));
+    await settle(tester);
+    expect(find.text('doomed'), findsNothing);
+    expect(source.todoLines, ['kept', 'last']);
+
+    // The row that took its line index is a row like any other.
+    await tester.drag(find.text('kept'), const Offset(-600, 0));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-swipe-confirm')));
+    await settle(tester);
+    expect(source.todoLines, ['last']);
+    expect(find.text('last'), findsOneWidget);
+  });
+
+  testWidgets('a swipe that is not confirmed keeps the row', (tester) async {
+    await pumpTab(tester, todo: ['kept']);
+    await tester.drag(find.text('kept'), const Offset(-600, 0));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-swipe-cancel')));
+    await settle(tester);
+    expect(find.text('kept'), findsOneWidget);
+    expect(source.todoLines, ['kept']);
+  });
+
   testWidgets('empty lists show the empty states', (tester) async {
     await pumpTab(tester);
     expect(find.text('No open tasks yet'), findsOneWidget);
