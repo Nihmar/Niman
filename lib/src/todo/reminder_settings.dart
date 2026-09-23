@@ -17,7 +17,9 @@
 /// system screen. The battery one is deliberately not requested through
 /// `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: that one-tap dialog
 /// needs `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which app stores
-/// restrict to a narrow set of categories. The plain list needs nothing.
+/// restrict to a narrow set of categories. Niman's own battery page needs
+/// nothing, and — unlike the system-wide list, which opens filtered to
+/// the apps already exempt — shows the one switch that matters.
 library;
 
 import 'dart:io';
@@ -32,7 +34,8 @@ abstract interface class ReminderSettings {
   /// Whether Niman is exempt from battery optimization right now.
   Future<bool> isBatteryExempt();
 
-  /// Opens the system list where the exemption is granted.
+  /// Opens Niman's battery page in system settings, where the exemption
+  /// is granted.
   ///
   /// Returns false when no activity handles it.
   Future<bool> openBatterySettings();
