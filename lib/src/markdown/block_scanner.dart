@@ -260,7 +260,14 @@ final class BlockScanner {
     }
     _scannedLineTotal += line - start;
 
-    var rebuilt = _buildBlocks(start, line);
+    // The block the rebuild's first item counts on from: the kept head's
+    // last non-blank one, which a rebuild that starts on an item's line
+    // otherwise never sees — and a list written `1. 1. 1.` renumbered itself
+    // 1, 1, 2 under the writer's keystroke.
+    final before = prefix != null && prefix.kind != BlockKind.blank
+        ? prefix
+        : _nonBlankBefore(headEnd);
+    var rebuilt = _buildBlocks(start, line, before: before);
     // The block that was already there before the edit, joined to what the
     // rebuild made of the rest when the two make one block — a paragraph's
     // second line, a quote's lazy continuation. The splice takes the old
@@ -406,17 +413,39 @@ final class BlockScanner {
 
   /// Whether a block can end at [line]: the state is top level and the line
   /// before it is blank, so nothing is continuing across it.
+  ///
+  /// Unless [line] is blank too: blank lines are one block however many there
+  /// are, so the second of two was never a boundary — and a rescan that
+  /// stopped on it split the run in two. Nor when [line] opens a list item:
+  /// an ordered item counts on from the block before the blank, which is the
+  /// rebuilt one, so a kept item there would keep a number that is no longer
+  /// its own.
   bool _isBlockBoundary(int line, LineState state) {
     if (!state.isPlain || state.quoteDepth != 0 || state.listIndent >= 0) {
       return false;
     }
     if (state.table) return false;
     if (line == 0) return true;
-    return _text(line - 1).trim().isEmpty;
+    final text = _text(line);
+    return _text(line - 1).trim().isEmpty &&
+        text.trim().isNotEmpty &&
+        _listMarker(text) == null;
   }
 
-  /// The blocks covering `[from, to)`.
-  List<Block> _buildBlocks(int from, int to) {
+  /// The last block before index [end] that is not a blank run, or null.
+  ///
+  /// Blank lines merge into one block, so this looks back one block or two.
+  Block? _nonBlankBefore(int end) {
+    for (var at = end - 1; at >= 0; at--) {
+      final block = _at(at);
+      if (block.kind != BlockKind.blank) return block;
+    }
+    return null;
+  }
+
+  /// The blocks covering `[from, to)`, [before] being the last non-blank block
+  /// ahead of [from]: what an ordered item there counts on from.
+  List<Block> _buildBlocks(int from, int to, {Block? before}) {
     final blocks = <Block>[];
     var line = from;
     while (line < to) {
@@ -445,7 +474,7 @@ final class BlockScanner {
       // between two items is a `blank` block, and looking only one back would
       // reset the count on every loose list — which is exactly the shape a
       // numbered list takes in a note written with air in it.
-      Block? previous;
+      var previous = before;
       for (var back = blocks.length - 1; back >= 0; back--) {
         if (blocks[back].kind != BlockKind.blank) {
           previous = blocks[back];
@@ -453,7 +482,7 @@ final class BlockScanner {
         }
       }
       final ordinal = kind == BlockKind.listItem
-          ? _ordinalOf(line, listDepth, previous)
+          ? _ordinalOf(line, listDepth, quoteDepth, previous)
           : 0;
       blocks.add(
         Block(
@@ -807,11 +836,14 @@ final class BlockScanner {
   /// item at the same indent, and both are written as ordered items — keeps
   /// counting. Anything else starts a list, and starts it at the number the
   /// note wrote.
-  int _ordinalOf(int line, int listDepth, Block? previous) {
+  int _ordinalOf(int line, int listDepth, int quoteDepth, Block? previous) {
     final written = _writtenOrdinal(_text(line));
+    // The same list is the same depth in the same quote: an item after a
+    // quote's list is a list of its own, not the quote's list counted on.
     if (previous != null &&
         previous.kind == BlockKind.listItem &&
         previous.listDepth == listDepth &&
+        previous.quoteDepth == quoteDepth &&
         previous.listOrdinal > 0 &&
         written > 0) {
       return previous.listOrdinal + 1;

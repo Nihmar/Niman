@@ -56,6 +56,21 @@ html block
 last paragraph
 ''';
 
+/// Everything a block carries, for comparing an incremental scan with a fresh
+/// one: `Block.toString` leaves out the ordinal, the heading level, the fence's
+/// language and the entering state, and an oracle that does not see a field
+/// cannot catch it going wrong.
+List<String> _described(BlockScanner scanner) => <String>[
+  for (final block in scanner.index.blocks)
+    <Object?>[
+      block,
+      '#${block.listOrdinal}',
+      'h${block.headingLevel}',
+      block.fenceInfo,
+      block.entering,
+    ].join(' '),
+];
+
 /// The kinds of the blocks over [text], in order.
 List<BlockKind> _kinds(String text) {
   final scanner = BlockScanner(SourceBuffer.fromText(text));
@@ -340,8 +355,8 @@ void main() {
 
           final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
           expect(
-            scanner.index.blocks.map((b) => b.toString()),
-            fresh.index.blocks.map((b) => b.toString()),
+            _described(scanner),
+            _described(fresh),
             reason: 'edit $start..$end',
           );
         }
@@ -361,6 +376,8 @@ void main() {
         '`',
         r'$',
         '|',
+        // An ordered marker, so the count an item carries is edited too.
+        '1. ',
       ];
       for (var round = 0; round < 60; round++) {
         var text = _randomDocument(random, alphabet);
@@ -382,11 +399,29 @@ void main() {
 
           final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
           expect(
-            scanner.index.blocks.map((b) => b.toString()),
-            fresh.index.blocks.map((b) => b.toString()),
+            _described(scanner),
+            _described(fresh),
             reason: 'round $round step $step on ${buffer.text}',
           );
         }
+      }
+    });
+
+    test('an item typed in keeps its place in the count', () {
+      // CommonMark numbers a list from its first item, so `1. 1. 1.` reads 1,
+      // 2, 3; a rebuild that starts on an item's own line has to count on
+      // from the item before it, tight or loose.
+      for (final (text, line) in <(String, int)>[
+        ('1. a\n1. b\n1. c\n', 2),
+        ('1. a\n\n1. b\n', 2),
+        ('1. a\n1. b\n1. c\n1. d\n', 3),
+      ]) {
+        final buffer = SourceBuffer.fromText(text);
+        final scanner = BlockScanner(buffer);
+        final at = buffer.offsetOfLine(line) + 3;
+        scanner.edited(buffer.replaceRange(at, at, 'x'));
+        final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+        expect(_described(scanner), _described(fresh), reason: text);
       }
     });
 
