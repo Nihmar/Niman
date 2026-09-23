@@ -18,6 +18,8 @@ library;
 
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
+
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/markdown/prefix_sums.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -66,6 +68,15 @@ final class WordCount {
   /// being worked out elsewhere.
   bool get isCounted => _sums != null;
 
+  /// Takes [counted]'s count as this one's: the count [countInBackground]
+  /// worked out elsewhere, so it is not worked out again here.
+  void adoptCount(WordCount counted) => _sums = counted._sums;
+
+  /// How many lines this isolate has counted, for a test to see that a count
+  /// done in the background was not done again here.
+  @visibleForTesting
+  static int linesCountedHere = 0;
+
   /// Follows [edit], already made to [buffer].
   ///
   /// The same shape as the buffer's own index update: one value per line
@@ -105,6 +116,7 @@ final class WordCount {
   /// one. The last line, with no break under it, is worth its own words
   /// alone.
   static double _lineValue(SourceBuffer buffer, int line) {
+    linesCountedHere++;
     final text = buffer.lineAt(line);
     final break_ = buffer.terminatorAt(line).isEmpty ? '' : '\n';
     return countWords('$text$break_').toDouble();
