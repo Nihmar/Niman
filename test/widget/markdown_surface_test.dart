@@ -274,6 +274,31 @@ void main() {
     }
   });
 
+  testWidgets("a bullet sits on its text's row, not on the hidden marker", (
+    tester,
+  ) async {
+    // The marker is set in a hundredth of a size, and the row read off it
+    // stood on the baseline with no height: bullets and numbers were drawn
+    // below the text they belong to.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- item\n1. first\n',
+    );
+    for (final prefix in ['- ', '1. ']) {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+      final slot = liveItemSlot(paragraph, 0, _theme);
+      final text = TextPosition(offset: prefix.length);
+      final top = paragraph.getOffsetForCaret(text, Rect.zero).dy;
+      final height = paragraph.getFullHeightForCaret(text);
+      expect(slot.top, closeTo(top, 0.5), reason: prefix);
+      expect(slot.height, closeTo(height, 0.5), reason: prefix);
+    }
+  });
+
   group('a task box in live', () {
     const note = 'caret\n\n- [ ] da fare\n- [x] fatto\n';
 

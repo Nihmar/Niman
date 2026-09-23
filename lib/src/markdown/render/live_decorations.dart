@@ -104,11 +104,48 @@ final class LineShape {
 ///
 /// One answer for the painter that draws there and the tap that toggles a
 /// checkbox there, so the two cannot disagree about where the box is.
+///
+/// The row is read off the item's first character of text, not off the
+/// marker: the marker is hidden, set in a hundredth of a size, and a caret
+/// at it stands on the baseline with next to no height — the bullets and the
+/// numbers were drawn that far below the text they belong to. An item with
+/// no text yet is one row, the paragraph's own height.
 Rect liveItemSlot(RenderParagraph box, int marker, MarkdownTheme theme) {
   final at = box.getOffsetForCaret(TextPosition(offset: marker), Rect.zero);
-  final height = box.getFullHeightForCaret(TextPosition(offset: marker));
   final slot = theme.listIndentPerLevel;
-  return Rect.fromLTWH(at.dx - slot, at.dy, slot, height);
+  final text = box.text.toPlainText(includeSemanticsLabels: false);
+  final first = _itemTextStart(text, marker);
+  if (first >= text.length) {
+    return Rect.fromLTWH(at.dx - slot, 0, slot, box.size.height);
+  }
+  final position = TextPosition(offset: first);
+  final top = box.getOffsetForCaret(position, Rect.zero).dy;
+  return Rect.fromLTWH(
+    at.dx - slot,
+    top,
+    slot,
+    box.getFullHeightForCaret(position),
+  );
+}
+
+/// Where the text of the item whose marker starts at [marker] begins: past
+/// the marker, the spaces after it and a task box.
+int _itemTextStart(String text, int marker) {
+  bool space(int at) => text[at] == ' ' || text[at] == '\t';
+  var at = marker;
+  while (at < text.length && !space(at)) {
+    at++;
+  }
+  while (at < text.length && space(at)) {
+    at++;
+  }
+  if (at + 2 < text.length && text[at] == '[' && text[at + 2] == ']') {
+    at += 3;
+    while (at < text.length && space(at)) {
+      at++;
+    }
+  }
+  return at;
 }
 
 /// Paints a line's [shape] behind it.
