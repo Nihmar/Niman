@@ -24,6 +24,7 @@ import 'package:niman/src/sync/webdav/webdav_probe.dart';
 const Set<String> libraryStateFiles = {
   '.niman/settings.json',
   '.niman/counters.json',
+  '.niman/dictionary.txt',
 };
 
 /// The paths the sync never touches.

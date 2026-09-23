@@ -1,6 +1,7 @@
-/// Merges for the library state files (`libraryStateFiles`): JSON
+/// Merges for the library state files (`libraryStateFiles`): two JSON
 /// objects, where a line merge could break the syntax and a whole-file
-/// "newest wins" drops whatever the older side changed.
+/// "newest wins" drops whatever the older side changed, and the personal
+/// dictionary, a set of words.
 ///
 /// Pure: the engine reads both sides and the base, and writes the result.
 library;
@@ -65,6 +66,40 @@ String? mergeCountersJson({required String local, required String remote}) {
     };
   }
   return _encode(merged);
+}
+
+/// `.niman/dictionary.txt` merged word by word over [base], the list both
+/// sides last agreed on (null when there is none): a word either side
+/// added is in, a word either side removed is out. Without a base it is
+/// the union.
+///
+/// Words compare case-insensitively, as the spell check reads them; the
+/// form kept is this device's, else the server's. Returns one word per
+/// line, local order first, with a final newline (empty for no words).
+String mergeWordList({
+  required String? base,
+  required String local,
+  required String remote,
+}) {
+  List<String> words(String text) => [
+    for (final line in text.split('\n'))
+      if (line.trim().isNotEmpty) line.trim(),
+  ];
+  final l = words(local);
+  final r = words(remote);
+  final inBase = {for (final w in words(base ?? '')) w.toLowerCase()};
+  final inRemote = {for (final w in r) w.toLowerCase()};
+  final seen = <String>{};
+  final merged = [
+    for (final w in l)
+      if ((inRemote.contains(w.toLowerCase()) ||
+              !inBase.contains(w.toLowerCase())) &&
+          seen.add(w.toLowerCase()))
+        w,
+    for (final w in r)
+      if (!inBase.contains(w.toLowerCase()) && seen.add(w.toLowerCase())) w,
+  ];
+  return merged.isEmpty ? '' : '${merged.join('\n')}\n';
 }
 
 /// One key's value in the merge; `present` false drops the key.

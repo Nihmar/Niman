@@ -350,6 +350,21 @@ void main() {
     expect(jsonOf(remoteText('.niman/counters.json')), highest);
   });
 
+  test('personal words added on two devices end up on both', () async {
+    a.write('.niman/dictionary.txt', 'Niman\n');
+    await a.sync();
+    await b.sync();
+    a.write('.niman/dictionary.txt', 'Niman\nWebDAV\n');
+    b.write('.niman/dictionary.txt', 'Niman\nKaTeX\n');
+    await a.sync();
+    final report = await b.sync();
+    expect(report.conflicts, isEmpty, reason: report.summary());
+    expect(report.changedLocally, contains('.niman/dictionary.txt'));
+    expect(b.read('.niman/dictionary.txt'), 'Niman\nKaTeX\nWebDAV\n');
+    await a.sync();
+    expect(a.read('.niman/dictionary.txt'), 'Niman\nKaTeX\nWebDAV\n');
+  });
+
   test('library settings that do not parse still go whole', () async {
     a.write('.niman/settings.json', '{"historyVersions": 3}');
     await a.sync();

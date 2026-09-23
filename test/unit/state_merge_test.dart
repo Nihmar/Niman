@@ -116,4 +116,35 @@ void main() {
       expect(mergeCountersJson(local: 'x', remote: json({'a': 1})), isNull);
     });
   });
+
+  group('personal dictionary, word by word', () {
+    test('words added on either side are in, removed ones are out', () {
+      expect(
+        mergeWordList(
+          base: 'Niman\nKatex\n',
+          local: 'Niman\nKatex\nWebDAV\n',
+          remote: 'Niman\nNextcloud\n',
+        ),
+        'Niman\nWebDAV\nNextcloud\n',
+      );
+    });
+
+    test('without a base it is the union', () {
+      expect(
+        mergeWordList(base: null, local: 'uno\n', remote: 'due\nuno\n'),
+        'uno\ndue\n',
+      );
+    });
+
+    test('case does not make a second word; the local form stays', () {
+      expect(
+        mergeWordList(base: null, local: 'WebDAV\n', remote: 'webdav\n'),
+        'WebDAV\n',
+      );
+    });
+
+    test('no words is an empty file', () {
+      expect(mergeWordList(base: 'a\n', local: '', remote: 'a\n'), '');
+    });
+  });
 }

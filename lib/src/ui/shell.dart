@@ -439,6 +439,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// when the library changes, detached on close.
   PersonalDictionary? _personalDictionary;
 
+  /// Where that dictionary lives, library-relative: the path a sync names
+  /// when it brought words from another device.
+  static const _personalDictionaryPath = '.niman/dictionary.txt';
+
   /// The root a personal-dictionary open is in flight for: the repeated
   /// [_refreshEditorSettings] calls must not open the same file again.
   String? _personalDictionaryOpening;
@@ -1342,6 +1346,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       (_) => _homeWidgets.pushNotes(),
     );
     _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
+      // Words added on another device count as soon as they arrive.
+      if (paths.contains(_personalDictionaryPath)) {
+        unawaited(_personalDictionary?.reload());
+      }
       final open = _selected;
       if (!mounted || open == null || _selectedIsDir) return;
       if (paths.contains(open)) setState(() => _noteReloadToken++);

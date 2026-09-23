@@ -1458,9 +1458,10 @@ final class SyncEngine {
     return _Outcome.conflict;
   });
 
-  /// Merges a library state file key by key ([mergeSettingsJson], or
-  /// [mergeCountersJson]) and writes the result on whichever side lacks
-  /// it; false, touching nothing, when a side does not parse.
+  /// Merges a library state file ([mergeSettingsJson] key by key,
+  /// [mergeCountersJson], [mergeWordList] word by word) and writes the
+  /// result on whichever side lacks it; false, touching nothing, when a
+  /// JSON side does not parse.
   Future<bool> _mergeState(
     _RunContext c,
     SyncDecision d,
@@ -1478,14 +1479,20 @@ final class SyncEngine {
       allowMalformed: true,
     );
     final base = c.rows[d.path]?.baseText;
-    final text = d.path == NoteOps.settingsFilePath
-        ? mergeSettingsJson(
-            base: base,
-            local: localText,
-            remote: remoteText,
-            localNewer: localNewer,
-          )
-        : mergeCountersJson(local: localText, remote: remoteText);
+    final text = switch (d.path) {
+      NoteOps.settingsFilePath => mergeSettingsJson(
+        base: base,
+        local: localText,
+        remote: remoteText,
+        localNewer: localNewer,
+      ),
+      _personalDictionaryPath => mergeWordList(
+        base: base,
+        local: localText,
+        remote: remoteText,
+      ),
+      _ => mergeCountersJson(local: localText, remote: remoteText),
+    };
     if (text == null) {
       _log.info('merge ${d.path}: a side is not a JSON object');
       return false;
@@ -1520,12 +1527,14 @@ final class SyncEngine {
       await _row(c, d.path, sha: sha, local: after, remote: listed),
     ]);
     _log.info(
-      'merge ${d.path}: key by key, ${base == null ? 'no base' : 'on the base'}'
+      'merge ${d.path}: ${base == null ? 'no base' : 'on the base'}'
       '${changedLocally ? ', written here' : ''}'
       '${text != remoteText ? ', uploaded' : ''}',
     );
     return true;
   }
+
+  static const _personalDictionaryPath = '.niman/dictionary.txt';
 
   /// Merges both sides of [d] over the pinned base and writes the result
   /// on both, or returns null when there is no base, the file is not
