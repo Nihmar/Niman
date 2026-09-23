@@ -83,19 +83,34 @@ List<Failure> geometryFailures(
     }
   }
 
-  final blocks = <Rect>[
-    for (final element in find.byType(BlockView).evaluate())
-      if (element.renderObject case final RenderBox box
-          when box.attached && box.hasSize)
+  // A quote's content is blocks of its own, drawn inside the quote's: the
+  // blocks that tile are the ones side by side — the note's, and each
+  // quote's inside it — so they are checked by the block they are in.
+  final siblings = <Element?, List<Rect>>{};
+  for (final element in find.byType(BlockView).evaluate()) {
+    if (element.renderObject case final RenderBox box
+        when box.attached && box.hasSize) {
+      Element? parent;
+      element.visitAncestorElements((ancestor) {
+        if (ancestor.widget is! BlockView) return true;
+        parent = ancestor;
+        return false;
+      });
+      (siblings[parent] ??= <Rect>[]).add(
         box.localToGlobal(Offset.zero) & box.size,
-  ]..sort((a, b) => a.top.compareTo(b.top));
-  for (var at = 1; at < blocks.length; at++) {
-    final overlap = blocks[at - 1].bottom - blocks[at].top;
-    if (overlap > 0.5) {
-      failures.add(
-        'two blocks overlap by ${overlap.toStringAsFixed(1)} px at y '
-        '${blocks[at].top.toStringAsFixed(1)}',
       );
+    }
+  }
+  for (final blocks in siblings.values) {
+    blocks.sort((a, b) => a.top.compareTo(b.top));
+    for (var at = 1; at < blocks.length; at++) {
+      final overlap = blocks[at - 1].bottom - blocks[at].top;
+      if (overlap > 0.5) {
+        failures.add(
+          'two blocks overlap by ${overlap.toStringAsFixed(1)} px at y '
+          '${blocks[at].top.toStringAsFixed(1)}',
+        );
+      }
     }
   }
 
