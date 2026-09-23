@@ -43,9 +43,12 @@ status row switches only when both are enabled.
   instead. A quote gets its bar, and what is inside it — a heading, a
   list, a code block — is drawn as it is outside; `---` a rule; a code
   block (and an HTML block) its box, in monospace, the code coloured by the
-  language its fence names. The read view is the same page: a blank line
-  is as tall in both, and flipping between them leaves the text where it
-  was. Columns, bullets,
+  language its fence names; a table its grid, the row the caret is on
+  written out with its pipes. Footnote and link definitions take no room
+  where they are written: the note ends with its footnotes, as in the read
+  view, and a tap on one puts the caret in its definition. The read view is
+  the same page: a blank line is as tall in both, and flipping between
+  them leaves the text where it was. Columns, bullets,
   checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones
   (`$…$`) are typeset, and
   images and `![[embeds]]` are drawn under their line. Put the caret in a word

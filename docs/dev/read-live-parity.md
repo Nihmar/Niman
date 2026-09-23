@@ -24,11 +24,12 @@ no column: the table's row measured with the platform font (Segoe UI) in a
 | display formulas | **0.0** | **0.0** |
 | HTML blocks | **0.0** | **0.0** |
 | a quote's content: headings, lists, code | **0.0** | **0.0** |
-| table | −0.7 | `live` draws tables as source (#261) |
-| footnote and link definitions | — | `live` draws them as source, the read view not at all |
+| tables: every cell, the rows, the grid | **0.0** | **0.0** |
+| definitions and the footnotes the note ends with | **0.0** | **0.0** |
 
-Everything but tables and definitions is aligned to the pixel, across and
-down, however far down the note it is.
+Every construct is aligned to the pixel, across and down, however far down
+the note it is — out of the caret's reach. Where the caret is, `live` shows
+the source: a table's row as written, a definition, a fence.
 
 ## Done
 
@@ -52,6 +53,9 @@ down, however far down the note it is.
 | `43e13c8` | A display formula has `live`'s half a spacing above and below it in the read view. |
 | `cd97871` | `live` reads a quote's content again as blocks, as the read view does (`LiveQuoteContent`): a heading inside a quote at its size, a list's next lines under its item's text, a code block in its box. |
 | `df4f5b9` | An HTML block is drawn in a code block's box in both modes, a row per line. |
+| `65919a1` | `live` hides a block of nothing but definitions while the caret is not in it, and ends the note with the read view's footnotes (`footnoteSliver`, shared); a tap on a footnote puts the caret in its definition. A link definition has no footnote to tap: it is reached with the caret, or in `source`. |
+| `78af1366` | The read view's table is as wide as its columns, where it spread what they left of the pane evenly across them. |
+| `061458e` | `live` draws a table as the read view's grid over its own source: the pipes and the spaces round each cell drawn as room that puts the next cell on its column (`LiveTables`), a cell's padding round each row, the delimiter row taking no room, the grid painted behind (`LiveTableGridPainter`). The caret's row is drawn as written. It is what #261's editing builds on. |
 
 ## Decisions (2026-09-23)
 
@@ -80,13 +84,9 @@ read view does, so a line of code wraps at the same place in both.
 
 ### Still to align after these
 
-- Tables: `live` has to draw them as tables first — the grid the read view
-  draws — before #261's editing can be built on it.
-- Footnote and link definitions: `live` draws them as their source; the
-  read view draws a link definition nowhere and a footnote in the section
-  it ends the note with. To be decided: whether `live` hides them as the
-  read view does (and ends the note with the same section), or the read
-  view shows where they are.
+Nothing, out of the caret's reach. What is left is by design: the caret's
+row shows its source in `live` — a table's row as written, off its columns,
+and the delimiter row when the caret is on it.
 
 ### Found on the way: a layout loop on one note
 
