@@ -1300,10 +1300,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       }
       final styled = _lineAt(index);
       final shape = LineShape.of(styled, _styler?.blockOf(index), index);
-      final marker = shape.marker;
       final ticked = shape.task;
-      if (marker == null || ticked == null) continue;
-      final slot = liveItemSlot(paragraph, marker, widget.theme);
+      if (shape.marker == null || ticked == null) continue;
+      final slot = liveItemSlot(paragraph, shape, widget.theme);
       if (!slot.contains(paragraph.globalToLocal(global))) continue;
       for (final token in styled.tokens) {
         if (token.kind != TokenKind.taskBox) continue;
@@ -2904,10 +2903,7 @@ final class _Line extends StatelessWidget {
           whole: true,
         ),
     ];
-    final indent = _indent(
-      revealed: mine,
-      scaler: MediaQuery.textScalerOf(context),
-    );
+    final indent = _indent(context, revealed: mine);
     Widget paragraph = Text.rich(
       _span(
         revealed: mine,
@@ -3060,13 +3056,7 @@ final class _Line extends StatelessWidget {
           ? _CaretPainter(
               rect: caret,
               on: caretOn,
-              shift: Offset(
-                _indent(
-                  revealed: true,
-                  scaler: MediaQuery.textScalerOf(context),
-                ),
-                0,
-              ),
+              shift: Offset(_indent(context, revealed: true), 0),
             )
           : null,
       child: child,
@@ -3126,50 +3116,112 @@ final class _Line extends StatelessWidget {
   /// or the gap past a quote's bar was — rather than after it: otherwise the
   /// text jumped right by the marks' width each time the caret came onto
   /// the line, and back when it left (device screenshot 2026-09-23, a list
-  /// being typed). [scaler] is the one the line's text is drawn at.
-  double _indent({
-    bool revealed = false,
-    TextScaler scaler = TextScaler.noScaling,
-  }) {
+  /// being typed).
+  double _indent(BuildContext context, {bool revealed = false}) {
     if (!hideMarkers) return 0;
+    final text = styled.text;
     var levels = 0;
+    Token? marker;
+    var content = 0;
     for (final token in styled.tokens) {
-      if (token.kind == TokenKind.listMarker) levels++;
+      if (token.kind == TokenKind.listMarker) {
+        levels++;
+        marker ??= token;
+      }
+      if (token.kind == TokenKind.blockquote ||
+          token.kind == TokenKind.listMarker ||
+          token.kind == TokenKind.taskBox) {
+        content = token.end;
+      }
     }
     // A quote's content moves in past its bar, a level at a time, as the
     // read view draws it.
-    final indent =
+    final base =
         levels * theme.listIndentPerLevel +
         shape.quoteDepth * theme.quoteIndentPerLevel;
-    if (!revealed || indent == 0) return indent;
-    return math.max(0, indent - _lineMarksWidth(scaler));
+    if (base == 0) return 0;
+    while (content < text.length &&
+        (text.codeUnitAt(content) == 0x20 ||
+            text.codeUnitAt(content) == 0x09)) {
+      content++;
+    }
+    final split = marker?.start ?? content;
+    // What revealing the quote marks before the list marker adds.
+    final quoted = revealed
+        ? _prefixWidth(context, 0, split, revealed: true) -
+              _prefixWidth(context, 0, split, revealed: false)
+        : 0.0;
+    // What the list's marks take beyond a hidden bullet and its space.
+    final listed = marker == null
+        ? 0.0
+        : _prefixWidth(context, split, content, revealed: revealed) -
+              _hiddenBulletWidth(context);
+    return math.max<double>(0, base - quoted - listed);
   }
 
-  /// How wide the line's structural marks are drawn as written — its `>`s,
-  /// its list marker, its task box — which is what the reveal adds to the
-  /// line: hidden, they take no room, and the spaces between them are drawn
-  /// either way.
-  double _lineMarksWidth(TextScaler scaler) {
+  /// How wide `[from, to)` of the line is drawn — hidden marks as hidden,
+  /// revealed ones as written, spaces as spaces — in the line's own style:
+  /// the paragraph's own shaping, so a mark's leftover advance and the
+  /// space after it are counted as the line counts them.
+  double _prefixWidth(
+    BuildContext context,
+    int from,
+    int to, {
+    required bool revealed,
+  }) {
+    if (to <= from) return 0;
     final text = styled.text;
-    final marks = <InlineSpan>[
-      for (final token in styled.tokens)
-        if (token.kind == TokenKind.blockquote ||
-            token.kind == TokenKind.listMarker ||
-            token.kind == TokenKind.taskBox)
-          TextSpan(
-            text: text.substring(token.start, token.end),
-            style: markdownTokenStyle(token.kind, syntax, dark: dark),
-          ),
-    ];
-    if (marks.isEmpty) return 0;
+    final spans = <InlineSpan>[];
+    var at = from;
+    for (final token in styled.tokens) {
+      if (token.end <= at || token.start >= to) continue;
+      if (token.start > at) {
+        spans.add(TextSpan(text: text.substring(at, token.start)));
+        at = token.start;
+      }
+      final end = math.min(token.end, to);
+      spans.add(
+        TextSpan(
+          text: text.substring(at, end),
+          style: hidden(token, revealed: revealed)
+              ? _hiddenMarker
+              : nestedTokenStyle(token, syntax, dark: dark),
+        ),
+      );
+      at = end;
+    }
+    if (at < to) spans.add(TextSpan(text: text.substring(at, to)));
+    return _drawnWidth(context, spans);
+  }
+
+  /// How wide a hidden bullet and its space are drawn: where an item's text
+  /// starts past its marker, which every item's is set to.
+  double _hiddenBulletWidth(BuildContext context) =>
+      _drawnWidth(context, const <InlineSpan>[
+        TextSpan(text: '-', style: _hiddenMarker),
+        TextSpan(text: ' '),
+      ]);
+
+  /// Where [spans], set as the line's paragraph sets them, end: the caret
+  /// after them. The paragraph's style is the line's over the ambient one,
+  /// whose letter spacing each hidden mark still advances by.
+  double _drawnWidth(BuildContext context, List<InlineSpan> spans) {
+    final style = DefaultTextStyle.of(context).style
+        .merge(_lineStyle(revealed: false));
     final painter = TextPainter(
-      text: TextSpan(children: marks, style: _lineStyle(revealed: true)),
+      text: TextSpan(children: spans, style: style),
       textDirection: TextDirection.ltr,
-      textScaler: scaler,
+      textScaler: MediaQuery.textScalerOf(context),
     )..layout();
-    final width = painter.width;
+    var length = 0;
+    for (final span in spans) {
+      length += (span as TextSpan).text?.length ?? 0;
+    }
+    final end = painter
+        .getOffsetForCaret(TextPosition(offset: length), Rect.zero)
+        .dx;
     painter.dispose();
-    return width;
+    return end;
   }
 
   /// The line's tokens as styled runs. A token's override never changes the

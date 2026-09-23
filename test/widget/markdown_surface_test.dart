@@ -50,6 +50,9 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
+/// The shape of a `- [ ] …` line.
+const LineShape _task = LineShape(marker: 0, box: 2, task: false);
+
 void main() {
   Future<MarkdownSourceViewState> pumpMode(
     WidgetTester tester,
@@ -290,13 +293,44 @@ void main() {
       final paragraph = tester
           .renderObjectList<RenderParagraph>(find.byType(RichText))
           .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
-      final slot = liveItemSlot(paragraph, 0, _theme);
+      final slot = liveItemSlot(paragraph, const LineShape(marker: 0), _theme);
       final text = TextPosition(offset: prefix.length);
       final top = paragraph.getOffsetForCaret(text, Rect.zero).dy;
       final height = paragraph.getFullHeightForCaret(text);
       expect(slot.top, closeTo(top, 0.5), reason: prefix);
       expect(slot.height, closeTo(height, 0.5), reason: prefix);
     }
+  });
+
+  testWidgets("a task's box and text line up with a bullet's", (tester) async {
+    // A task item has one more visible space than a bullet one, and its
+    // text stood that much to the right (device screenshot 2026-09-23).
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- item\n- [ ] task\n',
+    );
+    RenderParagraph line(String prefix) => tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+    double textLeft(RenderParagraph p, int offset) => p
+        .localToGlobal(
+          p.getOffsetForCaret(TextPosition(offset: offset), Rect.zero),
+        )
+        .dx;
+    final bullet = line('- item');
+    final task = line('- [ ]');
+    // To the pixel: a hidden mark still advances by a sliver, and the box's
+    // three of them held the text half a pixel off.
+    expect(textLeft(task, 6), closeTo(textLeft(bullet, 2), 0.01));
+    final bulletSlot = liveItemSlot(bullet, const LineShape(marker: 0), _theme);
+    final taskSlot = liveItemSlot(task, _task, _theme);
+    expect(
+      task.localToGlobal(taskSlot.topLeft).dx,
+      closeTo(bullet.localToGlobal(bulletSlot.topLeft).dx, 0.01),
+      reason: 'the box sits where the bullet does',
+    );
   });
 
   group('a task box in live', () {
@@ -307,7 +341,7 @@ void main() {
       final paragraph = tester
           .renderObjectList<RenderParagraph>(find.byType(RichText))
           .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
-      final slot = liveItemSlot(paragraph, 0, _theme);
+      final slot = liveItemSlot(paragraph, _task, _theme);
       return paragraph.localToGlobal(slot.center);
     }
 
