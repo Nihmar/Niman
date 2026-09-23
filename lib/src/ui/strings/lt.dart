@@ -1209,6 +1209,20 @@ final class LithuanianStrings extends Strings {
       'Komandų paletė siūlo tik tas komandas, kurias galima vykdyti ten, kur '
       'esate. Čia jos visos ir kada kiekviena rodoma.';
   @override
+  String get commandsKeysNote =>
+      'Čia niekas nekeičiama. Klavišai yra tie, kurie nustatyti skiltyje '
+      '„Klaviatūros santraupos“, ir seka kiekvieną ten padarytą pakeitimą.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Keisti klavišus skiltyje „Klaviatūros santraupos“';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Keisti skiltyje „Klaviatūros santraupos“';
+  @override
+  String get commandsSubtitle => 'Ką komandų paletė gali vykdyti, ir kada';
+  @override
+  String get keyboardShortcutsSubtitle => 'Keisti kiekvienos komandos klavišus';
+  @override
   String get commandNeedNone => 'Visada prieinama';
   @override
   String get commandNeedOpenNote => 'Reikia atidarytos pastabos';

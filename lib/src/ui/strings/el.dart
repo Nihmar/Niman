@@ -1251,6 +1251,21 @@ final class GreekStrings extends Strings {
       'Η παλέτα εντολών προσφέρει μόνο τις εντολές που μπορούν να εκτελεστούν '
       'εκεί που βρίσκεστε. Εδώ είναι όλες, και πότε εμφανίζεται η καθεμία.';
   @override
+  String get commandsKeysNote =>
+      'Εδώ δεν αλλάζει τίποτα. Τα πλήκτρα είναι αυτά που ορίζονται στην '
+      'ενότητα «Συντόμευση πληκτρολογίου» και ακολουθούν κάθε αλλαγή εκεί.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Αλλαγή πλήκτρων στην ενότητα «Συντόμευση πληκτρολογίου»';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Αλλαγή στην ενότητα «Συντόμευση πληκτρολογίου»';
+  @override
+  String get commandsSubtitle =>
+      'Τι μπορεί να εκτελέσει η παλέτα εντολών, και πότε';
+  @override
+  String get keyboardShortcutsSubtitle => 'Αλλαγή των πλήκτρων κάθε εντολής';
+  @override
   String get commandNeedNone => 'Πάντα διαθέσιμη';
   @override
   String get commandNeedOpenNote => 'Χρειάζεται ανοιχτή σημείωση';

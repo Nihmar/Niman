@@ -766,6 +766,11 @@ final class AppStrings {
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
   static String get commandsTitle => _s.commandsTitle;
   static String get commandsIntro => _s.commandsIntro;
+  static String get commandsKeysNote => _s.commandsKeysNote;
+  static String get commandsOpenShortcuts => _s.commandsOpenShortcuts;
+  static String get commandsChangeKeyTooltip => _s.commandsChangeKeyTooltip;
+  static String get commandsSubtitle => _s.commandsSubtitle;
+  static String get keyboardShortcutsSubtitle => _s.keyboardShortcutsSubtitle;
   static String get commandNeedNone => _s.commandNeedNone;
   static String get commandNeedOpenNote => _s.commandNeedOpenNote;
   static String get commandNeedWideWindow => _s.commandNeedWideWindow;

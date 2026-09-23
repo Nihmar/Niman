@@ -1126,6 +1126,17 @@ final class JapaneseStrings extends Strings {
   String get commandsIntro =>
       'コマンドパレットには、いまいる場所で実行できるコマンドだけが表示されます。ここにはすべてのコマンドと、それぞれが表示される条件があります。';
   @override
+  String get commandsKeysNote =>
+      'ここでは何も変更されません。キーはキーボードショートカットで設定されたもので、そこでの変更にすべて従います。';
+  @override
+  String get commandsOpenShortcuts => 'キーボードショートカットでキーを変更';
+  @override
+  String get commandsChangeKeyTooltip => 'キーボードショートカットで変更';
+  @override
+  String get commandsSubtitle => 'コマンドパレットで実行できるものと、その表示条件';
+  @override
+  String get keyboardShortcutsSubtitle => '各コマンドのキーを変更';
+  @override
   String get commandNeedNone => '常に利用可能';
   @override
   String get commandNeedOpenNote => 'ノートを開いている必要があります';

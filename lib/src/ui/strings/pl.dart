@@ -1226,6 +1226,19 @@ final class PolishStrings extends Strings {
       'Paleta poleceń pokazuje tylko polecenia, które można wykonać tam, '
       'gdzie jesteś. Tu są wszystkie i kiedy każde się pojawia.';
   @override
+  String get commandsKeysNote =>
+      'Tutaj nic się nie zmienia. Klawisze to te ustawione w sekcji „Skróty '
+      'klawiszowe” i podążają za każdą zmianą tam.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Zmień klawisze w sekcji „Skróty klawiszowe”';
+  @override
+  String get commandsChangeKeyTooltip => 'Zmień w sekcji „Skróty klawiszowe”';
+  @override
+  String get commandsSubtitle => 'Co może uruchomić paleta poleceń, i kiedy';
+  @override
+  String get keyboardShortcutsSubtitle => 'Zmień klawisze każdego polecenia';
+  @override
   String get commandNeedNone => 'Zawsze dostępne';
   @override
   String get commandNeedOpenNote => 'Wymaga otwartej notatki';

@@ -1220,6 +1220,20 @@ final class AlbanianStrings extends Strings {
       'Paleta e komandave ofron vetëm komandat që mund të ekzekutohen aty ku '
       'je. Këtu janë të gjitha, dhe kur shfaqet secila.';
   @override
+  String get commandsKeysNote =>
+      'Këtu nuk ndryshohet asgjë. Tastet janë ato të caktuara te „Shkurtoret '
+      'e tastaturës“ dhe ndjekin çdo ndryshim të bërë atje.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Ndrysho tastet te „Shkurtoret e tastaturës“';
+  @override
+  String get commandsChangeKeyTooltip => 'Ndrysho te „Shkurtoret e tastaturës“';
+  @override
+  String get commandsSubtitle =>
+      'Çfarë mund të ekzekutojë paleta e komandave, dhe kur';
+  @override
+  String get keyboardShortcutsSubtitle => 'Ndrysho tastet e çdo komande';
+  @override
   String get commandNeedNone => 'Gjithmonë e disponueshme';
   @override
   String get commandNeedOpenNote => 'Kërkon një shënim të hapur';

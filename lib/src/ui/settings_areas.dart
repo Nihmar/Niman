@@ -109,7 +109,8 @@ final class SettingsArea {
   /// Its name.
   final String title;
 
-  /// What it is about right now (the sync status, the version), read at
+  /// What it is about right now (the sync status, the version), or what
+  /// tells it apart from a neighbour that looks alike (#264), read at
   /// build; null shows nothing.
   final String? Function()? subtitle;
 
@@ -132,12 +133,15 @@ final class SettingsArea {
 /// Some exist only where they can work: Updates on the release channel
 /// (issue #106), Sync when the session has a sync engine, Transcription
 /// when the installation has models. [version] rides on the Updates row.
+/// [openArea] opens another area at a row, the way the settings search
+/// does: Commands uses it to lead to Keyboard shortcuts.
 List<SettingsArea> settingsAreas({
   required LibrarySession controller,
   required EditorSpellCheck? spellCheck,
   required TranscriptionModels? transcription,
   required bool keyboardAttached,
   String? version,
+  void Function(SettingsAreaId area, Key? row)? openArea,
 }) {
   final sync = controller.sync;
   return [
@@ -174,6 +178,7 @@ List<SettingsArea> settingsAreas({
       title: AppStrings.keyboardShortcutsTitle,
       enabled: keyboardAttached,
       disabledNote: AppStrings.settingsAreaKeyboardDisabled,
+      subtitle: () => AppStrings.keyboardShortcutsSubtitle,
       build: (highlight) =>
           KeyboardShortcutsScreen(controller: controller, highlight: highlight),
     ),
@@ -185,7 +190,17 @@ List<SettingsArea> settingsAreas({
       rowKey: const Key('settings-area-commands'),
       icon: () => Icons.bolt_outlined,
       title: AppStrings.commandsTitle,
-      build: (highlight) => SettingsCommandsScreen(highlight: highlight),
+      subtitle: () => AppStrings.commandsSubtitle,
+      build: (highlight) => SettingsCommandsScreen(
+        highlight: highlight,
+        // Only where the way in is open: the shortcuts need a keyboard.
+        openShortcuts: openArea == null || !keyboardAttached
+            ? null
+            : (command) => openArea(
+                SettingsAreaId.shortcuts,
+                command == null ? null : shortcutRowKey(command),
+              ),
+      ),
     ),
     if (!isTestingBuild)
       SettingsArea(

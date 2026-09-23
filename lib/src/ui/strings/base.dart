@@ -577,6 +577,11 @@ abstract base class Strings {
   String get paletteGroupGoTo;
   String get commandsTitle;
   String get commandsIntro;
+  String get commandsKeysNote;
+  String get commandsOpenShortcuts;
+  String get commandsChangeKeyTooltip;
+  String get commandsSubtitle;
+  String get keyboardShortcutsSubtitle;
   String get commandNeedNone;
   String get commandNeedOpenNote;
   String get commandNeedWideWindow;

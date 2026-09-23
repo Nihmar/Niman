@@ -1238,6 +1238,19 @@ final class CatalanStrings extends Strings {
       "La paleta d'ordres només ofereix les ordres que es poden executar on "
       'ets. Aquí hi són totes, i quan apareix cadascuna.';
   @override
+  String get commandsKeysNote =>
+      'Aquí no es canvia res. Les tecles són les definides a Dreceres de '
+      'teclat i segueixen qualsevol canvi fet allà.';
+  @override
+  String get commandsOpenShortcuts => 'Canvia les tecles a Dreceres de teclat';
+  @override
+  String get commandsChangeKeyTooltip => 'Canvia a Dreceres de teclat';
+  @override
+  String get commandsSubtitle =>
+      'El que pot executar la paleta d’ordres, i quan';
+  @override
+  String get keyboardShortcutsSubtitle => 'Canvia les tecles de cada ordre';
+  @override
   String get commandNeedNone => 'Sempre disponible';
   @override
   String get commandNeedOpenNote => 'Cal una nota oberta';

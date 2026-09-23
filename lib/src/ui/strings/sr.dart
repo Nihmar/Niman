@@ -1212,6 +1212,20 @@ final class SerbianStrings extends Strings {
       'Палета команди нуди само команде које могу да се покрену тамо где сте. '
       'Овде су све, и када се која приказује.';
   @override
+  String get commandsKeysNote =>
+      'Овде се ништа не мења. Тастери су они подешени у одељку „Пречице на '
+      'тастатури“ и прате сваку промену направљену тамо.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Промени тастере у одељку „Пречице на тастатури“';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Промени у одељку „Пречице на тастатури“';
+  @override
+  String get commandsSubtitle => 'Шта палета команди може да покрене, и када';
+  @override
+  String get keyboardShortcutsSubtitle => 'Промени тастере сваке команде';
+  @override
   String get commandNeedNone => 'Увек доступно';
   @override
   String get commandNeedOpenNote => 'Потребна је отворена белешка';

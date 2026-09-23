@@ -1210,6 +1210,20 @@ final class BosnianStrings extends Strings {
       'Paleta komandi nudi samo komande koje se mogu pokrenuti tamo gdje '
       'jeste. Ovdje su sve, i kada se koja prikazuje.';
   @override
+  String get commandsKeysNote =>
+      'Ovdje se ništa ne mijenja. Tipke su one postavljene u odjeljku '
+      '„Prečice na tastaturi“ i prate svaku promjenu napravljenu tamo.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Promijeni tipke u odjeljku „Prečice na tastaturi“';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Promijeni u odjeljku „Prečice na tastaturi“';
+  @override
+  String get commandsSubtitle => 'Šta paleta komandi može pokrenuti, i kada';
+  @override
+  String get keyboardShortcutsSubtitle => 'Promijeni tipke svake komande';
+  @override
   String get commandNeedNone => 'Uvijek dostupno';
   @override
   String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';

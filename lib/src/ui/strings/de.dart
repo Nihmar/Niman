@@ -1230,6 +1230,19 @@ final class GermanStrings extends Strings {
       'Die Befehlspalette bietet nur die Befehle an, die dort ausführbar '
       'sind, wo du gerade bist. Hier stehen alle, und wann jeder erscheint.';
   @override
+  String get commandsKeysNote =>
+      'Hier wird nichts geändert. Die Tasten sind die unter „Tastaturkürzel“ '
+      'festgelegten und folgen jeder Änderung dort.';
+  @override
+  String get commandsOpenShortcuts => 'Tasten unter „Tastaturkürzel“ ändern';
+  @override
+  String get commandsChangeKeyTooltip => 'Unter „Tastaturkürzel“ ändern';
+  @override
+  String get commandsSubtitle =>
+      'Was die Befehlspalette ausführen kann, und wann';
+  @override
+  String get keyboardShortcutsSubtitle => 'Die Tasten jedes Befehls ändern';
+  @override
   String get commandNeedNone => 'Immer verfügbar';
   @override
   String get commandNeedOpenNote => 'Braucht eine offene Notiz';

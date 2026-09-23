@@ -66,9 +66,13 @@ opens with two fingers dragged down, with the ⚡ on the Search tab's
 bar, or from an open note's ⋮ menu.
 
 Settings → **Keyboard shortcuts** lists every command, with its keys or
-with *No shortcut*. Settings → **Commands** lists the same commands with
-when each one can run: the palette and the keys offer a command only
-where it can, so one that needs an open note is not there without one.
+with *No shortcut*, and is where they change. Settings → **Commands** is
+the palette's reference: the same commands, with when each one can run —
+the palette and the keys offer a command only where it can, so one that
+needs an open note is not there without one. Nothing changes there: its
+keys are the ones set in Keyboard shortcuts and follow them, and tapping
+a key (or *Change keys in Keyboard shortcuts*) opens that command's row
+there.
 
 - **Change.** Tap a command and press the new combination. While the
   window is recording it takes every key, Esc and Tab included, so leave
