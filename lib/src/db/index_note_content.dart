@@ -10,9 +10,9 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
 /// One note's content after a read on the index isolate: the digest, the
@@ -131,7 +131,10 @@ Future<List<NoteContent>> readBatchOnIsolate(
 
 /// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links).
 NoteContent _extractContent(String rel, String sha, String text) {
-  final doc = HighlightDocument.fromText(text);
+  // Read by the unified engine, and only where a tag or a link can be: a
+  // whole-note tokenize was two minutes of a first index on a 247 MB note
+  // (`docs/dev/huge-notes.md`, item 8).
+  final references = noteReferencesOf(text);
   final fm = parseFrontmatter(text);
   return NoteContent(
     rel: rel,
@@ -139,9 +142,9 @@ NoteContent _extractContent(String rel, String sha, String text) {
     text: text,
     title: fm?.title ?? _titleFromName(rel),
     frontmatterTags: fm?.tags ?? const [],
-    inlineTags: inlineTagsOf(doc),
+    inlineTags: references.tags,
     aliases: fm?.aliases ?? const [],
-    links: linksInDocument(doc),
+    links: references.links,
     fields: fm?.fields ?? const {},
     date: fm?.date,
     pinned: fm?.pinned ?? false,

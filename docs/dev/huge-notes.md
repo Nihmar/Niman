@@ -16,7 +16,8 @@ for first: **one reading of the note for the editor and the preview.**
   the `BlockScanner`, and its inline runs from the `BlockParser`'s parse of
   that block. The legacy line tokenizer (`editor/highlighting.dart`) no longer
   colours the unified surface. It still serves the legacy editor, the
-  outline, the link parser and the index, until phase 5 removes them.
+  outline and the link parser until phase 5 removes them; the index reads
+  a note's tags and links with the unified engine (item 8).
 - Each `StyleRun` knows its markers from its text (`innerStart`/`innerEnd`),
   and a `Token` can be a marker (`Token.marker`). `live` mode already draws a
   marker token invisible and taking no room.
@@ -281,6 +282,58 @@ written next to it.
    paragraph added above it is still the same definition — the key is over
    content, not line numbers. 21 ms on the 246 MB note against 618 ms for
    the scan it saves (measured 2026-09-22).
+
+8. ~~**The first index of a note reads all of it with the legacy
+   tokenizer.**~~ Done (2026-09-23). Found on the testing build: with its
+   databases deleted, the first index of `Quicknote.md` did not seem to end.
+   Measured stage by stage (AOT, the 247 MB note):
+
+   | Stage | Time |
+   |---|---|
+   | read | 357 ms |
+   | UTF-8 decode | 550 ms |
+   | sha256 | 1 887 ms |
+   | `HighlightDocument.fromText` — every line tokenized, for tags and links | **112 127 ms** |
+   | tags and links off those tokens | 373 ms |
+   | FTS5 insert of the body (`unicode61`, on the database isolate) | 2 715 ms |
+
+   The tokenizer is the legacy one this design retires, and it is slow on
+   exactly this note: every position of a line runs a dozen patterns to find
+   the nearest construct, which is quadratic in a line thick with `$…$`
+   (32 µs a line, against 5 µs on the 200 KB fixture). And all the index
+   keeps of those tokens is the tags and the links.
+
+   So the index reads them with the unified engine, and asks each layer only
+   where its answer can be one (`lib/src/markdown/note_references.dart`):
+   the block scan says which blocks have inline text at all; the extension
+   masker finds the tags and the wikilinks — and sets code spans and inline
+   maths aside — in a block that holds a `#` or a `[`; and the Markdown parse
+   runs only on a block with a `[` left after the masker, the only place a
+   Markdown link can be. **`noteReferencesOf` takes 5.1 s on the note** (the
+   block scan is half of it), and the whole read on the index isolate 8.3 s;
+   with the FTS insert, a first index of the note is about eleven seconds
+   where it was two minutes.
+
+   Not by making the full parse faster: the Markdown package's parse of every
+   block is the same order as the tokenizer (378 ms for *Geometria 1*, so
+   about 100 s here). The source view is fast because it parses what is on
+   screen; the index is fast because it parses the blocks a link can be in.
+
+   What reading with the engine that draws the note changed, on purpose: a
+   reference link (`[text][label]` with its definition) is now a link — the
+   note draws it as one and the tokenizer never saw it — and a footnote's
+   own text is read for links, which the Markdown package takes out of the
+   flow. On every fixture note the tags and links are otherwise the ones the
+   legacy readers found (`note_references_test.dart`).
+
+   What the comparison caught on the way, and which was nobody's but the
+   scanner's: an HTML comment that closes on the line it opens on —
+   `<!-- a note -->` — was left open, so the rest of the note up to the next
+   `-->` was one HTML block, drawn as raw HTML by the read view and the
+   unified source, and its links unread (1 656 lines of the worst-note
+   fixture). CommonMark ends a comment, a raw-text tag, a processing
+   instruction, a declaration and a CDATA section on the line with its end
+   marker, the opening line included; the scanner does too now.
 
 ## The statistics, measured on the 247 MB note
 
