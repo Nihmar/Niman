@@ -7,14 +7,14 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
-import 'package:niman/src/ui/diff/diff_view.dart';
 import 'package:niman/src/ui/diff/merge_view.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One conflicted file (mockup S8, W7): with the version both sides came
 /// from, the merge region by region — the edits that do not overlap are
 /// already in, the ones that do are the user's to choose; without one,
-/// the two whole copies as a diff. Either way a whole copy can be kept.
+/// every place the two copies differ is a choice. Either way a whole
+/// copy can be kept.
 ///
 /// Pops with `true` once the conflict is resolved.
 final class SyncConflictScreen extends StatefulWidget {
@@ -22,7 +22,6 @@ final class SyncConflictScreen extends StatefulWidget {
   const new({
     required this.sync,
     required this.path,
-    this.compute = computeDiff,
     this.merge = computeMerge,
     super.key,
   });
@@ -32,9 +31,6 @@ final class SyncConflictScreen extends StatefulWidget {
 
   /// The conflicted file.
   final String path;
-
-  /// Diff computation (a test seam).
-  final DiffComputer compute;
 
   /// Merge computation (a test seam).
   final MergeComputer merge;
@@ -63,18 +59,16 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
   Future<void> _load() async {
     try {
       final texts = await widget.sync.conflictTexts(widget.path);
-      final base = texts.base;
-      final merge = base == null
-          ? null
-          : await widget.merge(base, texts.local, texts.remote);
-      if (merge != null) {
-        _log.info('conflict screen ${widget.path}: ${merge.describe()}');
-      }
+      final merge = await widget.merge(texts.base, texts.local, texts.remote);
+      _log.info(
+        'conflict screen ${widget.path}: '
+        '${texts.base == null ? 'no base, ' : ''}${merge.describe()}',
+      );
       if (!mounted) return;
       setState(() {
         _texts = texts;
         _merge = merge;
-        _choices = List.filled(merge?.conflicts.length ?? 0, MergeChoice.local);
+        _choices = List.filled(merge.conflicts.length, MergeChoice.local);
         _resolving = false;
       });
     } on SyncFailure catch (e) {
@@ -189,12 +183,14 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
             note(Icons.info_outline, AppStrings.syncConflictBinary)
           else if (_failed)
             note(Icons.error_outline, AppStrings.syncConflictLoadFailed)
-          else if (texts == null)
+          else if (texts == null || merge == null)
             const Expanded(child: Center(child: CircularProgressIndicator()))
-          else if (merge != null) ...[
+          else ...[
             note(
               Icons.merge_type,
-              merge.clean
+              texts.base == null
+                  ? AppStrings.syncMergeNoBase
+                  : merge.clean
                   ? AppStrings.syncMergeClean
                   : AppStrings.syncMergeIntro,
             ),
@@ -206,19 +202,6 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
                 onChoice: (index, choice) => setState(() {
                   _choices = [..._choices]..[index] = choice;
                 }),
-                padding: const EdgeInsets.only(bottom: 16),
-              ),
-            ),
-          ] else ...[
-            note(Icons.info_outline, AppStrings.syncMergeNoBase),
-            note(Icons.info_outline, AppStrings.syncConflictLegend),
-            Expanded(
-              child: DiffView(
-                key: const Key('sync-conflict-diff'),
-                oldText: texts.remote,
-                newText: texts.local,
-                compute: widget.compute,
-                identicalMessage: AppStrings.syncConflictIdentical,
                 padding: const EdgeInsets.only(bottom: 16),
               ),
             ),

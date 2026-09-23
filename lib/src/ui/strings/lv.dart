@@ -2008,9 +2008,6 @@ final class LatvianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Atrisināt konfliktu';
   @override
-  String get syncConflictLegend =>
-      'Rindas ar − ir no servera, rindas ar + ir no šīs ierīces.';
-  @override
   String get syncConflictBinary =>
       'Tas nav teksta fails: izvēlieties, kuru kopiju paturēt.';
   @override
@@ -2020,8 +2017,6 @@ final class LatvianStrings extends Strings {
   String get syncKeepLocal => 'Paturēt šīs ierīces versiju';
   @override
   String get syncKeepRemote => 'Paturēt servera versiju';
-  @override
-  String get syncConflictIdentical => 'Abas versijas ir vienādas';
   @override
   String get syncConflictLoadFailed => 'Nevarēja nolasīt abas versijas';
   @override
@@ -2100,7 +2095,8 @@ final class LatvianStrings extends Strings {
       'Abas versijas sapludinās pašas: nekas nepārklājas.';
   @override
   String get syncMergeNoBase =>
-      'Nav kopīgas versijas, uz kuras sapludināt, tāpēc jāizvēlas viss fails.';
+      'Nav kopīgas versijas, uz kuras apvienot: katrā vietā, kur abas kopijas '
+      'atšķiras, izvēlies tu.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Pārklājums $index no $total';
@@ -2110,6 +2106,8 @@ final class LatvianStrings extends Strings {
   String get syncMergeFromRemote => 'No servera';
   @override
   String get syncMergeRemovedLines => 'Noņemtās rindas';
+  @override
+  String get syncMergeAbsentLines => 'Nav šajā kopijā';
   @override
   String get syncMergeKeepLocal => 'Manas';
   @override

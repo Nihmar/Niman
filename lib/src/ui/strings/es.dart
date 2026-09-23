@@ -2052,10 +2052,6 @@ final class SpanishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Resolver conflicto';
   @override
-  String get syncConflictLegend =>
-      'Las líneas con − son del servidor; las líneas con + son '
-      'de este dispositivo.';
-  @override
   String get syncConflictBinary =>
       'No es un archivo de texto: elige qué copia conservar.';
   @override
@@ -2066,8 +2062,6 @@ final class SpanishStrings extends Strings {
   String get syncKeepLocal => 'Conservar la de este dispositivo';
   @override
   String get syncKeepRemote => 'Conservar la del servidor';
-  @override
-  String get syncConflictIdentical => 'Las dos versiones son idénticas';
   @override
   String get syncConflictLoadFailed => 'No se pudieron leer las dos versiones';
   @override
@@ -2144,8 +2138,8 @@ final class SpanishStrings extends Strings {
       'Las dos versiones se unen solas: no hay nada que se superponga.';
   @override
   String get syncMergeNoBase =>
-      'No hay una versión común sobre la que unir, así que hay que elegir el '
-      'archivo entero.';
+      'No hay una versión común sobre la que fusionar: eliges tú en cada '
+      'punto en que las dos copias difieren.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Superposición $index de $total';
@@ -2155,6 +2149,8 @@ final class SpanishStrings extends Strings {
   String get syncMergeFromRemote => 'Del servidor';
   @override
   String get syncMergeRemovedLines => 'Líneas eliminadas';
+  @override
+  String get syncMergeAbsentLines => 'No está en esta copia';
   @override
   String get syncMergeKeepLocal => 'Las mías';
   @override

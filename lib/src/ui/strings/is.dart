@@ -2017,10 +2017,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get syncConflictTitle => 'Leysa árekstur';
   @override
-  String get syncConflictLegend =>
-      'Línur merktar − eru af netþjóninum, línur merktar + af '
-      'þessu tæki.';
-  @override
   String get syncConflictBinary =>
       'Ekki textaskjal: veldu hvaða afrit á að halda.';
   @override
@@ -2030,8 +2026,6 @@ final class IcelandicStrings extends Strings {
   String get syncKeepLocal => 'Halda útgáfu þessa tækis';
   @override
   String get syncKeepRemote => 'Halda útgáfu netþjónsins';
-  @override
-  String get syncConflictIdentical => 'Útgáfurnar tvær eru eins';
   @override
   String get syncConflictLoadFailed => 'Gat ekki lesið báðar útgáfurnar';
   @override
@@ -2110,8 +2104,8 @@ final class IcelandicStrings extends Strings {
       'Útgáfurnar tvær sameinast af sjálfu sér: ekkert skarast.';
   @override
   String get syncMergeNoBase =>
-      'Engin sameiginleg útgáfa til að sameina á, svo velja verður alla '
-      'skrána.';
+      'Engin sameiginleg útgáfa til að sameina út frá: þú velur alls staðar '
+      'þar sem afritin tvö eru ólík.';
   @override
   String syncMergeOverlap(int index, int total) => 'Skörun $index af $total';
   @override
@@ -2120,6 +2114,8 @@ final class IcelandicStrings extends Strings {
   String get syncMergeFromRemote => 'Frá netþjóninum';
   @override
   String get syncMergeRemovedLines => 'Línur fjarlægðar';
+  @override
+  String get syncMergeAbsentLines => 'Ekki í þessu afriti';
   @override
   String get syncMergeKeepLocal => 'Mínar';
   @override

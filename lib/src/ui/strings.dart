@@ -1187,12 +1187,10 @@ final class AppStrings {
   static String syncConflictsSnack(int count) => _s.syncConflictsSnack(count);
   static String get syncShowAction => _s.syncShowAction;
   static String get syncConflictTitle => _s.syncConflictTitle;
-  static String get syncConflictLegend => _s.syncConflictLegend;
   static String get syncConflictBinary => _s.syncConflictBinary;
   static String get syncConflictKeepNote => _s.syncConflictKeepNote;
   static String get syncKeepLocal => _s.syncKeepLocal;
   static String get syncKeepRemote => _s.syncKeepRemote;
-  static String get syncConflictIdentical => _s.syncConflictIdentical;
   static String get syncConflictLoadFailed => _s.syncConflictLoadFailed;
   static String get syncResolveFailed => _s.syncResolveFailed;
   static String get syncResolved => _s.syncResolved;
@@ -1228,6 +1226,7 @@ final class AppStrings {
   static String get syncMergeFromLocal => _s.syncMergeFromLocal;
   static String get syncMergeFromRemote => _s.syncMergeFromRemote;
   static String get syncMergeRemovedLines => _s.syncMergeRemovedLines;
+  static String get syncMergeAbsentLines => _s.syncMergeAbsentLines;
   static String get syncMergeKeepLocal => _s.syncMergeKeepLocal;
   static String get syncMergeKeepRemote => _s.syncMergeKeepRemote;
   static String get syncMergeKeepBoth => _s.syncMergeKeepBoth;

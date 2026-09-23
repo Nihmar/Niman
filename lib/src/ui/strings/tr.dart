@@ -1994,10 +1994,6 @@ final class TurkishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Çakışmayı çöz';
   @override
-  String get syncConflictLegend =>
-      '− ile işaretli satırlar sunucunun, + ile işaretli '
-      'satırlar bu cihazın.';
-  @override
   String get syncConflictBinary =>
       'Metin dosyası değil: hangi kopyanın kalacağını seçin.';
   @override
@@ -2007,8 +2003,6 @@ final class TurkishStrings extends Strings {
   String get syncKeepLocal => 'Bu cihazdakini tut';
   @override
   String get syncKeepRemote => 'Sunucudakini tut';
-  @override
-  String get syncConflictIdentical => 'İki sürüm aynı';
   @override
   String get syncConflictLoadFailed => 'İki sürüm de okunamadı';
   @override
@@ -2085,8 +2079,8 @@ final class TurkishStrings extends Strings {
       'İki sürüm kendiliğinden birleşiyor: hiçbir yerde örtüşme yok.';
   @override
   String get syncMergeNoBase =>
-      'Üzerinde birleştirilecek ortak bir sürüm yok, bu yüzden '
-      'dosyanın tamamı seçilmeli.';
+      'Birleştirmek için ortak bir sürüm yok: iki kopyanın farklı olduğu her '
+      'yerde seçim sizin.';
   @override
   String syncMergeOverlap(int index, int total) => 'Örtüşme $index / $total';
   @override
@@ -2095,6 +2089,8 @@ final class TurkishStrings extends Strings {
   String get syncMergeFromRemote => 'Sunucudan';
   @override
   String get syncMergeRemovedLines => 'Kaldırılan satırlar';
+  @override
+  String get syncMergeAbsentLines => 'Bu kopyada yok';
   @override
   String get syncMergeKeepLocal => 'Benimki';
   @override

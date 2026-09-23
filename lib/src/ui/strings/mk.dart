@@ -2033,9 +2033,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Реши конфликт';
   @override
-  String get syncConflictLegend =>
-      'Редовите со − се од серверот, а тие со + од овој уред.';
-  @override
   String get syncConflictBinary =>
       'Не е текстуална датотека: изберете која копија да ја '
       'задржите.';
@@ -2047,8 +2044,6 @@ final class MacedonianStrings extends Strings {
   String get syncKeepLocal => 'Задржи ја од овој уред';
   @override
   String get syncKeepRemote => 'Задржи ја од серверот';
-  @override
-  String get syncConflictIdentical => 'Двете верзии се идентични';
   @override
   String get syncConflictLoadFailed => 'Не може да се прочитаат двете верзии';
   @override
@@ -2126,8 +2121,8 @@ final class MacedonianStrings extends Strings {
       'Двете верзии се спојуваат сами: ништо не се преклопува.';
   @override
   String get syncMergeNoBase =>
-      'Нема заедничка верзија врз која да се спои, па се избира целата '
-      'датотека.';
+      'Нема заедничка верзија за спојување: каде и да се разликуваат двете '
+      'копии, избирате вие.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Преклопување $index од $total';
@@ -2137,6 +2132,8 @@ final class MacedonianStrings extends Strings {
   String get syncMergeFromRemote => 'Од серверот';
   @override
   String get syncMergeRemovedLines => 'Отстранети редови';
+  @override
+  String get syncMergeAbsentLines => 'Ги нема во оваа копија';
   @override
   String get syncMergeKeepLocal => 'Моите';
   @override

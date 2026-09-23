@@ -931,12 +931,10 @@ abstract base class Strings {
   String syncConflictsSnack(int count);
   String get syncShowAction;
   String get syncConflictTitle;
-  String get syncConflictLegend;
   String get syncConflictBinary;
   String get syncConflictKeepNote;
   String get syncKeepLocal;
   String get syncKeepRemote;
-  String get syncConflictIdentical;
   String get syncConflictLoadFailed;
   String get syncResolveFailed;
   String get syncResolved;
@@ -971,6 +969,7 @@ abstract base class Strings {
   String get syncMergeFromLocal;
   String get syncMergeFromRemote;
   String get syncMergeRemovedLines;
+  String get syncMergeAbsentLines;
   String get syncMergeKeepLocal;
   String get syncMergeKeepRemote;
   String get syncMergeKeepBoth;

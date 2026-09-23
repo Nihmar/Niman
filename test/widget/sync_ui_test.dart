@@ -525,19 +525,32 @@ void main() {
       expect(sync.mergedText, note(['a', 'mine']));
     });
 
-    testWidgets('without a base it is the two whole copies', (tester) async {
-      sync.texts = conflictTextsOf(local: 'mine', remote: 'theirs');
+    testWidgets('without a base every difference is a choice', (tester) async {
+      sync.texts = conflictTextsOf(
+        local: note(['# Title', 'mine', 'shared']),
+        remote: note(['# Title', 'theirs', 'shared', 'extra']),
+      );
       await pumpConflict(tester);
-      expect(find.byKey(const Key('sync-conflict-merge')), findsNothing);
-      expect(find.byKey(const Key('sync-conflict-diff')), findsOneWidget);
+      expect(find.byKey(const Key('sync-conflict-merge')), findsOneWidget);
       expect(
         find.text(
-          'No shared version to merge on, so the whole file has to be '
-          'chosen.',
+          'No shared version to merge on: every place the two copies differ '
+          'is yours to choose.',
         ),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('sync-save-merge')), findsNothing);
+      expect(find.text('Overlap 1 of 2'), findsOneWidget);
+      expect(find.text('Not in this copy'), findsOneWidget);
+      await tester.tap(find.text('Both').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Theirs').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('sync-save-merge')));
+      await tester.pumpAndSettle();
+      expect(
+        sync.mergedText,
+        note(['# Title', 'mine', 'theirs', 'shared', 'extra']),
+      );
     });
   });
 

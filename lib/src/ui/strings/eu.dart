@@ -2035,10 +2035,6 @@ final class BasqueStrings extends Strings {
   @override
   String get syncConflictTitle => 'Ebatzi gatazka';
   @override
-  String get syncConflictLegend =>
-      '− markadun lerroak zerbitzarikoak dira, eta + markadunak '
-      'gailu honetakoak.';
-  @override
   String get syncConflictBinary =>
       'Ez da testu-fitxategi bat: aukeratu zein kopia gorde.';
   @override
@@ -2048,8 +2044,6 @@ final class BasqueStrings extends Strings {
   String get syncKeepLocal => 'Gorde gailu honetakoa';
   @override
   String get syncKeepRemote => 'Gorde zerbitzarikoa';
-  @override
-  String get syncConflictIdentical => 'Bi bertsioak berdinak dira';
   @override
   String get syncConflictLoadFailed => 'Ezin izan dira bi bertsioak irakurri';
   @override
@@ -2129,8 +2123,8 @@ final class BasqueStrings extends Strings {
       'Bi bertsioak berez batzen dira: ez da ezer gainjartzen.';
   @override
   String get syncMergeNoBase =>
-      'Ez dago bertsio komunik batzeko, beraz fitxategi osoa aukeratu behar '
-      'da.';
+      'Ez dago bateratzeko bertsio komunik: bi kopiak desberdinak diren leku '
+      'bakoitzean zuk aukeratzen duzu.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Gainjartzea $index / $total';
@@ -2140,6 +2134,8 @@ final class BasqueStrings extends Strings {
   String get syncMergeFromRemote => 'Zerbitzarikoa';
   @override
   String get syncMergeRemovedLines => 'Kendutako lerroak';
+  @override
+  String get syncMergeAbsentLines => 'Ez dago kopia honetan';
   @override
   String get syncMergeKeepLocal => 'Nireak';
   @override

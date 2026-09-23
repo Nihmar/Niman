@@ -2032,10 +2032,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Išspręsti konfliktą';
   @override
-  String get syncConflictLegend =>
-      'Eilutės su − yra iš serverio, eilutės su + – iš šio '
-      'įrenginio.';
-  @override
   String get syncConflictBinary =>
       'Tai ne tekstinis failas: pasirinkite, kurią kopiją '
       'palikti.';
@@ -2046,8 +2042,6 @@ final class LithuanianStrings extends Strings {
   String get syncKeepLocal => 'Palikti šio įrenginio';
   @override
   String get syncKeepRemote => 'Palikti serverio';
-  @override
-  String get syncConflictIdentical => 'Abi versijos vienodos';
   @override
   String get syncConflictLoadFailed => 'Nepavyko perskaityti abiejų versijų';
   @override
@@ -2134,8 +2128,8 @@ final class LithuanianStrings extends Strings {
       'Abi versijos susilieja pačios: niekas nepersidengia.';
   @override
   String get syncMergeNoBase =>
-      'Nėra bendros versijos, ant kurios būtų galima sulieti, todėl reikia '
-      'pasirinkti visą failą.';
+      'Nėra bendros versijos, pagal kurią sujungti: kiekvienoje vietoje, kur '
+      'kopijos skiriasi, renkatės jūs.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Persidengimas $index iš $total';
@@ -2145,6 +2139,8 @@ final class LithuanianStrings extends Strings {
   String get syncMergeFromRemote => 'Iš serverio';
   @override
   String get syncMergeRemovedLines => 'Pašalintos eilutės';
+  @override
+  String get syncMergeAbsentLines => 'Nėra šioje kopijoje';
   @override
   String get syncMergeKeepLocal => 'Mano';
   @override

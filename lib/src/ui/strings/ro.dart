@@ -2047,10 +2047,6 @@ final class RomanianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Rezolvă conflictul';
   @override
-  String get syncConflictLegend =>
-      'Liniile cu − sunt de pe server, cele cu + de pe acest '
-      'dispozitiv.';
-  @override
   String get syncConflictBinary =>
       'Nu este un fișier text: alege ce copie păstrezi.';
   @override
@@ -2060,8 +2056,6 @@ final class RomanianStrings extends Strings {
   String get syncKeepLocal => 'Păstrează varianta de pe acest dispozitiv';
   @override
   String get syncKeepRemote => 'Păstrează varianta de pe server';
-  @override
-  String get syncConflictIdentical => 'Cele două versiuni sunt identice';
   @override
   String get syncConflictLoadFailed =>
       'Cele două versiuni nu au putut fi citite';
@@ -2146,8 +2140,8 @@ final class RomanianStrings extends Strings {
       'Cele două versiuni se îmbină singure: nimic nu se suprapune.';
   @override
   String get syncMergeNoBase =>
-      'Nu există o versiune comună pe care să se îmbine, așa că trebuie ales '
-      'fișierul întreg.';
+      'Nu există o versiune comună pentru îmbinare: alegi tu în fiecare loc '
+      'în care cele două copii diferă.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Suprapunerea $index din $total';
@@ -2157,6 +2151,8 @@ final class RomanianStrings extends Strings {
   String get syncMergeFromRemote => 'De pe server';
   @override
   String get syncMergeRemovedLines => 'Linii eliminate';
+  @override
+  String get syncMergeAbsentLines => 'Nu există în această copie';
   @override
   String get syncMergeKeepLocal => 'Ale mele';
   @override

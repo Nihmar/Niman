@@ -2036,10 +2036,6 @@ final class CroatianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Riješi sukob';
   @override
-  String get syncConflictLegend =>
-      'Retci označeni s − su s poslužitelja, a retci označeni s '
-      '+ s ovog uređaja.';
-  @override
   String get syncConflictBinary =>
       'Nije tekstualna datoteka: odaberi koju kopiju zadržati.';
   @override
@@ -2049,8 +2045,6 @@ final class CroatianStrings extends Strings {
   String get syncKeepLocal => 'Zadrži s ovog uređaja';
   @override
   String get syncKeepRemote => 'Zadrži s poslužitelja';
-  @override
-  String get syncConflictIdentical => 'Obje verzije su iste';
   @override
   String get syncConflictLoadFailed => 'Nije moguće pročitati obje verzije';
   @override
@@ -2134,7 +2128,8 @@ final class CroatianStrings extends Strings {
       'Dvije se verzije spajaju same: ništa se ne preklapa.';
   @override
   String get syncMergeNoBase =>
-      'Nema zajedničke verzije za spajanje, pa se bira cijela datoteka.';
+      'Nema zajedničke verzije za spajanje: gdje god se dvije kopije '
+      'razlikuju, biraš ti.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Preklapanje $index od $total';
@@ -2144,6 +2139,8 @@ final class CroatianStrings extends Strings {
   String get syncMergeFromRemote => 'S poslužitelja';
   @override
   String get syncMergeRemovedLines => 'Uklonjeni retci';
+  @override
+  String get syncMergeAbsentLines => 'Nema u ovoj kopiji';
   @override
   String get syncMergeKeepLocal => 'Moji';
   @override
