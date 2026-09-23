@@ -157,6 +157,56 @@ MarkdownEdit orderedList({
   );
 }
 
+/// Makes every line the [selection] touches a task (`- [ ] `), or takes the
+/// task off them all when every one of them is a task already (#263).
+///
+/// A bulleted item keeps its marker and gains the box, a numbered one its
+/// number (`1. [ ] `, a task in GFM too), and any other line becomes a
+/// bulleted task at its own indent. A blank line among several is left
+/// alone: a list is made of the lines that say something. Taking the task
+/// off leaves the line's text, as the list buttons' second press would.
+MarkdownEdit toggleTaskList({
+  required String text,
+  required TextSelection selection,
+}) {
+  final startLine = _lineIndexOf(text, selection.start);
+  final endLine = _lineIndexOf(text, selection.end);
+  final lines = text.split('\n');
+  final newLines = <String>[...lines];
+  final several = endLine > startLine;
+  bool skipped(String line) => several && line.trim().isEmpty;
+  var allTasks = true;
+  for (var i = startLine; i <= endLine; i++) {
+    if (skipped(lines[i])) continue;
+    if (!(listItemHead(lines[i])?.box ?? false)) allTasks = false;
+  }
+  for (var i = startLine; i <= endLine; i++) {
+    final line = lines[i];
+    if (skipped(line)) continue;
+    final head = listItemHead(line);
+    if (allTasks) {
+      newLines[i] = '${head!.indent}${head.content}';
+    } else if (head == null) {
+      final indent = line.length - line.trimLeft().length;
+      newLines[i] =
+          '${line.substring(0, indent)}- [ ] ${line.substring(indent)}';
+    } else if (!head.box) {
+      newLines[i] = '${head.indent}${head.marker} [ ] ${head.content}';
+    }
+  }
+  final newText = newLines.join('\n');
+  return MarkdownEdit(
+    text: newText,
+    selection: _shiftSelectionForLines(
+      oldText: text,
+      newText: newText,
+      selection: selection,
+      startLine: startLine,
+      endLine: endLine,
+    ),
+  );
+}
+
 /// Indents (or outdents, with [outdent] true) every line the [selection]
 /// touches by [width] spaces: indent adds [width] spaces at each line's
 /// start; outdent removes up to [width] leading spaces (never content).

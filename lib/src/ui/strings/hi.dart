@@ -441,6 +441,8 @@ final class HindiStrings extends Strings {
   @override
   String get toolbarOrderedList => 'क्रमांकित सूची';
   @override
+  String get toolbarChecklist => 'चेकलिस्ट';
+  @override
   String get toolbarQuote => 'उद्धरण';
   @override
   String get toolbarIndent => 'इंडेंट बढ़ाएँ';

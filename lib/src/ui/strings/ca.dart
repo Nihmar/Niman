@@ -459,6 +459,8 @@ final class CatalanStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Llista numerada';
   @override
+  String get toolbarChecklist => 'Llista de control';
+  @override
   String get toolbarQuote => 'Cita';
   @override
   String get toolbarIndent => 'Sagna';

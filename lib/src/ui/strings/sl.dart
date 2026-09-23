@@ -458,6 +458,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Oštevilčen seznam';
   @override
+  String get toolbarChecklist => 'Kontrolni seznam';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Zamik';

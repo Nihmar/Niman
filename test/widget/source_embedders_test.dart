@@ -308,6 +308,17 @@ void main() {
           );
         });
 
+        testWidgets('Enter on a task starts an unticked one (#263)', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, mode, '- [x] latte\n');
+          await rig.pump();
+          await rig.tapEnd(0);
+          await rig.platform.enter();
+          await tester.pump();
+          rig.agree('- [x] latte\n- [ ] \n');
+        });
+
         testWidgets('an ordered list counts on, a fence does not continue', (
           tester,
         ) async {

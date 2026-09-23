@@ -50,6 +50,9 @@ enum ToolbarItem {
     Icons.format_list_numbered,
   ),
 
+  /// A checkbox (task) list: `- [ ] ` toggled on the lines (#263).
+  checklist('checklist', 'toolbar-checklist', Icons.checklist),
+
   /// A block quote.
   quote('quote', 'toolbar-quote', Icons.format_quote),
 
@@ -94,6 +97,7 @@ enum ToolbarItem {
     ToolbarItem.heading => AppStrings.toolbarHeading,
     ToolbarItem.list => AppStrings.toolbarList,
     ToolbarItem.orderedList => AppStrings.toolbarOrderedList,
+    ToolbarItem.checklist => AppStrings.toolbarChecklist,
     ToolbarItem.quote => AppStrings.toolbarQuote,
     ToolbarItem.outdent => AppStrings.toolbarOutdent,
     ToolbarItem.indent => AppStrings.toolbarIndent,
@@ -112,6 +116,7 @@ enum ToolbarItem {
     ToolbarItem.heading ||
     ToolbarItem.list ||
     ToolbarItem.orderedList ||
+    ToolbarItem.checklist ||
     ToolbarItem.quote ||
     ToolbarItem.outdent ||
     ToolbarItem.indent => ToolbarGroup.block,

@@ -58,6 +58,20 @@ void main() {
       expect(ToolbarLayout.parse(layout.encode()).encode(), layout.encode());
     });
 
+    test("a newer build's button lands beside the one it follows", () {
+      // A layout stored before the checkbox list (#263): everything else,
+      // in the catalogue's order.
+      final stored = [
+        for (final item in ToolbarItem.values)
+          if (item != ToolbarItem.checklist) item.id,
+      ].join(',');
+      final order = ToolbarLayout.parse(stored).order;
+      expect(
+        order.indexOf(ToolbarItem.checklist),
+        order.indexOf(ToolbarItem.orderedList) + 1,
+      );
+    });
+
     test('an unknown id is dropped and a missing one is appended shown', () {
       final layout = ToolbarLayout.parse('marquee,-bold');
       expect(layout.order.first, ToolbarItem.bold);

@@ -452,6 +452,8 @@ final class EnglishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numbered list';
   @override
+  String get toolbarChecklist => 'Checkbox list';
+  @override
   String get toolbarQuote => 'Quote';
   @override
   String get toolbarIndent => 'Indent';

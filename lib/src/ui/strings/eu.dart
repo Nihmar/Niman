@@ -450,6 +450,8 @@ final class BasqueStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Zerrenda zenbatua';
   @override
+  String get toolbarChecklist => 'Egiaztapen-zerrenda';
+  @override
   String get toolbarQuote => 'Aipua';
   @override
   String get toolbarIndent => 'Bilkatu';

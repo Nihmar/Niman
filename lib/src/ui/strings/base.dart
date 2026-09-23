@@ -230,6 +230,7 @@ abstract base class Strings {
   String get toolbarHeading;
   String get toolbarList;
   String get toolbarOrderedList;
+  String get toolbarChecklist;
   String get toolbarQuote;
   String get toolbarIndent;
   String get toolbarOutdent;

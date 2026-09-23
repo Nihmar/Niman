@@ -462,6 +462,8 @@ final class RomanianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Listă numerotată';
   @override
+  String get toolbarChecklist => 'Listă de verificare';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Indentare';

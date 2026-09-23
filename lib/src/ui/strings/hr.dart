@@ -455,6 +455,8 @@ final class CroatianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Brojčani popis';
   @override
+  String get toolbarChecklist => 'Kontrolni popis';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Uvlačenje';

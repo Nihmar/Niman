@@ -461,6 +461,8 @@ final class FrenchStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Liste numérotée';
   @override
+  String get toolbarChecklist => 'Liste de cases à cocher';
+  @override
   String get toolbarQuote => 'Citation';
   @override
   String get toolbarIndent => 'Augmenter l’indentation';

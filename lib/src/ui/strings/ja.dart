@@ -425,6 +425,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get toolbarOrderedList => '番号付きリスト';
   @override
+  String get toolbarChecklist => 'チェックリスト';
+  @override
   String get toolbarQuote => '引用';
   @override
   String get toolbarIndent => 'インデントを拡大';

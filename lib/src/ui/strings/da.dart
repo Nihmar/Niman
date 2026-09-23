@@ -451,6 +451,8 @@ final class DanishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Nummereret liste';
   @override
+  String get toolbarChecklist => 'Tjekliste';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Indryk';

@@ -273,6 +273,13 @@ fenced code, tables, math, frontmatter and HTML come back byte for
 byte. Tidying twice changes nothing the second time. The note is saved
 first, so what is tidied is the note as it stands.
 
+The **checkbox list** button (beside the bulleted and numbered lists)
+makes the selected lines — or the caret's — tasks: a bulleted item gains
+its box, a numbered one keeps its number, a plain line becomes `- [ ] `.
+Pressed on lines that are all tasks already, it takes the boxes off and
+leaves their text. Blank lines in a selection are left alone, and the
+whole change is one undo step. On a task line the button reads as on.
+
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
 changeable in Settings → Keyboard shortcuts → Formatting (see

@@ -456,6 +456,8 @@ final class DutchStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Genummerde lijst';
   @override
+  String get toolbarChecklist => 'Checklist';
+  @override
   String get toolbarQuote => 'Citaat';
   @override
   String get toolbarIndent => 'Inspringen';

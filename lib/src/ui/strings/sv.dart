@@ -456,6 +456,8 @@ final class SwedishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numrerad lista';
   @override
+  String get toolbarChecklist => 'Checklista';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Indentera';

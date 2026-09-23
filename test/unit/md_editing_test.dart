@@ -109,4 +109,48 @@ void main() {
       expect(edit.selection, _sel(4, 7));
     });
   });
+
+  group('toggleTaskList (#263)', () {
+    MarkdownEdit toggle(String text, TextSelection selection) =>
+        toggleTaskList(text: text, selection: selection);
+
+    test('a plain line becomes a task, the caret kept on its text', () {
+      final edit = toggle('buy milk', _sel(3));
+      expect(edit.text, '- [ ] buy milk');
+      expect(edit.selection, _sel(9));
+    });
+
+    test('a bulleted item gains the box and keeps its marker', () {
+      expect(toggle('* one', _sel(0)).text, '* [ ] one');
+      expect(toggle('  - nested', _sel(4)).text, '  - [ ] nested');
+    });
+
+    test('a numbered item keeps its number', () {
+      expect(toggle('3. third', _sel(0)).text, '3. [ ] third');
+    });
+
+    test('a task goes back to plain text, ticked or not', () {
+      expect(toggle('- [ ] todo', _sel(8)).text, 'todo');
+      expect(toggle('  - [x] done', _sel(0)).text, '  done');
+    });
+
+    test('several lines: tasks all, blank lines left alone', () {
+      final edit = toggle('a\n\n- b\n- [x] c', _sel(0, 13));
+      expect(edit.text, '- [ ] a\n\n- [ ] b\n- [x] c');
+    });
+
+    test('several lines, all tasks: all back to text', () {
+      final edit = toggle('- [ ] a\n- [x] b', _sel(0, 15));
+      expect(edit.text, 'a\nb');
+    });
+
+    test('an empty line alone becomes an empty task', () {
+      expect(toggle('a\n\nb', _sel(2)).text, 'a\n- [ ] \nb');
+    });
+
+    test('Enter on a task carries an unticked box on', () {
+      expect(listItemHead('- [x] done')!.continuation, '- [ ] ');
+      expect(listItemHead('  - [ ] todo')!.continuation, '  - [ ] ');
+    });
+  });
 }

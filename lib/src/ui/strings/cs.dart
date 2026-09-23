@@ -457,6 +457,8 @@ final class CzechStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Očíslovaný seznam';
   @override
+  String get toolbarChecklist => 'Kontrolní seznam';
+  @override
   String get toolbarQuote => 'Citace';
   @override
   String get toolbarIndent => 'Odsadit';

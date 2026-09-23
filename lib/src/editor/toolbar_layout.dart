@@ -33,9 +33,25 @@ final class ToolbarLayout {
     }
     if (order.isEmpty) return defaults;
     // Buttons this build has and the stored value does not: a newer
-    // build's additions, shown rather than silently missing.
-    for (final item in ToolbarItem.values) {
-      if (!order.contains(item)) order.add(item);
+    // build's additions, shown rather than silently missing. One whose
+    // neighbours in the catalogue were both stored is a button added
+    // between them — a checkbox list among the lists — and goes beside
+    // the one before it; any other goes at the end.
+    const catalogue = ToolbarItem.values;
+    final kept = {...order};
+    for (var at = 0; at < catalogue.length; at++) {
+      final item = catalogue[at];
+      if (order.contains(item)) continue;
+      final between =
+          at > 0 &&
+          at < catalogue.length - 1 &&
+          kept.contains(catalogue[at - 1]) &&
+          kept.contains(catalogue[at + 1]);
+      if (between) {
+        order.insert(order.indexOf(catalogue[at - 1]) + 1, item);
+      } else {
+        order.add(item);
+      }
     }
     return ToolbarLayout(order: order, hidden: hidden);
   }

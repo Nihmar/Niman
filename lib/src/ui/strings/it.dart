@@ -458,6 +458,8 @@ final class ItalianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Elenco numerato';
   @override
+  String get toolbarChecklist => 'Lista di controllo';
+  @override
   String get toolbarQuote => 'Citazione';
   @override
   String get toolbarIndent => 'Aumenta rientro';

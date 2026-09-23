@@ -454,6 +454,8 @@ final class LatvianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numurēts saraksts';
   @override
+  String get toolbarChecklist => 'Kontrolsaraksts';
+  @override
   String get toolbarQuote => 'Citāts';
   @override
   String get toolbarIndent => 'Ielāde';

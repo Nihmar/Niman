@@ -451,6 +451,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Nummerert liste';
   @override
+  String get toolbarChecklist => 'Sjekkliste';
+  @override
   String get toolbarQuote => 'Sitat';
   @override
   String get toolbarIndent => 'Rykk inn';

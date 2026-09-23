@@ -278,6 +278,43 @@ void main() {
   });
 
   for (final live in <bool>[false, true]) {
+    testWidgets('the checkbox list button toggles a task, one undo step '
+        '(${live ? 'live' : 'source'})', (tester) async {
+      // #263: the toolbar's checkbox list, in both unified modes.
+      final writes = <String>[];
+      await _pump(
+        tester,
+        _view(
+          readNote: (_) async => 'comprare il latte\n- pane\n',
+          writes: writes,
+          showWysiwyg: live,
+        ),
+      );
+      EditorToolbarButton button() => tester
+          .widget<EditorToolbar>(find.byType(EditorToolbar))
+          .buttons
+          .firstWhere((item) => item.key == const Key('toolbar-checklist'));
+      final surface = _surface(tester)
+        ..select(const SelectionModel(anchor: 3, extent: 22));
+      await tester.pump();
+      expect(button().active, isFalse);
+      await tester.tap(find.byKey(const Key('toolbar-checklist')));
+      await tester.pump();
+      expect(
+        surface.widget.buffer.text,
+        '- [ ] comprare il latte\n- [ ] pane\n',
+      );
+      expect(button().active, isTrue, reason: 'the caret is on a task now');
+      expect(surface.undo(), isTrue);
+      expect(
+        surface.widget.buffer.text,
+        'comprare il latte\n- pane\n',
+        reason: 'the two lines are one step',
+      );
+    });
+  }
+
+  for (final live in <bool>[false, true]) {
     testWidgets('the tools count the list the caret is in '
         '(${live ? 'live' : 'source'})', (tester) async {
       // #246's parity: the tools sheet is the toolbar's, and what it writes

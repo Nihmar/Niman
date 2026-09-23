@@ -449,6 +449,8 @@ final class TurkishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numaralı liste';
   @override
+  String get toolbarChecklist => 'Onay listesi';
+  @override
   String get toolbarQuote => 'Alıntı';
   @override
   String get toolbarIndent => 'Girintile';

@@ -451,6 +451,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Listë me numra';
   @override
+  String get toolbarChecklist => 'Listë kontrolli';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Indente';

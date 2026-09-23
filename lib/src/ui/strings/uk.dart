@@ -458,6 +458,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Нумерований список';
   @override
+  String get toolbarChecklist => 'Контрольний список';
+  @override
   String get toolbarQuote => 'Цитата';
   @override
   String get toolbarIndent => 'Відступ';
