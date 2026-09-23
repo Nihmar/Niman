@@ -33,6 +33,14 @@ settings (see [settings](settings.md)):
 - **Another day**: a day with no entry is not made behind your back —
   Niman asks first, so leafing through the days never leaves empty notes.
 
+## The strip over an entry
+
+Any note that is an entry — wherever it was opened from — wears a strip
+above it, on every platform: its day in full (with *Today* on today's),
+and on either side the entry before and after it, by date. A side whose
+day has no entry yet is drawn softer: tapping it offers to make one. The
+next side stops at today.
+
 ## What an entry starts with
 
 With no template set, an entry starts with its date as a heading

@@ -103,7 +103,7 @@ final class JournalFlow {
   /// Opens the entry before [day]'s, skipping the days without one; the
   /// day before, to be made, when there is none earlier.
   Future<void> openPrevious(BuildContext context, DateTime day) async {
-    final days = await _days();
+    final days = await entryDays();
     if (days == null || !context.mounted) return;
     final before =
         journalDayBefore(days, day) ??
@@ -115,7 +115,7 @@ final class JournalFlow {
   /// day after, to be made, when there is none later and it is not past
   /// today. Null, doing nothing, when [day] is today or later.
   Future<void> openNext(BuildContext context, DateTime day) async {
-    final days = await _days();
+    final days = await entryDays();
     final today = await this.today();
     if (days == null || today == null || !context.mounted) return;
     final after = journalDayAfter(days, day);
@@ -127,8 +127,8 @@ final class JournalFlow {
     await openDay(context, DateTime(day.year, day.month, day.day + 1));
   }
 
-  /// The days with an entry, oldest first.
-  Future<List<DateTime>?> _days() async {
+  /// The days with an entry, oldest first; null with no library open.
+  Future<List<DateTime>?> entryDays() async {
     final ops = controller.ops;
     if (ops == null) return null;
     final settings = await ops.journal;

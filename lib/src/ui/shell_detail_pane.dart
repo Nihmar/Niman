@@ -51,8 +51,13 @@ final class ShellDetailPane extends StatelessWidget {
     this.writeNote,
     this.saveNote,
     this.createMissingNote,
+    this.header,
     super.key,
   });
+
+  /// What goes above a note, by its library-relative path, or null for
+  /// nothing: the journal's strip over an entry (#7).
+  final Widget? Function(String path)? header;
 
   /// Absolute library root; null until the session is ready.
   final String? root;
@@ -183,7 +188,19 @@ final class ShellDetailPane extends StatelessWidget {
     );
   }
 
-  Widget _note(String root, DetailTab tab) => NoteView(
+  Widget _note(String root, DetailTab tab) {
+    final view = _view(root, tab);
+    final above = header?.call(tab.path);
+    if (above == null) return view;
+    return Column(
+      children: [
+        above,
+        Expanded(child: view),
+      ],
+    );
+  }
+
+  Widget _view(String root, DetailTab tab) => NoteView(
     // On the view itself, so the dock reaches its state (#175), and a tab
     // moved to the other pane takes its editor along.
     key: tab.key,
