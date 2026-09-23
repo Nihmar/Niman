@@ -66,6 +66,55 @@ Offset _glyph(WidgetTester tester, String start, int offset) {
   return paragraph.localToGlobal(Offset(box.left, box.top));
 }
 
+/// Pumps [note] in `live`, the caret on its first line, or in the read view
+/// when [read]; no numbers, no column.
+Future<void> _pumpNote(
+  WidgetTester tester,
+  String note, {
+  required bool read,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => read
+              ? MarkdownReadView(
+                  buffer: SourceBuffer.fromText(note),
+                  parser: BlockParser(),
+                  mathCache: MathCache(),
+                )
+              : MarkdownSurface(
+                  buffer: SourceBuffer.fromText(note),
+                  mode: MarkdownSurfaceMode.live,
+                  theme: markdownThemeOf(context),
+                  selection: const SelectionModel.at(0),
+                  showLineNumbers: false,
+                ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+  await tester.pump();
+}
+
+/// Where the first glyph of [word] is drawn, in whichever paragraph has it.
+Offset _glyphOf(WidgetTester tester, String word) {
+  for (final paragraph in tester.renderObjectList<RenderParagraph>(
+    find.byType(RichText),
+  )) {
+    final at = paragraph.text.toPlainText().indexOf(word);
+    if (at < 0) continue;
+    final box = paragraph
+        .getBoxesForSelection(
+          TextSelection(baseOffset: at, extentOffset: at + 1),
+        )
+        .first;
+    return paragraph.localToGlobal(Offset(box.left, box.top));
+  }
+  throw StateError('"$word" is not on screen');
+}
+
 /// The first offset of the paragraph starting with [start] that is drawn on
 /// its second row.
 int _wrap(WidgetTester tester, String start) {
@@ -101,4 +150,30 @@ void main() {
       });
     }
   }
+
+  testWidgets("each construct's text starts where it does in live", (
+    tester,
+  ) async {
+    // A heading's hidden `#` left its space behind, 6 px of the heading's
+    // size before the title in `live`; and a list's text stood a tenth of a
+    // pixel short of the read view's, which sets a paragraph's first glyph
+    // half an ambient letter spacing in.
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note =
+        'caret\n\n# Heading one\n\n## Heading two\n\n- bullet\n- [ ] task\n'
+        '  - nested\n\n1. numbered\n';
+    const words = ['Heading one', 'Heading two', 'bullet', 'task', 'nested'];
+    Future<List<double>> lefts({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      return [for (final word in words) _glyphOf(tester, word).dx];
+    }
+
+    final live = await lefts(read: false);
+    final read = await lefts(read: true);
+    for (var at = 0; at < words.length; at++) {
+      expect(read[at], closeTo(live[at], 0.01), reason: words[at]);
+    }
+  });
 }

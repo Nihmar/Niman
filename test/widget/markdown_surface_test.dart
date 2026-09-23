@@ -187,7 +187,8 @@ void main() {
       reason: 'source draws the hash at its own size, as the note was written',
     );
     expect(
-      hidden.any((span) => span.text == '#' && span.style?.fontSize == 0.01),
+      // With the space after it: a heading's prefix is hidden whole.
+      hidden.any((span) => span.text == '# ' && span.style?.fontSize == 0.01),
       isTrue,
       reason: 'live draws it invisible and taking no room',
     );
@@ -1121,48 +1122,43 @@ void main() {
   testWidgets('a hidden bullet leaves an indent, not a word at the margin', (
     tester,
   ) async {
-    /// Where the line's paragraph starts, and where its text after `- `
-    /// does: in live the hidden marker and its space take next to no room,
-    /// and the text is set on the column.
-    Future<(double, double)> textLeft(MarkdownSurfaceMode mode) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MarkdownSurface(
-              // The caret on the other line: on its own, the item's marker is
-              // drawn as written, in the indent the bullet had.
-              buffer: SourceBuffer.fromText('testo\n- una voce\n'),
-              mode: mode,
-              theme: _theme,
-              selection: const SelectionModel.at(0),
-              showLineNumbers: false,
-            ),
+    // The item's text is set one column in from where a paragraph's is: its
+    // glyph, not its paragraph's box, which starts where the hidden marker
+    // does.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSurface(
+            // The caret on the other line: on its own, the item's marker is
+            // drawn as written, in the indent the bullet had.
+            buffer: SourceBuffer.fromText('testo\n- una voce\n'),
+            mode: MarkdownSurfaceMode.live,
+            theme: _theme,
+            selection: const SelectionModel.at(0),
+            showLineNumbers: false,
           ),
         ),
-      );
-      await tester.pump();
+      ),
+    );
+    await tester.pump();
+    double glyph(String start, int offset) {
       final paragraph = tester
           .renderObjectList<RenderParagraph>(find.byType(RichText))
-          .firstWhere((p) => p.text.toPlainText().startsWith('-'));
-      final text = paragraph.getOffsetForCaret(
-        const TextPosition(offset: 2),
-        Rect.zero,
-      );
-      return (
-        paragraph.localToGlobal(Offset.zero).dx,
-        paragraph.localToGlobal(text).dx,
-      );
+          .firstWhere((p) => p.text.toPlainText().startsWith(start));
+      final box = paragraph
+          .getBoxesForSelection(
+            TextSelection(baseOffset: offset, extentOffset: offset + 1),
+          )
+          .first;
+      return paragraph.localToGlobal(Offset(box.left, 0)).dx;
     }
 
-    final (source, _) = await textLeft(MarkdownSurfaceMode.source);
-    final (_, live) = await textLeft(MarkdownSurfaceMode.live);
     expect(
-      live,
-      closeTo(source + _theme.listIndentPerLevel, 0.01),
+      glyph('- ', 2),
+      closeTo(glyph('testo', 0) + _theme.listIndentPerLevel, 0.01),
       reason: 'the item is set in by the column its marker was',
     );
   });
-
   testWidgets('the caret is at the same offset in both modes', (tester) async {
     // The property the whole arrangement rests on: hiding a marker does not
     // move
