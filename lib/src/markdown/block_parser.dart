@@ -9,9 +9,10 @@
 /// what makes a run cover `**bold**` rather than `bold`.
 ///
 /// That walk is exact for everything a note normally holds. It can be off when
-/// the parser *rewrites* text rather than dropping markup from it, and
-/// character references (`&amp;` becoming `&`) are the one case of that; the
-/// bridge tries the source form of the reference before giving up, and marks
+/// the parser *rewrites* text rather than dropping markup from it: it decodes
+/// character references (`&amp;` becoming `&`) and escapes what it hands back
+/// (`"` becoming `&quot;`). The bridge looks for every source form a node's
+/// text can have before giving up, and marks
 /// the block [ParsedBlock.approximate] if even that fails, so a caller that
 /// must not act on an uncertain range can refuse rather than guess.
 ///
@@ -373,16 +374,15 @@ final class _Walk {
     if (text.isEmpty) return null;
     var at = masked.text.indexOf(text, _cursor);
     if (at < 0) {
-      // The parser decodes character references, so the node's text is not
-      // always what the source says. Its source form is tried before giving up.
-      final encoded = _encode(text);
-      if (encoded != text) at = masked.text.indexOf(encoded, _cursor);
-      final found = at >= 0;
-      if (!found) {
-        approximate = true;
-        at = _cursor;
-      }
-      final end = at + (found ? encoded.length : text.length);
+      // The parser decodes character references and escapes the text it hands
+      // back — `"` comes as `&quot;` — so the node's text is not always what
+      // the source says. It is looked for in every form the source can have.
+      final match = _sourceFormOf(text)
+          .allMatches(masked.text, _cursor)
+          .firstOrNull;
+      if (match == null) approximate = true;
+      at = match?.start ?? _cursor;
+      final end = match?.end ?? at + text.length;
       _cursor = end > masked.text.length ? masked.text.length : end;
       if (depth == 0) {
         runs.add(StyleRun(kind: StyleKind.plain, start: at, end: _cursor));
@@ -530,11 +530,40 @@ final class _Walk {
   static String? _href(md.Element element) =>
       element.attributes['href'] ?? element.attributes['src'];
 
-  /// The source form of [text], for the characters the parser decodes.
-  static String _encode(String text) => text
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;');
+  /// What [text], a node's text, can have been in the source: each character
+  /// the parser escapes, and each escape it wrote, stands for either form —
+  /// `&quot;` is a `"` typed or a `&quot;` typed, and a node can hold both.
+  static RegExp _sourceFormOf(String text) {
+    final pattern = StringBuffer();
+    var from = 0;
+    for (final match in _escapable.allMatches(text)) {
+      pattern.write(RegExp.escape(text.substring(from, match.start)));
+      final char = _unescaped[match[0]] ?? match[0]!;
+      final entity = _escapes[char]!;
+      pattern.write('(?:${RegExp.escape(char)}|${RegExp.escape(entity)})');
+      from = match.end;
+    }
+    pattern.write(RegExp.escape(text.substring(from)));
+    return RegExp(pattern.toString());
+  }
+
+  /// The characters the parser escapes, and how it writes each.
+  static const Map<String, String> _escapes = <String, String>{
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+
+  static final Map<String, String> _unescaped = <String, String>{
+    for (final entry in _escapes.entries) entry.value: entry.key,
+  };
+
+  /// An escape the parser writes, or a character it escapes.
+  static final RegExp _escapable = RegExp(
+    '&amp;|&lt;|&gt;|&quot;|&#39;|[&<>"\']',
+  );
 }
 
 /// The definitions a note makes that no single block can resolve.
