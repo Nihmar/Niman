@@ -1144,6 +1144,8 @@ final class ChineseStrings extends Strings {
   @override
   String get journalFabToday => '今天的日记条目';
   @override
+  String journalDueOn(String day) => '$day 到期';
+  @override
   String get commandsTitle => '命令';
   @override
   String get commandsIntro => '命令面板只列出在当前位置可以运行的命令。这里是全部命令，以及每条命令何时出现。';

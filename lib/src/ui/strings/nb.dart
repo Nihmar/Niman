@@ -1252,6 +1252,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get journalFabToday => 'Dagens dagbokinnlegg';
   @override
+  String journalDueOn(String day) => 'Forfaller $day';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

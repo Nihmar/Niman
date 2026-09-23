@@ -1264,6 +1264,8 @@ final class SwedishStrings extends Strings {
   @override
   String get journalFabToday => 'Dagens dagboksanteckning';
   @override
+  String journalDueOn(String day) => 'Förfaller $day';
+  @override
   String get commandsTitle => 'Kommandon';
   @override
   String get commandsIntro =>

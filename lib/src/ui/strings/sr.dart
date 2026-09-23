@@ -1264,6 +1264,8 @@ final class SerbianStrings extends Strings {
   @override
   String get journalFabToday => 'Данашњи унос у дневник';
   @override
+  String journalDueOn(String day) => 'Рок $day';
+  @override
   String get commandsTitle => 'Команде';
   @override
   String get commandsIntro =>

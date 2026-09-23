@@ -1259,6 +1259,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get journalFabToday => 'Dagbókarfærsla dagsins';
   @override
+  String journalDueOn(String day) => 'Á gjalddaga $day';
+  @override
   String get commandsTitle => 'Skipanir';
   @override
   String get commandsIntro =>

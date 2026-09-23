@@ -1265,6 +1265,8 @@ final class BasqueStrings extends Strings {
   @override
   String get journalFabToday => 'Egunkariko gaurko sarrera';
   @override
+  String journalDueOn(String day) => 'Epea: $day';
+  @override
   String get commandsTitle => 'Komandoak';
   @override
   String get commandsIntro =>

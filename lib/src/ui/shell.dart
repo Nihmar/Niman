@@ -29,10 +29,12 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
+import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
@@ -3046,10 +3048,22 @@ final class _LibraryShellState extends State<_LibraryShell>
           onOpenDay: (day, {confirmed = false}) => unawaited(
             _journalFlow.openDay(context, day, confirmed: confirmed),
           ),
+          dueOn: _tasksDueOn,
+          tasksChanged: _todoController,
+          onOpenTasks: _openTodo,
+          focusDay: _shownJournalDay,
         ),
       },
     );
   }
+
+  /// The open tasks due on [day], as the task list reads them: what the
+  /// journal's calendar shows under the day (#7).
+  List<String> _tasksDueOn(DateTime day) => [
+    for (final entry in _todoController.snapshot?.todo ?? const <TodoEntry>[])
+      if (!entry.task.completed && entry.task.due == day)
+        taskDisplayText(entry.task.description),
+  ];
 
   /// The text of [day]'s journal entry, for the calendar's recent list.
   Future<String> _readJournalEntry(DateTime day) async {
@@ -3074,6 +3088,12 @@ final class _LibraryShellState extends State<_LibraryShell>
           entryDays: _journalFlow.entryDays,
           readEntry: _readJournalEntry,
           revision: widget.controller.revision,
+          dueOn: _tasksDueOn,
+          tasksChanged: _todoController,
+          onOpenTasks: () {
+            Navigator.of(screen).pop();
+            _openTodo();
+          },
           onOpenDay: (day, {confirmed = false}) {
             // The screen goes first: the entry opens in the shell.
             Navigator.of(screen).pop();

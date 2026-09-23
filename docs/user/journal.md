@@ -39,7 +39,10 @@ not saved:
 ## The calendar
 
 A month with a dot under each day that has an entry, today ringed, a
-**Today** button, and the latest entries with their first words.
+**Today** button, the open [tasks](tasks.md) due on the day (from
+`todo.txt`: tap one for the task list), and the latest entries with
+their first words. In the side panel the day is the entry on screen's,
+or today; on the phone's screen, the day picked.
 
 - **Desktop** (a window wide enough for the side panel): the *Journal*
   pane of the side panel, beside the note. Clicking a day opens its

@@ -1257,6 +1257,8 @@ final class LatvianStrings extends Strings {
   @override
   String get journalFabToday => 'Šodienas dienasgrāmatas ieraksts';
   @override
+  String journalDueOn(String day) => 'Termiņš $day';
+  @override
   String get commandsTitle => 'Komandas';
   @override
   String get commandsIntro =>

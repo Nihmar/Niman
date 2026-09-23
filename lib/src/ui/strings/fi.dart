@@ -1271,6 +1271,8 @@ final class FinnishStrings extends Strings {
   @override
   String get journalFabToday => 'Tämän päivän päiväkirjamerkintä';
   @override
+  String journalDueOn(String day) => 'Erääntyy $day';
+  @override
   String get commandsTitle => 'Komennot';
   @override
   String get commandsIntro =>

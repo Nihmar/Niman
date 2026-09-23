@@ -1263,6 +1263,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get journalFabToday => 'Сьогоднішній запис щоденника';
   @override
+  String journalDueOn(String day) => 'Термін $day';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>
