@@ -27,6 +27,7 @@ Widget _view(
   String document,
   MathCache cache, {
   Future<String?> Function(String target)? resolve,
+  double scale = 1,
 }) {
   final buffer = SourceBuffer.fromText(document);
   final scanner = BlockScanner(buffer);
@@ -34,23 +35,30 @@ Widget _view(
   return MaterialApp(
     home: Scaffold(
       body: Builder(
-        builder: (context) {
-          final theme = markdownThemeOf(context);
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                for (final block in scanner.index.blocks)
-                  BlockView(
-                    parsed: parser.of(block, buffer),
-                    theme: theme,
-                    mathCache: cache,
-                    embedResolver: resolve,
-                  ),
-              ],
-            ),
-          );
-        },
+        // The note's size, as the note view sets it around the read view.
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(scale)),
+          child: Builder(
+            builder: (context) {
+              final theme = markdownThemeOf(context);
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    for (final block in scanner.index.blocks)
+                      BlockView(
+                        parsed: parser.of(block, buffer),
+                        theme: theme,
+                        mathCache: cache,
+                        embedResolver: resolve,
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     ),
   );
@@ -184,6 +192,33 @@ void main() {
     expect(screen, isNot(contains('[ ]')));
   });
 
+  testWidgets("a task's box and a number's gap grow with the note's text", (
+    tester,
+  ) async {
+    // The note's size is a scaler, which scales the text as it is laid out
+    // and nothing else: the box and the gap stayed at 100% beside text twice
+    // as big, and so did the column they sit in.
+    Future<(double, double, double)> drawn(double scale) async {
+      await tester.pumpWidget(
+        _view('- [ ] task\n\n1. one', _syncCache(), scale: scale),
+      );
+      await tester.pump();
+      final box = tester.getSize(find.byType(Icon)).width;
+      final number = tester.getRect(find.text('1.'));
+      final text = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText() == 'one');
+      final gap = text.localToGlobal(Offset.zero).dx - number.right;
+      final column = text.localToGlobal(Offset.zero).dx;
+      return (box, gap, column);
+    }
+
+    final (box, gap, column) = await drawn(1);
+    final (bigBox, bigGap, bigColumn) = await drawn(2);
+    expect(bigBox, closeTo(box * 2, 0.01));
+    expect(bigGap, closeTo(gap * 2, 0.01));
+    expect(bigColumn, closeTo(column * 2, 0.01));
+  });
   testWidgets("a list's numbers end at one edge, clear of the text", (
     tester,
   ) async {

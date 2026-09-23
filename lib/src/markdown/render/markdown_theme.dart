@@ -23,6 +23,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 
+/// How far an ordered item's number ends before the item's text, in the
+/// prose's size: the read view and `live` both set it there, and it grows
+/// with the note's text.
+const double numberGapEm = 0.3;
+
 /// The typography and block metrics a note is drawn with.
 @immutable
 final class MarkdownTheme {
@@ -147,7 +152,10 @@ final class MarkdownTheme {
   /// The inset inside a table cell.
   final EdgeInsets tableCellPadding;
 
-  /// The height of one line of prose, for the height map's estimates.
+  /// The height of one line of prose, for the height map's estimates — at
+  /// the text's own size, which a reader scales by the scaler the text is
+  /// laid out at, as the text is: unlike the metrics above, it is not
+  /// scaled already.
   final double lineHeight;
 
   /// The heading style for [level], clamped to 1..6.
@@ -250,12 +258,17 @@ MarkdownTheme monospaceTheme(MarkdownTheme theme) {
   );
 }
 
-/// The note's theme for the nearest application theme.
+/// The note's theme for the nearest application theme, its metrics at the
+/// size the note's text is read at: [scaler]'s, or the context's.
+///
+/// The note's size is a text scaler, and a scaler scales text as it is
+/// laid out and nothing else: the metrics in pixels — the list's and the
+/// quote's columns, the spacing, the paddings — are scaled here, or a note
+/// set at 150% kept its columns at 100% around text half as big again.
 ///
 /// A function rather than a factory, as `noteTextScalerOf` is: it reads
 /// the context, which a constructor has no business doing.
-MarkdownTheme markdownThemeOf(BuildContext context) {
-  /// context, which a constructor has no business doing.
+MarkdownTheme markdownThemeOf(BuildContext context, {TextScaler? scaler}) {
   final theme = Theme.of(context);
   final colors = theme.colorScheme;
   final text = theme.textTheme;
@@ -267,6 +280,10 @@ MarkdownTheme markdownThemeOf(BuildContext context) {
     fontFamily: 'monospace',
     fontFamilyFallback: const <String>['DejaVu Sans Mono', 'Courier New'],
   );
+
+  final em =
+      (scaler ?? MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling)
+          .scale(body.fontSize!);
 
   TextStyle heading(double size, FontWeight weight) =>
       body.copyWith(fontSize: size, fontWeight: weight, height: 1.3);
@@ -298,15 +315,15 @@ MarkdownTheme markdownThemeOf(BuildContext context) {
     quoteBar: colors.outlineVariant,
     tableBorder: colors.outlineVariant,
     markerDim: colors.outline,
-    blockSpacing: body.fontSize! * 0.75,
-    listIndentPerLevel: body.fontSize! * 1.6,
-    quoteIndentPerLevel: body.fontSize! * 0.9,
-    codePadding: body.fontSize! * 0.6,
+    blockSpacing: em * 0.75,
+    listIndentPerLevel: em * 1.6,
+    quoteIndentPerLevel: em * 0.9,
+    codePadding: em * 0.6,
     quoteBarWidth: 3,
     ruleThickness: 1,
     tableCellPadding: EdgeInsets.symmetric(
-      horizontal: body.fontSize! * 0.5,
-      vertical: body.fontSize! * 0.3,
+      horizontal: em * 0.5,
+      vertical: em * 0.3,
     ),
     lineHeight: body.fontSize! * 1.5,
   );

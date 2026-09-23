@@ -272,49 +272,54 @@ final class LiveDecorationPainter extends CustomPainter {
     final right = place.right;
     final slot = place.width;
     final middle = place.center.dy;
+    // The size the item's text is drawn at: a bullet, a box and a number
+    // grow with the note's text, which is scaled as it is laid out.
+    final em = box.textScaler.scale(theme.body.fontSize!);
     final task = shape.task;
     if (task != null) {
-      _paintCheckbox(canvas, place.left, middle, slot, ticked: task);
+      _paintCheckbox(canvas, place.left + slot / 2, middle, em, ticked: task);
       return;
     }
     final ordinal = shape.ordinal;
     if (ordinal != null) {
-      _paintText(canvas, '$ordinal.', right, middle);
+      _paintText(canvas, '$ordinal.', right - em * numberGapEm, middle, box);
       return;
     }
     canvas.drawCircle(
       Offset(right - slot / 2, middle),
-      2.5,
+      em * 0.18,
       Paint()..color = color,
     );
   }
 
+  /// A checkbox [em] in size, centred on ([centre], [middle]).
   void _paintCheckbox(
     Canvas canvas,
-    double left,
+    double centre,
     double middle,
-    double slot, {
+    double em, {
     required bool ticked,
   }) {
-    const side = 12.0;
+    final side = em * 0.86;
     final rect = Rect.fromCenter(
-      center: Offset(left + slot / 2, middle),
+      center: Offset(centre, middle),
       width: side,
       height: side,
     );
-    final frame = RRect.fromRectAndRadius(rect, const Radius.circular(2));
+    final frame = RRect.fromRectAndRadius(rect, Radius.circular(em * 0.14));
     if (ticked) {
       canvas.drawRRect(frame, Paint()..color = color);
+      final inset = em * 0.18;
       final tick = Path()
-        ..moveTo(rect.left + 2.5, rect.center.dy)
-        ..lineTo(rect.left + side * 0.42, rect.bottom - 3)
-        ..lineTo(rect.right - 2.5, rect.top + 3);
+        ..moveTo(rect.left + inset, rect.center.dy)
+        ..lineTo(rect.left + side * 0.42, rect.bottom - em * 0.21)
+        ..lineTo(rect.right - inset, rect.top + em * 0.21);
       canvas.drawPath(
         tick,
         Paint()
           ..color = const Color(0xFFFFFFFF)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.6,
+          ..strokeWidth = em * 0.11,
       );
       return;
     }
@@ -323,22 +328,30 @@ final class LiveDecorationPainter extends CustomPainter {
       Paint()
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4,
+        ..strokeWidth = em * 0.1,
     );
   }
 
-  /// Paints [text] right-aligned to [right], centred on [middle].
-  void _paintText(Canvas canvas, String text, double right, double middle) {
+  /// Paints [text] ending at [right], centred on [middle], at the size and
+  /// the scale [box]'s text is drawn at.
+  void _paintText(
+    Canvas canvas,
+    String text,
+    double right,
+    double middle,
+    RenderParagraph box,
+  ) {
     final painter = TextPainter(
       text: TextSpan(
         text: text,
         style: theme.body.copyWith(color: color),
       ),
       textDirection: TextDirection.ltr,
+      textScaler: box.textScaler,
     )..layout();
     painter.paint(
       canvas,
-      Offset(right - painter.width - 4, middle - painter.height / 2),
+      Offset(right - painter.width, middle - painter.height / 2),
     );
     painter.dispose();
   }

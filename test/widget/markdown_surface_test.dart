@@ -504,6 +504,80 @@ void main() {
     expect(at(next).dx, closeTo(first.dx, 0.1));
   });
 
+  testWidgets("live's box and number grow with the note's text", (
+    tester,
+  ) async {
+    // The note's size is a scaler, which the text is laid out at: the box
+    // stayed 12 px and the number unscaled beside text twice as big.
+    /// The side of the drawn box and the height of the drawn number, at
+    /// text [scale].
+    Future<(double, double)> drawn(double scale) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: TextScaler.linear(scale)),
+                child: MarkdownSurface(
+                  buffer: SourceBuffer.fromText(
+                    'caret\n\n- [ ] task\n\n1. one\n',
+                  ),
+                  mode: MarkdownSurfaceMode.live,
+                  theme: _theme,
+                  selection: const SelectionModel.at(0),
+                  showLineNumbers: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      var box = 0.0;
+      var number = 0.0;
+      final item = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().startsWith('1. '));
+      final middle = liveItemSlot(
+        item,
+        const LineShape(marker: 0),
+        _theme,
+      ).center.dy;
+      for (final paint in tester.renderObjectList<RenderCustomPaint>(
+        find.byType(CustomPaint),
+      )) {
+        final painter = paint.painter;
+        if (painter is! LiveDecorationPainter) continue;
+        final numbered = painter.shape.ordinal != null;
+        expect(
+          paint,
+          paints..everything((method, arguments) {
+            if (method == #drawRRect) {
+              box = (arguments.first as RRect).width;
+            }
+            // The number is centred on its row, and its paragraph is gone
+            // once painted: its height is read off where it was drawn. It is
+            // painted first, behind the line's own paragraph.
+            if (method == #drawParagraph && numbered && number == 0) {
+              number = 2 * (middle - (arguments[1] as Offset).dy);
+            }
+            return true;
+          }),
+        );
+      }
+      return (box, number);
+    }
+
+    final (box, number) = await drawn(1);
+    final (bigBox, bigNumber) = await drawn(2);
+    expect(box, greaterThan(0));
+    expect(number, greaterThan(0));
+    expect(bigBox, closeTo(box * 2, 0.01));
+    expect(bigNumber, closeTo(number * 2, 0.5));
+  });
+
   group('a task box in live', () {
     const note = 'caret\n\n- [ ] da fare\n- [x] fatto\n';
 

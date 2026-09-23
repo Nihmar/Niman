@@ -505,27 +505,29 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final block = _blocks[index];
     final theme = _theme ?? _fallbackTheme;
     final spacing = theme.blockSpacing;
+    // A line at the size the text is read at: the theme's is the text's own.
+    final line = _textScaler.scale(theme.lineHeight);
     return switch (block.kind) {
       BlockKind.frontmatter => 0,
-      BlockKind.blank => spacing + theme.lineHeight * 0.5,
+      BlockKind.blank => spacing + line * 0.5,
       BlockKind.thematicBreak => theme.ruleThickness + spacing,
-      BlockKind.heading => theme.lineHeight * 1.3 + spacing,
+      BlockKind.heading => line * 1.3 + spacing,
       BlockKind.fencedCode || BlockKind.indentedCode =>
         _pieces.containsKey(index)
-            ? block.lineCount * theme.lineHeight
-            : block.lineCount * theme.lineHeight +
-                  2 * theme.codePadding +
-                  spacing,
-      BlockKind.math => block.lineCount * theme.lineHeight * 1.6 + spacing,
-      BlockKind.table ||
-      BlockKind.html => block.lineCount * theme.lineHeight + spacing,
+            ? block.lineCount * line
+            : block.lineCount * line + 2 * theme.codePadding + spacing,
+      BlockKind.math => block.lineCount * line * 1.6 + spacing,
+      BlockKind.table || BlockKind.html => block.lineCount * line + spacing,
       BlockKind.paragraph ||
       BlockKind.listItem ||
-      BlockKind.quote => block.lineCount * theme.lineHeight + spacing,
+      BlockKind.quote => block.lineCount * line + spacing,
     };
   }
 
   MarkdownTheme? _theme;
+
+  /// The scaler the note's text is read at, as of the last build.
+  TextScaler _textScaler = TextScaler.noScaling;
   static const MarkdownTheme _fallbackTheme = MarkdownTheme(
     body: TextStyle(fontSize: 14, height: 1.5),
     heading1: TextStyle(fontSize: 25),
@@ -561,6 +563,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   @override
   Widget build(BuildContext context) {
     _theme = markdownThemeOf(context);
+    _textScaler = MediaQuery.textScalerOf(context);
     final heights = _heights;
     if (heights == null || _blocks.isEmpty || _shown == null) {
       if (_scanning) {
