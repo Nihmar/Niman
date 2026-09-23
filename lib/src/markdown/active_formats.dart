@@ -21,10 +21,9 @@
 ///
 /// What is *not* reported, and why: `image`, `indent`, `outdent` and `tools`
 /// are actions rather than states, and the legacy WYSIWYG's own answer keeps
-/// them dark too (`QuillEditorCommands.isActive`); `underline` and
-/// `superscript` have no token of their own — they are the `<u>`/`<sup>`
-/// extensions, which the tokenizer does not mark today, so they stay dark
-/// rather than lying.
+/// them dark too (`QuillEditorCommands.isActive`). `underline` and
+/// `superscript` are the `<u>`/`<sup>` tags, which the engine reads as runs of
+/// their own and lights like any other inline format.
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
@@ -61,6 +60,7 @@ Set<ToolbarItem> activeFormatsOf({
         active.add(ToolbarItem.code);
       // The caret's own text.
       case TokenKind.bold || TokenKind.italic || TokenKind.strike:
+      case TokenKind.underline || TokenKind.superscript:
       case TokenKind.codeInline:
       case TokenKind.link || TokenKind.wikilink:
         if (token.start < run.$2 && token.end > run.$1) {
@@ -73,6 +73,8 @@ Set<ToolbarItem> activeFormatsOf({
       case TokenKind.mathBlock:
       case TokenKind.tag:
       case TokenKind.frontmatter:
+      // The toolbar has no subscript.
+      case TokenKind.subscript:
         break;
     }
   }
@@ -83,6 +85,8 @@ Set<ToolbarItem> activeFormatsOf({
 ToolbarItem _itemOf(TokenKind kind) => switch (kind) {
   TokenKind.italic => ToolbarItem.italic,
   TokenKind.strike => ToolbarItem.strikethrough,
+  TokenKind.underline => ToolbarItem.underline,
+  TokenKind.superscript => ToolbarItem.superscript,
   TokenKind.codeInline => ToolbarItem.code,
   TokenKind.link || TokenKind.wikilink => ToolbarItem.link,
   // Bold is the only one left of the kinds this is called with, and naming it

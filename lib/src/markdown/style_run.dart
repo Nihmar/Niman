@@ -27,6 +27,16 @@ enum StyleKind {
   /// `~~x~~`.
   strikethrough,
 
+  /// `<u>x</u>`: the one underline Markdown has, written as HTML — which is
+  /// what the toolbar's underline writes.
+  underline,
+
+  /// `<sup>x</sup>`, what the toolbar's superscript writes.
+  superscript,
+
+  /// `<sub>x</sub>`.
+  subscript,
+
   /// A code span, backticks included.
   ///
   /// Never produced by the parser: the extension masker sets code spans aside

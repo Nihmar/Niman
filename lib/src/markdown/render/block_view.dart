@@ -498,6 +498,19 @@ final class _InlineBuilder {
       StyleKind.strikethrough => base.copyWith(
         decoration: TextDecoration.lineThrough,
       ),
+      StyleKind.underline => base.copyWith(
+        decoration: TextDecoration.underline,
+      ),
+      // Smaller, and raised or lowered by the font's own glyphs where it has
+      // them: a text style has no baseline shift of its own.
+      StyleKind.superscript => base.copyWith(
+        fontSize: (base.fontSize ?? 14) * 0.75,
+        fontFeatures: const <FontFeature>[FontFeature.superscripts()],
+      ),
+      StyleKind.subscript => base.copyWith(
+        fontSize: (base.fontSize ?? 14) * 0.75,
+        fontFeatures: const <FontFeature>[FontFeature.subscripts()],
+      ),
       StyleKind.code => _code,
       StyleKind.link => _tinted(theme.link),
       StyleKind.image => _tinted(theme.marker),

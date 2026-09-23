@@ -38,6 +38,16 @@ enum TokenKind {
   /// Strikethrough (`~~…~~`).
   strike,
 
+  /// `<u>…</u>`. Made by the unified engine's styler only: the legacy
+  /// tokenizer reads HTML tags as text.
+  underline,
+
+  /// `<sup>…</sup>`, the unified engine's only.
+  superscript,
+
+  /// `<sub>…</sub>`, the unified engine's only.
+  subscript,
+
   /// An inline code span (`` `…` ``).
   codeInline,
 

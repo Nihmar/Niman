@@ -29,6 +29,9 @@ void main() {
     expect(_activeAt('`code`\n', 0, 2), {ToolbarItem.code});
     expect(_activeAt('[text](u)\n', 0, 2), {ToolbarItem.link});
     expect(_activeAt('[[wiki]]\n', 0, 3), {ToolbarItem.link});
+    // The two the toolbar writes as HTML.
+    expect(_activeAt('<u>under</u>\n', 0, 5), {ToolbarItem.underline});
+    expect(_activeAt('x<sup>2</sup>\n', 0, 6), {ToolbarItem.superscript});
   });
 
   test('a format one word over is not on', () {

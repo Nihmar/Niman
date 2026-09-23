@@ -37,6 +37,17 @@ TextStyle? markdownTokenStyle(
     ),
     TokenKind.italic => const TextStyle(fontStyle: FontStyle.italic),
     TokenKind.strike => const TextStyle(decoration: TextDecoration.lineThrough),
+    TokenKind.underline => const TextStyle(
+      decoration: TextDecoration.underline,
+    ),
+    // Raised or lowered by the font's own glyphs where it has them; the size
+    // is the line's either way, since a token never changes a line's height.
+    TokenKind.superscript => const TextStyle(
+      fontFeatures: <FontFeature>[FontFeature.superscripts()],
+    ),
+    TokenKind.subscript => const TextStyle(
+      fontFeatures: <FontFeature>[FontFeature.subscripts()],
+    ),
     TokenKind.codeInline => TextStyle(color: syntax.code),
     TokenKind.codeFence => TextStyle(color: syntax.codeMuted),
     TokenKind.codeLanguage => TextStyle(
