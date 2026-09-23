@@ -13,20 +13,30 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 
+/// The library's own files inside `.niman/` that belong on every device.
+///
+/// They are the library's state rather than its content, and the sync
+/// never removes one: a copy missing on one side is restored from the
+/// other ([reconcilePath]), because the file gone is never what the user
+/// meant. Without that, one device that lost its `settings.json` deleted
+/// it on the server, and every other device then moved its own copy into
+/// the trash and fell back to the defaults (the log of 2026-09-21).
+const Set<String> libraryStateFiles = {
+  '.niman/settings.json',
+  '.niman/counters.json',
+};
+
 /// The paths the sync never touches.
 ///
 /// Dot folders and dot files are left out — `.trash/`, `.history/`, the
-/// atomic-write temp files, a `.git/` the user keeps — except the two
-/// library files that belong on every device: `.niman/settings.json` and
-/// `.niman/counters.json`. So are the files operating systems drop into
+/// atomic-write temp files, a `.git/` the user keeps — except the
+/// [libraryStateFiles]. So are the files operating systems drop into
 /// folders on their own.
 bool isSyncablePath(String path) {
   if (path.isEmpty) return false;
   final segments = path.split('/');
   if (segments.any((s) => s.isEmpty)) return false;
-  if (path == '.niman/settings.json' || path == '.niman/counters.json') {
-    return true;
-  }
+  if (libraryStateFiles.contains(path)) return true;
   if (segments.any((s) => s.startsWith('.'))) return false;
   final name = segments.last.toLowerCase();
   return !_systemJunk.contains(name);
@@ -295,6 +305,10 @@ final class SyncDecision {
 /// never lost. With no row there is nothing to delete, which is why a
 /// first sync never deletes. Hashing comes first: a side that needs its
 /// hash is resolved before anything is decided.
+///
+/// The [libraryStateFiles] are never deleted: where the table says
+/// `deleteRemote` they download, and where it says `trashLocal` they
+/// upload.
 SyncDecision reconcilePath({
   required String path,
   required LocalFileState? local,
@@ -347,6 +361,7 @@ SyncDecision reconcilePath({
     checkRemoteFirst: !guardIfNoneMatch,
   );
 
+  final kept = libraryStateFiles.contains(path);
   return switch ((l.change, r.change)) {
     (SideChange.unchanged, SideChange.unchanged) => decide(
       _rowIsCurrent(local!, remote!, row!, remoteSha256)
@@ -360,12 +375,12 @@ SyncDecision reconcilePath({
       SyncActionKind.download,
     ),
     (SideChange.changed, SideChange.changed) => decide(SyncActionKind.conflict),
-    (SideChange.deleted, SideChange.unchanged) => overwriteRemote(
-      SyncActionKind.deleteRemote,
-    ),
-    (SideChange.unchanged, SideChange.deleted) => decide(
-      SyncActionKind.trashLocal,
-    ),
+    (SideChange.deleted, SideChange.unchanged) =>
+      kept
+          ? decide(SyncActionKind.download)
+          : overwriteRemote(SyncActionKind.deleteRemote),
+    (SideChange.unchanged, SideChange.deleted) =>
+      kept ? createRemote() : decide(SyncActionKind.trashLocal),
     (SideChange.deleted, SideChange.changed) => decide(SyncActionKind.download),
     (SideChange.changed, SideChange.deleted) => createRemote(),
     (SideChange.deleted, SideChange.deleted) => decide(SyncActionKind.dropRow),
