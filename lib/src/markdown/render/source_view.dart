@@ -2131,152 +2131,167 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                   if (_lastPointerKind == PointerDeviceKind.mouse) return;
                   _showTouch(toolbar: true);
                 },
-                child: CustomScrollView(
-                  key: _scrollKey,
-                  controller: _scroll,
-                  physics: const ContentClampPhysics(),
-                  slivers: <Widget>[
-                    SliverPadding(
-                      padding: EdgeInsets.only(
-                        left: _leftInset,
-                        right: _rightInset,
-                        top: widget.padding.top,
-                        // Typewriter mode: room for the last row to reach the
-                        // middle.
-                        bottom:
-                            widget.padding.bottom +
-                            (footnotes.isEmpty ? slack : 0),
-                      ),
-                      sliver: SliverMarkdownBlocks(
-                        heights: _heights,
-                        delegate: SliverChildBuilderDelegate(
-                          (context, row) {
-                            // A row is a line nobody folded away.
-                            final index = _folds.lineOf(row);
-                            final styled = _lineAt(index);
-                            final block = _styler?.blockOf(index);
-                            final quoted = widget.hideMarkers
-                                ? _quotes.of(index, block, widget.buffer)
-                                : null;
-                            return _Line(
-                              key: ValueKey<int>(index),
-                              fold: _foldMarkOf(index),
-                              onFold: () => toggleFold(index),
-                              onFoldDown: () => _foldPress = true,
-                              paragraphKey: _keyFor(index),
-                              styled: styled,
-                              shape: widget.hideMarkers
-                                  ? LineShape.of(
-                                      styled,
-                                      block,
-                                      index,
-                                      quoted: quoted,
-                                    )
-                                  : LineShape.none,
-                              pictures:
-                                  widget.hideMarkers &&
-                                      widget.embedResolver != null
-                                  ? _styler?.picturesOf(index) ??
-                                        const <LinePicture>[]
-                                  : const <LinePicture>[],
-                              embedResolver: widget.embedResolver,
-                              formula:
-                                  widget.hideMarkers && widget.mathCache != null
-                                  ? _formulaOf(index)
-                                  : null,
-                              mathCache: widget.mathCache,
-                              tableRow: widget.hideMarkers
-                                  ? _tables.rowOf(
-                                      index,
-                                      block,
-                                      widget.buffer,
-                                      tokensOf: (line) => _lineAt(line).tokens,
-                                      hiddenAtRest: (token) =>
-                                          token.marker || _isMarker(token.kind),
-                                      styleOf: (token) => nestedTokenStyle(
-                                        token,
-                                        syntax,
-                                        dark: widget.dark,
-                                      ),
-                                      theme: widget.theme,
-                                      scaler: MediaQuery.textScalerOf(context),
-                                    )
-                                  : null,
-                              definition:
-                                  widget.hideMarkers &&
-                                      block != null &&
-                                      (_styler?.definesOnly(block) ?? false)
-                                  ? (block.startLine, block.endLine)
-                                  : null,
-                              codeRuns: !widget.hideMarkers
-                                  ? null
-                                  : quoted != null
-                                  ? _codeColors.ofQuoted(
-                                      quoted,
-                                      block!.startLine,
-                                      widget.buffer,
-                                      widget.theme.codeHighlight,
-                                    )
-                                  : _codeColors.of(
-                                      index,
-                                      block,
-                                      widget.buffer,
-                                      widget.theme.codeHighlight,
-                                    ),
-                              number: widget.showLineNumbers ? index + 1 : null,
-                              gutterWidth: _gutter,
-                              // Past the numbers, only the gap the fold arrows
-                              // live in is empty, and a list line has none.
-                              margin:
-                                  _leftInset +
-                                  (widget.showLineNumbers
-                                      ? _gutterGap
-                                      : _gutter),
-                              theme: widget.theme,
-                              syntax: syntax,
-                              dark: widget.dark,
-                              hideMarkers: widget.hideMarkers,
-                              selected: _selectionIn(index),
-                              composing: _composingIn(index),
-                              misspelled: _misspelledIn(index),
-                              found: _foundIn(index),
-                              misspelledColor: Theme.of(context)
-                                  .colorScheme
-                                  .error,
-                              width: available,
-                              index: index,
-                              spot: _caretSpot,
-                              caret: _caretRect,
-                              caretOn: _caretOn,
-                              rowColor: widget.typewriter
-                                  ? typewriterLineColor(context)
-                                  : null,
-                            );
-                          },
-                          childCount: _folds.rowCount(widget.buffer.lineCount),
-                        ),
-                      ),
-                    ),
-                    if (footnotes.isNotEmpty)
+                // The text's own pointer over the note; the gutter keeps the
+                // arrow (`_Line`).
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.text,
+                  child: CustomScrollView(
+                    key: _scrollKey,
+                    controller: _scroll,
+                    physics: const ContentClampPhysics(),
+                    slivers: <Widget>[
                       SliverPadding(
-                        // Where the read view puts its section: past the
-                        // note's own padding, the text's edges its edges.
                         padding: EdgeInsets.only(
-                          left: _leftInset + _gutter,
+                          left: _leftInset,
                           right: _rightInset,
                           top: widget.padding.top,
-                          bottom: widget.padding.bottom + slack,
+                          // Typewriter mode: room for the last row to reach the
+                          // middle.
+                          bottom:
+                              widget.padding.bottom +
+                              (footnotes.isEmpty ? slack : 0),
                         ),
-                        sliver: footnoteSliver(
-                          footnotes: footnotes,
-                          theme: widget.theme,
-                          parser: _footnoteParser,
-                          mathCache: widget.mathCache ?? _footnoteMath,
-                          scope: _styler?.scope,
-                          onTap: _toDefinition,
+                        sliver: SliverMarkdownBlocks(
+                          heights: _heights,
+                          delegate: SliverChildBuilderDelegate(
+                            (context, row) {
+                              // A row is a line nobody folded away.
+                              final index = _folds.lineOf(row);
+                              final styled = _lineAt(index);
+                              final block = _styler?.blockOf(index);
+                              final quoted = widget.hideMarkers
+                                  ? _quotes.of(index, block, widget.buffer)
+                                  : null;
+                              return _Line(
+                                key: ValueKey<int>(index),
+                                fold: _foldMarkOf(index),
+                                onFold: () => toggleFold(index),
+                                onFoldDown: () => _foldPress = true,
+                                paragraphKey: _keyFor(index),
+                                styled: styled,
+                                shape: widget.hideMarkers
+                                    ? LineShape.of(
+                                        styled,
+                                        block,
+                                        index,
+                                        quoted: quoted,
+                                      )
+                                    : LineShape.none,
+                                pictures:
+                                    widget.hideMarkers &&
+                                        widget.embedResolver != null
+                                    ? _styler?.picturesOf(index) ??
+                                          const <LinePicture>[]
+                                    : const <LinePicture>[],
+                                embedResolver: widget.embedResolver,
+                                formula:
+                                    widget.hideMarkers &&
+                                        widget.mathCache != null
+                                    ? _formulaOf(index)
+                                    : null,
+                                mathCache: widget.mathCache,
+                                tableRow: widget.hideMarkers
+                                    ? _tables.rowOf(
+                                        index,
+                                        block,
+                                        widget.buffer,
+                                        tokensOf: (line) =>
+                                            _lineAt(line).tokens,
+                                        hiddenAtRest: (token) =>
+                                            token.marker ||
+                                            _isMarker(token.kind),
+                                        styleOf: (token) => nestedTokenStyle(
+                                          token,
+                                          syntax,
+                                          dark: widget.dark,
+                                        ),
+                                        theme: widget.theme,
+                                        scaler: MediaQuery.textScalerOf(
+                                          context,
+                                        ),
+                                      )
+                                    : null,
+                                definition:
+                                    widget.hideMarkers &&
+                                        block != null &&
+                                        (_styler?.definesOnly(block) ?? false)
+                                    ? (block.startLine, block.endLine)
+                                    : null,
+                                codeRuns: !widget.hideMarkers
+                                    ? null
+                                    : quoted != null
+                                    ? _codeColors.ofQuoted(
+                                        quoted,
+                                        block!.startLine,
+                                        widget.buffer,
+                                        widget.theme.codeHighlight,
+                                      )
+                                    : _codeColors.of(
+                                        index,
+                                        block,
+                                        widget.buffer,
+                                        widget.theme.codeHighlight,
+                                      ),
+                                number: widget.showLineNumbers
+                                    ? index + 1
+                                    : null,
+                                gutterWidth: _gutter,
+                                // Past the numbers, only the gap the fold
+                                // arrows live in is empty, and a list line
+                                // has none.
+                                margin:
+                                    _leftInset +
+                                    (widget.showLineNumbers
+                                        ? _gutterGap
+                                        : _gutter),
+                                theme: widget.theme,
+                                syntax: syntax,
+                                dark: widget.dark,
+                                hideMarkers: widget.hideMarkers,
+                                selected: _selectionIn(index),
+                                composing: _composingIn(index),
+                                misspelled: _misspelledIn(index),
+                                found: _foundIn(index),
+                                misspelledColor: Theme.of(context)
+                                    .colorScheme
+                                    .error,
+                                width: available,
+                                index: index,
+                                spot: _caretSpot,
+                                caret: _caretRect,
+                                caretOn: _caretOn,
+                                rowColor: widget.typewriter
+                                    ? typewriterLineColor(context)
+                                    : null,
+                              );
+                            },
+                            childCount: _folds.rowCount(
+                              widget.buffer.lineCount,
+                            ),
+                          ),
                         ),
                       ),
-                  ],
+                      if (footnotes.isNotEmpty)
+                        SliverPadding(
+                          // Where the read view puts its section: past the
+                          // note's own padding, the text's edges its edges.
+                          padding: EdgeInsets.only(
+                            left: _leftInset + _gutter,
+                            right: _rightInset,
+                            top: widget.padding.top,
+                            bottom: widget.padding.bottom + slack,
+                          ),
+                          sliver: footnoteSliver(
+                            footnotes: footnotes,
+                            theme: widget.theme,
+                            parser: _footnoteParser,
+                            mathCache: widget.mathCache ?? _footnoteMath,
+                            scope: _styler?.scope,
+                            onTap: _toDefinition,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -2988,17 +3003,21 @@ final class _Line extends StatelessWidget {
           // them off it is the note column's own indentation, and leaving it
           // out put the text at the pane's edge while the right side still
           // kept the column's room.
+          // The gutter is no text: the arrow, not the text's pointer.
           if (gutterWidth > 0)
             SizedBox(
               width: gutterWidth,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(child: _number() ?? const SizedBox.shrink()),
-                  // The gap between the numbers and the text is where the
-                  // fold arrows live, as in the legacy gutter.
-                  SizedBox(width: _gutterGap, child: _foldArrow(context)),
-                ],
+              child: MouseRegion(
+                cursor: SystemMouseCursors.basic,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(child: _number() ?? const SizedBox.shrink()),
+                    // The gap between the numbers and the text is where the
+                    // fold arrows live, as in the legacy gutter.
+                    SizedBox(width: _gutterGap, child: _foldArrow(context)),
+                  ],
+                ),
               ),
             ),
           Expanded(child: _caretBox(_listeningToFormulas())),
@@ -3215,16 +3234,21 @@ final class _Line extends StatelessWidget {
     final row = MediaQuery.textScalerOf(context).scale(theme.lineHeight);
     return Listener(
       onPointerDown: (_) => onFoldDown(),
-      child: GestureDetector(
-        key: ValueKey<String>('fold-$index'),
-        behavior: HitTestBehavior.opaque,
-        onTap: onFold,
-        child: SizedBox(
-          height: row,
-          child: Icon(
-            fold == _FoldMark.closed ? Icons.chevron_right : Icons.expand_more,
-            size: _gutterGap,
-            color: theme.markerDim,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          key: ValueKey<String>('fold-$index'),
+          behavior: HitTestBehavior.opaque,
+          onTap: onFold,
+          child: SizedBox(
+            height: row,
+            child: Icon(
+              fold == _FoldMark.closed
+                  ? Icons.chevron_right
+                  : Icons.expand_more,
+              size: _gutterGap,
+              color: theme.markerDim,
+            ),
           ),
         ),
       ),
