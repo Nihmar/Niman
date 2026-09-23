@@ -2125,6 +2125,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                               mathCache: widget.mathCache,
                               number: widget.showLineNumbers ? index + 1 : null,
                               gutterWidth: _gutter,
+                              // Past the numbers, only the gap the fold arrows
+                              // live in is empty, and a list line has none.
+                              margin:
+                                  _leftInset +
+                                  (widget.showLineNumbers
+                                      ? _gutterGap
+                                      : _gutter),
                               theme: widget.theme,
                               syntax: syntax,
                               dark: widget.dark,
@@ -2736,6 +2743,7 @@ final class _Line extends StatelessWidget {
     required this.styled,
     required this.number,
     required this.gutterWidth,
+    required this.margin,
     required this.theme,
     required this.syntax,
     required this.dark,
@@ -2779,6 +2787,11 @@ final class _Line extends StatelessWidget {
 
   /// How wide the gutter is, computed from the numbers the note has.
   final double gutterWidth;
+
+  /// How far left of the text's edge the line may draw: the field's inset
+  /// and the gutter's empty room — where marks revealed wider than their
+  /// column hang, rather than push the text right.
+  final double margin;
 
   final MarkdownTheme theme;
   final SyntaxColors syntax;
@@ -2926,8 +2939,8 @@ final class _Line extends StatelessWidget {
         child: paragraph,
       );
     }
-    final line = Padding(
-      padding: EdgeInsets.only(left: indent),
+    Widget line = Padding(
+      padding: EdgeInsets.only(left: indent < 0 ? 0 : indent),
       // The spelling is painted over the paragraph rather than written into
       // its runs: a style has one decoration, and a wavy underline there took
       // a struck word's strike.
@@ -2942,6 +2955,11 @@ final class _Line extends StatelessWidget {
         child: paragraph,
       ),
     );
+    // Marks revealed wider than their column hang out to the left, into the
+    // margin ([_indent]); the transform moves what hit tests see with it.
+    if (indent < 0) {
+      line = Transform.translate(offset: Offset(indent, 0), child: line);
+    }
     if (typeset) {
       if (index != math.start) return line;
       return liveFormulaUnder(
@@ -3115,7 +3133,8 @@ final class _Line extends StatelessWidget {
   /// it is set *into* the indent rather than before it: otherwise the text
   /// jumped right by the marks' width each time the caret came onto the
   /// line, and back when it left (device screenshot 2026-09-23, a list
-  /// being typed).
+  /// being typed). Marks wider than the column — a task's `- [ ] `, a
+  /// `10. ` — hang out to the left of it, into the [margin]: negative.
   double _indent(BuildContext context, {bool revealed = false}) {
     if (!hideMarkers) return 0;
     final listed = shape.listed
@@ -3123,7 +3142,12 @@ final class _Line extends StatelessWidget {
         : 0.0;
     final base = listed + shape.quoteDepth * theme.quoteIndentPerLevel;
     if (base == 0) return 0;
-    return math.max<double>(0, base - _textStart(context, revealed: revealed));
+    // Marks wider than their column hang into the margin, as far as there
+    // is one: the text moves only by what is left over.
+    return math.max<double>(
+      -margin,
+      base - _textStart(context, revealed: revealed),
+    );
   }
 
   /// Where the line's prefix ends: past its leading spaces, its quote
