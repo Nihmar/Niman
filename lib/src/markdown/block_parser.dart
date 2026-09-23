@@ -596,13 +596,26 @@ final class DocumentScope {
   /// scan used to run three multi-line patterns over the note's joined text
   /// — 8.5 s on the first frame of a 246 MB note's preview (0.0.9 stress
   /// test) — for definitions a few lines of it make.
-  factory scan(SourceBuffer source, int revision) {
+  factory scan(SourceBuffer source, int revision) => DocumentScope.ofLines(
+    source,
+    revision,
+    Iterable<int>.generate(source.lineCount),
+  );
+
+  /// Scans [lines] of [source], in ascending order, for both kinds of
+  /// definition: the same answer as [DocumentScope.scan] when they include
+  /// every line
+  /// that [DocumentScope.mayHold] one.
+  ///
+  /// What a reader that keeps track of those lines rescans after an edit,
+  /// instead of the note.
+  factory ofLines(SourceBuffer source, int revision, Iterable<int> lines) {
     final links = <String, md.LinkReference>{};
     final counts = <String, int>{};
     final bodies = <String, String>{};
     final labels = <String>[];
     final cited = <String>{};
-    for (var at = 0; at < source.lineCount; at++) {
+    for (final at in lines) {
       final line = source.lineAt(at);
       if (line.contains('[^')) {
         for (final match in _footnoteReference.allMatches(line)) {
@@ -649,6 +662,11 @@ final class DocumentScope {
       revision: revision,
     );
   }
+
+  /// Whether [line] can hold anything a scope is made of: a definition, or a
+  /// footnote reference, whose order is the footnotes' numbering.
+  static bool mayHold(String line) =>
+      _opensWithBracket(line) || line.contains('[^');
 
   /// Whether [line] opens with `[` after at most three spaces: the only
   /// lines a definition can be.

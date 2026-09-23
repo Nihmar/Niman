@@ -6,7 +6,9 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 
@@ -218,6 +220,74 @@ void main() {
           }
         }
       }
+    });
+
+    test('hand over the whole note as a fresh scan would read it', () {
+      // The read pane takes these instead of scanning the note: they have to
+      // be that scan, the definitions and the footnotes' order included — a
+      // `[^b]` cited mid-sentence renumbers them.
+      String block(Block block) =>
+          '${block.kind.name} ${block.startLine}-${block.endLine} '
+          'q${block.quoteDepth} l${block.listDepth} ${block.fenceInfo}';
+      String blocks(List<Block> blocks) => blocks.map(block).join('\n');
+      String scope(DocumentScope scope) => [
+        for (final entry in scope.links.entries)
+          '${entry.key}=${entry.value.destination}',
+        '${scope.footnoteCounts}',
+        '${scope.footnoteLabels}',
+        for (final note in scope.footnotes) '${note.label}:${note.body}',
+      ].join('\n');
+      String note(Random random) => switch (random.nextInt(6)) {
+        0 => 'see [^a] and [^b]',
+        1 => '[^a]: first',
+        2 => '[^b]: second',
+        3 => '[r]: https://x',
+        4 => '',
+        _ => 'plain ${random.nextInt(9)}',
+      };
+      final random = Random(11);
+      for (var round = 0; round < 40; round++) {
+        String any() => random.nextBool() ? line(random) : note(random);
+        final lines = [for (var at = 0; at < 30; at++) any()];
+        final buffer = SourceBuffer.fromText(lines.join('\n'));
+        final styler = SourceStyler(buffer);
+        for (var edit = 0; edit < 10; edit++) {
+          final length = buffer.length;
+          final start = random.nextInt(length + 1);
+          final end = min(length, start + random.nextInt(12));
+          final inserted = random.nextBool()
+              ? '\n${random.nextBool() ? line(random) : note(random)}'
+              : ['[^b]', '[^a]', '[', '^', '\n', 'x', '`'][random.nextInt(7)];
+          styler.edited(buffer.replaceRange(start, end, inserted));
+          final fresh = DocumentScan.of(buffer);
+          final kept = styler.scan;
+          if (kept == null) {
+            expect(
+              styler.settled,
+              isFalse,
+              reason: 'only an owed scan is kept',
+            );
+            continue;
+          }
+          final reason = 'round $round edit $edit:\n${buffer.text}';
+          expect(kept.revision, buffer.revision);
+          expect(blocks(kept.blocks), blocks(fresh.blocks), reason: reason);
+          expect(scope(kept.scope), scope(fresh.scope), reason: reason);
+        }
+      }
+    });
+
+    test('hand over nothing while an edit left the scan owed', () {
+      // Finishing it for the reader would put the rest of the note on its
+      // frame: it scans for itself instead.
+      final buffer = SourceBuffer.fromText(
+        [for (var at = 0; at < 3 * 4096; at++) 'line $at\n'].join('\n'),
+      );
+      final styler = SourceStyler(buffer);
+      expect(styler.scan, isNotNull);
+      styler.edited(buffer.replaceRange(0, 0, '\$\$\n'));
+      expect(styler.settled, isFalse);
+      expect(styler.scan, isNull);
     });
 
     test('a keystroke parses the block it landed in, not the screen', () {
