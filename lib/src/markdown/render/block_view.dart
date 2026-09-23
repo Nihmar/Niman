@@ -36,6 +36,7 @@ import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/style_run.dart';
@@ -245,7 +246,7 @@ final class BlockView extends StatelessWidget {
     child: BlockMathView(
       cache: mathCache,
       maxWidth: availableWidth,
-      tex: _displayTex(parsed.text),
+      tex: displayTexOf(parsed.text),
       style: MathStyle(
         fontSize: theme.body.fontSize ?? 14,
         color: theme.body.color,
@@ -381,22 +382,6 @@ final class BlockView extends StatelessWidget {
     return lines
         .sublist(1, closed ? lines.length - 1 : lines.length)
         .join('\n');
-  }
-
-  /// The tex of a display block, markers out.
-  static String _displayTex(String text) {
-    final lines = text.split('\n');
-    final body = <String>[];
-    for (var at = 0; at < lines.length; at++) {
-      final trimmed = lines[at].trim();
-      if (trimmed.startsWith(r'$$')) {
-        final inner = trimmed.replaceAll(r'$$', '').trim();
-        if (inner.isNotEmpty) body.add(inner);
-        continue;
-      }
-      body.add(lines[at]);
-    }
-    return body.join('\n').trim();
   }
 
   /// The rows and cells of a GFM table, delimiter row dropped.

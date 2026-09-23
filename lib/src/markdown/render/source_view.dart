@@ -44,6 +44,7 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -51,15 +52,18 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
@@ -111,6 +115,8 @@ final class MarkdownSourceView extends StatefulWidget {
     this.findMatches,
     this.onOpenLink,
     this.activeItems,
+    this.mathCache,
+    this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
     this.autofocus = false,
@@ -210,6 +216,14 @@ final class MarkdownSourceView extends StatefulWidget {
   /// (#246). The surface owns the answer — it has the tokens — and writes it
   /// here, so the shell reads one notifier whichever engine draws the pane.
   final ValueNotifier<Set<ToolbarItem>>? activeItems;
+
+  /// The typeset formulas, for `live` mode's display maths; without it a
+  /// formula stays its source.
+  final MathCache? mathCache;
+
+  /// Where an embed's target is on disk, for `live` mode's pictures; without
+  /// it a picture stays its source.
+  final Future<String?> Function(String target)? embedResolver;
 
   /// The caret's width; null keeps the surface's own (Zen mode, #69,
   /// thickens it).
@@ -1658,6 +1672,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
+  /// The display formula line [index] is part of, for `live` mode to draw
+  /// in its lines' place: its lines and its TeX. Null for any other line.
+  LiveFormula? _formulaOf(int index) {
+    final block = _styler?.blockOf(index);
+    if (block == null || block.kind != BlockKind.math) return null;
+    final tex = displayTexOf(BlockParser.blockText(block, widget.buffer));
+    if (tex.isEmpty) return null;
+    return (start: block.startLine, end: block.endLine, tex: tex);
+  }
+
   /// Moves the colours along [edit], already made to the buffer.
   void _styleEdited(SourceEdit edit) {
     _styler?.edited(edit);
@@ -2010,6 +2034,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                       index,
                                     )
                                   : LineShape.none,
+                              pictures:
+                                  widget.hideMarkers &&
+                                      widget.embedResolver != null
+                                  ? _styler?.picturesOf(index) ??
+                                        const <LinePicture>[]
+                                  : const <LinePicture>[],
+                              embedResolver: widget.embedResolver,
+                              formula:
+                                  widget.hideMarkers && widget.mathCache != null
+                                  ? _formulaOf(index)
+                                  : null,
+                              mathCache: widget.mathCache,
                               number: widget.showLineNumbers ? index + 1 : null,
                               gutterWidth: _gutter,
                               theme: widget.theme,
@@ -2616,6 +2652,10 @@ final class _Line extends StatelessWidget {
   const new({
     required this.paragraphKey,
     required this.shape,
+    required this.pictures,
+    required this.embedResolver,
+    required this.formula,
+    required this.mathCache,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -2647,6 +2687,15 @@ final class _Line extends StatelessWidget {
   /// What `live` draws beside the line's text: a bullet, a number, a
   /// checkbox, a quote's bar, a rule.
   final LineShape shape;
+
+  /// The pictures on the line, which `live` draws under it.
+  final List<LinePicture> pictures;
+  final Future<String?> Function(String target)? embedResolver;
+
+  /// The display formula the line belongs to, which `live` draws in place of
+  /// its lines while the caret is out of it.
+  final LiveFormula? formula;
+  final MathCache? mathCache;
 
   final StyledLine styled;
   final int? number;
@@ -2732,6 +2781,19 @@ final class _Line extends StatelessWidget {
                 valueListenable: spot,
                 builder: (context, at, _) {
                   final mine = at.line == index;
+                  final math = formula;
+                  // A formula is edited as a block: the caret anywhere in it
+                  // shows all of its source, and out of it none.
+                  final typeset =
+                      math != null &&
+                      mathCache != null &&
+                      (at.line < math.start || at.line >= math.end);
+                  final concealed = <(int, int)>[
+                    if (typeset) (0, styled.text.length),
+                    if (hideMarkers && !mine)
+                      for (final picture in pictures)
+                        (picture.start, picture.end),
+                  ];
                   final indent = _indent();
                   final line = Padding(
                     padding: EdgeInsets.only(left: indent),
@@ -2750,13 +2812,33 @@ final class _Line extends StatelessWidget {
                         _span(
                           revealed: mine,
                           run: mine ? (at.runStart, at.runEnd) : null,
+                          concealed: concealed,
                         ),
                         key: paragraphKey,
-                        style: _lineStyle(revealed: mine),
+                        // A typeset formula's lines take no room: the formula
+                        // is drawn under its first one instead.
+                        style: typeset
+                            ? _lineStyle(revealed: mine)
+                                  .copyWith(fontSize: 0.01, height: 1)
+                            : _lineStyle(revealed: mine),
                       ),
                     ),
                   );
-                  if (!hideMarkers || shape == LineShape.none) return line;
+                  if (typeset) {
+                    if (index != math.start) return line;
+                    return liveFormulaUnder(
+                      line,
+                      cache: mathCache!,
+                      tex: math.tex,
+                      theme: theme,
+                      maxWidth: width,
+                    );
+                  }
+                  final resolver = embedResolver;
+                  final pictured = resolver == null || pictures.isEmpty
+                      ? line
+                      : livePicturesUnder(line, pictures, resolver);
+                  if (!hideMarkers || shape == LineShape.none) return pictured;
                   return CustomPaint(
                     painter: LiveDecorationPainter(
                       shape: shape,
@@ -2766,7 +2848,7 @@ final class _Line extends StatelessWidget {
                       revealed: mine,
                       color: theme.markerDim,
                     ),
-                    child: line,
+                    child: pictured,
                   );
                 },
               ),
@@ -2911,14 +2993,18 @@ final class _Line extends StatelessWidget {
   /// size
   /// or the height, so a line keeps the surface's metrics whatever it contains
   /// (`highlight_style.dart`).
-  TextSpan _span({required bool revealed, (int, int)? run}) {
+  TextSpan _span({
+    required bool revealed,
+    (int, int)? run,
+    List<(int, int)> concealed = const <(int, int)>[],
+  }) {
     final spans = <InlineSpan>[];
     var at = 0;
     // The runs are the tokenizer's; the selection cuts them where it starts and
     // ends, so a highlighted range is the same text with a background.
     for (final token in styled.tokens) {
       if (token.start > at) {
-        _add(spans, at, token.start, null);
+        _add(spans, at, token.start, null, concealed);
       }
       _add(
         spans,
@@ -2927,10 +3013,13 @@ final class _Line extends StatelessWidget {
         hidden(token, revealed: revealed, run: run)
             ? _hiddenMarker
             : markdownTokenStyle(token.kind, syntax, dark: dark),
+        concealed,
       );
       at = token.end;
     }
-    if (at < styled.text.length) _add(spans, at, styled.text.length, null);
+    if (at < styled.text.length) {
+      _add(spans, at, styled.text.length, null, concealed);
+    }
     return TextSpan(children: spans);
   }
 
@@ -2977,12 +3066,19 @@ final class _Line extends StatelessWidget {
   /// Adds `[start, end)` to [spans], cut at the selection's and the composing
   /// range's edges: the selected part carries the highlight, the composed part
   /// the underline, and the rest keeps the run's own style.
-  void _add(List<InlineSpan> spans, int start, int end, TextStyle? style) {
+  void _add(
+    List<InlineSpan> spans,
+    int start,
+    int end,
+    TextStyle? style, [
+    List<(int, int)> concealed = const <(int, int)>[],
+  ]) {
     final cuts = <int>{start, end};
     for (final range in <(int, int)?>[
       selected,
       composing,
       for (final match in found) (match.$1, match.$2),
+      ...concealed,
     ]) {
       if (range == null) continue;
       if (range.$1 > start && range.$1 < end) cuts.add(range.$1);
@@ -2994,7 +3090,9 @@ final class _Line extends StatelessWidget {
       final to = points[at + 1];
       bool inside((int, int)? range) =>
           range != null && from >= range.$1 && to <= range.$2;
-      var piece = style;
+      // What `live` draws instead of its source — a picture, a formula — is
+      // hidden as a marker is: there, taking no room.
+      var piece = concealed.any(inside) ? _hiddenMarker : style;
       if (inside(selected)) {
         piece = (piece ?? const TextStyle()).copyWith(
           background: Paint()..color = _selectionColor,

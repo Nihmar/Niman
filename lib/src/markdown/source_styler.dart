@@ -39,6 +39,16 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/style_run.dart';
 
+/// A picture on a line: where its source is, in the line's coordinates, what
+/// it points at, what stands in for it, and the source as written.
+typedef LinePicture = ({
+  int start,
+  int end,
+  String target,
+  String display,
+  String source,
+});
+
 /// A note's lines, coloured by the engine's reading of them.
 final class SourceStyler {
   /// Reads [buffer] here, now.
@@ -161,6 +171,58 @@ final class SourceStyler {
 
   /// The block holding [line], scanned up to it when the scan still owes it.
   Block? blockOf(int line) => _scanner.blockAt(line);
+
+  /// The pictures on line [line] — each `![[embed]]` and `![alt](src)` — in
+  /// the line's own coordinates, read off the parse its colours come from.
+  List<LinePicture> picturesOf(int line) {
+    final block = _scanner.blockAt(line);
+    if (block == null) return const <LinePicture>[];
+    final parsed = _parsedOf(block);
+    if (parsed == null) return const <LinePicture>[];
+    final index = line - block.startLine;
+    if (index < 0 || index >= parsed.lineStarts.length) {
+      return const <LinePicture>[];
+    }
+    final start = parsed.lineStarts[index];
+    final end = index + 1 < parsed.lineStarts.length
+        ? parsed.lineStarts[index + 1] - 1
+        : parsed.parse.text.length;
+    final prefix = BlockParser.quotePrefixLength(
+      buffer.lineAt(line),
+      block.quoteDepth,
+    );
+    final text = parsed.parse.text;
+    final out = <LinePicture>[];
+    for (final span in parsed.parse.extensions) {
+      if (span.kind != ExtensionKind.embed) continue;
+      if (span.start < start || span.end > end) continue;
+      final inner = span.inner;
+      final pipe = inner.indexOf('|');
+      final target = (pipe >= 0 ? inner.substring(0, pipe) : inner).trim();
+      final alias = pipe >= 0 ? inner.substring(pipe + 1).trim() : '';
+      out.add((
+        start: span.start - start + prefix,
+        end: span.end - start + prefix,
+        target: target,
+        display: alias.isEmpty ? target : alias,
+        source: span.text,
+      ));
+    }
+    for (final run in parsed.parse.runs) {
+      final href = run.href;
+      if (run.kind != StyleKind.image || href == null) continue;
+      if (run.start < start || run.end > end) continue;
+      out.add((
+        start: run.start - start + prefix,
+        end: run.end - start + prefix,
+        target: href,
+        display: text.substring(run.innerStart, run.innerEnd),
+        source: text.substring(run.start, run.end),
+      ));
+    }
+    out.sort((a, b) => a.start.compareTo(b.start));
+    return out;
+  }
 
   /// Line [line]'s tokens, disjoint and sorted.
   List<Token> tokensOf(int line) {
