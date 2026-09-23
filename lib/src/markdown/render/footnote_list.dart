@@ -37,11 +37,16 @@ final class FootnoteRow extends StatelessWidget {
     required this.mathCache,
     this.scope,
     this.onTapBack,
+    this.onTap,
     super.key,
   });
 
   /// The definition.
   final Footnote footnote;
+
+  /// Called when the footnote's body is tapped: `live` puts the caret in
+  /// its definition, which it hides where it stands as the read view does.
+  final VoidCallback? onTap;
 
   /// Where it sits in the list, counting from one.
   final int number;
@@ -60,6 +65,20 @@ final class FootnoteRow extends StatelessWidget {
 
   /// Called when the backlink is tapped.
   final VoidCallback? onTapBack;
+
+  /// [body], answering a tap with [onTap] when there is one.
+  Widget _tappable(Widget body) {
+    final tap = onTap;
+    if (tap == null) return body;
+    return MouseRegion(
+      cursor: SystemMouseCursors.text,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: tap,
+        child: body,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +106,13 @@ final class FootnoteRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: BlockView(
-              parsed: parsed,
-              theme: theme.quoted,
-              mathCache: mathCache,
-              scope: scope,
+            child: _tappable(
+              BlockView(
+                parsed: parsed,
+                theme: theme.quoted,
+                mathCache: mathCache,
+                scope: scope,
+              ),
             ),
           ),
           // The package's own arrow, so the two renderings say the same
@@ -112,6 +133,39 @@ final class FootnoteRow extends StatelessWidget {
     );
   }
 }
+
+/// The footnotes a note ends with, as a lazy list: the rule, then a row per
+/// footnote, numbered from one — the read view's section and `live`'s, the
+/// same rows in both. [onTap] is called with a footnote whose body is
+/// tapped.
+///
+/// Lazy for the reason the note itself is: a section that lays out every
+/// footnote at the top of the frame costs the frame. Measured: appending it
+/// whole took the read view's first content from 76 ms to 112 ms on the
+/// geometry note, and its jump from 9 ms to 56.
+Widget footnoteSliver({
+  required List<Footnote> footnotes,
+  required MarkdownTheme theme,
+  required BlockParser parser,
+  required MathCache mathCache,
+  DocumentScope? scope,
+  void Function(Footnote footnote)? onTap,
+}) => SliverList.builder(
+  itemCount: footnotes.isEmpty ? 0 : footnotes.length + 1,
+  itemBuilder: (context, index) {
+    if (index == 0) return FootnoteDivider(theme: theme);
+    final footnote = footnotes[index - 1];
+    return FootnoteRow(
+      footnote: footnote,
+      number: index,
+      theme: theme,
+      parser: parser,
+      mathCache: mathCache,
+      scope: scope,
+      onTap: onTap == null ? null : () => onTap(footnote),
+    );
+  },
+);
 
 /// The rule that separates a note from its footnotes.
 final class FootnoteDivider extends StatelessWidget {
