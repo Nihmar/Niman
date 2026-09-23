@@ -3,8 +3,8 @@
 The read view and `live` are meant to be the same page, one of them
 editable. A glyph that moves when the pane flips is the page changing under
 the reader. This file records where the two stand, what was done to bring
-them together, the decisions still open, and where opening the 246 MB stress
-note stands.
+them together, the decisions taken on what is left, and where opening the
+246 MB stress note stands.
 
 The alignments are held by `test/widget/read_live_page_test.dart`: each one
 compares where a construct's first glyph lands in both modes, so they cannot
@@ -23,7 +23,7 @@ no column: the first glyph of each construct, read view minus `live`.
 
 Horizontally everything but code and tables is aligned to the pixel.
 Vertically the two differ by the rows each mode gives a blank line and the
-space around headings, which is a decision rather than a fix (below).
+space around headings: the decision is taken, the work owed (below).
 
 ## Done
 
@@ -38,27 +38,28 @@ space around headings, which is a decision rather than a fix (below).
 | `3d49b98` | Footnotes are drawn as prose (formulas typeset, emphasis stressed); the way back is the arrow alone, where a button's minimum height stood a blank row between footnotes. |
 | `a51e52f` | **Bug:** a footnote or link definition with a formula or a wikilink in it was drawn, in pieces, in the note's body. |
 
-## Decisions open
+## Decisions (2026-09-23)
 
-### 1. How tall a blank line is
+### 1. A blank line is 1.5 em, in both modes
 
 To align vertically the two modes need the same rows. In `live` a blank line
-is a text row, 1.5 em; the read view gives it 1 em, as asked on 2026-09-23.
+is a text row, 1.5 em; the read view gave it 1 em. **Decided: 1.5 em in
+both** — the read view draws a blank line as one of `live`'s rows, and a
+block leaves no spacing of its own under it: the space between two
+paragraphs is the blank line the note has between them, as tall as `live`
+draws it. The 1 em spacing of `09ec542` goes with it.
 
-- **A.** Blank rows in `live` are 1 em too: the spacing chosen stays, and the
-  one visible effect is a shorter caret on an empty line.
-- **B.** 1.5 em in both, as `live` is today.
+Headings go with it: the read view left a spacing under a heading, `live`
+leaves nothing. Still a proposal, to confirm: the same room above a heading
+in both modes.
 
-Headings go with it: the read view left 1 em under a heading, `live` leaves
-nothing. The proposal is the same room above a heading in both modes.
+### 2. A code block is a box, in both modes
 
-### 2. What a code block looks like
-
-The read view draws a filled box with an inner padding; `live` draws the
-code as plain rows, its fences hidden. The proposal is the box in both: in
-`live` a background and an inset behind the block's rows, the fence rows
-becoming the box's top and bottom padding.
-
+The read view draws a filled box with an inner padding; `live` drew the code
+as plain rows, its fences hidden. **Decided: the box in both.** In `live` a
+background and an inset behind the block's rows, the fence rows becoming the
+box's top and bottom padding; in the read view the same geometry, so the
+code's rows land on `live`'s.
 ### Still to align after these
 
 - Tables: `live` has to draw them as tables first (#261).
