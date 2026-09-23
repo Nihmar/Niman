@@ -196,6 +196,50 @@ void main() {
     expect(hidden(under), isFalse);
   });
 
+  testWidgets(
+    'the caret is drawn where its character is, on an indented line',
+    (tester) async {
+      // `live` indents a list item and a quote; the caret was measured in the
+      // paragraph and drawn over the box around it, an indent to the left.
+      for (final (note, caret) in [
+        ('caret\n\n- item\n', 11),
+        ('caret\n\n> quoted\n', 12),
+      ]) {
+        final state = await pumpMode(
+          tester,
+          MarkdownSurfaceMode.live,
+          caret: caret,
+          text: note,
+        );
+        await tester.pump();
+        final box = tester
+            .renderObjectList<RenderCustomPaint>(find.byType(CustomPaint))
+            .singleWhere(
+              (paint) =>
+                  paint.foregroundPainter.runtimeType.toString() ==
+                  '_CaretPainter',
+            );
+        final at = state.caretRect!;
+        final expected = Rect.fromPoints(
+          box.globalToLocal(at.topLeft),
+          box.globalToLocal(at.bottomRight),
+        );
+        // A quote's bar is painted too: the caret is the rect at the caret.
+        expect(
+          box,
+          paints..something((method, arguments) {
+            if (method != #drawRect) return false;
+            final drawn = arguments.first as Rect;
+            return (drawn.left - expected.left).abs() < 0.5 &&
+                (drawn.top - expected.top).abs() < 0.5 &&
+                (drawn.height - expected.height).abs() < 0.5;
+          }),
+          reason: note,
+        );
+      }
+    },
+  );
+
   group('a task box in live', () {
     const note = 'caret\n\n- [ ] da fare\n- [x] fatto\n';
 
