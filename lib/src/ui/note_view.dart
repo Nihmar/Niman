@@ -44,6 +44,7 @@ import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -1742,7 +1743,37 @@ final class _NoteViewState extends State<NoteView>
     ),
     embedResolver: _resolveEmbed,
     column: widget.noteColumn,
+    knownScan: _editorScanOf,
   );
+
+  /// The blocks and definitions of [buffer] as the source pane already holds
+  /// them, when [buffer] is the snapshot of its note at the revision the pane
+  /// has read — or null, and the read pane scans for itself.
+  ///
+  /// One reading of the note for both panes: the editor keeps its own current
+  /// edit by edit, and scanning the snapshot again was 3.3 s in an isolate on
+  /// a 246 MB note, after holding the frame that opened the pane to hand the
+  /// note over.
+  DocumentScan? _editorScanOf(SourceBuffer buffer) {
+    final from = _snapshotFrom;
+    if (!_bufferIsSnapshot ||
+        !identical(buffer, _unifiedBuffer) ||
+        from == null ||
+        from.revision != _snapshotRevision) {
+      return null;
+    }
+    final editor = _sourceViewKey.currentState;
+    if (editor == null || !identical(editor.widget.buffer, from)) return null;
+    final scan = editor.scan;
+    if (scan == null || scan.revision != from.revision) return null;
+    // The same lines, in a buffer of their own: the definitions are read
+    // against it from now on.
+    return DocumentScan(
+      blocks: scan.blocks,
+      scope: scan.scope.on(buffer, buffer.revision),
+      revision: buffer.revision,
+    );
+  }
 
   /// The preview the app has always had, kept until the unified render is
   /// shown to match it.

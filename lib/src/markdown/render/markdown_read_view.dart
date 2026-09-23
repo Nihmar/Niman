@@ -48,6 +48,7 @@ final class MarkdownReadView extends StatefulWidget {
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
+    this.knownScan,
     super.key,
   });
 
@@ -79,6 +80,15 @@ final class MarkdownReadView extends StatefulWidget {
 
   /// Resolves an embed's target to an absolute path, or null.
   final Future<String?> Function(String target)? embedResolver;
+
+  /// The blocks and definitions of a buffer, when someone already holds them
+  /// for exactly its lines — the editor, which keeps its own reading of the
+  /// note current edit by edit — or null.
+  ///
+  /// Asked before the note is scanned: on a 246 MB note the scan is 3.3 s in
+  /// an isolate, and handing the note to the isolate held the frame that
+  /// opened the pane (252 ms, device log 2026-09-23).
+  final DocumentScan? Function(SourceBuffer buffer)? knownScan;
 
   @override
   State<MarkdownReadView> createState() => MarkdownReadViewState();
@@ -271,6 +281,16 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final buffer = widget.buffer;
     final scan = ++_scans;
     final clock = Stopwatch()..start();
+    final known = widget.knownScan?.call(buffer);
+    if (known != null && known.revision == buffer.revision) {
+      _scanning = false;
+      _show(buffer, known, scopeCurrent: true);
+      _log.debug(
+        'scan: ${_blocks.length} blocks, ${buffer.lineCount} lines taken as '
+        'they were in ${clock.elapsedMilliseconds}ms',
+      );
+      return;
+    }
     if (buffer.lineCount < backgroundLines) {
       _scanning = false;
       _show(buffer, DocumentScan.of(buffer));
@@ -309,9 +329,25 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   }
 
   /// Draws [scan], the blocks of [buffer].
-  void _show(SourceBuffer buffer, DocumentScan scan) {
+  ///
+  /// With [scopeCurrent] its definitions are taken as they are: they were
+  /// kept current by whoever handed them over, and folding the note's lines
+  /// into a key to decide whether to reuse the last ones would read the note
+  /// the hand-over spared.
+  void _show(
+    SourceBuffer buffer,
+    DocumentScan scan, {
+    bool scopeCurrent = false,
+  }) {
     _shown = buffer;
-    widget.parser.scope = _scopeOf(buffer, scan.scope);
+    if (scopeCurrent) {
+      // What the key was of is not what these were read from: the next scan
+      // takes its own.
+      _scope = null;
+      widget.parser.scope = scan.scope;
+    } else {
+      widget.parser.scope = _scopeOf(buffer, scan.scope);
+    }
     _blocks = _pieced(scan.blocks);
     _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
     _built = 0;
