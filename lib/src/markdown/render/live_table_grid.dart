@@ -32,8 +32,9 @@ final class LiveTableGridPainter extends CustomPainter {
   /// Whether the caret is on the row.
   final bool revealed;
 
-  /// The grid's thickness, the read view's (`BlockView._table`).
-  static const double thickness = 0.5;
+  /// The grid's thickness, the read view's (`BlockView._table`): a hairline,
+  /// one device pixel wherever the measured columns put a line.
+  static const double thickness = 0;
 
   @override
   void paint(Canvas canvas, Size size) {

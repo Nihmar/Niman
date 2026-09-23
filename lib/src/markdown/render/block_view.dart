@@ -42,6 +42,7 @@ import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
+import 'package:niman/src/markdown/render/live_table_grid.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
@@ -462,7 +463,14 @@ final class BlockView extends StatelessWidget {
   Widget _table(BuildContext context) {
     final rows = _tableRows(parsed.text);
     if (rows.isEmpty) return const SizedBox.shrink();
-    final border = TableBorder.all(color: theme.tableBorder, width: 0.5);
+    // A hairline: one device pixel, wherever the columns end. A table as
+    // wide as its columns ends on a fraction of a pixel, and a half-pixel
+    // side drawn inside that edge was split across two pixels too faint to
+    // see — the table stood open on its right.
+    final border = TableBorder.all(
+      color: theme.tableBorder,
+      width: LiveTableGridPainter.thickness,
+    );
     // As wide as its columns, as `live` draws it: laid out on the pane's
     // width, a table spread what its columns left over evenly across them,
     // and a two-word column stood half the pane wide.
