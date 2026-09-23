@@ -25,6 +25,7 @@ final class LineShape {
     this.quoteDepth = 0,
     this.marker,
     this.listDepth = 0,
+    this.continued = false,
     this.box,
     this.ordinal,
     this.task,
@@ -61,12 +62,21 @@ final class LineShape {
             block.listOrdinal > 0
         ? block.listOrdinal
         : null;
-    if (quoteDepth == 0 && marker == null && !rule) return none;
+    // A line the item's block goes on to: under the item's text, lazy or not.
+    final continued =
+        marker == null &&
+        block != null &&
+        block.kind == BlockKind.listItem &&
+        index > block.startLine;
+    if (quoteDepth == 0 && marker == null && !continued && !rule) return none;
     return LineShape(
       quoteDepth: quoteDepth,
       marker: marker,
       // A line the scan has not reached yet is at the top level.
-      listDepth: marker == null ? 0 : math.max(0, block?.listDepth ?? 0),
+      listDepth: marker == null && !continued
+          ? 0
+          : math.max(0, block?.listDepth ?? 0),
+      continued: continued,
       box: box,
       ordinal: ordinal,
       task: task,
@@ -83,6 +93,13 @@ final class LineShape {
   /// How many list levels deep the item is, 0 at the top: the columns its
   /// text is set in by, as the read view sets it.
   final int listDepth;
+
+  /// Whether the line goes on an item a line above opened: its text is set
+  /// on the item's column, with nothing drawn beside it.
+  final bool continued;
+
+  /// Whether the line's text is an item's: set on the item's column.
+  bool get listed => marker != null || continued;
 
   /// Where the item's task box (`[ ]`) starts, for a task item: its text
   /// starts past the box, and the box is drawn where a bullet would be.
@@ -108,14 +125,23 @@ final class LineShape {
       other.quoteDepth == quoteDepth &&
       other.marker == marker &&
       other.listDepth == listDepth &&
+      other.continued == continued &&
       other.box == box &&
       other.ordinal == ordinal &&
       other.task == task &&
       other.rule == rule;
 
   @override
-  int get hashCode =>
-      Object.hash(quoteDepth, marker, listDepth, box, ordinal, task, rule);
+  int get hashCode => Object.hash(
+    quoteDepth,
+    marker,
+    listDepth,
+    continued,
+    box,
+    ordinal,
+    task,
+    rule,
+  );
 }
 
 /// Where a list item's bullet, number or checkbox sits, in its paragraph's

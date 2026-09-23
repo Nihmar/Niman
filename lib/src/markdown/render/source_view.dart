@@ -3118,23 +3118,20 @@ final class _Line extends StatelessWidget {
   /// being typed).
   double _indent(BuildContext context, {bool revealed = false}) {
     if (!hideMarkers) return 0;
-    final listed = shape.marker == null
-        ? 0.0
-        : (shape.listDepth + 1) * theme.listIndentPerLevel;
+    final listed = shape.listed
+        ? (shape.listDepth + 1) * theme.listIndentPerLevel
+        : 0.0;
     final base = listed + shape.quoteDepth * theme.quoteIndentPerLevel;
     if (base == 0) return 0;
-    return math.max<double>(
-      0,
-      base - _prefixWidth(context, revealed: revealed),
-    );
+    return math.max<double>(0, base - _textStart(context, revealed: revealed));
   }
 
   /// Where the line's prefix ends: past its leading spaces, its quote
   /// marks, its list marker, its task box and the spaces between them. Zero
-  /// for a line that is neither quoted nor an item, whose leading spaces are
-  /// its own.
+  /// for a line that is neither quoted nor an item's, whose leading spaces
+  /// are its own.
   int get _prefixEnd {
-    if (shape.marker == null && shape.quoteDepth == 0) return 0;
+    if (!shape.listed && shape.quoteDepth == 0) return 0;
     final text = styled.text;
     var at = 0;
     var tokens = 0;
@@ -3159,19 +3156,24 @@ final class _Line extends StatelessWidget {
     }
   }
 
-  /// How wide the line's prefix is drawn — hidden whole, or on the caret's
-  /// line as written — in the paragraph's own shaping, so what a hidden
-  /// mark still advances by is counted as the line counts it.
-  double _prefixWidth(BuildContext context, {required bool revealed}) {
+  /// Where the line's text is drawn from, past its prefix — hidden whole,
+  /// or on the caret's line as written — in the paragraph's own shaping.
+  ///
+  /// Measured to the first glyph of the text, not to the end of the
+  /// prefix: under an ambient letter spacing a paragraph's first glyph is
+  /// drawn half a spacing in, and one after a hidden mark (which has none)
+  /// is not, so a lazy line's text stood an eighth of a pixel right of its
+  /// item's.
+  double _textStart(BuildContext context, {required bool revealed}) {
     final end = _prefixEnd;
-    if (end == 0) return 0;
     final text = styled.text;
-    if (!revealed) {
-      return _drawnWidth(context, <InlineSpan>[
-        TextSpan(text: text.substring(0, end), style: _hiddenMarker),
-      ]);
-    }
     final spans = <InlineSpan>[];
+    if (!revealed) {
+      if (end > 0) {
+        spans.add(TextSpan(text: text.substring(0, end), style: _hiddenMarker));
+      }
+      return _glyphLeft(context, spans);
+    }
     var at = 0;
     for (final token in styled.tokens) {
       if (token.start >= end) break;
@@ -3187,29 +3189,36 @@ final class _Line extends StatelessWidget {
       at = token.end;
     }
     if (at < end) spans.add(TextSpan(text: text.substring(at, end)));
-    return _drawnWidth(context, spans);
+    return _glyphLeft(context, spans);
   }
 
-  /// Where [spans], set as the line's paragraph sets them, end: the caret
-  /// after them. The paragraph's style is the line's over the ambient one,
-  /// whose letter spacing each hidden mark still advances by.
-  double _drawnWidth(BuildContext context, List<InlineSpan> spans) {
+  /// Where a glyph set after [spans] is drawn, as the line's paragraph sets
+  /// them: the paragraph's style is the line's over the ambient one, whose
+  /// letter spacing moves a glyph as the paragraph moves it. The glyph is a
+  /// probe — where it starts is the spacing's, not its own shape's.
+  double _glyphLeft(BuildContext context, List<InlineSpan> spans) {
     final style = DefaultTextStyle.of(context).style
         .merge(_lineStyle(revealed: false));
-    final painter = TextPainter(
-      text: TextSpan(children: spans, style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
     var length = 0;
     for (final span in spans) {
       length += (span as TextSpan).text?.length ?? 0;
     }
-    final end = painter
-        .getOffsetForCaret(TextPosition(offset: length), Rect.zero)
-        .dx;
+    final painter = TextPainter(
+      text: TextSpan(
+        children: <InlineSpan>[
+          ...spans,
+          const TextSpan(text: 'x'),
+        ],
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final boxes = painter.getBoxesForSelection(
+      TextSelection(baseOffset: length, extentOffset: length + 1),
+    );
     painter.dispose();
-    return end;
+    return boxes.isEmpty ? 0 : boxes.first.left;
   }
 
   /// The line's tokens as styled runs. A token's override never changes the
