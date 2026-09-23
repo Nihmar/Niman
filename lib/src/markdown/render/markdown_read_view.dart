@@ -284,7 +284,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final known = widget.knownScan?.call(buffer);
     if (known != null && known.revision == buffer.revision) {
       _scanning = false;
-      _show(buffer, known, scopeCurrent: true);
+      _show(buffer, known);
       _log.debug(
         'scan: ${_blocks.length} blocks, ${buffer.lineCount} lines taken as '
         'they were in ${clock.elapsedMilliseconds}ms',
@@ -328,26 +328,16 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     );
   }
 
-  /// Draws [scan], the blocks of [buffer].
+  /// Draws [scan], the blocks of [buffer], with the definitions it brings.
   ///
-  /// With [scopeCurrent] its definitions are taken as they are: they were
-  /// kept current by whoever handed them over, and folding the note's lines
-  /// into a key to decide whether to reuse the last ones would read the note
-  /// the hand-over spared.
-  void _show(
-    SourceBuffer buffer,
-    DocumentScan scan, {
-    bool scopeCurrent = false,
-  }) {
+  /// Every scan brings its own — `DocumentScan.of` reads them with the
+  /// blocks, and the editor's hand-over keeps them current — so there is no
+  /// earlier scope to keep. Keeping one when the lines opening with `[` were
+  /// unchanged saved nothing, since the new one was already read, and missed
+  /// a footnote cited mid-sentence: the citations are the footnotes' order.
+  void _show(SourceBuffer buffer, DocumentScan scan) {
     _shown = buffer;
-    if (scopeCurrent) {
-      // What the key was of is not what these were read from: the next scan
-      // takes its own.
-      _scope = null;
-      widget.parser.scope = scan.scope;
-    } else {
-      widget.parser.scope = _scopeOf(buffer, scan.scope);
-    }
+    widget.parser.scope = scan.scope;
     final changes = scan.changes;
     if (!_follow(changes, scan.blocks)) {
       _blocks = _pieced(scan.blocks);
@@ -405,81 +395,6 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       );
     }
     return true;
-  }
-
-  /// [scanned], unless what it holds is what the pane already had.
-  ///
-  /// The scope is the note's link and footnote definitions, and the scan that
-  /// produced this one walked every line for them (`DocumentScope.scan`).
-  /// While a note is being edited here in `live` mode the pane is rescanned
-  /// per revision, and the definitions are almost never what changed. So the
-  /// lines that can hold one are folded into a key, and a revision whose key
-  /// is the one already had reuses the scope it has
-  /// (docs/dev/huge-notes.md item 7).
-  ///
-  /// The key is over the lines' *content*, not their numbers: a paragraph
-  /// added above a definition moves it without changing it, and a key of
-  /// indices would re-scan for that.
-  DocumentScope _scopeOf(SourceBuffer buffer, DocumentScope scanned) {
-    final key = _definitionsKey(buffer);
-    if (key != _scopeKey) {
-      _scopeKey = key;
-      _scope = scanned;
-      return scanned;
-    }
-    _scopeReuses++;
-    final kept = _scope;
-    if (kept == null) {
-      _scope = scanned;
-      return scanned;
-    }
-    // The lines that can hold a definition are what they were, so what the
-    // previous scope found is still what this note defines. It is rebuilt on
-    // the buffer all the same: it holds the source its offsets are read
-    // against, and that buffer is this one now.
-    final rebound = kept.on(buffer, buffer.revision);
-    _scope = rebound;
-    return rebound;
-  }
-
-  /// The scope the pane is showing, kept for [_scopeOf].
-  DocumentScope? _scope;
-
-  /// The definitions the scope was scanned from, folded into one number: what
-  /// says whether a re-scan would find anything different.
-  int? _scopeKey;
-
-  /// How many revisions reused that scope instead of scanning the note for
-  /// its definitions again: what the test of the reuse reads.
-  int get scopeReuses => _scopeReuses;
-  int _scopeReuses = 0;
-
-  /// The lines of [buffer] that can hold a link or footnote definition,
-  /// folded into one number — and null when there are none.
-  ///
-  /// The same rule the source styler uses to decide whether an edit has to
-  /// look at the definitions again: a `[` after at most three spaces. The
-  /// count and the characters of those lines are all that a definition scan
-  /// can read, so two notes with the same key have the same definitions.
-  static int? _definitionsKey(SourceBuffer buffer) {
-    var key = 0x811C9DC5;
-    var count = 0;
-    for (var line = 0; line < buffer.lineCount; line++) {
-      final text = buffer.lineAt(line);
-      var column = 0;
-      while (column < 3 &&
-          column < text.length &&
-          text.codeUnitAt(column) == 0x20) {
-        column++;
-      }
-      if (column >= text.length || text.codeUnitAt(column) != 0x5B) continue;
-      count++;
-      key = (key ^ text.length) * 0x01000193 & 0x7FFFFFFF;
-      for (var i = 0; i < text.length; i++) {
-        key = (key ^ text.codeUnitAt(i)) * 0x01000193 & 0x7FFFFFFF;
-      }
-    }
-    return count == 0 ? null : key ^ (count * 0x9E3779B1 & 0x7FFFFFFF);
   }
 
   /// Draws nothing until the next scan lands.

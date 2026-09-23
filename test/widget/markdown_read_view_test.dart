@@ -369,16 +369,9 @@ void main() {
       expect(parser.scope?.footnotes.single.body, 'a note');
     });
 
-    testWidgets('a revision that changes no definition keeps the scope', (
+    testWidgets("each revision's definitions are the ones drawn", (
       tester,
     ) async {
-      // The definitions are scanned out of the note, line by line, and the
-      // pane is rescanned on every revision while the note is edited in
-      // `live` mode — but the note's definitions almost never change. What
-      // the pane had is reused when the lines that can hold one are the
-      // same, and the answer is still the note's (docs/dev/huge-notes.md
-      // item 7).
-      //
       // Each revision comes as its own buffer, which is what the pane is
       // handed while a note is being edited: the live buffer is snapshotted
       // for the page ([SourceBuffer.snapshot]) rather than read in place.
@@ -390,28 +383,14 @@ void main() {
       await settle(tester);
       expect(parser.scope?.footnotes.single.body, 'a note');
       expect(parser.scope?.links['ref']?.destination, 'https://x.test');
-      expect(
-        tester
-            .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
-            .scopeReuses,
-        0,
-      );
 
-      // An edit somewhere else: one line added at the head, and the
-      // definitions are untouched.
+      // An edit somewhere else: one line added at the head.
       final second = SourceBuffer.fromText(
         'one more line to read\n${_note(20)}[^1]\n\n[^1]: a note\n\n'
         '[ref]: https://x.test\n',
       );
       await tester.pumpWidget(view(second, parser));
       await settle(tester);
-      expect(
-        tester
-            .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
-            .scopeReuses,
-        1,
-        reason: 'the definitions were not scanned again',
-      );
       expect(
         parser.scope?.footnotes.single.body,
         'a note',
@@ -420,20 +399,13 @@ void main() {
       expect(parser.scope?.links['ref']?.destination, 'https://x.test');
       expect(parser.scope?.revision, second.revision);
 
-      // A definition changed: the scope has to be scanned again.
+      // A definition changed.
       final third = SourceBuffer.fromText(
         '${_note(20)}[^1]\n\n[^1]: another note\n\n[ref]: https://x.test\n',
       );
       await tester.pumpWidget(view(third, parser));
       await settle(tester);
       expect(parser.scope?.footnotes.single.body, 'another note');
-      expect(
-        tester
-            .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
-            .scopeReuses,
-        1,
-        reason: 'a definition moved, so it was scanned',
-      );
     });
 
     testWidgets('a scan someone already holds is drawn at once', (
@@ -548,6 +520,32 @@ void main() {
       );
       await settle(tester);
       expect(find.textContaining('Now', findRichText: true), findsOne);
+    });
+
+    testWidgets('a footnote cited mid-sentence is not a reason to reuse', (
+      tester,
+    ) async {
+      // The citations are the footnotes' order and numbering, and the key the
+      // reuse is decided by read only the lines that open with `[`: a second
+      // footnote cited in prose kept the scope that knew one.
+      final parser = BlockParser();
+      const definitions = '[^1]: one\n\n[^2]: two\n';
+      await tester.pumpWidget(
+        view(
+          SourceBuffer.fromText('${_note(20)}See[^1].\n\n$definitions'),
+          parser,
+        ),
+      );
+      await settle(tester);
+      expect(parser.scope?.footnoteLabels, ['1']);
+      await tester.pumpWidget(
+        view(
+          SourceBuffer.fromText('${_note(20)}See[^1] and[^2].\n\n$definitions'),
+          parser,
+        ),
+      );
+      await settle(tester);
+      expect(parser.scope?.footnoteLabels, ['1', '2']);
     });
 
     testWidgets('the revision before stays on screen meanwhile', (
