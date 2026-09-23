@@ -26,6 +26,16 @@ status row switches only when both are enabled.
   links, folding, typewriter mode and Zen, and line numbers. It is still
   behind the flag: `editorKind: source` opens `re_editor`, and the unified
   surface needs the unified engine setting.
+- **The unified WYSIWYG pane** (experimental, behind the same unified engine
+  setting): the note drawn as it reads, in the same surface as the unified
+  source pane — the Markdown stays the note's text, and only where the caret is
+  does it show as written. Headings are set at their size; bold, italic,
+  strikethrough, underline (`<u>`) and superscript (`<sup>`) are drawn as
+  such; list items get their bullet, number or checkbox; a quote its bar; `---`
+  a rule. Display formulas (`$$…$$`) and inline ones (`$…$`) are typeset, and
+  images and `![[embeds]]` are drawn under their line. Put the caret in a word
+  and its syntax appears; put it in a formula block and the block's source
+  appears — so everything stays editable as text.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk. It opens a
   note of **any size** — the 934 KB geometry note included — and the price of

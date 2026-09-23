@@ -11714,6 +11714,54 @@ What the design asks for next, in the order it names them:
      decision rather than left as a to-do: the unit is the line, and the word
      inside it is the refinement that pays.
 
+### What `live` draws (2026-09-23)
+
+The device round on the testing build found `live` opening and typing fast and
+drawing almost nothing: no pictures, no maths, no underline, no strikethrough,
+no bullets, a quote indistinguishable from prose, `---` as three dashes. None of
+it was broken — the marker hiding was all that had been built. What was built
+next, one commit each, and the decisions worth keeping:
+
+- **The spelling squiggle is painted, not styled** (`SquigglePainter`). A text
+  style has one decoration: the wavy underline written into a misspelled
+  word's style took its strike, and a struck word in `live` — where the strike
+  is all that is left of `~~` — read as plain text.
+- **`<u>`, `<sup>` and `<sub>` are constructs** (`StyleKind.underline`,
+  `superscript`, `subscript`): an inline syntax hands them to the Markdown
+  package as elements with parsed children, so the tags are the run's markers
+  like `**`, hidden in `live` and dropped by the read view, and the toolbar's
+  underline and superscript buttons light.
+- **Line shapes are painted behind the line** (`live_decorations.dart`): a
+  bullet, a number counted as the list counts, a checkbox, a quote's bar, a
+  rule. Nothing is laid out — the paragraph is still the only thing the caret
+  and the hit test measure — and the bullet sits where the item's text begins,
+  read off the paragraph, so an item indented by spaces has its bullet in the
+  right place.
+- **Display formulas and pictures are laid out beside the paragraph, not in
+  it** (`live_blocks.dart`): a `$$…$$` block's lines collapse to nothing and the
+  formula is drawn under the first, until the caret enters the block — a
+  formula is edited as a block; a picture is drawn under its line, its source
+  hidden unless the caret is on the line.
+- **Inline formulas without a `WidgetSpan`** (`live_inline_math.dart`) —
+  a departure from §8.6.0 point 3, which accepted a widget in the paragraph
+  and the correction table it needs. The formula's *source* is kept, hidden,
+  and spaced (`letterSpacing`) so its characters are exactly as wide as the
+  typeset formula, and (`height`, `leadingDistribution.even`) at least as tall;
+  the formula is painted over that room. The paragraph's text stays the source
+  character for character, so the caret, the hit test, the selection, the
+  spelling and the IME need no correction — the risk §8.6.0 named is not
+  taken, not mitigated. With the caret in the formula's word it is its source,
+  as every other construct is.
+- **Formulas are set at KaTeX's size, 1.21 × the text** (`mathScale`), in the
+  read view as in `live`. Computer Modern at the text's own size is hairlines
+  on a 1× screen: the device report's "pixelated" matrix entries were glyphs
+  whose strokes were thinner than a pixel, beside parentheses drawn as paths.
+
+What remains of the shape: a nested format keeps only its innermost style
+(`<u>**x**</u>` is bold, not bold and underlined) because a line's tokens are
+disjoint — a limit the source view had already, now visible; and the
+checkbox is drawn but not yet clickable.
+
 ### Phase 5 — Delete the old world
 
 **Deliverable:** `re_editor`, `flutter_quill`, `flutter_markdown_plus`,
