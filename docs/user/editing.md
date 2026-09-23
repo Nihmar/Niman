@@ -34,8 +34,14 @@ status row switches only when both are enabled.
   such, and so is a format inside another (`<u>**x**</u>` is bold and
   underlined); list items get their bullet, number or checkbox — a click or a
   tap on the checkbox ticks it, one undo step, without moving the caret (in
-  the unified read view too, where the tick is saved like any edit); a
-  quote its bar; `---` a rule. Display formulas (`$$…$$`) and inline ones
+  the unified read view too, where the tick is saved like any edit). A
+  sublist is one column in per level, as the read view draws it, and a
+  line that goes on an item — its wrapped rows, and the lines written
+  under it — starts under the item's text. On the caret's line the marks
+  are written out and the text stays where it was: marks wider than their
+  column, like a task's `- [ ] ` or a `10. `, hang into the margin
+  instead. A quote gets its bar; `---` a rule. Columns, bullets,
+  checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones
   (`$…$`) are typeset, and
   images and `![[embeds]]` are drawn under their line. Put the caret in a word
   and its syntax appears; put it in a formula block and the block's source

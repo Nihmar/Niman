@@ -60,7 +60,7 @@ choices.
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `editorToolbar` | "" (= shipped) | Arranged toolbar layout |
 | `uiTextScale` | 1.0 | Interface text size (0.8–1.8) |
-| `noteTextScale` | 1.0 | Note text size, editor + preview (0.8–1.8) |
+| `noteTextScale` | 1.0 | Note text size, editor + preview (0.8–1.8); in the unified surfaces the list and quote columns, the spacing, the bullets, checkboxes and numbers grow with it |
 | `treeWidth` | 340 | Tree pane width, px (200–600) |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
