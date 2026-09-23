@@ -11785,6 +11785,12 @@ checkbox is drawn but not yet clickable.
   it and **adds up the lines** (`nestedTokenStyle`): `<u>~~x~~</u>` is
   underlined and struck through, where a merged style keeps one decoration.
   The toolbar lights the outer ones too.
+- **The checkbox is clickable** (2026-09-23). A click or a tap on the box
+  `live` draws writes the `x` in or takes it out of the brackets: one edit,
+  one undo step, the caret and the view where they were, no keyboard raised
+  on a phone. The box is found where the painter draws it — one function,
+  `liveItemSlot`, answers both — and only a drawn box ticks: on the caret's
+  line the markers are the source, and a click there is a click in the text.
 
 ### Phase 5 — Delete the old world
 

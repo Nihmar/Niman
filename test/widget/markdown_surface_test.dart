@@ -1,6 +1,7 @@
 // The one surface in its two modes (#245, #246), and the property that makes
 // them
 // one widget: the same note, the same offsets, one flag between them.
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -193,6 +194,81 @@ void main() {
     final under = spans.singleWhere((span) => span.text == 'under');
     expect(under.style?.decoration, TextDecoration.underline);
     expect(hidden(under), isFalse);
+  });
+
+  group('a task box in live', () {
+    const note = 'caret\n\n- [ ] da fare\n- [x] fatto\n';
+
+    /// Where the box of the line starting [prefix] is drawn, globally.
+    Offset boxOf(WidgetTester tester, String prefix) {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+      final slot = liveItemSlot(paragraph, 0, _theme);
+      return paragraph.localToGlobal(slot.center);
+    }
+
+    for (final kind in [PointerDeviceKind.mouse, PointerDeviceKind.touch]) {
+      testWidgets('ticks and unticks where it is drawn (${kind.name})', (
+        tester,
+      ) async {
+        final state = await pumpMode(
+          tester,
+          MarkdownSurfaceMode.live,
+          caret: 0,
+          text: note,
+        );
+        final buffer = state.widget.buffer;
+        await tester.tapAt(boxOf(tester, '- [ ] da'), kind: kind);
+        await tester.pump();
+        expect(buffer.text, 'caret\n\n- [x] da fare\n- [x] fatto\n');
+        expect(state.selection.extent, 0, reason: 'the caret stays put');
+        // Past the double-click window, or the second tap counts as one.
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.tapAt(boxOf(tester, '- [x] fatto'), kind: kind);
+        await tester.pump();
+        expect(buffer.text, 'caret\n\n- [x] da fare\n- [ ] fatto\n');
+        expect(state.undo(), isTrue);
+        expect(
+          buffer.text,
+          'caret\n\n- [x] da fare\n- [x] fatto\n',
+          reason: 'one tick, one undo step',
+        );
+      });
+    }
+
+    testWidgets('on the caret line the box is text, and a click is a caret', (
+      tester,
+    ) async {
+      // The caret is on the first item: its markers are drawn as written.
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: 9,
+        text: note,
+      );
+      await tester.tapAt(
+        boxOf(tester, '- [ ] da'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(state.widget.buffer.text, note);
+    });
+
+    testWidgets('source draws no box, and ticks none', (tester) async {
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.source,
+        caret: 0,
+        text: note,
+      );
+      await tester.tapAt(
+        boxOf(tester, '- [ ] da'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(state.widget.buffer.text, note);
+    });
   });
 
   testWidgets('live draws a format inside another as both', (tester) async {

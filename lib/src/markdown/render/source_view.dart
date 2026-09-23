@@ -818,13 +818,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// stored when none is given.
   ///
   /// With [verbatim] the text's own line endings are kept (see
-  /// `SourceBuffer.replaceRange`).
+  /// `SourceBuffer.replaceRange`). Without [follow] the note stays where it
+  /// is on screen rather than going to the caret: an edit made somewhere the
+  /// writer is looking, not where they are typing — a checkbox ticked.
   void _replaceRange(
     int start,
     int end,
     String text, {
     SelectionModel? caret,
     bool verbatim = false,
+    bool follow = true,
   }) {
     if (start < 0 || end < start || end > widget.buffer.length) return;
     _hideTouch();
@@ -849,7 +852,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.onSelection?.call(next);
     _input.sendSelection();
     _scheduleCaret();
-    _ensureCaretVisible();
+    if (follow) _ensureCaretVisible();
     // The shell saves and counts what it is told about: a cut, a paste or a
     // backspace is as much an edit as a keystroke, and the edit says which
     // lines moved so the word count pays for those and not for the note.
@@ -1276,6 +1279,63 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
   }
 
+  /// The `[ ]` or `[x]` of the task box `live` draws under [global] — its
+  /// source range, and whether it is ticked — or null when no box is there.
+  ///
+  /// Only a box that is drawn: on the caret's line the markers are the
+  /// source, written out, and a click there is a click in the text. The box
+  /// is where the painter puts it ([liveItemSlot]), asked of the same
+  /// paragraph, so the two agree by construction.
+  ({int start, int end, bool ticked})? _taskBoxAt(Offset global) {
+    if (!widget.hideMarkers) return null;
+    final caretLine = _caretSpot.value.line;
+    for (final entry in _lineKeys.entries) {
+      final index = entry.key;
+      if (index == caretLine || index >= widget.buffer.lineCount) continue;
+      final paragraph = entry.value.currentContext?.findRenderObject();
+      if (paragraph is! RenderParagraph ||
+          !paragraph.attached ||
+          !paragraph.hasSize) {
+        continue;
+      }
+      final styled = _lineAt(index);
+      final shape = LineShape.of(styled, _styler?.blockOf(index), index);
+      final marker = shape.marker;
+      final ticked = shape.task;
+      if (marker == null || ticked == null) continue;
+      final slot = liveItemSlot(paragraph, marker, widget.theme);
+      if (!slot.contains(paragraph.globalToLocal(global))) continue;
+      for (final token in styled.tokens) {
+        if (token.kind != TokenKind.taskBox) continue;
+        final start = widget.buffer.offsetOfLine(index) + token.start;
+        return (
+          start: start,
+          end: start + token.end - token.start,
+          ticked: ticked,
+        );
+      }
+    }
+    return null;
+  }
+
+  /// Ticks or unticks the task box under [global], and answers whether
+  /// there was one: one edit and one undo step, the `x` written or taken out
+  /// inside the brackets, the caret and the view left where they were.
+  bool _toggleTaskAt(Offset global) {
+    final box = _taskBoxAt(global);
+    if (box == null) return false;
+    _history.seal();
+    _replaceRange(
+      box.start + 1,
+      box.start + 2,
+      box.ticked ? ' ' : 'x',
+      caret: _selection,
+      follow: false,
+    );
+    _history.seal();
+    return true;
+  }
+
   void _select(int start, int end) {
     final next = SelectionModel(anchor: start, extent: end);
     _history.seal();
@@ -1322,6 +1382,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         return;
       }
       if (event.buttons != kPrimaryMouseButton) return;
+      // A press on a task box ticks it when it is let go (`_tapUp`): it
+      // neither places a caret nor starts a selection.
+      if (_taskBoxAt(event.position) != null) return;
       final offset = offsetAt(event.position);
       if (offset == null) return;
       if (_openLinkAt(offset)) return;
@@ -1982,6 +2045,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // The keyboard is asked for on the *tap*: a drag the scroll
                 // view wins is someone reading, not someone about to type.
                 onTapUp: (details) {
+                  // A task box is ticked where it is drawn, and a tick is
+                  // neither a caret nor a reason to raise the keyboard; nor
+                  // the first of a double click.
+                  if (_toggleTaskAt(details.globalPosition)) {
+                    _lastClick = null;
+                    return;
+                  }
                   _requestKeyboard();
                   if (details.kind != PointerDeviceKind.mouse &&
                       _touchTap(details.globalPosition)) {

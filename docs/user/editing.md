@@ -31,8 +31,11 @@ status row switches only when both are enabled.
   source pane — the Markdown stays the note's text, and only where the caret is
   does it show as written. Headings are set at their size; bold, italic,
   strikethrough, underline (`<u>`) and superscript (`<sup>`) are drawn as
-  such; list items get their bullet, number or checkbox; a quote its bar; `---`
-  a rule. Display formulas (`$$…$$`) and inline ones (`$…$`) are typeset, and
+  such, and so is a format inside another (`<u>**x**</u>` is bold and
+  underlined); list items get their bullet, number or checkbox — a click or a
+  tap on the checkbox ticks it, one undo step, without moving the caret; a
+  quote its bar; `---` a rule. Display formulas (`$$…$$`) and inline ones
+  (`$…$`) are typeset, and
   images and `![[embeds]]` are drawn under their line. Put the caret in a word
   and its syntax appears; put it in a formula block and the block's source
   appears — so everything stays editable as text.
