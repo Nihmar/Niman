@@ -14,7 +14,7 @@
 /// | paragraph, heading | rich text over the visible segments |
 /// | list item | the marker, then the item's own text, indented by its depth |
 /// | quote | a bar and the indented content |
-/// | fenced or indented code | a filled box of monospace lines |
+/// | fenced or indented code | a box of monospace lines, fences its padding |
 /// | math | the display typesetter |
 /// | table | a real table, cells from the source rows |
 /// | thematic break | a row with a rule across its middle, as `live` draws it |
@@ -118,14 +118,14 @@ final class BlockView extends StatelessWidget {
       ),
       BlockKind.listItem => _listItem(context),
       BlockKind.quote => _quote(context),
-      BlockKind.fencedCode ||
-      BlockKind.indentedCode => _code(context, block.fenceInfo),
+      BlockKind.fencedCode => _code(context, block.fenceInfo, fences: true),
+      BlockKind.indentedCode => _code(context, null, fences: true),
       BlockKind.math => _blockMath(context),
       BlockKind.table => _table(context),
       BlockKind.thematicBreak => _rule(context),
       BlockKind.blank => SizedBox(height: block.lineCount * _row(context)),
       BlockKind.frontmatter => const SizedBox.shrink(),
-      BlockKind.html => _code(context, null),
+      BlockKind.html => _code(context, null, fences: false),
     };
   }
 
@@ -370,20 +370,37 @@ final class BlockView extends StatelessWidget {
   /// A code block: a filled box of monospace lines, the fence taken out, the
   /// code coloured by the language the fence names.
   ///
+  /// With [fences] the box is `live`'s: its code a padding in from the sides,
+  /// and a fence's row above and below it — the rows `live` draws the fences
+  /// on, hidden, inside its box — so the code's rows land on `live`'s. An
+  /// HTML block has no fences, and keeps a padding all round.
+  ///
   /// The tokens come from the same `highlight` core the preview's highlighter
   /// uses, one block at a time and only for the blocks a frame draws. The
   /// engine's own line-state lexer (§8.8.2) is the design's replacement when
   /// the whole-block regex stops being enough.
-  Widget _code(BuildContext context, String? language) {
-    final text = _fenceContent(parsed.text);
+  Widget _code(BuildContext context, String? language, {required bool fences}) {
+    final content = _fenceContent(parsed.text);
+    final text = content.text;
+    final row = _row(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: theme.codeBackground,
         borderRadius: BorderRadius.circular(4),
       ),
-      padding: EdgeInsets.all(theme.codePadding),
-      child: language == null || language.isEmpty
+      padding: fences
+          ? EdgeInsets.fromLTRB(
+              theme.codePadding,
+              content.opened ? row : 0,
+              theme.codePadding,
+              content.closed ? row : 0,
+            )
+          : EdgeInsets.all(theme.codePadding),
+      // A fence with nothing between its lines has no row of code.
+      child: text == null
+          ? null
+          : language == null || language.isEmpty
           ? Text(text, style: theme.code)
           : Text.rich(
               CodeHighlighter(
@@ -532,22 +549,31 @@ final class BlockView extends StatelessWidget {
     );
   }
 
-  /// The lines inside a fence, or the block's own text for indented code.
-  static String _fenceContent(String text) {
+  /// The lines inside a fence, or the block's own text for indented code;
+  /// null for a fence with no line inside it. `opened` and `closed` say
+  /// whether a fence's row stands above the code and below it — the one
+  /// below is missing when the note never closed the fence.
+  static ({String? text, bool opened, bool closed}) _fenceContent(String text) {
     final lines = text.split('\n');
-    if (lines.isEmpty) return text;
     if (!lines.first.trimLeft().startsWith('```') &&
         !lines.first.trimLeft().startsWith('~~~')) {
       // Indented code: four spaces come off each line.
-      return lines
-          .map((line) => line.startsWith('    ') ? line.substring(4) : line)
-          .join('\n');
+      return (
+        text: lines
+            .map((line) => line.startsWith('    ') ? line.substring(4) : line)
+            .join('\n'),
+        opened: false,
+        closed: false,
+      );
     }
     final last = lines.length > 1 ? lines.last.trim() : '';
     final closed = last.startsWith('```') || last.startsWith('~~~');
-    return lines
-        .sublist(1, closed ? lines.length - 1 : lines.length)
-        .join('\n');
+    final code = lines.sublist(1, closed ? lines.length - 1 : lines.length);
+    return (
+      text: code.isEmpty ? null : code.join('\n'),
+      opened: true,
+      closed: closed,
+    );
   }
 
   /// The rows and cells of a GFM table, delimiter row dropped.
@@ -822,6 +848,9 @@ final class CodePieceView extends StatelessWidget {
     final language = block.fenceInfo;
     final radius = Radius.circular(first || last ? 4 : 0);
     final text = _text();
+    // The fences' rows, as the whole block has them (`BlockView._code`).
+    final fenced = block.kind == BlockKind.fencedCode;
+    final row = MediaQuery.textScalerOf(context).scale(theme.lineHeight);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -835,9 +864,9 @@ final class CodePieceView extends StatelessWidget {
       ),
       padding: EdgeInsets.fromLTRB(
         theme.codePadding,
-        first ? theme.codePadding : 0,
+        fenced && first ? row : 0,
         theme.codePadding,
-        last ? theme.codePadding : 0,
+        fenced && last && _closed ? row : 0,
       ),
       child: language == null || language.isEmpty
           ? Text(text, style: theme.code)
@@ -851,6 +880,13 @@ final class CodePieceView extends StatelessWidget {
     );
   }
 
+  /// Whether the block ends on its closing fence: the note may never close
+  /// it.
+  bool get _closed {
+    final closing = buffer.lineAt(block.endLine - 1).trim();
+    return closing.startsWith('```') || closing.startsWith('~~~');
+  }
+
   /// The piece's code: its lines, without a fence line, without an indented
   /// block's four spaces.
   String _text() {
@@ -858,10 +894,7 @@ final class CodePieceView extends StatelessWidget {
     var from = block.startLine;
     var to = block.endLine;
     if (fenced && first) from++;
-    if (fenced && last && to > from) {
-      final closing = buffer.lineAt(to - 1).trim();
-      if (closing.startsWith('```') || closing.startsWith('~~~')) to--;
-    }
+    if (fenced && last && _closed) to--;
     final lines = <String>[];
     for (var at = from; at < to; at++) {
       final line = buffer.lineAt(at);
