@@ -268,6 +268,45 @@ void main() {
     );
   });
 
+  testWidgets("the pointer is the text's over the note, an arrow in the "
+      'gutter', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: SourceBuffer.fromText("una riga di testo\nun'altra"),
+            theme: _theme,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    final text = tester.getCenter(
+      find.textContaining('una riga', findRichText: true),
+    );
+    await mouse.addPointer(location: text);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+    // Well below the note's last line: still the note.
+    await mouse.moveTo(text + const Offset(0, 200));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+    await mouse.moveTo(tester.getCenter(find.text('1')));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+  });
+
   testWidgets('Ctrl+End shows the last line whole, estimates or not', (
     tester,
   ) async {
