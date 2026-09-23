@@ -24,6 +24,7 @@ final class LineShape {
   const new({
     this.quoteDepth = 0,
     this.marker,
+    this.listDepth = 0,
     this.box,
     this.ordinal,
     this.task,
@@ -64,6 +65,8 @@ final class LineShape {
     return LineShape(
       quoteDepth: quoteDepth,
       marker: marker,
+      // A line the scan has not reached yet is at the top level.
+      listDepth: marker == null ? 0 : math.max(0, block?.listDepth ?? 0),
       box: box,
       ordinal: ordinal,
       task: task,
@@ -76,6 +79,10 @@ final class LineShape {
 
   /// Where the line's list marker starts, when it opens a list item.
   final int? marker;
+
+  /// How many list levels deep the item is, 0 at the top: the columns its
+  /// text is set in by, as the read view sets it.
+  final int listDepth;
 
   /// Where the item's task box (`[ ]`) starts, for a task item: its text
   /// starts past the box, and the box is drawn where a bullet would be.
@@ -100,26 +107,23 @@ final class LineShape {
       other is LineShape &&
       other.quoteDepth == quoteDepth &&
       other.marker == marker &&
+      other.listDepth == listDepth &&
       other.box == box &&
       other.ordinal == ordinal &&
       other.task == task &&
       other.rule == rule;
 
   @override
-  int get hashCode => Object.hash(quoteDepth, marker, box, ordinal, task, rule);
+  int get hashCode =>
+      Object.hash(quoteDepth, marker, listDepth, box, ordinal, task, rule);
 }
 
 /// Where a list item's bullet, number or checkbox sits, in its paragraph's
-/// coordinates: the indent one list level takes, one row tall, ending where
-/// a bullet's does — a hidden marker and its space before the item's text.
+/// coordinates: the column one list level takes, one row tall, ending where
+/// the item's text begins — which is where the read view's column ends.
 ///
 /// One answer for the painter that draws there and the tap that toggles a
 /// checkbox there, so the two cannot disagree about where the box is.
-///
-/// A task's text starts past its box as well, whose hidden `[ ]` still
-/// advances by a sliver each: the slot is measured back from the text by
-/// the width the line's own marker and its space take, so a box sits where
-/// a bullet does, to the pixel, and each with its text the same way off.
 ///
 /// The row is read off the item's first character of text, not off the
 /// marker: the marker is hidden, set in a hundredth of a size, and a caret
@@ -127,19 +131,17 @@ final class LineShape {
 /// numbers were drawn that far below the text they belong to. An item with
 /// no text yet is one row, the paragraph's own height.
 Rect liveItemSlot(RenderParagraph box, LineShape shape, MarkdownTheme theme) {
-  final marker = shape.marker ?? 0;
   final text = box.text.toPlainText(includeSemanticsLabels: false);
-  double left(int offset) =>
-      box.getOffsetForCaret(TextPosition(offset: offset), Rect.zero).dx;
-  final lead = _pastSpaces(text, _pastMark(text, marker));
   final taskBox = shape.box;
-  final first = taskBox == null ? lead : _pastSpaces(text, taskBox + 3);
-  final right = left(first) - (left(lead) - left(marker));
+  final first = taskBox == null
+      ? _pastSpaces(text, _pastMark(text, shape.marker ?? 0))
+      : _pastSpaces(text, taskBox + 3);
+  final position = TextPosition(offset: first);
+  final right = box.getOffsetForCaret(position, Rect.zero).dx;
   final slot = theme.listIndentPerLevel;
   if (first >= text.length) {
     return Rect.fromLTWH(right - slot, 0, slot, box.size.height);
   }
-  final position = TextPosition(offset: first);
   final top = box.getOffsetForCaret(position, Rect.zero).dy;
   return Rect.fromLTWH(
     right - slot,

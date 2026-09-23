@@ -50,6 +50,41 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
+/// [_theme] with a list column the test font's `- ` fits in: every glyph
+/// of it is as wide as it is tall, 28 px for the two, and a text face's
+/// are a third of that.
+const MarkdownTheme _wideColumns = MarkdownTheme(
+  body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
+  heading1: TextStyle(fontSize: 25),
+  heading2: TextStyle(fontSize: 21),
+  heading3: TextStyle(fontSize: 18),
+  heading4: TextStyle(fontSize: 16),
+  heading5: TextStyle(fontSize: 14),
+  heading6: TextStyle(fontSize: 13),
+  code: TextStyle(fontSize: 14, fontFamily: 'monospace'),
+  quote: TextStyle(fontSize: 14),
+  tableCell: TextStyle(fontSize: 14),
+  tableHeader: TextStyle(fontSize: 14),
+  link: TextStyle(fontSize: 14),
+  wikilink: TextStyle(fontSize: 14),
+  tag: TextStyle(fontSize: 14),
+  marker: TextStyle(fontSize: 14),
+  codeHighlight: <String, TextStyle>{},
+  rule: Color(0xFF888888),
+  codeBackground: Color(0xFFEEEEEE),
+  quoteBar: Color(0xFFCCCCCC),
+  tableBorder: Color(0xFFCCCCCC),
+  markerDim: Color(0xFF999999),
+  blockSpacing: 10,
+  listIndentPerLevel: 32,
+  quoteIndentPerLevel: 12,
+  codePadding: 8,
+  quoteBarWidth: 3,
+  ruleThickness: 1,
+  tableCellPadding: EdgeInsets.all(4),
+  lineHeight: 21,
+);
+
 /// The shape of a `- [ ] …` line.
 const LineShape _task = LineShape(marker: 0, box: 2, task: false);
 
@@ -59,6 +94,7 @@ void main() {
     MarkdownSurfaceMode mode, {
     int? caret = 3,
     String text = '# Titolo\n\ntesto\n',
+    MarkdownTheme theme = _theme,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -66,7 +102,7 @@ void main() {
           body: MarkdownSurface(
             buffer: SourceBuffer.fromText(text),
             mode: mode,
-            theme: _theme,
+            theme: theme,
             // A caret the caller holds, or `null` for a surface that owns its
             // own — the two contracts a caller can have, and the reveal has to
             // hold for both.
@@ -255,6 +291,7 @@ void main() {
         MarkdownSurfaceMode.live,
         caret: caret,
         text: note,
+        theme: _wideColumns,
       );
       await tester.pump();
       final paragraph = tester
@@ -268,8 +305,8 @@ void main() {
     }
 
     // A list's: in the test font every glyph is as wide as it is tall, and a
-    // quote's `>` (14 px) is wider than the quote's own indent (12 px), so
-    // that one runs out of room here — in a text face it is half that.
+    // quote's `>` and its space (28 px) are wider than the quote's own indent
+    // (12 px), so that one runs out of room here — in a text face it fits.
     for (final (note, lineStart, prefix) in [('caret\n\n- item\n', 7, '- ')]) {
       final away = await textLeft(note, 0, prefix);
       final on = await textLeft(note, lineStart + prefix.length + 2, prefix);
@@ -331,6 +368,64 @@ void main() {
       closeTo(bullet.localToGlobal(bulletSlot.topLeft).dx, 0.01),
       reason: 'the box sits where the bullet does',
     );
+  });
+
+  testWidgets('a nested item is one column in per level, as read draws it', (
+    tester,
+  ) async {
+    // Live nested by the spaces the note was written with, so a sublist sat
+    // a few pixels in rather than under its parent's text.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- one\n  - two\n    - [ ] three\n',
+    );
+    RenderParagraph line(String prefix) => tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+    double textLeft(String prefix) {
+      final p = line(prefix);
+      return p
+          .localToGlobal(
+            p.getOffsetForCaret(TextPosition(offset: prefix.length), Rect.zero),
+          )
+          .dx;
+    }
+
+    final one = textLeft('- ');
+    final two = textLeft('  - ');
+    final three = textLeft('    - [ ] ');
+    expect(two - one, closeTo(_theme.listIndentPerLevel, 0.1));
+    expect(three - two, closeTo(_theme.listIndentPerLevel, 0.1));
+  });
+
+  testWidgets("a wrapped item's next row starts under its text", (
+    tester,
+  ) async {
+    // The paragraph's rows start where it does, and its first row had the
+    // hidden prefix — the written indent, the marker, the box, the spaces —
+    // before the text: the second row hung out to the left by all of it.
+    const prefix = '  - [ ] ';
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n- parent\n$prefix${'word ' * 30}\n',
+    );
+    final paragraph = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+    Offset at(int offset) =>
+        paragraph.getOffsetForCaret(TextPosition(offset: offset), Rect.zero);
+    final first = at(prefix.length);
+    var next = prefix.length;
+    while (at(next).dy <= first.dy) {
+      next++;
+    }
+    // A hidden mark keeps a hundredth of its advance: eight of them are
+    // under a tenth of a pixel.
+    expect(at(next).dx, closeTo(first.dx, 0.1));
   });
 
   group('a task box in live', () {
@@ -846,7 +941,10 @@ void main() {
   testWidgets('a hidden bullet leaves an indent, not a word at the margin', (
     tester,
   ) async {
-    Future<Rect> textRect(MarkdownSurfaceMode mode) async {
+    /// Where the line's paragraph starts, and where its text after `- `
+    /// does: in live the hidden marker and its space take next to no room,
+    /// and the text is set on the column.
+    Future<(double, double)> textLeft(MarkdownSurfaceMode mode) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -863,23 +961,25 @@ void main() {
         ),
       );
       await tester.pump();
-      return tester.getRect(
-        find
-            .byWidgetPredicate(
-              (widget) =>
-                  widget is RichText &&
-                  widget.text.toPlainText().startsWith('-'),
-            )
-            .first,
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().startsWith('-'));
+      final text = paragraph.getOffsetForCaret(
+        const TextPosition(offset: 2),
+        Rect.zero,
+      );
+      return (
+        paragraph.localToGlobal(Offset.zero).dx,
+        paragraph.localToGlobal(text).dx,
       );
     }
 
-    final source = await textRect(MarkdownSurfaceMode.source);
-    final live = await textRect(MarkdownSurfaceMode.live);
+    final (source, _) = await textLeft(MarkdownSurfaceMode.source);
+    final (_, live) = await textLeft(MarkdownSurfaceMode.live);
     expect(
-      live.left,
-      closeTo(source.left + _theme.listIndentPerLevel, 0.01),
-      reason: 'the item is indented by the level its marker was',
+      live,
+      closeTo(source + _theme.listIndentPerLevel, 0.01),
+      reason: 'the item is set in by the column its marker was',
     );
   });
 
