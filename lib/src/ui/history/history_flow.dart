@@ -45,6 +45,8 @@ Future<void> openNoteHistory(
   onRestored();
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
+      // An action would keep it up until it is dismissed by hand.
+      persist: false,
       key: const Key('history-restored-snack'),
       content: Text(
         AppStrings.historyRestored(

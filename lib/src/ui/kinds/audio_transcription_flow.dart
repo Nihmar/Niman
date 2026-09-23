@@ -277,6 +277,8 @@ final class AudioTranscriptionFlow {
     );
     messenger?.showSnackBar(
       SnackBar(
+        // An action would keep it up until it is dismissed by hand.
+        persist: false,
         content: Text(AppStrings.transcriptionSaved),
         action: SnackBarAction(
           label: AppStrings.actionUndo,
