@@ -67,6 +67,37 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets('a definition is not drawn in the body, a formula in it or not', (
+    tester,
+  ) async {
+    // A definition is syntax: the parser files it with the footnotes and
+    // gives the block nothing back. With a formula or a wikilink in it, the
+    // placeholders standing in for them were something, and the block was
+    // drawn in the note's body — ` ￼ is *big*.` after the paragraph.
+    await _pump(
+      tester,
+      'a claim[^1]\n\n[^1]: Where \$x^2\$ is *big*.\n\n'
+      '[ref]: https://example.com "[[a note]]"\n',
+    );
+    final body = [
+      for (final widget in tester.widgetList<RichText>(
+        find.descendant(
+          of: find.byType(BlockView),
+          matching: find.byType(RichText),
+        ),
+      ))
+        if (find
+            .ancestor(
+              of: find.byWidget(widget),
+              matching: find.byType(FootnoteRow),
+            )
+            .evaluate()
+            .isEmpty)
+          widget.text.toPlainText(),
+    ];
+    expect(body.any((text) => text.contains('big')), isFalse, reason: '$body');
+    expect(body.any((text) => text.contains('example')), isFalse);
+  });
   testWidgets(
     "a footnote's body is drawn as prose: its formulas, its emphasis",
     (tester) async {
