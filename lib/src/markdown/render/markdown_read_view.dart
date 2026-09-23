@@ -638,7 +638,16 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         // every footnote at the top of the frame costs the frame. Measured:
         // appending it whole took first content from 76 ms to 112 ms on the
         // geometry note and the jump from 9 ms to 56.
-        SliverPadding(padding: padding, sliver: _footnoteSliver()),
+        //
+        // Keyed by the text it was read from: a list kept across a new text
+        // kept its children and where they were laid out, and a far offset
+        // had it asking the viewport for corrections that never agreed — a
+        // layout loop (`read_view_geometry_test`, the fixtures in a row).
+        SliverPadding(
+          key: ObjectKey(_shown),
+          padding: padding,
+          sliver: _footnoteSliver(),
+        ),
       ],
     );
   }

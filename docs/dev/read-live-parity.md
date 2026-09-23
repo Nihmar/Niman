@@ -88,21 +88,31 @@ Nothing, out of the caret's reach. What is left is by design: the caret's
 row shows its source in `live` — a table's row as written, off its columns,
 and the delimiter row when the caret is on it.
 
-### Found on the way: a layout loop on one note
+### Found on the way: a layout loop on one note — fixed
 
 `read_view_geometry_test` sweeps the fixtures and, when it is on the
-machine, `Geometria 1.md` (one person's note, not in the repository). On
-that note, the jump to the very end has thrown *RenderViewport exceeded its
-maximum number of layout cycles* since `3d49b98` (footnotes drawn as prose),
-before this round's changes: bisected. The fixtures in the repository are
-clean, and CI does not have the note.
+machine, `Geometria 1.md` (one person's note, not in the repository). It
+threw *RenderViewport exceeded its maximum number of layout cycles* on that
+note since `3d49b98` (footnotes drawn as prose).
 
-What the trace shows: the blocks sliver is laid out once, the footnotes'
-`SliverList` asks for no scroll correction, and the viewport goes round
-again nineteen times without laying either out — a position adjusted by
-less than a double can tell at 266 800 px, so no sliver's constraints
-change. Not fixed yet; the next step is to log the position's
-`applyContentDimensions` in that frame.
+The diagnosis written here before was wrong: the note alone scrolls to its
+end cleanly. The loop was the **hand-over from one text to the next**: the
+test pumps the fixtures one after another into the same read view, and the
+geometry note arrived while the pane stood 138 000 px down the 200 KB
+fixture. The footnote `SliverList` kept the previous text's children, laid
+out at that text's end; inserting the new footnotes above them — taller,
+with formulas — asked the viewport for a scroll correction on every pass,
+and each correction moved the blocks the pane measured, so no pass agreed.
+The app hands the read pane a new buffer at every flip from the editor, so
+the same shape was reachable there.
+
+The footnote sliver is now keyed by the text it was read from, so a new
+text starts it afresh. `markdown_read_view_test.dart` holds it with a
+synthetic pair of notes, in CI; the geometry note's sweep is clean again,
+which also let its gate see a check it had never run on that note: a
+formula wider than the pane was counted as neither broken nor shrunk,
+because the gate read the size the view was *asked* for, not the one it
+painted. It reads the painters now.
 
 ## Opening the 246 MB note
 
