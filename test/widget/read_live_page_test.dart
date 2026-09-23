@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -228,5 +229,40 @@ void main() {
     for (var at = 0; at < words.length; at++) {
       expect(read[at], closeTo(live[at], 0.01), reason: words[at]);
     }
+  });
+
+  testWidgets('a row whose text is all hidden is a row, in live', (
+    tester,
+  ) async {
+    // A rule's row and a quote's empty line are all marks, hidden: the row
+    // was laid out as nothing while the list gave it its room, so the rule
+    // was drawn at the top of its row, not across its middle where the read
+    // view draws it, and the quote's bar broke off at the empty line.
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note = 'caret\n\n---\n\n> quoted\n>\n> more\n';
+    await _pumpNote(tester, note, read: false);
+    final theme = markdownThemeOf(tester.element(find.byType(Scaffold)));
+    final row = theme.lineHeight;
+    final origin = _glyphOf(tester, 'caret').dy;
+    final rows = [
+      for (final element in find.byType(CustomPaint).evaluate())
+        if ((element.widget as CustomPaint).painter
+            case final LiveDecorationPainter painter)
+          (painter.shape, tester.getRect(find.byWidget(element.widget))),
+    ];
+    for (final (_, rect) in rows) {
+      expect(rect.height, closeTo(row, 0.01));
+    }
+    final rule = rows.firstWhere((row) => row.$1.rule).$2.center.dy - origin;
+
+    await _pumpNote(tester, note, read: true);
+    final drawn = tester.getRect(
+      find.byWidgetPredicate(
+        (widget) => widget is Container && widget.color == theme.rule,
+      ),
+    );
+    expect(drawn.center.dy - _glyphOf(tester, 'caret').dy, closeTo(rule, 0.01));
   });
 }
