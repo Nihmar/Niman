@@ -141,28 +141,31 @@ final class BlockScanner {
 
   /// Re-scans after [edit].
   ///
-  /// Blocks entirely before the edit are kept, blocks entirely after the
-  /// converged boundary are kept, and the region between is rebuilt. The
-  /// boundary is the first line past the edit whose entering state is unchanged
-  /// and which the previous line's blankness makes a block boundary, so no
-  /// block can span it.
-  void edited(SourceEdit edit) {
-    // Back up to the start of the block the edit landed in: the block list is
-    // rebuilt from there, and a block spanning the edit would otherwise lose
-    // the part of itself before it.
-    // By binary search: a walk over the blocks was a keystroke's cost on a
-    // note of millions of them.
-    final from = blockAt(edit.firstLine)?.startLine ?? edit.firstLine;
-    _rescanFrom(from, edit);
-  }
+  /// Blocks entirely before the edit are kept, blocks from the point where the
+  /// scan converges on are kept, and the region between is rebuilt.
+  void edited(SourceEdit edit) => _rescanFrom(0, edit);
 
-  /// Re-scans from [from], given what [edit] did (or nothing, for the first
-  /// scan).
+  /// Re-scans from [from] — the whole note, for the first scan — or from
+  /// the line [edit] began on.
   ///
   /// The kept states and blocks are brought into the new line coordinates
   /// first: an edit that removed lines leaves every line number after it
   /// stale, and comparing stale numbers with fresh ones is exactly how a
   /// scanner ends up with blocks that overlap themselves.
+  ///
+  /// Both ends of the rebuild are the *edit's*, not the block's
+  /// (`docs/dev/huge-notes.md` item 3): a block can be the whole note — a
+  /// paragraph with no blank line in it, a formula that never closes — and a
+  /// keystroke that paid for the block paid for the note.
+  ///
+  /// * **It starts at the edit.** The lines before it are the lines they were,
+  ///   entered in the states they were, so the block they are in is the block
+  ///   it was up to the edit; the rebuild takes that block *open* and asks, as
+  ///   a fresh scan would, whether the edited line goes on with it.
+  /// * **It stops where the scan agrees with what was there** — the state
+  ///   entering a line is what it was, and so is the block that line is in
+  ///   (see [_convergesAt]). From there on every line is the same text entered
+  ///   in the same state, so it makes the same blocks it made before.
   void _rescanFrom(int from, [SourceEdit? edit]) {
     // Which blocks survive, and where the survivors are, found by binary
     // search rather than by walking the list: the block list is the one
@@ -171,6 +174,7 @@ final class BlockScanner {
     // document-shaped one.
     var headEnd = 0;
     var tailStart = _blocks.length;
+    var start = from;
     if (edit != null) {
       final untouched = edit.firstUntouchedLine;
       if (edit.firstLine < _entering.length) {
@@ -181,132 +185,83 @@ final class BlockScanner {
           edit.insertedLines,
         );
       }
-      headEnd = _firstIndexWhere(0, (block) => block.endLine > edit.firstLine);
       tailStart = _firstIndexWhere(0, (block) => block.startLine >= untouched);
       // The survivors after the edit are the same blocks, moved by however
       // many lines the document gained or lost — owed, not moved ([_owe]):
       // everything below reads them where they are now.
       if (edit.lineDelta != 0) _owe(tailStart, edit.lineDelta);
-    }
-
-    // The block that ends where the rebuild begins has to be rebuilt too.
-    // Whether two adjacent lines are one block or two depends on the pair — a
-    // paragraph that runs on, a quote continued lazily — so a rebuild that
-    // starts at a block's end would produce a second block where the first
-    // belongs. Widening by one block costs one block's lines and removes the
-    // whole class of boundary bugs.
-    // The rebuild begins at the first line of the block the edit is in, since
-    // starting at the edit would make the rest of that block a block of its
-    // own. Unless the block holds one state throughout: then the lines
-    // between its first line and the edit are the same lines still entered in
-    // that state, their states are recomputed rather than walked, and the
-    // rebuild starts at the edit — with the block's prefix kept and joined to
-    // what the rebuild makes, so the list goes on tiling the note
-    // (docs/dev/huge-notes.md item 3: a keystroke inside a 137 k-line `$$…$$`
-    // block re-scanned all 137 k).
-    var start = from;
-    Block? prefix;
-    var narrowed = false;
-    if (headEnd > 0) {
-      final candidate = _at(headEnd - 1);
-      if (candidate.endLine == from) {
-        headEnd--;
-        start = candidate.startLine;
-        final inside =
-            edit != null &&
-            edit.lineDelta == 0 &&
-            start < from &&
-            _holdsOneState(candidate.kind);
-        if (inside) {
-          // The lines between the block's first line and the edit, given the
-          // state each of them is entered in. The result has to be the state
-          // the note recorded for the edit's own line — that is what says the
-          // lines before the edit really are the same lines, and it is the
-          // only check that can catch a block whose shape the edit changed
-          // without the block being rebuilt.
-          var probing = _exitOf(start);
-          for (var at = start + 1; at < from; at++) {
-            _setEntering(at, probing);
-            probing = _exitOf(at);
-          }
-          if (from < _entering.length && _entering[from] == probing) {
-            prefix = candidate;
-            start = from;
-            narrowed = true;
-          } else if (from > 0) {
-            _setEntering(from, probing);
-          }
-        }
+      start = edit.firstLine;
+      // The line before the edit reads the edited line when it asks whether
+      // it heads a table (the delimiter row is the line under it), so it is
+      // not the line it was: the rebuild takes in its whole block.
+      if (start > 0 &&
+          start - 1 < buffer.lineCount &&
+          _hasPipe(_text(start - 1))) {
+        start = blockAt(start - 1)?.startLine ?? 0;
+      }
+      if (start > 0) {
+        // The block holding the line before the rebuild, which is a kept one:
+        // everything before the edit is where it was.
+        headEnd = _firstIndexWhere(0, (block) => block.endLine >= start);
+        // A line no kept block holds is a list that no longer tiles the
+        // note; a scan from the top is the answer that cannot be wrong.
+        if (headEnd >= tailStart) headEnd = start = 0;
       }
     }
+
+    // The block the line before the rebuild is in, cut at the rebuild: what a
+    // fresh scan has open when it reaches the edited line.
+    final open = start > 0 && headEnd < _blocks.length
+        ? _cut(_at(headEnd), start)
+        : null;
+    final builder = _BlockBuilder(
+      this,
+      open: open,
+      before: _nonBlankBefore(headEnd),
+    );
+    // Only from two lines past the edit is a line's recorded state its own:
+    // the inserted lines hold placeholders, and the first line after them
+    // still reads the last inserted one (an indented block opens only after
+    // a blank line).
+    final settledFrom = edit == null
+        ? buffer.lineCount + 1
+        : edit.firstLine + edit.insertedLines + 1;
 
     var line = start;
     var state = start == 0 ? LineState.initial : _exitOf(start - 1);
-
+    var keepFrom = -1;
     while (line < buffer.lineCount) {
       final previous = line < _entering.length ? _entering[line] : null;
-      if (line > start &&
-          previous == state &&
-          _isBlockBoundary(line, state) &&
-          _hasBoundaryAt(line, tailStart)) {
-        // Converged: the state is what it was, nothing is continuing across
-        // this line, and the block list already has a boundary here — so the
-        // blocks after it are untouched and can be kept as they are.
-        break;
+      if (line > start && previous == state) {
+        if (_isBlockBoundary(line, state) && _hasBoundaryAt(line, tailStart)) {
+          // Converged at a boundary: the state is what it was, nothing is
+          // continuing across this line, and the block list already has a
+          // boundary here — so the blocks after it are untouched.
+          break;
+        }
+        if (line >= settledFrom) {
+          keepFrom = _convergesAt(line, builder, tailStart, headEnd, edit!);
+          if (keepFrom >= 0) break;
+        }
       }
       _setEntering(line, state);
+      builder.add(line);
       state = _exitOf(line);
       line++;
     }
     _scannedLineTotal += line - start;
-
-    // The block the rebuild's first item counts on from: the kept head's
-    // last non-blank one, which a rebuild that starts on an item's line
-    // otherwise never sees — and a list written `1. 1. 1.` renumbered itself
-    // 1, 1, 2 under the writer's keystroke.
-    final before = prefix != null && prefix.kind != BlockKind.blank
-        ? prefix
-        : _nonBlankBefore(headEnd);
-    var rebuilt = _buildBlocks(start, line, before: before);
-    // The block that was already there before the edit, joined to what the
-    // rebuild made of the rest when the two make one block — a paragraph's
-    // second line, a quote's lazy continuation. The splice takes the old
-    // block's place either way, so the list keeps tiling the note.
-    if (narrowed && prefix != null) {
-      if (rebuilt.isNotEmpty) {
-        final first = rebuilt.first;
-        if (first.kind == prefix.kind &&
-            _mergesInto(prefix.kind, from - 1, from)) {
-          rebuilt = <Block>[
-            Block(
-              kind: prefix.kind,
-              startLine: prefix.startLine,
-              endLine: first.endLine,
-              quoteDepth: prefix.quoteDepth,
-              listDepth: prefix.listDepth,
-              listOrdinal: prefix.listOrdinal,
-              headingLevel: prefix.headingLevel,
-              fenceInfo: prefix.fenceInfo,
-              entering: prefix.entering,
-            ),
-            ...rebuilt.skip(1),
-          ];
-        } else {
-          rebuilt = <Block>[_prefixOf(prefix, from), ...rebuilt];
-        }
-      } else {
-        rebuilt = <Block>[_prefixOf(prefix, from)];
-      }
-    }
+    final rebuilt = builder.finish();
 
     // Everything from the convergence point on is what it was, so the
     // survivors are spliced back in place instead of being copied into a new
     // list: one range replacement, and the blocks inside the edit — the ones
     // between the head and the tail — are what it drops.
-    final keepFrom = _firstIndexWhere(
-      tailStart,
-      (block) => block.startLine >= line,
-    );
+    if (keepFrom < 0) {
+      keepFrom = _firstIndexWhere(
+        tailStart,
+        (block) => block.startLine >= line,
+      );
+    }
     // The dropped blocks are the ones between the head and the kept tail;
     // anything owed a shift among them is paid first, so what is owed after
     // the splice is owed from the kept tail on, exactly.
@@ -323,20 +278,70 @@ final class BlockScanner {
     _lineCount = buffer.lineCount;
   }
 
-  /// Whether every line of a [kind] block is entered in the state the block
-  /// was: the shapes whose merge rule is "the next line is the same kind".
+  /// Whether the rebuild can stop before [line] — whose entering state is
+  /// the one it had, as is the line before it — and, when it can, the index
+  /// of the first old block to keep; -1 when it cannot.
   ///
-  /// A quote counts its depth per line and a list item its own marker, so a
-  /// line inside one of those is not the block's state and a rebuild cannot
-  /// give it one.
-  static bool _holdsOneState(BlockKind kind) => switch (kind) {
-    BlockKind.quote || BlockKind.listItem => false,
-    _ => true,
-  };
+  /// The state being the same says every line from here on is entered as it
+  /// was. What it does not say is which block [line] is in, because that is
+  /// the pair's question: whether [line] goes on with the block the rebuild
+  /// has open, or starts one. So the old block holding [line] is looked up,
+  /// and the rebuild stops only when the fresh scan would make the same one:
+  ///
+  /// * the old block starts at [line], and [line] does not go on with the
+  ///   open block — then the old blocks from here on are kept whole;
+  /// * the old block started above, and [line] goes on with an open block of
+  ///   the same shape — then that block is the old one, and it ends where the
+  ///   old one did (whether a line goes on with a block asks only the block's
+  ///   kind and the line).
+  ///
+  /// Not a blank run, nor an item that counts differently: the block after a
+  /// blank run counts its items from the block *before* it, which is the
+  /// rebuild's, so a kept list there would keep numbers that are not its own.
+  int _convergesAt(
+    int line,
+    _BlockBuilder builder,
+    int tailStart,
+    int headEnd,
+    SourceEdit edit,
+  ) {
+    // The old block holding [line]: a kept one after the edit, where it is
+    // now; or the last one the edit touched, when it runs on past the edit —
+    // read where it was, so its end is moved by the edit's delta.
+    var index = _firstIndexWhere(tailStart, (b) => b.startLine > line) - 1;
+    Block old;
+    int oldEnd;
+    if (index >= tailStart) {
+      old = _at(index);
+      oldEnd = old.endLine;
+    } else {
+      index = tailStart - 1;
+      if (index < headEnd || index < 0) return -1;
+      old = _at(index);
+      oldEnd = old.endLine + edit.lineDelta;
+      if (old.endLine < edit.firstUntouchedLine || line >= oldEnd) return -1;
+      if (old.startLine >= line) return -1;
+    }
+    if (old.kind == BlockKind.blank) return -1;
+    final open = builder.open;
+    final goesOn = open != null && _mergesInto(open.kind, open.startLine, line);
+    if (old.startLine == line) {
+      if (goesOn) return -1;
+      if (old.kind == BlockKind.listItem &&
+          _ordinalOf(line, old.listDepth, old.quoteDepth, builder.previous) !=
+              old.listOrdinal) {
+        return -1;
+      }
+      return index;
+    }
+    if (!goesOn || !open.sameShape(old)) return -1;
+    builder.openEnd = oldEnd;
+    return index + 1;
+  }
 
   /// [block] as it was before [end]: the run it covered up to a line inside
   /// it, which is what an edit leaves of the block it landed in.
-  static Block _prefixOf(Block block, int end) => Block(
+  static Block _cut(Block block, int end) => Block(
     kind: block.kind,
     startLine: block.startLine,
     endLine: end,
@@ -443,65 +448,42 @@ final class BlockScanner {
     return null;
   }
 
-  /// The blocks covering `[from, to)`, [before] being the last non-blank block
-  /// ahead of [from]: what an ordered item there counts on from.
-  List<Block> _buildBlocks(int from, int to, {Block? before}) {
-    final blocks = <Block>[];
-    var line = from;
-    while (line < to) {
-      final kind = _kindOf(line);
-      // The depth *on* the line, not the one entering it: a quote's first line
-      // has no depth before its own `>`, so taking the entering state left
-      // every quote block at depth 0 — which made the renderer draw it as an
-      // unnested quote and the parser read the `>` as text.
-      final quoteDepth = _quoteDepthAfter(line, _text(line), _entering[line]);
-      // The depth *on* the line, like the quote's: the state entering a marker
-      // line describes the item before it, so a block that took its depth from
-      // there was drawn at the previous item's indent — siblings at different
-      // indents, the item after a sublist pushed right (device report,
-      // 2026-09-21).
-      final listStack = _listAfter(_text(line), _entering[line]);
-      final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
-      var end = line + 1;
-      while (end < to && _mergesInto(kind, line, end)) {
-        end++;
-      }
+  /// The block that starts on [line], one line long: the builder extends it.
+  ///
+  /// [previous] is the last non-blank block before it, which an ordered item
+  /// counts on from.
+  Block _blockStarting(int line, Block? previous) {
+    final kind = _kindOf(line);
+    final text = _text(line);
+    // The depth *on* the line, not the one entering it: a quote's first line
+    // has no depth before its own `>`, so taking the entering state left
+    // every quote block at depth 0 — which made the renderer draw it as an
+    // unnested quote and the parser read the `>` as text.
+    final quoteDepth = _quoteDepthAfter(line, text, _entering[line]);
+    // The depth *on* the line, like the quote's: the state entering a marker
+    // line describes the item before it, so a block that took its depth from
+    // there was drawn at the previous item's indent — siblings at different
+    // indents, the item after a sublist pushed right (device report,
+    // 2026-09-21).
+    final listStack = _listAfter(text, _entering[line]);
+    final listDepth = listStack.isEmpty ? -1 : listStack.length - 1;
+    return Block(
+      kind: kind,
+      startLine: line,
+      endLine: line + 1,
+      quoteDepth: quoteDepth,
+      listDepth: listDepth,
       // An ordered list counts from its first item on, wherever the list
       // starts; a list written `1. 1. 1.` renders 1, 2, 3, which is CommonMark
       // and what the preview draws. The count lives here because this is where
       // the *list* is still visible: a block knows only its own item.
-      // The previous *item*, not merely the previous block: a blank line
-      // between two items is a `blank` block, and looking only one back would
-      // reset the count on every loose list — which is exactly the shape a
-      // numbered list takes in a note written with air in it.
-      var previous = before;
-      for (var back = blocks.length - 1; back >= 0; back--) {
-        if (blocks[back].kind != BlockKind.blank) {
-          previous = blocks[back];
-          break;
-        }
-      }
-      final ordinal = kind == BlockKind.listItem
+      listOrdinal: kind == BlockKind.listItem
           ? _ordinalOf(line, listDepth, quoteDepth, previous)
-          : 0;
-      blocks.add(
-        Block(
-          kind: kind,
-          startLine: line,
-          endLine: end,
-          quoteDepth: quoteDepth,
-          listDepth: listDepth,
-          listOrdinal: ordinal,
-          headingLevel: kind == BlockKind.heading
-              ? _headingLevel(_text(line))
-              : 0,
-          fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
-          entering: _entering[line],
-        ),
-      );
-      line = end;
-    }
-    return blocks;
+          : 0,
+      headingLevel: kind == BlockKind.heading ? _headingLevel(text) : 0,
+      fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
+      entering: _entering[line],
+    );
   }
 
   /// Whether line [end] belongs to the block that started on [start].
@@ -1061,4 +1043,73 @@ final class BlockScanner {
     'track',
     'ul',
   };
+}
+
+/// Blocks built line by line, as a scan reaches each line.
+///
+/// A block is a run of lines: the first line says what it is, and each line
+/// after it either goes on with it or starts the next one. Built as the scan
+/// goes rather than after it, so the scan can ask at any line which block is
+/// open — which is what deciding that it has converged needs.
+final class _BlockBuilder {
+  new(this._scanner, {Block? open, this._before})
+    : _open = open,
+      openEnd = open?.endLine ?? 0;
+
+  final BlockScanner _scanner;
+  final List<Block> _blocks = <Block>[];
+
+  /// The block the next line may go on with. Its own end is not kept up:
+  /// the run is [openEnd], and the block is cut there when it closes — a
+  /// block a line would be an allocation per line of the note.
+  Block? _open;
+
+  /// Where the open block runs to: one past the last line added to it, or
+  /// wherever the scan found the old block it turned out to be ending.
+  int openEnd;
+
+  /// The last non-blank block before the ones built here.
+  final Block? _before;
+
+  /// The block the next line may go on with (its end is not its end).
+  Block? get open => _open;
+
+  /// The last non-blank block before the next line: what an item starting
+  /// there would count on from.
+  Block? get previous {
+    final open = _open;
+    if (open != null && open.kind != BlockKind.blank) return open;
+    for (var at = _blocks.length - 1; at >= 0; at--) {
+      if (_blocks[at].kind != BlockKind.blank) return _blocks[at];
+    }
+    return _before;
+  }
+
+  /// Adds [line], whose entering state is recorded.
+  void add(int line) {
+    final open = _open;
+    if (open != null && _scanner._mergesInto(open.kind, open.startLine, line)) {
+      openEnd = line + 1;
+      return;
+    }
+    final before = previous;
+    _close();
+    _open = _scanner._blockStarting(line, before);
+    openEnd = line + 1;
+  }
+
+  /// The blocks built, the open one closed.
+  List<Block> finish() {
+    _close();
+    return _blocks;
+  }
+
+  void _close() {
+    final open = _open;
+    if (open == null) return;
+    _blocks.add(
+      open.endLine == openEnd ? open : BlockScanner._cut(open, openEnd),
+    );
+    _open = null;
+  }
 }

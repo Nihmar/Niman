@@ -98,10 +98,7 @@ final class Block {
 
   /// The state entering the block's first line, when the scanner kept it.
   ///
-  /// What a rebuild that starts inside the block works from: the lines before
-  /// the edit are the same lines, entered in this state, so their states are
-  /// recomputed rather than walked (`BlockScanner._rescanFrom`, and
-  /// `docs/dev/huge-notes.md` item 3). Null for a `Block` built by hand.
+  /// Null for a `Block` built by hand.
   final LineState? entering;
 
   /// How many lines it covers.
@@ -109,6 +106,16 @@ final class Block {
 
   /// Whether [line] is inside the block.
   bool contains(int line) => line >= startLine && line < endLine;
+
+  /// Whether [other] is the same block as this one wherever either of them
+  /// starts and ends: its kind and everything read off its first line.
+  bool sameShape(Block other) =>
+      kind == other.kind &&
+      quoteDepth == other.quoteDepth &&
+      listDepth == other.listDepth &&
+      listOrdinal == other.listOrdinal &&
+      headingLevel == other.headingLevel &&
+      fenceInfo == other.fenceInfo;
 
   /// The same block, [delta] lines further down.
   ///
