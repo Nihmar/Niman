@@ -154,3 +154,28 @@ rows (85 ms cold, JIT) and the colours' hand-over to their isolate (23 ms —
 a `String` is not copied between the isolates of one group, measured: 250 MB
 in 0 ms, so only the view's bound and index arrays are). The decode stays
 (~700 ms, off the UI isolate): the text has to be a `String` to be drawn.
+
+## Formulas with paths on the desktop (2026-09-24)
+
+KaTeX draws a stretched delimiter, a root sign, a brace or an enclosure's
+strokes as a path, and Impeller on the Linux desktop fills a path without
+antialiasing when its surface has no multisampling. Measured on the engine
+(an integration probe under `-d linux`): a matrix's parentheses had only
+black and white pixels on their edges, while the glyphs beside them, which
+come from the font's atlas, were smooth.
+
+`preview/math_raster.dart` draws such a formula — and only such a one —
+at four times the screen's resolution, halves the image twice (a box
+filter over sixteen samples a pixel) and keeps it, one image per formula,
+size, colour and screen, the 128 last drawn. The image is drawn with no
+filtering: it has the screen's resolution already, so each pixel takes one
+of its pixels, and a formula on a fraction of a pixel lands at most half a
+pixel off rather than blurred. All three places a formula is painted go
+through it (`paintMath`): a display formula, an inline one in the read
+view's text, an inline one in `live`.
+
+**Open doubt:** it is on for Linux and Windows. Linux is measured; Windows
+is assumed, from the same renderer family, and not verified — if Windows
+turns out to smooth paths itself, `MathRaster.enabled` should drop it,
+since the image costs a little sharpness a smooth renderer does not need
+to pay. Android's Vulkan surface is multisampled and is left out.

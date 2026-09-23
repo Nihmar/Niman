@@ -3277,6 +3277,7 @@ final class _Line extends StatelessWidget {
         foregroundPainter: InlineMathPainter(
           paragraph: paragraphKey,
           formulas: inline,
+          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
         ),
         child: paragraph,
       );

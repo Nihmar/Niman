@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:katex/katex.dart' show KatexBoxPainter;
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -18,6 +17,7 @@ import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_styler.dart';
+import 'package:niman/src/preview/math_box_painter.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
@@ -1246,7 +1246,7 @@ void main() {
               matching: find.byType(CustomPaint),
             ),
           )
-          .where((paint) => paint.painter is KatexBoxPainter)
+          .where((paint) => paint.painter is MathBoxPainter)
           .toList();
       expect(
         painted.length,
