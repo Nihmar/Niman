@@ -9,6 +9,8 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/settings.dart';
@@ -164,6 +166,7 @@ void main() {
     Future<void> pumpNotePane(
       WidgetTester tester, {
       required bool preview,
+      bool unified = false,
     }) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -182,7 +185,8 @@ void main() {
               showLineNumbers: true,
               autofocusEditor: false,
               showPreview: preview,
-              readNote: (_) async => '# Hello',
+              unifiedMarkdown: unified,
+              readNote: (_) async => '# Hello\n\n- item',
             ),
           ),
         ),
@@ -233,5 +237,42 @@ void main() {
         closeTo(baseNoteFontSize * 1.2, 1e-9),
       );
     });
+
+    testWidgets("the unified note's columns grow with the note's size", (
+      tester,
+    ) async {
+      // The note's size is a scaler, which scales its text and nothing
+      // else: the list's column and the spacing stayed at 100% around text
+      // half as big again. The interface's size reaches neither.
+      await controller.setUiTextScale(1.8);
+      for (final preview in [false, true]) {
+        await controller.setNoteTextScale(1);
+        await pumpNotePane(tester, preview: preview, unified: true);
+        await tester.pump();
+        final base = _column(tester, preview: preview);
+        await controller.setNoteTextScale(1.5);
+        await pumpNotePane(tester, preview: preview, unified: true);
+        await tester.pump();
+        expect(
+          _column(tester, preview: preview),
+          closeTo(base * 1.5, 1e-9),
+          reason: preview ? 'read' : 'edit',
+        );
+      }
+    });
   });
 }
+
+/// The list column the unified note is drawn with: the editor's, or the
+/// read view's when [preview].
+double _column(WidgetTester tester, {required bool preview}) => preview
+    ? tester
+          .widget<BlockView>(find.byType(BlockView).first)
+          .theme
+          .listIndentPerLevel
+    : tester
+          .widget<MarkdownSurface>(
+            find.byType(MarkdownSurface, skipOffstage: false),
+          )
+          .theme
+          .listIndentPerLevel;

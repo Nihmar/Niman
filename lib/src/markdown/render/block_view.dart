@@ -177,6 +177,9 @@ final class BlockView extends StatelessWidget {
     // One marker column per level, so a sublist's marker sits exactly where its
     // parent's text starts.
     final offset = depth <= 0 ? 0.0 : depth * theme.listIndentPerLevel;
+    // The size the item's text is read at: its box and its number's gap
+    // grow with the note's text, which is scaled as it is laid out.
+    final em = MediaQuery.textScalerOf(context).scale(theme.body.fontSize!);
     return Padding(
       padding: EdgeInsets.only(left: offset),
       child: Row(
@@ -185,9 +188,9 @@ final class BlockView extends StatelessWidget {
           SizedBox(
             width: theme.listIndentPerLevel,
             child: marker.isTask
-                ? _taskBox(marker.checked)
+                ? _taskBox(marker.checked, em)
                 : marker.ordered
-                ? _number(marker.display)
+                ? _number(marker.display, em)
                 : Text(marker.display, style: theme.marker),
           ),
           Expanded(child: _rich(context, style: theme.body)),
@@ -200,8 +203,8 @@ final class BlockView extends StatelessWidget {
   /// item's text, and running out to the left when it is wider than the
   /// column — a `10.` wrapped to two rows in it, and the numbers of a list
   /// did not line up. It is where `live` draws it (`live_decorations.dart`).
-  Widget _number(String display) => Padding(
-    padding: const EdgeInsets.only(right: 4),
+  Widget _number(String display, double em) => Padding(
+    padding: EdgeInsets.only(right: em * numberGapEm),
     child: OverflowBox(
       maxWidth: double.infinity,
       // As tall as the number: the column's height is the item's to set.
@@ -214,12 +217,12 @@ final class BlockView extends StatelessWidget {
   /// A task item's checkbox — ticked by a tap when [onToggleTask] is given,
   /// the whole marker column being the target, so a finger need not find
   /// the box's own few pixels.
-  Widget _taskBox(bool checked) {
+  Widget _taskBox(bool checked, double em) {
     final box = Padding(
-      padding: EdgeInsets.only(top: theme.body.fontSize! * 0.15),
+      padding: EdgeInsets.only(top: em * 0.15),
       child: Icon(
         checked ? Icons.check_box_outlined : Icons.check_box_outline_blank,
-        size: theme.body.fontSize! * 0.95,
+        size: em * 0.95,
         color: theme.marker.color,
       ),
     );

@@ -1608,7 +1608,9 @@ final class _NoteViewState extends State<NoteView>
         // the preview goes all ask *it* whether the editor has the focus.
         focusNode: _focus,
         mode: _unifiedMode,
-        theme: markdownThemeOf(context),
+        // Its metrics at the note's size: this context is above the scaler
+        // set just around the surface.
+        theme: markdownThemeOf(context, scaler: noteTextScalerOf(context)),
         showLineNumbers: widget.showLineNumbers && !widget.zen,
         caretWidth: widget.zen ? zenCaretWidth : null,
         typewriter: widget.typewriter,
