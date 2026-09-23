@@ -13,6 +13,7 @@ import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -65,6 +66,34 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets("a tight list's items touch, and a blank line is one spacing", (
+    tester,
+  ) async {
+    // Every block left a spacing under it, and a blank line was a block of
+    // its own that drew one and left one: a tight list's items stood apart
+    // where `live` draws them one under the other, and two paragraphs a
+    // blank line apart were three spacings apart.
+    tester.view.physicalSize = const Size(600, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(tester, '- one\n- two\n  - three\n\npara\n\n\nnext\n');
+    Rect rowOf(String text) => tester.getRect(
+      find.byWidgetPredicate(
+        (widget) => widget is RichText && widget.text.toPlainText() == text,
+      ),
+    );
+    final spacing = markdownThemeOf(
+      tester.element(find.byType(MarkdownReadView)),
+    ).blockSpacing;
+    expect(rowOf('two').top, closeTo(rowOf('one').bottom, 0.01));
+    expect(rowOf('three').top, closeTo(rowOf('two').bottom, 0.01));
+    expect(rowOf('para').top - rowOf('three').bottom, closeTo(spacing, 0.01));
+    expect(
+      rowOf('next').top - rowOf('para').bottom,
+      closeTo(spacing, 0.01),
+      reason: 'two blank lines are still one spacing',
+    );
+  });
   group('a code block too long to lay out whole', () {
     /// A fence of [lines] numbered lines, between two paragraphs.
     String fence(int lines) {
