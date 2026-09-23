@@ -421,12 +421,18 @@ final class BlockView extends StatelessWidget {
   /// stretched to the whole column — and the katex painter starts its ink at
   /// the canvas origin whatever size it is handed, which put every formula at
   /// the column's left edge (#252). Center hands the view its own width back.
-  Widget _blockMath(BuildContext context) => Center(
-    child: BlockMathView(
-      cache: mathCache,
-      maxWidth: availableWidth,
-      tex: displayTexOf(parsed.text),
-      style: mathStyleFor(theme.body),
+  ///
+  /// Half a spacing above and below it, as `live` sets it
+  /// (`liveFormulaUnder`).
+  Widget _blockMath(BuildContext context) => Padding(
+    padding: EdgeInsets.symmetric(vertical: theme.blockSpacing / 2),
+    child: Center(
+      child: BlockMathView(
+        cache: mathCache,
+        maxWidth: availableWidth,
+        tex: displayTexOf(parsed.text),
+        style: mathStyleFor(theme.body),
+      ),
     ),
   );
 
