@@ -161,14 +161,15 @@ void main() {
     // half an ambient letter spacing in; and a quote's text stood its bar's
     // width further in, in the read view, than past the bar in `live`; and
     // a code block's code stood a padding further in, in its box, than on
-    // `live`'s page, which drew no box.
+    // `live`'s page, which drew no box; and an indented block's code stood
+    // its four spaces further in, in `live`, which drew them.
     tester.view.physicalSize = const Size(900, 700);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     const note =
         'caret\n\n# Heading one\n\n## Heading two\n\n- bullet\n- [ ] task\n'
         '  - nested\n\n1. numbered\n\n> quoted\n>\n> > deeper\n\n'
-        '```dart\nfenced();\n```\n';
+        '```dart\nfenced();\n```\n\n    indented();\n      deeper();\n';
     const words = [
       'Heading one',
       'Heading two',
@@ -178,6 +179,8 @@ void main() {
       'quoted',
       'deeper',
       'fenced',
+      'indented',
+      'deeper()',
     ];
     Future<List<double>> lefts({required bool read}) async {
       await _pumpNote(tester, note, read: read);

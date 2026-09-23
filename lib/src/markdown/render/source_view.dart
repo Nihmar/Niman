@@ -2994,6 +2994,7 @@ final class _Line extends StatelessWidget {
         theme: theme,
         paragraph: paragraphKey,
         textLeft: indent,
+        restingLeft: mine ? _indent(context) : indent,
         revealed: mine,
         color: theme.markerDim,
       ),
@@ -3183,6 +3184,7 @@ final class _Line extends StatelessWidget {
   /// between them. Zero for a line that is none of these, whose leading
   /// spaces are its own.
   int get _prefixEnd {
+    if (shape.codeIndented) return _codeIndentEnd(styled.text);
     if (!shape.listed && shape.quoteDepth == 0 && !_heading) return 0;
     final text = styled.text;
     var at = 0;
@@ -3207,6 +3209,25 @@ final class _Line extends StatelessWidget {
       }
       at = token.end;
     }
+  }
+
+  /// Where an indented code line's indent ends: four columns in, a tab
+  /// being all four, and no further — the spaces past them are the code's.
+  static int _codeIndentEnd(String text) {
+    var at = 0;
+    var columns = 0;
+    while (at < text.length && columns < 4) {
+      final unit = text.codeUnitAt(at);
+      if (unit == 0x09) {
+        columns = 4;
+      } else if (unit == 0x20) {
+        columns++;
+      } else {
+        break;
+      }
+      at++;
+    }
+    return at;
   }
 
   /// Where the line's text is drawn from, past its prefix — hidden whole,
@@ -3296,9 +3317,11 @@ final class _Line extends StatelessWidget {
       if (token.start > at) {
         _add(spans, at, token.start, null, concealed);
       }
+      // A token the prefix cuts into — an indented code line's, which is
+      // the whole line — is drawn from where the prefix ends.
       _add(
         spans,
-        token.start,
+        token.start < at ? at : token.start,
         token.end,
         hidden(token, revealed: revealed, run: run)
             ? _hiddenMarker

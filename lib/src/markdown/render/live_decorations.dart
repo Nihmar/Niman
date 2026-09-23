@@ -68,6 +68,7 @@ final class LineShape {
     this.task,
     this.rule = false,
     this.code,
+    this.codeIndented = false,
   });
 
   /// The shape of [line], whose block is [block] and whose index is [index].
@@ -132,6 +133,7 @@ final class LineShape {
       task: task,
       rule: rule,
       code: code,
+      codeIndented: block?.kind == BlockKind.indentedCode,
     );
   }
 
@@ -171,6 +173,10 @@ final class LineShape {
   /// for a line of no code block.
   final CodeRow? code;
 
+  /// Whether the line is an indented code block's: its first four columns
+  /// are the block's indent, hidden as a list's marker is, and not code.
+  final bool codeIndented;
+
   /// A line with no shape to draw.
   static const LineShape none = LineShape();
 
@@ -185,7 +191,8 @@ final class LineShape {
       other.ordinal == ordinal &&
       other.task == task &&
       other.rule == rule &&
-      other.code == code;
+      other.code == code &&
+      other.codeIndented == codeIndented;
 
   @override
   int get hashCode => Object.hash(
@@ -198,6 +205,7 @@ final class LineShape {
     task,
     rule,
     code,
+    codeIndented,
   );
 }
 
@@ -269,7 +277,8 @@ final class LiveDecorationPainter extends CustomPainter {
     required this.textLeft,
     required this.revealed,
     required this.color,
-  });
+    double? restingLeft,
+  }) : restingLeft = restingLeft ?? textLeft;
 
   /// What to draw.
   final LineShape shape;
@@ -282,6 +291,11 @@ final class LiveDecorationPainter extends CustomPainter {
 
   /// Where the paragraph starts, from the painter's left edge.
   final double textLeft;
+
+  /// Where the paragraph starts when the caret is not on the line: where a
+  /// code block's box is drawn from, which does not move when the caret
+  /// shows an indented block's spaces into it.
+  final double restingLeft;
 
   /// Whether the caret is on the line: its markers are drawn as written, so
   /// nothing stands in for them.
@@ -317,7 +331,7 @@ final class LiveDecorationPainter extends CustomPainter {
   void _paintCode(Canvas canvas, Size size) {
     final row = shape.code;
     if (row == null) return;
-    final left = textLeft - theme.codePadding;
+    final left = restingLeft - theme.codePadding;
     const round = Radius.circular(4);
     canvas.drawRRect(
       RRect.fromRectAndCorners(
@@ -402,6 +416,7 @@ final class LiveDecorationPainter extends CustomPainter {
       oldDelegate.shape != shape ||
       oldDelegate.revealed != revealed ||
       oldDelegate.textLeft != textLeft ||
+      oldDelegate.restingLeft != restingLeft ||
       oldDelegate.color != color ||
       oldDelegate.theme != theme;
 }
