@@ -1207,6 +1207,18 @@ final class IcelandicStrings extends Strings {
       'Skipanaspjaldið býður aðeins upp á skipanir sem hægt er að keyra þar '
       'sem þú ert. Hér eru þær allar, og hvenær hver birtist.';
   @override
+  String get commandsKeysNote =>
+      'Hér er engu breytt. Lyklarnir eru þeir sem eru stilltir í '
+      '„Lyklaborðssnarstæður“ og fylgja hverri breytingu þar.';
+  @override
+  String get commandsOpenShortcuts => 'Breyta lyklum í „Lyklaborðssnarstæður“';
+  @override
+  String get commandsChangeKeyTooltip => 'Breyta í „Lyklaborðssnarstæður“';
+  @override
+  String get commandsSubtitle => 'Hvað skipanaspjaldið getur keyrt, og hvenær';
+  @override
+  String get keyboardShortcutsSubtitle => 'Breyta lyklum hverrar skipunar';
+  @override
   String get commandNeedNone => 'Alltaf tiltæk';
   @override
   String get commandNeedOpenNote => 'Krefst opinnar glósu';

@@ -3,12 +3,16 @@
 // navigation between them. The phone keeps its list of screens.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
+import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -124,5 +128,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SettingsEditorScreen), findsOne);
     expect(find.byKey(const Key('settings-area-editor')), findsNothing);
+  });
+
+  // #264: Commands is the palette's reference; its keys lead to Keyboard
+  // shortcuts, where they are changed.
+  group('from Commands to Keyboard shortcuts', () {
+    late bool wasAttached;
+    setUp(() {
+      wasAttached = KeyboardPresence.shared.attached;
+      KeyboardPresence.shared.attached = true;
+    });
+    tearDown(() => KeyboardPresence.shared.attached = wasAttached);
+
+    Future<void> openCommands(WidgetTester tester) async {
+      final row = find.byKey(const Key('settings-area-commands'));
+      await tester.ensureVisible(row);
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsCommandsScreen), findsOne);
+    }
+
+    testWidgets('the two rows say what tells them apart', (tester) async {
+      // The phone's list: the desktop's compact rows carry no subtitles.
+      await pumpAt(tester, 400);
+      await tester.ensureVisible(
+        find.byKey(const Key('settings-area-commands')),
+      );
+      expect(find.text(AppStrings.commandsSubtitle), findsOne);
+      expect(find.text(AppStrings.keyboardShortcutsSubtitle), findsOne);
+    });
+
+    testWidgets('wide, a keycap shows its command beside the list', (
+      tester,
+    ) async {
+      await pumpAt(tester, 1200);
+      await openCommands(tester);
+      final keycap = find.byKey(
+        Key('command-keys-${AppCommand.openPalette.name}'),
+      );
+      await tester.ensureVisible(keycap);
+      await tester.tap(keycap);
+      await tester.pumpAndSettle();
+      expect(find.byType(KeyboardShortcutsScreen), findsOne);
+      expect(find.byType(SettingsCommandsScreen), findsNothing);
+      expect(find.byKey(shortcutRowKey(AppCommand.openPalette)), findsOne);
+      expect(find.byKey(const Key('settings-area-commands')), findsOne);
+    });
+
+    testWidgets('narrow, it opens over Commands, and back returns there', (
+      tester,
+    ) async {
+      await pumpAt(tester, 400);
+      await openCommands(tester);
+      await tester.tap(find.byKey(const Key('commands-open-shortcuts')));
+      await tester.pumpAndSettle();
+      expect(find.byType(KeyboardShortcutsScreen), findsOne);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsCommandsScreen), findsOne);
+    });
   });
 }

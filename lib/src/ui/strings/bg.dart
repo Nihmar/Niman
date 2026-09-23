@@ -1218,6 +1218,20 @@ final class BulgarianStrings extends Strings {
       'Палитрата с команди предлага само командите, които могат да се '
       'изпълнят там, където сте. Тук са всички и кога се показва всяка.';
   @override
+  String get commandsKeysNote =>
+      'Тук нищо не се променя. Клавишите са зададените в „Клавишни '
+      'комбинации“ и следват всяка промяна там.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Смяна на клавишите в „Клавишни комбинации“';
+  @override
+  String get commandsChangeKeyTooltip => 'Смяна в „Клавишни комбинации“';
+  @override
+  String get commandsSubtitle =>
+      'Какво може да изпълни палитрата с команди, и кога';
+  @override
+  String get keyboardShortcutsSubtitle => 'Смяна на клавишите на всяка команда';
+  @override
   String get commandNeedNone => 'Винаги налично';
   @override
   String get commandNeedOpenNote => 'Изисква отворена бележка';

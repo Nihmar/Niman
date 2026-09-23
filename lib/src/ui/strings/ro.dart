@@ -1218,6 +1218,19 @@ final class RomanianStrings extends Strings {
       'Paleta de comenzi oferă doar comenzile care pot rula acolo unde ești. '
       'Aici sunt toate, și când apare fiecare.';
   @override
+  String get commandsKeysNote =>
+      'Aici nu se schimbă nimic. Tastele sunt cele setate în „Scurtături de '
+      'tastatură” și urmează orice schimbare făcută acolo.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Schimbă tastele în „Scurtături de tastatură”';
+  @override
+  String get commandsChangeKeyTooltip => 'Schimbă în „Scurtături de tastatură”';
+  @override
+  String get commandsSubtitle => 'Ce poate rula paleta de comenzi, și când';
+  @override
+  String get keyboardShortcutsSubtitle => 'Schimbă tastele fiecărei comenzi';
+  @override
   String get commandNeedNone => 'Mereu disponibilă';
   @override
   String get commandNeedOpenNote => 'Necesită o notă deschisă';

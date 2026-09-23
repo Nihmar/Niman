@@ -1241,6 +1241,21 @@ final class FrenchStrings extends Strings {
       'La palette de commandes ne propose que les commandes exécutables là où '
       'vous êtes. Les voici toutes, avec le moment où chacune apparaît.';
   @override
+  String get commandsKeysNote =>
+      'Rien ne se modifie ici. Les touches sont celles définies dans '
+      'Raccourcis clavier et suivent chaque changement fait là-bas.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Modifier les touches dans Raccourcis clavier';
+  @override
+  String get commandsChangeKeyTooltip => 'Modifier dans Raccourcis clavier';
+  @override
+  String get commandsSubtitle =>
+      'Ce que la palette de commandes peut exécuter, et quand';
+  @override
+  String get keyboardShortcutsSubtitle =>
+      'Modifier les touches de chaque commande';
+  @override
   String get commandNeedNone => 'Toujours disponible';
   @override
   String get commandNeedOpenNote => 'Nécessite une note ouverte';

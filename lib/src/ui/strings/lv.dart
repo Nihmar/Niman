@@ -1204,6 +1204,20 @@ final class LatvianStrings extends Strings {
       'Komandu palete piedāvā tikai tās komandas, kuras var izpildīt tur, kur '
       'tu esi. Šeit ir visas, un kad katra parādās.';
   @override
+  String get commandsKeysNote =>
+      'Šeit nekas netiek mainīts. Taustiņi ir tie, kas iestatīti sadaļā '
+      '“Tastatūras saīsinājumi”, un seko katrai tur veiktajai izmaiņai.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Mainīt taustiņus sadaļā “Tastatūras saīsinājumi”';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Mainīt sadaļā “Tastatūras saīsinājumi”';
+  @override
+  String get commandsSubtitle => 'Ko komandu palete var izpildīt, un kad';
+  @override
+  String get keyboardShortcutsSubtitle => 'Mainīt katras komandas taustiņus';
+  @override
   String get commandNeedNone => 'Vienmēr pieejama';
   @override
   String get commandNeedOpenNote => 'Nepieciešama atvērta piezīme';

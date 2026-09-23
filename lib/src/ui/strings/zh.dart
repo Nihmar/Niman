@@ -1097,6 +1097,16 @@ final class ChineseStrings extends Strings {
   @override
   String get commandsIntro => '命令面板只列出在当前位置可以运行的命令。这里是全部命令，以及每条命令何时出现。';
   @override
+  String get commandsKeysNote => '这里不做任何更改。按键就是在键盘快捷键中设置的按键，并随那里的任何更改而更新。';
+  @override
+  String get commandsOpenShortcuts => '在键盘快捷键中更改按键';
+  @override
+  String get commandsChangeKeyTooltip => '在键盘快捷键中更改';
+  @override
+  String get commandsSubtitle => '命令面板可以运行什么，以及何时可用';
+  @override
+  String get keyboardShortcutsSubtitle => '更改每个命令的按键';
+  @override
   String get commandNeedNone => '始终可用';
   @override
   String get commandNeedOpenNote => '需要打开一条笔记';

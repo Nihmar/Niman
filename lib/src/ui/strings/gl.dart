@@ -1221,6 +1221,19 @@ final class GalicianStrings extends Strings {
       'A paleta de ordes só ofrece as ordes que se poden executar onde estás. '
       'Aquí están todas, e cando aparece cada unha.';
   @override
+  String get commandsKeysNote =>
+      'Aquí non se cambia nada. As teclas son as definidas en Atallos de '
+      'teclado e seguen calquera cambio feito alí.';
+  @override
+  String get commandsOpenShortcuts => 'Cambiar as teclas en Atallos de teclado';
+  @override
+  String get commandsChangeKeyTooltip => 'Cambiar en Atallos de teclado';
+  @override
+  String get commandsSubtitle =>
+      'O que pode executar a paleta de comandos, e cando';
+  @override
+  String get keyboardShortcutsSubtitle => 'Cambia as teclas de cada comando';
+  @override
   String get commandNeedNone => 'Sempre dispoñible';
   @override
   String get commandNeedOpenNote => 'Precisa unha nota aberta';

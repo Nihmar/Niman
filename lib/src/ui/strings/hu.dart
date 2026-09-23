@@ -1215,6 +1215,20 @@ final class HungarianStrings extends Strings {
       'futtathatók, ahol éppen vagy. Itt van mind, és hogy melyik mikor '
       'jelenik meg.';
   @override
+  String get commandsKeysNote =>
+      'Itt semmi sem változik. A billentyűk a Billentyűparancsokban '
+      'beállítottak, és követnek minden ott végzett módosítást.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Billentyűk módosítása a Billentyűparancsokban';
+  @override
+  String get commandsChangeKeyTooltip => 'Módosítás a Billentyűparancsokban';
+  @override
+  String get commandsSubtitle => 'Mit futtathat a parancspaletta, és mikor';
+  @override
+  String get keyboardShortcutsSubtitle =>
+      'Minden parancs billentyűinek módosítása';
+  @override
   String get commandNeedNone => 'Mindig elérhető';
   @override
   String get commandNeedOpenNote => 'Nyitott jegyzet kell hozzá';

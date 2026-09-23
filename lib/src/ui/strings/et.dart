@@ -1189,6 +1189,20 @@ final class EstonianStrings extends Strings {
       'Käsupalett pakub ainult käske, mida saab seal, kus sa oled, käivitada. '
       'Siin on need kõik ja millal igaüks ilmub.';
   @override
+  String get commandsKeysNote =>
+      'Siin ei muudeta midagi. Klahvid on need, mis on määratud jaotises '
+      '„Klaviatuuri lühendid“, ja järgivad iga seal tehtud muudatust.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Muuda klahve jaotises „Klaviatuuri lühendid“';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Muuda jaotises „Klaviatuuri lühendid“';
+  @override
+  String get commandsSubtitle => 'Mida käsupalett saab käivitada, ja millal';
+  @override
+  String get keyboardShortcutsSubtitle => 'Muuda iga käsu klahve';
+  @override
   String get commandNeedNone => 'Alati saadaval';
   @override
   String get commandNeedOpenNote => 'Vajab avatud märget';
