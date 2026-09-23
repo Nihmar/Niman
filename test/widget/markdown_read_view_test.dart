@@ -14,6 +14,7 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
@@ -468,6 +469,57 @@ void main() {
       expect(state.blockCount, held.blocks.length);
       expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
       expect(parser.scope?.footnotes.single.body, 'a note');
+    });
+
+    testWidgets('the heights a frame measured outlive the next hand-over', (
+      tester,
+    ) async {
+      // Estimating every block again forgot them, and on 2 M blocks cost
+      // 100–200 ms; the editor's hand-over says which blocks are new.
+      final parser = BlockParser();
+      final live = SourceBuffer.fromText(_note(40));
+      final styler = SourceStyler(live);
+      Widget view() {
+        final snapshot = live.snapshot();
+        return MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: snapshot,
+              parser: parser,
+              mathCache: _syncCache(),
+              knownScan: (buffer) {
+                final scan = styler.handOver()!;
+                return DocumentScan(
+                  blocks: scan.blocks,
+                  scope: scan.scope.on(buffer, buffer.revision),
+                  revision: buffer.revision,
+                  changes: scan.changes,
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(view());
+      await tester.pump();
+      MarkdownReadViewState state() =>
+          tester.state<MarkdownReadViewState>(find.byType(MarkdownReadView));
+      final measured = state().measuredBlocks;
+      expect(measured, greaterThan(5), reason: 'a screen of blocks drawn');
+
+      // A paragraph added far below what is on screen.
+      final end = live.length;
+      styler.edited(live.replaceRange(end, end, '\nA new paragraph.\n'));
+      await tester.pumpWidget(view(), phase: EnginePhase.build);
+      expect(
+        state().measuredBlocks,
+        measured,
+        reason: 'no block on screen changed, so none lost its height',
+      );
+      await tester.pump();
+      expect(state().blockCount, styler.handOver()!.blocks.length);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('a held scan of another revision is not taken', (tester) async {

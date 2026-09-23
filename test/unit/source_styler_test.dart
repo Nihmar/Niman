@@ -245,22 +245,53 @@ void main() {
         4 => '',
         _ => 'plain ${random.nextInt(9)}',
       };
+      // A block's shape without where it is: what the changes replayed over
+      // the last hand-over keep is the blocks it had, moved along.
+      String shape(Block block) =>
+          '${block.kind.name} ${block.lineCount} '
+          'q${block.quoteDepth} l${block.listDepth} ${block.fenceInfo}';
       final random = Random(11);
       for (var round = 0; round < 40; round++) {
         String any() => random.nextBool() ? line(random) : note(random);
         final lines = [for (var at = 0; at < 30; at++) any()];
         final buffer = SourceBuffer.fromText(lines.join('\n'));
         final styler = SourceStyler(buffer);
+        DocumentScan? previous;
         for (var edit = 0; edit < 10; edit++) {
-          final length = buffer.length;
-          final start = random.nextInt(length + 1);
-          final end = min(length, start + random.nextInt(12));
-          final inserted = random.nextBool()
-              ? '\n${random.nextBool() ? line(random) : note(random)}'
-              : ['[^b]', '[^a]', '[', '^', '\n', 'x', '`'][random.nextInt(7)];
-          styler.edited(buffer.replaceRange(start, end, inserted));
+          // Several edits between two hand-overs, as a writer makes before
+          // opening the read pane.
+          for (var step = random.nextInt(3); step >= 0; step--) {
+            final length = buffer.length;
+            final start = random.nextInt(length + 1);
+            final end = min(length, start + random.nextInt(12));
+            final inserted = random.nextBool()
+                ? '\n${random.nextBool() ? line(random) : note(random)}'
+                : ['[^b]', '[^a]', '[', '^', '\n', 'x', '`'][random.nextInt(7)];
+            styler.edited(buffer.replaceRange(start, end, inserted));
+          }
           final fresh = DocumentScan.of(buffer);
-          final kept = styler.scan;
+          final kept = styler.handOver();
+          final changes = kept?.changes;
+          if (kept != null && previous != null && changes != null) {
+            expect(changes.since, same(previous.changes!.token));
+            final replayed = List<Block>.of(previous.blocks);
+            for (final stretch in changes.stretches!) {
+              replayed.replaceRange(
+                stretch.start,
+                stretch.start + stretch.removed,
+                kept.blocks.sublist(
+                  stretch.start,
+                  stretch.start + stretch.inserted,
+                ),
+              );
+            }
+            expect(
+              replayed.map(shape).toList(),
+              kept.blocks.map(shape).toList(),
+              reason: 'round $round edit $edit: the changes replayed',
+            );
+          }
+          if (kept != null) previous = kept;
           if (kept == null) {
             expect(
               styler.settled,
@@ -284,10 +315,10 @@ void main() {
         [for (var at = 0; at < 3 * 4096; at++) 'line $at\n'].join('\n'),
       );
       final styler = SourceStyler(buffer);
-      expect(styler.scan, isNotNull);
+      expect(styler.handOver(), isNotNull);
       styler.edited(buffer.replaceRange(0, 0, '\$\$\n'));
       expect(styler.settled, isFalse);
-      expect(styler.scan, isNull);
+      expect(styler.handOver(), isNull);
     });
 
     test('a keystroke parses the block it landed in, not the screen', () {

@@ -348,9 +348,63 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     } else {
       widget.parser.scope = _scopeOf(buffer, scan.scope);
     }
-    _blocks = _pieced(scan.blocks);
-    _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
-    _built = 0;
+    final changes = scan.changes;
+    if (!_follow(changes, scan.blocks)) {
+      _blocks = _pieced(scan.blocks);
+      _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
+      _built = 0;
+    }
+    _handed = changes?.token;
+  }
+
+  /// The mark of the editor's hand-over the pane shows, or null when what it
+  /// shows was scanned from the text.
+  Object? _handed;
+
+  /// Takes [blocks] by replaying [changes] over the heights the pane has,
+  /// when they follow the hand-over it shows: the blocks the edits did not
+  /// touch keep the height a frame measured, and only the new ones are
+  /// estimated — O(the changes), where a new map was O(blocks), 100–200 ms
+  /// on a note of 2 M of them, and forgot every measurement.
+  ///
+  /// False, with nothing changed, when they do not follow it, were not
+  /// worth keeping, or a long code block is involved: the pane lays those
+  /// out in pieces that are entries of their own, and the changes count
+  /// blocks.
+  bool _follow(ScanChanges? changes, List<Block> blocks) {
+    final heights = _heights;
+    final stretches = changes?.stretches;
+    if (changes == null ||
+        stretches == null ||
+        heights == null ||
+        changes.since == null ||
+        !identical(changes.since, _handed) ||
+        _pieces.isNotEmpty) {
+      return false;
+    }
+    var length = heights.length;
+    for (final stretch in stretches) {
+      length += stretch.inserted - stretch.removed;
+      for (
+        var at = stretch.start;
+        at < stretch.start + stretch.inserted;
+        at++
+      ) {
+        if (_isLongCode(blocks[at])) return false;
+      }
+    }
+    if (length != blocks.length) return false;
+    // The estimates are asked with the new indices, of the new list.
+    _blocks = blocks;
+    for (final stretch in stretches) {
+      heights.splice(
+        stretch.start,
+        stretch.removed,
+        stretch.inserted,
+        _estimateOf,
+      );
+    }
+    return true;
   }
 
   /// [scanned], unless what it holds is what the pane already had.
@@ -435,6 +489,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     _pieces.clear();
     _heights = null;
     _built = 0;
+    _handed = null;
   }
 
   /// The lines a code block is drawn in pieces of, past twice as many.

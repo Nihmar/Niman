@@ -23,6 +23,8 @@
 /// rebuilt — 59 ms per Enter at a million lines.
 library;
 
+import 'dart:typed_data';
+
 import 'package:niman/src/markdown/prefix_sums.dart';
 
 /// The height of every block of a note.
@@ -30,7 +32,7 @@ final class BlockHeightMap {
   /// Creates a map over [count] items, estimating item `index` with
   /// `estimate`.
   new({required int count, required double Function(int index) estimate})
-    : _measured = List<double>.filled(count, 0, growable: true),
+    : _measured = Uint8List(count),
       // The estimator is asked **once**, here. Asking it again when a block is
       // measured would compute today's answer against a map seeded with an
       // earlier one — the read view builds this in `initState`, before the
@@ -58,10 +60,26 @@ final class BlockHeightMap {
     final end = (start + removed).clamp(start, _measured.length);
     var gone = 0;
     for (var at = start; at < end; at++) {
-      if (_measured[at] > 0) gone++;
+      if (_measured[at] != 0) gone++;
     }
     _measuredCount -= gone;
-    _measured.replaceRange(start, end, List<double>.filled(inserted, 0));
+    if (end - start == inserted) {
+      _measured.fillRange(start, end, 0);
+    } else {
+      // A byte a block, copied into a new list: 2 MB for 2 M blocks, where a
+      // growable list of doubles moved 16 MB of pointers, and grew by
+      // reallocating all of them on the first block an edit added (140 ms
+      // on the 246 MB note, AOT).
+      final next = Uint8List(_measured.length - (end - start) + inserted)
+        ..setRange(0, start, _measured)
+        ..setRange(
+          start + inserted,
+          _measured.length - end + start + inserted,
+          _measured,
+          end,
+        );
+      _measured = next;
+    }
     _extents.splice(start, end - start, <double>[
       for (var at = 0; at < inserted; at++) estimate(start + at),
     ]);
@@ -73,8 +91,9 @@ final class BlockHeightMap {
   int get generation => _generation;
   int _generation = 0;
 
-  /// The height a frame laid each block out at, or 0 while none has.
-  final List<double> _measured;
+  /// 1 for each block a frame has laid out, 0 while none has; the height
+  /// itself is in [_extents].
+  Uint8List _measured;
 
   /// The best height known for each block, summed: the estimate until a frame
   /// measures it, the measurement after.
@@ -125,8 +144,8 @@ final class BlockHeightMap {
   /// in the same pass, right away.
   void measured(int index, double height) {
     if (index < 0 || index >= _measured.length || height <= 0) return;
-    if (_measured[index] <= 0) _measuredCount++;
-    _measured[index] = height;
+    if (_measured[index] == 0) _measuredCount++;
+    _measured[index] = 1;
     _extents.setValue(index, height);
   }
 }
