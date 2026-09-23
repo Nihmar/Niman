@@ -195,6 +195,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   Future<void> _publishQuickActions() async {
     final labels = {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
+      ShortcutAction.journalToday: AppStrings.journalFabToday,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
@@ -1523,6 +1524,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     switch (action) {
       case ShortcutAction.quickNote:
         await _openQuickNoteFromTile();
+      case ShortcutAction.journalToday:
+        await _journalFlow.openToday(context);
       case ShortcutAction.newTodo:
         _openTodo();
         await _addTodo();

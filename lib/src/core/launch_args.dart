@@ -75,6 +75,7 @@ String? _pathOf(String arg, String? cwd) {
 
 const Map<String, ShortcutAction> _flags = {
   '--quick-note': ShortcutAction.quickNote,
+  '--journal-today': ShortcutAction.journalToday,
   '--new-note': ShortcutAction.newNote,
   '--new-todo': ShortcutAction.newTodo,
   '--new-list': ShortcutAction.newList,

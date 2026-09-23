@@ -128,6 +128,7 @@ class ShortcutsBridge(private val activity: Activity) :
      */
     private fun iconFor(id: String): Int? = when (id) {
         "quick_note" -> R.drawable.ic_shortcut_quick_note
+        "journal_today" -> R.drawable.ic_shortcut_journal
         "new_todo" -> R.drawable.ic_shortcut_new_todo
         "new_note" -> R.drawable.ic_shortcut_new_note
         "new_list" -> R.drawable.ic_shortcut_new_list
