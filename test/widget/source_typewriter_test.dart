@@ -40,10 +40,14 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
 Future<MarkdownSourceViewState> _pump(
   WidgetTester tester, {
   bool typewriter = false,
   double? caretWidth,
+  bool live = false,
 }) async {
   tester.view.physicalSize = const Size(600, 400);
   tester.view.devicePixelRatio = 1;
@@ -58,6 +62,9 @@ Future<MarkdownSourceViewState> _pump(
           showLineNumbers: false,
           typewriter: typewriter,
           caretWidth: caretWidth,
+          // The mode hides markers; this note has none, and what is under test
+          // is where the row being written is kept.
+          hideMarkers: live,
         ),
       ),
     ),
@@ -78,10 +85,25 @@ bool _rowLit(WidgetTester tester) => tester
     .any((paint) => paint.painter?.runtimeType.toString() == '_RowPainter');
 
 void main() {
-  testWidgets('typewriter mode keeps the caret row in the middle', (
+  /// The same test in `source` and in `live` (#246).
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('typewriter mode keeps the caret row in the middle', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester, typewriter: true);
+    final state = await _pump(
+      tester,
+      typewriter: true,
+      live: mode == _Mode.live,
+    );
     state.focusNode.requestFocus();
     await tester.pump();
     for (var line = 0; line < 40; line++) {
@@ -93,8 +115,12 @@ void main() {
     expect(_rowLit(tester), isTrue);
   });
 
-  testWidgets('the last line can reach the middle too', (tester) async {
-    final state = await _pump(tester, typewriter: true);
+  both('the last line can reach the middle too', (tester, mode) async {
+    final state = await _pump(
+      tester,
+      typewriter: true,
+      live: mode == _Mode.live,
+    );
     state.focusNode.requestFocus();
     await tester.pump();
     state.moveCaretBy(CaretMotion.documentEnd);
@@ -102,10 +128,11 @@ void main() {
     expect(_caretShare(tester, state), closeTo(0.5, 0.06));
   });
 
-  testWidgets('without it the caret row stays where it is drawn', (
+  both('without it the caret row stays where it is drawn', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester);
+    final state = await _pump(tester, live: mode == _Mode.live);
     state.focusNode.requestFocus();
     await tester.pump();
     state.moveCaretBy(CaretMotion.documentEnd);
@@ -114,19 +141,23 @@ void main() {
     expect(_rowLit(tester), isFalse);
   });
 
-  testWidgets('a note put back without the focus is not moved', (tester) async {
-    final state = await _pump(tester, typewriter: true);
+  both('a note put back without the focus is not moved', (tester, mode) async {
+    final state = await _pump(
+      tester,
+      typewriter: true,
+      live: mode == _Mode.live,
+    );
     // Line 15: on screen, well below the middle.
     state.placeCaret(110);
     await tester.pumpAndSettle();
     expect(state.scrollOffset, lessThan(1));
   });
 
-  testWidgets('Zen draws the caret thicker', (tester) async {
-    final plain = await _pump(tester);
+  both('Zen draws the caret thicker', (tester, mode) async {
+    final plain = await _pump(tester, live: mode == _Mode.live);
     await tester.pump();
     expect(plain.caretRect!.width, 1.5);
-    final zen = await _pump(tester, caretWidth: 3);
+    final zen = await _pump(tester, caretWidth: 3, live: mode == _Mode.live);
     await tester.pump();
     expect(zen.caretRect!.width, 3);
   });

@@ -41,13 +41,23 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
-Future<MarkdownSourceViewState> _pump(WidgetTester tester, String text) async {
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
+Future<MarkdownSourceViewState> _pump(
+  WidgetTester tester,
+  String text, {
+  bool live = false,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(text),
           theme: _theme,
+          // Hiding a marker is a style: the note the reader is given is the
+          // note's own text either way, which is the property under test.
+          hideMarkers: live,
         ),
       ),
     ),
@@ -63,11 +73,26 @@ SemanticsNode _field(WidgetTester tester) => tester.getSemantics(
 );
 
 void main() {
-  testWidgets('the note is one multiline text field with its text', (
+  /// The same test in `source` and in `live` (#246).
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('the note is one multiline text field with its text', (
     tester,
+    mode,
   ) async {
     final semantics = tester.ensureSemantics();
-    final state = await _pump(tester, 'prima riga\nseconda riga\n');
+    final state = await _pump(
+      tester,
+      'prima riga\nseconda riga\n',
+      live: mode == _Mode.live,
+    );
     state.select(const SelectionModel(anchor: 6, extent: 10));
     await tester.pump();
     final data = _field(tester).getSemanticsData();
@@ -83,11 +108,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a reader moves the caret and sets the selection', (
-    tester,
-  ) async {
+  both('a reader moves the caret and sets the selection', (tester, mode) async {
     final semantics = tester.ensureSemantics();
-    final state = await _pump(tester, 'una parola\n');
+    final state = await _pump(tester, 'una parola\n', live: mode == _Mode.live);
     final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
     final id = _field(tester).id;
     owner.performAction(id, SemanticsAction.moveCursorForwardByCharacter, true);
@@ -102,15 +125,16 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a long note gives the reader the text around the caret', (
+  both('a long note gives the reader the text around the caret', (
     tester,
+    mode,
   ) async {
     final semantics = tester.ensureSemantics();
     final text = List<String>.generate(
       2000,
       (at) => 'riga numero $at',
     ).join('\n');
-    final state = await _pump(tester, text);
+    final state = await _pump(tester, text, live: mode == _Mode.live);
     state.placeCaret(text.indexOf('riga numero 1500'));
     await tester.pump();
     final data = _field(tester).getSemanticsData();

@@ -41,15 +41,38 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
 /// Column [column] of line [line], as the view lays the text out (14 px a
 /// glyph, a 5 px inset, an 8 px top margin, 21 px rows).
 Offset _at(int line, int column) =>
     Offset(5 + column * 14.0 + 7, 8 + line * 21.0 + 10);
 
+/// The visual column of a buffer offset, which is the offset itself in
+/// `source` and the offset minus the markers hidden before it in `live` — a
+/// hidden marker is a style and takes no room, so the text is drawn shifted
+/// left by exactly those characters. The fixture hides `[[` and `]]` (4) before
+/// `La nota`, and those plus the `[` of the Markdown link (5) before `il sito`.
+Offset _atOffset(_Mode mode, int offset) =>
+    _at(0, mode == _Mode.live ? offset - _hiddenBefore(offset) : offset);
+
+int _hiddenBefore(int offset) => switch (offset) {
+  // The space inside `[[La nota]]`.
+  9 => 2,
+  // The space inside `[il sito](…)`.
+  22 => 5,
+  _ => 0,
+};
+
 /// The links opened, as the surface reports them.
 final List<(TokenKind, String)> _opened = <(TokenKind, String)>[];
 
-Future<MarkdownSourceViewState> _pump(WidgetTester tester, String text) async {
+Future<MarkdownSourceViewState> _pump(
+  WidgetTester tester,
+  String text,
+  _Mode mode,
+) async {
   _opened.clear();
   tester.view.physicalSize = const Size(900, 500);
   tester.view.devicePixelRatio = 1;
@@ -61,6 +84,7 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester, String text) async {
           buffer: SourceBuffer.fromText(text),
           theme: _theme,
           showLineNumbers: false,
+          hideMarkers: mode == _Mode.live,
           onOpenLink: (kind, raw) => _opened.add((kind, raw)),
         ),
       ),
@@ -84,31 +108,43 @@ Future<void> _click(
 void main() {
   const note = 'vedi [[La nota]] e [il sito](https://example.com) ora';
 
-  testWidgets('Ctrl+click on a wikilink opens it', (tester) async {
-    final state = await _pump(tester, note);
-    await _click(tester, _at(0, 9), control: true);
+  /// The same test in `source` and in `live` (#246): the link is the same run
+  /// of the same text, hidden markers or not, so a Ctrl+click on it must land
+  /// and open the same thing.
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('Ctrl+click on a wikilink opens it', (tester, mode) async {
+    final state = await _pump(tester, note, mode);
+    await _click(tester, _atOffset(mode, 9), control: true);
     expect(_opened, <(TokenKind, String)>[(TokenKind.wikilink, '[[La nota]]')]);
     expect(state.selection.extent, 9, reason: 'the caret went there too');
   });
 
-  testWidgets('Ctrl+click on a Markdown link opens it', (tester) async {
-    await _pump(tester, note);
-    await _click(tester, _at(0, 22), control: true);
+  both('Ctrl+click on a Markdown link opens it', (tester, mode) async {
+    await _pump(tester, note, mode);
+    await _click(tester, _atOffset(mode, 22), control: true);
     expect(_opened, <(TokenKind, String)>[
       (TokenKind.link, '[il sito](https://example.com)'),
     ]);
   });
 
-  testWidgets('a plain click on a link only places the caret', (tester) async {
-    final state = await _pump(tester, note);
-    await _click(tester, _at(0, 9));
+  both('a plain click on a link only places the caret', (tester, mode) async {
+    final state = await _pump(tester, note, mode);
+    await _click(tester, _atOffset(mode, 9));
     expect(_opened, isEmpty);
     expect(state.selection.extent, 9);
   });
 
-  testWidgets('Ctrl+click on plain text opens nothing', (tester) async {
-    await _pump(tester, note);
-    await _click(tester, _at(0, 1), control: true);
+  both('Ctrl+click on plain text opens nothing', (tester, mode) async {
+    await _pump(tester, note, mode);
+    await _click(tester, _atOffset(mode, 1), control: true);
     expect(_opened, isEmpty);
   });
 }

@@ -11626,15 +11626,32 @@ What the design asks for next, in the order it names them:
      Quill.
   2. **The row-wise reveal** that follows a wrap.
   3. **The parity run the criterion asks for**: the same widget tests over both
-     unified modes, rather than a live-mode copy of each. **Three files are
+     unified modes, rather than a live-mode copy of each. **Seven files are
      done** (2026-09-22): the find bar (`source_find_bar_test.dart`), the
-     spelling (`source_spelling_test.dart`) and the context menu
-     (`source_context_menu_test.dart`) each run *every* test twice, once per
-     mode, through a small `both(...)` helper — so the criterion is held by
-     construction rather than by a second test that says the same thing. The
-     toolbar has a live-mode test in the shell; what is left unpaired is the
-     tools sheet, folding, the typewriter, Ctrl+click and the semantics, all of
-     which are covered in `source` only.
+     spelling (`source_spelling_test.dart`), the context menu
+     (`source_context_menu_test.dart`), folding (`source_folding_test.dart`),
+     the typewriter and Zen (`source_typewriter_test.dart`), the semantics
+     (`source_semantics_test.dart`) and Ctrl+click (`source_link_click_test.dart`)
+     each run *every* test twice, once per mode, through a small `both(...)`
+     helper — so the criterion is held by construction rather than by a second
+     test that says the same thing. The toolbar has a live-mode test in the
+     shell. Two of them needed a real judgement rather than a parameter:
+     * folding's "the next heading's row is right under the folded one"
+       asserted `closeTo(21, 1)`, the body's line height. In `live` a heading is
+       drawn at the *heading's* size, so that was an assertion about the
+       typography and not about the fold; it now compares the two headings'
+       tops against the first one's own height, which is the property either
+       way.
+     * Ctrl+click clicks by *column*, and in `live` a hidden marker takes no
+       room, so the same buffer offset is a different visual column. The
+       fixture's mapping is written out (`_atOffset`, plus the four and five
+       characters the note hides before the wikilink and the Markdown link), and
+       the click lands on the same offsets in both modes.
+     What is still paired in `source` only: `source_embedders_test.dart`, whose
+     tests tap at computed columns on notes that carry markers — the same
+     column arithmetic would be needed per fixture, and its subject is the
+     platform path rather than the reveal — and `source_touch_selection_test.dart`,
+     the phone's long press and handles.
   4. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
      and per word, no visible thrash — which is the only criterion on this list
      that needs a phone rather than a host.
