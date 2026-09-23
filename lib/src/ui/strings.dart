@@ -1196,6 +1196,7 @@ final class AppStrings {
   static String get syncConflictLoadFailed => _s.syncConflictLoadFailed;
   static String get syncResolveFailed => _s.syncResolveFailed;
   static String get syncResolved => _s.syncResolved;
+  static String get syncConflictMoved => _s.syncConflictMoved;
   static String get syncSectionWhen => _s.syncSectionWhen;
   static String get syncAutoTitle => _s.syncAutoTitle;
   static String get syncAutoSubtitle => _s.syncAutoSubtitle;

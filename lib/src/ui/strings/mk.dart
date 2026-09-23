@@ -2056,6 +2056,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get syncResolved => 'Конфликтот е решен';
   @override
+  String get syncConflictMoved =>
+      'Една од верзиите во меѓувреме се промени: конфликтот е повторно '
+      'вчитан, изберете повторно.';
+  @override
   String get syncSectionWhen => 'Кога да се синхронизира';
   @override
   String get syncAutoTitle => 'Автоматски';

@@ -2029,6 +2029,10 @@ final class LatvianStrings extends Strings {
   @override
   String get syncResolved => 'Konflikts atrisināts';
   @override
+  String get syncConflictMoved =>
+      'Viena no versijām pa to laiku mainījās: konflikts nolasīts no jauna, '
+      'izvēlies vēlreiz.';
+  @override
   String get syncSectionWhen => 'Kad sinhronizēt';
   @override
   String get syncAutoTitle => 'Automātiski';

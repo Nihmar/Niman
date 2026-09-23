@@ -115,6 +115,10 @@ both sides, the sync icon gets a dot, and **Resolve** opens the merge:
 - or keep one whole copy: **Keep this device's** uploads yours, **Keep
   the server's** replaces yours (which stays in the history).
 
+If either copy changes while the screen is open (another device syncs
+again, or you keep typing in the note), nothing is written: the conflict
+is read again and you choose over what is there now.
+
 Files with no version in common — created on both devices, or an
 attachment — cannot be merged: there the two whole copies are shown as a
 diff (lines marked − are the server's, + are this device's) and you keep

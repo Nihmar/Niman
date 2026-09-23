@@ -2049,6 +2049,10 @@ final class HungarianStrings extends Strings {
   @override
   String get syncResolved => 'Ütközés feloldva';
   @override
+  String get syncConflictMoved =>
+      'Az egyik változat közben módosult: az ütközést újra beolvastuk, '
+      'válasszon újra.';
+  @override
   String get syncSectionWhen => 'Mikor szinkronizáljon';
   @override
   String get syncAutoTitle => 'Automatikusan';

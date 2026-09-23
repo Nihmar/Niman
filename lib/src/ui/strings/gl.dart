@@ -2058,6 +2058,10 @@ final class GalicianStrings extends Strings {
   @override
   String get syncResolved => 'Conflito resolto';
   @override
+  String get syncConflictMoved =>
+      'Unha das versións cambiou mentres tanto: o conflito volveuse ler, '
+      'escolle de novo.';
+  @override
   String get syncSectionWhen => 'Cando sincronizar';
   @override
   String get syncAutoTitle => 'Automaticamente';

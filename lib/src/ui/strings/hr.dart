@@ -2058,6 +2058,10 @@ final class CroatianStrings extends Strings {
   @override
   String get syncResolved => 'Sukob riješen';
   @override
+  String get syncConflictMoved =>
+      'Jedna se od verzija u međuvremenu promijenila: sukob je ponovno '
+      'učitan, odaberite ponovno.';
+  @override
   String get syncSectionWhen => 'Kada sinkronizirati';
   @override
   String get syncAutoTitle => 'Automatski';

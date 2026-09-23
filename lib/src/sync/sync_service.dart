@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/network_monitor.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
@@ -236,16 +237,24 @@ abstract interface class SyncService implements Listenable {
 
   /// The texts of a conflicted [path]: both sides and, when history still
   /// has it, the version they last agreed on. Throws [SyncFailure].
-  Future<({String local, String remote, String? base})> conflictTexts(
-    String path,
-  );
+  Future<ConflictTexts> conflictTexts(String path);
 
   /// Keeps one whole side of a conflicted [path]; throws [SyncFailure].
-  Future<void> resolveConflict(String path, {required bool keepLocal});
+  /// With [shown], a side that moved since fails as a `moved` one.
+  Future<void> resolveConflict(
+    String path, {
+    required bool keepLocal,
+    ConflictTexts? shown,
+  });
 
-  /// Resolves a conflicted [path] with the [text] the user merged; throws
-  /// [SyncFailure].
-  Future<void> resolveMerged(String path, String text);
+  /// Resolves a conflicted [path] with the [text] the user merged from
+  /// the versions [shown]; throws [SyncFailure], a `moved` one when a
+  /// side changed since.
+  Future<void> resolveMerged(
+    String path,
+    String text, {
+    required ConflictTexts shown,
+  });
 
   /// Whether the "Wi-Fi only" option means anything on this device.
   bool get offersWifiOnly;
@@ -669,19 +678,26 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
   void appBackgrounded() => scheduler.backgrounded();
 
   @override
-  Future<({String local, String remote, String? base})> conflictTexts(
-    String path,
-  ) => engine.conflictTexts(path);
+  Future<ConflictTexts> conflictTexts(String path) =>
+      engine.conflictTexts(path);
 
   @override
-  Future<void> resolveConflict(String path, {required bool keepLocal}) async {
-    await engine.resolveConflict(path, keepLocal: keepLocal);
+  Future<void> resolveConflict(
+    String path, {
+    required bool keepLocal,
+    ConflictTexts? shown,
+  }) async {
+    await engine.resolveConflict(path, keepLocal: keepLocal, shown: shown);
     await _resolved(path, changedLocally: !keepLocal);
   }
 
   @override
-  Future<void> resolveMerged(String path, String text) async {
-    await engine.resolveMerged(path, text);
+  Future<void> resolveMerged(
+    String path,
+    String text, {
+    required ConflictTexts shown,
+  }) async {
+    await engine.resolveMerged(path, text, shown: shown);
     await _resolved(path, changedLocally: true);
   }
 

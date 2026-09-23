@@ -9,6 +9,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -173,16 +174,28 @@ typedef SyncProgress = void Function(SyncStage stage, int done, int total);
 /// Why a conflict resolution or a conflict read could not complete.
 final class SyncFailure implements Exception {
   /// A failure for [reason], with a [detail] safe to show.
-  const new(this.reason, this.detail);
+  const new(this.reason, this.detail, {this.moved = false});
+
+  /// A resolution refused because a side is no longer the version the
+  /// user decided on; nothing was written.
+  factory stale(String detail) =>
+      SyncFailure(SyncAbort.failed, detail, moved: true);
 
   /// The failure a WebDAV [error] amounts to.
-  factory of(WebDavFailure error) => SyncFailure(switch (error) {
-    WebDavAuthFailure() => SyncAbort.authentication,
-    WebDavNotFound() => SyncAbort.remoteMissing,
-    WebDavUnsupported() => SyncAbort.unsupported,
-    WebDavRetryable() => SyncAbort.offline,
-    WebDavPrecondition() || WebDavProtocolFailure() => SyncAbort.failed,
-  }, error.message);
+  ///
+  /// A refused precondition is a side that moved: the only guarded writes
+  /// here are a resolution's, against the version the user saw.
+  factory of(WebDavFailure error) => SyncFailure(
+    switch (error) {
+      WebDavAuthFailure() => SyncAbort.authentication,
+      WebDavNotFound() => SyncAbort.remoteMissing,
+      WebDavUnsupported() => SyncAbort.unsupported,
+      WebDavRetryable() => SyncAbort.offline,
+      WebDavPrecondition() || WebDavProtocolFailure() => SyncAbort.failed,
+    },
+    error.message,
+    moved: error is WebDavPrecondition,
+  );
 
   /// The same classification a run's abort uses.
   final SyncAbort reason;
@@ -190,8 +203,12 @@ final class SyncFailure implements Exception {
   /// What went wrong; never a secret.
   final String detail;
 
+  /// Whether a side moved after the user saw it: the conflict should be
+  /// read again, not given up on.
+  final bool moved;
+
   @override
-  String toString() => 'SyncFailure(${reason.name}: $detail)';
+  String toString() => 'SyncFailure(${moved ? 'moved' : reason.name}: $detail)';
 }
 
 /// Carries out sync runs for one library (docs/dev/sync.md): scans both
@@ -720,14 +737,16 @@ final class SyncEngine {
 
   /// The texts of a conflicted [path]: the local file, the server's copy,
   /// and the version both last agreed on when history still has it — what
-  /// the merge view needs. Decoded as UTF-8 (malformed bytes replaced).
-  /// Throws [SyncFailure].
-  Future<({String local, String remote, String? base})> conflictTexts(
-    String path,
-  ) => _exclusively(() async {
+  /// the merge view needs, and which versions they were, for the
+  /// resolution to check against. Decoded as UTF-8 (malformed bytes
+  /// replaced). Throws [SyncFailure].
+  Future<ConflictTexts> conflictTexts(String path) => _exclusively(() async {
     final connection = await _connect();
     try {
       final localBytes = await File(p.join(root, path)).readAsBytes();
+      // The listing's ETag, read first: it is what the resolution compares
+      // with, and what its upload's If-Match sends.
+      final listed = await connection.client.stat(path);
       final remoteBytes = await connection.client.readBytes(path);
       final base = await _baseText(path);
       _log.info(
@@ -735,10 +754,13 @@ final class SyncEngine {
         '${remoteBytes.length} b remote, '
         '${base == null ? 'no base' : '${base.length} chars of base'}',
       );
-      return (
+      return ConflictTexts(
         local: utf8.decode(localBytes, allowMalformed: true),
         remote: utf8.decode(remoteBytes, allowMalformed: true),
         base: base,
+        localSha256: sha256.convert(localBytes).toString(),
+        remoteSha256: sha256.convert(remoteBytes).toString(),
+        remoteEtag: listed?.etag,
       );
     } on WebDavFailure catch (e) {
       throw SyncFailure.of(e);
@@ -764,72 +786,77 @@ final class SyncEngine {
   }
 
   /// Resolves a conflicted [path] with the merged [text] the user put
-  /// together: it is written here (the replaced text becomes a `sync`
-  /// history version) and uploaded, and the row records the agreement.
-  /// Throws [SyncFailure].
-  Future<void> resolveMerged(String path, String text) =>
-      _exclusively(() async {
-        final clock = Stopwatch()..start();
-        _log.info('resolve $path: merged text (${text.length} chars)');
-        final connection = await _connect();
-        final client = connection.client;
-        try {
-          final capabilities = await _capabilities(
-            client,
-            connection.destination,
-          );
-          final remote = await client.stat(path);
-          final c = _RunContext(
-            client: client,
-            capabilities: capabilities,
-            local: const {},
-            remote: {path: ?remote},
-            rows: const {},
-            localSha: const {},
-            remoteSha: const {},
-            folders: {''},
-            report: SyncReport(),
-          );
-          await ops.syncMerge(path, text);
-          final local = await _stat(path);
-          if (local == null) {
-            throw SyncFailure(SyncAbort.failed, '$path is gone here');
-          }
-          final sha = (await _hashLocal(root, [path]))[path]!;
-          await _ensureRemoteParent(c, path);
-          await client.uploadFile(
-            path,
-            File(p.join(root, path)),
-            ifMatch: capabilities.ifMatch ? remote?.etag : null,
-          );
-          final listed = await client.stat(path);
-          if (listed == null) {
-            throw SyncFailure(SyncAbort.failed, '$path uploaded, not listed');
-          }
-          await store.putItems([
-            await _row(c, path, sha: sha, local: local, remote: listed),
-          ]);
-          _log.info('resolve $path: merged (${clock.elapsedMilliseconds} ms)');
-        } on WebDavFailure catch (e) {
-          _log.warning('resolve $path failed: ${e.message}');
-          throw SyncFailure.of(e);
-        } on FileSystemException catch (e) {
-          _log.warning('resolve $path failed: ${e.message}');
-          throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
-        } finally {
-          client.close();
-        }
-      });
+  /// together from the versions [shown]: it is written here (the replaced
+  /// text becomes a `sync` history version) and uploaded, and the row
+  /// records the agreement. Throws [SyncFailure], a `moved` one when
+  /// either side is no longer what [shown] holds.
+  Future<void> resolveMerged(
+    String path,
+    String text, {
+    required ConflictTexts shown,
+  }) => _exclusively(() async {
+    final clock = Stopwatch()..start();
+    _log.info('resolve $path: merged text (${text.length} chars)');
+    final connection = await _connect();
+    final client = connection.client;
+    try {
+      final capabilities = await _capabilities(client, connection.destination);
+      final remote = await client.stat(path);
+      await _stillAsShown(client, path, shown, remote);
+      final c = _RunContext(
+        client: client,
+        capabilities: capabilities,
+        local: const {},
+        remote: {path: ?remote},
+        rows: const {},
+        localSha: const {},
+        remoteSha: const {},
+        folders: {''},
+        report: SyncReport(),
+      );
+      await ops.syncMerge(path, text);
+      final local = await _stat(path);
+      if (local == null) {
+        throw SyncFailure(SyncAbort.failed, '$path is gone here');
+      }
+      final sha = (await _hashLocal(root, [path]))[path]!;
+      await _ensureRemoteParent(c, path);
+      await client.uploadFile(
+        path,
+        File(p.join(root, path)),
+        ifMatch: capabilities.ifMatch ? remote?.etag : null,
+      );
+      final listed = await client.stat(path);
+      if (listed == null) {
+        throw SyncFailure(SyncAbort.failed, '$path uploaded, not listed');
+      }
+      await store.putItems([
+        await _row(c, path, sha: sha, local: local, remote: listed),
+      ]);
+      _log.info('resolve $path: merged (${clock.elapsedMilliseconds} ms)');
+    } on WebDavFailure catch (e) {
+      _log.warning('resolve $path failed: ${e.message}');
+      throw SyncFailure.of(e);
+    } on FileSystemException catch (e) {
+      _log.warning('resolve $path failed: ${e.message}');
+      throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
+    } finally {
+      client.close();
+    }
+  });
 
   /// Resolves a conflict at [path] by keeping one whole side: with
   /// [keepLocal] the local file is uploaded over the server's (guarded by
   /// `If-Match` where the server honors it); otherwise the server's copy
   /// replaces the local file, whose text becomes a `sync` history
   /// version. Either way the agreed row and the merge base are recorded.
+  /// With [shown], the versions the user decided on, a side that moved
+  /// since fails as a `moved` [SyncFailure] and nothing is written.
   /// Throws [SyncFailure].
   Future<void> resolveConflict(
     String path, {
     required bool keepLocal,
+    ConflictTexts? shown,
   }) => _exclusively(() async {
     final clock = Stopwatch()..start();
     _log.info('resolve $path: keep ${keepLocal ? 'local' : 'remote'}');
@@ -838,6 +865,7 @@ final class SyncEngine {
     try {
       final capabilities = await _capabilities(client, connection.destination);
       final remote = await client.stat(path);
+      if (shown != null) await _stillAsShown(client, path, shown, remote);
       final c = _RunContext(
         client: client,
         capabilities: capabilities,
@@ -874,6 +902,11 @@ final class SyncEngine {
           throw SyncFailure(SyncAbort.failed, '$path is gone on the server');
         }
         final fetched = await _fetch(c, path);
+        if (shown != null && fetched.download.sha256 != shown.remoteSha256) {
+          // Rewritten between the check and this read.
+          await fetched.temp.delete();
+          throw SyncFailure.stale('$path changed on the server');
+        }
         await ops.syncReplace(path, fetched.temp.path);
         final local = await _stat(path);
         if (local == null) {
@@ -900,6 +933,35 @@ final class SyncEngine {
       client.close();
     }
   });
+
+  /// Throws a `moved` [SyncFailure] unless both sides of [path] are
+  /// still the versions [shown]: the local bytes by hash, the server's
+  /// copy ([remote], just listed) by ETag when both have one, else by
+  /// hashing a fresh download.
+  Future<void> _stillAsShown(
+    WebDavClient client,
+    String path,
+    ConflictTexts shown,
+    WebDavResource? remote,
+  ) async {
+    final localSha = (await _hashLocal(root, [path]))[path];
+    if (localSha != shown.localSha256) {
+      _log.info('resolve $path: refused, changed here since it was shown');
+      throw SyncFailure.stale('$path changed on this device');
+    }
+    final String? remoteSha;
+    if (remote == null) {
+      remoteSha = null;
+    } else if (shown.remoteEtag != null && remote.etag != null) {
+      remoteSha = remote.etag == shown.remoteEtag ? shown.remoteSha256 : null;
+    } else {
+      remoteSha = (await client.download(path, _DiscardSink())).sha256;
+    }
+    if (remoteSha != shown.remoteSha256) {
+      _log.info('resolve $path: refused, changed on the server since shown');
+      throw SyncFailure.stale('$path changed on the server');
+    }
+  }
 
   // --- capabilities ---------------------------------------------------
 

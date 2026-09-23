@@ -1819,6 +1819,8 @@ final class ChineseStrings extends Strings {
   @override
   String get syncResolved => '冲突已解决';
   @override
+  String get syncConflictMoved => '其中一个版本在此期间已更改：已重新读取冲突，请重新选择。';
+  @override
   String get syncSectionWhen => '何时同步';
   @override
   String get syncAutoTitle => '自动';

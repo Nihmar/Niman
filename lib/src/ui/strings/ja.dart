@@ -1869,6 +1869,9 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncResolved => '競合を解決しました';
   @override
+  String get syncConflictMoved =>
+      'その間に一方のバージョンが変更されたため、競合を読み直しました。もう一度選んでください。';
+  @override
   String get syncSectionWhen => '同期のタイミング';
   @override
   String get syncAutoTitle => '自動';

@@ -2045,6 +2045,10 @@ final class ItalianStrings extends Strings {
   @override
   String get syncResolved => 'Conflitto risolto';
   @override
+  String get syncConflictMoved =>
+      'Una delle due versioni è cambiata nel frattempo: il conflitto è stato '
+      'riletto, scegli di nuovo.';
+  @override
   String get syncSectionWhen => 'Quando sincronizzare';
   @override
   String get syncAutoTitle => 'Automaticamente';

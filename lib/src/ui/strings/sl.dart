@@ -2058,6 +2058,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt razrešen';
   @override
+  String get syncConflictMoved =>
+      'Ena od različic se je medtem spremenila: spor je bil znova prebran, '
+      'izberite znova.';
+  @override
   String get syncSectionWhen => 'Kdaj sinhronizirati';
   @override
   String get syncAutoTitle => 'Samodejno';

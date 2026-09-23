@@ -2075,6 +2075,10 @@ final class SpanishStrings extends Strings {
   @override
   String get syncResolved => 'Conflicto resuelto';
   @override
+  String get syncConflictMoved =>
+      'Una de las versiones cambió mientras tanto: el conflicto se ha vuelto '
+      'a leer, elige de nuevo.';
+  @override
   String get syncSectionWhen => 'Cuándo sincronizar';
   @override
   String get syncAutoTitle => 'Automáticamente';

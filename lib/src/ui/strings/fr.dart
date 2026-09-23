@@ -2105,6 +2105,10 @@ final class FrenchStrings extends Strings {
   @override
   String get syncResolved => 'Conflit résolu';
   @override
+  String get syncConflictMoved =>
+      'Une des versions a changé entre-temps : le conflit a été relu, '
+      'choisissez à nouveau.';
+  @override
   String get syncSectionWhen => 'Quand synchroniser';
   @override
   String get syncAutoTitle => 'Automatiquement';

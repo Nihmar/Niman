@@ -2033,6 +2033,10 @@ final class DanishStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt løst';
   @override
+  String get syncConflictMoved =>
+      'En af versionerne er ændret i mellemtiden: konflikten er læst igen, '
+      'vælg igen.';
+  @override
   String get syncSectionWhen => 'Hvornår der synkroniseres';
   @override
   String get syncAutoTitle => 'Automatisk';

@@ -2055,6 +2055,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get syncResolved => 'Konfliktas išspręstas';
   @override
+  String get syncConflictMoved =>
+      'Viena iš versijų tuo metu pasikeitė: konfliktas perskaitytas iš naujo, '
+      'pasirinkite dar kartą.';
+  @override
   String get syncSectionWhen => 'Kada sinchronizuoti';
   @override
   String get syncAutoTitle => 'Automatiškai';

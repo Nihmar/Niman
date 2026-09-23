@@ -2045,6 +2045,10 @@ final class SlovakStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt vyriešený';
   @override
+  String get syncConflictMoved =>
+      'Jedna z verzií sa medzitým zmenila: konflikt bol načítaný znova, '
+      'vyberte znova.';
+  @override
   String get syncSectionWhen => 'Kedy synchronizovať';
   @override
   String get syncAutoTitle => 'Automaticky';
