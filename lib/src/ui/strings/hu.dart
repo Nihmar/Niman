@@ -451,6 +451,8 @@ final class HungarianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Számozott lista';
   @override
+  String get toolbarChecklist => 'Jelölőnégyzetes lista';
+  @override
   String get toolbarQuote => 'Idézet';
   @override
   String get toolbarIndent => 'Behúzás';

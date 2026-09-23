@@ -53,7 +53,7 @@ Set<ToolbarItem> activeFormatsOf({
               : ToolbarItem.list,
         );
       case TokenKind.taskBox:
-        active.add(ToolbarItem.list);
+        active.add(ToolbarItem.checklist);
       case TokenKind.blockquote:
         active.add(ToolbarItem.quote);
       case TokenKind.codeFence || TokenKind.codeBlock || TokenKind.codeLanguage:
@@ -85,6 +85,9 @@ Set<ToolbarItem> activeFormatsOf({
       }
     }
   }
+  // A task's dash is its box's: the checkbox list is the one on, not the
+  // bulleted list (#263). A numbered task keeps its number on.
+  if (active.contains(ToolbarItem.checklist)) active.remove(ToolbarItem.list);
   return active;
 }
 

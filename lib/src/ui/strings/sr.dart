@@ -458,6 +458,8 @@ final class SerbianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Бројчани списак';
   @override
+  String get toolbarChecklist => 'Контролна листа';
+  @override
   String get toolbarQuote => 'Цитат';
   @override
   String get toolbarIndent => 'Устави';

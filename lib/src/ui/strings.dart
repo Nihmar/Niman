@@ -378,6 +378,7 @@ final class AppStrings {
   static String get toolbarHeading => _s.toolbarHeading;
   static String get toolbarList => _s.toolbarList;
   static String get toolbarOrderedList => _s.toolbarOrderedList;
+  static String get toolbarChecklist => _s.toolbarChecklist;
   static String get toolbarQuote => _s.toolbarQuote;
   static String get toolbarIndent => _s.toolbarIndent;
   static String get toolbarOutdent => _s.toolbarOutdent;

@@ -458,6 +458,8 @@ final class SpanishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Lista numerada';
   @override
+  String get toolbarChecklist => 'Lista de verificación';
+  @override
   String get toolbarQuote => 'Cita';
   @override
   String get toolbarIndent => 'Aumentar sangría';

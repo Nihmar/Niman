@@ -453,6 +453,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Lista numerada';
   @override
+  String get toolbarChecklist => 'Lista de verificação';
+  @override
   String get toolbarQuote => 'Citação';
   @override
   String get toolbarIndent => 'Aumentar indentação';

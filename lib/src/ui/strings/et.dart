@@ -447,6 +447,8 @@ final class EstonianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numbreeritud loetelu';
   @override
+  String get toolbarChecklist => 'Kontrollnimekiri';
+  @override
   String get toolbarQuote => 'Tsitaat';
   @override
   String get toolbarIndent => 'Taande';

@@ -459,6 +459,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Бројчана листа';
   @override
+  String get toolbarChecklist => 'Листа за проверка';
+  @override
   String get toolbarQuote => 'Цитат';
   @override
   String get toolbarIndent => 'Вовлечи';

@@ -63,6 +63,8 @@ final class QuillEditorCommands implements EditorCommands {
         _toggle(const quill.ListAttribute('bullet'));
       case ToolbarItem.orderedList:
         _toggle(const quill.ListAttribute('ordered'));
+      case ToolbarItem.checklist:
+        _toggle(quill.Attribute.unchecked);
       case ToolbarItem.quote:
         _toggle(quill.Attribute.blockQuote);
       case ToolbarItem.outdent:
@@ -148,6 +150,9 @@ final class QuillEditorCommands implements EditorCommands {
         attributes[quill.Attribute.list.key]?.value == 'bullet',
       ToolbarItem.orderedList =>
         attributes[quill.Attribute.list.key]?.value == 'ordered',
+      ToolbarItem.checklist =>
+        attributes[quill.Attribute.list.key]?.value == 'unchecked' ||
+            attributes[quill.Attribute.list.key]?.value == 'checked',
       ToolbarItem.quote => _isOn(attributes, quill.Attribute.blockQuote),
       // Tools opens a sheet; there is no state of the document it could
       // be the lit lamp for.

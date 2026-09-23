@@ -458,6 +458,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numeruotas sąrašas';
   @override
+  String get toolbarChecklist => 'Kontrolinis sąrašas';
+  @override
   String get toolbarQuote => 'Citata';
   @override
   String get toolbarIndent => 'Įtrauka';

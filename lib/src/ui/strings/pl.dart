@@ -462,6 +462,8 @@ final class PolishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Lista numerowana';
   @override
+  String get toolbarChecklist => 'Lista kontrolna';
+  @override
   String get toolbarQuote => 'Cytat';
   @override
   String get toolbarIndent => 'Wcinij';

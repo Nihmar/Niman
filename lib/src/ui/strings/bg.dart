@@ -456,6 +456,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Номериран списък';
   @override
+  String get toolbarChecklist => 'Списък със задачи';
+  @override
   String get toolbarQuote => 'Цитат';
   @override
   String get toolbarIndent => 'Отстъп';

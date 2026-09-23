@@ -461,6 +461,8 @@ final class GreekStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Αριθμημένη λίστα';
   @override
+  String get toolbarChecklist => 'Λίστα ελέγχου';
+  @override
   String get toolbarQuote => 'Παράθεση';
   @override
   String get toolbarIndent => 'Εισαγωγή';

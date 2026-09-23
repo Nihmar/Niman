@@ -453,6 +453,8 @@ final class FinnishStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Numeroitu lista';
   @override
+  String get toolbarChecklist => 'Tarkistuslista';
+  @override
   String get toolbarQuote => 'Lainaus';
   @override
   String get toolbarIndent => 'Sisäännyrjäys';

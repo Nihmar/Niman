@@ -74,6 +74,13 @@ void main() {
     expect(_activeAt('# Titolo\n', 0, 4), {ToolbarItem.heading});
     expect(_activeAt('- item\n', 0, 4), {ToolbarItem.list});
     expect(_activeAt('1. item\n', 0, 4), {ToolbarItem.orderedList});
+    // A task is the checkbox list's, not the bulleted list's (#263); a
+    // numbered task is both numbered and a task.
+    expect(_activeAt('- [ ] item\n', 0, 8), {ToolbarItem.checklist});
+    expect(_activeAt('1. [x] item\n', 0, 8), {
+      ToolbarItem.orderedList,
+      ToolbarItem.checklist,
+    });
     expect(_activeAt('> quote\n', 0, 3), {ToolbarItem.quote});
     expect(_activeAt('```\ncode here\n```\n', 1, 2), {ToolbarItem.code});
   });

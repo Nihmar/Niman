@@ -456,6 +456,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Нумараваны спіс';
   @override
+  String get toolbarChecklist => 'Кантрольны спіс';
+  @override
   String get toolbarQuote => 'Цытата';
   @override
   String get toolbarIndent => 'Відступ';

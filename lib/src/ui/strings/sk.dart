@@ -457,6 +457,8 @@ final class SlovakStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Číslovaný zoznam';
   @override
+  String get toolbarChecklist => 'Kontrolný zoznam';
+  @override
   String get toolbarQuote => 'Citát';
   @override
   String get toolbarIndent => 'Odsadenie';

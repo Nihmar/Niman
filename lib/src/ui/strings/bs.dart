@@ -458,6 +458,8 @@ final class BosnianStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Brojčani popis';
   @override
+  String get toolbarChecklist => 'Kontrolna lista';
+  @override
   String get toolbarQuote => 'Citat';
   @override
   String get toolbarIndent => 'Uvuci';

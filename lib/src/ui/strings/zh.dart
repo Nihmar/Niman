@@ -425,6 +425,8 @@ final class ChineseStrings extends Strings {
   @override
   String get toolbarOrderedList => '编号列表';
   @override
+  String get toolbarChecklist => '复选框列表';
+  @override
   String get toolbarQuote => '引用';
   @override
   String get toolbarIndent => '增加缩进';

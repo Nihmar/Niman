@@ -2961,6 +2961,9 @@ final class _NoteViewState extends State<NoteView>
       ToolbarItem.heading: _showHeadingDialog,
       ToolbarItem.list: () => _prefixLines(prefix: '- '),
       ToolbarItem.orderedList: _insertOrderedList,
+      ToolbarItem.checklist: () => _runCommand(
+        (text, selection) => toggleTaskList(text: text, selection: selection),
+      ),
       ToolbarItem.quote: () => _prefixLines(prefix: '> '),
       ToolbarItem.outdent: () => _indentLines(outdent: true),
       ToolbarItem.indent: () => _indentLines(outdent: false),

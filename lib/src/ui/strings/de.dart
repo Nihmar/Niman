@@ -456,6 +456,8 @@ final class GermanStrings extends Strings {
   @override
   String get toolbarOrderedList => 'Nummerierte Liste';
   @override
+  String get toolbarChecklist => 'Checkliste';
+  @override
   String get toolbarQuote => 'Zitat';
   @override
   String get toolbarIndent => 'Einzug vergrößern';
