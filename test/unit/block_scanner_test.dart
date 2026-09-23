@@ -329,6 +329,25 @@ void main() {
       ]);
     });
 
+    test('a line less than four spaces in ends an indented code block', () {
+      // The entering state said the block went on, and a line was code for
+      // it whatever its indent: `end`, after the code and a blank line — or
+      // right under the code — was drawn in a code block's box.
+      expect(_kinds('para\n\n    code\n\nend'), <BlockKind>[
+        BlockKind.paragraph,
+        BlockKind.blank,
+        BlockKind.indentedCode,
+        BlockKind.blank,
+        BlockKind.paragraph,
+      ]);
+      expect(_kinds('para\n\n    code\nend'), <BlockKind>[
+        BlockKind.paragraph,
+        BlockKind.blank,
+        BlockKind.indentedCode,
+        BlockKind.paragraph,
+      ]);
+    });
+
     test(r'an indented `$$` line is code, not a formula', () {
       // The preview's parser runs its indented-code syntax before its math
       // one, so a `$$` line four spaces in never opens a formula — either
