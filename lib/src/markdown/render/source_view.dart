@@ -2960,6 +2960,15 @@ final class _Line extends StatelessWidget {
         ? line
         : livePicturesUnder(line, pictures, resolver);
     if (!hideMarkers || shape == LineShape.none) return pictured;
+    // A row whose text is all hidden — a rule, a quote's empty line — is
+    // laid out as nothing, while the list still gives it a row: the rule
+    // across its middle and the quote's bar were drawn on no height at all.
+    final row = ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.textScalerOf(context).scale(theme.lineHeight),
+      ),
+      child: pictured,
+    );
     return CustomPaint(
       painter: LiveDecorationPainter(
         shape: shape,
@@ -2969,7 +2978,7 @@ final class _Line extends StatelessWidget {
         revealed: mine,
         color: theme.markerDim,
       ),
-      child: pictured,
+      child: row,
     );
   }
 
