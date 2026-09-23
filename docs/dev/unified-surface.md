@@ -11796,6 +11796,33 @@ checkbox is drawn but not yet clickable.
   it through the editor's controller, only while the snapshot is of the
   note as it is, and shows the pane the new note on the next frame rather
   than after the preview's debounce.
+- **Lists at any depth, set on the read view's columns** (2026-09-23).
+  A list marker may stand up to three spaces past the innermost item's
+  content column, not past the margin (`_markerReach`) — lists stopped at
+  two levels. The parse takes a list item's indent off its first line and
+  its content column off the lines after it (`BlockParser.listStripOf`),
+  as it takes a quote's marks, and every reader adds them back: parsed
+  with its indent, a deep item was indented code, and an item with a
+  second line was guessed, its `- ` drawn as text. In `live` a line's
+  whole prefix — written indent, quote marks, marker, box and the spaces
+  between them — is hidden, with no letter or word spacing, and its text
+  is set on the item's column, `(depth + 1) × listIndentPerLevel`; a line
+  that goes on an item (`LineShape.continued`) is set there too, and so
+  are a wrapped item's next rows. The indent is measured to where the
+  text's first glyph is drawn, not to where the prefix ends: under an
+  ambient letter spacing a paragraph's first glyph is drawn half a
+  spacing in, and one after a hidden mark is not.
+- **Revealed marks hang into the margin.** On the caret's line the prefix
+  is written out and set into the column; marks wider than it (a task's
+  `- [ ] `, a `10. `) hang left of it, into the field's inset and the
+  gutter's empty room (`_Line.margin`), and the text moves only by what
+  the margin cannot take.
+- **The note's size reaches the metrics.** The note's size is a text
+  scaler, which scales text and nothing else: `markdownThemeOf` scales
+  the pixel metrics (columns, spacing, paddings) by it, and `live` and the
+  read view size the bullet, the checkbox and the number's gap
+  (`numberGapEm`) from the scaled text. `lineHeight` stays in font units,
+  as every reader already scales it.
 
 ### Phase 5 — Delete the old world
 
