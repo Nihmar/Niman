@@ -3126,21 +3126,29 @@ final class _Line extends StatelessWidget {
         ? (shape.listDepth + 1) * theme.listIndentPerLevel
         : 0.0;
     final base = listed + shape.quoteDepth * theme.quoteIndentPerLevel;
-    if (base == 0) return 0;
+    if (base == 0 && _prefixEnd == 0) return 0;
     // Marks wider than their column hang into the margin, as far as there
     // is one: the text moves only by what is left over.
     return math.max<double>(
       -margin,
-      base - _textStart(context, revealed: revealed),
+      base -
+          (_textStart(context, revealed: revealed) -
+              _glyphLeft(context, const <InlineSpan>[])),
     );
   }
 
+  /// Whether the line is a heading's: its hashes and the spaces after them
+  /// are its prefix, hidden whole, where the space was left behind and set
+  /// the title a space's width in.
+  bool get _heading =>
+      styled.tokens.any((token) => token.kind == TokenKind.headingMarker);
+
   /// Where the line's prefix ends: past its leading spaces, its quote
-  /// marks, its list marker, its task box and the spaces between them. Zero
-  /// for a line that is neither quoted nor an item's, whose leading spaces
-  /// are its own.
+  /// marks, its list marker, its task box, a heading's hashes and the spaces
+  /// between them. Zero for a line that is none of these, whose leading
+  /// spaces are its own.
   int get _prefixEnd {
-    if (!shape.listed && shape.quoteDepth == 0) return 0;
+    if (!shape.listed && shape.quoteDepth == 0 && !_heading) return 0;
     final text = styled.text;
     var at = 0;
     var tokens = 0;
@@ -3158,7 +3166,8 @@ final class _Line extends StatelessWidget {
       if (token.start != at ||
           (token.kind != TokenKind.blockquote &&
               token.kind != TokenKind.listMarker &&
-              token.kind != TokenKind.taskBox)) {
+              token.kind != TokenKind.taskBox &&
+              token.kind != TokenKind.headingMarker)) {
         return at;
       }
       at = token.end;

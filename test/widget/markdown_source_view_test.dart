@@ -964,7 +964,9 @@ void main() {
       _theme.heading2.fontSize,
       reason: 'live mode draws the heading at the heading size',
     );
-    final marker = live.firstWhere((span) => span.text == '##');
+    // The hashes and the space after them: the heading's prefix, hidden
+    // whole so the title starts at the margin.
+    final marker = live.firstWhere((span) => span.text == '## ');
     expect(marker.style?.fontSize, lessThan(1));
     expect(marker.style?.color, const Color(0x00000000));
   });
