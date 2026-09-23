@@ -18,6 +18,28 @@ List<String> _links(String text) =>
     noteReferencesOf(text).links.map(_key).toList();
 
 void main() {
+  test('a link is placed on the note, whatever its line had taken off', () {
+    // The parse reads a block without its quote marks and without a list
+    // item's indent; an offset past the first line was short by every
+    // prefix above it, and a rename rewrote the wrong characters.
+    for (final text in <String>[
+      '> first line\n> second [[Target]] here\n',
+      '> > deep\n> > again [see](u) now\n',
+      '- item\n  - nested\n    - deeper [[Target]]\n',
+      '> quoted\r\n> on [[Target]]\r\n',
+    ]) {
+      for (final link in noteReferencesOf(text).links) {
+        final written = text.substring(link.start, link.end);
+        expect(
+          written,
+          anyOf('[[Target]]', '[see](u)'),
+          reason: text.replaceAll('\n', r'\n'),
+        );
+      }
+      expect(noteReferencesOf(text).links, isNotEmpty, reason: text);
+    }
+  });
+
   test('tags and wikilinks in prose, headings, lists, quotes and tables', () {
     final refs = noteReferencesOf(
       '# Title #Heading-Tag\n'

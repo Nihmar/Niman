@@ -322,6 +322,32 @@ inline math $x$ and a #tag, all in one block.
     expect(_slice(parsed, plain), 'a &amp; b');
   });
 
+  test('a list item deep in its list is parsed as an item, not as code', () {
+    // Parsed alone, an item three levels down stands four spaces in, which
+    // alone is an indented code block: the parse takes its marker's indent
+    // off, and a reader adds it back ([BlockParser.linePrefixLength]).
+    const raw = '    - a **bold** word';
+    const block = Block(kind: BlockKind.listItem, startLine: 0, endLine: 1);
+    final parsed = BlockParser().parseText(
+      block,
+      raw,
+      () => DocumentScope.scan(SourceBuffer.fromText(raw), 0),
+    );
+    expect(parsed.text, '- a **bold** word');
+    expect(_slice(parsed, _run(parsed, StyleKind.strong)!), '**bold**');
+    expect(_run(parsed, StyleKind.code), isNull);
+    final prefix = BlockParser.linePrefixLength(
+      block,
+      raw,
+      BlockParser.listIndentOf(block, raw),
+    );
+    final strong = _run(parsed, StyleKind.strong)!;
+    expect(
+      raw.substring(strong.start + prefix, strong.end + prefix),
+      '**bold**',
+    );
+  });
+
   test('a quotation mark is placed, and so is what follows it', () {
     // The package hands text back HTML-escaped: `"` is `&quot;` in the node,
     // which the source does not say, and every run after it was guessed.
