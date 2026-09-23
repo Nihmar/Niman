@@ -87,6 +87,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 28) await drop('sync_items', 'base_text');
   if (version < 27) {
     await db.customStatement('DROP TABLE library_device_settings');
   }
@@ -1082,6 +1083,27 @@ void main() {
       });
       await store.remove('/lib/W');
       expect(await store.read('/lib/W'), equals(null));
+      await db.close();
+    });
+  });
+
+  group('v27 → v28: the settings files get a merge base', () {
+    test('existing sync rows upgrade with none', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 27);
+        await db.customStatement(
+          'INSERT INTO sync_items (library_path, path, local_sha256, '
+          'local_size, local_mtime_ms, remote_size, remote_mtime_ms, '
+          'remote_unverified, synced_at_ms) '
+          "VALUES ('/lib/W', '.niman/settings.json', 'abc', 2, 1, 2, 1, 0, 1)",
+        );
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final row = await db.select(db.syncItems).getSingle();
+      expect(row.path, '.niman/settings.json');
+      expect(row.baseText, equals(null));
       await db.close();
     });
   });

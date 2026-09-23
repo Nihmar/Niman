@@ -2396,6 +2396,17 @@ class $SyncItemsTable extends SyncItems
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _baseTextMeta = const VerificationMeta(
+    'baseText',
+  );
+  @override
+  late final GeneratedColumn<String> baseText = GeneratedColumn<String>(
+    'base_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _syncedAtMsMeta = const VerificationMeta(
     'syncedAtMs',
   );
@@ -2420,6 +2431,7 @@ class $SyncItemsTable extends SyncItems
     remoteUnverified,
     remoteFileId,
     baseVersion,
+    baseText,
     syncedAtMs,
   ];
   @override
@@ -2535,6 +2547,12 @@ class $SyncItemsTable extends SyncItems
         ),
       );
     }
+    if (data.containsKey('base_text')) {
+      context.handle(
+        _baseTextMeta,
+        baseText.isAcceptableOrUnknown(data['base_text']!, _baseTextMeta),
+      );
+    }
     if (data.containsKey('synced_at_ms')) {
       context.handle(
         _syncedAtMsMeta,
@@ -2599,6 +2617,10 @@ class $SyncItemsTable extends SyncItems
         DriftSqlType.int,
         data['${effectivePrefix}base_version'],
       ),
+      baseText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}base_text'],
+      ),
       syncedAtMs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}synced_at_ms'],
@@ -2650,6 +2672,11 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
   /// attachments and when history is off.
   final int? baseVersion;
 
+  /// For the library state files (`.niman/settings.json`, `counters.json`),
+  /// which keep no history: the agreed content itself, the base of their
+  /// key-by-key merge. Null for every other file.
+  final String? baseText;
+
   /// When this agreement was recorded, ms.
   final int syncedAtMs;
   const SyncItem({
@@ -2664,6 +2691,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     required this.remoteUnverified,
     this.remoteFileId,
     this.baseVersion,
+    this.baseText,
     required this.syncedAtMs,
   });
   @override
@@ -2685,6 +2713,9 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     }
     if (!nullToAbsent || baseVersion != null) {
       map['base_version'] = Variable<int>(baseVersion);
+    }
+    if (!nullToAbsent || baseText != null) {
+      map['base_text'] = Variable<String>(baseText);
     }
     map['synced_at_ms'] = Variable<int>(syncedAtMs);
     return map;
@@ -2709,6 +2740,9 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       baseVersion: baseVersion == null && nullToAbsent
           ? const Value.absent()
           : Value(baseVersion),
+      baseText: baseText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseText),
       syncedAtMs: Value(syncedAtMs),
     );
   }
@@ -2730,6 +2764,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       remoteUnverified: serializer.fromJson<bool>(json['remoteUnverified']),
       remoteFileId: serializer.fromJson<String?>(json['remoteFileId']),
       baseVersion: serializer.fromJson<int?>(json['baseVersion']),
+      baseText: serializer.fromJson<String?>(json['baseText']),
       syncedAtMs: serializer.fromJson<int>(json['syncedAtMs']),
     );
   }
@@ -2748,6 +2783,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       'remoteUnverified': serializer.toJson<bool>(remoteUnverified),
       'remoteFileId': serializer.toJson<String?>(remoteFileId),
       'baseVersion': serializer.toJson<int?>(baseVersion),
+      'baseText': serializer.toJson<String?>(baseText),
       'syncedAtMs': serializer.toJson<int>(syncedAtMs),
     };
   }
@@ -2764,6 +2800,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     bool? remoteUnverified,
     Value<String?> remoteFileId = const Value.absent(),
     Value<int?> baseVersion = const Value.absent(),
+    Value<String?> baseText = const Value.absent(),
     int? syncedAtMs,
   }) => SyncItem(
     libraryPath: libraryPath ?? this.libraryPath,
@@ -2777,6 +2814,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     remoteUnverified: remoteUnverified ?? this.remoteUnverified,
     remoteFileId: remoteFileId.present ? remoteFileId.value : this.remoteFileId,
     baseVersion: baseVersion.present ? baseVersion.value : this.baseVersion,
+    baseText: baseText.present ? baseText.value : this.baseText,
     syncedAtMs: syncedAtMs ?? this.syncedAtMs,
   );
   SyncItem copyWithCompanion(SyncItemsCompanion data) {
@@ -2810,6 +2848,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       baseVersion: data.baseVersion.present
           ? data.baseVersion.value
           : this.baseVersion,
+      baseText: data.baseText.present ? data.baseText.value : this.baseText,
       syncedAtMs: data.syncedAtMs.present
           ? data.syncedAtMs.value
           : this.syncedAtMs,
@@ -2830,6 +2869,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           ..write('remoteUnverified: $remoteUnverified, ')
           ..write('remoteFileId: $remoteFileId, ')
           ..write('baseVersion: $baseVersion, ')
+          ..write('baseText: $baseText, ')
           ..write('syncedAtMs: $syncedAtMs')
           ..write(')'))
         .toString();
@@ -2848,6 +2888,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     remoteUnverified,
     remoteFileId,
     baseVersion,
+    baseText,
     syncedAtMs,
   );
   @override
@@ -2865,6 +2906,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           other.remoteUnverified == this.remoteUnverified &&
           other.remoteFileId == this.remoteFileId &&
           other.baseVersion == this.baseVersion &&
+          other.baseText == this.baseText &&
           other.syncedAtMs == this.syncedAtMs);
 }
 
@@ -2880,6 +2922,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
   final Value<bool> remoteUnverified;
   final Value<String?> remoteFileId;
   final Value<int?> baseVersion;
+  final Value<String?> baseText;
   final Value<int> syncedAtMs;
   final Value<int> rowid;
   const SyncItemsCompanion({
@@ -2894,6 +2937,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     this.remoteUnverified = const Value.absent(),
     this.remoteFileId = const Value.absent(),
     this.baseVersion = const Value.absent(),
+    this.baseText = const Value.absent(),
     this.syncedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -2909,6 +2953,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     this.remoteUnverified = const Value.absent(),
     this.remoteFileId = const Value.absent(),
     this.baseVersion = const Value.absent(),
+    this.baseText = const Value.absent(),
     required int syncedAtMs,
     this.rowid = const Value.absent(),
   }) : libraryPath = Value(libraryPath),
@@ -2931,6 +2976,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     Expression<bool>? remoteUnverified,
     Expression<String>? remoteFileId,
     Expression<int>? baseVersion,
+    Expression<String>? baseText,
     Expression<int>? syncedAtMs,
     Expression<int>? rowid,
   }) {
@@ -2946,6 +2992,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
       if (remoteUnverified != null) 'remote_unverified': remoteUnverified,
       if (remoteFileId != null) 'remote_file_id': remoteFileId,
       if (baseVersion != null) 'base_version': baseVersion,
+      if (baseText != null) 'base_text': baseText,
       if (syncedAtMs != null) 'synced_at_ms': syncedAtMs,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2963,6 +3010,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     Value<bool>? remoteUnverified,
     Value<String?>? remoteFileId,
     Value<int?>? baseVersion,
+    Value<String?>? baseText,
     Value<int>? syncedAtMs,
     Value<int>? rowid,
   }) {
@@ -2978,6 +3026,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
       remoteUnverified: remoteUnverified ?? this.remoteUnverified,
       remoteFileId: remoteFileId ?? this.remoteFileId,
       baseVersion: baseVersion ?? this.baseVersion,
+      baseText: baseText ?? this.baseText,
       syncedAtMs: syncedAtMs ?? this.syncedAtMs,
       rowid: rowid ?? this.rowid,
     );
@@ -3019,6 +3068,9 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     if (baseVersion.present) {
       map['base_version'] = Variable<int>(baseVersion.value);
     }
+    if (baseText.present) {
+      map['base_text'] = Variable<String>(baseText.value);
+    }
     if (syncedAtMs.present) {
       map['synced_at_ms'] = Variable<int>(syncedAtMs.value);
     }
@@ -3042,6 +3094,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
           ..write('remoteUnverified: $remoteUnverified, ')
           ..write('remoteFileId: $remoteFileId, ')
           ..write('baseVersion: $baseVersion, ')
+          ..write('baseText: $baseText, ')
           ..write('syncedAtMs: $syncedAtMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -5353,6 +5406,7 @@ typedef $$SyncItemsTableCreateCompanionBuilder = SyncItemsCompanion Function({
   Value<bool> remoteUnverified,
   Value<String?> remoteFileId,
   Value<int?> baseVersion,
+  Value<String?> baseText,
   required int syncedAtMs,
   Value<int> rowid,
 });
@@ -5368,6 +5422,7 @@ typedef $$SyncItemsTableUpdateCompanionBuilder = SyncItemsCompanion Function({
   Value<bool> remoteUnverified,
   Value<String?> remoteFileId,
   Value<int?> baseVersion,
+  Value<String?> baseText,
   Value<int> syncedAtMs,
   Value<int> rowid,
 });
@@ -5433,6 +5488,11 @@ class $$SyncItemsTableFilterComposer
 
   ColumnFilters<int> get baseVersion => $composableBuilder(
     column: $table.baseVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get baseText => $composableBuilder(
+    column: $table.baseText,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5506,6 +5566,11 @@ class $$SyncItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get baseText => $composableBuilder(
+    column: $table.baseText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get syncedAtMs => $composableBuilder(
     column: $table.syncedAtMs,
     builder: (column) => ColumnOrderings(column),
@@ -5572,6 +5637,9 @@ class $$SyncItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get baseText =>
+      $composableBuilder(column: $table.baseText, builder: (column) => column);
+
   GeneratedColumn<int> get syncedAtMs => $composableBuilder(
     column: $table.syncedAtMs,
     builder: (column) => column,
@@ -5617,6 +5685,7 @@ class $$SyncItemsTableTableManager
                 Value<bool> remoteUnverified = const Value.absent(),
                 Value<String?> remoteFileId = const Value.absent(),
                 Value<int?> baseVersion = const Value.absent(),
+                Value<String?> baseText = const Value.absent(),
                 Value<int> syncedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncItemsCompanion(
@@ -5631,6 +5700,7 @@ class $$SyncItemsTableTableManager
                 remoteUnverified: remoteUnverified,
                 remoteFileId: remoteFileId,
                 baseVersion: baseVersion,
+                baseText: baseText,
                 syncedAtMs: syncedAtMs,
                 rowid: rowid,
               ),
@@ -5647,6 +5717,7 @@ class $$SyncItemsTableTableManager
                 Value<bool> remoteUnverified = const Value.absent(),
                 Value<String?> remoteFileId = const Value.absent(),
                 Value<int?> baseVersion = const Value.absent(),
+                Value<String?> baseText = const Value.absent(),
                 required int syncedAtMs,
                 Value<int> rowid = const Value.absent(),
               }) => SyncItemsCompanion.insert(
@@ -5661,6 +5732,7 @@ class $$SyncItemsTableTableManager
                 remoteUnverified: remoteUnverified,
                 remoteFileId: remoteFileId,
                 baseVersion: baseVersion,
+                baseText: baseText,
                 syncedAtMs: syncedAtMs,
                 rowid: rowid,
               ),

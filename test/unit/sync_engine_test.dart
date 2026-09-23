@@ -294,14 +294,68 @@ void main() {
     },
   );
 
-  test('library settings: the newer side wins whole', () async {
+  Map<String, Object?> jsonOf(String? text) =>
+      (jsonDecode(text!) as Map).cast<String, Object?>();
+
+  test('library settings: a key both changed takes the newer side', () async {
     a.write('.niman/settings.json', '{"historyVersions": 3}');
     await a.sync();
     b.write('.niman/settings.json', '{"historyVersions": 7}');
     await b.sync();
-    expect(remoteText('.niman/settings.json'), '{"historyVersions": 7}');
     // B's file was written later (the test mtimes only move forward).
-    expect(b.read('.niman/settings.json'), '{"historyVersions": 7}');
+    expect(jsonOf(remoteText('.niman/settings.json')), {'historyVersions': 7});
+    expect(jsonOf(b.read('.niman/settings.json')), {'historyVersions': 7});
+  });
+
+  test('library settings changed on two devices keep both changes', () async {
+    a.write(
+      '.niman/settings.json',
+      '{"trashEnabled": true, "historyVersions": 10}',
+    );
+    await a.sync();
+    await b.sync();
+    a.write(
+      '.niman/settings.json',
+      '{"trashEnabled": false, "historyVersions": 10}',
+    );
+    b.write(
+      '.niman/settings.json',
+      '{"trashEnabled": true, "historyVersions": 3}',
+    );
+    await a.sync();
+    final report = await b.sync();
+    expect(report.conflicts, isEmpty, reason: report.summary());
+    final both = {'trashEnabled': false, 'historyVersions': 3};
+    expect(jsonOf(b.read('.niman/settings.json')), both);
+    expect(jsonOf(remoteText('.niman/settings.json')), both);
+    await a.sync();
+    expect(jsonOf(a.read('.niman/settings.json')), both);
+    expect(
+      (await b.store.item(b.path, '.niman/settings.json'))!.baseText,
+      b.read('.niman/settings.json'),
+      reason: 'the agreement is the next merge base',
+    );
+  });
+
+  test('template counters keep the highest on each side', () async {
+    a.write('.niman/counters.json', '{"meeting": 2}');
+    await a.sync();
+    await b.sync();
+    a.write('.niman/counters.json', '{"meeting": 5}');
+    b.write('.niman/counters.json', '{"meeting": 3, "quest": 1}');
+    await a.sync();
+    await b.sync();
+    final highest = {'meeting': 5, 'quest': 1};
+    expect(jsonOf(b.read('.niman/counters.json')), highest);
+    expect(jsonOf(remoteText('.niman/counters.json')), highest);
+  });
+
+  test('library settings that do not parse still go whole', () async {
+    a.write('.niman/settings.json', '{"historyVersions": 3}');
+    await a.sync();
+    b.write('.niman/settings.json', '{broken');
+    await b.sync();
+    expect(remoteText('.niman/settings.json'), '{broken');
   });
 
   test('library settings deleted on the server are put back', () async {
