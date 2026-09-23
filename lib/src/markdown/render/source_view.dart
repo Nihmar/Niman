@@ -51,6 +51,7 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
@@ -1994,13 +1995,21 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                           (context, row) {
                             // A row is a line nobody folded away.
                             final index = _folds.lineOf(row);
+                            final styled = _lineAt(index);
                             return _Line(
                               key: ValueKey<int>(index),
                               fold: _foldMarkOf(index),
                               onFold: () => toggleFold(index),
                               onFoldDown: () => _foldPress = true,
                               paragraphKey: _keyFor(index),
-                              styled: _lineAt(index),
+                              styled: styled,
+                              shape: widget.hideMarkers
+                                  ? LineShape.of(
+                                      styled,
+                                      _styler?.blockOf(index),
+                                      index,
+                                    )
+                                  : LineShape.none,
                               number: widget.showLineNumbers ? index + 1 : null,
                               gutterWidth: _gutter,
                               theme: widget.theme,
@@ -2606,6 +2615,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 final class _Line extends StatelessWidget {
   const new({
     required this.paragraphKey,
+    required this.shape,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -2633,6 +2643,10 @@ final class _Line extends StatelessWidget {
   /// The key of the line's own paragraph, so the surface can ask it for a caret
   /// offset or a caret rectangle.
   final GlobalKey paragraphKey;
+
+  /// What `live` draws beside the line's text: a bullet, a number, a
+  /// checkbox, a quote's bar, a rule.
+  final LineShape shape;
 
   final StyledLine styled;
   final int? number;
@@ -2718,8 +2732,9 @@ final class _Line extends StatelessWidget {
                 valueListenable: spot,
                 builder: (context, at, _) {
                   final mine = at.line == index;
-                  return Padding(
-                    padding: EdgeInsets.only(left: _indent()),
+                  final indent = _indent();
+                  final line = Padding(
+                    padding: EdgeInsets.only(left: indent),
                     // The spelling is painted over the paragraph rather than
                     // written into its runs: a style has one decoration, and
                     // a wavy underline there took a struck word's strike.
@@ -2740,6 +2755,18 @@ final class _Line extends StatelessWidget {
                         style: _lineStyle(revealed: mine),
                       ),
                     ),
+                  );
+                  if (!hideMarkers || shape == LineShape.none) return line;
+                  return CustomPaint(
+                    painter: LiveDecorationPainter(
+                      shape: shape,
+                      theme: theme,
+                      paragraph: paragraphKey,
+                      textLeft: indent,
+                      revealed: mine,
+                      color: theme.markerDim,
+                    ),
+                    child: line,
                   );
                 },
               ),
@@ -2836,6 +2863,8 @@ final class _Line extends StatelessWidget {
     // revealing a marker is not a reason to restyle the line under the caret
     // (`docs/dev/unified-surface.md` §8.6.2, and the test that holds it).
     if (!hideMarkers) return theme.body;
+    // Quoted prose reads as the read view draws it: in the quote's own style.
+    if (shape.quoteDepth > 0) return theme.body.merge(theme.quote);
     final text = styled.text;
     var level = 0;
     while (level < text.length && level < 6 && text[level] == '#') {
@@ -2872,7 +2901,10 @@ final class _Line extends StatelessWidget {
     for (final token in styled.tokens) {
       if (token.kind == TokenKind.listMarker) levels++;
     }
-    return levels * theme.listIndentPerLevel;
+    // A quote's content moves in past its bar, a level at a time, as the
+    // read view draws it.
+    return levels * theme.listIndentPerLevel +
+        shape.quoteDepth * theme.quoteIndentPerLevel;
   }
 
   /// The line's tokens as styled runs. A token's override never changes the
@@ -3150,6 +3182,8 @@ bool _isMarker(TokenKind kind) => switch (kind) {
   TokenKind.blockquote ||
   TokenKind.codeFence ||
   TokenKind.codeLanguage ||
+  // A thematic break is all marker: `live` draws its rule instead.
+  TokenKind.horizontalRule ||
   TokenKind.taskBox => true,
   _ => false,
 };
