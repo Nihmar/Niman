@@ -664,6 +664,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
           footnote: notes[index - 1],
           number: index,
           theme: theme,
+          parser: widget.parser,
+          mathCache: widget.mathCache,
+          scope: widget.parser.scope,
         );
       },
     );
