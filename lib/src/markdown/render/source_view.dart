@@ -730,12 +730,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Moves the caret by [motion], the logical motions the key table calls.
   void moveCaretBy(CaretMotion motion, {bool extend = false}) {
-    final next = moveCaret(
+    var next = moveCaret(
       _selection,
       motion,
       buffer: widget.buffer,
       extend: extend,
     );
+    final into = switch (motion) {
+      CaretMotion.characterLeft || CaretMotion.wordLeft => -1,
+      CaretMotion.characterRight || CaretMotion.wordRight => 1,
+      // Home goes to the row's first cell, End to its last one.
+      CaretMotion.lineStart || CaretMotion.lineTextStart => 1,
+      CaretMotion.lineEnd => -1,
+      CaretMotion.documentStart => 1,
+      CaretMotion.documentEnd => -1,
+    };
+    final line =
+        motion == CaretMotion.lineStart ||
+        motion == CaretMotion.lineTextStart ||
+        motion == CaretMotion.lineEnd;
+    final extent = _inCell(next.extent, into, keepLine: line);
+    if (extent != next.extent) {
+      next = extend
+          ? SelectionModel(anchor: next.anchor, extent: extent)
+          : SelectionModel.at(extent);
+    }
     _publishSelection(next);
     widget.onSelection?.call(next);
     _input.sendSelection();
@@ -796,12 +815,45 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     WidgetsBinding.instance.scheduleFrame();
   }
 
+  /// Where the caret goes from [offset] in `live`: [offset] itself, unless
+  /// it is in a table's room — the pipes and spaces round the cells, or the
+  /// delimiter row, which are drawn as nothing — and then the nearest
+  /// cell's text [direction]-wards (`LiveTables.cellColumn`): past the
+  /// row's end onto the next line going forward, back onto the previous
+  /// one going back, unless [keepLine] keeps it on its row.
+  int _inCell(int offset, int direction, {bool keepLine = false}) {
+    if (!widget.hideMarkers) return offset;
+    final buffer = widget.buffer;
+    var at = offset;
+    while (true) {
+      final line = buffer.lineOf(at);
+      if (line < 0 || line >= buffer.lineCount) return offset;
+      if (_styler?.blockOf(line)?.kind != BlockKind.table) return at;
+      final start = buffer.offsetOfLine(line);
+      final column = LiveTables.cellColumn(
+        buffer.lineAt(line),
+        at - start,
+        direction,
+      );
+      if (column != null) return start + column;
+      if (direction == 0 || keepLine) return at;
+      if (direction > 0) {
+        if (line + 1 >= buffer.lineCount) return at;
+        at = buffer.offsetOfLine(line + 1);
+      } else {
+        if (line == 0) return at;
+        at = buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
+      }
+    }
+  }
+
   /// Puts the caret at [offset] — extending the selection with [extend] — and
   /// tells everyone who needs to know.
   void _moveCaretTo(int offset, {bool extend = false}) {
+    final to = _inCell(offset, 0);
     final next = extend
-        ? SelectionModel(anchor: _selection.anchor, extent: offset)
-        : SelectionModel.at(offset);
+        ? SelectionModel(anchor: _selection.anchor, extent: to)
+        : SelectionModel.at(to);
     _publishSelection(next.clampTo(widget.buffer.length));
     widget.onSelection?.call(_selection);
     _input.sendSelection();
@@ -911,11 +963,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _replaceRange(selection.start, selection.end, '');
       return;
     }
-    final other = moveCaret(selection, motion, buffer: widget.buffer).extent;
+    final other = _withinCell(
+      selection.extent,
+      moveCaret(selection, motion, buffer: widget.buffer).extent,
+    );
     if (other == selection.extent) return;
     final start = math.min(other, selection.extent);
     final end = math.max(other, selection.extent);
     _replaceRange(start, end, '');
+  }
+
+  /// [other] kept inside the table cell [caret] is in, in `live`: a
+  /// deletion from a cell stops at its edges, as Obsidian's does, rather
+  /// than taking the pipes that make the table.
+  int _withinCell(int caret, int other) {
+    if (!widget.hideMarkers) return other;
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(caret);
+    if (_styler?.blockOf(line)?.kind != BlockKind.table) return other;
+    final start = buffer.offsetOfLine(line);
+    final cell = LiveTables.cellAround(buffer.lineAt(line), caret - start);
+    if (cell == null) return other;
+    return other.clamp(start + cell.$1, start + cell.$2);
   }
 
   /// A line break typed over `[start, end)`, when it means more than a line
@@ -1290,7 +1359,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _lastClickAt = position;
     switch (_clicks) {
       case 1:
-        placeCaret(offset);
+        // A click on a table's room puts the caret in the nearer cell.
+        placeCaret(_inCell(offset, 0));
       case 2:
         // A word never crosses a line: the line's text, not the note's.
         final line = widget.buffer.lineOf(offset);
@@ -1846,6 +1916,37 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Row [row]'s height before a frame has drawn it: its line's.
   double _estimateRow(int row) => _estimate(_folds.lineOf(row));
 
+  /// How line [index] of table [block] is laid out with the caret at [at]:
+  /// as every line of it is at rest, but for the run the caret is in, whose
+  /// marks show as a paragraph's word does — and widen its column.
+  LiveTableRow? _tableRowAt(
+    BuildContext context,
+    int index,
+    Block block,
+    CaretSpot at,
+  ) {
+    final inside = at.line >= block.startLine && at.line < block.endLine;
+    return _tables.rowOf(
+      index,
+      block,
+      widget.buffer,
+      tokensOf: (line) => _lineAt(line).tokens,
+      hidden: (line, token) {
+        if (!token.marker && !_isMarker(token.kind)) return false;
+        if (_isMarker(token.kind) || line != at.line) return true;
+        return token.start < at.runStart || token.end > at.runEnd;
+      },
+      styleOf: (token) => nestedTokenStyle(
+        token,
+        widget.syntax ?? SyntaxColors.of(context),
+        dark: widget.dark,
+      ),
+      theme: widget.theme,
+      scaler: MediaQuery.textScalerOf(context),
+      reveal: inside ? at : null,
+    );
+  }
+
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
   /// and is corrected by the sliver's own measurement.
@@ -2190,27 +2291,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                     ? _formulaOf(index)
                                     : null,
                                 mathCache: widget.mathCache,
-                                tableRow: widget.hideMarkers
-                                    ? _tables.rowOf(
+                                tableRow:
+                                    widget.hideMarkers &&
+                                        block?.kind == BlockKind.table
+                                    ? (at) => _tableRowAt(
+                                        context,
                                         index,
-                                        block,
-                                        widget.buffer,
-                                        tokensOf: (line) =>
-                                            _lineAt(line).tokens,
-                                        hiddenAtRest: (token) =>
-                                            token.marker ||
-                                            _isMarker(token.kind),
-                                        styleOf: (token) => nestedTokenStyle(
-                                          token,
-                                          syntax,
-                                          dark: widget.dark,
-                                        ),
-                                        theme: widget.theme,
-                                        scaler: MediaQuery.textScalerOf(
-                                          context,
-                                        ),
+                                        block!,
+                                        at,
                                       )
                                     : null,
+                                tableHeader:
+                                    block?.kind == BlockKind.table &&
+                                    index == block!.startLine,
                                 definition:
                                     widget.hideMarkers &&
                                         block != null &&
@@ -2877,6 +2970,7 @@ final class _Line extends StatelessWidget {
     required this.codeRuns,
     required this.definition,
     required this.tableRow,
+    required this.tableHeader,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -2929,9 +3023,13 @@ final class _Line extends StatelessWidget {
   /// typeset formula's lines do; the caret anywhere in them shows them all.
   final (int, int)? definition;
 
-  /// How the line is laid out in its table, for a table's line in `live`:
-  /// its cells on their columns, as the read view draws them.
-  final LiveTableRow? tableRow;
+  /// How the line is laid out in its table with the caret at a spot, for a
+  /// table's line in `live`: its cells on their columns, as the read view
+  /// draws them.
+  final LiveTableRow? Function(CaretSpot at)? tableRow;
+
+  /// Whether the line is its table's header.
+  final bool tableHeader;
 
   final StyledLine styled;
   final int? number;
@@ -3056,12 +3154,14 @@ final class _Line extends StatelessWidget {
         mathCache != null &&
         (at.line < math.start || at.line >= math.end);
     final defined = definition;
-    final table = tableRow;
-    // The delimiter row takes no room, as the read view leaves it out,
-    // unless the caret is on it.
+    final table = tableRow?.call(at);
+    // A table's row stays on the grid under the caret, as the read view
+    // draws it, its marks showing only in the run the caret is in; and the
+    // delimiter row takes no room, as the read view leaves it out.
+    final revealed = mine && table == null;
     final folded =
         (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) ||
-        (table != null && table.delimiter && !mine);
+        (table != null && table.delimiter);
     final inline = typeset || folded
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
@@ -3080,7 +3180,7 @@ final class _Line extends StatelessWidget {
         ),
       // A table's pipes, and the spaces round its cells' text, as wide as
       // it takes to put each cell's text on its column.
-      if (table != null && !mine)
+      if (table != null)
         for (final gap in table.gaps)
           (
             gap.start,
@@ -3089,10 +3189,10 @@ final class _Line extends StatelessWidget {
             whole: true,
           ),
     ];
-    final indent = _indent(context, revealed: mine);
+    final indent = _indent(context, revealed: revealed);
     Widget paragraph = Text.rich(
       _span(
-        revealed: mine,
+        revealed: revealed,
         run: mine ? (at.runStart, at.runEnd) : null,
         concealed: concealed,
       ),
@@ -3102,8 +3202,8 @@ final class _Line extends StatelessWidget {
       // the read view does not draw them there, and ends the note with the
       // footnotes, as `live` does.
       style: typeset || folded
-          ? _lineStyle(revealed: mine).copyWith(fontSize: 0.01, height: 1)
-          : _lineStyle(revealed: mine),
+          ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
+          : _lineStyle(revealed: revealed),
     );
     if (folded) return paragraph;
     if (inline.isNotEmpty) {
@@ -3143,7 +3243,6 @@ final class _Line extends StatelessWidget {
           row: table,
           left: indent < 0 ? 0 : indent,
           color: theme.tableBorder,
-          revealed: mine,
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: theme.tableCellPadding.top),
@@ -3304,9 +3403,8 @@ final class _Line extends StatelessWidget {
     // (`docs/dev/unified-surface.md` §8.6.2, and the test that holds it).
     if (!hideMarkers) return theme.body;
     // A table's cells are set as the read view sets them.
-    final table = tableRow;
-    if (table != null) {
-      return table.header ? theme.tableHeader : theme.tableCell;
+    if (tableRow != null) {
+      return tableHeader ? theme.tableHeader : theme.tableCell;
     }
     // Code reads as the read view draws it: in monospace, fences and all.
     if (shape.code != null) return theme.code;

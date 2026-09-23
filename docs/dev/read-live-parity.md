@@ -29,7 +29,8 @@ no column: the table's row measured with the platform font (Segoe UI) in a
 
 Every construct is aligned to the pixel, across and down, however far down
 the note it is — out of the caret's reach. Where the caret is, `live` shows
-the source: a table's row as written, a definition, a fence.
+the source: a definition, a fence, the marks of the word the caret is in —
+in a table's cell too, whose row stays on the grid.
 
 ## Done
 
@@ -85,8 +86,11 @@ read view does, so a line of code wraps at the same place in both.
 ### Still to align after these
 
 Nothing, out of the caret's reach. What is left is by design: the caret's
-row shows its source in `live` — a table's row as written, off its columns,
-and the delimiter row when the caret is on it.
+line shows its structural marks in `live`, and the word the caret is in its
+inline ones. A table is the exception, as in Obsidian: its row stays on the
+grid under the caret — only the word's marks show, widening the cell while
+they do — the delimiter row never shows, and the caret moves from cell to
+cell, never onto the room between them (`LiveTables.cellColumn`).
 
 ### Found on the way: a layout loop on one note — fixed
 
