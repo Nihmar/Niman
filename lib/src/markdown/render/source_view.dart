@@ -969,7 +969,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final first = buffer.lineOf(selection.start);
     final last = buffer.lineOf(selection.end);
     final start = buffer.offsetOfLine(first);
-    final end = buffer.offsetOfLine(last) + buffer.lineAt(last).length;
+    final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
     final block = StringBuffer();
     final deltas = <int>[];
     var changed = false;
@@ -1120,7 +1120,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       final caret = widget.buffer.lineOf(_selection.extent);
       if (_folds.isHidden(caret)) {
         placeCaret(
-          widget.buffer.offsetOfLine(line) + widget.buffer.lineAt(line).length,
+          widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
         );
       }
     }
@@ -1267,7 +1267,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         final line = widget.buffer.lineOf(offset);
         _select(
           widget.buffer.offsetOfLine(line),
-          widget.buffer.offsetOfLine(line) + widget.buffer.lineAt(line).length,
+          widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
         );
         _clicks = 0;
     }
@@ -1595,14 +1595,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (matches == null) return const <(int, int, bool)>[];
     final start = widget.buffer.offsetOfLine(index);
     return matches
-        .within(start, start + widget.buffer.lineAt(index).length)
+        .within(start, start + widget.buffer.lineLengthAt(index))
         .toList();
   }
 
   /// `[from, to)` of the note, as offsets local to line [index], or null.
   (int, int)? _rangeIn(int index, int from, int to) {
     final start = widget.buffer.offsetOfLine(index);
-    final end = start + widget.buffer.lineAt(index).length;
+    final end = start + widget.buffer.lineLengthAt(index);
     final a = from < start ? start : from;
     final b = to > end ? end : to;
     if (a >= b) return null;
@@ -1780,8 +1780,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
-  BlockHeightMap _map() =>
-      BlockHeightMap(count: _folds.rowCount(lineCount), estimate: _estimateRow);
+  BlockHeightMap _map() {
+    // Read once for the whole map, not once a row: a map is built over every
+    // row of the note, 2.76 M on the 246 MB one.
+    final columns = _columnsPerLine;
+    final row = _rowHeight;
+    final buffer = widget.buffer;
+    if (_folds.isEmpty) {
+      return BlockHeightMap(
+        count: lineCount,
+        estimate: (line) =>
+            _estimateOf(buffer.lineLengthAt(line), columns, row),
+      );
+    }
+    return BlockHeightMap(
+      count: _folds.rowCount(lineCount),
+      estimate: _estimateRow,
+    );
+  }
 
   /// Row [row]'s height before a frame has drawn it: its line's.
   double _estimateRow(int row) => _estimate(_folds.lineOf(row));
@@ -1789,18 +1805,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A line's height before a frame has drawn it: its character count over the
   /// width a line holds, which is the same shape the read view's estimator has
   /// and is corrected by the sliver's own measurement.
-  double _estimate(int index) {
+  double _estimate(int index) => _estimateOf(
     // The *buffer*, never the tokenizer: `HighlightDocument.lineAt`
-    // materializes
-    // the line, so asking it for every line of a 10 000-line note to fill the
-    // height map is a whole-note tokenize on every keystroke. The buffer's line
-    // is
-    // O(1) and its length is all an estimate needs.
-    final text = widget.buffer.lineAt(index);
-    final columns = _columnsPerLine;
-    final visual = text.isEmpty ? 1 : (text.length / columns).ceil();
-    return visual * _rowHeight;
-  }
+    // materializes the line, so asking it for every line of a 10 000-line
+    // note to fill the height map is a whole-note tokenize on every
+    // keystroke. And the line's length, not the line: a line is cut out of
+    // the text it was read from when it is asked for (`LineChunk`).
+    widget.buffer.lineLengthAt(index),
+    _columnsPerLine,
+    _rowHeight,
+  );
+
+  /// The height of a line [length] long, [columns] to a row of [row].
+  static double _estimateOf(int length, double columns, double row) =>
+      (length == 0 ? 1 : (length / columns).ceil()) * row;
 
   /// Roughly how many monospace characters fit a line at this width and size.
   ///

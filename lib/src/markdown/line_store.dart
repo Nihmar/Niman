@@ -20,7 +20,15 @@
 /// Reading stays cheap: line *i* is found by its chunk's start, and the chunk
 /// the last read landed in is tried first, so a walk down the note — the
 /// block scanner reads every line in order — does not search at all.
+///
+/// A note read from its text starts as views of that text
+/// ([LineStore.views], [LineChunk]): no string per line until a chunk is
+/// written to.
 library;
+
+import 'dart:typed_data';
+
+import 'package:niman/src/markdown/line_chunk.dart';
 
 /// Chunked lines and terminators, shared by copies until written.
 final class LineStore {
@@ -30,8 +38,20 @@ final class LineStore {
     : assert(lines.length == terminators.length, 'one terminator per line') {
     for (var at = 0; at < lines.length; at += chunkSize) {
       final end = at + chunkSize < lines.length ? at + chunkSize : lines.length;
-      _lines.add(lines.sublist(at, end));
-      _terminators.add(terminators.sublist(at, end));
+      _chunks.add(
+        LineChunk.lines(lines.sublist(at, end), terminators.sublist(at, end)),
+      );
+      _owned.add(true);
+    }
+    _restart();
+  }
+
+  /// Views of [source], a chunk per entry of [bounds]: chunk *c*'s line *i*
+  /// spans `[bounds[c][i], bounds[c][i + 1])` of it, terminator included,
+  /// and each chunk's last bound is the next one's first.
+  new views(String source, List<Uint32List> bounds) {
+    for (final chunk in bounds) {
+      _chunks.add(LineChunk.view(source, chunk));
       _owned.add(true);
     }
     _restart();
@@ -40,8 +60,7 @@ final class LineStore {
   /// A store holding what [other] holds now, apart from it: a write to
   /// either is not seen by the other. O(chunks).
   new sharing(LineStore other) : _cursor = 0, _length = other._length {
-    _lines.addAll(other._lines);
-    _terminators.addAll(other._terminators);
+    _chunks.addAll(other._chunks);
     _starts = List<int>.of(other._starts);
     _owned.addAll(List<bool>.filled(other._owned.length, false));
     other._owned.fillRange(0, other._owned.length, false);
@@ -51,8 +70,7 @@ final class LineStore {
   /// before it is cut again.
   static const int chunkSize = 1024;
 
-  final List<List<String>> _lines = <List<String>>[];
-  final List<List<String>> _terminators = <List<String>>[];
+  final List<LineChunk> _chunks = <LineChunk>[];
 
   /// Whether this store may write to chunk *c* in place: false for a chunk
   /// it shares with a copy.
@@ -71,18 +89,38 @@ final class LineStore {
   int get length => _length;
 
   /// How many chunks the lines are kept in.
-  int get chunkCount => _lines.length;
+  int get chunkCount => _chunks.length;
 
   /// Line [index].
   String lineAt(int index) {
     final chunk = _chunkOf(index);
-    return _lines[chunk][index - _starts[chunk]];
+    return _chunks[chunk].lineAt(index - _starts[chunk]);
   }
 
   /// Line [index]'s terminator.
   String terminatorAt(int index) {
     final chunk = _chunkOf(index);
-    return _terminators[chunk][index - _starts[chunk]];
+    return _chunks[chunk].terminatorAt(index - _starts[chunk]);
+  }
+
+  /// How long line [index]'s text is: what [lineAt] would answer, without
+  /// cutting the line out of the text a view holds.
+  int lineLengthAt(int index) {
+    final chunk = _chunkOf(index);
+    return _chunks[chunk].lineLengthAt(index - _starts[chunk]);
+  }
+
+  /// Writes lines `[start, end)` and their terminators to [sink]: a view's
+  /// lines as slices of its text, a chunk at a time.
+  void writeLines(StringSink sink, int start, int end) {
+    var at = start;
+    while (at < end) {
+      final chunk = _chunkOf(at);
+      final first = _starts[chunk];
+      final stop = end < _starts[chunk + 1] ? end : _starts[chunk + 1];
+      _chunks[chunk].writeTo(sink, at - first, stop - first);
+      at = stop;
+    }
   }
 
   /// Replaces lines `[start, end)` with [lines], ended by [terminators].
@@ -101,64 +139,65 @@ final class LineStore {
       for (var at = 0; at < lines.length; at++) {
         final chunk = _chunkOf(start + at);
         _own(chunk);
-        final local = start + at - _starts[chunk];
-        _lines[chunk][local] = lines[at];
-        _terminators[chunk][local] = terminators[at];
+        _chunks[chunk].setLine(
+          start + at - _starts[chunk],
+          lines[at],
+          terminators[at],
+        );
       }
       return;
     }
     // The chunks the range runs through, and where it starts and ends in
     // the first and the last of them. A range at the very end is the end of
     // the last chunk.
-    final first = start == _length ? _lines.length - 1 : _chunkOf(start);
+    final first = start == _length ? _chunks.length - 1 : _chunkOf(start);
     final last = end == start
         ? first
         : end == _length
-        ? _lines.length - 1
+        ? _chunks.length - 1
         : _chunkOf(end - 1);
     final from = start - _starts[first];
     final to = end - _starts[last];
+    final head = _chunks[first];
+    final tail = _chunks[last];
     final touchedLines = <String>[
-      ..._lines[first].take(from),
+      ...head.linesIn(0, from),
       ...lines,
-      ..._lines[last].skip(to),
+      ...tail.linesIn(to, tail.length),
     ];
     final touchedTerminators = <String>[
-      ..._terminators[first].take(from),
+      ...head.terminatorsIn(0, from),
       ...terminators,
-      ..._terminators[last].skip(to),
+      ...tail.terminatorsIn(to, tail.length),
     ];
-    final cutLines = <List<String>>[];
-    final cutTerminators = <List<String>>[];
+    final cut = <LineChunk>[];
     if (touchedLines.length <= 2 * chunkSize) {
       if (touchedLines.isNotEmpty) {
-        cutLines.add(touchedLines);
-        cutTerminators.add(touchedTerminators);
+        cut.add(LineChunk.lines(touchedLines, touchedTerminators));
       }
     } else {
       for (var at = 0; at < touchedLines.length; at += chunkSize) {
         final stop = at + chunkSize < touchedLines.length
             ? at + chunkSize
             : touchedLines.length;
-        cutLines.add(touchedLines.sublist(at, stop));
-        cutTerminators.add(touchedTerminators.sublist(at, stop));
+        cut.add(
+          LineChunk.lines(
+            touchedLines.sublist(at, stop),
+            touchedTerminators.sublist(at, stop),
+          ),
+        );
       }
     }
-    _lines.replaceRange(first, last + 1, cutLines);
-    _terminators.replaceRange(first, last + 1, cutTerminators);
-    _owned.replaceRange(
-      first,
-      last + 1,
-      List<bool>.filled(cutLines.length, true),
-    );
+    _chunks.replaceRange(first, last + 1, cut);
+    _owned.replaceRange(first, last + 1, List<bool>.filled(cut.length, true));
     _restart();
   }
 
-  /// Makes chunk [chunk] this store's own, copying it if a copy shares it.
+  /// Makes chunk [chunk] this store's own to write, copying it if a copy
+  /// shares it and cutting a view into its lines.
   void _own(int chunk) {
-    if (_owned[chunk]) return;
-    _lines[chunk] = List<String>.of(_lines[chunk]);
-    _terminators[chunk] = List<String>.of(_terminators[chunk]);
+    if (_owned[chunk] && !_chunks[chunk].isView) return;
+    _chunks[chunk] = _chunks[chunk].writable();
     _owned[chunk] = true;
   }
 
@@ -174,7 +213,7 @@ final class LineStore {
       }
     }
     var low = 0;
-    var high = _lines.length - 1;
+    var high = _chunks.length - 1;
     while (low < high) {
       final middle = (low + high + 1) >> 1;
       if (_starts[middle] <= index) {
@@ -188,14 +227,13 @@ final class LineStore {
 
   /// Recomputes the chunk starts after the chunks changed, O(chunks).
   void _restart() {
-    if (_lines.isEmpty) {
-      _lines.add(<String>[]);
-      _terminators.add(<String>[]);
+    if (_chunks.isEmpty) {
+      _chunks.add(LineChunk.lines(<String>[], <String>[]));
       _owned.add(true);
     }
-    final starts = List<int>.filled(_lines.length + 1, 0);
-    for (var at = 0; at < _lines.length; at++) {
-      starts[at + 1] = starts[at] + _lines[at].length;
+    final starts = List<int>.filled(_chunks.length + 1, 0);
+    for (var at = 0; at < _chunks.length; at++) {
+      starts[at + 1] = starts[at] + _chunks[at].length;
     }
     _starts = starts;
     _length = starts.last;

@@ -19,6 +19,81 @@ List<int> _naiveOffsets(String text) {
 }
 
 void main() {
+  group('a note read from its text', () {
+    // The lines are views of the text they were read from until a chunk is
+    // written to (`LineChunk`): every line, terminator and length has to be
+    // what a split of the text says, across chunks, and an edit has to
+    // leave the text the edit says.
+    /// Lines of every terminator, a lone `\r` as content, over three chunks.
+    String note() {
+      final random = Random(7);
+      final out = StringBuffer('\uFEFFfirst\r\n');
+      for (var at = 0; at < 2600; at++) {
+        out
+          ..write('line $at${random.nextInt(4) == 0 ? '\r' : ''} x')
+          ..write(switch (random.nextInt(3)) {
+            0 => '\n',
+            1 => '\r\n',
+            _ => '\n\n',
+          });
+      }
+      return (out..write('last\r')).toString();
+    }
+
+    /// Checks [buffer] line by line against [text] split by hand.
+    void agrees(SourceBuffer buffer, String text) {
+      final lines = <String>[];
+      final ends = <String>[];
+      var start = 0;
+      while (true) {
+        final at = text.indexOf('\n', start);
+        if (at < 0) {
+          lines.add(text.substring(start));
+          ends.add('');
+          break;
+        }
+        final cr = at > start && text.codeUnitAt(at - 1) == 0x0D;
+        lines.add(text.substring(start, cr ? at - 1 : at));
+        ends.add(cr ? '\r\n' : '\n');
+        start = at + 1;
+      }
+      expect(buffer.lineCount, lines.length);
+      for (var at = 0; at < lines.length; at++) {
+        expect(buffer.lineAt(at), lines[at], reason: 'line $at');
+        expect(buffer.terminatorAt(at), ends[at], reason: 'end of $at');
+        expect(buffer.lineLengthAt(at), lines[at].length, reason: '$at');
+      }
+      expect(buffer.text, text);
+      expect(buffer.length, text.length);
+    }
+
+    test('reads every line and terminator back as written', () {
+      final text = note();
+      agrees(SourceBuffer.fromText(text), text);
+      for (final small in ['', '\n', 'a', 'a\n', '\r\n', 'a\r', '\r']) {
+        agrees(SourceBuffer.fromText(small), small);
+      }
+    });
+
+    test('an edit across a chunk boundary leaves the text it says', () {
+      var text = note();
+      final buffer = SourceBuffer.fromText(text);
+      final snapshot = buffer.snapshot();
+      final before = text;
+      for (final (start, end, inserted) in <(int, int, String)>[
+        (buffer.offsetOfLine(1023), buffer.offsetOfLine(1026), 'a\nb'),
+        (buffer.offsetOfLine(2047) + 2, buffer.offsetOfLine(2048) + 1, 'z'),
+        (10, 12, 'one line'),
+        (buffer.offsetOfLine(3000), buffer.offsetOfLine(3000), 'new\n'),
+      ]) {
+        buffer.replaceRange(start, end, inserted);
+        text = text.replaceRange(start, end, inserted);
+        agrees(buffer, text);
+      }
+      agrees(snapshot, before);
+    });
+  });
+
   group('snapshot', () {
     test('holds the text as it was, whatever the buffer does next', () {
       final buffer = SourceBuffer.fromText('uno\r\ndue\ntre');

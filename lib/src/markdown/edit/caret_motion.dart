@@ -214,7 +214,7 @@ int _wordRight(SourceBuffer buffer, int at) {
 /// The end of the line the caret is on, before its terminator.
 int _lineEnd(SourceBuffer buffer, int at) {
   final line = buffer.lineOf(at);
-  return buffer.offsetOfLine(line) + buffer.lineAt(line).length;
+  return buffer.offsetOfLine(line) + buffer.lineLengthAt(line);
 }
 
 /// The start of the line's text, past its indentation.

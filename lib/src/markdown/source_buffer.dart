@@ -39,6 +39,8 @@
 /// terminator, because nothing in the app has ever produced one.
 library;
 
+import 'dart:typed_data';
+
 import 'package:niman/src/markdown/line_store.dart';
 import 'package:niman/src/markdown/prefix_sums.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -59,30 +61,57 @@ final class SourceBuffer {
   /// buffer always has at least one, which is what lets the index always answer
   /// with a valid line.
   factory fromText(String text) {
-    final lines = <String>[];
-    final terminators = <String>[];
+    // Where each line starts, a chunk of lines at a time: the lines stay in
+    // [text] (`LineChunk`), and nothing is cut out of it here.
+    const size = LineStore.chunkSize;
+    final chunks = <Uint32List>[];
+    var crlf = 0;
+    var lf = 0;
     var start = 0;
-    while (true) {
-      final at = text.indexOf('\n', start);
-      if (at < 0) {
-        lines.add(text.substring(start));
-        terminators.add('');
-        break;
+    var done = false;
+    while (!done) {
+      final bounds = Uint32List(size + 1)..[0] = start;
+      var count = 0;
+      while (count < size) {
+        final at = text.indexOf('\n', start);
+        if (at < 0) {
+          start = text.length;
+          done = true;
+        } else {
+          // A `\r` immediately before the `\n` belongs to the terminator, not
+          // to the line: that is what makes CRLF round-trip as CRLF.
+          if (at > start && text.codeUnitAt(at - 1) == 0x0D) {
+            crlf++;
+          } else {
+            lf++;
+          }
+          start = at + 1;
+        }
+        bounds[++count] = start;
+        if (done) break;
       }
-      // A `\r` immediately before the `\n` belongs to the terminator, not to
-      // the line: that is what makes CRLF round-trip as CRLF.
-      final endsWithCr = at > start && text.codeUnitAt(at - 1) == 0x0D;
-      lines.add(text.substring(start, endsWithCr ? at - 1 : at));
-      terminators.add(endsWithCr ? '\r\n' : '\n');
-      start = at + 1;
+      chunks.add(
+        count == size
+            ? bounds
+            : Uint32List.fromList(bounds.sublist(0, count + 1)),
+      );
     }
+    // The spans, read off the bounds in order: the index asks for them so.
+    var chunk = 0;
+    var local = 0;
+    final lines = (chunks.length - 1) * size + chunks.last.length - 1;
+    final index = PrefixSums.generate(lines, (_) {
+      if (local == chunks[chunk].length - 1) {
+        chunk++;
+        local = 0;
+      }
+      final bounds = chunks[chunk];
+      return (bounds[local + 1] - bounds[local++]).toDouble();
+    });
     return SourceBuffer._(
-      LineStore(lines, terminators),
-      PrefixSums.generate(
-        lines.length,
-        (at) => (lines[at].length + terminators[at].length).toDouble(),
-      ),
-      _detectEol(terminators),
+      LineStore.views(text, chunks),
+      index,
+      crlf > lf ? '\r\n' : '\n',
     );
   }
 
@@ -154,11 +183,7 @@ final class SourceBuffer {
   /// [substring] instead; saving a note is what this exists for.
   String get text {
     final buffer = StringBuffer();
-    for (var i = 0; i < _store.length; i++) {
-      buffer
-        ..write(_store.lineAt(i))
-        ..write(_store.terminatorAt(i));
-    }
+    _store.writeLines(buffer, 0, _store.length);
     return buffer.toString();
   }
 
@@ -194,6 +219,13 @@ final class SourceBuffer {
     return _store.lineAt(line);
   }
 
+  /// How long line [line]'s text is: `lineAt(line).length`, without the
+  /// line cut out of the text it was read from.
+  int lineLengthAt(int line) {
+    assert(line >= 0 && line < _store.length, 'line $line out of range');
+    return _store.lineLengthAt(line);
+  }
+
   /// Line [line]'s terminator: `''` for the last line when the file does not
   /// end
   /// with one.
@@ -208,7 +240,7 @@ final class SourceBuffer {
   int caretOffset(int offset) {
     final clamped = offset < 0 ? 0 : (offset > _length ? _length : offset);
     final line = lineOf(clamped);
-    final end = offsetOfLine(line) + _store.lineAt(line).length;
+    final end = offsetOfLine(line) + _store.lineLengthAt(line);
     return clamped > end ? end : clamped;
   }
 
@@ -246,7 +278,7 @@ final class SourceBuffer {
   int offsetAt(int line, int column) {
     final start = offsetOfLine(line);
     final within = column < 0 ? 0 : column;
-    final text = _store.lineAt(line).length;
+    final text = _store.lineLengthAt(line);
     return start + (within > text ? text : within);
   }
 
@@ -264,7 +296,7 @@ final class SourceBuffer {
     var offset = start;
     while (offset < end && line < _store.length) {
       final lineStart = offsetOfLine(line);
-      final lineEnd = lineStart + _store.lineAt(line).length;
+      final lineEnd = lineStart + _store.lineLengthAt(line);
       if (offset < lineEnd) {
         final to = end < lineEnd ? end : lineEnd;
         buffer.write(
@@ -331,10 +363,10 @@ final class SourceBuffer {
 
     // A boundary inside a terminator swallows the terminator, so the prefix is
     // the whole line and the suffix is empty.
-    final prefix = startColumn < _store.lineAt(startLine).length
+    final prefix = startColumn < _store.lineLengthAt(startLine)
         ? _store.lineAt(startLine).substring(0, startColumn)
         : _store.lineAt(startLine);
-    final suffix = endColumn < _store.lineAt(endLine).length
+    final suffix = endColumn < _store.lineLengthAt(endLine)
         ? _store.lineAt(endLine).substring(endColumn)
         : '';
 
@@ -407,14 +439,14 @@ final class SourceBuffer {
   int snapOutOfTerminator(int offset, {bool forward = false}) {
     if (offset <= 0 || offset >= _length) return offset;
     final line = lineOf(offset);
-    final textEnd = offsetOfLine(line) + _store.lineAt(line).length;
+    final textEnd = offsetOfLine(line) + _store.lineLengthAt(line);
     if (offset <= textEnd) return offset;
     return forward ? offsetOfLine(line + 1) : textEnd;
   }
 
   /// The span of line [index]: its text plus its terminator.
   int _spanOf(int index) =>
-      _store.lineAt(index).length + _store.terminatorAt(index).length;
+      _store.lineLengthAt(index) + _store.terminatorAt(index).length;
 
   /// [inserted] as lines, terminators rewritten to the dominant one.
   List<String> _splitInserted(String inserted) {
@@ -440,19 +472,5 @@ final class SourceBuffer {
     return sum == _length &&
         _index.total == _length &&
         _index.length == _store.length;
-  }
-
-  /// The dominant terminator of [terminators]: CRLF only if it is the majority.
-  static String _detectEol(List<String> terminators) {
-    var crlf = 0;
-    var lf = 0;
-    for (final terminator in terminators) {
-      if (terminator == '\r\n') {
-        crlf++;
-      } else if (terminator == '\n') {
-        lf++;
-      }
-    }
-    return crlf > lf ? '\r\n' : '\n';
   }
 }
