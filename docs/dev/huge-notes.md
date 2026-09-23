@@ -1,4 +1,4 @@
-# Huge notes: where the unified surface stands (2026-09-22)
+# Huge notes: where the unified surface stands (2026-09-23)
 
 The 0.0.9 stress test opens `Quicknote.md` in the testing build: 246 867 774
 characters, 2 757 539 lines, 2 014 477 blocks, a copy of *Geometria 1* many
@@ -126,10 +126,10 @@ written next to it.
    | | What it is | Before | Now |
    |---|---|---|---|
    | a | a keystroke inside one huge block (a paragraph with no blank line, a formula or fence that never closes) | the block, per keystroke: 300 000 lines, 80 ms, for the synthetic 300 k-line paragraph | **2 lines** — fixed, below |
-   | b | a keystroke that changes what the rest of the note *is*: typing the second `$` of a `$$`, a fence's third backtick, the `---` that opens frontmatter | the rest of the note: 1 378 772 lines, 822 ms at 50 % of `Quicknote.md` | still the rest of the note — the next step, below |
+   | b | a keystroke that changes what the rest of the note *is*: typing the second `$` of a `$$`, a fence's third backtick, the `---` that opens frontmatter | the rest of the note, at once: 1 378 772 lines, 822 ms at 50 % of `Quicknote.md` | **4 098 lines, 4.5 ms** (AOT); the rest carried on in slices — below |
 
    **(a) is fixed: the rescan starts at the edit and stops where the scan
-   agrees with what was there** (`BlockScanner._rescanFrom`). Both ends used
+   agrees with what was there** (`BlockScanner._rebuild`). Both ends used
    to be the block's: the rebuild began at the first line of the block the
    edit was in, and stopped only at a blank line with a plain state and a kept
    block starting under it — inside a block there is neither, so it ran to
@@ -171,11 +171,71 @@ written next to it.
    blank lines split the run in two, and an item after a quote counted on from
    the quote's list.
 
-   **(b) is still open, and it cannot be made O(change): the change is
-   O(note).** What can be bounded is how much of it one keystroke pays for.
-   The scan has to be current for the lines on screen and nowhere else, so
-   the rest of it can be carried on across frames — which is what editors
-   that parse Markdown incrementally do. That is the next step.
+   **(b) cannot be made O(change), because the change is O(note); what is
+   bounded is how much of it one keystroke pays for.** The scan has to be
+   current for the lines on screen and for nothing else at that moment, so
+   the rest is carried on between frames — which is what editors that parse
+   incrementally do.
+
+   * **A rescan stops at its budget.** Past its own edit it reads at most
+     `BlockScanner.budget` lines (4 096 by default: a few milliseconds, far
+     more than a screen) and, if it has not converged, leaves a **frontier**
+     there. From a frontier on, the recorded states and blocks are what an
+     earlier scan made of them — *hints*, kept in place so the list still
+     tiles the note (the block the scan stopped inside is cut at the
+     frontier).
+   * **A hint is still good to converge on.** Every edit lands above every
+     frontier (an edit on lines past one starts its rebuild at the
+     frontier), so the text around a hint has not changed since it was
+     recorded. If the scan reaches a line whose state and block match the
+     hint, everything after it is what the hint says — up to the next,
+     deeper frontier, if an older budgeted scan left one. A frontier line
+     itself is never a convergence point: the block cut there took its shape
+     from a line above it. (That guard is not decorative: without it the
+     property test below fails at round 658 of 3 000.)
+   * **Readers ask for what they need.** `blockAt(line)` scans up to the line
+     and on to the end of its block, so every line drawn is coloured exactly
+     as a fresh read colours it; `index` finishes the scan; the outline
+     (`SourceStyler.headings`) is null while the scan is owed, and the note
+     view keeps the outline it has and asks again until it lands.
+   * **The rest is carried on a slice at a time** (`MarkdownSourceViewState.
+     _carryScanOn`), one budget per slice, each slice its own zero-length
+     timer — so a frame or a key waits for one slice at most. Not an
+     idle-priority scheduler task, which was tried first: Flutter refuses an
+     idle task while any animation runs, and a refused task asks the event
+     loop again at once, so a spinner anywhere on screen would have kept a
+     core busy spinning for as long as it turned (in the widget test, it was
+     an infinite loop).
+
+   Measured on `Quicknote.md`, AOT (`dart compile exe
+   tool/scanner_edit_bench.dart`, which now reports the slices too):
+
+   | Edit at | The keystroke | Then | Slices | Worst slice | In all |
+   |---|---|---|---|---|---|
+   | 10 % | 0.0 ms, 2 lines | — | — | — | — |
+   | 25 % | 16.4 ms, 4 098 lines | 2 064 060 lines | 504 | 21.7 ms | 1 933 ms |
+   | 50 % | 4.5 ms, 4 098 lines | 1 374 674 lines | 336 | 40.1 ms | 1 455 ms |
+   | 75 % | 2.8 ms, 4 098 lines | 685 288 lines | 168 | 22.1 ms | 287 ms |
+   | 90 % | 3.2 ms, 4 098 lines | 271 657 lines | 67 | 15.1 ms | 244 ms |
+
+   Two things in that table are owed an honest word. A slice averages about
+   4 ms, but the worst ones are 15–40 ms, and they do not follow the slice's
+   work — they look like collections on a heap that holds two million
+   blocks, which slicing cannot fix. And the carried-on total is about twice
+   what the one-shot rescan cost (1.5 s against 0.8 s): the same lines are
+   read, but each slice pays for a splice of the block list and its own
+   warm-up. Both are paid off the keystroke, on a note of a quarter of a
+   gigabyte, for an edit that rewrites what most of it means; the device
+   round is where they get their verdict.
+
+   Held by `block_scanner_test.dart` — *a rescan that stops short answers
+   every line as a fresh scan would* (a three-line budget, a thousand notes,
+   edits landing above, on and past the frontiers, `advance` and `blockAt`
+   interleaved and nothing settled between them) and *an edit that changes
+   the rest of the note costs its budget* — and, in the view,
+   `source_scan_frontier_test.dart`: a `$$` opened over 25 000 lines, the
+   lines on screen coloured right at once, the scan carried on, the outline
+   back, and a line at the note's end drawn right before any slice has run.
 
 4. ~~**A reload from disk compares the whole text.**~~ Done, and not with a
    hash: the watcher is what asks for the reload, and a watcher reports that

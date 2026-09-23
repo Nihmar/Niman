@@ -71,6 +71,17 @@ List<String> _described(BlockScanner scanner) => <String>[
     ].join(' '),
 ];
 
+/// [_described] for one block, or null.
+String? _describedBlock(Block? block) => block == null
+    ? null
+    : <Object?>[
+        block,
+        '#${block.listOrdinal}',
+        'h${block.headingLevel}',
+        block.fenceInfo,
+        block.entering,
+      ].join(' ');
+
 /// The kinds of the blocks over [text], in order.
 List<BlockKind> _kinds(String text) {
   final scanner = BlockScanner(SourceBuffer.fromText(text));
@@ -509,6 +520,121 @@ void main() {
         final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
         expect(_described(scanner), _described(fresh), reason: label);
       }
+    });
+
+    test('a rescan that stops short answers every line as a fresh scan '
+        'would', () {
+      // A budget of three lines, so nearly every edit leaves a frontier, and
+      // the next edit lands above it, on it or on the lines past it that are
+      // still hints. Nothing is settled between the steps except by the
+      // reads themselves: `blockAt` catches up as far as it needs to, and
+      // `advance` carries the scan on a few lines at a time — which is what
+      // the editor does between keystrokes.
+      const pieces = <String>[
+        '',
+        '',
+        'prose',
+        r'$$',
+        'x = 1',
+        '```',
+        '~~~',
+        '# h',
+        '- item',
+        '1. one',
+        '   cont',
+        '> quote',
+        'lazy',
+        '    code',
+        '| a | b |',
+        '|---|---|',
+        '---',
+        '<div>',
+        '</div>',
+      ];
+      final random = Random(20260924);
+      String piece() => pieces[random.nextInt(pieces.length)];
+      for (var round = 0; round < 1000; round++) {
+        final buffer = SourceBuffer.fromText(
+          List<String>.generate(
+            20 + random.nextInt(120),
+            (_) => piece(),
+          ).join('\n'),
+        );
+        final scanner = BlockScanner(buffer, budget: 3);
+        for (var step = 0; step < 16; step++) {
+          final line = random.nextInt(buffer.lineCount);
+          final at = buffer.offsetOfLine(line);
+          final end = at + buffer.lineAt(line).length;
+          final edit = switch (random.nextInt(5)) {
+            0 => buffer.replaceRange(at, at, '${piece()}\n'),
+            1 when line > 0 => buffer.replaceRange(at - 1, at, ''),
+            2 => buffer.replaceRange(at, end, piece()),
+            3 => buffer.replaceRange(
+              at,
+              at,
+              r'$$'
+              '\n',
+            ),
+            _ => buffer.replaceRange(end, end, '\n${piece()}'),
+          };
+          scanner.edited(edit);
+          if (random.nextBool()) scanner.advance(random.nextInt(6));
+          final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+          for (var probe = 0; probe < 3; probe++) {
+            final line = random.nextInt(buffer.lineCount);
+            expect(
+              _describedBlock(scanner.blockAt(line)),
+              _describedBlock(fresh.blockAt(line)),
+              reason: 'round $round step $step line $line on ${buffer.text}',
+            );
+          }
+          if (step % 5 == 4) {
+            expect(
+              _described(scanner),
+              _described(fresh),
+              reason: 'round $round step $step on ${buffer.text}',
+            );
+            expect(scanner.settled, isTrue, reason: 'index settles');
+          }
+        }
+      }
+    });
+
+    test('an edit that changes the rest of the note costs its budget', () {
+      // Two hundred formulas: opening one more at the top turns every one
+      // after it inside out, which a fresh scan agrees with. The keystroke
+      // pays for its budget, and the rest is carried on by `advance`.
+      final text = [
+        for (var at = 0; at < 200; at++) ...[
+          r'$$',
+          'x_$at',
+          r'$$',
+          'prose',
+          '',
+        ],
+      ].join('\n');
+      final buffer = SourceBuffer.fromText(text);
+      final scanner = BlockScanner(buffer, budget: 50);
+      final before = scanner.scannedLineTotal;
+      scanner.edited(
+        buffer.replaceRange(
+          0,
+          0,
+          r'$$'
+          '\n',
+        ),
+      );
+      expect(scanner.scannedLineTotal - before, lessThan(60));
+      expect(scanner.settled, isFalse);
+      expect(scanner.frontier, isNotNull);
+      var slices = 0;
+      while (!scanner.settled) {
+        scanner.advance();
+        slices++;
+      }
+      expect(slices, greaterThan(10), reason: 'carried on in slices');
+      final fresh = BlockScanner(SourceBuffer.fromText(buffer.text));
+      expect(_described(scanner), _described(fresh));
     });
 
     test('an item typed in keeps its place in the count', () {

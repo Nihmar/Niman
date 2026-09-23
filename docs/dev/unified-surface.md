@@ -11427,6 +11427,19 @@ its criteria are only half answered:
   the reason a device round is not yet worth running: the build under test is
   not one to hand over.
 
+  **Answered on 2026-09-23**, and the diagnosis above was wrong in a way worth
+  keeping: the note has no block longer than 36 lines. The 1 378 781 lines
+  were an edit that destroyed a `$$` opener, which turns every formula after
+  it inside out — a change that really is O(note), and that a fresh scan
+  agrees with. Both costs are now bounded: a keystroke inside one huge block
+  re-scans a line or two (the rescan starts at the edit and stops where the
+  scan agrees with what was there), and a keystroke that changes the rest of
+  the note pays a 4 096-line budget — 4.5 ms at 50 % of `Quicknote.md`, AOT —
+  and leaves the rest to be carried on between frames, the lines on screen
+  scanned up to as they are drawn. The details and the numbers are
+  `huge-notes.md` item 3. What remains for this debt is the device round
+  itself.
+
 The user-facing half is stale for the same reason: `docs/user/editing.md` still
 lists find and replace, the spelling underline, the context menu, Ctrl+click,
 typewriter mode and folding as missing from the unified source pane, and they
