@@ -53,6 +53,7 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
@@ -263,6 +264,24 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A quote's content read again as blocks, so `live` draws a quote's lines
   /// as the blocks they are inside it, as the read view does.
   final LiveQuoteContent _quotes = LiveQuoteContent();
+
+  /// What the footnotes `live` ends the note with are parsed with.
+  final BlockParser _footnoteParser = BlockParser();
+
+  /// The formulas of those footnotes, for a surface given no math cache.
+  final MathCache _footnoteMath = MathCache();
+
+  /// Puts the caret at the start of [footnote]'s definition, which shows
+  /// it: a tap on the footnote, at the end of the note, is the way to a
+  /// definition `live` hides where it stands.
+  void _toDefinition(Footnote footnote) {
+    final line = _styler?.definitionLineOf(footnote.label);
+    if (line == null) return;
+    final offset = widget.buffer.offsetOfLine(line);
+    _focus.requestFocus();
+    _select(offset, offset);
+    _ensureCaretVisible();
+  }
 
   /// The folded heading sections; the rows are the lines they leave.
   final SourceFolds _folds = SourceFolds();
@@ -502,6 +521,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _typewriter.dispose();
     _semanticsTick.dispose();
     _caretRect.dispose();
+    _footnoteMath.dispose();
     _caretSpot.dispose();
     _caretOn.dispose();
     if (_ownsScroll) _scroll.dispose();
@@ -2058,6 +2078,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 _leftInset;
             final available =
                 constraints.maxWidth - _leftInset - _rightInset - _gutter;
+            // Typewriter mode: room for the last row to reach the middle,
+            // under whatever the note ends with.
+            final slack = widget.typewriter
+                ? typewriterSlack(constraints.maxHeight)
+                : 0.0;
+            // The footnotes the read view ends the note with, which `live`
+            // ends it with too: its definitions take no room where they
+            // stand.
+            final footnotes = widget.hideMarkers
+                ? _styler?.footnotes ?? const <Footnote>[]
+                : const <Footnote>[];
             return _mouseSelection(
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -2106,9 +2137,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                         // middle.
                         bottom:
                             widget.padding.bottom +
-                            (widget.typewriter
-                                ? typewriterSlack(constraints.maxHeight)
-                                : 0),
+                            (footnotes.isEmpty ? slack : 0),
                       ),
                       sliver: SliverMarkdownBlocks(
                         heights: _heights,
@@ -2148,6 +2177,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   ? _formulaOf(index)
                                   : null,
                               mathCache: widget.mathCache,
+                              definition:
+                                  widget.hideMarkers &&
+                                      block != null &&
+                                      (_styler?.definesOnly(block) ?? false)
+                                  ? (block.startLine, block.endLine)
+                                  : null,
                               codeRuns: !widget.hideMarkers
                                   ? null
                                   : quoted != null
@@ -2197,6 +2232,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                         ),
                       ),
                     ),
+                    if (footnotes.isNotEmpty)
+                      SliverPadding(
+                        // Where the read view puts its section: past the
+                        // note's own padding, the text's edges its edges.
+                        padding: EdgeInsets.only(
+                          left: _leftInset + _gutter,
+                          right: _rightInset,
+                          top: widget.padding.top,
+                          bottom: widget.padding.bottom + slack,
+                        ),
+                        sliver: footnoteSliver(
+                          footnotes: footnotes,
+                          theme: widget.theme,
+                          parser: _footnoteParser,
+                          mathCache: widget.mathCache ?? _footnoteMath,
+                          scope: _styler?.scope,
+                          onTap: _toDefinition,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -2781,6 +2835,7 @@ final class _Line extends StatelessWidget {
     required this.formula,
     required this.mathCache,
     required this.codeRuns,
+    required this.definition,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -2826,6 +2881,12 @@ final class _Line extends StatelessWidget {
   /// The colours of the line's code, as the read view colours its block;
   /// null for a line that is not code the read view colours.
   final List<CodeRun>? codeRuns;
+
+  /// The lines `[start, end)` of the definitions this line is one of — link
+  /// references or footnotes, which the read view does not draw where they
+  /// stand — or null. Out of the caret's reach they take no room, as a
+  /// typeset formula's lines do; the caret anywhere in them shows them all.
+  final (int, int)? definition;
 
   final StyledLine styled;
   final int? number;
@@ -2945,11 +3006,15 @@ final class _Line extends StatelessWidget {
         math != null &&
         mathCache != null &&
         (at.line < math.start || at.line >= math.end);
-    final inline = typeset
+    final defined = definition;
+    final folded =
+        defined != null && (at.line < defined.$1 || at.line >= defined.$2);
+    final inline = typeset || folded
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
     final concealed = <_Concealed>[
-      if (typeset) (0, styled.text.length, _hiddenMarker, whole: false),
+      if (typeset || folded)
+        (0, styled.text.length, _hiddenMarker, whole: false),
       if (hideMarkers && !mine)
         for (final picture in pictures)
           (picture.start, picture.end, _hiddenMarker, whole: false),
@@ -2970,11 +3035,14 @@ final class _Line extends StatelessWidget {
       ),
       key: paragraphKey,
       // A typeset formula's lines take no room: the formula is drawn under
-      // its first one instead.
-      style: typeset
+      // its first one instead. Nor do definitions out of the caret's reach:
+      // the read view does not draw them there, and ends the note with the
+      // footnotes, as `live` does.
+      style: typeset || folded
           ? _lineStyle(revealed: mine).copyWith(fontSize: 0.01, height: 1)
           : _lineStyle(revealed: mine),
     );
+    if (folded) return paragraph;
     if (inline.isNotEmpty) {
       paragraph = CustomPaint(
         foregroundPainter: InlineMathPainter(

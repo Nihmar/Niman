@@ -125,6 +125,35 @@ final class SourceStyler {
   /// shapes, and a pasted table of this size is one block.
   static const int _inlineLimit = 64 * 1024;
 
+  /// The note's footnotes, in the order they are cited: the section the
+  /// read view ends the note with, and `live` too.
+  List<Footnote> get footnotes => _scope.footnotes;
+
+  /// The note's link and footnote definitions, for what a footnote's body
+  /// cites.
+  DocumentScope get scope => _scope;
+
+  /// Whether [block] is nothing but definitions — link references or
+  /// footnotes — which the read view does not draw where they stand: a
+  /// paragraph whose parse gave nothing back. False for a block too long to
+  /// parse, which is drawn as it is.
+  bool definesOnly(Block block) {
+    if (block.kind != BlockKind.paragraph) return false;
+    final parsed = _parsedOf(block);
+    return parsed != null && parsed.parse.runs.isEmpty;
+  }
+
+  /// The line footnote [label]'s definition is on, or null when no line
+  /// defines it: where a tap on the footnote puts the caret.
+  int? definitionLineOf(String label) {
+    final opening = '[^$label]:';
+    for (final line in _definers) {
+      if (line >= buffer.lineCount) continue;
+      if (buffer.lineAt(line).trimLeft().startsWith(opening)) return line;
+    }
+    return null;
+  }
+
   /// Follows [edit], already made to [buffer].
   void edited(SourceEdit edit) {
     _revision = null;

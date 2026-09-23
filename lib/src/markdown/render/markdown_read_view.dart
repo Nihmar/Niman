@@ -644,24 +644,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   }
 
   /// The footnotes, one row per sliver child.
-  Widget _footnoteSliver() {
-    final notes = widget.parser.footnotesOf(_shown!);
-    return SliverList.builder(
-      itemCount: notes.isEmpty ? 0 : notes.length + 1,
-      itemBuilder: (context, index) {
-        final theme = _theme ?? _fallbackTheme;
-        if (index == 0) return FootnoteDivider(theme: theme);
-        return FootnoteRow(
-          footnote: notes[index - 1],
-          number: index,
-          theme: theme,
-          parser: widget.parser,
-          mathCache: widget.mathCache,
-          scope: widget.parser.scope,
-        );
-      },
-    );
-  }
+  Widget _footnoteSliver() => footnoteSliver(
+    footnotes: widget.parser.footnotesOf(_shown!),
+    theme: _theme ?? _fallbackTheme,
+    parser: widget.parser,
+    mathCache: widget.mathCache,
+    scope: widget.parser.scope,
+  );
 
   /// Draws block [index], parsing it for the first time if need be.
   ///

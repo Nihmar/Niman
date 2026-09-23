@@ -100,11 +100,13 @@ Future<void> _pumpNote(
   await tester.pump();
 }
 
-/// Where the first glyph of [word] is drawn, in whichever paragraph has it.
-Offset _glyphOf(WidgetTester tester, String word) {
-  for (final paragraph in tester.renderObjectList<RenderParagraph>(
-    find.byType(RichText),
-  )) {
+/// Where the first glyph of [word] is drawn, in the first paragraph that
+/// has it — or the [last].
+Offset _glyphOf(WidgetTester tester, String word, {bool last = false}) {
+  final paragraphs = tester
+      .renderObjectList<RenderParagraph>(find.byType(RichText))
+      .toList();
+  for (final paragraph in last ? paragraphs.reversed : paragraphs) {
     final at = paragraph.text.toPlainText().indexOf(word);
     if (at < 0) continue;
     final box = paragraph
@@ -415,6 +417,47 @@ void main() {
     }
 
     final live = await places(read: false);
+    final read = await places(read: true);
+    for (var at = 0; at < words.length; at++) {
+      expect(read[at].dx, closeTo(live[at].dx, 0.01), reason: words[at]);
+      expect(read[at].dy, closeTo(live[at].dy, 0.01), reason: words[at]);
+    }
+  });
+
+  testWidgets('definitions and footnotes stand where they do in live', (
+    tester,
+  ) async {
+    // `live` drew a note's link and footnote definitions as their source
+    // where they stand, and no footnotes at its end; the read view draws
+    // the definitions nowhere and ends the note with its footnotes. `live`
+    // now hides them out of the caret's reach and ends the note the same.
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note =
+        'caret with a note[^1] and a [link][site].\n\n'
+        '[^1]: the footnote body\n[site]: https://example.org\n\n'
+        'after definitions\n';
+    const words = ['after definitions', 'the footnote body'];
+    Future<List<Offset>> places({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      final origin = _glyphOf(tester, 'caret');
+      // The section's row: the definition's source, hidden in `live`, holds
+      // the body too, and comes first.
+      return [
+        for (final word in words) _glyphOf(tester, word, last: true) - origin,
+      ];
+    }
+
+    final live = await places(read: false);
+    final definition = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((p) => p.text.toPlainText().contains('example.org'));
+    expect(
+      definition.size.height,
+      lessThan(1),
+      reason: "a definition out of the caret's reach takes no room",
+    );
     final read = await places(read: true);
     for (var at = 0; at < words.length; at++) {
       expect(read[at].dx, closeTo(live[at].dx, 0.01), reason: words[at]);
