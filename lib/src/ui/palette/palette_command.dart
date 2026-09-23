@@ -61,7 +61,8 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.reindexLibrary || AppCommand.switchLibrary => PaletteGroup.library,
   AppCommand.journalToday ||
   AppCommand.journalPrevious ||
-  AppCommand.journalNext => PaletteGroup.journal,
+  AppCommand.journalNext ||
+  AppCommand.journalCalendar => PaletteGroup.journal,
   AppCommand.tabFiles ||
   AppCommand.tabTodo ||
   AppCommand.tabSearch ||

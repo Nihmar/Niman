@@ -594,6 +594,11 @@ abstract base class Strings {
   String get journalTemplateNone;
   String get journalDayStartTitle;
   String get journalDayStartSubtitle;
+  String get journalRecent;
+  String get journalNoEntry;
+  String get journalOpenEntry;
+  String get journalShowCalendar;
+  String get journalFabToday;
   String get commandsTitle;
   String get commandsIntro;
   String get commandNeedNone;

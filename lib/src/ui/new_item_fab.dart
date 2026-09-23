@@ -22,6 +22,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewAudioNote,
     required this.onNewFromTemplate,
     required this.onNewFolder,
+    required this.onJournalToday,
     this.listFolder,
     super.key,
   });
@@ -56,6 +57,9 @@ final class NewItemFab extends StatelessWidget {
   /// Creates a note from a template, in the FAB target folder.
   final VoidCallback onNewFromTemplate;
 
+  /// Opens today's journal entry, made first when there is none (#7).
+  final VoidCallback onJournalToday;
+
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
 
@@ -71,6 +75,15 @@ final class NewItemFab extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        // First, and set apart: the one thing done every day (#7).
+        _MiniFab(
+          key: const Key('journal-today-action'),
+          icon: Icons.today_outlined,
+          label: AppStrings.journalFabToday,
+          open: expanded,
+          onTap: onJournalToday,
+        ),
+        const SizedBox(height: 12),
         _MiniFab(
           key: const Key('new-note-action'),
           icon: Icons.note_add_outlined,

@@ -1244,6 +1244,16 @@ final class SlovenianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Pozno pokonci? Ob 04:00 noč še spada k prejšnjemu dnevu';
   @override
+  String get journalRecent => 'Nedavni';
+  @override
+  String get journalNoEntry => 'Za ta dan ni vnosa';
+  @override
+  String get journalOpenEntry => 'Odpri';
+  @override
+  String get journalShowCalendar => 'Pokaži koledar';
+  @override
+  String get journalFabToday => 'Današnji vnos v dnevnik';
+  @override
   String get commandsTitle => 'Ukazi';
   @override
   String get commandsIntro =>

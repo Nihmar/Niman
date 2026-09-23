@@ -1264,6 +1264,16 @@ final class DutchStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Laat op? Om 04:00 blijft de nacht bij de dag ervoor';
   @override
+  String get journalRecent => 'Recent';
+  @override
+  String get journalNoEntry => 'Geen notitie voor deze dag';
+  @override
+  String get journalOpenEntry => 'Openen';
+  @override
+  String get journalShowCalendar => 'Kalender tonen';
+  @override
+  String get journalFabToday => 'Dagboeknotitie van vandaag';
+  @override
   String get commandsTitle => 'Opdrachten';
   @override
   String get commandsIntro =>

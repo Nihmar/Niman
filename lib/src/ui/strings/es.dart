@@ -1277,6 +1277,16 @@ final class SpanishStrings extends Strings {
   String get journalDayStartSubtitle =>
       '¿Trasnochas? A las 04:00 la noche sigue en el día anterior';
   @override
+  String get journalRecent => 'Recientes';
+  @override
+  String get journalNoEntry => 'No hay entrada para este día';
+  @override
+  String get journalOpenEntry => 'Abrir';
+  @override
+  String get journalShowCalendar => 'Mostrar el calendario';
+  @override
+  String get journalFabToday => 'Entrada de hoy del diario';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

@@ -1249,6 +1249,16 @@ final class BelarusianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Позна кладзешся? А 04:00 ноч застаецца на папярэднім дні';
   @override
+  String get journalRecent => 'Нядаўнія';
+  @override
+  String get journalNoEntry => 'Няма запісу на гэты дзень';
+  @override
+  String get journalOpenEntry => 'Адкрыць';
+  @override
+  String get journalShowCalendar => 'Паказаць каляндар';
+  @override
+  String get journalFabToday => 'Сённяшні запіс дзённіка';
+  @override
   String get commandsTitle => 'Каманды';
   @override
   String get commandsIntro =>

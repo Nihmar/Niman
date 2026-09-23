@@ -1254,6 +1254,16 @@ final class SerbianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Касно лежеш? У 04:00 ноћ остаје на претходном дану';
   @override
+  String get journalRecent => 'Недавно';
+  @override
+  String get journalNoEntry => 'Нема уноса за овај дан';
+  @override
+  String get journalOpenEntry => 'Отвори';
+  @override
+  String get journalShowCalendar => 'Прикажи календар';
+  @override
+  String get journalFabToday => 'Данашњи унос у дневник';
+  @override
   String get commandsTitle => 'Команде';
   @override
   String get commandsIntro =>

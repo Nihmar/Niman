@@ -1261,6 +1261,16 @@ final class AlbanianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Vonë? Në 04:00 nata mbetet te dita e mëparshme';
   @override
+  String get journalRecent => 'Së fundi';
+  @override
+  String get journalNoEntry => 'Asnjë hyrje për këtë ditë';
+  @override
+  String get journalOpenEntry => 'Hap';
+  @override
+  String get journalShowCalendar => 'Shfaq kalendarin';
+  @override
+  String get journalFabToday => 'Hyrja e sotme e ditarit';
+  @override
   String get commandsTitle => 'Komandat';
   @override
   String get commandsIntro =>

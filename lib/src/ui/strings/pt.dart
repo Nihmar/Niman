@@ -1257,6 +1257,16 @@ final class PortugueseStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Deitas-te tarde? Às 04:00 a noite fica no dia anterior';
   @override
+  String get journalRecent => 'Recentes';
+  @override
+  String get journalNoEntry => 'Sem entrada para este dia';
+  @override
+  String get journalOpenEntry => 'Abrir';
+  @override
+  String get journalShowCalendar => 'Mostrar o calendário';
+  @override
+  String get journalFabToday => 'Entrada de hoje do diário';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

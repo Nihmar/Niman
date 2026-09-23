@@ -1260,6 +1260,16 @@ final class BulgarianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Лягаш късно? В 04:00 нощта остава към предишния ден';
   @override
+  String get journalRecent => 'Скорошни';
+  @override
+  String get journalNoEntry => 'Няма запис за този ден';
+  @override
+  String get journalOpenEntry => 'Отвори';
+  @override
+  String get journalShowCalendar => 'Покажи календара';
+  @override
+  String get journalFabToday => 'Днешен запис в дневника';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

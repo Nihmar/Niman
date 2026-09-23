@@ -1255,6 +1255,16 @@ final class HungarianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Későn fekszik? 04:00-kor az éjszaka még az előző naphoz tartozik';
   @override
+  String get journalRecent => 'Legutóbbiak';
+  @override
+  String get journalNoEntry => 'Erre a napra nincs bejegyzés';
+  @override
+  String get journalOpenEntry => 'Megnyitás';
+  @override
+  String get journalShowCalendar => 'Naptár megjelenítése';
+  @override
+  String get journalFabToday => 'Mai naplóbejegyzés';
+  @override
   String get commandsTitle => 'Parancsok';
   @override
   String get commandsIntro =>

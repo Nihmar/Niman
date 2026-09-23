@@ -1238,6 +1238,16 @@ final class TurkishStrings extends Strings {
   String get journalDayStartSubtitle =>
       "Geç mi yatıyorsun? 04:00'te gece bir önceki güne sayılır";
   @override
+  String get journalRecent => 'Son girdiler';
+  @override
+  String get journalNoEntry => 'Bu gün için girdi yok';
+  @override
+  String get journalOpenEntry => 'Aç';
+  @override
+  String get journalShowCalendar => 'Takvimi göster';
+  @override
+  String get journalFabToday => 'Bugünün günlük girdisi';
+  @override
   String get commandsTitle => 'Komutlar';
   @override
   String get commandsIntro =>

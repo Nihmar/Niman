@@ -137,7 +137,8 @@ and Windows only: a phone has nothing to drag from.
 Linux and Windows only for now: Android's picker hands over a copy of
 the file, which could be read but not saved back.
 
-The **side panel** (outline, tags, history beside the note) shows on
+The **side panel** (outline, tags, history beside the note, and the
+[journal](journal.md)'s calendar) shows on
 any window at least 1000 px wide: desktops, tablets, a phone in
 landscape if it is that wide. A phone upright has no room for a note
 and a panel side by side, so this is a decision rather than an

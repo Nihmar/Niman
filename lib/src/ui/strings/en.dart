@@ -1242,6 +1242,16 @@ final class EnglishStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Up late? At 04:00 the night stays on the day before';
   @override
+  String get journalRecent => 'Recent';
+  @override
+  String get journalNoEntry => 'No entry for this day';
+  @override
+  String get journalOpenEntry => 'Open';
+  @override
+  String get journalShowCalendar => 'Show the calendar';
+  @override
+  String get journalFabToday => "Today's journal entry";
+  @override
   String get commandsTitle => 'Commands';
   @override
   String get commandsIntro =>

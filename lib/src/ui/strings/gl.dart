@@ -1263,6 +1263,16 @@ final class GalicianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Deitaste tarde? Ás 04:00 a noite queda no día anterior';
   @override
+  String get journalRecent => 'Recentes';
+  @override
+  String get journalNoEntry => 'Non hai entrada para este día';
+  @override
+  String get journalOpenEntry => 'Abrir';
+  @override
+  String get journalShowCalendar => 'Amosar o calendario';
+  @override
+  String get journalFabToday => 'Entrada de hoxe do diario';
+  @override
   String get commandsTitle => 'Ordes';
   @override
   String get commandsIntro =>

@@ -1280,6 +1280,16 @@ final class CatalanStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Et fas tard? A les 04:00 la nit queda en el dia anterior';
   @override
+  String get journalRecent => 'Recents';
+  @override
+  String get journalNoEntry => 'Cap entrada per a aquest dia';
+  @override
+  String get journalOpenEntry => 'Obre';
+  @override
+  String get journalShowCalendar => 'Mostra el calendari';
+  @override
+  String get journalFabToday => 'Entrada d’avui del diari';
+  @override
   String get commandsTitle => 'Ordres';
   @override
   String get commandsIntro =>

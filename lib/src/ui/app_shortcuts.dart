@@ -40,6 +40,9 @@ enum AppCommand {
   /// The journal entry after the one on screen.
   journalNext,
 
+  /// The journal's calendar: the dock's pane, or the phone's screen.
+  journalCalendar,
+
   /// Show or hide the wide tree pane.
   toggleSidebar,
 
@@ -249,6 +252,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.journalToday => AppStrings.journalToday,
   AppCommand.journalPrevious => AppStrings.journalPrevious,
   AppCommand.journalNext => AppStrings.journalNext,
+  AppCommand.journalCalendar => AppStrings.journalShowCalendar,
   AppCommand.toggleSidebar => AppStrings.shortcutToggleSidebar,
   AppCommand.closeTab => AppStrings.shortcutCloseTab,
   AppCommand.nextTab => AppStrings.shortcutNextTab,

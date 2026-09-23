@@ -23,7 +23,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+W` — close the note on screen (its tab)
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note
 - `Ctrl/⌘+\` — split the window right with the note on screen
-- `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history)
+- `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history,
+  the journal's calendar)
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
   leaves it (see [editing](editing.md#zen-mode))
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written

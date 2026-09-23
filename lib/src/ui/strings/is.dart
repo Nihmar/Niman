@@ -1249,6 +1249,16 @@ final class IcelandicStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Seint á fótum? Kl. 04:00 tilheyrir nóttin enn deginum á undan';
   @override
+  String get journalRecent => 'Nýlegt';
+  @override
+  String get journalNoEntry => 'Engin færsla fyrir þennan dag';
+  @override
+  String get journalOpenEntry => 'Opna';
+  @override
+  String get journalShowCalendar => 'Sýna dagatalið';
+  @override
+  String get journalFabToday => 'Dagbókarfærsla dagsins';
+  @override
   String get commandsTitle => 'Skipanir';
   @override
   String get commandsIntro =>

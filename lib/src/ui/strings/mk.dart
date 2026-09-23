@@ -1261,6 +1261,16 @@ final class MacedonianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Доцна легнуваш? Во 04:00 ноќта останува на претходниот ден';
   @override
+  String get journalRecent => 'Неодамнешни';
+  @override
+  String get journalNoEntry => 'Нема запис за овој ден';
+  @override
+  String get journalOpenEntry => 'Отвори';
+  @override
+  String get journalShowCalendar => 'Прикажи го календарот';
+  @override
+  String get journalFabToday => 'Денешен запис во дневникот';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

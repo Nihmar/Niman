@@ -80,8 +80,13 @@ final class JournalFlow {
   }
 
   /// Opens [day]'s entry. One that does not exist is made — after
-  /// asking, unless [day] is today.
-  Future<void> openDay(BuildContext context, DateTime day) async {
+  /// asking, unless [day] is today or the making was [confirmed] already
+  /// (the phone's Create button).
+  Future<void> openDay(
+    BuildContext context,
+    DateTime day, {
+    bool confirmed = false,
+  }) async {
     final ops = controller.ops;
     if (ops == null) return;
     final settings = await ops.journal;
@@ -91,7 +96,7 @@ final class JournalFlow {
       onOpen(path);
       return;
     }
-    if (day != settings.today(_clock())) {
+    if (!confirmed && day != settings.today(_clock())) {
       if (!context.mounted) return;
       final create = await _askToCreate(context, day);
       if (create != true) return;

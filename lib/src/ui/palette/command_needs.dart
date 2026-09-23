@@ -76,6 +76,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.newTodo ||
   AppCommand.quickNote ||
   AppCommand.journalToday ||
+  AppCommand.journalCalendar ||
   AppCommand.typewriterMode ||
   AppCommand.reindexLibrary ||
   AppCommand.switchLibrary ||

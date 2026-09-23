@@ -1272,6 +1272,16 @@ final class GermanStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Lange auf? Um 04:00 bleibt die Nacht beim Vortag';
   @override
+  String get journalRecent => 'Zuletzt';
+  @override
+  String get journalNoEntry => 'Kein Eintrag für diesen Tag';
+  @override
+  String get journalOpenEntry => 'Öffnen';
+  @override
+  String get journalShowCalendar => 'Kalender zeigen';
+  @override
+  String get journalFabToday => 'Heutiger Tagebucheintrag';
+  @override
   String get commandsTitle => 'Befehle';
   @override
   String get commandsIntro =>

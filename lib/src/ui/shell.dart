@@ -43,7 +43,9 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
+import 'package:niman/src/ui/journal/journal_screen.dart';
 import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
@@ -2201,6 +2203,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         _closeFab();
         unawaited(_createFlow.createNote(context));
       },
+      onJournalToday: () {
+        _closeFab();
+        unawaited(_journalFlow.openToday(context));
+      },
       onNewListNote: () {
         _closeFab();
         unawaited(_createFlow.createListNote(context));
@@ -2286,6 +2292,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       // Leftmost: it comes and goes, and the row grows from the left, so
       // the buttons a thumb already knows stay where they were.
       if (_workspace.value.tabs.isNotEmpty) _openNotesButton(),
+      IconButton(
+        key: const Key('open-journal'),
+        tooltip: AppStrings.paletteGroupJournal,
+        icon: const Icon(Icons.calendar_today_outlined),
+        onPressed: _showJournalCalendar,
+      ),
       _syncActions.button(context, controller),
       IconButton(
         key: const Key('open-trash'),
@@ -2603,6 +2615,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           unawaited(_journalFlow.openPrevious(context, _shownJournalDay!)),
       AppCommand.journalNext: () =>
           unawaited(_journalFlow.openNext(context, _shownJournalDay!)),
+      AppCommand.journalCalendar: _showJournalCalendar,
       AppCommand.zenMode: _toggleZen,
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
@@ -3022,7 +3035,49 @@ final class _LibraryShellState extends State<_LibraryShell>
             if (path != null) unawaited(_openHistory(path));
           },
         ),
+        DockPane.journal => JournalBrowser(
+          today: _journal.today(DateTime.now()),
+          entryDays: _journalFlow.entryDays,
+          readEntry: _readJournalEntry,
+          revision: controller.revision,
+          onOpenDay: (day, {confirmed = false}) => unawaited(
+            _journalFlow.openDay(context, day, confirmed: confirmed),
+          ),
+        ),
       },
+    );
+  }
+
+  /// The text of [day]'s journal entry, for the calendar's recent list.
+  Future<String> _readJournalEntry(DateTime day) async {
+    final ops = widget.controller.ops;
+    if (ops == null) return '';
+    return await ops.readNote(_journal.entryPath(day));
+  }
+
+  /// The journal's calendar (#7): the dock's pane where the window has
+  /// room for the dock, the Journal screen everywhere else.
+  void _showJournalCalendar() {
+    if (_dockRoom) {
+      _workspace.controller.update(
+        (w) => w.withDock(open: true, pane: DockPane.journal),
+      );
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (screen) => JournalScreen(
+          today: _journal.today(DateTime.now()),
+          entryDays: _journalFlow.entryDays,
+          readEntry: _readJournalEntry,
+          revision: widget.controller.revision,
+          onOpenDay: (day, {confirmed = false}) {
+            // The screen goes first: the entry opens in the shell.
+            Navigator.of(screen).pop();
+            unawaited(_journalFlow.openDay(context, day, confirmed: confirmed));
+          },
+        ),
+      ),
     );
   }
 
@@ -3187,6 +3242,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       entryDays: _journalFlow.entryDays,
       onPrevious: () => unawaited(_journalFlow.openPrevious(context, day)),
       onNext: () => unawaited(_journalFlow.openNext(context, day)),
+      onDay: _showJournalCalendar,
       revision: widget.controller.revision,
       compact: compact,
     );

@@ -1163,6 +1163,16 @@ final class JapaneseStrings extends Strings {
   @override
   String get journalDayStartSubtitle => '夜更かし? 04:00 にすると夜は前日のままです';
   @override
+  String get journalRecent => '最近';
+  @override
+  String get journalNoEntry => 'この日のエントリはありません';
+  @override
+  String get journalOpenEntry => '開く';
+  @override
+  String get journalShowCalendar => 'カレンダーを表示';
+  @override
+  String get journalFabToday => '今日の日記エントリ';
+  @override
   String get commandsTitle => 'コマンド';
   @override
   String get commandsIntro =>
