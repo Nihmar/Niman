@@ -771,7 +771,13 @@ final class BlockScanner {
     }
     final html = _htmlOpen(text);
     if (html != null) {
-      return LineState(html: html.$1, htmlClosing: html.$2);
+      final opened = LineState(html: html.$1, htmlClosing: html.$2);
+      // A comment, a raw-text tag, a processing instruction, a declaration or
+      // a CDATA section ends on the line with its end marker — which can be
+      // the line it opens on. Left open, a one-line `<!-- note -->` made an
+      // HTML block of everything under it until the next `-->`: 1 656 lines
+      // of the worst-note fixture drawn as raw HTML, and their links unread.
+      if (!_closesOnItsOwnLine(text, opened)) return opened;
     }
     final quoteDepth = _quoteDepthAfter(line, text, state);
     final listStack = _listAfter(text, state);
@@ -908,6 +914,25 @@ final class BlockScanner {
       return (HtmlBlockKind.completeTag, null);
     }
     return null;
+  }
+
+  /// Whether the HTML block [state] opens on [text] also ends there: its end
+  /// marker after the opening one, for the kinds that end on a marker.
+  static bool _closesOnItsOwnLine(String text, LineState state) {
+    final trimmed = text.trimLeft();
+    final (from, marker) = switch (state.html!) {
+      HtmlBlockKind.rawText => (1, '</${state.htmlClosing}>'),
+      HtmlBlockKind.comment => (4, '-->'),
+      HtmlBlockKind.processingInstruction => (2, '?>'),
+      HtmlBlockKind.declaration => (2, '>'),
+      HtmlBlockKind.cdata => (9, ']]>'),
+      HtmlBlockKind.blockTag || HtmlBlockKind.completeTag => (0, ''),
+    };
+    if (marker.isEmpty) return false;
+    final rest = from > trimmed.length ? '' : trimmed.substring(from);
+    return state.html == HtmlBlockKind.rawText
+        ? rest.toLowerCase().contains(marker)
+        : rest.contains(marker);
   }
 
   /// Whether [text] closes the HTML block [state] opened.
