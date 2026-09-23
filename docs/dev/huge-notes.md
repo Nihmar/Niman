@@ -277,14 +277,17 @@ written next to it.
    (`_changedRange`), so an unchanged head and tail are only compared and the
    replacement is the part that actually differs. A handback of what the note
    already says is not an edit at all: no revision bump, no save.
-7. ~~**The read view's definitions are rescanned per revision.**~~ Done: the
-   scope is reused when the lines that can hold a definition are what they
-   were, which is what decides whether a scan could find anything different.
-   The check folds those lines into one number
-   (`MarkdownReadViewState._definitionsKey`), so a definition moved by a
-   paragraph added above it is still the same definition — the key is over
-   content, not line numbers. 21 ms on the 246 MB note against 618 ms for
-   the scan it saves (measured 2026-09-22).
+7. ~~**The read view's definitions are rescanned per revision.**~~
+   **Corrected (2026-09-23): the reuse saved nothing, and was wrong.** It kept
+   the last scope when the lines opening with `[` were unchanged
+   (`_definitionsKey`, 21 ms on the 246 MB note), claiming to spare the 618 ms
+   definitions scan — but every scan already reads the definitions with the
+   blocks (`DocumentScan.of`, in place or in the isolate), so the fresh scope
+   was there and the old one was chosen over it. And the key did not see a
+   footnote cited mid-sentence, whose order is the footnotes' numbering, so
+   the kept scope could be stale. The reuse is gone: the pane draws the
+   definitions its scan brings. What does spare the scan now is the editor's
+   hand-over (the table above), whose scope is kept current edit by edit.
 
 8. ~~**The first index of a note reads all of it with the legacy
    tokenizer.**~~ Done (2026-09-23). Found on the testing build: with its
