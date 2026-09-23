@@ -335,6 +335,19 @@ written next to it.
    instruction, a declaration and a CDATA section on the line with its end
    marker, the opening line included; the scanner does too now.
 
+9. ~~**Every save reads the whole note back into the index.**~~ Done
+   (2026-09-23), as a wait rather than a speed-up. The device log of the
+   `live` round shows a reindex after each save of the stress note — 18, 16,
+   34 and 15 s — back to back for as long as the writer typed: the writer
+   already folded them to one running and one after it, but on this note one
+   is longer than the pause between two saves. A note past 2 MB is now
+   reindexed once it has been left alone for 5 s, past 16 MB for 30 s, each
+   save starting the wait again (`NoteWriter.quietBeforeReindex`, the save's
+   own thresholds). The index is a little behind the note while it is being
+   written, and the note is read back once. `NoteWriter.indexed` runs a
+   waiting reindex at once, since whoever asks wants the index as the disk has
+   it.
+
 ## The statistics, measured on the 247 MB note
 
 `dart run tool/stats_bench.dart "Quicknote.md"` (246 867 656 chars,

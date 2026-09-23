@@ -61,6 +61,57 @@ void main() {
     expect(row!.size, '# Title\n\nbody words'.length);
   });
 
+  test('a large note is reindexed once it is left alone', () async {
+    // The stress note's reindex was 15 to 34 s a save, one after another
+    // while the writer typed. A note past the threshold waits to be quiet.
+    final quiet = NoteWriter(
+      root: root.path,
+      indexer: indexer,
+      quietBeforeReindex: (_) => const Duration(milliseconds: 300),
+    );
+    await quiet.save('Big.md', 'first');
+    await quiet.indexed;
+    expect((await indexer.dao.find('Big.md'))!.size, 'first'.length);
+    for (var i = 0; i < 3; i++) {
+      await quiet.save('Big.md', 'second ${'x' * i}');
+    }
+    expect(
+      (await indexer.dao.find('Big.md'))!.size,
+      'first'.length,
+      reason: 'saved and saved again: not read back yet',
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    await quiet.indexed;
+    expect((await indexer.dao.find('Big.md'))!.size, 'second xx'.length);
+  });
+
+  test('asking for the index runs a reindex that waits to be quiet', () async {
+    final quiet = NoteWriter(
+      root: root.path,
+      indexer: indexer,
+      quietBeforeReindex: (_) => const Duration(hours: 1),
+    );
+    await quiet.save('Big.md', 'first');
+    await quiet.save('Big.md', 'the second, longer');
+    await quiet.indexed;
+    expect(
+      (await indexer.dao.find('Big.md'))!.size,
+      'the second, longer'.length,
+    );
+  });
+
+  test('the default waits only for large notes', () {
+    expect(NoteWriter.defaultQuietBeforeReindex(1 << 20), Duration.zero);
+    expect(
+      NoteWriter.defaultQuietBeforeReindex(4 << 20),
+      const Duration(seconds: 5),
+    );
+    expect(
+      NoteWriter.defaultQuietBeforeReindex(250 << 20),
+      const Duration(seconds: 30),
+    );
+  });
+
   test('saves while a reindex runs leave the index on the last one', () async {
     // The reindexes are folded — one running, one more after it — so what
     // matters is that the one after reads what the last save wrote.
