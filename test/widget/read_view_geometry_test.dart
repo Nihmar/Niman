@@ -115,13 +115,6 @@ List<Failure> geometryFailures(
   }
 
   final column = pane - 32;
-  // The size the note is set in: a formula drawn below it was shrunk to fit.
-  // Null when there is no read view to ask — the teeth tests build their own
-  // trees — and then nothing is treated as shrunk.
-  final readView = find.byType(MarkdownReadView).evaluate();
-  final baseFontSize = readView.isEmpty
-      ? null
-      : markdownThemeOf(readView.first).body.fontSize;
   for (final element in find.byType(BlockMathView).evaluate()) {
     if (element.renderObject case final RenderBox box
         when box.attached && box.hasSize) {
@@ -139,19 +132,24 @@ List<Failure> geometryFailures(
       // A formula the pane is too narrow for must be **broken or shrunk** —
       // never drawn at full size into a box it cannot fit, which is the cut
       // (#257). Both answers are visible from the tree: the pieces the painter
-      // draws, and the size the view was drawn at against the theme's.
+      // draws, and the size they are painted at against the view's own. The
+      // view shrinks inside itself, so its own style is the size it was asked
+      // for, not the one it drew; and the theme's body is no measure either,
+      // since a formula is set larger than the prose around it.
       if (intrinsic != null && intrinsic > column) {
-        final pieces = find
+        final painters = find
             .descendant(
               of: find.byWidget(view),
               matching: find.byType(CustomPaint),
             )
             .evaluate()
-            .where((e) => (e.widget as CustomPaint).painter is KatexBoxPainter)
-            .length;
-        final shrunk =
-            baseFontSize != null && view.style.fontSize < baseFontSize - 0.01;
-        if (pieces < 2 && !shrunk) {
+            .map((e) => (e.widget as CustomPaint).painter)
+            .whereType<KatexBoxPainter>()
+            .toList();
+        final shrunk = painters.any(
+          (painter) => painter.fontSize < view.style.fontSize - 0.01,
+        );
+        if (painters.length < 2 && !shrunk) {
           failures.add(
             'a formula wider than the pane is drawn whole at '
             '${view.style.fontSize} px: "$shown"',
