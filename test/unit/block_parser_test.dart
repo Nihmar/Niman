@@ -322,6 +322,19 @@ inline math $x$ and a #tag, all in one block.
     expect(_slice(parsed, plain), 'a &amp; b');
   });
 
+  test('a quotation mark is placed, and so is what follows it', () {
+    // The package hands text back HTML-escaped: `"` is `&quot;` in the node,
+    // which the source does not say, and every run after it was guessed.
+    for (final source in <String>[
+      'say "hi" then **bold**',
+      'a &amp; "b" <c> **bold**',
+    ]) {
+      final parsed = _parse(source);
+      expect(parsed.approximate, isFalse, reason: source);
+      expect(_slice(parsed, _run(parsed, StyleKind.strong)!), '**bold**');
+    }
+  });
+
   test('the runs are the kinds the note actually uses', () {
     expect(_runs('a **b** c', onlyStyled: false), <String>[
       'plain:a ',
