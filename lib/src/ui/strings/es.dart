@@ -452,6 +452,8 @@ final class SpanishStrings extends Strings {
   @override
   String get toolbarImage => 'Insertar imagen';
   @override
+  String get toolbarTable => 'Tabla';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

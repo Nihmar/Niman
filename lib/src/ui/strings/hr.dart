@@ -449,6 +449,8 @@ final class CroatianStrings extends Strings {
   @override
   String get toolbarImage => 'Umetni sliku';
   @override
+  String get toolbarTable => 'Tablica';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

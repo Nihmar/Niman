@@ -445,6 +445,8 @@ final class DanishStrings extends Strings {
   @override
   String get toolbarImage => 'Indsæt billede';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

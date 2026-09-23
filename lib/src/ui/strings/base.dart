@@ -227,6 +227,7 @@ abstract base class Strings {
   String get toolbarLink;
   String get toolbarCode;
   String get toolbarImage;
+  String get toolbarTable;
   String get toolbarHeading;
   String get toolbarList;
   String get toolbarOrderedList;

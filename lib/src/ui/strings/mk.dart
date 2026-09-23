@@ -453,6 +453,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get toolbarImage => 'Вметни слика';
   @override
+  String get toolbarTable => 'Табела';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Листа';

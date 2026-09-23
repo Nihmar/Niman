@@ -452,6 +452,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get toolbarImage => 'Вставити зображення';
   @override
+  String get toolbarTable => 'Таблиця';
+  @override
   String get toolbarHeading => 'Заголовок';
   @override
   String get toolbarList => 'Список';

@@ -450,6 +450,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get toolbarImage => 'Уставіць выяву';
   @override
+  String get toolbarTable => 'Табліца';
+  @override
   String get toolbarHeading => 'Загаловак';
   @override
   String get toolbarList => 'Спіс';

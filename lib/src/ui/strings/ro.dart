@@ -456,6 +456,8 @@ final class RomanianStrings extends Strings {
   @override
   String get toolbarImage => 'Inserează imagine';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
   String get toolbarHeading => 'Titlu';
   @override
   String get toolbarList => 'Listă';

@@ -453,6 +453,8 @@ final class CatalanStrings extends Strings {
   @override
   String get toolbarImage => 'Insereix imatge';
   @override
+  String get toolbarTable => 'Taula';
+  @override
   String get toolbarHeading => 'Títol';
   @override
   String get toolbarList => 'Llista';

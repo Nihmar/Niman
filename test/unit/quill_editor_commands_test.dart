@@ -12,6 +12,7 @@ QuillEditorCommands _commands(quill.QuillController controller) =>
       onImage: () {},
       onHeading: () {},
       onTools: () {},
+      onTable: () {},
     );
 
 quill.QuillController _controller() {

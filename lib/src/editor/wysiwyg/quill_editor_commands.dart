@@ -17,6 +17,7 @@ final class QuillEditorCommands implements EditorCommands {
     required this.onImage,
     required this.onHeading,
     required this.onTools,
+    required this.onTable,
   });
 
   static const AppLogger _log = AppLogger(name: 'wysiwyg');
@@ -36,6 +37,10 @@ final class QuillEditorCommands implements EditorCommands {
   /// Opens the editor's Tools sheet (#136). Not a format, so it leaves
   /// through the owner like the dialogs do.
   final VoidCallback onTools;
+
+  /// Inserts a table (#262): Quill has no table of its own, so the shell
+  /// writes one as the Markdown it is.
+  final VoidCallback onTable;
 
   @override
   void apply(ToolbarItem item) {
@@ -73,6 +78,8 @@ final class QuillEditorCommands implements EditorCommands {
         _indent(1);
       case ToolbarItem.tools:
         onTools();
+      case ToolbarItem.table:
+        onTable();
     }
     _log.debug('toolbar ${item.name}: [$before] -> [${_styleKeys()}]');
   }
@@ -156,7 +163,10 @@ final class QuillEditorCommands implements EditorCommands {
       ToolbarItem.quote => _isOn(attributes, quill.Attribute.blockQuote),
       // Tools opens a sheet; there is no state of the document it could
       // be the lit lamp for.
-      ToolbarItem.outdent || ToolbarItem.indent || ToolbarItem.tools => false,
+      ToolbarItem.outdent ||
+      ToolbarItem.indent ||
+      ToolbarItem.tools ||
+      ToolbarItem.table => false,
     };
   }
 

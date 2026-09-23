@@ -447,6 +447,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get toolbarImage => 'Inserir imagem';
   @override
+  String get toolbarTable => 'Tabela';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

@@ -446,6 +446,8 @@ final class EnglishStrings extends Strings {
   @override
   String get toolbarImage => 'Insert image';
   @override
+  String get toolbarTable => 'Table';
+  @override
   String get toolbarHeading => 'Heading';
   @override
   String get toolbarList => 'List';

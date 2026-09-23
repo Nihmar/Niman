@@ -444,6 +444,8 @@ final class BasqueStrings extends Strings {
   @override
   String get toolbarImage => 'Txertatu irudia';
   @override
+  String get toolbarTable => 'Taula';
+  @override
   String get toolbarHeading => 'Izenburua';
   @override
   String get toolbarList => 'Zerrenda';

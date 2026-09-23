@@ -448,6 +448,8 @@ final class LatvianStrings extends Strings {
   @override
   String get toolbarImage => 'Ievietot attēlu';
   @override
+  String get toolbarTable => 'Tabula';
+  @override
   String get toolbarHeading => 'Virsraksts';
   @override
   String get toolbarList => 'Saraksts';

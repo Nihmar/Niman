@@ -452,6 +452,8 @@ final class GalicianStrings extends Strings {
   @override
   String get toolbarImage => 'Inserir imaxe';
   @override
+  String get toolbarTable => 'Táboa';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

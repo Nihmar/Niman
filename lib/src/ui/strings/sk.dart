@@ -451,6 +451,8 @@ final class SlovakStrings extends Strings {
   @override
   String get toolbarImage => 'Vložiť obrázok';
   @override
+  String get toolbarTable => 'Tabuľka';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Zoznam';

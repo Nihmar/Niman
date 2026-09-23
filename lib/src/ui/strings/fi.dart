@@ -447,6 +447,8 @@ final class FinnishStrings extends Strings {
   @override
   String get toolbarImage => 'Lisää kuva';
   @override
+  String get toolbarTable => 'Taulukko';
+  @override
   String get toolbarHeading => 'Otsikko';
   @override
   String get toolbarList => 'Lista';

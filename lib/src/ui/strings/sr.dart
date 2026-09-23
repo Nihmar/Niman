@@ -452,6 +452,8 @@ final class SerbianStrings extends Strings {
   @override
   String get toolbarImage => 'Уметни слику';
   @override
+  String get toolbarTable => 'Табела';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Списак';

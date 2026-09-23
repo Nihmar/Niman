@@ -451,6 +451,8 @@ final class CzechStrings extends Strings {
   @override
   String get toolbarImage => 'Vložit obrázek';
   @override
+  String get toolbarTable => 'Tabulka';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Seznam';

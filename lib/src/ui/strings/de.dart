@@ -450,6 +450,8 @@ final class GermanStrings extends Strings {
   @override
   String get toolbarImage => 'Bild einfügen';
   @override
+  String get toolbarTable => 'Tabelle';
+  @override
   String get toolbarHeading => 'Überschrift';
   @override
   String get toolbarList => 'Liste';

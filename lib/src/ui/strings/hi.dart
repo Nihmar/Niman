@@ -435,6 +435,8 @@ final class HindiStrings extends Strings {
   @override
   String get toolbarImage => 'छवि डालें';
   @override
+  String get toolbarTable => 'तालिका';
+  @override
   String get toolbarHeading => 'हेडिंग';
   @override
   String get toolbarList => 'सूची';

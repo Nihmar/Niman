@@ -446,6 +446,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get toolbarImage => 'Setja inn mynd';
   @override
+  String get toolbarTable => 'Tafla';
+  @override
   String get toolbarHeading => 'Titill';
   @override
   String get toolbarList => 'Listi';

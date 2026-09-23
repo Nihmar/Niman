@@ -455,6 +455,8 @@ final class FrenchStrings extends Strings {
   @override
   String get toolbarImage => 'Insérer une image';
   @override
+  String get toolbarTable => 'Tableau';
+  @override
   String get toolbarHeading => 'Titre';
   @override
   String get toolbarList => 'Liste';
