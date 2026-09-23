@@ -325,7 +325,8 @@ to `settings.json`). A personal word always passes, whatever the hunspell
 engines say, and its underline clears on the next scan. Words are read
 case-insensitively but stored as first typed. The file travels with the
 library, so different libraries can carry different vocabularies; it
-survives app restarts.
+survives app restarts, and the WebDAV sync merges it word by word, so
+a word added on one device is known on the others.
 
 The status row's spelling button opens a panel listing the note's
 misspellings, each with hunspell's suggestions; tapping one replaces the

@@ -256,7 +256,7 @@ The first sync (empty table) compares by content only and **never
 deletes** on either side; it shows a summary before it starts.
 
 The library state files (`libraryStateFiles`: `.niman/settings.json`,
-`.niman/counters.json`) are never deleted either: *deleted | same*
+`.niman/counters.json`, `.niman/dictionary.txt`) are never deleted either: *deleted | same*
 downloads and *same | deleted* uploads. A missing settings file is never
 what the user meant, and treating it as a deletion let one device that
 lost its copy delete it on the server, after which every other device
@@ -473,7 +473,9 @@ one runs joins it.
      changed takes that side, a key both changed takes the newer file
      (local mtime vs remote `getlastmodified`), and without a base a key
      either side has is kept; `counters.json` takes the highest value per
-     counter. Only a side that does not parse falls back to the newer file
+     counter; `dictionary.txt` merges word by word over `base_text`
+     (case-insensitive, as the spell check reads it), and the shell
+     reloads the `PersonalDictionary` when a run changed it. Only a side that does not parse falls back to the newer file
      whole. Anything else is left untouched on both sides and reported,
      with the pinned base, for the merge (step 7).
 6. **Rows:** every success records local sha/size/mtime, remote ETag/
