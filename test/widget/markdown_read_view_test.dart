@@ -67,6 +67,48 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets('a new text far down the pane does not loop the layout', (
+    tester,
+  ) async {
+    // The footnote list kept the children of the text before, laid out at
+    // its end; a new text, at an offset far into its body, had it asking the
+    // viewport for corrections that never agreed (a layout loop, found on
+    // the geometry note).
+    String withFootnotes(String body, String Function(int n) definition) {
+      final note = StringBuffer(body);
+      for (var n = 1; n <= 60; n++) {
+        note.writeln('A citation[^$n].');
+      }
+      note.writeln();
+      for (var n = 1; n <= 60; n++) {
+        note.writeln('[^$n]: ${definition(n)}');
+      }
+      return note.toString();
+    }
+
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await _pump(
+      tester,
+      withFootnotes(_note(20), (n) => 'short $n'),
+      controller: controller,
+    );
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+    await tester.pump();
+    final far = controller.offset;
+    await _pump(
+      tester,
+      withFootnotes(
+        _note(3000),
+        (n) => List.filled(60, 'a long definition, $n').join(' '),
+      ),
+      controller: controller,
+    );
+    expect(tester.takeException(), isNull);
+    expect(controller.offset, closeTo(far, 1));
+  });
+
   testWidgets('a definition is not drawn in the body, a formula in it or not', (
     tester,
   ) async {
