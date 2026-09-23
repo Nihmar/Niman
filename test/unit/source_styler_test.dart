@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 
@@ -236,4 +237,30 @@ void main() {
       expect(_describe(background, at), _describe(here, at));
     }
   });
+
+  test('the blocks are there whenever the scan is of the buffer as it is', () {
+    // A styler read here, and one that has followed an edit, have scanned the
+    // current revision: the shell's tools ask for its blocks to know whether
+    // the note has a list, and a null sent them to a pane that had none.
+    final buffer = SourceBuffer.fromText('- uno\n- due\n');
+    final styler = SourceStyler(buffer);
+    expect(styler.blocks?.map((b) => b.kind), contains(BlockKind.listItem));
+    styler.edited(buffer.replaceRange(0, 0, 'testo\n\n'));
+    expect(styler.blocks?.map((b) => b.kind), contains(BlockKind.listItem));
+  });
+
+  test(
+    'a background scan the buffer has moved on from has no blocks',
+    () async {
+      final buffer = SourceBuffer.fromText('- uno\n');
+      final pending = SourceStyler.inBackground(buffer);
+      buffer.replaceRange(0, 0, 'x');
+      final stale = await pending;
+      expect(
+        stale.blocks,
+        isNull,
+        reason: 'they are of a text no longer there',
+      );
+    },
+  );
 }

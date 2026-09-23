@@ -1599,7 +1599,7 @@ final class _NoteViewState extends State<NoteView>
       data: MediaQuery.of(context)
           .copyWith(textScaler: noteTextScalerOf(context)),
       child: MarkdownSurface(
-        key: _sourceViewKey,
+        viewKey: _sourceViewKey,
         buffer: buffer,
         surface: surface,
         // The shell's own focus node, the one the legacy editor held: the

@@ -82,6 +82,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.caretWidth,
     this.typewriter = false,
     this.autofocus = false,
+    this.viewKey,
     super.key,
   });
 
@@ -161,6 +162,13 @@ final class MarkdownSurface extends StatelessWidget {
   /// Whether the note takes the focus as it opens.
   final bool autofocus;
 
+  /// The key of the [MarkdownSourceView] this builds.
+  ///
+  /// A caller that wants the view's state — its blocks, its headings — keys
+  /// the view and not this widget: this one is stateless, so a
+  /// `GlobalKey<MarkdownSourceViewState>` on it has no state to answer with.
+  final GlobalKey<MarkdownSourceViewState>? viewKey;
+
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
@@ -173,6 +181,7 @@ final class MarkdownSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MarkdownSourceView(
+    key: viewKey,
     buffer: buffer,
     theme: effectiveTheme,
     selection: selection,

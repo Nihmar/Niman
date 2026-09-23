@@ -132,11 +132,18 @@ final class SourceStyler {
       outlineOfBlocks(_scanner.index, buffer.lineAt);
 
   /// The note's blocks, as the scan behind the colours has them, or null
-  /// before a scan has read this revision.
+  /// when the scan is of a revision the buffer has moved on from.
   ///
   /// The same answer the colours are drawn from, for a caller that wants the
   /// blocks themselves. O(blocks): [BlockScanner.index] copies its list.
-  List<Block>? get blocks => _revision == null ? null : _scanner.index.blocks;
+  ///
+  /// A null [_revision] is the *current* one, as [revision] reads it: a
+  /// styler built here has read the buffer as it is, and [edited] follows
+  /// every edit into the scan. Testing `_revision` for null answered "not
+  /// scanned" for exactly those, so every note small enough to be read here —
+  /// and every note after its first keystroke — had no blocks to give.
+  List<Block>? get blocks =>
+      revision == buffer.revision ? _scanner.index.blocks : null;
 
   /// Line [line]'s tokens, disjoint and sorted.
   List<Token> tokensOf(int line) {
