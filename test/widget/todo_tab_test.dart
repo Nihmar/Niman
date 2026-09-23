@@ -48,6 +48,13 @@ void main() {
     controller = null;
   });
 
+  /// A phone-sized window, where the task dialog uses the system pickers.
+  void phoneSized(WidgetTester tester) {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+  }
+
   /// Pumps enough fake time for sheets/dialogs to settle.
   Future<void> settle(WidgetTester tester) async {
     await tester.pump();
@@ -321,6 +328,8 @@ void main() {
   });
 
   testWidgets('due picker writes due: on save', (tester) async {
+    // A phone: the system picker (#268 picks in place on a desktop).
+    phoneSized(tester);
     await pumpTab(tester, todo: ['tasked']);
     await tester.tap(find.text('tasked'));
     await settle(tester);
@@ -433,6 +442,7 @@ void main() {
   });
 
   testWidgets('add stamps creation and appends picked tags', (tester) async {
+    phoneSized(tester);
     String? result;
     await tester.pumpWidget(
       MaterialApp(
