@@ -66,6 +66,7 @@ import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
+import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -760,6 +761,43 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
+  }
+
+  /// The source line at the top of the view, and how far into its rows
+  /// ([ScrollAnchor]). Null while there is nothing drawn to ask.
+  ScrollAnchor? get topAnchor {
+    if (!_scroll.hasClients || _heights.length == 0) return null;
+    final y = _scroll.offset - widget.padding.top;
+    if (y <= 0) return (line: 0, fraction: 0.0);
+    final row = _heights.indexAt(y) ?? _heights.length - 1;
+    final extent = _heights.extentFor(row);
+    final into = extent > 0 ? (y - _heights.offsetOf(row)) / extent : 0.0;
+    return (line: _folds.lineOf(row), fraction: into.clamp(0.0, 1.0));
+  }
+
+  /// Scrolls the view so [anchor]'s line is at its top, as far into it as
+  /// the anchor says; the caret stays where it is. The rows it lands among
+  /// may be estimates — a switch of mode draws every row anew — so it looks
+  /// again after each frame that measured them, as long as that moves it.
+  void showAnchor(ScrollAnchor anchor, {int attempt = 0}) {
+    if (!_scroll.hasClients || lineCount == 0) return;
+    final row = _folds.rowOf(anchor.line.clamp(0, lineCount - 1));
+    final atTop = anchor.line == 0 && anchor.fraction == 0;
+    final offset = atTop
+        ? 0.0
+        : (widget.padding.top +
+                  _heights.offsetOf(row) +
+                  anchor.fraction * _heights.extentFor(row))
+              .clamp(0.0, _scroll.position.maxScrollExtent);
+    if ((_scroll.position.pixels - offset).abs() > 0.5) {
+      _scroll.jumpTo(offset);
+    } else if (attempt > 0) {
+      return;
+    }
+    if (attempt >= 12) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) showAnchor(anchor, attempt: attempt + 1);
+    });
   }
 
   /// Moves the caret [rows] visual rows up (negative) or down, keeping its
