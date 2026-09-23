@@ -11666,6 +11666,21 @@ What the design asks for next, in the order it names them:
        draws them and moves the word right. The end handle is held to where
        `source` puts it for the same selection — the layout *after* the reveal,
        not the one the press was aimed at.
+     * The **tools** had no test in any mode, and the one written for both
+       found them broken in both: the count-list tool was greyed out on a note
+       that is a list. Two faults, stacked. The shell's
+       `GlobalKey<MarkdownSourceViewState>` was on `MarkdownSurface`, which is
+       stateless, so `currentState` was always null and every question the
+       shell asked the pane (the tools' list, the outline's headings) went to
+       its fallback — here an off-stage read view that had scanned nothing.
+       The surface now forwards the key to the view it builds (`viewKey`).
+       Behind it, `SourceStyler.blocks` answered null whenever `_revision` was
+       null, which is the styler's own word for *current*: every note read on
+       this isolate, and every note after its first keystroke, had no blocks
+       to give. It now answers null only for a background scan the buffer has
+       moved on from (`source_styler_test.dart`), and
+       `note_view_unified_edit_test.dart` counts a list through the toolbar in
+       both modes.
   3. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
      and per word, no visible thrash — which is the only criterion on this list
      that needs a phone rather than a host.

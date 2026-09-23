@@ -276,4 +276,48 @@ void main() {
     await tester.pump();
     expect(button().active, isFalse, reason: 'and one word back, it is off');
   });
+
+  for (final live in <bool>[false, true]) {
+    testWidgets('the tools count the list the caret is in '
+        '(${live ? 'live' : 'source'})', (tester) async {
+      // #246's parity: the tools sheet is the toolbar's, and what it writes
+      // goes through the same edit whichever unified mode draws the note. The
+      // sheet asks the pane whether there is a list to count, so a pane that
+      // answered for the wrong surface would grey the tool out.
+      final writes = <String>[];
+      await _pump(
+        tester,
+        _view(
+          readNote: (_) async => '- caffè\n- tè\n- caffè\n',
+          writes: writes,
+          showWysiwyg: live,
+        ),
+      );
+      expect(
+        tester
+            .widget<MarkdownSourceView>(find.byType(MarkdownSourceView))
+            .hideMarkers,
+        live,
+      );
+      _surface(tester).placeCaret(3);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('toolbar-tools')));
+      await tester.pumpAndSettle();
+      final tool = find.byKey(const Key('editor-tool-countList'));
+      expect(
+        tester.widget<ListTile>(tool).enabled,
+        isTrue,
+        reason: 'the note has a list',
+      );
+      await tester.tap(tool);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('tally-apply')));
+      await tester.pumpAndSettle();
+      final text = _surface(tester).widget.buffer.text;
+      expect(text, contains('caffè'));
+      expect(text, isNot('- caffè\n- tè\n- caffè\n'), reason: 'counted');
+      await _settleSave(tester);
+      expect(writes.last, text);
+    });
+  }
 }
