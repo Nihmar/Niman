@@ -40,9 +40,12 @@ status row switches only when both are enabled.
   under it — starts under the item's text. On the caret's line the marks
   are written out and the text stays where it was: marks wider than their
   column, like a task's `- [ ] ` or a `10. `, hang into the margin
-  instead. A quote gets its bar; `---` a rule; a code block its box, in
-  monospace. The read view is the same page: a blank line is as tall in
-  both, and flipping between them leaves the text where it was. Columns, bullets,
+  instead. A quote gets its bar, and what is inside it — a heading, a
+  list, a code block — is drawn as it is outside; `---` a rule; a code
+  block (and an HTML block) its box, in monospace, the code coloured by the
+  language its fence names. The read view is the same page: a blank line
+  is as tall in both, and flipping between them leaves the text where it
+  was. Columns, bullets,
   checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones
   (`$…$`) are typeset, and
   images and `![[embeds]]` are drawn under their line. Put the caret in a word

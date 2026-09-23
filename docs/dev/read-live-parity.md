@@ -20,11 +20,14 @@ no column: the table's row measured with the platform font (Segoe UI) in a
 | construct | dx | dy |
 |---|---|---|
 | headings, paragraphs, lists, task lists, quotes, rules | **0.0** | **0.0** |
-| fenced code, its box | **0.0** | **0.0** |
-| indented code | its four spaces: `live` shows them | **0.0** |
+| fenced and indented code, its box, its colours | **0.0** | **0.0** |
+| display formulas | **0.0** | **0.0** |
+| HTML blocks | **0.0** | **0.0** |
+| a quote's content: headings, lists, code | **0.0** | **0.0** |
 | table | −0.7 | `live` draws tables as source (#261) |
+| footnote and link definitions | — | `live` draws them as source, the read view not at all |
 
-Everything but tables and indented code is aligned to the pixel, across and
+Everything but tables and definitions is aligned to the pixel, across and
 down, however far down the note it is.
 
 ## Done
@@ -43,6 +46,12 @@ down, however far down the note it is.
 | `be23473` | **Bug:** a line less than four spaces in, after an indented code block, was scanned as code and drawn in a box, in both modes. |
 | `e55f6f8` | **Bug:** a row of `live` whose text is all hidden — a rule, a quote's empty line — was laid out as nothing: the rule stood at the top of its row and a quote's bar broke off at every empty line. |
 | `a05639e` | Decision 2: a code block is `live`'s box in both modes, in monospace, the fences' rows its top and bottom padding. |
+| `b7a4e47` | An indented code block's four columns are hidden in `live`, as the read view takes them off. |
+| `063ab5a` | `live` colours code by its fence's language, the block highlighted whole or in the read view's own pieces (`LiveCodeColors`); the read view no longer paints the highlight theme's background band behind each row. |
+| `518fa07` | **Bug:** a block measured at no height kept its estimate — a typeset formula's lines past its first stood a row of nothing apiece in `live`, and a definition left its rows empty in the read view. |
+| `43e13c8` | A display formula has `live`'s half a spacing above and below it in the read view. |
+| `cd97871` | `live` reads a quote's content again as blocks, as the read view does (`LiveQuoteContent`): a heading inside a quote at its size, a list's next lines under its item's text, a code block in its box. |
+| `df4f5b9` | An HTML block is drawn in a code block's box in both modes, a row per line. |
 
 ## Decisions (2026-09-23)
 
@@ -56,8 +65,9 @@ paragraphs is the blank line the note has between them, as tall as `live`
 draws it. The 1 em spacing of `09ec542` goes with it.
 
 Headings went with it: neither mode leaves a spacing under a heading now,
-and none above it. Still a proposal, to confirm: some room above a heading,
-the same in both modes.
+and none above it. Room above a heading is **not added**: the Markdown
+linter (#72) will ask for a blank line before a heading, and that blank
+line is the room, the same in both modes.
 
 ### 2. A code block is a box, in both modes — done (`a05639e`)
 
@@ -70,21 +80,13 @@ read view does, so a line of code wraps at the same place in both.
 
 ### Still to align after these
 
-- Tables: `live` has to draw them as tables first (#261).
-- Display formulas: their margins in the two modes.
-- A list inside a quote: its continuation lines in `live` stay on the
-  quote's column rather than the item's — the scanner sees one quote block.
-  A code block inside a quote is the same case: `live` draws its lines as
-  the quote's, with no box.
-- Indented code: the read view takes its four spaces off, `live` shows them
-  — they are the line's own text, not a prefix it hides.
-- The colours of code: the read view highlights by the fence's language,
-  `live` draws code in one muted colour.
-- An HTML block: a box with a padding all round in the read view, source in
-  `live`.
-- Footnote and link definitions: `live` draws them as their source, the read
-  view as nothing — the blank lines around them are still rows, so the read
-  view leaves a few empty rows where the definitions stand.
+- Tables: `live` has to draw them as tables first — the grid the read view
+  draws — before #261's editing can be built on it.
+- Footnote and link definitions: `live` draws them as their source; the
+  read view draws a link definition nowhere and a footnote in the section
+  it ends the note with. To be decided: whether `live` hides them as the
+  read view does (and ends the note with the same section), or the read
+  view shows where they are.
 
 ### Found on the way: a layout loop on one note
 
@@ -104,7 +106,7 @@ change. Not fixed yet; the next step is to log the position's
 
 ## Opening the 246 MB note
 
-### Where it stands
+### Where it stood
 
 The device log (beta) showed about 5 s with the window frozen after the text
 had arrived. A CPU profile of a profile build found three passes over the
@@ -120,35 +122,21 @@ whole note on the UI isolate:
 
 `138d3ad` reads, normalizes, splits and counts the note in one isolate
 (`loadNote`) and hands the result over with `Isolate.exit`, which does not
-copy it. Measured again on the profile build:
+copy it: the longest frame went from 8 326 ms to 413 ms (profile build),
+the load 4.3 s off the UI isolate.
 
-| | before | after |
-|---|---|---|
-| load, off the UI isolate | — | 4.3 s, the window responsive |
-| longest frame | 8 326 ms | 413 ms |
-| first frame after the load | — | 11 ms |
+### What was done after
 
-The load's phases, measured on the real note (JIT, so slower than the
-app's AOT):
+| commit | what | before | after |
+|---|---|---|---|
+| `b47e8d3` | Prefix sums keep their values in `Float64List`s, filled from a function (`PrefixSums.generate`): the height map and the buffer's index were a boxed double per row | height map over 2.76 M rows 218 ms (JIT); a million rows 72 ms | 31 ms; a million rows 10 ms |
+| `6b0dd63` | A note's lines are **views** of the text it was read from — the string and where each line starts (`LineChunk`) — until a chunk is written to; `lineLengthAt` answers a length without cutting the line out, and `live`'s height map reads lengths | `fromText` 802 ms (JIT), 2.76 M strings for the garbage collector | 198 ms, ~2 700 chunks |
+| `954afde` | The load no longer counts the words: the note is shown when it is read, and the surface counts it in the background | ~1 s of the open (1.0–1.3 s JIT) | 0: the count lands after the note |
 
-| phase | ms |
-|---|---|
-| read from disk | 70–210 |
-| UTF-8 decode | 640–780 |
-| line-ending normalization | ~100 |
-| split into lines | ~950 |
-| word count | ~1 100 |
-
-### What can still be done
-
-1. **The 413 ms frame** is the height map, built for all 2.76 M rows during
-   the first build. It can be made in the loading isolate, or built a chunk
-   at a time: the frame goes.
-2. **About −1 s**: show the note before its word count is done; the count
-   lands a moment later.
-3. **The decode and the split** would need a different buffer: lines as
-   offsets into one string rather than 2.76 M strings of their own. A larger
-   piece of work, which would also cut the memory and the garbage collector's
-   time — the native time the profile still shows. Worth an issue of its own.
-
-The recommendation is 1 and 2 now, and 3 as an issue.
+The numbers are from `test/perf/huge_note_open_test.dart` and from runs on
+the real note under `flutter test` (JIT); the app's AOT is faster. What the
+first frame of `live` still spends on the note is the height map over its
+rows (85 ms cold, JIT) and the colours' hand-over to their isolate (23 ms —
+a `String` is not copied between the isolates of one group, measured: 250 MB
+in 0 ms, so only the view's bound and index arrays are). The decode stays
+(~700 ms, off the UI isolate): the text has to be a `String` to be drawn.
