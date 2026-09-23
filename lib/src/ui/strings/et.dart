@@ -1230,6 +1230,16 @@ final class EstonianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Hiline? Kell 04:00 jääb öö eelmise päeva juurde';
   @override
+  String get journalRecent => 'Viimased';
+  @override
+  String get journalNoEntry => 'Selle päeva kohta pole sissekannet';
+  @override
+  String get journalOpenEntry => 'Ava';
+  @override
+  String get journalShowCalendar => 'Näita kalendrit';
+  @override
+  String get journalFabToday => 'Tänane päeviku sissekanne';
+  @override
   String get commandsTitle => 'Käsud';
   @override
   String get commandsIntro =>

@@ -1244,6 +1244,16 @@ final class CzechStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Ponocujete? V 04:00 noc ještě patří předchozímu dni';
   @override
+  String get journalRecent => 'Nedávné';
+  @override
+  String get journalNoEntry => 'Pro tento den není záznam';
+  @override
+  String get journalOpenEntry => 'Otevřít';
+  @override
+  String get journalShowCalendar => 'Zobrazit kalendář';
+  @override
+  String get journalFabToday => 'Dnešní záznam deníku';
+  @override
   String get commandsTitle => 'Příkazy';
   @override
   String get commandsIntro =>

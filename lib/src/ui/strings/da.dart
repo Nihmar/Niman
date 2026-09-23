@@ -1246,6 +1246,16 @@ final class DanishStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Sent oppe? Kl. 04:00 hører natten stadig til dagen før';
   @override
+  String get journalRecent => 'Seneste';
+  @override
+  String get journalNoEntry => 'Intet indlæg for denne dag';
+  @override
+  String get journalOpenEntry => 'Åbn';
+  @override
+  String get journalShowCalendar => 'Vis kalenderen';
+  @override
+  String get journalFabToday => 'Dagens dagbogsindlæg';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

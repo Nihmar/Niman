@@ -36,6 +36,22 @@ not saved:
 - **Another day**: a day with no entry is not made behind your back —
   Niman asks first, so leafing through the days never leaves empty notes.
 
+## The calendar
+
+A month with a dot under each day that has an entry, today ringed, a
+**Today** button, and the latest entries with their first words.
+
+- **Desktop** (a window wide enough for the side panel): the *Journal*
+  pane of the side panel, beside the note. Clicking a day opens its
+  entry (or offers to make it).
+- **Phone**: the calendar icon in the Files bar opens the Journal
+  screen. Tap a day to pick it; its card opens the entry or makes it.
+- Everywhere: the day in the strip over an entry, or *Journal: Show the
+  calendar* in the command palette.
+
+The **+** button on the phone's Files tab starts with *Today's journal
+entry*.
+
 ## The strip over an entry
 
 Any note that is an entry — wherever it was opened from — wears a strip

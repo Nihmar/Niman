@@ -1254,6 +1254,16 @@ final class SwedishStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Uppe sent? Kl. 04:00 hör natten fortfarande till dagen innan';
   @override
+  String get journalRecent => 'Senaste';
+  @override
+  String get journalNoEntry => 'Ingen anteckning för den här dagen';
+  @override
+  String get journalOpenEntry => 'Öppna';
+  @override
+  String get journalShowCalendar => 'Visa kalendern';
+  @override
+  String get journalFabToday => 'Dagens dagboksanteckning';
+  @override
   String get commandsTitle => 'Kommandon';
   @override
   String get commandsIntro =>

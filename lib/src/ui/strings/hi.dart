@@ -1222,6 +1222,16 @@ final class HindiStrings extends Strings {
   String get journalDayStartSubtitle =>
       'देर तक जागते हैं? 04:00 पर रात पिछले दिन में ही रहती है';
   @override
+  String get journalRecent => 'हाल की';
+  @override
+  String get journalNoEntry => 'इस दिन की कोई प्रविष्टि नहीं';
+  @override
+  String get journalOpenEntry => 'खोलें';
+  @override
+  String get journalShowCalendar => 'कैलेंडर दिखाएँ';
+  @override
+  String get journalFabToday => 'आज की डायरी प्रविष्टि';
+  @override
   String get commandsTitle => 'कमांड';
   @override
   String get commandsIntro =>

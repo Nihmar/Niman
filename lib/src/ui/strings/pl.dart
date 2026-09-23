@@ -1268,6 +1268,16 @@ final class PolishStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Późno? O 04:00 noc wciąż należy do poprzedniego dnia';
   @override
+  String get journalRecent => 'Ostatnie';
+  @override
+  String get journalNoEntry => 'Brak wpisu na ten dzień';
+  @override
+  String get journalOpenEntry => 'Otwórz';
+  @override
+  String get journalShowCalendar => 'Pokaż kalendarz';
+  @override
+  String get journalFabToday => 'Dzisiejszy wpis w dzienniku';
+  @override
   String get commandsTitle => 'Polecenia';
   @override
   String get commandsIntro =>

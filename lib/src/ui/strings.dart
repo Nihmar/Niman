@@ -785,6 +785,11 @@ final class AppStrings {
   static String get journalTemplateNone => _s.journalTemplateNone;
   static String get journalDayStartTitle => _s.journalDayStartTitle;
   static String get journalDayStartSubtitle => _s.journalDayStartSubtitle;
+  static String get journalRecent => _s.journalRecent;
+  static String get journalNoEntry => _s.journalNoEntry;
+  static String get journalOpenEntry => _s.journalOpenEntry;
+  static String get journalShowCalendar => _s.journalShowCalendar;
+  static String get journalFabToday => _s.journalFabToday;
   static String get commandsTitle => _s.commandsTitle;
   static String get commandsIntro => _s.commandsIntro;
   static String get commandNeedNone => _s.commandNeedNone;

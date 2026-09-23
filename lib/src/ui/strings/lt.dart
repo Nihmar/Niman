@@ -1249,6 +1249,16 @@ final class LithuanianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Vėlai? 04:00 naktis vis dar priklauso ankstesnei dienai';
   @override
+  String get journalRecent => 'Naujausi';
+  @override
+  String get journalNoEntry => 'Šiai dienai įrašo nėra';
+  @override
+  String get journalOpenEntry => 'Atverti';
+  @override
+  String get journalShowCalendar => 'Rodyti kalendorių';
+  @override
+  String get journalFabToday => 'Šiandienos dienoraščio įrašas';
+  @override
   String get commandsTitle => 'Komandos';
   @override
   String get commandsIntro =>

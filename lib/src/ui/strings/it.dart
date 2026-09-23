@@ -1262,6 +1262,16 @@ final class ItalianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Fai tardi? Alle 04:00 la notte resta sul giorno prima';
   @override
+  String get journalRecent => 'Recenti';
+  @override
+  String get journalNoEntry => 'Nessuna voce per questo giorno';
+  @override
+  String get journalOpenEntry => 'Apri';
+  @override
+  String get journalShowCalendar => 'Mostra il calendario';
+  @override
+  String get journalFabToday => 'Voce di oggi del diario';
+  @override
   String get commandsTitle => 'Comandi';
   @override
   String get commandsIntro =>

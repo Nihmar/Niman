@@ -1255,6 +1255,16 @@ final class BasqueStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Berandu? 04:00etan gaua aurreko egunean geratzen da';
   @override
+  String get journalRecent => 'Azkenak';
+  @override
+  String get journalNoEntry => 'Ez dago sarrerarik egun honetarako';
+  @override
+  String get journalOpenEntry => 'Ireki';
+  @override
+  String get journalShowCalendar => 'Erakutsi egutegia';
+  @override
+  String get journalFabToday => 'Egunkariko gaurko sarrera';
+  @override
   String get commandsTitle => 'Komandoak';
   @override
   String get commandsIntro =>

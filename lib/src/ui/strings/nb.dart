@@ -1242,6 +1242,16 @@ final class NorwegianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Sent oppe? Kl. 04:00 hører natten fortsatt til dagen før';
   @override
+  String get journalRecent => 'Nylige';
+  @override
+  String get journalNoEntry => 'Ingen innlegg for denne dagen';
+  @override
+  String get journalOpenEntry => 'Åpne';
+  @override
+  String get journalShowCalendar => 'Vis kalenderen';
+  @override
+  String get journalFabToday => 'Dagens dagbokinnlegg';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

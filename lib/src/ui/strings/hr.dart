@@ -1245,6 +1245,16 @@ final class CroatianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Kasno liježeš? U 04:00 noć ostaje na prethodnom danu';
   @override
+  String get journalRecent => 'Nedavno';
+  @override
+  String get journalNoEntry => 'Nema unosa za ovaj dan';
+  @override
+  String get journalOpenEntry => 'Otvori';
+  @override
+  String get journalShowCalendar => 'Prikaži kalendar';
+  @override
+  String get journalFabToday => 'Današnji unos u dnevnik';
+  @override
   String get commandsTitle => 'Naredbe';
   @override
   String get commandsIntro =>

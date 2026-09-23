@@ -1294,6 +1294,16 @@ final class GreekStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Ξενυχτάς; Στις 04:00 η νύχτα μένει στην προηγούμενη ημέρα';
   @override
+  String get journalRecent => 'Πρόσφατα';
+  @override
+  String get journalNoEntry => 'Καμία καταχώριση για αυτή την ημέρα';
+  @override
+  String get journalOpenEntry => 'Άνοιγμα';
+  @override
+  String get journalShowCalendar => 'Εμφάνιση ημερολογίου';
+  @override
+  String get journalFabToday => 'Σημερινή καταχώριση ημερολογίου';
+  @override
   String get commandsTitle => 'Εντολές';
   @override
   String get commandsIntro =>

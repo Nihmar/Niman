@@ -1260,6 +1260,16 @@ final class RomanianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Stai până târziu? La 04:00 noaptea rămâne în ziua dinainte';
   @override
+  String get journalRecent => 'Recente';
+  @override
+  String get journalNoEntry => 'Nicio intrare pentru această zi';
+  @override
+  String get journalOpenEntry => 'Deschide';
+  @override
+  String get journalShowCalendar => 'Arată calendarul';
+  @override
+  String get journalFabToday => 'Intrarea de azi din jurnal';
+  @override
   String get commandsTitle => 'Comenzi';
   @override
   String get commandsIntro =>

@@ -1249,6 +1249,16 @@ final class SlovakStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Ponocujete? O 04:00 noc ešte patrí predchádzajúcemu dňu';
   @override
+  String get journalRecent => 'Nedávne';
+  @override
+  String get journalNoEntry => 'Pre tento deň nie je záznam';
+  @override
+  String get journalOpenEntry => 'Otvoriť';
+  @override
+  String get journalShowCalendar => 'Zobraziť kalendár';
+  @override
+  String get journalFabToday => 'Dnešný záznam denníka';
+  @override
   String get commandsTitle => 'Príkazy';
   @override
   String get commandsIntro =>

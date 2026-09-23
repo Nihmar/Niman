@@ -1253,6 +1253,16 @@ final class UkrainianStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Пізно лягаєш? О 04:00 ніч лишається на попередньому дні';
   @override
+  String get journalRecent => 'Нещодавні';
+  @override
+  String get journalNoEntry => 'Немає запису на цей день';
+  @override
+  String get journalOpenEntry => 'Відкрити';
+  @override
+  String get journalShowCalendar => 'Показати календар';
+  @override
+  String get journalFabToday => 'Сьогоднішній запис щоденника';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

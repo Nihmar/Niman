@@ -1134,6 +1134,16 @@ final class ChineseStrings extends Strings {
   @override
   String get journalDayStartSubtitle => '熬夜？设为 04:00 时，深夜仍算前一天';
   @override
+  String get journalRecent => '最近';
+  @override
+  String get journalNoEntry => '这一天没有条目';
+  @override
+  String get journalOpenEntry => '打开';
+  @override
+  String get journalShowCalendar => '显示日历';
+  @override
+  String get journalFabToday => '今天的日记条目';
+  @override
   String get commandsTitle => '命令';
   @override
   String get commandsIntro => '命令面板只列出在当前位置可以运行的命令。这里是全部命令，以及每条命令何时出现。';

@@ -1285,6 +1285,16 @@ final class FrenchStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Couche-tard ? À 04:00, la nuit reste sur la veille';
   @override
+  String get journalRecent => 'Récentes';
+  @override
+  String get journalNoEntry => 'Aucune entrée pour ce jour';
+  @override
+  String get journalOpenEntry => 'Ouvrir';
+  @override
+  String get journalShowCalendar => 'Afficher le calendrier';
+  @override
+  String get journalFabToday => 'Entrée du journal d’aujourd’hui';
+  @override
   String get commandsTitle => 'Commandes';
   @override
   String get commandsIntro =>

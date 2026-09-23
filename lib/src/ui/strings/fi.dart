@@ -1261,6 +1261,16 @@ final class FinnishStrings extends Strings {
   String get journalDayStartSubtitle =>
       'Valvotko? Klo 04:00 yö kuuluu vielä edelliseen päivään';
   @override
+  String get journalRecent => 'Viimeisimmät';
+  @override
+  String get journalNoEntry => 'Ei merkintää tälle päivälle';
+  @override
+  String get journalOpenEntry => 'Avaa';
+  @override
+  String get journalShowCalendar => 'Näytä kalenteri';
+  @override
+  String get journalFabToday => 'Tämän päivän päiväkirjamerkintä';
+  @override
   String get commandsTitle => 'Komennot';
   @override
   String get commandsIntro =>
