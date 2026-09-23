@@ -2814,13 +2814,18 @@ final class _Line extends StatelessWidget {
     final inline = typeset
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
-    final concealed = <(int, int, TextStyle)>[
-      if (typeset) (0, styled.text.length, _hiddenMarker),
+    final concealed = <_Concealed>[
+      if (typeset) (0, styled.text.length, _hiddenMarker, whole: false),
       if (hideMarkers && !mine)
         for (final picture in pictures)
-          (picture.start, picture.end, _hiddenMarker),
+          (picture.start, picture.end, _hiddenMarker, whole: false),
       for (final formula in inline)
-        (formula.start, formula.end, spacerStyleFor(formula, theme.lineHeight)),
+        (
+          formula.start,
+          formula.end,
+          spacerStyleFor(formula, theme.lineHeight),
+          whole: true,
+        ),
     ];
     final indent = _indent();
     Widget paragraph = Text.rich(
@@ -3044,7 +3049,7 @@ final class _Line extends StatelessWidget {
   TextSpan _span({
     required bool revealed,
     (int, int)? run,
-    List<(int, int, TextStyle)> concealed = const <(int, int, TextStyle)>[],
+    List<_Concealed> concealed = const <_Concealed>[],
   }) {
     final spans = <InlineSpan>[];
     var at = 0;
@@ -3119,7 +3124,7 @@ final class _Line extends StatelessWidget {
     int start,
     int end,
     TextStyle? style, [
-    List<(int, int, TextStyle)> concealed = const <(int, int, TextStyle)>[],
+    List<_Concealed> concealed = const <_Concealed>[],
   ]) {
     final cuts = <int>{start, end};
     for (final range in <(int, int)?>[
@@ -3141,8 +3146,12 @@ final class _Line extends StatelessWidget {
       // What `live` draws instead of its source — a picture, a formula — is
       // hidden as a marker is: there, taking no room.
       var piece = style;
+      var whole = false;
       for (final hidden in concealed) {
-        if (inside((hidden.$1, hidden.$2))) piece = hidden.$3;
+        if (inside((hidden.$1, hidden.$2))) {
+          piece = hidden.$3;
+          whole = hidden.whole;
+        }
       }
       if (inside(selected)) {
         piece = (piece ?? const TextStyle()).copyWith(
@@ -3164,10 +3173,22 @@ final class _Line extends StatelessWidget {
           decoration: TextDecoration.underline,
         );
       }
-      spans.add(TextSpan(text: styled.text.substring(from, to), style: piece));
+      spans.add(
+        TextSpan(
+          text: whole
+              ? unbrokenSource(to - from)
+              : styled.text.substring(from, to),
+          style: piece,
+        ),
+      );
     }
   }
 }
+
+/// A stretch of a line `live` draws something else in place of: its range,
+/// the style that hides it, and whether it has to stay on one row — the room
+/// a formula is painted over does.
+typedef _Concealed = (int, int, TextStyle, {bool whole});
 
 /// The note as a text field to the platform's accessibility: what
 /// `RenderEditable` tells it about a `TextField`, which the `Semantics`

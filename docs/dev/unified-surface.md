@@ -11748,10 +11748,13 @@ next, one commit each, and the decisions worth keeping:
   and spaced (`letterSpacing`) so its characters are exactly as wide as the
   typeset formula, and (`height`, `leadingDistribution.even`) at least as tall;
   the formula is painted over that room. The paragraph's text stays the source
-  character for character, so the caret, the hit test, the selection, the
+  offset for offset, so the caret, the hit test, the selection, the
   spelling and the IME need no correction — the risk §8.6.0 named is not
-  taken, not mitigated. With the caret in the formula's word it is its source,
-  as every other construct is.
+  taken, not mitigated. The hidden characters are *laid out* as letters, one
+  code unit each (`unbrokenSource`): the source has spaces, a row that ended
+  at one split the room in two, and the formula — painted whole where the
+  room starts — ran past the margin. With the caret in the formula's word it
+  is its source, as every other construct is.
 - **Formulas are set at KaTeX's size, 1.21 × the text** (`mathScale`), in the
   read view as in `live`. Computer Modern at the text's own size is hairlines
   on a 1× screen: the device report's "pixelated" matrix entries were glyphs
