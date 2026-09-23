@@ -18,23 +18,34 @@
 /// thousandth of the note.
 ///
 /// The values are doubles: the height map's are, and the buffer's spans are
-/// integers well inside what a double holds exactly.
+/// integers well inside what a double holds exactly. They are kept in typed
+/// lists, unboxed: a list of `double` holds each value as an object, and
+/// building one over 2.76 M lines — the 246 MB note's height map and its
+/// buffer's index, both on opening it — cost ~200 ms apiece in allocations.
 library;
+
+import 'dart:typed_data';
 
 /// Chunked prefix sums over a list of non-negative values.
 final class PrefixSums {
   /// Sums over [values], in O(values.length).
-  new(List<double> values) {
-    for (var at = 0; at < values.length; at += _chunkSize) {
-      final end = at + _chunkSize < values.length
-          ? at + _chunkSize
-          : values.length;
-      _chunks.add(values.sublist(at, end));
+  new(List<double> values) : this.generate(values.length, (at) => values[at]);
+
+  /// Sums over [count] values, value `at` being `valueOf(at)`, asked once
+  /// each and in order: no list of them is built on the way.
+  new generate(int count, double Function(int at) valueOf) {
+    for (var at = 0; at < count; at += _chunkSize) {
+      final end = at + _chunkSize < count ? at + _chunkSize : count;
+      final chunk = Float64List(end - at);
+      for (var local = 0; local < chunk.length; local++) {
+        chunk[local] = valueOf(at + local);
+      }
+      _chunks.add(chunk);
     }
-    if (_chunks.isEmpty) _chunks.add(<double>[]);
+    if (_chunks.isEmpty) _chunks.add(Float64List(0));
     _prefixes.addAll(_chunks.map(_prefixOf));
     _owned.addAll(List<bool>.filled(_chunks.length, true));
-    _length = values.length;
+    _length = count;
     _rebuildTrees();
   }
 
@@ -64,11 +75,11 @@ final class PrefixSums {
   static const int _chunkSize = 1024;
 
   /// The values, chunk by chunk. Never empty: an empty list is one empty chunk.
-  final List<List<double>> _chunks = <List<double>>[];
+  final List<Float64List> _chunks = <Float64List>[];
 
   /// Each chunk's own prefix sums: `_prefixes[c][i]` is the sum of the first
   /// `i` values of chunk `c`, so it has one entry more than the chunk.
-  final List<List<double>> _prefixes = <List<double>>[];
+  final List<Float64List> _prefixes = <Float64List>[];
 
   /// Fenwick trees over the chunks, 1-indexed: their totals and their sizes.
   List<double> _sumTree = <double>[0];
@@ -147,8 +158,8 @@ final class PrefixSums {
     final (chunk, local) = _locate(index);
     if (_chunks[chunk][local] == value) return;
     if (!_owned[chunk]) {
-      _chunks[chunk] = List<double>.of(_chunks[chunk]);
-      _prefixes[chunk] = List<double>.of(_prefixes[chunk]);
+      _chunks[chunk] = Float64List.fromList(_chunks[chunk]);
+      _prefixes[chunk] = Float64List.fromList(_prefixes[chunk]);
       _owned[chunk] = true;
     }
     final values = _chunks[chunk];
@@ -192,15 +203,15 @@ final class PrefixSums {
       ...inserted,
       ..._chunks[lastChunk].skip(end),
     ];
-    final recut = <List<double>>[];
+    final recut = <Float64List>[];
     if (touched.length <= 2 * _chunkSize) {
-      if (touched.isNotEmpty) recut.add(touched);
+      if (touched.isNotEmpty) recut.add(Float64List.fromList(touched));
     } else {
       for (var from = 0; from < touched.length; from += _chunkSize) {
         final to = from + _chunkSize < touched.length
             ? from + _chunkSize
             : touched.length;
-        recut.add(touched.sublist(from, to));
+        recut.add(Float64List.fromList(touched.sublist(from, to)));
       }
     }
     _chunks.replaceRange(firstChunk, lastChunk + 1, recut);
@@ -211,8 +222,8 @@ final class PrefixSums {
       List<bool>.filled(recut.length, true),
     );
     if (_chunks.isEmpty) {
-      _chunks.add(<double>[]);
-      _prefixes.add(<double>[0]);
+      _chunks.add(Float64List(0));
+      _prefixes.add(Float64List(1));
       _owned.add(true);
     }
     _length += inserted.length - removed;
@@ -243,8 +254,8 @@ final class PrefixSums {
     return sum;
   }
 
-  static List<double> _prefixOf(List<double> values) {
-    final prefix = List<double>.filled(values.length + 1, 0);
+  static Float64List _prefixOf(Float64List values) {
+    final prefix = Float64List(values.length + 1);
     var sum = 0.0;
     for (var at = 0; at < values.length; at++) {
       prefix[at] = sum;
