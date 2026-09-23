@@ -638,7 +638,7 @@ final class BlockScanner {
       case BlockKind.listItem:
         // A new marker starts a new item, and a blank line ends this one; a
         // line with neither continues it, which keeps a wrapped item whole.
-        return _text(end).trim().isNotEmpty && _listMarker(_text(end)) == null;
+        return _text(end).trim().isNotEmpty && _markerOn(end) == null;
       case BlockKind.quote:
         // A blank line ends the quoted run; a line that is still a quote line —
         // with a marker or lazily without one — continues it.
@@ -707,7 +707,9 @@ final class BlockScanner {
     // either continues the item it is indented into or the quote it is lazily
     // part of.
     if (_quoteDepth(text) > 0) return BlockKind.quote;
-    if (_listMarker(text) != null) return BlockKind.listItem;
+    if (_listMarker(text, _markerReach(state)) != null) {
+      return BlockKind.listItem;
+    }
     if (text.trim().isNotEmpty && state.listIndent >= 0) {
       return BlockKind.paragraph;
     }
@@ -773,8 +775,10 @@ final class BlockScanner {
 
   /// The list marker [text] opens with — its start, its width and where the
   /// item's text begins — or null: the scanner's own rule, for a reader
-  /// that colours the marker.
-  static (int, int, int)? listMarkerOf(String text) => _listMarker(text);
+  /// that colours the marker of a line the scanner already took for an
+  /// item, which is why the marker's indent is not asked about.
+  static (int, int, int)? listMarkerOf(String text) =>
+      _listMarker(text, text.length);
 
   /// How many `#` open a heading on [text], or 0.
   static int headingLevelOf(String text) => _headingLevel(text);
@@ -1003,7 +1007,8 @@ final class BlockScanner {
 
   /// The number an ordered marker was written with, or 0 for an unordered one.
   static int _writtenOrdinal(String text) {
-    final marker = _listMarker(text);
+    // Asked of a line already taken for an item: its indent is settled.
+    final marker = _listMarker(text, text.length);
     if (marker == null) return 0;
     final (start, width, _) = marker;
     final slice = text.substring(start, start + width).trim();
@@ -1012,9 +1017,15 @@ final class BlockScanner {
   }
 
   /// The list marker on [text], or null: its start, width and content indent.
-  static (int, int, int)? _listMarker(String text) {
+  ///
+  /// A marker may stand up to three spaces in from where a line starts its
+  /// text — the note's margin, or inside a list item the item's own content
+  /// column, which is [reach] minus those three ([_markerReach]). Counting
+  /// them from the margin alone took `    - c`, a third level, for the text
+  /// of the item above it: every list stopped at two levels.
+  static (int, int, int)? _listMarker(String text, [int reach = 3]) {
     var at = 0;
-    while (at < 3 && at < text.length && _isSpace(text.codeUnitAt(at))) {
+    while (at < reach && at < text.length && _isSpace(text.codeUnitAt(at))) {
       at++;
     }
     if (at >= text.length) return null;
@@ -1049,6 +1060,17 @@ final class BlockScanner {
     return (at, width, after + padding);
   }
 
+  /// How far in a marker may stand on a line entering in [state]: three
+  /// spaces past the content column of the innermost open item, or past the
+  /// margin outside a list.
+  static int _markerReach(LineState state) =>
+      (state.listIndent < 0 ? 0 : state.listIndent) + 3;
+
+  /// The list marker on line [line], read with the reach the state entering
+  /// it gives ([_markerReach]).
+  (int, int, int)? _markerOn(int line) =>
+      _listMarker(_text(line), _markerReach(_entering[line]));
+
   /// The open list items after [text], given those entering it.
   ///
   /// A marker opens an item: it keeps every open item whose content column it
@@ -1058,7 +1080,7 @@ final class BlockScanner {
     String text,
     LineState state,
   ) {
-    final marker = _listMarker(text);
+    final marker = _listMarker(text, _markerReach(state));
     if (marker != null) {
       final (start, _, content) = marker;
       final open = <({int marker, int content})>[];

@@ -240,6 +240,24 @@ void main() {
       expect(_depths(scanner), <int>[0, 1, 1, 0, 0, 0]);
     });
 
+    test('a list goes as deep as it is written', () {
+      // A marker may stand three spaces past its parent's content, not past
+      // the margin: counted from the margin, `    - c` was the text of the
+      // item above it, and every list stopped at two levels.
+      for (final (note, depths) in <(String, List<int>)>[
+        ('- a\n  - b\n    - c\n      - d\n- e', [0, 1, 2, 3, 0]),
+        ('- [ ] a\n  - [ ] b\n    - [x] c\n- [x] d', [0, 1, 2, 0]),
+        ('1. a\n   1. b\n      1. c\n2. d', [0, 1, 2, 0]),
+        ('1. a\n   - b\n     - [ ] c', [0, 1, 2]),
+      ]) {
+        final scanner = BlockScanner(SourceBuffer.fromText(note));
+        expect(scanner.index.blocks.map((block) => block.kind).toSet(), {
+          BlockKind.listItem,
+        }, reason: note);
+        expect(_depths(scanner), depths, reason: note);
+      }
+    });
+
     test('a marker at the parent column is a child, not a sibling', () {
       final scanner = BlockScanner(
         SourceBuffer.fromText('- one\n  - child\n- two'),
