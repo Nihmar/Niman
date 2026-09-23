@@ -50,9 +50,10 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
-/// The field's left inset and the page's top margin, as the view lays them out
-/// with no line numbers and no note column.
-const double _left = 5;
+/// Where the text starts and the page's top margin, as the view lays them out
+/// with no line numbers and no note column: the column's edge, as in the
+/// read view (`noteTextInsets`).
+const double _left = 16;
 const double _top = 8;
 
 /// Which unified mode a body is being run in: the same tests, twice.

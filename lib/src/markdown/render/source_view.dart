@@ -59,6 +59,7 @@ import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
+import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -77,16 +78,8 @@ const Color _selectionColor = Color(0x553B82F6);
 const Color _matchColor = Color(0x55FFB300);
 const Color _currentMatchColor = Color(0xAAFF8F00);
 
-/// The gap between the line numbers and the text.
-///
-/// A decision rather than leftover space: the numbers are right-aligned against
-/// it,
-/// so it is what keeps the text from touching them.
-/// The gap between the numbers and the text: the room the legacy gutter kept
-/// for
-/// the fold arrows, which is why the old editor's text never touched its
-/// numbers.
-const double _gutterGap = 14;
+/// The gap between the line numbers and the text ([lineNumbersGap]).
+const double _gutterGap = lineNumbersGap;
 
 /// A link the writer Ctrl+clicked: its token's kind (a wikilink or a Markdown
 /// link) and its text as written, brackets and all.
@@ -1844,23 +1837,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// legacy `side + 16 - 5`, so the text starts exactly on the column's edge.
   double _gutter = 0;
 
-  /// The field's inset on the left: the legacy editor's own number.
-  static const double _fieldInset = 5;
+  /// The field's inset on the left ([noteFieldInset]).
+  static const double _fieldInset = noteFieldInset;
 
-  /// The field's inset on the right: the field inset, or the column's edge.
-  double get _rightInset =>
-      _sideSpace == 0 ? _fieldInset : _sideSpace + NoteColumn.textInset;
+  /// The field's inset on the right: the column's edge, as the read view's
+  /// ([noteTextInsets]).
+  double get _rightInset => _sideSpace + NoteColumn.textInset;
 
   /// The field's inset on the left.
   double get _leftInset => _fieldInset;
 
-  /// How wide the numbers are in the note's own face, plus the gap.
-  ///
-  /// **Measured**, not estimated: the numbers are set in the note's face at
-  /// the ambient text scale, and "0.6 em per digit" is only nearly true of a
-  /// monospace face — DejaVu Sans Mono, Linux's usual one, is 0.602 em, so two
-  /// digits did not fit the room for two and every number from 10 on wrapped
-  /// onto a second row, making each of its lines two rows tall.
+  /// How wide the numbers are in the note's own face, plus the gap
+  /// ([lineNumbersWidth]); kept while the digits, the face and the scale are.
   double _numbersWidth(TextScaler scaler) {
     if (!widget.showLineNumbers) return 0;
     final digits = widget.buffer.lineCount.toString().length;
@@ -1870,20 +1858,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         cached.digits == digits &&
         cached.style == style &&
         cached.scaler == scaler) {
-      return cached.width + _gutterGap;
+      return cached.width;
     }
-    final painter = TextPainter(
-      text: TextSpan(text: '0' * digits, style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: scaler,
-      maxLines: 1,
-    )..layout();
-    // A pixel of slack: a width that is exactly the text's can still wrap on
-    // rounding.
-    final width = painter.width.ceilToDouble() + 1;
-    painter.dispose();
+    final width = lineNumbersWidth(widget.buffer.lineCount, style, scaler);
     _digits = (digits: digits, style: style, scaler: scaler, width: width);
-    return width + _gutterGap;
+    return width;
   }
 
   ({int digits, TextStyle style, TextScaler scaler, double width})? _digits;
@@ -2032,10 +2011,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             // turned
             // off, which is what keeps a column centred when the gutter is
             // empty.
-            _gutter = math.max(
-              _numbersWidth(MediaQuery.textScalerOf(context)),
-              _sideSpace == 0 ? 0 : _sideSpace + 11,
-            );
+            // The text's left edge is the read view's ([noteTextInsets]): the
+            // column's edge, or past the numbers — with no column too, where
+            // it stood 5 px in and moved at every flip to the read pane.
+            _gutter =
+                noteTextInsets(
+                  side: _sideSpace,
+                  numbers: _numbersWidth(MediaQuery.textScalerOf(context)),
+                ).left -
+                _leftInset;
             final available =
                 constraints.maxWidth - _leftInset - _rightInset - _gutter;
             return _mouseSelection(

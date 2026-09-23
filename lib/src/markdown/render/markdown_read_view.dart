@@ -32,6 +32,7 @@ import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -43,8 +44,9 @@ final class MarkdownReadView extends StatefulWidget {
     required this.parser,
     required this.mathCache,
     this.controller,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.padding = const EdgeInsets.symmetric(vertical: 8),
     this.column = NoteColumn.off,
+    this.lineNumbers = false,
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
@@ -70,8 +72,13 @@ final class MarkdownReadView extends StatefulWidget {
   /// The scroll controller, for the shell's tabs and its place keeping.
   final ScrollController? controller;
 
-  /// The inset around the content.
+  /// The inset above and below the content, and any beyond the note's own
+  /// on the sides ([noteTextInsets]).
   final EdgeInsets padding;
+
+  /// Whether the editor draws line numbers: the read view keeps their room
+  /// without drawing them, so its text stands where the editor's does.
+  final bool lineNumbers;
 
   /// The shell's note column: the text set in a centred column of its
   /// width, as the legacy preview and the source pane set it. Without it
@@ -591,10 +598,20 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         final pane = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
-        final side = widget.column.sideSpaceIn(pane);
+        final insets = noteTextInsets(
+          side: widget.column.sideSpaceIn(pane),
+          numbers: widget.lineNumbers
+              ? lineNumbersWidth(
+                  _shown!.lineCount,
+                  (_theme ?? _fallbackTheme).body,
+                  MediaQuery.textScalerOf(context),
+                )
+              : 0,
+        );
         return _scrollView(
           heights,
-          widget.padding + EdgeInsets.symmetric(horizontal: side),
+          widget.padding +
+              EdgeInsets.only(left: insets.left, right: insets.right),
           pane,
         );
       },
