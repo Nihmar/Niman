@@ -78,15 +78,19 @@ void main() {
     expect(map.measuredCount, 1);
   });
 
-  test('a measurement of nothing is ignored', () {
-    // A block laid out at zero height is a delegate that drew nothing; writing
-    // it would make the block unmeasurable rather than empty.
-    final map = _map(2)
+  test('a block that draws nothing takes no room; a bad measurement none', () {
+    // Nothing tall was ignored, from when 0 meant "not measured": a typeset
+    // formula's lines past its first, which take no room in `live`, and a
+    // definition, which the read view does not draw, kept their estimates —
+    // a row of nothing apiece on the page.
+    final map = _map(3)
       ..measured(0, 0)
+      ..measured(1, -4)
+      ..measured(2, double.nan)
       ..measured(-1, 10)
       ..measured(9, 10);
     expect(map.totalExtent, 20);
-    expect(map.measuredCount, 0);
+    expect(map.measuredCount, 1);
   });
 
   test('a long note answers without walking it', () {

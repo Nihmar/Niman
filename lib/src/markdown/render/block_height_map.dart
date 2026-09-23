@@ -140,8 +140,13 @@ final class BlockHeightMap {
   /// Everything after it moves by the difference, which is what the sliver
   /// reads on its next layout — and, for the blocks it lays out after this one
   /// in the same pass, right away.
+  ///
+  /// Nothing tall is a height like any other: a typeset formula's lines past
+  /// its first take no room in `live`, and a definition none in the read
+  /// view. Refused, as it was when 0 meant "not measured", each kept its
+  /// estimate — a row of nothing apiece on the page.
   void measured(int index, double height) {
-    if (index < 0 || index >= _measured.length || height <= 0) return;
+    if (index < 0 || index >= _measured.length || !(height >= 0)) return;
     if (_measured[index] == 0) _measuredCount++;
     _measured[index] = 1;
     _extents.setValue(index, height);
