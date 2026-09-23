@@ -21,6 +21,7 @@ import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_changes.dart';
 import 'package:niman/src/markdown/block_index.dart';
+import 'package:niman/src/markdown/block_list.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -31,7 +32,7 @@ final class BlockScanner {
   ///
   /// An edit's rescan reads at most [budget] lines past the edit before it
   /// leaves the rest to [advance] (see [edited]).
-  new(this.buffer, {this.budget = defaultBudget}) {
+  new(this.buffer, {this.budget = defaultBudget}) : _blocks = BlockList() {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
     // The changes are counted from the list a reader first takes.
     _changes = BlockChanges();
@@ -41,13 +42,11 @@ final class BlockScanner {
   /// in an isolate — taken over by the note itself, without scanning again.
   ///
   /// The two must hold the same lines, which is the caller's to promise.
-  new rebound(BlockScanner scanned, this.buffer) : budget = scanned.budget {
-    scanned.settle();
-    scanned._settle(scanned._blocks.length);
+  new rebound(BlockScanner scanned, this.buffer)
+    : budget = scanned.budget,
+      _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
-    _blocks.addAll(scanned._blocks);
     _lineCount = scanned._lineCount;
-    _shiftFrom = _blocks.length;
   }
 
   /// How many lines past its edit a rescan reads before it stops, by default:
@@ -65,57 +64,18 @@ final class BlockScanner {
 
   /// The blocks of the scanned prefix, in line order.
   ///
-  /// Final, and spliced in place: the list is the one structure here whose size
-  /// is the document's, so an edit replaces a range of it rather than building
-  /// a new one.
-  ///
-  /// The blocks from [_shiftFrom] on are stored [_shift] lines above where
-  /// they are: read them through [_at].
-  final List<Block> _blocks = <Block>[];
-
-  /// Where the blocks still owed a shift start, and by how many lines.
-  ///
-  /// An edit that adds or removes lines moves every block after it, and
-  /// moving them — a new block each — was an Enter's cost on a note of
-  /// millions of blocks: 170 ms on a 246 MB one. So the move is owed rather
-  /// than made: one shift for everything past a point, paid only over the
-  /// blocks between that point and the next edit's, which for a writer is
-  /// the few blocks between two keystrokes.
-  int _shiftFrom = 0;
-  int _shift = 0;
+  /// Spliced in place: the list is the one structure here whose size is the
+  /// document's, so an edit replaces a range of it rather than building a
+  /// new one. It is kept in chunks, each with the lines its blocks have
+  /// moved ([BlockList]): an edit that adds or removes lines moves every
+  /// block after it, and moving them — a new block each — was an Enter's
+  /// cost on a note of millions of blocks, 170 ms on a 246 MB one. A chunk's
+  /// shift moves a thousand of them at once, and a reader that takes the
+  /// whole list takes the chunks, not the blocks.
+  final BlockList _blocks;
 
   /// Block [index] where it is now.
-  Block _at(int index) {
-    final block = _blocks[index];
-    return index >= _shiftFrom && _shift != 0 ? block.shifted(_shift) : block;
-  }
-
-  /// Pays the owed shift on the blocks before [upTo].
-  void _settle(int upTo) {
-    if (_shift != 0) {
-      for (var at = _shiftFrom; at < upTo; at++) {
-        _blocks[at] = _blocks[at].shifted(_shift);
-      }
-    }
-    if (upTo > _shiftFrom) _shiftFrom = upTo;
-  }
-
-  /// Owes [delta] more lines to every block from [from] on.
-  void _owe(int from, int delta) {
-    if (from >= _shiftFrom) {
-      _settle(from);
-    } else {
-      // These are where they are; stored against the shift owed from [from]
-      // on, so that reading them adds [delta] and nothing else.
-      if (_shift != 0) {
-        for (var at = from; at < _shiftFrom; at++) {
-          _blocks[at] = _blocks[at].shifted(-_shift);
-        }
-      }
-      _shiftFrom = from;
-    }
-    _shift += delta;
-  }
+  Block _at(int index) => _blocks[index];
 
   /// What the edits did to the block list since the last call — or since the
   /// scan, the first time — and a fresh record from here on.
@@ -134,12 +94,12 @@ final class BlockScanner {
   ///
   /// All of them, so a scan still owed is finished first ([settle]): O(the
   /// rest of the note) once after an edit that changed it, which is why the
-  /// readers on a keystroke's path ask [blockAt] instead.
+  /// readers on a keystroke's path ask [blockAt] instead. The list itself
+  /// is a copy that shares the scanner's chunks: O(chunks).
   BlockIndex get index {
     settle();
-    _settle(_blocks.length);
     return BlockIndex(
-      blocks: List<Block>.unmodifiable(_blocks),
+      blocks: BlockList.sharing(_blocks),
       revision: buffer.revision,
     );
   }
@@ -275,9 +235,9 @@ final class BlockScanner {
       (block) => block.startLine >= untouched,
     );
     // The survivors after the edit are the same blocks, moved by however
-    // many lines the document gained or lost — owed, not moved ([_owe]):
-    // everything below reads them where they are now.
-    if (edit.lineDelta != 0) _owe(tailStart, edit.lineDelta);
+    // many lines the document gained or lost — a chunk at a time
+    // ([BlockList.shiftFrom]): everything below reads them where they are.
+    _blocks.shiftFrom(tailStart, edit.lineDelta);
     var start = edit.firstLine;
     // The line before the edit reads the edited line when it asks whether
     // it heads a table (the delimiter row is the line under it), so it is
@@ -409,13 +369,9 @@ final class BlockScanner {
         (block) => block.startLine >= line,
       );
     }
-    // The dropped blocks are the ones between the head and the kept tail;
-    // anything owed a shift among them is paid first, so what is owed after
-    // the splice is owed from the kept tail on, exactly.
-    if (_shiftFrom < keepFrom) _settle(keepFrom);
-    _blocks.replaceRange(headEnd, keepFrom, rebuilt);
+    // The dropped blocks are the ones between the head and the kept tail.
+    _blocks.splice(headEnd, keepFrom, rebuilt);
     _changes.record(headEnd, keepFrom - headEnd, rebuilt.length);
-    _shiftFrom += rebuilt.length - (keepFrom - headEnd);
     // The frontiers the rebuild passed are behind it; a converged one leaves
     // the ones below it, whose hints it did not reach, and one that stopped
     // short is the first frontier itself.
