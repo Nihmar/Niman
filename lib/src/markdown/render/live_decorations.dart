@@ -9,6 +9,8 @@
 /// nothing here moves an offset.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -22,6 +24,7 @@ final class LineShape {
   const new({
     this.quoteDepth = 0,
     this.marker,
+    this.box,
     this.ordinal,
     this.task,
     this.rule = false,
@@ -31,6 +34,7 @@ final class LineShape {
   factory of(StyledLine line, Block? block, int index) {
     var markers = 0;
     int? marker;
+    int? box;
     bool? task;
     var rule = false;
     for (final token in line.tokens) {
@@ -40,8 +44,9 @@ final class LineShape {
       } else if (kind == TokenKind.listMarker) {
         marker ??= token.start;
       } else if (kind == TokenKind.taskBox) {
-        final box = line.text.substring(token.start, token.end);
-        task = box.contains('x') || box.contains('X');
+        box = token.start;
+        final written = line.text.substring(token.start, token.end);
+        task = written.contains('x') || written.contains('X');
       } else if (kind == TokenKind.horizontalRule) {
         rule = true;
       }
@@ -59,6 +64,7 @@ final class LineShape {
     return LineShape(
       quoteDepth: quoteDepth,
       marker: marker,
+      box: box,
       ordinal: ordinal,
       task: task,
       rule: rule,
@@ -70,6 +76,10 @@ final class LineShape {
 
   /// Where the line's list marker starts, when it opens a list item.
   final int? marker;
+
+  /// Where the item's task box (`[ ]`) starts, for a task item: its text
+  /// starts past the box, and the box is drawn where a bullet would be.
+  final int? box;
 
   /// The item's number, for an ordered item: the list's count, which is
   /// CommonMark's (`1. 1. 1.` reads 1, 2, 3) and the read view's.
@@ -90,60 +100,71 @@ final class LineShape {
       other is LineShape &&
       other.quoteDepth == quoteDepth &&
       other.marker == marker &&
+      other.box == box &&
       other.ordinal == ordinal &&
       other.task == task &&
       other.rule == rule;
 
   @override
-  int get hashCode => Object.hash(quoteDepth, marker, ordinal, task, rule);
+  int get hashCode => Object.hash(quoteDepth, marker, box, ordinal, task, rule);
 }
 
 /// Where a list item's bullet, number or checkbox sits, in its paragraph's
-/// coordinates: the indent one list level takes, ending where the item's
-/// text begins — its (hidden) marker at [marker] — and one row tall.
+/// coordinates: the indent one list level takes, one row tall, ending where
+/// a bullet's does — a hidden marker and its space before the item's text.
 ///
 /// One answer for the painter that draws there and the tap that toggles a
 /// checkbox there, so the two cannot disagree about where the box is.
+///
+/// A task's text starts past its box as well, whose hidden `[ ]` still
+/// advances by a sliver each: the slot is measured back from the text by
+/// the width the line's own marker and its space take, so a box sits where
+/// a bullet does, to the pixel, and each with its text the same way off.
 ///
 /// The row is read off the item's first character of text, not off the
 /// marker: the marker is hidden, set in a hundredth of a size, and a caret
 /// at it stands on the baseline with next to no height — the bullets and the
 /// numbers were drawn that far below the text they belong to. An item with
 /// no text yet is one row, the paragraph's own height.
-Rect liveItemSlot(RenderParagraph box, int marker, MarkdownTheme theme) {
-  final at = box.getOffsetForCaret(TextPosition(offset: marker), Rect.zero);
-  final slot = theme.listIndentPerLevel;
+Rect liveItemSlot(RenderParagraph box, LineShape shape, MarkdownTheme theme) {
+  final marker = shape.marker ?? 0;
   final text = box.text.toPlainText(includeSemanticsLabels: false);
-  final first = _itemTextStart(text, marker);
+  double left(int offset) =>
+      box.getOffsetForCaret(TextPosition(offset: offset), Rect.zero).dx;
+  final lead = _pastSpaces(text, _pastMark(text, marker));
+  final taskBox = shape.box;
+  final first = taskBox == null ? lead : _pastSpaces(text, taskBox + 3);
+  final right = left(first) - (left(lead) - left(marker));
+  final slot = theme.listIndentPerLevel;
   if (first >= text.length) {
-    return Rect.fromLTWH(at.dx - slot, 0, slot, box.size.height);
+    return Rect.fromLTWH(right - slot, 0, slot, box.size.height);
   }
   final position = TextPosition(offset: first);
   final top = box.getOffsetForCaret(position, Rect.zero).dy;
   return Rect.fromLTWH(
-    at.dx - slot,
+    right - slot,
     top,
     slot,
     box.getFullHeightForCaret(position),
   );
 }
 
-/// Where the text of the item whose marker starts at [marker] begins: past
-/// the marker, the spaces after it and a task box.
-int _itemTextStart(String text, int marker) {
-  bool space(int at) => text[at] == ' ' || text[at] == '\t';
-  var at = marker;
-  while (at < text.length && !space(at)) {
+bool _space(String text, int at) => text[at] == ' ' || text[at] == '\t';
+
+/// Past the mark that starts at [from]: the characters up to a space.
+int _pastMark(String text, int from) {
+  var at = from;
+  while (at < text.length && !_space(text, at)) {
     at++;
   }
-  while (at < text.length && space(at)) {
+  return at;
+}
+
+/// Past the spaces that start at [from], and never past the text.
+int _pastSpaces(String text, int from) {
+  var at = math.min(from, text.length);
+  while (at < text.length && _space(text, at)) {
     at++;
-  }
-  if (at + 2 < text.length && text[at] == '[' && text[at + 2] == ']') {
-    at += 3;
-    while (at < text.length && space(at)) {
-      at++;
-    }
   }
   return at;
 }
@@ -189,8 +210,7 @@ final class LiveDecorationPainter extends CustomPainter {
     _paintQuoteBars(canvas, size);
     if (revealed) return;
     if (shape.rule) _paintRule(canvas, size);
-    final marker = shape.marker;
-    if (marker != null) _paintItem(canvas, marker);
+    if (shape.marker != null) _paintItem(canvas);
   }
 
   void _paintQuoteBars(Canvas canvas, Size size) {
@@ -217,10 +237,10 @@ final class LiveDecorationPainter extends CustomPainter {
     );
   }
 
-  void _paintItem(Canvas canvas, int marker) {
+  void _paintItem(Canvas canvas) {
     final box = paragraph.currentContext?.findRenderObject();
     if (box is! RenderParagraph || !box.hasSize) return;
-    final place = liveItemSlot(box, marker, theme).shift(Offset(textLeft, 0));
+    final place = liveItemSlot(box, shape, theme).shift(Offset(textLeft, 0));
     final right = place.right;
     final slot = place.width;
     final middle = place.center.dy;
