@@ -1265,6 +1265,8 @@ final class HungarianStrings extends Strings {
   @override
   String get journalFabToday => 'Mai naplóbejegyzés';
   @override
+  String journalDueOn(String day) => 'Határidő: $day';
+  @override
   String get commandsTitle => 'Parancsok';
   @override
   String get commandsIntro =>

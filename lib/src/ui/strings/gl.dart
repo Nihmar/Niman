@@ -1273,6 +1273,8 @@ final class GalicianStrings extends Strings {
   @override
   String get journalFabToday => 'Entrada de hoxe do diario';
   @override
+  String journalDueOn(String day) => 'Vence o $day';
+  @override
   String get commandsTitle => 'Ordes';
   @override
   String get commandsIntro =>

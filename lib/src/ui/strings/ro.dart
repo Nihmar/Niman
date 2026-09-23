@@ -1270,6 +1270,8 @@ final class RomanianStrings extends Strings {
   @override
   String get journalFabToday => 'Intrarea de azi din jurnal';
   @override
+  String journalDueOn(String day) => 'Scadent $day';
+  @override
   String get commandsTitle => 'Comenzi';
   @override
   String get commandsIntro =>

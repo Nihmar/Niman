@@ -1173,6 +1173,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get journalFabToday => '今日の日記エントリ';
   @override
+  String journalDueOn(String day) => '$day が期限';
+  @override
   String get commandsTitle => 'コマンド';
   @override
   String get commandsIntro =>

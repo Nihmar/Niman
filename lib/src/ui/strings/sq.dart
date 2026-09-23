@@ -1271,6 +1271,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get journalFabToday => 'Hyrja e sotme e ditarit';
   @override
+  String journalDueOn(String day) => 'Afati $day';
+  @override
   String get commandsTitle => 'Komandat';
   @override
   String get commandsIntro =>

@@ -15,8 +15,20 @@ final class JournalScreen extends StatelessWidget {
     required this.readEntry,
     required this.onOpenDay,
     this.revision = 0,
+    this.dueOn,
+    this.tasksChanged,
+    this.onOpenTasks,
     super.key,
   });
+
+  /// See [JournalBrowser.dueOn].
+  final List<String> Function(DateTime day)? dueOn;
+
+  /// See [JournalBrowser.tasksChanged].
+  final Listenable? tasksChanged;
+
+  /// See [JournalBrowser.onOpenTasks].
+  final VoidCallback? onOpenTasks;
 
   /// See [JournalBrowser.today].
   final DateTime today;
@@ -45,6 +57,9 @@ final class JournalScreen extends StatelessWidget {
         onOpenDay: onOpenDay,
         revision: revision,
         large: true,
+        dueOn: dueOn,
+        tasksChanged: tasksChanged,
+        onOpenTasks: onOpenTasks,
       ),
     );
   }

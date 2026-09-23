@@ -1255,6 +1255,8 @@ final class CroatianStrings extends Strings {
   @override
   String get journalFabToday => 'Današnji unos u dnevnik';
   @override
+  String journalDueOn(String day) => 'Rok $day';
+  @override
   String get commandsTitle => 'Naredbe';
   @override
   String get commandsIntro =>

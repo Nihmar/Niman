@@ -1254,6 +1254,8 @@ final class CzechStrings extends Strings {
   @override
   String get journalFabToday => 'Dnešní záznam deníku';
   @override
+  String journalDueOn(String day) => 'Termín $day';
+  @override
   String get commandsTitle => 'Příkazy';
   @override
   String get commandsIntro =>

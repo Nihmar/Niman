@@ -1259,6 +1259,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get journalFabToday => 'Šiandienos dienoraščio įrašas';
   @override
+  String journalDueOn(String day) => 'Terminas $day';
+  @override
   String get commandsTitle => 'Komandos';
   @override
   String get commandsIntro =>

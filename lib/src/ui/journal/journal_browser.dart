@@ -1,7 +1,8 @@
 /// The journal at a glance (#7): a month with its entries dotted, a way
-/// back to today, the day picked, and the latest entries with their first
-/// words. The desktop's dock pane and the phone's Journal screen are this,
-/// in two sizes.
+/// back to today, the day picked, the open tasks due on it (from
+/// `todo.txt`), and the latest entries with their first words. The
+/// desktop's dock pane and the phone's Journal screen are this, in two
+/// sizes.
 library;
 
 import 'dart:async';
@@ -29,8 +30,26 @@ final class JournalBrowser extends StatefulWidget {
     required this.onOpenDay,
     this.revision = 0,
     this.large = false,
+    this.dueOn,
+    this.tasksChanged,
+    this.onOpenTasks,
+    this.focusDay,
     super.key,
   });
+
+  /// The open tasks due on a day, as they read in the task list; null
+  /// shows no tasks at all.
+  final List<String> Function(DateTime day)? dueOn;
+
+  /// Fires when the tasks change, so the list follows.
+  final Listenable? tasksChanged;
+
+  /// Opens the task list, from a task's tap.
+  final VoidCallback? onOpenTasks;
+
+  /// The day the dock speaks for when nothing is picked in it: the entry
+  /// on screen's, else today.
+  final DateTime? focusDay;
 
   /// The journal's day now.
   final DateTime today;
@@ -146,6 +165,41 @@ final class _JournalBrowserState extends State<JournalBrowser> {
           const SizedBox(height: 14),
           _dayCard(context, entries.contains(_selected)),
         ],
+        if (widget.dueOn case final dueOn?)
+          ListenableBuilder(
+            listenable: widget.tasksChanged ?? const _Never(),
+            builder: (context, _) {
+              final day = widget.large
+                  ? _selected
+                  : widget.focusDay ?? widget.today;
+              final tasks = dueOn(day);
+              if (tasks.isEmpty) return const SizedBox.shrink();
+              return Column(
+                key: const Key('journal-due'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    AppStrings.journalDueOn(formatDateTime(day, 'ddd D'))
+                        .toUpperCase(),
+                    style: heading,
+                  ),
+                  for (final task in tasks)
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        Icons.check_box_outline_blank,
+                        size: 18,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      title: Text(task),
+                      onTap: widget.onOpenTasks,
+                    ),
+                ],
+              );
+            },
+          ),
         if (latest.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text(AppStrings.journalRecent.toUpperCase(), style: heading),
@@ -230,4 +284,15 @@ final class _JournalBrowserState extends State<JournalBrowser> {
       ),
     );
   }
+}
+
+/// A listenable that never fires, for a browser with no tasks to follow.
+final class _Never implements Listenable {
+  const new();
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
 }

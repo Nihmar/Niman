@@ -1259,6 +1259,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get journalFabToday => 'Сённяшні запіс дзённіка';
   @override
+  String journalDueOn(String day) => 'Тэрмін $day';
+  @override
   String get commandsTitle => 'Каманды';
   @override
   String get commandsIntro =>

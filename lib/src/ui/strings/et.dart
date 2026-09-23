@@ -1240,6 +1240,8 @@ final class EstonianStrings extends Strings {
   @override
   String get journalFabToday => 'Tänane päeviku sissekanne';
   @override
+  String journalDueOn(String day) => 'Tähtaeg $day';
+  @override
   String get commandsTitle => 'Käsud';
   @override
   String get commandsIntro =>

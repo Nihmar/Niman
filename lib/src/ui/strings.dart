@@ -790,6 +790,7 @@ final class AppStrings {
   static String get journalOpenEntry => _s.journalOpenEntry;
   static String get journalShowCalendar => _s.journalShowCalendar;
   static String get journalFabToday => _s.journalFabToday;
+  static String journalDueOn(String day) => _s.journalDueOn(day);
   static String get commandsTitle => _s.commandsTitle;
   static String get commandsIntro => _s.commandsIntro;
   static String get commandNeedNone => _s.commandNeedNone;

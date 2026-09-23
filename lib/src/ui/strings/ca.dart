@@ -1290,6 +1290,8 @@ final class CatalanStrings extends Strings {
   @override
   String get journalFabToday => 'Entrada d’avui del diari';
   @override
+  String journalDueOn(String day) => 'Venç el $day';
+  @override
   String get commandsTitle => 'Ordres';
   @override
   String get commandsIntro =>

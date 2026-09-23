@@ -109,4 +109,62 @@ void main() {
       expect(opened, [(DateTime(2026, 9, 20), true)]);
     });
   });
+
+  group('the tasks due on the day', () {
+    List<String> dueOn(DateTime day) => day == DateTime(2026, 9, 23)
+        ? ['Renew the car insurance']
+        : day == DateTime(2026, 9, 20)
+        ? ['Book the train']
+        : const [];
+
+    Future<List<String>> pump(
+      WidgetTester tester, {
+      required bool large,
+      DateTime? focusDay,
+    }) async {
+      final opened = <String>[];
+      tester.view.physicalSize = const Size(420, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: JournalBrowser(
+              today: today,
+              large: large,
+              focusDay: focusDay,
+              entryDays: () async => const [],
+              readEntry: (_) async => '',
+              onOpenDay: (_, {confirmed = false}) {},
+              dueOn: dueOn,
+              onOpenTasks: () => opened.add('tasks'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return opened;
+    }
+
+    testWidgets("the dock lists today's, or the entry's day's", (tester) async {
+      final opened = await pump(tester, large: false);
+      expect(find.text('DUE ON WED 23'), findsOne);
+      await tester.tap(find.text('Renew the car insurance'));
+      expect(opened, ['tasks']);
+
+      await pump(tester, large: false, focusDay: DateTime(2026, 9, 20));
+      expect(find.text('Book the train'), findsOne);
+      expect(find.text('Renew the car insurance'), findsNothing);
+    });
+
+    testWidgets("the phone lists the picked day's, and none says nothing", (
+      tester,
+    ) async {
+      await pump(tester, large: true);
+      expect(find.text('Renew the car insurance'), findsOne);
+      await tester.tap(find.byKey(const Key('journal-day-21')));
+      await tester.pump();
+      expect(find.byKey(const Key('journal-due')), findsNothing);
+    });
+  });
 }

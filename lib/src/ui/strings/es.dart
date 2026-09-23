@@ -1287,6 +1287,8 @@ final class SpanishStrings extends Strings {
   @override
   String get journalFabToday => 'Entrada de hoy del diario';
   @override
+  String journalDueOn(String day) => 'Vence el $day';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

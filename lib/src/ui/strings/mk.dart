@@ -1271,6 +1271,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get journalFabToday => 'Денешен запис во дневникот';
   @override
+  String journalDueOn(String day) => 'Рок $day';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>
