@@ -15,6 +15,10 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+A` — new voice note
 - `Ctrl/⌘+T` — new todo
 - `Ctrl/⌘+Q` — quick note
+- `Ctrl/⌘+Shift+J` — today's [journal](journal.md) entry, made first when
+  there is none
+- `Ctrl/⌘+Shift+Page Up` / `Page Down` — the journal entry before / after
+  the one on screen
 - `Ctrl/⌘+B` — show or hide the sidebar
 - `Ctrl/⌘+W` — close the note on screen (its tab)
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note

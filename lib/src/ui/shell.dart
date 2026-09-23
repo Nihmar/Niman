@@ -20,6 +20,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
@@ -42,6 +43,7 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/library_window.dart';
@@ -550,6 +552,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// (issue #73, item 1). Refreshed with the editor settings.
   String? _quickNotePath;
 
+  /// The journal's settings (#7), read with the editor settings: which
+  /// note on screen is an entry, and of which day.
+  JournalSettings _journal = const JournalSettings();
+
   /// Carries focus for the app accelerators (T-PP-10) when nothing else
   /// wants it, so a keyboard-only tab switch is followed by a working next
   /// one: [FocusManager] would otherwise leave nothing focused.
@@ -662,6 +668,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// file; the shell keeps the selection state it reads through callbacks
   /// and the open that follows.
   late final ShellTemplateFlow _templateFlow;
+
+  /// Opens and makes journal entries (#7).
+  late final JournalFlow _journalFlow;
 
   /// Notification taps while running: a todo tap opens the Todo tab.
   StreamSubscription<String?>? _reminderTaps;
@@ -1319,6 +1328,13 @@ final class _LibraryShellState extends State<_LibraryShell>
       opensPreviewOnly: _opensPreviewOnly,
       onNoteFiled: _onTemplateNoteFiled,
     );
+    _journalFlow = JournalFlow(
+      controller: widget.controller,
+      templates: _templateFlow,
+      guard: _guard,
+      onOpen: (path) => _openNoteFromLink(path, null),
+      onCreated: _openNewJournalEntry,
+    );
     // The controller loads here, not in TodoTab.initState: T-TD-07
     // reconciles reminders at every library open, and the Todo tab is
     // only reachable in the narrow layout -- a >= 600 px device would
@@ -1520,7 +1536,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     final spellDictionaries = await controller.spellDictionaries;
     final ops = controller.ops;
     final quickNote = ops == null ? null : await ops.quickNotePath;
+    final journal = ops == null ? null : await ops.journal;
     if (!mounted) return;
+    if (journal != null && journal != _journal) {
+      setState(() => _journal = journal);
+    }
     widget.spellCheck.setDictionaries(spellDictionaries);
     if (settings != _editorSettings) {
       setState(() => _editorSettings = settings);
@@ -2530,7 +2550,22 @@ final class _LibraryShellState extends State<_LibraryShell>
     CommandNeed.zenRoom => _zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
+    CommandNeed.journalEntry => _shownJournalDay != null,
   };
+
+  /// The day of the journal entry on screen, or null when the note on
+  /// screen is not one (#7).
+  DateTime? get _shownJournalDay => switch (_shownNote) {
+    final path? => _journal.dayOfPath(path),
+    null => null,
+  };
+
+  /// Opens an entry the journal just made, the caret where its template
+  /// put it.
+  void _openNewJournalEntry(String path, int? caret) {
+    _openNoteFromLink(path, null);
+    if (caret != null) setState(() => _pendingCaretOffset = caret);
+  }
 
   /// Every command's handler; [_commandHandlers] keeps the ones that can
   /// run now. A handler whose command needs an open note runs only with
@@ -2550,6 +2585,11 @@ final class _LibraryShellState extends State<_LibraryShell>
         unawaited(_addTodo());
       },
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
+      AppCommand.journalToday: () => unawaited(_journalFlow.openToday(context)),
+      AppCommand.journalPrevious: () =>
+          unawaited(_journalFlow.openPrevious(context, _shownJournalDay!)),
+      AppCommand.journalNext: () =>
+          unawaited(_journalFlow.openNext(context, _shownJournalDay!)),
       AppCommand.zenMode: _toggleZen,
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).

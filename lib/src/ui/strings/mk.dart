@@ -1213,6 +1213,23 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Оди на';
   @override
+  String get paletteGroupJournal => 'Дневник';
+  @override
+  String get journalToday => 'Денешен запис';
+  @override
+  String get journalPrevious => 'Претходен запис';
+  @override
+  String get journalNext => 'Следен запис';
+  @override
+  String get commandNeedJournalEntry => 'Потребен е отворен запис од дневникот';
+  @override
+  String journalCreateAsk(String day) =>
+      'Сè уште нема запис за $day. Да се создаде?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Шаблонот на дневникот $path не можеше да се прочита: записот е '
+      'создаден без него.';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

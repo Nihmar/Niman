@@ -1195,6 +1195,22 @@ final class NorwegianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå til';
   @override
+  String get paletteGroupJournal => 'Dagbok';
+  @override
+  String get journalToday => 'Dagens innlegg';
+  @override
+  String get journalPrevious => 'Forrige innlegg';
+  @override
+  String get journalNext => 'Neste innlegg';
+  @override
+  String get commandNeedJournalEntry => 'Krever et åpent dagbokinnlegg';
+  @override
+  String journalCreateAsk(String day) =>
+      'Det finnes ikke noe innlegg for $day ennå. Opprette det?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Dagbokmalen $path kunne ikke leses: innlegget ble opprettet uten.';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

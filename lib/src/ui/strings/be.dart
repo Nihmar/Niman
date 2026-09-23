@@ -1203,6 +1203,21 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Перайсці';
   @override
+  String get paletteGroupJournal => 'Дзённік';
+  @override
+  String get journalToday => 'Сённяшні запіс';
+  @override
+  String get journalPrevious => 'Папярэдні запіс';
+  @override
+  String get journalNext => 'Наступны запіс';
+  @override
+  String get commandNeedJournalEntry => 'Патрэбны адкрыты запіс дзённіка';
+  @override
+  String journalCreateAsk(String day) => 'Для $day яшчэ няма запісу. Стварыць?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Не ўдалося прачытаць шаблон дзённіка $path: запіс створаны без яго.';
+  @override
   String get commandsTitle => 'Каманды';
   @override
   String get commandsIntro =>

@@ -1175,6 +1175,22 @@ final class HindiStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'जाएँ';
   @override
+  String get paletteGroupJournal => 'डायरी';
+  @override
+  String get journalToday => 'आज की प्रविष्टि';
+  @override
+  String get journalPrevious => 'पिछली प्रविष्टि';
+  @override
+  String get journalNext => 'अगली प्रविष्टि';
+  @override
+  String get commandNeedJournalEntry => 'खुली डायरी प्रविष्टि चाहिए';
+  @override
+  String journalCreateAsk(String day) =>
+      '$day के लिए अभी कोई प्रविष्टि नहीं है। बनाएँ?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'डायरी टेम्पलेट $path पढ़ा नहीं जा सका: प्रविष्टि उसके बिना बनाई गई।';
+  @override
   String get commandsTitle => 'कमांड';
   @override
   String get commandsIntro =>

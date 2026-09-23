@@ -1195,6 +1195,22 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Go to';
   @override
+  String get paletteGroupJournal => 'Journal';
+  @override
+  String get journalToday => "Today's entry";
+  @override
+  String get journalPrevious => 'Previous entry';
+  @override
+  String get journalNext => 'Next entry';
+  @override
+  String get commandNeedJournalEntry => 'Needs an open journal entry';
+  @override
+  String journalCreateAsk(String day) => 'No entry for $day yet. Create it?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'The journal template $path could not be read: the entry was made '
+      'without it.';
+  @override
   String get commandsTitle => 'Commands';
   @override
   String get commandsIntro =>

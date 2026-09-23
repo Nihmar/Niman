@@ -575,6 +575,13 @@ abstract base class Strings {
   String get paletteGroupView;
   String get paletteGroupLibrary;
   String get paletteGroupGoTo;
+  String get paletteGroupJournal;
+  String get journalToday;
+  String get journalPrevious;
+  String get journalNext;
+  String get commandNeedJournalEntry;
+  String journalCreateAsk(String day);
+  String journalTemplateMissing(String path);
   String get commandsTitle;
   String get commandsIntro;
   String get commandNeedNone;

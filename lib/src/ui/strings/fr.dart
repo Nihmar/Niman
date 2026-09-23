@@ -1235,6 +1235,24 @@ final class FrenchStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Aller à';
   @override
+  String get paletteGroupJournal => 'Journal';
+  @override
+  String get journalToday => 'Entrée du jour';
+  @override
+  String get journalPrevious => 'Entrée précédente';
+  @override
+  String get journalNext => 'Entrée suivante';
+  @override
+  String get commandNeedJournalEntry =>
+      'Nécessite une entrée du journal ouverte';
+  @override
+  String journalCreateAsk(String day) =>
+      'Pas encore d’entrée pour $day. La créer ?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Le modèle du journal $path est illisible : l’entrée a été créée sans '
+      'lui.';
+  @override
   String get commandsTitle => 'Commandes';
   @override
   String get commandsIntro =>

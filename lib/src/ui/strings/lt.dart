@@ -1203,6 +1203,21 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Eiti į';
   @override
+  String get paletteGroupJournal => 'Dienoraštis';
+  @override
+  String get journalToday => 'Šiandienos įrašas';
+  @override
+  String get journalPrevious => 'Ankstesnis įrašas';
+  @override
+  String get journalNext => 'Kitas įrašas';
+  @override
+  String get commandNeedJournalEntry => 'Reikia atverto dienoraščio įrašo';
+  @override
+  String journalCreateAsk(String day) => 'Dienai $day dar nėra įrašo. Sukurti?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Nepavyko perskaityti dienoraščio šablono $path: įrašas sukurtas be jo.';
+  @override
   String get commandsTitle => 'Komandos';
   @override
   String get commandsIntro =>

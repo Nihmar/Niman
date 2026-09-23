@@ -1245,6 +1245,24 @@ final class GreekStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Μετάβαση';
   @override
+  String get paletteGroupJournal => 'Ημερολόγιο';
+  @override
+  String get journalToday => 'Σημερινή καταχώριση';
+  @override
+  String get journalPrevious => 'Προηγούμενη καταχώριση';
+  @override
+  String get journalNext => 'Επόμενη καταχώριση';
+  @override
+  String get commandNeedJournalEntry =>
+      'Χρειάζεται ανοιχτή καταχώριση ημερολογίου';
+  @override
+  String journalCreateAsk(String day) =>
+      'Δεν υπάρχει ακόμη καταχώριση για $day. Να δημιουργηθεί;';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Το πρότυπο ημερολογίου $path δεν διαβάστηκε: η καταχώριση '
+      'δημιουργήθηκε χωρίς αυτό.';
+  @override
   String get commandsTitle => 'Εντολές';
   @override
   String get commandsIntro =>

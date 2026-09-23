@@ -1199,6 +1199,22 @@ final class DanishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå til';
   @override
+  String get paletteGroupJournal => 'Dagbog';
+  @override
+  String get journalToday => 'Dagens indlæg';
+  @override
+  String get journalPrevious => 'Forrige indlæg';
+  @override
+  String get journalNext => 'Næste indlæg';
+  @override
+  String get commandNeedJournalEntry => 'Kræver et åbent dagbogsindlæg';
+  @override
+  String journalCreateAsk(String day) =>
+      'Der er endnu intet indlæg for $day. Opret det?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Dagbogsskabelonen $path kunne ikke læses: indlægget blev oprettet uden.';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

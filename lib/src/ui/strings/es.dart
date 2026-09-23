@@ -1228,6 +1228,24 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ir a';
   @override
+  String get paletteGroupJournal => 'Diario';
+  @override
+  String get journalToday => 'Entrada de hoy';
+  @override
+  String get journalPrevious => 'Entrada anterior';
+  @override
+  String get journalNext => 'Entrada siguiente';
+  @override
+  String get commandNeedJournalEntry =>
+      'Necesita una entrada del diario abierta';
+  @override
+  String journalCreateAsk(String day) =>
+      'Aún no hay entrada para $day. ¿Crearla?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'No se pudo leer la plantilla del diario $path: la entrada se creó sin '
+      'ella.';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

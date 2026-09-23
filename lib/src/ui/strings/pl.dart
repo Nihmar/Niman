@@ -1220,6 +1220,23 @@ final class PolishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Przejdź do';
   @override
+  String get paletteGroupJournal => 'Dziennik';
+  @override
+  String get journalToday => 'Dzisiejszy wpis';
+  @override
+  String get journalPrevious => 'Poprzedni wpis';
+  @override
+  String get journalNext => 'Następny wpis';
+  @override
+  String get commandNeedJournalEntry => 'Wymaga otwartego wpisu dziennika';
+  @override
+  String journalCreateAsk(String day) =>
+      'Brak jeszcze wpisu na $day. Utworzyć?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Nie udało się odczytać szablonu dziennika $path: wpis utworzono bez '
+      'niego.';
+  @override
   String get commandsTitle => 'Polecenia';
   @override
   String get commandsIntro =>

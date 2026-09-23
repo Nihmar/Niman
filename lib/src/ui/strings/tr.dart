@@ -1191,6 +1191,22 @@ final class TurkishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Git';
   @override
+  String get paletteGroupJournal => 'Günlük';
+  @override
+  String get journalToday => 'Bugünün girdisi';
+  @override
+  String get journalPrevious => 'Önceki girdi';
+  @override
+  String get journalNext => 'Sonraki girdi';
+  @override
+  String get commandNeedJournalEntry => 'Açık bir günlük girdisi gerekir';
+  @override
+  String journalCreateAsk(String day) =>
+      '$day için henüz girdi yok. Oluşturulsun mu?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Günlük şablonu $path okunamadı: girdi onsuz oluşturuldu.';
+  @override
   String get commandsTitle => 'Komutlar';
   @override
   String get commandsIntro =>

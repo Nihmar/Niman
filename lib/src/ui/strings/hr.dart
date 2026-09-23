@@ -1198,6 +1198,22 @@ final class CroatianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Idi na';
   @override
+  String get paletteGroupJournal => 'Dnevnik';
+  @override
+  String get journalToday => 'Današnji unos';
+  @override
+  String get journalPrevious => 'Prethodni unos';
+  @override
+  String get journalNext => 'Sljedeći unos';
+  @override
+  String get commandNeedJournalEntry => 'Treba otvoren unos dnevnika';
+  @override
+  String journalCreateAsk(String day) => 'Za $day još nema unosa. Stvoriti ga?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Predložak dnevnika $path nije se mogao pročitati: unos je stvoren bez '
+      'njega.';
+  @override
   String get commandsTitle => 'Naredbe';
   @override
   String get commandsIntro =>

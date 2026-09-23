@@ -1206,6 +1206,23 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Иди на';
   @override
+  String get paletteGroupJournal => 'Дневник';
+  @override
+  String get journalToday => 'Данашњи унос';
+  @override
+  String get journalPrevious => 'Претходни унос';
+  @override
+  String get journalNext => 'Следећи унос';
+  @override
+  String get commandNeedJournalEntry => 'Потребан је отворен унос дневника';
+  @override
+  String journalCreateAsk(String day) =>
+      'За $day још нема уноса. Направити га?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Шаблон дневника $path није могао да се прочита: унос је направљен без '
+      'њега.';
+  @override
   String get commandsTitle => 'Команде';
   @override
   String get commandsIntro =>

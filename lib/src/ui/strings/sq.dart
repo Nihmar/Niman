@@ -1214,6 +1214,22 @@ final class AlbanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Shko te';
   @override
+  String get paletteGroupJournal => 'Ditari';
+  @override
+  String get journalToday => 'Hyrja e sotme';
+  @override
+  String get journalPrevious => 'Hyrja e mëparshme';
+  @override
+  String get journalNext => 'Hyrja tjetër';
+  @override
+  String get commandNeedJournalEntry => 'Kërkon një hyrje ditari të hapur';
+  @override
+  String journalCreateAsk(String day) =>
+      'Ende nuk ka hyrje për $day. Ta krijoj?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Shablloni i ditarit $path nuk u lexua dot: hyrja u krijua pa të.';
+  @override
   String get commandsTitle => 'Komandat';
   @override
   String get commandsIntro =>

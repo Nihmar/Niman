@@ -1197,6 +1197,22 @@ final class CzechStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Přejít na';
   @override
+  String get paletteGroupJournal => 'Deník';
+  @override
+  String get journalToday => 'Dnešní záznam';
+  @override
+  String get journalPrevious => 'Předchozí záznam';
+  @override
+  String get journalNext => 'Další záznam';
+  @override
+  String get commandNeedJournalEntry => 'Vyžaduje otevřený záznam deníku';
+  @override
+  String journalCreateAsk(String day) =>
+      'Pro $day zatím není záznam. Vytvořit?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Šablonu deníku $path se nepodařilo přečíst: záznam byl vytvořen bez ní.';
+  @override
   String get commandsTitle => 'Příkazy';
   @override
   String get commandsIntro =>

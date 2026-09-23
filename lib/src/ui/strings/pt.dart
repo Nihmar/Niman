@@ -1208,6 +1208,24 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ir para';
   @override
+  String get paletteGroupJournal => 'Diário';
+  @override
+  String get journalToday => 'Entrada de hoje';
+  @override
+  String get journalPrevious => 'Entrada anterior';
+  @override
+  String get journalNext => 'Entrada seguinte';
+  @override
+  String get commandNeedJournalEntry =>
+      'Precisa de uma entrada do diário aberta';
+  @override
+  String journalCreateAsk(String day) =>
+      'Ainda não há entrada para $day. Criá-la?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Não foi possível ler o modelo do diário $path: a entrada foi criada '
+      'sem ele.';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

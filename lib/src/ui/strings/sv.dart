@@ -1207,6 +1207,22 @@ final class SwedishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå till';
   @override
+  String get paletteGroupJournal => 'Dagbok';
+  @override
+  String get journalToday => 'Dagens anteckning';
+  @override
+  String get journalPrevious => 'Föregående anteckning';
+  @override
+  String get journalNext => 'Nästa anteckning';
+  @override
+  String get commandNeedJournalEntry => 'Kräver en öppen dagboksanteckning';
+  @override
+  String journalCreateAsk(String day) =>
+      'Det finns ingen anteckning för $day än. Skapa den?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Dagboksmallen $path gick inte att läsa: anteckningen skapades utan den.';
+  @override
   String get commandsTitle => 'Kommandon';
   @override
   String get commandsIntro =>

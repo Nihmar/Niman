@@ -1216,6 +1216,23 @@ final class DutchStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ga naar';
   @override
+  String get paletteGroupJournal => 'Dagboek';
+  @override
+  String get journalToday => 'Vandaag';
+  @override
+  String get journalPrevious => 'Vorige notitie';
+  @override
+  String get journalNext => 'Volgende notitie';
+  @override
+  String get commandNeedJournalEntry => 'Vereist een open dagboeknotitie';
+  @override
+  String journalCreateAsk(String day) =>
+      'Nog geen notitie voor $day. Aanmaken?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'De dagboeksjabloon $path kon niet worden gelezen: de notitie is zonder '
+      'gemaakt.';
+  @override
   String get commandsTitle => 'Opdrachten';
   @override
   String get commandsIntro =>

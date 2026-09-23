@@ -1183,6 +1183,22 @@ final class EstonianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Mine';
   @override
+  String get paletteGroupJournal => 'Päevik';
+  @override
+  String get journalToday => 'Tänane sissekanne';
+  @override
+  String get journalPrevious => 'Eelmine sissekanne';
+  @override
+  String get journalNext => 'Järgmine sissekanne';
+  @override
+  String get commandNeedJournalEntry => 'Vajab avatud päeviku sissekannet';
+  @override
+  String journalCreateAsk(String day) =>
+      'Päeva $day jaoks pole veel sissekannet. Kas luua?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Päeviku malli $path ei saanud lugeda: sissekanne loodi ilma selleta.';
+  @override
   String get commandsTitle => 'Käsud';
   @override
   String get commandsIntro =>
