@@ -195,6 +195,16 @@ written next to it.
    (`tool`-style bench, `test/perf/list_count_check_test.dart`). The caret's
    own list is still found by tokenizing the note (`_countListSource`), which
    is one tokenize on a tap the writer asked for.
+
+   **Correction (2026-09-23): it was not in effect until `3347d8c`.** The
+   shell asked the pane through a `GlobalKey<MarkdownSourceViewState>` that
+   sat on the stateless `MarkdownSurface`, so it never had a state to answer
+   with, and `SourceStyler.blocks` answered null for any styler whose scan was
+   current. Every open of the sheet took the fallback — a full `BlockScanner`
+   pass of the note on the UI isolate, or an off-stage read view's stale
+   answer, which greyed the tool out on a note that is a list. The benchmark
+   measured `blockList` itself, which was right; nothing measured whether the
+   shell reached it.
 6. ~~**A kind GUI's edit is whole-text by design.**~~ Done, as the guard
    rather than the rewrite: `_applyKindEdit` still hands its whole note back,
    but `MarkdownSurfaceController.applyEdit` no longer cuts the note out to
