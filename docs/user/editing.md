@@ -33,7 +33,8 @@ status row switches only when both are enabled.
   strikethrough, underline (`<u>`) and superscript (`<sup>`) are drawn as
   such, and so is a format inside another (`<u>**x**</u>` is bold and
   underlined); list items get their bullet, number or checkbox — a click or a
-  tap on the checkbox ticks it, one undo step, without moving the caret; a
+  tap on the checkbox ticks it, one undo step, without moving the caret (in
+  the unified read view too, where the tick is saved like any edit); a
   quote its bar; `---` a rule. Display formulas (`$$…$$`) and inline ones
   (`$…$`) are typeset, and
   images and `![[embeds]]` are drawn under their line. Put the caret in a word

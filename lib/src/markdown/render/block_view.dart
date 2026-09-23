@@ -55,8 +55,13 @@ final class BlockView extends StatelessWidget {
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
+    this.onToggleTask,
     super.key,
   });
+
+  /// Called with a task item's line when its checkbox is tapped; null draws
+  /// the box and leaves it alone.
+  final void Function(int line)? onToggleTask;
 
   /// The block, parsed and ready.
   final ParsedBlock parsed;
@@ -158,20 +163,40 @@ final class BlockView extends StatelessWidget {
           SizedBox(
             width: theme.listIndentPerLevel,
             child: marker.isTask
-                ? Padding(
-                    padding: EdgeInsets.only(top: theme.body.fontSize! * 0.15),
-                    child: Icon(
-                      marker.checked
-                          ? Icons.check_box_outlined
-                          : Icons.check_box_outline_blank,
-                      size: theme.body.fontSize! * 0.95,
-                      color: theme.marker.color,
-                    ),
-                  )
+                ? _taskBox(marker.checked)
                 : Text(marker.display, style: theme.marker),
           ),
           Expanded(child: _rich(context, style: theme.body)),
         ],
+      ),
+    );
+  }
+
+  /// A task item's checkbox — ticked by a tap when [onToggleTask] is given,
+  /// the whole marker column being the target, so a finger need not find
+  /// the box's own few pixels.
+  Widget _taskBox(bool checked) {
+    final box = Padding(
+      padding: EdgeInsets.only(top: theme.body.fontSize! * 0.15),
+      child: Icon(
+        checked ? Icons.check_box_outlined : Icons.check_box_outline_blank,
+        size: theme.body.fontSize! * 0.95,
+        color: theme.marker.color,
+      ),
+    );
+    final toggle = onToggleTask;
+    if (toggle == null) return box;
+    final line = parsed.block.startLine;
+    return Semantics(
+      checked: checked,
+      onTap: () => toggle(line),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => toggle(line),
+          child: Align(alignment: Alignment.topLeft, child: box),
+        ),
       ),
     );
   }

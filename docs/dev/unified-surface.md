@@ -11791,6 +11791,11 @@ checkbox is drawn but not yet clickable.
   on a phone. The box is found where the painter draws it — one function,
   `liveItemSlot`, answers both — and only a drawn box ticks: on the caret's
   line the markers are the source, and a click there is a click in the text.
+  The read view's box ticks too (`MarkdownReadView.onToggleTask`): the pane
+  reads a snapshot, so the tick is the note owner's edit — `NoteView` makes
+  it through the editor's controller, only while the snapshot is of the
+  note as it is, and shows the pane the new note on the next frame rather
+  than after the preview's debounce.
 
 ### Phase 5 — Delete the old world
 

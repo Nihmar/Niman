@@ -1744,7 +1744,40 @@ final class _NoteViewState extends State<NoteView>
     embedResolver: _resolveEmbed,
     column: widget.noteColumn,
     knownScan: _editorScanOf,
+    onToggleTask: _toggleTaskFromRead,
   );
+
+  /// Ticks or unticks the task item on [line] of the note the read pane is
+  /// showing: an edit to the note itself, through the editor's own door —
+  /// one undo step, saved like any other — and the pane shown the note as
+  /// it now is at once, rather than when the preview's debounce comes round.
+  ///
+  /// Only when the pane shows the editor's note as it is: its lines are a
+  /// snapshot, and a line number of an older one is not this note's.
+  void _toggleTaskFromRead(int line) {
+    final surface = _surface;
+    final from = _snapshotFrom;
+    if (surface == null ||
+        from == null ||
+        !identical(from, surface.buffer) ||
+        from.revision != _snapshotRevision ||
+        line >= from.lineCount) {
+      return;
+    }
+    for (final token in surface.tokensOf(line)) {
+      if (token.kind != TokenKind.taskBox) continue;
+      final at = from.offsetOfLine(line) + token.start + 1;
+      final ticked = from.lineAt(line).codeUnitAt(token.start + 1) != 0x20;
+      surface.replaceRange(
+        at,
+        at + 1,
+        ticked ? ' ' : 'x',
+        caret: surface.selection,
+      );
+      _refreshPreview();
+      return;
+    }
+  }
 
   /// The blocks and definitions of [buffer] as the source pane already holds
   /// them, when [buffer] is the snapshot of its note at the revision the pane

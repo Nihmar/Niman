@@ -49,8 +49,14 @@ final class MarkdownReadView extends StatefulWidget {
     this.onTapWikiLink,
     this.embedResolver,
     this.knownScan,
+    this.onToggleTask,
     super.key,
   });
+
+  /// Called with a task item's line, in [buffer], when its checkbox is
+  /// tapped: the pane reads a copy of the note, so ticking it is the note
+  /// owner's edit. Null leaves the boxes as pictures.
+  final void Function(int line)? onToggleTask;
 
   /// The note's text.
   final SourceBuffer buffer;
@@ -661,6 +667,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onTapLink: widget.onTapLink,
       onTapWikiLink: widget.onTapWikiLink,
       embedResolver: widget.embedResolver,
+      onToggleTask: widget.onToggleTask,
     );
   }
 }
