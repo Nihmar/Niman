@@ -65,6 +65,10 @@ choices.
 | `treeWidth` | 340 | Tree pane width, px (200–600) |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
+| `journalFolder` | `Journal` | Where the [journal](journal.md)'s entries go (empty = the root) |
+| `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
+| `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
+| `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
 
 The three folder keys — `listNoteFolder`, `templateFolder`,
 `attachmentsFolder` — are paths under the library root, created the

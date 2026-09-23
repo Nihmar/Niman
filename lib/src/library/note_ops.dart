@@ -11,6 +11,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -203,6 +204,17 @@ final class NoteOps implements NoteOperations {
   Future<void> setQuickNotePath({required String? path}) => config.update(
     (c) => c.copyWith(quickNotePath: path, clearQuickNotePath: path == null),
   );
+
+  @override
+  Future<JournalSettings> get journal async => (await config.config).journal;
+
+  @override
+  Future<void> setJournal(JournalSettings settings) =>
+      config.update((c) => c.copyWith(journal: settings));
+
+  @override
+  Future<List<String>> notePathsUnder(String folder) =>
+      _dao.filePathsUnder(folder);
 
   /// Creates a `<name>.md` note in [parentPath] with [content] as its
   /// initial content, uniquifying the name. Returns the indexed row.

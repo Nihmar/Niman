@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:path/path.dart' as p;
 
@@ -315,6 +316,7 @@ final class LibraryConfig {
     this.editorKind = EditorKind.source,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
     this.previewEnabled = true,
+    this.journal = const JournalSettings(),
     this.extra = const {},
   });
 
@@ -400,6 +402,7 @@ final class LibraryConfig {
       // file must never resolve to no editor.
       enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
       previewEnabled: _boolOr(json['previewEnabled'], true),
+      journal: JournalSettings.fromJson(json),
       extra: extra,
     );
   }
@@ -520,6 +523,9 @@ final class LibraryConfig {
   /// Whether the preview exists at all (default true).
   final bool previewEnabled;
 
+  /// The journal's settings (#7).
+  final JournalSettings journal;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -553,6 +559,7 @@ final class LibraryConfig {
     EditorKind? editorKind,
     Set<EditorKind>? enabledEditors,
     bool? previewEnabled,
+    JournalSettings? journal,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -585,11 +592,12 @@ final class LibraryConfig {
       editorKind: editorKind ?? this.editorKind,
       enabledEditors: enabledEditors ?? this.enabledEditors,
       previewEnabled: previewEnabled ?? this.previewEnabled,
+      journal: journal ?? this.journal,
       extra: extra,
     );
   }
 
-  static const _knownKeys = {
+  static const Set<String> _knownKeys = {
     'trashEnabled',
     'trashAutoEmptyDays',
     'historyVersions',
@@ -618,6 +626,7 @@ final class LibraryConfig {
     'editorKind',
     'enabledEditors',
     'previewEnabled',
+    ...JournalSettings.keys,
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -662,6 +671,7 @@ final class LibraryConfig {
           if (enabledEditors.contains(kind)) kind.name,
       ],
       'previewEnabled': previewEnabled,
+      ...journal.toJson(),
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -747,6 +757,7 @@ final class LibraryConfig {
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
         previewEnabled == other.previewEnabled &&
+        journal == other.journal &&
         _deepEquals(extra, other.extra);
   }
 

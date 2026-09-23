@@ -110,6 +110,27 @@ final class NoteDao {
         .get();
   }
 
+  /// The paths of the notes (files, not folders) under [folder], at any
+  /// depth; every note's for the root (empty).
+  ///
+  /// A range on the path, like [subtreeRows], so a folder is an index
+  /// seek however large the library: the journal's calendar reads a
+  /// month's entries this way (#7).
+  Future<List<String>> filePathsUnder(String folder) async {
+    final query = _db.selectOnly(_db.notes)
+      ..addColumns([_db.notes.path])
+      ..where(_db.notes.isDir.equals(false));
+    if (folder.isNotEmpty) {
+      final range = subtreePathRange(folder);
+      query.where(
+        _db.notes.path.isBiggerOrEqualValue(range.from) &
+            _db.notes.path.isSmallerThanValue(range.to),
+      );
+    }
+    final rows = await query.get();
+    return [for (final row in rows) row.read(_db.notes.path)!];
+  }
+
   /// Every indexed row, for full-scan reconciliation.
   Future<List<Note>> allRows() {
     return _db.select(_db.notes).get();
