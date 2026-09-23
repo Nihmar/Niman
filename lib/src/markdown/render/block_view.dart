@@ -29,6 +29,7 @@ library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -164,7 +165,6 @@ final class BlockView extends StatelessWidget {
   }
 
   /// A list item: its marker, then its content at the item's own indent.
-  /// A list item: its marker, then its content at the item's own indent.
   ///
   /// The marker is drawn, not read from the text, and it agrees with the
   /// preview on purpose: a bullet is `\u2022` whatever the note wrote (`-`, `*`
@@ -186,6 +186,8 @@ final class BlockView extends StatelessWidget {
             width: theme.listIndentPerLevel,
             child: marker.isTask
                 ? _taskBox(marker.checked)
+                : marker.ordered
+                ? _number(marker.display)
                 : Text(marker.display, style: theme.marker),
           ),
           Expanded(child: _rich(context, style: theme.body)),
@@ -193,6 +195,21 @@ final class BlockView extends StatelessWidget {
       ),
     );
   }
+
+  /// An ordered item's number: on one row, ending a few pixels before the
+  /// item's text, and running out to the left when it is wider than the
+  /// column — a `10.` wrapped to two rows in it, and the numbers of a list
+  /// did not line up. It is where `live` draws it (`live_decorations.dart`).
+  Widget _number(String display) => Padding(
+    padding: const EdgeInsets.only(right: 4),
+    child: OverflowBox(
+      maxWidth: double.infinity,
+      // As tall as the number: the column's height is the item's to set.
+      fit: OverflowBoxFit.deferToChild,
+      alignment: Alignment.topRight,
+      child: Text(display, style: theme.marker, maxLines: 1, softWrap: false),
+    ),
+  );
 
   /// A task item's checkbox — ticked by a tap when [onToggleTask] is given,
   /// the whole marker column being the target, so a finger need not find
@@ -425,10 +442,8 @@ final class BlockView extends StatelessWidget {
   /// The `display` field is the text of the marker, and a task item has none:
   /// it draws a box. The indent the item was written at is not this function's
   /// business: the block carries it and the caller applies it.
-  static ({String display, bool isTask, bool checked}) _listMarker(
-    String text,
-    int ordinal,
-  ) {
+  static ({String display, bool isTask, bool checked, bool ordered})
+  _listMarker(String text, int ordinal) {
     final line = text.split('\n').first;
     var at = 0;
     while (at < line.length && (line[at] == ' ' || line[at] == '\t')) {
@@ -449,13 +464,16 @@ final class BlockView extends StatelessWidget {
         ordered = true;
       }
     }
-    if (at == start) return (display: '', isTask: false, checked: false);
+    if (at == start) {
+      return (display: '', isTask: false, checked: false, ordered: false);
+    }
     final rest = line.substring(at).trimLeft();
     if (rest.startsWith('[') && rest.length > 2 && rest[2] == ']') {
       return (
         display: '',
         isTask: true,
         checked: rest[1] == 'x' || rest[1] == 'X',
+        ordered: false,
       );
     }
     // An ordered item shows its *position* in the list, not the number the note
@@ -469,6 +487,7 @@ final class BlockView extends StatelessWidget {
           : '\u2022',
       isTask: false,
       checked: false,
+      ordered: ordered,
     );
   }
 

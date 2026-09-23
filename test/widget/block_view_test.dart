@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -165,6 +166,41 @@ void main() {
     expect(screen, contains('one'));
     expect(screen, contains('two'));
     expect(screen, contains('three'));
+  });
+
+  testWidgets("a list's numbers end at one edge, clear of the text", (
+    tester,
+  ) async {
+    // A `10.` is wider than the marker column: it wrapped to two rows, and
+    // the numbers of a long list did not line up.
+    final items = [for (var at = 1; at <= 10; at++) '$at. item $at'];
+    await tester.pumpWidget(_view(items.join('\n'), _syncCache()));
+    await tester.pump();
+
+    /// Where [text] is drawn: from its first character to past its last,
+    /// as tall as its paragraph.
+    Rect paragraphOf(String text) {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText() == text);
+      Offset at(int offset) => paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(TextPosition(offset: offset), Rect.zero),
+      );
+      final start = at(0);
+      return Rect.fromLTRB(
+        start.dx,
+        start.dy,
+        at(text.length).dx,
+        start.dy + paragraph.size.height,
+      );
+    }
+
+    final nine = paragraphOf('9.');
+    final ten = paragraphOf('10.');
+    final tenText = paragraphOf('item 10');
+    expect(ten.height, closeTo(nine.height, 0.5), reason: 'one row');
+    expect(ten.right, closeTo(nine.right, 0.5), reason: 'numbers align');
+    expect(ten.right, lessThan(tenText.left), reason: 'clear of the text');
   });
 
   testWidgets('a quote is drawn, with its bar', (tester) async {
