@@ -54,6 +54,7 @@ import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
+import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
@@ -66,6 +67,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
@@ -252,6 +254,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The heights the sliver places the rows with: one per line nobody has
   /// folded away.
   late BlockHeightMap _heights;
+
+  /// The colours of the code blocks `live` draws, highlighted a block at a
+  /// time as the read view highlights them.
+  final LiveCodeColors _codeColors = LiveCodeColors();
 
   /// The folded heading sections; the rows are the lines they leave.
   final SourceFolds _folds = SourceFolds();
@@ -2126,6 +2132,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   ? _formulaOf(index)
                                   : null,
                               mathCache: widget.mathCache,
+                              codeRuns: widget.hideMarkers
+                                  ? _codeColors.of(
+                                      index,
+                                      _styler?.blockOf(index),
+                                      widget.buffer,
+                                      widget.theme.codeHighlight,
+                                    )
+                                  : null,
                               number: widget.showLineNumbers ? index + 1 : null,
                               gutterWidth: _gutter,
                               // Past the numbers, only the gap the fold arrows
@@ -2743,6 +2757,7 @@ final class _Line extends StatelessWidget {
     required this.embedResolver,
     required this.formula,
     required this.mathCache,
+    required this.codeRuns,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -2784,6 +2799,10 @@ final class _Line extends StatelessWidget {
   /// its lines while the caret is out of it.
   final LiveFormula? formula;
   final MathCache? mathCache;
+
+  /// The colours of the line's code, as the read view colours its block;
+  /// null for a line that is not code the read view colours.
+  final List<CodeRun>? codeRuns;
 
   final StyledLine styled;
   final int? number;
@@ -3319,9 +3338,33 @@ final class _Line extends StatelessWidget {
       }
       // A token the prefix cuts into — an indented code line's, which is
       // the whole line — is drawn from where the prefix ends.
+      final from = token.start < at ? at : token.start;
+      // Code, in `live`, is coloured as the read view colours it: by its
+      // block's language, or not at all.
+      if (hideMarkers && token.kind == TokenKind.codeBlock) {
+        final runs = codeRuns;
+        if (runs == null) {
+          _add(spans, from, token.end, null, concealed);
+        } else {
+          var cursor = from;
+          for (final run in runs) {
+            final start = run.start < cursor ? cursor : run.start;
+            final end = run.end > token.end ? token.end : run.end;
+            if (end <= start) continue;
+            if (start > cursor) _add(spans, cursor, start, null, concealed);
+            _add(spans, start, end, run.style, concealed);
+            cursor = end;
+          }
+          if (cursor < token.end) {
+            _add(spans, cursor, token.end, null, concealed);
+          }
+        }
+        at = token.end;
+        continue;
+      }
       _add(
         spans,
-        token.start < at ? at : token.start,
+        from,
         token.end,
         hidden(token, revealed: revealed, run: run)
             ? _hiddenMarker

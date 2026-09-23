@@ -328,4 +328,63 @@ void main() {
     expect(read.bottom, closeTo(live.bottom, 0.01), reason: 'the bottom');
     expect(read.right, closeTo(live.right, 0.01), reason: 'the right edge');
   });
+
+  testWidgets("a code block's code is coloured as it is in live", (
+    tester,
+  ) async {
+    // `live` drew every row of code in one muted colour, where the read view
+    // highlights the block by the language its fence names: a pane flip
+    // recoloured the code. A comment over two rows is coloured on both, the
+    // block being highlighted whole in both modes.
+    const lines = ['var name = "text"; // note', '/* one', 'two */ var x;'];
+    final note = 'caret\n\n```dart\n${lines.join('\n')}\n```\n';
+    Future<List<Color?>> colours({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      final out = <Color?>[];
+      for (final line in lines) {
+        final paragraph = tester
+            .renderObjectList<RenderParagraph>(find.byType(RichText))
+            .firstWhere((p) => p.text.toPlainText().contains(line));
+        final at = paragraph.text.toPlainText().indexOf(line);
+        for (var offset = at; offset < at + line.length; offset++) {
+          out.add(_colourAt(paragraph.text, offset));
+        }
+      }
+      return out;
+    }
+
+    final live = await colours(read: false);
+    final read = await colours(read: true);
+    expect(live.toSet().length, greaterThan(2), reason: 'coloured at all');
+    expect(live, read);
+  });
+}
+
+/// The colour the character at [offset] of [root]'s text is drawn in, the
+/// styles above it inherited.
+Color? _colourAt(InlineSpan root, int offset) {
+  var seen = 0;
+  Color? found;
+  bool walk(InlineSpan span, Color? inherited) {
+    if (span is! TextSpan) {
+      seen++;
+      return false;
+    }
+    final colour = span.style?.color ?? inherited;
+    final text = span.text;
+    if (text != null) {
+      if (offset < seen + text.length) {
+        found = colour;
+        return true;
+      }
+      seen += text.length;
+    }
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      if (walk(child, colour)) return true;
+    }
+    return false;
+  }
+
+  walk(root, null);
+  return found;
 }

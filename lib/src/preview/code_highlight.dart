@@ -2,6 +2,10 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 
+/// A run of a code line's text and how it is coloured, its offsets the
+/// line's own.
+typedef CodeRun = ({int start, int end, TextStyle style});
+
 /// flutter_highlight-backed code highlighter, one fence at a time.
 ///
 /// [theme] is a flutter_highlight theme map (the read view's theme carries
@@ -30,15 +34,58 @@ final class CodeHighlighter implements SyntaxHighlighter {
         : highlight.parse(trimmed, language: language).nodes ?? <Node>[];
     final root = theme['root'];
     return TextSpan(
-      style: TextStyle(
-        fontFamily: 'monospace',
-        color: root?.color,
-        backgroundColor: root?.backgroundColor,
-      ),
+      // The root's colour and not its background: the code block's box is
+      // the background, and the theme's painted a band of its own behind
+      // every row of text, which `live`'s rows do not have.
+      style: TextStyle(fontFamily: 'monospace', color: root?.color),
       children: nodes.isEmpty
           ? <TextSpan>[TextSpan(text: code)]
           : _convert(nodes),
     );
+  }
+
+  /// [code]'s colours line by line: for each of its lines, the runs that
+  /// cover it, their offsets the line's own, each styled as [format] styles
+  /// it — the root's colour where the grammar says nothing.
+  ///
+  /// What `live` colours a code block's rows with: the block is highlighted
+  /// whole, as the read view highlights it, so a string or a comment that
+  /// runs over several lines is coloured on all of them.
+  List<List<CodeRun>> lines(String code) {
+    final out = <List<CodeRun>>[<CodeRun>[]];
+    final root = TextStyle(color: theme['root']?.color);
+    var column = 0;
+    void add(String text, TextStyle style) {
+      var from = 0;
+      while (true) {
+        final at = text.indexOf('\n', from);
+        final end = at < 0 ? text.length : at;
+        if (end > from) {
+          out.last.add((start: column, end: column + end - from, style: style));
+          column += end - from;
+        }
+        if (at < 0) return;
+        out.add(<CodeRun>[]);
+        column = 0;
+        from = at + 1;
+      }
+    }
+
+    void walk(InlineSpan span, TextStyle style) {
+      if (span is! TextSpan) return;
+      final own = span.style == null ? style : style.merge(span.style);
+      final text = span.text;
+      if (text != null) add(text, own);
+      for (final child in span.children ?? const <InlineSpan>[]) {
+        walk(child, own);
+      }
+    }
+
+    final formatted = format(code);
+    for (final child in formatted.children ?? const <InlineSpan>[]) {
+      walk(child, root);
+    }
+    return out;
   }
 
   /// The highlight tree to styled inline spans (same walk as
