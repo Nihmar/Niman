@@ -1214,6 +1214,23 @@ final class ItalianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Vai a';
   @override
+  String get paletteGroupJournal => 'Diario';
+  @override
+  String get journalToday => 'Voce di oggi';
+  @override
+  String get journalPrevious => 'Voce precedente';
+  @override
+  String get journalNext => 'Voce successiva';
+  @override
+  String get commandNeedJournalEntry => 'Serve una voce del diario aperta';
+  @override
+  String journalCreateAsk(String day) =>
+      "Non c'è ancora una voce per $day. Crearla?";
+  @override
+  String journalTemplateMissing(String path) =>
+      'Il template del diario $path non si può leggere: la voce è stata '
+      'creata senza.';
+  @override
   String get commandsTitle => 'Comandi';
   @override
   String get commandsIntro =>

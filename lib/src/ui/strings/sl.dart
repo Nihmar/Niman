@@ -1197,6 +1197,22 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Pojdi na';
   @override
+  String get paletteGroupJournal => 'Dnevnik';
+  @override
+  String get journalToday => 'Današnji vnos';
+  @override
+  String get journalPrevious => 'Prejšnji vnos';
+  @override
+  String get journalNext => 'Naslednji vnos';
+  @override
+  String get commandNeedJournalEntry => 'Zahteva odprt vnos dnevnika';
+  @override
+  String journalCreateAsk(String day) => 'Za $day še ni vnosa. Ga ustvarim?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Predloge dnevnika $path ni bilo mogoče prebrati: vnos je bil ustvarjen '
+      'brez nje.';
+  @override
   String get commandsTitle => 'Ukazi';
   @override
   String get commandsIntro =>

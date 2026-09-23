@@ -1215,6 +1215,23 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ir a';
   @override
+  String get paletteGroupJournal => 'Diario';
+  @override
+  String get journalToday => 'Entrada de hoxe';
+  @override
+  String get journalPrevious => 'Entrada anterior';
+  @override
+  String get journalNext => 'Entrada seguinte';
+  @override
+  String get commandNeedJournalEntry =>
+      'Precisa dunha entrada do diario aberta';
+  @override
+  String journalCreateAsk(String day) =>
+      'Aínda non hai entrada para $day. Creala?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Non se puido ler o modelo do diario $path: a entrada creouse sen el.';
+  @override
   String get commandsTitle => 'Ordes';
   @override
   String get commandsIntro =>

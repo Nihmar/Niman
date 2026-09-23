@@ -1212,6 +1212,23 @@ final class BulgarianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Към';
   @override
+  String get paletteGroupJournal => 'Дневник';
+  @override
+  String get journalToday => 'Днешен запис';
+  @override
+  String get journalPrevious => 'Предишен запис';
+  @override
+  String get journalNext => 'Следващ запис';
+  @override
+  String get commandNeedJournalEntry => 'Нужен е отворен запис от дневника';
+  @override
+  String journalCreateAsk(String day) =>
+      'Все още няма запис за $day. Да се създаде ли?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Шаблонът на дневника $path не можа да се прочете: записът е създаден '
+      'без него.';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

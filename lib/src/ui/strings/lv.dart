@@ -1198,6 +1198,24 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Doties uz';
   @override
+  String get paletteGroupJournal => 'Dienasgrāmata';
+  @override
+  String get journalToday => 'Šodienas ieraksts';
+  @override
+  String get journalPrevious => 'Iepriekšējais ieraksts';
+  @override
+  String get journalNext => 'Nākamais ieraksts';
+  @override
+  String get commandNeedJournalEntry =>
+      'Nepieciešams atvērts dienasgrāmatas ieraksts';
+  @override
+  String journalCreateAsk(String day) =>
+      'Dienai $day vēl nav ieraksta. Izveidot?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Dienasgrāmatas veidni $path neizdevās nolasīt: ieraksts izveidots bez '
+      'tās.';
+  @override
   String get commandsTitle => 'Komandas';
   @override
   String get commandsIntro =>

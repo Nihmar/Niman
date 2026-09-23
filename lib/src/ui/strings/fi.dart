@@ -1214,6 +1214,22 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Siirry';
   @override
+  String get paletteGroupJournal => 'Päiväkirja';
+  @override
+  String get journalToday => 'Tämän päivän merkintä';
+  @override
+  String get journalPrevious => 'Edellinen merkintä';
+  @override
+  String get journalNext => 'Seuraava merkintä';
+  @override
+  String get commandNeedJournalEntry => 'Vaatii avoimen päiväkirjamerkinnän';
+  @override
+  String journalCreateAsk(String day) =>
+      'Päivälle $day ei ole vielä merkintää. Luodaanko?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Päiväkirjan mallia $path ei voitu lukea: merkintä luotiin ilman sitä.';
+  @override
   String get commandsTitle => 'Komennot';
   @override
   String get commandsIntro =>

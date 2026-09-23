@@ -1224,6 +1224,23 @@ final class GermanStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gehe zu';
   @override
+  String get paletteGroupJournal => 'Tagebuch';
+  @override
+  String get journalToday => 'Heutiger Eintrag';
+  @override
+  String get journalPrevious => 'Vorheriger Eintrag';
+  @override
+  String get journalNext => 'Nächster Eintrag';
+  @override
+  String get commandNeedJournalEntry => 'Braucht einen offenen Tagebucheintrag';
+  @override
+  String journalCreateAsk(String day) =>
+      'Für $day gibt es noch keinen Eintrag. Anlegen?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Die Tagebuchvorlage $path ließ sich nicht lesen: Der Eintrag wurde '
+      'ohne sie angelegt.';
+  @override
   String get commandsTitle => 'Befehle';
   @override
   String get commandsIntro =>

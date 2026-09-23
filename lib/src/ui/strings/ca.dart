@@ -1232,6 +1232,23 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ves a';
   @override
+  String get paletteGroupJournal => 'Diari';
+  @override
+  String get journalToday => 'Entrada d’avui';
+  @override
+  String get journalPrevious => 'Entrada anterior';
+  @override
+  String get journalNext => 'Entrada següent';
+  @override
+  String get commandNeedJournalEntry => 'Cal una entrada del diari oberta';
+  @override
+  String journalCreateAsk(String day) =>
+      'Encara no hi ha cap entrada per a $day. La vols crear?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'No s’ha pogut llegir la plantilla del diari $path: l’entrada s’ha '
+      'creat sense.';
+  @override
   String get commandsTitle => 'Ordres';
   @override
   String get commandsIntro =>

@@ -37,6 +37,9 @@ enum CommandNeed {
 
   /// Both editors are enabled, so there is another to switch to.
   twoEditors,
+
+  /// The note on screen is a journal entry (#7).
+  journalEntry,
 }
 
 /// What [command] waits on; empty for one that can always run.
@@ -61,6 +64,8 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.splitDown => const {CommandNeed.wideWindow, CommandNeed.notInZen},
   AppCommand.toggleDock => const {CommandNeed.dockRoom, CommandNeed.notInZen},
   AppCommand.toggleSidebar => const {CommandNeed.notInZen},
+  AppCommand.journalPrevious ||
+  AppCommand.journalNext => const {CommandNeed.journalEntry},
   AppCommand.zenMode => const {CommandNeed.zenRoom},
   AppCommand.openFile => const {CommandNeed.desktop},
   AppCommand.openPalette ||
@@ -70,6 +75,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.newAudioNote ||
   AppCommand.newTodo ||
   AppCommand.quickNote ||
+  AppCommand.journalToday ||
   AppCommand.typewriterMode ||
   AppCommand.reindexLibrary ||
   AppCommand.switchLibrary ||
@@ -90,4 +96,5 @@ String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.zenRoom => AppStrings.commandNeedZenRoom,
   CommandNeed.previewToggle => AppStrings.commandNeedPreview,
   CommandNeed.twoEditors => AppStrings.commandNeedTwoEditors,
+  CommandNeed.journalEntry => AppStrings.commandNeedJournalEntry,
 };

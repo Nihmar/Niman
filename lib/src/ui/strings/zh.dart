@@ -1093,6 +1093,21 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteGroupGoTo => '转到';
   @override
+  String get paletteGroupJournal => '日记';
+  @override
+  String get journalToday => '今天的条目';
+  @override
+  String get journalPrevious => '上一条目';
+  @override
+  String get journalNext => '下一条目';
+  @override
+  String get commandNeedJournalEntry => '需要打开一条日记条目';
+  @override
+  String journalCreateAsk(String day) => '$day 还没有条目。要创建吗？';
+  @override
+  String journalTemplateMissing(String path) =>
+      '无法读取日记模板 $path：已在没有模板的情况下创建条目。';
+  @override
   String get commandsTitle => '命令';
   @override
   String get commandsIntro => '命令面板只列出在当前位置可以运行的命令。这里是全部命令，以及每条命令何时出现。';

@@ -23,8 +23,11 @@ Substitution, not a language — unknown `{{…}}` is copied verbatim:
 | `{{parent}}` | Reserved: answered by the creation flow (e.g. `[[{{parent}}]]`); never `{{ask:parent}}` |
 | `{{include:name}}` | Paste another template's content (its own placeholders resolve too) |
 
-Date formats use the tokens you already know: `YYYY MM DD HH mm ss`
-(plus date arithmetic, see filters). `{{folder}}` and `{{title}}`-style
+Date formats use the tokens you already know: `YYYY MM DD HH mm ss`,
+plus `D` / `M` / `H` / `m` / `s` without the leading zero, `dddd` / `ddd`
+for the weekday's name, `MMMM` / `MMM` for the month's (in the app's
+language), `WW` for the ISO week and `Q` for the quarter — and date
+arithmetic, see filters. `{{folder}}` and `{{title}}`-style
 self-references inside directives resolve against the creation context.
 
 ## Filters

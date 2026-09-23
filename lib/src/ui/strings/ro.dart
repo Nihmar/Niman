@@ -1212,6 +1212,23 @@ final class RomanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Mergi la';
   @override
+  String get paletteGroupJournal => 'Jurnal';
+  @override
+  String get journalToday => 'Intrarea de azi';
+  @override
+  String get journalPrevious => 'Intrarea anterioară';
+  @override
+  String get journalNext => 'Intrarea următoare';
+  @override
+  String get commandNeedJournalEntry => 'Necesită o intrare de jurnal deschisă';
+  @override
+  String journalCreateAsk(String day) =>
+      'Încă nu există o intrare pentru $day. O creezi?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Șablonul jurnalului $path nu a putut fi citit: intrarea a fost creată '
+      'fără el.';
+  @override
   String get commandsTitle => 'Comenzi';
   @override
   String get commandsIntro =>

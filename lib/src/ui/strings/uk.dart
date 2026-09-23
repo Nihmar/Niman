@@ -1207,6 +1207,21 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Перейти до';
   @override
+  String get paletteGroupJournal => 'Щоденник';
+  @override
+  String get journalToday => 'Сьогоднішній запис';
+  @override
+  String get journalPrevious => 'Попередній запис';
+  @override
+  String get journalNext => 'Наступний запис';
+  @override
+  String get commandNeedJournalEntry => 'Потрібен відкритий запис щоденника';
+  @override
+  String journalCreateAsk(String day) => 'Для $day ще немає запису. Створити?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Не вдалося прочитати шаблон щоденника $path: запис створено без нього.';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

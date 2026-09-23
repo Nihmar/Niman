@@ -764,6 +764,14 @@ final class AppStrings {
   static String get paletteGroupView => _s.paletteGroupView;
   static String get paletteGroupLibrary => _s.paletteGroupLibrary;
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
+  static String get paletteGroupJournal => _s.paletteGroupJournal;
+  static String get journalToday => _s.journalToday;
+  static String get journalPrevious => _s.journalPrevious;
+  static String get journalNext => _s.journalNext;
+  static String get commandNeedJournalEntry => _s.commandNeedJournalEntry;
+  static String journalCreateAsk(String day) => _s.journalCreateAsk(day);
+  static String journalTemplateMissing(String path) =>
+      _s.journalTemplateMissing(path);
   static String get commandsTitle => _s.commandsTitle;
   static String get commandsIntro => _s.commandsIntro;
   static String get commandNeedNone => _s.commandNeedNone;

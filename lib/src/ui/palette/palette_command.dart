@@ -26,6 +26,9 @@ enum PaletteGroup {
   /// The library as a whole.
   library,
 
+  /// The journal (#7).
+  journal,
+
   /// The app's places.
   goTo,
 }
@@ -56,6 +59,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.nextTab ||
   AppCommand.previousTab => PaletteGroup.view,
   AppCommand.reindexLibrary || AppCommand.switchLibrary => PaletteGroup.library,
+  AppCommand.journalToday ||
+  AppCommand.journalPrevious ||
+  AppCommand.journalNext => PaletteGroup.journal,
   AppCommand.tabFiles ||
   AppCommand.tabTodo ||
   AppCommand.tabSearch ||
@@ -84,6 +90,7 @@ String paletteGroupName(PaletteGroup group) => switch (group) {
   PaletteGroup.editor => AppStrings.paletteGroupEditor,
   PaletteGroup.view => AppStrings.paletteGroupView,
   PaletteGroup.library => AppStrings.paletteGroupLibrary,
+  PaletteGroup.journal => AppStrings.paletteGroupJournal,
   PaletteGroup.goTo => AppStrings.paletteGroupGoTo,
 };
 

@@ -1208,6 +1208,22 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ugrás';
   @override
+  String get paletteGroupJournal => 'Napló';
+  @override
+  String get journalToday => 'Mai bejegyzés';
+  @override
+  String get journalPrevious => 'Előző bejegyzés';
+  @override
+  String get journalNext => 'Következő bejegyzés';
+  @override
+  String get commandNeedJournalEntry => 'Nyitott naplóbejegyzés kell hozzá';
+  @override
+  String journalCreateAsk(String day) =>
+      'Még nincs bejegyzés erre a napra: $day. Létrehozza?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'A(z) $path naplósablon nem olvasható: a bejegyzés nélküle készült el.';
+  @override
   String get commandsTitle => 'Parancsok';
   @override
   String get commandsIntro =>

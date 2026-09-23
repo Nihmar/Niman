@@ -1204,6 +1204,22 @@ final class BosnianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Idi na';
   @override
+  String get paletteGroupJournal => 'Dnevnik';
+  @override
+  String get journalToday => 'Današnji unos';
+  @override
+  String get journalPrevious => 'Prethodni unos';
+  @override
+  String get journalNext => 'Sljedeći unos';
+  @override
+  String get commandNeedJournalEntry => 'Treba otvoren unos dnevnika';
+  @override
+  String journalCreateAsk(String day) => 'Za $day još nema unosa. Kreirati ga?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Šablon dnevnika $path nije se mogao pročitati: unos je kreiran bez '
+      'njega.';
+  @override
   String get commandsTitle => 'Komande';
   @override
   String get commandsIntro =>

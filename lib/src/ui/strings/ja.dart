@@ -1121,6 +1121,21 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteGroupGoTo => '移動';
   @override
+  String get paletteGroupJournal => '日記';
+  @override
+  String get journalToday => '今日のエントリ';
+  @override
+  String get journalPrevious => '前のエントリ';
+  @override
+  String get journalNext => '次のエントリ';
+  @override
+  String get commandNeedJournalEntry => '日記のエントリを開いている必要があります';
+  @override
+  String journalCreateAsk(String day) => '$day のエントリはまだありません。作成しますか？';
+  @override
+  String journalTemplateMissing(String path) =>
+      '日記テンプレート $path を読み込めませんでした。テンプレートなしでエントリを作成しました。';
+  @override
   String get commandsTitle => 'コマンド';
   @override
   String get commandsIntro =>

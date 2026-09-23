@@ -1201,6 +1201,23 @@ final class IcelandicStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Fara í';
   @override
+  String get paletteGroupJournal => 'Dagbók';
+  @override
+  String get journalToday => 'Færsla dagsins';
+  @override
+  String get journalPrevious => 'Fyrri færsla';
+  @override
+  String get journalNext => 'Næsta færsla';
+  @override
+  String get commandNeedJournalEntry => 'Þarf opna dagbókarfærslu';
+  @override
+  String journalCreateAsk(String day) =>
+      'Engin færsla enn fyrir $day. Búa hana til?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Ekki tókst að lesa dagbókarsniðmátið $path: færslan var búin til án '
+      'þess.';
+  @override
   String get commandsTitle => 'Skipanir';
   @override
   String get commandsIntro =>

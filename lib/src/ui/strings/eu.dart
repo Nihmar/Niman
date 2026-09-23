@@ -1207,6 +1207,23 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Joan';
   @override
+  String get paletteGroupJournal => 'Egunkaria';
+  @override
+  String get journalToday => 'Gaurko sarrera';
+  @override
+  String get journalPrevious => 'Aurreko sarrera';
+  @override
+  String get journalNext => 'Hurrengo sarrera';
+  @override
+  String get commandNeedJournalEntry => 'Egunkariko sarrera bat ireki behar da';
+  @override
+  String journalCreateAsk(String day) =>
+      'Oraindik ez dago sarrerarik $day egunerako. Sortu?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Ezin izan da $path egunkari-txantiloia irakurri: sarrera hura gabe '
+      'sortu da.';
+  @override
   String get commandsTitle => 'Komandoak';
   @override
   String get commandsIntro =>

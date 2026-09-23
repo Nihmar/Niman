@@ -1201,6 +1201,23 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Prejsť na';
   @override
+  String get paletteGroupJournal => 'Denník';
+  @override
+  String get journalToday => 'Dnešný záznam';
+  @override
+  String get journalPrevious => 'Predchádzajúci záznam';
+  @override
+  String get journalNext => 'Ďalší záznam';
+  @override
+  String get commandNeedJournalEntry => 'Vyžaduje otvorený záznam denníka';
+  @override
+  String journalCreateAsk(String day) =>
+      'Pre $day zatiaľ nie je záznam. Vytvoriť?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Šablónu denníka $path sa nepodarilo prečítať: záznam bol vytvorený bez '
+      'nej.';
+  @override
   String get commandsTitle => 'Príkazy';
   @override
   String get commandsIntro =>
