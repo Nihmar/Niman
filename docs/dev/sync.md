@@ -675,6 +675,16 @@ conflict:
   recorded — `SyncReport.merged` lists those paths and the editor
   re-reads them. A merge with overlaps changes nothing and reports the
   conflict, base included.
+- **The task files** (`todo.txt`, `done.txt` at the root) always merge,
+  with `mergeRecords` (`lib/src/diff/record_merge.dart`): the line merge
+  first, then each region it would ask about settled line by line — a
+  line either side added is in, a base line either side removed is out,
+  a line both added lands once. Without a base (two devices that each
+  started a list) it is the union, local order first. Their lines are
+  records, so the overlaps the line merge sees there (both devices
+  appending a task, adjacent tasks checked on different devices) are
+  never real disagreements; before this, nearly every two-device task
+  edit became a whole-file choice that dropped one side's tasks.
 - **The screen** (`SyncConflictScreen` + `MergeView`) shows the merge
   region by region: what each side contributed is already in, and every
   overlap has a three-way segmented choice. **Save the merge** calls

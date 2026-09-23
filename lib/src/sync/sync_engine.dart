@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
@@ -17,6 +18,7 @@ import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
+import 'package:niman/src/todo/todo_store.dart';
 import 'package:path/path.dart' as p;
 
 /// A path both sides changed differently, left untouched for the merge
@@ -1498,6 +1500,9 @@ final class SyncEngine {
   /// Merges both sides of [d] over the pinned base and writes the result
   /// on both, or returns null when there is no base, the file is not
   /// text, or the edits overlap (then the conflict stays for the user).
+  ///
+  /// The task files always merge: their lines are records, merged one by
+  /// one ([mergeRecords]), and without a base they are the union of both.
   Future<({bool changedLocally})?> _tryMerge(
     _RunContext c,
     SyncDecision d,
@@ -1505,13 +1510,17 @@ final class SyncEngine {
     WebDavResource remote,
   ) async {
     final base = d.baseVersion;
-    if (base == null || !NoteOps.keepsHistory(d.path)) return null;
-    final String baseText;
-    try {
-      baseText = await ops.readNoteVersion(d.path, base);
-    } on Object catch (e) {
-      _log.info('merge ${d.path}: base v$base unreadable ($e)');
-      return null;
+    final records = _isRecordFile(d.path);
+    if (!NoteOps.keepsHistory(d.path)) return null;
+    if (base == null && !records) return null;
+    var baseText = '';
+    if (base != null) {
+      try {
+        baseText = await ops.readNoteVersion(d.path, base);
+      } on Object catch (e) {
+        _log.info('merge ${d.path}: base v$base unreadable ($e)');
+        if (!records) return null;
+      }
     }
     final localText = utf8.decode(
       await File(p.join(root, d.path)).readAsBytes(),
@@ -1521,15 +1530,23 @@ final class SyncEngine {
       await remoteCopy.readAsBytes(),
       allowMalformed: true,
     );
-    final merge = await _mergeTexts(baseText, localText, remoteText);
-    if (!merge.clean) {
-      _log.info(
-        'merge ${d.path}: ${merge.conflicts.length} overlapping region(s), '
-        'left for the user (${merge.describe()})',
-      );
-      return null;
+    final String text;
+    final String how;
+    if (records) {
+      text = await _mergeRecordTexts(baseText, localText, remoteText);
+      how = 'task lines, ${base == null ? 'no base: union' : 'base v$base'}';
+    } else {
+      final merge = await _mergeTexts(baseText, localText, remoteText);
+      if (!merge.clean) {
+        _log.info(
+          'merge ${d.path}: ${merge.conflicts.length} overlapping region(s), '
+          'left for the user (${merge.describe()})',
+        );
+        return null;
+      }
+      text = merge.text();
+      how = merge.describe();
     }
-    final text = merge.text();
     final changedLocally = text != localText;
     if (changedLocally) await ops.syncMerge(d.path, text);
     // The file on disk is the merge now: hash and stat it as written.
@@ -1549,7 +1566,7 @@ final class SyncEngine {
     await store.putItems([
       await _row(c, d.path, sha: sha, local: local, remote: listed),
     ]);
-    _log.info('merge ${d.path}: ${merge.describe()}, both sides now agree');
+    _log.info('merge ${d.path}: $how, both sides now agree');
     return (changedLocally: changedLocally);
   }
 
@@ -1565,6 +1582,24 @@ final class SyncEngine {
     }
     return Isolate.run(() => mergeThreeWay(base, local, remote));
   }
+
+  /// Merges three versions of a task file, off the UI isolate when long.
+  static Future<String> _mergeRecordTexts(
+    String base,
+    String local,
+    String remote,
+  ) {
+    final size = base.length + local.length + remote.length;
+    if (size <= _inlineMergeLimit) {
+      return Future.value(mergeRecords(base, local, remote));
+    }
+    return Isolate.run(() => mergeRecords(base, local, remote));
+  }
+
+  /// Whether [path] is one of the library's task files, whose lines are
+  /// records rather than prose.
+  static bool _isRecordFile(String path) =>
+      path == todoFileName || path == doneFileName;
 
   /// Texts up to this many characters (all three together) are merged on
   /// the calling isolate; an isolate costs more than the merge itself.

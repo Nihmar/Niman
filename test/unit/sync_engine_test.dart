@@ -772,6 +772,45 @@ void main() {
       expect(a.read('fresh.txt'), note(['mine']));
       expect(remoteText('fresh.txt'), note(['theirs']));
     });
+
+    test('task files started on both devices merge into one list', () async {
+      a.write('todo.txt', note(['buy milk', 'pay rent']));
+      b.write('todo.txt', note(['call mum', 'buy milk']));
+      await b.sync();
+      final report = await a.sync();
+      expect(report.conflicts, isEmpty, reason: report.summary());
+      expect(report.merged, ['todo.txt']);
+      final merged = note(['buy milk', 'pay rent', 'call mum']);
+      expect(a.read('todo.txt'), merged);
+      expect(remoteText('todo.txt'), merged);
+      await b.sync();
+      expect(b.read('todo.txt'), merged);
+    });
+
+    test('tasks checked on both devices all reach done.txt', () async {
+      a.write('done.txt', note(['x 2026-09-20 old']));
+      await a.sync();
+      await b.sync();
+      a.write('done.txt', note(['x 2026-09-20 old', 'x 2026-09-21 mine']));
+      b.write('done.txt', note(['x 2026-09-20 old', 'x 2026-09-21 theirs']));
+      await b.sync();
+      final report = await a.sync();
+      expect(report.conflicts, isEmpty, reason: report.summary());
+      final merged = note([
+        'x 2026-09-20 old',
+        'x 2026-09-21 mine',
+        'x 2026-09-21 theirs',
+      ]);
+      expect(a.read('done.txt'), merged);
+      expect(remoteText('done.txt'), merged);
+    });
+
+    test('a todo.txt deeper in the library is a note like any other', () async {
+      a.write('Dir/todo.txt', note(['mine']));
+      b.write('Dir/todo.txt', note(['theirs']));
+      await b.sync();
+      expect((await a.sync()).conflicts.single.path, 'Dir/todo.txt');
+    });
   });
 
   group('quick sync and the queue', () {
