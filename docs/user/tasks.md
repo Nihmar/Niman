@@ -13,6 +13,14 @@ The Todo tab reads `todo.txt` files (todo.txt grammar: `x (A)
   filter) and `rem:YYYY-MM-DDTHH:MM` (schedules a reminder).
 - Untouched lines round-trip byte-stable; edits normalize spacing.
 
+## Editing and deleting
+
+Tap a task to edit it; the trash icon in the dialog's title deletes it.
+Long-press a row (right-click on desktop) for the same Edit / Delete as
+a menu. Deleting removes the line from `todo.txt` (or `done.txt`, in the
+Done view) outright: there is no trash for tasks. To keep a finished
+task, check it instead.
+
 ## Reminders
 
 Add `rem:2026-09-20T09:00` to a task and Niman schedules an exact alarm

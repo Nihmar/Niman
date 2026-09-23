@@ -6,7 +6,8 @@
 ///
 /// Dumb by design: the parent owns the controller, the edit dialog and
 /// the long-press menu — the row only reports toggle, edit and menu
-/// callbacks.
+/// callbacks. A right-click opens the menu too: a mouse has no long
+/// press worth the name.
 library;
 
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ final class TodoRow extends StatelessWidget {
   /// Opens the edit dialog.
   final VoidCallback onEdit;
 
-  /// Opens the long-press bottom sheet.
+  /// Opens the long-press (or right-click) bottom sheet.
   final VoidCallback onShowMenu;
 
   /// The wall-clock day for the due state (defaults to now).
@@ -81,6 +82,17 @@ final class TodoRow extends StatelessWidget {
     final task = entry.task;
     final now = today ?? DateTime.now();
     final display = taskDisplayText(task.description);
+    return GestureDetector(
+      onSecondaryTap: () {
+        _log.debug('todo row menu (right-click): line ${entry.lineIndex}');
+        onShowMenu();
+      },
+      child: _tile(task, display, now),
+    );
+  }
+
+  /// The tile itself: checkbox, text, subtitle, tap and long-press.
+  Widget _tile(TodoTask task, String display, DateTime now) {
     return ListTile(
       leading: Checkbox(
         value: task.completed,

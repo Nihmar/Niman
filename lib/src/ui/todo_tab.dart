@@ -4,8 +4,9 @@
 /// The shell owns the [TodoController] (its add action shares it); the
 /// tab opens the controller on mount, renders the Open/Done switch over
 /// the same list shape, and routes row gestures: checkbox toggles
-/// check/uncheck, tap edits, long-press opens the bottom sheet (the
-/// app's menu pattern) with edit/delete.
+/// check/uncheck, tap edits (the dialog can also delete), long-press or
+/// right-click opens the bottom sheet (the app's menu pattern) with
+/// edit/delete.
 library;
 
 import 'dart:async';
@@ -350,6 +351,7 @@ final class _TodoTabState extends State<TodoTab> {
       initial: entry.task,
       today: _today,
       knownTokens: _knownTokens(),
+      onDelete: () => unawaited(_delete(entry)),
     );
     if (line == null || !mounted) {
       return;
@@ -399,12 +401,15 @@ final class _TodoTabState extends State<TodoTab> {
       case 'edit':
         await _edit(entry);
       case 'delete':
-        _log.debug('todo delete: line ${entry.lineIndex}');
-        if (_showDone) {
-          await widget.controller.deleteDone(entry);
-        } else {
-          await widget.controller.deleteTodo(entry);
-        }
+        await _delete(entry);
     }
+  }
+
+  /// Removes [entry]'s line from the visible file.
+  Future<void> _delete(TodoEntry entry) {
+    _log.debug('todo delete: line ${entry.lineIndex}');
+    return _showDone
+        ? widget.controller.deleteDone(entry)
+        : widget.controller.deleteTodo(entry);
   }
 }

@@ -1,7 +1,9 @@
 // T-TD-04 AC: todo list UI — rows with badges/chips, checking moves a
 // row to Done with today's date, unchecking restores it, Open/Done
-// switch, tap-to-edit and long-press delete, all against FakeTodoSource
+// switch, tap-to-edit and delete (dialog, long-press, right-click), all
+// against FakeTodoSource
 // (no disk I/O in the fake-async test zone).
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/todo_controller.dart';
@@ -191,6 +193,39 @@ void main() {
     await settle(tester);
     expect(find.text('doomed'), findsNothing);
     expect(find.text('kept'), findsOneWidget);
+    expect(source.todoLines, ['kept']);
+  });
+
+  testWidgets('the edit dialog deletes the row', (tester) async {
+    await pumpTab(tester, todo: ['doomed', 'kept']);
+    await tester.tap(find.text('doomed'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-delete')));
+    await settle(tester);
+    expect(find.byKey(const Key('todo-dialog-field')), findsNothing);
+    expect(find.text('doomed'), findsNothing);
+    expect(source.todoLines, ['kept']);
+  });
+
+  testWidgets('the edit dialog deletes a done row from done.txt', (
+    tester,
+  ) async {
+    await pumpTab(tester, done: ['x 2026-09-01 old', 'x 2026-09-02 kept']);
+    await tester.tap(find.text('Done'));
+    await settle(tester);
+    await tester.tap(find.text('old'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-delete')));
+    await settle(tester);
+    expect(source.doneLines, ['x 2026-09-02 kept']);
+  });
+
+  testWidgets('right-click opens the row menu', (tester) async {
+    await pumpTab(tester, todo: ['doomed', 'kept']);
+    await tester.tap(find.text('doomed'), buttons: kSecondaryMouseButton);
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-menu-delete')));
+    await settle(tester);
     expect(source.todoLines, ['kept']);
   });
 
@@ -456,6 +491,8 @@ void main() {
     );
     await tester.tap(find.text('open dialog'));
     await settle(tester);
+    // Nothing to delete yet.
+    expect(find.byKey(const Key('todo-dialog-delete')), findsNothing);
     await tester.enterText(
       find.byKey(const Key('todo-dialog-field')),
       'new task',
