@@ -59,6 +59,8 @@ import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
+import 'package:niman/src/markdown/render/live_table_grid.dart';
+import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
@@ -264,6 +266,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A quote's content read again as blocks, so `live` draws a quote's lines
   /// as the blocks they are inside it, as the read view does.
   final LiveQuoteContent _quotes = LiveQuoteContent();
+
+  /// The note's tables, laid out as the read view lays them out.
+  final LiveTables _tables = LiveTables();
 
   /// What the footnotes `live` ends the note with are parsed with.
   final BlockParser _footnoteParser = BlockParser();
@@ -2177,6 +2182,23 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                   ? _formulaOf(index)
                                   : null,
                               mathCache: widget.mathCache,
+                              tableRow: widget.hideMarkers
+                                  ? _tables.rowOf(
+                                      index,
+                                      block,
+                                      widget.buffer,
+                                      tokensOf: (line) => _lineAt(line).tokens,
+                                      hiddenAtRest: (token) =>
+                                          token.marker || _isMarker(token.kind),
+                                      styleOf: (token) => nestedTokenStyle(
+                                        token,
+                                        syntax,
+                                        dark: widget.dark,
+                                      ),
+                                      theme: widget.theme,
+                                      scaler: MediaQuery.textScalerOf(context),
+                                    )
+                                  : null,
                               definition:
                                   widget.hideMarkers &&
                                       block != null &&
@@ -2836,6 +2858,7 @@ final class _Line extends StatelessWidget {
     required this.mathCache,
     required this.codeRuns,
     required this.definition,
+    required this.tableRow,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -2887,6 +2910,10 @@ final class _Line extends StatelessWidget {
   /// stand — or null. Out of the caret's reach they take no room, as a
   /// typeset formula's lines do; the caret anywhere in them shows them all.
   final (int, int)? definition;
+
+  /// How the line is laid out in its table, for a table's line in `live`:
+  /// its cells on their columns, as the read view draws them.
+  final LiveTableRow? tableRow;
 
   final StyledLine styled;
   final int? number;
@@ -3007,8 +3034,12 @@ final class _Line extends StatelessWidget {
         mathCache != null &&
         (at.line < math.start || at.line >= math.end);
     final defined = definition;
+    final table = tableRow;
+    // The delimiter row takes no room, as the read view leaves it out,
+    // unless the caret is on it.
     final folded =
-        defined != null && (at.line < defined.$1 || at.line >= defined.$2);
+        (defined != null && (at.line < defined.$1 || at.line >= defined.$2)) ||
+        (table != null && table.delimiter && !mine);
     final inline = typeset || folded
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
@@ -3025,6 +3056,16 @@ final class _Line extends StatelessWidget {
           spacerStyleFor(formula, theme.lineHeight),
           whole: true,
         ),
+      // A table's pipes, and the spaces round its cells' text, as wide as
+      // it takes to put each cell's text on its column.
+      if (table != null && !mine)
+        for (final gap in table.gaps)
+          (
+            gap.start,
+            gap.end,
+            LiveTables.gapStyle(gap.width / (gap.end - gap.start)),
+            whole: true,
+          ),
     ];
     final indent = _indent(context, revealed: mine);
     Widget paragraph = Text.rich(
@@ -3072,6 +3113,21 @@ final class _Line extends StatelessWidget {
     // margin ([_indent]); the transform moves what hit tests see with it.
     if (indent < 0) {
       line = Transform.translate(offset: Offset(indent, 0), child: line);
+    }
+    if (table != null) {
+      // A cell's padding above and below its text, and the grid behind.
+      return CustomPaint(
+        painter: LiveTableGridPainter(
+          row: table,
+          left: indent < 0 ? 0 : indent,
+          color: theme.tableBorder,
+          revealed: mine,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: theme.tableCellPadding.top),
+          child: line,
+        ),
+      );
     }
     if (typeset) {
       if (index != math.start) return line;
@@ -3220,6 +3276,11 @@ final class _Line extends StatelessWidget {
     // revealing a marker is not a reason to restyle the line under the caret
     // (`docs/dev/unified-surface.md` §8.6.2, and the test that holds it).
     if (!hideMarkers) return theme.body;
+    // A table's cells are set as the read view sets them.
+    final table = tableRow;
+    if (table != null) {
+      return table.header ? theme.tableHeader : theme.tableCell;
+    }
     // Code reads as the read view draws it: in monospace, fences and all.
     if (shape.code != null) return theme.code;
     // A heading inside a quote is set at its size, as the read view sets it.
