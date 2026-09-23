@@ -98,6 +98,19 @@ final class LineShape {
   int get hashCode => Object.hash(quoteDepth, marker, ordinal, task, rule);
 }
 
+/// Where a list item's bullet, number or checkbox sits, in its paragraph's
+/// coordinates: the indent one list level takes, ending where the item's
+/// text begins — its (hidden) marker at [marker] — and one row tall.
+///
+/// One answer for the painter that draws there and the tap that toggles a
+/// checkbox there, so the two cannot disagree about where the box is.
+Rect liveItemSlot(RenderParagraph box, int marker, MarkdownTheme theme) {
+  final at = box.getOffsetForCaret(TextPosition(offset: marker), Rect.zero);
+  final height = box.getFullHeightForCaret(TextPosition(offset: marker));
+  final slot = theme.listIndentPerLevel;
+  return Rect.fromLTWH(at.dx - slot, at.dy, slot, height);
+}
+
 /// Paints a line's [shape] behind it.
 ///
 /// The painter covers the line from the pane's text edge; the paragraph
@@ -170,16 +183,13 @@ final class LiveDecorationPainter extends CustomPainter {
   void _paintItem(Canvas canvas, int marker) {
     final box = paragraph.currentContext?.findRenderObject();
     if (box is! RenderParagraph || !box.hasSize) return;
-    final at = box.getOffsetForCaret(TextPosition(offset: marker), Rect.zero);
-    final lineHeight = box.getFullHeightForCaret(TextPosition(offset: marker));
-    // The slot is the indent one list level takes, ending where the item's
-    // text begins.
-    final right = textLeft + at.dx;
-    final slot = theme.listIndentPerLevel;
-    final middle = at.dy + lineHeight / 2;
+    final place = liveItemSlot(box, marker, theme).shift(Offset(textLeft, 0));
+    final right = place.right;
+    final slot = place.width;
+    final middle = place.center.dy;
     final task = shape.task;
     if (task != null) {
-      _paintCheckbox(canvas, right - slot, middle, slot, ticked: task);
+      _paintCheckbox(canvas, place.left, middle, slot, ticked: task);
       return;
     }
     final ordinal = shape.ordinal;
