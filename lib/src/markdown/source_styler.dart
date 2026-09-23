@@ -214,9 +214,13 @@ final class SourceStyler {
     ];
   }
 
+  /// A quote depth no line reaches: how far a line's own quote marks go.
+  static const int _anyDepth = 1 << 16;
+
   /// The structural marks at the start of [text] — quote marks, a list
   /// marker and its task box, a heading's hashes — added to [out]; answers
   /// where they end, before which no inline token is put.
+
   static int _structure(
     Block block,
     int line,
@@ -224,13 +228,19 @@ final class SourceStyler {
     int prefix,
     List<_Piece> out,
   ) {
-    for (var at = 0; at < prefix; at++) {
+    // Every quote mark the line has, not only the block's: a quote that
+    // opens at one level and goes a level deeper — `> a` then `> > b` — is one
+    // block at the first level, and the second `>` is as much syntax as the
+    // first (`live` drew it as text).
+    final own = BlockParser.quotePrefixLength(text, _anyDepth);
+    final marks = own > prefix ? own : prefix;
+    for (var at = 0; at < marks; at++) {
       if (text.codeUnitAt(at) == 0x3E) {
         out.add(_Piece(TokenKind.blockquote, at, at + 1, _structural));
       }
     }
-    var from = prefix;
-    final rest = prefix == 0 ? text : text.substring(prefix);
+    var from = marks;
+    final rest = marks == 0 ? text : text.substring(marks);
     final opensItem =
         (block.kind == BlockKind.listItem && line == block.startLine) ||
         block.kind == BlockKind.quote;

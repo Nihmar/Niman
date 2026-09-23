@@ -115,6 +115,20 @@ void main() {
       expect(_line('12. item'), ['listMarker[12.]']);
     });
 
+    test('a quote that goes a level deeper marks both of its `>`', () {
+      // One block, opened at the first level; the second line's second `>`
+      // is syntax as much as its first, and `live` drew it as text.
+      const note = '> a\n> > b *c*';
+      final styler = SourceStyler(SourceBuffer.fromText(note));
+      expect(_describe(styler, 1), [
+        'blockquote[>]',
+        'blockquote[>]',
+        'italic*[*]',
+        'italic[c]',
+        'italic*[*]',
+      ]);
+    });
+
     test('a quote, a list inside it, and its continuation', () {
       const note = '> - a **b**\n> more';
       final styler = SourceStyler(SourceBuffer.fromText(note));
