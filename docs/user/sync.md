@@ -159,7 +159,8 @@ Forgetting a library from the home screen disconnects it too.
 A library is a plain folder with its settings in `.niman/`, so any tool
 that copies folders works too (Syncthing, a Nextcloud client, rsync, a
 USB stick). Everything travels: notes, folders, templates, settings,
-trash, history.
+trash, history — except how the library looks on each device (tree
+width, text size, editor), which stays with the device.
 
 - Close the library on both sides before copying, to avoid half-written
   files (note writes themselves are atomic: temp file + rename).

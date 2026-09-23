@@ -7,7 +7,8 @@ disk; the app's SQLite database is only a rebuildable index.
 
 - **Library:** just a folder. Its settings live inside it as
   `.niman/settings.json`, so copying the folder to another machine moves
-  everything (see [settings](settings.md)).
+  them too; only how it looks on each screen (tree width, text size,
+  editor) stays with the device (see [settings](settings.md)).
 - **Disk is source of truth:** anything the app knows can be rebuilt from
   the files. Never edit the `.niman/` or `.history/` folders by hand,
   but everything else is yours.

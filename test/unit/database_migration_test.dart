@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -86,6 +87,9 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 27) {
+    await db.customStatement('DROP TABLE library_device_settings');
+  }
   if (version < 26) await drop('app_settings', 'close_to_tray');
   if (version < 25) await drop('app_settings', 'pinned_commands');
   if (version < 24) await drop('app_settings', 'key_map');
@@ -770,7 +774,7 @@ void main() {
   });
 
   test('a fresh database holds the settings, registry, widgets, sync '
-      'state and workspaces alone', () async {
+      'state, workspaces and device settings alone', () async {
     final db = AppDatabase(NativeDatabase(dbFile));
     final tables = await db
         .customSelect(
@@ -788,6 +792,7 @@ void main() {
         'sync_items',
         'sync_ops',
         'workspaces',
+        'library_device_settings',
       ]),
     );
     expect(await db.select(db.appSettings).get(), isEmpty);
@@ -1056,6 +1061,27 @@ void main() {
       expect(await repo.closeToTray(), isTrue);
       await repo.setCloseToTray(enabled: false);
       expect(await repo.closeToTray(), isFalse);
+      await db.close();
+    });
+  });
+
+  group('v26 → v27: device settings get their own table', () {
+    test('an existing install upgrades with it empty', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 26);
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final store = DbDeviceSettingsStore(db);
+      expect(await store.read('/lib/W'), equals(null));
+      await store.write('/lib/W', {'treeWidth': 300.0, 'lineNumbers': false});
+      expect(await store.read('/lib/W'), {
+        'treeWidth': 300.0,
+        'lineNumbers': false,
+      });
+      await store.remove('/lib/W');
+      expect(await store.read('/lib/W'), equals(null));
       await db.close();
     });
   });
