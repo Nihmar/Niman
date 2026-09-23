@@ -26,7 +26,7 @@ void main() {
       '- a\n  - b\n\n1. one\n1. two\n\n- [ ] do\n- [x] done',
     );
     expect(shapes[0], const LineShape(marker: 0));
-    expect(shapes[1], const LineShape(marker: 2));
+    expect(shapes[1], const LineShape(marker: 2, listDepth: 1));
     expect(shapes[3].ordinal, 1);
     expect(shapes[4].ordinal, 2, reason: '`1. 1.` reads 1, 2');
     expect(shapes[6].task, isFalse);
