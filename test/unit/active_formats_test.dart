@@ -34,6 +34,18 @@ void main() {
     expect(_activeAt('x<sup>2</sup>\n', 0, 6), {ToolbarItem.superscript});
   });
 
+  test('formats inside one another are all on', () {
+    // `<u>**x**</u>` is one bold stretch with the underline around it.
+    expect(_activeAt('<u>**xyz**</u>\n', 0, 7), {
+      ToolbarItem.bold,
+      ToolbarItem.underline,
+    });
+    expect(_activeAt('**a ~~bcd~~ e**\n', 0, 7), {
+      ToolbarItem.bold,
+      ToolbarItem.strikethrough,
+    });
+  });
+
   test('a format one word over is not on', () {
     // The toolbar says what is on *at the caret*, so the syntax of the next
     // word is dark until the caret is in it.

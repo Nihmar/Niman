@@ -99,10 +99,23 @@ enum TokenKind {
 @immutable
 final class Token {
   /// Creates a token of [kind] covering [start]..[end).
-  const new(this.kind, this.start, this.end, {this.marker = false});
+  const new(
+    this.kind,
+    this.start,
+    this.end, {
+    this.marker = false,
+    this.outer = const <TokenKind>[],
+  });
 
   /// The style of the run.
   final TokenKind kind;
+
+  /// The inline constructs the run sits inside, outermost first: the
+  /// underline around `**x**` in `<u>**x**</u>`. A line's tokens are disjoint,
+  /// so a stretch is one token of the innermost construct over it, and this
+  /// is what keeps the ones around it — without it the underline was lost.
+  /// Only the unified surface's styler fills it.
+  final List<TokenKind> outer;
 
   /// Whether the run is the syntax of a construct rather than its text: the
   /// `**` of a bold run, a link's `](href)`. What `live` mode hides. Only the
@@ -125,10 +138,20 @@ final class Token {
       other.kind == kind &&
       other.start == start &&
       other.end == end &&
-      other.marker == marker;
+      other.marker == marker &&
+      _sameKinds(other.outer, outer);
 
   @override
-  int get hashCode => Object.hash(kind, start, end, marker);
+  int get hashCode =>
+      Object.hash(kind, start, end, marker, Object.hashAll(outer));
+
+  static bool _sameKinds(List<TokenKind> a, List<TokenKind> b) {
+    if (a.length != b.length) return false;
+    for (var at = 0; at < a.length; at++) {
+      if (a[at] != b[at]) return false;
+    }
+    return true;
+  }
 }
 
 /// One line of the display text with its tokens; anything not covered by a

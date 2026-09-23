@@ -20,6 +20,43 @@ import 'package:niman/src/ui/theme/tokens.dart';
 /// which the tokenizer leaves unmarked: bold, at the base row size.
 const TextStyle markdownHeadingStyle = TextStyle(fontWeight: FontWeight.bold);
 
+/// The style of [token] with the constructs around it ([Token.outer]): each
+/// one's override laid over the one outside it, the token's own last, so
+/// the innermost decides a colour — and the lines are added up rather than
+/// replaced, since `<u>~~x~~</u>` is underlined *and* struck through.
+TextStyle? nestedTokenStyle(
+  Token token,
+  SyntaxColors syntax, {
+  required bool dark,
+}) {
+  final own = markdownTokenStyle(token.kind, syntax, dark: dark);
+  if (token.outer.isEmpty) return own;
+  TextStyle? style;
+  for (final kind in <TokenKind>[...token.outer, token.kind]) {
+    final next = markdownTokenStyle(kind, syntax, dark: dark);
+    if (next == null) continue;
+    if (style == null) {
+      style = next;
+      continue;
+    }
+    final lines = <TextDecoration>[
+      if (style.decoration != null) style.decoration!,
+      if (next.decoration != null) next.decoration!,
+    ];
+    final features = <FontFeature>[
+      ...?style.fontFeatures,
+      ...?next.fontFeatures,
+    ];
+    style = style
+        .merge(next)
+        .copyWith(
+          decoration: lines.isEmpty ? null : TextDecoration.combine(lines),
+          fontFeatures: features.isEmpty ? null : features,
+        );
+  }
+  return style;
+}
+
 /// The [TextStyle] override for [kind] in [syntax] (null = base style).
 ///
 /// [dark] decides the weight of bold text and nothing else: a heavy face

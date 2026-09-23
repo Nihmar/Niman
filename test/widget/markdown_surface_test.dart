@@ -195,6 +195,31 @@ void main() {
     expect(hidden(under), isFalse);
   });
 
+  testWidgets('live draws a format inside another as both', (tester) async {
+    // A line's tokens are disjoint, and the innermost won: `<u>**x**</u>` was
+    // drawn bold and not underlined.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n<u>**both**</u> and <u>~~lines~~</u>\n',
+    );
+    final spans = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+    }
+    final both = spans.singleWhere((span) => span.text == 'both').style!;
+    expect(both.fontWeight, isNot(FontWeight.normal));
+    expect(both.fontWeight, isNotNull, reason: 'bold');
+    expect(both.decoration!.contains(TextDecoration.underline), isTrue);
+    final lines = spans.singleWhere((span) => span.text == 'lines').style!;
+    expect(lines.decoration!.contains(TextDecoration.underline), isTrue);
+    expect(lines.decoration!.contains(TextDecoration.lineThrough), isTrue);
+  });
+
   testWidgets('live draws what a line marker stood for, beside the text', (
     tester,
   ) async {

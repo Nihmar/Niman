@@ -528,23 +528,68 @@ final class SourceStyler {
         if (best == null || piece.depth >= best.depth) best = piece;
       }
       if (best == null) continue;
+      final outer = best.depth < _structural
+          ? _outerOf(pieces, best, from, to)
+          : const <TokenKind>[];
       final last = tokens.isEmpty ? null : tokens.last;
       if (last != null &&
           last.end == from &&
           last.kind == best.kind &&
           last.marker == best.marker &&
+          _sameKinds(last.outer, outer) &&
           best.depth < _structural) {
         tokens[tokens.length - 1] = Token(
           last.kind,
           last.start,
           to,
           marker: last.marker,
+          outer: last.outer,
         );
       } else {
-        tokens.add(Token(best.kind, from, to, marker: best.marker));
+        tokens.add(
+          Token(best.kind, from, to, marker: best.marker, outer: outer),
+        );
       }
     }
     return tokens;
+  }
+
+  /// The inline constructs around [inner] over `[from, to)`, outermost
+  /// first: the text of the pieces shallower than it that cover the stretch,
+  /// each kind once. A construct's markers are its own syntax and style
+  /// nothing inside it, so a marker piece is none of them.
+  static List<TokenKind> _outerOf(
+    List<_Piece> pieces,
+    _Piece inner,
+    int from,
+    int to,
+  ) {
+    final around = <_Piece>[
+      for (final piece in pieces)
+        if (!identical(piece, inner) &&
+            !piece.marker &&
+            piece.depth < inner.depth &&
+            piece.start <= from &&
+            piece.end >= to)
+          piece,
+    ];
+    if (around.isEmpty) return const <TokenKind>[];
+    around.sort((a, b) => a.depth.compareTo(b.depth));
+    final kinds = <TokenKind>[];
+    for (final piece in around) {
+      if (piece.kind != inner.kind && !kinds.contains(piece.kind)) {
+        kinds.add(piece.kind);
+      }
+    }
+    return kinds.isEmpty ? const <TokenKind>[] : List.unmodifiable(kinds);
+  }
+
+  static bool _sameKinds(List<TokenKind> a, List<TokenKind> b) {
+    if (a.length != b.length) return false;
+    for (var at = 0; at < a.length; at++) {
+      if (a[at] != b[at]) return false;
+    }
+    return true;
   }
 
   // --------------------------------------------------------------- definitions
