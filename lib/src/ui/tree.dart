@@ -43,7 +43,7 @@ final class NoteTree extends StatefulWidget {
     this.onLongPress,
     this.onSecondaryTapDown,
     this.onOpenInNewTab,
-    this.onBackgroundSecondaryTapDown,
+    this.onBackgroundSecondaryTapUp,
     this.nameDesc = false,
     super.key,
   });
@@ -80,7 +80,14 @@ final class NoteTree extends StatefulWidget {
 
   /// Called on a right click on the tree's empty space, below or between
   /// the rows: where a new note or folder at the root is asked for.
-  final void Function(TapDownDetails details)? onBackgroundSecondaryTapDown;
+  ///
+  /// On the button's release, where a row's menu opens on its press: a
+  /// press is told to every detector still in the running once it is held
+  /// past the tap's deadline, the tree's background with the row it is
+  /// on, and a click held that long opened both menus — the row's over the
+  /// tree's, which was left up when a delete closed the row's. A release
+  /// goes to the one detector that won, the row when it was on one.
+  final void Function(TapUpDetails details)? onBackgroundSecondaryTapUp;
 
   @override
   State<NoteTree> createState() => _NoteTreeState();
@@ -188,7 +195,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
   @override
   Widget build(BuildContext context) {
-    final background = widget.onBackgroundSecondaryTapDown;
+    final background = widget.onBackgroundSecondaryTapUp;
     final tree = _tree(context);
     if (background == null) return tree;
     // The rows answer their own right click (theirs is the inner detector);
@@ -196,7 +203,7 @@ final class _NoteTreeState extends State<NoteTree> {
     return GestureDetector(
       key: const Key('note-tree-background'),
       behavior: HitTestBehavior.translucent,
-      onSecondaryTapDown: background,
+      onSecondaryTapUp: background,
       child: tree,
     );
   }
