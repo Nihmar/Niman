@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/math_widget.dart';
 
 const MarkdownTheme _theme = MarkdownTheme(
   body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
@@ -240,6 +243,98 @@ void main() {
         .whereType<LiveDecorationPainter>()
         .single;
     expect(item.revealed, isTrue);
+  });
+
+  testWidgets('live typesets a display formula until the caret is in it', (
+    tester,
+  ) async {
+    final cache = MathCache();
+    addTearDown(cache.dispose);
+    Future<void> pumpAt(int caret) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: SourceBuffer.fromText('caret\n\n\$\$\na^2\n\$\$\n'),
+              mode: MarkdownSurfaceMode.live,
+              theme: _theme,
+              selection: SelectionModel.at(caret),
+              showLineNumbers: false,
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    await pumpAt(0);
+    expect(find.byType(BlockMathView), findsOneWidget);
+    expect(
+      tester.getSize(find.text('a^2', findRichText: true)).height,
+      lessThan(1),
+      reason: "the formula's source takes no room",
+    );
+    await pumpAt(12);
+    expect(
+      find.byType(BlockMathView),
+      findsNothing,
+      reason: 'with the caret in it, the formula is its source',
+    );
+    expect(
+      tester.getSize(find.text('a^2', findRichText: true)).height,
+      greaterThan(10),
+    );
+  });
+
+  testWidgets('live draws a picture under its line, its source hidden', (
+    tester,
+  ) async {
+    Future<void> pumpAt(int caret) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: SourceBuffer.fromText('caret\n\nsee ![[pic.png]] here\n'),
+              mode: MarkdownSurfaceMode.live,
+              theme: _theme,
+              selection: SelectionModel.at(caret),
+              showLineNumbers: false,
+              embedResolver: (_) async => null,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    await pumpAt(0);
+    final embed = tester.widget<EmbedView>(find.byType(EmbedView));
+    expect(embed.target, 'pic.png');
+    final spans = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+    }
+    // The line's own runs of the embed — not the placeholder the picture
+    // draws when the file is not there, which is meant to be read.
+    final source = spans.where(
+      (span) => span.text == 'pic.png' || span.text == '![[',
+    );
+    expect(source, isNotEmpty);
+    expect(
+      source.every((span) => span.style?.fontSize == 0.01),
+      isTrue,
+      reason: 'the picture stands in for its source',
+    );
+    await pumpAt(9);
+    expect(
+      find.byType(EmbedView),
+      findsOneWidget,
+      reason: 'the picture stays while its source is edited',
+    );
   });
 
   testWidgets('live reveals the markers of the line the caret is in', (

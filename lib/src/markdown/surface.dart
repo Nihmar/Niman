@@ -32,6 +32,7 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
@@ -79,6 +80,8 @@ final class MarkdownSurface extends StatelessWidget {
     this.findMatches,
     this.onOpenLink,
     this.activeItems,
+    this.mathCache,
+    this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
     this.autofocus = false,
@@ -153,6 +156,12 @@ final class MarkdownSurface extends StatelessWidget {
   /// published through, so the shell reads one thing in either mode.
   final ValueNotifier<Set<ToolbarItem>>? activeItems;
 
+  /// The typeset formulas `live` draws in place of `$$` blocks.
+  final MathCache? mathCache;
+
+  /// Where an embed's target is on disk, for the pictures `live` draws.
+  final Future<String?> Function(String target)? embedResolver;
+
   /// The caret's width; null keeps the surface's own.
   final double? caretWidth;
 
@@ -203,6 +212,8 @@ final class MarkdownSurface extends StatelessWidget {
     findMatches: findMatches,
     onOpenLink: onOpenLink,
     activeItems: activeItems,
+    mathCache: mathCache,
+    embedResolver: embedResolver,
     caretWidth: caretWidth,
     typewriter: typewriter,
     autofocus: autofocus,

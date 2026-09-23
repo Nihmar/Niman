@@ -1619,6 +1619,10 @@ final class _NoteViewState extends State<NoteView>
         formatMenu: _formatMenu,
         spellCheck: widget.spellCheck,
         activeItems: _activeFormats,
+        // What `live` draws in place of the source it hides: the formulas
+        // and pictures the read view draws, from the same cache and disk.
+        mathCache: _mathCache,
+        embedResolver: _resolveEmbed,
         findMatches: _sourceFind,
         onOpenLink: (kind, raw) => unawaited(_openLinkToken(kind, raw)),
         onChanged: (edit) {
