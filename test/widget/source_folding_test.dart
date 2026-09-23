@@ -47,7 +47,13 @@ const String _note =
     '# Due\nsotto due\n## Due.a\nsotto due.a\naltro due.a\n'
     '# Tre\nfine';
 
-Future<MarkdownSourceViewState> _pump(WidgetTester tester) async {
+/// Which unified mode a body is being run in: the same tests, twice.
+enum _Mode { source, live }
+
+Future<MarkdownSourceViewState> _pump(
+  WidgetTester tester, {
+  bool live = false,
+}) async {
   tester.view.physicalSize = const Size(700, 600);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -57,6 +63,9 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester) async {
         body: MarkdownSourceView(
           buffer: SourceBuffer.fromText(_note),
           theme: _theme,
+          // Folding draws rows, and the mode only decides whether a marker is
+          // hidden: the section arrows and what they fold are the same in both.
+          hideMarkers: live,
         ),
       ),
     ),
@@ -70,10 +79,21 @@ bool _drawn(String text) =>
     find.text(text, findRichText: true).evaluate().isNotEmpty;
 
 void main() {
-  testWidgets('a heading with a section has an arrow, a line has none', (
+  /// The same test in `source` and in `live` (#246).
+  void both(
+    String name,
+    Future<void> Function(WidgetTester tester, _Mode mode) body,
+  ) {
+    for (final mode in _Mode.values) {
+      testWidgets('$name (${mode.name})', (tester) => body(tester, mode));
+    }
+  }
+
+  both('a heading with a section has an arrow, a line has none', (
     tester,
+    mode,
   ) async {
-    await _pump(tester);
+    await _pump(tester, live: mode == _Mode.live);
     expect(find.byKey(const ValueKey<String>('fold-0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('fold-4')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('fold-1')), findsNothing);
@@ -81,8 +101,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('fold-9')), findsNothing);
   });
 
-  testWidgets('the arrow folds the section, and folds it back', (tester) async {
-    final state = await _pump(tester);
+  both('the arrow folds the section, and folds it back', (tester, mode) async {
+    final state = await _pump(tester, live: mode == _Mode.live);
     await tester.tap(find.byKey(const ValueKey<String>('fold-0')));
     await tester.pump();
     expect(state.isFolded(0), isTrue);
@@ -90,11 +110,12 @@ void main() {
     expect(_drawn('terza riga'), isFalse);
     expect(_drawn('# Due'), isTrue);
     // The next heading's row is right under the folded one.
-    expect(
-      tester.getTopLeft(find.text('# Due', findRichText: true)).dy -
-          tester.getTopLeft(find.text('# Uno', findRichText: true)).dy,
-      closeTo(21, 1),
-    );
+    // The two headings are adjacent rows, whatever height a row is: in `live`
+    // a heading is drawn at the heading's own size, so a constant here would
+    // be an assertion about the typography rather than about the fold.
+    final uno = tester.getRect(find.text('# Uno', findRichText: true));
+    final due = tester.getRect(find.text('# Due', findRichText: true));
+    expect(due.top - uno.top, closeTo(uno.height, 1));
     expect(state.selection.extent, 0, reason: 'the arrow moved no caret');
 
     await tester.tap(find.byKey(const ValueKey<String>('fold-0')));
@@ -103,10 +124,11 @@ void main() {
     expect(_drawn('prima riga'), isTrue);
   });
 
-  testWidgets('a section runs to the next heading of its level or above', (
+  both('a section runs to the next heading of its level or above', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester);
+    final state = await _pump(tester, live: mode == _Mode.live);
     state.toggleFold(4);
     await tester.pump();
     expect(_drawn('sotto due'), isFalse);
@@ -114,8 +136,8 @@ void main() {
     expect(_drawn('# Tre'), isTrue);
   });
 
-  testWidgets('folding the caret away puts it on the heading', (tester) async {
-    final state = await _pump(tester);
+  both('folding the caret away puts it on the heading', (tester, mode) async {
+    final state = await _pump(tester, live: mode == _Mode.live);
     state
       ..placeCaret(_note.indexOf('seconda'))
       ..toggleFold(0);
@@ -123,10 +145,11 @@ void main() {
     expect(state.selection.extent, '# Uno'.length);
   });
 
-  testWidgets('a caret that goes into a folded section opens it', (
+  both('a caret that goes into a folded section opens it', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester);
+    final state = await _pump(tester, live: mode == _Mode.live);
     state.toggleFold(0);
     await tester.pump();
     state
@@ -137,8 +160,8 @@ void main() {
     expect(_drawn('prima riga'), isTrue);
   });
 
-  testWidgets('an edit above a fold keeps it folded', (tester) async {
-    final state = await _pump(tester);
+  both('an edit above a fold keeps it folded', (tester, mode) async {
+    final state = await _pump(tester, live: mode == _Mode.live);
     state.toggleFold(4);
     await tester.pump();
     state
@@ -150,10 +173,11 @@ void main() {
     expect(_drawn('nuova'), isTrue);
   });
 
-  testWidgets('a tap below a fold lands on the line that is drawn there', (
+  both('a tap below a fold lands on the line that is drawn there', (
     tester,
+    mode,
   ) async {
-    final state = await _pump(tester);
+    final state = await _pump(tester, live: mode == _Mode.live);
     state.toggleFold(0);
     await tester.pump();
     final due = tester.getCenter(find.text('# Due', findRichText: true));
@@ -162,8 +186,8 @@ void main() {
     expect(state.widget.buffer.lineOf(state.selection.extent), 4);
   });
 
-  testWidgets('Ctrl+End with a fold keeps working', (tester) async {
-    final state = await _pump(tester);
+  both('Ctrl+End with a fold keeps working', (tester, mode) async {
+    final state = await _pump(tester, live: mode == _Mode.live);
     state.focusNode.requestFocus();
     await tester.pump();
     state.toggleFold(0);
