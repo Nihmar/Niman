@@ -58,8 +58,8 @@ NoteReferences noteReferencesOf(String text) {
     if (!_hasInlineText(block.kind)) continue;
     final raw = BlockParser.blockText(block, buffer);
     if (!raw.contains('#') && !raw.contains('[')) continue;
-    final at = buffer.offsetOfLine(block.startLine);
-    final masked = masker.mask(_contentText(block, raw));
+    final source = _SourceOffsets(block, raw, buffer);
+    final masked = masker.mask(BlockParser.contentText(block, raw));
     for (final span in masked.spans) {
       switch (span.kind) {
         case ExtensionKind.tag:
@@ -71,7 +71,11 @@ NoteReferences noteReferencesOf(String text) {
             continue;
           }
           links.add(
-            WikiLink(start: at + span.start, end: at + span.end, ref: ref),
+            WikiLink(
+              start: source.of(span.start),
+              end: source.of(span.end),
+              ref: ref,
+            ),
           );
         case ExtensionKind.embed ||
             ExtensionKind.inlineMath ||
@@ -95,8 +99,8 @@ NoteReferences noteReferencesOf(String text) {
       if (href.startsWith('#fn-')) continue;
       links.add(
         MarkdownLink(
-          start: at + run.start,
-          end: at + run.end,
+          start: source.of(run.start),
+          end: source.of(run.end),
           text: parsed.text.substring(run.innerStart, run.innerEnd).trim(),
           href: href,
         ),
@@ -117,13 +121,41 @@ bool _hasInlineText(BlockKind kind) => switch (kind) {
   _ => false,
 };
 
-/// [raw] without its quote marks, as the parser reads a quote's block.
-String _contentText(Block block, String raw) {
-  if (block.quoteDepth <= 0) return raw;
-  return <String>[
-    for (final line in raw.split('\n'))
-      line.substring(BlockParser.quotePrefixLength(line, block.quoteDepth)),
-  ].join('\n');
+/// Offsets in a block's text as the parse reads it
+/// ([BlockParser.contentText]), put back on the note.
+///
+/// The parse takes each line's quote marks and a list item's indent off,
+/// so an offset past the first line is short by every prefix above it: the
+/// offset of a link in a quote's second line used to land that far left of
+/// the link, and a rename that rewrote it wrote into the wrong characters.
+/// Each line is found by where it starts in the parse's text and put back
+/// at where it starts in the note, its prefix added — which also keeps a
+/// CRLF note right, whose lines the parse joins with one character.
+final class _SourceOffsets {
+  new(Block block, String raw, SourceBuffer buffer) {
+    final lines = raw.split('\n');
+    final indent = BlockParser.listIndentOf(block, lines.first);
+    var content = 0;
+    for (var at = 0; at < lines.length; at++) {
+      final prefix = BlockParser.linePrefixLength(block, lines[at], indent);
+      _contentStarts.add(content);
+      _sourceStarts.add(buffer.offsetOfLine(block.startLine + at) + prefix);
+      content += lines[at].length - prefix + 1;
+    }
+  }
+
+  final List<int> _contentStarts = <int>[];
+  final List<int> _sourceStarts = <int>[];
+
+  /// Where [offset], in the parse's text, is in the note.
+  int of(int offset) {
+    var line = 0;
+    while (line + 1 < _contentStarts.length &&
+        _contentStarts[line + 1] <= offset) {
+      line++;
+    }
+    return _sourceStarts[line] + offset - _contentStarts[line];
+  }
 }
 
 /// [raw] with a footnote definition's label (`[^1]:`) blanked out, so its

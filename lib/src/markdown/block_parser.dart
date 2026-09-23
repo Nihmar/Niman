@@ -223,15 +223,52 @@ final class BlockParser {
   /// A list marker is *not* the same kind of thing and is left alone: the
   /// package needs it to know the line is an item at all, and `[x] …` without
   /// its `-` is a paragraph whose text is `[x] …`, so the task box would come
-  /// back as those three characters.
-  static String _contentText(Block block, String raw) {
-    if (block.quoteDepth <= 0) return raw;
+  /// back as those three characters. **The indent the marker stands at is**,
+  /// though: the package parses the item alone, and an item three levels
+  /// down stands four spaces in — which alone is an indented code block, and
+  /// was drawn as one. See [listIndentOf].
+  static String _contentText(Block block, String raw) =>
+      contentText(block, raw);
+
+  /// [raw], the text of [block], as the parse reads it: each line without
+  /// what [linePrefixLength] says the parse takes off it.
+  static String contentText(Block block, String raw) {
+    if (block.quoteDepth <= 0 && block.kind != BlockKind.listItem) return raw;
     final lines = raw.split('\n');
+    final indent = listIndentOf(block, lines.first);
+    if (block.quoteDepth <= 0 && indent == 0) return raw;
     for (var at = 0; at < lines.length; at++) {
       final line = lines[at];
-      lines[at] = line.substring(quotePrefixLength(line, block.quoteDepth));
+      lines[at] = line.substring(linePrefixLength(block, line, indent));
     }
     return lines.join('\n');
+  }
+
+  /// The indent a list item's marker stands at, past its quote marks, on the
+  /// item's [firstLine] — what the parse takes off each of its lines — or 0
+  /// for any other block.
+  static int listIndentOf(Block block, String firstLine) {
+    if (block.kind != BlockKind.listItem) return 0;
+    final from = quotePrefixLength(firstLine, block.quoteDepth);
+    var at = from;
+    while (at < firstLine.length && firstLine.codeUnitAt(at) == 0x20) {
+      at++;
+    }
+    return at - from;
+  }
+
+  /// How much of [line], a line of [block], the parse takes off: its quote
+  /// marks, and up to [listIndent] spaces after them ([listIndentOf]). A
+  /// reader puts the parse's offsets back on the line by adding this.
+  static int linePrefixLength(Block block, String line, int listIndent) {
+    final quote = quotePrefixLength(line, block.quoteDepth);
+    var at = quote;
+    while (at - quote < listIndent &&
+        at < line.length &&
+        line.codeUnitAt(at) == 0x20) {
+      at++;
+    }
+    return at;
   }
 
   /// How much of [line] its [depth] quote marks take — each `>` with the up

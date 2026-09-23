@@ -223,10 +223,7 @@ final class SourceStyler {
     final end = index + 1 < parsed.lineStarts.length
         ? parsed.lineStarts[index + 1] - 1
         : parsed.parse.text.length;
-    final prefix = BlockParser.quotePrefixLength(
-      buffer.lineAt(line),
-      block.quoteDepth,
-    );
+    final prefix = _parsePrefix(block, buffer.lineAt(line));
     final text = parsed.parse.text;
     final out = <LinePicture>[];
     for (final span in parsed.parse.extensions) {
@@ -290,9 +287,25 @@ final class SourceStyler {
     final prefix = BlockParser.quotePrefixLength(text, block.quoteDepth);
     final structural = _structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
-    if (parsed != null) _inline(parsed, line - block.startLine, prefix, tokens);
+    if (parsed != null) {
+      _inline(
+        parsed,
+        line - block.startLine,
+        _parsePrefix(block, text),
+        tokens,
+      );
+    }
     return _flatten(tokens, structural);
   }
+
+  /// How much of [text], a line of [block], its parse took off — the quote
+  /// marks, and a list item's indent ([BlockParser.linePrefixLength]) — so
+  /// the parse's offsets land back on the line.
+  int _parsePrefix(Block block, String text) => BlockParser.linePrefixLength(
+    block,
+    text,
+    BlockParser.listIndentOf(block, buffer.lineAt(block.startLine)),
+  );
 
   // ----------------------------------------------------------------- structure
 
