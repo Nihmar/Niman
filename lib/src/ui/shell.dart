@@ -1834,7 +1834,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Right-click context menu on a tree row (T-PP-20): the same actions
   /// at the cursor instead of in the phone's bottom sheet.
   Future<void> _showRowMenuAt(Note note, Offset position) async {
-    _treeMenuLog.debug('row menu asked: "${note.path}" at $position');
+    _treeMenuLog.debug('row menu asked: "${note.path}"');
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
@@ -3274,7 +3274,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       onLongPress: _showRowMenu,
       onSecondaryTapDown: (note, details) =>
           _showRowMenuAt(note, details.globalPosition),
-      onBackgroundSecondaryTapDown: (details) =>
+      onBackgroundSecondaryTapUp: (details) =>
           unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
     );
   }
@@ -3282,7 +3282,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The right-click menu on the tree's empty space: a note, a note from a
   /// template or a folder, at the library's root.
   Future<void> _showTreeBackgroundMenuAt(Offset position) async {
-    _treeMenuLog.debug('background menu asked at $position');
+    _treeMenuLog.debug('background menu asked');
     final action = await showTreeBackgroundMenuAt(context, position: position);
     _treeMenuLog.debug('background menu closed -> $action');
     if (!mounted) return;
