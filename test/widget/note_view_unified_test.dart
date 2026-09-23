@@ -223,6 +223,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a checkbox in the read pane ticks the note', (tester) async {
+    const note = 'Tasks\n\n- [ ] one\n- [x] two\n';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteView(
+            path: '/tmp/niman-read-task-test.md',
+            showLineNumbers: true,
+            autofocusEditor: false,
+            showPreview: true,
+            unifiedMarkdown: true,
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final editor = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView, skipOffstage: false),
+    );
+    Finder inRead(IconData icon) => find.descendant(
+      of: find.byType(MarkdownReadView),
+      matching: find.byIcon(icon),
+    );
+    expect(inRead(Icons.check_box_outline_blank), findsOneWidget);
+
+    await tester.tap(inRead(Icons.check_box_outline_blank));
+    await tester.pump();
+    expect(editor.widget.buffer.text, 'Tasks\n\n- [x] one\n- [x] two\n');
+    expect(
+      inRead(Icons.check_box_outlined),
+      findsNWidgets(2),
+      reason: 'the pane shows the tick on the next frame, not after a debounce',
+    );
+
+    await tester.tap(inRead(Icons.check_box_outlined).last);
+    await tester.pump();
+    expect(editor.widget.buffer.text, 'Tasks\n\n- [x] one\n- [ ] two\n');
+    expect(editor.undo(), isTrue);
+    expect(
+      editor.widget.buffer.text,
+      'Tasks\n\n- [x] one\n- [x] two\n',
+      reason: 'one tick, one undo step',
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('flipping the flag over a live note does not throw', (
     tester,
   ) async {
