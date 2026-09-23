@@ -49,6 +49,7 @@ import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
+import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -614,10 +615,20 @@ final class _NoteViewState extends State<NoteView>
   /// it.
   SourceBuffer? get _unifiedSurfaceBuffer => _surface?.buffer;
 
-  /// A controller over [text], reporting its edits the way the surface does.
-  MarkdownSurfaceController _surfaceFor(String text, {int caret = 0}) {
+  /// A controller over [text], reporting its edits the way the surface does:
+  /// over [ready]'s buffer and count when the note came made ready, which
+  /// the UI isolate then neither splits nor counts.
+  MarkdownSurfaceController _surfaceFor(
+    String text, {
+    int caret = 0,
+    LoadedNote? ready,
+  }) {
     final surface =
-        MarkdownSurfaceController(SourceBuffer.fromText(text), caret: caret)
+        MarkdownSurfaceController(
+            ready?.buffer ?? SourceBuffer.fromText(text),
+            caret: caret,
+            words: ready?.words,
+          )
           ..onChanged = (edit) => _noteChanged(
             caretLine: _surfaceCaretLine ?? _caretLine,
             edit: edit,
@@ -1133,9 +1144,17 @@ final class _NoteViewState extends State<NoteView>
     final clock = Stopwatch()..start();
     try {
       final String content;
+      // The note made ready off the UI isolate — its buffer and its count
+      // with its text — for the unified surface, which is what it draws.
+      LoadedNote? ready;
       if (widget.readNote != null) {
         // The test seam: content per the injected reader.
         content = await widget.readNote!(path);
+      } else if (widget.unifiedMarkdown) {
+        final loaded = await loadNote(path);
+        if (loaded is PreviewWorkFailure) throw loaded;
+        ready = loaded as LoadedNote;
+        content = ready.text;
       } else {
         // Production: the top-level isolate entry reads the file, and only
         // that. It used to compute the stats in the same pass, which put
@@ -1154,7 +1173,7 @@ final class _NoteViewState extends State<NoteView>
       }
       if (!mounted || widget.path != path) return;
       // The buffer uses LF: normalize line endings on load.
-      final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+      final text = ready?.text ?? normalizedLineEndings(content);
       // The note kind (T-TK-02): the frontmatter `type` decides the body
       // (kind GUI or plain editor); detection scans the leading block
       // only, never the whole text.
@@ -1165,6 +1184,7 @@ final class _NoteViewState extends State<NoteView>
       _surface = _surfaceFor(
         text,
         caret: (widget.initialCaretOffset ?? 0).clamp(0, text.length),
+        ready: ready,
       );
       _surfaceCaretLine = null;
       _unifiedText = text;
@@ -1298,7 +1318,7 @@ final class _NoteViewState extends State<NoteView>
         _revision != _lastSavedRevision) {
       return;
     }
-    final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+    final text = normalizedLineEndings(content);
     // Against what the pane on screen holds: the unified surface's text is not
     // in the legacy controller, and comparing with it made every reload look
     // like an external change after any unified edit — or none at all.
