@@ -668,6 +668,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onTapWikiLink: widget.onTapWikiLink,
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
+      scope: widget.parser.scope,
     );
   }
 }
