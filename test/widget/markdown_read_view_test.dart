@@ -12,6 +12,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -66,6 +67,30 @@ Future<MarkdownReadViewState> _pump(
 }
 
 void main() {
+  testWidgets(
+    "a footnote's body is drawn as prose: its formulas, its emphasis",
+    (tester) async {
+      // The footnotes were drawn as their source: `$x^2$` and `*big*` as
+      // written, where the note's own paragraphs typeset and stress them
+      // (device screenshot 2026-09-23).
+      tester.view.physicalSize = const Size(600, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(tester, 'a claim[^1]\n\n[^1]: Where \$x^2\$ is *big*.\n');
+      final texts = [
+        for (final widget in tester.widgetList<RichText>(
+          find.descendant(
+            of: find.byType(FootnoteRow),
+            matching: find.byType(RichText),
+          ),
+        ))
+          widget.text.toPlainText(),
+      ];
+      expect(texts.where((text) => text.contains('big')), isNotEmpty);
+      expect(texts.any((text) => text.contains(r'$x^2$')), isFalse);
+      expect(texts.any((text) => text.contains('*big*')), isFalse);
+    },
+  );
   testWidgets("a tight list's items touch, and a blank line is one spacing", (
     tester,
   ) async {
