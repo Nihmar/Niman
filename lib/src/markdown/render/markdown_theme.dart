@@ -159,6 +159,41 @@ final class MarkdownTheme {
     5 => heading5,
     _ => heading6,
   };
+
+  /// The theme a quote's content is drawn with: its prose in the quote's
+  /// style, everything else as it is — a heading or a list inside a quote
+  /// is still a heading or a list.
+  MarkdownTheme get quoted => MarkdownTheme(
+    body: body.merge(quote),
+    heading1: heading1,
+    heading2: heading2,
+    heading3: heading3,
+    heading4: heading4,
+    heading5: heading5,
+    heading6: heading6,
+    code: code,
+    quote: quote,
+    tableCell: tableCell,
+    tableHeader: tableHeader,
+    link: link,
+    wikilink: wikilink,
+    tag: tag,
+    marker: marker,
+    rule: rule,
+    codeHighlight: codeHighlight,
+    codeBackground: codeBackground,
+    quoteBar: quoteBar,
+    tableBorder: tableBorder,
+    markerDim: markerDim,
+    blockSpacing: blockSpacing,
+    listIndentPerLevel: listIndentPerLevel,
+    quoteIndentPerLevel: quoteIndentPerLevel,
+    codePadding: codePadding,
+    quoteBarWidth: quoteBarWidth,
+    ruleThickness: ruleThickness,
+    tableCellPadding: tableCellPadding,
+    lineHeight: lineHeight,
+  );
 }
 
 /// The source mode's typography: a copy of [theme] in a monospace face.

@@ -143,6 +143,67 @@ void main() {
     });
   });
 
+  group("a quote's content is drawn as blocks", () {
+    // Drawn as one text, a quote showed a quote inside it as a paragraph
+    // with no bar of its own, and a list inside it as its dashes.
+    Future<void> pump(
+      WidgetTester tester,
+      String note, {
+      void Function(int line)? onToggleTask,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownReadView(
+              buffer: SourceBuffer.fromText(note),
+              parser: BlockParser(),
+              mathCache: _syncCache(),
+              onToggleTask: onToggleTask,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    int bars(WidgetTester tester) =>
+        tester.widgetList<Container>(find.byType(Container)).where((box) {
+          final decoration = box.decoration;
+          return decoration is BoxDecoration &&
+              decoration.border is Border &&
+              (decoration.border! as Border).left.width > 0;
+        }).length;
+
+    testWidgets('a quote inside a quote has a bar of its own', (tester) async {
+      await pump(tester, '> outer\n>\n> > inner\n> > > deepest\n');
+      expect(bars(tester), 3);
+      expect(find.textContaining('deepest', findRichText: true), findsOne);
+      expect(find.textContaining('>', findRichText: true), findsNothing);
+    });
+
+    testWidgets('a list inside a quote has its bullets and boxes', (
+      tester,
+    ) async {
+      await pump(tester, '> text\n>\n> - item\n> - [ ] task\n');
+      expect(find.text('•'), findsOne);
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOne);
+      expect(find.textContaining('- item', findRichText: true), findsNothing);
+    });
+
+    testWidgets("a task inside a quote is ticked on the note's own line", (
+      tester,
+    ) async {
+      final ticked = <int>[];
+      await pump(
+        tester,
+        'before\n\n> text\n>\n> - [ ] task\n',
+        onToggleTask: ticked.add,
+      );
+      await tester.tap(find.byIcon(Icons.check_box_outline_blank));
+      expect(ticked, [4]);
+    });
+  });
+
   testWidgets('the note column centres the text, as the preview does', (
     tester,
   ) async {

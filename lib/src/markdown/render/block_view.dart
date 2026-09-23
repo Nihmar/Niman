@@ -56,12 +56,33 @@ final class BlockView extends StatelessWidget {
     this.onTapWikiLink,
     this.embedResolver,
     this.onToggleTask,
+    this.scope,
+    this.spaced = true,
+    this.quoteNesting = 0,
     super.key,
   });
 
   /// Called with a task item's line when its checkbox is tapped; null draws
   /// the box and leaves it alone.
   final void Function(int line)? onToggleTask;
+
+  /// The note's link and footnote definitions, for what a quote's content
+  /// is parsed with when it is read again as blocks of its own; null reads
+  /// the quote's own.
+  final DocumentScope? scope;
+
+  /// Whether the block leaves the spacing between blocks under it: all but
+  /// the last block inside a quote do, whose bar would otherwise run on past
+  /// its text.
+  final bool spaced;
+
+  /// How many quotes this block is inside, which bounds how deep a quote's
+  /// content is read again as blocks.
+  final int quoteNesting;
+
+  /// Past this many quotes inside one another, a quote's content is drawn as
+  /// its text rather than read again.
+  static const int _maxQuoteNesting = 8;
 
   /// The block, parsed and ready.
   final ParsedBlock parsed;
@@ -106,6 +127,7 @@ final class BlockView extends StatelessWidget {
       BlockKind.frontmatter => const SizedBox.shrink(),
       BlockKind.html => _code(context, null),
     };
+    if (!spaced) return child;
     return Padding(
       padding: EdgeInsets.only(bottom: theme.blockSpacing),
       child: child,
@@ -201,16 +223,58 @@ final class BlockView extends StatelessWidget {
     );
   }
 
-  /// A blockquote: a bar, and its content indented by the depth.
+  /// A blockquote: a bar, and its content indented past it.
+  ///
+  /// The content is read again as blocks of its own — the quote's marks
+  /// are already off its text — and each is drawn as any block is, so a
+  /// quote inside it has its own bar and a list its bullets, the way the
+  /// page they are on draws them. Drawn as one text, a quote showed a
+  /// quote inside it as a paragraph and a list as its dashes. The pattern
+  /// is the table cell's: the same engine, over the smaller text.
   Widget _quote(BuildContext context) {
-    final depth = parsed.block.quoteDepth;
-    final style = depth > 1 ? theme.quote : theme.quote;
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(color: theme.quoteBar, width: theme.quoteBarWidth),
-        ),
+    final bar = BoxDecoration(
+      border: Border(
+        left: BorderSide(color: theme.quoteBar, width: theme.quoteBarWidth),
       ),
+    );
+    final inner = quoteNesting < _maxQuoteNesting ? _quoteContent() : null;
+    if (inner != null && inner.isNotEmpty) {
+      final start = parsed.block.startLine;
+      final toggle = onToggleTask;
+      final width = availableWidth;
+      return Container(
+        decoration: bar,
+        padding: EdgeInsets.only(left: theme.quoteIndentPerLevel),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            for (var at = 0; at < inner.length; at++)
+              BlockView(
+                parsed: inner[at],
+                theme: theme.quoted,
+                mathCache: mathCache,
+                availableWidth: width == null
+                    ? null
+                    : width - theme.quoteIndentPerLevel - theme.quoteBarWidth,
+                onTapLink: onTapLink,
+                onTapWikiLink: onTapWikiLink,
+                embedResolver: embedResolver,
+                // The content's lines are the quote's, one for one: its
+                // marks were taken off each line, not the lines.
+                onToggleTask: toggle == null
+                    ? null
+                    : (line) => toggle(start + line),
+                scope: scope,
+                spaced: at < inner.length - 1,
+                quoteNesting: quoteNesting + 1,
+              ),
+          ],
+        ),
+      );
+    }
+    final style = theme.quote;
+    return Container(
+      decoration: bar,
       padding: EdgeInsets.only(left: theme.quoteIndentPerLevel),
       child: Text.rich(
         TextSpan(
@@ -228,6 +292,26 @@ final class BlockView extends StatelessWidget {
         style: style,
       ),
     );
+  }
+
+  /// The quote's content — its text, the marks already off it — as blocks
+  /// of its own, the blank ones at its end left out.
+  List<ParsedBlock> _quoteContent() {
+    final buffer = SourceBuffer.fromText(parsed.text);
+    final blocks = <Block>[...BlockScanner(buffer).index.blocks];
+    while (blocks.isNotEmpty && blocks.last.kind == BlockKind.blank) {
+      blocks.removeLast();
+    }
+    final parser = BlockParser();
+    final definitions = scope ?? DocumentScope.scan(buffer, buffer.revision);
+    return <ParsedBlock>[
+      for (final block in blocks)
+        parser.parseText(
+          block,
+          BlockParser.blockText(block, buffer),
+          () => definitions,
+        ),
+    ];
   }
 
   /// A code block: a filled box of monospace lines, the fence taken out, the
