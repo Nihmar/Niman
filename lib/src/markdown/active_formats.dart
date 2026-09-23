@@ -56,7 +56,7 @@ Set<ToolbarItem> activeFormatsOf({
         active.add(ToolbarItem.list);
       case TokenKind.blockquote:
         active.add(ToolbarItem.quote);
-      case TokenKind.codeFence || TokenKind.codeLanguage:
+      case TokenKind.codeFence || TokenKind.codeBlock || TokenKind.codeLanguage:
         active.add(ToolbarItem.code);
       // The caret's own text.
       case TokenKind.bold || TokenKind.italic || TokenKind.strike:

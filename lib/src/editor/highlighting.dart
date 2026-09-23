@@ -51,8 +51,15 @@ enum TokenKind {
   /// An inline code span (`` `…` ``).
   codeInline,
 
-  /// A line of a fenced code block (fence lines and content).
+  /// A line of a fenced code block (fence lines and content), or, from the
+  /// unified engine, a fence line alone: the syntax around a code block.
   codeFence,
+
+  /// A line of a code block's content — fenced or indented — from the
+  /// unified engine: the code itself, drawn in every mode. It is told apart
+  /// from its fences because `live` hides the fences and showed nothing of
+  /// a block whose code was a fence's.
+  codeBlock,
 
   /// The language info on a fence-opening line.
   codeLanguage,

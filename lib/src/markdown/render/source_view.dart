@@ -921,6 +921,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (index < 0 || index >= lineCount) return true;
     for (final token in _lineAt(index).tokens) {
       if (token.kind == TokenKind.codeFence ||
+          token.kind == TokenKind.codeBlock ||
           token.kind == TokenKind.mathBlock ||
           token.kind == TokenKind.frontmatter) {
         return false;
