@@ -336,8 +336,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Whether the note's blocks are all current: false while an edit that
   /// changed the rest of the note is still being scanned on, a slice at a
-  /// time, and [headings] waits for it.
-  bool get scanSettled => _styler?.settled ?? true;
+  /// time, and [headings] waits for it — and while a long note is still
+  /// being read in the background, when there are no blocks at all.
+  bool get scanSettled => _styler?.settled ?? false;
 
   /// The note's blocks, as the scan behind the colours has them, or null
   /// while there is no scan yet.

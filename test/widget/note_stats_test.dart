@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 
 const String _note = '# Alpha\n\none two\n\n## Beta\n\nthree\n';
 
@@ -93,4 +94,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(_shownWords(tester), contains(before.toString()));
   });
+
+  testWidgets(
+    'a big note gets its count and outline once they are worked out',
+    (tester) async {
+      // Past the size counted in place, and past the lines the pane scans in
+      // place: both answers come from an isolate, after the refresh that asked.
+      MarkdownSourceViewState.backgroundLines = 100;
+      addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+      final note = StringBuffer('# Alpha\n\n');
+      for (var i = 0; i < 3000; i++) {
+        note.writeln('one two three four five six seven eight nine ten');
+      }
+      note.write('\n## Beta\n\nlast words\n');
+      final text = note.toString();
+      final key = GlobalKey<State<NoteView>>();
+      expect(text.length, greaterThan(64 * 1024));
+      await tester.pumpWidget(
+        _app(
+          NoteView(
+            key: key,
+            path: '/notes/big.md',
+            showLineNumbers: false,
+            autofocusEditor: false,
+            unifiedMarkdown: true,
+            readNote: (_) async => text,
+          ),
+        ),
+      );
+      await tester.pump();
+      for (var i = 0; i < 20; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        );
+        await tester.pump(const Duration(milliseconds: 1));
+      }
+      final view = key.currentState! as NoteViewHandle;
+      expect(view.outline.value.map((e) => e.text), <String>['Alpha', 'Beta']);
+      expect(_shownWords(tester), contains(countWords(text).toString()));
+    },
+  );
 }

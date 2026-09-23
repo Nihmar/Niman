@@ -59,8 +59,16 @@ final class MarkdownSurfaceController {
   /// The answer is dropped when the note moved on while it was being worked
   /// out — the next call starts again — and the count is adopted whole, so a
   /// reader never sees half of one.
-  Future<void> buildWords() async {
-    if (words.isCounted) return;
+  Future<void> buildWords() {
+    if (words.isCounted) return Future<void>.value();
+    // Asked again while the count is under way (every statistics refresh
+    // asks): the same count answers, rather than a second one.
+    return _counting ??= _countWords().whenComplete(() => _counting = null);
+  }
+
+  Future<void>? _counting;
+
+  Future<void> _countWords() async {
     final revision = buffer.revision;
     final counted = await countInBackground(buffer);
     // The note was typed in while the count was worked out: what came back
