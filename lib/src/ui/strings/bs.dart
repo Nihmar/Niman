@@ -1220,6 +1220,37 @@ final class BosnianStrings extends Strings {
       'Šablon dnevnika $path nije se mogao pročitati: unos je kreiran bez '
       'njega.';
   @override
+  String get journalIntro =>
+      'Jedna bilješka dnevno, kreirana iz šablona kad taj dan otvoriš prvi '
+      'put. Ove postavke putuju s bibliotekom.';
+  @override
+  String get journalFolderTitle => 'Folder dnevnika';
+  @override
+  String get journalFolderSubtitle => 'Gdje idu unosi';
+  @override
+  String get journalEntryNameTitle => 'Naziv unosa';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM ili M, DD ili D za datum; / pravi folder; tekst u '
+      "'navodnicima' ostaje kakav jest";
+  @override
+  String journalEntryNamePreview(String path) => 'Današnji unos: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Treba YYYY, mjesec (MM ili M) i dan (DD ili D), i ništa što naziv '
+      'datoteke ne smije sadržavati';
+  @override
+  String get journalTemplateTitle => 'Šablon';
+  @override
+  String get journalTemplateSubtitle => 'Čime počinje novi unos';
+  @override
+  String get journalTemplateNone => 'Nijedan: naslov s datumom';
+  @override
+  String get journalDayStartTitle => 'Novi dan počinje u';
+  @override
+  String get journalDayStartSubtitle =>
+      'Kasno liježeš? U 04:00 noć ostaje na prethodnom danu';
+  @override
   String get commandsTitle => 'Komande';
   @override
   String get commandsIntro =>

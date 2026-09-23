@@ -1237,6 +1237,37 @@ final class PolishStrings extends Strings {
       'Nie udało się odczytać szablonu dziennika $path: wpis utworzono bez '
       'niego.';
   @override
+  String get journalIntro =>
+      'Jedna notatka dziennie, tworzona z szablonu przy pierwszym otwarciu '
+      'danego dnia. Te ustawienia podróżują z biblioteką.';
+  @override
+  String get journalFolderTitle => 'Folder dziennika';
+  @override
+  String get journalFolderSubtitle => 'Gdzie trafiają wpisy';
+  @override
+  String get journalEntryNameTitle => 'Nazwa wpisu';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM lub M, DD lub D dla daty; / tworzy folder; tekst w '
+      "'cudzysłowie' zostaje bez zmian";
+  @override
+  String journalEntryNamePreview(String path) => 'Dzisiejszy wpis: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Wymaga YYYY, miesiąca (MM lub M) i dnia (DD lub D), i niczego, czego '
+      'nie może zawierać nazwa pliku';
+  @override
+  String get journalTemplateTitle => 'Szablon';
+  @override
+  String get journalTemplateSubtitle => 'Od czego zaczyna się nowy wpis';
+  @override
+  String get journalTemplateNone => 'Brak: nagłówek z datą';
+  @override
+  String get journalDayStartTitle => 'Nowy dzień zaczyna się o';
+  @override
+  String get journalDayStartSubtitle =>
+      'Późno? O 04:00 noc wciąż należy do poprzedniego dnia';
+  @override
   String get commandsTitle => 'Polecenia';
   @override
   String get commandsIntro =>

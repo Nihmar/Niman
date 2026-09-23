@@ -1224,6 +1224,37 @@ final class HungarianStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'A(z) $path naplósablon nem olvasható: a bejegyzés nélküle készült el.';
   @override
+  String get journalIntro =>
+      'Naponta egy jegyzet, sablonból készül, amikor először nyitja meg az '
+      'adott napot. Ezek a beállítások a könyvtárral utaznak.';
+  @override
+  String get journalFolderTitle => 'Napló mappája';
+  @override
+  String get journalFolderSubtitle => 'Hová kerülnek a bejegyzések';
+  @override
+  String get journalEntryNameTitle => 'Bejegyzés neve';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM vagy M, DD vagy D a dátumhoz; a / mappát hoz létre; az '
+      "'idézőjeles' szöveg változatlan marad";
+  @override
+  String journalEntryNamePreview(String path) => 'Mai bejegyzés: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Kell YYYY, egy hónap (MM vagy M) és egy nap (DD vagy D), és semmi, '
+      'amit egy fájlnév nem tartalmazhat';
+  @override
+  String get journalTemplateTitle => 'Sablon';
+  @override
+  String get journalTemplateSubtitle => 'Mivel kezdődik egy új bejegyzés';
+  @override
+  String get journalTemplateNone => 'Nincs: címsor a dátummal';
+  @override
+  String get journalDayStartTitle => 'Az új nap kezdete';
+  @override
+  String get journalDayStartSubtitle =>
+      'Későn fekszik? 04:00-kor az éjszaka még az előző naphoz tartozik';
+  @override
   String get commandsTitle => 'Parancsok';
   @override
   String get commandsIntro =>

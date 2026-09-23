@@ -1136,6 +1136,33 @@ final class JapaneseStrings extends Strings {
   String journalTemplateMissing(String path) =>
       '日記テンプレート $path を読み込めませんでした。テンプレートなしでエントリを作成しました。';
   @override
+  String get journalIntro =>
+      '1 日 1 ノート。その日を初めて開いたときにテンプレートから作成されます。これらの設定はライブラリと一緒に移動します。';
+  @override
+  String get journalFolderTitle => '日記フォルダー';
+  @override
+  String get journalFolderSubtitle => 'エントリの保存先';
+  @override
+  String get journalEntryNameTitle => 'エントリ名';
+  @override
+  String get journalEntryNameSubtitle =>
+      "日付は YYYY、MM または M、DD または D。/ でフォルダー。'引用符' 内の文字はそのまま";
+  @override
+  String journalEntryNamePreview(String path) => '今日のエントリ: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'YYYY、月（MM または M）、日（DD または D）が必要で、ファイル名に使えない文字は使えません';
+  @override
+  String get journalTemplateTitle => 'テンプレート';
+  @override
+  String get journalTemplateSubtitle => '新しいエントリの始まり';
+  @override
+  String get journalTemplateNone => 'なし: 日付の見出し';
+  @override
+  String get journalDayStartTitle => '新しい日の始まり';
+  @override
+  String get journalDayStartSubtitle => '夜更かし? 04:00 にすると夜は前日のままです';
+  @override
   String get commandsTitle => 'コマンド';
   @override
   String get commandsIntro =>

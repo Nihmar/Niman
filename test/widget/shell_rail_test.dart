@@ -220,6 +220,17 @@ void main() {
     await pumpWide(tester);
     await tester.tap(railDest('settings'));
     await settle(tester);
+    // Maintenance closes the list of areas: scroll the list to it.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('reindex-setting')),
+      100,
+      scrollable: find
+          .ancestor(
+            of: find.byKey(const Key('settings-area-journal')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(find.byKey(const Key('reindex-setting')), findsOne);
     expect(find.byKey(const Key('switch-library-setting')), findsNothing);
     expect(find.byKey(const Key('close-library-setting')), findsNothing);

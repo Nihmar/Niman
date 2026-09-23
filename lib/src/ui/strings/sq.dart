@@ -1230,6 +1230,37 @@ final class AlbanianStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'Shablloni i ditarit $path nuk u lexua dot: hyrja u krijua pa të.';
   @override
+  String get journalIntro =>
+      'Një shënim në ditë, i krijuar nga një shabllon herën e parë që hap atë '
+      'ditë. Këto cilësime udhëtojnë me bibliotekën.';
+  @override
+  String get journalFolderTitle => 'Dosja e ditarit';
+  @override
+  String get journalFolderSubtitle => 'Ku shkojnë hyrjet';
+  @override
+  String get journalEntryNameTitle => 'Emri i hyrjes';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM ose M, DD ose D për datën; / krijon një dosje; teksti në '
+      "'thonjëza' mbetet siç është";
+  @override
+  String journalEntryNamePreview(String path) => 'Hyrja e sotme: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Duhen YYYY, një muaj (MM ose M) dhe një ditë (DD ose D), dhe asgjë që '
+      'një emër skedari nuk mund ta mbajë';
+  @override
+  String get journalTemplateTitle => 'Shabllon';
+  @override
+  String get journalTemplateSubtitle => 'Me çfarë fillon një hyrje e re';
+  @override
+  String get journalTemplateNone => 'Asnjë: një titull me datën';
+  @override
+  String get journalDayStartTitle => 'Një ditë e re fillon në';
+  @override
+  String get journalDayStartSubtitle =>
+      'Vonë? Në 04:00 nata mbetet te dita e mëparshme';
+  @override
   String get commandsTitle => 'Komandat';
   @override
   String get commandsIntro =>

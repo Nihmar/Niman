@@ -1231,6 +1231,37 @@ final class ItalianStrings extends Strings {
       'Il template del diario $path non si può leggere: la voce è stata '
       'creata senza.';
   @override
+  String get journalIntro =>
+      'Una nota al giorno, creata da un template la prima volta che apri quel '
+      'giorno. Queste impostazioni viaggiano con la libreria.';
+  @override
+  String get journalFolderTitle => 'Cartella del diario';
+  @override
+  String get journalFolderSubtitle => 'Dove vanno le voci';
+  @override
+  String get journalEntryNameTitle => 'Nome della voce';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM o M, DD o D per la data; / crea una cartella; il testo 'tra "
+      "apici' resta com'è";
+  @override
+  String journalEntryNamePreview(String path) => 'Voce di oggi: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Servono YYYY, un mese (MM o M) e un giorno (DD o D), e niente che un '
+      'nome di file non possa contenere';
+  @override
+  String get journalTemplateTitle => 'Template';
+  @override
+  String get journalTemplateSubtitle => 'Con cosa inizia una voce nuova';
+  @override
+  String get journalTemplateNone => 'Nessuno: un titolo con la data';
+  @override
+  String get journalDayStartTitle => 'Un nuovo giorno inizia alle';
+  @override
+  String get journalDayStartSubtitle =>
+      'Fai tardi? Alle 04:00 la notte resta sul giorno prima';
+  @override
   String get commandsTitle => 'Comandi';
   @override
   String get commandsIntro =>

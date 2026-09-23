@@ -1218,6 +1218,37 @@ final class SlovakStrings extends Strings {
       'Šablónu denníka $path sa nepodarilo prečítať: záznam bol vytvorený bez '
       'nej.';
   @override
+  String get journalIntro =>
+      'Jedna poznámka denne, vytvorená zo šablóny pri prvom otvorení daného '
+      'dňa. Tieto nastavenia cestujú s knižnicou.';
+  @override
+  String get journalFolderTitle => 'Priečinok denníka';
+  @override
+  String get journalFolderSubtitle => 'Kam idú záznamy';
+  @override
+  String get journalEntryNameTitle => 'Názov záznamu';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM alebo M, DD alebo D pre dátum; / vytvorí priečinok; text v '
+      "'úvodzovkách' zostane, ako je";
+  @override
+  String journalEntryNamePreview(String path) => 'Dnešný záznam: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Potrebuje YYYY, mesiac (MM alebo M) a deň (DD alebo D), a nič, čo '
+      'názov súboru nesmie obsahovať';
+  @override
+  String get journalTemplateTitle => 'Šablóna';
+  @override
+  String get journalTemplateSubtitle => 'Čím nový záznam začína';
+  @override
+  String get journalTemplateNone => 'Žiadna: nadpis s dátumom';
+  @override
+  String get journalDayStartTitle => 'Nový deň začína o';
+  @override
+  String get journalDayStartSubtitle =>
+      'Ponocujete? O 04:00 noc ešte patrí predchádzajúcemu dňu';
+  @override
   String get commandsTitle => 'Príkazy';
   @override
   String get commandsIntro =>

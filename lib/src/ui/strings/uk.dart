@@ -1222,6 +1222,37 @@ final class UkrainianStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'Не вдалося прочитати шаблон щоденника $path: запис створено без нього.';
   @override
+  String get journalIntro =>
+      'Одна нотатка на день, створена з шаблону, коли ти вперше відкриваєш '
+      'цей день. Ці налаштування подорожують разом із бібліотекою.';
+  @override
+  String get journalFolderTitle => 'Тека щоденника';
+  @override
+  String get journalFolderSubtitle => 'Куди йдуть записи';
+  @override
+  String get journalEntryNameTitle => 'Назва запису';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM або M, DD або D для дати; / створює теку; текст у 'лапках' "
+      'лишається як є';
+  @override
+  String journalEntryNamePreview(String path) => 'Сьогоднішній запис: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Потрібні YYYY, місяць (MM або M) і день (DD або D), і нічого, чого не '
+      'може містити назва файлу';
+  @override
+  String get journalTemplateTitle => 'Шаблон';
+  @override
+  String get journalTemplateSubtitle => 'З чого починається новий запис';
+  @override
+  String get journalTemplateNone => 'Немає: заголовок із датою';
+  @override
+  String get journalDayStartTitle => 'Новий день починається о';
+  @override
+  String get journalDayStartSubtitle =>
+      'Пізно лягаєш? О 04:00 ніч лишається на попередньому дні';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

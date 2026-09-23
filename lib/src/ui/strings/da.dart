@@ -1215,6 +1215,37 @@ final class DanishStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'Dagbogsskabelonen $path kunne ikke læses: indlægget blev oprettet uden.';
   @override
+  String get journalIntro =>
+      'Én note om dagen, lavet ud fra en skabelon første gang du åbner dagen. '
+      'Disse indstillinger følger med biblioteket.';
+  @override
+  String get journalFolderTitle => 'Dagbogsmappe';
+  @override
+  String get journalFolderSubtitle => 'Hvor indlæggene lægges';
+  @override
+  String get journalEntryNameTitle => 'Indlæggets navn';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM eller M, DD eller D for datoen; / laver en mappe; tekst i '
+      "'citationstegn' bliver som den er";
+  @override
+  String journalEntryNamePreview(String path) => 'Dagens indlæg: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Kræver YYYY, en måned (MM eller M) og en dag (DD eller D), og intet et '
+      'filnavn ikke kan indeholde';
+  @override
+  String get journalTemplateTitle => 'Skabelon';
+  @override
+  String get journalTemplateSubtitle => 'Hvad et nyt indlæg begynder med';
+  @override
+  String get journalTemplateNone => 'Ingen: en overskrift med datoen';
+  @override
+  String get journalDayStartTitle => 'En ny dag begynder kl.';
+  @override
+  String get journalDayStartSubtitle =>
+      'Sent oppe? Kl. 04:00 hører natten stadig til dagen før';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

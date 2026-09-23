@@ -1207,6 +1207,37 @@ final class TurkishStrings extends Strings {
   String journalTemplateMissing(String path) =>
       'Günlük şablonu $path okunamadı: girdi onsuz oluşturuldu.';
   @override
+  String get journalIntro =>
+      'Günde bir not; o günü ilk açtığında bir şablondan oluşturulur. Bu '
+      'ayarlar kitaplıkla birlikte taşınır.';
+  @override
+  String get journalFolderTitle => 'Günlük klasörü';
+  @override
+  String get journalFolderSubtitle => 'Girdilerin gideceği yer';
+  @override
+  String get journalEntryNameTitle => 'Girdi adı';
+  @override
+  String get journalEntryNameSubtitle =>
+      "Tarih için YYYY, MM veya M, DD veya D; / klasör oluşturur; 'tırnak "
+      "içindeki' metin olduğu gibi kalır";
+  @override
+  String journalEntryNamePreview(String path) => 'Bugünün girdisi: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'YYYY, bir ay (MM veya M) ve bir gün (DD veya D) gerekir; dosya adında '
+      'olamayacak bir şey olmamalı';
+  @override
+  String get journalTemplateTitle => 'Şablon';
+  @override
+  String get journalTemplateSubtitle => 'Yeni bir girdinin neyle başladığı';
+  @override
+  String get journalTemplateNone => 'Yok: tarihli bir başlık';
+  @override
+  String get journalDayStartTitle => 'Yeni gün şu saatte başlar';
+  @override
+  String get journalDayStartSubtitle =>
+      "Geç mi yatıyorsun? 04:00'te gece bir önceki güne sayılır";
+  @override
   String get commandsTitle => 'Komutlar';
   @override
   String get commandsIntro =>

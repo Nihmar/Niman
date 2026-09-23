@@ -1229,6 +1229,37 @@ final class BulgarianStrings extends Strings {
       'Шаблонът на дневника $path не можа да се прочете: записът е създаден '
       'без него.';
   @override
+  String get journalIntro =>
+      'Една бележка на ден, създадена от шаблон, когато отвориш деня за първи '
+      'път. Тези настройки пътуват с библиотеката.';
+  @override
+  String get journalFolderTitle => 'Папка на дневника';
+  @override
+  String get journalFolderSubtitle => 'Къде отиват записите';
+  @override
+  String get journalEntryNameTitle => 'Име на записа';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM или M, DD или D за датата; / създава папка; текстът в '
+      "'кавички' остава какъвто е";
+  @override
+  String journalEntryNamePreview(String path) => 'Днешен запис: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Нужни са YYYY, месец (MM или M) и ден (DD или D), и нищо, което име на '
+      'файл не може да съдържа';
+  @override
+  String get journalTemplateTitle => 'Шаблон';
+  @override
+  String get journalTemplateSubtitle => 'С какво започва нов запис';
+  @override
+  String get journalTemplateNone => 'Без: заглавие с датата';
+  @override
+  String get journalDayStartTitle => 'Новият ден започва в';
+  @override
+  String get journalDayStartSubtitle =>
+      'Лягаш късно? В 04:00 нощта остава към предишния ден';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

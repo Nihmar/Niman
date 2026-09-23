@@ -11,6 +11,7 @@ import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/journal/settings_journal.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_commands.dart';
@@ -48,6 +49,9 @@ enum SettingsAreaId {
 
   /// The library's folders.
   folders,
+
+  /// The journal (#7).
+  journal,
 
   /// Trash and note history.
   trashHistory,
@@ -219,6 +223,15 @@ List<SettingsArea> settingsAreas({
         controller: controller,
         highlight: highlight,
       ),
+    ),
+    SettingsArea(
+      id: SettingsAreaId.journal,
+      group: SettingsGroup.library,
+      rowKey: const Key('settings-area-journal'),
+      icon: () => Icons.calendar_today_outlined,
+      title: AppStrings.paletteGroupJournal,
+      build: (highlight) =>
+          SettingsJournalScreen(controller: controller, highlight: highlight),
     ),
     SettingsArea(
       id: SettingsAreaId.trashHistory,
