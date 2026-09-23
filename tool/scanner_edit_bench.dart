@@ -118,10 +118,29 @@ Future<void> _real(String path) async {
     final edit = buffer.replaceRange(offset, offset + 1, 'X');
     final clock = Stopwatch()..start();
     scanner.edited(edit);
+    final keystroke = clock.elapsedMicroseconds / 1000;
+    final scanned = scanner.scannedLineTotal - before;
+    // What the edit left owed, carried on the way the editor carries it: a
+    // slice at a time, each its own turn of the event loop.
+    var slices = 0;
+    var worst = 0.0;
+    var rest = 0.0;
+    while (!scanner.settled) {
+      final slice = Stopwatch()..start();
+      scanner.advance();
+      final ms = slice.elapsedMicroseconds / 1000;
+      if (ms > worst) worst = ms;
+      rest += ms;
+      slices++;
+    }
     print(
-      '  edit at ${(at * 100).toInt()}%: ${clock.elapsedMilliseconds}ms, '
-      '${scanner.scannedLineTotal - before} lines re-scanned '
-      '(${holder.kind.name} ${holder.startLine}..${holder.endLine})',
+      '  edit at ${(at * 100).toInt()}%: ${keystroke.toStringAsFixed(1)}ms, '
+      '$scanned lines re-scanned '
+      '(${holder.kind.name} ${holder.startLine}..${holder.endLine})'
+      '${slices == 0 ? '' : '; then $slices slices, worst '
+                '${worst.toStringAsFixed(1)}ms, '
+                '${rest.toStringAsFixed(0)}ms in all, '
+                '${scanner.scannedLineTotal - before - scanned} lines'}',
     );
   }
 }

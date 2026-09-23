@@ -1910,9 +1910,18 @@ final class _NoteViewState extends State<NoteView>
       // the count it has and takes the next refresh's.
       final revision = surface.revision;
       if (revision == _unifiedStatsRevision && surface.words.isCounted) return;
-      _unifiedStatsRevision = revision;
       final counted = surface.words.isCounted ? surface.words.words : null;
       final headings = _outlineNow(surface);
+      // The pane's scan may still be carrying on an edit that changed the rest
+      // of the note, and the outline is the whole note's: this revision is not
+      // done until it lands, so the refresh asks again rather than keeping
+      // the outline from before the edit for as long as nobody types.
+      if (_sourceViewKey.currentState?.scanSettled ?? true) {
+        _unifiedStatsRevision = revision;
+      } else {
+        _statsTimer?.cancel();
+        _statsTimer = Timer(_statsDelay, _refreshStats);
+      }
       final frontmatter = _frontmatterErrorOf(surface.buffer);
       setState(() {
         if (counted != null) _wordCount = counted;

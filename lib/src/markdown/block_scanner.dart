@@ -26,22 +26,33 @@ import 'package:niman/src/markdown/source_edit.dart';
 
 /// Reads a note's lines into blocks, and keeps up with edits.
 final class BlockScanner {
-  /// Scans [buffer] from the top.
-  new(this.buffer) {
-    _rescanFrom(0);
+  /// Scans [buffer] from the top, all of it.
+  ///
+  /// An edit's rescan reads at most [budget] lines past the edit before it
+  /// leaves the rest to [advance] (see [edited]).
+  new(this.buffer, {this.budget = defaultBudget}) {
+    _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
   }
 
   /// [scanned]'s answer, for [buffer]: a scan made of a copy of the note —
   /// in an isolate — taken over by the note itself, without scanning again.
   ///
   /// The two must hold the same lines, which is the caller's to promise.
-  new rebound(BlockScanner scanned, this.buffer) {
+  new rebound(BlockScanner scanned, this.buffer) : budget = scanned.budget {
+    scanned.settle();
     scanned._settle(scanned._blocks.length);
     _entering.addAll(scanned._entering);
     _blocks.addAll(scanned._blocks);
     _lineCount = scanned._lineCount;
     _shiftFrom = _blocks.length;
   }
+
+  /// How many lines past its edit a rescan reads before it stops, by default:
+  /// a few milliseconds of scanning, and far more than a screen of lines.
+  static const int defaultBudget = 4096;
+
+  /// How many lines past its edit a rescan reads before it stops.
+  final int budget;
 
   /// The text being scanned.
   final SourceBuffer buffer;
@@ -104,16 +115,18 @@ final class BlockScanner {
   }
 
   /// The blocks as of [SourceBuffer.revision], for a reader that wants them.
+  ///
+  /// All of them, so a scan still owed is finished first ([settle]): O(the
+  /// rest of the note) once after an edit that changed it, which is why the
+  /// readers on a keystroke's path ask [blockAt] instead.
   BlockIndex get index {
+    settle();
     _settle(_blocks.length);
     return BlockIndex(
       blocks: List<Block>.unmodifiable(_blocks),
       revision: buffer.revision,
     );
   }
-
-  /// How many lines have a recorded state. Everything up to here is current.
-  int get scannedLines => _entering.length;
 
   /// The line count at the last scan.
   int _lineCount = 0;
@@ -126,12 +139,26 @@ final class BlockScanner {
   int get scannedLineTotal => _scannedLineTotal;
   int _scannedLineTotal = 0;
 
-  /// The state entering [line]. O(1), and only valid below [scannedLines].
-  LineState stateEntering(int line) => _entering[line];
+  /// The state entering [line]: scanned up to it first when it is owed.
+  LineState stateEntering(int line) {
+    _catchUp(line);
+    return _entering[line];
+  }
 
   /// The block holding [line], or null past the note's end. O(log blocks),
   /// and without the copy [index] makes.
+  ///
+  /// Current: a line past a [frontier] is scanned up to first — and on to the
+  /// end of its block, since a block the scan has not finished is cut where
+  /// the scan stopped, and a reader of its last line or of its parse needs
+  /// the block that is.
   Block? blockAt(int line) {
+    _catchUp(line);
+    return _blockHolding(line);
+  }
+
+  /// The block holding [line] as the list has it, current or not.
+  Block? _blockHolding(int line) {
     if (_blocks.isEmpty || line < 0) return null;
     final at = _firstIndexWhere(0, (block) => block.startLine > line) - 1;
     if (at < 0) return null;
@@ -139,21 +166,146 @@ final class BlockScanner {
     return block.contains(line) ? block : null;
   }
 
+  // ------------------------------------------------------------ frontiers
+
+  /// Where the scan stopped short, ascending: from each of these lines on,
+  /// the recorded states and blocks are what an earlier scan made of them —
+  /// hints, not answers, until [advance] reaches them. Empty when the whole
+  /// note is current.
+  ///
+  /// Why a rescan stops short at all is `docs/dev/huge-notes.md` item 3: an
+  /// edit can change what the whole rest of the note *is* — the second `$`
+  /// of a `$$`, the third backtick of a fence — and then there is nothing to
+  /// converge to until the end. That work is the note's, and it cannot be
+  /// made smaller; what a keystroke can be spared is doing all of it at once.
+  final List<int> _frontiers = <int>[];
+
+  /// Whether every line's state and block is current.
+  bool get settled => _frontiers.isEmpty;
+
+  /// The first line that is not yet current, or null when all are.
+  int? get frontier => _frontiers.isEmpty ? null : _frontiers.first;
+
+  /// Scans on from the first [frontier], [lines] lines or until the scan
+  /// agrees with what was there. Does nothing when [settled].
+  void advance([int? lines]) {
+    if (_frontiers.isEmpty) return;
+    final from = _frontiers.removeAt(0);
+    // The block that ends at the frontier is the one the scan had open when it
+    // stopped: it is taken open again, and the blocks from the frontier on are
+    // the hints the rebuild compares with.
+    final headEnd = _firstIndexWhere(0, (block) => block.endLine >= from);
+    _rebuild(
+      start: from,
+      headEnd: headEnd,
+      tailStart: headEnd + 1,
+      settledFrom: from + 1,
+      // At least a line past the frontier, or a caller with nothing left
+      // to spend would put it back where it was.
+      budget: (lines ?? budget) < 1 ? 1 : lines ?? budget,
+    );
+  }
+
+  /// Scans until every line is current.
+  void settle() {
+    while (_frontiers.isNotEmpty) {
+      advance(1 << 30);
+    }
+  }
+
+  /// Scans until [line] and the block holding it are current.
+  void _catchUp(int line) {
+    while (_frontiers.isNotEmpty) {
+      final first = _frontiers.first;
+      if (first > line) {
+        // The line is current; its block is too unless the scan stopped
+        // inside it, which is when the block ends at the frontier.
+        final block = _blockHolding(line);
+        if (block == null || block.endLine != first) return;
+      }
+      advance(line >= first ? line - first + budget : budget);
+    }
+  }
+
   /// Re-scans after [edit].
   ///
   /// Blocks entirely before the edit are kept, blocks from the point where the
-  /// scan converges on are kept, and the region between is rebuilt.
-  void edited(SourceEdit edit) => _rescanFrom(0, edit);
+  /// scan converges on are kept, and the region between is rebuilt. When the
+  /// rebuild has read [budget] lines past the edit without converging, it
+  /// stops there and leaves a [frontier]: the rest is what the edit changed,
+  /// and [advance] carries on with it.
+  void edited(SourceEdit edit) {
+    final untouched = edit.firstUntouchedLine;
+    if (edit.firstLine < _entering.length) {
+      _replaceStates(
+        edit.firstLine,
+        (untouched > _entering.length ? _entering.length : untouched) -
+            edit.firstLine,
+        edit.insertedLines,
+      );
+    }
+    // A frontier below the edit moves with the lines; one inside what the
+    // edit replaced is where the edit begins, which the rebuild passes.
+    for (var at = 0; at < _frontiers.length; at++) {
+      final line = _frontiers[at];
+      if (line >= untouched) {
+        _frontiers[at] = line + edit.lineDelta;
+      } else if (line > edit.firstLine) {
+        _frontiers[at] = edit.firstLine;
+      }
+    }
+    final tailStart = _firstIndexWhere(
+      0,
+      (block) => block.startLine >= untouched,
+    );
+    // The survivors after the edit are the same blocks, moved by however
+    // many lines the document gained or lost — owed, not moved ([_owe]):
+    // everything below reads them where they are now.
+    if (edit.lineDelta != 0) _owe(tailStart, edit.lineDelta);
+    var start = edit.firstLine;
+    // The line before the edit reads the edited line when it asks whether
+    // it heads a table (the delimiter row is the line under it), so it is
+    // not the line it was: the rebuild takes in its whole block.
+    if (start > 0 &&
+        start - 1 < buffer.lineCount &&
+        _hasPipe(_text(start - 1))) {
+      start = _blockHolding(start - 1)?.startLine ?? 0;
+    }
+    // An edit at or past a frontier lands on lines that are not current: the
+    // rebuild starts where they begin.
+    if (_frontiers.isNotEmpty && _frontiers.first < start) {
+      start = _frontiers.first;
+    }
+    var headEnd = 0;
+    if (start > 0) {
+      // The block holding the line before the rebuild, which is a kept one:
+      // everything before the edit is where it was.
+      headEnd = _firstIndexWhere(0, (block) => block.endLine >= start);
+      // A line no kept block holds is a list that no longer tiles the
+      // note; a scan from the top is the answer that cannot be wrong.
+      if (headEnd >= tailStart) headEnd = start = 0;
+    }
+    _rebuild(
+      start: start,
+      headEnd: headEnd,
+      tailStart: tailStart,
+      // Only from two lines past the edit is a line's recorded state its own:
+      // the inserted lines hold placeholders, and the first line after them
+      // still reads the last inserted one (an indented block opens only
+      // after a blank line).
+      settledFrom: edit.firstLine + edit.insertedLines + 1,
+      edit: edit,
+      budget: budget,
+    );
+  }
 
-  /// Re-scans from [from] — the whole note, for the first scan — or from
-  /// the line [edit] began on.
+  /// Rebuilds from [start] — the block at [headEnd] holding the line before
+  /// it, taken open — until the scan converges on what was there, reaches
+  /// the note's end, or has read [budget] lines past [settledFrom].
   ///
-  /// The kept states and blocks are brought into the new line coordinates
-  /// first: an edit that removed lines leaves every line number after it
-  /// stale, and comparing stale numbers with fresh ones is exactly how a
-  /// scanner ends up with blocks that overlap themselves.
-  ///
-  /// Both ends of the rebuild are the *edit's*, not the block's
+  /// The blocks from [tailStart] on are the ones the scan is compared with;
+  /// the ones before it that [edit] touched are read where they were before
+  /// it. Both ends of the rebuild are the *edit's*, not the block's
   /// (`docs/dev/huge-notes.md` item 3): a block can be the whole note — a
   /// paragraph with no blank line in it, a formula that never closes — and a
   /// keystroke that paid for the block paid for the note.
@@ -166,49 +318,14 @@ final class BlockScanner {
   ///   entering a line is what it was, and so is the block that line is in
   ///   (see [_convergesAt]). From there on every line is the same text entered
   ///   in the same state, so it makes the same blocks it made before.
-  void _rescanFrom(int from, [SourceEdit? edit]) {
-    // Which blocks survive, and where the survivors are, found by binary
-    // search rather than by walking the list: the block list is the one
-    // structure here whose size is the document's, so a pass over it per
-    // keystroke is the difference between a screen-shaped cost and a
-    // document-shaped one.
-    var headEnd = 0;
-    var tailStart = _blocks.length;
-    var start = from;
-    if (edit != null) {
-      final untouched = edit.firstUntouchedLine;
-      if (edit.firstLine < _entering.length) {
-        _replaceStates(
-          edit.firstLine,
-          (untouched > _entering.length ? _entering.length : untouched) -
-              edit.firstLine,
-          edit.insertedLines,
-        );
-      }
-      tailStart = _firstIndexWhere(0, (block) => block.startLine >= untouched);
-      // The survivors after the edit are the same blocks, moved by however
-      // many lines the document gained or lost — owed, not moved ([_owe]):
-      // everything below reads them where they are now.
-      if (edit.lineDelta != 0) _owe(tailStart, edit.lineDelta);
-      start = edit.firstLine;
-      // The line before the edit reads the edited line when it asks whether
-      // it heads a table (the delimiter row is the line under it), so it is
-      // not the line it was: the rebuild takes in its whole block.
-      if (start > 0 &&
-          start - 1 < buffer.lineCount &&
-          _hasPipe(_text(start - 1))) {
-        start = blockAt(start - 1)?.startLine ?? 0;
-      }
-      if (start > 0) {
-        // The block holding the line before the rebuild, which is a kept one:
-        // everything before the edit is where it was.
-        headEnd = _firstIndexWhere(0, (block) => block.endLine >= start);
-        // A line no kept block holds is a list that no longer tiles the
-        // note; a scan from the top is the answer that cannot be wrong.
-        if (headEnd >= tailStart) headEnd = start = 0;
-      }
-    }
-
+  void _rebuild({
+    required int start,
+    required int headEnd,
+    required int tailStart,
+    required int settledFrom,
+    required int? budget,
+    SourceEdit? edit,
+  }) {
     // The block the line before the rebuild is in, cut at the rebuild: what a
     // fresh scan has open when it reaches the edited line.
     final open = start > 0 && headEnd < _blocks.length
@@ -219,31 +336,31 @@ final class BlockScanner {
       open: open,
       before: _nonBlankBefore(headEnd),
     );
-    // Only from two lines past the edit is a line's recorded state its own:
-    // the inserted lines hold placeholders, and the first line after them
-    // still reads the last inserted one (an indented block opens only after
-    // a blank line).
-    final settledFrom = edit == null
-        ? buffer.lineCount + 1
-        : edit.firstLine + edit.insertedLines + 1;
+    final stopAt = budget == null
+        ? buffer.lineCount
+        : (settledFrom > start ? settledFrom : start) + budget;
 
     var line = start;
     var state = start == 0 ? LineState.initial : _exitOf(start - 1);
     var keepFrom = -1;
+    var converged = false;
     while (line < buffer.lineCount) {
       final previous = line < _entering.length ? _entering[line] : null;
-      if (line > start && previous == state) {
+      if (line >= settledFrom && previous == state && !_isFrontier(line)) {
         if (_isBlockBoundary(line, state) && _hasBoundaryAt(line, tailStart)) {
           // Converged at a boundary: the state is what it was, nothing is
           // continuing across this line, and the block list already has a
           // boundary here — so the blocks after it are untouched.
+          converged = true;
           break;
         }
-        if (line >= settledFrom) {
-          keepFrom = _convergesAt(line, builder, tailStart, headEnd, edit!);
-          if (keepFrom >= 0) break;
+        keepFrom = _convergesAt(line, builder, tailStart, headEnd, edit);
+        if (keepFrom >= 0) {
+          converged = true;
+          break;
         }
       }
+      if (line >= stopAt) break;
       _setEntering(line, state);
       builder.add(line);
       state = _exitOf(line);
@@ -252,6 +369,20 @@ final class BlockScanner {
     _scannedLineTotal += line - start;
     final rebuilt = builder.finish();
 
+    if (!converged && line < buffer.lineCount) {
+      // Stopped short: the lines from here on keep what they had, as hints,
+      // and the block the old list has here is cut so the list goes on tiling
+      // the note — its shape is the old one's, which [advance] will replace.
+      final (index, block, end) = _hintAt(line, tailStart, headEnd, edit);
+      if (block == null) {
+        keepFrom = _firstIndexWhere(tailStart, (b) => b.startLine >= line);
+      } else if (block.startLine >= line) {
+        keepFrom = index;
+      } else {
+        rebuilt.add(_cutFront(block, line, end));
+        keepFrom = index + 1;
+      }
+    }
     // Everything from the convergence point on is what it was, so the
     // survivors are spliced back in place instead of being copied into a new
     // list: one range replacement, and the blocks inside the edit — the ones
@@ -268,6 +399,11 @@ final class BlockScanner {
     if (_shiftFrom < keepFrom) _settle(keepFrom);
     _blocks.replaceRange(headEnd, keepFrom, rebuilt);
     _shiftFrom += rebuilt.length - (keepFrom - headEnd);
+    // The frontiers the rebuild passed are behind it; a converged one leaves
+    // the ones below it, whose hints it did not reach, and one that stopped
+    // short is the first frontier itself.
+    _frontiers.removeWhere((frontier) => frontier <= line);
+    if (!converged && line < buffer.lineCount) _frontiers.insert(0, line);
     // The states recorded after the convergence point are *kept*: convergence
     // means they are what they were, and a later edit down there needs the
     // state entering its block. Only the entries past the document's end go,
@@ -277,6 +413,56 @@ final class BlockScanner {
     }
     _lineCount = buffer.lineCount;
   }
+
+  /// Whether a scan stopped short at [line]: the block there was cut from one
+  /// above it, so it is no block of the note's and nothing converges on it.
+  bool _isFrontier(int line) {
+    for (final frontier in _frontiers) {
+      if (frontier == line) return true;
+      if (frontier > line) return false;
+    }
+    return false;
+  }
+
+  /// The old block holding [line], its index and where it ends now: a kept
+  /// one after the edit, where it is now; or the last one [edit] touched,
+  /// when it runs on past the edit — read where it was, so its end is moved
+  /// by the edit's delta. A null block when neither holds [line].
+  (int, Block?, int) _hintAt(
+    int line,
+    int tailStart,
+    int headEnd,
+    SourceEdit? edit,
+  ) {
+    final index = _firstIndexWhere(tailStart, (b) => b.startLine > line) - 1;
+    if (index >= tailStart) {
+      final block = _at(index);
+      return (index, block, block.endLine);
+    }
+    final touched = tailStart - 1;
+    if (edit == null || touched < headEnd || touched < 0) return (-1, null, 0);
+    final block = _at(touched);
+    final end = block.endLine + edit.lineDelta;
+    if (block.endLine < edit.firstUntouchedLine ||
+        line >= end ||
+        block.startLine >= line) {
+      return (-1, null, 0);
+    }
+    return (touched, block, end);
+  }
+
+  /// [block] from [start] on, to [end]: what is left of a block a scan
+  /// stopped inside.
+  static Block _cutFront(Block block, int start, int end) => Block(
+    kind: block.kind,
+    startLine: start,
+    endLine: end,
+    quoteDepth: block.quoteDepth,
+    listDepth: block.listDepth,
+    listOrdinal: block.listOrdinal,
+    headingLevel: block.headingLevel,
+    fenceInfo: block.fenceInfo,
+  );
 
   /// Whether the rebuild can stop before [line] — whose entering state is
   /// the one it had, as is the line before it — and, when it can, the index
@@ -303,26 +489,10 @@ final class BlockScanner {
     _BlockBuilder builder,
     int tailStart,
     int headEnd,
-    SourceEdit edit,
+    SourceEdit? edit,
   ) {
-    // The old block holding [line]: a kept one after the edit, where it is
-    // now; or the last one the edit touched, when it runs on past the edit —
-    // read where it was, so its end is moved by the edit's delta.
-    var index = _firstIndexWhere(tailStart, (b) => b.startLine > line) - 1;
-    Block old;
-    int oldEnd;
-    if (index >= tailStart) {
-      old = _at(index);
-      oldEnd = old.endLine;
-    } else {
-      index = tailStart - 1;
-      if (index < headEnd || index < 0) return -1;
-      old = _at(index);
-      oldEnd = old.endLine + edit.lineDelta;
-      if (old.endLine < edit.firstUntouchedLine || line >= oldEnd) return -1;
-      if (old.startLine >= line) return -1;
-    }
-    if (old.kind == BlockKind.blank) return -1;
+    final (index, old, oldEnd) = _hintAt(line, tailStart, headEnd, edit);
+    if (old == null || old.kind == BlockKind.blank) return -1;
     final open = builder.open;
     final goesOn = open != null && _mergesInto(open.kind, open.startLine, line);
     if (old.startLine == line) {

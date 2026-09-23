@@ -128,8 +128,22 @@ final class SourceStyler {
   /// colouring is drawn by rather than from a second walk of the text: see
   /// [outlineOfBlocks]. O(blocks), so it is the note's heading count and
   /// never its length.
-  List<OutlineEntry> get headings =>
-      outlineOfBlocks(_scanner.index, buffer.lineAt);
+  ///
+  /// Null while the scan still owes part of the note ([settled]): the outline
+  /// is the whole note's, and finishing the scan for it would put back on one
+  /// frame the work an edit that changed the rest of the note was spared. The
+  /// note view keeps the outline it has, and asks again.
+  List<OutlineEntry>? get headings =>
+      _scanner.settled ? outlineOfBlocks(_scanner.index, buffer.lineAt) : null;
+
+  /// Whether every line's block is current. An edit that changes the rest of
+  /// the note — a `$$` opened, a fence — scans a budget of lines past itself
+  /// and leaves the rest to [advance] (`BlockScanner.edited`).
+  bool get settled => _scanner.settled;
+
+  /// Carries the scan on for a budget of lines; the lines drawn never wait
+  /// for it, because [tokensOf] catches the scan up to the line it colours.
+  void advance() => _scanner.advance();
 
   /// The note's blocks, as the scan behind the colours has them, or null
   /// when the scan is of a revision the buffer has moved on from.

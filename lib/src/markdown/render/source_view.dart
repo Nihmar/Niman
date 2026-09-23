@@ -288,6 +288,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The outline the note view publishes, from an answer it already holds.
   List<OutlineEntry>? get headings => _styler?.headings;
 
+  /// Whether the note's blocks are all current: false while an edit that
+  /// changed the rest of the note is still being scanned on, a slice at a
+  /// time, and [headings] waits for it.
+  bool get scanSettled => _styler?.settled ?? true;
+
   /// The note's blocks, as the scan behind the colours has them, or null
   /// while there is no scan yet.
   ///
@@ -465,6 +470,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
+    _scanSlice?.cancel();
     _typewriter.dispose();
     _semanticsTick.dispose();
     _caretRect.dispose();
@@ -1651,7 +1657,38 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// Moves the colours along [edit], already made to the buffer.
-  void _styleEdited(SourceEdit edit) => _styler?.edited(edit);
+  void _styleEdited(SourceEdit edit) {
+    _styler?.edited(edit);
+    _carryScanOn();
+  }
+
+  /// The next slice of a scan an edit left owed, when one is waiting.
+  Timer? _scanSlice;
+
+  /// Carries on, a slice at a time, the scan an edit left owed
+  /// (`docs/dev/huge-notes.md` item 3).
+  ///
+  /// An edit that changes what the rest of the note is — a `$$` opened at 50 %
+  /// of a 246 MB note — scans its budget of lines and stops, and the lines on
+  /// screen catch it up as far as they need. Nothing drawn waits for the rest,
+  /// so nothing here repaints; what finishing it gives back is the whole
+  /// note's answers — the outline, the blocks — to the readers that ask for
+  /// all of it.
+  ///
+  /// Each slice is a timer of its own, so a frame or a key between two slices
+  /// waits for one slice at most. Not an idle-priority scheduler task: those
+  /// are refused while any animation runs, and a refused task asks the event
+  /// loop again at once — a core spinning for as long as a spinner turns.
+  void _carryScanOn() {
+    final styler = _styler;
+    if (_scanSlice != null || styler == null || styler.settled) return;
+    _scanSlice = Timer(Duration.zero, () {
+      _scanSlice = null;
+      if (!mounted || !identical(_styler, styler)) return;
+      styler.advance();
+      _carryScanOn();
+    });
+  }
 
   BlockHeightMap _map() =>
       BlockHeightMap(count: _folds.rowCount(lineCount), estimate: _estimateRow);
