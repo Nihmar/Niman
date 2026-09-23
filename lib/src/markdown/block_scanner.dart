@@ -699,7 +699,8 @@ final class BlockScanner {
     if (_isTableRow(line)) return BlockKind.table;
     if (_hr.hasMatch(text)) return BlockKind.thematicBreak;
     if (_headingLevel(text) > 0) return BlockKind.heading;
-    if (state.indentedCode || _opensIndentedCode(line, text)) {
+    // Code while it is four spaces in: a line less than that ends the block.
+    if (_indentedCodeContinues(line, text, state)) {
       return BlockKind.indentedCode;
     }
     // Containers, innermost first: a line with its own quote marker is a quote
