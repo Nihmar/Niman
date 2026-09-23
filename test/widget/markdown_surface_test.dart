@@ -132,6 +132,36 @@ void main() {
     }
   });
 
+  testWidgets("live shows a code block's code, and hides its fences", (
+    tester,
+  ) async {
+    // A fence's content lines were tokens of the fence, and the fence is a
+    // marker: `live` hid the code itself, a blank where the block was, until
+    // the caret went into it.
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\n```dart\ncode line\n```\n\n    indented code\n',
+    );
+    final spans = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+    }
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+    for (final code in ['code line', 'indented code']) {
+      final drawn = spans.where((span) => span.text!.contains(code));
+      expect(drawn, isNotEmpty, reason: code);
+      expect(drawn.any(hidden), isFalse, reason: '$code is the note');
+    }
+    final fences = spans.where((span) => span.text!.startsWith('```'));
+    expect(fences, isNotEmpty);
+    expect(fences.every(hidden), isTrue, reason: 'the fences are syntax');
+  });
+
   testWidgets('live hides the marker, source shows it', (tester) async {
     // The caret is *off* the heading's line: the markers are hidden
     // everywhere except where the writer is, which is the policy

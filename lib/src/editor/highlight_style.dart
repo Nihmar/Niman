@@ -86,7 +86,8 @@ TextStyle? markdownTokenStyle(
       fontFeatures: <FontFeature>[FontFeature.subscripts()],
     ),
     TokenKind.codeInline => TextStyle(color: syntax.code),
-    TokenKind.codeFence => TextStyle(color: syntax.codeMuted),
+    TokenKind.codeFence ||
+    TokenKind.codeBlock => TextStyle(color: syntax.codeMuted),
     TokenKind.codeLanguage => TextStyle(
       color: syntax.codeMuted,
       fontStyle: FontStyle.italic,

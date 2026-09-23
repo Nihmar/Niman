@@ -171,13 +171,22 @@ void main() {
       expect(_line('> > deep'), ['blockquote[>]', 'blockquote[>]']);
     });
 
-    test('a fence: every line code, the opening one with its language', () {
-      const note = '```dart\nvar a = **b**;\n```';
-      final styler = SourceStyler(SourceBuffer.fromText(note));
-      expect(_describe(styler, 0), ['codeFence[```]', 'codeLanguage[dart]']);
-      expect(_describe(styler, 1), ['codeFence[var a = **b**;]']);
-      expect(_describe(styler, 2), ['codeFence[```]']);
-    });
+    test(
+      'a fence: its fences, the opening one with its language, and code',
+      () {
+        // The content is code, not fence: `live` hides a fence, and hid the
+        // code with it.
+        const note = '```dart\nvar a = **b**;\n```';
+        final styler = SourceStyler(SourceBuffer.fromText(note));
+        expect(_describe(styler, 0), ['codeFence[```]', 'codeLanguage[dart]']);
+        expect(_describe(styler, 1), ['codeBlock[var a = **b**;]']);
+        expect(_describe(styler, 2), ['codeFence[```]']);
+        final open = SourceStyler(SourceBuffer.fromText('```\nstill code'));
+        expect(_describe(open, 1), [
+          'codeBlock[still code]',
+        ], reason: 'a block the note did not close ends on its code');
+      },
+    );
 
     test('display maths, the frontmatter, a rule and a blank line', () {
       const note = '---\ntitle: x\n---\n\n\$\$\na\n\$\$\n\n***';

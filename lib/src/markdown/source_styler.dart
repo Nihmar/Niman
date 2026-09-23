@@ -267,7 +267,7 @@ final class SourceStyler {
       case BlockKind.fencedCode:
         return _fenceTokens(block, line, text);
       case BlockKind.indentedCode:
-        return <Token>[Token(TokenKind.codeFence, 0, text.length)];
+        return <Token>[Token(TokenKind.codeBlock, 0, text.length)];
       case BlockKind.math:
         return <Token>[Token(TokenKind.mathBlock, 0, text.length)];
       case BlockKind.frontmatter:
@@ -321,7 +321,14 @@ final class SourceStyler {
   /// in three rather than lying on top of it.
   static List<Token> _fenceTokens(Block block, int line, String text) {
     final whole = <Token>[Token(TokenKind.codeFence, 0, text.length)];
-    if (line != block.startLine) return whole;
+    if (line != block.startLine) {
+      // The code itself, unless this is the fence that closes the block.
+      final closing =
+          line == block.endLine - 1 && _closesFence(text.trimLeft());
+      return closing
+          ? whole
+          : <Token>[Token(TokenKind.codeBlock, 0, text.length)];
+    }
     final info = block.fenceInfo;
     if (info == null) return whole;
     final at = text.indexOf(info);
@@ -333,6 +340,11 @@ final class SourceStyler {
       if (end < text.length) Token(TokenKind.codeFence, end, text.length),
     ];
   }
+
+  /// Whether [text], a code block's last line trimmed, is its closing fence
+  /// rather than code: a block the note did not close ends on its code.
+  static bool _closesFence(String text) =>
+      text.startsWith('```') || text.startsWith('~~~');
 
   /// A quote depth no line reaches: how far a line's own quote marks go.
   static const int _anyDepth = 1 << 16;
