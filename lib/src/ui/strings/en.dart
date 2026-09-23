@@ -2016,6 +2016,10 @@ final class EnglishStrings extends Strings {
   @override
   String get syncResolved => 'Conflict resolved';
   @override
+  String get syncConflictMoved =>
+      'One side changed meanwhile, so the conflict was read again: choose '
+      'again.';
+  @override
   String get syncSectionWhen => 'When to sync';
   @override
   String get syncAutoTitle => 'Automatically';

@@ -2032,6 +2032,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncResolved => 'Konflikten er løst';
   @override
+  String get syncConflictMoved =>
+      'En av versjonene er endret i mellomtiden: konflikten er lest på nytt, '
+      'velg igjen.';
+  @override
   String get syncSectionWhen => 'Når det skal synkroniseres';
   @override
   String get syncAutoTitle => 'Automatisk';

@@ -2057,6 +2057,10 @@ final class BasqueStrings extends Strings {
   @override
   String get syncResolved => 'Gatazka ebatzita';
   @override
+  String get syncConflictMoved =>
+      'Bertsioetako bat aldatu da bitartean: gatazka berriro irakurri da, '
+      'aukeratu berriro.';
+  @override
   String get syncSectionWhen => 'Noiz sinkronizatu';
   @override
   String get syncAutoTitle => 'Automatikoki';

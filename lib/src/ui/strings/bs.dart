@@ -2061,6 +2061,10 @@ final class BosnianStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt riješen';
   @override
+  String get syncConflictMoved =>
+      'Jedna od verzija se u međuvremenu promijenila: konflikt je ponovo '
+      'učitan, odaberite ponovo.';
+  @override
   String get syncSectionWhen => 'Kada sinhronizovati';
   @override
   String get syncAutoTitle => 'Automatski';

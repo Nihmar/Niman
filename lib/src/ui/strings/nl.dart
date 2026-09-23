@@ -2067,6 +2067,10 @@ final class DutchStrings extends Strings {
   @override
   String get syncResolved => 'Conflict opgelost';
   @override
+  String get syncConflictMoved =>
+      'Een van de versies is intussen gewijzigd: het conflict is opnieuw '
+      'gelezen, kies opnieuw.';
+  @override
   String get syncSectionWhen => 'Wanneer synchroniseren';
   @override
   String get syncAutoTitle => 'Automatisch';

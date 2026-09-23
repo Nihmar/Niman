@@ -2064,6 +2064,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get syncResolved => 'Конфлікт розв’язано';
   @override
+  String get syncConflictMoved =>
+      'Одна з версій тим часом змінилася: конфлікт прочитано знову, виберіть '
+      'ще раз.';
+  @override
   String get syncSectionWhen => 'Коли синхронізувати';
   @override
   String get syncAutoTitle => 'Автоматично';

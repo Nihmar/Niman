@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/diff/diff_view.dart';
@@ -45,7 +46,7 @@ final class SyncConflictScreen extends StatefulWidget {
 final class _SyncConflictScreenState extends State<SyncConflictScreen> {
   static const _log = AppLogger(name: 'sync');
 
-  ({String local, String remote, String? base})? _texts;
+  ConflictTexts? _texts;
   MergeResult? _merge;
   List<MergeChoice> _choices = const [];
   bool _failed = false;
@@ -74,10 +75,16 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
         _texts = texts;
         _merge = merge;
         _choices = List.filled(merge?.conflicts.length ?? 0, MergeChoice.local);
+        _resolving = false;
       });
     } on SyncFailure catch (e) {
       _log.warning('conflict screen ${widget.path}: $e');
-      if (mounted) setState(() => _failed = true);
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          _resolving = false;
+        });
+      }
     }
   }
 
@@ -97,22 +104,50 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
     } on SyncFailure catch (e) {
       _log.warning('conflict screen ${widget.path}: $what failed: $e');
       if (!mounted) return;
+      if (e.moved && _isText) {
+        // Nothing was written: show the versions as they are now, and let
+        // the user choose again over them.
+        messenger.showSnackBar(
+          SnackBar(
+            key: const Key('sync-conflict-moved-snack'),
+            content: Text(AppStrings.syncConflictMoved),
+          ),
+        );
+        setState(() => _texts = null);
+        await _load();
+        return;
+      }
       setState(() => _resolving = false);
       messenger.showSnackBar(
-        SnackBar(content: Text(AppStrings.syncResolveFailed)),
+        SnackBar(
+          content: Text(
+            e.moved
+                ? AppStrings.syncConflictMoved
+                : AppStrings.syncResolveFailed,
+          ),
+        ),
       );
     }
   }
 
   Future<void> _keep({required bool local}) => _resolve(
-    () => widget.sync.resolveConflict(widget.path, keepLocal: local),
+    () => widget.sync.resolveConflict(
+      widget.path,
+      keepLocal: local,
+      shown: _texts,
+    ),
     'keep ${local ? 'local' : 'remote'}',
   );
 
   Future<void> _saveMerge() {
     final merge = _merge!;
+    final shown = _texts!;
     return _resolve(
-      () => widget.sync.resolveMerged(widget.path, merge.text(_choices)),
+      () => widget.sync.resolveMerged(
+        widget.path,
+        merge.text(_choices),
+        shown: shown,
+      ),
       'save the merge (${merge.describe()})',
     );
   }

@@ -2004,6 +2004,9 @@ final class HindiStrings extends Strings {
   @override
   String get syncResolved => 'टकराव सुलझ गया';
   @override
+  String get syncConflictMoved =>
+      'इस बीच एक संस्करण बदल गया: टकराव फिर से पढ़ा गया, दोबारा चुनें।';
+  @override
   String get syncSectionWhen => 'कब सिंक करें';
   @override
   String get syncAutoTitle => 'अपने-आप';

@@ -2016,6 +2016,10 @@ final class TurkishStrings extends Strings {
   @override
   String get syncResolved => 'Çakışma çözüldü';
   @override
+  String get syncConflictMoved =>
+      'Sürümlerden biri bu arada değişti: çakışma yeniden okundu, tekrar '
+      'seçin.';
+  @override
   String get syncSectionWhen => 'Ne zaman eşitlensin';
   @override
   String get syncAutoTitle => 'Otomatik olarak';

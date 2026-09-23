@@ -2037,6 +2037,10 @@ final class CzechStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt vyřešen';
   @override
+  String get syncConflictMoved =>
+      'Jedna z verzí se mezitím změnila: konflikt byl načten znovu, vyberte '
+      'znovu.';
+  @override
   String get syncSectionWhen => 'Kdy synchronizovat';
   @override
   String get syncAutoTitle => 'Automaticky';

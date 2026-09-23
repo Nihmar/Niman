@@ -2070,6 +2070,10 @@ final class PolishStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt rozwiązany';
   @override
+  String get syncConflictMoved =>
+      'Jedna z wersji zmieniła się w międzyczasie: konflikt wczytano '
+      'ponownie, wybierz jeszcze raz.';
+  @override
   String get syncSectionWhen => 'Kiedy synchronizować';
   @override
   String get syncAutoTitle => 'Automatycznie';

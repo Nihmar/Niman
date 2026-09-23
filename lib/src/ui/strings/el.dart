@@ -2112,6 +2112,10 @@ final class GreekStrings extends Strings {
   @override
   String get syncResolved => 'Η διένεξη επιλύθηκε';
   @override
+  String get syncConflictMoved =>
+      'Μία από τις εκδόσεις άλλαξε στο μεταξύ: η σύγκρουση διαβάστηκε ξανά, '
+      'επιλέξτε πάλι.';
+  @override
   String get syncSectionWhen => 'Πότε γίνεται συγχρονισμός';
   @override
   String get syncAutoTitle => 'Αυτόματα';

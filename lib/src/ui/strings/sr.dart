@@ -2058,6 +2058,10 @@ final class SerbianStrings extends Strings {
   @override
   String get syncResolved => 'Конфликт је решен';
   @override
+  String get syncConflictMoved =>
+      'Једна од верзија се у међувремену променила: сукоб је поново учитан, '
+      'изаберите поново.';
+  @override
   String get syncSectionWhen => 'Када синхронизовати';
   @override
   String get syncAutoTitle => 'Аутоматски';

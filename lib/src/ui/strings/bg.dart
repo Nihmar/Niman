@@ -2053,6 +2053,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get syncResolved => 'Конфликтът е разрешен';
   @override
+  String get syncConflictMoved =>
+      'Една от версиите се промени междувременно: конфликтът е прочетен '
+      'отново, изберете пак.';
+  @override
   String get syncSectionWhen => 'Кога да се синхронизира';
   @override
   String get syncAutoTitle => 'Автоматично';

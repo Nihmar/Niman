@@ -2060,6 +2060,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncResolved => 'Konflikti u zgjidh';
   @override
+  String get syncConflictMoved =>
+      'Njëri nga versionet ndryshoi ndërkohë: konflikti u lexua sërish, '
+      'zgjidhni përsëri.';
+  @override
   String get syncSectionWhen => 'Kur të sinkronizohet';
   @override
   String get syncAutoTitle => 'Automatikisht';

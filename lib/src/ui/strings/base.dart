@@ -940,6 +940,7 @@ abstract base class Strings {
   String get syncConflictLoadFailed;
   String get syncResolveFailed;
   String get syncResolved;
+  String get syncConflictMoved;
   String get syncSectionWhen;
   String get syncAutoTitle;
   String get syncAutoSubtitle;

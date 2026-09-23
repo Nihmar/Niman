@@ -2010,6 +2010,9 @@ final class EstonianStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt lahendatud';
   @override
+  String get syncConflictMoved =>
+      'Üks versioon muutus vahepeal: konflikt loeti uuesti, vali uuesti.';
+  @override
   String get syncSectionWhen => 'Millal sünkroonida';
   @override
   String get syncAutoTitle => 'Automaatselt';

@@ -2063,6 +2063,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get syncResolved => 'Канфлікт вырашаны';
   @override
+  String get syncConflictMoved =>
+      'Адна з версій тым часам змянілася: канфлікт прачытаны зноў, выберыце '
+      'яшчэ раз.';
+  @override
   String get syncSectionWhen => 'Калі сінхранізаваць';
   @override
   String get syncAutoTitle => 'Аўтаматычна';

@@ -2050,6 +2050,10 @@ final class FinnishStrings extends Strings {
   @override
   String get syncResolved => 'Ristiriita ratkaistu';
   @override
+  String get syncConflictMoved =>
+      'Toinen versioista muuttui sillä välin: ristiriita luettiin uudelleen, '
+      'valitse uudelleen.';
+  @override
   String get syncSectionWhen => 'Milloin synkronoidaan';
   @override
   String get syncAutoTitle => 'Automaattisesti';

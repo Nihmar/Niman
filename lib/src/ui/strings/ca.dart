@@ -2083,6 +2083,10 @@ final class CatalanStrings extends Strings {
   @override
   String get syncResolved => 'Conflicte resolt';
   @override
+  String get syncConflictMoved =>
+      'Una de les versions ha canviat mentrestant: el conflicte s’ha tornat a '
+      'llegir, torna a triar.';
+  @override
   String get syncSectionWhen => 'Quan sincronitzar';
   @override
   String get syncAutoTitle => 'Automàticament';

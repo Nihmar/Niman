@@ -357,6 +357,25 @@ void main() {
         ..supportMove = false;
     });
 
+    test('a resolution still sees the server move on', () async {
+      a.write('a.md', 'base');
+      await a.sync();
+      await b.sync();
+      a.write('a.md', 'mine');
+      b.write('a.md', 'theirs');
+      await b.sync();
+      expect((await a.sync()).conflicts.single.path, 'a.md');
+      final shown = await a.engine.conflictTexts('a.md');
+      expect(shown.remoteEtag, isNull);
+      b.write('a.md', 'theirs, later');
+      await b.sync();
+      await expectLater(
+        a.engine.resolveConflict('a.md', keepLocal: true, shown: shown),
+        throwsA(isA<SyncFailure>().having((f) => f.moved, 'moved', isTrue)),
+      );
+      expect(remoteText('a.md'), 'theirs, later');
+    });
+
     test('edits and deletions still travel both ways', () async {
       a
         ..write('a.md', 'one')
@@ -558,6 +577,54 @@ void main() {
       },
     );
 
+    test('the server moving on after the texts were read wins', () async {
+      await makeConflict();
+      final shown = await a.engine.conflictTexts('a.md');
+      // Another device edits again while the user is choosing.
+      b.write('a.md', 'theirs, later');
+      await b.sync();
+      for (final keepLocal in [true, false]) {
+        await expectLater(
+          a.engine.resolveConflict('a.md', keepLocal: keepLocal, shown: shown),
+          throwsA(isA<SyncFailure>().having((f) => f.moved, 'moved', isTrue)),
+        );
+      }
+      await expectLater(
+        a.engine.resolveMerged('a.md', 'merged', shown: shown),
+        throwsA(isA<SyncFailure>().having((f) => f.moved, 'moved', isTrue)),
+      );
+      expect(remoteText('a.md'), 'theirs, later', reason: 'not written over');
+      expect(a.read('a.md'), 'mine');
+
+      // Read again, the resolution goes through.
+      final fresh = await a.engine.conflictTexts('a.md');
+      expect(fresh.remote, 'theirs, later');
+      await a.engine.resolveMerged('a.md', 'merged', shown: fresh);
+      expect(remoteText('a.md'), 'merged');
+    });
+
+    test(
+      'an edit here after the texts were read is not written over',
+      () async {
+        await makeConflict();
+        final shown = await a.engine.conflictTexts('a.md');
+        a.write('a.md', 'mine, typed on');
+        await expectLater(
+          a.engine.resolveConflict('a.md', keepLocal: false, shown: shown),
+          throwsA(isA<SyncFailure>().having((f) => f.moved, 'moved', isTrue)),
+        );
+        expect(a.read('a.md'), 'mine, typed on');
+        expect(remoteText('a.md'), 'theirs');
+      },
+    );
+
+    test('unchanged sides resolve as shown', () async {
+      await makeConflict();
+      final shown = await a.engine.conflictTexts('a.md');
+      await a.engine.resolveConflict('a.md', keepLocal: false, shown: shown);
+      expect(a.read('a.md'), 'theirs');
+    });
+
     test('a resolution without a destination fails as SyncFailure', () async {
       final lone = await _Device.create('lone2');
       addTearDown(lone.close);
@@ -680,7 +747,7 @@ void main() {
         expect(texts.remote, note(['# Title', 'one', 'theirs', 'three']));
 
         final chosen = note(['# Title', 'one', 'mine', 'theirs', 'three']);
-        await a.engine.resolveMerged('note.md', chosen);
+        await a.engine.resolveMerged('note.md', chosen, shown: texts);
         await a.ops.writer.indexed;
         expect(a.read('note.md'), chosen);
         expect(remoteText('note.md'), chosen);

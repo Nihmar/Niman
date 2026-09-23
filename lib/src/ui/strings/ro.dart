@@ -2070,6 +2070,10 @@ final class RomanianStrings extends Strings {
   @override
   String get syncResolved => 'Conflict rezolvat';
   @override
+  String get syncConflictMoved =>
+      'Una dintre versiuni s-a schimbat între timp: conflictul a fost '
+      'recitit, alegeți din nou.';
+  @override
   String get syncSectionWhen => 'Când se sincronizează';
   @override
   String get syncAutoTitle => 'Automat';

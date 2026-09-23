@@ -682,6 +682,16 @@ conflict:
   version) and uploads it with `If-Match`. Keeping one whole copy stays
   one tap away, and is the only option without a base, where the screen
   falls back to the read-only `DiffView`.
+- **What the user saw is what gets resolved.** `conflictTexts` returns a
+  `ConflictTexts` (`lib/src/sync/conflict_texts.dart`): the texts plus
+  the sha256 of both sides and the listing's ETag. Every resolution
+  carries it back, and the engine checks both sides before writing
+  (`_stillAsShown`: the local hash; the ETag when the server has them,
+  else a fresh download's hash). A side that moved fails as a `moved`
+  `SyncFailure` with nothing written, and the screen reads the conflict
+  again. Before this, the upload's `If-Match` used the ETag listed at
+  resolve time, so a server edit that arrived while the screen was open
+  was overwritten — and that edit existed nowhere on this device.
 
 ### Tests (#20)
 

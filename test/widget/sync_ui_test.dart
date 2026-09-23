@@ -457,7 +457,7 @@ void main() {
     testWidgets('with a base, the overlaps are the only question (W7)', (
       tester,
     ) async {
-      sync.texts = (
+      sync.texts = conflictTextsOf(
         base: note(['# Title', 'one', 'two', 'three']),
         local: note(['# Title', 'one', 'mine', 'three', 'four']),
         remote: note(['# Notes', 'one', 'theirs', 'three']),
@@ -488,7 +488,7 @@ void main() {
     });
 
     testWidgets('both whole copies stay one tap away', (tester) async {
-      sync.texts = (
+      sync.texts = conflictTextsOf(
         base: note(['a', 'b']),
         local: note(['a', 'mine']),
         remote: note(['a', 'theirs']),
@@ -499,8 +499,34 @@ void main() {
       expect(sync.calls.last, 'resolve note.md remote');
     });
 
+    testWidgets('a side that moved is read again, not written over', (
+      tester,
+    ) async {
+      sync.texts = conflictTextsOf(
+        base: note(['a', 'b']),
+        local: note(['a', 'mine']),
+        remote: note(['a', 'theirs']),
+      );
+      sync.resolveFailures.add(SyncFailure.stale('changed'));
+      await pumpConflict(tester);
+      await tester.tap(find.byKey(const Key('sync-save-merge')));
+      await tester.pumpAndSettle();
+      expect(sync.resolvedShown, same(sync.texts));
+      expect(sync.mergedText, isNull, reason: 'nothing was written');
+      expect(
+        find.byKey(const Key('sync-conflict-moved-snack')),
+        findsOneWidget,
+      );
+      expect(sync.calls, ['texts note.md', 'merge note.md', 'texts note.md']);
+      // Still on the screen, ready for another choice.
+      expect(find.byKey(const Key('sync-save-merge')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('sync-save-merge')));
+      await tester.pumpAndSettle();
+      expect(sync.mergedText, note(['a', 'mine']));
+    });
+
     testWidgets('without a base it is the two whole copies', (tester) async {
-      sync.texts = (local: 'mine', remote: 'theirs', base: null);
+      sync.texts = conflictTextsOf(local: 'mine', remote: 'theirs');
       await pumpConflict(tester);
       expect(find.byKey(const Key('sync-conflict-merge')), findsNothing);
       expect(find.byKey(const Key('sync-conflict-diff')), findsOneWidget);

@@ -2049,6 +2049,10 @@ final class SwedishStrings extends Strings {
   @override
   String get syncResolved => 'Konflikten är löst';
   @override
+  String get syncConflictMoved =>
+      'En av versionerna har ändrats under tiden: konflikten har lästs in '
+      'igen, välj igen.';
+  @override
   String get syncSectionWhen => 'När det ska synkas';
   @override
   String get syncAutoTitle => 'Automatiskt';

@@ -2087,6 +2087,10 @@ final class GermanStrings extends Strings {
   @override
   String get syncResolved => 'Konflikt gelöst';
   @override
+  String get syncConflictMoved =>
+      'Eine Seite hat sich inzwischen geändert; der Konflikt wurde neu '
+      'gelesen. Bitte erneut wählen.';
+  @override
   String get syncSectionWhen => 'Wann synchronisiert wird';
   @override
   String get syncAutoTitle => 'Automatisch';

@@ -2039,6 +2039,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get syncResolved => 'Árekstur leystur';
   @override
+  String get syncConflictMoved =>
+      'Önnur útgáfan breyttist á meðan: árekstrurinn var lesinn aftur, veldu '
+      'aftur.';
+  @override
   String get syncSectionWhen => 'Hvenær á að samstilla';
   @override
   String get syncAutoTitle => 'Sjálfvirkt';

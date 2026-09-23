@@ -2053,6 +2053,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get syncResolved => 'Conflito resolvido';
   @override
+  String get syncConflictMoved =>
+      'Uma das versões mudou entretanto: o conflito foi lido de novo, escolha '
+      'outra vez.';
+  @override
   String get syncSectionWhen => 'Quando sincronizar';
   @override
   String get syncAutoTitle => 'Automaticamente';
