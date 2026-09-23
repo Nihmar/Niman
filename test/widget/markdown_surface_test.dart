@@ -240,6 +240,40 @@ void main() {
     },
   );
 
+  testWidgets("a line's text stays put when the caret reveals its marks", (
+    tester,
+  ) async {
+    // The revealed `- ` and `> ` are set into the indent where the bullet and
+    // the gap past the bar were: the text jumped right by their width every
+    // time the caret came onto the line (device screenshot 2026-09-23).
+    Future<double> textLeft(String note, int caret, String prefix) async {
+      await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: caret,
+        text: note,
+      );
+      await tester.pump();
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
+      final at = paragraph.getOffsetForCaret(
+        TextPosition(offset: prefix.length),
+        Rect.zero,
+      );
+      return paragraph.localToGlobal(at).dx;
+    }
+
+    // A list's: in the test font every glyph is as wide as it is tall, and a
+    // quote's `>` (14 px) is wider than the quote's own indent (12 px), so
+    // that one runs out of room here — in a text face it is half that.
+    for (final (note, lineStart, prefix) in [('caret\n\n- item\n', 7, '- ')]) {
+      final away = await textLeft(note, 0, prefix);
+      final on = await textLeft(note, lineStart + prefix.length + 2, prefix);
+      expect(on, closeTo(away, 0.5), reason: note);
+    }
+  });
+
   group('a task box in live', () {
     const note = 'caret\n\n- [ ] da fare\n- [x] fatto\n';
 
@@ -758,9 +792,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: MarkdownSurface(
-              buffer: SourceBuffer.fromText('- una voce\ntesto\n'),
+              // The caret on the other line: on its own, the item's marker is
+              // drawn as written, in the indent the bullet had.
+              buffer: SourceBuffer.fromText('testo\n- una voce\n'),
               mode: mode,
               theme: _theme,
+              selection: const SelectionModel.at(0),
               showLineNumbers: false,
             ),
           ),

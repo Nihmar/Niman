@@ -2864,7 +2864,7 @@ final class _Line extends StatelessWidget {
   Widget _listeningToFormulas() {
     Widget line() => ValueListenableBuilder<CaretSpot>(
       valueListenable: spot,
-      builder: (context, at, _) => _content(at),
+      builder: (context, at, _) => _content(context, at),
     );
     final cache = mathCache;
     if (!hideMarkers ||
@@ -2879,7 +2879,7 @@ final class _Line extends StatelessWidget {
 
   /// The line with the caret at [at]: its text, and in `live` what stands in
   /// for the source it hides.
-  Widget _content(CaretSpot at) {
+  Widget _content(BuildContext context, CaretSpot at) {
     final mine = at.line == index;
     final math = formula;
     // A formula is edited as a block: the caret anywhere in it shows all of
@@ -2904,7 +2904,10 @@ final class _Line extends StatelessWidget {
           whole: true,
         ),
     ];
-    final indent = _indent();
+    final indent = _indent(
+      revealed: mine,
+      scaler: MediaQuery.textScalerOf(context),
+    );
     Widget paragraph = Text.rich(
       _span(
         revealed: mine,
@@ -3054,7 +3057,17 @@ final class _Line extends StatelessWidget {
           ? _RowPainter(rect: caret, color: rowColor!)
           : null,
       foregroundPainter: at.line == index
-          ? _CaretPainter(rect: caret, on: caretOn, shift: Offset(_indent(), 0))
+          ? _CaretPainter(
+              rect: caret,
+              on: caretOn,
+              shift: Offset(
+                _indent(
+                  revealed: true,
+                  scaler: MediaQuery.textScalerOf(context),
+                ),
+                0,
+              ),
+            )
           : null,
       child: child,
     ),
@@ -3107,7 +3120,17 @@ final class _Line extends StatelessWidget {
   /// It is pure layout: no offset moves, because the text underneath is still
   /// the
   /// note's own text, character for character.
-  double _indent() {
+  ///
+  /// On the caret's line ([revealed]) the marks are drawn as written, and
+  /// they are set *into* the indent — where the bullet, the number, the box
+  /// or the gap past a quote's bar was — rather than after it: otherwise the
+  /// text jumped right by the marks' width each time the caret came onto
+  /// the line, and back when it left (device screenshot 2026-09-23, a list
+  /// being typed). [scaler] is the one the line's text is drawn at.
+  double _indent({
+    bool revealed = false,
+    TextScaler scaler = TextScaler.noScaling,
+  }) {
     if (!hideMarkers) return 0;
     var levels = 0;
     for (final token in styled.tokens) {
@@ -3115,8 +3138,38 @@ final class _Line extends StatelessWidget {
     }
     // A quote's content moves in past its bar, a level at a time, as the
     // read view draws it.
-    return levels * theme.listIndentPerLevel +
+    final indent =
+        levels * theme.listIndentPerLevel +
         shape.quoteDepth * theme.quoteIndentPerLevel;
+    if (!revealed || indent == 0) return indent;
+    return math.max(0, indent - _lineMarksWidth(scaler));
+  }
+
+  /// How wide the line's structural marks are drawn as written — its `>`s,
+  /// its list marker, its task box — which is what the reveal adds to the
+  /// line: hidden, they take no room, and the spaces between them are drawn
+  /// either way.
+  double _lineMarksWidth(TextScaler scaler) {
+    final text = styled.text;
+    final marks = <InlineSpan>[
+      for (final token in styled.tokens)
+        if (token.kind == TokenKind.blockquote ||
+            token.kind == TokenKind.listMarker ||
+            token.kind == TokenKind.taskBox)
+          TextSpan(
+            text: text.substring(token.start, token.end),
+            style: markdownTokenStyle(token.kind, syntax, dark: dark),
+          ),
+    ];
+    if (marks.isEmpty) return 0;
+    final painter = TextPainter(
+      text: TextSpan(children: marks, style: _lineStyle(revealed: true)),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
   }
 
   /// The line's tokens as styled runs. A token's override never changes the
