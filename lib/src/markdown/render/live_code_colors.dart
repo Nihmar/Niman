@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/painting.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/code_highlight.dart';
@@ -40,21 +41,70 @@ final class LiveCodeColors {
     SourceBuffer buffer,
     Map<String, TextStyle> palette,
   ) {
+    _follow(buffer, palette);
+    return _runs(_stretches, line, block, buffer.lineAt, palette);
+  }
+
+  /// The runs a line of a quote is coloured with, [quoted] saying what it
+  /// is inside the quote that starts on line [quote] — its runs' offsets
+  /// the line's own past the quote marks. Null as for [of].
+  List<CodeRun>? ofQuoted(
+    QuotedLine quoted,
+    int quote,
+    SourceBuffer buffer,
+    Map<String, TextStyle> palette,
+  ) {
+    _follow(buffer, palette);
+    // A block inside a quote is keyed by the quote and its place there.
+    final stretches = _quoted.putIfAbsent(
+      quote,
+      () => <int, List<List<CodeRun>>>{},
+    );
+    return _runs(
+      stretches,
+      quoted.line,
+      quoted.block,
+      (at) => quoted.lines[at],
+      palette,
+    );
+  }
+
+  /// The stretches of the blocks inside each quote, by the quote's first
+  /// line.
+  final Map<int, Map<int, List<List<CodeRun>>>> _quoted =
+      <int, Map<int, List<List<CodeRun>>>>{};
+
+  /// Forgets every stretch when [buffer] or [palette] is not the one they
+  /// were highlighted for.
+  void _follow(SourceBuffer buffer, Map<String, TextStyle> palette) {
+    if (identical(buffer, _buffer) &&
+        buffer.revision == _revision &&
+        identical(palette, _palette)) {
+      return;
+    }
+    _stretches.clear();
+    _quoted.clear();
+    _buffer = buffer;
+    _revision = buffer.revision;
+    _palette = palette;
+  }
+
+  /// Line [line]'s runs, [block] being its block and [lineAt] its lines,
+  /// highlighted into [stretches].
+  static List<CodeRun>? _runs(
+    Map<int, List<List<CodeRun>>> stretches,
+    int line,
+    Block? block,
+    String Function(int line) lineAt,
+    Map<String, TextStyle> palette,
+  ) {
     if (block == null || block.kind != BlockKind.fencedCode) return null;
     final language = block.fenceInfo;
     if (language == null || language.isEmpty) return null;
-    if (!identical(buffer, _buffer) ||
-        buffer.revision != _revision ||
-        !identical(palette, _palette)) {
-      _stretches.clear();
-      _buffer = buffer;
-      _revision = buffer.revision;
-      _palette = palette;
-    }
     // The code between the fences: the closing one, when the note closed
     // the block, is not code.
     final first = block.startLine + 1;
-    final closing = buffer.lineAt(block.endLine - 1).trimLeft();
+    final closing = lineAt(block.endLine - 1).trimLeft();
     final closed =
         block.endLine - 1 > block.startLine &&
         (closing.startsWith('```') || closing.startsWith('~~~'));
@@ -70,10 +120,9 @@ final class LiveCodeColors {
       from = start < first ? first : start;
       to = start + piece < last ? start + piece : last;
     }
-    final rows = _stretches.putIfAbsent(from, () {
-      final code = <String>[
-        for (var at = from; at < to; at++) buffer.lineAt(at),
-      ].join('\n');
+    final rows = stretches.putIfAbsent(from, () {
+      final code = <String>[for (var at = from; at < to; at++) lineAt(at)]
+          .join('\n');
       return CodeHighlighter(language: language, theme: palette).lines(code);
     });
     final row = line - from;
