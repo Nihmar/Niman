@@ -157,14 +157,23 @@ void main() {
     // A heading's hidden `#` left its space behind, 6 px of the heading's
     // size before the title in `live`; and a list's text stood a tenth of a
     // pixel short of the read view's, which sets a paragraph's first glyph
-    // half an ambient letter spacing in.
+    // half an ambient letter spacing in; and a quote's text stood its bar's
+    // width further in, in the read view, than past the bar in `live`.
     tester.view.physicalSize = const Size(900, 700);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     const note =
         'caret\n\n# Heading one\n\n## Heading two\n\n- bullet\n- [ ] task\n'
-        '  - nested\n\n1. numbered\n';
-    const words = ['Heading one', 'Heading two', 'bullet', 'task', 'nested'];
+        '  - nested\n\n1. numbered\n\n> quoted\n>\n> > deeper\n';
+    const words = [
+      'Heading one',
+      'Heading two',
+      'bullet',
+      'task',
+      'nested',
+      'quoted',
+      'deeper',
+    ];
     Future<List<double>> lefts({required bool read}) async {
       await _pumpNote(tester, note, read: read);
       return [for (final word in words) _glyphOf(tester, word).dx];
