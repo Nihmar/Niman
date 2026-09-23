@@ -3054,7 +3054,7 @@ final class _Line extends StatelessWidget {
           ? _RowPainter(rect: caret, color: rowColor!)
           : null,
       foregroundPainter: at.line == index
-          ? _CaretPainter(rect: caret, on: caretOn)
+          ? _CaretPainter(rect: caret, on: caretOn, shift: Offset(_indent(), 0))
           : null,
       child: child,
     ),
@@ -3465,20 +3465,31 @@ final class _RowPainter extends CustomPainter {
 /// It reads the rectangle and the blink at *paint* time and repaints when
 /// either changes, so neither rebuilds the line it is drawn over.
 final class _CaretPainter extends CustomPainter {
-  new({required this.rect, required this.on})
+  new({required this.rect, required this.on, this.shift = Offset.zero})
     : super(repaint: Listenable.merge(<Listenable>[rect, on]));
 
+  /// The caret, in its line's *paragraph's* coordinates.
   final ValueListenable<Rect?> rect;
   final ValueListenable<bool> on;
+
+  /// Where the paragraph sits in the box this paints over: `live` indents a
+  /// list item or a quote, and the caret drawn without it stood that far to
+  /// the left of the character it was at.
+  final Offset shift;
 
   @override
   void paint(Canvas canvas, Size size) {
     final value = rect.value;
     if (!on.value || value == null) return;
-    canvas.drawRect(value, Paint()..color = const Color(0xFF7AA2F7));
+    canvas.drawRect(
+      value.shift(shift),
+      Paint()..color = const Color(0xFF7AA2F7),
+    );
   }
 
   @override
   bool shouldRepaint(_CaretPainter oldDelegate) =>
-      oldDelegate.rect != rect || oldDelegate.on != on;
+      oldDelegate.rect != rect ||
+      oldDelegate.on != on ||
+      oldDelegate.shift != shift;
 }
