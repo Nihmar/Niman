@@ -50,9 +50,9 @@ const MarkdownTheme _theme = MarkdownTheme(
   lineHeight: 21,
 );
 
-/// [_theme] with a list column the test font's `- ` fits in: every glyph
-/// of it is as wide as it is tall, 28 px for the two, and a text face's
-/// are a third of that.
+/// [_theme] with a list column as wide, for the test font, as a text face's
+/// is: every glyph of the test font is as wide as it is tall, so a `- ` is
+/// 28 px of it and a third of that in a text face.
 const MarkdownTheme _wideColumns = MarkdownTheme(
   body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
   heading1: TextStyle(fontSize: 25),
@@ -76,7 +76,7 @@ const MarkdownTheme _wideColumns = MarkdownTheme(
   tableBorder: Color(0xFFCCCCCC),
   markerDim: Color(0xFF999999),
   blockSpacing: 10,
-  listIndentPerLevel: 32,
+  listIndentPerLevel: 80,
   quoteIndentPerLevel: 12,
   codePadding: 8,
   quoteBarWidth: 3,
@@ -95,6 +95,7 @@ void main() {
     int? caret = 3,
     String text = '# Titolo\n\ntesto\n',
     MarkdownTheme theme = _theme,
+    bool lineNumbers = false,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -107,7 +108,7 @@ void main() {
             // own — the two contracts a caller can have, and the reveal has to
             // hold for both.
             selection: caret == null ? null : SelectionModel.at(caret),
-            showLineNumbers: false,
+            showLineNumbers: lineNumbers,
           ),
         ),
       ),
@@ -240,15 +241,19 @@ void main() {
     (tester) async {
       // `live` indents a list item and a quote; the caret was measured in the
       // paragraph and drawn over the box around it, an indent to the left.
-      for (final (note, caret) in [
-        ('caret\n\n- item\n', 11),
-        ('caret\n\n> quoted\n', 12),
+      // The task's marks are wider than its column, and hang left of it.
+      for (final (note, caret, wide) in [
+        ('caret\n\n- item\n', 11, false),
+        ('caret\n\n> quoted\n', 12, false),
+        ('caret\n\n- [ ] task\n', 15, true),
       ]) {
         final state = await pumpMode(
           tester,
           MarkdownSurfaceMode.live,
           caret: caret,
           text: note,
+          theme: wide ? _wideColumns : _theme,
+          lineNumbers: wide,
         );
         await tester.pump();
         final box = tester
@@ -282,38 +287,78 @@ void main() {
   testWidgets("a line's text stays put when the caret reveals its marks", (
     tester,
   ) async {
-    // The revealed `- ` and `> ` are set into the indent where the bullet and
-    // the gap past the bar were: the text jumped right by their width every
-    // time the caret came onto the line (device screenshot 2026-09-23).
-    Future<double> textLeft(String note, int caret, String prefix) async {
+    // The revealed marks are set into the indent where the bullet and the
+    // gap past the bar were: the text jumped right by their width every time
+    // the caret came onto the line (device screenshot 2026-09-23). Marks
+    // wider than their column — a task's `- [ ] `, a `10. `, and in the test
+    // font, whose glyphs are as wide as they are tall, even a `- ` — hang
+    // out into the margin left of the text instead.
+    /// Where the glyph after [prefix] is drawn on the line starting with it,
+    /// and where the line's first glyph is.
+    Future<(double, double)> textLeft(
+      String note,
+      int caret,
+      String prefix,
+    ) async {
       await pumpMode(
         tester,
         MarkdownSurfaceMode.live,
         caret: caret,
         text: note,
+        // The numbers' gutter keeps the fold arrows' gap empty: the margin
+        // marks wider than their column hang into.
         theme: _wideColumns,
+        lineNumbers: true,
       );
       await tester.pump();
       final paragraph = tester
           .renderObjectList<RenderParagraph>(find.byType(RichText))
           .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
-      final at = paragraph.getOffsetForCaret(
-        TextPosition(offset: prefix.length),
-        Rect.zero,
+      double glyph(int offset) => paragraph
+          .localToGlobal(
+            Offset(
+              paragraph
+                  .getBoxesForSelection(
+                    TextSelection(baseOffset: offset, extentOffset: offset + 1),
+                  )
+                  .first
+                  .left,
+              0,
+            ),
+          )
+          .dx;
+      return (glyph(prefix.length), glyph(0));
+    }
+
+    for (final (note, prefix) in [
+      ('caret\n\n- item\n', '- '),
+      ('caret\n\n- [ ] task\n', '- [ ] '),
+      ('caret\n\n10. ten\n', '10. '),
+      ('caret\n\n- item\n  - [ ] deep\n', '  - [ ] '),
+      ('caret\n\n> quoted\n', '> '),
+    ]) {
+      final line = note.indexOf(prefix, 7);
+      final (away, _) = await textLeft(note, 0, prefix);
+      final (on, first) = await textLeft(
+        note,
+        line + prefix.length + 1,
+        prefix,
       );
-      return paragraph.localToGlobal(at).dx;
+      expect(on, closeTo(away, 0.01), reason: note);
+      final surface = tester.getRect(find.byType(MarkdownSurface));
+      expect(first, greaterThanOrEqualTo(surface.left), reason: note);
     }
-
-    // A list's: in the test font every glyph is as wide as it is tall, and a
-    // quote's `>` and its space (28 px) are wider than the quote's own indent
-    // (12 px), so that one runs out of room here — in a text face it fits.
-    for (final (note, lineStart, prefix) in [('caret\n\n- item\n', 7, '- ')]) {
-      final away = await textLeft(note, 0, prefix);
-      final on = await textLeft(note, lineStart + prefix.length + 2, prefix);
-      expect(on, closeTo(away, 0.5), reason: note);
-    }
+    // Wider than the margin too: the text moves by what is left over, and
+    // the marks stay on the surface.
+    const note = 'caret\n\n1000000. far\n';
+    final (away, _) = await textLeft(note, 0, '1000000. ');
+    final (on, first) = await textLeft(note, 18, '1000000. ');
+    expect(on, greaterThan(away));
+    expect(
+      first,
+      greaterThanOrEqualTo(tester.getRect(find.byType(MarkdownSurface)).left),
+    );
   });
-
   testWidgets("a bullet sits on its text's row, not on the hidden marker", (
     tester,
   ) async {
