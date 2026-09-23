@@ -54,6 +54,7 @@ import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
+import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
@@ -2719,13 +2720,25 @@ final class _Line extends StatelessWidget {
                   final mine = at.line == index;
                   return Padding(
                     padding: EdgeInsets.only(left: _indent()),
-                    child: Text.rich(
-                      _span(
-                        revealed: mine,
-                        run: mine ? (at.runStart, at.runEnd) : null,
+                    // The spelling is painted over the paragraph rather than
+                    // written into its runs: a style has one decoration, and
+                    // a wavy underline there took a struck word's strike.
+                    child: CustomPaint(
+                      foregroundPainter: misspelled.isEmpty
+                          ? null
+                          : SquigglePainter(
+                              paragraph: paragraphKey,
+                              ranges: _unjudged(),
+                              color: misspelledColor,
+                            ),
+                      child: Text.rich(
+                        _span(
+                          revealed: mine,
+                          run: mine ? (at.runStart, at.runEnd) : null,
+                        ),
+                        key: paragraphKey,
+                        style: _lineStyle(revealed: mine),
                       ),
-                      key: paragraphKey,
-                      style: _lineStyle(revealed: mine),
                     ),
                   );
                 },
@@ -2918,6 +2931,17 @@ final class _Line extends StatelessWidget {
     return token.start < run.$1 || token.end > run.$2;
   }
 
+  /// The misspelled words to underline: all of them but the one being
+  /// composed, which is not judged yet — its underline is the IME's.
+  List<TextRange> _unjudged() {
+    final typing = composing;
+    if (typing == null) return misspelled;
+    return <TextRange>[
+      for (final word in misspelled)
+        if (word.end <= typing.$1 || word.start >= typing.$2) word,
+    ];
+  }
+
   /// Adds `[start, end)` to [spans], cut at the selection's and the composing
   /// range's edges: the selected part carries the highlight, the composed part
   /// the underline, and the rest keeps the run's own style.
@@ -2926,7 +2950,6 @@ final class _Line extends StatelessWidget {
     for (final range in <(int, int)?>[
       selected,
       composing,
-      for (final word in misspelled) (word.start, word.end),
       for (final match in found) (match.$1, match.$2),
     ]) {
       if (range == null) continue;
@@ -2958,16 +2981,6 @@ final class _Line extends StatelessWidget {
       if (inside(composing)) {
         piece = (piece ?? const TextStyle()).copyWith(
           decoration: TextDecoration.underline,
-        );
-      } else if (misspelled.any(
-        (word) => from >= word.start && to <= word.end,
-      )) {
-        // The word being composed is not judged yet: its underline is the
-        // IME's.
-        piece = (piece ?? const TextStyle()).copyWith(
-          decoration: TextDecoration.underline,
-          decorationStyle: TextDecorationStyle.wavy,
-          decorationColor: misspelledColor,
         );
       }
       spans.add(TextSpan(text: styled.text.substring(from, to), style: piece));
