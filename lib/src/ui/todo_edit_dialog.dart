@@ -11,8 +11,12 @@
 ///
 /// The description wraps and grows downward rather than scrolling
 /// sideways (#267), yet stays one todo.txt line: Enter saves, and a line
-/// break never gets in. A wide window gives the dialog more width.
+/// break never gets in. A wide window gives the dialog more width, and
+/// one with the room picks the due date and the reminder in place, under
+/// their rows, rather than in pickers stacked over the dialog (#268).
 library;
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +24,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/todo_date_panel.dart';
 
 /// Shows the add ([initial] null) or edit dialog.
 ///
@@ -76,6 +81,13 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   /// rewritten — an untouched edit keeps the text byte-identical).
   bool _dueDirty = false;
   bool _reminderDirty = false;
+
+  /// The date picked in place right now, on a window with the room; one
+  /// at a time.
+  _DatePanel? _open;
+
+  /// Where the open panel is, to bring it into view.
+  final GlobalKey _panelKey = GlobalKey();
 
   @override
   void initState() {
@@ -190,33 +202,66 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     setState(() {});
   }
 
+  /// Opens [panel] in place, or closes it when it is open; the other
+  /// closes. Scrolls it into view once it is laid out.
+  void _toggle(_DatePanel panel) {
+    final opening = _open != panel;
+    _log.debug(
+      'todo dialog ${panel.name} panel ${opening ? 'open' : 'closed'}',
+    );
+    setState(() => _open = opening ? panel : null);
+    if (opening) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _revealPanel());
+    }
+  }
+
+  /// Scrolls the open panel into view: under the last row, it can open
+  /// below the dialog's fold.
+  Future<void> _revealPanel() async {
+    final panelContext = _panelKey.currentContext;
+    if (panelContext == null || !panelContext.mounted) return;
+    await Scrollable.ensureVisible(
+      panelContext,
+      duration: const Duration(milliseconds: 200),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+  }
+
   /// Picks the due date (writes/updates `due:` on save).
   Future<void> _pickDue() async {
+    if (todoPicksInPlace(context)) return _toggle(_DatePanel.due);
     final today = _day(widget.today);
     final picked = await showDatePicker(
       context: context,
       initialDate: _due ?? today,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      firstDate: todoFirstDate,
+      lastDate: todoLastDate,
     );
     if (picked == null || !mounted) {
       return;
     }
+    _setDue(picked);
+  }
+
+  /// Keeps [picked] as the due date, closing the panel it came from.
+  void _setDue(DateTime picked) {
     _log.debug('todo dialog due: ${formatTodoDate(picked)}');
     setState(() {
       _due = picked;
       _dueDirty = true;
+      _open = null;
     });
   }
 
   /// Picks the reminder day and time (writes `rem:` on save).
   Future<void> _pickReminder() async {
+    if (todoPicksInPlace(context)) return _toggle(_DatePanel.reminder);
     final today = _day(widget.today);
     final date = await showDatePicker(
       context: context,
       initialDate: _reminder ?? today,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      firstDate: todoFirstDate,
+      lastDate: todoLastDate,
     );
     if (date == null || !mounted) {
       return;
@@ -228,17 +273,18 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     if (time == null || !mounted) {
       return;
     }
-    final stamp = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
+    _setReminder(
+      DateTime(date.year, date.month, date.day, time.hour, time.minute),
     );
+  }
+
+  /// Keeps [stamp] as the reminder, closing the panel it came from.
+  void _setReminder(DateTime stamp) {
     _log.debug('todo dialog reminder: ${formatTodoStamp(stamp)}');
     setState(() {
       _reminder = stamp;
       _reminderDirty = true;
+      _open = null;
     });
   }
 
@@ -407,11 +453,18 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
                     setState(() {
                       _due = null;
                       _dueDirty = true;
+                      if (_open == _DatePanel.due) _open = null;
                     });
                   },
                 ),
             ],
           ),
+          if (_open == _DatePanel.due)
+            TodoDatePanel(
+              key: _panelKey,
+              initial: _due ?? _day(widget.today),
+              onPicked: _setDue,
+            ),
           Row(
             children: [
               const Icon(Icons.alarm_outlined, size: 20),
@@ -438,11 +491,18 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
                     setState(() {
                       _reminder = null;
                       _reminderDirty = true;
+                      if (_open == _DatePanel.reminder) _open = null;
                     });
                   },
                 ),
             ],
           ),
+          if (_open == _DatePanel.reminder)
+            TodoReminderPanel(
+              key: _panelKey,
+              initial: _reminder ?? widget.today,
+              onPicked: _setReminder,
+            ),
         ],
       ),
     );
@@ -653,4 +713,13 @@ final class _NoLineBreaks extends TextInputFormatter {
       text: newValue.text.replaceAll(RegExp('[\r\n]'), ' '),
     );
   }
+}
+
+/// The date picked in place.
+enum _DatePanel {
+  /// The due date's calendar.
+  due,
+
+  /// The reminder's calendar and time.
+  reminder,
 }
