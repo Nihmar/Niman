@@ -153,9 +153,12 @@ final class BlockView extends StatelessWidget {
   /// reference definition and a footnote definition are syntax, not prose, and
   /// the parser files them elsewhere and returns an empty node list. Drawing
   /// "the text it did not cover" instead put `[^1]: fetch free fog national.`
-  /// on screen where the preview draws a footnote.
+  /// on screen where the preview draws a footnote. The *runs* say it, not
+  /// the extensions: a formula or a wikilink in a definition is masked before
+  /// the parse and kept as an extension, and the block was drawn as what it
+  /// did not cover — ` ￼ is *big*.` after the paragraph that cited it.
   Widget _rich(BuildContext context, {TextStyle? style}) {
-    if (parsed.runs.isEmpty && parsed.extensions.isEmpty) {
+    if (parsed.runs.isEmpty) {
       return const SizedBox.shrink();
     }
     final visible = VisibleText.of(parsed);
