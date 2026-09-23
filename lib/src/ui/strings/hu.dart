@@ -445,6 +445,8 @@ final class HungarianStrings extends Strings {
   @override
   String get toolbarImage => 'Kép beszúrása';
   @override
+  String get toolbarTable => 'Táblázat';
+  @override
   String get toolbarHeading => 'Cím';
   @override
   String get toolbarList => 'Lista';

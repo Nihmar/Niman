@@ -443,6 +443,8 @@ final class TurkishStrings extends Strings {
   @override
   String get toolbarImage => 'Görsel ekle';
   @override
+  String get toolbarTable => 'Tablo';
+  @override
   String get toolbarHeading => 'Başlık';
   @override
   String get toolbarList => 'Liste';

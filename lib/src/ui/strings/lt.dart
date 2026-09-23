@@ -452,6 +452,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get toolbarImage => 'Įterpti vaizdą';
   @override
+  String get toolbarTable => 'Lentelė';
+  @override
   String get toolbarHeading => 'Antraštė';
   @override
   String get toolbarList => 'Sąrašas';

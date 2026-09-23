@@ -445,6 +445,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get toolbarImage => 'Sett inn bilde';
   @override
+  String get toolbarTable => 'Tabell';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

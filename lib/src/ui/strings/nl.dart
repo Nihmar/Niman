@@ -450,6 +450,8 @@ final class DutchStrings extends Strings {
   @override
   String get toolbarImage => 'Afbeelding invoegen';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
   String get toolbarHeading => 'Kop';
   @override
   String get toolbarList => 'Lijst';

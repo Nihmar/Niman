@@ -455,6 +455,8 @@ final class GreekStrings extends Strings {
   @override
   String get toolbarImage => 'Εισαγωγή εικόνας';
   @override
+  String get toolbarTable => 'Πίνακας';
+  @override
   String get toolbarHeading => 'Τίτλος';
   @override
   String get toolbarList => 'Λίστα';

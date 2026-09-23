@@ -456,6 +456,8 @@ final class PolishStrings extends Strings {
   @override
   String get toolbarImage => 'Wstaw obraz';
   @override
+  String get toolbarTable => 'Tabela';
+  @override
   String get toolbarHeading => 'Nagłówek';
   @override
   String get toolbarList => 'Lista';

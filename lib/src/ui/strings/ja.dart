@@ -419,6 +419,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get toolbarImage => '画像の挿入';
   @override
+  String get toolbarTable => '表';
+  @override
   String get toolbarHeading => '見出し';
   @override
   String get toolbarList => 'リスト';

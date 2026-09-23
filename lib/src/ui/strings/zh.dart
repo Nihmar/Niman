@@ -419,6 +419,8 @@ final class ChineseStrings extends Strings {
   @override
   String get toolbarImage => '插入图片';
   @override
+  String get toolbarTable => '表格';
+  @override
   String get toolbarHeading => '标题';
   @override
   String get toolbarList => '列表';

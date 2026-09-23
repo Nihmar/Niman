@@ -441,6 +441,8 @@ final class EstonianStrings extends Strings {
   @override
   String get toolbarImage => 'Sisesta pilt';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
   String get toolbarHeading => 'Pealkiri';
   @override
   String get toolbarList => 'Loetelu';

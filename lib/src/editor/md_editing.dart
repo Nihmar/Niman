@@ -207,6 +207,61 @@ MarkdownEdit toggleTaskList({
   );
 }
 
+/// Inserts an empty table of [columns] columns and [rows] body rows, on
+/// lines of its own, with the caret in its first header cell (#262).
+///
+/// Where it goes follows the caret: a blank line is replaced by it, a
+/// caret at the very start of a line puts it above that line, and
+/// anywhere else puts it below. A table glued to a paragraph is read as
+/// the paragraph's text, so a blank line keeps it from its neighbours on
+/// either side, where there is not one already. A selection is not
+/// replaced: the table goes by the caret's end of it.
+MarkdownEdit insertTable({
+  required String text,
+  required TextSelection selection,
+  int columns = 2,
+  int rows = 1,
+}) {
+  final lines = text.split('\n');
+  final caret = selection.extentOffset;
+  final line = _lineIndexOf(text, caret);
+  final column = caret - _lineStart(text, line);
+  final blank = lines[line].trim().isEmpty;
+  // The line the table's first row becomes, and the lines kept either side.
+  final int at;
+  final int remove;
+  if (blank) {
+    at = line;
+    remove = 1;
+  } else if (column == 0) {
+    at = line;
+    remove = 0;
+  } else {
+    at = line + 1;
+    remove = 0;
+  }
+  String row(String cell) =>
+      '|${List<String>.filled(columns, ' $cell ').join('|')}|';
+  final table = <String>[
+    row('  '),
+    row('---'),
+    for (var body = 0; body < rows; body++) row('  '),
+  ];
+  final before = at > 0 && lines[at - 1].trim().isNotEmpty;
+  final afterIndex = at + remove;
+  final after =
+      afterIndex < lines.length && lines[afterIndex].trim().isNotEmpty;
+  final inserted = <String>[if (before) '', ...table, if (after) ''];
+  final newLines = <String>[...lines]..replaceRange(at, at + remove, inserted);
+  final headerLine = at + (before ? 1 : 0);
+  // The first header cell's text starts two columns in: `| ` and the caret.
+  final offset = _lineStart(newLines.join('\n'), headerLine) + 2;
+  return MarkdownEdit(
+    text: newLines.join('\n'),
+    selection: TextSelection.collapsed(offset: offset),
+  );
+}
+
 /// Indents (or outdents, with [outdent] true) every line the [selection]
 /// touches by [width] spaces: indent adds [width] spaces at each line's
 /// start; outdent removes up to [width] leading spaces (never content).

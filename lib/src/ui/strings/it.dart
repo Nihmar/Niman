@@ -452,6 +452,8 @@ final class ItalianStrings extends Strings {
   @override
   String get toolbarImage => 'Inserisci immagine';
   @override
+  String get toolbarTable => 'Tabella';
+  @override
   String get toolbarHeading => 'Titolo';
   @override
   String get toolbarList => 'Elenco';

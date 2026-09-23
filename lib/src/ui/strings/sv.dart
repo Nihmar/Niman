@@ -450,6 +450,8 @@ final class SwedishStrings extends Strings {
   @override
   String get toolbarImage => 'Infoga bild';
   @override
+  String get toolbarTable => 'Tabell';
+  @override
   String get toolbarHeading => 'Rubrik';
   @override
   String get toolbarList => 'Lista';

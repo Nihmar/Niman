@@ -278,6 +278,32 @@ void main() {
   });
 
   for (final live in <bool>[false, true]) {
+    testWidgets('the table button writes a table, one undo step '
+        '(${live ? 'live' : 'source'})', (tester) async {
+      // #262: an empty table at the caret, on lines of its own, the caret
+      // in its first header cell.
+      final writes = <String>[];
+      await _pump(
+        tester,
+        _view(
+          readNote: (_) async => 'una riga\n',
+          writes: writes,
+          showWysiwyg: live,
+        ),
+      );
+      final surface = _surface(tester)..placeCaret(8);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('toolbar-table')));
+      await tester.pump();
+      const table = '|    |    |\n| --- | --- |\n|    |    |';
+      expect(surface.widget.buffer.text, 'una riga\n\n$table\n');
+      expect(surface.selection.extent, 'una riga\n\n'.length + 2);
+      expect(surface.undo(), isTrue);
+      expect(surface.widget.buffer.text, 'una riga\n');
+    });
+  }
+
+  for (final live in <bool>[false, true]) {
     testWidgets('the checkbox list button toggles a task, one undo step '
         '(${live ? 'live' : 'source'})', (tester) async {
       // #263: the toolbar's checkbox list, in both unified modes.

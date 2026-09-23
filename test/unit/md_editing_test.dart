@@ -153,4 +153,49 @@ void main() {
       expect(listItemHead('  - [ ] todo')!.continuation, '  - [ ] ');
     });
   });
+
+  group('insertTable (#262)', () {
+    const table = '|    |    |\n| --- | --- |\n|    |    |';
+
+    MarkdownEdit insert(String text, int caret) =>
+        insertTable(text: text, selection: _sel(caret));
+
+    test('an empty note becomes the table, the caret in its first cell', () {
+      final edit = insert('', 0);
+      expect(edit.text, table);
+      expect(edit.selection, _sel(2));
+    });
+
+    test('a blank line is replaced, and kept from its neighbours', () {
+      final edit = insert('prima\n\ndopo', 6);
+      expect(edit.text, 'prima\n\n$table\n\ndopo');
+      expect(edit.selection, _sel('prima\n\n'.length + 2));
+    });
+
+    test('a caret in a line puts it below, a blank line between', () {
+      final edit = insert('una riga\ndopo', 3);
+      expect(edit.text, 'una riga\n\n$table\n\ndopo');
+    });
+
+    test('a caret at the start of a line puts it above', () {
+      final edit = insert('una riga', 0);
+      expect(edit.text, '$table\n\nuna riga');
+      expect(edit.selection, _sel(2));
+    });
+
+    test('more columns and rows when asked', () {
+      final edit = insertTable(
+        text: '',
+        selection: _sel(0),
+        columns: 3,
+        rows: 2,
+      );
+      expect(edit.text.split('\n'), [
+        '|    |    |    |',
+        '| --- | --- | --- |',
+        '|    |    |    |',
+        '|    |    |    |',
+      ]);
+    });
+  });
 }

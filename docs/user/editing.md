@@ -280,6 +280,13 @@ Pressed on lines that are all tasks already, it takes the boxes off and
 leaves their text. Blank lines in a selection are left alone, and the
 whole change is one undo step. On a task line the button reads as on.
 
+The **table** button writes an empty table — two columns, a header and
+one row — on lines of its own, with the caret in its first header cell:
+it takes the place of a blank line the caret is on, goes above a line
+the caret is at the start of, and below one the caret is anywhere else
+in, with a blank line kept from the text around it. One undo step takes
+it away. Rows and columns are added from the table itself in live mode.
+
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
 changeable in Settings → Keyboard shortcuts → Formatting (see

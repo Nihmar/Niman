@@ -13,6 +13,8 @@
 /// is mounted — a kind GUI's edit — still edits the note and still counts.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show TextSelection;
 import 'package:niman/src/editor/highlighting.dart';
@@ -262,12 +264,20 @@ final class MarkdownSurfaceController {
   /// the note meant joining it, building its formatted copy and comparing
   /// the two: seconds for a bold on a 246 MB note (0.0.9 stress test), for
   /// two asterisks.
+  ///
+  /// A command that looks at the lines around the ones it changes — an
+  /// inserted table keeps a blank line from its neighbours — asks for
+  /// [context] lines either side, and gets them.
   void applyLineCommand(
-    MarkdownEdit Function(String text, TextSelection selection) command,
-  ) {
+    MarkdownEdit Function(String text, TextSelection selection) command, {
+    int context = 0,
+  }) {
     final current = _caretSelection(selection);
-    final first = buffer.lineOf(current.start);
-    final last = buffer.lineOf(current.end);
+    final first = math.max(0, buffer.lineOf(current.start) - context);
+    final last = math.min(
+      buffer.lineCount - 1,
+      buffer.lineOf(current.end) + context,
+    );
     final start = buffer.offsetOfLine(first);
     final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
     final result = command(

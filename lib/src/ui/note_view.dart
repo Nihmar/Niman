@@ -2958,6 +2958,11 @@ final class _NoteViewState extends State<NoteView>
       ToolbarItem.link: _insertLink,
       ToolbarItem.code: _insertCodeBlock,
       ToolbarItem.image: _insertImage,
+      ToolbarItem.table: () => _runCommand(
+        (text, selection) => insertTable(text: text, selection: selection),
+        // The lines either side: the table keeps a blank line from them.
+        context: 1,
+      ),
       ToolbarItem.heading: _showHeadingDialog,
       ToolbarItem.list: () => _prefixLines(prefix: '- '),
       ToolbarItem.orderedList: _insertOrderedList,
@@ -3128,11 +3133,12 @@ final class _NoteViewState extends State<NoteView>
   /// not the note ([MarkdownSurfaceController.applyLineCommand]); the legacy
   /// editor hands it its whole text, as it always has.
   void _runCommand(
-    MarkdownEdit Function(String text, TextSelection selection) command,
-  ) {
+    MarkdownEdit Function(String text, TextSelection selection) command, {
+    int context = 0,
+  }) {
     final surface = _surface;
     if (_unified && surface != null) {
-      surface.applyLineCommand(command);
+      surface.applyLineCommand(command, context: context);
       _focus.requestFocus();
       return;
     }
@@ -3247,7 +3253,27 @@ final class _NoteViewState extends State<NoteView>
         onImage: _insertQuillImage,
         onHeading: _showQuillHeadingDialog,
         onTools: () => unawaited(_openTools()),
+        onTable: () => _insertQuillTable(state),
       );
+
+  /// The table button in the legacy WYSIWYG: Quill has no table, so the
+  /// table is written as the Markdown it is, on lines of its own.
+  void _insertQuillTable(WysiwygEditorState state) {
+    final controller = state.controller;
+    final at = controller.selection.extentOffset;
+    final text = controller.document.toPlainText();
+    final lineStart = at == 0 ? 0 : text.lastIndexOf('\n', at - 1) + 1;
+    final blank = text.substring(lineStart, at).trim().isEmpty;
+    const table = '|    |    |\n| --- | --- |\n|    |    |\n';
+    final snippet = blank ? table : '\n\n$table';
+    controller.replaceText(
+      at,
+      0,
+      snippet,
+      TextSelection.collapsed(offset: at + snippet.indexOf('|') + 2),
+    );
+    state.requestEditorFocus();
+  }
 
   /// The heading picker, applied to the Quill selection.
   Future<void> _showQuillHeadingDialog() async {

@@ -452,6 +452,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get toolbarImage => 'Vstavi sliko';
   @override
+  String get toolbarTable => 'Tabela';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Seznam';

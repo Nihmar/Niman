@@ -445,6 +445,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get toolbarImage => 'Vendos foto';
   @override
+  String get toolbarTable => 'Tabelë';
+  @override
   String get toolbarHeading => 'Titull';
   @override
   String get toolbarList => 'Listë';

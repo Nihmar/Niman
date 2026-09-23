@@ -452,6 +452,8 @@ final class BosnianStrings extends Strings {
   @override
   String get toolbarImage => 'Umetni sliku';
   @override
+  String get toolbarTable => 'Tabela';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

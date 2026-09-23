@@ -450,6 +450,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get toolbarImage => 'Вмъкване на изображение';
   @override
+  String get toolbarTable => 'Таблица';
+  @override
   String get toolbarHeading => 'Заглавие';
   @override
   String get toolbarList => 'Списък';
