@@ -24,6 +24,7 @@ library;
 import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/masked_block.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
@@ -235,13 +236,34 @@ final class BlockParser {
   static String contentText(Block block, String raw) {
     if (block.quoteDepth <= 0 && block.kind != BlockKind.listItem) return raw;
     final lines = raw.split('\n');
-    final indent = listIndentOf(block, lines.first);
-    if (block.quoteDepth <= 0 && indent == 0) return raw;
+    if (block.quoteDepth <= 0 &&
+        lines.length == 1 &&
+        listIndentOf(block, lines.first) == 0) {
+      return raw;
+    }
+    final first = lines.first;
     for (var at = 0; at < lines.length; at++) {
       final line = lines[at];
-      lines[at] = line.substring(linePrefixLength(block, line, indent));
+      lines[at] = line.substring(
+        linePrefixLength(block, line, listStripOf(block, first, at)),
+      );
     }
     return lines.join('\n');
+  }
+
+  /// How many spaces past its quote marks the parse takes off line [index]
+  /// of [block], whose first line is [firstLine]: on the item's own line the
+  /// indent its marker stands at ([listIndentOf]), and on the lines after it
+  /// the item's content column — the spaces the package itself reads an
+  /// item's next lines without. Left on, a text node of two lines was not
+  /// found in the source, the run was guessed, and the read view drew the
+  /// item's `- ` as text. 0 for any other block.
+  static int listStripOf(Block block, String firstLine, int index) {
+    if (block.kind != BlockKind.listItem) return 0;
+    if (index == 0) return listIndentOf(block, firstLine);
+    final from = quotePrefixLength(firstLine, block.quoteDepth);
+    final marker = BlockScanner.listMarkerOf(firstLine.substring(from));
+    return marker?.$3 ?? listIndentOf(block, firstLine);
   }
 
   /// The indent a list item's marker stands at, past its quote marks, on the
@@ -258,12 +280,12 @@ final class BlockParser {
   }
 
   /// How much of [line], a line of [block], the parse takes off: its quote
-  /// marks, and up to [listIndent] spaces after them ([listIndentOf]). A
+  /// marks, and up to [listStrip] spaces after them ([listStripOf]). A
   /// reader puts the parse's offsets back on the line by adding this.
-  static int linePrefixLength(Block block, String line, int listIndent) {
+  static int linePrefixLength(Block block, String line, int listStrip) {
     final quote = quotePrefixLength(line, block.quoteDepth);
     var at = quote;
-    while (at - quote < listIndent &&
+    while (at - quote < listStrip &&
         at < line.length &&
         line.codeUnitAt(at) == 0x20) {
       at++;

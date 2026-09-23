@@ -134,10 +134,13 @@ bool _hasInlineText(BlockKind kind) => switch (kind) {
 final class _SourceOffsets {
   new(Block block, String raw, SourceBuffer buffer) {
     final lines = raw.split('\n');
-    final indent = BlockParser.listIndentOf(block, lines.first);
     var content = 0;
     for (var at = 0; at < lines.length; at++) {
-      final prefix = BlockParser.linePrefixLength(block, lines[at], indent);
+      final prefix = BlockParser.linePrefixLength(
+        block,
+        lines[at],
+        BlockParser.listStripOf(block, lines.first, at),
+      );
       _contentStarts.add(content);
       _sourceStarts.add(buffer.offsetOfLine(block.startLine + at) + prefix);
       content += lines[at].length - prefix + 1;
