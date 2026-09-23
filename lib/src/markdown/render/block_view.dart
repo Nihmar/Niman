@@ -292,6 +292,9 @@ final class BlockView extends StatelessWidget {
   /// quote inside it as a paragraph and a list as its dashes. The pattern
   /// is the table cell's: the same engine, over the smaller text.
   Widget _quote(BuildContext context) {
+    // The bar is inside the quote's indent, as `live` draws it: a box adds
+    // its border to its padding, and the text stood the bar's width further
+    // in than past the bar in `live`.
     final bar = BoxDecoration(
       border: Border(
         left: BorderSide(color: theme.quoteBar, width: theme.quoteBarWidth),
@@ -304,7 +307,9 @@ final class BlockView extends StatelessWidget {
       final width = availableWidth;
       return Container(
         decoration: bar,
-        padding: EdgeInsets.only(left: theme.quoteIndentPerLevel),
+        padding: EdgeInsets.only(
+          left: theme.quoteIndentPerLevel - theme.quoteBarWidth,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -315,7 +320,7 @@ final class BlockView extends StatelessWidget {
                 mathCache: mathCache,
                 availableWidth: width == null
                     ? null
-                    : width - theme.quoteIndentPerLevel - theme.quoteBarWidth,
+                    : width - theme.quoteIndentPerLevel,
                 onTapLink: onTapLink,
                 onTapWikiLink: onTapWikiLink,
                 embedResolver: embedResolver,
@@ -337,7 +342,9 @@ final class BlockView extends StatelessWidget {
     final style = theme.quote;
     return Container(
       decoration: bar,
-      padding: EdgeInsets.only(left: theme.quoteIndentPerLevel),
+      padding: EdgeInsets.only(
+        left: theme.quoteIndentPerLevel - theme.quoteBarWidth,
+      ),
       child: Text.rich(
         TextSpan(
           children: _InlineBuilder(
