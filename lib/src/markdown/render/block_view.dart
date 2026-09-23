@@ -82,6 +82,15 @@ final class BlockView extends StatelessWidget {
   /// content is read again as blocks.
   final int quoteNesting;
 
+  /// Whether [block] leaves the spacing between blocks under it, with [next]
+  /// after it: all but an item a next item follows at once — a tight list's
+  /// items sit one under the other, as `live` draws them.
+  static bool spacedBefore(Block block, Block? next) =>
+      !(block.kind == BlockKind.listItem &&
+          next != null &&
+          next.kind == BlockKind.listItem &&
+          next.startLine == block.endLine);
+
   /// Past this many quotes inside one another, a quote's content is drawn as
   /// its text rather than read again.
   static const int _maxQuoteNesting = 8;
@@ -125,11 +134,13 @@ final class BlockView extends StatelessWidget {
       BlockKind.math => _blockMath(context),
       BlockKind.table => _table(context),
       BlockKind.thematicBreak => _rule(context),
-      BlockKind.blank => SizedBox(height: theme.blockSpacing),
+      // A blank line is the spacing between the blocks around it, which the
+      // one above leaves: drawn again here, it counted twice more.
+      BlockKind.blank => const SizedBox.shrink(),
       BlockKind.frontmatter => const SizedBox.shrink(),
       BlockKind.html => _code(context, null),
     };
-    if (!spaced) return child;
+    if (!spaced || block.kind == BlockKind.blank) return child;
     return Padding(
       padding: EdgeInsets.only(bottom: theme.blockSpacing),
       child: child,
@@ -311,7 +322,9 @@ final class BlockView extends StatelessWidget {
                     ? null
                     : (line) => toggle(start + line),
                 scope: scope,
-                spaced: at < inner.length - 1,
+                spaced:
+                    at < inner.length - 1 &&
+                    spacedBefore(inner[at].block, inner[at + 1].block),
                 quoteNesting: quoteNesting + 1,
               ),
           ],

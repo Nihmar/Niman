@@ -83,11 +83,15 @@ final class MarkdownExportView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            for (final block in blocks)
+            for (var at = 0; at < blocks.length; at++)
               BlockView(
-                parsed: parser.of(block, buffer),
+                parsed: parser.of(blocks[at], buffer),
                 theme: theme,
                 mathCache: mathCache,
+                spaced: BlockView.spacedBefore(
+                  blocks[at],
+                  at + 1 < blocks.length ? blocks[at + 1] : null,
+                ),
               ),
           ],
         ),

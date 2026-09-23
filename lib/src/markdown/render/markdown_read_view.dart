@@ -509,7 +509,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final line = _textScaler.scale(theme.lineHeight);
     return switch (block.kind) {
       BlockKind.frontmatter => 0,
-      BlockKind.blank => spacing + line * 0.5,
+      // The spacing a blank line stands for is the block above's.
+      BlockKind.blank => 0,
       BlockKind.thematicBreak => theme.ruleThickness + spacing,
       BlockKind.heading => line * 1.3 + spacing,
       BlockKind.fencedCode || BlockKind.indentedCode =>
@@ -518,8 +519,15 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             : block.lineCount * line + 2 * theme.codePadding + spacing,
       BlockKind.math => block.lineCount * line * 1.6 + spacing,
       BlockKind.table || BlockKind.html => block.lineCount * line + spacing,
+      BlockKind.listItem =>
+        block.lineCount * line +
+            (BlockView.spacedBefore(
+                  block,
+                  index + 1 < _blocks.length ? _blocks[index + 1] : null,
+                )
+                ? spacing
+                : 0),
       BlockKind.paragraph ||
-      BlockKind.listItem ||
       BlockKind.quote => block.lineCount * line + spacing,
     };
   }
@@ -672,6 +680,10 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
       scope: widget.parser.scope,
+      spaced: BlockView.spacedBefore(
+        block,
+        index + 1 < _blocks.length ? _blocks[index + 1] : null,
+      ),
     );
   }
 }

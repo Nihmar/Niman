@@ -315,7 +315,7 @@ MarkdownTheme markdownThemeOf(BuildContext context, {TextScaler? scaler}) {
     quoteBar: colors.outlineVariant,
     tableBorder: colors.outlineVariant,
     markerDim: colors.outline,
-    blockSpacing: em * 0.75,
+    blockSpacing: em,
     listIndentPerLevel: em * 1.6,
     quoteIndentPerLevel: em * 0.9,
     codePadding: em * 0.6,
