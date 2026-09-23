@@ -126,6 +126,8 @@ final class ShellRowActions {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        // An action would keep it up until it is dismissed by hand.
+        persist: false,
         content: Text(
           pinned ? AppStrings.pinnedForWidget : AppStrings.pinWidgetUnavailable,
         ),
@@ -215,6 +217,8 @@ final class ShellRowActions {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            // An action would keep it up until it is dismissed by hand.
+            persist: false,
             content: Text(
               trash ? AppStrings.movedToTrash : AppStrings.deletedMessage,
             ),
