@@ -54,6 +54,7 @@ import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
+import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/math_text.dart';
@@ -2775,87 +2776,134 @@ final class _Line extends StatelessWidget {
                 ],
               ),
             ),
-          Expanded(
-            child: _caretBox(
-              ValueListenableBuilder<CaretSpot>(
-                valueListenable: spot,
-                builder: (context, at, _) {
-                  final mine = at.line == index;
-                  final math = formula;
-                  // A formula is edited as a block: the caret anywhere in it
-                  // shows all of its source, and out of it none.
-                  final typeset =
-                      math != null &&
-                      mathCache != null &&
-                      (at.line < math.start || at.line >= math.end);
-                  final concealed = <(int, int)>[
-                    if (typeset) (0, styled.text.length),
-                    if (hideMarkers && !mine)
-                      for (final picture in pictures)
-                        (picture.start, picture.end),
-                  ];
-                  final indent = _indent();
-                  final line = Padding(
-                    padding: EdgeInsets.only(left: indent),
-                    // The spelling is painted over the paragraph rather than
-                    // written into its runs: a style has one decoration, and
-                    // a wavy underline there took a struck word's strike.
-                    child: CustomPaint(
-                      foregroundPainter: misspelled.isEmpty
-                          ? null
-                          : SquigglePainter(
-                              paragraph: paragraphKey,
-                              ranges: _unjudged(),
-                              color: misspelledColor,
-                            ),
-                      child: Text.rich(
-                        _span(
-                          revealed: mine,
-                          run: mine ? (at.runStart, at.runEnd) : null,
-                          concealed: concealed,
-                        ),
-                        key: paragraphKey,
-                        // A typeset formula's lines take no room: the formula
-                        // is drawn under its first one instead.
-                        style: typeset
-                            ? _lineStyle(revealed: mine)
-                                  .copyWith(fontSize: 0.01, height: 1)
-                            : _lineStyle(revealed: mine),
-                      ),
-                    ),
-                  );
-                  if (typeset) {
-                    if (index != math.start) return line;
-                    return liveFormulaUnder(
-                      line,
-                      cache: mathCache!,
-                      tex: math.tex,
-                      theme: theme,
-                      maxWidth: width,
-                    );
-                  }
-                  final resolver = embedResolver;
-                  final pictured = resolver == null || pictures.isEmpty
-                      ? line
-                      : livePicturesUnder(line, pictures, resolver);
-                  if (!hideMarkers || shape == LineShape.none) return pictured;
-                  return CustomPaint(
-                    painter: LiveDecorationPainter(
-                      shape: shape,
-                      theme: theme,
-                      paragraph: paragraphKey,
-                      textLeft: indent,
-                      revealed: mine,
-                      color: theme.markerDim,
-                    ),
-                    child: pictured,
-                  );
-                },
-              ),
-            ),
-          ),
+          Expanded(child: _caretBox(_listeningToFormulas())),
         ],
       ),
+    );
+  }
+
+  /// The line as [spot] says to draw it, rebuilt when a formula the line
+  /// waits for is typeset.
+  Widget _listeningToFormulas() {
+    Widget line() => ValueListenableBuilder<CaretSpot>(
+      valueListenable: spot,
+      builder: (context, at, _) => _content(at),
+    );
+    final cache = mathCache;
+    if (!hideMarkers ||
+        cache == null ||
+        !styled.tokens.any((token) => token.kind == TokenKind.mathInline)) {
+      return line();
+    }
+    // A new widget each time: the same instance handed back is one the
+    // framework does not build again, and the typeset formula never landed.
+    return ListenableBuilder(listenable: cache, builder: (_, _) => line());
+  }
+
+  /// The line with the caret at [at]: its text, and in `live` what stands in
+  /// for the source it hides.
+  Widget _content(CaretSpot at) {
+    final mine = at.line == index;
+    final math = formula;
+    // A formula is edited as a block: the caret anywhere in it shows all of
+    // its source, and out of it none.
+    final typeset =
+        math != null &&
+        mathCache != null &&
+        (at.line < math.start || at.line >= math.end);
+    final inline = typeset
+        ? const <InlineFormula>[]
+        : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
+    final concealed = <(int, int, TextStyle)>[
+      if (typeset) (0, styled.text.length, _hiddenMarker),
+      if (hideMarkers && !mine)
+        for (final picture in pictures)
+          (picture.start, picture.end, _hiddenMarker),
+      for (final formula in inline)
+        (formula.start, formula.end, spacerStyleFor(formula, theme.lineHeight)),
+    ];
+    final indent = _indent();
+    Widget paragraph = Text.rich(
+      _span(
+        revealed: mine,
+        run: mine ? (at.runStart, at.runEnd) : null,
+        concealed: concealed,
+      ),
+      key: paragraphKey,
+      // A typeset formula's lines take no room: the formula is drawn under
+      // its first one instead.
+      style: typeset
+          ? _lineStyle(revealed: mine).copyWith(fontSize: 0.01, height: 1)
+          : _lineStyle(revealed: mine),
+    );
+    if (inline.isNotEmpty) {
+      paragraph = CustomPaint(
+        foregroundPainter: InlineMathPainter(
+          paragraph: paragraphKey,
+          formulas: inline,
+        ),
+        child: paragraph,
+      );
+    }
+    final line = Padding(
+      padding: EdgeInsets.only(left: indent),
+      // The spelling is painted over the paragraph rather than written into
+      // its runs: a style has one decoration, and a wavy underline there took
+      // a struck word's strike.
+      child: CustomPaint(
+        foregroundPainter: misspelled.isEmpty
+            ? null
+            : SquigglePainter(
+                paragraph: paragraphKey,
+                ranges: _unjudged(),
+                color: misspelledColor,
+              ),
+        child: paragraph,
+      ),
+    );
+    if (typeset) {
+      if (index != math.start) return line;
+      return liveFormulaUnder(
+        line,
+        cache: mathCache!,
+        tex: math.tex,
+        theme: theme,
+        maxWidth: width,
+      );
+    }
+    final resolver = embedResolver;
+    final pictured = resolver == null || pictures.isEmpty
+        ? line
+        : livePicturesUnder(line, pictures, resolver);
+    if (!hideMarkers || shape == LineShape.none) return pictured;
+    return CustomPaint(
+      painter: LiveDecorationPainter(
+        shape: shape,
+        theme: theme,
+        paragraph: paragraphKey,
+        textLeft: indent,
+        revealed: mine,
+        color: theme.markerDim,
+      ),
+      child: pictured,
+    );
+  }
+
+  /// The inline formulas `live` typesets on this line: all of them but the
+  /// one in the caret's word, [run], whose source is shown as written.
+  List<InlineFormula> _inlineFormulas({(int, int)? run}) {
+    final cache = mathCache;
+    if (!hideMarkers || cache == null) return const <InlineFormula>[];
+    final sources = inlineFormulasOf(styled.text, styled.tokens);
+    if (sources.isEmpty) return const <InlineFormula>[];
+    return typesetInline(
+      <InlineFormulaSource>[
+        for (final source in sources)
+          if (run == null || source.start < run.$1 || source.end > run.$2)
+            source,
+      ],
+      cache,
+      _lineStyle(revealed: false),
     );
   }
 
@@ -2996,7 +3044,7 @@ final class _Line extends StatelessWidget {
   TextSpan _span({
     required bool revealed,
     (int, int)? run,
-    List<(int, int)> concealed = const <(int, int)>[],
+    List<(int, int, TextStyle)> concealed = const <(int, int, TextStyle)>[],
   }) {
     final spans = <InlineSpan>[];
     var at = 0;
@@ -3071,14 +3119,14 @@ final class _Line extends StatelessWidget {
     int start,
     int end,
     TextStyle? style, [
-    List<(int, int)> concealed = const <(int, int)>[],
+    List<(int, int, TextStyle)> concealed = const <(int, int, TextStyle)>[],
   ]) {
     final cuts = <int>{start, end};
     for (final range in <(int, int)?>[
       selected,
       composing,
       for (final match in found) (match.$1, match.$2),
-      ...concealed,
+      for (final hidden in concealed) (hidden.$1, hidden.$2),
     ]) {
       if (range == null) continue;
       if (range.$1 > start && range.$1 < end) cuts.add(range.$1);
@@ -3092,7 +3140,10 @@ final class _Line extends StatelessWidget {
           range != null && from >= range.$1 && to <= range.$2;
       // What `live` draws instead of its source — a picture, a formula — is
       // hidden as a marker is: there, taking no room.
-      var piece = concealed.any(inside) ? _hiddenMarker : style;
+      var piece = style;
+      for (final hidden in concealed) {
+        if (inside((hidden.$1, hidden.$2))) piece = hidden.$3;
+      }
       if (inside(selected)) {
         piece = (piece ?? const TextStyle()).copyWith(
           background: Paint()..color = _selectionColor,
