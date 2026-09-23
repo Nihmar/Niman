@@ -348,6 +348,37 @@ inline math $x$ and a #tag, all in one block.
     );
   });
 
+  test("an item's next line is its text, parsed without its indent", () {
+    // The package reads an item's next lines from its content column on,
+    // and a text node of two lines was not found in a source that still
+    // had the spaces: the run was guessed, and the read view drew the
+    // item's `- ` as text.
+    const raw = '  - a **bold** word\n    and more';
+    const block = Block(
+      kind: BlockKind.listItem,
+      startLine: 0,
+      endLine: 2,
+      listDepth: 1,
+    );
+    final parsed = BlockParser().parseText(
+      block,
+      raw,
+      () => DocumentScope.scan(SourceBuffer.fromText(raw), 0),
+    );
+    expect(parsed.approximate, isFalse);
+    expect(parsed.text, '- a **bold** word\nand more');
+    // What a reader adds back to put the parse's offsets on the note.
+    final lines = raw.split('\n');
+    for (final (index, text) in [(0, '- a **bold** word'), (1, 'and more')]) {
+      final prefix = BlockParser.linePrefixLength(
+        block,
+        lines[index],
+        BlockParser.listStripOf(block, lines.first, index),
+      );
+      expect(lines[index].substring(prefix), text);
+    }
+  });
+
   test('a quotation mark is placed, and so is what follows it', () {
     // The package hands text back HTML-escaped: `"` is `&quot;` in the node,
     // which the source does not say, and every run after it was guessed.

@@ -168,6 +168,22 @@ void main() {
     expect(screen, contains('three'));
   });
 
+  testWidgets("an item's next line is its text, and its marker is not", (
+    tester,
+  ) async {
+    // A second line indented to the item's text left the parse guessing:
+    // the item was drawn as `- one` with its next line's spaces kept.
+    await tester.pumpWidget(
+      _view('- one\n  two\n- [ ] three\n  four', _syncCache()),
+    );
+    await tester.pump();
+    final screen = _screenText(tester);
+    expect(screen, contains('one\ntwo'));
+    expect(screen, contains('three\nfour'));
+    expect(screen, isNot(contains('- ')));
+    expect(screen, isNot(contains('[ ]')));
+  });
+
   testWidgets("a list's numbers end at one edge, clear of the text", (
     tester,
   ) async {
