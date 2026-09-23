@@ -19,6 +19,7 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
 
 import '../../tool/spec_suite.dart';
+import '../fakes/item_mark_finder.dart';
 
 /// A cache that renders in-line, as the preview's own tests do.
 MathCache _syncCache() => MathCache(
@@ -185,8 +186,8 @@ void main() {
       tester,
     ) async {
       await pump(tester, '> text\n>\n> - item\n> - [ ] task\n');
-      expect(find.text('•'), findsOne);
-      expect(find.byIcon(Icons.check_box_outline_blank), findsOne);
+      expect(findBullet(), findsOne);
+      expect(findCheckbox(ticked: false), findsOne);
       expect(find.textContaining('- item', findRichText: true), findsNothing);
     });
 
@@ -199,7 +200,7 @@ void main() {
         'before\n\n> text\n>\n> - [ ] task\n',
         onToggleTask: ticked.add,
       );
-      await tester.tap(find.byIcon(Icons.check_box_outline_blank));
+      await tester.tap(findCheckbox(ticked: false));
       expect(ticked, [4]);
     });
   });
@@ -709,12 +710,12 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await _pump(tester, '- [x] tight checked\n- [ ] tight unchecked\n');
-      expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(findCheckbox(ticked: true), findsOneWidget);
+      expect(findCheckbox(ticked: false), findsOneWidget);
 
       await _pump(tester, '- [x] loose checked\n\n- [ ] loose unchecked\n');
-      expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(findCheckbox(ticked: true), findsOneWidget);
+      expect(findCheckbox(ticked: false), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -954,7 +955,7 @@ void main() {
       // after a sublist further still (device report, 2026-09-21: "il punto b
       // non dovrebbe essere doppiamente indentato").
       await _pump(tester, '- one\n  - nested\n- two\n');
-      final markers = find.text('\u2022');
+      final markers = findBullet();
       expect(markers, findsNWidgets(3));
       final xs = <double>[
         for (final marker in markers.evaluate())
