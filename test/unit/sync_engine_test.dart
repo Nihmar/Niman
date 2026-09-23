@@ -304,6 +304,26 @@ void main() {
     expect(b.read('.niman/settings.json'), '{"historyVersions": 7}');
   });
 
+  test('library settings deleted on the server are put back', () async {
+    a.write('.niman/settings.json', '{"historyVersions": 3}');
+    await a.sync();
+    server.remove('.niman/settings.json');
+    final report = await a.sync();
+    expect(report.done[SyncActionKind.trashLocal], isNull);
+    expect(a.read('.niman/settings.json'), '{"historyVersions": 3}');
+    expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+  });
+
+  test('library settings deleted here come back from the server', () async {
+    a.write('.niman/settings.json', '{"historyVersions": 3}');
+    await a.sync();
+    a.delete('.niman/settings.json');
+    final report = await a.sync();
+    expect(report.done[SyncActionKind.deleteRemote], isNull);
+    expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+    expect(a.read('.niman/settings.json'), '{"historyVersions": 3}');
+  });
+
   test('a local rename is one MOVE, not a new upload', () async {
     a.write('Old name.md', 'content');
     await a.sync();

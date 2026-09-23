@@ -92,6 +92,9 @@ example), and the files the operating system drops into folders
 - A file that disappeared from the server — deleted on another device —
   is **moved to this device's trash**, never deleted outright. After such
   a sync a message offers **Show**, which opens the trash.
+- The library's own settings (`.niman/settings.json`, `.niman/counters.json`)
+  are never deleted by a sync: if one goes missing on one side, it is put
+  back from the other.
 - If a sync would remove more than 10 files and more than half of the
   library, Niman stops and asks first. That is what a wrong address, an
   unmounted NAS disk or a folder emptied by mistake looks like.

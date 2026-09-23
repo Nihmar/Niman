@@ -254,6 +254,13 @@ Reconcile compares disk now and remote now against the row:
 The first sync (empty table) compares by content only and **never
 deletes** on either side; it shows a summary before it starts.
 
+The library state files (`libraryStateFiles`: `.niman/settings.json`,
+`.niman/counters.json`) are never deleted either: *deleted | same*
+downloads and *same | deleted* uploads. A missing settings file is never
+what the user meant, and treating it as a deletion let one device that
+lost its copy delete it on the server, after which every other device
+trashed its own and fell back to the defaults.
+
 #### Reconcile (`lib/src/sync/reconcile.dart`)
 
 Pure functions, no I/O and no clock, one unit test per row above:
