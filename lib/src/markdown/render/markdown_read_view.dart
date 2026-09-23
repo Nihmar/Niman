@@ -34,6 +34,7 @@ import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
+import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -221,10 +222,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// look again after the frame that landed.
   void _jumpToIndex(int index, {required int attempt}) {
     final heights = _heights;
-    final controller = widget.controller;
-    if (heights == null || controller == null || !controller.hasClients) {
-      return;
-    }
+    final controller = _scroll;
+    if (heights == null || !controller.hasClients) return;
     final offset = heights
         .offsetOf(index)
         .clamp(0.0, controller.position.maxScrollExtent);
@@ -264,10 +263,43 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     return low;
   }
 
+  /// The scroll the view is moved by: the shell's, or the view's own.
+  ScrollController get _scroll =>
+      widget.controller ?? (_ownScroll ??= ScrollController());
+  ScrollController? _ownScroll;
+
+  /// The view's focus: the keys that move it are heard while it has it
+  /// ([readViewKey]).
+  final FocusNode _focus = FocusNode(debugLabel: 'read view');
+
+  /// Gives the view the keyboard, so its keys move it.
+  void focus() => _focus.requestFocus();
+
+  /// Goes to the note's end, and again after each frame that measured the
+  /// rows it landed on and moved the end — as long as it moves.
+  void _toEnd({int attempt = 0}) {
+    final scroll = _scroll;
+    if (!scroll.hasClients) return;
+    final end = scroll.position.maxScrollExtent;
+    if ((scroll.position.pixels - end).abs() <= 0.5 && attempt > 0) return;
+    scroll.jumpTo(end);
+    if (attempt >= _maxJumpAttempts) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _toEnd(attempt: attempt + 1);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _rescan();
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    _ownScroll?.dispose();
+    super.dispose();
   }
 
   @override
@@ -585,6 +617,27 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     // `LayoutBuilder` cannot answer an intrinsic query, and a display formula
     // inside a table cell (a column sized by `IntrinsicColumnWidth`) is asked
     // for one. This one is the pane's, around a scroll view nobody asks.
+    //
+    // The keys a reader moves a page with — the arrows, the page keys, Home
+    // and End — while the view has the keyboard, which a click on it gives.
+    return Focus(
+      focusNode: _focus,
+      onKeyEvent: (node, event) => readViewKey(
+        event,
+        _scroll,
+        row: MediaQuery.textScalerOf(context)
+            .scale((_theme ?? _fallbackTheme).lineHeight),
+        toEnd: _toEnd,
+      ),
+      child: Listener(
+        onPointerDown: (_) => _focus.requestFocus(),
+        child: _page(heights),
+      ),
+    );
+  }
+
+  /// The note's page: its blocks and its footnotes, laid out on the pane.
+  Widget _page(BlockHeightMap heights) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final pane = constraints.maxWidth.isFinite
@@ -615,7 +668,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   Widget _scrollView(BlockHeightMap heights, EdgeInsets padding, double pane) {
     final availableWidth = pane - padding.horizontal;
     return CustomScrollView(
-      controller: widget.controller,
+      controller: _scroll,
       physics: const ContentClampPhysics(),
       slivers: <Widget>[
         SliverPadding(

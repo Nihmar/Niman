@@ -453,6 +453,29 @@ void main() {
     );
   });
 
+  testWidgets('the flip to the read pane gives it the keyboard', (
+    tester,
+  ) async {
+    final text = List<String>.generate(300, (i) => 'riga $i').join('\n\n');
+    await tester.pumpWidget(_app(_note(text: text, autofocus: true)));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(_app(_note(text: text, showPreview: true)));
+    await tester.pumpAndSettle();
+    final scroll = tester
+        .state<ScrollableState>(
+          find.descendant(
+            of: find.byType(MarkdownReadView),
+            matching: find.byType(Scrollable),
+          ),
+        )
+        .position;
+    expect(scroll.pixels, 0);
+    // No click first: the page keys work at once.
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(scroll.pixels, greaterThan(0));
+  });
+
   testWidgets('a key the user chose wins over the note’s own '
       '(chosen_keys_test)', (tester) async {
     AppKeyMap.current.value = KeyMap.defaults.withBinding(
