@@ -159,13 +159,16 @@ void main() {
     // size before the title in `live`; and a list's text stood a tenth of a
     // pixel short of the read view's, which sets a paragraph's first glyph
     // half an ambient letter spacing in; and a quote's text stood its bar's
-    // width further in, in the read view, than past the bar in `live`.
+    // width further in, in the read view, than past the bar in `live`; and
+    // a code block's code stood a padding further in, in its box, than on
+    // `live`'s page, which drew no box.
     tester.view.physicalSize = const Size(900, 700);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     const note =
         'caret\n\n# Heading one\n\n## Heading two\n\n- bullet\n- [ ] task\n'
-        '  - nested\n\n1. numbered\n\n> quoted\n>\n> > deeper\n';
+        '  - nested\n\n1. numbered\n\n> quoted\n>\n> > deeper\n\n'
+        '```dart\nfenced();\n```\n';
     const words = [
       'Heading one',
       'Heading two',
@@ -174,6 +177,7 @@ void main() {
       'nested',
       'quoted',
       'deeper',
+      'fenced',
     ];
     Future<List<double>> lefts({required bool read}) async {
       await _pumpNote(tester, note, read: read);
@@ -195,14 +199,18 @@ void main() {
     // and leaves nothing under a block: every construct past the first stood
     // higher or lower than it did a pane flip before, and further off the
     // further down the note it was. A rule, one pixel in the read view, is a
-    // row in `live` with the rule across its middle.
+    // row in `live` with the rule across its middle. A code block's box had
+    // a padding of 0.6 em above and below its code, where `live` has a
+    // fence's row.
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     const note =
         'caret\n\n# Heading one\n\n## Heading two\npara under\n\n\n'
         'after two\n\n- bullet\n- [ ] task\n  - nested\n\n- loose\n\n'
-        '1. numbered\n\n---\n\nruled\n\n> quoted\n>\n> > deeper\n\nlast\n';
+        '1. numbered\n\n---\n\nruled\n\n> quoted\n>\n> > deeper\n\n'
+        '```dart\nfenced();\nsecond();\n```\nafter code\n\n```\n```\n'
+        'after empty\n\n```\nnever closed\n';
     const words = [
       'Heading one',
       'Heading two',
@@ -216,7 +224,11 @@ void main() {
       'ruled',
       'quoted',
       'deeper',
-      'last',
+      'fenced',
+      'second',
+      'after code',
+      'after empty',
+      'never closed',
     ];
     Future<List<double>> tops({required bool read}) async {
       await _pumpNote(tester, note, read: read);
@@ -264,5 +276,53 @@ void main() {
       ),
     );
     expect(drawn.center.dy - _glyphOf(tester, 'caret').dy, closeTo(rule, 0.01));
+  });
+  testWidgets("a code block's box stands where it does in live", (
+    tester,
+  ) async {
+    // `live` drew a code block's rows on the page, where the read view drew a
+    // box with a padding of 0.6 em above and below its code: the box is now
+    // `live`'s rows, its fences' rows its top and bottom, in both modes.
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note = 'caret\n\n```dart\nfenced();\n```\n\nlast\n';
+    Future<Rect> box({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      final background = markdownThemeOf(tester.element(find.byType(Scaffold)))
+          .codeBackground;
+      final origin = _glyphOf(tester, 'caret');
+      if (read) {
+        return tester
+            .getRect(
+              find.byWidgetPredicate(
+                (widget) =>
+                    widget is Container &&
+                    widget.decoration is BoxDecoration &&
+                    (widget.decoration! as BoxDecoration).color == background,
+              ),
+            )
+            .shift(-origin);
+      }
+      final rows = [
+        for (final element in find.byType(CustomPaint).evaluate())
+          if ((element.widget as CustomPaint).painter
+              case final LiveDecorationPainter painter
+              when painter.shape.code != null)
+            tester.getRect(find.byWidget(element.widget)),
+      ];
+      return Rect.fromLTRB(
+        rows.first.left,
+        rows.first.top,
+        rows.last.right,
+        rows.last.bottom,
+      ).shift(-origin);
+    }
+
+    final live = await box(read: false);
+    final read = await box(read: true);
+    expect(read.top, closeTo(live.top, 0.01), reason: 'the top');
+    expect(read.bottom, closeTo(live.bottom, 0.01), reason: 'the bottom');
+    expect(read.right, closeTo(live.right, 0.01), reason: 'the right edge');
   });
 }

@@ -504,8 +504,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// Block [index]'s height before it has ever been drawn.
   ///
   /// Per kind rather than one global "pixels per line", because the kinds
-  /// differ by more than their line count: a fence carries its padding, a rule
-  /// is one row whatever its text, and the frontmatter takes no room at all.
+  /// differ by more than their line count: a heading is set larger, a
+  /// formula taller, and the frontmatter takes no room at all. A code block
+  /// is its lines' rows, its fences' rows its padding.
   /// A wrong estimate only costs a jump that lands slightly off before the
   /// block is measured.
   double _estimateOf(int index) {
@@ -517,11 +518,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       BlockKind.frontmatter => 0,
       BlockKind.thematicBreak => line,
       BlockKind.heading => line * 1.3,
-      BlockKind.fencedCode || BlockKind.indentedCode =>
-        _pieces.containsKey(index)
-            ? block.lineCount * line
-            : block.lineCount * line + 2 * theme.codePadding,
       BlockKind.math => block.lineCount * line * 1.6,
+      BlockKind.fencedCode ||
+      BlockKind.indentedCode ||
       BlockKind.blank ||
       BlockKind.table ||
       BlockKind.html ||

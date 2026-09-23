@@ -1,5 +1,6 @@
 /// What `live` mode draws *around* a line's text: a list item's bullet, its
-/// number or its checkbox, a quote's bar, a thematic break's rule.
+/// number or its checkbox, a quote's bar, a thematic break's rule, a code
+/// block's box.
 ///
 /// Approach B (`docs/dev/unified-surface.md` §8.6.0) keeps the line's text the
 /// source, character for character, and hides a marker by style — so what the
@@ -18,6 +19,41 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 
+/// Where a line stands in a code block's box: which of its corners are the
+/// box's.
+enum CodeRow {
+  /// The block's first row, and not its last: the box's top.
+  top,
+
+  /// A row between the block's first and last.
+  middle,
+
+  /// The block's last row, and not its first: the box's bottom.
+  bottom,
+
+  /// A block of one row: the whole box.
+  only;
+
+  /// The row [index] is of [block], a code block.
+  factory of(Block block, int index) {
+    final top = index == block.startLine;
+    final bottom = index == block.endLine - 1;
+    return top && bottom
+        ? only
+        : top
+        ? CodeRow.top
+        : bottom
+        ? CodeRow.bottom
+        : middle;
+  }
+
+  /// Whether the row has the box's top corners.
+  bool get opens => this == top || this == only;
+
+  /// Whether the row has the box's bottom corners.
+  bool get closes => this == bottom || this == only;
+}
+
 /// The shape a line has in its block: what `live` draws beside its text.
 @immutable
 final class LineShape {
@@ -31,6 +67,7 @@ final class LineShape {
     this.ordinal,
     this.task,
     this.rule = false,
+    this.code,
   });
 
   /// The shape of [line], whose block is [block] and whose index is [index].
@@ -69,7 +106,19 @@ final class LineShape {
         block != null &&
         block.kind == BlockKind.listItem &&
         index > block.startLine;
-    if (quoteDepth == 0 && marker == null && !continued && !rule) return none;
+    final code =
+        block != null &&
+            (block.kind == BlockKind.fencedCode ||
+                block.kind == BlockKind.indentedCode)
+        ? CodeRow.of(block, index)
+        : null;
+    if (quoteDepth == 0 &&
+        marker == null &&
+        !continued &&
+        !rule &&
+        code == null) {
+      return none;
+    }
     return LineShape(
       quoteDepth: quoteDepth,
       marker: marker,
@@ -82,6 +131,7 @@ final class LineShape {
       ordinal: ordinal,
       task: task,
       rule: rule,
+      code: code,
     );
   }
 
@@ -117,6 +167,10 @@ final class LineShape {
   /// Whether the line is a thematic break.
   final bool rule;
 
+  /// Where the line stands in a code block's box — fence or code — or null
+  /// for a line of no code block.
+  final CodeRow? code;
+
   /// A line with no shape to draw.
   static const LineShape none = LineShape();
 
@@ -130,7 +184,8 @@ final class LineShape {
       other.box == box &&
       other.ordinal == ordinal &&
       other.task == task &&
-      other.rule == rule;
+      other.rule == rule &&
+      other.code == code;
 
   @override
   int get hashCode => Object.hash(
@@ -142,6 +197,7 @@ final class LineShape {
     ordinal,
     task,
     rule,
+    code,
   );
 }
 
@@ -237,6 +293,8 @@ final class LiveDecorationPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _paintQuoteBars(canvas, size);
+    // The box stays under a revealed fence: the fence is written inside it.
+    _paintCode(canvas, size);
     if (revealed) return;
     if (shape.rule) _paintRule(canvas, size);
     if (shape.marker != null) _paintItem(canvas);
@@ -251,6 +309,26 @@ final class LiveDecorationPainter extends CustomPainter {
         paint,
       );
     }
+  }
+
+  /// The line's part of its code block's box: from a padding before the
+  /// code to the pane's edge, rounded where the box starts and ends — the
+  /// box the read view draws, the fences' rows its top and bottom.
+  void _paintCode(Canvas canvas, Size size) {
+    final row = shape.code;
+    if (row == null) return;
+    final left = textLeft - theme.codePadding;
+    const round = Radius.circular(4);
+    canvas.drawRRect(
+      RRect.fromRectAndCorners(
+        Rect.fromLTWH(left, 0, size.width - left, size.height),
+        topLeft: row.opens ? round : Radius.zero,
+        topRight: row.opens ? round : Radius.zero,
+        bottomLeft: row.closes ? round : Radius.zero,
+        bottomRight: row.closes ? round : Radius.zero,
+      ),
+      Paint()..color = theme.codeBackground,
+    );
   }
 
   void _paintRule(Canvas canvas, Size size) {

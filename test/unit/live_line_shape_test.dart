@@ -47,4 +47,21 @@ void main() {
     expect(shapes[2].rule, isFalse);
     expect(shapes[6].rule, isTrue);
   });
+
+  test("a code block's rows are its box, the fences its top and bottom", () {
+    // `live` drew a code block as plain rows on the page, where the read
+    // view draws a box: each row now says which part of the box it is.
+    final shapes = _shapes(
+      'text\n\n```dart\nvar a;\nvar b;\n```\n\n```\n```\n\n    indented\n',
+    );
+    expect(shapes[0].code, isNull);
+    expect(shapes[2].code, CodeRow.top);
+    expect(shapes[3].code, CodeRow.middle);
+    expect(shapes[4].code, CodeRow.middle);
+    expect(shapes[5].code, CodeRow.bottom);
+    expect(shapes[6], LineShape.none);
+    expect(shapes[7].code, CodeRow.top);
+    expect(shapes[8].code, CodeRow.bottom);
+    expect(shapes[10].code, CodeRow.only);
+  });
 }

@@ -2960,9 +2960,10 @@ final class _Line extends StatelessWidget {
         ? line
         : livePicturesUnder(line, pictures, resolver);
     if (!hideMarkers || shape == LineShape.none) return pictured;
-    // A row whose text is all hidden — a rule, a quote's empty line — is
-    // laid out as nothing, while the list still gives it a row: the rule
-    // across its middle and the quote's bar were drawn on no height at all.
+    // A row whose text is all hidden — a fence, a rule, a quote's empty
+    // line — is laid out as nothing, while the list still gives it a row:
+    // its part of the box, the rule across its middle and the quote's bar
+    // were drawn on no height at all.
     final row = ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: MediaQuery.textScalerOf(context).scale(theme.lineHeight),
@@ -3090,6 +3091,8 @@ final class _Line extends StatelessWidget {
     // revealing a marker is not a reason to restyle the line under the caret
     // (`docs/dev/unified-surface.md` §8.6.2, and the test that holds it).
     if (!hideMarkers) return theme.body;
+    // Code reads as the read view draws it: in monospace, fences and all.
+    if (shape.code != null) return theme.code;
     // Quoted prose reads as the read view draws it: in the quote's own style.
     if (shape.quoteDepth > 0) return theme.body.merge(theme.quote);
     final text = styled.text;
@@ -3118,7 +3121,9 @@ final class _Line extends StatelessWidget {
   /// spaces between them — is hidden whole ([_span]), so the text lands on
   /// the column and a wrapped item's next row starts under it, where it
   /// hung out to the left by the prefix's width. Live nested by the spaces
-  /// the note was written with before: a sublist sat a few pixels in.
+  /// the note was written with before: a sublist sat a few pixels in. A
+  /// code block's rows are set a padding into its box, as the read view
+  /// sets its code.
   ///
   /// It is pure layout: no offset moves, because the text underneath is
   /// still the note's own text, character for character.
@@ -3134,7 +3139,10 @@ final class _Line extends StatelessWidget {
     final listed = shape.listed
         ? (shape.listDepth + 1) * theme.listIndentPerLevel
         : 0.0;
-    final base = listed + shape.quoteDepth * theme.quoteIndentPerLevel;
+    final base =
+        listed +
+        shape.quoteDepth * theme.quoteIndentPerLevel +
+        (shape.code == null ? 0 : theme.codePadding);
     if (base == 0 && _prefixEnd == 0) return 0;
     // Marks wider than their column hang into the margin, as far as there
     // is one: the text moves only by what is left over.
