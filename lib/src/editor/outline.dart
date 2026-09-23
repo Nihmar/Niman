@@ -11,6 +11,7 @@ library;
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
+import 'package:niman/src/markdown/block_list.dart';
 
 /// One heading in the outline.
 final class OutlineEntry {
@@ -64,8 +65,15 @@ List<OutlineEntry> outlineOfBlocks(
   String Function(int line) line,
 ) {
   final out = <OutlineEntry>[];
-  for (final block in index.blocks) {
-    if (block.kind != BlockKind.heading || block.headingLevel <= 0) continue;
+  bool isHeading(Block block) =>
+      block.kind == BlockKind.heading && block.headingLevel > 0;
+  final blocks = index.blocks;
+  // A scanner's list moves its blocks a chunk at a time, and reading each
+  // one where it is makes a block: only the headings are asked for there.
+  final headings = blocks is BlockList
+      ? blocks.matching(isHeading)
+      : blocks.where(isHeading);
+  for (final block in headings) {
     final text = line(block.startLine);
     out.add(
       OutlineEntry(
