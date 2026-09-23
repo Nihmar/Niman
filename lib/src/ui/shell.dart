@@ -1827,9 +1827,14 @@ final class _LibraryShellState extends State<_LibraryShell>
     await _rowActions.run(context, action, note, here);
   }
 
+  /// The tree's right-click menus, which one opened and when: a row's and
+  /// the background's were both seen on one click (0.0.9 test round).
+  static const AppLogger _treeMenuLog = AppLogger(name: 'tree.menu');
+
   /// Right-click context menu on a tree row (T-PP-20): the same actions
   /// at the cursor instead of in the phone's bottom sheet.
   Future<void> _showRowMenuAt(Note note, Offset position) async {
+    _treeMenuLog.debug('row menu asked: "${note.path}" at $position');
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
@@ -1840,8 +1845,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       position: position,
       offersNewTab: _wide,
     );
+    _treeMenuLog.debug('row menu closed: "${note.path}" -> $action');
     if (!mounted) return;
     await _rowActions.run(context, action, note, here);
+    _treeMenuLog.debug('row menu action done: "${note.path}" $action');
   }
 
   /// Opens the history of the note at [path]; a restore reloads the open
@@ -3275,7 +3282,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The right-click menu on the tree's empty space: a note, a note from a
   /// template or a folder, at the library's root.
   Future<void> _showTreeBackgroundMenuAt(Offset position) async {
+    _treeMenuLog.debug('background menu asked at $position');
     final action = await showTreeBackgroundMenuAt(context, position: position);
+    _treeMenuLog.debug('background menu closed -> $action');
     if (!mounted) return;
     switch (action) {
       case 'note':
