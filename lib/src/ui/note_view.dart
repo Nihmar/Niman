@@ -1765,6 +1765,8 @@ final class _NoteViewState extends State<NoteView>
     ),
     embedResolver: _resolveEmbed,
     column: widget.noteColumn,
+    // The editor's numbers' room, kept so the text does not move at a flip.
+    lineNumbers: widget.showLineNumbers && !widget.zen,
     knownScan: _editorScanOf,
     onToggleTask: _toggleTaskFromRead,
   );
