@@ -2,11 +2,14 @@
 // them
 // one widget: the same note, the same offsets, one flag between them.
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:katex/katex.dart' show boxSizePx;
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
+import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -284,6 +287,69 @@ void main() {
     expect(
       tester.getSize(find.text('a^2', findRichText: true)).height,
       greaterThan(10),
+    );
+  });
+
+  testWidgets("live typesets an inline formula in its source's room", (
+    tester,
+  ) async {
+    final cache = MathCache();
+    addTearDown(cache.dispose);
+    const note = 'caret\n\nsia \$x^2\$ qui\n';
+    Future<void> pumpAt(int caret) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: SourceBuffer.fromText(note),
+              mode: MarkdownSurfaceMode.live,
+              theme: _theme,
+              selection: SelectionModel.at(caret),
+              showLineNumbers: false,
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      // The formula is typeset in the background of the first frame, and
+      // the line is drawn again when it lands.
+      await tester.pump();
+      await tester.pump();
+    }
+
+    RenderParagraph lineOf(String text) => tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere((paragraph) => paragraph.text.toPlainText() == text);
+
+    await pumpAt(0);
+    final painter = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((paint) => paint.foregroundPainter)
+        .whereType<InlineMathPainter>()
+        .single;
+    final formula = painter.formulas.single;
+    expect((formula.start, formula.end), (4, 9));
+    // The paragraph is the source, every character: nothing to correct.
+    final line = lineOf(r'sia $x^2$ qui');
+    final room = line
+        .getBoxesForSelection(
+          const TextSelection(baseOffset: 4, extentOffset: 9),
+        )
+        .first;
+    expect(
+      room.right - room.left,
+      closeTo(boxSizePx(formula.box, formula.fontSize).width, 1),
+      reason: "the source takes the formula's width",
+    );
+
+    await pumpAt(12);
+    expect(
+      tester
+          .widgetList<CustomPaint>(find.byType(CustomPaint))
+          .map((paint) => paint.foregroundPainter)
+          .whereType<InlineMathPainter>(),
+      isEmpty,
+      reason: 'with the caret in its word, the formula is its source',
     );
   });
 
