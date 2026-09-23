@@ -13,6 +13,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
@@ -45,10 +46,7 @@ Widget liveFormulaUnder(
           cache: cache,
           maxWidth: maxWidth,
           tex: tex,
-          style: MathStyle(
-            fontSize: theme.body.fontSize ?? 14,
-            color: theme.body.color,
-          ),
+          style: mathStyleFor(theme.body),
         ),
       ),
     ),

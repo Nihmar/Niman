@@ -247,10 +247,7 @@ final class BlockView extends StatelessWidget {
       cache: mathCache,
       maxWidth: availableWidth,
       tex: displayTexOf(parsed.text),
-      style: MathStyle(
-        fontSize: theme.body.fontSize ?? 14,
-        color: theme.body.color,
-      ),
+      style: mathStyleFor(theme.body),
     ),
   );
 
@@ -543,7 +540,7 @@ final class _InlineBuilder {
           child: InlineMathView(
             cache: mathCache,
             tex: span.inner,
-            style: MathStyle(fontSize: base.fontSize ?? 14, color: base.color),
+            style: mathStyleFor(base),
           ),
         );
       case ExtensionKind.wikilink:
@@ -592,7 +589,7 @@ final class _InlineBuilder {
             cache: mathCache,
             maxWidth: availableWidth,
             tex: span.inner,
-            style: MathStyle(fontSize: base.fontSize ?? 14, color: base.color),
+            style: mathStyleFor(base),
           ),
         );
     }
