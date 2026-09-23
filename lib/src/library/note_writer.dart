@@ -26,7 +26,31 @@ import 'package:path/path.dart' as p;
 final class NoteWriter {
   /// Creates the writer for the library at [root], re-indexing each saved
   /// note through [indexer]; without [history] no versions are kept.
-  new({required this.root, required this.indexer, this.history});
+  new({
+    required this.root,
+    required this.indexer,
+    this.history,
+    this.quietBeforeReindex = defaultQuietBeforeReindex,
+  });
+
+  /// How long a saved note of so many bytes is left quiet before it is read
+  /// into the index again: at once for an ordinary note, and for a large one
+  /// only once the writer has stopped saving it.
+  ///
+  /// A reindex reads the whole note back — digest, tags and links, the
+  /// full-text row — and on the 247 MB stress note that is 15 to 34 s of work
+  /// for every save; written while the writer types, one reindex ran after
+  /// another for as long as they did (device log, 2026-09-23). The index
+  /// catches up with the note a little later, and the work is done once. The
+  /// thresholds are the save's own debounce (`cee783e`).
+  final Duration Function(int bytes) quietBeforeReindex;
+
+  /// [quietBeforeReindex]'s default.
+  static Duration defaultQuietBeforeReindex(int bytes) {
+    if (bytes > 16 << 20) return const Duration(seconds: 30);
+    if (bytes > 2 << 20) return const Duration(seconds: 5);
+    return Duration.zero;
+  }
 
   /// Absolute path of the library root.
   final String root;
@@ -54,6 +78,9 @@ final class NoteWriter {
   /// test).
   final Set<String> _reindexing = <String>{};
   final Set<String> _reindexAgain = <String>{};
+
+  /// The reindexes waiting for their note to be quiet, by path.
+  final Map<String, Timer> _quiet = <String, Timer>{};
 
   /// Writes [content] to the note at library-relative [path], creating
   /// the file when it is not there.
@@ -165,7 +192,15 @@ final class NoteWriter {
   }
 
   /// Completes when every re-index started by a save so far has finished.
+  ///
+  /// One still waiting for its note to be quiet runs now: whoever asks wants
+  /// the index as the disk has it.
   Future<void> get indexed async {
+    final waiting = _quiet.keys.toList();
+    for (final path in waiting) {
+      _quiet.remove(path)?.cancel();
+      _reindex(path, p.join(root, path), created: false);
+    }
     while (_indexing.isNotEmpty) {
       await Future.wait(_indexing.toList());
     }
@@ -218,7 +253,29 @@ final class NoteWriter {
       'encode ${result.encodeMs} ms, write ${result.writeMs} ms, '
       'total ${queuedAt.elapsedMilliseconds} ms)',
     );
-    _reindex(path, abs, created: result.created);
+    _reindexWhenQuiet(path, abs, created: result.created, bytes: result.bytes);
+  }
+
+  /// Reindexes [path] once it has been left alone for
+  /// [quietBeforeReindex] — each save of it starting the wait again. A new
+  /// note has no row yet and is indexed at once.
+  void _reindexWhenQuiet(
+    String path,
+    String abs, {
+    required bool created,
+    required int bytes,
+  }) {
+    _quiet.remove(path)?.cancel();
+    final wait = created ? Duration.zero : quietBeforeReindex(bytes);
+    if (wait == Duration.zero) {
+      _reindex(path, abs, created: created);
+      return;
+    }
+    _log.debug('reindex of "$path" in ${wait.inSeconds} s, if left alone');
+    _quiet[path] = Timer(wait, () {
+      _quiet.remove(path);
+      _reindex(path, abs, created: false);
+    });
   }
 
   /// Runs [writeNoteFile] with its snapshot on a short-lived isolate.
