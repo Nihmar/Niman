@@ -259,6 +259,25 @@ final class JapaneseStrings extends Strings {
   String get themeDuplicate => '複製';
   @override
   String get themeMenuTooltip => 'テーマの操作';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => '編集';
+  @override
+  String get themeEditorTitle => 'テーマを編集';
+  @override
+  String get themeEditorChrome => 'インターフェース';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
+  @override
+  String get themeEditorDiscardTitle => '変更を破棄';
+  @override
+  String get themeEditorDiscardBody => '変更した色は保存されません';
+  @override
+  String get themeEditorDiscard => '破棄';
+  @override
+  String get themeEditorBadColor => '#RRGGBB の形式で入力';
 
   // Settings: text size (T-M6-12).
   @override

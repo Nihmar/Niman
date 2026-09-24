@@ -275,6 +275,26 @@ final class TurkishStrings extends Strings {
   String get themeDuplicate => 'Çoğalt';
   @override
   String get themeMenuTooltip => 'Tema işlemleri';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Düzenle';
+  @override
+  String get themeEditorTitle => 'Temayı düzenle';
+  @override
+  String get themeEditorChrome => 'Arayüz';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Her renk, dışa aktarılan dosyadaki adı taşır';
+  @override
+  String get themeEditorDiscardTitle => 'Değişiklikleri geri al';
+  @override
+  String get themeEditorDiscardBody => 'Değiştirdiğiniz renkler kaydedilmez';
+  @override
+  String get themeEditorDiscard => 'Geri al';
+  @override
+  String get themeEditorBadColor => '#RRGGBB kullan';
 
   // Settings: text size (T-M6-12).
   @override

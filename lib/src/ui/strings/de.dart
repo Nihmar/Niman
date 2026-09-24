@@ -284,6 +284,27 @@ final class GermanStrings extends Strings {
   String get themeDuplicate => 'Duplizieren';
   @override
   String get themeMenuTooltip => 'Design-Aktionen';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Bearbeiten';
+  @override
+  String get themeEditorTitle => 'Design bearbeiten';
+  @override
+  String get themeEditorChrome => 'Oberfläche';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
+  @override
+  String get themeEditorDiscardTitle => 'Änderungen verwerfen';
+  @override
+  String get themeEditorDiscardBody =>
+      'Die Farben, die du geändert hast, werden nicht gespeichert';
+  @override
+  String get themeEditorDiscard => 'Verwerfen';
+  @override
+  String get themeEditorBadColor => '#RRGGBB verwenden';
 
   // Settings: text size (T-M6-12).
   @override

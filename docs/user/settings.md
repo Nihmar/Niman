@@ -111,6 +111,13 @@ name and where the colors start from: a theme already in the list, shipped
 or your own, or *Random colors* — a complete theme invented around a random
 accent. Each theme in the list carries a ⋮ menu:
 
+- *Edit*, on a theme of your own, opens it color by color: the interface
+roles first, the Markdown ones after, each with the color it holds and the
+name the exported file uses. The app wears the colors as they are moved, so
+a color is chosen by seeing it in place; *Save* keeps them, and leaving
+puts back what was there, after asking. The Light/Dark switch at the top
+picks the side being edited — and previews it, since editing the night
+colors in daylight is editing blind.
 - *Duplicate* makes a theme of your own out of the one it is on, named
 after it (`Gruvbox 2`) and worn at once. The shipped themes offer only
 this: they can be copied, not renamed away.

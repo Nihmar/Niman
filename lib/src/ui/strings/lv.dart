@@ -279,6 +279,26 @@ final class LatvianStrings extends Strings {
   String get themeDuplicate => 'Dublēt';
   @override
   String get themeMenuTooltip => 'Tēmas darbības';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Rediģēt';
+  @override
+  String get themeEditorTitle => 'Rediģēt tēmu';
+  @override
+  String get themeEditorChrome => 'Saskarne';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Katrai krāsai ir tāds nosaukums kā eksportētajā failā';
+  @override
+  String get themeEditorDiscardTitle => 'Atmest izmaiņas';
+  @override
+  String get themeEditorDiscardBody => 'Mainītās krāsas netiks saglabātas';
+  @override
+  String get themeEditorDiscard => 'Atmest';
+  @override
+  String get themeEditorBadColor => 'Lieto #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

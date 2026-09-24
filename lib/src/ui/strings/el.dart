@@ -287,6 +287,27 @@ final class GreekStrings extends Strings {
   String get themeDuplicate => 'Διπλότυπο';
   @override
   String get themeMenuTooltip => 'Ενέργειες θέματος';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Επεξεργασία';
+  @override
+  String get themeEditorTitle => 'Επεξεργασία θέματος';
+  @override
+  String get themeEditorChrome => 'Διεπαφή';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
+  @override
+  String get themeEditorDiscardTitle => 'Απόρριψη αλλαγών';
+  @override
+  String get themeEditorDiscardBody =>
+      'Τα χρώματα που άλλαξες δεν αποθηκεύονται';
+  @override
+  String get themeEditorDiscard => 'Απόρριψη';
+  @override
+  String get themeEditorBadColor => 'Χρησιμοποίησε #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

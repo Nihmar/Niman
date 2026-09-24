@@ -281,6 +281,26 @@ final class FinnishStrings extends Strings {
   String get themeDuplicate => 'Kopioi';
   @override
   String get themeMenuTooltip => 'Teeman toiminnot';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Muokkaa';
+  @override
+  String get themeEditorTitle => 'Muokkaa teemaa';
+  @override
+  String get themeEditorChrome => 'Käyttöliittymä';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Jokainen väri on nimetty viedyn tiedoston mukaan';
+  @override
+  String get themeEditorDiscardTitle => 'Hylkää muutokset';
+  @override
+  String get themeEditorDiscardBody => 'Muuttamiasi värejä ei tallenneta';
+  @override
+  String get themeEditorDiscard => 'Hylkää';
+  @override
+  String get themeEditorBadColor => 'Käytä muotoa #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

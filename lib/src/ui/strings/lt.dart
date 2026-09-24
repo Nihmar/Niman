@@ -283,6 +283,26 @@ final class LithuanianStrings extends Strings {
   String get themeDuplicate => 'Dubliuoti';
   @override
   String get themeMenuTooltip => 'Temos veiksmai';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Redaguoti';
+  @override
+  String get themeEditorTitle => 'Redaguoti temą';
+  @override
+  String get themeEditorChrome => 'Sąsaja';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Kiekviena spalva pavadinta taip, kaip eksportuotame faile';
+  @override
+  String get themeEditorDiscardTitle => 'Atmesti pakeitimus';
+  @override
+  String get themeEditorDiscardBody => 'Pakeistos spalvos nebus išsaugotos';
+  @override
+  String get themeEditorDiscard => 'Atmesti';
+  @override
+  String get themeEditorBadColor => 'Naudokite #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

@@ -285,6 +285,26 @@ final class GalicianStrings extends Strings {
   String get themeDuplicate => 'Duplicar';
   @override
   String get themeMenuTooltip => 'Accións do tema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editar';
+  @override
+  String get themeEditorTitle => 'Editar o tema';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Cada cor leva o nome que usa o ficheiro exportado';
+  @override
+  String get themeEditorDiscardTitle => 'Descartar os cambios';
+  @override
+  String get themeEditorDiscardBody => 'As cores que cambiaste non se gardan';
+  @override
+  String get themeEditorDiscard => 'Descartar';
+  @override
+  String get themeEditorBadColor => 'Usa #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

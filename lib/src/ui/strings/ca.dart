@@ -284,6 +284,26 @@ final class CatalanStrings extends Strings {
   String get themeDuplicate => 'Duplica';
   @override
   String get themeMenuTooltip => 'Accions del tema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Edita';
+  @override
+  String get themeEditorTitle => 'Edita el tema';
+  @override
+  String get themeEditorChrome => 'Interfície';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Cada color porta el nom que fa servir el fitxer exportat';
+  @override
+  String get themeEditorDiscardTitle => 'Descarta els canvis';
+  @override
+  String get themeEditorDiscardBody => 'Els colors que has canviat no es desen';
+  @override
+  String get themeEditorDiscard => 'Descarta';
+  @override
+  String get themeEditorBadColor => 'Fes servir #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

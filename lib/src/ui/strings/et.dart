@@ -278,6 +278,26 @@ final class EstonianStrings extends Strings {
   String get themeDuplicate => 'Dubleeri';
   @override
   String get themeMenuTooltip => 'Teema toimingud';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Muuda';
+  @override
+  String get themeEditorTitle => 'Muuda teemat';
+  @override
+  String get themeEditorChrome => 'Kasutajaliides';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Iga värv on nimetatud nii, nagu seda nimetab eksporditud fail';
+  @override
+  String get themeEditorDiscardTitle => 'Loobu muudatustest';
+  @override
+  String get themeEditorDiscardBody => 'Muudetud värve ei salvestata';
+  @override
+  String get themeEditorDiscard => 'Loobu';
+  @override
+  String get themeEditorBadColor => 'Kasuta #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

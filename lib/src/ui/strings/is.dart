@@ -281,6 +281,26 @@ final class IcelandicStrings extends Strings {
   String get themeDuplicate => 'Tvífalda';
   @override
   String get themeMenuTooltip => 'Aðgerðir þema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Breyta';
+  @override
+  String get themeEditorTitle => 'Breyta þema';
+  @override
+  String get themeEditorChrome => 'Viðmót';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Hver litur heitir því sem útflutta skráin kallar hann';
+  @override
+  String get themeEditorDiscardTitle => 'Henda breytingum';
+  @override
+  String get themeEditorDiscardBody => 'Litirnir sem þú breyttir vistast ekki';
+  @override
+  String get themeEditorDiscard => 'Henda';
+  @override
+  String get themeEditorBadColor => 'Nota #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

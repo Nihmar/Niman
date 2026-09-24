@@ -280,6 +280,26 @@ final class AlbanianStrings extends Strings {
   String get themeDuplicate => 'Dyfisho';
   @override
   String get themeMenuTooltip => 'Veprime për temën';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Modifiko';
+  @override
+  String get themeEditorTitle => 'Modifiko temën';
+  @override
+  String get themeEditorChrome => 'Ndërfaqja';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
+  @override
+  String get themeEditorDiscardTitle => 'Hiq dorë nga ndryshimet';
+  @override
+  String get themeEditorDiscardBody => 'Ngjyrat që ndryshove nuk ruhen';
+  @override
+  String get themeEditorDiscard => 'Hiq';
+  @override
+  String get themeEditorBadColor => 'Përdor #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

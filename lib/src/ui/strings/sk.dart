@@ -284,6 +284,26 @@ final class SlovakStrings extends Strings {
   String get themeDuplicate => 'Duplikovať';
   @override
   String get themeMenuTooltip => 'Akcie motívu';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Upraviť';
+  @override
+  String get themeEditorTitle => 'Upraviť motív';
+  @override
+  String get themeEditorChrome => 'Rozhranie';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Každá farba sa volá ako v exportovanom súbore';
+  @override
+  String get themeEditorDiscardTitle => 'Zahodiť zmeny';
+  @override
+  String get themeEditorDiscardBody => 'Farby, ktoré ste zmenili, sa neuložia';
+  @override
+  String get themeEditorDiscard => 'Zahodiť';
+  @override
+  String get themeEditorBadColor => 'Použite #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

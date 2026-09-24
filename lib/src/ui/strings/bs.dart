@@ -285,6 +285,27 @@ final class BosnianStrings extends Strings {
   String get themeDuplicate => 'Dupliciraj';
   @override
   String get themeMenuTooltip => 'Radnje za temu';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Uredi';
+  @override
+  String get themeEditorTitle => 'Uredi temu';
+  @override
+  String get themeEditorChrome => 'Sučelje';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Svaka boja nosi ime koje koristi izvezena datoteka';
+  @override
+  String get themeEditorDiscardTitle => 'Odbaci izmjene';
+  @override
+  String get themeEditorDiscardBody =>
+      'Boje koje ste promijenili nisu sačuvane';
+  @override
+  String get themeEditorDiscard => 'Odbaci';
+  @override
+  String get themeEditorBadColor => 'Koristi #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

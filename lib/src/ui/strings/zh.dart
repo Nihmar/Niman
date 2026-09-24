@@ -259,6 +259,25 @@ final class ChineseStrings extends Strings {
   String get themeDuplicate => '创建副本';
   @override
   String get themeMenuTooltip => '主题操作';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => '编辑';
+  @override
+  String get themeEditorTitle => '编辑主题';
+  @override
+  String get themeEditorChrome => '界面';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
+  @override
+  String get themeEditorDiscardTitle => '放弃更改';
+  @override
+  String get themeEditorDiscardBody => '你改动的颜色不会被保存';
+  @override
+  String get themeEditorDiscard => '放弃';
+  @override
+  String get themeEditorBadColor => '请使用 #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

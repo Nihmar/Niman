@@ -286,6 +286,27 @@ final class FrenchStrings extends Strings {
   String get themeDuplicate => 'Dupliquer';
   @override
   String get themeMenuTooltip => 'Actions du thème';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Modifier';
+  @override
+  String get themeEditorTitle => 'Modifier le thème';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Chaque couleur porte le nom que lui donne le fichier exporté';
+  @override
+  String get themeEditorDiscardTitle => 'Abandonner les modifications';
+  @override
+  String get themeEditorDiscardBody =>
+      'Les couleurs que vous avez modifiées ne seront pas enregistrées';
+  @override
+  String get themeEditorDiscard => 'Abandonner';
+  @override
+  String get themeEditorBadColor => 'Utiliser #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

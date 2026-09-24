@@ -14,6 +14,9 @@ import 'package:niman/src/ui/theme/palettes.dart';
 
 /// What a theme row's menu can do.
 enum ThemeRowAction {
+  /// Change the colors of a theme of the user's own.
+  edit,
+
   /// Make a theme of the user's own out of this one.
   duplicate,
 
@@ -80,12 +83,17 @@ final class ThemeRow extends StatelessWidget {
             icon: const Icon(Icons.more_vert),
             onSelected: onAction,
             itemBuilder: (context) => [
-              _item(
-                ThemeRowAction.duplicate,
-                Icons.copy_all_outlined,
-                AppStrings.themeDuplicate,
-              ),
               if (_mine) ...[
+                _item(
+                  ThemeRowAction.edit,
+                  Icons.palette_outlined,
+                  AppStrings.themeEdit,
+                ),
+                _item(
+                  ThemeRowAction.duplicate,
+                  Icons.copy_all_outlined,
+                  AppStrings.themeDuplicate,
+                ),
                 _item(
                   ThemeRowAction.rename,
                   Icons.edit_outlined,
@@ -96,7 +104,12 @@ final class ThemeRow extends StatelessWidget {
                   Icons.delete_outline,
                   AppStrings.actionDelete,
                 ),
-              ],
+              ] else
+                _item(
+                  ThemeRowAction.duplicate,
+                  Icons.copy_all_outlined,
+                  AppStrings.themeDuplicate,
+                ),
             ],
           ),
         ),

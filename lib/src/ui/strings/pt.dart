@@ -282,6 +282,26 @@ final class PortugueseStrings extends Strings {
   String get themeDuplicate => 'Duplicar';
   @override
   String get themeMenuTooltip => 'Ações do tema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editar';
+  @override
+  String get themeEditorTitle => 'Editar o tema';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Cada cor tem o nome que usa o ficheiro exportado';
+  @override
+  String get themeEditorDiscardTitle => 'Descartar as alterações';
+  @override
+  String get themeEditorDiscardBody => 'As cores que alterou não são guardadas';
+  @override
+  String get themeEditorDiscard => 'Descartar';
+  @override
+  String get themeEditorBadColor => 'Usa #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override
