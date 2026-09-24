@@ -522,6 +522,9 @@ final class SpanishStrings extends Strings {
   String get cheatChecklists => 'Listas de verificación';
   @override
   String get cheatQuotes => 'Citas';
+
+  @override
+  String get cheatCallouts => 'Destacados';
   @override
   String get cheatLinks => 'Enlaces';
   @override

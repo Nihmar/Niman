@@ -522,6 +522,9 @@ final class LithuanianStrings extends Strings {
   String get cheatChecklists => 'Kontroliniai sąrašai';
   @override
   String get cheatQuotes => 'Citatos';
+
+  @override
+  String get cheatCallouts => 'Išskirti blokai';
   @override
   String get cheatLinks => 'Nuorodos';
   @override

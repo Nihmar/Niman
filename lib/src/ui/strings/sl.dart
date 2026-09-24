@@ -522,6 +522,9 @@ final class SlovenianStrings extends Strings {
   String get cheatChecklists => 'Kontrolni seznami';
   @override
   String get cheatQuotes => 'Citati';
+
+  @override
+  String get cheatCallouts => 'Poudarjeni bloki';
   @override
   String get cheatLinks => 'Povezave';
   @override

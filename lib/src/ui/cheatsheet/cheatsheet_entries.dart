@@ -22,11 +22,8 @@ final class CheatsheetEntry {
   final String source;
 }
 
-/// The cheatsheet, in reading order.
-///
-/// Only what the engine draws: callouts (`> [!note]`), which other apps
-/// read, are not here because Niman does not read them yet, and an example
-/// that renders as its own source would teach the wrong thing.
+/// The cheatsheet, in reading order: only what the engine draws, since an
+/// example that renders as its own source would teach the wrong thing.
 final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
   CheatsheetEntry(
     id: 'headings',
@@ -57,6 +54,13 @@ final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
     id: 'quotes',
     title: () => AppStrings.cheatQuotes,
     source: '> A quote\n>\n> > and one inside it',
+  ),
+  CheatsheetEntry(
+    id: 'callouts',
+    title: () => AppStrings.cheatCallouts,
+    source:
+        '> [!tip] A title of its own\n> What it says.\n\n'
+        '> [!warning]- Folded until opened\n> Hidden at first.',
   ),
   CheatsheetEntry(
     id: 'links',

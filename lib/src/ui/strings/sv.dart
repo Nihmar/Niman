@@ -520,6 +520,9 @@ final class SwedishStrings extends Strings {
   String get cheatChecklists => 'Checklistor';
   @override
   String get cheatQuotes => 'Citat';
+
+  @override
+  String get cheatCallouts => 'Framhävda block';
   @override
   String get cheatLinks => 'Länkar';
   @override

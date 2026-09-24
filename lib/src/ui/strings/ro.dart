@@ -526,6 +526,9 @@ final class RomanianStrings extends Strings {
   String get cheatChecklists => 'Liste de verificare';
   @override
   String get cheatQuotes => 'Citate';
+
+  @override
+  String get cheatCallouts => 'Casete evidențiate';
   @override
   String get cheatLinks => 'Linkuri';
   @override

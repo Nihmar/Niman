@@ -39,7 +39,7 @@ same Markdown either way, and only how it is drawn differs. The read view
   under it — starts under the item's text. On the caret's line the marks
   are written out and the text stays where it was: marks wider than their
   column, like a task's `- [ ] ` or a `10. `, hang into the margin
-  instead. A quote gets its bar, and what is inside it — a heading, a
+  instead. A quote gets its bar — a callout its box, icon and title — and what is inside it — a heading, a
   list, a code block — is drawn as it is outside; `---` a rule; a code
   block (and an HTML block) its box, in monospace, the code coloured by the
   language its fence names; a table its grid, which stays a grid while
@@ -240,13 +240,35 @@ the HTML is used when the clipboard carries it.
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's
-yellow, the same in every theme), fenced code blocks with
+yellow, the same in every theme), callouts, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
+**Callouts**, as Obsidian writes them: a quote whose first line is
+`[!type]`, with a title of its own after it or the type's as its title.
+
+```markdown
+> [!tip] A title of its own
+> What it says.
+
+> [!warning]- Folded until opened
+> Hidden at first.
+```
+
+The read view and the WYSIWYG editor draw a box in the type's colour,
+with its icon and title on top. The types Obsidian ships have their own
+colour and icon — note, abstract (summary, tldr), info, todo, tip (hint,
+important), success (check, done), question (help, faq), warning
+(caution, attention), failure (fail, missing), danger (error), bug,
+example, quote (cite) — and any other word is drawn as a note. A `-`
+after the type folds the callout in the read view until its title is
+tapped, a `+` makes it foldable and open; the editor always shows what
+it says, to be written in. With the caret on the title line its
+`[!type]` shows as written.
+
 The **Markdown cheatsheet** shows every construct Niman reads, each as it
 is written beside how a note shows it — headings, emphasis, underline and
-super/subscript, lists and checkbox lists, quotes, links and links to
+super/subscript, lists and checkbox lists, quotes and callouts, links and links to
 notes, images and embeds, tags, code, math, tables, footnotes, rules,
 frontmatter and template placeholders. Open it from the note's ⋮ menu,
 *Editor: Markdown cheatsheet* in the palette, or Settings, next to the

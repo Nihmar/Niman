@@ -489,6 +489,9 @@ final class JapaneseStrings extends Strings {
   String get cheatChecklists => 'チェックリスト';
   @override
   String get cheatQuotes => '引用';
+
+  @override
+  String get cheatCallouts => 'コールアウト';
   @override
   String get cheatLinks => 'リンク';
   @override

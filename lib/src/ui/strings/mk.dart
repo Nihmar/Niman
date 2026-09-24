@@ -523,6 +523,9 @@ final class MacedonianStrings extends Strings {
   String get cheatChecklists => 'Листи за проверка';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Истакнати блокови';
   @override
   String get cheatLinks => 'Врски';
   @override

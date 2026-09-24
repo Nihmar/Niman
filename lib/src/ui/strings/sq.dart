@@ -515,6 +515,9 @@ final class AlbanianStrings extends Strings {
   String get cheatChecklists => 'Lista kontrolli';
   @override
   String get cheatQuotes => 'Citimet';
+
+  @override
+  String get cheatCallouts => 'Blloqe të theksuara';
   @override
   String get cheatLinks => 'Lidhjet';
   @override

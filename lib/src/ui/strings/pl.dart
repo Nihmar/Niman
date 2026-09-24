@@ -526,6 +526,9 @@ final class PolishStrings extends Strings {
   String get cheatChecklists => 'Listy kontrolne';
   @override
   String get cheatQuotes => 'Cytaty';
+
+  @override
+  String get cheatCallouts => 'Wyróżnione bloki';
   @override
   String get cheatLinks => 'Linki';
   @override

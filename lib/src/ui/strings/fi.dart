@@ -517,6 +517,9 @@ final class FinnishStrings extends Strings {
   String get cheatChecklists => 'Tarkistuslistat';
   @override
   String get cheatQuotes => 'Lainaukset';
+
+  @override
+  String get cheatCallouts => 'Korostuslaatikot';
   @override
   String get cheatLinks => 'Linkit';
   @override

@@ -522,6 +522,9 @@ final class UkrainianStrings extends Strings {
   String get cheatChecklists => 'Контрольні списки';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Виділені блоки';
   @override
   String get cheatLinks => 'Посилання';
   @override

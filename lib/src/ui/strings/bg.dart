@@ -520,6 +520,9 @@ final class BulgarianStrings extends Strings {
   String get cheatChecklists => 'Списъци със задачи';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Акцентни блокове';
   @override
   String get cheatLinks => 'Връзки';
   @override
