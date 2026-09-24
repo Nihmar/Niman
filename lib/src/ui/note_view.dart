@@ -922,6 +922,16 @@ final class _NoteViewState extends State<NoteView>
       });
       // Opened straight into the preview: the IME has no target here.
       _dismissKeyboardForPreview();
+      // A template `{{cursor}}` landing takes the keyboard (#53), and asks
+      // for it: the surface's `autofocus` gives way to whatever its scope
+      // already focused — the tree, the button the template was picked
+      // from — and the caret was drawn where no key went. Once the frame
+      // has put the surface under its focus node.
+      if (widget.initialCaretOffset != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && widget.path == path) _focus.requestFocus();
+        });
+      }
       widget.onNoteKindChanged?.call(_noteKind);
       // Word count + outline: asked for only now, with the note already on
       // screen, because computing them costs an order of magnitude more
