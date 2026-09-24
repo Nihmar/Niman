@@ -949,6 +949,9 @@ final class AppStrings {
       _s.shortcutTakesEditorKey(keys, what);
   static String get openFileMissing => _s.openFileMissing;
   static String get openFileFailed => _s.openFileFailed;
+  static String get attachmentUnreadable => _s.attachmentUnreadable;
+  static String get attachmentMissing => _s.attachmentMissing;
+  static String get attachmentOpenFailed => _s.attachmentOpenFailed;
   static String get movedToTrash => _s.movedToTrash;
   static String get deletedMessage => _s.deletedMessage;
   static String deleteToTrashConfirm(String name) =>

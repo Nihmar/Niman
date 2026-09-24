@@ -1475,6 +1475,12 @@ final class ChineseStrings extends Strings {
   String get openFileMissing => '这篇笔记的文件不在磁盘上';
   @override
   String get openFileFailed => '无法在 Niman 之外打开这篇笔记';
+  @override
+  String get attachmentUnreadable => '无法显示此文件。';
+  @override
+  String get attachmentMissing => '此文件不在磁盘上。';
+  @override
+  String get attachmentOpenFailed => '无法在 Niman 之外打开此文件。';
 
   @override
   String get movedToTrash => '已移入回收站';

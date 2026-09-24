@@ -763,6 +763,9 @@ abstract base class Strings {
   String shortcutTakesEditorKey(String keys, String what);
   String get openFileMissing;
   String get openFileFailed;
+  String get attachmentUnreadable;
+  String get attachmentMissing;
+  String get attachmentOpenFailed;
   String get movedToTrash;
   String get deletedMessage;
   String deleteToTrashConfirm(String name);

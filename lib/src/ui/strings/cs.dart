@@ -1605,6 +1605,13 @@ final class CzechStrings extends Strings {
   String get openFileMissing => 'Soubor této poznámky na disku není';
   @override
   String get openFileFailed => 'Tuto poznámku se nepodařilo otevřít mimo Niman';
+  @override
+  String get attachmentUnreadable => 'Tento soubor se nepodařilo zobrazit.';
+  @override
+  String get attachmentMissing => 'Tento soubor není na disku.';
+  @override
+  String get attachmentOpenFailed =>
+      'Tento soubor se nepodařilo otevřít mimo Niman.';
 
   @override
   String get movedToTrash => 'Přesunuto do koše';

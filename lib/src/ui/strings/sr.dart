@@ -1619,6 +1619,13 @@ final class SerbianStrings extends Strings {
   @override
   String get openFileFailed =>
       'Није било могуће отворити ову белешку изван Нимана';
+  @override
+  String get attachmentUnreadable => 'Ова датотека није могла да се прикаже.';
+  @override
+  String get attachmentMissing => 'Ова датотека није на диску.';
+  @override
+  String get attachmentOpenFailed =>
+      'Није било могуће отворити ову датотеку изван Нимана.';
 
   @override
   String get movedToTrash => 'Премештено у кош';

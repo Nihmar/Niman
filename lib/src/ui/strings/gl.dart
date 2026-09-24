@@ -1626,6 +1626,13 @@ final class GalicianStrings extends Strings {
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override
   String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';
+  @override
+  String get attachmentUnreadable => 'Non se puido mostrar este ficheiro.';
+  @override
+  String get attachmentMissing => 'Este ficheiro non está no disco.';
+  @override
+  String get attachmentOpenFailed =>
+      'Non foi posible abrir este ficheiro fóra do Niman.';
 
   @override
   String get movedToTrash => 'Movida ao paperilleiro';

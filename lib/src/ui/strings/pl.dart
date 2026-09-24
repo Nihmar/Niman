@@ -1635,6 +1635,13 @@ final class PolishStrings extends Strings {
   @override
   String get openFileFailed =>
       'Nie udało się otworzyć tej notatki poza Nimanem';
+  @override
+  String get attachmentUnreadable => 'Nie udało się wyświetlić tego pliku.';
+  @override
+  String get attachmentMissing => 'Tego pliku nie ma na dysku.';
+  @override
+  String get attachmentOpenFailed =>
+      'Nie udało się otworzyć tego pliku poza Nimanem.';
 
   @override
   String get movedToTrash => 'Przeniesiono do kosza';

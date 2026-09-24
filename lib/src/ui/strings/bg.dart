@@ -1628,6 +1628,13 @@ final class BulgarianStrings extends Strings {
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override
   String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';
+  @override
+  String get attachmentUnreadable => 'Този файл не можа да бъде показан.';
+  @override
+  String get attachmentMissing => 'Този файл не е на диска.';
+  @override
+  String get attachmentOpenFailed =>
+      'Файлът не можа да бъде отворен извън Niman.';
 
   @override
   String get movedToTrash => 'Преместен в коша';

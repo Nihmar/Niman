@@ -39,6 +39,7 @@ import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
@@ -958,6 +959,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
+    // A picture or a PDF, shown rather than read as a note.
+    if (isShownAttachment(selectedPath)) {
+      return AttachmentView(
+        key: _phoneNoteKey,
+        path: p.join(controller.root ?? '', selectedPath),
+      );
+    }
     return NoteView(
       key: _phoneNoteKey,
       path: p.join(controller.root ?? '', selectedPath),

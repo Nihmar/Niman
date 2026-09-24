@@ -1618,6 +1618,13 @@ final class BosnianStrings extends Strings {
   @override
   String get openFileFailed =>
       'Ovu bilješku nije bilo moguće otvoriti izvan Nimana';
+  @override
+  String get attachmentUnreadable => 'Ova datoteka se nije mogla prikazati.';
+  @override
+  String get attachmentMissing => 'Ova datoteka nije na disku.';
+  @override
+  String get attachmentOpenFailed =>
+      'Ovu datoteku nije bilo moguće otvoriti izvan Nimana.';
 
   @override
   String get movedToTrash => 'Pomaknuto u korpu';

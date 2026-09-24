@@ -1597,6 +1597,13 @@ final class EstonianStrings extends Strings {
   @override
   String get openFileFailed =>
       'Seda märget ei saanud Nimanist väljaspool avada';
+  @override
+  String get attachmentUnreadable => 'Seda faili ei õnnestunud kuvada.';
+  @override
+  String get attachmentMissing => 'Seda faili kettal ei ole.';
+  @override
+  String get attachmentOpenFailed =>
+      'Seda faili ei saanud Nimanist väljaspool avada.';
 
   @override
   String get movedToTrash => 'Liigutatud prügikastu';

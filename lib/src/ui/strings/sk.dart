@@ -1613,6 +1613,13 @@ final class SlovakStrings extends Strings {
   @override
   String get openFileFailed =>
       'Túto poznámku sa nepodarilo otvoriť mimo Nimanu';
+  @override
+  String get attachmentUnreadable => 'Tento súbor sa nepodarilo zobraziť.';
+  @override
+  String get attachmentMissing => 'Tento súbor na disku nie je.';
+  @override
+  String get attachmentOpenFailed =>
+      'Tento súbor sa nepodarilo otvoriť mimo Nimanu.';
 
   @override
   String get movedToTrash => 'Presunuté do koša';

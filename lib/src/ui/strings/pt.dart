@@ -1621,6 +1621,13 @@ final class PortugueseStrings extends Strings {
   String get openFileMissing => 'O arquivo desta nota não está no disco';
   @override
   String get openFileFailed => 'Não foi possível abrir esta nota fora do Niman';
+  @override
+  String get attachmentUnreadable => 'Não foi possível mostrar este arquivo.';
+  @override
+  String get attachmentMissing => 'Este arquivo não está no disco.';
+  @override
+  String get attachmentOpenFailed =>
+      'Não foi possível abrir este arquivo fora do Niman.';
 
   @override
   String get movedToTrash => 'Movido para a lixeira';
