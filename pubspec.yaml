@@ -14,6 +14,7 @@ environment:
 
 dependencies:
   # Rebuildable index (SQLite + FTS5); schema lands in M1.
+  archive: ^4.3.0
   audioplayers: ^6.8.1
 
   # The sync's automatic triggers: Wi-Fi only, and a retry as soon as the
@@ -55,6 +56,7 @@ dependencies:
   # The math typesetter (katex_dart: TeX to boxes) and its painter and KaTeX
   # fonts (katex). Kept through phase 5 (#247): a typesetter of Niman's own
   # is 8-12k lines for a start, and these render the geometry note right.
+  html: ^0.15.7
   katex: ^1.0.0
   katex_dart: ^0.1.1
 
