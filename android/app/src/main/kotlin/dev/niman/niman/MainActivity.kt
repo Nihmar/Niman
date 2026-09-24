@@ -89,16 +89,26 @@ class MainActivity : FlutterActivity() {
     }
 
     /**
-     * Opens the system list of battery-optimized apps.
+     * Opens Niman's own battery page, where "Unrestricted" is one tap.
+     *
+     * Not ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS: that list opens
+     * filtered to the apps already exempt, so Niman -- the one app that
+     * is not -- is nowhere on it until the user finds the filter. The
+     * per-app page is Settings' own VIEW_ADVANCED_POWER_USAGE_DETAIL
+     * (exported, not in the SDK constants); a ROM without it falls back
+     * to the app's info page, one "Battery" tap away, then to the list.
      *
      * Deliberately not ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: that
      * one-tap dialog needs the REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
      * permission, which app stores restrict to a narrow set of app
-     * categories. The list needs no permission; the user picks Niman and
-     * flips it. Returns false when no activity handles the intent.
+     * categories. Returns false when no activity handles any of them.
      */
     private fun openBatterySettings(): Boolean {
-        return open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+        val pkg = Uri.fromParts("package", packageName, null)
+        val batteryPage = Intent("android.settings.VIEW_ADVANCED_POWER_USAGE_DETAIL", pkg)
+        val details = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)
+        return open(batteryPage) || open(details) ||
+            open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
     }
 
     /**
