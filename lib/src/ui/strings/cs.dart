@@ -2120,10 +2120,6 @@ final class CzechStrings extends Strings {
   @override
   String get syncConflictTitle => 'Vyřešit konflikt';
   @override
-  String get syncConflictLegend =>
-      'Řádky označené − jsou ze serveru, řádky označené + z '
-      'tohoto zařízení.';
-  @override
   String get syncConflictBinary =>
       'Nejde o textový soubor: vyberte, kterou kopii ponechat.';
   @override
@@ -2134,13 +2130,15 @@ final class CzechStrings extends Strings {
   @override
   String get syncKeepRemote => 'Ponechat verzi ze serveru';
   @override
-  String get syncConflictIdentical => 'Obě verze jsou stejné';
-  @override
   String get syncConflictLoadFailed => 'Obě verze se nepodařilo načíst';
   @override
   String get syncResolveFailed => 'Konflikt se nepodařilo vyřešit';
   @override
   String get syncResolved => 'Konflikt vyřešen';
+  @override
+  String get syncConflictMoved =>
+      'Jedna z verzí se mezitím změnila: konflikt byl načten znovu, vyberte '
+      'znovu.';
   @override
   String get syncSectionWhen => 'Kdy synchronizovat';
   @override
@@ -2212,7 +2210,8 @@ final class CzechStrings extends Strings {
   String get syncMergeClean => 'Obě verze se sloučí samy: nic se nepřekrývá.';
   @override
   String get syncMergeNoBase =>
-      'Není společná verze, na které sloučit, takže se vybírá celý soubor.';
+      'Chybí společná verze ke sloučení: všude, kde se obě kopie liší, '
+      'vybíráte vy.';
   @override
   String syncMergeOverlap(int index, int total) => 'Překryv $index z $total';
   @override
@@ -2221,6 +2220,8 @@ final class CzechStrings extends Strings {
   String get syncMergeFromRemote => 'Ze serveru';
   @override
   String get syncMergeRemovedLines => 'Odebrané řádky';
+  @override
+  String get syncMergeAbsentLines => 'Není v této kopii';
   @override
   String get syncMergeKeepLocal => 'Moje';
   @override

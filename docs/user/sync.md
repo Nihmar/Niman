@@ -119,10 +119,22 @@ both sides, the sync icon gets a dot, and **Resolve** opens the merge:
 - or keep one whole copy: **Keep this device's** uploads yours, **Keep
   the server's** replaces yours (which stays in the history).
 
-Files with no version in common — created on both devices, or an
-attachment — cannot be merged: there the two whole copies are shown as a
-diff (lines marked − are the server's, + are this device's) and you keep
-one.
+If either copy changes while the screen is open (another device syncs
+again, or you keep typing in the note), nothing is written: the conflict
+is read again and you choose over what is there now.
+
+A note with no version in common (created on both devices, or synced
+so long ago that its history no longer has the shared version) still
+merges, but nothing is taken on its own. The lines both copies share
+stay, and every place they differ is a **Mine** / **Theirs** / **Both**
+choice. An attachment cannot be merged: you keep one whole copy.
+
+The task lists (`todo.txt` and `done.txt` at the top of the library)
+never ask: each line is one task, so they merge line by line. A task
+added on either device is kept, one removed or checked on either device
+goes, and a task edited differently on both keeps both edits, for you
+to tidy. Two lists started separately on two devices become one list
+with the tasks of both.
 
 Library settings (`.niman/settings.json`) never conflict: they merge
 setting by setting. A setting changed on one device only is kept; the

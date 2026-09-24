@@ -2087,10 +2087,6 @@ final class HindiStrings extends Strings {
   @override
   String get syncConflictTitle => 'टकराव सुलझाएँ';
   @override
-  String get syncConflictLegend =>
-      '− वाली पंक्तियाँ सर्वर की हैं, + वाली पंक्तियाँ इस डिवाइस '
-      'की।';
-  @override
   String get syncConflictBinary =>
       'यह टेक्स्ट फ़ाइल नहीं है: चुनें कि कौन-सी कॉपी रखनी है।';
   @override
@@ -2101,13 +2097,14 @@ final class HindiStrings extends Strings {
   @override
   String get syncKeepRemote => 'सर्वर वाली रखें';
   @override
-  String get syncConflictIdentical => 'दोनों संस्करण एक जैसे हैं';
-  @override
   String get syncConflictLoadFailed => 'दोनों संस्करण नहीं पढ़े जा सके';
   @override
   String get syncResolveFailed => 'टकराव नहीं सुलझाया जा सका';
   @override
   String get syncResolved => 'टकराव सुलझ गया';
+  @override
+  String get syncConflictMoved =>
+      'इस बीच एक संस्करण बदल गया: टकराव फिर से पढ़ा गया, दोबारा चुनें।';
   @override
   String get syncSectionWhen => 'कब सिंक करें';
   @override
@@ -2173,8 +2170,8 @@ final class HindiStrings extends Strings {
       'दोनों संस्करण अपने-आप मिल जाते हैं: कुछ भी ओवरलैप नहीं होता।';
   @override
   String get syncMergeNoBase =>
-      'मिलाने के लिए कोई साझा संस्करण नहीं है, इसलिए पूरी फ़ाइल '
-      'चुननी होगी।';
+      'मिलाने के लिए कोई साझा संस्करण नहीं है: जहाँ भी दोनों प्रतियाँ अलग '
+      'हैं, वहाँ आप चुनें।';
   @override
   String syncMergeOverlap(int index, int total) => 'ओवरलैप $index / $total';
   @override
@@ -2183,6 +2180,8 @@ final class HindiStrings extends Strings {
   String get syncMergeFromRemote => 'सर्वर से';
   @override
   String get syncMergeRemovedLines => 'हटाई गई पंक्तियाँ';
+  @override
+  String get syncMergeAbsentLines => 'इस प्रति में नहीं';
   @override
   String get syncMergeKeepLocal => 'मेरी';
   @override

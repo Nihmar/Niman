@@ -2166,10 +2166,6 @@ final class GermanStrings extends Strings {
   @override
   String get syncConflictTitle => 'Konflikt lösen';
   @override
-  String get syncConflictLegend =>
-      'Mit − markierte Zeilen stammen vom Server, mit + '
-      'markierte von diesem Gerät.';
-  @override
   String get syncConflictBinary =>
       'Keine Textdatei: Wähle, welche Kopie du behältst.';
   @override
@@ -2181,14 +2177,16 @@ final class GermanStrings extends Strings {
   @override
   String get syncKeepRemote => 'Version des Servers behalten';
   @override
-  String get syncConflictIdentical => 'Die beiden Versionen sind identisch';
-  @override
   String get syncConflictLoadFailed =>
       'Die beiden Versionen konnten nicht gelesen werden';
   @override
   String get syncResolveFailed => 'Konflikt konnte nicht gelöst werden';
   @override
   String get syncResolved => 'Konflikt gelöst';
+  @override
+  String get syncConflictMoved =>
+      'Eine Seite hat sich inzwischen geändert; der Konflikt wurde neu '
+      'gelesen. Bitte erneut wählen.';
   @override
   String get syncSectionWhen => 'Wann synchronisiert wird';
   @override
@@ -2260,8 +2258,8 @@ final class GermanStrings extends Strings {
       'überschneidet sich.';
   @override
   String get syncMergeNoBase =>
-      'Es gibt keine gemeinsame Version zum Zusammenführen, also muss die '
-      'ganze Datei gewählt werden.';
+      'Es gibt keine gemeinsame Version zum Zusammenführen: An jeder Stelle, '
+      'an der sich die Kopien unterscheiden, wählst du.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Überschneidung $index von $total';
@@ -2271,6 +2269,8 @@ final class GermanStrings extends Strings {
   String get syncMergeFromRemote => 'Vom Server';
   @override
   String get syncMergeRemovedLines => 'Entfernte Zeilen';
+  @override
+  String get syncMergeAbsentLines => 'Nicht in dieser Kopie';
   @override
   String get syncMergeKeepLocal => 'Meine';
   @override

@@ -2138,10 +2138,6 @@ final class SlovenianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Razreši konflikt';
   @override
-  String get syncConflictLegend =>
-      'Vrstice z oznako − so s strežnika, vrstice z oznako + s '
-      'te naprave.';
-  @override
   String get syncConflictBinary =>
       'To ni besedilna datoteka: izberite, katero kopijo želite '
       'obdržati.';
@@ -2153,13 +2149,15 @@ final class SlovenianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Obdrži različico strežnika';
   @override
-  String get syncConflictIdentical => 'Različici sta enaki';
-  @override
   String get syncConflictLoadFailed => 'Obeh različic ni bilo mogoče prebrati';
   @override
   String get syncResolveFailed => 'Konflikta ni bilo mogoče razrešiti';
   @override
   String get syncResolved => 'Konflikt razrešen';
+  @override
+  String get syncConflictMoved =>
+      'Ena od različic se je medtem spremenila: spor je bil znova prebran, '
+      'izberite znova.';
   @override
   String get syncSectionWhen => 'Kdaj sinhronizirati';
   @override
@@ -2234,8 +2232,8 @@ final class SlovenianStrings extends Strings {
       'Različici se združita sami: nič se ne prekriva.';
   @override
   String get syncMergeNoBase =>
-      'Ni skupne različice za združitev, zato je treba izbrati celotno '
-      'datoteko.';
+      'Ni skupne različice za združevanje: povsod, kjer se kopiji '
+      'razlikujeta, izberete vi.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Prekrivanje $index od $total';
@@ -2245,6 +2243,8 @@ final class SlovenianStrings extends Strings {
   String get syncMergeFromRemote => 'S strežnika';
   @override
   String get syncMergeRemovedLines => 'Odstranjene vrstice';
+  @override
+  String get syncMergeAbsentLines => 'Ni v tej kopiji';
   @override
   String get syncMergeKeepLocal => 'Moje';
   @override

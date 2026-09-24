@@ -2136,10 +2136,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Разреши конфликта';
   @override
-  String get syncConflictLegend =>
-      'Редовете с − са от сървъра, редовете с + са от това '
-      'устройство.';
-  @override
   String get syncConflictBinary =>
       'Не е текстов файл: изберете кое копие да запазите.';
   @override
@@ -2151,13 +2147,15 @@ final class BulgarianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Запази версията от сървъра';
   @override
-  String get syncConflictIdentical => 'Двете версии са еднакви';
-  @override
   String get syncConflictLoadFailed => 'Двете версии не могат да се прочетат';
   @override
   String get syncResolveFailed => 'Конфликтът не може да се разреши';
   @override
   String get syncResolved => 'Конфликтът е разрешен';
+  @override
+  String get syncConflictMoved =>
+      'Една от версиите се промени междувременно: конфликтът е прочетен '
+      'отново, изберете пак.';
   @override
   String get syncSectionWhen => 'Кога да се синхронизира';
   @override
@@ -2223,7 +2221,8 @@ final class BulgarianStrings extends Strings {
       'Двете версии се сливат сами: нищо не се припокрива.';
   @override
   String get syncMergeNoBase =>
-      'Няма обща версия, върху която да се слее, затова се избира целият файл.';
+      'Няма обща версия за сливане: навсякъде, където двете копия се '
+      'различават, избирате вие.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Припокриване $index от $total';
@@ -2233,6 +2232,8 @@ final class BulgarianStrings extends Strings {
   String get syncMergeFromRemote => 'От сървъра';
   @override
   String get syncMergeRemovedLines => 'Премахнати редове';
+  @override
+  String get syncMergeAbsentLines => 'Липсва в това копие';
   @override
   String get syncMergeKeepLocal => 'Моите';
   @override

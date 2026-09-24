@@ -2148,9 +2148,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Вырашыць канфлікт';
   @override
-  String get syncConflictLegend =>
-      'Радкі з − з сервера, радкі з + з гэтай прылады.';
-  @override
   String get syncConflictBinary =>
       'Гэта не тэкставы файл: выберыце, якую копію пакінуць.';
   @override
@@ -2161,13 +2158,15 @@ final class BelarusianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Пакінуць версію з сервера';
   @override
-  String get syncConflictIdentical => 'Абедзве версіі аднолькавыя';
-  @override
   String get syncConflictLoadFailed => 'Не ўдалося прачытаць абедзве версіі';
   @override
   String get syncResolveFailed => 'Не ўдалося вырашыць канфлікт';
   @override
   String get syncResolved => 'Канфлікт вырашаны';
+  @override
+  String get syncConflictMoved =>
+      'Адна з версій тым часам змянілася: канфлікт прачытаны зноў, выберыце '
+      'яшчэ раз.';
   @override
   String get syncSectionWhen => 'Калі сінхранізаваць';
   @override
@@ -2241,7 +2240,8 @@ final class BelarusianStrings extends Strings {
       'Дзве версіі аб’ядноўваюцца самі: нічога не перакрываецца.';
   @override
   String get syncMergeNoBase =>
-      'Няма агульнай версіі для аб’яднання, таму трэба выбраць увесь файл.';
+      'Няма агульнай версіі для аб’яднання: усюды, дзе дзве копіі '
+      'адрозніваюцца, выбіраеце вы.';
   @override
   String syncMergeOverlap(int index, int total) => 'Перакрыццё $index з $total';
   @override
@@ -2250,6 +2250,8 @@ final class BelarusianStrings extends Strings {
   String get syncMergeFromRemote => 'З сервера';
   @override
   String get syncMergeRemovedLines => 'Радкі выдалены';
+  @override
+  String get syncMergeAbsentLines => 'Няма ў гэтай копіі';
   @override
   String get syncMergeKeepLocal => 'Мае';
   @override

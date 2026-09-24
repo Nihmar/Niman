@@ -2130,10 +2130,6 @@ final class SwedishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Lös konflikt';
   @override
-  String get syncConflictLegend =>
-      'Rader märkta − är serverns, rader märkta + är den här '
-      'enhetens.';
-  @override
   String get syncConflictBinary =>
       'Inte en textfil: välj vilken kopia du vill behålla.';
   @override
@@ -2145,13 +2141,15 @@ final class SwedishStrings extends Strings {
   @override
   String get syncKeepRemote => 'Behåll serverns';
   @override
-  String get syncConflictIdentical => 'De två versionerna är identiska';
-  @override
   String get syncConflictLoadFailed => 'Kunde inte läsa båda versionerna';
   @override
   String get syncResolveFailed => 'Kunde inte lösa konflikten';
   @override
   String get syncResolved => 'Konflikten är löst';
+  @override
+  String get syncConflictMoved =>
+      'En av versionerna har ändrats under tiden: konflikten har lästs in '
+      'igen, välj igen.';
   @override
   String get syncSectionWhen => 'När det ska synkas';
   @override
@@ -2217,8 +2215,8 @@ final class SwedishStrings extends Strings {
       'De två versionerna sammanfogas av sig själva: inget överlappar.';
   @override
   String get syncMergeNoBase =>
-      'Det finns ingen gemensam version att sammanfoga på, så hela filen måste '
-      'väljas.';
+      'Det finns ingen gemensam version att sammanfoga från: där de två '
+      'kopiorna skiljer sig väljer du.';
   @override
   String syncMergeOverlap(int index, int total) => 'Överlapp $index av $total';
   @override
@@ -2227,6 +2225,8 @@ final class SwedishStrings extends Strings {
   String get syncMergeFromRemote => 'Från servern';
   @override
   String get syncMergeRemovedLines => 'Rader borttagna';
+  @override
+  String get syncMergeAbsentLines => 'Inte i den här kopian';
   @override
   String get syncMergeKeepLocal => 'Mina';
   @override

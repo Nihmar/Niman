@@ -2148,10 +2148,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Розв’язати конфлікт';
   @override
-  String get syncConflictLegend =>
-      'Рядки з позначкою − — із сервера, рядки з позначкою + — '
-      'із цього пристрою.';
-  @override
   String get syncConflictBinary =>
       'Це не текстовий файл: виберіть, яку копію залишити.';
   @override
@@ -2162,13 +2158,15 @@ final class UkrainianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Залишити версію сервера';
   @override
-  String get syncConflictIdentical => 'Обидві версії однакові';
-  @override
   String get syncConflictLoadFailed => 'Не вдалося прочитати обидві версії';
   @override
   String get syncResolveFailed => 'Не вдалося розв’язати конфлікт';
   @override
   String get syncResolved => 'Конфлікт розв’язано';
+  @override
+  String get syncConflictMoved =>
+      'Одна з версій тим часом змінилася: конфлікт прочитано знову, виберіть '
+      'ще раз.';
   @override
   String get syncSectionWhen => 'Коли синхронізувати';
   @override
@@ -2244,8 +2242,8 @@ final class UkrainianStrings extends Strings {
       'Дві версії об’єднуються самі: ніщо не перекривається.';
   @override
   String get syncMergeNoBase =>
-      'Немає спільної версії для об’єднання, тому доводиться вибирати весь '
-      'файл.';
+      'Немає спільної версії для об’єднання: скрізь, де дві копії '
+      'відрізняються, вибираєте ви.';
   @override
   String syncMergeOverlap(int index, int total) => 'Перекриття $index з $total';
   @override
@@ -2254,6 +2252,8 @@ final class UkrainianStrings extends Strings {
   String get syncMergeFromRemote => 'Із сервера';
   @override
   String get syncMergeRemovedLines => 'Вилучені рядки';
+  @override
+  String get syncMergeAbsentLines => 'Немає в цій копії';
   @override
   String get syncMergeKeepLocal => 'Мої';
   @override

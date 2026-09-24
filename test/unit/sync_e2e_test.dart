@@ -273,7 +273,7 @@ void main() {
         'three',
         'four',
       ]);
-      await b.sync.resolveMerged('note.md', chosen);
+      await b.sync.resolveMerged('note.md', chosen, shown: texts);
       await b.ops.writer.indexed;
       expect(b.read('note.md'), chosen);
       expect(remote('note.md'), chosen);
