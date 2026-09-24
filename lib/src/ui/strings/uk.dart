@@ -1305,6 +1305,20 @@ final class UkrainianStrings extends Strings {
       'Палітра команд пропонує лише ті команди, які можна виконати там, де ви '
       "є. Тут усі, і коли кожна з'являється.";
   @override
+  String get commandsKeysNote =>
+      'Тут нічого не змінюється. Клавіші — це ті, що задані в розділі '
+      '«Комбінації клавіш», і вони слідують за кожною зміною там.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Змінити клавіші в розділі «Комбінації клавіш»';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Змінити в розділі «Комбінації клавіш»';
+  @override
+  String get commandsSubtitle => 'Що може виконати палітра команд, і коли';
+  @override
+  String get keyboardShortcutsSubtitle => 'Змінити клавіші кожної команди';
+  @override
   String get commandNeedNone => 'Завжди доступно';
   @override
   String get commandNeedOpenNote => 'Потрібна відкрита нотатка';

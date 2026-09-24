@@ -1311,6 +1311,20 @@ final class ItalianStrings extends Strings {
       'La palette dei comandi offre solo i comandi che si possono eseguire '
       'dove sei. Qui ci sono tutti, e quando compare ciascuno.';
   @override
+  String get commandsKeysNote =>
+      'Qui non si modifica nulla. I tasti sono quelli impostati in '
+      'Scorciatoie da tastiera e seguono ogni modifica fatta lì.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Cambia i tasti in Scorciatoie da tastiera';
+  @override
+  String get commandsChangeKeyTooltip => 'Cambia in Scorciatoie da tastiera';
+  @override
+  String get commandsSubtitle =>
+      'Cosa può eseguire la palette dei comandi, e quando';
+  @override
+  String get keyboardShortcutsSubtitle => 'Cambia i tasti di ogni comando';
+  @override
   String get commandNeedNone => 'Sempre disponibile';
   @override
   String get commandNeedOpenNote => 'Serve una nota aperta';

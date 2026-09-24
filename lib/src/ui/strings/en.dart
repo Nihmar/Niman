@@ -1291,6 +1291,18 @@ final class EnglishStrings extends Strings {
       'The command palette offers only the commands that can run where you '
       'are. These are all of them, and when each one shows.';
   @override
+  String get commandsKeysNote =>
+      'Nothing is changed here. The keys are the ones set in Keyboard '
+      'shortcuts, and follow any change made there.';
+  @override
+  String get commandsOpenShortcuts => 'Change keys in Keyboard shortcuts';
+  @override
+  String get commandsChangeKeyTooltip => 'Change in Keyboard shortcuts';
+  @override
+  String get commandsSubtitle => 'What the command palette can run, and when';
+  @override
+  String get keyboardShortcutsSubtitle => 'Change the keys of every command';
+  @override
   String get commandNeedNone => 'Always available';
   @override
   String get commandNeedOpenNote => 'Needs an open note';

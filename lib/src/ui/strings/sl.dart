@@ -1294,6 +1294,18 @@ final class SlovenianStrings extends Strings {
       'Paleta ukazov ponuja le ukaze, ki jih je mogoče zagnati tam, kjer ste. '
       'Tu so vsi in kdaj se kateri prikaže.';
   @override
+  String get commandsKeysNote =>
+      'Tu se nič ne spreminja. Tipke so tiste, nastavljene v razdelku '
+      '»Bližnjice«, in sledijo vsaki spremembi tam.';
+  @override
+  String get commandsOpenShortcuts => 'Spremeni tipke v razdelku »Bližnjice«';
+  @override
+  String get commandsChangeKeyTooltip => 'Spremeni v razdelku »Bližnjice«';
+  @override
+  String get commandsSubtitle => 'Kaj lahko zažene paleta ukazov, in kdaj';
+  @override
+  String get keyboardShortcutsSubtitle => 'Spremeni tipke vsakega ukaza';
+  @override
   String get commandNeedNone => 'Vedno na voljo';
   @override
   String get commandNeedOpenNote => 'Potrebuje odprt zapisek';

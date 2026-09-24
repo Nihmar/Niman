@@ -1311,6 +1311,22 @@ final class MacedonianStrings extends Strings {
       'Палетата со команди нуди само команди што може да се извршат таму каде '
       'што сте. Тука се сите, и кога се појавува секоја.';
   @override
+  String get commandsKeysNote =>
+      'Тука ништо не се менува. Копчињата се оние поставени во делот '
+      '„Тастатурски прецици“ и ја следат секоја промена направена таму.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Промени ги копчињата во делот „Тастатурски прецици“';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Промени во делот „Тастатурски прецици“';
+  @override
+  String get commandsSubtitle =>
+      'Што може да изврши палетата со команди, и кога';
+  @override
+  String get keyboardShortcutsSubtitle =>
+      'Промени ги копчињата на секоја команда';
+  @override
   String get commandNeedNone => 'Секогаш достапно';
   @override
   String get commandNeedOpenNote => 'Потребна е отворена белешка';

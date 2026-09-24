@@ -1296,6 +1296,20 @@ final class CroatianStrings extends Strings {
       'Paleta naredbi nudi samo naredbe koje se mogu pokrenuti tamo gdje '
       'jeste. Ovdje su sve, i kada se koja prikazuje.';
   @override
+  String get commandsKeysNote =>
+      'Ovdje se ništa ne mijenja. Tipke su one postavljene u odjeljku '
+      '„Tipkovnički prečaci” i prate svaku promjenu napravljenu ondje.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Promijeni tipke u odjeljku „Tipkovnički prečaci”';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Promijeni u odjeljku „Tipkovnički prečaci”';
+  @override
+  String get commandsSubtitle => 'Što paleta naredbi može pokrenuti, i kada';
+  @override
+  String get keyboardShortcutsSubtitle => 'Promijeni tipke svake naredbe';
+  @override
   String get commandNeedNone => 'Uvijek dostupno';
   @override
   String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';

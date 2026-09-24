@@ -1304,6 +1304,21 @@ final class BasqueStrings extends Strings {
       'Komando-paletak zauden lekuan exekutatu daitezkeen komandoak soilik '
       'eskaintzen ditu. Hemen daude guztiak, eta noiz agertzen den bakoitza.';
   @override
+  String get commandsKeysNote =>
+      'Hemen ez da ezer aldatzen. Teklak «Teklatu-lasterdarrak» atalean '
+      'ezarritakoak dira, eta han egindako aldaketa oro jarraitzen dute.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Aldatu teklak «Teklatu-lasterdarrak» atalean';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Aldatu «Teklatu-lasterdarrak» atalean';
+  @override
+  String get commandsSubtitle =>
+      'Komando-paletak zer exekuta dezakeen, eta noiz';
+  @override
+  String get keyboardShortcutsSubtitle => 'Aldatu komando bakoitzaren teklak';
+  @override
   String get commandNeedNone => 'Beti erabilgarri';
   @override
   String get commandNeedOpenNote => 'Ohar ireki bat behar du';

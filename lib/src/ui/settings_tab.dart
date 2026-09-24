@@ -93,6 +93,8 @@ final class _SettingsTabState extends State<SettingsTab> {
                   spellCheck: widget.spellCheck,
                   transcription: widget.transcription,
                   keyboardAttached: true,
+                  openArea: (area, row) =>
+                      _navigation.select(area, highlight: row),
                 ),
               ),
             ),

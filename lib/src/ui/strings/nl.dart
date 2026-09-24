@@ -1313,6 +1313,20 @@ final class DutchStrings extends Strings {
       'Het opdrachtenpalet biedt alleen de opdrachten aan die kunnen draaien '
       'waar je bent. Hier staan ze allemaal, en wanneer elke verschijnt.';
   @override
+  String get commandsKeysNote =>
+      'Hier wordt niets gewijzigd. De toetsen zijn die uit Sneltoetsen en '
+      'volgen elke wijziging daar.';
+  @override
+  String get commandsOpenShortcuts => 'Toetsen wijzigen in Sneltoetsen';
+  @override
+  String get commandsChangeKeyTooltip => 'Wijzigen in Sneltoetsen';
+  @override
+  String get commandsSubtitle =>
+      'Wat het opdrachtenpalet kan uitvoeren, en wanneer';
+  @override
+  String get keyboardShortcutsSubtitle =>
+      'De toetsen van elke opdracht wijzigen';
+  @override
   String get commandNeedNone => 'Altijd beschikbaar';
   @override
   String get commandNeedOpenNote => 'Vereist een geopende notitie';
