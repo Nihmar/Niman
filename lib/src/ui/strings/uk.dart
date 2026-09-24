@@ -441,6 +441,9 @@ final class UkrainianStrings extends Strings {
   String get toolbarItalic => 'Курсив';
   @override
   String get toolbarStrikethrough => 'Закреслений';
+
+  @override
+  String get toolbarHighlight => 'Виділення';
   @override
   String get toolbarSuperscript => 'Верхній індекс';
   @override

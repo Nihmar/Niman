@@ -439,6 +439,9 @@ final class BelarusianStrings extends Strings {
   String get toolbarItalic => 'Курсіў';
   @override
   String get toolbarStrikethrough => 'Закрэслены';
+
+  @override
+  String get toolbarHighlight => 'Вылучэнне';
   @override
   String get toolbarSuperscript => 'Верхні індыкс';
   @override

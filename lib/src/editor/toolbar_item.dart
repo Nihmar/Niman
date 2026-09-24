@@ -22,6 +22,9 @@ enum ToolbarItem {
   /// `~~strikethrough~~`.
   strikethrough('strikethrough', 'toolbar-strike', Icons.strikethrough_s),
 
+  /// `==highlight==` (#279).
+  highlight('highlight', 'toolbar-highlight', Icons.border_color_outlined),
+
   /// `<sup>superscript</sup>`.
   superscript('superscript', 'toolbar-sup', Icons.superscript),
 
@@ -92,6 +95,7 @@ enum ToolbarItem {
     ToolbarItem.bold => AppStrings.toolbarBold,
     ToolbarItem.italic => AppStrings.toolbarItalic,
     ToolbarItem.strikethrough => AppStrings.toolbarStrikethrough,
+    ToolbarItem.highlight => AppStrings.toolbarHighlight,
     ToolbarItem.superscript => AppStrings.toolbarSuperscript,
     ToolbarItem.underline => AppStrings.toolbarUnderline,
     ToolbarItem.link => AppStrings.toolbarLink,
@@ -115,6 +119,7 @@ enum ToolbarItem {
     ToolbarItem.bold ||
     ToolbarItem.italic ||
     ToolbarItem.strikethrough ||
+    ToolbarItem.highlight ||
     ToolbarItem.superscript ||
     ToolbarItem.underline => ToolbarGroup.text,
     ToolbarItem.heading ||

@@ -747,6 +747,7 @@ final class _InlineBuilder {
       StyleKind.strikethrough => base.copyWith(
         decoration: TextDecoration.lineThrough,
       ),
+      StyleKind.highlight => base.copyWith(backgroundColor: theme.highlight),
       StyleKind.underline => base.copyWith(
         decoration: TextDecoration.underline,
       ),

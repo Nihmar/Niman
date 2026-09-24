@@ -81,6 +81,19 @@ void main() {
       );
     });
 
+    test('highlight (#279), and not a comparison', () {
+      final parsed = _parse('a ==marked **here**== b');
+      expect(
+        _slice(parsed, _run(parsed, StyleKind.highlight)!),
+        '==marked **here**==',
+      );
+      // What it holds is parsed as any other inline text.
+      expect(_slice(parsed, _run(parsed, StyleKind.strong)!), '**here**');
+      // Spaces inside the markers make it two comparisons, as emphasis does.
+      expect(_run(_parse('if a == b == c'), StyleKind.highlight), isNull);
+      expect(_run(_parse('==== not one'), StyleKind.highlight), isNull);
+    });
+
     test('the HTML the toolbar writes: underline, superscript, subscript', () {
       // The package passes inline HTML through as text, which a renderer
       // that draws runs showed as tags; these three are read as the
@@ -160,6 +173,7 @@ void main() {
       expect(split('a **bold** b', StyleKind.strong), '**|bold|**');
       expect(split('a _it_ b', StyleKind.emphasis), '_|it|_');
       expect(split('a ~~gone~~ b', StyleKind.strikethrough), '~~|gone|~~');
+      expect(split('a ==mark== b', StyleKind.highlight), '==|mark|==');
     });
 
     test('a link, an image and a heading', () {

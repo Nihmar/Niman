@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The style of the *heading text* — the region after a `#…` marker,
@@ -74,6 +75,9 @@ TextStyle? markdownTokenStyle(
     ),
     TokenKind.italic => const TextStyle(fontStyle: FontStyle.italic),
     TokenKind.strike => const TextStyle(decoration: TextDecoration.lineThrough),
+    TokenKind.highlight => TextStyle(
+      backgroundColor: markHighlightFor(dark: dark),
+    ),
     TokenKind.underline => const TextStyle(
       decoration: TextDecoration.underline,
     ),

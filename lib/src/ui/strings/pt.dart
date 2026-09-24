@@ -436,6 +436,9 @@ final class PortugueseStrings extends Strings {
   String get toolbarItalic => 'Itálico';
   @override
   String get toolbarStrikethrough => 'Riscado';
+
+  @override
+  String get toolbarHighlight => 'Realce';
   @override
   String get toolbarSuperscript => 'Sobrescrito';
   @override

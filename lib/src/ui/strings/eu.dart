@@ -433,6 +433,9 @@ final class BasqueStrings extends Strings {
   String get toolbarItalic => 'Etzana';
   @override
   String get toolbarStrikethrough => 'Marratua';
+
+  @override
+  String get toolbarHighlight => 'Nabarmendua';
   @override
   String get toolbarSuperscript => 'Goiko indizea';
   @override

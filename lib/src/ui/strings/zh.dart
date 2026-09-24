@@ -408,6 +408,9 @@ final class ChineseStrings extends Strings {
   String get toolbarItalic => '斜体';
   @override
   String get toolbarStrikethrough => '删除线';
+
+  @override
+  String get toolbarHighlight => '高亮';
   @override
   String get toolbarSuperscript => '上标';
   @override

@@ -445,6 +445,9 @@ final class RomanianStrings extends Strings {
   String get toolbarItalic => 'Cursiv';
   @override
   String get toolbarStrikethrough => 'Tăiat';
+
+  @override
+  String get toolbarHighlight => 'Evidențiat';
   @override
   String get toolbarSuperscript => 'Indice sus';
   @override

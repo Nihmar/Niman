@@ -441,6 +441,9 @@ final class GalicianStrings extends Strings {
   String get toolbarItalic => 'Itálica';
   @override
   String get toolbarStrikethrough => 'Rachado';
+
+  @override
+  String get toolbarHighlight => 'Resaltado';
   @override
   String get toolbarSuperscript => 'Superíndice';
   @override

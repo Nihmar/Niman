@@ -435,6 +435,9 @@ final class IcelandicStrings extends Strings {
   String get toolbarItalic => 'Skrátt';
   @override
   String get toolbarStrikethrough => 'Stríkað';
+
+  @override
+  String get toolbarHighlight => 'Auðkennt';
   @override
   String get toolbarSuperscript => 'Ofanastexti';
   @override

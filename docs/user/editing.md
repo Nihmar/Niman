@@ -29,7 +29,7 @@ same Markdown either way, and only how it is drawn differs. The read view
 - **WYSIWYG editor**: the note drawn as it reads — the Markdown stays the
   note's text, and only where the caret is does it show as written. Headings
   are set at their size; bold, italic,
-  strikethrough, underline (`<u>`) and superscript (`<sup>`) are drawn as
+  strikethrough, `==highlight==`, underline (`<u>`) and superscript (`<sup>`) are drawn as
   such, and so is a format inside another (`<u>**x**</u>` is bold and
   underlined); list items get their bullet, number or checkbox — a click or a
   tap on the checkbox ticks it, one undo step, without moving the caret (in
@@ -239,7 +239,8 @@ the HTML is used when the clipboard carries it.
 
 ## Markdown support
 
-Tables, task lists, footnotes, strikethrough, fenced code blocks with
+Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's
+yellow, the same in every theme), fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
@@ -320,7 +321,7 @@ Obsidian's is:
 - the spelling's suggestions for a misspelled word, and a table's
   **Row ›**, **Column ›** and sorts on a table's cell, first;
 - **Add link** (`[[…]]`) and **Add external link** (`[…](https://)`);
-- **Format ›** — bold, italic, strikethrough, underline, superscript,
+- **Format ›** — bold, italic, strikethrough, highlight, underline, superscript,
   subscript, code — **Paragraph ›** — headings 1 to 6, **Body** (the
   heading taken off), bulleted, numbered and checkbox lists, quote — and
   **Insert ›** — footnote, table, horizontal rule, code block, math

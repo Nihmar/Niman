@@ -408,6 +408,9 @@ final class JapaneseStrings extends Strings {
   String get toolbarItalic => '斜体';
   @override
   String get toolbarStrikethrough => '取り消し線';
+
+  @override
+  String get toolbarHighlight => 'ハイライト';
   @override
   String get toolbarSuperscript => '上付き文字';
   @override

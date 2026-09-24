@@ -440,6 +440,9 @@ final class SlovakStrings extends Strings {
   String get toolbarItalic => 'Kurzíva';
   @override
   String get toolbarStrikethrough => 'Prečiarknuté';
+
+  @override
+  String get toolbarHighlight => 'Zvýraznenie';
   @override
   String get toolbarSuperscript => 'Horný index';
   @override

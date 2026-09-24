@@ -442,6 +442,9 @@ final class CatalanStrings extends Strings {
   String get toolbarItalic => 'Cursiva';
   @override
   String get toolbarStrikethrough => 'Ratllat';
+
+  @override
+  String get toolbarHighlight => 'Ressaltat';
   @override
   String get toolbarSuperscript => 'Exponent';
   @override

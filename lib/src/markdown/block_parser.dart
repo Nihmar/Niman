@@ -100,7 +100,7 @@ final class BlockParser {
     final definitions = scope();
     final document = md.Document(
       extensionSet: md.ExtensionSet.gitHubFlavored,
-      inlineSyntaxes: _htmlStyleSyntaxes,
+      inlineSyntaxes: _inlineSyntaxes,
     );
     // The two constructs that are a *document's*, not a block's. A link
     // reference and a footnote definition are written in one block and used in
@@ -469,6 +469,8 @@ final class _Walk {
         return _overMarkers(text, inner, const <int>[0x2A, 0x5F]);
       case 'del':
         return _overMarkers(text, inner, const <int>[0x7E]);
+      case 'mark':
+        return _overMarkers(text, inner, const <int>[0x3D]);
       case 'h1' || 'h2' || 'h3' || 'h4' || 'h5' || 'h6':
         return _widenHeading(text, inner);
       case 'a' || 'img':
@@ -575,6 +577,7 @@ final class _Walk {
     'em' => StyleKind.emphasis,
     'strong' => StyleKind.strong,
     'del' => StyleKind.strikethrough,
+    'mark' => StyleKind.highlight,
     'u' => StyleKind.underline,
     'sup' => StyleKind.superscript,
     'sub' => StyleKind.subscript,
@@ -797,6 +800,29 @@ final class Footnote {
 
   @override
   String toString() => 'Footnote($label: $body)';
+}
+
+/// What the parser reads beyond GitHub's Markdown: the HTML style tags and
+/// `==highlight==`.
+final List<md.InlineSyntax> _inlineSyntaxes = <md.InlineSyntax>[
+  ..._htmlStyleSyntaxes,
+  _HighlightSyntax(),
+];
+
+/// `==text==` on one line, as a `mark` element whose contents are parsed
+/// like any other inline text (#279).
+///
+/// The text neither starts nor ends with a space, as emphasis does not:
+/// `a == b == c` is two comparisons, not a highlighted ` b `.
+final class _HighlightSyntax extends md.InlineSyntax {
+  new() : super(r'==(?![\s=])(.+?)(?<![\s=])==', startCharacter: 0x3D);
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    final children = md.InlineParser(match[1]!, parser.document).parse();
+    parser.addNode(md.Element('mark', children));
+    return true;
+  }
 }
 
 /// The HTML tags a note uses for what Markdown has no syntax for, read as the

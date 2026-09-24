@@ -24,10 +24,9 @@ final class CheatsheetEntry {
 
 /// The cheatsheet, in reading order.
 ///
-/// Only what the engine draws: `==highlight==` and callouts (`> [!note]`),
-/// which other apps read, are not here because Niman does not read them,
-/// and an example that renders as its own source would teach the wrong
-/// thing.
+/// Only what the engine draws: callouts (`> [!note]`), which other apps
+/// read, are not here because Niman does not read them yet, and an example
+/// that renders as its own source would teach the wrong thing.
 final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
   CheatsheetEntry(
     id: 'headings',
@@ -37,7 +36,7 @@ final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
   CheatsheetEntry(
     id: 'emphasis',
     title: () => AppStrings.cheatEmphasis,
-    source: '**bold**, *italic*, ~~struck through~~',
+    source: '**bold**, *italic*, ~~struck through~~, ==highlighted==',
   ),
   CheatsheetEntry(
     id: 'html',

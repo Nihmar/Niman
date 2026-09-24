@@ -238,6 +238,31 @@ void main() {
     expect(source.where((span) => span.text == '**').any(hidden), isFalse);
   });
 
+  testWidgets('==highlight== is marked, its markers hidden in live (#279)', (
+    tester,
+  ) async {
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\na ==marked== word\n',
+    );
+    final spans = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+    }
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+    final markers = spans.where((span) => span.text == '==');
+    expect(markers, hasLength(2));
+    expect(markers.every(hidden), isTrue, reason: 'live hides the markers');
+    final marked = spans.singleWhere((span) => span.text == 'marked');
+    expect(hidden(marked), isFalse);
+    expect(marked.style?.backgroundColor, isNotNull, reason: 'it is marked');
+  });
+
   testWidgets('live hides the tags the toolbar writes, and draws them', (
     tester,
   ) async {

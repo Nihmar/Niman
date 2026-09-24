@@ -21,6 +21,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/markdown/render/code_themes.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 
 /// How far an ordered item's number ends before the item's text, in the
 /// prose's size: the read view and `live` both set it there, and it grows
@@ -61,6 +62,7 @@ final class MarkdownTheme {
     required this.ruleThickness,
     required this.tableCellPadding,
     required this.lineHeight,
+    this.highlight = markHighlightLight,
   });
 
   /// The prose style.
@@ -129,6 +131,9 @@ final class MarkdownTheme {
 
   /// The colour of a syntax marker when `live` mode reveals one.
   final Color markerDim;
+
+  /// The mark behind `==highlighted==` text.
+  final Color highlight;
 
   /// How much space goes above and below a block.
   final double blockSpacing;
@@ -200,6 +205,7 @@ final class MarkdownTheme {
     ruleThickness: ruleThickness,
     tableCellPadding: tableCellPadding,
     lineHeight: lineHeight,
+    highlight: highlight,
   );
 }
 
@@ -254,6 +260,7 @@ MarkdownTheme monospaceTheme(MarkdownTheme theme) {
     ruleThickness: theme.ruleThickness,
     tableCellPadding: theme.tableCellPadding,
     lineHeight: theme.lineHeight,
+    highlight: theme.highlight,
   );
 }
 
@@ -325,5 +332,6 @@ MarkdownTheme markdownThemeOf(BuildContext context, {TextScaler? scaler}) {
       vertical: em * 0.3,
     ),
     lineHeight: body.fontSize! * 1.5,
+    highlight: markHighlightFor(dark: theme.brightness == Brightness.dark),
   );
 }

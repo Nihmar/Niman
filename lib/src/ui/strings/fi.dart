@@ -436,6 +436,9 @@ final class FinnishStrings extends Strings {
   String get toolbarItalic => 'Kursivointi';
   @override
   String get toolbarStrikethrough => 'Yläviiva';
+
+  @override
+  String get toolbarHighlight => 'Korostus';
   @override
   String get toolbarSuperscript => 'Yläindeksi';
   @override
