@@ -285,6 +285,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Листи со задачи (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Секоја боја е именувана како во извезената датотека';
   @override

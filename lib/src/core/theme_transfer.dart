@@ -1,7 +1,7 @@
 // Moving a theme between installations (issue #269).
 //
 // One theme, one file: JSON and not an `.ini`, because a theme is two
-// structured maps of twenty colors, JSON carries that structure natively
+// structured maps of twenty-six colors, JSON carries that structure natively
 // and validates cheaply, and it is what the app already writes elsewhere
 // (`settings.json`). The file says what it is (`format`) and which shape
 // it is in (`version`), so a file from a later build is refused with an
@@ -104,7 +104,11 @@ final class ThemeImportProblem {
 ///
 /// Strict on purpose: every role is required at both brightnesses and
 /// every color has to be one, because a theme with a hole in it would be
-/// a theme wearing a color from somewhere else.
+/// a theme wearing a color from somewhere else. The task-list roles are
+/// the exception, and only when left out: a file exported before they
+/// existed still imports, reading them from the roles they were painted
+/// with ([ThemeColors.taskListRoleSources]). One that names them has to
+/// name colors.
 ThemeFileResult decodeThemeFile(String source) {
   final Object? decoded;
   try {
@@ -163,6 +167,9 @@ ThemeFileResult decodeThemeFile(String source) {
   }
   for (final role in ThemeColors.roleNames) {
     final value = side[role];
+    if (value == null && ThemeColors.taskListRoleSources.containsKey(role)) {
+      continue;
+    }
     if (value is! String || colorFromHex(value) == null) {
       return (
         colors: null,

@@ -286,6 +286,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Seznami nalog (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Vsaka barva je poimenovana kot v izvoženi datoteki';
   @override

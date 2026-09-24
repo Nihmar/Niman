@@ -3,7 +3,9 @@
 // The published palette, mapped onto the app's roles and nothing more:
 // every value below is one of Catppuccin's own named colors, so the
 // mapping can be read against the style guide rather than against a color
-// picker. Mauve is the accent the project itself defaults to.
+// picker. Mauve is the accent the project itself defaults to. A task
+// list reads its priority in yellow, and a finished task in overlay0, the
+// quietest text color the palette names.
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
@@ -41,6 +43,12 @@ const SyntaxColors _mochaSyntax = SyntaxColors(
   quote: Color(0xFFA6ADC8), // subtext0
   math: Color(0xFFF5C2E7), // pink
   tag: Color(0xFF74C7EC), // sapphire
+  todoPriority: Color(0xFFF9E2AF), // yellow
+  todoDate: Color(0xFF9399B2), // overlay2
+  todoProject: Color(0xFFCBA6F7), // mauve
+  todoContext: Color(0xFFB4BEFE), // lavender
+  todoKeyValue: Color(0xFF94E2D5), // teal
+  todoDone: Color(0xFF6C7086), // overlay0
 );
 
 // Latte (day). Latte has nothing lighter than base, so the ramp runs the
@@ -71,4 +79,10 @@ const SyntaxColors _latteSyntax = SyntaxColors(
   quote: Color(0xFF6C6F85), // subtext0
   math: Color(0xFFEA76CB), // pink
   tag: Color(0xFF209FB5), // sapphire
+  todoPriority: Color(0xFFDF8E1D), // yellow
+  todoDate: Color(0xFF7C7F93), // overlay2
+  todoProject: Color(0xFF8839EF), // mauve
+  todoContext: Color(0xFF7287FD), // lavender
+  todoKeyValue: Color(0xFF179299), // teal
+  todoDone: Color(0xFF9CA0B0), // overlay0
 );

@@ -20,6 +20,10 @@ at once, everywhere, and the choice is remembered on this device.
 
 The Markdown colors — code, links, quotes, tags — travel with the theme:
 the editor and the preview always agree with the interface around them.
+So do the colors of a task list (`todo.txt`, `done.txt`), which the editor
+paints with roles of their own: the priority `(A)`, drawn bold; the
+dates; `+projects`; `@contexts`; `key:value` tags such as `due:`; and a
+completed task, struck through and stepped back.
 
 ## Themes of your own
 
@@ -34,7 +38,10 @@ Each theme in the list carries a ⋮ menu:
 
 - **Edit** (your own themes) opens the theme color by color: the interface
   roles first — background, text, accent, error — then the Markdown ones,
-  each with the color it holds and the name the exported file uses. A
+  and last, under *Task lists (todo.txt)*, the six a task list is painted
+  with (`todoPriority`, `todoDate`, `todoProject`, `todoContext`,
+  `todoKeyValue`, `todoDone`), each with the color it holds and the name
+  the exported file uses. A
   color is opened in a picker with a saturation-and-value square, a hue
   bar and a `#RRGGBB` field, and **the whole app wears the colors as they
   move**, so a color is chosen by seeing it in place. The Light/Dark
@@ -57,14 +64,21 @@ shipped names included — is refused while it is typed.
 - **Export**, in a theme's ⋮ menu, writes that one theme into a single
   `.json` file wherever you say, through the system's own save dialog: the
   name, the format version, and the colors at day and at night. JSON and
-  not an `.ini`, because a theme is two structured maps of twenty colors.
+  not an `.ini`, because a theme is two structured maps of twenty-six
+  colors.
 - **Import**, the row after *New theme*, reads such a file back. This is
   how a theme gets to another device: it is stored with the installation,
   not with the library, so it never travels in a synced folder. A file
   that is not a Niman theme, comes from a newer Niman, or is missing a
   color is refused with the reason — nothing half-imported lands. A file
   whose theme name is already taken is refused too, and offered to be
-  imported under a name typed on the spot.
+  imported under a name typed on the spot. A file exported before the
+  task-list colors existed still imports: each one it leaves out takes
+  the color a task list was painted with then — the priority the task
+  color, dates and completed tasks the markers' grey, projects the
+  wikilink color, contexts the link color, `key:value` tags the code
+  color — so the theme looks exactly as it did. Custom themes saved
+  before them load the same way.
 
 ## Where they live
 

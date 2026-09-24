@@ -35,7 +35,8 @@ final class ThemeColors {
     'error',
   ];
 
-  /// The Markdown roles, in the order [SyntaxColors] names them.
+  /// The Markdown roles, in the order [SyntaxColors] names them: the
+  /// note's own, then [taskListRoles].
   static const List<String> markdownRoles = [
     'dim',
     'code',
@@ -47,7 +48,38 @@ final class ThemeColors {
     'quote',
     'math',
     'tag',
+    ...taskListRoles,
   ];
+
+  /// The roles a task list (todo.txt, done.txt) is painted with, the last
+  /// of [markdownRoles].
+  static const List<String> taskListRoles = [
+    'todoPriority',
+    'todoDate',
+    'todoProject',
+    'todoContext',
+    'todoKeyValue',
+    'todoDone',
+  ];
+
+  /// The role each of [taskListRoles] is read from when a theme does not
+  /// name it.
+  ///
+  /// The task-list roles came after the first themes were stored and
+  /// exported, and a theme from before them is whole in every way it was
+  /// when it was made: refusing it would take away a theme the user
+  /// already has. So a missing task-list role takes the color the editor
+  /// painted it with before it was a role of its own — the theme looks
+  /// exactly as it did — while any other missing role still refuses the
+  /// theme, since nothing but a hole explains it.
+  static const Map<String, String> taskListRoleSources = {
+    'todoPriority': 'task',
+    'todoDate': 'dim',
+    'todoProject': 'wikilink',
+    'todoContext': 'link',
+    'todoKeyValue': 'code',
+    'todoDone': 'dim',
+  };
 
   /// Every role, chrome first, in the order a theme file lists them.
   static const List<String> roleNames = [...chromeRoles, ...markdownRoles];
@@ -91,18 +123,33 @@ final class ThemeColors {
     'quote': colorToHex(syntax.quote),
     'math': colorToHex(syntax.math),
     'tag': colorToHex(syntax.tag),
+    'todoPriority': colorToHex(syntax.todoPriority),
+    'todoDate': colorToHex(syntax.todoDate),
+    'todoProject': colorToHex(syntax.todoProject),
+    'todoContext': colorToHex(syntax.todoContext),
+    'todoKeyValue': colorToHex(syntax.todoKeyValue),
+    'todoDone': colorToHex(syntax.todoDone),
   };
 
   /// The colors [json] describes, or null when a role is missing or is
   /// not a color. Every role has to be there: a theme with a hole in it
   /// is a theme that would wear a color from somewhere else.
+  ///
+  /// The one exception is a theme older than the task-list roles: one
+  /// that leaves them out (rather than giving something that is not a
+  /// color) reads them from [taskListRoleSources].
   static ThemeColors? fromJson(Map<String, Object?> json) {
     final colors = <String, Color>{};
     for (final role in roleNames) {
       final value = json[role];
+      if (value == null && taskListRoleSources.containsKey(role)) continue;
       final color = value is String ? colorFromHex(value) : null;
       if (color == null) return null;
       colors[role] = color;
+    }
+    for (final MapEntry(key: role, value: source)
+        in taskListRoleSources.entries) {
+      colors.putIfAbsent(role, () => colors[source]!);
     }
     return ThemeColors(
       tokens: PaletteTokens(
@@ -128,6 +175,12 @@ final class ThemeColors {
         quote: colors['quote']!,
         math: colors['math']!,
         tag: colors['tag']!,
+        todoPriority: colors['todoPriority']!,
+        todoDate: colors['todoDate']!,
+        todoProject: colors['todoProject']!,
+        todoContext: colors['todoContext']!,
+        todoKeyValue: colors['todoKeyValue']!,
+        todoDone: colors['todoDone']!,
       ),
     );
   }

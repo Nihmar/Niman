@@ -35,6 +35,7 @@ import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
@@ -1261,9 +1262,12 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
+    // A todo.txt is read in its editor alone: the eye stays, off.
+    final shown = _shownNote;
+    final plain = shown != null && isTodoTxtFile(p.basename(shown));
     return PreviewToggleAction(
-      previewVisible: _notePreview,
-      onToggle: _togglePreview,
+      previewVisible: _notePreview && !plain,
+      onToggle: plain ? null : _togglePreview,
       compact: compact,
     );
   }
@@ -3279,10 +3283,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   List<Widget> _statusActionsFor(int pane) {
     final tab = _workspace.value.panes[pane].activeTab;
     if (tab == null || !_previewToggleVisible) return const [];
+    final plain = isTodoTxtFile(p.basename(tab.path));
     return [
       PreviewToggleAction(
-        previewVisible: tab.memento.preview ?? false,
-        onToggle: () => _togglePreviewOf(tab.path),
+        previewVisible: !plain && (tab.memento.preview ?? false),
+        onToggle: plain ? null : () => _togglePreviewOf(tab.path),
         compact: true,
       ),
     ];

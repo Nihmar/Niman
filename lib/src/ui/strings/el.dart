@@ -287,6 +287,8 @@ final class GreekStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Λίστες καθηκόντων (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
   @override

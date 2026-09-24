@@ -284,6 +284,8 @@ final class SwedishStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Uppgiftslistor (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Varje färg heter det den exporterade filen kallar den';
   @override

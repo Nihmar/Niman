@@ -53,6 +53,7 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
@@ -588,9 +589,9 @@ final class _NoteViewState extends State<NoteView>
   void _keepPlaceAcrossModes(NoteView oldWidget) {
     if (!_ready) return;
     if (oldWidget.path != widget.path) return;
-    final wasRead = oldWidget.showPreview;
-    final read = widget.showPreview;
-    final modeChanged = oldWidget.showWysiwyg != widget.showWysiwyg;
+    final wasRead = _previewIn(oldWidget);
+    final read = _previewIn(widget);
+    final modeChanged = _wysiwygIn(oldWidget) != _wysiwygIn(widget);
     if (wasRead == read && (read || !modeChanged)) return;
     final anchor = wasRead
         ? _readViewKey.currentState?.topAnchor
@@ -598,7 +599,7 @@ final class _NoteViewState extends State<NoteView>
     if (anchor == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.showPreview) {
+      if (_previewIn(widget)) {
         _readViewKey.currentState?.showAnchor(anchor);
       } else {
         _sourceViewKey.currentState?.showAnchor(anchor);
@@ -608,7 +609,7 @@ final class _NoteViewState extends State<NoteView>
 
   /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
   /// source pane is `source` (`docs/dev/unified-surface.md` §8.6.3).
-  MarkdownSurfaceMode get _unifiedMode => widget.showWysiwyg
+  MarkdownSurfaceMode get _unifiedMode => _wysiwygIn(widget)
       ? MarkdownSurfaceMode.live
       : MarkdownSurfaceMode.source;
 
@@ -856,7 +857,7 @@ final class _NoteViewState extends State<NoteView>
   void _restoreMemento() {
     final memento = widget.initialMemento;
     if (memento == null || memento.isEmpty) return;
-    final wysiwyg = widget.showWysiwyg;
+    final wysiwyg = _wysiwygIn(widget);
     final sameEditor =
         memento.editorKind == (wysiwyg ? wysiwygEditorKind : sourceEditorKind);
     // One surface, two modes, the same text and the same offsets: the
@@ -1149,7 +1150,19 @@ final class _NoteViewState extends State<NoteView>
 
   /// Whether [view] shows its preview. In Zen (#69) too: a note read
   /// rather than written is read there in its preview (0.0.8 test round).
-  static bool _previewIn(NoteView view) => view.showPreview;
+  static bool _previewIn(NoteView view) =>
+      view.showPreview && !_plainTextIn(view);
+
+  /// Whether [view] holds a file of a syntax of its own rather than
+  /// Markdown — the Todo tab's todo.txt and done.txt — drawn in the source
+  /// pane with its own colours and nowhere else: the preview and `live`
+  /// read Markdown, and would run its lines together into paragraphs.
+  static bool _plainTextIn(NoteView view) =>
+      isTodoTxtFile(p.basename(view.path));
+
+  /// Whether [view] shows its note in the WYSIWYG pane.
+  static bool _wysiwygIn(NoteView view) =>
+      view.showWysiwyg && !_plainTextIn(view);
 
   /// Dismisses the keyboard when the preview is the only pane: a note
   /// opening in preview, or the switch flipping to it, must not leave
@@ -1199,6 +1212,7 @@ final class _NoteViewState extends State<NoteView>
         viewKey: _sourceViewKey,
         buffer: buffer,
         surface: surface,
+        lineTokens: _plainTextIn(widget) ? todoTxtTokens : null,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
@@ -2010,8 +2024,10 @@ final class _NoteViewState extends State<NoteView>
     // it never does.
     // Hiding every button hides the toolbar itself; the editor keeps its
     // keyboard shortcuts.
+    // A todo.txt has no Markdown to format.
     final showToolbar =
         !showPreview &&
+        !_plainTextIn(widget) &&
         (widget.toolbarTop || _keyboardUp) &&
         widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
@@ -2062,7 +2078,7 @@ final class _NoteViewState extends State<NoteView>
                             offstage: showPreview,
                             child: KeyedSubtree(
                               key: ValueKey(
-                                widget.showWysiwyg
+                                _wysiwygIn(widget)
                                     ? 'pane-wysiwyg'
                                     : 'pane-editor',
                               ),
@@ -2100,11 +2116,13 @@ final class _NoteViewState extends State<NoteView>
                   child: NoteStatusRow(
                     loading: _loading,
                     showPreview: showPreview,
-                    showWysiwyg: widget.showWysiwyg,
+                    showWysiwyg: _wysiwygIn(widget),
                     spellCheckAvailable:
                         widget.spellCheck != null &&
                         widget.spellCheck!.available,
+                    // In its place, and off: a todo.txt has one pane.
                     canSwitchEditorKind: widget.onEditorKindChanged != null,
+                    editorKindLocked: _plainTextIn(widget),
                     wordCount: _wordCount,
                     statusText: _status,
                     statusActions: widget.statusActions,

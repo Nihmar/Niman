@@ -126,6 +126,31 @@ void main() {
       }
     }
 
+    test('each paints a task list: priority apart, a finished task back', () {
+      for (final palette in AppPalette.values) {
+        for (final brightness in Brightness.values) {
+          final colors = themeColors(BuiltinAppTheme(palette), brightness);
+          final syntax = colors.syntax;
+          final ground = colors.tokens.background;
+          final reason = '${palette.id} at $brightness';
+          expect(syntax.todoPriority, isNot(syntax.todoDone), reason: reason);
+          expect(syntax.todoProject, isNot(syntax.todoContext), reason: reason);
+          // A finished task is quieter than the text and the priority.
+          final done = _contrast(syntax.todoDone, ground);
+          expect(
+            done,
+            lessThan(_contrast(colors.tokens.text, ground)),
+            reason: reason,
+          );
+          expect(
+            done,
+            lessThan(_contrast(syntax.todoPriority, ground)),
+            reason: reason,
+          );
+        }
+      }
+    });
+
     test('the named palettes are not the shipped one', () {
       final shipped = buildAppTheme(
         const BuiltinAppTheme(AppPalette.system),

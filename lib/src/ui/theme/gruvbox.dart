@@ -2,7 +2,8 @@
 //
 // Gruvbox is a warm ramp with two sets of accents: the bright ones read on
 // the dark ground, the faded ones on the light. Yellow carries the
-// interface, which is the color the theme is known by.
+// interface, which is the color the theme is known by; orange, the
+// loudest after it, marks a task's priority.
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
@@ -40,6 +41,12 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   quote: Color(0xFFA89984), // fg4
   math: Color(0xFFD3869B), // bright purple
   tag: Color(0xFF689D6A), // neutral aqua
+  todoPriority: Color(0xFFFE8019), // bright orange
+  todoDate: Color(0xFFA89984), // fg4
+  todoProject: Color(0xFFD3869B), // bright purple
+  todoContext: Color(0xFF83A598), // bright blue
+  todoKeyValue: Color(0xFF8EC07C), // bright aqua
+  todoDone: Color(0xFF7C6F64), // bg4
 );
 
 // Light (medium): bg0 as the ground, bg0_hard as the lighter step behind.
@@ -67,4 +74,10 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   quote: Color(0xFF7C6F64), // fg4
   math: Color(0xFF8F3F71), // faded purple
   tag: Color(0xFF689D6A), // neutral aqua
+  todoPriority: Color(0xFFAF3A03), // faded orange
+  todoDate: Color(0xFF7C6F64), // fg4
+  todoProject: Color(0xFF8F3F71), // faded purple
+  todoContext: Color(0xFF076678), // faded blue
+  todoKeyValue: Color(0xFF427B58), // faded aqua
+  todoDone: Color(0xFFA89984), // bg4
 );

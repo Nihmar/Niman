@@ -124,5 +124,20 @@ TextStyle? markdownTokenStyle(
       color: syntax.dim,
       fontStyle: FontStyle.italic,
     ),
+    // A task list's runs: a list is read by its priorities, projects and
+    // contexts, and a finished task steps back. Each run has a role of its
+    // own, so a theme can color a task list apart from a note.
+    TokenKind.todoPriority => TextStyle(
+      color: syntax.todoPriority,
+      fontWeight: dark ? FontWeight.w600 : FontWeight.bold,
+    ),
+    TokenKind.todoDate => TextStyle(color: syntax.todoDate),
+    TokenKind.todoProject => TextStyle(color: syntax.todoProject),
+    TokenKind.todoContext => TextStyle(color: syntax.todoContext),
+    TokenKind.todoKeyValue => TextStyle(color: syntax.todoKeyValue),
+    TokenKind.todoDone => TextStyle(
+      color: syntax.todoDone,
+      decoration: TextDecoration.lineThrough,
+    ),
   };
 }

@@ -131,6 +131,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
+    this.lineTokens,
     this.autofocus = false,
     super.key,
   });
@@ -250,6 +251,10 @@ final class MarkdownSourceView extends StatefulWidget {
   /// pane, lit faintly, and the note leaves room below its last line so that
   /// row can reach the middle there too.
   final bool typewriter;
+
+  /// The colours of a line of a file that is not Markdown, by its text —
+  /// a todo.txt's (`todoTxtTokens`) — or null for the Markdown engine's.
+  final List<Token> Function(String line)? lineTokens;
 
   /// Whether the note takes the focus — and the keyboard — as it opens (the
   /// keyboard-on-open setting, and a template's `{{cursor}}`).
@@ -1832,6 +1837,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// drifted.
   StyledLine _lineAt(int index) {
     final text = widget.buffer.lineAt(index);
+    final own = widget.lineTokens;
+    if (own != null) return StyledLine(text, own(text));
     final styler = _styler;
     if (styler == null || index < 0 || index >= lineCount) {
       return StyledLine(text, const <Token>[]);

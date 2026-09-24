@@ -94,6 +94,47 @@ void main() {
     }
   });
 
+  test('a file from before the task-list roles still imports', () {
+    // Exported by a build that did not have them: every role it does name
+    // is kept, and the task-list ones come from the roles a task list was
+    // painted with then.
+    final json = jsonDecode(file()) as Map<String, Object?>;
+    for (final side in ['day', 'night']) {
+      json[side] = Map<String, Object?>.of(json[side]! as Map<String, Object?>)
+        ..removeWhere((role, _) => ThemeColors.taskListRoles.contains(role));
+    }
+
+    final read = decodeThemeFile(jsonEncode(json)) as ThemeFileRead;
+    for (final (colors, original) in [
+      (read.day, theme.day),
+      (read.night, theme.night),
+    ]) {
+      expect(colors.tokens, original.tokens);
+      expect(colors.syntax.tag, original.syntax.tag);
+      expect(colors.syntax.todoPriority, original.syntax.task);
+      expect(colors.syntax.todoDate, original.syntax.dim);
+      expect(colors.syntax.todoProject, original.syntax.wikilink);
+      expect(colors.syntax.todoContext, original.syntax.link);
+      expect(colors.syntax.todoKeyValue, original.syntax.code);
+      expect(colors.syntax.todoDone, original.syntax.dim);
+    }
+  });
+
+  test('a task-list role that is not a color is named', () {
+    for (final side in ['day', 'night']) {
+      for (final role in ThemeColors.taskListRoles) {
+        final json = jsonDecode(file()) as Map<String, Object?>;
+        json[side] = Map<String, Object?>.of(
+          json[side]! as Map<String, Object?>,
+        )..[role] = 'teal';
+
+        final refused = decodeThemeFile(jsonEncode(json)) as ThemeFileRefused;
+        expect(refused.problem.kind, ThemeImportKind.badRole);
+        expect(refused.problem.role, role, reason: '$side/$role');
+      }
+    }
+  });
+
   test('a brightness that is not there at all is refused', () {
     final json = jsonDecode(file()) as Map<String, Object?>..remove('night');
     final refused = decodeThemeFile(jsonEncode(json)) as ThemeFileRefused;

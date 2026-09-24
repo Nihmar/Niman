@@ -286,6 +286,8 @@ final class SpanishStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Listas de tareas (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Cada color lleva el nombre que usa el archivo exportado';
   @override

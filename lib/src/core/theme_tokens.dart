@@ -123,6 +123,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     required this.quote,
     required this.math,
     required this.tag,
+    required this.todoPriority,
+    required this.todoDate,
+    required this.todoProject,
+    required this.todoContext,
+    required this.todoKeyValue,
+    required this.todoDone,
   });
 
   /// Markers the reader looks past: `#`, list bullets, rules,
@@ -157,6 +163,25 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
   /// Inline `#tags`.
   final Color tag;
 
+  /// A task's priority, `(A)`, in a task list (todo.txt): the run a list
+  /// is read by first, drawn bold.
+  final Color todoPriority;
+
+  /// A task's creation or completion date, at the head of its line.
+  final Color todoDate;
+
+  /// A task's `+project`.
+  final Color todoProject;
+
+  /// A task's `@context`.
+  final Color todoContext;
+
+  /// A task's `key:value` tag — `due:`, `rem:` and the rest.
+  final Color todoKeyValue;
+
+  /// A completed task, the whole line, struck through: it steps back.
+  final Color todoDone;
+
   /// The Markdown colors at [context], falling back to the shipped ones
   /// for a theme built without them (a bare `MaterialApp` in a test).
   static SyntaxColors of(BuildContext context) {
@@ -177,6 +202,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     quote: Color(0xFF6B7280),
     math: Color(0xFFAD1457),
     tag: Color(0xFF00838F),
+    todoPriority: Color(0xFFD84315),
+    todoDate: Color(0xFF7A7A7A),
+    todoProject: Color(0xFF6A1B9A),
+    todoContext: Color(0xFF1A5FB4),
+    todoKeyValue: Color(0xFF0E7C7B),
+    todoDone: Color(0xFFA0A0A0),
   );
 
   /// The dark Markdown colors, for a theme that carries none.
@@ -191,6 +222,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     quote: Color(0xFF80868E),
     math: Color(0xFFC678DD),
     tag: Color(0xFF4EC9B0),
+    todoPriority: Color(0xFFE5C07B),
+    todoDate: Color(0xFF9E9E9E),
+    todoProject: Color(0xFFC678DD),
+    todoContext: Color(0xFF61AFEF),
+    todoKeyValue: Color(0xFF56B6C2),
+    todoDone: Color(0xFF7A7A7A),
   );
 
   @override
@@ -205,6 +242,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     Color? quote,
     Color? math,
     Color? tag,
+    Color? todoPriority,
+    Color? todoDate,
+    Color? todoProject,
+    Color? todoContext,
+    Color? todoKeyValue,
+    Color? todoDone,
   }) {
     return SyntaxColors(
       dim: dim ?? this.dim,
@@ -217,6 +260,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       quote: quote ?? this.quote,
       math: math ?? this.math,
       tag: tag ?? this.tag,
+      todoPriority: todoPriority ?? this.todoPriority,
+      todoDate: todoDate ?? this.todoDate,
+      todoProject: todoProject ?? this.todoProject,
+      todoContext: todoContext ?? this.todoContext,
+      todoKeyValue: todoKeyValue ?? this.todoKeyValue,
+      todoDone: todoDone ?? this.todoDone,
     );
   }
 
@@ -234,6 +283,12 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       quote: Color.lerp(quote, other.quote, t)!,
       math: Color.lerp(math, other.math, t)!,
       tag: Color.lerp(tag, other.tag, t)!,
+      todoPriority: Color.lerp(todoPriority, other.todoPriority, t)!,
+      todoDate: Color.lerp(todoDate, other.todoDate, t)!,
+      todoProject: Color.lerp(todoProject, other.todoProject, t)!,
+      todoContext: Color.lerp(todoContext, other.todoContext, t)!,
+      todoKeyValue: Color.lerp(todoKeyValue, other.todoKeyValue, t)!,
+      todoDone: Color.lerp(todoDone, other.todoDone, t)!,
     );
   }
 
@@ -251,7 +306,13 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       other.task == task &&
       other.quote == quote &&
       other.math == math &&
-      other.tag == tag;
+      other.tag == tag &&
+      other.todoPriority == todoPriority &&
+      other.todoDate == todoDate &&
+      other.todoProject == todoProject &&
+      other.todoContext == todoContext &&
+      other.todoKeyValue == todoKeyValue &&
+      other.todoDone == todoDone;
 
   @override
   int get hashCode => Object.hash(
@@ -265,5 +326,11 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     quote,
     math,
     tag,
+    todoPriority,
+    todoDate,
+    todoProject,
+    todoContext,
+    todoKeyValue,
+    todoDone,
   );
 }
