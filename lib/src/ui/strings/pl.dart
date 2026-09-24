@@ -286,6 +286,8 @@ final class PolishStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Listy zadań (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Każdy kolor nazywa się tak jak w wyeksportowanym pliku';
   @override

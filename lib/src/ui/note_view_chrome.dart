@@ -78,6 +78,7 @@ final class NoteStatusRow extends StatelessWidget {
     required this.onFind,
     required this.onSpellCheck,
     required this.onToggleEditorKind,
+    this.editorKindLocked = false,
     this.typewriter = false,
     this.onToggleTypewriter,
     super.key,
@@ -97,6 +98,10 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// Whether the editor-kind toggle shows.
   final bool canSwitchEditorKind;
+
+  /// Whether the toggle is there but off: a file with one pane (a task
+  /// list) keeps it in its place rather than moving the row.
+  final bool editorKindLocked;
 
   /// The note's word count, left of the status.
   final int wordCount;
@@ -259,7 +264,7 @@ final class NoteStatusRow extends StatelessWidget {
                   : AppStrings.switchToWysiwygTooltip,
               child: TextButton.icon(
                 key: const Key('editor-kind-toggle'),
-                onPressed: onToggleEditorKind,
+                onPressed: editorKindLocked ? null : onToggleEditorKind,
                 style: TextButton.styleFrom(
                   minimumSize: const Size(48, 48),
                   padding: const EdgeInsets.symmetric(horizontal: 10),

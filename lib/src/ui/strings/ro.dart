@@ -287,6 +287,8 @@ final class RomanianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Liste de sarcini (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Fiecare culoare poartă numele din fișierul exportat';
   @override

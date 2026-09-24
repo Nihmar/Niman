@@ -287,6 +287,8 @@ final class FrenchStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Listes de tâches (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Chaque couleur porte le nom que lui donne le fichier exporté';
   @override

@@ -262,6 +262,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'タスクリスト (todo.txt)';
+  @override
   String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
   @override
   String get themeEditorDiscardTitle => '変更を破棄';

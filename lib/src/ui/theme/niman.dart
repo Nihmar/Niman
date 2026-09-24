@@ -5,7 +5,9 @@
 // the blue the accent — and day is the same three read from the other
 // end, the cream become the ground and the anthracite the ink. The rest
 // of the Markdown palette is a small cool family built around the blue,
-// since the logo names only the one accent.
+// since the logo names only the one accent. A task list borrows from that
+// family: the warm image color for a priority, the blues and the purple
+// for projects and contexts, and a finished task in the markers' grey.
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
@@ -49,6 +51,12 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   quote: Color(0xFF9A968E),
   math: Color(0xFFC08CD8),
   tag: Color(0xFF6FB8CC),
+  todoPriority: Color(0xFFD8A56B),
+  todoDate: Color(0xFF9A968E),
+  todoProject: Color(0xFFC08CD8),
+  todoContext: Color(0xFF7CA0E6),
+  todoKeyValue: Color(0xFF7FD1C4),
+  todoDone: Color(0xFF6B7079),
 );
 
 // Day — the same three colors turned over: the cream is the ground and
@@ -80,4 +88,10 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   quote: Color(0xFF6E6A60),
   math: Color(0xFF8A44B0),
   tag: Color(0xFF217F94),
+  todoPriority: Color(0xFFB26A25),
+  todoDate: Color(0xFF6E7178),
+  todoProject: Color(0xFF8A44B0),
+  todoContext: Color(0xFF3E63C7),
+  todoKeyValue: Color(0xFF2E8C86),
+  todoDone: Color(0xFF9B968C),
 );

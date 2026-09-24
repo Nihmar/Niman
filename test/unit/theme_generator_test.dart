@@ -75,6 +75,32 @@ void main() {
     }
   });
 
+  test('a task list reads by its priority, and a finished task steps back', () {
+    for (var seed = 0; seed < _seeds; seed++) {
+      final theme = _themeFor(seed);
+      for (final colors in [theme.day, theme.night]) {
+        final syntax = colors.syntax;
+        final ground = colors.tokens.background;
+        final reason = 'seed $seed';
+        // Colors of their own, not a note's borrowed.
+        expect(syntax.todoPriority, isNot(syntax.task), reason: reason);
+        expect(syntax.todoProject, isNot(syntax.wikilink), reason: reason);
+        expect(syntax.todoContext, isNot(syntax.link), reason: reason);
+        expect(syntax.todoProject, isNot(syntax.todoContext), reason: reason);
+        expect(
+          _contrast(syntax.todoPriority, ground),
+          greaterThan(3),
+          reason: reason,
+        );
+        // Done is quieter than the text, the date and even the markers.
+        final done = _contrast(syntax.todoDone, ground);
+        expect(done, lessThan(_contrast(colors.tokens.text, ground)));
+        expect(done, lessThan(_contrast(syntax.todoDate, ground)));
+        expect(done, lessThan(_contrast(syntax.dim, ground)));
+      }
+    }
+  });
+
   test('the same seed is the same theme, another seed is not', () {
     final one = _themeFor(7);
     final again = _themeFor(7);

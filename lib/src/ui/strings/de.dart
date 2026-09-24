@@ -285,6 +285,8 @@ final class GermanStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Aufgabenlisten (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
   @override

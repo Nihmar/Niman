@@ -286,6 +286,8 @@ final class GalicianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Listas de tarefas (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Cada cor leva o nome que usa o ficheiro exportado';
   @override

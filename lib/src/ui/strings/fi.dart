@@ -282,6 +282,8 @@ final class FinnishStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Tehtävälistat (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Jokainen väri on nimetty viedyn tiedoston mukaan';
   @override
