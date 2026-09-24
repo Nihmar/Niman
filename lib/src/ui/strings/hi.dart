@@ -1274,6 +1274,18 @@ final class HindiStrings extends Strings {
       'कमांड पैलेट केवल वे कमांड दिखाता है जो आप जहाँ हैं वहाँ चल सकते हैं। '
       'यहाँ सभी हैं, और यह भी कि हर एक कब दिखता है।';
   @override
+  String get commandsKeysNote =>
+      'यहाँ कुछ नहीं बदला जाता। कुंजियाँ वही हैं जो कीबोर्ड शॉर्टकट में सेट '
+      'हैं, और वहाँ किए हर बदलाव का पालन करती हैं।';
+  @override
+  String get commandsOpenShortcuts => 'कीबोर्ड शॉर्टकट में कुंजियाँ बदलें';
+  @override
+  String get commandsChangeKeyTooltip => 'कीबोर्ड शॉर्टकट में बदलें';
+  @override
+  String get commandsSubtitle => 'कमांड पैलेट क्या चला सकता है, और कब';
+  @override
+  String get keyboardShortcutsSubtitle => 'हर कमांड की कुंजियाँ बदलें';
+  @override
   String get commandNeedNone => 'हमेशा उपलब्ध';
   @override
   String get commandNeedOpenNote => 'खुला नोट चाहिए';

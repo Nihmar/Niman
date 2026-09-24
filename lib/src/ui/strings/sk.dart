@@ -1299,6 +1299,19 @@ final class SlovakStrings extends Strings {
       'Paleta príkazov ponúka len príkazy, ktoré sa dajú spustiť tam, kde '
       'práve ste. Tu sú všetky a kedy sa ktorý zobrazí.';
   @override
+  String get commandsKeysNote =>
+      'Tu sa nič nemení. Klávesy sú tie nastavené v sekcii „Klávesové '
+      'skratky“ a riadia sa každou zmenou tam.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Zmeniť klávesy v sekcii „Klávesové skratky“';
+  @override
+  String get commandsChangeKeyTooltip => 'Zmeniť v sekcii „Klávesové skratky“';
+  @override
+  String get commandsSubtitle => 'Čo môže paleta príkazov spustiť, a kedy';
+  @override
+  String get keyboardShortcutsSubtitle => 'Zmeňte klávesy každého príkazu';
+  @override
   String get commandNeedNone => 'Vždy k dispozícii';
   @override
   String get commandNeedOpenNote => 'Vyžaduje otvorenú poznámku';

@@ -1295,6 +1295,18 @@ final class DanishStrings extends Strings {
       'Kommandopaletten tilbyder kun de kommandoer, der kan køre, hvor du er. '
       'Her er dem alle, og hvornår hver enkelt vises.';
   @override
+  String get commandsKeysNote =>
+      'Her ændres intet. Tasterne er dem, der er sat i »Genveje«, og de '
+      'følger enhver ændring der.';
+  @override
+  String get commandsOpenShortcuts => 'Skift taster i »Genveje«';
+  @override
+  String get commandsChangeKeyTooltip => 'Skift i »Genveje«';
+  @override
+  String get commandsSubtitle => 'Hvad kommandopaletten kan køre, og hvornår';
+  @override
+  String get keyboardShortcutsSubtitle => 'Skift tasterne for hver kommando';
+  @override
   String get commandNeedNone => 'Altid tilgængelig';
   @override
   String get commandNeedOpenNote => 'Kræver en åben note';

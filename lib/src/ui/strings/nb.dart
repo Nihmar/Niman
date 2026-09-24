@@ -1291,6 +1291,18 @@ final class NorwegianStrings extends Strings {
       'Kommandopaletten tilbyr bare kommandoene som kan kjøres der du er. Her '
       'er alle, og når hver av dem vises.';
   @override
+  String get commandsKeysNote =>
+      'Her endres ingenting. Tastene er de som er satt i '
+      '«Tastaturforkortelser», og de følger hver endring der.';
+  @override
+  String get commandsOpenShortcuts => 'Endre taster i «Tastaturforkortelser»';
+  @override
+  String get commandsChangeKeyTooltip => 'Endre i «Tastaturforkortelser»';
+  @override
+  String get commandsSubtitle => 'Hva kommandopaletten kan kjøre, og når';
+  @override
+  String get keyboardShortcutsSubtitle => 'Endre tastene for hver kommando';
+  @override
   String get commandNeedNone => 'Alltid tilgjengelig';
   @override
   String get commandNeedOpenNote => 'Krever et åpent notat';

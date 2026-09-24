@@ -209,6 +209,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     transcription: widget.transcription,
     keyboardAttached: _keyboard.attached,
     version: _version,
+    openArea: _openArea,
   );
 
   /// Opens [area] with [row] flashed: in the right column on the desktop,

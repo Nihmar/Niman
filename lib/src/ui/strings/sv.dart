@@ -1303,6 +1303,20 @@ final class SwedishStrings extends Strings {
       'Kommandopaletten erbjuder bara de kommandon som kan köras där du är. '
       'Här är alla, och när vart och ett visas.';
   @override
+  String get commandsKeysNote =>
+      'Här ändras ingenting. Tangenterna är de som är inställda i '
+      '”Tangentbordsgenvägar” och följer varje ändring där.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Ändra tangenter i ”Tangentbordsgenvägar”';
+  @override
+  String get commandsChangeKeyTooltip => 'Ändra i ”Tangentbordsgenvägar”';
+  @override
+  String get commandsSubtitle => 'Vad kommandopaletten kan köra, och när';
+  @override
+  String get keyboardShortcutsSubtitle =>
+      'Ändra tangenterna för varje kommando';
+  @override
   String get commandNeedNone => 'Alltid tillgängligt';
   @override
   String get commandNeedOpenNote => 'Kräver en öppen anteckning';

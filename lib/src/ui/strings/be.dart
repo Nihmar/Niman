@@ -1301,6 +1301,20 @@ final class BelarusianStrings extends Strings {
       'Палітра каманд прапануе толькі тыя каманды, якія можна выканаць там, '
       "дзе вы ёсць. Тут усе, і калі кожная з'яўляецца.";
   @override
+  String get commandsKeysNote =>
+      'Тут нічога не змяняецца. Клавішы — тыя, што зададзены ў раздзеле '
+      '«Комбінацыі клавіш», і яны ідуць за кожнай зменай там.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Змяніць клавішы ў раздзеле «Комбінацыі клавіш»';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Змяніць у раздзеле «Комбінацыі клавіш»';
+  @override
+  String get commandsSubtitle => 'Што можа выканаць палітра каманд, і калі';
+  @override
+  String get keyboardShortcutsSubtitle => 'Змяніць клавішы кожнай каманды';
+  @override
   String get commandNeedNone => 'Заўсёды даступна';
   @override
   String get commandNeedOpenNote => 'Патрэбна адкрытая нататка';

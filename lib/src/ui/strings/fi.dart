@@ -1311,6 +1311,21 @@ final class FinnishStrings extends Strings {
       'Komentopaletti tarjoaa vain komennot, jotka voi suorittaa siellä missä '
       'olet. Tässä ovat kaikki, ja milloin kukin näkyy.';
   @override
+  String get commandsKeysNote =>
+      'Täällä ei muuteta mitään. Näppäimet ovat kohdassa ”Näppäimistön '
+      'oikotiet” asetetut, ja ne seuraavat jokaista siellä tehtyä muutosta.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Muuta näppäimiä kohdassa ”Näppäimistön oikotiet”';
+  @override
+  String get commandsChangeKeyTooltip =>
+      'Muuta kohdassa ”Näppäimistön oikotiet”';
+  @override
+  String get commandsSubtitle =>
+      'Mitä komentopaletti voi suorittaa, ja milloin';
+  @override
+  String get keyboardShortcutsSubtitle => 'Muuta jokaisen komennon näppäimiä';
+  @override
   String get commandNeedNone => 'Aina käytettävissä';
   @override
   String get commandNeedOpenNote => 'Vaatii avoimen muistiinpanon';

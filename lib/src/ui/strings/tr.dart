@@ -1288,6 +1288,20 @@ final class TurkishStrings extends Strings {
       'Komut paleti yalnızca bulunduğun yerde çalışabilen komutları sunar. '
       'Hepsi burada, her birinin ne zaman göründüğüyle birlikte.';
   @override
+  String get commandsKeysNote =>
+      'Burada hiçbir şey değiştirilmez. Tuşlar “Klavye kısayolu” bölümünde '
+      'ayarlananlardır ve oradaki her değişikliği izler.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Tuşları “Klavye kısayolu” bölümünde değiştir';
+  @override
+  String get commandsChangeKeyTooltip => '“Klavye kısayolu” bölümünde değiştir';
+  @override
+  String get commandsSubtitle =>
+      'Komut paletinin neyi çalıştırabileceği, ve ne zaman';
+  @override
+  String get keyboardShortcutsSubtitle => 'Her komutun tuşlarını değiştir';
+  @override
   String get commandNeedNone => 'Her zaman kullanılabilir';
   @override
   String get commandNeedOpenNote => 'Açık bir not gerekir';

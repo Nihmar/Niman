@@ -1324,6 +1324,19 @@ final class SpanishStrings extends Strings {
       'La paleta de comandos ofrece solo los comandos que se pueden ejecutar '
       'donde estás. Aquí están todos, y cuándo aparece cada uno.';
   @override
+  String get commandsKeysNote =>
+      'Aquí no se cambia nada. Las teclas son las definidas en Atajos de '
+      'teclado y siguen cualquier cambio hecho allí.';
+  @override
+  String get commandsOpenShortcuts => 'Cambiar las teclas en Atajos de teclado';
+  @override
+  String get commandsChangeKeyTooltip => 'Cambiar en Atajos de teclado';
+  @override
+  String get commandsSubtitle =>
+      'Lo que puede ejecutar la paleta de comandos, y cuándo';
+  @override
+  String get keyboardShortcutsSubtitle => 'Cambia las teclas de cada comando';
+  @override
   String get commandNeedNone => 'Siempre disponible';
   @override
   String get commandNeedOpenNote => 'Necesita una nota abierta';

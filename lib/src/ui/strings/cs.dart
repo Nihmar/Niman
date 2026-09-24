@@ -1295,6 +1295,19 @@ final class CzechStrings extends Strings {
       'Paleta příkazů nabízí jen příkazy, které lze spustit tam, kde právě '
       'jste. Tady jsou všechny a kdy se který zobrazí.';
   @override
+  String get commandsKeysNote =>
+      'Zde se nic nemění. Klávesy jsou ty nastavené v sekci „Klávesové '
+      'zkratky“ a řídí se každou změnou tam.';
+  @override
+  String get commandsOpenShortcuts =>
+      'Změnit klávesy v sekci „Klávesové zkratky“';
+  @override
+  String get commandsChangeKeyTooltip => 'Změnit v sekci „Klávesové zkratky“';
+  @override
+  String get commandsSubtitle => 'Co může paleta příkazů spustit, a kdy';
+  @override
+  String get keyboardShortcutsSubtitle => 'Změňte klávesy každého příkazu';
+  @override
   String get commandNeedNone => 'Vždy k dispozici';
   @override
   String get commandNeedOpenNote => 'Vyžaduje otevřenou poznámku';
