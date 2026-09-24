@@ -98,10 +98,14 @@ final class IndexTree {
   /// While [onProgress] is set, the read isolate reports each note as it
   /// reaches it. The port is opened only then: a scan nobody is watching
   /// should not pay for a message per note.
+  ///
+  /// [known] holds what the app knows of notes it wrote itself
+  /// ([KnownContent]), taken when the file is still the one written.
   Future<Map<String, NoteContent>> readRelContents(
     String root,
-    List<String> rels,
-  ) async {
+    List<String> rels, {
+    Map<String, KnownContent> known = const {},
+  }) async {
     if (rels.isEmpty) return const {};
     final contents = <String, NoteContent>{};
     _log.debug('contents: reading ${rels.length} note(s)');
@@ -127,7 +131,10 @@ final class IndexTree {
         final end = i + _contentBatch < rels.length
             ? i + _contentBatch
             : rels.length;
-        final read = await readBatchOnIsolate(root, rels.sublist(i, end), send);
+        final batch = rels.sublist(i, end);
+        final read = await readBatchOnIsolate(root, batch, send, {
+          for (final rel in batch) rel: ?known[rel],
+        });
         for (final c in read) {
           contents[c.rel] = c;
         }

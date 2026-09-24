@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:crypto/crypto.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
@@ -82,6 +84,10 @@ final class NoteWriter {
 
   /// The reindexes waiting for their note to be quiet, by path.
   final Map<String, Timer> _quiet = <String, Timer>{};
+
+  /// What the last write of each note left, by path: handed to its reindex,
+  /// which takes it while the file is still that one ([KnownContent]).
+  final Map<String, KnownContent> _written = <String, KnownContent>{};
 
   /// Writes [content] to the note at library-relative [path], creating
   /// the file when it is not there.
@@ -200,6 +206,8 @@ final class NoteWriter {
       rethrow;
     }
     history?.report(path, result.snapshot, result.snapshotError);
+    // The bytes came from elsewhere, unhashed: the reindex reads them.
+    _written.remove(path);
     _log.info(
       'replaced from download: "$path" (${result.created ? 'new file, ' : ''}'
       '${clock.elapsedMilliseconds} ms)',
@@ -263,6 +271,11 @@ final class NoteWriter {
     // note as it then stands.
     if (result == null) return;
     history?.report(path, result.snapshot, result.snapshotError);
+    _written[path] = (
+      sha256: result.sha256,
+      size: result.bytes,
+      modified: result.modified,
+    );
     _log.info(
       'saved: "$path" (${result.bytes} bytes, '
       '${result.created ? 'new file, ' : ''}'
@@ -360,10 +373,11 @@ final class NoteWriter {
     _reindexing.add(path);
     final clock = Stopwatch()..start();
     late final Future<void> job;
+    final wrote = _written[path];
     job =
         (created
                 ? indexer.applyEvents(root, [abs])
-                : indexer.rescanFiles(root, [abs]))
+                : indexer.rescanFiles(root, [abs], known: {path: ?wrote}))
             .then(
               (_) => _log.debug(
                 'reindexed: "$path" (${clock.elapsedMilliseconds} ms)',
@@ -391,6 +405,10 @@ typedef NoteText = Object;
 /// What [writeNoteFile] did: the bytes written, whether the file is new,
 /// where the time went, and the history snapshot taken before the write
 /// (or why it failed — a failed snapshot never stops the save).
+///
+/// `sha256` is the digest of the bytes written, made as they were, and
+/// `modified` the file's time once in place: what the reindex behind the
+/// save takes instead of hashing the note again ([KnownContent]).
 typedef NoteWriteResult = ({
   int bytes,
   bool created,
@@ -398,6 +416,8 @@ typedef NoteWriteResult = ({
   int writeMs,
   SnapshotOutcome? snapshot,
   String? snapshotError,
+  String sha256,
+  DateTime modified,
 });
 
 /// Runs [writeNoteFile] on a short-lived isolate, without history.
@@ -583,5 +603,7 @@ Future<NoteWriteResult> writeNoteFile(
     writeMs: writeClock.elapsedMilliseconds,
     snapshot: outcome,
     snapshotError: snapshotError,
+    sha256: sha256.convert(encoded).toString(),
+    modified: file.statSync().modified,
   );
 }

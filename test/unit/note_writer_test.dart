@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -87,6 +89,64 @@ void main() {
 
     test('a note that is gone is nothing to tidy', () async {
       expect(await writer.tidy('gone.md'), isFalse);
+    });
+  });
+
+  group('the digest the write made', () {
+    // A reindex after a save hashed the note again: 1.9 s of the 247 MB
+    // stress note's 10.6 (`docs/dev/huge-notes.md`, item 8), for bytes the
+    // write had in hand.
+    late NoteWriter waiting;
+
+    setUp(() {
+      waiting = NoteWriter(
+        root: root.path,
+        indexer: indexer,
+        quietBeforeReindex: (_) => const Duration(hours: 1),
+      );
+    });
+
+    Future<String?> indexedSha(String rel) async =>
+        (await indexer.dao.find(rel))?.sha256;
+
+    String shaOf(String rel) => sha256
+        .convert(File(p.join(root.path, rel)).readAsBytesSync())
+        .toString();
+
+    test('is the digest of what was written', () async {
+      await waiting.save('a.md', 'first');
+      await waiting.indexed;
+      await waiting.save('a.md', 'second, and longer');
+      await waiting.indexed;
+      expect(await indexedSha('a.md'), shaOf('a.md'));
+    });
+
+    test('is taken while the file is the one written', () async {
+      await waiting.save('a.md', 'first');
+      await waiting.indexed;
+      await waiting.save('a.md', 'the text');
+      // Changed behind the writer's back as no editor would, same length
+      // and same time: proof the reindex took the write's digest, not the
+      // file's.
+      final file = File(p.join(root.path, 'a.md'));
+      final time = file.lastModifiedSync();
+      file
+        ..writeAsStringSync('THE TEXT')
+        ..setLastModifiedSync(time);
+      await waiting.indexed;
+      expect(
+        await indexedSha('a.md'),
+        sha256.convert(utf8.encode('the text')).toString(),
+      );
+    });
+
+    test('is not taken once the file changed', () async {
+      await waiting.save('a.md', 'first');
+      await waiting.indexed;
+      await waiting.save('a.md', 'the text');
+      File(p.join(root.path, 'a.md')).writeAsStringSync('another text');
+      await waiting.indexed;
+      expect(await indexedSha('a.md'), shaOf('a.md'));
     });
   });
 
