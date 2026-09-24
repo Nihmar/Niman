@@ -1,6 +1,8 @@
-// T-M3-04 AC: word search ranks (bm25, title over body) with snippets;
-// #tag search answers from tags/note_tags, never FTS; superseded queries
-// are dropped by invocation id; MATCH vs LIKE behaviors.
+// T-M3-04 AC: word search ranks (bm25, title over body), its excerpts read
+// from the notes; #tag search answers from tags/note_tags, never FTS;
+// superseded queries are dropped by invocation id; MATCH vs contains.
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,17 +10,20 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
+  late Directory root;
   late IndexDatabase db;
   late SearchRepo search;
   late TagRepo tags;
 
   Future<void> indexNote(String path, String title, String body) async {
+    File(p.join(root.path, path)).writeAsStringSync(body);
     await db.customStatement(
-      'INSERT INTO notes (path, parent, name, is_dir, size, modified) '
-      'VALUES (?1, 0, ?2, 0, ?3, 0)',
-      [path, path.split('/').last, body.length],
+      'INSERT INTO notes (path, parent, name, is_dir, size, modified, title) '
+      'VALUES (?1, 0, ?2, 0, ?3, 0, ?4)',
+      [path, path.split('/').last, body.length, title],
     );
     final row = await db
         .customSelect(
@@ -33,9 +38,11 @@ void main() {
   }
 
   setUp(() async {
+    root = Directory.systemTemp.createTempSync('niman_search_');
+    addTearDown(() => root.deleteSync(recursive: true));
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
-    search = SearchRepo(db);
+    search = SearchRepo(db, root: root.path);
     tags = TagRepo(db);
     await indexNote('zebra.md', 'Zebra study', 'zebra facts in the text');
     await indexNote(
@@ -80,8 +87,43 @@ void main() {
     expect(hits, hasLength(2));
     // "Zebra study" hits the title (weight 10) — it must rank first.
     expect(hits.first.title, 'Zebra study');
-    expect(hits.first.snippet, isNotEmpty);
-    expect(hits.first.snippet, contains('<mark>'));
+    // The excerpt is read from the note when its row asks.
+    expect(hits.first.snippet, isEmpty);
+    expect(
+      await search.excerpt(hits.first, 'zebra'),
+      '<mark>zebra</mark> facts in the text',
+    );
+    // A prefix marks the word it starts; the cut is marked where it is not
+    // the note's edge.
+    final prefix = await search.excerpt(hits.last, 'zeb');
+    expect(prefix, startsWith('<mark>zebra</mark> attacks the apple'));
+    expect(prefix, endsWith('…'));
+  });
+
+  test('the index keeps no copy of the text', () async {
+    final rows = await db
+        .customSelect('SELECT title, body FROM notes_fts')
+        .get();
+    expect(rows, hasLength(3));
+    expect(rows.map((r) => r.read<String?>('body')), everyElement(isNull));
+  });
+
+  test('an excerpt matches a word by its start, accents folded', () async {
+    await indexNote(
+      'it.md',
+      'It',
+      'Un “Perché” detto piano, poi un altro perché ancora',
+    );
+    final hit = (await search.search(
+      buildFtsQuery('perche'),
+      id: search.begin(),
+    )).single;
+    expect(hit.path, 'it.md');
+    // The first `perché`, after an opening quote: a quote starts a word.
+    expect(
+      await search.excerpt(hit, 'perche'),
+      startsWith('Un “<mark>Perché</mark>” detto piano'),
+    );
   });
 
   test('superseded queries return no results', () async {
@@ -157,7 +199,22 @@ void main() {
       expect(hit.snippet, endsWith('…'));
     });
 
-    test('LIKE wildcards in the pattern are literal', () async {
+    test('accents are folded, as the word search folds them', () async {
+      await indexNote('acc.md', 'Acc', 'la città è grande');
+      final hits = await search.searchContains('CITTA', id: search.begin());
+      expect(hits.single.snippet, 'la <mark>città</mark> è grande');
+    });
+
+    test('a match past the first slice of a long note is found', () async {
+      final long = '${'x ' * 200000}needle here';
+      await indexNote('long.md', 'Long', long);
+      final hits = await search.searchContains('needle', id: search.begin());
+      expect(hits.single.path, 'long.md');
+      expect(hits.single.snippet, endsWith('<mark>needle</mark> here'));
+      expect(hits.single.snippet, startsWith('…'));
+    });
+
+    test('wildcards in the pattern are literal', () async {
       final id = search.begin();
       expect(await search.searchContains('%', id: id), isEmpty);
       expect(await search.searchContains('_', id: id), isEmpty);

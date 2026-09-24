@@ -55,7 +55,7 @@ void main() {
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     indexer = Indexer(db);
-    search = SearchRepo(db);
+    search = SearchRepo(db, root: root.path);
     tags = TagRepo(db);
   });
 
@@ -95,7 +95,11 @@ void main() {
     final elapsed = clock.elapsedMilliseconds;
     expect(elapsed, lessThan(2000), reason: 'search took $elapsed ms');
     expect(hits, hasLength(5));
-    expect(hits.first.snippet, contains('<mark>'));
+    // The excerpt is read from the note, which the index keeps no copy of.
+    expect(
+      await search.excerpt(hits.first, 'unique'),
+      contains('<mark>unique</mark>'),
+    );
   });
 
   test('tag counts and tag→notes are instant on the fixture', () async {
