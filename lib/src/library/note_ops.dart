@@ -8,7 +8,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
-import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/frontmatter/edit_in_file.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -421,12 +421,14 @@ final class NoteOps implements NoteOperations {
         throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
       }
       final file = File(_abs(path));
-      final text = utf8.decode(await file.readAsBytes(), allowMalformed: true);
-      final updated = pinned
-          ? setFrontmatterKey(text, 'pinned', 'true')
-          : removeFrontmatterKey(text, 'pinned');
-      if (updated == text) return row;
-      await writeFileAtomically(file, utf8.encode(updated));
+      // The head of the note, not the note: off the UI isolate, the rest
+      // of the file copied behind the edited frontmatter as it is.
+      final changed = await editFrontmatterKeyOnIsolate(
+        file.path,
+        'pinned',
+        pinned ? 'true' : null,
+      );
+      if (!changed) return row;
       _hint(path, SyncOpKind.changed);
       await indexer.rescanFiles(root, [file.path]);
       return await _mustFind(path);
