@@ -1555,6 +1555,13 @@ final class SpanishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override
+  String get tidyOnCloseTitle => 'Ordenar el Markdown al cerrar';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Cuando cierras una nota que has editado, su Markdown se ordena como '
+      'con el comando «Ordenar el Markdown». Las notas de más de 4 MB se '
+      'quedan como están.';
+  @override
   String get typewriterSubtitle =>
       'Mantén la línea que escribes en el centro del editor';
   @override

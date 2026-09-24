@@ -11,6 +11,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/library/note_tidy.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:path/path.dart' as p;
 
@@ -103,19 +104,20 @@ final class NoteWriter {
     int? contentLength,
   }) {
     final queuedAt = Stopwatch()..start();
+    return _inTurn(
+      path,
+      () => _write(path, content, editSession, forced, queuedAt, contentLength),
+    );
+  }
+
+  /// Runs [job] on [path]'s save chain: after every write of the note asked
+  /// for before it, and before every one asked for after. A failed job does
+  /// not stop the ones behind it.
+  Future<T> _inTurn<T>(String path, Future<T> Function() job) {
     final previous = _tails[path] ?? Future<void>.value();
     final run = previous
         .then<void>((_) {}, onError: (Object _) {})
-        .then(
-          (_) => _write(
-            path,
-            content,
-            editSession,
-            forced,
-            queuedAt,
-            contentLength,
-          ),
-        );
+        .then((_) => job());
     final tail = run.then<void>((_) {}, onError: (Object _) {});
     _tails[path] = tail;
     unawaited(
@@ -125,6 +127,33 @@ final class NoteWriter {
     );
     return run;
   }
+
+  /// Tidies the note at [path] (`formatMarkdown`), in its turn among its
+  /// saves; answers whether the note changed.
+  ///
+  /// In turn, so the text tidied is the note as its last save left it and
+  /// nothing written after the tidying began is written over: a save asked
+  /// for meanwhile waits for it, then writes its own text. A note past
+  /// [tidyLimit] bytes is left as it is — tidying reads and rewrites the
+  /// whole note, which on the 247 MB stress note is a note-sized job for a
+  /// tidy nobody asked of it by name.
+  Future<bool> tidy(String path) => _inTurn(path, () async {
+    final tidied = await _tidiedOffIsolate(p.join(root, path));
+    if (tidied == null) return false;
+    _log.info('tidy: "$path"');
+    await _write(path, tidied, null, null, Stopwatch()..start(), null);
+    return true;
+  });
+
+  /// The largest note [tidy] tidies.
+  static const int tidyLimit = 4 << 20;
+
+  /// The tidied text of the note at [abs], or null when it is tidy already,
+  /// past [tidyLimit], or gone. Static so the closure holds the path alone.
+  static Future<String?> _tidiedOffIsolate(String abs) => IsolateGauge.run(
+    () => tidiedNoteText(abs, limit: tidyLimit),
+    'tidy "${p.basename(abs)}"',
+  );
 
   /// Replaces the file at library-relative [path] with the finished file
   /// at [tempAbs] (a verified sync download next to it), in the same
@@ -138,20 +167,7 @@ final class NoteWriter {
     String path,
     String tempAbs, {
     HistoryReason? forced,
-  }) {
-    final previous = _tails[path] ?? Future<void>.value();
-    final run = previous
-        .then<void>((_) {}, onError: (Object _) {})
-        .then((_) => _replace(path, tempAbs, forced));
-    final tail = run.then<void>((_) {}, onError: (Object _) {});
-    _tails[path] = tail;
-    unawaited(
-      tail.whenComplete(() {
-        if (identical(_tails[path], tail)) _tails.remove(path)?.ignore();
-      }),
-    );
-    return run;
-  }
+  }) => _inTurn(path, () => _replace(path, tempAbs, forced));
 
   Future<void> _replace(
     String path,

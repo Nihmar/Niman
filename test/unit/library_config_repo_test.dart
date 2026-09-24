@@ -104,6 +104,17 @@ void main() {
       expect(written, 1);
     });
 
+    test('tidyOnClose is written to the file, not the device', () async {
+      await split.update((c) => c.copyWith(tidyOnClose: false));
+      expect(fileJson()['tidyOnClose'], isFalse);
+      expect(
+        (await device.read(lib.path))?.containsKey('tidyOnClose') ?? false,
+        isFalse,
+      );
+      final fresh = LibraryConfigRepo(lib.path);
+      expect((await fresh.config).tidyOnClose, isFalse);
+    });
+
     test('a device key alone never touches the file', () async {
       await split.update((c) => c.copyWith(trashEnabled: false));
       final before = store.file.statSync().modified;

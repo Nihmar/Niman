@@ -36,6 +36,7 @@ final class ShellEditorSettings {
     this.treeSort = TreeSort.nameAsc,
     this.treeWidth = defaultTreeWidth,
     this.toolbarLayout = ToolbarLayout.defaults,
+    this.tidyOnClose = true,
   });
 
   /// What the shell shows before the first read lands.
@@ -82,6 +83,10 @@ final class ShellEditorSettings {
   /// The editor toolbar the user arranged (T-TB-04).
   final ToolbarLayout toolbarLayout;
 
+  /// Whether a note edited and then closed has its Markdown tidied, as
+  /// the "Tidy the Markdown" command does.
+  final bool tidyOnClose;
+
   /// Reads the open library's settings.
   ///
   /// Two of them are answered rather than reported: an `editorsEnabled`
@@ -103,6 +108,7 @@ final class ShellEditorSettings {
     final treeSort = await session.treeSort;
     final treeWidth = await session.treeWidth;
     final toolbar = await session.editorToolbar;
+    final tidyOnClose = await session.tidyOnClose;
     final editorKind = await session.editorKind;
     final editorsEnabled = await session.enabledEditors;
     final enabled = editorsEnabled.isEmpty
@@ -129,6 +135,7 @@ final class ShellEditorSettings {
       treeSort: treeSort,
       treeWidth: treeWidth,
       toolbarLayout: ToolbarLayout.parse(toolbar),
+      tidyOnClose: tidyOnClose,
     );
   }
 
@@ -144,6 +151,7 @@ final class ShellEditorSettings {
     TreeSort? treeSort,
     double? treeWidth,
     bool? typewriter,
+    bool? tidyOnClose,
   }) {
     return ShellEditorSettings(
       lineNumbers: lineNumbers,
@@ -159,6 +167,7 @@ final class ShellEditorSettings {
       treeSort: treeSort ?? this.treeSort,
       treeWidth: treeWidth ?? this.treeWidth,
       toolbarLayout: toolbarLayout,
+      tidyOnClose: tidyOnClose ?? this.tidyOnClose,
     );
   }
 
@@ -178,6 +187,7 @@ final class ShellEditorSettings {
         indentWidth == other.indentWidth &&
         treeSort == other.treeSort &&
         treeWidth == other.treeWidth &&
+        tidyOnClose == other.tidyOnClose &&
         // The layout compares by what it is written as: two parses of the
         // same string are two objects.
         toolbarLayout.encode() == other.toolbarLayout.encode();
@@ -198,5 +208,6 @@ final class ShellEditorSettings {
     treeSort,
     treeWidth,
     toolbarLayout.encode(),
+    tidyOnClose,
   );
 }

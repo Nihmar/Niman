@@ -1513,6 +1513,13 @@ final class TurkishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override
+  String get tidyOnCloseTitle => 'Kapatırken Markdown’ı düzenle';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Düzenlediğiniz bir notu kapattığınızda, Markdown’ı “Markdown’ı '
+      'düzenle” komutundaki gibi düzenlenir. 4 MB’tan büyük notlar olduğu '
+      'gibi bırakılır.';
+  @override
   String get typewriterSubtitle =>
       'Yazdığınız satır düzenleyicinin ortasında kalır';
   @override

@@ -1538,6 +1538,13 @@ final class AlbanianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override
+  String get tidyOnCloseTitle => 'Rregullo Markdown-in në mbyllje';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Kur mbyllni një shënim që keni ndryshuar, Markdown-i i tij '
+      'rregullohet si me komandën „Rregullo Markdown-in“. Shënimet mbi 4 MB '
+      'mbeten siç janë.';
+  @override
   String get typewriterSubtitle =>
       'Rreshti që po shkruani mbetet në mes të redaktuesit';
   @override

@@ -53,6 +53,43 @@ void main() {
     expect(read('a.md'), 'version 19');
   });
 
+  group('tidy', () {
+    test('tidies the note as its last save left it', () async {
+      await writer.save('a.md', '#  Heading   \n\n\n\ntext  ');
+      expect(await writer.tidy('a.md'), isTrue);
+      expect(read('a.md'), '# Heading\n\ntext\n');
+      expect(await writer.tidy('a.md'), isFalse, reason: 'tidy already');
+    });
+
+    test('a save asked for after the tidy is not written over', () async {
+      // The tidy of a closed note, and the note opened again and typed in
+      // before the tidy lands: the typing is what the note says after.
+      await writer.save('a.md', 'one\n\n\n\ntwo');
+      final tidy = writer.tidy('a.md');
+      final save = writer.save('a.md', 'typed after');
+      expect(await tidy, isTrue);
+      await save;
+      expect(read('a.md'), 'typed after');
+    });
+
+    test('a Windows line ending alone is not a reason to rewrite', () async {
+      File(p.join(root.path, 'crlf.md')).writeAsStringSync('one\r\ntwo\r\n');
+      expect(await writer.tidy('crlf.md'), isFalse);
+      expect(read('crlf.md'), 'one\r\ntwo\r\n');
+    });
+
+    test('a note past the limit is left as it is', () async {
+      final big = '${'word  \n' * (NoteWriter.tidyLimit ~/ 7 + 1)}\n\n';
+      File(p.join(root.path, 'big.md')).writeAsStringSync(big);
+      expect(await writer.tidy('big.md'), isFalse);
+      expect(read('big.md'), big);
+    });
+
+    test('a note that is gone is nothing to tidy', () async {
+      expect(await writer.tidy('gone.md'), isFalse);
+    });
+  });
+
   test('the index follows the save', () async {
     await writer.save('Indexed.md', '# Title\n\nbody words');
     await writer.indexed;

@@ -1520,6 +1520,13 @@ final class DanishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
   @override
+  String get tidyOnCloseTitle => 'Ryd op i Markdown ved lukning';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Når du lukker en note, du har redigeret, bliver dens Markdown ryddet '
+      'op som med kommandoen „Ryd op i Markdown“. Noter over 4 MB '
+      'forbliver, som de er.';
+  @override
   String get typewriterSubtitle =>
       'Hold linjen, du skriver på, midt i editoren';
   @override

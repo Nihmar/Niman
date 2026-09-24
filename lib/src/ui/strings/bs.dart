@@ -1531,6 +1531,13 @@ final class BosnianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
+  String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Kada zatvorite bilješku koju ste uređivali, njen Markdown se posloži '
+      'kao naredbom „Posloži Markdown“. Bilješke veće od 4 MB ostaju kakve '
+      'jesu.';
+  @override
   String get typewriterSubtitle => 'Red koji pišete ostaje u sredini uređivača';
   @override
   String get zenMode => 'Zen način';

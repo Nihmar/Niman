@@ -1538,6 +1538,13 @@ final class RomanianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
   @override
+  String get tidyOnCloseTitle => 'Aranjează Markdown-ul la închidere';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Când închizi o notă pe care ai modificat-o, Markdown-ul ei este '
+      'aranjat ca prin comanda „Aranjează Markdown-ul”. Notele de peste '
+      '4 MB rămân așa cum sunt.';
+  @override
   String get typewriterSubtitle =>
       'Rândul pe care scrii rămâne în mijlocul editorului';
   @override

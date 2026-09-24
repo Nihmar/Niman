@@ -1545,6 +1545,13 @@ final class DutchStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override
+  String get tidyOnCloseTitle => 'Markdown opruimen bij sluiten';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Als je een notitie sluit die je hebt bewerkt, wordt de Markdown '
+      'opgeruimd zoals met de opdracht „Markdown opruimen”. Notities groter '
+      'dan 4 MB blijven zoals ze zijn.';
+  @override
   String get typewriterSubtitle =>
       'Houd de regel waarop je schrijft in het midden van de editor';
   @override

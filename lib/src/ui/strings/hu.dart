@@ -1535,6 +1535,13 @@ final class HungarianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override
+  String get tidyOnCloseTitle => 'Markdown rendbetétele bezáráskor';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Egy szerkesztett jegyzet bezárásakor a Markdownja rendbe lesz téve, '
+      'akárcsak a „Markdown rendbetétele” paranccsal. A 4 MB-nál nagyobb '
+      'jegyzetek változatlanok maradnak.';
+  @override
   String get typewriterSubtitle =>
       'Az éppen írt sor a szerkesztő közepén marad';
   @override

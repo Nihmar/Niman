@@ -56,6 +56,7 @@ sync) in `.niman/settings.json`.
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
+| `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
 | `journalFolder` | `Journal` | Where the [journal](journal.md)'s entries go (empty = the root) |

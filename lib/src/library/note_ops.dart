@@ -449,6 +449,13 @@ final class NoteOps implements NoteOperations {
   }
 
   @override
+  Future<bool> tidyNote(String path) async {
+    final changed = await writer.tidy(path);
+    if (changed) _hint(path, SyncOpKind.changed);
+    return changed;
+  }
+
+  @override
   Future<void> saveNoteStream(
     String path,
     NoteContentProducer content, {

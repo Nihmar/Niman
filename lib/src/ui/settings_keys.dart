@@ -47,6 +47,7 @@ abstract final class SettingsKeys {
   static const missingNoteLocation = Key('missing-note-location');
   static const noteTextScale = Key('note-text-scale-setting');
   static const indentWidth = Key('indent-width');
+  static const tidyOnClose = Key('tidy-on-close-setting');
 
   // Folders and paths.
   static const quickNote = Key('quick-note-setting');
