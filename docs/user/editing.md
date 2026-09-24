@@ -372,6 +372,12 @@ table (as Obsidian does):
 - **Tab** goes to the next cell and Shift+Tab to the one before, the
   cell's text selected so what you type replaces it; Tab past the last
   cell adds a row. Outside a table Tab indents, as ever.
+- **Enter** goes to the end of the cell below, in the same column; on the
+  last row it leaves the table, to the line after it. **Shift+Enter** or
+  **Ctrl+Enter** leave it from any row, and **Down** on the last row does
+  too. A table the note ends with gets an empty line under it to leave
+  to, so the keyboard alone always gets out. On a phone the keyboard's
+  Enter does the same as Enter.
 - The header stays the header: it is not moved, sorted or deleted. The
   sort compares numbers as numbers and the rest ignoring case, and rows
   that tie keep their order.

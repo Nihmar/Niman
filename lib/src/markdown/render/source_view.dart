@@ -1123,6 +1123,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// text and the desktop embedders insert it themselves, so there is no key
   /// to bind that all of them send.
   bool _newline(int start, int end) {
+    // In a table in `live`: the cell below, or out of it.
+    if (_tableEnter()) return true;
     if (start != end) return false;
     final buffer = widget.buffer;
     final line = buffer.lineOf(start);
@@ -2800,12 +2802,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return;
     }
     final buffer = widget.buffer;
-    final block = commands.block;
-    // The table's rows, the delimiter row left out, and the cells of each.
-    final rows = <int>[
-      for (var line = block.startLine; line < block.endLine; line++)
-        if (line != block.startLine + 1) line,
-    ];
+    final rows = _tableRows(commands.block);
     final cell = commands.cell;
     var row = cell.row;
     var column = cell.column + (forward ? 1 : -1);
@@ -2830,6 +2827,73 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _moveSelection(
       SelectionModel(anchor: lineStart + start, extent: lineStart + end),
     );
+  }
+
+  /// The lines of table [block] that are rows: all of them but the
+  /// delimiter row.
+  static List<int> _tableRows(Block block) => <int>[
+    for (var line = block.startLine; line < block.endLine; line++)
+      if (line != block.startLine + 1) line,
+  ];
+
+  /// Enter in a table in `live`: the caret to the end of the cell below,
+  /// in the same column, and from the last row out of the table. Answers
+  /// whether the caret was in one. A line break typed into a row split it,
+  /// and the table with it.
+  bool _tableEnter() {
+    final commands = _tableCommands();
+    if (commands == null) return false;
+    final buffer = widget.buffer;
+    final rows = _tableRows(commands.block);
+    final below = commands.cell.row + 1;
+    if (below >= rows.length) {
+      _caretOutOfTable(commands.block);
+      return true;
+    }
+    final cells = LiveTables.cellsOf(buffer.lineAt(rows[below]));
+    if (cells.isEmpty) {
+      _caretOutOfTable(commands.block);
+      return true;
+    }
+    final (_, end) = cells[commands.cell.column.clamp(0, cells.length - 1)];
+    _moveSelection(SelectionModel.at(buffer.offsetOfLine(rows[below]) + end));
+    return true;
+  }
+
+  /// Shift+Enter or Ctrl+Enter in a table in `live`: out of it, from any
+  /// row. Answers whether the caret was in one.
+  bool _tableExit() {
+    final commands = _tableCommands();
+    if (commands == null) return false;
+    _caretOutOfTable(commands.block);
+    return true;
+  }
+
+  /// Down from a table's last row in `live`, when the note ends with it:
+  /// a line to go to, rather than a caret that cannot leave. Answers
+  /// whether it was that.
+  bool _downOutOfTable() {
+    final commands = _tableCommands();
+    if (commands == null) return false;
+    final block = commands.block;
+    final rows = _tableRows(block);
+    if (commands.cell.row != rows.length - 1) return false;
+    if (block.endLine < widget.buffer.lineCount) return false;
+    _caretOutOfTable(block);
+    return true;
+  }
+
+  /// The caret to the start of the line after table [block] — an empty one
+  /// added when the note ends with the table, so there is always one.
+  void _caretOutOfTable(Block block) {
+    final buffer = widget.buffer;
+    if (block.endLine < buffer.lineCount) {
+      _moveSelection(SelectionModel.at(buffer.offsetOfLine(block.endLine)));
+      return;
+    }
+    final last = block.endLine - 1;
+    final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);
+    _replaceRange(end, end, '\n');
   }
 
   /// Makes [next] the selection, and tells everyone who needs to know.
@@ -2902,6 +2966,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return KeyEventResult.ignored;
     }
     final shift = HardwareKeyboard.instance.isShiftPressed;
+    // Shift+Enter and Ctrl+Enter leave a table in `live`; anywhere else they
+    // go on to the platform and the app, as before.
+    if ((key == LogicalKeyboardKey.enter ||
+            key == LogicalKeyboardKey.numpadEnter) &&
+        (shift || HardwareKeyboard.instance.isControlPressed) &&
+        _tableExit()) {
+      return KeyEventResult.handled;
+    }
     if (key == LogicalKeyboardKey.contextMenu ||
         (key == LogicalKeyboardKey.f10 && shift)) {
       showContextMenu();
@@ -3248,8 +3320,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     bindings: <ShortcutActivator, VoidCallback>{
       const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
           moveCaretVertically(-1),
-      const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
-          moveCaretVertically(1),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): () {
+        if (!_downOutOfTable()) moveCaretVertically(1);
+      },
       const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): () =>
           moveCaretVertically(-1, extend: true),
       const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): () =>
