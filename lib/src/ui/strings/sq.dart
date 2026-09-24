@@ -322,6 +322,24 @@ final class AlbanianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Redaktori dhe parapamja, gjithmonë të bashkërenditura';
+  @override
+  String get epubLookTitle => 'Pamja e librave';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, shkronja dhe madhësia e tekstit të librave EPUB, veçmas nga '
+      'shënimet';
+  @override
+  String get epubSameAsApp => 'Si aplikacioni';
+  @override
+  String get epubFontTitle => 'Shkronja';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Madhësia e tekstit';
 
   // Settings: preview mode.
   // Settings: editor formatting.

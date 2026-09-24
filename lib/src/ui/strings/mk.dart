@@ -327,6 +327,23 @@ final class MacedonianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Уредникот и прегледот, кои секогаш се усогласени';
+  @override
+  String get epubLookTitle => 'Изглед на книгите';
+  @override
+  String get epubLookSubtitle =>
+      'Тема, фонт и големина на текстот на EPUB книгите, одвоено од белешките';
+  @override
+  String get epubSameAsApp => 'Како апликацијата';
+  @override
+  String get epubFontTitle => 'Фонт';
+  @override
+  String get epubFontSerif => 'Серифен';
+  @override
+  String get epubFontSans => 'Без серифи';
+  @override
+  String get epubFontMono => 'Моноспејс';
+  @override
+  String get epubTextSizeTitle => 'Големина на текстот';
 
   // Settings: preview mode.
   // Settings: editor formatting.

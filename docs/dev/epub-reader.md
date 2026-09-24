@@ -46,19 +46,50 @@ Read the EPUB with what the app has, draw it with the app's read view.
   as they are.
 - `lib/src/ui/epub_pane.dart` — `EpubPane`: `AttachmentView` hands it
   every `.epub`. A spinner while the book is read, the unreadable message
-  on any error. The book is a `MarkdownReadView` at the note text size
-  (`noteTextScalerOf`), in the shell's note column; its pictures resolve
-  through `embedResolver`, `epub-link:N` taps `jumpToLine`, the rest go
-  to `launchUrl`.
+  on any error. The book is a `MarkdownReadView` in the shell's note
+  column; its pictures resolve through `embedResolver`, `epub-link:N`
+  taps `jumpToLine`, the rest go to `launchUrl`. The whole pane, its row
+  included, sits in a `Theme` of the books' look (`epubThemeOf`) and a
+  `MediaQuery` at their text size (`epubTextScalerOf`), rebuilt on
+  `EpubLooks.revision`.
+- The books' look — `lib/src/epub/epub_look.dart`: `EpubLook` (theme id
+  or null for the app's, `AppBrightness` or null for the app's,
+  `EpubFont`, text scale), four device keys of the library's settings
+  (`epubTheme`, `epubBrightness`, `epubFont`, `epubTextScale`), part of
+  `LibraryConfig` as `epubLook`. `LibrarySession.epubLook` /
+  `setEpubLook` read and keep it; the session publishes it, with the
+  theme it names resolved (a custom theme from the app database, none
+  when it is gone), to the global `EpubLooks` (`epub_looks.dart`) when
+  the library opens, when it is set, and when a custom theme is saved or
+  deleted; closing the library resets it. `lib/src/ui/epub_theme.dart`
+  turns it into the pane's `ThemeData`: the app's own theme untouched
+  when the books ask for nothing else, otherwise `buildAppTheme` at the
+  books' brightness, its `textTheme` in the books' face. The faces:
+  Literata, bundled (`assets/fonts/literata/`, regular, italic, bold,
+  bold italic, SIL OFL 1.1 with its `OFL.txt` as an asset); `serif` and
+  `monospace` with the common platform faces as fallbacks (Windows has
+  no `serif` alias); the app's own for sans serif. Code blocks stay
+  monospace whatever the face.
+- `lib/src/ui/epub_look_sheet.dart` — `showEpubLookSheet` /
+  `EpubLookPanel`: theme and brightness dropdowns, a chip per face (each
+  named in itself), a text-size slider that publishes to `EpubLooks`
+  while it moves and keeps the size when let go. The book's **Aa**
+  button opens it (`EpubPane.onEditLook`, from the shell through
+  `ShellDetailPane` / `AttachmentView`), and so does Settings →
+  Appearance → *Book appearance* (`SettingsKeys.epubLook`, in the
+  settings search too), whose value is `epubLookSummary`.
 - `lib/src/ui/attachment_bar.dart` — `AttachmentBar`, the row under
   every attachment, with an `actions` slot left of *Open in default
-  app*. The book puts its **Outline** button there (disabled while it is
-  read or when it has no contents): a sheet of the contents indented by
-  depth, the chapter at the top of the view marked, a tap jumps.
+  app*. The book puts its **Aa** and **Outline** buttons there (Outline
+  disabled while the book is read or when it has no contents): a sheet
+  of the contents indented by depth, the chapter at the top of the view
+  marked, a tap jumps.
 
 Tests: `test/unit/xhtml_markdown_test.dart`,
 `test/unit/epub_document_test.dart` (books built by
-`test/fakes/epub_builder.dart`), `test/widget/epub_pane_test.dart`.
+`test/fakes/epub_builder.dart`), `test/unit/epub_look_test.dart`,
+`test/widget/epub_pane_test.dart`, `test/widget/epub_look_sheet_test.dart`,
+`test/widget/epub_look_settings_test.dart`.
 
 ## Later, maybe
 

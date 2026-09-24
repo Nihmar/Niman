@@ -47,6 +47,7 @@ final class AttachmentView extends StatelessWidget {
     required this.path,
     this.launcher = const OsLauncher(),
     this.column = NoteColumn.off,
+    this.onEditEpubLook,
     super.key,
   });
 
@@ -59,6 +60,9 @@ final class AttachmentView extends StatelessWidget {
   /// The shell's note column: a book is set in it like a note.
   final NoteColumn column;
 
+  /// Opens the sheet that sets how the books look ([EpubPane.onEditLook]).
+  final VoidCallback? onEditEpubLook;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -67,7 +71,12 @@ final class AttachmentView extends StatelessWidget {
   Widget build(BuildContext context) {
     // A book reads on the note's own ground, and brings its own row.
     if (_isEpub) {
-      return EpubPane(path: path, launcher: launcher, column: column);
+      return EpubPane(
+        path: path,
+        launcher: launcher,
+        column: column,
+        onEditLook: onEditEpubLook,
+      );
     }
     final theme = Theme.of(context);
     return ColoredBox(

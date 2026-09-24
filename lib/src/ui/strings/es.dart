@@ -330,6 +330,23 @@ final class SpanishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'El editor y la vista previa, que siempre coinciden';
+  @override
+  String get epubLookTitle => 'Aspecto de los libros';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, fuente y tamaño del texto de los libros EPUB, aparte de las notas';
+  @override
+  String get epubSameAsApp => 'Como la app';
+  @override
+  String get epubFontTitle => 'Fuente';
+  @override
+  String get epubFontSerif => 'Con serifa';
+  @override
+  String get epubFontSans => 'Sin serifa';
+  @override
+  String get epubFontMono => 'Monoespaciada';
+  @override
+  String get epubTextSizeTitle => 'Tamaño del texto';
 
   // Settings: preview mode.
   // Settings: editor formatting.

@@ -315,6 +315,23 @@ final class HindiStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'एडिटर और पूर्वावलोकन, जो हमेशा एक-दूसरे से मिलते हैं';
+  @override
+  String get epubLookTitle => 'किताबों का रूप';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB किताबों की थीम, फ़ॉन्ट और टेक्स्ट का आकार, नोट्स से अलग';
+  @override
+  String get epubSameAsApp => 'ऐप जैसा';
+  @override
+  String get epubFontTitle => 'फ़ॉन्ट';
+  @override
+  String get epubFontSerif => 'सेरिफ़';
+  @override
+  String get epubFontSans => 'सैन्स सेरिफ़';
+  @override
+  String get epubFontMono => 'मोनोस्पेस';
+  @override
+  String get epubTextSizeTitle => 'टेक्स्ट का आकार';
 
   // Settings: preview mode.
   // Settings: editor formatting.

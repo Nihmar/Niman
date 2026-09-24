@@ -52,12 +52,16 @@ final class ShellDetailPane extends StatelessWidget {
     this.saveNoteStream,
     this.createMissingNote,
     this.header,
+    this.onEditEpubLook,
     super.key,
   });
 
   /// What goes above a note, by its library-relative path, or null for
   /// nothing: the journal's strip over an entry (#7).
   final Widget? Function(String path)? header;
+
+  /// Opens the sheet that sets how the books look (#280).
+  final VoidCallback? onEditEpubLook;
 
   /// Absolute library root; null until the session is ready.
   final String? root;
@@ -207,6 +211,7 @@ final class ShellDetailPane extends StatelessWidget {
           key: tab.key,
           path: p.join(root, tab.path),
           column: noteColumn,
+          onEditEpubLook: onEditEpubLook,
         )
       : _noteView(root, tab);
 

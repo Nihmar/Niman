@@ -155,3 +155,19 @@ flutter:
   assets:
     - assets/branding/
     - CHANGELOG.md
+    # Literata's license travels with the font (SIL OFL 1.1).
+    - assets/fonts/literata/OFL.txt
+
+  # The reading face the books can be set in (#280): Literata, by the
+  # Literata Project Authors, under the SIL Open Font License 1.1.
+  fonts:
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/literata/Literata-Regular.ttf
+        - asset: assets/fonts/literata/Literata-Italic.ttf
+          style: italic
+        - asset: assets/fonts/literata/Literata-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/literata/Literata-BoldItalic.ttf
+          weight: 700
+          style: italic

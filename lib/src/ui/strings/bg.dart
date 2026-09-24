@@ -330,6 +330,23 @@ final class BulgarianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Редакторът и прегледът винаги са синхронизирани';
+  @override
+  String get epubLookTitle => 'Облик на книгите';
+  @override
+  String get epubLookSubtitle =>
+      'Тема, шрифт и размер на текста на EPUB книгите, отделно от бележките';
+  @override
+  String get epubSameAsApp => 'Както в приложението';
+  @override
+  String get epubFontTitle => 'Шрифт';
+  @override
+  String get epubFontSerif => 'Серифен';
+  @override
+  String get epubFontSans => 'Безсерифен';
+  @override
+  String get epubFontMono => 'Моноширинен';
+  @override
+  String get epubTextSizeTitle => 'Размер на текста';
 
   // Settings: preview mode.
   // Settings: editor formatting.

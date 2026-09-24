@@ -328,6 +328,23 @@ final class PolishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Edytor i podgląd, zawsze zsynchronizowane';
+  @override
+  String get epubLookTitle => 'Wygląd książek';
+  @override
+  String get epubLookSubtitle =>
+      'Motyw, czcionka i rozmiar tekstu książek EPUB, osobno od notatek';
+  @override
+  String get epubSameAsApp => 'Jak w aplikacji';
+  @override
+  String get epubFontTitle => 'Czcionka';
+  @override
+  String get epubFontSerif => 'Szeryfowa';
+  @override
+  String get epubFontSans => 'Bezszeryfowa';
+  @override
+  String get epubFontMono => 'Stałej szerokości';
+  @override
+  String get epubTextSizeTitle => 'Rozmiar tekstu';
 
   // Settings: preview mode.
   // Settings: editor formatting.

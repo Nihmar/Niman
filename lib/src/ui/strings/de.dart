@@ -329,6 +329,23 @@ final class GermanStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Der Editor und die Vorschau, die immer übereinstimmen';
+  @override
+  String get epubLookTitle => 'Aussehen der Bücher';
+  @override
+  String get epubLookSubtitle =>
+      'Design, Schrift und Textgröße der EPUB-Bücher, getrennt von den Notizen';
+  @override
+  String get epubSameAsApp => 'Wie die App';
+  @override
+  String get epubFontTitle => 'Schrift';
+  @override
+  String get epubFontSerif => 'Serifen';
+  @override
+  String get epubFontSans => 'Serifenlos';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Textgröße';
 
   // Settings: preview mode.
   // Settings: editor formatting.
