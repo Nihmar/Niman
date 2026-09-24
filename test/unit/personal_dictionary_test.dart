@@ -80,6 +80,20 @@ void main() {
       expect(dictionary.contains('zebra'), isTrue);
     });
 
+    test('reload picks up words written behind its back', () async {
+      final dir = dir0();
+      final dictionary = await PersonalDictionary.open(dir.path);
+      await dictionary.add('zebra');
+      var heard = 0;
+      dictionary.addListener(() => heard++);
+      // A sync merged in the words added on another device.
+      File(dictionary.path).writeAsStringSync('zebra\nKaTeX\n');
+      await dictionary.reload();
+      expect(dictionary.contains('katex'), isTrue);
+      expect(dictionary.length, 2);
+      expect(heard, 1);
+    });
+
     test('a hostile file opens empty rather than throwing', () async {
       // A directory where the file should be: the read fails and the
       // dictionary stays empty, the settings file's rule.

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
@@ -86,6 +87,10 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 29) await drop('sync_items', 'base_text');
+  if (version < 28) {
+    await db.customStatement('DROP TABLE library_device_settings');
+  }
   if (version < 27) {
     // The editor|preview split columns lived here from v5 through v26.
     await db.customStatement(
@@ -797,7 +802,7 @@ void main() {
   });
 
   test('a fresh database holds the settings, registry, widgets, sync '
-      'state and workspaces alone', () async {
+      'state, workspaces and device settings alone', () async {
     final db = AppDatabase(NativeDatabase(dbFile));
     final tables = await db
         .customSelect(
@@ -815,6 +820,7 @@ void main() {
         'sync_items',
         'sync_ops',
         'workspaces',
+        'library_device_settings',
       ]),
     );
     expect(await db.select(db.appSettings).get(), isEmpty);
@@ -1116,6 +1122,100 @@ void main() {
       }
       final db = AppDatabase(NativeDatabase(dbFile));
       await expectLater(db.select(db.appSettings).get(), throwsStateError);
+      await db.close();
+    });
+  });
+
+  group('v27–v29, numbered on two branches at once', () {
+    // A testing build of the settings-sync branch stamped v27 with its
+    // table and v28 with `base_text`, the split columns still there; one
+    // of the unified-surface branch stamped v27 with the columns gone.
+    // Each opens here and ends with the same schema.
+    Future<void> opensAndHasAll() async {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/W',
+      );
+      final columns = await db
+          .customSelect('PRAGMA table_info(app_settings)')
+          .get();
+      expect(
+        columns.map((row) => row.read<String>('name')),
+        isNot(contains('preview_mode')),
+      );
+      expect(await DbDeviceSettingsStore(db).read('/lib/W'), equals(null));
+      expect(await db.select(db.syncItems).get(), isEmpty);
+      await db.close();
+    }
+
+    Future<void> stamp(int version, {required bool baseText}) async {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/W')",
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings ADD COLUMN preview_mode '
+        "TEXT NOT NULL DEFAULT 'auto'",
+      );
+      if (!baseText) {
+        await db.customStatement(
+          'ALTER TABLE sync_items DROP COLUMN base_text',
+        );
+      }
+      await db.customStatement('PRAGMA user_version = $version');
+      await db.close();
+    }
+
+    test("the settings-sync branch's v27 opens", () async {
+      await stamp(27, baseText: false);
+      await opensAndHasAll();
+    });
+
+    test("the settings-sync branch's v28 opens", () async {
+      await stamp(28, baseText: true);
+      await opensAndHasAll();
+    });
+  });
+
+  group('v27 → v28: device settings get their own table', () {
+    test('an existing install upgrades with it empty', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 27);
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final store = DbDeviceSettingsStore(db);
+      expect(await store.read('/lib/W'), equals(null));
+      await store.write('/lib/W', {'treeWidth': 300.0, 'lineNumbers': false});
+      expect(await store.read('/lib/W'), {
+        'treeWidth': 300.0,
+        'lineNumbers': false,
+      });
+      await store.remove('/lib/W');
+      expect(await store.read('/lib/W'), equals(null));
+      await db.close();
+    });
+  });
+
+  group('v28 → v29: the settings files get a merge base', () {
+    test('existing sync rows upgrade with none', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 28);
+        await db.customStatement(
+          'INSERT INTO sync_items (library_path, path, local_sha256, '
+          'local_size, local_mtime_ms, remote_size, remote_mtime_ms, '
+          'remote_unverified, synced_at_ms) '
+          "VALUES ('/lib/W', '.niman/settings.json', 'abc', 2, 1, 2, 1, 0, 1)",
+        );
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final row = await db.select(db.syncItems).getSingle();
+      expect(row.path, '.niman/settings.json');
+      expect(row.baseText, equals(null));
       await db.close();
     });
   });

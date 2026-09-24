@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
@@ -276,13 +277,18 @@ String cleanAttachmentsFolder(String folder) =>
 /// on read and written back untouched, so a newer build's settings survive
 /// an older one opening the library.
 ///
-/// Every setting that describes how you write in *this* library is here,
-/// not only the four T-ML-02 moved: the toolbar, the editor toggles, the
-/// tree order, the reminder markers. There is no notion of a library
-/// "overriding" the app — a library simply has its own answers, seeded
-/// from the defaults the first time it is opened. What stays app-wide is
-/// what does not depend on the library at all: the language and the debug
-/// switch.
+/// One model, two homes. The settings that shape the library — its
+/// trash, history, folders, links, indentation, quick note, reminder
+/// markers, dictionaries — are written to that file and travel with it.
+/// The ones that describe this screen and this person ([deviceKeys]: the
+/// tree's width and order, the text scale, the editor and its toggles)
+/// are kept on the device, per library, by a [DeviceSettingsStore]: a
+/// width set on a desktop means nothing on a phone, and every tweak of
+/// one used to rewrite the shared file and sync it everywhere. There is
+/// no notion of a library "overriding" the app — a library simply has its
+/// own answers, seeded from the defaults the first time it is opened.
+/// What stays app-wide is what does not depend on the library at all: the
+/// language and the debug switch.
 @immutable
 final class LibraryConfig {
   /// Creates a library config. [extra] holds keys this build does not
@@ -581,6 +587,35 @@ final class LibraryConfig {
     );
   }
 
+  /// The keys kept on the device rather than in `settings.json`.
+  static const Set<String> deviceKeys = {
+    'pinnedCollapsed',
+    'lineNumbers',
+    'readableLineLength',
+    'typewriter',
+    'noteColumnWidth',
+    'editorAutofocus',
+    'treeSort',
+    'editorToolbar',
+    'uiTextScale',
+    'noteTextScale',
+    'treeWidth',
+    'editorKind',
+    'enabledEditors',
+  };
+
+  /// What `settings.json` holds: [toJsonMap] without the [deviceKeys].
+  Map<String, Object?> libraryJsonMap() => {
+    for (final entry in toJsonMap().entries)
+      if (!deviceKeys.contains(entry.key)) entry.key: entry.value,
+  };
+
+  /// What the device keeps: the [deviceKeys] of [toJsonMap].
+  Map<String, Object?> deviceJsonMap() => {
+    for (final entry in toJsonMap().entries)
+      if (deviceKeys.contains(entry.key)) entry.key: entry.value,
+  };
+
   static const _knownKeys = {
     'trashEnabled',
     'trashAutoEmptyDays',
@@ -755,18 +790,23 @@ final class LibraryConfig {
   int get hashCode => _stableHash(toJsonMap());
 }
 
-/// The reader/writer for one library's `.niman/settings.json`.
+/// The reader/writer for one library's settings: `.niman/settings.json`
+/// and, with a [DeviceSettingsStore], the device's share of them
+/// ([LibraryConfig.deviceKeys]).
 ///
-/// Reading a missing, unreadable or malformed file yields
-/// [LibraryConfig.defaults] rather than throwing: the settings file is
-/// user-editable and must never take the app down. Writing is atomic
-/// (temp file + rename, same as a note), so a reader never observes a
-/// partial write.
+/// Reading a missing, unreadable or malformed file yields the defaults
+/// rather than throwing: the settings file is user-editable and must
+/// never take the app down. Writing is atomic (temp file + rename, same
+/// as a note), so a reader never observes a partial write.
+///
+/// Without a device store (tests, tools, the legacy seed) the file keeps
+/// every key, as it did before the split.
 final class LibraryConfigStore {
   /// Creates a store for the library at its absolute path.
-  new(this._libraryPath);
+  new(this._libraryPath, {this._device});
 
   final String _libraryPath;
+  final DeviceSettingsStore? _device;
 
   /// The settings file: `<library>/.niman/settings.json`.
   File get file => File(p.join(_libraryPath, '.niman', 'settings.json'));
@@ -778,14 +818,42 @@ final class LibraryConfigStore {
   /// Reads the library's settings; defaults when the file is missing,
   /// unreadable or malformed.
   ///
-  /// The fallback stays — a library must open whatever its settings file says —
-  /// but it **says which** of the three happened, because the defaults are not
-  /// neutral: the Markdown engine, which editors are on, the toolbar, the tree
-  /// sort and width all revert, and nothing on screen mentions it. A missing
-  /// file in a library that has been written to before is a `warning` (that is
-  /// the shape of a lost or trashed file); a library with no `.niman/` at all is
-  /// an `info`, because that is simply a new one.
+  /// With a device store, the device keys come from it — whatever the
+  /// file says about them, since an older build elsewhere may still write
+  /// its own there. A device that has none yet takes the file's values
+  /// once and keeps them: that is the move out of the shared file.
   Future<LibraryConfig> read() async {
+    final json = await _readFile();
+    final deviceStore = _device;
+    if (deviceStore == null) return LibraryConfig.fromJsonMap(json);
+    var device = await deviceStore.read(_libraryPath);
+    if (device == null) {
+      device = {
+        for (final key in LibraryConfig.deviceKeys)
+          if (json.containsKey(key)) key: json[key],
+      };
+      await deviceStore.write(_libraryPath, device);
+    }
+    return LibraryConfig.fromJsonMap({
+      for (final entry in json.entries)
+        if (!LibraryConfig.deviceKeys.contains(entry.key))
+          entry.key: entry.value,
+      ...device,
+    });
+  }
+
+  /// The file's JSON object; empty — the defaults — when it is missing,
+  /// unreadable or not an object.
+  ///
+  /// The fallback stays — a library must open whatever its settings file
+  /// says — but it **says which** of the three happened, because the
+  /// defaults are not neutral: which editors are on, the toolbar, the
+  /// links, the trash all revert, and nothing on screen mentions it. A
+  /// missing file in a library that has been written to before is a
+  /// `warning` (that is the shape of a lost or trashed file); a library
+  /// with no `.niman/` at all is an `info`, because that is simply a new
+  /// one.
+  Future<Map<String, Object?>> _readFile() async {
     String raw;
     try {
       raw = await file.readAsString();
@@ -798,7 +866,7 @@ final class LibraryConfigStore {
       } else {
         _log.info('no settings.json yet: a new library, on defaults');
       }
-      return LibraryConfig.defaults;
+      return const {};
     }
     try {
       final decoded = jsonDecode(raw);
@@ -807,26 +875,43 @@ final class LibraryConfigStore {
           'settings.json is not an object in ${file.parent.path}: '
           'this library is on defaults',
         );
-        return LibraryConfig.defaults;
+        return const {};
       }
       // jsonDecode yields `Map<String, dynamic>`; bridge to the typed view.
-      final json = <String, Object?>{
+      return {
         for (final entry in decoded.entries) entry.key.toString(): entry.value,
       };
-      return LibraryConfig.fromJsonMap(json);
     } on Object catch (error) {
       _log.warning(
         'settings.json could not be parsed in ${file.parent.path} ($error): '
         'this library is on defaults',
       );
-      return LibraryConfig.defaults;
+      return const {};
     }
   }
 
-  /// Writes [config] atomically, creating the `.niman/` folder if needed.
-  Future<void> write(LibraryConfig config) async {
+  /// Writes [config]: its library keys to the file (atomically, creating
+  /// `.niman/` if needed) and, with a device store, its device keys there.
+  ///
+  /// The file is rewritten only when its text changes, so a change of a
+  /// device key never touches it. Returns whether the file was written —
+  /// what the sync needs to hear about.
+  Future<bool> write(LibraryConfig config) async {
+    final deviceStore = _device;
+    if (deviceStore != null) {
+      await deviceStore.write(_libraryPath, config.deviceJsonMap());
+    }
+    final json = deviceStore == null
+        ? config.toJsonMap()
+        : config.libraryJsonMap();
+    final text = '${const JsonEncoder.withIndent('  ').convert(json)}\n';
+    try {
+      if (await file.readAsString() == text) return false;
+    } on FileSystemException {
+      // Missing: written below.
+    }
     await file.parent.create(recursive: true);
-    final text = const JsonEncoder.withIndent('  ').convert(config.toJsonMap());
-    await writeFileAtomically(file, utf8.encode('$text\n'));
+    await writeFileAtomically(file, utf8.encode(text));
+    return true;
   }
 }

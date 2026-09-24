@@ -76,6 +76,17 @@ final class PersonalDictionary extends ChangeNotifier {
     }
   }
 
+  /// Reads the file again, after something other than [add] changed it
+  /// (a sync brought the words added on another device), and tells the
+  /// listeners.
+  Future<void> reload() async {
+    if (_disposed) return;
+    _words.clear();
+    _lowercase.clear();
+    await _load();
+    if (!_disposed) notifyListeners();
+  }
+
   Future<void> _load() async {
     try {
       // A library nobody has added a word to has no dictionary yet: that is

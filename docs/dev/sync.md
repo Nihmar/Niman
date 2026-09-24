@@ -227,6 +227,7 @@ every file look new on both sides.
 | `remote_file_id` | text, nullable | `oc:fileid` when offered |
 | `remote_unverified` | bool | the listing could not rule out a same-second rewrite (no ETags, mtime = the server's current second): the next reconcile hashes the remote |
 | `base_version` | int, nullable | the `.history` version pinned as `syncBase`; null for attachments and when history is off |
+| `base_text` | text, nullable | for the library state files only (schema v28): the agreed content itself, since they keep no history — the base of their key-by-key merge |
 | `synced_at_ms` | int | |
 
 Folders get no rows: a folder exists remotely when a file under it
@@ -253,6 +254,13 @@ Reconcile compares disk now and remote now against the row:
 
 The first sync (empty table) compares by content only and **never
 deletes** on either side; it shows a summary before it starts.
+
+The library state files (`libraryStateFiles`: `.niman/settings.json`,
+`.niman/counters.json`, `.niman/dictionary.txt`) are never deleted either: *deleted | same*
+downloads and *same | deleted* uploads. A missing settings file is never
+what the user meant, and treating it as a deletion let one device that
+lost its copy delete it on the server, after which every other device
+trashed its own and fell back to the defaults.
 
 #### Reconcile (`lib/src/sync/reconcile.dart`)
 
@@ -464,10 +472,17 @@ one runs joins it.
      not to support it gets `move: false` stored. *moveLocal*:
      `NoteOps.syncMove`, history included.
    - *conflict*: the remote is downloaded and hashed. Equal content is
-     recorded. For `.niman/*.json` the newer side (local mtime vs remote
-     `getlastmodified`) wins whole, since a line merge could break JSON.
-     Anything else is left untouched on both sides and reported, with the
-     pinned base, for the merge (step 7).
+     recorded. The library state files merge as JSON
+     (`lib/src/sync/state_merge.dart`), since a line merge could break
+     them: `settings.json` key by key over `base_text` — a key one side
+     changed takes that side, a key both changed takes the newer file
+     (local mtime vs remote `getlastmodified`), and without a base a key
+     either side has is kept; `counters.json` takes the highest value per
+     counter; `dictionary.txt` merges word by word over `base_text`
+     (case-insensitive, as the spell check reads it), and the shell
+     reloads the `PersonalDictionary` when a run changed it. Only a side that does not parse falls back to the newer file
+     whole. Anything else is left untouched on both sides and reported,
+     with the pinned base, for the merge (step 7).
 6. **Rows:** every success records local sha/size/mtime, remote ETag/
    size/mtime/file id, `remote_unverified` (no file ETags and the mtime
    within 2 s of the server's `Date`, never this device's clock), and —

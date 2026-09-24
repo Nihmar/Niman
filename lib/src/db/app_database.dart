@@ -141,6 +141,30 @@ class Workspaces extends Table {
   Set<Column> get primaryKey => {libraryPath};
 }
 
+/// How a library is shown on this device: the settings of its
+/// `LibraryConfig` that describe the screen and the person rather than
+/// the library (`LibraryConfig.deviceKeys`) — the tree's width, the text
+/// scale, the editor and its toggles.
+///
+/// Kept here rather than in `.niman/settings.json`, which travels with
+/// the library: a width set on a desktop means nothing on a phone, and
+/// every tweak of one rewrote the shared file and synced it everywhere.
+/// Forgetting the library drops its row.
+@DataClassName('LibraryDeviceSettingsRow')
+class LibraryDeviceSettings extends Table {
+  /// Absolute, normalized path of the library root; the primary key.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// The device keys, as a JSON object in the `settings.json` format.
+  TextColumn get settings => text()();
+
+  /// When it was last written.
+  DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+
+  @override
+  Set<Column> get primaryKey => {libraryPath};
+}
+
 /// A library the app knows about: one row per entry on the home screen
 /// (T-ML-04).
 ///
@@ -254,6 +278,11 @@ class SyncItems extends Table {
   /// attachments and when history is off.
   IntColumn get baseVersion => integer().named('base_version').nullable()();
 
+  /// For the library state files (`.niman/settings.json`, `counters.json`),
+  /// which keep no history: the agreed content itself, the base of their
+  /// key-by-key merge. Null for every other file.
+  TextColumn get baseText => text().named('base_text').nullable()();
+
   /// When this agreement was recorded, ms.
   IntColumn get syncedAtMs => integer().named('synced_at_ms')();
 
@@ -320,6 +349,7 @@ class SyncOps extends Table {
     SyncItems,
     SyncOps,
     Workspaces,
+    LibraryDeviceSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -327,7 +357,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 27;
+  int get schemaVersion => 29;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -378,7 +408,18 @@ class AppDatabase extends _$AppDatabase {
   /// Niman in the tray, where the reminders keep firing, and pre-v27
   /// databases lose `preview_mode` + `split_ratio`: the editor and the
   /// preview are one pane now, and neither a layout override nor a width
-  /// share means anything without two panes to share it with.
+  /// share means anything without two panes to share it with, and pre-v28
+  /// databases gain `library_device_settings`, empty: each library fills
+  /// its row from its `settings.json` the first time it is opened, and
+  /// pre-v29 databases gain `sync_items.base_text`, null: the settings
+  /// files merge without a base until their next agreement records one.
+  ///
+  /// v27 to v29 were numbered on two branches at once — one took v27 for
+  /// the columns, the other v27 and v28 for the table and `base_text` — so
+  /// a testing build of either may have stamped a database with a number
+  /// whose step here is another one. Each of the three therefore looks at
+  /// what the database has instead of trusting the number, and runs for
+  /// anything below v29.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -552,9 +593,8 @@ class AppDatabase extends _$AppDatabase {
           'BOOLEAN NOT NULL DEFAULT 1',
         );
       }
-      if (from < 27) {
-        // Only the ones still there: a database stamped back down by an
-        // older build (see above) has already lost them.
+      // v27–v29 look before they act: see the note above the strategy.
+      if (from < 29) {
         final existing = await _columnsOf('app_settings');
         for (final column in ['preview_mode', 'split_ratio']) {
           if (!existing.contains(column)) continue;
@@ -563,8 +603,29 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 29 && !await _hasTable('library_device_settings')) {
+        await m.createTable(libraryDeviceSettings);
+      }
+      // Only on a table that was already there: below v22 it was just
+      // created, with the column.
+      if (from >= 22 &&
+          from < 29 &&
+          !(await _columnsOf('sync_items')).contains('base_text')) {
+        await m.database.customStatement(
+          'ALTER TABLE sync_items ADD COLUMN base_text TEXT',
+        );
+      }
     },
   );
+
+  /// Whether the database has a table called [name].
+  Future<bool> _hasTable(String name) async {
+    final rows = await customSelect(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+      variables: [Variable<String>(name)],
+    ).get();
+    return rows.isNotEmpty;
+  }
 
   /// The column names of [table] as the database has them.
   Future<Set<String>> _columnsOf(String table) async {
