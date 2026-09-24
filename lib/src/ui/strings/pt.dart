@@ -491,6 +491,54 @@ final class PortugueseStrings extends Strings {
   @override
   String get tableAddColumn => 'Adicionar coluna';
   @override
+  String get cheatsheetTitle => 'Guia rápido de Markdown';
+  @override
+  String get cheatsheetCopy => 'Copiar';
+  @override
+  String get cheatsheetCopied => 'Copiado';
+  @override
+  String get cheatsheetInsert => 'Inserir na nota';
+  @override
+  String get cheatsheetWritten => 'Escrito';
+  @override
+  String get cheatsheetShown => 'Mostrado';
+  @override
+  String get cheatHeadings => 'Títulos';
+  @override
+  String get cheatEmphasis => 'Negrito, itálico, riscado';
+  @override
+  String get cheatHtmlFormats => 'Sublinhado, sobrescrito, subscrito';
+  @override
+  String get cheatLists => 'Listas';
+  @override
+  String get cheatChecklists => 'Listas de verificação';
+  @override
+  String get cheatQuotes => 'Citações';
+  @override
+  String get cheatLinks => 'Ligações';
+  @override
+  String get cheatWikilinks => 'Ligações para notas';
+  @override
+  String get cheatEmbeds => 'Imagens e incorporações';
+  @override
+  String get cheatTags => 'Etiquetas';
+  @override
+  String get cheatInlineCode => 'Código numa frase';
+  @override
+  String get cheatCodeBlocks => 'Blocos de código';
+  @override
+  String get cheatMath => 'Matemática';
+  @override
+  String get cheatTables => 'Tabelas';
+  @override
+  String get cheatFootnotes => 'Notas de rodapé';
+  @override
+  String get cheatRule => 'Linha horizontal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Marcadores de modelos';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

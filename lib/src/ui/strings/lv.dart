@@ -492,6 +492,54 @@ final class LatvianStrings extends Strings {
   @override
   String get tableAddColumn => 'Pievienot kolonnu';
   @override
+  String get cheatsheetTitle => 'Markdown špikeris';
+  @override
+  String get cheatsheetCopy => 'Kopēt';
+  @override
+  String get cheatsheetCopied => 'Nokopēts';
+  @override
+  String get cheatsheetInsert => 'Ievietot piezīmē';
+  @override
+  String get cheatsheetWritten => 'Rakstīts';
+  @override
+  String get cheatsheetShown => 'Parādīts';
+  @override
+  String get cheatHeadings => 'Virsraksti';
+  @override
+  String get cheatEmphasis => 'Treknraksts, slīpraksts, pārsvītrots';
+  @override
+  String get cheatHtmlFormats => 'Pasvītrots, augšraksts, apakšraksts';
+  @override
+  String get cheatLists => 'Saraksti';
+  @override
+  String get cheatChecklists => 'Kontrolsaraksti';
+  @override
+  String get cheatQuotes => 'Citāti';
+  @override
+  String get cheatLinks => 'Saites';
+  @override
+  String get cheatWikilinks => 'Saites uz piezīmēm';
+  @override
+  String get cheatEmbeds => 'Attēli un iegulumi';
+  @override
+  String get cheatTags => 'Birkas';
+  @override
+  String get cheatInlineCode => 'Kods teikumā';
+  @override
+  String get cheatCodeBlocks => 'Koda bloki';
+  @override
+  String get cheatMath => 'Matemātika';
+  @override
+  String get cheatTables => 'Tabulas';
+  @override
+  String get cheatFootnotes => 'Vēres';
+  @override
+  String get cheatRule => 'Horizontāla līnija';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Veidņu vietturi';
+  @override
   String get toolbarHeading => 'Virsraksts';
   @override
   String get toolbarList => 'Saraksts';

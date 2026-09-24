@@ -496,6 +496,54 @@ final class ItalianStrings extends Strings {
   @override
   String get tableAddColumn => 'Aggiungi colonna';
   @override
+  String get cheatsheetTitle => 'Guida rapida al Markdown';
+  @override
+  String get cheatsheetCopy => 'Copia';
+  @override
+  String get cheatsheetCopied => 'Copiato';
+  @override
+  String get cheatsheetInsert => 'Inserisci nella nota';
+  @override
+  String get cheatsheetWritten => 'Scritto';
+  @override
+  String get cheatsheetShown => 'Mostrato';
+  @override
+  String get cheatHeadings => 'Titoli';
+  @override
+  String get cheatEmphasis => 'Grassetto, corsivo, barrato';
+  @override
+  String get cheatHtmlFormats => 'Sottolineato, apice, pedice';
+  @override
+  String get cheatLists => 'Elenchi';
+  @override
+  String get cheatChecklists => 'Liste di controllo';
+  @override
+  String get cheatQuotes => 'Citazioni';
+  @override
+  String get cheatLinks => 'Link';
+  @override
+  String get cheatWikilinks => 'Link alle note';
+  @override
+  String get cheatEmbeds => 'Immagini e incorporamenti';
+  @override
+  String get cheatTags => 'Tag';
+  @override
+  String get cheatInlineCode => 'Codice in una frase';
+  @override
+  String get cheatCodeBlocks => 'Blocchi di codice';
+  @override
+  String get cheatMath => 'Matematica';
+  @override
+  String get cheatTables => 'Tabelle';
+  @override
+  String get cheatFootnotes => 'Note a piè di pagina';
+  @override
+  String get cheatRule => 'Linea orizzontale';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Segnaposto dei modelli';
+  @override
   String get toolbarHeading => 'Titolo';
   @override
   String get toolbarList => 'Elenco';

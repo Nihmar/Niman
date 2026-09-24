@@ -488,6 +488,54 @@ final class BasqueStrings extends Strings {
   @override
   String get tableAddColumn => 'Gehitu zutabea';
   @override
+  String get cheatsheetTitle => 'Markdown gida azkarra';
+  @override
+  String get cheatsheetCopy => 'Kopiatu';
+  @override
+  String get cheatsheetCopied => 'Kopiatuta';
+  @override
+  String get cheatsheetInsert => 'Txertatu oharrean';
+  @override
+  String get cheatsheetWritten => 'Idatzita';
+  @override
+  String get cheatsheetShown => 'Erakutsita';
+  @override
+  String get cheatHeadings => 'Izenburuak';
+  @override
+  String get cheatEmphasis => 'Lodia, etzana, marratua';
+  @override
+  String get cheatHtmlFormats => 'Azpimarratua, goi-indizea, azpiindizea';
+  @override
+  String get cheatLists => 'Zerrendak';
+  @override
+  String get cheatChecklists => 'Egiaztapen-zerrendak';
+  @override
+  String get cheatQuotes => 'Aipuak';
+  @override
+  String get cheatLinks => 'Estekak';
+  @override
+  String get cheatWikilinks => 'Oharretarako estekak';
+  @override
+  String get cheatEmbeds => 'Irudiak eta txertaketak';
+  @override
+  String get cheatTags => 'Etiketak';
+  @override
+  String get cheatInlineCode => 'Kodea esaldi batean';
+  @override
+  String get cheatCodeBlocks => 'Kode-blokeak';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Taulak';
+  @override
+  String get cheatFootnotes => 'Oin-oharrak';
+  @override
+  String get cheatRule => 'Marra horizontala';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Txantiloien lekukoak';
+  @override
   String get toolbarHeading => 'Izenburua';
   @override
   String get toolbarList => 'Zerrenda';

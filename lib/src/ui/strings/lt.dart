@@ -496,6 +496,54 @@ final class LithuanianStrings extends Strings {
   @override
   String get tableAddColumn => 'Pridėti stulpelį';
   @override
+  String get cheatsheetTitle => 'Markdown atmintinė';
+  @override
+  String get cheatsheetCopy => 'Kopijuoti';
+  @override
+  String get cheatsheetCopied => 'Nukopijuota';
+  @override
+  String get cheatsheetInsert => 'Įterpti į užrašą';
+  @override
+  String get cheatsheetWritten => 'Parašyta';
+  @override
+  String get cheatsheetShown => 'Rodoma';
+  @override
+  String get cheatHeadings => 'Antraštės';
+  @override
+  String get cheatEmphasis => 'Paryškintas, kursyvas, perbrauktas';
+  @override
+  String get cheatHtmlFormats => 'Pabrauktas, viršutinis, apatinis indeksas';
+  @override
+  String get cheatLists => 'Sąrašai';
+  @override
+  String get cheatChecklists => 'Kontroliniai sąrašai';
+  @override
+  String get cheatQuotes => 'Citatos';
+  @override
+  String get cheatLinks => 'Nuorodos';
+  @override
+  String get cheatWikilinks => 'Nuorodos į užrašus';
+  @override
+  String get cheatEmbeds => 'Paveikslėliai ir įterpiniai';
+  @override
+  String get cheatTags => 'Žymės';
+  @override
+  String get cheatInlineCode => 'Kodas sakinyje';
+  @override
+  String get cheatCodeBlocks => 'Kodo blokai';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Lentelės';
+  @override
+  String get cheatFootnotes => 'Išnašos';
+  @override
+  String get cheatRule => 'Horizontali linija';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Šablonų vietos rezervavimo ženklai';
+  @override
   String get toolbarHeading => 'Antraštė';
   @override
   String get toolbarList => 'Sąrašas';

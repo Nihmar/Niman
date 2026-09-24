@@ -496,6 +496,54 @@ final class SpanishStrings extends Strings {
   @override
   String get tableAddColumn => 'Añadir columna';
   @override
+  String get cheatsheetTitle => 'Guía rápida de Markdown';
+  @override
+  String get cheatsheetCopy => 'Copiar';
+  @override
+  String get cheatsheetCopied => 'Copiado';
+  @override
+  String get cheatsheetInsert => 'Insertar en la nota';
+  @override
+  String get cheatsheetWritten => 'Escrito';
+  @override
+  String get cheatsheetShown => 'Mostrado';
+  @override
+  String get cheatHeadings => 'Encabezados';
+  @override
+  String get cheatEmphasis => 'Negrita, cursiva, tachado';
+  @override
+  String get cheatHtmlFormats => 'Subrayado, superíndice, subíndice';
+  @override
+  String get cheatLists => 'Listas';
+  @override
+  String get cheatChecklists => 'Listas de verificación';
+  @override
+  String get cheatQuotes => 'Citas';
+  @override
+  String get cheatLinks => 'Enlaces';
+  @override
+  String get cheatWikilinks => 'Enlaces a notas';
+  @override
+  String get cheatEmbeds => 'Imágenes e incrustaciones';
+  @override
+  String get cheatTags => 'Etiquetas';
+  @override
+  String get cheatInlineCode => 'Código en una frase';
+  @override
+  String get cheatCodeBlocks => 'Bloques de código';
+  @override
+  String get cheatMath => 'Matemáticas';
+  @override
+  String get cheatTables => 'Tablas';
+  @override
+  String get cheatFootnotes => 'Notas al pie';
+  @override
+  String get cheatRule => 'Línea horizontal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Marcadores de plantillas';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

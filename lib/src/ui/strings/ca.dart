@@ -497,6 +497,54 @@ final class CatalanStrings extends Strings {
   @override
   String get tableAddColumn => 'Afegeix una columna';
   @override
+  String get cheatsheetTitle => 'Guia ràpida de Markdown';
+  @override
+  String get cheatsheetCopy => 'Copia';
+  @override
+  String get cheatsheetCopied => 'Copiat';
+  @override
+  String get cheatsheetInsert => 'Insereix a la nota';
+  @override
+  String get cheatsheetWritten => 'Escrit';
+  @override
+  String get cheatsheetShown => 'Mostrat';
+  @override
+  String get cheatHeadings => 'Títols';
+  @override
+  String get cheatEmphasis => 'Negreta, cursiva, ratllat';
+  @override
+  String get cheatHtmlFormats => 'Subratllat, superíndex, subíndex';
+  @override
+  String get cheatLists => 'Llistes';
+  @override
+  String get cheatChecklists => 'Llistes de control';
+  @override
+  String get cheatQuotes => 'Cites';
+  @override
+  String get cheatLinks => 'Enllaços';
+  @override
+  String get cheatWikilinks => 'Enllaços a notes';
+  @override
+  String get cheatEmbeds => 'Imatges i incrustacions';
+  @override
+  String get cheatTags => 'Etiquetes';
+  @override
+  String get cheatInlineCode => 'Codi en una frase';
+  @override
+  String get cheatCodeBlocks => 'Blocs de codi';
+  @override
+  String get cheatMath => 'Matemàtiques';
+  @override
+  String get cheatTables => 'Taules';
+  @override
+  String get cheatFootnotes => 'Notes al peu';
+  @override
+  String get cheatRule => 'Línia horitzontal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Marcadors de les plantilles';
+  @override
   String get toolbarHeading => 'Títol';
   @override
   String get toolbarList => 'Llista';

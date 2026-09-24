@@ -500,6 +500,54 @@ final class PolishStrings extends Strings {
   @override
   String get tableAddColumn => 'Dodaj kolumnę';
   @override
+  String get cheatsheetTitle => 'Ściągawka Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiuj';
+  @override
+  String get cheatsheetCopied => 'Skopiowano';
+  @override
+  String get cheatsheetInsert => 'Wstaw do notatki';
+  @override
+  String get cheatsheetWritten => 'Zapis';
+  @override
+  String get cheatsheetShown => 'Wygląd';
+  @override
+  String get cheatHeadings => 'Nagłówki';
+  @override
+  String get cheatEmphasis => 'Pogrubienie, kursywa, przekreślenie';
+  @override
+  String get cheatHtmlFormats => 'Podkreślenie, indeks górny, indeks dolny';
+  @override
+  String get cheatLists => 'Listy';
+  @override
+  String get cheatChecklists => 'Listy kontrolne';
+  @override
+  String get cheatQuotes => 'Cytaty';
+  @override
+  String get cheatLinks => 'Linki';
+  @override
+  String get cheatWikilinks => 'Linki do notatek';
+  @override
+  String get cheatEmbeds => 'Obrazy i osadzenia';
+  @override
+  String get cheatTags => 'Tagi';
+  @override
+  String get cheatInlineCode => 'Kod w zdaniu';
+  @override
+  String get cheatCodeBlocks => 'Bloki kodu';
+  @override
+  String get cheatMath => 'Matematyka';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Przypisy';
+  @override
+  String get cheatRule => 'Linia pozioma';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Symbole zastępcze szablonów';
+  @override
   String get toolbarHeading => 'Nagłówek';
   @override
   String get toolbarList => 'Lista';

@@ -491,6 +491,54 @@ final class FinnishStrings extends Strings {
   @override
   String get tableAddColumn => 'Lisää sarake';
   @override
+  String get cheatsheetTitle => 'Markdown-lunttilappu';
+  @override
+  String get cheatsheetCopy => 'Kopioi';
+  @override
+  String get cheatsheetCopied => 'Kopioitu';
+  @override
+  String get cheatsheetInsert => 'Lisää muistiinpanoon';
+  @override
+  String get cheatsheetWritten => 'Kirjoitettu';
+  @override
+  String get cheatsheetShown => 'Näytetty';
+  @override
+  String get cheatHeadings => 'Otsikot';
+  @override
+  String get cheatEmphasis => 'Lihavointi, kursiivi, yliviivaus';
+  @override
+  String get cheatHtmlFormats => 'Alleviivaus, yläindeksi, alaindeksi';
+  @override
+  String get cheatLists => 'Luettelot';
+  @override
+  String get cheatChecklists => 'Tarkistuslistat';
+  @override
+  String get cheatQuotes => 'Lainaukset';
+  @override
+  String get cheatLinks => 'Linkit';
+  @override
+  String get cheatWikilinks => 'Linkit muistiinpanoihin';
+  @override
+  String get cheatEmbeds => 'Kuvat ja upotukset';
+  @override
+  String get cheatTags => 'Tunnisteet';
+  @override
+  String get cheatInlineCode => 'Koodia lauseessa';
+  @override
+  String get cheatCodeBlocks => 'Koodilohkot';
+  @override
+  String get cheatMath => 'Matematiikka';
+  @override
+  String get cheatTables => 'Taulukot';
+  @override
+  String get cheatFootnotes => 'Alaviitteet';
+  @override
+  String get cheatRule => 'Vaakaviiva';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Mallipohjien paikkamerkit';
+  @override
   String get toolbarHeading => 'Otsikko';
   @override
   String get toolbarList => 'Lista';

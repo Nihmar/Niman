@@ -495,6 +495,54 @@ final class CzechStrings extends Strings {
   @override
   String get tableAddColumn => 'Přidat sloupec';
   @override
+  String get cheatsheetTitle => 'Tahák k Markdownu';
+  @override
+  String get cheatsheetCopy => 'Kopírovat';
+  @override
+  String get cheatsheetCopied => 'Zkopírováno';
+  @override
+  String get cheatsheetInsert => 'Vložit do poznámky';
+  @override
+  String get cheatsheetWritten => 'Zápis';
+  @override
+  String get cheatsheetShown => 'Zobrazení';
+  @override
+  String get cheatHeadings => 'Nadpisy';
+  @override
+  String get cheatEmphasis => 'Tučné, kurzíva, přeškrtnuté';
+  @override
+  String get cheatHtmlFormats => 'Podtržené, horní index, dolní index';
+  @override
+  String get cheatLists => 'Seznamy';
+  @override
+  String get cheatChecklists => 'Kontrolní seznamy';
+  @override
+  String get cheatQuotes => 'Citace';
+  @override
+  String get cheatLinks => 'Odkazy';
+  @override
+  String get cheatWikilinks => 'Odkazy na poznámky';
+  @override
+  String get cheatEmbeds => 'Obrázky a vložení';
+  @override
+  String get cheatTags => 'Štítky';
+  @override
+  String get cheatInlineCode => 'Kód ve větě';
+  @override
+  String get cheatCodeBlocks => 'Bloky kódu';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tabulky';
+  @override
+  String get cheatFootnotes => 'Poznámky pod čarou';
+  @override
+  String get cheatRule => 'Vodorovná čára';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Zástupné symboly šablon';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Seznam';

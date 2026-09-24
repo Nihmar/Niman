@@ -500,6 +500,54 @@ final class RomanianStrings extends Strings {
   @override
   String get tableAddColumn => 'Adaugă coloană';
   @override
+  String get cheatsheetTitle => 'Fițuică Markdown';
+  @override
+  String get cheatsheetCopy => 'Copiază';
+  @override
+  String get cheatsheetCopied => 'Copiat';
+  @override
+  String get cheatsheetInsert => 'Inserează în notă';
+  @override
+  String get cheatsheetWritten => 'Scris';
+  @override
+  String get cheatsheetShown => 'Afișat';
+  @override
+  String get cheatHeadings => 'Titluri';
+  @override
+  String get cheatEmphasis => 'Aldin, cursiv, tăiat';
+  @override
+  String get cheatHtmlFormats => 'Subliniat, exponent, indice';
+  @override
+  String get cheatLists => 'Liste';
+  @override
+  String get cheatChecklists => 'Liste de verificare';
+  @override
+  String get cheatQuotes => 'Citate';
+  @override
+  String get cheatLinks => 'Linkuri';
+  @override
+  String get cheatWikilinks => 'Linkuri către note';
+  @override
+  String get cheatEmbeds => 'Imagini și încorporări';
+  @override
+  String get cheatTags => 'Etichete';
+  @override
+  String get cheatInlineCode => 'Cod într-o propoziție';
+  @override
+  String get cheatCodeBlocks => 'Blocuri de cod';
+  @override
+  String get cheatMath => 'Matematică';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Note de subsol';
+  @override
+  String get cheatRule => 'Linie orizontală';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Substituenți de șabloane';
+  @override
   String get toolbarHeading => 'Titlu';
   @override
   String get toolbarList => 'Listă';

@@ -61,6 +61,9 @@ enum AppCommand {
   /// Tidy the note's Markdown (#227).
   formatNote,
 
+  /// The Markdown cheatsheet (#265): every construct, written and shown.
+  markdownCheatsheet,
+
   /// Open a Markdown file outside the library (#77).
   openFile,
 
@@ -233,6 +236,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.typewriterMode => AppStrings.typewriterTitle,
   AppCommand.formatNote => AppStrings.formatNoteTitle,
+  AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
   AppCommand.openFile => AppStrings.openFileTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,

@@ -497,6 +497,54 @@ final class MacedonianStrings extends Strings {
   @override
   String get tableAddColumn => 'Додај колона';
   @override
+  String get cheatsheetTitle => 'Потсетник за Markdown';
+  @override
+  String get cheatsheetCopy => 'Копирај';
+  @override
+  String get cheatsheetCopied => 'Копирано';
+  @override
+  String get cheatsheetInsert => 'Вметни во белешката';
+  @override
+  String get cheatsheetWritten => 'Напишано';
+  @override
+  String get cheatsheetShown => 'Прикажано';
+  @override
+  String get cheatHeadings => 'Наслови';
+  @override
+  String get cheatEmphasis => 'Задебелено, курзив, прецртано';
+  @override
+  String get cheatHtmlFormats => 'Потцртано, горен индекс, долен индекс';
+  @override
+  String get cheatLists => 'Листи';
+  @override
+  String get cheatChecklists => 'Листи за проверка';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Врски';
+  @override
+  String get cheatWikilinks => 'Врски до белешки';
+  @override
+  String get cheatEmbeds => 'Слики и вградувања';
+  @override
+  String get cheatTags => 'Ознаки';
+  @override
+  String get cheatInlineCode => 'Код во реченица';
+  @override
+  String get cheatCodeBlocks => 'Блокови код';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Табели';
+  @override
+  String get cheatFootnotes => 'Фусноти';
+  @override
+  String get cheatRule => 'Хоризонтална линија';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Резервирани места во шаблоните';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Листа';

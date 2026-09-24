@@ -489,6 +489,54 @@ final class HungarianStrings extends Strings {
   @override
   String get tableAddColumn => 'Oszlop hozzáadása';
   @override
+  String get cheatsheetTitle => 'Markdown puska';
+  @override
+  String get cheatsheetCopy => 'Másolás';
+  @override
+  String get cheatsheetCopied => 'Másolva';
+  @override
+  String get cheatsheetInsert => 'Beszúrás a jegyzetbe';
+  @override
+  String get cheatsheetWritten => 'Leírva';
+  @override
+  String get cheatsheetShown => 'Megjelenítve';
+  @override
+  String get cheatHeadings => 'Címsorok';
+  @override
+  String get cheatEmphasis => 'Félkövér, dőlt, áthúzott';
+  @override
+  String get cheatHtmlFormats => 'Aláhúzott, felső index, alsó index';
+  @override
+  String get cheatLists => 'Listák';
+  @override
+  String get cheatChecklists => 'Ellenőrzőlisták';
+  @override
+  String get cheatQuotes => 'Idézetek';
+  @override
+  String get cheatLinks => 'Hivatkozások';
+  @override
+  String get cheatWikilinks => 'Hivatkozások jegyzetekre';
+  @override
+  String get cheatEmbeds => 'Képek és beágyazások';
+  @override
+  String get cheatTags => 'Címkék';
+  @override
+  String get cheatInlineCode => 'Kód a mondatban';
+  @override
+  String get cheatCodeBlocks => 'Kódblokkok';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Táblázatok';
+  @override
+  String get cheatFootnotes => 'Lábjegyzetek';
+  @override
+  String get cheatRule => 'Vízszintes vonal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Sablon-helyőrzők';
+  @override
   String get toolbarHeading => 'Cím';
   @override
   String get toolbarList => 'Lista';

@@ -459,6 +459,39 @@ final class _NoteViewState extends State<NoteView>
   @override
   void jumpToHeading(int line) => _jumpToHeading(line);
 
+  @override
+  bool get canInsert {
+    if (!_ready) return false;
+    final kind = _noteKind == null ? null : NoteKinds.forType(_noteKind);
+    return !(widget.kindMode && kind != null);
+  }
+
+  @override
+  void insertAtCaret(String markdown) {
+    if (!canInsert) return;
+    if (widget.showWysiwyg && !_unified) {
+      final state = _wysiwygKey.currentState;
+      if (state == null) return;
+      final controller = state.controller;
+      final at = controller.selection.extentOffset;
+      final text = markdown.contains('\n') ? '\n\n$markdown\n' : markdown;
+      controller.replaceText(
+        at,
+        0,
+        text,
+        TextSelection.collapsed(offset: at + text.length),
+      );
+      state.requestEditorFocus();
+      return;
+    }
+    _runCommand(
+      (text, selection) =>
+          insertSnippet(text: text, selection: selection, snippet: markdown),
+      // A block keeps a blank line from the lines either side.
+      context: 1,
+    );
+  }
+
   /// The unified note's revision the word count and the outline were last
   /// read at, or -1 before the first read. Comparing revisions is what says
   /// a note changed, where the statistics used to compare its whole text.

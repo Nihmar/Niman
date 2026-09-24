@@ -209,56 +209,86 @@ MarkdownEdit toggleTaskList({
 
 /// Inserts an empty table of [columns] columns and [rows] body rows, on
 /// lines of its own, with the caret in its first header cell (#262).
-///
-/// Where it goes follows the caret: a blank line is replaced by it, a
-/// caret at the very start of a line puts it above that line, and
-/// anywhere else puts it below. A table glued to a paragraph is read as
-/// the paragraph's text, so a blank line keeps it from its neighbours on
-/// either side, where there is not one already. A selection is not
-/// replaced: the table goes by the caret's end of it.
 MarkdownEdit insertTable({
   required String text,
   required TextSelection selection,
   int columns = 2,
   int rows = 1,
 }) {
-  final lines = text.split('\n');
-  final caret = selection.extentOffset;
-  final line = _lineIndexOf(text, caret);
-  final column = caret - _lineStart(text, line);
-  final blank = lines[line].trim().isEmpty;
-  // The line the table's first row becomes, and the lines kept either side.
-  final int at;
-  final int remove;
-  if (blank) {
-    at = line;
-    remove = 1;
-  } else if (column == 0) {
-    at = line;
-    remove = 0;
-  } else {
-    at = line + 1;
-    remove = 0;
-  }
   String row(String cell) =>
       '|${List<String>.filled(columns, ' $cell ').join('|')}|';
-  final table = <String>[
-    row('  '),
-    row('---'),
-    for (var body = 0; body < rows; body++) row('  '),
-  ];
+  return insertBlock(
+    text: text,
+    selection: selection,
+    block: <String>[
+      row('  '),
+      row('---'),
+      for (var body = 0; body < rows; body++) row('  '),
+    ],
+    // The first header cell's text starts two columns in: `| `.
+    caret: (line: 0, column: 2),
+  );
+}
+
+/// Inserts [block]'s lines on lines of their own, the caret at [caret] in
+/// them — at the end of the last one without it.
+///
+/// Where they go follows the caret: a blank line is replaced by them, a
+/// caret at the very start of a line puts them above that line, and
+/// anywhere else puts them below. A block glued to a paragraph is read as
+/// the paragraph's text, so a blank line keeps it from its neighbours on
+/// either side, where there is not one already. A selection is not
+/// replaced: the block goes by the caret's end of it.
+MarkdownEdit insertBlock({
+  required String text,
+  required TextSelection selection,
+  required List<String> block,
+  ({int line, int column})? caret,
+}) {
+  final lines = text.split('\n');
+  final at0 = selection.extentOffset;
+  final line = _lineIndexOf(text, at0);
+  final column = at0 - _lineStart(text, line);
+  final blank = lines[line].trim().isEmpty;
+  final at = blank || column == 0 ? line : line + 1;
+  final remove = blank ? 1 : 0;
   final before = at > 0 && lines[at - 1].trim().isNotEmpty;
   final afterIndex = at + remove;
   final after =
       afterIndex < lines.length && lines[afterIndex].trim().isNotEmpty;
-  final inserted = <String>[if (before) '', ...table, if (after) ''];
+  final inserted = <String>[if (before) '', ...block, if (after) ''];
   final newLines = <String>[...lines]..replaceRange(at, at + remove, inserted);
-  final headerLine = at + (before ? 1 : 0);
-  // The first header cell's text starts two columns in: `| ` and the caret.
-  final offset = _lineStart(newLines.join('\n'), headerLine) + 2;
+  final target = caret ?? (line: block.length - 1, column: block.last.length);
+  final newText = newLines.join('\n');
+  final offset =
+      _lineStart(newText, at + (before ? 1 : 0) + target.line) + target.column;
   return MarkdownEdit(
-    text: newLines.join('\n'),
+    text: newText,
     selection: TextSelection.collapsed(offset: offset),
+  );
+}
+
+/// Inserts [snippet] at the caret, in place of the selection: a snippet of
+/// one line where the caret is, one of several lines on lines of its own
+/// ([insertBlock]). The caret lands after it.
+MarkdownEdit insertSnippet({
+  required String text,
+  required TextSelection selection,
+  required String snippet,
+}) {
+  if (!snippet.contains('\n')) {
+    final newText = text.replaceRange(selection.start, selection.end, snippet);
+    return MarkdownEdit(
+      text: newText,
+      selection: TextSelection.collapsed(
+        offset: selection.start + snippet.length,
+      ),
+    );
+  }
+  return insertBlock(
+    text: text,
+    selection: selection,
+    block: snippet.split('\n'),
   );
 }
 

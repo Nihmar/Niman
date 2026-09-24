@@ -493,6 +493,54 @@ final class CroatianStrings extends Strings {
   @override
   String get tableAddColumn => 'Dodaj stupac';
   @override
+  String get cheatsheetTitle => 'Podsjetnik za Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiraj';
+  @override
+  String get cheatsheetCopied => 'Kopirano';
+  @override
+  String get cheatsheetInsert => 'Umetni u bilješku';
+  @override
+  String get cheatsheetWritten => 'Napisano';
+  @override
+  String get cheatsheetShown => 'Prikazano';
+  @override
+  String get cheatHeadings => 'Naslovi';
+  @override
+  String get cheatEmphasis => 'Podebljano, kurziv, precrtano';
+  @override
+  String get cheatHtmlFormats => 'Podcrtano, eksponent, indeks';
+  @override
+  String get cheatLists => 'Popisi';
+  @override
+  String get cheatChecklists => 'Kontrolni popisi';
+  @override
+  String get cheatQuotes => 'Citati';
+  @override
+  String get cheatLinks => 'Poveznice';
+  @override
+  String get cheatWikilinks => 'Poveznice na bilješke';
+  @override
+  String get cheatEmbeds => 'Slike i ugradnje';
+  @override
+  String get cheatTags => 'Oznake';
+  @override
+  String get cheatInlineCode => 'Kôd u rečenici';
+  @override
+  String get cheatCodeBlocks => 'Blokovi kôda';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tablice';
+  @override
+  String get cheatFootnotes => 'Fusnote';
+  @override
+  String get cheatRule => 'Vodoravna crta';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Rezervirana mjesta predložaka';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

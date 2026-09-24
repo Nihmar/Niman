@@ -494,6 +494,54 @@ final class GermanStrings extends Strings {
   @override
   String get tableAddColumn => 'Spalte hinzufügen';
   @override
+  String get cheatsheetTitle => 'Markdown-Spickzettel';
+  @override
+  String get cheatsheetCopy => 'Kopieren';
+  @override
+  String get cheatsheetCopied => 'Kopiert';
+  @override
+  String get cheatsheetInsert => 'In die Notiz einfügen';
+  @override
+  String get cheatsheetWritten => 'Geschrieben';
+  @override
+  String get cheatsheetShown => 'Angezeigt';
+  @override
+  String get cheatHeadings => 'Überschriften';
+  @override
+  String get cheatEmphasis => 'Fett, kursiv, durchgestrichen';
+  @override
+  String get cheatHtmlFormats => 'Unterstrichen, hochgestellt, tiefgestellt';
+  @override
+  String get cheatLists => 'Listen';
+  @override
+  String get cheatChecklists => 'Checklisten';
+  @override
+  String get cheatQuotes => 'Zitate';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links zu Notizen';
+  @override
+  String get cheatEmbeds => 'Bilder und Einbettungen';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code im Satz';
+  @override
+  String get cheatCodeBlocks => 'Codeblöcke';
+  @override
+  String get cheatMath => 'Mathematik';
+  @override
+  String get cheatTables => 'Tabellen';
+  @override
+  String get cheatFootnotes => 'Fußnoten';
+  @override
+  String get cheatRule => 'Trennlinie';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Vorlagen-Platzhalter';
+  @override
   String get toolbarHeading => 'Überschrift';
   @override
   String get toolbarList => 'Liste';

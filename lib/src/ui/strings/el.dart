@@ -499,6 +499,54 @@ final class GreekStrings extends Strings {
   @override
   String get tableAddColumn => 'Προσθήκη στήλης';
   @override
+  String get cheatsheetTitle => 'Σκονάκι Markdown';
+  @override
+  String get cheatsheetCopy => 'Αντιγραφή';
+  @override
+  String get cheatsheetCopied => 'Αντιγράφηκε';
+  @override
+  String get cheatsheetInsert => 'Εισαγωγή στη σημείωση';
+  @override
+  String get cheatsheetWritten => 'Γραμμένο';
+  @override
+  String get cheatsheetShown => 'Εμφάνιση';
+  @override
+  String get cheatHeadings => 'Επικεφαλίδες';
+  @override
+  String get cheatEmphasis => 'Έντονα, πλάγια, διαγραμμένα';
+  @override
+  String get cheatHtmlFormats => 'Υπογράμμιση, εκθέτης, δείκτης';
+  @override
+  String get cheatLists => 'Λίστες';
+  @override
+  String get cheatChecklists => 'Λίστες ελέγχου';
+  @override
+  String get cheatQuotes => 'Παραθέσεις';
+  @override
+  String get cheatLinks => 'Σύνδεσμοι';
+  @override
+  String get cheatWikilinks => 'Σύνδεσμοι σε σημειώσεις';
+  @override
+  String get cheatEmbeds => 'Εικόνες και ενσωματώσεις';
+  @override
+  String get cheatTags => 'Ετικέτες';
+  @override
+  String get cheatInlineCode => 'Κώδικας σε πρόταση';
+  @override
+  String get cheatCodeBlocks => 'Μπλοκ κώδικα';
+  @override
+  String get cheatMath => 'Μαθηματικά';
+  @override
+  String get cheatTables => 'Πίνακες';
+  @override
+  String get cheatFootnotes => 'Υποσημειώσεις';
+  @override
+  String get cheatRule => 'Οριζόντια γραμμή';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Σύμβολα κράτησης προτύπων';
+  @override
   String get toolbarHeading => 'Τίτλος';
   @override
   String get toolbarList => 'Λίστα';

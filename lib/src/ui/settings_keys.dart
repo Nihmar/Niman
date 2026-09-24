@@ -66,6 +66,7 @@ abstract final class SettingsKeys {
   static const debugLogs = Key('debug-logs-setting');
   static const exportLog = Key('export-log-setting');
   static const changelog = Key('changelog-setting');
+  static const cheatsheet = Key('cheatsheet-setting');
 
   // Reminders.
   static const reminderShowTokens = Key('reminder-show-tokens');

@@ -463,6 +463,54 @@ final class JapaneseStrings extends Strings {
   @override
   String get tableAddColumn => '列を追加';
   @override
+  String get cheatsheetTitle => 'Markdown チートシート';
+  @override
+  String get cheatsheetCopy => 'コピー';
+  @override
+  String get cheatsheetCopied => 'コピーしました';
+  @override
+  String get cheatsheetInsert => 'ノートに挿入';
+  @override
+  String get cheatsheetWritten => '記法';
+  @override
+  String get cheatsheetShown => '表示';
+  @override
+  String get cheatHeadings => '見出し';
+  @override
+  String get cheatEmphasis => '太字・斜体・取り消し線';
+  @override
+  String get cheatHtmlFormats => '下線・上付き・下付き';
+  @override
+  String get cheatLists => 'リスト';
+  @override
+  String get cheatChecklists => 'チェックリスト';
+  @override
+  String get cheatQuotes => '引用';
+  @override
+  String get cheatLinks => 'リンク';
+  @override
+  String get cheatWikilinks => 'ノートへのリンク';
+  @override
+  String get cheatEmbeds => '画像と埋め込み';
+  @override
+  String get cheatTags => 'タグ';
+  @override
+  String get cheatInlineCode => '文中のコード';
+  @override
+  String get cheatCodeBlocks => 'コードブロック';
+  @override
+  String get cheatMath => '数式';
+  @override
+  String get cheatTables => '表';
+  @override
+  String get cheatFootnotes => '脚注';
+  @override
+  String get cheatRule => '水平線';
+  @override
+  String get cheatFrontmatter => 'フロントマター';
+  @override
+  String get cheatTemplates => 'テンプレートのプレースホルダー';
+  @override
   String get toolbarHeading => '見出し';
   @override
   String get toolbarList => 'リスト';

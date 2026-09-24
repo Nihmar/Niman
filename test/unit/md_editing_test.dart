@@ -198,4 +198,26 @@ void main() {
       ]);
     });
   });
+
+  group('insertSnippet (#265)', () {
+    test('one line goes at the caret, over the selection', () {
+      final edit = insertSnippet(
+        text: 'ab cd',
+        selection: _sel(3, 5),
+        snippet: '**x**',
+      );
+      expect(edit.text, 'ab **x**');
+      expect(edit.selection, _sel(8));
+    });
+
+    test('several go on lines of their own, the caret after them', () {
+      final edit = insertSnippet(
+        text: 'prima riga',
+        selection: _sel(5),
+        snippet: '- [ ] a\n- [ ] b',
+      );
+      expect(edit.text, 'prima riga\n\n- [ ] a\n- [ ] b');
+      expect(edit.selection, _sel(edit.text.length));
+    });
+  });
 }

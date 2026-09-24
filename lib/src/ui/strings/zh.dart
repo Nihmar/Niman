@@ -463,6 +463,54 @@ final class ChineseStrings extends Strings {
   @override
   String get tableAddColumn => '添加列';
   @override
+  String get cheatsheetTitle => 'Markdown 速查表';
+  @override
+  String get cheatsheetCopy => '复制';
+  @override
+  String get cheatsheetCopied => '已复制';
+  @override
+  String get cheatsheetInsert => '插入到笔记';
+  @override
+  String get cheatsheetWritten => '写法';
+  @override
+  String get cheatsheetShown => '效果';
+  @override
+  String get cheatHeadings => '标题';
+  @override
+  String get cheatEmphasis => '粗体、斜体、删除线';
+  @override
+  String get cheatHtmlFormats => '下划线、上标、下标';
+  @override
+  String get cheatLists => '列表';
+  @override
+  String get cheatChecklists => '复选框列表';
+  @override
+  String get cheatQuotes => '引用';
+  @override
+  String get cheatLinks => '链接';
+  @override
+  String get cheatWikilinks => '指向笔记的链接';
+  @override
+  String get cheatEmbeds => '图片与嵌入';
+  @override
+  String get cheatTags => '标签';
+  @override
+  String get cheatInlineCode => '句中代码';
+  @override
+  String get cheatCodeBlocks => '代码块';
+  @override
+  String get cheatMath => '数学公式';
+  @override
+  String get cheatTables => '表格';
+  @override
+  String get cheatFootnotes => '脚注';
+  @override
+  String get cheatRule => '水平线';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => '模板占位符';
+  @override
   String get toolbarHeading => '标题';
   @override
   String get toolbarList => '列表';

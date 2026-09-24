@@ -490,6 +490,54 @@ final class EnglishStrings extends Strings {
   @override
   String get tableAddColumn => 'Add column';
   @override
+  String get cheatsheetTitle => 'Markdown cheatsheet';
+  @override
+  String get cheatsheetCopy => 'Copy';
+  @override
+  String get cheatsheetCopied => 'Copied';
+  @override
+  String get cheatsheetInsert => 'Insert in the note';
+  @override
+  String get cheatsheetWritten => 'Written';
+  @override
+  String get cheatsheetShown => 'Shown';
+  @override
+  String get cheatHeadings => 'Headings';
+  @override
+  String get cheatEmphasis => 'Bold, italic, strikethrough';
+  @override
+  String get cheatHtmlFormats => 'Underline, superscript, subscript';
+  @override
+  String get cheatLists => 'Lists';
+  @override
+  String get cheatChecklists => 'Checkbox lists';
+  @override
+  String get cheatQuotes => 'Quotes';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links to notes';
+  @override
+  String get cheatEmbeds => 'Images and embeds';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code in a sentence';
+  @override
+  String get cheatCodeBlocks => 'Code blocks';
+  @override
+  String get cheatMath => 'Math';
+  @override
+  String get cheatTables => 'Tables';
+  @override
+  String get cheatFootnotes => 'Footnotes';
+  @override
+  String get cheatRule => 'Horizontal rule';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Template placeholders';
+  @override
   String get toolbarHeading => 'Heading';
   @override
   String get toolbarList => 'List';

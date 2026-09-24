@@ -494,6 +494,54 @@ final class SwedishStrings extends Strings {
   @override
   String get tableAddColumn => 'Lägg till kolumn';
   @override
+  String get cheatsheetTitle => 'Markdown-fusklapp';
+  @override
+  String get cheatsheetCopy => 'Kopiera';
+  @override
+  String get cheatsheetCopied => 'Kopierat';
+  @override
+  String get cheatsheetInsert => 'Infoga i anteckningen';
+  @override
+  String get cheatsheetWritten => 'Skrivet';
+  @override
+  String get cheatsheetShown => 'Visat';
+  @override
+  String get cheatHeadings => 'Rubriker';
+  @override
+  String get cheatEmphasis => 'Fet, kursiv, genomstruken';
+  @override
+  String get cheatHtmlFormats => 'Understruken, upphöjd, nedsänkt';
+  @override
+  String get cheatLists => 'Listor';
+  @override
+  String get cheatChecklists => 'Checklistor';
+  @override
+  String get cheatQuotes => 'Citat';
+  @override
+  String get cheatLinks => 'Länkar';
+  @override
+  String get cheatWikilinks => 'Länkar till anteckningar';
+  @override
+  String get cheatEmbeds => 'Bilder och inbäddningar';
+  @override
+  String get cheatTags => 'Taggar';
+  @override
+  String get cheatInlineCode => 'Kod i en mening';
+  @override
+  String get cheatCodeBlocks => 'Kodblock';
+  @override
+  String get cheatMath => 'Matematik';
+  @override
+  String get cheatTables => 'Tabeller';
+  @override
+  String get cheatFootnotes => 'Fotnoter';
+  @override
+  String get cheatRule => 'Horisontell linje';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Mallplatshållare';
+  @override
   String get toolbarHeading => 'Rubrik';
   @override
   String get toolbarList => 'Lista';
