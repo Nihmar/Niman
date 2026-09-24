@@ -2028,10 +2028,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final row = _rowHeight;
     final buffer = widget.buffer;
     if (_folds.isEmpty) {
-      return BlockHeightMap(
+      // A line's estimate when a frame first comes near it, a chunk of lines
+      // at a time: the map is built on the frame that opens the note, and
+      // asking every line was 2.9 M estimates on the 246 MB stress note.
+      return BlockHeightMap.lazy(
         count: lineCount,
         estimate: (line) =>
             _estimateOf(buffer.lineLengthAt(line), columns, row),
+        estimateSpan: (first, end) =>
+            _estimateSpanOf(buffer, first, end, columns, row),
       );
     }
     return BlockHeightMap(
@@ -2091,6 +2096,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The height of a line [length] long, [columns] to a row of [row].
   static double _estimateOf(int length, double columns, double row) =>
       (length == 0 ? 1 : (length / columns).ceil()) * row;
+
+  /// The height of lines `[first, end)` of [buffer] before they are asked
+  /// one by one: from their characters alone, O(log lines).
+  ///
+  /// A line of `l` characters takes `l / columns` rows rounded up — half a
+  /// row more than the division, on average — and one row at least. So
+  /// lines holding `c` characters between them take about `c / columns +
+  /// lines / 2` rows, and never fewer than one each.
+  static double _estimateSpanOf(
+    SourceBuffer buffer,
+    int first,
+    int end,
+    double columns,
+    double row,
+  ) {
+    final lines = end - first;
+    final to = end < buffer.lineCount
+        ? buffer.offsetOfLine(end)
+        : buffer.length;
+    // The terminators are not text: about one character a line.
+    final text = to - buffer.offsetOfLine(first) - lines;
+    final rows = text / columns + lines / 2;
+    return (rows < lines ? lines : rows) * row;
+  }
 
   /// Roughly how many monospace characters fit a line at this width and size.
   ///
