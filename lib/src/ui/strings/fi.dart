@@ -301,6 +301,23 @@ final class FinnishStrings extends Strings {
   String get themeEditorDiscard => 'Hylkää';
   @override
   String get themeEditorBadColor => 'Käytä muotoa #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Vie';
+  @override
+  String themeExportDone(String where) => 'Teema viety kohteeseen $where';
+  @override
+  String themeFileFailed(String error) => 'Teemaa ei voitu siirtää: $error';
+  @override
+  String get themeImport => 'Tuo';
+  @override
+  String get themeImportInvalid => 'Tämä tiedosto ei ole Niman-teema';
+  @override
+  String themeImportVersion(int version) =>
+      'Tämä teema on uudemmasta Nimanista (versio $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Tiedosto ei anna väriä kohteelle „$role“';
 
   // Settings: text size (T-M6-12).
   @override

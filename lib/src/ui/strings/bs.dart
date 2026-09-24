@@ -306,6 +306,23 @@ final class BosnianStrings extends Strings {
   String get themeEditorDiscard => 'Odbaci';
   @override
   String get themeEditorBadColor => 'Koristi #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Izvezi';
+  @override
+  String themeExportDone(String where) => 'Tema izvezena u $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Temu nije bilo moguće prenijeti: $error';
+  @override
+  String get themeImport => 'Uvezi';
+  @override
+  String get themeImportInvalid => 'Ta datoteka nije Niman tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Ova tema je iz novije verzije Nimana (verzija $version)';
+  @override
+  String themeImportBadRole(String role) => 'Datoteka ne daje boju za „$role“';
 
   // Settings: text size (T-M6-12).
   @override

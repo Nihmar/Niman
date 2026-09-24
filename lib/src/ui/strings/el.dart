@@ -308,6 +308,24 @@ final class GreekStrings extends Strings {
   String get themeEditorDiscard => 'Απόρριψη';
   @override
   String get themeEditorBadColor => 'Χρησιμοποίησε #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Εξαγωγή';
+  @override
+  String themeExportDone(String where) => 'Το θέμα εξήχθη στο $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Το θέμα δεν μπόρεσε να μεταφερθεί: $error';
+  @override
+  String get themeImport => 'Εισαγωγή';
+  @override
+  String get themeImportInvalid => 'Το αρχείο δεν είναι θέμα του Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Αυτό το θέμα προέρχεται από νεότερο Niman (έκδοση $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Το αρχείο δεν δίνει χρώμα για «$role»';
 
   // Settings: text size (T-M6-12).
   @override

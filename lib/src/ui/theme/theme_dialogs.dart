@@ -29,6 +29,7 @@ Future<String?> showThemeNameDialog(
   required String title,
   required String initial,
   required Set<String> takenNames,
+  String? description,
 }) {
   return showDialog<String>(
     context: context,
@@ -36,6 +37,7 @@ Future<String?> showThemeNameDialog(
       title: title,
       initial: initial,
       takenNames: takenNames,
+      description: description,
     ),
   );
 }
@@ -110,11 +112,13 @@ final class _ThemeNameDialog extends StatefulWidget {
     required this.title,
     required this.initial,
     required this.takenNames,
+    this.description,
   });
 
   final String title;
   final String initial;
   final Set<String> takenNames;
+  final String? description;
 
   @override
   State<_ThemeNameDialog> createState() => _ThemeNameDialogState();
@@ -146,13 +150,24 @@ final class _ThemeNameDialogState extends State<_ThemeNameDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final description = widget.description;
     return AlertDialog(
       title: Text(widget.title),
-      content: _ThemeNameField(
-        controller: _controller,
-        error: _error,
-        onChanged: (_) => setState(() => _error = null),
-        onSubmitted: _submit,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (description != null) ...[
+            Text(description),
+            const SizedBox(height: 12),
+          ],
+          _ThemeNameField(
+            controller: _controller,
+            error: _error,
+            onChanged: (_) => setState(() => _error = null),
+            onSubmitted: _submit,
+          ),
+        ],
       ),
       actions: _actions(
         context: context,

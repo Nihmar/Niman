@@ -300,6 +300,22 @@ final class NorwegianStrings extends Strings {
   String get themeEditorDiscard => 'Forkast';
   @override
   String get themeEditorBadColor => 'Bruk #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksporter';
+  @override
+  String themeExportDone(String where) => 'Temaet er eksportert til $where';
+  @override
+  String themeFileFailed(String error) => 'Temaet kunne ikke flyttes: $error';
+  @override
+  String get themeImport => 'Importer';
+  @override
+  String get themeImportInvalid => 'Denne filen er ikke et Niman-tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Dette temaet er fra en nyere Niman (versjon $version)';
+  @override
+  String themeImportBadRole(String role) => 'Filen gir ingen farge for «$role»';
 
   // Settings: text size (T-M6-12).
   @override

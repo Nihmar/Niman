@@ -304,6 +304,24 @@ final class MacedonianStrings extends Strings {
   String get themeEditorDiscard => 'Отфрли';
   @override
   String get themeEditorBadColor => 'Користи #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Извези';
+  @override
+  String themeExportDone(String where) => 'Темата е извезена во $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Темата не можеше да се пренесе: $error';
+  @override
+  String get themeImport => 'Увези';
+  @override
+  String get themeImportInvalid => 'Оваа датотека не е тема на Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Оваа тема е од понова верзија на Niman (верзија $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Датотеката не дава боја за „$role“';
 
   // Settings: text size (T-M6-12).
   @override

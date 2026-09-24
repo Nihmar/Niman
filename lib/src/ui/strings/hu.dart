@@ -301,6 +301,24 @@ final class HungarianStrings extends Strings {
   String get themeEditorDiscard => 'Elvetés';
   @override
   String get themeEditorBadColor => 'Használj #RRGGBB alakot';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportálás';
+  @override
+  String themeExportDone(String where) => 'Motívum exportálva ide: $where';
+  @override
+  String themeFileFailed(String error) =>
+      'A motívumot nem sikerült átmozgatni: $error';
+  @override
+  String get themeImport => 'Importálás';
+  @override
+  String get themeImportInvalid => 'Ez a fájl nem Niman-motívum';
+  @override
+  String themeImportVersion(int version) =>
+      'Ez a motívum újabb Nimanból származik (verzió: $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'A fájl nem ad színt ehhez: „$role”';
 
   // Settings: text size (T-M6-12).
   @override

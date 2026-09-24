@@ -303,6 +303,22 @@ final class UkrainianStrings extends Strings {
   String get themeEditorDiscard => 'Скасувати';
   @override
   String get themeEditorBadColor => 'Використайте #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Експортувати';
+  @override
+  String themeExportDone(String where) => 'Тему експортовано до $where';
+  @override
+  String themeFileFailed(String error) => 'Тему не вдалося перенести: $error';
+  @override
+  String get themeImport => 'Імпортувати';
+  @override
+  String get themeImportInvalid => 'Цей файл не є темою Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Ця тема з новішого Niman (версія $version)';
+  @override
+  String themeImportBadRole(String role) => 'Файл не дає кольору для «$role»';
 
   // Settings: text size (T-M6-12).
   @override

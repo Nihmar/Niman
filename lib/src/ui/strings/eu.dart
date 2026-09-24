@@ -299,6 +299,23 @@ final class BasqueStrings extends Strings {
   String get themeEditorDiscard => 'Baztertu';
   @override
   String get themeEditorBadColor => 'Erabili #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Esportatu';
+  @override
+  String themeExportDone(String where) => 'Gaia hona esportatu da: $where';
+  @override
+  String themeFileFailed(String error) => 'Ezin izan da gaia mugitu: $error';
+  @override
+  String get themeImport => 'Inportatu';
+  @override
+  String get themeImportInvalid => 'Fitxategi hori ez da Niman gaia';
+  @override
+  String themeImportVersion(int version) =>
+      'Gai hori Niman berriago batetik dator (bertsioa $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Fitxategiak ez du kolorearik ematen «$role»-rentzat';
 
   // Settings: text size (T-M6-12).
   @override

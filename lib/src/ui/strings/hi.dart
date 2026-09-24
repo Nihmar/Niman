@@ -291,6 +291,24 @@ final class HindiStrings extends Strings {
   String get themeEditorDiscard => 'छोड़ें';
   @override
   String get themeEditorBadColor => '#RRGGBB इस्तेमाल करें';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'निर्यात करें';
+  @override
+  String themeExportDone(String where) => 'थीम $where पर निर्यात की गई';
+  @override
+  String themeFileFailed(String error) =>
+      'थीम को स्थानांतरित नहीं किया जा सका: $error';
+  @override
+  String get themeImport => 'आयात करें';
+  @override
+  String get themeImportInvalid => 'यह फ़ाइल Niman थीम नहीं है';
+  @override
+  String themeImportVersion(int version) =>
+      'यह थीम नए Niman से है (संस्करण $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'फ़ाइल “$role” के लिए कोई रंग नहीं देती';
 
   // Settings: text size (T-M6-12).
   @override

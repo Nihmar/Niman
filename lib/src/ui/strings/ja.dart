@@ -278,6 +278,22 @@ final class JapaneseStrings extends Strings {
   String get themeEditorDiscard => '破棄';
   @override
   String get themeEditorBadColor => '#RRGGBB の形式で入力';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => '書き出す';
+  @override
+  String themeExportDone(String where) => '$where に書き出しました';
+  @override
+  String themeFileFailed(String error) => 'テーマを移動できませんでした: $error';
+  @override
+  String get themeImport => '読み込む';
+  @override
+  String get themeImportInvalid => 'このファイルは Niman のテーマではありません';
+  @override
+  String themeImportVersion(int version) =>
+      'このテーマは新しい Niman のものです (バージョン $version)';
+  @override
+  String themeImportBadRole(String role) => '「$role」の色がファイルにありません';
 
   // Settings: text size (T-M6-12).
   @override

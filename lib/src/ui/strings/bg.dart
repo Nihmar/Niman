@@ -307,6 +307,23 @@ final class BulgarianStrings extends Strings {
   String get themeEditorDiscard => 'Откажи';
   @override
   String get themeEditorBadColor => 'Използвайте #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Изнасяне';
+  @override
+  String themeExportDone(String where) => 'Темата е изнесена в $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Темата не може да бъде преместена: $error';
+  @override
+  String get themeImport => 'Внасяне';
+  @override
+  String get themeImportInvalid => 'Този файл не е тема на Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Тази тема е от по-нова версия на Niman (версия $version)';
+  @override
+  String themeImportBadRole(String role) => 'Файлът не дава цвят за „$role“';
 
   // Settings: text size (T-M6-12).
   @override

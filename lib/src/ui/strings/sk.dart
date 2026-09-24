@@ -304,6 +304,23 @@ final class SlovakStrings extends Strings {
   String get themeEditorDiscard => 'Zahodiť';
   @override
   String get themeEditorBadColor => 'Použite #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportovať';
+  @override
+  String themeExportDone(String where) => 'Motív exportovaný do $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Motív sa nepodarilo preniesť: $error';
+  @override
+  String get themeImport => 'Importovať';
+  @override
+  String get themeImportInvalid => 'Tento súbor nie je motív Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Tento motív je z novšieho Nimanu (verzia $version)';
+  @override
+  String themeImportBadRole(String role) => 'Súbor neuvádza farbu pre „$role“';
 
   // Settings: text size (T-M6-12).
   @override

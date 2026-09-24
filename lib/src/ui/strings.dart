@@ -240,6 +240,14 @@ final class AppStrings {
   static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;
   static String get themeEditorDiscard => _s.themeEditorDiscard;
   static String get themeEditorBadColor => _s.themeEditorBadColor;
+  static String get themeExport => _s.themeExport;
+  static String themeExportDone(String where) => _s.themeExportDone(where);
+  static String themeFileFailed(String error) => _s.themeFileFailed(error);
+  static String get themeImport => _s.themeImport;
+  static String get themeImportInvalid => _s.themeImportInvalid;
+  static String themeImportVersion(int version) =>
+      _s.themeImportVersion(version);
+  static String themeImportBadRole(String role) => _s.themeImportBadRole(role);
 
   /// The device-colors palette. Named for what it does rather than for
   /// Material You: on a device that offers nothing it is the colors the

@@ -301,6 +301,23 @@ final class IcelandicStrings extends Strings {
   String get themeEditorDiscard => 'Henda';
   @override
   String get themeEditorBadColor => 'Nota #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Flytja út';
+  @override
+  String themeExportDone(String where) => 'Þema flutt út í $where';
+  @override
+  String themeFileFailed(String error) => 'Ekki tókst að flytja þemað: $error';
+  @override
+  String get themeImport => 'Flytja inn';
+  @override
+  String get themeImportInvalid => 'Þessi skrá er ekki Niman-þema';
+  @override
+  String themeImportVersion(int version) =>
+      'Þetta þema kemur frá nýrri Niman (útgáfa $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Skráin gefur engan lit fyrir „$role“';
 
   // Settings: text size (T-M6-12).
   @override

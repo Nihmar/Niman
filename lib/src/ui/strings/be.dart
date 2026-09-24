@@ -301,6 +301,22 @@ final class BelarusianStrings extends Strings {
   String get themeEditorDiscard => 'Адмяніць';
   @override
   String get themeEditorBadColor => 'Выкарыстайце #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Экспарт';
+  @override
+  String themeExportDone(String where) => 'Тэма экспартавана ў $where';
+  @override
+  String themeFileFailed(String error) => 'Тэму не ўдалося перанесці: $error';
+  @override
+  String get themeImport => 'Імпарт';
+  @override
+  String get themeImportInvalid => 'Гэты файл не з’яўляецца тэмай Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Гэта тэма з больш новай версіі Niman (версія $version)';
+  @override
+  String themeImportBadRole(String role) => 'Файл не дае колер для «$role»';
 
   // Settings: text size (T-M6-12).
   @override

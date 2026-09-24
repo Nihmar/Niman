@@ -298,6 +298,23 @@ final class EstonianStrings extends Strings {
   String get themeEditorDiscard => 'Loobu';
   @override
   String get themeEditorBadColor => 'Kasuta #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Ekspordi';
+  @override
+  String themeExportDone(String where) => 'Teema eksporditud asukohta $where';
+  @override
+  String themeFileFailed(String error) => 'Teemat ei saanud teisaldada: $error';
+  @override
+  String get themeImport => 'Impordi';
+  @override
+  String get themeImportInvalid => 'See fail ei ole Niman teema';
+  @override
+  String themeImportVersion(int version) =>
+      'See teema on uuemast Nimanist (versioon $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Fail ei anna värve rollile „$role“';
 
   // Settings: text size (T-M6-12).
   @override

@@ -144,6 +144,13 @@ abstract base class Strings {
   String get themeEditorDiscardBody;
   String get themeEditorDiscard;
   String get themeEditorBadColor;
+  String get themeExport;
+  String themeExportDone(String where);
+  String themeFileFailed(String error);
+  String get themeImport;
+  String get themeImportInvalid;
+  String themeImportVersion(int version);
+  String themeImportBadRole(String role);
   String get themePaletteSystem;
 
   // Settings: text size (T-M6-12).

@@ -305,6 +305,23 @@ final class SerbianStrings extends Strings {
   String get themeEditorDiscard => 'Одбаци';
   @override
   String get themeEditorBadColor => 'Користи #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Извези';
+  @override
+  String themeExportDone(String where) => 'Тема извезена у $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Тему није било могуће пренети: $error';
+  @override
+  String get themeImport => 'Увези';
+  @override
+  String get themeImportInvalid => 'Ова датотека није Niman тема';
+  @override
+  String themeImportVersion(int version) =>
+      'Ова тема је из новијег Niman-а (верзија $version)';
+  @override
+  String themeImportBadRole(String role) => 'Датотека не даје боју за „$role“';
 
   // Settings: text size (T-M6-12).
   @override

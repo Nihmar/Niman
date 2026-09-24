@@ -303,6 +303,22 @@ final class CzechStrings extends Strings {
   String get themeEditorDiscard => 'Zahodit';
   @override
   String get themeEditorBadColor => 'Použijte #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportovat';
+  @override
+  String themeExportDone(String where) => 'Motiv exportován do $where';
+  @override
+  String themeFileFailed(String error) => 'Motiv se nepodařilo přenést: $error';
+  @override
+  String get themeImport => 'Importovat';
+  @override
+  String get themeImportInvalid => 'Tento soubor není motiv Nimanu';
+  @override
+  String themeImportVersion(int version) =>
+      'Tento motiv je z novějšího Nimanu (verze $version)';
+  @override
+  String themeImportBadRole(String role) => 'Soubor neuvádí barvu pro „$role“';
 
   // Settings: text size (T-M6-12).
   @override

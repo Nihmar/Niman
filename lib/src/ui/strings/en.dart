@@ -301,6 +301,24 @@ final class EnglishStrings extends Strings {
   String get themeEditorDiscard => 'Discard';
   @override
   String get themeEditorBadColor => 'Use #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Export';
+  @override
+  String themeExportDone(String where) => 'Theme exported to $where';
+  @override
+  String themeFileFailed(String error) =>
+      'The theme could not be moved: $error';
+  @override
+  String get themeImport => 'Import';
+  @override
+  String get themeImportInvalid => 'That file is not a Niman theme';
+  @override
+  String themeImportVersion(int version) =>
+      'That theme comes from a newer Niman (version $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'The file gives no color for “$role”';
 
   // Settings: text size (T-M6-12).
   @override

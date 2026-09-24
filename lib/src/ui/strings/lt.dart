@@ -303,6 +303,22 @@ final class LithuanianStrings extends Strings {
   String get themeEditorDiscard => 'Atmesti';
   @override
   String get themeEditorBadColor => 'Naudokite #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksportuoti';
+  @override
+  String themeExportDone(String where) => 'Tema eksportuota į $where';
+  @override
+  String themeFileFailed(String error) => 'Temos perkelti nepavyko: $error';
+  @override
+  String get themeImport => 'Importuoti';
+  @override
+  String get themeImportInvalid => 'Šis failas nėra Niman tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Ši tema iš naujesnio Niman (versija $version)';
+  @override
+  String themeImportBadRole(String role) => 'Failas nenurodo spalvos „$role“';
 
   // Settings: text size (T-M6-12).
   @override
