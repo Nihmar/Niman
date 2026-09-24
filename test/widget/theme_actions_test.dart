@@ -9,6 +9,7 @@ import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_themes.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
+import 'package:niman/src/ui/theme/theme_editor_screen.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/sample_themes.dart';
@@ -90,6 +91,15 @@ void main() {
     // It is stored, and it is what the app wears now.
     expect(await controller.theme, CustomAppTheme(theme));
     expect(AppThemes.theme, CustomAppTheme(theme));
+    // It opens in the editor, to be given its own colors.
+    final editor = tester.widget<ThemeEditorScreen>(
+      find.byType(ThemeEditorScreen),
+    );
+    expect(editor.theme.id, theme.id);
+    // Back from it, the list has it, worn.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(ThemeEditorScreen), findsNothing);
     expect(find.text('Copy of Gruvbox'), findsOneWidget);
     expect(
       find.descendant(
