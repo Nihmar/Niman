@@ -80,6 +80,53 @@ void main() {
     expect(empty.parent, 0);
   });
 
+  group('the first index, the tree first', () {
+    test('writes the tree without reading a note, and the scan after it '
+        'reads them all', () async {
+      expect(await indexer.indexTreeFirst(root.path), isTrue);
+      final rows = await dao.allRows();
+      expect(rows.map((n) => n.path).toSet(), {
+        'note1.md',
+        'note2.md',
+        'docs',
+        'docs/doc1.md',
+        'empty_folder',
+      });
+      // Not read: no digest, and nothing to search.
+      expect(rows.every((n) => n.sha256 == null), isTrue);
+      final searchable = await db
+          .customSelect('SELECT count(*) AS c FROM notes_fts')
+          .getSingle();
+      expect(searchable.read<int>('c'), 0);
+
+      await indexer.fullScan(root.path);
+      final read = await dao.allRows();
+      expect(
+        read.where((n) => !n.isDir).every((n) => n.sha256 != null),
+        isTrue,
+      );
+      final indexed = await db
+          .customSelect('SELECT count(*) AS c FROM notes_fts')
+          .getSingle();
+      expect(indexed.read<int>('c'), 3);
+    });
+
+    test(
+      'is the empty index alone: one with rows is scanned as ever',
+      () async {
+        await indexer.fullScan(root.path);
+        final before = await dao.allRows();
+        expect(await indexer.indexTreeFirst(root.path), isFalse);
+        final after = await dao.allRows();
+        expect(
+          after.map((n) => n.sha256).toList(),
+          before.map((n) => n.sha256).toList(),
+          reason: 'the digests the rename pairing keys on are kept',
+        );
+      },
+    );
+  });
+
   test('a scan landing mid-write never indexes the atomic temp file', () async {
     // The temp file as it exists between the write and the rename.
     final target = File(p.join(root.path, 'inflight.md'));

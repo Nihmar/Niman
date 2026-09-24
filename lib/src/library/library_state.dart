@@ -431,7 +431,14 @@ final class LibraryController implements LibrarySession {
         indexer: indexer,
         config: config,
       );
+      // A library indexed for the first time opens on its tree, and its
+      // notes are read behind it: the search, the tags and the links fill
+      // in as they are read.
+      var contentOwed = false;
       if (blockingScan) {
+        contentOwed = await indexer.indexTreeFirst(abs);
+      }
+      if (blockingScan && !contentOwed) {
         // Only here: the first index is the scan long enough to be worth
         // watching, and reporting costs a message per note.
         indexer.onProgress = _onIndexProgress;
@@ -506,6 +513,7 @@ final class LibraryController implements LibrarySession {
       if (!blockingScan) {
         _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
       }
+      if (contentOwed) unawaited(_indexContents(abs));
       _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
       _log.error('open failed: $error');
@@ -1290,6 +1298,21 @@ final class LibraryController implements LibrarySession {
       await autoEmptyTrash(ops, maxAgeDays: days);
     } on Object catch (error) {
       _log.error('auto-empty failed: $error');
+    }
+  }
+
+  /// Reads the notes of a library whose first index wrote the tree alone
+  /// (`Indexer.indexTreeFirst`), once it is open.
+  Future<void> _indexContents(String abs) async {
+    final indexer = _indexer;
+    if (indexer == null || phase != LibraryPhase.ready) return;
+    try {
+      _log.info('first index: reading the notes of $abs');
+      await indexer.fullScan(abs);
+      _log.info('first index complete');
+    } on Object catch (error) {
+      // The periodic rescan finds what is still missing and reads it.
+      _log.error('first index failed: $error');
     }
   }
 
