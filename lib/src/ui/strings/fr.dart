@@ -268,6 +268,24 @@ final class FrenchStrings extends Strings {
   String get settingsSectionThemes => 'Thèmes';
   @override
   String get themesInUse => 'Utilisé';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nouveau thème';
+  @override
+  String get themeNewName => 'Nom';
+  @override
+  String get themeNewStartFrom => 'Partir de';
+  @override
+  String get themeNewRandom => 'Couleurs aléatoires';
+  @override
+  String get themeNameTaken => 'Un thème portant ce nom existe déjà';
+  @override
+  String themeDeleteBody(String name) =>
+      'Supprimer « $name » ? Ses couleurs seront perdues définitivement.';
+  @override
+  String get themeDuplicate => 'Dupliquer';
+  @override
+  String get themeMenuTooltip => 'Actions du thème';
 
   // Settings: text size (T-M6-12).
   @override

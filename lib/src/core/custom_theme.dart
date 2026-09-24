@@ -65,6 +65,19 @@ final class CustomTheme {
   int get hashCode => Object.hash(id, name, day, night);
 }
 
+/// [base] with a number appended until it is not in [taken]: what a copy
+/// of a theme is called when nobody is asked ("Gruvbox 2").
+///
+/// [taken] holds the names already in the list, lowercased.
+String uniqueThemeName(String base, Set<String> taken) {
+  final clean = CustomTheme.cleanName(base);
+  if (!taken.contains(clean.toLowerCase())) return clean;
+  for (var number = 2; ; number++) {
+    final candidate = '$clean $number';
+    if (!taken.contains(candidate.toLowerCase())) return candidate;
+  }
+}
+
 /// An id for a theme the app is about to create.
 ///
 /// Unique on this installation without a table read: the clock alone is

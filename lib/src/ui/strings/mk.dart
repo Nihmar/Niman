@@ -266,6 +266,24 @@ final class MacedonianStrings extends Strings {
   String get settingsSectionThemes => 'Теми';
   @override
   String get themesInUse => 'Се користи';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Нова тема';
+  @override
+  String get themeNewName => 'Име';
+  @override
+  String get themeNewStartFrom => 'Почеток од';
+  @override
+  String get themeNewRandom => 'Случајни бои';
+  @override
+  String get themeNameTaken => 'Веќе постои тема со тоа име';
+  @override
+  String themeDeleteBody(String name) =>
+      'Да се избрише „$name“? Неговите бои исчезнуваат засекогаш.';
+  @override
+  String get themeDuplicate => 'Дуплирај';
+  @override
+  String get themeMenuTooltip => 'Дејства за тема';
 
   // Settings: text size (T-M6-12).
   @override

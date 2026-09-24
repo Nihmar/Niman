@@ -266,6 +266,24 @@ final class CroatianStrings extends Strings {
   String get settingsSectionThemes => 'Teme';
   @override
   String get themesInUse => 'U upotrebi';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nova tema';
+  @override
+  String get themeNewName => 'Naziv';
+  @override
+  String get themeNewStartFrom => 'Početak od';
+  @override
+  String get themeNewRandom => 'Slučajne boje';
+  @override
+  String get themeNameTaken => 'Tema s tim nazivom već postoji';
+  @override
+  String themeDeleteBody(String name) =>
+      'Izbrisati „$name“? Njegove boje nestaju zauvijek.';
+  @override
+  String get themeDuplicate => 'Dupliciraj';
+  @override
+  String get themeMenuTooltip => 'Radnje za temu';
 
   // Settings: text size (T-M6-12).
   @override

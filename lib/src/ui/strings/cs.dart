@@ -265,6 +265,24 @@ final class CzechStrings extends Strings {
   String get settingsSectionThemes => 'Motivy';
   @override
   String get themesInUse => 'Používá se';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nový motiv';
+  @override
+  String get themeNewName => 'Název';
+  @override
+  String get themeNewStartFrom => 'Začít od';
+  @override
+  String get themeNewRandom => 'Náhodné barvy';
+  @override
+  String get themeNameTaken => 'Motiv s tímto názvem už existuje';
+  @override
+  String themeDeleteBody(String name) =>
+      'Smazat „$name“? Jeho barvy zmizí navždy.';
+  @override
+  String get themeDuplicate => 'Duplikovat';
+  @override
+  String get themeMenuTooltip => 'Akce motivu';
 
   // Settings: text size (T-M6-12).
   @override

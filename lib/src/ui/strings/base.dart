@@ -127,6 +127,14 @@ abstract base class Strings {
   /// theme in use (issue #269).
   String get settingsSectionThemes;
   String get themesInUse;
+  String get themeNewTitle;
+  String get themeNewName;
+  String get themeNewStartFrom;
+  String get themeNewRandom;
+  String get themeNameTaken;
+  String themeDeleteBody(String name);
+  String get themeDuplicate;
+  String get themeMenuTooltip;
   String get themePaletteSystem;
 
   // Settings: text size (T-M6-12).

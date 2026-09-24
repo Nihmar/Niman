@@ -261,6 +261,24 @@ final class LatvianStrings extends Strings {
   String get settingsSectionThemes => 'Tēmas';
   @override
   String get themesInUse => 'Lieto';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Jauna tēma';
+  @override
+  String get themeNewName => 'Nosaukums';
+  @override
+  String get themeNewStartFrom => 'Sākt no';
+  @override
+  String get themeNewRandom => 'Nejaušas krāsas';
+  @override
+  String get themeNameTaken => 'Tēma ar šādu nosaukumu jau ir';
+  @override
+  String themeDeleteBody(String name) =>
+      'Dzēst „$name“? Tās krāsas pazudīs neatgriezeniski.';
+  @override
+  String get themeDuplicate => 'Dublēt';
+  @override
+  String get themeMenuTooltip => 'Tēmas darbības';
 
   // Settings: text size (T-M6-12).
   @override

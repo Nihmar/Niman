@@ -268,6 +268,24 @@ final class BulgarianStrings extends Strings {
   String get settingsSectionThemes => 'Теми';
   @override
   String get themesInUse => 'Използва се';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Нова тема';
+  @override
+  String get themeNewName => 'Име';
+  @override
+  String get themeNewStartFrom => 'Начало от';
+  @override
+  String get themeNewRandom => 'Случайни цветове';
+  @override
+  String get themeNameTaken => 'Вече има тема с това име';
+  @override
+  String themeDeleteBody(String name) =>
+      'Да изтриете „$name“? Цветовете му ще изчезнат завинаги.';
+  @override
+  String get themeDuplicate => 'Дублиране';
+  @override
+  String get themeMenuTooltip => 'Действия с тема';
 
   // Settings: text size (T-M6-12).
   @override

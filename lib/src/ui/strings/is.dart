@@ -263,6 +263,24 @@ final class IcelandicStrings extends Strings {
   String get settingsSectionThemes => 'Þemu';
   @override
   String get themesInUse => 'Í notkun';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nýtt þema';
+  @override
+  String get themeNewName => 'Heiti';
+  @override
+  String get themeNewStartFrom => 'Byrja frá';
+  @override
+  String get themeNewRandom => 'Slemmir litir';
+  @override
+  String get themeNameTaken => 'Þema með þessu heiti er þegar til';
+  @override
+  String themeDeleteBody(String name) =>
+      'Eyða „$name“? Litirnir hverfa fyrir fullt og allt.';
+  @override
+  String get themeDuplicate => 'Tvífalda';
+  @override
+  String get themeMenuTooltip => 'Aðgerðir þema';
 
   // Settings: text size (T-M6-12).
   @override

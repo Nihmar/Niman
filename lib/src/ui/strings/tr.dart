@@ -257,6 +257,24 @@ final class TurkishStrings extends Strings {
   String get settingsSectionThemes => 'Temalar';
   @override
   String get themesInUse => 'Kullanımda';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Yeni tema';
+  @override
+  String get themeNewName => 'Ad';
+  @override
+  String get themeNewStartFrom => 'Şundan başla';
+  @override
+  String get themeNewRandom => 'Rastgele renkler';
+  @override
+  String get themeNameTaken => 'Bu adla bir tema zaten var';
+  @override
+  String themeDeleteBody(String name) =>
+      '“$name” silinsin mi? Renkleri kalıcı olarak kaybolur.';
+  @override
+  String get themeDuplicate => 'Çoğalt';
+  @override
+  String get themeMenuTooltip => 'Tema işlemleri';
 
   // Settings: text size (T-M6-12).
   @override

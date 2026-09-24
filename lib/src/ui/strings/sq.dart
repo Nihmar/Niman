@@ -262,6 +262,24 @@ final class AlbanianStrings extends Strings {
   String get settingsSectionThemes => 'Temat';
   @override
   String get themesInUse => 'Në përdorim';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Temë e re';
+  @override
+  String get themeNewName => 'Emri';
+  @override
+  String get themeNewStartFrom => 'Nisur nga';
+  @override
+  String get themeNewRandom => 'Ngjyra të rastësishme';
+  @override
+  String get themeNameTaken => 'Ekziston tashmë një temë me këtë emër';
+  @override
+  String themeDeleteBody(String name) =>
+      'Të fshihet „$name“? Ngjyrat e tij humbin përgjithmonë.';
+  @override
+  String get themeDuplicate => 'Dyfisho';
+  @override
+  String get themeMenuTooltip => 'Veprime për temën';
 
   // Settings: text size (T-M6-12).
   @override

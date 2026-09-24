@@ -263,6 +263,24 @@ final class EnglishStrings extends Strings {
   String get settingsSectionThemes => 'Themes';
   @override
   String get themesInUse => 'In use';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'New theme';
+  @override
+  String get themeNewName => 'Name';
+  @override
+  String get themeNewStartFrom => 'Start from';
+  @override
+  String get themeNewRandom => 'Random colors';
+  @override
+  String get themeNameTaken => 'A theme with this name already exists';
+  @override
+  String themeDeleteBody(String name) =>
+      'Delete “$name”? Its colors are gone for good.';
+  @override
+  String get themeDuplicate => 'Duplicate';
+  @override
+  String get themeMenuTooltip => 'Theme actions';
 
   // Settings: text size (T-M6-12).
   @override

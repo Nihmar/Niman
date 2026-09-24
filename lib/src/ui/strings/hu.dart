@@ -262,6 +262,24 @@ final class HungarianStrings extends Strings {
   String get settingsSectionThemes => 'Témák';
   @override
   String get themesInUse => 'Használatban';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Új motívum';
+  @override
+  String get themeNewName => 'Név';
+  @override
+  String get themeNewStartFrom => 'Kiindulás';
+  @override
+  String get themeNewRandom => 'Véletlen színek';
+  @override
+  String get themeNameTaken => 'Már van ilyen nevű motívum';
+  @override
+  String themeDeleteBody(String name) =>
+      'Törli a(z) „$name” motívumot? A színei végleg elvesznek.';
+  @override
+  String get themeDuplicate => 'Duplikálás';
+  @override
+  String get themeMenuTooltip => 'Motívumműveletek';
 
   // Settings: text size (T-M6-12).
   @override

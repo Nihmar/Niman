@@ -260,6 +260,24 @@ final class EstonianStrings extends Strings {
   String get settingsSectionThemes => 'Teemad';
   @override
   String get themesInUse => 'Kasutusel';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Uus teema';
+  @override
+  String get themeNewName => 'Nimi';
+  @override
+  String get themeNewStartFrom => 'Alusta';
+  @override
+  String get themeNewRandom => 'Juhuslikud värvid';
+  @override
+  String get themeNameTaken => 'Selle nimega teema on juba olemas';
+  @override
+  String themeDeleteBody(String name) =>
+      'Kas kustutada „$name“? Selle värvid kaovad jäädavalt.';
+  @override
+  String get themeDuplicate => 'Dubleeri';
+  @override
+  String get themeMenuTooltip => 'Teema toimingud';
 
   // Settings: text size (T-M6-12).
   @override

@@ -252,6 +252,24 @@ final class HindiStrings extends Strings {
   String get settingsSectionThemes => 'थीम';
   @override
   String get themesInUse => 'उपयोग में';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'नई थीम';
+  @override
+  String get themeNewName => 'नाम';
+  @override
+  String get themeNewStartFrom => 'से शुरू करें';
+  @override
+  String get themeNewRandom => 'यादृच्छिक रंग';
+  @override
+  String get themeNameTaken => 'इस नाम की थीम पहले से मौजूद है';
+  @override
+  String themeDeleteBody(String name) =>
+      '“$name” हटाएँ? इसके रंग हमेशा के लिए चले जाएँगे।';
+  @override
+  String get themeDuplicate => 'प्रतिलिपि बनाएँ';
+  @override
+  String get themeMenuTooltip => 'थीम क्रियाएँ';
 
   // Settings: text size (T-M6-12).
   @override
