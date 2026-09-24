@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/diff/diff_view.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:path/path.dart' as p;
 
 /// The kept versions of one note (issue #55, mockup H3): the current

@@ -154,6 +154,33 @@ class Workspaces extends Table {
   Set<Column> get primaryKey => {libraryPath};
 }
 
+/// A theme of the user's own making (issue #269): its name and the
+/// colors it fills in at day and at night, as JSON role maps.
+///
+/// App-side on purpose, like [KnownLibraries]: a theme is how this
+/// installation looks, so a copied library folder must not carry someone
+/// else's colors and a synced library must not spread them. The name is
+/// unique without regard to case (the index the migration creates), so
+/// the list is one row per name and an import can say which name is
+/// taken.
+@DataClassName('CustomThemeRow')
+class CustomThemes extends Table {
+  /// The id the theme carries; the primary key.
+  TextColumn get id => text()();
+
+  /// What the user calls it.
+  TextColumn get name => text()();
+
+  /// The daylight colors, as `ThemeColors.toJson` writes them.
+  TextColumn get dayColors => text().named('day_colors')();
+
+  /// The night colors, the same shape.
+  TextColumn get nightColors => text().named('night_colors')();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// A library the app knows about: one row per entry on the home screen
 /// (T-ML-04).
 ///
@@ -333,6 +360,7 @@ class SyncOps extends Table {
     SyncItems,
     SyncOps,
     Workspaces,
+    CustomThemes,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -340,7 +368,16 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 26;
+  int get schemaVersion => 27;
+
+  /// The index that makes a custom theme's name unique without regard to
+  /// case, and the name it answers to (issue #269).
+  ///
+  /// SQLite compares text case-sensitively by default, and the list shows
+  /// one row per name: `Niman` and `niman` are one theme to the user, so
+  /// the index says the same. Created by hand because
+  /// [Migrator.createTable] makes tables, not the indexes on them.
+  static const String customThemeNameIndex = 'custom_themes_name';
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -388,10 +425,15 @@ class AppDatabase extends _$AppDatabase {
   /// pre-v25 databases gain `pinned_commands` (issue #208), null: the
   /// palette opens on what was used lately, as it did, and pre-v26
   /// databases gain `close_to_tray` (issue #209), on: the window's × puts
-  /// Niman in the tray, where the reminders keep firing.
+  /// Niman in the tray, where the reminders keep firing, and pre-v27
+  /// databases gain `custom_themes` (issue #269), empty: a fresh install
+  /// has no themes of its own, and an upgrade keeps the shipped ones.
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      await _createCustomThemeNameIndex(m);
+    },
     onUpgrade: (m, from, to) async {
       if (from == 1) {
         await m.database.customStatement(
@@ -551,8 +593,20 @@ class AppDatabase extends _$AppDatabase {
           'BOOLEAN NOT NULL DEFAULT 1',
         );
       }
+      if (from < 27) {
+        await m.createTable(customThemes);
+        await _createCustomThemeNameIndex(m);
+      }
     },
   );
+
+  /// The unique index on a custom theme's name, for both the database
+  /// that is created fresh and the one being upgraded from v26.
+  static Future<void> _createCustomThemeNameIndex(Migrator m) =>
+      m.database.customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS $customThemeNameIndex '
+        'ON custom_themes (name COLLATE NOCASE)',
+      );
 
   /// The columns v17 hands to the libraries (T-ML-10).
   ///

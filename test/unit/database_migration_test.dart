@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/custom_theme_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
+
+import '../fakes/sample_themes.dart';
 
 /// The `library_settings` table as it stood through v13, before T-ML-02
 /// dropped it. A rewound database has to bring it back itself: the
@@ -86,6 +89,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 27) await db.customStatement('DROP TABLE custom_themes');
   if (version < 26) await drop('app_settings', 'close_to_tray');
   if (version < 25) await drop('app_settings', 'pinned_commands');
   if (version < 24) await drop('app_settings', 'key_map');
@@ -731,7 +735,7 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final repo = AppSettingsRepo(db);
       expect(await repo.themeBrightness(), AppBrightness.system);
-      expect(await repo.themePalette(), AppPalette.system);
+      expect(await repo.themeId(), 'system');
       expect((await db.select(db.appSettings).get()).single.language, 'it');
       await db.close();
     });
@@ -740,21 +744,23 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final repo = AppSettingsRepo(db);
       await repo.setThemeBrightness(AppBrightness.night);
-      await repo.setThemePalette(AppPalette.gruvbox);
+      await repo.setThemeId('gruvbox');
 
       expect(await repo.themeBrightness(), AppBrightness.night);
-      expect(await repo.themePalette(), AppPalette.gruvbox);
+      expect(await repo.themeId(), 'gruvbox');
       await db.close();
     });
 
-    test('a palette this build never heard of reads as the default', () async {
-      // A settings row written by a later build, or edited by hand.
+    test('a stored id is kept as it is, never rewritten', () async {
+      // The id reads as a theme in `themeFromId`; storing it is what the
+      // repo does, and an id from a later build has to survive untouched
+      // for that build to find it again.
       final db = AppDatabase(NativeDatabase(dbFile));
       await db.customStatement(
         'INSERT INTO app_settings (id, theme_palette) '
         "VALUES (1, 'dracula')",
       );
-      expect(await AppSettingsRepo(db).themePalette(), AppPalette.system);
+      expect(await AppSettingsRepo(db).themeId(), 'dracula');
       await db.close();
     });
   });
@@ -788,6 +794,7 @@ void main() {
         'sync_items',
         'sync_ops',
         'workspaces',
+        'custom_themes',
       ]),
     );
     expect(await db.select(db.appSettings).get(), isEmpty);
@@ -1056,6 +1063,38 @@ void main() {
       expect(await repo.closeToTray(), isTrue);
       await repo.setCloseToTray(enabled: false);
       expect(await repo.closeToTray(), isFalse);
+      await db.close();
+    });
+  });
+
+  group('v26 → v27: custom themes appear (#269)', () {
+    test('an existing install upgrades with none of its own', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 26);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path) '
+          "VALUES (1, '/lib/Work')",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = CustomThemeRepo(db);
+      // Empty: the shipped palettes are still there, the user's own start
+      // from nothing.
+      expect(await repo.list(), isEmpty);
+
+      final theme = sampleCustomTheme(id: 'mine', name: 'Mine');
+      await repo.save(theme);
+      expect(await repo.byId('mine'), theme);
+
+      // The name index the migration had to create by hand, since
+      // `createTable` makes tables and not the indexes on them.
+      await expectLater(
+        repo.save(sampleCustomTheme(id: 'other', name: 'mine')),
+        throwsA(isA<Exception>()),
+      );
       await db.close();
     });
   });

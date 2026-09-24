@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -45,7 +46,19 @@ final class _SettingsAppearanceScreenState
     extends State<SettingsAppearanceScreen> {
   AppLanguage _language = AppLanguage.system;
   AppBrightness _themeBrightness = AppBrightness.system;
-  AppPalette _themePalette = AppPalette.system;
+
+  /// The theme in use, for the palette row's label. The choice itself
+  /// moves to the Themes page (issue #269); until then this row offers
+  /// the shipped palettes and shows the worn one.
+  AppTheme _theme = const BuiltinAppTheme(AppPalette.niman);
+
+  /// Which shipped palette the row reads: the worn theme when it is one
+  /// of them, Niman's own colors when a custom theme is worn (a custom
+  /// theme's colors show on the Themes page, issue #269).
+  AppPalette get _shownPalette => switch (_theme) {
+    BuiltinAppTheme(:final palette) => palette,
+    CustomAppTheme() => AppPalette.niman,
+  };
   double _uiTextScale = defaultTextScale;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
@@ -72,7 +85,7 @@ final class _SettingsAppearanceScreenState
     final controller = widget.controller;
     final language = await controller.language;
     final themeBrightness = await controller.themeBrightness;
-    final themePalette = await controller.themePalette;
+    final theme = await controller.theme;
     final uiTextScale = await controller.uiTextScale;
     final splitRatio = await controller.splitRatio;
     final previewMode = await controller.previewMode;
@@ -83,7 +96,7 @@ final class _SettingsAppearanceScreenState
     setState(() {
       _language = language;
       _themeBrightness = themeBrightness;
-      _themePalette = themePalette;
+      _theme = theme;
       _uiTextScale = uiTextScale;
       _splitRatio = splitRatio;
       _splitLoaded = true;
@@ -114,12 +127,13 @@ final class _SettingsAppearanceScreenState
     }
   }
 
-  /// Persists the palette and applies it immediately.
+  /// Persists the theme and applies it immediately.
   Future<void> _setThemePalette(AppPalette palette) async {
-    await widget.controller.setThemePalette(palette);
-    AppThemes.palette = palette;
+    final chosen = BuiltinAppTheme(palette);
+    await widget.controller.setTheme(chosen);
+    AppThemes.theme = chosen;
     if (mounted) {
-      setState(() => _themePalette = palette);
+      setState(() => _theme = chosen);
     }
   }
 
@@ -167,7 +181,7 @@ final class _SettingsAppearanceScreenState
       dialogKey: const Key('theme-palette-dialog'),
       title: AppStrings.themePaletteTitle,
       subtitle: AppStrings.themePaletteSubtitle,
-      current: _themePalette,
+      current: _shownPalette,
       options: [
         for (final palette in AppPalette.values)
           SettingsOption(
@@ -264,7 +278,7 @@ final class _SettingsAppearanceScreenState
             child: SettingsValueRow(
               title: AppStrings.themePaletteTitle,
               subtitle: AppStrings.themePaletteSubtitle,
-              value: SettingsAppearanceScreen.paletteName(_themePalette),
+              value: SettingsAppearanceScreen.paletteName(_shownPalette),
               onTap: () => unawaited(_chooseThemePalette()),
             ),
           ),

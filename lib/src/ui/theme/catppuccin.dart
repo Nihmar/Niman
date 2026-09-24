@@ -6,7 +6,7 @@
 // picker. Mauve is the accent the project itself defaults to.
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 
 /// Catppuccin's chrome at [brightness].
 PaletteTokens catppuccinTokens(Brightness brightness) =>

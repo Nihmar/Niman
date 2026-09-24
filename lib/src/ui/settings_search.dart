@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -124,7 +125,10 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: appearance,
       rowKey: SettingsKeys.palette,
       value: () async =>
-          SettingsAppearanceScreen.paletteName(await controller.themePalette),
+          SettingsAppearanceScreen.paletteName(switch (await controller.theme) {
+            BuiltinAppTheme(:final palette) => palette,
+            CustomAppTheme() => AppPalette.niman,
+          }),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.palette),
     ),

@@ -5,13 +5,13 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
