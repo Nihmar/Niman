@@ -300,6 +300,39 @@ void main() {
       expect(d.kind, SyncActionKind.trashLocal);
     });
 
+    group('the library state files are restored, never deleted', () {
+      for (final path in libraryStateFiles) {
+        test('$path gone here comes back from the server', () {
+          final d = reconcilePath(
+            path: path,
+            local: null,
+            remote: dav(path: path),
+            row: row(path: path, base: null),
+            capabilities: full,
+          );
+          expect(d.kind, SyncActionKind.download);
+          expect(d.isDestructive, isFalse);
+        });
+
+        test('$path gone on the server goes back up', () {
+          final d = reconcilePath(
+            path: path,
+            local: disk(),
+            remote: null,
+            row: row(path: path, base: null),
+            capabilities: full,
+          );
+          expect(d.kind, SyncActionKind.upload);
+          expect(d.ifNoneMatch, isTrue);
+          expect(d.isDestructive, isFalse);
+        });
+      }
+
+      test('another dot file under .niman does not sync at all', () {
+        expect(isSyncablePath('.niman/workspace.json'), isFalse);
+      });
+    });
+
     test('deleted | changed → download again: the edit wins', () {
       final d = decide(remote: changedRemote, agreed: row(), caps: full);
       expect(d.kind, SyncActionKind.download);

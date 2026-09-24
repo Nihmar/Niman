@@ -1,3 +1,4 @@
+import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 
 /// The open library's settings, read once from
@@ -14,8 +15,10 @@ import 'package:niman/src/core/settings/library_config.dart';
 /// Writes are read-modify-write over a shared file, so they run one at a
 /// time, and the cache is replaced only once the write has landed.
 final class LibraryConfigRepo {
-  /// Creates the repo for the library at its absolute path.
-  new(String libraryPath) : _store = LibraryConfigStore(libraryPath);
+  /// Creates the repo for the library at its absolute path; [device]
+  /// keeps the device's share of the settings (see [LibraryConfigStore]).
+  new(String libraryPath, {DeviceSettingsStore? device})
+    : _store = LibraryConfigStore(libraryPath, device: device);
 
   final LibraryConfigStore _store;
 
@@ -23,7 +26,7 @@ final class LibraryConfigRepo {
   Future<void> _chain = Future<void>.value();
 
   /// Called after every write that changed the file (the sync queues the
-  /// file for upload).
+  /// file for upload); a change of a device setting alone does not.
   void Function()? onWritten;
 
   /// The library's settings; the first call reads the file, later ones
@@ -48,9 +51,9 @@ final class LibraryConfigRepo {
       final current = await config;
       final updated = change(current);
       if (updated == current) return;
-      await _store.write(updated);
+      final fileChanged = await _store.write(updated);
       _config = Future<LibraryConfig>.value(updated);
-      onWritten?.call();
+      if (fileChanged) onWritten?.call();
     });
     _chain = next.then<void>((_) {}, onError: (Object _) {});
     return next;

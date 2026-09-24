@@ -80,7 +80,8 @@ address), or a sync that would remove many files (tap **Sync now** to
 see what and decide). Syncing by hand lifts the pause.
 
 What travels: every note and attachment, plus the library's
-`.niman/settings.json` and `.niman/counters.json`. What stays on each
+`.niman/settings.json`, `.niman/counters.json` and personal dictionary
+(`.niman/dictionary.txt`, the words added with *Add to dictionary*). What stays on each
 device: `.trash/`, `.history/`, any other dot folder (a `.git/`, for
 example), and the files the operating system drops into folders
 (`Thumbs.db`, `desktop.ini`).
@@ -92,6 +93,9 @@ example), and the files the operating system drops into folders
 - A file that disappeared from the server — deleted on another device —
   is **moved to this device's trash**, never deleted outright. After such
   a sync a message offers **Show**, which opens the trash.
+- The library's own files (`.niman/settings.json`, `.niman/counters.json`,
+  `.niman/dictionary.txt`) are never deleted by a sync: if one goes
+  missing on one side, it is put back from the other.
 - If a sync would remove more than 10 files and more than half of the
   library, Niman stops and asks first. That is what a wrong address, an
   unmounted NAS disk or a folder emptied by mistake looks like.
@@ -120,8 +124,14 @@ attachment — cannot be merged: there the two whole copies are shown as a
 diff (lines marked − are the server's, + are this device's) and you keep
 one.
 
-Library settings (`.niman/settings.json`) never conflict: the newer copy
-wins.
+Library settings (`.niman/settings.json`) never conflict: they merge
+setting by setting. A setting changed on one device only is kept; the
+same setting changed differently on both takes the device that saved
+last. Template counters (`.niman/counters.json`) keep the highest number
+either device reached, so a number is never handed out twice. The
+personal dictionary merges word by word: a word added on either device
+is kept, one removed on either goes, and the spell check knows the new
+words as soon as they arrive.
 
 ### When something goes wrong
 
@@ -156,7 +166,8 @@ Forgetting a library from the home screen disconnects it too.
 A library is a plain folder with its settings in `.niman/`, so any tool
 that copies folders works too (Syncthing, a Nextcloud client, rsync, a
 USB stick). Everything travels: notes, folders, templates, settings,
-trash, history.
+trash, history — except how the library looks on each device (tree
+width, text size, editor), which stays with the device.
 
 - Close the library on both sides before copying, to avoid half-written
   files (note writes themselves are atomic: temp file + rename).

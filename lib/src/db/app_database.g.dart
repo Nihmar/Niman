@@ -2288,6 +2288,17 @@ class $SyncItemsTable extends SyncItems
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _baseTextMeta = const VerificationMeta(
+    'baseText',
+  );
+  @override
+  late final GeneratedColumn<String> baseText = GeneratedColumn<String>(
+    'base_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _syncedAtMsMeta = const VerificationMeta(
     'syncedAtMs',
   );
@@ -2312,6 +2323,7 @@ class $SyncItemsTable extends SyncItems
     remoteUnverified,
     remoteFileId,
     baseVersion,
+    baseText,
     syncedAtMs,
   ];
   @override
@@ -2427,6 +2439,12 @@ class $SyncItemsTable extends SyncItems
         ),
       );
     }
+    if (data.containsKey('base_text')) {
+      context.handle(
+        _baseTextMeta,
+        baseText.isAcceptableOrUnknown(data['base_text']!, _baseTextMeta),
+      );
+    }
     if (data.containsKey('synced_at_ms')) {
       context.handle(
         _syncedAtMsMeta,
@@ -2491,6 +2509,10 @@ class $SyncItemsTable extends SyncItems
         DriftSqlType.int,
         data['${effectivePrefix}base_version'],
       ),
+      baseText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}base_text'],
+      ),
       syncedAtMs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}synced_at_ms'],
@@ -2542,6 +2564,11 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
   /// attachments and when history is off.
   final int? baseVersion;
 
+  /// For the library state files (`.niman/settings.json`, `counters.json`),
+  /// which keep no history: the agreed content itself, the base of their
+  /// key-by-key merge. Null for every other file.
+  final String? baseText;
+
   /// When this agreement was recorded, ms.
   final int syncedAtMs;
   const SyncItem({
@@ -2556,6 +2583,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     required this.remoteUnverified,
     this.remoteFileId,
     this.baseVersion,
+    this.baseText,
     required this.syncedAtMs,
   });
   @override
@@ -2577,6 +2605,9 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     }
     if (!nullToAbsent || baseVersion != null) {
       map['base_version'] = Variable<int>(baseVersion);
+    }
+    if (!nullToAbsent || baseText != null) {
+      map['base_text'] = Variable<String>(baseText);
     }
     map['synced_at_ms'] = Variable<int>(syncedAtMs);
     return map;
@@ -2601,6 +2632,9 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       baseVersion: baseVersion == null && nullToAbsent
           ? const Value.absent()
           : Value(baseVersion),
+      baseText: baseText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseText),
       syncedAtMs: Value(syncedAtMs),
     );
   }
@@ -2622,6 +2656,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       remoteUnverified: serializer.fromJson<bool>(json['remoteUnverified']),
       remoteFileId: serializer.fromJson<String?>(json['remoteFileId']),
       baseVersion: serializer.fromJson<int?>(json['baseVersion']),
+      baseText: serializer.fromJson<String?>(json['baseText']),
       syncedAtMs: serializer.fromJson<int>(json['syncedAtMs']),
     );
   }
@@ -2640,6 +2675,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       'remoteUnverified': serializer.toJson<bool>(remoteUnverified),
       'remoteFileId': serializer.toJson<String?>(remoteFileId),
       'baseVersion': serializer.toJson<int?>(baseVersion),
+      'baseText': serializer.toJson<String?>(baseText),
       'syncedAtMs': serializer.toJson<int>(syncedAtMs),
     };
   }
@@ -2656,6 +2692,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     bool? remoteUnverified,
     Value<String?> remoteFileId = const Value.absent(),
     Value<int?> baseVersion = const Value.absent(),
+    Value<String?> baseText = const Value.absent(),
     int? syncedAtMs,
   }) => SyncItem(
     libraryPath: libraryPath ?? this.libraryPath,
@@ -2669,6 +2706,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     remoteUnverified: remoteUnverified ?? this.remoteUnverified,
     remoteFileId: remoteFileId.present ? remoteFileId.value : this.remoteFileId,
     baseVersion: baseVersion.present ? baseVersion.value : this.baseVersion,
+    baseText: baseText.present ? baseText.value : this.baseText,
     syncedAtMs: syncedAtMs ?? this.syncedAtMs,
   );
   SyncItem copyWithCompanion(SyncItemsCompanion data) {
@@ -2702,6 +2740,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       baseVersion: data.baseVersion.present
           ? data.baseVersion.value
           : this.baseVersion,
+      baseText: data.baseText.present ? data.baseText.value : this.baseText,
       syncedAtMs: data.syncedAtMs.present
           ? data.syncedAtMs.value
           : this.syncedAtMs,
@@ -2722,6 +2761,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           ..write('remoteUnverified: $remoteUnverified, ')
           ..write('remoteFileId: $remoteFileId, ')
           ..write('baseVersion: $baseVersion, ')
+          ..write('baseText: $baseText, ')
           ..write('syncedAtMs: $syncedAtMs')
           ..write(')'))
         .toString();
@@ -2740,6 +2780,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     remoteUnverified,
     remoteFileId,
     baseVersion,
+    baseText,
     syncedAtMs,
   );
   @override
@@ -2757,6 +2798,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           other.remoteUnverified == this.remoteUnverified &&
           other.remoteFileId == this.remoteFileId &&
           other.baseVersion == this.baseVersion &&
+          other.baseText == this.baseText &&
           other.syncedAtMs == this.syncedAtMs);
 }
 
@@ -2772,6 +2814,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
   final Value<bool> remoteUnverified;
   final Value<String?> remoteFileId;
   final Value<int?> baseVersion;
+  final Value<String?> baseText;
   final Value<int> syncedAtMs;
   final Value<int> rowid;
   const SyncItemsCompanion({
@@ -2786,6 +2829,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     this.remoteUnverified = const Value.absent(),
     this.remoteFileId = const Value.absent(),
     this.baseVersion = const Value.absent(),
+    this.baseText = const Value.absent(),
     this.syncedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -2801,6 +2845,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     this.remoteUnverified = const Value.absent(),
     this.remoteFileId = const Value.absent(),
     this.baseVersion = const Value.absent(),
+    this.baseText = const Value.absent(),
     required int syncedAtMs,
     this.rowid = const Value.absent(),
   }) : libraryPath = Value(libraryPath),
@@ -2823,6 +2868,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     Expression<bool>? remoteUnverified,
     Expression<String>? remoteFileId,
     Expression<int>? baseVersion,
+    Expression<String>? baseText,
     Expression<int>? syncedAtMs,
     Expression<int>? rowid,
   }) {
@@ -2838,6 +2884,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
       if (remoteUnverified != null) 'remote_unverified': remoteUnverified,
       if (remoteFileId != null) 'remote_file_id': remoteFileId,
       if (baseVersion != null) 'base_version': baseVersion,
+      if (baseText != null) 'base_text': baseText,
       if (syncedAtMs != null) 'synced_at_ms': syncedAtMs,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2855,6 +2902,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     Value<bool>? remoteUnverified,
     Value<String?>? remoteFileId,
     Value<int?>? baseVersion,
+    Value<String?>? baseText,
     Value<int>? syncedAtMs,
     Value<int>? rowid,
   }) {
@@ -2870,6 +2918,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
       remoteUnverified: remoteUnverified ?? this.remoteUnverified,
       remoteFileId: remoteFileId ?? this.remoteFileId,
       baseVersion: baseVersion ?? this.baseVersion,
+      baseText: baseText ?? this.baseText,
       syncedAtMs: syncedAtMs ?? this.syncedAtMs,
       rowid: rowid ?? this.rowid,
     );
@@ -2911,6 +2960,9 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     if (baseVersion.present) {
       map['base_version'] = Variable<int>(baseVersion.value);
     }
+    if (baseText.present) {
+      map['base_text'] = Variable<String>(baseText.value);
+    }
     if (syncedAtMs.present) {
       map['synced_at_ms'] = Variable<int>(syncedAtMs.value);
     }
@@ -2934,6 +2986,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
           ..write('remoteUnverified: $remoteUnverified, ')
           ..write('remoteFileId: $remoteFileId, ')
           ..write('baseVersion: $baseVersion, ')
+          ..write('baseText: $baseText, ')
           ..write('syncedAtMs: $syncedAtMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3800,6 +3853,292 @@ class WorkspacesCompanion extends UpdateCompanion<WorkspaceRow> {
   }
 }
 
+class $LibraryDeviceSettingsTable extends LibraryDeviceSettings
+    with TableInfo<$LibraryDeviceSettingsTable, LibraryDeviceSettingsRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LibraryDeviceSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _libraryPathMeta = const VerificationMeta(
+    'libraryPath',
+  );
+  @override
+  late final GeneratedColumn<String> libraryPath = GeneratedColumn<String>(
+    'library_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _settingsMeta = const VerificationMeta(
+    'settings',
+  );
+  @override
+  late final GeneratedColumn<String> settings = GeneratedColumn<String>(
+    'settings',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [libraryPath, settings, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'library_device_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LibraryDeviceSettingsRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('library_path')) {
+      context.handle(
+        _libraryPathMeta,
+        libraryPath.isAcceptableOrUnknown(
+          data['library_path']!,
+          _libraryPathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_libraryPathMeta);
+    }
+    if (data.containsKey('settings')) {
+      context.handle(
+        _settingsMeta,
+        settings.isAcceptableOrUnknown(data['settings']!, _settingsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_settingsMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {libraryPath};
+  @override
+  LibraryDeviceSettingsRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LibraryDeviceSettingsRow(
+      libraryPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}library_path'],
+      )!,
+      settings: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}settings'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LibraryDeviceSettingsTable createAlias(String alias) {
+    return $LibraryDeviceSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class LibraryDeviceSettingsRow extends DataClass
+    implements Insertable<LibraryDeviceSettingsRow> {
+  /// Absolute, normalized path of the library root; the primary key.
+  final String libraryPath;
+
+  /// The device keys, as a JSON object in the `settings.json` format.
+  final String settings;
+
+  /// When it was last written.
+  final DateTime updatedAt;
+  const LibraryDeviceSettingsRow({
+    required this.libraryPath,
+    required this.settings,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['library_path'] = Variable<String>(libraryPath);
+    map['settings'] = Variable<String>(settings);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  LibraryDeviceSettingsCompanion toCompanion(bool nullToAbsent) {
+    return LibraryDeviceSettingsCompanion(
+      libraryPath: Value(libraryPath),
+      settings: Value(settings),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory LibraryDeviceSettingsRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LibraryDeviceSettingsRow(
+      libraryPath: serializer.fromJson<String>(json['libraryPath']),
+      settings: serializer.fromJson<String>(json['settings']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'libraryPath': serializer.toJson<String>(libraryPath),
+      'settings': serializer.toJson<String>(settings),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  LibraryDeviceSettingsRow copyWith({
+    String? libraryPath,
+    String? settings,
+    DateTime? updatedAt,
+  }) => LibraryDeviceSettingsRow(
+    libraryPath: libraryPath ?? this.libraryPath,
+    settings: settings ?? this.settings,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  LibraryDeviceSettingsRow copyWithCompanion(
+    LibraryDeviceSettingsCompanion data,
+  ) {
+    return LibraryDeviceSettingsRow(
+      libraryPath: data.libraryPath.present
+          ? data.libraryPath.value
+          : this.libraryPath,
+      settings: data.settings.present ? data.settings.value : this.settings,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryDeviceSettingsRow(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('settings: $settings, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(libraryPath, settings, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LibraryDeviceSettingsRow &&
+          other.libraryPath == this.libraryPath &&
+          other.settings == this.settings &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LibraryDeviceSettingsCompanion
+    extends UpdateCompanion<LibraryDeviceSettingsRow> {
+  final Value<String> libraryPath;
+  final Value<String> settings;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const LibraryDeviceSettingsCompanion({
+    this.libraryPath = const Value.absent(),
+    this.settings = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LibraryDeviceSettingsCompanion.insert({
+    required String libraryPath,
+    required String settings,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : libraryPath = Value(libraryPath),
+       settings = Value(settings),
+       updatedAt = Value(updatedAt);
+  static Insertable<LibraryDeviceSettingsRow> custom({
+    Expression<String>? libraryPath,
+    Expression<String>? settings,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (libraryPath != null) 'library_path': libraryPath,
+      if (settings != null) 'settings': settings,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LibraryDeviceSettingsCompanion copyWith({
+    Value<String>? libraryPath,
+    Value<String>? settings,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return LibraryDeviceSettingsCompanion(
+      libraryPath: libraryPath ?? this.libraryPath,
+      settings: settings ?? this.settings,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (libraryPath.present) {
+      map['library_path'] = Variable<String>(libraryPath.value);
+    }
+    if (settings.present) {
+      map['settings'] = Variable<String>(settings.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryDeviceSettingsCompanion(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('settings: $settings, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3812,6 +4151,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncItemsTable syncItems = $SyncItemsTable(this);
   late final $SyncOpsTable syncOps = $SyncOpsTable(this);
   late final $WorkspacesTable workspaces = $WorkspacesTable(this);
+  late final $LibraryDeviceSettingsTable libraryDeviceSettings =
+      $LibraryDeviceSettingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3824,6 +4165,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncItems,
     syncOps,
     workspaces,
+    libraryDeviceSettings,
   ];
 }
 
@@ -4914,6 +5256,7 @@ typedef $$SyncItemsTableCreateCompanionBuilder = SyncItemsCompanion Function({
   Value<bool> remoteUnverified,
   Value<String?> remoteFileId,
   Value<int?> baseVersion,
+  Value<String?> baseText,
   required int syncedAtMs,
   Value<int> rowid,
 });
@@ -4929,6 +5272,7 @@ typedef $$SyncItemsTableUpdateCompanionBuilder = SyncItemsCompanion Function({
   Value<bool> remoteUnverified,
   Value<String?> remoteFileId,
   Value<int?> baseVersion,
+  Value<String?> baseText,
   Value<int> syncedAtMs,
   Value<int> rowid,
 });
@@ -4994,6 +5338,11 @@ class $$SyncItemsTableFilterComposer
 
   ColumnFilters<int> get baseVersion => $composableBuilder(
     column: $table.baseVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get baseText => $composableBuilder(
+    column: $table.baseText,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5067,6 +5416,11 @@ class $$SyncItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get baseText => $composableBuilder(
+    column: $table.baseText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get syncedAtMs => $composableBuilder(
     column: $table.syncedAtMs,
     builder: (column) => ColumnOrderings(column),
@@ -5133,6 +5487,9 @@ class $$SyncItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get baseText =>
+      $composableBuilder(column: $table.baseText, builder: (column) => column);
+
   GeneratedColumn<int> get syncedAtMs => $composableBuilder(
     column: $table.syncedAtMs,
     builder: (column) => column,
@@ -5178,6 +5535,7 @@ class $$SyncItemsTableTableManager
                 Value<bool> remoteUnverified = const Value.absent(),
                 Value<String?> remoteFileId = const Value.absent(),
                 Value<int?> baseVersion = const Value.absent(),
+                Value<String?> baseText = const Value.absent(),
                 Value<int> syncedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncItemsCompanion(
@@ -5192,6 +5550,7 @@ class $$SyncItemsTableTableManager
                 remoteUnverified: remoteUnverified,
                 remoteFileId: remoteFileId,
                 baseVersion: baseVersion,
+                baseText: baseText,
                 syncedAtMs: syncedAtMs,
                 rowid: rowid,
               ),
@@ -5208,6 +5567,7 @@ class $$SyncItemsTableTableManager
                 Value<bool> remoteUnverified = const Value.absent(),
                 Value<String?> remoteFileId = const Value.absent(),
                 Value<int?> baseVersion = const Value.absent(),
+                Value<String?> baseText = const Value.absent(),
                 required int syncedAtMs,
                 Value<int> rowid = const Value.absent(),
               }) => SyncItemsCompanion.insert(
@@ -5222,6 +5582,7 @@ class $$SyncItemsTableTableManager
                 remoteUnverified: remoteUnverified,
                 remoteFileId: remoteFileId,
                 baseVersion: baseVersion,
+                baseText: baseText,
                 syncedAtMs: syncedAtMs,
                 rowid: rowid,
               ),
@@ -5704,6 +6065,201 @@ typedef $$WorkspacesTableProcessedTableManager =
       WorkspaceRow,
       PrefetchHooks Function()
     >;
+typedef $$LibraryDeviceSettingsTableCreateCompanionBuilder =
+    LibraryDeviceSettingsCompanion Function({
+      required String libraryPath,
+      required String settings,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$LibraryDeviceSettingsTableUpdateCompanionBuilder =
+    LibraryDeviceSettingsCompanion Function({
+      Value<String> libraryPath,
+      Value<String> settings,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$LibraryDeviceSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $LibraryDeviceSettingsTable> {
+  $$LibraryDeviceSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get settings => $composableBuilder(
+    column: $table.settings,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LibraryDeviceSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LibraryDeviceSettingsTable> {
+  $$LibraryDeviceSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get settings => $composableBuilder(
+    column: $table.settings,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LibraryDeviceSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LibraryDeviceSettingsTable> {
+  $$LibraryDeviceSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get settings =>
+      $composableBuilder(column: $table.settings, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$LibraryDeviceSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LibraryDeviceSettingsTable,
+          LibraryDeviceSettingsRow,
+          $$LibraryDeviceSettingsTableFilterComposer,
+          $$LibraryDeviceSettingsTableOrderingComposer,
+          $$LibraryDeviceSettingsTableAnnotationComposer,
+          $$LibraryDeviceSettingsTableCreateCompanionBuilder,
+          $$LibraryDeviceSettingsTableUpdateCompanionBuilder,
+          (
+            LibraryDeviceSettingsRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LibraryDeviceSettingsTable,
+              LibraryDeviceSettingsRow
+            >,
+          ),
+          LibraryDeviceSettingsRow,
+          PrefetchHooks Function()
+        > {
+  $$LibraryDeviceSettingsTableTableManager(
+    _$AppDatabase db,
+    $LibraryDeviceSettingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LibraryDeviceSettingsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LibraryDeviceSettingsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LibraryDeviceSettingsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> libraryPath = const Value.absent(),
+                Value<String> settings = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LibraryDeviceSettingsCompanion(
+                libraryPath: libraryPath,
+                settings: settings,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String libraryPath,
+                required String settings,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LibraryDeviceSettingsCompanion.insert(
+                libraryPath: libraryPath,
+                settings: settings,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $LibraryDeviceSettingsTable,
+                    LibraryDeviceSettingsRow
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LibraryDeviceSettingsTable,
+                    LibraryDeviceSettingsRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LibraryDeviceSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LibraryDeviceSettingsTable,
+      LibraryDeviceSettingsRow,
+      $$LibraryDeviceSettingsTableFilterComposer,
+      $$LibraryDeviceSettingsTableOrderingComposer,
+      $$LibraryDeviceSettingsTableAnnotationComposer,
+      $$LibraryDeviceSettingsTableCreateCompanionBuilder,
+      $$LibraryDeviceSettingsTableUpdateCompanionBuilder,
+      (
+        LibraryDeviceSettingsRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LibraryDeviceSettingsTable,
+          LibraryDeviceSettingsRow
+        >,
+      ),
+      LibraryDeviceSettingsRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5722,4 +6278,6 @@ class $AppDatabaseManager {
       $$SyncOpsTableTableManager(_db, _db.syncOps);
   $$WorkspacesTableTableManager get workspaces =>
       $$WorkspacesTableTableManager(_db, _db.workspaces);
+  $$LibraryDeviceSettingsTableTableManager get libraryDeviceSettings =>
+      $$LibraryDeviceSettingsTableTableManager(_db, _db.libraryDeviceSettings);
 }

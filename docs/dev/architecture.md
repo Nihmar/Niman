@@ -36,7 +36,8 @@ lines or when responsibilities mix.
 
 ## Key flows
 
-- **Open library:** read `.niman/settings.json` once into
+- **Open library:** read `.niman/settings.json` and the device's share
+  (`library_device_settings`, `LibraryConfig.deviceKeys`) once into
   `LibraryConfigRepo` (cached per session) → scan files off the UI
   isolate (`Isolate.run` — every stat is a FUSE round trip on Android) →
   upsert into `IndexDatabase` on main.
