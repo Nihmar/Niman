@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:path/path.dart' as p;
 
@@ -320,6 +321,7 @@ final class LibraryConfig {
     this.spellDictionaries = const <String>[],
     this.editorKind = EditorKind.source,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
+    this.journal = const JournalSettings(),
     this.extra = const {},
   });
 
@@ -404,6 +406,7 @@ final class LibraryConfig {
       // on. An empty or all-unknown list reads back the same way — the
       // file must never resolve to no editor.
       enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
+      journal: JournalSettings.fromJson(json),
       extra: extra,
     );
   }
@@ -520,6 +523,9 @@ final class LibraryConfig {
   /// switches between them only when both are enabled.
   final Set<EditorKind> enabledEditors;
 
+  /// The journal's settings (#7).
+  final JournalSettings journal;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -552,6 +558,7 @@ final class LibraryConfig {
     List<String>? spellDictionaries,
     EditorKind? editorKind,
     Set<EditorKind>? enabledEditors,
+    JournalSettings? journal,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -583,6 +590,7 @@ final class LibraryConfig {
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
       editorKind: editorKind ?? this.editorKind,
       enabledEditors: enabledEditors ?? this.enabledEditors,
+      journal: journal ?? this.journal,
       extra: extra,
     );
   }
@@ -616,7 +624,7 @@ final class LibraryConfig {
       if (deviceKeys.contains(entry.key)) entry.key: entry.value,
   };
 
-  static const _knownKeys = {
+  static const Set<String> _knownKeys = {
     'trashEnabled',
     'trashAutoEmptyDays',
     'historyVersions',
@@ -652,6 +660,7 @@ final class LibraryConfig {
     // the app now, and a file that still carries the key must not have it
     // handed back as an unknown one to preserve forever.
     'previewEnabled',
+    ...JournalSettings.keys,
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -695,6 +704,7 @@ final class LibraryConfig {
         for (final kind in EditorKind.values)
           if (enabledEditors.contains(kind)) kind.name,
       ],
+      ...journal.toJson(),
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -779,6 +789,7 @@ final class LibraryConfig {
         editorKind == other.editorKind &&
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
+        journal == other.journal &&
         _deepEquals(extra, other.extra);
   }
 

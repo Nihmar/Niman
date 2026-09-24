@@ -1,0 +1,80 @@
+# Journal
+
+One note per day, made the first time you open that day.
+
+An entry is an ordinary note: it lives in the library like any other,
+syncs, is found by search and links to and from other notes. What makes
+it an entry is where it is and what it is called, set in **Settings →
+Library → Journal** and kept in the library's `settings.json`, so they
+travel with it (see [settings](settings.md)). The entry name shows today's
+entry as you type it, and a name that cannot make one entry per day is
+not saved:
+
+- **Folder** (`journalFolder`, default `Journal`).
+- **Entry name** (`journalEntryName`, default `YYYY/MM/YYYY-MM-DD`):
+  `YYYY`, `MM` / `M` and `DD` / `D` are the day's year, month and day; a
+  `/` makes a folder; text in `'quotes'` is kept as it is. Numbers only,
+  so an entry has the same name on every device whatever the app's
+  language. The default files 23 September 2026 as
+  `Journal/2026/09/2026-09-23.md`.
+- **Template** (`journalTemplate`): the template an entry is made from.
+  None set, an entry starts with a heading holding its date.
+- **A new day starts at** (`journalDayStart`, 0 to 6): for late nights,
+  at 4 the journal's "today" stays on the day before until four in the
+  morning.
+
+## Opening the journal
+
+- **Today's entry**: `Ctrl/⌘+Shift+J`, or *Journal: Today's entry* in the
+  command palette. It opens today's entry, and makes it first when there
+  is none — no question asked, since it is the one you want every day.
+- **The entries around it**: on an entry, `Ctrl/⌘+Shift+Page Up` and
+  `Page Down` (or *Journal: Previous entry* / *Next entry*) go to the
+  entry before or after it, skipping the days without one. With none
+  left in that direction, previous offers the day before; next stops at
+  today.
+- **Another day**: a day with no entry is not made behind your back —
+  Niman asks first, so leafing through the days never leaves empty notes.
+
+## The calendar
+
+A month with a dot under each day that has an entry, today ringed, a
+**Today** button, the open [tasks](tasks.md) due on the day (from
+`todo.txt`: tap one for the task list), and the latest entries with
+their first words. In the side panel the day is the entry on screen's,
+or today; on the phone's screen, the day picked.
+
+- **Desktop** (a window wide enough for the side panel): the *Journal*
+  pane of the side panel, beside the note. Clicking a day opens its
+  entry (or offers to make it).
+- **Phone**: the calendar icon in the Files bar opens the Journal
+  screen. Tap a day to pick it; its card opens the entry or makes it.
+- Everywhere: the day in the strip over an entry, or *Journal: Show the
+  calendar* in the command palette.
+
+The **+** button on the phone's Files tab starts with *Today's journal
+entry*.
+
+## The strip over an entry
+
+Any note that is an entry — wherever it was opened from — wears a strip
+above it, on every platform: its day in full (with *Today* on today's),
+and on either side the entry before and after it, by date. A side whose
+day has no entry yet is drawn softer: tapping it offers to make one. The
+next side stops at today.
+
+## What an entry starts with
+
+With no template set, an entry starts with its date as a heading
+(`# Wednesday 23 September 2026`) and the caret under it.
+
+With one, the template is filled in as for any
+[template](templates.md), with one difference: the date is the entry's
+day, not the moment it was made, so an entry made for last Monday says
+Monday — and `{{date|-1d}}` links it to the Sunday before
+(`[[{{date|-1d}}]]`). `{{time}}` still says when it was written. The
+template's own questions are asked; its `niman:` directives are not
+followed, since the journal already says where the entry goes and what
+it is called. A template that cannot be read is said so, and the entry
+is made without it.
+

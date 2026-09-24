@@ -1305,6 +1305,66 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Оди на';
   @override
+  String get paletteGroupJournal => 'Дневник';
+  @override
+  String get journalToday => 'Денешен запис';
+  @override
+  String get journalPrevious => 'Претходен запис';
+  @override
+  String get journalNext => 'Следен запис';
+  @override
+  String get commandNeedJournalEntry => 'Потребен е отворен запис од дневникот';
+  @override
+  String journalCreateAsk(String day) =>
+      'Сè уште нема запис за $day. Да се создаде?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Шаблонот на дневникот $path не можеше да се прочита: записот е '
+      'создаден без него.';
+  @override
+  String get journalIntro =>
+      'Една белешка дневно, создадена од шаблон кога тој ден го отвораш прв '
+      'пат. Овие поставки патуваат со библиотеката.';
+  @override
+  String get journalFolderTitle => 'Папка на дневникот';
+  @override
+  String get journalFolderSubtitle => 'Каде одат записите';
+  @override
+  String get journalEntryNameTitle => 'Име на записот';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM или M, DD или D за датумот; / создава папка; текстот во '
+      "'наводници' останува каков што е";
+  @override
+  String journalEntryNamePreview(String path) => 'Денешен запис: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Потребни се YYYY, месец (MM или M) и ден (DD или D), и ништо што името '
+      'на датотека не смее да го содржи';
+  @override
+  String get journalTemplateTitle => 'Шаблон';
+  @override
+  String get journalTemplateSubtitle => 'Со што започнува нов запис';
+  @override
+  String get journalTemplateNone => 'Никој: наслов со датумот';
+  @override
+  String get journalDayStartTitle => 'Нов ден започнува во';
+  @override
+  String get journalDayStartSubtitle =>
+      'Доцна легнуваш? Во 04:00 ноќта останува на претходниот ден';
+  @override
+  String get journalRecent => 'Неодамнешни';
+  @override
+  String get journalNoEntry => 'Нема запис за овој ден';
+  @override
+  String get journalOpenEntry => 'Отвори';
+  @override
+  String get journalShowCalendar => 'Прикажи го календарот';
+  @override
+  String get journalFabToday => 'Денешен запис во дневникот';
+  @override
+  String journalDueOn(String day) => 'Рок $day';
+  @override
   String get commandsTitle => 'Команди';
   @override
   String get commandsIntro =>

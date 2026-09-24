@@ -76,9 +76,9 @@ void main() {
     await openPalette(tester);
     expect(find.text(AppStrings.palettePinned.toUpperCase()), findsNothing);
 
-    // Re-index now is far from the head: nothing was used yet, so the
-    // list opens in registry order.
-    final pin = find.byKey(const Key('palette-pin-reindexLibrary'));
+    // Nothing was used yet, so the list opens in name order: the
+    // journal's calendar is far from its head.
+    final pin = find.byKey(const Key('palette-pin-journalCalendar'));
     // Built lazily: the list is longer than the palette shows.
     await tester.scrollUntilVisible(
       pin,
@@ -92,8 +92,8 @@ void main() {
     );
     await tester.tap(pin);
     await settle(tester);
-    expect(PinnedCommands.current.value, [AppCommand.reindexLibrary]);
-    expect(controller.pinnedCommandsJson, contains('reindexLibrary'));
+    expect(PinnedCommands.current.value, [AppCommand.journalCalendar]);
+    expect(controller.pinnedCommandsJson, contains('journalCalendar'));
     // Its pin reads as pinned at once, and the row moved to the pinned
     // head: back at the top of the list, under its own heading, without
     // the palette being reopened.
@@ -101,13 +101,13 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, 600));
     await settle(tester);
     expect(find.text(AppStrings.palettePinned.toUpperCase()), findsOne);
-    expect(heads(AppCommand.reindexLibrary), isTrue);
+    expect(heads(AppCommand.journalCalendar), isTrue);
 
     // And it is still first on the next palette, from the stored pins.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await settle(tester);
     await openPalette(tester);
-    expect(heads(AppCommand.reindexLibrary), isTrue);
+    expect(heads(AppCommand.journalCalendar), isTrue);
   });
 
   testWidgets('the pin unpins, and the head goes with it', (tester) async {

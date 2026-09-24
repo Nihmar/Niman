@@ -1314,6 +1314,66 @@ final class GermanStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gehe zu';
   @override
+  String get paletteGroupJournal => 'Tagebuch';
+  @override
+  String get journalToday => 'Heutiger Eintrag';
+  @override
+  String get journalPrevious => 'Vorheriger Eintrag';
+  @override
+  String get journalNext => 'Nächster Eintrag';
+  @override
+  String get commandNeedJournalEntry => 'Braucht einen offenen Tagebucheintrag';
+  @override
+  String journalCreateAsk(String day) =>
+      'Für $day gibt es noch keinen Eintrag. Anlegen?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Die Tagebuchvorlage $path ließ sich nicht lesen: Der Eintrag wurde '
+      'ohne sie angelegt.';
+  @override
+  String get journalIntro =>
+      'Eine Notiz pro Tag, beim ersten Öffnen des Tages aus einer Vorlage '
+      'angelegt. Diese Einstellungen reisen mit der Bibliothek.';
+  @override
+  String get journalFolderTitle => 'Tagebuchordner';
+  @override
+  String get journalFolderSubtitle => 'Wohin die Einträge kommen';
+  @override
+  String get journalEntryNameTitle => 'Name des Eintrags';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM oder M, DD oder D für das Datum; / legt einen Ordner an; Text '
+      "in 'Anführungszeichen' bleibt, wie er ist";
+  @override
+  String journalEntryNamePreview(String path) => 'Heutiger Eintrag: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Braucht YYYY, einen Monat (MM oder M) und einen Tag (DD oder D), und '
+      'nichts, was ein Dateiname nicht enthalten darf';
+  @override
+  String get journalTemplateTitle => 'Vorlage';
+  @override
+  String get journalTemplateSubtitle => 'Womit ein neuer Eintrag beginnt';
+  @override
+  String get journalTemplateNone => 'Keine: eine Überschrift mit dem Datum';
+  @override
+  String get journalDayStartTitle => 'Ein neuer Tag beginnt um';
+  @override
+  String get journalDayStartSubtitle =>
+      'Lange auf? Um 04:00 bleibt die Nacht beim Vortag';
+  @override
+  String get journalRecent => 'Zuletzt';
+  @override
+  String get journalNoEntry => 'Kein Eintrag für diesen Tag';
+  @override
+  String get journalOpenEntry => 'Öffnen';
+  @override
+  String get journalShowCalendar => 'Kalender zeigen';
+  @override
+  String get journalFabToday => 'Heutiger Tagebucheintrag';
+  @override
+  String journalDueOn(String day) => 'Fällig am $day';
+  @override
   String get commandsTitle => 'Befehle';
   @override
   String get commandsIntro =>

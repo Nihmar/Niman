@@ -31,6 +31,18 @@ enum AppCommand {
   /// The quick-note tab (its chooser when none is set).
   quickNote,
 
+  /// Today's journal entry, made first when there is none (#7).
+  journalToday,
+
+  /// The journal entry before the one on screen.
+  journalPrevious,
+
+  /// The journal entry after the one on screen.
+  journalNext,
+
+  /// The journal's calendar: the dock's pane, or the phone's screen.
+  journalCalendar,
+
   /// Show or hide the wide tree pane.
   toggleSidebar,
 
@@ -153,6 +165,20 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       AppCommand.quickNote,
       SingleActivator(LogicalKeyboardKey.keyQ, control: true),
     ),
+    // Not Ctrl+Alt: Linux desktops switch workspaces on it, and on
+    // Windows it is AltGr, which types letters on many layouts.
+    AppShortcut(
+      AppCommand.journalToday,
+      SingleActivator(LogicalKeyboardKey.keyJ, control: true, shift: true),
+    ),
+    AppShortcut(
+      AppCommand.journalPrevious,
+      SingleActivator(LogicalKeyboardKey.pageUp, control: true, shift: true),
+    ),
+    AppShortcut(
+      AppCommand.journalNext,
+      SingleActivator(LogicalKeyboardKey.pageDown, control: true, shift: true),
+    ),
     AppShortcut(
       AppCommand.toggleSidebar,
       SingleActivator(LogicalKeyboardKey.keyB, control: true),
@@ -226,6 +252,10 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
+  AppCommand.journalToday => AppStrings.journalToday,
+  AppCommand.journalPrevious => AppStrings.journalPrevious,
+  AppCommand.journalNext => AppStrings.journalNext,
+  AppCommand.journalCalendar => AppStrings.journalShowCalendar,
   AppCommand.toggleSidebar => AppStrings.shortcutToggleSidebar,
   AppCommand.closeTab => AppStrings.shortcutCloseTab,
   AppCommand.nextTab => AppStrings.shortcutNextTab,

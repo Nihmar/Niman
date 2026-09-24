@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/shell.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
@@ -74,6 +75,29 @@ void main() {
 
     await press(tester, LogicalKeyboardKey.keyN);
     expect(find.text('New note'), findsWidgets);
+    await close();
+  });
+
+  testWidgets("Ctrl+Shift+J makes today's journal entry and opens it (#7)", (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    const journal = JournalSettings();
+    final path = journal.entryPath(journal.today(DateTime.now()));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    expect(controller.contentOf(path), startsWith('# '));
+    expect(find.text(path.split('/').last.replaceAll('.md', '')), findsWidgets);
+    // An entry wears the journal's strip, with today's badge.
+    expect(find.byKey(const Key('journal-strip')), findsOne);
+    expect(find.byKey(const Key('journal-today-badge')), findsOne);
     await close();
   });
 }

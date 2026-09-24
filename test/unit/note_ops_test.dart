@@ -73,6 +73,28 @@ void main() {
 
   // T-TPL-02: what a template's `folder:` and `append:` directives need
   // from the ops layer.
+  group('notePathsUnder (#7)', () {
+    test(
+      'lists the notes at any depth under a folder, and no folders',
+      () async {
+        await ops.ensureFolder('Journal/2026/09');
+        await ops.createNote(parentPath: 'Journal/2026/09', name: '2026-09-03');
+        await ops.createNote(parentPath: 'Journal', name: 'About');
+        await ops.createNote(parentPath: '', name: 'Journal notes');
+        await ops.ensureFolder('Journalism');
+        await ops.createNote(parentPath: 'Journalism', name: 'Not it');
+        expect((await ops.notePathsUnder('Journal'))..sort(), [
+          'Journal/2026/09/2026-09-03.md',
+          'Journal/About.md',
+        ]);
+        expect(await ops.notePathsUnder('Journal/2026/09'), [
+          'Journal/2026/09/2026-09-03.md',
+        ]);
+        expect(await ops.notePathsUnder(''), hasLength(4));
+      },
+    );
+  });
+
   group('ensureFolder', () {
     test('creates the whole chain, and indexes every folder in it', () async {
       final row = await ops.ensureFolder('Journal/2026/03');

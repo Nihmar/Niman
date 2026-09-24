@@ -1,5 +1,6 @@
 /// The right dock (#175): the note's outline, its tags and its history,
-/// one at a time, beside the note on a window wide enough for both.
+/// one at a time, beside the note on a window wide enough for both — and
+/// the journal's calendar (#7), which is the library's, not the note's.
 ///
 /// It follows the focused pane's note: with the window split, the dock
 /// speaks for the note the next key would go to. Closing it gives the
@@ -45,6 +46,7 @@ final class RightDock extends StatelessWidget {
     DockPane.outline => AppStrings.outlineTooltip,
     DockPane.tags => AppStrings.tagsTitle,
     DockPane.history => AppStrings.noteHistoryTitle,
+    DockPane.journal => AppStrings.paletteGroupJournal,
   };
 
   static IconData _icon(DockPane pane, {required bool selected}) =>
@@ -52,6 +54,8 @@ final class RightDock extends StatelessWidget {
         DockPane.outline => Icons.toc,
         DockPane.tags => selected ? Icons.sell : Icons.sell_outlined,
         DockPane.history => Icons.history,
+        DockPane.journal =>
+          selected ? Icons.calendar_today : Icons.calendar_today_outlined,
       };
 
   @override

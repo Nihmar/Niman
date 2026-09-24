@@ -1268,6 +1268,65 @@ final class HindiStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'जाएँ';
   @override
+  String get paletteGroupJournal => 'डायरी';
+  @override
+  String get journalToday => 'आज की प्रविष्टि';
+  @override
+  String get journalPrevious => 'पिछली प्रविष्टि';
+  @override
+  String get journalNext => 'अगली प्रविष्टि';
+  @override
+  String get commandNeedJournalEntry => 'खुली डायरी प्रविष्टि चाहिए';
+  @override
+  String journalCreateAsk(String day) =>
+      '$day के लिए अभी कोई प्रविष्टि नहीं है। बनाएँ?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'डायरी टेम्पलेट $path पढ़ा नहीं जा सका: प्रविष्टि उसके बिना बनाई गई।';
+  @override
+  String get journalIntro =>
+      'हर दिन एक नोट, उस दिन को पहली बार खोलने पर टेम्पलेट से बना। ये '
+      'सेटिंग्स लाइब्रेरी के साथ चलती हैं।';
+  @override
+  String get journalFolderTitle => 'डायरी फ़ोल्डर';
+  @override
+  String get journalFolderSubtitle => 'प्रविष्टियाँ कहाँ जाती हैं';
+  @override
+  String get journalEntryNameTitle => 'प्रविष्टि का नाम';
+  @override
+  String get journalEntryNameSubtitle =>
+      "तारीख के लिए YYYY, MM या M, DD या D; / फ़ोल्डर बनाता है; 'उद्धरण' वाला "
+      'पाठ जैसा है वैसा रहता है';
+  @override
+  String journalEntryNamePreview(String path) => 'आज की प्रविष्टि: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'YYYY, महीना (MM या M) और दिन (DD या D) चाहिए, और ऐसा कुछ नहीं जो फ़ाइल '
+      'नाम में न हो सके';
+  @override
+  String get journalTemplateTitle => 'टेम्पलेट';
+  @override
+  String get journalTemplateSubtitle => 'नई प्रविष्टि किससे शुरू होती है';
+  @override
+  String get journalTemplateNone => 'कोई नहीं: तारीख वाला शीर्षक';
+  @override
+  String get journalDayStartTitle => 'नया दिन शुरू होता है';
+  @override
+  String get journalDayStartSubtitle =>
+      'देर तक जागते हैं? 04:00 पर रात पिछले दिन में ही रहती है';
+  @override
+  String get journalRecent => 'हाल की';
+  @override
+  String get journalNoEntry => 'इस दिन की कोई प्रविष्टि नहीं';
+  @override
+  String get journalOpenEntry => 'खोलें';
+  @override
+  String get journalShowCalendar => 'कैलेंडर दिखाएँ';
+  @override
+  String get journalFabToday => 'आज की डायरी प्रविष्टि';
+  @override
+  String journalDueOn(String day) => 'नियत तिथि $day';
+  @override
   String get commandsTitle => 'कमांड';
   @override
   String get commandsIntro =>

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -52,6 +53,7 @@ void main() {
 
     expect(shortcuts.published, {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
+      ShortcutAction.journalToday: AppStrings.journalFabToday,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
@@ -153,6 +155,26 @@ void main() {
     // No quick note is set yet, so the tab shows its choose/create
     // screen.
     expect(find.byKey(const Key('quick-note-choose')), findsOneWidget);
+    await close();
+  });
+
+  testWidgets("the launcher's journal action opens today's entry (#7)", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    shortcuts.emit(ShortcutAction.journalToday);
+    await settle(tester);
+    const journal = JournalSettings();
+    final path = journal.entryPath(journal.today(DateTime.now()));
+    expect(controller.contentOf(path), startsWith('# '));
+    expect(find.byKey(const Key('journal-strip')), findsOneWidget);
     await close();
   });
 

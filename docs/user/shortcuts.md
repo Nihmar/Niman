@@ -15,11 +15,16 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+A` — new voice note
 - `Ctrl/⌘+T` — new todo
 - `Ctrl/⌘+Q` — quick note
+- `Ctrl/⌘+Shift+J` — today's [journal](journal.md) entry, made first when
+  there is none
+- `Ctrl/⌘+Shift+Page Up` / `Page Down` — the journal entry before / after
+  the one on screen
 - `Ctrl/⌘+B` — show or hide the sidebar
 - `Ctrl/⌘+W` — close the note on screen (its tab)
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note
 - `Ctrl/⌘+\` — split the window right with the note on screen
-- `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history)
+- `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history,
+  the journal's calendar)
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
   leaves it (see [editing](editing.md#zen-mode))
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
@@ -153,20 +158,22 @@ Long-press the app icon for dynamic shortcuts (labels localized,
 published at startup):
 
 - **Quick note** — opens the quick note
+- **Today's journal entry** — opens today's [journal](journal.md) entry,
+  made first when there is none
 - **New todo** — opens the Todo tab's add-task dialog
 - **New note** — the Files FAB's "New note" flow
-- **New list note** — the Files FAB's "New list note" flow
-- **New voice note** — the Files FAB's "New voice note" flow (desktop
-  tray only; Android launchers show the first four)
+- **New list note** — the Files FAB's "New list note" flow (desktop tray
+  and Linux launcher; Android launchers show the first four)
+- **New voice note** — the Files FAB's "New voice note" flow (likewise)
 
 Each shortcut runs the same flow as its in-app button, so the two can
 never drift.
 
 ## CLI launch flags (desktop)
 
-Desktop builds accept `--quick-note`, `--new-todo`, `--new-note`,
-`--new-list`, `--new-voice`, routed through the same handler as the
-launcher actions.
+Desktop builds accept `--quick-note`, `--journal-today`, `--new-todo`,
+`--new-note`, `--new-list`, `--new-voice`, routed through the same
+handler as the launcher actions — and the tray menu lists the same ones.
 
 A path opens that file: `niman ~/project/README.md` opens it the way
 **Open file** does (see

@@ -1189,6 +1189,59 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteGroupGoTo => '转到';
   @override
+  String get paletteGroupJournal => '日记';
+  @override
+  String get journalToday => '今天的条目';
+  @override
+  String get journalPrevious => '上一条目';
+  @override
+  String get journalNext => '下一条目';
+  @override
+  String get commandNeedJournalEntry => '需要打开一条日记条目';
+  @override
+  String journalCreateAsk(String day) => '$day 还没有条目。要创建吗？';
+  @override
+  String journalTemplateMissing(String path) =>
+      '无法读取日记模板 $path：已在没有模板的情况下创建条目。';
+  @override
+  String get journalIntro => '每天一条笔记，第一次打开那一天时从模板创建。这些设置随资料库一起移动。';
+  @override
+  String get journalFolderTitle => '日记文件夹';
+  @override
+  String get journalFolderSubtitle => '条目存放的位置';
+  @override
+  String get journalEntryNameTitle => '条目名称';
+  @override
+  String get journalEntryNameSubtitle =>
+      "日期用 YYYY、MM 或 M、DD 或 D；/ 创建文件夹；'引号' 中的文字保持原样";
+  @override
+  String journalEntryNamePreview(String path) => '今天的条目：$path';
+  @override
+  String get journalEntryNameInvalid =>
+      '需要 YYYY、月份（MM 或 M）和日期（DD 或 D），且不能包含文件名不允许的字符';
+  @override
+  String get journalTemplateTitle => '模板';
+  @override
+  String get journalTemplateSubtitle => '新条目以什么开头';
+  @override
+  String get journalTemplateNone => '无：带日期的标题';
+  @override
+  String get journalDayStartTitle => '新的一天开始于';
+  @override
+  String get journalDayStartSubtitle => '熬夜？设为 04:00 时，深夜仍算前一天';
+  @override
+  String get journalRecent => '最近';
+  @override
+  String get journalNoEntry => '这一天没有条目';
+  @override
+  String get journalOpenEntry => '打开';
+  @override
+  String get journalShowCalendar => '显示日历';
+  @override
+  String get journalFabToday => '今天的日记条目';
+  @override
+  String journalDueOn(String day) => '$day 到期';
+  @override
   String get commandsTitle => '命令';
   @override
   String get commandsIntro => '命令面板只列出在当前位置可以运行的命令。这里是全部命令，以及每条命令何时出现。';

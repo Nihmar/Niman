@@ -1282,6 +1282,65 @@ final class TurkishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Git';
   @override
+  String get paletteGroupJournal => 'Günlük';
+  @override
+  String get journalToday => 'Bugünün girdisi';
+  @override
+  String get journalPrevious => 'Önceki girdi';
+  @override
+  String get journalNext => 'Sonraki girdi';
+  @override
+  String get commandNeedJournalEntry => 'Açık bir günlük girdisi gerekir';
+  @override
+  String journalCreateAsk(String day) =>
+      '$day için henüz girdi yok. Oluşturulsun mu?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Günlük şablonu $path okunamadı: girdi onsuz oluşturuldu.';
+  @override
+  String get journalIntro =>
+      'Günde bir not; o günü ilk açtığında bir şablondan oluşturulur. Bu '
+      'ayarlar kitaplıkla birlikte taşınır.';
+  @override
+  String get journalFolderTitle => 'Günlük klasörü';
+  @override
+  String get journalFolderSubtitle => 'Girdilerin gideceği yer';
+  @override
+  String get journalEntryNameTitle => 'Girdi adı';
+  @override
+  String get journalEntryNameSubtitle =>
+      "Tarih için YYYY, MM veya M, DD veya D; / klasör oluşturur; 'tırnak "
+      "içindeki' metin olduğu gibi kalır";
+  @override
+  String journalEntryNamePreview(String path) => 'Bugünün girdisi: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'YYYY, bir ay (MM veya M) ve bir gün (DD veya D) gerekir; dosya adında '
+      'olamayacak bir şey olmamalı';
+  @override
+  String get journalTemplateTitle => 'Şablon';
+  @override
+  String get journalTemplateSubtitle => 'Yeni bir girdinin neyle başladığı';
+  @override
+  String get journalTemplateNone => 'Yok: tarihli bir başlık';
+  @override
+  String get journalDayStartTitle => 'Yeni gün şu saatte başlar';
+  @override
+  String get journalDayStartSubtitle =>
+      "Geç mi yatıyorsun? 04:00'te gece bir önceki güne sayılır";
+  @override
+  String get journalRecent => 'Son girdiler';
+  @override
+  String get journalNoEntry => 'Bu gün için girdi yok';
+  @override
+  String get journalOpenEntry => 'Aç';
+  @override
+  String get journalShowCalendar => 'Takvimi göster';
+  @override
+  String get journalFabToday => 'Bugünün günlük girdisi';
+  @override
+  String journalDueOn(String day) => 'Son tarih $day';
+  @override
   String get commandsTitle => 'Komutlar';
   @override
   String get commandsIntro =>

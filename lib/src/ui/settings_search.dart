@@ -82,6 +82,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   void pushAppearance(Key row) => openArea(SettingsAreaId.appearance, row);
   void pushEditor(Key row) => openArea(SettingsAreaId.editor, row);
   void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
+  void pushJournal(Key row) => openArea(SettingsAreaId.journal, row);
   void pushTrash(Key row) => openArea(SettingsAreaId.trashHistory, row);
   void pushUpdates(Key row) => openArea(SettingsAreaId.updates, row);
   void pushDiagnostics(Key row) => openArea(SettingsAreaId.diagnostics, row);
@@ -96,6 +97,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   final appearance = AppStrings.settingsSectionAppearance;
   final editor = AppStrings.settingsSectionEditor;
   final folders = libraryArea(AppStrings.settingsAreaFolders);
+  final journal = libraryArea(AppStrings.paletteGroupJournal);
   final trashHistory = libraryArea(AppStrings.settingsAreaTrashHistory);
   final maintenance = AppStrings.settingsGroupMaintenance;
   final entries = <SettingsSearchEntry>[
@@ -288,6 +290,40 @@ List<SettingsSearchEntry> settingsSearchEntries({
           : (await ops.quickNotePath) ?? AppStrings.quickNoteUnset,
       areaId: SettingsAreaId.folders,
       open: () => pushFolders(SettingsKeys.quickNote),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.journalFolderTitle,
+      area: journal,
+      rowKey: SettingsKeys.journalFolder,
+      value: () async => ops == null ? null : (await ops.journal).folder,
+      areaId: SettingsAreaId.journal,
+      open: () => pushJournal(SettingsKeys.journalFolder),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.journalEntryNameTitle,
+      area: journal,
+      rowKey: SettingsKeys.journalEntryName,
+      value: () async => ops == null ? null : (await ops.journal).entryName,
+      areaId: SettingsAreaId.journal,
+      open: () => pushJournal(SettingsKeys.journalEntryName),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.journalTemplateTitle,
+      area: journal,
+      rowKey: SettingsKeys.journalTemplate,
+      value: () async => ops == null
+          ? null
+          : (await ops.journal).template ?? AppStrings.journalTemplateNone,
+      areaId: SettingsAreaId.journal,
+      open: () => pushJournal(SettingsKeys.journalTemplate),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.journalDayStartTitle,
+      area: journal,
+      rowKey: SettingsKeys.journalDayStart,
+      value: noValue,
+      areaId: SettingsAreaId.journal,
+      open: () => pushJournal(SettingsKeys.journalDayStart),
     ),
     SettingsSearchEntry(
       title: AppStrings.trashTitle,

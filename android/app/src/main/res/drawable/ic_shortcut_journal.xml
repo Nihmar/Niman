@@ -1,0 +1,28 @@
+<!-- Launcher quick action: Today's journal entry (#7).
+     108x108 with the glyph inside the central 72x72 safe zone, so the
+     launcher's circular mask never cuts into it: a calendar page, its two
+     rings, and a mark on today. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#45475A"
+        android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineJoin="round"
+        android:pathData="M33,37L75,37L75,77L33,77Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M33,49L75,49M44,30L44,40M64,30L64,40" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,58L60,58L60,69L48,69Z" />
+</vector>

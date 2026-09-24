@@ -1299,6 +1299,67 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ir para';
   @override
+  String get paletteGroupJournal => 'Diário';
+  @override
+  String get journalToday => 'Entrada de hoje';
+  @override
+  String get journalPrevious => 'Entrada anterior';
+  @override
+  String get journalNext => 'Entrada seguinte';
+  @override
+  String get commandNeedJournalEntry =>
+      'Precisa de uma entrada do diário aberta';
+  @override
+  String journalCreateAsk(String day) =>
+      'Ainda não há entrada para $day. Criá-la?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Não foi possível ler o modelo do diário $path: a entrada foi criada '
+      'sem ele.';
+  @override
+  String get journalIntro =>
+      'Uma nota por dia, criada a partir de um modelo na primeira vez que '
+      'abres esse dia. Estas definições viajam com a biblioteca.';
+  @override
+  String get journalFolderTitle => 'Pasta do diário';
+  @override
+  String get journalFolderSubtitle => 'Para onde vão as entradas';
+  @override
+  String get journalEntryNameTitle => 'Nome da entrada';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM ou M, DD ou D para a data; / cria uma pasta; o texto 'entre "
+      "aspas' fica como está";
+  @override
+  String journalEntryNamePreview(String path) => 'Entrada de hoje: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Precisa de YYYY, um mês (MM ou M) e um dia (DD ou D), e nada que um '
+      'nome de ficheiro não possa conter';
+  @override
+  String get journalTemplateTitle => 'Modelo';
+  @override
+  String get journalTemplateSubtitle => 'Com o que começa uma entrada nova';
+  @override
+  String get journalTemplateNone => 'Nenhum: um título com a data';
+  @override
+  String get journalDayStartTitle => 'Um novo dia começa às';
+  @override
+  String get journalDayStartSubtitle =>
+      'Deitas-te tarde? Às 04:00 a noite fica no dia anterior';
+  @override
+  String get journalRecent => 'Recentes';
+  @override
+  String get journalNoEntry => 'Sem entrada para este dia';
+  @override
+  String get journalOpenEntry => 'Abrir';
+  @override
+  String get journalShowCalendar => 'Mostrar o calendário';
+  @override
+  String get journalFabToday => 'Entrada de hoje do diário';
+  @override
+  String journalDueOn(String day) => 'Vence a $day';
+  @override
   String get commandsTitle => 'Comandos';
   @override
   String get commandsIntro =>

@@ -1297,6 +1297,65 @@ final class SwedishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå till';
   @override
+  String get paletteGroupJournal => 'Dagbok';
+  @override
+  String get journalToday => 'Dagens anteckning';
+  @override
+  String get journalPrevious => 'Föregående anteckning';
+  @override
+  String get journalNext => 'Nästa anteckning';
+  @override
+  String get commandNeedJournalEntry => 'Kräver en öppen dagboksanteckning';
+  @override
+  String journalCreateAsk(String day) =>
+      'Det finns ingen anteckning för $day än. Skapa den?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Dagboksmallen $path gick inte att läsa: anteckningen skapades utan den.';
+  @override
+  String get journalIntro =>
+      'En anteckning per dag, skapad från en mall första gången du öppnar '
+      'dagen. De här inställningarna följer med biblioteket.';
+  @override
+  String get journalFolderTitle => 'Dagboksmapp';
+  @override
+  String get journalFolderSubtitle => 'Var anteckningarna hamnar';
+  @override
+  String get journalEntryNameTitle => 'Anteckningens namn';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM eller M, DD eller D för datumet; / skapar en mapp; text inom '
+      "'citattecken' står kvar som den är";
+  @override
+  String journalEntryNamePreview(String path) => 'Dagens anteckning: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Kräver YYYY, en månad (MM eller M) och en dag (DD eller D), och inget '
+      'ett filnamn inte kan innehålla';
+  @override
+  String get journalTemplateTitle => 'Mall';
+  @override
+  String get journalTemplateSubtitle => 'Vad en ny anteckning börjar med';
+  @override
+  String get journalTemplateNone => 'Ingen: en rubrik med datumet';
+  @override
+  String get journalDayStartTitle => 'En ny dag börjar kl.';
+  @override
+  String get journalDayStartSubtitle =>
+      'Uppe sent? Kl. 04:00 hör natten fortfarande till dagen innan';
+  @override
+  String get journalRecent => 'Senaste';
+  @override
+  String get journalNoEntry => 'Ingen anteckning för den här dagen';
+  @override
+  String get journalOpenEntry => 'Öppna';
+  @override
+  String get journalShowCalendar => 'Visa kalendern';
+  @override
+  String get journalFabToday => 'Dagens dagboksanteckning';
+  @override
+  String journalDueOn(String day) => 'Förfaller $day';
+  @override
   String get commandsTitle => 'Kommandon';
   @override
   String get commandsIntro =>

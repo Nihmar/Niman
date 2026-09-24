@@ -1275,6 +1275,65 @@ final class EstonianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Mine';
   @override
+  String get paletteGroupJournal => 'Päevik';
+  @override
+  String get journalToday => 'Tänane sissekanne';
+  @override
+  String get journalPrevious => 'Eelmine sissekanne';
+  @override
+  String get journalNext => 'Järgmine sissekanne';
+  @override
+  String get commandNeedJournalEntry => 'Vajab avatud päeviku sissekannet';
+  @override
+  String journalCreateAsk(String day) =>
+      'Päeva $day jaoks pole veel sissekannet. Kas luua?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Päeviku malli $path ei saanud lugeda: sissekanne loodi ilma selleta.';
+  @override
+  String get journalIntro =>
+      'Üks märkus päevas, mis tehakse mallist, kui avad selle päeva esimest '
+      'korda. Need seaded liiguvad koos teegiga.';
+  @override
+  String get journalFolderTitle => 'Päeviku kaust';
+  @override
+  String get journalFolderSubtitle => 'Kuhu sissekanded lähevad';
+  @override
+  String get journalEntryNameTitle => 'Sissekande nimi';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM või M, DD või D kuupäeva jaoks; / loob kausta; 'jutumärkides' "
+      'tekst jääb nagu on';
+  @override
+  String journalEntryNamePreview(String path) => 'Tänane sissekanne: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Vajab YYYY-d, kuud (MM või M) ja päeva (DD või D) ning mitte midagi, '
+      'mida failinimi ei tohi sisaldada';
+  @override
+  String get journalTemplateTitle => 'Mall';
+  @override
+  String get journalTemplateSubtitle => 'Millega uus sissekanne algab';
+  @override
+  String get journalTemplateNone => 'Puudub: pealkiri kuupäevaga';
+  @override
+  String get journalDayStartTitle => 'Uus päev algab kell';
+  @override
+  String get journalDayStartSubtitle =>
+      'Hiline? Kell 04:00 jääb öö eelmise päeva juurde';
+  @override
+  String get journalRecent => 'Viimased';
+  @override
+  String get journalNoEntry => 'Selle päeva kohta pole sissekannet';
+  @override
+  String get journalOpenEntry => 'Ava';
+  @override
+  String get journalShowCalendar => 'Näita kalendrit';
+  @override
+  String get journalFabToday => 'Tänane päeviku sissekanne';
+  @override
+  String journalDueOn(String day) => 'Tähtaeg $day';
+  @override
   String get commandsTitle => 'Käsud';
   @override
   String get commandsIntro =>

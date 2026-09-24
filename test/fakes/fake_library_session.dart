@@ -14,6 +14,7 @@ import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
@@ -688,6 +689,25 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setQuickNotePath({required String? path}) async {
     _quickNotePath = path;
   }
+
+  JournalSettings _journal = const JournalSettings();
+
+  @override
+  Future<JournalSettings> get journal async => _journal;
+
+  @override
+  Future<void> setJournal(JournalSettings settings) async {
+    _journal = settings;
+  }
+
+  @override
+  Future<List<String>> notePathsUnder(String folder) async => [
+    for (final row in _rows)
+      if (!row.isDir &&
+          !row.trashed &&
+          (folder.isEmpty || row.path.startsWith('$folder/')))
+        row.path,
+  ];
 
   /// The stored content of the note at [path], or null (test aid).
   String? contentOf(String path) => _findRow(path)?.content;

@@ -56,6 +56,7 @@ void main() {
 
     expect(tray.labels, {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
+      ShortcutAction.journalToday: AppStrings.journalFabToday,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
