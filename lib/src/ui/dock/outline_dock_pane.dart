@@ -31,34 +31,36 @@ final class OutlineDockPane extends StatelessWidget {
             ),
           );
         }
-        return ListView(
+        final body = theme.textTheme.bodyMedium;
+        final title = body?.copyWith(fontWeight: FontWeight.w600);
+        // Built as the list scrolls to them, not all at once: an outline
+        // follows the note, and the 246 MB stress note has 22 260 headings
+        // — a row each, built on every outline the note published.
+        return ListView.builder(
           key: const Key('dock-outline'),
           padding: const EdgeInsets.symmetric(vertical: 4),
-          children: [
-            for (final entry in entries)
-              InkWell(
-                key: Key('dock-outline-${entry.line}'),
-                onTap: () => note.jumpToHeading(entry.line),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    12.0 + 14 * (entry.level - 1),
-                    6,
-                    12,
-                    6,
-                  ),
-                  child: Text(
-                    entry.text.isEmpty ? AppStrings.outlineNoTitle : entry.text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: entry.level == 1
-                        ? theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          )
-                        : theme.textTheme.bodyMedium,
-                  ),
+          itemCount: entries.length,
+          itemBuilder: (context, index) {
+            final entry = entries[index];
+            return InkWell(
+              key: Key('dock-outline-${entry.line}'),
+              onTap: () => note.jumpToHeading(entry.line),
+              child: Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  12.0 + 14 * (entry.level - 1),
+                  6,
+                  12,
+                  6,
+                ),
+                child: Text(
+                  entry.text.isEmpty ? AppStrings.outlineNoTitle : entry.text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: entry.level == 1 ? title : body,
                 ),
               ),
-          ],
+            );
+          },
         );
       },
     );

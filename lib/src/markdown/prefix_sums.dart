@@ -22,9 +22,17 @@
 /// lists, unboxed: a list of `double` holds each value as an object, and
 /// building one over 2.76 M lines — the 246 MB note's height map and its
 /// buffer's index, both on opening it — cost ~200 ms apiece in allocations.
+///
+/// Sums made [PrefixSums.lazy] do not know their values until they are asked
+/// for them: a chunk stands at an estimate of its total until a question
+/// reaches inside it. That is what a height map is on a note it has not drawn
+/// yet — the sliver asks about the chunks around the viewport, and nothing
+/// asks about the rest.
 library;
 
 import 'dart:typed_data';
+
+import 'package:niman/src/markdown/chunk_tree.dart';
 
 /// Chunked prefix sums over a list of non-negative values.
 final class PrefixSums {
@@ -33,20 +41,48 @@ final class PrefixSums {
 
   /// Sums over [count] values, value `at` being `valueOf(at)`, asked once
   /// each and in order: no list of them is built on the way.
-  new generate(int count, double Function(int at) valueOf) {
+  new generate(int count, double Function(int at) valueOf)
+    : _valueOf = null,
+      _tree = ChunkTree(const <int>[], const <double>[]) {
     for (var at = 0; at < count; at += _chunkSize) {
       final end = at + _chunkSize < count ? at + _chunkSize : count;
       final chunk = Float64List(end - at);
       for (var local = 0; local < chunk.length; local++) {
         chunk[local] = valueOf(at + local);
       }
+      final prefix = _prefixOf(chunk);
       _chunks.add(chunk);
+      _prefixes.add(prefix);
+      _sizes.add(chunk.length);
+      _totals.add(prefix.last);
     }
-    if (_chunks.isEmpty) _chunks.add(Float64List(0));
-    _prefixes.addAll(_chunks.map(_prefixOf));
-    _owned.addAll(List<bool>.filled(_chunks.length, true));
-    _length = count;
-    _rebuildTrees();
+    _start(count);
+  }
+
+  /// Sums over [count] values that are worked out a chunk at a time, when a
+  /// question first reaches inside the chunk: value `at` is `valueOf(at)`,
+  /// asked once, with the index it has *then* — after whatever splices came
+  /// before. Until a chunk is worked out it counts for `estimate(first,
+  /// end)`, the sum of values `[first, end)` as best known without them.
+  ///
+  /// O(count / chunk size) to make, where [PrefixSums.generate] is
+  /// O(count): what a height map over a note of millions of lines costs on
+  /// the frame that opens it. An estimate that is off moves the offsets
+  /// after the chunk when the chunk is worked out, as a measured height does.
+  new lazy(
+    int count,
+    double Function(int at) valueOf, {
+    required double Function(int first, int end) estimate,
+  }) : _valueOf = valueOf,
+       _tree = ChunkTree(const <int>[], const <double>[]) {
+    for (var at = 0; at < count; at += _chunkSize) {
+      final end = at + _chunkSize < count ? at + _chunkSize : count;
+      _chunks.add(null);
+      _prefixes.add(null);
+      _sizes.add(end - at);
+      _totals.add(estimate(at, end));
+    }
+    _start(count);
   }
 
   /// Sums holding what [other] holds now, apart from it: a write to either
@@ -56,15 +92,32 @@ final class PrefixSums {
   /// What a snapshot of the source buffer takes instead of summing every
   /// line again (~200 ms of reading 2.76 M lines' lengths on a 246 MB note).
   new sharing(PrefixSums other)
-    : _sumTree = List<double>.of(other._sumTree),
-      _sizeTree = List<int>.of(other._sizeTree),
-      _highestPower = other._highestPower,
+    : _valueOf = other._valueOf,
+      _tree = ChunkTree.copy(other._tree),
       _length = other._length {
     _chunks.addAll(other._chunks);
     _prefixes.addAll(other._prefixes);
+    _sizes.addAll(other._sizes);
+    _totals.addAll(other._totals);
     _owned.addAll(List<bool>.filled(other._owned.length, false));
     other._owned.fillRange(0, other._owned.length, false);
   }
+
+  /// Every chunk this side's own, with no chunk left empty, and the trees.
+  void _start(int count) {
+    if (_chunks.isEmpty) {
+      _chunks.add(Float64List(0));
+      _prefixes.add(Float64List(1));
+      _sizes.add(0);
+      _totals.add(0);
+    }
+    _owned.addAll(List<bool>.filled(_chunks.length, true));
+    _length = count;
+    _tree.rebuild(_sizes, _totals);
+  }
+
+  /// Works a lazy chunk's values out; null for sums that know them all.
+  final double Function(int at)? _valueOf;
 
   /// Whether chunk *c* may be written in place: false for one shared with a
   /// copy.
@@ -74,19 +127,23 @@ final class PrefixSums {
   /// is split again.
   static const int _chunkSize = 1024;
 
-  /// The values, chunk by chunk. Never empty: an empty list is one empty chunk.
-  final List<Float64List> _chunks = <Float64List>[];
+  /// The values, chunk by chunk; null for a lazy chunk not worked out yet.
+  /// Never empty: an empty list is one empty chunk.
+  final List<Float64List?> _chunks = <Float64List?>[];
 
   /// Each chunk's own prefix sums: `_prefixes[c][i]` is the sum of the first
-  /// `i` values of chunk `c`, so it has one entry more than the chunk.
-  final List<Float64List> _prefixes = <Float64List>[];
+  /// `i` values of chunk `c`, so it has one entry more than the chunk. Null
+  /// where the chunk is.
+  final List<Float64List?> _prefixes = <Float64List?>[];
 
-  /// Fenwick trees over the chunks, 1-indexed: their totals and their sizes.
-  List<double> _sumTree = <double>[0];
-  List<int> _sizeTree = <int>[0];
+  /// How many values each chunk holds, worked out or not.
+  final List<int> _sizes = <int>[];
 
-  /// The largest power of two at or below the chunk count, for the descents.
-  int _highestPower = 0;
+  /// Each chunk's total: its values', or its estimate while it has none.
+  final List<double> _totals = <double>[];
+
+  /// The trees over the chunks' totals and sizes.
+  final ChunkTree _tree;
 
   int _length = 0;
 
@@ -94,22 +151,23 @@ final class PrefixSums {
   int get length => _length;
 
   /// The sum of every value.
-  double get total => _chunkPrefix(_chunks.length);
+  double get total => _tree.total;
 
   /// The sum of the values before [index]. [index] may be [length], which
   /// answers [total]. O(log chunks).
   double offsetOf(int index) {
     assert(index >= 0 && index <= _length, 'index $index out of 0..$_length');
     if (index >= _length) return total;
-    final (chunk, local) = _locate(index);
-    return _chunkPrefix(chunk) + _prefixes[chunk][local];
+    final (chunk, local) = _tree.locate(index);
+    final within = _prefixAt(chunk)[local];
+    return _tree.totalBefore(chunk) + within;
   }
 
   /// Value [index].
   double valueAt(int index) {
     assert(index >= 0 && index < _length, 'index $index out of range');
-    final (chunk, local) = _locate(index);
-    return _chunks[chunk][local];
+    final (chunk, local) = _tree.locate(index);
+    return _valuesAt(chunk)[local];
   }
 
   /// The largest index whose offset is at or before [offset]: the value that
@@ -119,59 +177,55 @@ final class PrefixSums {
   /// answer `length - 1`, so the result is always a valid index — the callers
   /// rely on it, since a buffer always has a line and a height map a block.
   int indexOf(double offset) {
-    if (_length == 0 || offset <= 0) return 0;
-    if (offset >= total) return _length - 1;
-    // The chunks that end at or before [offset], by binary lifting.
-    var chunk = 0;
-    var before = 0;
-    var remaining = offset;
-    final count = _chunks.length;
-    for (var power = _highestPower; power > 0; power >>= 1) {
-      final next = chunk + power;
-      if (next <= count && _sumTree[next] <= remaining) {
-        remaining -= _sumTree[next];
-        before += _sizeTree[next];
-        chunk = next;
+    while (true) {
+      if (_length == 0 || offset <= 0) return 0;
+      if (offset >= total) return _length - 1;
+      // The chunks that end at or before [offset], by binary lifting.
+      final (chunk, before, remaining) = _tree.find(offset);
+      if (chunk >= _chunks.length) return _length - 1;
+      // A chunk that stood at an estimate is worked out, which moves every
+      // offset after it: the descent is asked again of the sums as they are.
+      if (_prefixes[chunk] == null) {
+        _workOut(chunk);
+        continue;
       }
-    }
-    if (chunk >= count) return _length - 1;
-    // Inside that chunk: the last local start at or before what is left.
-    final prefix = _prefixes[chunk];
-    var low = 0;
-    var high = _chunks[chunk].length - 1;
-    while (low < high) {
-      final mid = (low + high + 1) >> 1;
-      if (prefix[mid] <= remaining) {
-        low = mid;
-      } else {
-        high = mid - 1;
+      // Inside that chunk: the last local start at or before what is left.
+      final prefix = _prefixes[chunk]!;
+      var low = 0;
+      var high = _sizes[chunk] - 1;
+      while (low < high) {
+        final mid = (low + high + 1) >> 1;
+        if (prefix[mid] <= remaining) {
+          low = mid;
+        } else {
+          high = mid - 1;
+        }
       }
+      final index = before + low;
+      return index < _length ? index : _length - 1;
     }
-    final index = before + low;
-    return index < _length ? index : _length - 1;
   }
 
   /// Sets value [index] to [value]. O(chunk + log chunks).
   void setValue(int index, double value) {
     assert(index >= 0 && index < _length, 'index $index out of range');
     assert(value >= 0, 'value $index would be negative: $value');
-    final (chunk, local) = _locate(index);
-    if (_chunks[chunk][local] == value) return;
+    final (chunk, local) = _tree.locate(index);
+    if (_valuesAt(chunk)[local] == value) return;
     if (!_owned[chunk]) {
-      _chunks[chunk] = Float64List.fromList(_chunks[chunk]);
-      _prefixes[chunk] = Float64List.fromList(_prefixes[chunk]);
+      _chunks[chunk] = Float64List.fromList(_chunks[chunk]!);
+      _prefixes[chunk] = Float64List.fromList(_prefixes[chunk]!);
       _owned[chunk] = true;
     }
-    final values = _chunks[chunk];
+    final values = _chunks[chunk]!;
     final delta = value - values[local];
     values[local] = value;
-    final prefix = _prefixes[chunk];
+    final prefix = _prefixes[chunk]!;
     for (var at = local + 1; at < prefix.length; at++) {
       prefix[at] += delta;
     }
-    for (var at = chunk + 1; at <= _chunks.length; at += at & -at) {
-      _sumTree[at] += delta;
-    }
+    _totals[chunk] += delta;
+    _tree.add(chunk, delta);
   }
 
   /// Replaces the [removed] values from [first] on with [inserted].
@@ -183,25 +237,29 @@ final class PrefixSums {
     assert(first + removed <= _length, 'removing past the end');
     if (removed == 0 && inserted.isEmpty) return;
     final (chunk, local) = first == _length
-        ? (_chunks.length - 1, _chunks.last.length)
-        : _locate(first);
+        ? (_chunks.length - 1, _sizes.last)
+        : _tree.locate(first);
     final firstChunk = chunk;
     // Where the removal ends: the chunk, and the place in it. Nothing is
     // written in place, because a copy may share these chunks.
     var left = removed;
     var lastChunk = chunk;
     var end = local;
-    while (left > _chunks[lastChunk].length - end) {
-      left -= _chunks[lastChunk].length - end;
+    while (left > _sizes[lastChunk] - end) {
+      left -= _sizes[lastChunk] - end;
       lastChunk++;
       end = 0;
     }
     end += left;
     // Every chunk the edit went through is recut, and the empty ones go.
+    // Only the two it starts and ends in keep values, so only those two are
+    // worked out — asked with the indices they have *after* the edit, which
+    // the note they are read from already holds: the values past it moved
+    // by what it inserted less what it removed.
     final touched = <double>[
-      ..._chunks[firstChunk].take(local),
+      ..._kept(firstChunk, 0, local, 0),
       ...inserted,
-      ..._chunks[lastChunk].skip(end),
+      ..._kept(lastChunk, end, _sizes[lastChunk], inserted.length - removed),
     ];
     final recut = <Float64List>[];
     if (touched.length <= 2 * _chunkSize) {
@@ -214,8 +272,17 @@ final class PrefixSums {
         recut.add(Float64List.fromList(touched.sublist(from, to)));
       }
     }
+    final prefixes = <Float64List>[
+      for (final values in recut) _prefixOf(values),
+    ];
     _chunks.replaceRange(firstChunk, lastChunk + 1, recut);
-    _prefixes.replaceRange(firstChunk, lastChunk + 1, recut.map(_prefixOf));
+    _prefixes.replaceRange(firstChunk, lastChunk + 1, prefixes);
+    _sizes.replaceRange(firstChunk, lastChunk + 1, [
+      for (final values in recut) values.length,
+    ]);
+    _totals.replaceRange(firstChunk, lastChunk + 1, [
+      for (final prefix in prefixes) prefix.last,
+    ]);
     _owned.replaceRange(
       firstChunk,
       lastChunk + 1,
@@ -224,34 +291,53 @@ final class PrefixSums {
     if (_chunks.isEmpty) {
       _chunks.add(Float64List(0));
       _prefixes.add(Float64List(1));
+      _sizes.add(0);
+      _totals.add(0);
       _owned.add(true);
     }
     _length += inserted.length - removed;
-    _rebuildTrees();
+    _tree.rebuild(_sizes, _totals);
   }
 
-  /// Which chunk value [index] is in, and where in it. O(log chunks).
-  (int, int) _locate(int index) {
-    var chunk = 0;
-    var remaining = index;
-    final count = _chunks.length;
-    for (var power = _highestPower; power > 0; power >>= 1) {
-      final next = chunk + power;
-      if (next <= count && _sizeTree[next] <= remaining) {
-        remaining -= _sizeTree[next];
-        chunk = next;
-      }
-    }
-    return (chunk, remaining);
+  /// Values `[from, to)` of chunk [chunk], a splice keeps: the chunk's own
+  /// when it has them, and otherwise asked for at their index [shift] on,
+  /// where the splice moves them.
+  List<double> _kept(int chunk, int from, int to, int shift) {
+    final values = _chunks[chunk];
+    if (values != null) return values.sublist(from, to);
+    final valueOf = _valueOf!;
+    final start = _tree.sizeBefore(chunk) + shift;
+    return <double>[for (var at = from; at < to; at++) valueOf(start + at)];
   }
 
-  /// The sum of the first [count] chunks.
-  double _chunkPrefix(int count) {
-    var sum = 0.0;
-    for (var at = count; at > 0; at -= at & -at) {
-      sum += _sumTree[at];
+  /// Chunk [chunk]'s values, worked out first when it has none yet.
+  Float64List _valuesAt(int chunk) {
+    if (_chunks[chunk] == null) _workOut(chunk);
+    return _chunks[chunk]!;
+  }
+
+  /// Chunk [chunk]'s prefix sums, worked out first when it has none yet.
+  Float64List _prefixAt(int chunk) {
+    if (_prefixes[chunk] == null) _workOut(chunk);
+    return _prefixes[chunk]!;
+  }
+
+  /// Asks for lazy chunk [chunk]'s values, and puts its total where its
+  /// estimate was.
+  void _workOut(int chunk) {
+    final valueOf = _valueOf!;
+    final first = _tree.sizeBefore(chunk);
+    final values = Float64List(_sizes[chunk]);
+    for (var local = 0; local < values.length; local++) {
+      values[local] = valueOf(first + local);
     }
-    return sum;
+    final prefix = _prefixOf(values);
+    _chunks[chunk] = values;
+    _prefixes[chunk] = prefix;
+    _owned[chunk] = true;
+    final delta = prefix.last - _totals[chunk];
+    _totals[chunk] = prefix.last;
+    _tree.add(chunk, delta);
   }
 
   static Float64List _prefixOf(Float64List values) {
@@ -263,28 +349,5 @@ final class PrefixSums {
     }
     prefix[values.length] = sum;
     return prefix;
-  }
-
-  /// Rebuilds the trees over the chunks, O(chunks).
-  void _rebuildTrees() {
-    final count = _chunks.length;
-    final sums = List<double>.filled(count + 1, 0);
-    final sizes = List<int>.filled(count + 1, 0);
-    for (var at = 1; at <= count; at++) {
-      sums[at] += _prefixes[at - 1].last;
-      sizes[at] += _chunks[at - 1].length;
-      final parent = at + (at & -at);
-      if (parent <= count) {
-        sums[parent] += sums[at];
-        sizes[parent] += sizes[at];
-      }
-    }
-    _sumTree = sums;
-    _sizeTree = sizes;
-    var power = 1;
-    while (power * 2 <= count) {
-      power *= 2;
-    }
-    _highestPower = count == 0 ? 0 : power;
   }
 }

@@ -77,7 +77,9 @@ const MarkdownTheme _wideColumns = MarkdownTheme(
   markerDim: Color(0xFF999999),
   blockSpacing: 10,
   listIndentPerLevel: 80,
-  quoteIndentPerLevel: 12,
+  // A `> ` in the test font is 28 wide: 16 leaves it 12 to hang into the
+  // numbers' gap, which is 14 and all the room there is past the numbers.
+  quoteIndentPerLevel: 16,
   codePadding: 8,
   quoteBarWidth: 3,
   ruleThickness: 1,
@@ -265,6 +267,57 @@ void main() {
     final under = spans.singleWhere((span) => span.text == 'under');
     expect(under.style?.decoration, TextDecoration.underline);
     expect(hidden(under), isFalse);
+  });
+
+  // 2026-09-24 report: from source to live and back the caret kept the
+  // place and the height it had, over a line drawn another way.
+  testWidgets('a mode switch measures the caret again', (tester) async {
+    const text = '# Hello\n\nSome text.\n';
+    final buffer = SourceBuffer.fromText(text);
+    const caret = 5; // # Hel|lo
+    Future<MarkdownSourceViewState> pump(MarkdownSurfaceMode mode) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: buffer,
+              mode: mode,
+              theme: _theme,
+              selection: const SelectionModel.at(caret),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+    }
+
+    /// Where the caret belongs on the line as it is drawn now.
+    Rect expected() {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().contains('Hello'));
+      const position = TextPosition(offset: caret);
+      final at = paragraph.getOffsetForCaret(position, Rect.zero);
+      return Rect.fromLTWH(
+        at.dx,
+        at.dy,
+        0,
+        paragraph.getFullHeightForCaret(position),
+      ).shift(paragraph.localToGlobal(Offset.zero));
+    }
+
+    final first = await pump(MarkdownSurfaceMode.live);
+    for (final mode in [MarkdownSurfaceMode.source, MarkdownSurfaceMode.live]) {
+      final state = await pump(mode);
+      expect(identical(state, first), isTrue, reason: 'the same surface');
+      final want = expected();
+      final got = state.caretRect!;
+      expect(got.left, closeTo(want.left, 0.5), reason: '$mode: its place');
+      expect(got.height, closeTo(want.height, 0.5), reason: '$mode: height');
+    }
   });
 
   testWidgets(

@@ -164,6 +164,36 @@ void main() {
           rig.agree('cia! mondo\n', reason: 'and typing carries on from there');
         });
 
+        testWidgets('brackets come in pairs, and are typed through', (
+          tester,
+        ) async {
+          final rig = _Rig(tester, profile, mode, 'vedi\n');
+          await rig.pump();
+          await rig.tapEnd(0);
+          await rig.platform.type(' (');
+          rig.agree('vedi ()\n');
+          await rig.platform.type('a');
+          rig.agree('vedi (a)\n', reason: 'typed between the two');
+          await rig.platform.type(')');
+          rig.agree('vedi (a)\n', reason: 'the closing one is stepped over');
+          await rig.platform.type('[');
+          await rig.platform.type('[');
+          rig.agree('vedi (a)[[]]\n', reason: 'a wikilink opens whole');
+          await rig.platform.backspace();
+          await tester.pump();
+          rig.agree('vedi (a)[]\n', reason: 'Backspace takes an empty pair');
+          await rig.platform.type('x]]');
+          rig.agree('vedi (a)[x]]\n', reason: 'only the pair’s own is stepped');
+        });
+
+        testWidgets('a bracket before a word is only itself', (tester) async {
+          final rig = _Rig(tester, profile, mode, 'parola\n');
+          await rig.pump();
+          await rig.tapAt(0, 0);
+          await rig.platform.type('{');
+          rig.agree('{parola\n');
+        });
+
         testWidgets('Enter is one line', (tester) async {
           final rig = _Rig(tester, profile, mode, 'unofine\n');
           await rig.pump();

@@ -13,9 +13,11 @@
 // the VM runs on its own OS thread, makes an owner window there and runs
 // `TrackPopupMenu` against it. What Microsoft documents for a notification-
 // area menu is kept: `SetForegroundWindow` on the owner first, a `WM_NULL`
-// posted to it after. The menu is still nativeapi's `HMENU` with its items; the
-// choice comes back from `TrackPopupMenu` itself (`TPM_RETURNCMD`), so no
-// `WM_COMMAND` goes anywhere and the caller runs the item.
+// posted to it after — and retrieved, because that thread has no message loop
+// of its own to do it (`core/tray_menu_thread.dart`). The menu is still
+// nativeapi's `HMENU` with its items; the choice comes back from
+// `TrackPopupMenu` itself (`TPM_RETURNCMD`), so no `WM_COMMAND` goes anywhere
+// and the caller runs the item.
 //
 // A classic menu draws in the light theme unless the process asks otherwise,
 // and the only way to ask is uxtheme's `SetPreferredAppMode` (ordinal 135,
@@ -28,10 +30,9 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
+import 'package:niman/src/core/tray_menu_thread.dart';
 
-/// What opening the menu gave: the chosen item's id, or 0 when it was
-/// dismissed, and a line for the log.
-typedef TrayMenuChoice = ({int chosen, String report});
+export 'package:niman/src/core/tray_menu_thread.dart' show TrayMenuChoice;
 
 /// The theme a menu is drawn in: the app's own choice, or the system's.
 enum TrayMenuTheme {
@@ -108,71 +109,131 @@ bool _setMenuTheme(int mode) {
 /// uxtheme's app [mode] when there is one to ask for.
 TrayMenuChoice _track(int menuAddress, int x, int y, int? mode) {
   final themed = mode != null && _setMenuTheme(mode);
-  final user32 = DynamicLibrary.open('user32.dll');
-  final createWindow = user32
-      .lookupFunction<_CreateWindowExC, _CreateWindowExDart>('CreateWindowExW');
-  final destroyWindow = user32.lookupFunction<_HwndC, _HwndDart>(
-    'DestroyWindow',
-  );
-  final setForeground = user32.lookupFunction<_HwndC, _HwndDart>(
-    'SetForegroundWindow',
-  );
-  final track = user32.lookupFunction<_TrackPopupMenuC, _TrackPopupMenuDart>(
-    'TrackPopupMenu',
-  );
-  final post = user32.lookupFunction<_PostMessageC, _PostMessageDart>(
-    'PostMessageW',
-  );
-  final lastError = DynamicLibrary.open('kernel32.dll')
-      .lookupFunction<_LastErrorC, _LastErrorDart>('GetLastError');
-  final className = 'STATIC'.toNativeUtf16();
-  final name = ''.toNativeUtf16();
-  // A top-level window, never shown: a tool window stays off the taskbar, and
-  // a predefined class needs no window procedure of its own.
-  final owner = createWindow(
-    _wsExToolWindow,
-    className,
-    name,
-    _wsPopup,
-    0,
-    0,
-    0,
-    0,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-  );
-  calloc
-    ..free(className)
-    ..free(name);
-  if (owner == nullptr) {
-    return (chosen: 0, report: 'no owner window (error ${lastError()})');
-  }
+  final thread = _Win32MenuThread();
   try {
-    final foreground = setForeground(owner);
-    final chosen = track(
-      Pointer<Void>.fromAddress(menuAddress),
-      _tpmRightButton | _tpmBottomAlign | _tpmNoNotify | _tpmReturnCmd,
+    return trackTrayMenu(
+      thread,
+      menuAddress,
       x,
       y,
-      0,
-      owner,
-      nullptr,
-    );
-    final error = lastError();
-    // So the next click outside a menu closes it (the `TrackPopupMenu`
-    // remarks).
-    post(owner, _wmNull, 0, 0);
-    return (
-      chosen: chosen,
-      report:
-          'at $x,$y, theme ${themed ? 'mode $mode' : 'default'}, '
-          'foreground $foreground, result $chosen, error $error',
+      theme: themed ? 'mode $mode' : 'default',
     );
   } finally {
-    destroyWindow(owner);
+    thread.release();
   }
+}
+
+/// [TrayMenuThread] over user32, on the calling thread.
+final class _Win32MenuThread implements TrayMenuThread {
+  final DynamicLibrary _user32 = DynamicLibrary.open('user32.dll');
+
+  late final _CreateWindowExDart _createWindow = _user32
+      .lookupFunction<_CreateWindowExC, _CreateWindowExDart>('CreateWindowExW');
+  late final _HwndDart _destroyWindow = _user32
+      .lookupFunction<_HwndC, _HwndDart>('DestroyWindow');
+  late final _HwndDart _setForeground = _user32
+      .lookupFunction<_HwndC, _HwndDart>('SetForegroundWindow');
+  late final _TrackPopupMenuDart _track = _user32
+      .lookupFunction<_TrackPopupMenuC, _TrackPopupMenuDart>('TrackPopupMenu');
+  late final _PostMessageDart _post = _user32
+      .lookupFunction<_PostMessageC, _PostMessageDart>('PostMessageW');
+  late final _PeekMessageDart _peek = _user32
+      .lookupFunction<_PeekMessageC, _PeekMessageDart>('PeekMessageW');
+  late final _MsgDart _translate = _user32.lookupFunction<_MsgC, _MsgDart>(
+    'TranslateMessage',
+  );
+  late final _MsgDart _dispatch = _user32.lookupFunction<_MsgC, _MsgDart>(
+    'DispatchMessageW',
+  );
+  late final _LastErrorDart _lastError = DynamicLibrary.open('kernel32.dll')
+      .lookupFunction<_LastErrorC, _LastErrorDart>('GetLastError');
+
+  /// The one message [dispatchOne] reads into, freed by [release].
+  final Pointer<_Msg> _msg = calloc<_Msg>();
+
+  @override
+  int createOwner() {
+    final className = 'STATIC'.toNativeUtf16();
+    final name = ''.toNativeUtf16();
+    // A top-level window, never shown: a tool window stays off the taskbar,
+    // and a predefined class needs no window procedure of its own.
+    final owner = _createWindow(
+      _wsExToolWindow,
+      className,
+      name,
+      _wsPopup,
+      0,
+      0,
+      0,
+      0,
+      nullptr,
+      nullptr,
+      nullptr,
+      nullptr,
+    );
+    calloc
+      ..free(className)
+      ..free(name);
+    return owner.address;
+  }
+
+  @override
+  int lastError() => _lastError();
+
+  @override
+  bool setForeground(int owner) =>
+      _setForeground(Pointer<Void>.fromAddress(owner)) != 0;
+
+  @override
+  int track(int menu, int x, int y, int owner) => _track(
+    Pointer<Void>.fromAddress(menu),
+    _tpmRightButton | _tpmBottomAlign | _tpmNoNotify | _tpmReturnCmd,
+    x,
+    y,
+    0,
+    Pointer<Void>.fromAddress(owner),
+    nullptr,
+  );
+
+  @override
+  void postNull(int owner) =>
+      _post(Pointer<Void>.fromAddress(owner), _wmNull, 0, 0);
+
+  @override
+  bool dispatchOne() {
+    if (_peek(_msg, nullptr, 0, 0, _pmRemove) == 0) return false;
+    _translate(_msg);
+    _dispatch(_msg);
+    return true;
+  }
+
+  @override
+  void destroy(int owner) => _destroyWindow(Pointer<Void>.fromAddress(owner));
+
+  /// Frees the message buffer.
+  void release() => calloc.free(_msg);
+}
+
+/// A queued message, as `PeekMessageW` fills it.
+final class _Msg extends Struct {
+  external Pointer<Void> hwnd;
+
+  @Uint32()
+  external int message;
+
+  @IntPtr()
+  external int wParam;
+
+  @IntPtr()
+  external int lParam;
+
+  @Uint32()
+  external int time;
+
+  external _Point pt;
+
+  @Uint32()
+  external int lPrivate;
 }
 
 /// A cursor position, as `GetCursorPos` fills it.
@@ -234,6 +295,22 @@ typedef _PostMessageDart = int Function(
   int wParam,
   int lParam,
 );
+typedef _PeekMessageC = Int32 Function(
+  Pointer<_Msg> msg,
+  Pointer<Void> hwnd,
+  Uint32 first,
+  Uint32 last,
+  Uint32 remove,
+);
+typedef _PeekMessageDart = int Function(
+  Pointer<_Msg> msg,
+  Pointer<Void> hwnd,
+  int first,
+  int last,
+  int remove,
+);
+typedef _MsgC = IntPtr Function(Pointer<_Msg> msg);
+typedef _MsgDart = int Function(Pointer<_Msg> msg);
 typedef _CreateWindowExC = Pointer<Void> Function(
   Uint32 exStyle,
   Pointer<Utf16> className,
@@ -270,3 +347,4 @@ const int _tpmBottomAlign = 0x0020;
 const int _tpmNoNotify = 0x0080;
 const int _tpmReturnCmd = 0x0100;
 const int _wmNull = 0x0000;
+const int _pmRemove = 0x0001;

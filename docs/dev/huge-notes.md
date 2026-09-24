@@ -48,6 +48,8 @@ for first: **one reading of the note for the editor and the preview.**
 | `b47e8d3` | `PrefixSums` keeps its values unboxed (`Float64List`) and fills them from a function (`PrefixSums.generate`) | the height map over 2.76 M rows 218 ms (JIT), most of the 413 ms first frame of `live` | 31 ms (JIT) |
 | `6b0dd63` | The buffer's lines are views of the text read from disk (`LineChunk`: the string and each line's start) until a chunk is written; lengths are read without cutting a line out (`lineLengthAt`) | `SourceBuffer.fromText` 802 ms (JIT), 2.76 M strings alive | 198 ms, ~2 700 chunks |
 | `954afde` | `loadNote` stops counting words; the surface counts them in the background once the note is on screen | ~1 s of the open | the count lands after the note |
+| `8da0105` | The dock's outline builds the rows on screen (`ListView.builder`), not a row per heading | 128 ms frame on each outline publish (profile build, 244 k headings) | a screen's rows |
+| the lazy height map | `PrefixSums.lazy`: a chunk of rows stands at an estimate from its characters (source) or its lines (read view) until a frame reaches it, and only then asks each row; a splice reads the rows past it at their new indices | the frame that opened the note: 202 ms, most of it estimating 2.76 M lines one by one, plus the GC of it (profile build) | O(chunks) to build: a million lines and a first screen in 0.1 ms, 17.6 asking every line (`test/perf/huge_note_open_test.dart`, JIT) |
 
 ### The streaming save, measured on the 247 MB note
 

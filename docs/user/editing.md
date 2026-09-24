@@ -344,6 +344,15 @@ anything into ends the list instead — the usual second Enter. Inside a
 fenced code block, a math block or the frontmatter it does nothing: a
 dash there is a dash.
 
+Brackets come in pairs, in both editors and on every platform: `(`
+writes `()`, `[` writes `[]` and `{` writes `{}`, with the caret between
+them, so `[[` opens a whole wikilink. The closing bracket is added only
+before a space, a closing bracket or the end of the line; before a word
+and after a backslash (`\(` starts inline math) a bracket is just
+itself. Typing the closing bracket where the pair put one steps over it,
+Backspace between an empty pair removes both, and a bracket typed over
+a selection wraps it.
+
 ### Tables in live mode
 
 A table in live mode is drawn as the read view draws it, and edited as a
