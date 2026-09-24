@@ -514,7 +514,7 @@ void main() {
       // FTS: title and body both searchable, rowid = notes.id.
       final fts = await db
           .customSelect(
-            'SELECT rowid, title FROM notes_fts WHERE notes_fts MATCH ?',
+            'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?',
             variables: [const Variable<String>('"Indexed Title"')],
           )
           .get();
@@ -625,13 +625,7 @@ void main() {
           .writeAsStringSync('---\ntitle: Renamable\n---\nbody text here\n');
       await indexer.fullScan(root.path);
       final before = (await dao.find('note1.md'))!;
-      final ftsBefore = await db
-          .customSelect(
-            'SELECT title FROM notes_fts WHERE rowid = ?',
-            variables: [Variable<int>(before.id)],
-          )
-          .getSingle();
-      expect(ftsBefore.read<String>('title'), 'Renamable');
+      expect(await _ftsTitleIs(db, before.id, 'Renamable'), isTrue);
 
       File(p.join(root.path, 'note1.md'))
           .renameSync(p.join(root.path, 'renamed.md'));
@@ -642,13 +636,7 @@ void main() {
 
       final after = (await dao.find('renamed.md'))!;
       expect(after.id, before.id); // the rename kept the row id
-      final ftsAfter = await db
-          .customSelect(
-            'SELECT title FROM notes_fts WHERE rowid = ?',
-            variables: [Variable<int>(after.id)],
-          )
-          .getSingle();
-      expect(ftsAfter.read<String>('title'), 'Renamable');
+      expect(await _ftsTitleIs(db, after.id, 'Renamable'), isTrue);
       // And the old stem is gone, the new one present.
       final stems = await db.select(db.noteStems).get();
       expect(stems.map((s) => s.stem).toSet(), containsAll(['renamed']));
@@ -791,13 +779,7 @@ void main() {
         db.noteTags,
       )..where((t) => t.noteId.equals(row.id))).get();
       expect(tags.map((t) => t.tag), ['keep']);
-      final title = await db
-          .customSelect(
-            'SELECT title FROM notes_fts WHERE rowid = ?',
-            variables: [Variable<int>(row.id)],
-          )
-          .getSingle();
-      expect(title.read<String>('title'), 'note1');
+      expect(await _ftsTitleIs(db, row.id, 'note1'), isTrue);
     });
   });
 
@@ -944,6 +926,18 @@ void main() {
   });
 }
 
+/// Whether the full-text row of note [id] has [title] for its title: the
+/// table keeps no text to read back, so the question is asked of its index.
+Future<bool> _ftsTitleIs(IndexDatabase db, int id, String title) async {
+  final rows = await db
+      .customSelect(
+        'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1 AND rowid = ?2',
+        variables: [Variable<String>('title : "$title"'), Variable<int>(id)],
+      )
+      .get();
+  return rows.isNotEmpty;
+}
+
 /// The index state a rebuild reproduces: per-note content rows.
 Future<Map<String, List<String>>> _indexState(
   IndexDatabase db,
@@ -952,9 +946,11 @@ Future<Map<String, List<String>>> _indexState(
   final notes = await dao.allRows();
   final state = <String, List<String>>{};
   for (final note in notes.where((n) => !n.isDir)) {
+    // The full-text row keeps no text to compare (it is contentless): that
+    // it is there, and the title the row says the note has.
     final fts = await db
         .customSelect(
-          'SELECT title FROM notes_fts WHERE rowid = ?',
+          'SELECT count(*) c FROM notes_fts WHERE rowid = ?',
           variables: [Variable<int>(note.id)],
         )
         .getSingle();
@@ -968,7 +964,8 @@ Future<Map<String, List<String>>> _indexState(
       db.noteStems,
     )..where((s) => s.noteId.equals(note.id))).get();
     state[note.path] = [
-      fts.read<String>('title'),
+      'fts:${fts.read<int>('c')}',
+      'title:${note.title}',
       ...tags.map((t) => '${t.tag}:${t.isFrontmatter}'),
       ...links.map((l) => '${l.toNote}:${l.kind}'),
       ...stems.map((s) => '${s.stem}:${s.source}'),

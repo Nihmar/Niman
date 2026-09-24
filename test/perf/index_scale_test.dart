@@ -172,7 +172,7 @@ void main() {
     indexFile = File(p.join(tmp.path, 'index.db'));
     db = IndexDatabase(NativeDatabase(indexFile));
     dao = NoteDao(db);
-    search = SearchRepo(db);
+    search = SearchRepo(db, root: root.path);
     tags = TagRepo(db);
     await build();
     _say('index file: ${(indexFile.lengthSync() / (1024 * 1024)).round()} MB');
