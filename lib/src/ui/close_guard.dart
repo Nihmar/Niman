@@ -69,6 +69,7 @@ final class _CloseGuardState extends State<CloseGuard> {
     super.initState();
     widget.tracker.addListener(_syncPrevent);
     CloseToTray.enabled.addListener(_syncPrevent);
+    CloseToTray.trayShown.addListener(_syncPrevent);
     CloseToTray.quitRequests.addListener(_onQuitRequested);
     widget.window.onCloseRequested = _onCloseRequested;
     unawaited(_init());
@@ -90,6 +91,7 @@ final class _CloseGuardState extends State<CloseGuard> {
   void dispose() {
     widget.window.onCloseRequested = null;
     CloseToTray.enabled.removeListener(_syncPrevent);
+    CloseToTray.trayShown.removeListener(_syncPrevent);
     CloseToTray.quitRequests.removeListener(_onQuitRequested);
     widget.tracker.removeListener(_syncPrevent);
     super.dispose();
@@ -102,7 +104,7 @@ final class _CloseGuardState extends State<CloseGuard> {
   void _syncPrevent() {
     // Close-to-tray needs the flag on at all times: without it the OS
     // closes the window instead of reporting the request to hide it.
-    final prevent = widget.tracker.hasUnsaved || CloseToTray.enabled.value;
+    final prevent = widget.tracker.hasUnsaved || CloseToTray.active;
     if (prevent == _preventOn) return;
     _preventOn = prevent;
     if (_platformOff) return;
@@ -123,7 +125,7 @@ final class _CloseGuardState extends State<CloseGuard> {
     if (_asking) return;
     // Nothing is ending: the window goes to the tray and the notes stay
     // as they are, saved on their own timer as always (#209).
-    if (CloseToTray.enabled.value && !_quitting) {
+    if (CloseToTray.active && !_quitting) {
       _log.info('close request: hiding to the tray');
       unawaited(widget.window.hide());
       return;

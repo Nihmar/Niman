@@ -126,11 +126,6 @@ final class DutchStrings extends Strings {
   @override
   String get settingsToggleOff => 'Uit';
   @override
-  String get settingsPreviewEnabledTitle => 'Voorbeeld';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Toon de gerenderde notitie naast de brontekst-editor';
-  @override
   String get switchToWysiwygTooltip => 'Over naar de WYSIWYG-editor';
   @override
   String get switchToSourceTooltip => 'Over naar de Markdown-brontekst';
@@ -139,10 +134,6 @@ final class DutchStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Deze notitie is te groot voor de WYSIWYG-editor. Open hem in de '
-      'Markdown-brontekst.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Uiterlijk';
@@ -275,21 +266,6 @@ final class DutchStrings extends Strings {
       'De editor en het voorbeeld, die altijd overeenkomen';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Voorbeeldmodus';
-  @override
-  String get previewModeSubtitle =>
-      'Of het voorbeeld het scherm deelt met de editor, of hem vervangt';
-  @override
-  String get previewModeAuto => 'Naast elkaar';
-  @override
-  String get previewModeSwitch => 'Volledig scherm';
-  @override
-  String get splitRatioTitle => 'Indelingsbreedte';
-  @override
-  String get splitRatioSubtitle =>
-      'Het aandeel van de editor als het voorbeeld naast elkaar staat';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkformaat';
@@ -474,11 +450,131 @@ final class DutchStrings extends Strings {
   @override
   String get toolbarImage => 'Afbeelding invoegen';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
+  String get tableRow => 'Rij';
+  @override
+  String get tableColumn => 'Kolom';
+  @override
+  String get tableAddRowAbove => 'Rij erboven invoegen';
+  @override
+  String get tableAddRowBelow => 'Rij eronder invoegen';
+  @override
+  String get tableMoveRowUp => 'Rij omhoog';
+  @override
+  String get tableMoveRowDown => 'Rij omlaag';
+  @override
+  String get tableDuplicateRow => 'Rij dupliceren';
+  @override
+  String get tableDeleteRow => 'Rij verwijderen';
+  @override
+  String get tableAddColumnLeft => 'Kolom links invoegen';
+  @override
+  String get tableAddColumnRight => 'Kolom rechts invoegen';
+  @override
+  String get tableMoveColumnLeft => 'Kolom naar links';
+  @override
+  String get tableMoveColumnRight => 'Kolom naar rechts';
+  @override
+  String get tableAlignLeft => 'Links uitlijnen';
+  @override
+  String get tableAlignCenter => 'Centreren';
+  @override
+  String get tableAlignRight => 'Rechts uitlijnen';
+  @override
+  String get tableDuplicateColumn => 'Kolom dupliceren';
+  @override
+  String get tableDeleteColumn => 'Kolom verwijderen';
+  @override
+  String get tableSortAscending => 'Sorteren op kolom (A → Z)';
+  @override
+  String get tableSortDescending => 'Sorteren op kolom (Z → A)';
+  @override
+  String get tableAddRow => 'Rij toevoegen';
+  @override
+  String get tableAddColumn => 'Kolom toevoegen';
+  @override
+  String get cheatsheetTitle => 'Markdown-spiekbrief';
+  @override
+  String get cheatsheetCopy => 'Kopiëren';
+  @override
+  String get cheatsheetCopied => 'Gekopieerd';
+  @override
+  String get cheatsheetInsert => 'In de notitie invoegen';
+  @override
+  String get cheatsheetWritten => 'Geschreven';
+  @override
+  String get cheatsheetShown => 'Getoond';
+  @override
+  String get cheatHeadings => 'Koppen';
+  @override
+  String get cheatEmphasis => 'Vet, cursief, doorgehaald';
+  @override
+  String get cheatHtmlFormats => 'Onderstreept, superscript, subscript';
+  @override
+  String get cheatLists => 'Lijsten';
+  @override
+  String get cheatChecklists => 'Checklists';
+  @override
+  String get cheatQuotes => 'Citaten';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links naar notities';
+  @override
+  String get cheatEmbeds => 'Afbeeldingen en insluitingen';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code in een zin';
+  @override
+  String get cheatCodeBlocks => 'Codeblokken';
+  @override
+  String get cheatMath => 'Wiskunde';
+  @override
+  String get cheatTables => 'Tabellen';
+  @override
+  String get cheatFootnotes => 'Voetnoten';
+  @override
+  String get cheatRule => 'Horizontale lijn';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Sjabloonplaatshouders';
+  @override
+  String get menuAddLink => 'Link toevoegen';
+  @override
+  String get menuAddExternalLink => 'Externe link toevoegen';
+  @override
+  String get menuFormat => 'Opmaak';
+  @override
+  String get menuParagraph => 'Alinea';
+  @override
+  String get menuInsert => 'Invoegen';
+  @override
+  String get menuBody => 'Platte tekst';
+  @override
+  String get formatSubscript => 'Subscript';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Voetnoot';
+  @override
+  String get insertRule => 'Horizontale lijn';
+  @override
+  String get insertCodeBlock => 'Codeblok';
+  @override
+  String get insertMathBlock => 'Wiskundeblok';
+  @override
+  String get menuHeadingWord => 'Kop';
+  @override
   String get toolbarHeading => 'Kop';
   @override
   String get toolbarList => 'Lijst';
   @override
   String get toolbarOrderedList => 'Genummerde lijst';
+  @override
+  String get toolbarChecklist => 'Checklist';
   @override
   String get toolbarQuote => 'Citaat';
   @override
@@ -547,11 +643,6 @@ final class DutchStrings extends Strings {
   String get showPreviewTooltip => 'Voorbeeld tonen';
   @override
   String get showEditorTooltip => 'Editor tonen';
-  @override
-  String get enterFullScreenTooltip => 'Volledig scherm';
-  @override
-  String get exitFullScreenTooltip => 'Volledig scherm verlaten';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(ruwe HTML-tabel)';

@@ -35,6 +35,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
@@ -196,13 +197,13 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       ShortcutAction.newVoice: AppStrings.shortcutNewAudio,
     };
     await ref.read(shortcutServiceProvider).publish(labels);
-    await ref
-        .read(trayServiceProvider)
-        .init(
-          labels: labels,
-          openLabel: AppStrings.trayOpen,
-          quitLabel: AppStrings.trayQuit,
-        );
+    final tray = ref.read(trayServiceProvider);
+    await tray.init(
+      labels: labels,
+      openLabel: AppStrings.trayOpen,
+      quitLabel: AppStrings.trayQuit,
+    );
+    CloseToTray.trayShown.value = tray.shown;
   }
 
   /// Resumes the last library, unless Android is withholding the
@@ -251,6 +252,10 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     });
   }
 
+  // No library is open here, so there is no library config to read an engine
+  // setting from and the file is drawn the way the app has always drawn one.
+  // The shell's own path (`_openPath`) inherits the open library's setting;
+  // both go away when the engine setting does (phase 5).
   void _openOutside(String path) => unawaited(
     openOutsideFile(
       context,
@@ -495,7 +500,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     // shell-wide rebuild re-running every mounted body's build (12-24 ms of
     // `build` per switch in the device log). A fullscreen note to close, a
     // first mount, or the open FAB all still fall to the full setState.
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
     if (narrow && _treeVisible && !_fabExpanded && _visitedTabs.contains(tab)) {
       _noteClosed();
       _tab = tab;
@@ -569,7 +574,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     _shellFocus.requestFocus();
   }
 
-  /// Phone (< [splitBreakpoint]) mode: which pane is visible.
+  /// Phone (< [wideBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
 
@@ -712,8 +717,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Whether the app bar shows the editor/preview eye action: hidden in
   /// kind mode (the note is a list, not a document) unless the user is
   /// in raw-edit mode.
-  bool get _previewToggleVisible =>
-      _editorSettings.previewEnabled && (_kindGui == null || _kindRawMode);
+  bool get _previewToggleVisible => _kindGui == null || _kindRawMode;
 
   /// The kind toggle actions (T-TK-05): a note whose kind has a GUI offers
   /// the raw editor (pencil); in raw mode the kind GUI is offered back.
@@ -744,9 +748,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _resetNoteKind() {
     _noteKind = null;
     _kindRawMode = false;
-    // Fullscreen is a property of the note being previewed, not of the
-    // app: the next note opens with its chrome.
-    _previewFullScreen = false;
   }
 
   Future<void> _loadLinkSource() async {
@@ -794,13 +795,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// siblings). Written from the FAB's paint, read when the scrim builds.
   Offset? _fabAnchor;
 
-  /// Editor/preview switch for the non-split layouts (T-UI-06): the eye
-  /// action lives in the shared app bar, so the shell owns the state.
-  /// The phone's; on a wide window each tab has its own (#23).
-  bool _previewVisible = false;
-
   /// Whether the window is wide: the tabs' layout (#23).
-  bool get _wide => MediaQuery.sizeOf(context).width >= splitBreakpoint;
+  bool get _wide => MediaQuery.sizeOf(context).width >= wideBreakpoint;
 
   /// The note on screen: on a wide window the showing tab, whatever the
   /// tree has selected (a folder leaves the tabs alone); on a phone the
@@ -829,9 +825,25 @@ final class _LibraryShellState extends State<_LibraryShell>
   EditorKind get _noteEditorKind =>
       _wide ? _editorOf(_shownMemento) : _editorSettings.editorKind;
 
-  /// Whether the note on screen shows its preview.
-  bool get _notePreview =>
-      _wide ? _shownMemento.preview ?? false : _previewVisible;
+  /// The memento of the tab showing [path], or an empty one: a note is
+  /// shown the way it was left (#23).
+  ///
+  /// On a wide window the note on screen is the showing tab, so this is
+  /// [_shownMemento]; on a phone it is the selection, and a note whose
+  /// tab this build's follow has not made yet has no memento to read —
+  /// an empty one answers that frame, not the note before it.
+  NoteMemento _mementoOf(String? path) {
+    if (path == null) return const NoteMemento();
+    final tab = _workspace.value.tabs
+        .where((tab) => tab.path == path)
+        .firstOrNull;
+    return tab?.memento ?? const NoteMemento();
+  }
+
+  /// Whether the note on screen shows its preview: the showing tab's own
+  /// flag, on either layout. One pane holds one of the two, so the flag
+  /// is all there is to know.
+  bool get _notePreview => _mementoOf(_shownNote).preview ?? false;
 
   /// Changes the showing tab's own way of showing its note (#23).
   void _updateShownTab(NoteMemento Function(NoteMemento memento) change) {
@@ -846,36 +858,18 @@ final class _LibraryShellState extends State<_LibraryShell>
     // The preview has no editable: flipping to it dismisses the keyboard
     // instead of leaving the IME up over a read-only pane.
     if (!_notePreview) FocusManager.instance.primaryFocus?.unfocus();
-    if (_wide) {
-      final show = !_notePreview;
-      _updateShownTab((m) => m.copyWith(preview: show));
-      return;
-    }
-    setState(() {
-      _previewVisible = !_previewVisible;
-      // Fullscreen belongs to the preview: switching back to the editor
-      // must not leave a chromeless editor with no way out.
-      if (!_previewVisible) _previewFullScreen = false;
-    });
+    final show = !_notePreview;
+    _updateShownTab((m) => m.copyWith(preview: show));
     // Device trace (preview toggle needs two presses on huge notes) —
     // temporary: remove once the trace is in.
     const AppLogger(name: 'preview')
-        .info('toggle → ${_previewVisible ? 'preview' : 'editor'}');
+        .info('toggle → ${show ? 'preview' : 'editor'}');
   }
 
   /// Whether a note opened right now would show only the preview (the
   /// editor hidden): the IME has no target and must go before the
   /// transition, or its resize lands mid-fade.
-  bool _opensPreviewOnly() {
-    if (!_notePreview) return false;
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
-    return !previewSplits(
-      _editorSettings.previewMode,
-      narrow: narrow,
-      editor: _noteEditorKind,
-      previewEnabled: _editorSettings.previewEnabled,
-    );
-  }
+  bool _opensPreviewOnly() => _notePreview;
 
   /// Records a note open: the tabs stay painted under the fading note
   /// (issue #4, see [_noteHidingTabs]) and hide once it has covered them.
@@ -906,13 +900,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     _noteHidingTabs = false;
   }
 
-  /// Whether the preview has taken over the phone screen (2026-09-08
-  /// user request): app bar and tab bar hidden, the note's own text left.
-  ///
-  /// Phone-only. On the wide layout the note already shares the window
-  /// with the tree, and "fullscreen" there would mean something else.
-  bool _previewFullScreen = false;
-
   /// The full-note open fade (matches the AnimatedSwitcher below).
   static const _fullNoteFade = Duration(milliseconds: 220);
 
@@ -937,19 +924,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Guards the pending hide against a rapid close/reopen.
   int _noteHideRevision = 0;
 
-  /// The app-bar fullscreen action, left of the editor/preview eye —
-  /// which stays where it is (see [_noteBarActions]).
-  Widget _previewFullScreenAction() {
-    return IconButton(
-      key: const Key('preview-fullscreen'),
-      tooltip: AppStrings.enterFullScreenTooltip,
-      icon: const Icon(Icons.fullscreen),
-      onPressed: () => setState(() => _previewFullScreen = true),
-    );
-  }
-
-  /// The phone full-screen note body (one builder for both the chromed
-  /// and the immersive variants: only the Scaffold around it changes).
+  /// The phone full-screen note body.
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     return NoteView(
       key: _phoneNoteKey,
@@ -975,22 +950,13 @@ final class _LibraryShellState extends State<_LibraryShell>
       attachmentsFolder: _editorSettings.attachmentsFolder,
       indentWidth: _editorSettings.indentWidth,
       toolbarLayout: _editorSettings.toolbarLayout,
-      splitPreview: previewSplits(
-        _editorSettings.previewMode,
-        narrow: true,
-        editor: _editorSettings.editorKind,
-        previewEnabled: _editorSettings.previewEnabled,
-      ),
-      showPreview: _editorSettings.previewEnabled && _previewVisible,
+      showPreview: _notePreview,
       showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
       // A single enabled editor has nowhere to switch to: the note hides
       // its switch instead of offering a dead toggle.
       onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
           ? _setEditorKind
           : null,
-      splitFraction: _editorSettings.splitRatio,
-      onSplitFractionChanged: _onSplitFractionChanged,
-      onSplitDragEnd: _onSplitDragEnd,
       libraryRoot: controller.root,
       linkSource: _linkSource,
       onOpenNote: _openNoteFromLink,
@@ -1002,6 +968,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       spellCheck: widget.spellCheck,
       reloadToken: _noteReloadToken,
       saveNote: _noteSaver(controller),
+      saveNoteStream: _noteStreamSaver(controller),
       createMissingNote: _missingNoteCreator(controller),
     );
   }
@@ -1237,6 +1204,28 @@ final class _LibraryShellState extends State<_LibraryShell>
     };
   }
 
+  /// The same write path for a note handed over in slices
+  /// ([NoteView.saveNoteStream]): the joined twin above, without the join.
+  ///
+  /// Null for a note outside the library root as well, which is the one
+  /// case the streaming write does not cover — [NoteView] then joins the
+  /// note and saves it through [_noteSaver].
+  NoteStreamSaver? _noteStreamSaver(LibrarySession controller) {
+    final ops = controller.ops;
+    final root = controller.root;
+    if (ops == null || root == null) return null;
+    return (path, content, {required editSession}) {
+      if (!p.isWithin(root, path)) {
+        return Future<void>.error(StateError('"$path" is outside the library'));
+      }
+      return ops.saveNoteStream(
+        relPath(path, root),
+        content,
+        editSession: editSession,
+      );
+    };
+  }
+
   /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
     return PreviewToggleAction(
@@ -1244,31 +1233,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       onToggle: _togglePreview,
       compact: compact,
     );
-  }
-
-  /// The split/switch picker: how the preview shares the window. Wide
-  /// only — below 600 dp the panes cannot share the screen.
-  Widget _layoutModeAction({bool compact = false}) {
-    return PreviewLayoutModeAction(
-      mode: _editorSettings.previewMode,
-      onSelected: (mode) => unawaited(_setPreviewMode(mode)),
-      compact: compact,
-    );
-  }
-
-  /// Persists the split/switch choice the layout menu made: the stored
-  /// value is shared with the settings ratio row, and the session event
-  /// refreshes every NoteView through [_refreshEditorSettings].
-  Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
-    if (mode == _editorSettings.previewMode) return;
-    final controller = widget.controller;
-    await controller.setPreviewMode(mode);
-    controller.notify();
-    if (mounted) {
-      setState(
-        () => _editorSettings = _editorSettings.copyWith(previewMode: mode),
-      );
-    }
   }
 
   /// Switches the library's current editor from the note's status row
@@ -1579,16 +1543,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// Live divider moves mirror into the settings value's split ratio;
-  /// the lift persists it.
-  void _onSplitFractionChanged(double value) =>
-      _editorSettings = _editorSettings.copyWith(splitRatio: value);
-
-  Future<void> _onSplitDragEnd() async {
-    await widget.controller.setSplitRatio(_editorSettings.splitRatio);
-    widget.controller.notify();
-  }
-
   /// Parent path for new note/folder creation.
   String get _createParent {
     if (_selected == null) return '';
@@ -1672,7 +1626,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// (the search body would otherwise hide the selection).
   void _openSearchNote(String path) {
     if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
-    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
+    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     setState(() {
       _selected = path;
       _selectedIsDir = false;
@@ -1751,7 +1705,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     // the note leaves it selected, and on a phone the tab it lands on has
     // an empty body by design — so the shortcut showed nothing at all.
     // The tree being up is what says the note is closed.
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
     final onScreen = !narrow || !_treeVisible;
     if (onScreen &&
         _selected == path &&
@@ -1807,6 +1761,13 @@ final class _LibraryShellState extends State<_LibraryShell>
     }
   }
 
+  /// A note a template asked to open in preview (#51).
+  ///
+  /// The flag belongs to the note's tab, and that tab is made by this
+  /// build's follow — one microtask after the flow asks. The request
+  /// waits here instead of being written into a tab that is not there.
+  String? _opensInPreview;
+
   /// Opens a note the template flow just filed (#51): preview per its
   /// `open` directive, caret per its `{{cursor}}`. The state the flow
   /// cannot know is set here, not in the flow.
@@ -1816,7 +1777,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     required int? caret,
   }) {
     setState(() {
-      if (preview) _previewVisible = true;
+      if (preview) _opensInPreview = path;
       _selected = path;
       _selectedIsDir = false;
       _treeVisible = false;
@@ -1860,9 +1821,14 @@ final class _LibraryShellState extends State<_LibraryShell>
     await _rowActions.run(context, action, note, here);
   }
 
+  /// The tree's right-click menus, which one opened and when: a row's and
+  /// the background's were both seen on one click (0.0.9 test round).
+  static const AppLogger _treeMenuLog = AppLogger(name: 'tree.menu');
+
   /// Right-click context menu on a tree row (T-PP-20): the same actions
   /// at the cursor instead of in the phone's bottom sheet.
   Future<void> _showRowMenuAt(Note note, Offset position) async {
+    _treeMenuLog.debug('row menu asked: "${note.path}"');
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
@@ -1873,8 +1839,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       position: position,
       offersNewTab: _wide,
     );
+    _treeMenuLog.debug('row menu closed: "${note.path}" -> $action');
     if (!mounted) return;
     await _rowActions.run(context, action, note, here);
+    _treeMenuLog.debug('row menu action done: "${note.path}" $action');
   }
 
   /// Opens the history of the note at [path]; a restore reloads the open
@@ -1905,6 +1873,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _openPalette(),
         NoteMenuAction.format => _formatNote(),
+        NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -1917,7 +1886,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final selectedPath = _selected;
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final narrow = MediaQuery.sizeOf(context).width < wideBreakpoint;
     _markOpenNote(controller.root, _shownNote);
     // Notes stay open until they are closed: a folder selected, or the
     // phone back on its tree, closes none (#23). On the phone a note
@@ -1927,30 +1896,25 @@ final class _LibraryShellState extends State<_LibraryShell>
       keepOnNone: true,
       alongside: !_wide,
     );
+    // A template's `open: preview` (#51) belongs to the tab the follow
+    // above is about to make, so it is asked for once that has landed.
+    if (_opensInPreview case final path?) {
+      _opensInPreview = null;
+      _workspace.showPreviewWhenOpen(path);
+    }
     _leaveZenIfEmpty();
-    final splitsPreview = previewSplits(
-      _editorSettings.previewMode,
-      narrow: narrow,
-      editor: _editorSettings.editorKind,
-      previewEnabled: _editorSettings.previewEnabled,
-    );
     final props = ShellLayoutProps(
       controller: controller,
       selectedPath: selectedPath,
       selectedIsDir: _selectedIsDir,
       treeVisible: _treeVisible,
-      previewFullScreen: _previewFullScreen,
-      previewSplitsHere: splitsPreview,
-      previewVisible: _previewVisible,
       previewToggleVisible: _previewToggleVisible,
       noteHidingTabs: _noteHidingTabs,
       noteFade: _fullNoteFade,
       shortcutBindings: _appShortcutBindings(),
       onCloseFullScreenNote: _closeFullScreenNote,
-      onLeaveFullScreenPreview: () =>
-          setState(() => _previewFullScreen = false),
       isQuickNote: _selected != null && _selected == _quickNotePath,
-      noteBarActions: _noteBarActions(splitsPreview: splitsPreview),
+      noteBarActions: _noteBarActions(),
       buildTabShell: () => _tabShell(
         controller: controller,
         bodies: _tabBodyChildren(controller),
@@ -1982,21 +1946,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   /// The open note's actions on the phone's note bar: the kind toggles,
-  /// the preview controls where a preview can be toggled at all, and the
-  /// ⋮ menu.
-  List<Widget> _noteBarActions({required bool splitsPreview}) {
+  /// the editor/preview eye, and the ⋮ menu.
+  List<Widget> _noteBarActions() {
     return [
       ..._kindActions,
-      if (!splitsPreview && _previewToggleVisible) ...[
-        // Fullscreen goes before the toggle, not after it (user,
-        // 2026-09-17). App-bar actions are laid out from the right, so an
-        // action that only appears in one state has to be inserted on the
-        // left: added after, the fullscreen button took the eye's place
-        // and pushed the toggle along, moving the one button the user
-        // alternates on out from under the thumb that was already there.
-        if (_previewVisible) _previewFullScreenAction(),
-        _previewToggleAction(),
-      ],
+      if (_previewToggleVisible) _previewToggleAction(),
       _openNotesButton(),
       _noteMenu(),
     ];
@@ -2555,6 +2509,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
       AppCommand.formatNote: () => unawaited(_formatNote()),
+      AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
       AppCommand.closeTab: _workspace.closeActive,
@@ -2706,6 +2661,16 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// is saved first, tidied on disk and read back the way an edit from
   /// another program is read back, so both editors show the result and
   /// neither has to know how to rewrite its own document.
+  /// The Markdown cheatsheet (#265); its examples go into the note on
+  /// screen when there is one to take them.
+  Future<void> _openCheatsheet() {
+    final note = _panelNote;
+    return showMarkdownCheatsheet(
+      context,
+      onInsert: note == null || !note.canInsert ? null : note.insertAtCaret,
+    );
+  }
+
   Future<void> _formatNote() async {
     final path = _shownNote;
     final ops = widget.controller.ops;
@@ -3106,9 +3071,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
             ? _setEditorKind
             : null,
-        splitFraction: _editorSettings.splitRatio,
-        onSplitFractionChanged: _onSplitFractionChanged,
-        onSplitDragEnd: _onSplitDragEnd,
         linkSource: _linkSource,
         onOpenNote: _openNoteFromLink,
         kindMode: !_kindRawMode,
@@ -3117,6 +3079,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         spellCheck: widget.spellCheck,
         reloadToken: _noteReloadToken,
         saveNote: _noteSaver(controller),
+        saveNoteStream: _noteStreamSaver(controller),
         createMissingNote: _missingNoteCreator(controller),
         statusActions: _statusActionsFor(pane),
       ),
@@ -3128,20 +3091,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   List<Widget> _statusActionsFor(int pane) {
     final tab = _workspace.value.panes[pane].activeTab;
     if (tab == null || !_previewToggleVisible) return const [];
-    final editor = _editorOf(tab.memento);
     return [
-      if (editor == EditorKind.source) _layoutModeAction(compact: true),
-      if (!previewSplits(
-        _editorSettings.previewMode,
-        narrow: false,
-        editor: editor,
-        previewEnabled: _editorSettings.previewEnabled,
-      ))
-        PreviewToggleAction(
-          previewVisible: tab.memento.preview ?? false,
-          onToggle: () => _togglePreviewOf(tab.path),
-          compact: true,
-        ),
+      PreviewToggleAction(
+        previewVisible: tab.memento.preview ?? false,
+        onToggle: () => _togglePreviewOf(tab.path),
+        compact: true,
+      ),
     ];
   }
 
@@ -3177,16 +3132,14 @@ final class _LibraryShellState extends State<_LibraryShell>
               focused: focused,
               memento: tab.memento,
               showWysiwyg: editor == EditorKind.wysiwyg,
-              showPreview:
-                  _editorSettings.previewEnabled &&
-                  (tab.memento.preview ?? false),
-              splitPreview: previewSplits(
-                _editorSettings.previewMode,
-                narrow: false,
-                editor: editor,
-                previewEnabled: _editorSettings.previewEnabled,
-              ),
+              showPreview: tab.memento.preview ?? false,
               anchor: focused && tab.path == showing ? _pendingAnchor : null,
+              // The wide deck's own door for it: the phone's single note
+              // view took it, and the tabs never did, so a template's
+              // `{{cursor}}` landed nowhere on the desktop.
+              caret: focused && tab.path == showing
+                  ? _pendingCaretOffset
+                  : null,
             );
           }(),
     ];
@@ -3325,6 +3278,25 @@ final class _LibraryShellState extends State<_LibraryShell>
       onLongPress: _showRowMenu,
       onSecondaryTapDown: (note, details) =>
           _showRowMenuAt(note, details.globalPosition),
+      onBackgroundSecondaryTapUp: (details) =>
+          unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
     );
+  }
+
+  /// The right-click menu on the tree's empty space: a note, a note from a
+  /// template or a folder, at the library's root.
+  Future<void> _showTreeBackgroundMenuAt(Offset position) async {
+    _treeMenuLog.debug('background menu asked');
+    final action = await showTreeBackgroundMenuAt(context, position: position);
+    _treeMenuLog.debug('background menu closed -> $action');
+    if (!mounted) return;
+    switch (action) {
+      case 'note':
+        await _createFlow.createNote(context, parent: '');
+      case 'template':
+        await _templateFlow.createFromTemplate(context, parent: '');
+      case 'folder':
+        await _createFlow.createFolder(context, parent: '');
+    }
   }
 }

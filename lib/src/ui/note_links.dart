@@ -20,7 +20,6 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/slug.dart';
 import 'package:niman/src/ui/missing_note_dialog.dart';
-import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
@@ -360,4 +359,16 @@ void jumpToAnchor(BuildContext context, String heading, NoteLinkTargets link) {
 void _linkSnack(BuildContext context, String message) {
   if (!context.mounted) return;
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+}
+
+/// The one-line link outcome for the logs.
+String describeResolved(ResolveResult resolved) {
+  return switch (resolved) {
+    ExternalLink(:final url) => 'ExternalLink($url)',
+    LocalAnchor(:final heading) => 'LocalAnchor(#$heading)',
+    ResolvedNote(:final note) => 'ResolvedNote(${note.path})',
+    AmbiguousNote(:final candidates) =>
+      'AmbiguousNote(${candidates.length} candidates)',
+    UnresolvedNote(:final target) => 'UnresolvedNote("$target")',
+  };
 }

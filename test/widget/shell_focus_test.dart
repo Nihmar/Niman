@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -34,7 +33,6 @@ void main() {
   }
 
   testWidgets('after the preview’s eye, the keys still work', (tester) async {
-    await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
     setSurfaceSize(tester, const Size(1400, 900));
     await tester.pumpWidget(
       ProviderScope(

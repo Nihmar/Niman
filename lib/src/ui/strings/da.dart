@@ -125,11 +125,6 @@ final class DanishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Fra';
   @override
-  String get settingsPreviewEnabledTitle => 'Forhåndsvisning';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Vis den renderede note ved siden af kildeeditoren';
-  @override
   String get switchToWysiwygTooltip => 'Skift til WYSIWYG-editoren';
   @override
   String get switchToSourceTooltip => 'Skift til Markdown-kilden';
@@ -138,10 +133,6 @@ final class DanishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Denne note er for stor til WYSIWYG-editoren. Åbn den i '
-      'Markdown-kilden.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Udseende';
@@ -272,22 +263,6 @@ final class DanishStrings extends Strings {
       'Editoren og forhåndsvisningen, som altid er enige';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Forhåndsvisningstilstand';
-  @override
-  String get previewModeSubtitle =>
-      'Om forhåndsvisningen deler skærmen med editoren eller erstatter '
-      'den';
-  @override
-  String get previewModeAuto => 'Side ved side';
-  @override
-  String get previewModeSwitch => 'Hel skærm';
-  @override
-  String get splitRatioTitle => 'Opdelingens bredde';
-  @override
-  String get splitRatioSubtitle =>
-      'Editors andel, når forhåndsvisningen er side ved side';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkformat';
@@ -470,11 +445,131 @@ final class DanishStrings extends Strings {
   @override
   String get toolbarImage => 'Indsæt billede';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
+  String get tableRow => 'Række';
+  @override
+  String get tableColumn => 'Kolonne';
+  @override
+  String get tableAddRowAbove => 'Indsæt række over';
+  @override
+  String get tableAddRowBelow => 'Indsæt række under';
+  @override
+  String get tableMoveRowUp => 'Flyt række op';
+  @override
+  String get tableMoveRowDown => 'Flyt række ned';
+  @override
+  String get tableDuplicateRow => 'Dupliker række';
+  @override
+  String get tableDeleteRow => 'Slet række';
+  @override
+  String get tableAddColumnLeft => 'Indsæt kolonne til venstre';
+  @override
+  String get tableAddColumnRight => 'Indsæt kolonne til højre';
+  @override
+  String get tableMoveColumnLeft => 'Flyt kolonne til venstre';
+  @override
+  String get tableMoveColumnRight => 'Flyt kolonne til højre';
+  @override
+  String get tableAlignLeft => 'Venstrejuster';
+  @override
+  String get tableAlignCenter => 'Centrer';
+  @override
+  String get tableAlignRight => 'Højrejuster';
+  @override
+  String get tableDuplicateColumn => 'Dupliker kolonne';
+  @override
+  String get tableDeleteColumn => 'Slet kolonne';
+  @override
+  String get tableSortAscending => 'Sorter efter kolonne (A → Z)';
+  @override
+  String get tableSortDescending => 'Sorter efter kolonne (Z → A)';
+  @override
+  String get tableAddRow => 'Tilføj række';
+  @override
+  String get tableAddColumn => 'Tilføj kolonne';
+  @override
+  String get cheatsheetTitle => 'Markdown-snydeark';
+  @override
+  String get cheatsheetCopy => 'Kopiér';
+  @override
+  String get cheatsheetCopied => 'Kopieret';
+  @override
+  String get cheatsheetInsert => 'Indsæt i noten';
+  @override
+  String get cheatsheetWritten => 'Skrevet';
+  @override
+  String get cheatsheetShown => 'Vist';
+  @override
+  String get cheatHeadings => 'Overskrifter';
+  @override
+  String get cheatEmphasis => 'Fed, kursiv, gennemstreget';
+  @override
+  String get cheatHtmlFormats => 'Understreget, hævet, sænket';
+  @override
+  String get cheatLists => 'Lister';
+  @override
+  String get cheatChecklists => 'Tjeklister';
+  @override
+  String get cheatQuotes => 'Citater';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links til noter';
+  @override
+  String get cheatEmbeds => 'Billeder og indlejringer';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Kode i en sætning';
+  @override
+  String get cheatCodeBlocks => 'Kodeblokke';
+  @override
+  String get cheatMath => 'Matematik';
+  @override
+  String get cheatTables => 'Tabeller';
+  @override
+  String get cheatFootnotes => 'Fodnoter';
+  @override
+  String get cheatRule => 'Vandret linje';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Skabelonpladsholdere';
+  @override
+  String get menuAddLink => 'Tilføj link';
+  @override
+  String get menuAddExternalLink => 'Tilføj eksternt link';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Afsnit';
+  @override
+  String get menuInsert => 'Indsæt';
+  @override
+  String get menuBody => 'Brødtekst';
+  @override
+  String get formatSubscript => 'Sænket';
+  @override
+  String get formatInlineCode => 'Kode';
+  @override
+  String get insertFootnote => 'Fodnote';
+  @override
+  String get insertRule => 'Vandret linje';
+  @override
+  String get insertCodeBlock => 'Kodeblok';
+  @override
+  String get insertMathBlock => 'Matematikblok';
+  @override
+  String get menuHeadingWord => 'Overskrift';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';
   @override
   String get toolbarOrderedList => 'Nummereret liste';
+  @override
+  String get toolbarChecklist => 'Tjekliste';
   @override
   String get toolbarQuote => 'Citat';
   @override
@@ -542,11 +637,6 @@ final class DanishStrings extends Strings {
   String get showPreviewTooltip => 'Vis forhåndsvisning';
   @override
   String get showEditorTooltip => 'Vis editor';
-  @override
-  String get enterFullScreenTooltip => 'Hel skærm';
-  @override
-  String get exitFullScreenTooltip => 'Forlad hel skærm';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rå HTML-tabel)';

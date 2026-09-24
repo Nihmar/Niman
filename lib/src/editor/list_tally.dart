@@ -5,12 +5,10 @@
 /// into a checklist he ticks off at the bar. This is that count, and
 /// nothing else: rows of text in, `- [ ] label: n` rows out.
 ///
-/// Pure Dart, no Flutter and no editor: the source editor reads its rows
-/// from the highlighter's list markers and the WYSIWYG reads them from
-/// the Quill block at the caret, and both hand them here. Every rule
-/// about what a value is, how two spellings become one label and how the
-/// rows are ordered lives in this file, so both editors cannot drift
-/// apart and the whole of it is unit-testable.
+/// Pure Dart, no Flutter and no editor: the editor reads its rows from
+/// the list at the caret and hands them here. Every rule about what a
+/// value is, how two spellings become one label and how the rows are
+/// ordered lives in this file, so the whole of it is unit-testable.
 ///
 /// The generated block is plain Markdown with no marker of its own: it
 /// has to stay a portable file, and a tally that cannot be ticked is

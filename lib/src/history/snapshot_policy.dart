@@ -63,6 +63,33 @@ final class SnapshotDecision {
 const String emptySha256 =
     'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
+/// The skip [decideSnapshot] would answer whatever the note's bytes are, or
+/// null when the answer needs them.
+///
+/// Reading and hashing the old note is the whole cost of a snapshot check —
+/// 1.5 s on every save of a 100 MB note, most of them saves the interval
+/// had already ruled out (0.0.9 stress test). When history is off, or the
+/// newest version is younger than the interval and nothing forces or opens
+/// a session, every branch of [decideSnapshot] that reads the bytes ends in
+/// a skip too, so the bytes are not needed to say so.
+SnapshotDecision? skipWithoutReading({
+  required HistoryManifest manifest,
+  required SnapshotRequest request,
+}) {
+  if (request.limit <= 0) {
+    return const SnapshotDecision.skip('history off (historyVersions 0)');
+  }
+  if (request.forced != null || request.sessionStart) return null;
+  final newest = manifest.newest;
+  if (newest == null) return null;
+  final age = request.now.difference(newest.savedAt);
+  if (age >= request.interval) return null;
+  return SnapshotDecision.skip(
+    'v${newest.number} is ${age.inSeconds} s old, '
+    'interval ${request.interval.inSeconds} s not reached',
+  );
+}
+
 /// Decides whether the content about to be overwritten becomes a version.
 ///
 /// [oldSha] is the sha256 of the note's current bytes, null when the note

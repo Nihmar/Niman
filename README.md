@@ -38,7 +38,8 @@ Full guides live in [`docs/`](docs/):
 - **Spellcheck** on every platform (system/IME on Android, hunspell on
   desktop).
 - **WYSIWYG editor** alongside the source editor — switch per note or per
-  library (powered by `flutter_quill`).
+  library. Both, and the preview, are one Markdown surface of Niman's own:
+  the note on disk is the text either way.
 - Word count, heading outline, heading folding.
 
 ### Libraries
@@ -168,10 +169,10 @@ details.
 
 - **Framework:** Flutter + Dart with `very_good_analysis`.
 - **State:** Riverpod.
-- **Source editor:** `re_editor` with Niman's own incremental Markdown tokenizer.
-- **WYSIWYG editor:** `flutter_quill` with a Markdown round-trip codec.
-- **Preview:** `flutter_markdown_plus` + `katex_dart` for math +
-  `flutter_highlight` for code.
+- **Editor and preview:** one Markdown surface of Niman's own
+  (`lib/src/markdown/`) in three modes — source, live (WYSIWYG) and read —
+  over the `markdown` package's parser, with its own incremental tokenizer,
+  `katex_dart` for math and `highlight` for code.
 - **Index:** `drift` (SQLite + FTS5), one database per library.
 - **Credentials:** `flutter_secure_storage`.
 - **Testing:** `flutter_test` + `integration_test`.
@@ -181,11 +182,9 @@ details.
 
 | Package | Role |
 |---------|------|
-| [`re_editor`](https://pub.dev/packages/re_editor) | Source editor widget |
-| [`flutter_quill`](https://pub.dev/packages/flutter_quill) | WYSIWYG editor |
-| [`flutter_markdown_plus`](https://pub.dev/packages/flutter_markdown_plus) + [`markdown`](https://pub.dev/packages/markdown) | Markdown preview and AST |
+| [`markdown`](https://pub.dev/packages/markdown) | CommonMark/GFM parser the surface walks |
 | [`katex`](https://pub.dev/packages/katex) / [`katex_dart`](https://pub.dev/packages/katex_dart) | Math rendering |
-| [`flutter_highlight`](https://pub.dev/packages/flutter_highlight) | Code syntax highlighting |
+| [`highlight`](https://pub.dev/packages/highlight) | Code syntax highlighting |
 | [`drift`](https://pub.dev/packages/drift) | SQLite index + FTS5 search |
 | [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) | State management |
 | [`file_picker`](https://pub.dev/packages/file_picker) | Library/image picker |

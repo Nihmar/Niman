@@ -129,11 +129,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Исклучено';
   @override
-  String get settingsPreviewEnabledTitle => 'Преглед';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Го прикажува форматираното белешко покрај уредникот на изворот';
-  @override
   String get switchToWysiwygTooltip => 'Префрли на WYSIWYG уредник';
   @override
   String get switchToSourceTooltip => 'Префрли на Markdown изворот';
@@ -142,10 +137,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Оваа белешка е премногу голема за WYSIWYG уредникот. Отвори ја во '
-      'Markdown изворот.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Изглед';
@@ -275,20 +266,6 @@ final class MacedonianStrings extends Strings {
       'Уредникот и прегледот, кои секогаш се усогласени';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Начин на преглед';
-  @override
-  String get previewModeSubtitle =>
-      'Дали прегледот го дели екранот со уредникот или го заменува';
-  @override
-  String get previewModeAuto => 'Еден до друг';
-  @override
-  String get previewModeSwitch => 'Цел екран';
-  @override
-  String get splitRatioTitle => 'Ширина на поделба';
-  @override
-  String get splitRatioSubtitle => 'Удел на уредникот кога прегледот е до него';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат на врска';
@@ -476,11 +453,131 @@ final class MacedonianStrings extends Strings {
   @override
   String get toolbarImage => 'Вметни слика';
   @override
+  String get toolbarTable => 'Табела';
+  @override
+  String get tableRow => 'Ред';
+  @override
+  String get tableColumn => 'Колона';
+  @override
+  String get tableAddRowAbove => 'Вметни ред над';
+  @override
+  String get tableAddRowBelow => 'Вметни ред под';
+  @override
+  String get tableMoveRowUp => 'Помести го редот нагоре';
+  @override
+  String get tableMoveRowDown => 'Помести го редот надолу';
+  @override
+  String get tableDuplicateRow => 'Удвои го редот';
+  @override
+  String get tableDeleteRow => 'Избриши го редот';
+  @override
+  String get tableAddColumnLeft => 'Вметни колона лево';
+  @override
+  String get tableAddColumnRight => 'Вметни колона десно';
+  @override
+  String get tableMoveColumnLeft => 'Помести ја колоната лево';
+  @override
+  String get tableMoveColumnRight => 'Помести ја колоната десно';
+  @override
+  String get tableAlignLeft => 'Порамни лево';
+  @override
+  String get tableAlignCenter => 'Центрирај';
+  @override
+  String get tableAlignRight => 'Порамни десно';
+  @override
+  String get tableDuplicateColumn => 'Удвои ја колоната';
+  @override
+  String get tableDeleteColumn => 'Избриши ја колоната';
+  @override
+  String get tableSortAscending => 'Подреди по колона (А → Ш)';
+  @override
+  String get tableSortDescending => 'Подреди по колона (Ш → А)';
+  @override
+  String get tableAddRow => 'Додај ред';
+  @override
+  String get tableAddColumn => 'Додај колона';
+  @override
+  String get cheatsheetTitle => 'Потсетник за Markdown';
+  @override
+  String get cheatsheetCopy => 'Копирај';
+  @override
+  String get cheatsheetCopied => 'Копирано';
+  @override
+  String get cheatsheetInsert => 'Вметни во белешката';
+  @override
+  String get cheatsheetWritten => 'Напишано';
+  @override
+  String get cheatsheetShown => 'Прикажано';
+  @override
+  String get cheatHeadings => 'Наслови';
+  @override
+  String get cheatEmphasis => 'Задебелено, курзив, прецртано';
+  @override
+  String get cheatHtmlFormats => 'Потцртано, горен индекс, долен индекс';
+  @override
+  String get cheatLists => 'Листи';
+  @override
+  String get cheatChecklists => 'Листи за проверка';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Врски';
+  @override
+  String get cheatWikilinks => 'Врски до белешки';
+  @override
+  String get cheatEmbeds => 'Слики и вградувања';
+  @override
+  String get cheatTags => 'Ознаки';
+  @override
+  String get cheatInlineCode => 'Код во реченица';
+  @override
+  String get cheatCodeBlocks => 'Блокови код';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Табели';
+  @override
+  String get cheatFootnotes => 'Фусноти';
+  @override
+  String get cheatRule => 'Хоризонтална линија';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Резервирани места во шаблоните';
+  @override
+  String get menuAddLink => 'Додај врска';
+  @override
+  String get menuAddExternalLink => 'Додај надворешна врска';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Пасус';
+  @override
+  String get menuInsert => 'Вметни';
+  @override
+  String get menuBody => 'Обичен текст';
+  @override
+  String get formatSubscript => 'Долен индекс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Фуснота';
+  @override
+  String get insertRule => 'Хоризонтална линија';
+  @override
+  String get insertCodeBlock => 'Блок код';
+  @override
+  String get insertMathBlock => 'Математички блок';
+  @override
+  String get menuHeadingWord => 'Наслов';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Листа';
   @override
   String get toolbarOrderedList => 'Бројчана листа';
+  @override
+  String get toolbarChecklist => 'Листа за проверка';
   @override
   String get toolbarQuote => 'Цитат';
   @override
@@ -548,11 +645,6 @@ final class MacedonianStrings extends Strings {
   String get showPreviewTooltip => 'Прикажи преглед';
   @override
   String get showEditorTooltip => 'Прикажи уредник';
-  @override
-  String get enterFullScreenTooltip => 'Цел екран';
-  @override
-  String get exitFullScreenTooltip => 'Изијди од цел екран';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(сурва HTML табела)';

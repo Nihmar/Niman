@@ -130,11 +130,6 @@ final class CroatianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Isključeno';
   @override
-  String get settingsPreviewEnabledTitle => 'Pregled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Prikaži renderiranu napomenu pored izvornog uređivača';
-  @override
   String get switchToWysiwygTooltip => 'Prebaci na WYSIWYG uređivač';
   @override
   String get switchToSourceTooltip => 'Prebaci na Markdown izvor';
@@ -143,10 +138,6 @@ final class CroatianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ova napomena je prevelika za WYSIWYG uređivač. Otvori je kao '
-      'Markdown izvor.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Izgled';
@@ -274,20 +265,6 @@ final class CroatianStrings extends Strings {
   String get noteTextScaleSubtitle => 'Uređivač i pregled su uvijek usklađeni';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Način pregleda';
-  @override
-  String get previewModeSubtitle =>
-      'Podijeli li pregled zaslon s uređivačem ili ga zamijeni';
-  @override
-  String get previewModeAuto => 'Pored';
-  @override
-  String get previewModeSwitch => 'Cijeli zaslon';
-  @override
-  String get splitRatioTitle => 'Širina omjera podjele';
-  @override
-  String get splitRatioSubtitle => 'Udio uređivača kada je pregled pored';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format veze';
@@ -472,11 +449,131 @@ final class CroatianStrings extends Strings {
   @override
   String get toolbarImage => 'Umetni sliku';
   @override
+  String get toolbarTable => 'Tablica';
+  @override
+  String get tableRow => 'Redak';
+  @override
+  String get tableColumn => 'Stupac';
+  @override
+  String get tableAddRowAbove => 'Umetni redak iznad';
+  @override
+  String get tableAddRowBelow => 'Umetni redak ispod';
+  @override
+  String get tableMoveRowUp => 'Pomakni redak gore';
+  @override
+  String get tableMoveRowDown => 'Pomakni redak dolje';
+  @override
+  String get tableDuplicateRow => 'Dupliciraj redak';
+  @override
+  String get tableDeleteRow => 'Izbriši redak';
+  @override
+  String get tableAddColumnLeft => 'Umetni stupac lijevo';
+  @override
+  String get tableAddColumnRight => 'Umetni stupac desno';
+  @override
+  String get tableMoveColumnLeft => 'Pomakni stupac lijevo';
+  @override
+  String get tableMoveColumnRight => 'Pomakni stupac desno';
+  @override
+  String get tableAlignLeft => 'Poravnaj lijevo';
+  @override
+  String get tableAlignCenter => 'Centriraj';
+  @override
+  String get tableAlignRight => 'Poravnaj desno';
+  @override
+  String get tableDuplicateColumn => 'Dupliciraj stupac';
+  @override
+  String get tableDeleteColumn => 'Izbriši stupac';
+  @override
+  String get tableSortAscending => 'Poredaj po stupcu (A → Ž)';
+  @override
+  String get tableSortDescending => 'Poredaj po stupcu (Ž → A)';
+  @override
+  String get tableAddRow => 'Dodaj redak';
+  @override
+  String get tableAddColumn => 'Dodaj stupac';
+  @override
+  String get cheatsheetTitle => 'Podsjetnik za Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiraj';
+  @override
+  String get cheatsheetCopied => 'Kopirano';
+  @override
+  String get cheatsheetInsert => 'Umetni u bilješku';
+  @override
+  String get cheatsheetWritten => 'Napisano';
+  @override
+  String get cheatsheetShown => 'Prikazano';
+  @override
+  String get cheatHeadings => 'Naslovi';
+  @override
+  String get cheatEmphasis => 'Podebljano, kurziv, precrtano';
+  @override
+  String get cheatHtmlFormats => 'Podcrtano, eksponent, indeks';
+  @override
+  String get cheatLists => 'Popisi';
+  @override
+  String get cheatChecklists => 'Kontrolni popisi';
+  @override
+  String get cheatQuotes => 'Citati';
+  @override
+  String get cheatLinks => 'Poveznice';
+  @override
+  String get cheatWikilinks => 'Poveznice na bilješke';
+  @override
+  String get cheatEmbeds => 'Slike i ugradnje';
+  @override
+  String get cheatTags => 'Oznake';
+  @override
+  String get cheatInlineCode => 'Kôd u rečenici';
+  @override
+  String get cheatCodeBlocks => 'Blokovi kôda';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tablice';
+  @override
+  String get cheatFootnotes => 'Fusnote';
+  @override
+  String get cheatRule => 'Vodoravna crta';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Rezervirana mjesta predložaka';
+  @override
+  String get menuAddLink => 'Dodaj poveznicu';
+  @override
+  String get menuAddExternalLink => 'Dodaj vanjsku poveznicu';
+  @override
+  String get menuFormat => 'Oblik';
+  @override
+  String get menuParagraph => 'Odlomak';
+  @override
+  String get menuInsert => 'Umetni';
+  @override
+  String get menuBody => 'Obični tekst';
+  @override
+  String get formatSubscript => 'Indeks';
+  @override
+  String get formatInlineCode => 'Kôd';
+  @override
+  String get insertFootnote => 'Fusnota';
+  @override
+  String get insertRule => 'Vodoravna crta';
+  @override
+  String get insertCodeBlock => 'Blok kôda';
+  @override
+  String get insertMathBlock => 'Matematički blok';
+  @override
+  String get menuHeadingWord => 'Naslov';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';
   @override
   String get toolbarOrderedList => 'Brojčani popis';
+  @override
+  String get toolbarChecklist => 'Kontrolni popis';
   @override
   String get toolbarQuote => 'Citat';
   @override
@@ -544,11 +641,6 @@ final class CroatianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži pregled';
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
-  @override
-  String get enterFullScreenTooltip => 'Cijeli zaslon';
-  @override
-  String get exitFullScreenTooltip => 'Izadi iz celog zaslona';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(sirova HTML tablica)';

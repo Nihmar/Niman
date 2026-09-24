@@ -131,11 +131,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Išjungta';
   @override
-  String get settingsPreviewEnabledTitle => 'Peržiūra';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Rodys sukurtą pastabą šalia šaltinio redaktoriaus';
-  @override
   String get switchToWysiwygTooltip => 'Perjungti į WYSIWYG redaktorių';
   @override
   String get switchToSourceTooltip => 'Perjungti į Markdown šaltinį';
@@ -144,10 +139,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ši pastaba per didelė WYSIWYG redaktoriui. Atidarykite ją kaip '
-      'Markdown šaltinį.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Išvaizda';
@@ -274,20 +265,6 @@ final class LithuanianStrings extends Strings {
       'Redaktorius ir peržiūra visada suderinami';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Peržiūros režimas';
-  @override
-  String get previewModeSubtitle =>
-      'Ar peržiūra dalija ekraną su redaktoriumi, ar jį pakeičia';
-  @override
-  String get previewModeAuto => 'Šalia';
-  @override
-  String get previewModeSwitch => 'Visas ekranas';
-  @override
-  String get splitRatioTitle => 'Padalinimo santykis';
-  @override
-  String get splitRatioSubtitle => 'Redaktoriaus dalis, kai peržiūra yra šalia';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Nuorodos formatas';
@@ -475,11 +452,131 @@ final class LithuanianStrings extends Strings {
   @override
   String get toolbarImage => 'Įterpti vaizdą';
   @override
+  String get toolbarTable => 'Lentelė';
+  @override
+  String get tableRow => 'Eilutė';
+  @override
+  String get tableColumn => 'Stulpelis';
+  @override
+  String get tableAddRowAbove => 'Įterpti eilutę virš';
+  @override
+  String get tableAddRowBelow => 'Įterpti eilutę po';
+  @override
+  String get tableMoveRowUp => 'Perkelti eilutę aukštyn';
+  @override
+  String get tableMoveRowDown => 'Perkelti eilutę žemyn';
+  @override
+  String get tableDuplicateRow => 'Dubliuoti eilutę';
+  @override
+  String get tableDeleteRow => 'Ištrinti eilutę';
+  @override
+  String get tableAddColumnLeft => 'Įterpti stulpelį kairėje';
+  @override
+  String get tableAddColumnRight => 'Įterpti stulpelį dešinėje';
+  @override
+  String get tableMoveColumnLeft => 'Perkelti stulpelį kairėn';
+  @override
+  String get tableMoveColumnRight => 'Perkelti stulpelį dešinėn';
+  @override
+  String get tableAlignLeft => 'Lygiuoti kairėje';
+  @override
+  String get tableAlignCenter => 'Centruoti';
+  @override
+  String get tableAlignRight => 'Lygiuoti dešinėje';
+  @override
+  String get tableDuplicateColumn => 'Dubliuoti stulpelį';
+  @override
+  String get tableDeleteColumn => 'Ištrinti stulpelį';
+  @override
+  String get tableSortAscending => 'Rikiuoti pagal stulpelį (A → Z)';
+  @override
+  String get tableSortDescending => 'Rikiuoti pagal stulpelį (Z → A)';
+  @override
+  String get tableAddRow => 'Pridėti eilutę';
+  @override
+  String get tableAddColumn => 'Pridėti stulpelį';
+  @override
+  String get cheatsheetTitle => 'Markdown atmintinė';
+  @override
+  String get cheatsheetCopy => 'Kopijuoti';
+  @override
+  String get cheatsheetCopied => 'Nukopijuota';
+  @override
+  String get cheatsheetInsert => 'Įterpti į užrašą';
+  @override
+  String get cheatsheetWritten => 'Parašyta';
+  @override
+  String get cheatsheetShown => 'Rodoma';
+  @override
+  String get cheatHeadings => 'Antraštės';
+  @override
+  String get cheatEmphasis => 'Paryškintas, kursyvas, perbrauktas';
+  @override
+  String get cheatHtmlFormats => 'Pabrauktas, viršutinis, apatinis indeksas';
+  @override
+  String get cheatLists => 'Sąrašai';
+  @override
+  String get cheatChecklists => 'Kontroliniai sąrašai';
+  @override
+  String get cheatQuotes => 'Citatos';
+  @override
+  String get cheatLinks => 'Nuorodos';
+  @override
+  String get cheatWikilinks => 'Nuorodos į užrašus';
+  @override
+  String get cheatEmbeds => 'Paveikslėliai ir įterpiniai';
+  @override
+  String get cheatTags => 'Žymės';
+  @override
+  String get cheatInlineCode => 'Kodas sakinyje';
+  @override
+  String get cheatCodeBlocks => 'Kodo blokai';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Lentelės';
+  @override
+  String get cheatFootnotes => 'Išnašos';
+  @override
+  String get cheatRule => 'Horizontali linija';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Šablonų vietos rezervavimo ženklai';
+  @override
+  String get menuAddLink => 'Pridėti nuorodą';
+  @override
+  String get menuAddExternalLink => 'Pridėti išorinę nuorodą';
+  @override
+  String get menuFormat => 'Formatas';
+  @override
+  String get menuParagraph => 'Pastraipa';
+  @override
+  String get menuInsert => 'Įterpti';
+  @override
+  String get menuBody => 'Pagrindinis tekstas';
+  @override
+  String get formatSubscript => 'Apatinis indeksas';
+  @override
+  String get formatInlineCode => 'Kodas';
+  @override
+  String get insertFootnote => 'Išnaša';
+  @override
+  String get insertRule => 'Horizontali linija';
+  @override
+  String get insertCodeBlock => 'Kodo blokas';
+  @override
+  String get insertMathBlock => 'Matematikos blokas';
+  @override
+  String get menuHeadingWord => 'Antraštė';
+  @override
   String get toolbarHeading => 'Antraštė';
   @override
   String get toolbarList => 'Sąrašas';
   @override
   String get toolbarOrderedList => 'Numeruotas sąrašas';
+  @override
+  String get toolbarChecklist => 'Kontrolinis sąrašas';
   @override
   String get toolbarQuote => 'Citata';
   @override
@@ -548,11 +645,6 @@ final class LithuanianStrings extends Strings {
   String get showPreviewTooltip => 'Rodyti peržiūrą';
   @override
   String get showEditorTooltip => 'Rodyti redaktorių';
-  @override
-  String get enterFullScreenTooltip => 'Visas ekranas';
-  @override
-  String get exitFullScreenTooltip => 'Išeiti iš viso ekrano';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(neapdorota HTML lentelė)';

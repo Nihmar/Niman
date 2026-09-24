@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/crash_reporter.dart';
 import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
@@ -13,16 +14,13 @@ import 'package:niman/src/core/log_file.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/single_instance.dart';
-import 'package:niman/src/editor/wysiwyg/guarded_clipboard_service.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 /// Entrypoint of the Niman application.
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
-  GuardedClipboardService.install();
   unawaited(_attachLogFile());
   unawaited(_registerWidgetToggle());
   _reportSlowFrames();
@@ -72,7 +70,7 @@ Future<void> main(List<String> args) async {
 /// handed anything.
 Future<SingleInstance?> _claimSession(LaunchArgs launch) async {
   try {
-    final dir = await getApplicationSupportDirectory();
+    final dir = await appSupportDirectory();
     return await SingleInstance.claim(dir, launch.toJson());
   } on Object catch (error) {
     const AppLogger(name: 'instance').warning('running unguarded ($error)');
@@ -105,7 +103,7 @@ Future<void> _registerWidgetToggle() async {
 /// it lands are still in the buffer and reach the file on the first flush.
 Future<void> _attachLogFile() async {
   try {
-    final dir = await getApplicationSupportDirectory();
+    final dir = await appSupportDirectory();
     final path = p.join(dir.path, 'niman-log.txt');
     AppLog.file = LogFile(path: path);
     const AppLogger(name: 'log').info('log file attached: $path');

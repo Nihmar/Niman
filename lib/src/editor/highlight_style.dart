@@ -1,5 +1,5 @@
-/// Display styles for the source editor's highlighting (M2a E7-influence,
-/// now over re_editor's per-line `spanBuilder`).
+/// Display styles for the source editor's highlighting (M2a
+/// E7-influence), per token over each line's span.
 ///
 /// [markdownTokenStyle] maps a [TokenKind] to a [TextStyle] *override* for
 /// the line span; [TokenKind.plain] maps to null (the base editor style
@@ -20,6 +20,43 @@ import 'package:niman/src/ui/theme/tokens.dart';
 /// which the tokenizer leaves unmarked: bold, at the base row size.
 const TextStyle markdownHeadingStyle = TextStyle(fontWeight: FontWeight.bold);
 
+/// The style of [token] with the constructs around it ([Token.outer]): each
+/// one's override laid over the one outside it, the token's own last, so
+/// the innermost decides a colour — and the lines are added up rather than
+/// replaced, since `<u>~~x~~</u>` is underlined *and* struck through.
+TextStyle? nestedTokenStyle(
+  Token token,
+  SyntaxColors syntax, {
+  required bool dark,
+}) {
+  final own = markdownTokenStyle(token.kind, syntax, dark: dark);
+  if (token.outer.isEmpty) return own;
+  TextStyle? style;
+  for (final kind in <TokenKind>[...token.outer, token.kind]) {
+    final next = markdownTokenStyle(kind, syntax, dark: dark);
+    if (next == null) continue;
+    if (style == null) {
+      style = next;
+      continue;
+    }
+    final lines = <TextDecoration>[
+      if (style.decoration != null) style.decoration!,
+      if (next.decoration != null) next.decoration!,
+    ];
+    final features = <FontFeature>[
+      ...?style.fontFeatures,
+      ...?next.fontFeatures,
+    ];
+    style = style
+        .merge(next)
+        .copyWith(
+          decoration: lines.isEmpty ? null : TextDecoration.combine(lines),
+          fontFeatures: features.isEmpty ? null : features,
+        );
+  }
+  return style;
+}
+
 /// The [TextStyle] override for [kind] in [syntax] (null = base style).
 ///
 /// [dark] decides the weight of bold text and nothing else: a heavy face
@@ -37,8 +74,20 @@ TextStyle? markdownTokenStyle(
     ),
     TokenKind.italic => const TextStyle(fontStyle: FontStyle.italic),
     TokenKind.strike => const TextStyle(decoration: TextDecoration.lineThrough),
+    TokenKind.underline => const TextStyle(
+      decoration: TextDecoration.underline,
+    ),
+    // Raised or lowered by the font's own glyphs where it has them; the size
+    // is the line's either way, since a token never changes a line's height.
+    TokenKind.superscript => const TextStyle(
+      fontFeatures: <FontFeature>[FontFeature.superscripts()],
+    ),
+    TokenKind.subscript => const TextStyle(
+      fontFeatures: <FontFeature>[FontFeature.subscripts()],
+    ),
     TokenKind.codeInline => TextStyle(color: syntax.code),
-    TokenKind.codeFence => TextStyle(color: syntax.codeMuted),
+    TokenKind.codeFence ||
+    TokenKind.codeBlock => TextStyle(color: syntax.codeMuted),
     TokenKind.codeLanguage => TextStyle(
       color: syntax.codeMuted,
       fontStyle: FontStyle.italic,

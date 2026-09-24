@@ -174,6 +174,23 @@ final class ShellWorkspace {
     );
   }
 
+  /// Shows [path]'s preview, once [follow] has taken the note in.
+  ///
+  /// The template flow's `open: preview` (#51) is asked for before the
+  /// note has a tab — [follow] makes it one microtask later — so the
+  /// write queues behind that request instead of landing nowhere.
+  void showPreviewWhenOpen(String path) => scheduleMicrotask(() {
+    for (final tab in value.tabs) {
+      if (tab.path != path) continue;
+      if (tab.memento.preview != true) {
+        controller.update(
+          (w) => w.withMemento(path, tab.memento.copyWith(preview: true)),
+        );
+      }
+      return;
+    }
+  });
+
   /// Open notes, the most recently shown first: what the palette offers
   /// before anything is typed (#155).
   List<String> get recentNotes => [

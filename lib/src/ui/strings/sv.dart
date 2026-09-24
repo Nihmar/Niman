@@ -127,11 +127,6 @@ final class SwedishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Av';
   @override
-  String get settingsPreviewEnabledTitle => 'Förhandsvisning';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Visa den renderade anteckningen bredvid källtexteditorn';
-  @override
   String get switchToWysiwygTooltip => 'Byt till WYSIWYG-editorn';
   @override
   String get switchToSourceTooltip => 'Byt till Markdown-källan';
@@ -140,10 +135,6 @@ final class SwedishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Denna anteckning är för stor för WYSIWYG-editorn. Öppna den i '
-      'Markdown-källan.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Utseende';
@@ -275,22 +266,6 @@ final class SwedishStrings extends Strings {
       'Editorn och förhandsvisningen, som alltid håller ihop';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Förhandsvisningsläge';
-  @override
-  String get previewModeSubtitle =>
-      'Huru förhandsvisningen delar skärmen med editorn eller ersätter '
-      'den';
-  @override
-  String get previewModeAuto => 'Sida vid sida';
-  @override
-  String get previewModeSwitch => 'Helskärm';
-  @override
-  String get splitRatioTitle => 'Utdelningsbredd';
-  @override
-  String get splitRatioSubtitle =>
-      'Editorns andel när förhandsvisningen är sida vid sida';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Länkformat';
@@ -475,11 +450,131 @@ final class SwedishStrings extends Strings {
   @override
   String get toolbarImage => 'Infoga bild';
   @override
+  String get toolbarTable => 'Tabell';
+  @override
+  String get tableRow => 'Rad';
+  @override
+  String get tableColumn => 'Kolumn';
+  @override
+  String get tableAddRowAbove => 'Infoga rad ovanför';
+  @override
+  String get tableAddRowBelow => 'Infoga rad nedanför';
+  @override
+  String get tableMoveRowUp => 'Flytta rad uppåt';
+  @override
+  String get tableMoveRowDown => 'Flytta rad nedåt';
+  @override
+  String get tableDuplicateRow => 'Duplicera rad';
+  @override
+  String get tableDeleteRow => 'Ta bort rad';
+  @override
+  String get tableAddColumnLeft => 'Infoga kolumn till vänster';
+  @override
+  String get tableAddColumnRight => 'Infoga kolumn till höger';
+  @override
+  String get tableMoveColumnLeft => 'Flytta kolumn åt vänster';
+  @override
+  String get tableMoveColumnRight => 'Flytta kolumn åt höger';
+  @override
+  String get tableAlignLeft => 'Vänsterjustera';
+  @override
+  String get tableAlignCenter => 'Centrera';
+  @override
+  String get tableAlignRight => 'Högerjustera';
+  @override
+  String get tableDuplicateColumn => 'Duplicera kolumn';
+  @override
+  String get tableDeleteColumn => 'Ta bort kolumn';
+  @override
+  String get tableSortAscending => 'Sortera efter kolumn (A → Ö)';
+  @override
+  String get tableSortDescending => 'Sortera efter kolumn (Ö → A)';
+  @override
+  String get tableAddRow => 'Lägg till rad';
+  @override
+  String get tableAddColumn => 'Lägg till kolumn';
+  @override
+  String get cheatsheetTitle => 'Markdown-fusklapp';
+  @override
+  String get cheatsheetCopy => 'Kopiera';
+  @override
+  String get cheatsheetCopied => 'Kopierat';
+  @override
+  String get cheatsheetInsert => 'Infoga i anteckningen';
+  @override
+  String get cheatsheetWritten => 'Skrivet';
+  @override
+  String get cheatsheetShown => 'Visat';
+  @override
+  String get cheatHeadings => 'Rubriker';
+  @override
+  String get cheatEmphasis => 'Fet, kursiv, genomstruken';
+  @override
+  String get cheatHtmlFormats => 'Understruken, upphöjd, nedsänkt';
+  @override
+  String get cheatLists => 'Listor';
+  @override
+  String get cheatChecklists => 'Checklistor';
+  @override
+  String get cheatQuotes => 'Citat';
+  @override
+  String get cheatLinks => 'Länkar';
+  @override
+  String get cheatWikilinks => 'Länkar till anteckningar';
+  @override
+  String get cheatEmbeds => 'Bilder och inbäddningar';
+  @override
+  String get cheatTags => 'Taggar';
+  @override
+  String get cheatInlineCode => 'Kod i en mening';
+  @override
+  String get cheatCodeBlocks => 'Kodblock';
+  @override
+  String get cheatMath => 'Matematik';
+  @override
+  String get cheatTables => 'Tabeller';
+  @override
+  String get cheatFootnotes => 'Fotnoter';
+  @override
+  String get cheatRule => 'Horisontell linje';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Mallplatshållare';
+  @override
+  String get menuAddLink => 'Lägg till länk';
+  @override
+  String get menuAddExternalLink => 'Lägg till extern länk';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Stycke';
+  @override
+  String get menuInsert => 'Infoga';
+  @override
+  String get menuBody => 'Brödtext';
+  @override
+  String get formatSubscript => 'Nedsänkt';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Fotnot';
+  @override
+  String get insertRule => 'Horisontell linje';
+  @override
+  String get insertCodeBlock => 'Kodblock';
+  @override
+  String get insertMathBlock => 'Matematikblock';
+  @override
+  String get menuHeadingWord => 'Rubrik';
+  @override
   String get toolbarHeading => 'Rubrik';
   @override
   String get toolbarList => 'Lista';
   @override
   String get toolbarOrderedList => 'Numrerad lista';
+  @override
+  String get toolbarChecklist => 'Checklista';
   @override
   String get toolbarQuote => 'Citat';
   @override
@@ -548,11 +643,6 @@ final class SwedishStrings extends Strings {
   String get showPreviewTooltip => 'Visa förhandsvisning';
   @override
   String get showEditorTooltip => 'Visa editor';
-  @override
-  String get enterFullScreenTooltip => 'Helskärm';
-  @override
-  String get exitFullScreenTooltip => 'Lämnar helskärm';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rå HTML-tabell)';

@@ -11,6 +11,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -425,6 +426,16 @@ final class NoteOps implements NoteOperations {
     await writer.save(path, content, editSession: editSession);
     // After the write: a sync that read the hint before the text landed
     // could otherwise upload the old text and drop the hint.
+    _hint(path, SyncOpKind.changed);
+  }
+
+  @override
+  Future<void> saveNoteStream(
+    String path,
+    NoteContentProducer content, {
+    int? editSession,
+  }) async {
+    await writer.save(path, content, editSession: editSession);
     _hint(path, SyncOpKind.changed);
   }
 

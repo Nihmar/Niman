@@ -79,7 +79,17 @@ void main() {
     // Re-index now is far from the head: nothing was used yet, so the
     // list opens in registry order.
     final pin = find.byKey(const Key('palette-pin-reindexLibrary'));
-    await tester.ensureVisible(pin);
+    // Built lazily: the list is longer than the palette shows.
+    await tester.scrollUntilVisible(
+      pin,
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.tap(pin);
     await settle(tester);
     expect(PinnedCommands.current.value, [AppCommand.reindexLibrary]);

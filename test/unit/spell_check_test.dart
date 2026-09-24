@@ -5,15 +5,12 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:path/path.dart' as p;
-import 'package:re_editor/re_editor.dart';
 
 /// Whether the machine has the Italian dictionary (installed separately).
 final bool _hasItalian = discoverDictionaries().containsKey('it_IT');
@@ -494,41 +491,12 @@ void main() {
     expect(checker.suggest('helo'), contains('hello'));
   }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
 
-  test('the real engine underlines a real typo in a real span', () {
+  test('the real engine finds a real typo', () {
     final check = EditorSpellCheck();
     addTearDown(check.dispose);
     const line = 'hello wrold';
     final ranges = check.rangesFor(0, line, skip: const <TextRange>[]);
-    expect(ranges, isNotEmpty);
-
-    final sync = EditorHighlightSync();
-    final controller = CodeLineEditingController()..text = line;
-    addTearDown(controller.dispose);
-    sync.onBufferChanged(controller.codeLines);
-    const spell = TextStyle(
-      decoration: TextDecoration.underline,
-      decorationStyle: TextDecorationStyle.wavy,
-      decorationColor: Color(0xFFB00020),
-    );
-    final span = sync.spanFor(
-      index: 0,
-      text: line,
-      base: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-      syntax: SyntaxColors.fallbackLight,
-      dark: false,
-      spellRanges: ranges,
-      spellStyle: spell,
-    );
-
-    // Walk to the misspelled run and check the wavy style landed.
-    final walk = <TextSpan>[span];
-    TextStyle? found;
-    while (walk.isNotEmpty) {
-      final node = walk.removeLast();
-      if (node.text == 'wrold') found = node.style;
-      walk.addAll(node.children?.whereType<TextSpan>() ?? const []);
-    }
-    expect(found?.decorationStyle, TextDecorationStyle.wavy);
+    expect(ranges.map((r) => r.textInside(line)), ['wrold']);
   }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
 
   test('the Italian dictionary checks Italian', () {

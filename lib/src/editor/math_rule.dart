@@ -1,6 +1,6 @@
 /// The shared Markdown math-span rules (T-M2-05): one definition of "what
-/// is a math span" for both consumers, so the editor highlight and the
-/// preview parse can never drift:
+/// is a math span" for every consumer — the editor highlight, the preview
+/// parse and the read view's block scanner — so they can never drift:
 ///
 /// * inline math: a `$` (not preceded by `\`) opens unless the next char is
 ///   a `$` (display). Whitespace next to a delimiter is allowed (`$ x $`
@@ -17,6 +17,15 @@ library;
 /// Whether [trimmed] is a single-line display block (`$$…$$`).
 bool isSingleLineDisplay(String trimmed) =>
     trimmed.length >= 4 && trimmed.startsWith(r'$$') && trimmed.endsWith(r'$$');
+
+/// Whether [trimmed] is display math at all — a `$$` line, of either form.
+///
+/// The door the other two are asked behind: the preview's `MathBlockSyntax`
+/// and the read view's block scanner both classify by this first, so a line
+/// holding `$$x$$` is a display block in both. They drifted while the scanner
+/// kept its own copy of these rules — the line was a display block in the
+/// preview and a paragraph in the read view (#252) — so the copy is gone.
+bool isDisplayLine(String trimmed) => trimmed.startsWith(r'$$');
 
 /// Whether a *line* (trimmed) starts a display-math block — single-line or
 /// multi-line. The block runs until [isDisplayClose] (or EOF).

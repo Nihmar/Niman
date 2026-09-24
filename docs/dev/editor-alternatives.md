@@ -1,5 +1,12 @@
 # WYSIWYG surface: alternatives measured
 
+> **Superseded (#247).** `flutter_quill`, `re_editor` and the old preview are
+> gone: every mode is now Niman's own surface
+> ([unified-surface.md](unified-surface.md)). This page is kept as the record
+> of what was measured before that decision; the files it links under
+> `editor/wysiwyg/` and the M2 benchmark it names no longer exist (they are in
+> the git history).
+
 The WYSIWYG surface is `flutter_quill` behind Niman's own Markdown codec
 (`editor/wysiwyg/`). A Delta document is not Markdown, so the codec pays
 for the round trip: ~530 lines across

@@ -13,7 +13,6 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:re_editor/re_editor.dart';
 
 /// The frontmatter parse-error banner.
 final class FrontmatterWarningBanner extends StatelessWidget {
@@ -68,7 +67,6 @@ final class NoteStatusRow extends StatelessWidget {
   /// Creates the row; every tap leaves through a callback.
   const new({
     required this.loading,
-    required this.splitPreview,
     required this.showPreview,
     required this.showWysiwyg,
     required this.spellCheckAvailable,
@@ -87,9 +85,6 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// Whether a note is still loading (hides the buttons).
   final bool loading;
-
-  /// Whether editor and preview sit side by side.
-  final bool splitPreview;
 
   /// Whether the preview is the visible pane.
   final bool showPreview;
@@ -195,22 +190,14 @@ final class NoteStatusRow extends StatelessWidget {
         if (!loading)
           Padding(
             padding: iconPadding,
-            // In the editor's tap region like the formatting toolbar:
-            // re_editor unfocuses the editor on any tap outside it, so
-            // an unwrapped find button closes the keyboard on tap-down
-            // and the find field reopens it a frame later. Wrapped,
-            // focus moves straight to the find field and the keyboard
-            // never leaves.
-            child: CodeEditorTapRegion(
-              child: IconButton(
-                key: const Key('editor-find-open'),
-                tooltip: AppStrings.findInNoteTooltip,
-                icon: const Icon(Icons.search),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                onPressed: splitPreview || !showPreview ? onFind : null,
-              ),
+            child: IconButton(
+              key: const Key('editor-find-open'),
+              tooltip: AppStrings.findInNoteTooltip,
+              icon: const Icon(Icons.search),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              onPressed: !showPreview ? onFind : null,
             ),
           ),
         if (!loading && spellCheckAvailable)
@@ -242,9 +229,7 @@ final class NoteStatusRow extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              onPressed: splitPreview || !showPreview
-                  ? onToggleTypewriter
-                  : null,
+              onPressed: !showPreview ? onToggleTypewriter : null,
             ),
           ),
         // The quick way between the two editors (T-WYS-12): the setting
@@ -265,7 +250,7 @@ final class NoteStatusRow extends StatelessWidget {
         // that is already on them, and this one is the last thing
         // before the Spacer, so nothing to its left moves and what is
         // to its right is anchored to the other edge.
-        if (!loading && canSwitchEditorKind && (splitPreview || !showPreview))
+        if (!loading && canSwitchEditorKind && !showPreview)
           Padding(
             padding: iconPadding,
             child: Tooltip(

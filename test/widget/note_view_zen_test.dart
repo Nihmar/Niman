@@ -1,10 +1,9 @@
 // Issue #69: a note in Zen mode. Its row above, its status row and its
-// row numbers go, the caret thickens, and a split comes apart: the tab's
-// own flag says whether the editor or the preview shows.
+// row numbers go, the caret thickens, and the tab's own flag says
+// whether the editor or the preview shows.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/note_editor.dart';
-import 'package:niman/src/ui/editor_preview_split.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -14,7 +13,6 @@ Widget _app({
   bool zen = false,
   bool active = true,
   bool showPreview = false,
-  bool splitPreview = false,
   void Function(String, NoteMemento)? onMemento,
 }) => MaterialApp(
   home: Scaffold(
@@ -26,7 +24,6 @@ Widget _app({
       zen: zen,
       active: active,
       showPreview: showPreview,
-      splitPreview: splitPreview,
       onMemento: onMemento,
       readNote: (_) async => '# Title\n\nSome text.',
       writeNote: (_, _) async {},
@@ -42,7 +39,8 @@ void main() {
   ) async {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
-    NoteEditor editor() => tester.widget<NoteEditor>(find.byType(NoteEditor));
+    MarkdownSurface editor() =>
+        tester.widget<MarkdownSurface>(find.byType(MarkdownSurface));
     expect(find.byType(NoteTopBar), findsOne);
     expect(find.byType(NoteStatusRow), findsOne);
     expect(editor().showLineNumbers, isTrue);
@@ -54,18 +52,6 @@ void main() {
     expect(find.byType(NoteStatusRow), findsNothing);
     expect(editor().showLineNumbers, isFalse);
     expect(editor().caretWidth, zenCaretWidth);
-  });
-
-  testWidgets('the split preview makes way for the editor', (tester) async {
-    await tester.pumpWidget(_app(splitPreview: true));
-    await tester.pumpAndSettle();
-    expect(find.byType(EditorPreviewSplit), findsOne);
-
-    await tester.pumpWidget(_app(splitPreview: true, zen: true));
-    await tester.pumpAndSettle();
-    expect(find.byType(EditorPreviewSplit), findsNothing);
-    expect(preview, findsNothing);
-    expect(find.byType(NoteEditor), findsOne);
   });
 
   // 0.0.8 test round: a note read rather than written is read in Zen
@@ -84,16 +70,5 @@ void main() {
       _app(showPreview: true, zen: true, active: false, onMemento: keep),
     );
     expect(handed?.preview, isTrue);
-  });
-
-  testWidgets('a split tab in its preview shows the preview alone in Zen', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _app(splitPreview: true, showPreview: true, zen: true),
-    );
-    await tester.pumpAndSettle();
-    expect(find.byType(EditorPreviewSplit), findsNothing);
-    expect(preview, findsOne);
   });
 }

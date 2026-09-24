@@ -1,0 +1,912 @@
+# Niman crash report
+# captured: 2026-09-22T09:07:46.442488
+
+flutter error
+PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+#0      JSONMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:168)
+#1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366)
+<asynchronous suspension>
+#2      ParsedPath._splitExtension.<anonymous closure> (package:path/src/parsed_path.dart:194)
+<asynchronous suspension>
+
+
+--- AppLog buffer (oldest first) ---
+2026-09-22 09:06:56.422 INFO [log] log file attached: C:\Users\Alessandro.Manente\AppData\Roaming\dev.niman\niman\niman-log.txt
+2026-09-22 09:06:57.428 INFO [instance] no session answering (SocketException: Connection timed out, host: InternetAddress('127.0.0.1', IPv4), port: 59239 (OS Error: Connection timed out, errno = 10060))
+2026-09-22 09:06:57.434 INFO [instance] first instance, listening on 53074
+2026-09-22 09:06:57.486 INFO [tray] tray ready (5 actions)
+2026-09-22 09:06:57.486 INFO [session] resume: lastLibraryPath=C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4
+2026-09-22 09:06:57.486 INFO [session] open start: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 create=false blockingScan=false
+2026-09-22 09:06:57.487 INFO [watcher] watcher start: "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4" (recursive)
+2026-09-22 09:06:57.487 INFO [session] open: watcher started for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4
+2026-09-22 09:06:57.502 INFO [transcription] settings loaded in 63 ms: model -, language app (no file)
+2026-09-22 09:06:57.528 INFO [transcription] models scanned in 25 ms: installed none; partial none
+2026-09-22 09:06:57.528 INFO [transcription] loaded in 89 ms: 0 installed (0 b), 0 interrupted, default -
+2026-09-22 09:06:57.528 INFO [sync] scheduler: start (network unmetered, phone false)
+2026-09-22 09:06:57.528 INFO [sync] scheduler: periodic full sync every 60s
+2026-09-22 09:06:57.528 INFO [sync] scheduler: full sync (library opened)
+2026-09-22 09:06:57.528 INFO [sync] run: 1 queued hints still backing off
+2026-09-22 09:06:57.528 INFO [sync] run: full start for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 (0 queued hints)
+2026-09-22 09:06:57.531 INFO [theme] device colors: system accent
+2026-09-22 09:06:57.533 WARNING [frames] slow frame: total 31.6 ms (build 0.0 ms, raster 31.5 ms, vsync 0.0 ms)
+2026-09-22 09:06:57.547 INFO [session] open complete: ready root=C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4
+2026-09-22 09:06:57.551 DEBUG [sync] secret: read for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4: present
+2026-09-22 09:06:57.552 DEBUG [sync] capabilities: stored, no file etags (size + mtime, hash on doubt); no collection etags (Depth 1 per folder); no If-Match (PROPFIND before PUT); no If-None-Match (PROPFIND before PUT); no MOVE (DELETE + PUT); no file ids (renames = delete + create); no checksums (sha256 while streaming); no X-OC-Mtime (server's mtime)
+2026-09-22 09:06:57.651 INFO [todo] todo open: root=C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4
+2026-09-22 09:06:57.683 DEBUG [tree.ui] mount
+2026-09-22 09:06:57.687 INFO [todo] todo reminders: 0 pending at startup []
+2026-09-22 09:06:57.687 DEBUG [tree.ui] flatten: 4ms (19 rows, 0 pinned)
+2026-09-22 09:06:57.693 INFO [window] custom title bar applied
+2026-09-22 09:06:57.694 INFO [window] window controller ready
+2026-09-22 09:06:57.694 WARNING [spellcheck] personal dictionary read failed: PathNotFoundException: Cannot open file, path = 'C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\dictionary.txt' (OS Error: Impossibile trovare il file specificato, errno = 2)
+2026-09-22 09:06:57.694 INFO [todo] todo migrate: open 6->6, done 16->16
+2026-09-22 09:06:57.726 INFO [todo] todo reload: 6 open, 16 done
+2026-09-22 09:06:57.726 DEBUG [widgets] todo refresh: placed=[]
+2026-09-22 09:06:57.727 INFO [todo] todo reminders: reconcile 0 wanted, notifications allowed, alarms inexact, battery unrestricted
+2026-09-22 09:06:57.727 INFO [todo] todo reminders reconciled: 0 scheduled
+2026-09-22 09:06:57.732 DEBUG [editor] edit session 1: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md
+2026-09-22 09:06:57.733 INFO [editor] note loaded: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17912 chars, 34 ms)
+2026-09-22 09:06:57.737 DEBUG [editor] note open first frame (17912 chars): first frame 4.51ms after call
+2026-09-22 09:06:57.738 DEBUG [preview] apply parse: 0 top-level nodes, 0 chars in 0ms
+2026-09-22 09:06:57.738 DEBUG [preview] parse sync: 0 blocks, 0 chars in 0ms
+2026-09-22 09:06:57.755 DEBUG [preview] apply parse: 1 top-level nodes, 17912 chars in 1ms
+2026-09-22 09:06:57.755 DEBUG [preview] parse sync: 1 blocks, 17912 chars in 4ms
+2026-09-22 09:06:58.494 INFO [webdav] PROPFIND / -> 207, depth 1, 19 items, 6223 chars, 936 ms
+2026-09-22 09:06:58.709 WARNING [frames] slow frame: total 198.2 ms (build 37.3 ms, raster 21.6 ms, vsync 139.2 ms)
+2026-09-22 09:06:58.709 WARNING [frames] slow frame: total 35.6 ms (build 29.9 ms, raster 3.2 ms, vsync 2.5 ms)
+2026-09-22 09:06:58.709 WARNING [frames] slow frame: total 21.6 ms (build 18.9 ms, raster 2.2 ms, vsync 0.5 ms)
+2026-09-22 09:06:59.367 INFO [webdav] PROPFIND Lists -> 207, depth 1, 4 items, 1372 chars, 872 ms
+2026-09-22 09:06:59.490 INFO [webdav] PROPFIND assets -> 207, depth 1, 2 items, 765 chars, 123 ms
+2026-09-22 09:06:59.602 INFO [webdav] PROPFIND Attachments -> 207, depth 1, 11 items, 4324 chars, 112 ms
+2026-09-22 09:06:59.603 INFO [sync] scan: 30 local files, 29 remote files, 4 remote folders known, 29 of 29 agreed rows (2050 ms)
+2026-09-22 09:06:59.604 INFO [sync] hash: 1 local, 0 remote (1 ms)
+2026-09-22 09:06:59.604 INFO [sync] plan: 1 wait out their backoff (upload .niman/settings.json: local new, 748 b; remote no file)
+2026-09-22 09:06:59.604 INFO [sync] plan: nothing to do (0 destructive of 29 rows)
+2026-09-22 09:06:59.605 INFO [sync] destination: sync of C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 succeeded
+2026-09-22 09:06:59.605 INFO [sync] run: full done for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 in 2077 ms: 1 waiting out a backoff
+2026-09-22 09:07:00.040 DEBUG [shell] tap tab: settings
+2026-09-22 09:07:00.861 WARNING [frames] slow frame: total 18.5 ms (build 6.0 ms, raster 11.1 ms, vsync 1.4 ms)
+2026-09-22 09:07:02.548 INFO [session] periodic rescan start: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4
+2026-09-22 09:07:02.548 DEBUG [isolate] #1 start: walk "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4" (in flight 1, peak 1)
+2026-09-22 09:07:02.550 DEBUG [isolate] #1 done: walk "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4" (2 ms, in flight 0)
+2026-09-22 09:07:02.550 DEBUG [indexer] walk: skip hidden entry ".history"
+2026-09-22 09:07:02.550 DEBUG [indexer] walk: skip hidden entry ".niman"
+2026-09-22 09:07:02.550 DEBUG [indexer] walk: skip hidden entry ".trash"
+2026-09-22 09:07:02.551 INFO [indexer] fullScan C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4: found 33 entr(ies) (29 file, 4 dir)
+2026-09-22 09:07:02.551 DEBUG [indexer] fullScan entries: 33 path(s)
+2026-09-22 09:07:02.552 INFO [indexer] fullScan: index already mirrors disk, no write
+2026-09-22 09:07:02.552 INFO [session] periodic rescan complete
+2026-09-22 09:07:02.792 INFO [session] markdown engine set to unified
+2026-09-22 09:07:02.794 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\.settings.json.niman-tmp-1790060822793600"
+2026-09-22 09:07:02.795 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\.settings.json.niman-tmp-1790060822793600"
+2026-09-22 09:07:02.799 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman"
+2026-09-22 09:07:02.799 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\settings.json"
+2026-09-22 09:07:02.799 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\.settings.json.niman-tmp-1790060822793600" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\settings.json
+2026-09-22 09:07:02.799 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman"
+2026-09-22 09:07:02.800 INFO [sync] queue: changed .niman/settings.json
+2026-09-22 09:07:03.045 DEBUG [session] watch batch: 3 path(s), 1 resync dir(s)
+2026-09-22 09:07:03.045 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman" (outside root, root itself, or hidden)
+2026-09-22 09:07:03.045 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\.settings.json.niman-tmp-1790060822793600" (outside root, root itself, or hidden)
+2026-09-22 09:07:03.045 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman" (outside root, root itself, or hidden)
+2026-09-22 09:07:03.045 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.niman\settings.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:03.045 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:03.046 INFO [sync] queue: changed .niman/settings.json
+2026-09-22 09:07:04.913 WARNING [frames] slow frame: total 18.8 ms (build 14.1 ms, raster 3.8 ms, vsync 0.9 ms)
+2026-09-22 09:07:06.864 DEBUG [shell] tap tab: quickNote
+2026-09-22 09:07:06.870 DEBUG [shell] quick note open first frame: first frame 5.00ms after call
+2026-09-22 09:07:06.889 DEBUG [editor] edit session 2: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md
+2026-09-22 09:07:06.890 INFO [editor] note loaded: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17912 chars, 12 ms)
+2026-09-22 09:07:06.890 DEBUG [editor] note open first frame (17912 chars): first frame 0.00ms after call
+2026-09-22 09:07:06.909 DEBUG [wysiwyg] open: 17912 chars, 1 delta ops, 0 preserved blocks
+2026-09-22 09:07:06.909 DEBUG [preview] apply parse: 0 top-level nodes, 0 chars in 0ms
+2026-09-22 09:07:06.909 DEBUG [preview] parse sync: 0 blocks, 0 chars in 0ms
+2026-09-22 09:07:07.034 DEBUG [preview] apply parse: 1 top-level nodes, 17912 chars in 1ms
+2026-09-22 09:07:07.034 DEBUG [preview] parse sync: 1 blocks, 17912 chars in 4ms
+2026-09-22 09:07:08.034 WARNING [frames] slow frame: total 145.6 ms (build 139.2 ms, raster 3.7 ms, vsync 2.6 ms)
+2026-09-22 09:07:08.034 WARNING [frames] slow frame: total 45.2 ms (build 41.8 ms, raster 3.0 ms, vsync 0.5 ms)
+2026-09-22 09:07:08.034 WARNING [frames] slow frame: total 27.1 ms (build 22.8 ms, raster 3.0 ms, vsync 1.3 ms)
+2026-09-22 09:07:08.048 DEBUG [sync] scheduler: quick (after edits) skipped: nothing queued is due
+2026-09-22 09:07:09.042 WARNING [frames] slow frame: total 20.6 ms (build 17.9 ms, raster 2.6 ms, vsync 0.1 ms)
+2026-09-22 09:07:12.661 WARNING [frames] slow frame: total 52.0 ms (build 47.5 ms, raster 2.8 ms, vsync 1.6 ms)
+2026-09-22 09:07:13.185 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:13.345 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:13.513 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:13.664 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:13.817 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:13.969 DEBUG [editor] keystroke: highlight+select sync 0.04 ms, line 0
+2026-09-22 09:07:14.113 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:14.257 DEBUG [editor] keystroke: highlight+select sync 0.04 ms, line 0
+2026-09-22 09:07:14.409 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:14.561 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:14.689 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:14.833 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:14.977 DEBUG [editor] keystroke: highlight+select sync 0.03 ms, line 0
+2026-09-22 09:07:15.097 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:15.233 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:15.376 DEBUG [editor] keystroke: highlight+select sync 0.01 ms, line 0
+2026-09-22 09:07:15.513 DEBUG [editor] keystroke: highlight+select sync 0.03 ms, line 0
+2026-09-22 09:07:15.657 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:15.801 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:16.001 DEBUG [editor] keystroke: highlight+select sync 0.02 ms, line 0
+2026-09-22 09:07:16.502 INFO [editor] save start: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17892 chars, join 0 ms, session 2)
+2026-09-22 09:07:16.502 DEBUG [save] save start: "Quicknote.md" (17892 chars, session 2, waited 0 ms)
+2026-09-22 09:07:16.502 DEBUG [isolate] #2 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 09:07:16.514 DEBUG [preview] apply parse: 1 top-level nodes, 17892 chars in 0ms
+2026-09-22 09:07:16.514 DEBUG [preview] parse sync: 1 blocks, 17892 chars in 3ms
+2026-09-22 09:07:16.526 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060836510861"
+2026-09-22 09:07:16.526 DEBUG [isolate] #2 done: write "Quicknote.md" (24 ms, in flight 0)
+2026-09-22 09:07:16.526 DEBUG [history] snapshot "Quicknote.md": skip (unchanged since v35) in 7 ms
+2026-09-22 09:07:16.526 INFO [save] saved: "Quicknote.md" (17892 bytes, encode 0 ms, write 7 ms, total 24 ms)
+2026-09-22 09:07:16.526 INFO [editor] note saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17892 chars, 24 ms)
+2026-09-22 09:07:16.526 DEBUG [isolate] #3 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:16.527 INFO [sync] queue: changed Quicknote.md
+2026-09-22 09:07:16.528 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060836510861"
+2026-09-22 09:07:16.528 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md"
+2026-09-22 09:07:16.528 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060836510861" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md
+2026-09-22 09:07:16.528 DEBUG [isolate] #3 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 09:07:16.528 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 09:07:16.534 DEBUG [save] reindexed: "Quicknote.md" (7 ms)
+2026-09-22 09:07:16.534 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:16.547 DEBUG [tree.ui] flatten: 8ms (19 rows, 0 pinned)
+2026-09-22 09:07:16.555 DEBUG [read] scan: 2 blocks, 853 lines in 0ms
+2026-09-22 09:07:16.575 INFO [read] first content: 2 blocks, 2 built, 8ms after the view was created
+2026-09-22 09:07:16.778 DEBUG [session] watch batch: 2 path(s), 1 resync dir(s)
+2026-09-22 09:07:16.778 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4" (outside root, root itself, or hidden)
+2026-09-22 09:07:16.778 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060836510861" (outside root, root itself, or hidden)
+2026-09-22 09:07:16.778 DEBUG [isolate] #4 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:16.778 DEBUG [isolate] #4 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:16.778 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 09:07:16.778 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 09:07:16.779 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:16.780 INFO [sync] queue: changed Quicknote.md
+2026-09-22 09:07:16.836 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:17.375 WARNING [frames] slow frame: total 19.2 ms (build 16.0 ms, raster 2.7 ms, vsync 0.6 ms)
+2026-09-22 09:07:17.375 WARNING [frames] slow frame: total 28.6 ms (build 24.8 ms, raster 3.1 ms, vsync 0.6 ms)
+2026-09-22 09:07:20.433 INFO [edit] attach: connecting the keyboard to the note
+2026-09-22 09:07:20.434 ERROR [crash] flutter error: PlatformException(Bad Arguments, Could not set client, view ID is null., null, null)
+2026-09-22 09:07:20.435 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:20.436 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090720.txt"
+2026-09-22 09:07:20.436 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090720.txt"
+2026-09-22 09:07:20.439 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090720.txt"
+2026-09-22 09:07:20.439 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090720.txt"
+2026-09-22 09:07:20.440 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090720.txt
+2026-09-22 09:07:20.443 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090720.txt
+2026-09-22 09:07:20.688 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:20.688 DEBUG [isolate] #5 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:20.688 DEBUG [isolate] #5 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:20.688 DEBUG [indexer] applyEvents: "niman-crash-20260922-090720.txt" -> upsert file
+2026-09-22 09:07:20.688 DEBUG [indexer] upsert "niman-crash-20260922-090720.txt": insert (parent "")
+2026-09-22 09:07:20.693 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:20.693 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:20.693 INFO [sync] queue: changed niman-crash-20260922-090720.txt
+2026-09-22 09:07:20.703 DEBUG [tree.ui] flatten: 6ms (20 rows, 0 pinned)
+2026-09-22 09:07:20.707 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:20.708 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090720.txt"
+2026-09-22 09:07:20.709 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090720.txt"
+2026-09-22 09:07:20.712 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090720.txt
+2026-09-22 09:07:20.960 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:20.960 DEBUG [isolate] #6 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:20.960 DEBUG [isolate] #6 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:20.960 DEBUG [indexer] applyEvents: "niman-crash-20260922-090720.txt" -> upsert file
+2026-09-22 09:07:20.960 DEBUG [indexer] upsert "niman-crash-20260922-090720.txt": update (parent "")
+2026-09-22 09:07:20.961 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:20.961 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:20.962 INFO [sync] queue: changed niman-crash-20260922-090720.txt
+2026-09-22 09:07:20.969 DEBUG [tree.ui] flatten: 4ms (20 rows, 0 pinned)
+2026-09-22 09:07:21.263 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:22.405 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:22.406 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090722.txt"
+2026-09-22 09:07:22.407 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090722.txt"
+2026-09-22 09:07:22.410 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090722.txt
+2026-09-22 09:07:22.658 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:22.658 DEBUG [isolate] #7 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:22.658 DEBUG [isolate] #7 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:22.658 DEBUG [indexer] applyEvents: "niman-crash-20260922-090722.txt" -> upsert file
+2026-09-22 09:07:22.658 DEBUG [indexer] upsert "niman-crash-20260922-090722.txt": insert (parent "")
+2026-09-22 09:07:22.660 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:22.660 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:22.660 INFO [sync] queue: changed niman-crash-20260922-090722.txt
+2026-09-22 09:07:22.676 DEBUG [tree.ui] flatten: 5ms (21 rows, 0 pinned)
+2026-09-22 09:07:22.961 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:24.777 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:24.779 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090724.txt"
+2026-09-22 09:07:24.779 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090724.txt"
+2026-09-22 09:07:24.783 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090724.txt
+2026-09-22 09:07:25.031 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:25.031 DEBUG [isolate] #8 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:25.031 DEBUG [isolate] #8 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:25.031 DEBUG [indexer] applyEvents: "niman-crash-20260922-090724.txt" -> upsert file
+2026-09-22 09:07:25.031 DEBUG [indexer] upsert "niman-crash-20260922-090724.txt": insert (parent "")
+2026-09-22 09:07:25.033 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:25.033 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:25.033 INFO [sync] queue: changed niman-crash-20260922-090724.txt
+2026-09-22 09:07:25.044 DEBUG [tree.ui] flatten: 4ms (22 rows, 0 pinned)
+2026-09-22 09:07:25.335 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:27.139 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:27.141 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090727.txt"
+2026-09-22 09:07:27.142 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090727.txt"
+2026-09-22 09:07:27.146 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090727.txt
+2026-09-22 09:07:27.392 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:27.392 DEBUG [isolate] #9 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:27.392 DEBUG [isolate] #9 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:27.392 DEBUG [indexer] applyEvents: "niman-crash-20260922-090727.txt" -> upsert file
+2026-09-22 09:07:27.392 DEBUG [indexer] upsert "niman-crash-20260922-090727.txt": insert (parent "")
+2026-09-22 09:07:27.394 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:27.394 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:27.395 INFO [sync] queue: changed niman-crash-20260922-090727.txt
+2026-09-22 09:07:27.410 DEBUG [tree.ui] flatten: 6ms (23 rows, 0 pinned)
+2026-09-22 09:07:27.696 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:29.233 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.234 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.235 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.238 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.485 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:29.485 DEBUG [isolate] #10 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:29.485 DEBUG [isolate] #10 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:29.485 DEBUG [indexer] applyEvents: "niman-crash-20260922-090729.txt" -> upsert file
+2026-09-22 09:07:29.485 DEBUG [indexer] upsert "niman-crash-20260922-090729.txt": insert (parent "")
+2026-09-22 09:07:29.488 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:29.488 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:29.489 INFO [sync] queue: changed niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.504 DEBUG [tree.ui] flatten: 7ms (24 rows, 0 pinned)
+2026-09-22 09:07:29.724 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.725 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.726 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.730 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.780 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.782 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.782 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.786 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.791 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:29.807 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.808 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.808 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.812 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.834 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.835 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.835 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.839 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.864 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.865 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.866 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.869 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.904 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.905 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.906 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.909 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.924 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.926 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.926 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.930 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.966 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.967 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.968 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.972 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.977 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:29.977 DEBUG [isolate] #11 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:29.977 DEBUG [isolate] #11 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:29.977 DEBUG [indexer] applyEvents: "niman-crash-20260922-090729.txt" -> upsert file
+2026-09-22 09:07:29.977 DEBUG [indexer] upsert "niman-crash-20260922-090729.txt": update (parent "")
+2026-09-22 09:07:29.978 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:29.978 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:29.979 INFO [sync] queue: changed niman-crash-20260922-090729.txt
+2026-09-22 09:07:29.992 DEBUG [tree.ui] flatten: 4ms (24 rows, 0 pinned)
+2026-09-22 09:07:29.995 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:29.996 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:29.996 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090729.txt"
+2026-09-22 09:07:30.000 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090729.txt
+2026-09-22 09:07:30.031 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.032 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.032 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.036 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.073 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.074 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.075 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.078 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.097 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.099 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.099 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.103 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.138 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.150 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.151 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.155 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.165 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.167 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.167 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.171 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.193 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.194 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.195 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.198 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.232 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.233 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.234 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.238 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.247 DEBUG [session] watch batch: 2 path(s), 0 resync dir(s)
+2026-09-22 09:07:30.247 DEBUG [isolate] #12 start: probe 2 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:30.247 DEBUG [isolate] #12 done: probe 2 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:30.247 DEBUG [indexer] applyEvents: "niman-crash-20260922-090729.txt" -> upsert file
+2026-09-22 09:07:30.247 DEBUG [indexer] upsert "niman-crash-20260922-090729.txt": update (parent "")
+2026-09-22 09:07:30.248 DEBUG [indexer] applyEvents: "niman-crash-20260922-090730.txt" -> upsert file
+2026-09-22 09:07:30.248 DEBUG [indexer] upsert "niman-crash-20260922-090730.txt": insert (parent "")
+2026-09-22 09:07:30.249 DEBUG [sync] queue: 2 hints from the watcher
+2026-09-22 09:07:30.250 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:30.250 INFO [sync] queue: changed niman-crash-20260922-090729.txt
+2026-09-22 09:07:30.250 INFO [sync] queue: changed niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.264 DEBUG [tree.ui] flatten: 7ms (25 rows, 0 pinned)
+2026-09-22 09:07:30.266 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.268 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.270 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.274 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.283 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.284 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.285 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.289 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.326 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.327 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.328 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.332 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.352 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.353 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.354 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.358 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.404 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.406 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.406 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.411 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.432 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.434 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.435 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.440 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.457 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.458 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.458 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.464 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.499 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.500 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.501 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.506 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.519 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:30.519 DEBUG [isolate] #13 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:30.519 DEBUG [isolate] #13 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:30.519 DEBUG [indexer] applyEvents: "niman-crash-20260922-090730.txt" -> upsert file
+2026-09-22 09:07:30.519 DEBUG [indexer] upsert "niman-crash-20260922-090730.txt": update (parent "")
+2026-09-22 09:07:30.520 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:30.520 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:30.521 INFO [sync] queue: changed niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.530 DEBUG [tree.ui] flatten: 8ms (25 rows, 0 pinned)
+2026-09-22 09:07:30.531 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.532 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.533 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.539 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.553 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.554 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.555 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.559 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.592 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.593 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.594 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.598 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.619 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.620 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.621 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.625 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.659 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.660 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.661 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.665 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.699 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.700 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.701 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.705 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.727 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.728 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.729 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.735 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.757 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.759 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.760 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.767 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.785 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:30.785 DEBUG [isolate] #14 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:30.785 DEBUG [isolate] #14 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:30.785 DEBUG [indexer] applyEvents: "niman-crash-20260922-090730.txt" -> upsert file
+2026-09-22 09:07:30.786 DEBUG [indexer] upsert "niman-crash-20260922-090730.txt": update (parent "")
+2026-09-22 09:07:30.786 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:30.787 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:30.787 INFO [sync] queue: changed niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.801 DEBUG [tree.ui] flatten: 7ms (25 rows, 0 pinned)
+2026-09-22 09:07:30.802 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.804 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.807 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.813 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.820 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.822 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.823 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.828 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:30.848 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:30.850 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.851 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090730.txt"
+2026-09-22 09:07:30.857 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090730.txt
+2026-09-22 09:07:31.056 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:31.056 DEBUG [isolate] #15 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:31.056 DEBUG [isolate] #15 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:31.056 DEBUG [indexer] applyEvents: "niman-crash-20260922-090730.txt" -> upsert file
+2026-09-22 09:07:31.056 DEBUG [indexer] upsert "niman-crash-20260922-090730.txt": update (parent "")
+2026-09-22 09:07:31.058 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:31.058 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:31.059 INFO [sync] queue: changed niman-crash-20260922-090730.txt
+2026-09-22 09:07:31.078 DEBUG [tree.ui] flatten: 5ms (25 rows, 0 pinned)
+2026-09-22 09:07:31.341 INFO [editor] save start: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17876 chars, join 0 ms, session 2)
+2026-09-22 09:07:31.341 DEBUG [save] save start: "Quicknote.md" (17876 chars, session 2, waited 0 ms)
+2026-09-22 09:07:31.341 DEBUG [isolate] #16 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 09:07:31.345 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v36.niman-tmp-1790060851344030"
+2026-09-22 09:07:31.345 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v36.niman-tmp-1790060851344030"
+2026-09-22 09:07:31.351 DEBUG [read] scan: 1 blocks, 851 lines in 0ms
+2026-09-22 09:07:31.373 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:31.373 DEBUG [isolate] #16 done: write "Quicknote.md" (31 ms, in flight 0)
+2026-09-22 09:07:31.373 INFO [history] snapshot "Quicknote.md": take interval (v35 is 665 s old (interval 300 s)) -> v36 (17892 b), rotated out v25 in 18 ms
+2026-09-22 09:07:31.373 INFO [save] saved: "Quicknote.md" (17876 bytes, encode 0 ms, write 8 ms, total 31 ms)
+2026-09-22 09:07:31.373 INFO [editor] note saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17876 chars, 31 ms)
+2026-09-22 09:07:31.373 DEBUG [isolate] #17 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:31.373 INFO [sync] queue: changed Quicknote.md
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v36.niman-tmp-1790060851344030" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v36
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v25"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060851353158"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060851353158"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.json"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060851353158" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.json
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060851360158"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060851360158"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md"
+2026-09-22 09:07:31.374 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060851360158" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md
+2026-09-22 09:07:31.374 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:31.374 DEBUG [isolate] #17 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 09:07:31.374 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 09:07:31.385 DEBUG [save] reindexed: "Quicknote.md" (12 ms)
+2026-09-22 09:07:31.385 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:31.399 DEBUG [tree.ui] flatten: 6ms (25 rows, 0 pinned)
+2026-09-22 09:07:31.459 WARNING [frames] slow frame: total 23.7 ms (build 21.3 ms, raster 2.0 ms, vsync 0.4 ms)
+2026-09-22 09:07:31.597 DEBUG [session] watch batch: 8 path(s), 2 resync dir(s)
+2026-09-22 09:07:31.597 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v36.niman-tmp-1790060851344030" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v36" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v25" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060851353158" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060851360158" (outside root, root itself, or hidden)
+2026-09-22 09:07:31.597 DEBUG [isolate] #18 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:31.597 DEBUG [isolate] #18 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:31.597 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 09:07:31.598 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 09:07:31.598 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:31.599 INFO [sync] queue: changed Quicknote.md
+2026-09-22 09:07:31.672 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:31.674 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090731.txt"
+2026-09-22 09:07:31.675 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090731.txt"
+2026-09-22 09:07:31.680 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090731.txt
+2026-09-22 09:07:31.687 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:31.926 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:31.926 DEBUG [isolate] #19 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:31.926 DEBUG [isolate] #19 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:31.926 DEBUG [indexer] applyEvents: "niman-crash-20260922-090731.txt" -> upsert file
+2026-09-22 09:07:31.926 DEBUG [indexer] upsert "niman-crash-20260922-090731.txt": insert (parent "")
+2026-09-22 09:07:31.928 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:31.928 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:31.929 INFO [sync] queue: changed niman-crash-20260922-090731.txt
+2026-09-22 09:07:31.941 DEBUG [tree.ui] flatten: 4ms (26 rows, 0 pinned)
+2026-09-22 09:07:32.231 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:32.807 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:32.809 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090732.txt"
+2026-09-22 09:07:32.810 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090732.txt"
+2026-09-22 09:07:32.815 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090732.txt
+2026-09-22 09:07:33.003 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.004 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.005 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.010 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.062 DEBUG [session] watch batch: 2 path(s), 0 resync dir(s)
+2026-09-22 09:07:33.062 DEBUG [isolate] #20 start: probe 2 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:33.062 DEBUG [isolate] #20 done: probe 2 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:33.062 DEBUG [indexer] applyEvents: "niman-crash-20260922-090732.txt" -> upsert file
+2026-09-22 09:07:33.062 DEBUG [indexer] upsert "niman-crash-20260922-090732.txt": insert (parent "")
+2026-09-22 09:07:33.063 DEBUG [indexer] applyEvents: "niman-crash-20260922-090733.txt" -> upsert file
+2026-09-22 09:07:33.064 DEBUG [indexer] upsert "niman-crash-20260922-090733.txt": insert (parent "")
+2026-09-22 09:07:33.065 DEBUG [sync] queue: 2 hints from the watcher
+2026-09-22 09:07:33.065 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:33.065 INFO [sync] queue: changed niman-crash-20260922-090732.txt
+2026-09-22 09:07:33.066 INFO [sync] queue: changed niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.075 DEBUG [tree.ui] flatten: 4ms (28 rows, 0 pinned)
+2026-09-22 09:07:33.153 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.155 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.156 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.160 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.330 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.331 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.332 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.336 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.367 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:33.407 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:33.407 DEBUG [isolate] #21 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:33.407 DEBUG [isolate] #21 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:33.407 DEBUG [indexer] applyEvents: "niman-crash-20260922-090733.txt" -> upsert file
+2026-09-22 09:07:33.407 DEBUG [indexer] upsert "niman-crash-20260922-090733.txt": update (parent "")
+2026-09-22 09:07:33.408 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:33.408 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:33.409 INFO [sync] queue: changed niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.428 DEBUG [tree.ui] flatten: 6ms (28 rows, 0 pinned)
+2026-09-22 09:07:33.473 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.474 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.475 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.480 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.619 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.620 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.621 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.625 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.710 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:33.725 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:33.725 DEBUG [isolate] #22 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:33.725 DEBUG [isolate] #22 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:33.725 DEBUG [indexer] applyEvents: "niman-crash-20260922-090733.txt" -> upsert file
+2026-09-22 09:07:33.725 DEBUG [indexer] upsert "niman-crash-20260922-090733.txt": update (parent "")
+2026-09-22 09:07:33.727 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:33.727 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:33.727 INFO [sync] queue: changed niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.743 DEBUG [tree.ui] flatten: 5ms (28 rows, 0 pinned)
+2026-09-22 09:07:33.779 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.780 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.781 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.785 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:33.927 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+2026-09-22 09:07:33.929 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.929 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\niman-crash-20260922-090733.txt"
+2026-09-22 09:07:33.934 INFO [crash] crash report saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4/niman-crash-20260922-090733.txt
+2026-09-22 09:07:34.029 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:34.032 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 09:07:34.032 DEBUG [isolate] #23 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:34.032 DEBUG [isolate] #23 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:34.032 DEBUG [indexer] applyEvents: "niman-crash-20260922-090733.txt" -> upsert file
+2026-09-22 09:07:34.032 DEBUG [indexer] upsert "niman-crash-20260922-090733.txt": update (parent "")
+2026-09-22 09:07:34.033 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:34.033 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:34.034 INFO [sync] queue: changed niman-crash-20260922-090733.txt
+2026-09-22 09:07:34.049 DEBUG [tree.ui] flatten: 4ms (28 rows, 0 pinned)
+2026-09-22 09:07:34.335 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:34.423 INFO [editor] save start: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17868 chars, join 0 ms, session 2)
+2026-09-22 09:07:34.423 DEBUG [save] save start: "Quicknote.md" (17868 chars, session 2, waited 0 ms)
+2026-09-22 09:07:34.423 DEBUG [isolate] #24 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 09:07:34.426 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060854425475"
+2026-09-22 09:07:34.427 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060854425475"
+2026-09-22 09:07:34.432 DEBUG [read] scan: 1 blocks, 851 lines in 0ms
+2026-09-22 09:07:34.448 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md"
+2026-09-22 09:07:34.448 DEBUG [isolate] #24 done: write "Quicknote.md" (25 ms, in flight 0)
+2026-09-22 09:07:34.448 DEBUG [history] snapshot "Quicknote.md": skip (v36 is 3 s old, interval 300 s not reached) in 2 ms
+2026-09-22 09:07:34.448 INFO [save] saved: "Quicknote.md" (17868 bytes, encode 0 ms, write 7 ms, total 26 ms)
+2026-09-22 09:07:34.448 INFO [editor] note saved: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (17868 chars, 26 ms)
+2026-09-22 09:07:34.448 DEBUG [isolate] #25 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:34.449 INFO [sync] queue: changed Quicknote.md
+2026-09-22 09:07:34.451 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060854425475" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md
+2026-09-22 09:07:34.451 DEBUG [isolate] #25 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 09:07:34.451 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 09:07:34.458 DEBUG [save] reindexed: "Quicknote.md" (8 ms)
+2026-09-22 09:07:34.458 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:34.467 DEBUG [tree.ui] flatten: 8ms (28 rows, 0 pinned)
+2026-09-22 09:07:34.622 WARNING [frames] slow frame: total 21.9 ms (build 17.6 ms, raster 2.8 ms, vsync 1.5 ms)
+2026-09-22 09:07:34.679 DEBUG [session] watch batch: 2 path(s), 1 resync dir(s)
+2026-09-22 09:07:34.679 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4" (outside root, root itself, or hidden)
+2026-09-22 09:07:34.679 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.Quicknote.md.niman-tmp-1790060854425475" (outside root, root itself, or hidden)
+2026-09-22 09:07:34.679 DEBUG [isolate] #26 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 09:07:34.679 DEBUG [isolate] #26 done: probe 1 path(s) (0 ms, in flight 0)
+2026-09-22 09:07:34.679 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 09:07:34.679 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 09:07:34.679 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 09:07:34.680 INFO [sync] queue: changed Quicknote.md
+2026-09-22 09:07:34.759 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:38.369 DEBUG [shell] tap tab: settings
+2026-09-22 09:07:38.383 INFO [edit] detach: the surface lost focus
+2026-09-22 09:07:38.953 WARNING [frames] slow frame: total 16.6 ms (build 13.1 ms, raster 3.3 ms, vsync 0.2 ms)
+2026-09-22 09:07:38.953 WARNING [frames] slow frame: total 18.9 ms (build 3.2 ms, raster 15.3 ms, vsync 0.4 ms)
+2026-09-22 09:07:39.682 INFO [sync] scheduler: quick sync (after edits)
+2026-09-22 09:07:39.682 INFO [sync] run: quick start for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 (10 queued hints)
+2026-09-22 09:07:39.686 DEBUG [sync] secret: read for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4: present
+2026-09-22 09:07:39.686 DEBUG [sync] capabilities: stored, no file etags (size + mtime, hash on doubt); no collection etags (Depth 1 per folder); no If-Match (PROPFIND before PUT); no If-None-Match (PROPFIND before PUT); no MOVE (DELETE + PUT); no file ids (renames = delete + create); no checksums (sha256 while streaming); no X-OC-Mtime (server's mtime)
+2026-09-22 09:07:40.524 INFO [webdav] PROPFIND / -> 207, depth 0, 1 items, 369 chars, 838 ms
+2026-09-22 09:07:40.642 INFO [webdav] PROPFIND Quicknote.md -> 207, depth 0, 1 items, 413 chars, 118 ms
+2026-09-22 09:07:40.759 WARNING [webdav] PROPFIND niman-crash-20260922-090720.txt: 404 Not Found, 114 ms
+2026-09-22 09:07:40.867 WARNING [webdav] PROPFIND niman-crash-20260922-090722.txt: 404 Not Found, 108 ms
+2026-09-22 09:07:40.985 WARNING [webdav] PROPFIND niman-crash-20260922-090724.txt: 404 Not Found, 117 ms
+2026-09-22 09:07:41.093 WARNING [webdav] PROPFIND niman-crash-20260922-090727.txt: 404 Not Found, 107 ms
+2026-09-22 09:07:41.202 WARNING [webdav] PROPFIND niman-crash-20260922-090729.txt: 404 Not Found, 107 ms
+2026-09-22 09:07:41.311 WARNING [webdav] PROPFIND niman-crash-20260922-090730.txt: 404 Not Found, 108 ms
+2026-09-22 09:07:41.452 WARNING [webdav] PROPFIND niman-crash-20260922-090731.txt: 404 Not Found, 140 ms
+2026-09-22 09:07:41.573 WARNING [webdav] PROPFIND niman-crash-20260922-090732.txt: 404 Not Found, 120 ms
+2026-09-22 09:07:41.692 WARNING [webdav] PROPFIND niman-crash-20260922-090733.txt: 404 Not Found, 119 ms
+2026-09-22 09:07:41.692 INFO [sync] scan: quick, 10 local files, 1 remote files, 1 remote folders known, 1 of 29 agreed rows (2006 ms)
+2026-09-22 09:07:41.710 INFO [sync] hash: 10 local, 0 remote (17 ms)
+2026-09-22 09:07:41.710 INFO [sync] plan: upload 10 (0 destructive of 29 rows)
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload Quicknote.md: local sha 61570dc4→4442f599; remote same size and mtime
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090720.txt: local new, 18757 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090722.txt: local new, 20202 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090724.txt: local new, 21647 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090727.txt: local new, 23092 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090729.txt: local new, 31731 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090730.txt: local new, 50508 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090731.txt: local new, 58578 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090732.txt: local new, 60100 b; remote no file
+2026-09-22 09:07:41.710 DEBUG [sync] plan: upload niman-crash-20260922-090733.txt: local new, 67152 b; remote no file
+2026-09-22 09:07:41.844 INFO [webdav] PROPFIND Quicknote.md -> 207, depth 0, 1 items, 413 chars, 133 ms
+2026-09-22 09:07:41.967 INFO [webdav] PUT Quicknote.md -> 204, 17868 b, 122 ms
+2026-09-22 09:07:42.084 INFO [webdav] PROPFIND Quicknote.md -> 207, depth 0, 1 items, 413 chars, 116 ms
+2026-09-22 09:07:42.087 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v37.niman-tmp-1790060862086513"
+2026-09-22 09:07:42.088 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v37.niman-tmp-1790060862086513"
+2026-09-22 09:07:42.093 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.093 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v37.niman-tmp-1790060862086513" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v37
+2026-09-22 09:07:42.093 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.094 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v26"
+2026-09-22 09:07:42.095 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.095 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060862095514"
+2026-09-22 09:07:42.096 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060862095514"
+2026-09-22 09:07:42.101 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.101 DEBUG [watcher] watcher event: delete "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.json"
+2026-09-22 09:07:42.102 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060862095514" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.json
+2026-09-22 09:07:42.102 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.102 INFO [history] sync base "Quicknote.md" -> v37 (4442f599, kept as a new sync version, rotated out v26, 18 ms)
+2026-09-22 09:07:42.103 DEBUG [sync] items: recorded 1 (Quicknote.md)
+2026-09-22 09:07:42.103 INFO [sync] apply: upload Quicknote.md: local sha 61570dc4→4442f599; remote same size and mtime (392 ms)
+2026-09-22 09:07:42.220 WARNING [webdav] PROPFIND niman-crash-20260922-090720.txt: 404 Not Found, 116 ms
+2026-09-22 09:07:42.339 DEBUG [session] watch batch: 6 path(s), 1 resync dir(s)
+2026-09-22 09:07:42.339 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.v37.niman-tmp-1790060862086513" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v37" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.v26" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.Quicknote.md.json.niman-tmp-1790060862095514" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\Quicknote.md.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.339 INFO [webdav] PUT niman-crash-20260922-090720.txt -> 201, 18757 b, 119 ms
+2026-09-22 09:07:42.455 INFO [webdav] PROPFIND niman-crash-20260922-090720.txt -> 207, depth 0, 1 items, 432 chars, 115 ms
+2026-09-22 09:07:42.457 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.v1.niman-tmp-1790060862457131"
+2026-09-22 09:07:42.458 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.v1.niman-tmp-1790060862457131"
+2026-09-22 09:07:42.463 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.464 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.v1.niman-tmp-1790060862457131" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090720.txt.v1
+2026-09-22 09:07:42.464 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.465 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.json.niman-tmp-1790060862464428"
+2026-09-22 09:07:42.465 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.json.niman-tmp-1790060862464428"
+2026-09-22 09:07:42.468 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.469 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.json.niman-tmp-1790060862464428" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090720.txt.json
+2026-09-22 09:07:42.469 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.469 INFO [history] sync base "niman-crash-20260922-090720.txt" -> v1 (a10fba7e, kept as a new sync version, 13 ms)
+2026-09-22 09:07:42.469 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090720.txt)
+2026-09-22 09:07:42.469 INFO [sync] apply: upload niman-crash-20260922-090720.txt: local new, 18757 b; remote no file (366 ms)
+2026-09-22 09:07:42.578 WARNING [webdav] PROPFIND niman-crash-20260922-090722.txt: 404 Not Found, 108 ms
+2026-09-22 09:07:42.700 INFO [webdav] PUT niman-crash-20260922-090722.txt -> 201, 20202 b, 121 ms
+2026-09-22 09:07:42.709 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:42.709 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.709 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.v1.niman-tmp-1790060862457131" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.709 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.709 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090720.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.709 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090720.txt.json.niman-tmp-1790060862464428" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.709 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090720.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:42.810 INFO [webdav] PROPFIND niman-crash-20260922-090722.txt -> 207, depth 0, 1 items, 432 chars, 110 ms
+2026-09-22 09:07:42.813 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.v1.niman-tmp-1790060862812681"
+2026-09-22 09:07:42.814 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.v1.niman-tmp-1790060862812681"
+2026-09-22 09:07:42.819 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.820 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.v1.niman-tmp-1790060862812681" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090722.txt.v1
+2026-09-22 09:07:42.820 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.820 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.json.niman-tmp-1790060862820681"
+2026-09-22 09:07:42.821 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.json.niman-tmp-1790060862820681"
+2026-09-22 09:07:42.824 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.824 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.json.niman-tmp-1790060862820681" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090722.txt.json
+2026-09-22 09:07:42.824 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:42.824 INFO [history] sync base "niman-crash-20260922-090722.txt" -> v1 (755ae75e, kept as a new sync version, 14 ms)
+2026-09-22 09:07:42.825 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090722.txt)
+2026-09-22 09:07:42.825 INFO [sync] apply: upload niman-crash-20260922-090722.txt: local new, 20202 b; remote no file (355 ms)
+2026-09-22 09:07:42.937 WARNING [webdav] PROPFIND niman-crash-20260922-090724.txt: 404 Not Found, 111 ms
+2026-09-22 09:07:43.066 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:43.066 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.066 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.v1.niman-tmp-1790060862812681" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.066 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.066 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090722.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.066 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090722.txt.json.niman-tmp-1790060862820681" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.066 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090722.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.075 INFO [webdav] PUT niman-crash-20260922-090724.txt -> 201, 21647 b, 138 ms
+2026-09-22 09:07:43.186 INFO [webdav] PROPFIND niman-crash-20260922-090724.txt -> 207, depth 0, 1 items, 432 chars, 109 ms
+2026-09-22 09:07:43.189 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.v1.niman-tmp-1790060863188357"
+2026-09-22 09:07:43.189 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.v1.niman-tmp-1790060863188357"
+2026-09-22 09:07:43.199 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.200 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.v1.niman-tmp-1790060863188357" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090724.txt.v1
+2026-09-22 09:07:43.200 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.201 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.json.niman-tmp-1790060863200356"
+2026-09-22 09:07:43.201 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.json.niman-tmp-1790060863200356"
+2026-09-22 09:07:43.205 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.206 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.json.niman-tmp-1790060863200356" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090724.txt.json
+2026-09-22 09:07:43.206 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.206 INFO [history] sync base "niman-crash-20260922-090724.txt" -> v1 (6c42ed8f, kept as a new sync version, 20 ms)
+2026-09-22 09:07:43.206 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090724.txt)
+2026-09-22 09:07:43.206 INFO [sync] apply: upload niman-crash-20260922-090724.txt: local new, 21647 b; remote no file (381 ms)
+2026-09-22 09:07:43.327 WARNING [webdav] PROPFIND niman-crash-20260922-090727.txt: 404 Not Found, 120 ms
+2026-09-22 09:07:43.440 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:43.440 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.440 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.v1.niman-tmp-1790060863188357" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.440 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.440 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090724.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.440 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090724.txt.json.niman-tmp-1790060863200356" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.440 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090724.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.449 INFO [webdav] PUT niman-crash-20260922-090727.txt -> 201, 23092 b, 121 ms
+2026-09-22 09:07:43.565 INFO [webdav] PROPFIND niman-crash-20260922-090727.txt -> 207, depth 0, 1 items, 432 chars, 115 ms
+2026-09-22 09:07:43.568 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.v1.niman-tmp-1790060863567098"
+2026-09-22 09:07:43.569 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.v1.niman-tmp-1790060863567098"
+2026-09-22 09:07:43.574 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.574 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.v1.niman-tmp-1790060863567098" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090727.txt.v1
+2026-09-22 09:07:43.574 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.576 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.json.niman-tmp-1790060863574614"
+2026-09-22 09:07:43.576 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.json.niman-tmp-1790060863574614"
+2026-09-22 09:07:43.580 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.580 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.json.niman-tmp-1790060863574614" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090727.txt.json
+2026-09-22 09:07:43.580 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.580 INFO [history] sync base "niman-crash-20260922-090727.txt" -> v1 (6aaf7a4e, kept as a new sync version, 15 ms)
+2026-09-22 09:07:43.581 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090727.txt)
+2026-09-22 09:07:43.581 INFO [sync] apply: upload niman-crash-20260922-090727.txt: local new, 23092 b; remote no file (374 ms)
+2026-09-22 09:07:43.613 INFO [editor] lifecycle: inactive
+2026-09-22 09:07:43.703 WARNING [webdav] PROPFIND niman-crash-20260922-090729.txt: 404 Not Found, 120 ms
+2026-09-22 09:07:43.819 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:43.819 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.819 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.v1.niman-tmp-1790060863567098" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.819 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.819 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090727.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.819 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090727.txt.json.niman-tmp-1790060863574614" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.819 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090727.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:43.827 INFO [webdav] PUT niman-crash-20260922-090729.txt -> 201, 31731 b, 123 ms
+2026-09-22 09:07:43.944 INFO [webdav] PROPFIND niman-crash-20260922-090729.txt -> 207, depth 0, 1 items, 432 chars, 118 ms
+2026-09-22 09:07:43.947 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.v1.niman-tmp-1790060863946983"
+2026-09-22 09:07:43.947 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.v1.niman-tmp-1790060863946983"
+2026-09-22 09:07:43.954 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.954 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.v1.niman-tmp-1790060863946983" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090729.txt.v1
+2026-09-22 09:07:43.954 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.955 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.json.niman-tmp-1790060863954496"
+2026-09-22 09:07:43.955 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.json.niman-tmp-1790060863954496"
+2026-09-22 09:07:43.963 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.963 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.json.niman-tmp-1790060863954496" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090729.txt.json
+2026-09-22 09:07:43.963 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:43.963 INFO [history] sync base "niman-crash-20260922-090729.txt" -> v1 (5be92a81, kept as a new sync version, 18 ms)
+2026-09-22 09:07:43.964 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090729.txt)
+2026-09-22 09:07:43.964 INFO [sync] apply: upload niman-crash-20260922-090729.txt: local new, 31731 b; remote no file (382 ms)
+2026-09-22 09:07:44.081 WARNING [webdav] PROPFIND niman-crash-20260922-090730.txt: 404 Not Found, 116 ms
+2026-09-22 09:07:44.199 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:44.199 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.199 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.v1.niman-tmp-1790060863946983" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.199 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.199 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090729.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.199 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090729.txt.json.niman-tmp-1790060863954496" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.199 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090729.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.199 INFO [webdav] PUT niman-crash-20260922-090730.txt -> 201, 50508 b, 118 ms
+2026-09-22 09:07:44.318 INFO [webdav] PROPFIND niman-crash-20260922-090730.txt -> 207, depth 0, 1 items, 432 chars, 118 ms
+2026-09-22 09:07:44.322 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.v1.niman-tmp-1790060864321304"
+2026-09-22 09:07:44.323 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.v1.niman-tmp-1790060864321304"
+2026-09-22 09:07:44.329 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.329 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.v1.niman-tmp-1790060864321304" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090730.txt.v1
+2026-09-22 09:07:44.330 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.330 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.json.niman-tmp-1790060864329309"
+2026-09-22 09:07:44.331 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.331 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.json.niman-tmp-1790060864329309"
+2026-09-22 09:07:44.334 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.json.niman-tmp-1790060864329309" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090730.txt.json
+2026-09-22 09:07:44.334 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.334 INFO [history] sync base "niman-crash-20260922-090730.txt" -> v1 (59eb5a32, kept as a new sync version, 16 ms)
+2026-09-22 09:07:44.335 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090730.txt)
+2026-09-22 09:07:44.335 INFO [sync] apply: upload niman-crash-20260922-090730.txt: local new, 50508 b; remote no file (370 ms)
+2026-09-22 09:07:44.452 WARNING [webdav] PROPFIND niman-crash-20260922-090731.txt: 404 Not Found, 117 ms
+2026-09-22 09:07:44.573 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:44.573 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.573 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.v1.niman-tmp-1790060864321304" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.573 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.573 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090730.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.573 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090730.txt.json.niman-tmp-1790060864329309" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.573 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090730.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.574 INFO [webdav] PUT niman-crash-20260922-090731.txt -> 201, 58578 b, 121 ms
+2026-09-22 09:07:44.683 INFO [webdav] PROPFIND niman-crash-20260922-090731.txt -> 207, depth 0, 1 items, 432 chars, 109 ms
+2026-09-22 09:07:44.687 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.v1.niman-tmp-1790060864686376"
+2026-09-22 09:07:44.688 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.v1.niman-tmp-1790060864686376"
+2026-09-22 09:07:44.694 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.694 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.v1.niman-tmp-1790060864686376" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090731.txt.v1
+2026-09-22 09:07:44.694 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.695 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.json.niman-tmp-1790060864694377"
+2026-09-22 09:07:44.695 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.json.niman-tmp-1790060864694377"
+2026-09-22 09:07:44.699 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.700 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.json.niman-tmp-1790060864694377" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090731.txt.json
+2026-09-22 09:07:44.700 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:44.700 INFO [history] sync base "niman-crash-20260922-090731.txt" -> v1 (25bf6d52, kept as a new sync version, 16 ms)
+2026-09-22 09:07:44.700 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090731.txt)
+2026-09-22 09:07:44.700 INFO [sync] apply: upload niman-crash-20260922-090731.txt: local new, 58578 b; remote no file (365 ms)
+2026-09-22 09:07:44.813 WARNING [webdav] PROPFIND niman-crash-20260922-090732.txt: 404 Not Found, 112 ms
+2026-09-22 09:07:44.938 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:44.938 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.938 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.v1.niman-tmp-1790060864686376" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.938 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.938 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090731.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.938 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090731.txt.json.niman-tmp-1790060864694377" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.938 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090731.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:44.945 INFO [webdav] PUT niman-crash-20260922-090732.txt -> 201, 60100 b, 131 ms
+2026-09-22 09:07:45.059 INFO [webdav] PROPFIND niman-crash-20260922-090732.txt -> 207, depth 0, 1 items, 432 chars, 113 ms
+2026-09-22 09:07:45.064 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.v1.niman-tmp-1790060865062170"
+2026-09-22 09:07:45.064 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.v1.niman-tmp-1790060865062170"
+2026-09-22 09:07:45.079 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.079 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.v1.niman-tmp-1790060865062170" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090732.txt.v1
+2026-09-22 09:07:45.080 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.081 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.json.niman-tmp-1790060865080690"
+2026-09-22 09:07:45.082 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.json.niman-tmp-1790060865080690"
+2026-09-22 09:07:45.089 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.090 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.json.niman-tmp-1790060865080690" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090732.txt.json
+2026-09-22 09:07:45.090 INFO [history] sync base "niman-crash-20260922-090732.txt" -> v1 (a93b02dd, kept as a new sync version, 31 ms)
+2026-09-22 09:07:45.091 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090732.txt)
+2026-09-22 09:07:45.091 INFO [sync] apply: upload niman-crash-20260922-090732.txt: local new, 60100 b; remote no file (390 ms)
+2026-09-22 09:07:45.091 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.214 WARNING [webdav] PROPFIND niman-crash-20260922-090733.txt: 404 Not Found, 123 ms
+2026-09-22 09:07:45.314 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:45.314 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.314 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.v1.niman-tmp-1790060865062170" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.314 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.314 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090732.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.314 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090732.txt.json.niman-tmp-1790060865080690" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.314 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090732.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.345 INFO [webdav] PUT niman-crash-20260922-090733.txt -> 201, 67152 b, 130 ms
+2026-09-22 09:07:45.469 INFO [sync] scheduler: app resumed
+2026-09-22 09:07:45.469 DEBUG [sync] scheduler: full (app resumed) after the running one
+2026-09-22 09:07:45.469 INFO [todo] todo open: root=C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4
+2026-09-22 09:07:45.469 INFO [editor] lifecycle: resumed
+2026-09-22 09:07:45.470 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 09:07:45.470 DEBUG [widgets] todo refresh: placed=[]
+2026-09-22 09:07:45.479 DEBUG [todo] todo reload superseded (probe)
+2026-09-22 09:07:45.479 INFO [todo] todo reminders: reconcile 0 wanted, notifications allowed, alarms inexact, battery unrestricted
+2026-09-22 09:07:45.479 INFO [todo] todo reminders reconciled: 0 scheduled
+2026-09-22 09:07:45.479 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 09:07:45.484 DEBUG [editor] edit session 3: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (adopted disk text)
+2026-09-22 09:07:45.484 INFO [editor] note reloaded: C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\Quicknote.md (external change, 17868 chars)
+2026-09-22 09:07:45.485 INFO [webdav] PROPFIND niman-crash-20260922-090733.txt -> 207, depth 0, 1 items, 432 chars, 140 ms
+2026-09-22 09:07:45.497 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.v1.niman-tmp-1790060865489881"
+2026-09-22 09:07:45.497 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.v1.niman-tmp-1790060865489881"
+2026-09-22 09:07:45.500 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.501 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.v1.niman-tmp-1790060865489881" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090733.txt.v1
+2026-09-22 09:07:45.501 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.503 DEBUG [watcher] watcher event: create "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.json.niman-tmp-1790060865501881"
+2026-09-22 09:07:45.504 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.json.niman-tmp-1790060865501881"
+2026-09-22 09:07:45.509 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.509 DEBUG [watcher] watcher event: move "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.json.niman-tmp-1790060865501881" -> C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090733.txt.json
+2026-09-22 09:07:45.510 DEBUG [watcher] watcher event: modify "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history"
+2026-09-22 09:07:45.510 INFO [history] sync base "niman-crash-20260922-090733.txt" -> v1 (07c96a5c, kept as a new sync version, 23 ms)
+2026-09-22 09:07:45.510 DEBUG [sync] items: recorded 1 (niman-crash-20260922-090733.txt)
+2026-09-22 09:07:45.510 INFO [sync] apply: upload niman-crash-20260922-090733.txt: local new, 67152 b; remote no file (419 ms)
+2026-09-22 09:07:45.511 DEBUG [sync] queue: done changed Quicknote.md
+2026-09-22 09:07:45.512 DEBUG [sync] queue: done changed niman-crash-20260922-090720.txt
+2026-09-22 09:07:45.513 DEBUG [sync] queue: done changed niman-crash-20260922-090722.txt
+2026-09-22 09:07:45.513 DEBUG [sync] queue: done changed niman-crash-20260922-090724.txt
+2026-09-22 09:07:45.514 DEBUG [sync] queue: done changed niman-crash-20260922-090727.txt
+2026-09-22 09:07:45.514 DEBUG [sync] queue: done changed niman-crash-20260922-090729.txt
+2026-09-22 09:07:45.515 DEBUG [sync] queue: done changed niman-crash-20260922-090730.txt
+2026-09-22 09:07:45.515 DEBUG [sync] queue: done changed niman-crash-20260922-090731.txt
+2026-09-22 09:07:45.516 DEBUG [sync] queue: done changed niman-crash-20260922-090732.txt
+2026-09-22 09:07:45.516 DEBUG [sync] queue: done changed niman-crash-20260922-090733.txt
+2026-09-22 09:07:45.517 INFO [sync] destination: sync of C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 succeeded
+2026-09-22 09:07:45.517 INFO [sync] run: quick done for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 in 5835 ms: upload 10; hints 10 done, 0 backing off
+2026-09-22 09:07:45.517 INFO [sync] scheduler: full sync (asked for during a run)
+2026-09-22 09:07:45.517 INFO [sync] run: 1 queued hints still backing off
+2026-09-22 09:07:45.517 INFO [sync] run: full start for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4 (0 queued hints)
+2026-09-22 09:07:45.520 DEBUG [sync] secret: read for C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4: present
+2026-09-22 09:07:45.520 DEBUG [sync] capabilities: stored, no file etags (size + mtime, hash on doubt); no collection etags (Depth 1 per folder); no If-Match (PROPFIND before PUT); no If-None-Match (PROPFIND before PUT); no MOVE (DELETE + PUT); no file ids (renames = delete + create); no checksums (sha256 while streaming); no X-OC-Mtime (server's mtime)
+2026-09-22 09:07:45.749 DEBUG [session] watch batch: 5 path(s), 1 resync dir(s)
+2026-09-22 09:07:45.749 DEBUG [indexer] resync: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.749 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.v1.niman-tmp-1790060865489881" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.749 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.749 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090733.txt.v1" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.749 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\.niman-crash-20260922-090733.txt.json.niman-tmp-1790060865501881" (outside root, root itself, or hidden)
+2026-09-22 09:07:45.749 DEBUG [indexer] applyEvents: skip "C:\Users\Alessandro.Manente\Documents\vaults\Niman\Notes4\.history\niman-crash-20260922-090733.txt.json" (outside root, root itself, or hidden)
+2026-09-22 09:07:46.029 WARNING [frames] slow frame: total 20.6 ms (build 8.9 ms, raster 4.1 ms, vsync 7.5 ms)
+2026-09-22 09:07:46.389 INFO [webdav] PROPFIND / -> 207, depth 1, 28 items, 9319 chars, 861 ms
+2026-09-22 09:07:46.441 INFO [edit] attach: connecting the keyboard to the note
+2026-09-22 09:07:46.441 ERROR [crash] flutter error: PlatformException(Bad Arguments, Could not set client, view ID is null., null, null)
+2026-09-22 09:07:46.442 ERROR [crash] flutter error: PlatformException(Internal Consistency Error, Set editing state has been invoked, but no client is set., null, null)
+

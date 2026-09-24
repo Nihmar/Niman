@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
@@ -15,7 +14,7 @@ import 'package:niman/src/ui/strings.dart';
 
 /// The Appearance area of the settings home (issue #104): the app's own
 /// look — language, brightness, palette, the interface text size, and
-/// the split width where the panes split.
+/// which engine draws a note.
 final class SettingsAppearanceScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
   const new({required this.controller, this.highlight, super.key});
@@ -47,11 +46,6 @@ final class _SettingsAppearanceScreenState
   AppBrightness _themeBrightness = AppBrightness.system;
   AppPalette _themePalette = AppPalette.system;
   double _uiTextScale = defaultTextScale;
-  double _splitRatio = defaultSplitRatio;
-  bool _splitLoaded = false;
-  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
-  EditorKind _editorKind = EditorKind.source;
-  bool _previewEnabled = true;
   bool _closeToTray = true;
 
   /// The tray is the desktops': elsewhere there is nothing to close into.
@@ -74,10 +68,6 @@ final class _SettingsAppearanceScreenState
     final themeBrightness = await controller.themeBrightness;
     final themePalette = await controller.themePalette;
     final uiTextScale = await controller.uiTextScale;
-    final splitRatio = await controller.splitRatio;
-    final previewMode = await controller.previewMode;
-    final editorKind = await controller.editorKind;
-    final previewEnabled = await controller.previewEnabled;
     final closeToTray = await controller.closeToTray;
     if (!mounted) return;
     setState(() {
@@ -85,12 +75,7 @@ final class _SettingsAppearanceScreenState
       _themeBrightness = themeBrightness;
       _themePalette = themePalette;
       _uiTextScale = uiTextScale;
-      _splitRatio = splitRatio;
-      _splitLoaded = true;
       _closeToTray = closeToTray;
-      _previewMode = previewMode;
-      _editorKind = editorKind;
-      _previewEnabled = previewEnabled;
     });
   }
 
@@ -204,32 +189,8 @@ final class _SettingsAppearanceScreenState
     if (mounted) setState(() => _closeToTray = enabled);
   }
 
-  Future<void> _setSplitRatio(double ratio) async {
-    final controller = widget.controller;
-    await controller.setSplitRatio(ratio);
-    controller.notify();
-    if (mounted) {
-      setState(() => _splitRatio = ratio);
-    }
-  }
-
-  Future<void> _chooseSplitRatio() async {
-    final ratio = await showSettingsSlider(
-      context,
-      dialogKey: const Key('split-ratio-dialog'),
-      title: AppStrings.splitRatioTitle,
-      subtitle: AppStrings.splitRatioSubtitle,
-      current: _splitRatio,
-      min: minSplitRatio,
-      max: maxSplitRatio,
-      format: AppStrings.splitRatioValue,
-    );
-    if (ratio != null) await _setSplitRatio(ratio);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     return SettingsAreaShell(
       title: AppStrings.settingsSectionAppearance,
       controller: widget.controller,
@@ -277,25 +238,6 @@ final class _SettingsAppearanceScreenState
               onTap: () => unawaited(_chooseUiTextScale()),
             ),
           ),
-          // The split ratio stays here; the split/switch choice itself
-          // lives in the editor's app bar (user, 2026-09-09): a layout a
-          // narrow screen cannot have is not a global setting.
-          if (_splitLoaded &&
-              previewSplits(
-                _previewMode,
-                narrow: narrow,
-                editor: _editorKind,
-                previewEnabled: _previewEnabled,
-              ))
-            HighlightRow(
-              key: SettingsKeys.splitRatio,
-              child: SettingsValueRow(
-                title: AppStrings.splitRatioTitle,
-                subtitle: AppStrings.splitRatioSubtitle,
-                value: AppStrings.splitRatioValue(_splitRatio),
-                onTap: () => unawaited(_chooseSplitRatio()),
-              ),
-            ),
           // The window's × (#209): the desktops only, where there is a
           // tray to hide into.
           if (_hasTray)

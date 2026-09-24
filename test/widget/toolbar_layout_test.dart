@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
-import 'package:re_editor/re_editor.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -25,8 +25,6 @@ Future<void> _pumpEditor(
   bool toolbarTop = false,
   bool showPreview = false,
 }) async {
-  final controller = CodeLineEditingController.fromText(_doc);
-  addTearDown(controller.dispose);
   await tester.pumpWidget(
     _app(
       NoteView(
@@ -38,7 +36,6 @@ Future<void> _pumpEditor(
         toolbarLayout: layout,
         toolbarTop: toolbarTop,
         showPreview: showPreview,
-        controller: controller,
         readNote: (_) async => _doc,
         writeNote: (path, content) async {},
       ),
@@ -66,7 +63,7 @@ void main() {
   ) async {
     await _pumpEditor(tester, ToolbarLayout.defaults);
     final bar = tester.getCenter(find.byKey(ToolbarItem.bold.widgetKey)).dy;
-    final editor = tester.getCenter(find.byType(CodeEditor)).dy;
+    final editor = tester.getCenter(find.byType(MarkdownSourceView)).dy;
     expect(bar, greaterThan(editor));
   });
 
@@ -80,7 +77,7 @@ void main() {
       editorToolbarHeight,
     );
     final bar = tester.getCenter(find.byKey(ToolbarItem.bold.widgetKey)).dy;
-    final editor = tester.getCenter(find.byType(CodeEditor)).dy;
+    final editor = tester.getCenter(find.byType(MarkdownSourceView)).dy;
     expect(bar, lessThan(editor));
     // A divider sets the bar off the text.
     expect(find.byType(Divider), findsOneWidget);

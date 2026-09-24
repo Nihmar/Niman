@@ -129,11 +129,6 @@ final class GalicianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desactivado';
   @override
-  String get settingsPreviewEnabledTitle => 'Previsualización';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Mostra a nota renderizada ao lado do editor de fonte';
-  @override
   String get switchToWysiwygTooltip => 'Cambiar ao editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Cambiar á fonte Markdown';
@@ -142,10 +137,6 @@ final class GalicianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Esta nota é demasiado grande para o editor WYSIWYG. Ábrea na '
-      'fonte Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aparencia';
@@ -277,22 +268,6 @@ final class GalicianStrings extends Strings {
       'O editor e a previsualización, sempre de acordo';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modo de previsualización';
-  @override
-  String get previewModeSubtitle =>
-      'Se a previsualización comparte a pantalla co editor ou a '
-      'substitúe';
-  @override
-  String get previewModeAuto => 'Lado a lado';
-  @override
-  String get previewModeSwitch => 'Pantalla completa';
-  @override
-  String get splitRatioTitle => 'Amplitud da división';
-  @override
-  String get splitRatioSubtitle =>
-      'A parte do editor cando a previsualización é lado a lado';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formato do enlace';
@@ -477,11 +452,131 @@ final class GalicianStrings extends Strings {
   @override
   String get toolbarImage => 'Inserir imaxe';
   @override
+  String get toolbarTable => 'Táboa';
+  @override
+  String get tableRow => 'Fila';
+  @override
+  String get tableColumn => 'Columna';
+  @override
+  String get tableAddRowAbove => 'Inserir fila enriba';
+  @override
+  String get tableAddRowBelow => 'Inserir fila debaixo';
+  @override
+  String get tableMoveRowUp => 'Subir fila';
+  @override
+  String get tableMoveRowDown => 'Baixar fila';
+  @override
+  String get tableDuplicateRow => 'Duplicar fila';
+  @override
+  String get tableDeleteRow => 'Eliminar fila';
+  @override
+  String get tableAddColumnLeft => 'Inserir columna á esquerda';
+  @override
+  String get tableAddColumnRight => 'Inserir columna á dereita';
+  @override
+  String get tableMoveColumnLeft => 'Mover columna á esquerda';
+  @override
+  String get tableMoveColumnRight => 'Mover columna á dereita';
+  @override
+  String get tableAlignLeft => 'Aliñar á esquerda';
+  @override
+  String get tableAlignCenter => 'Centrar';
+  @override
+  String get tableAlignRight => 'Aliñar á dereita';
+  @override
+  String get tableDuplicateColumn => 'Duplicar columna';
+  @override
+  String get tableDeleteColumn => 'Eliminar columna';
+  @override
+  String get tableSortAscending => 'Ordenar pola columna (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordenar pola columna (Z → A)';
+  @override
+  String get tableAddRow => 'Engadir fila';
+  @override
+  String get tableAddColumn => 'Engadir columna';
+  @override
+  String get cheatsheetTitle => 'Guía rápida de Markdown';
+  @override
+  String get cheatsheetCopy => 'Copiar';
+  @override
+  String get cheatsheetCopied => 'Copiado';
+  @override
+  String get cheatsheetInsert => 'Inserir na nota';
+  @override
+  String get cheatsheetWritten => 'Escrito';
+  @override
+  String get cheatsheetShown => 'Amosado';
+  @override
+  String get cheatHeadings => 'Títulos';
+  @override
+  String get cheatEmphasis => 'Negra, cursiva, riscado';
+  @override
+  String get cheatHtmlFormats => 'Subliñado, superíndice, subíndice';
+  @override
+  String get cheatLists => 'Listas';
+  @override
+  String get cheatChecklists => 'Listas de verificación';
+  @override
+  String get cheatQuotes => 'Citas';
+  @override
+  String get cheatLinks => 'Ligazóns';
+  @override
+  String get cheatWikilinks => 'Ligazóns a notas';
+  @override
+  String get cheatEmbeds => 'Imaxes e incrustacións';
+  @override
+  String get cheatTags => 'Etiquetas';
+  @override
+  String get cheatInlineCode => 'Código nunha frase';
+  @override
+  String get cheatCodeBlocks => 'Bloques de código';
+  @override
+  String get cheatMath => 'Matemáticas';
+  @override
+  String get cheatTables => 'Táboas';
+  @override
+  String get cheatFootnotes => 'Notas ao pé';
+  @override
+  String get cheatRule => 'Liña horizontal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Marcadores dos modelos';
+  @override
+  String get menuAddLink => 'Engadir ligazón';
+  @override
+  String get menuAddExternalLink => 'Engadir ligazón externa';
+  @override
+  String get menuFormat => 'Formato';
+  @override
+  String get menuParagraph => 'Parágrafo';
+  @override
+  String get menuInsert => 'Inserir';
+  @override
+  String get menuBody => 'Texto normal';
+  @override
+  String get formatSubscript => 'Subíndice';
+  @override
+  String get formatInlineCode => 'Código';
+  @override
+  String get insertFootnote => 'Nota ao pé';
+  @override
+  String get insertRule => 'Liña horizontal';
+  @override
+  String get insertCodeBlock => 'Bloque de código';
+  @override
+  String get insertMathBlock => 'Bloque matemático';
+  @override
+  String get menuHeadingWord => 'Título';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';
   @override
   String get toolbarOrderedList => 'Lista numerada';
+  @override
+  String get toolbarChecklist => 'Lista de verificación';
   @override
   String get toolbarQuote => 'Cita';
   @override
@@ -550,11 +645,6 @@ final class GalicianStrings extends Strings {
   String get showPreviewTooltip => 'Mostrar a previsualización';
   @override
   String get showEditorTooltip => 'Mostrar o editor';
-  @override
-  String get enterFullScreenTooltip => 'Pantalla completa';
-  @override
-  String get exitFullScreenTooltip => 'Saír da pantalla completa';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(táboa HTML a bruto)';

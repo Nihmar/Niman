@@ -33,10 +33,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Preview rendering: code highlighting.
-  flutter_highlight: ^0.7.0
-
-  # Preview rendering: Markdown.
   # State management (Flutter integration).
   flutter_local_notifications: ^22.3.0
 
@@ -45,31 +41,25 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  flutter_markdown_plus: ^1.0.12
-
-  # WYSIWYG editing surface (T-WYS). Delta document model; the Markdown codec
-  # is Niman's (markdown_quill was measured and rejected, see
-  # plan/m-wysiwyg-editor.md).
-  flutter_quill: ^11.5.1
   flutter_riverpod: ^3.4.3
 
   # OS secure storage for credentials and the encryption key (M5/M6).
   flutter_secure_storage: ^11.0.0
 
-  # Pure-Dart KaTeX for math; spec coverage is verified in M2.
-  flutter_smooth_markdown: 0.8.1
-
-  # The highlighter core behind flutter_highlight, used directly by the
-  # preview's code highlighter (lang rules, parse).
   flutter_timezone: ^5.1.0
+  # The code lexer (D2 of docs/dev/unified-surface.md): its grammars colour
+  # a fence by its language; the drawing is Niman's.
   highlight: ^0.7.0
 
   home_widget: ^0.9.4
+  # The math typesetter (katex_dart: TeX to boxes) and its painter and KaTeX
+  # fonts (katex). Kept through phase 5 (#247): a typesetter of Niman's own
+  # is 8-12k lines for a start, and these render the geometry note right.
   katex: ^1.0.0
   katex_dart: ^0.1.1
 
-  # The Markdown parser core behind flutter_markdown_plus (AST + GFM and
-  # footnote syntax), used directly by the windowed preview.
+  # The CommonMark/GFM parser (D2 of docs/dev/unified-surface.md): the
+  # unified engine walks its AST.
   markdown: ^7.3.1
   # Filesystem location for the library root.
   meta: ^1.19.0
@@ -86,13 +76,6 @@ dependencies:
   package_info_plus: ^10.2.1
   path: ^1.9.1
   path_provider: ^2.1.6
-
-  # Source editor widget (Reqable's large-text editor): caret, selection,
-  # IME/composition, handles and scrolling come from the package instead of
-  # the former hand-built editor stack. Highlighting is Niman's incremental
-  # tokenizer (editor/highlighting.dart) wired through the controller's
-  # spanBuilder — NOT the package's whole-file codeTheme engine.
-  re_editor: ^0.10.0
 
   # State management (app-wide).
   record: ^7.1.1

@@ -126,11 +126,6 @@ final class FinnishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Pois';
   @override
-  String get settingsPreviewEnabledTitle => 'Esikatselu';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Näytä renderöity muistiinpano lähdekoodin muokkainnin vieressä';
-  @override
   String get switchToWysiwygTooltip => 'Vaihda WYSIWYG-muokkainniin';
   @override
   String get switchToSourceTooltip => 'Vaihda Markdown-lähdekoodiin';
@@ -139,10 +134,6 @@ final class FinnishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Tämä muistiinpano on liian suuri WYSIWYG-muokkainille. Avaa se '
-      'Markdown-lähdekoodina.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Ulkoasu';
@@ -271,21 +262,6 @@ final class FinnishStrings extends Strings {
   String get noteTextScaleSubtitle => 'Muokkain ja esikatselu aina samassa';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Esikatselutila';
-  @override
-  String get previewModeSubtitle =>
-      'Jakoiko esikatselu ruudun muokkainnin kanssa vai korvaa se sen';
-  @override
-  String get previewModeAuto => 'Vierekkäin';
-  @override
-  String get previewModeSwitch => 'Koko näyttö';
-  @override
-  String get splitRatioTitle => 'Jako-osuuden leveys';
-  @override
-  String get splitRatioSubtitle =>
-      'Muokkainnin osa, kun esikatselu on vierekkäin';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkin muoto';
@@ -471,11 +447,131 @@ final class FinnishStrings extends Strings {
   @override
   String get toolbarImage => 'Lisää kuva';
   @override
+  String get toolbarTable => 'Taulukko';
+  @override
+  String get tableRow => 'Rivi';
+  @override
+  String get tableColumn => 'Sarake';
+  @override
+  String get tableAddRowAbove => 'Lisää rivi yläpuolelle';
+  @override
+  String get tableAddRowBelow => 'Lisää rivi alapuolelle';
+  @override
+  String get tableMoveRowUp => 'Siirrä riviä ylös';
+  @override
+  String get tableMoveRowDown => 'Siirrä riviä alas';
+  @override
+  String get tableDuplicateRow => 'Monista rivi';
+  @override
+  String get tableDeleteRow => 'Poista rivi';
+  @override
+  String get tableAddColumnLeft => 'Lisää sarake vasemmalle';
+  @override
+  String get tableAddColumnRight => 'Lisää sarake oikealle';
+  @override
+  String get tableMoveColumnLeft => 'Siirrä saraketta vasemmalle';
+  @override
+  String get tableMoveColumnRight => 'Siirrä saraketta oikealle';
+  @override
+  String get tableAlignLeft => 'Tasaa vasemmalle';
+  @override
+  String get tableAlignCenter => 'Keskitä';
+  @override
+  String get tableAlignRight => 'Tasaa oikealle';
+  @override
+  String get tableDuplicateColumn => 'Monista sarake';
+  @override
+  String get tableDeleteColumn => 'Poista sarake';
+  @override
+  String get tableSortAscending => 'Lajittele sarakkeen mukaan (A → Ö)';
+  @override
+  String get tableSortDescending => 'Lajittele sarakkeen mukaan (Ö → A)';
+  @override
+  String get tableAddRow => 'Lisää rivi';
+  @override
+  String get tableAddColumn => 'Lisää sarake';
+  @override
+  String get cheatsheetTitle => 'Markdown-lunttilappu';
+  @override
+  String get cheatsheetCopy => 'Kopioi';
+  @override
+  String get cheatsheetCopied => 'Kopioitu';
+  @override
+  String get cheatsheetInsert => 'Lisää muistiinpanoon';
+  @override
+  String get cheatsheetWritten => 'Kirjoitettu';
+  @override
+  String get cheatsheetShown => 'Näytetty';
+  @override
+  String get cheatHeadings => 'Otsikot';
+  @override
+  String get cheatEmphasis => 'Lihavointi, kursiivi, yliviivaus';
+  @override
+  String get cheatHtmlFormats => 'Alleviivaus, yläindeksi, alaindeksi';
+  @override
+  String get cheatLists => 'Luettelot';
+  @override
+  String get cheatChecklists => 'Tarkistuslistat';
+  @override
+  String get cheatQuotes => 'Lainaukset';
+  @override
+  String get cheatLinks => 'Linkit';
+  @override
+  String get cheatWikilinks => 'Linkit muistiinpanoihin';
+  @override
+  String get cheatEmbeds => 'Kuvat ja upotukset';
+  @override
+  String get cheatTags => 'Tunnisteet';
+  @override
+  String get cheatInlineCode => 'Koodia lauseessa';
+  @override
+  String get cheatCodeBlocks => 'Koodilohkot';
+  @override
+  String get cheatMath => 'Matematiikka';
+  @override
+  String get cheatTables => 'Taulukot';
+  @override
+  String get cheatFootnotes => 'Alaviitteet';
+  @override
+  String get cheatRule => 'Vaakaviiva';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Mallipohjien paikkamerkit';
+  @override
+  String get menuAddLink => 'Lisää linkki';
+  @override
+  String get menuAddExternalLink => 'Lisää ulkoinen linkki';
+  @override
+  String get menuFormat => 'Muotoilu';
+  @override
+  String get menuParagraph => 'Kappale';
+  @override
+  String get menuInsert => 'Lisää';
+  @override
+  String get menuBody => 'Leipäteksti';
+  @override
+  String get formatSubscript => 'Alaindeksi';
+  @override
+  String get formatInlineCode => 'Koodi';
+  @override
+  String get insertFootnote => 'Alaviite';
+  @override
+  String get insertRule => 'Vaakaviiva';
+  @override
+  String get insertCodeBlock => 'Koodilohko';
+  @override
+  String get insertMathBlock => 'Matematiikkalohko';
+  @override
+  String get menuHeadingWord => 'Otsikko';
+  @override
   String get toolbarHeading => 'Otsikko';
   @override
   String get toolbarList => 'Lista';
   @override
   String get toolbarOrderedList => 'Numeroitu lista';
+  @override
+  String get toolbarChecklist => 'Tarkistuslista';
   @override
   String get toolbarQuote => 'Lainaus';
   @override
@@ -545,11 +641,6 @@ final class FinnishStrings extends Strings {
   String get showPreviewTooltip => 'Näytä esikatselu';
   @override
   String get showEditorTooltip => 'Näytä muokkain';
-  @override
-  String get enterFullScreenTooltip => 'Koko näyttö';
-  @override
-  String get exitFullScreenTooltip => 'Poistu kokonäytöstä';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(raaka HTML-taulukko)';

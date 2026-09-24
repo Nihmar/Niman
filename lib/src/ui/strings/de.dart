@@ -128,11 +128,6 @@ final class GermanStrings extends Strings {
   @override
   String get settingsToggleOff => 'Aus';
   @override
-  String get settingsPreviewEnabledTitle => 'Vorschau';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Zeigt die gerenderte Notiz neben dem Quelltext-Editor';
-  @override
   String get switchToWysiwygTooltip => 'Zum WYSIWYG-Editor wechseln';
   @override
   String get switchToSourceTooltip => 'Zum Markdown-Quelltext wechseln';
@@ -141,10 +136,6 @@ final class GermanStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Diese Notiz ist für den WYSIWYG-Editor zu groß. Öffne sie im '
-      'Markdown-Quelltext.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Erscheinungsbild';
@@ -276,22 +267,6 @@ final class GermanStrings extends Strings {
       'Der Editor und die Vorschau, die immer übereinstimmen';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Vorschau-Modus';
-  @override
-  String get previewModeSubtitle =>
-      'Ob die Vorschau den Bildschirm mit dem Editor teilt oder ihn '
-      'ersetzt';
-  @override
-  String get previewModeAuto => 'Nebeneinander';
-  @override
-  String get previewModeSwitch => 'Vollbild';
-  @override
-  String get splitRatioTitle => 'Teilungsbreite';
-  @override
-  String get splitRatioSubtitle =>
-      'Der Anteil des Editors, wenn die Vorschau daneben steht';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Linkformat';
@@ -475,11 +450,131 @@ final class GermanStrings extends Strings {
   @override
   String get toolbarImage => 'Bild einfügen';
   @override
+  String get toolbarTable => 'Tabelle';
+  @override
+  String get tableRow => 'Zeile';
+  @override
+  String get tableColumn => 'Spalte';
+  @override
+  String get tableAddRowAbove => 'Zeile darüber einfügen';
+  @override
+  String get tableAddRowBelow => 'Zeile darunter einfügen';
+  @override
+  String get tableMoveRowUp => 'Zeile nach oben';
+  @override
+  String get tableMoveRowDown => 'Zeile nach unten';
+  @override
+  String get tableDuplicateRow => 'Zeile duplizieren';
+  @override
+  String get tableDeleteRow => 'Zeile löschen';
+  @override
+  String get tableAddColumnLeft => 'Spalte links einfügen';
+  @override
+  String get tableAddColumnRight => 'Spalte rechts einfügen';
+  @override
+  String get tableMoveColumnLeft => 'Spalte nach links';
+  @override
+  String get tableMoveColumnRight => 'Spalte nach rechts';
+  @override
+  String get tableAlignLeft => 'Linksbündig';
+  @override
+  String get tableAlignCenter => 'Zentriert';
+  @override
+  String get tableAlignRight => 'Rechtsbündig';
+  @override
+  String get tableDuplicateColumn => 'Spalte duplizieren';
+  @override
+  String get tableDeleteColumn => 'Spalte löschen';
+  @override
+  String get tableSortAscending => 'Nach Spalte sortieren (A → Z)';
+  @override
+  String get tableSortDescending => 'Nach Spalte sortieren (Z → A)';
+  @override
+  String get tableAddRow => 'Zeile hinzufügen';
+  @override
+  String get tableAddColumn => 'Spalte hinzufügen';
+  @override
+  String get cheatsheetTitle => 'Markdown-Spickzettel';
+  @override
+  String get cheatsheetCopy => 'Kopieren';
+  @override
+  String get cheatsheetCopied => 'Kopiert';
+  @override
+  String get cheatsheetInsert => 'In die Notiz einfügen';
+  @override
+  String get cheatsheetWritten => 'Geschrieben';
+  @override
+  String get cheatsheetShown => 'Angezeigt';
+  @override
+  String get cheatHeadings => 'Überschriften';
+  @override
+  String get cheatEmphasis => 'Fett, kursiv, durchgestrichen';
+  @override
+  String get cheatHtmlFormats => 'Unterstrichen, hochgestellt, tiefgestellt';
+  @override
+  String get cheatLists => 'Listen';
+  @override
+  String get cheatChecklists => 'Checklisten';
+  @override
+  String get cheatQuotes => 'Zitate';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links zu Notizen';
+  @override
+  String get cheatEmbeds => 'Bilder und Einbettungen';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code im Satz';
+  @override
+  String get cheatCodeBlocks => 'Codeblöcke';
+  @override
+  String get cheatMath => 'Mathematik';
+  @override
+  String get cheatTables => 'Tabellen';
+  @override
+  String get cheatFootnotes => 'Fußnoten';
+  @override
+  String get cheatRule => 'Trennlinie';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Vorlagen-Platzhalter';
+  @override
+  String get menuAddLink => 'Link hinzufügen';
+  @override
+  String get menuAddExternalLink => 'Externen Link hinzufügen';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Absatz';
+  @override
+  String get menuInsert => 'Einfügen';
+  @override
+  String get menuBody => 'Fließtext';
+  @override
+  String get formatSubscript => 'Tiefgestellt';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Fußnote';
+  @override
+  String get insertRule => 'Trennlinie';
+  @override
+  String get insertCodeBlock => 'Codeblock';
+  @override
+  String get insertMathBlock => 'Mathematikblock';
+  @override
+  String get menuHeadingWord => 'Überschrift';
+  @override
   String get toolbarHeading => 'Überschrift';
   @override
   String get toolbarList => 'Liste';
   @override
   String get toolbarOrderedList => 'Nummerierte Liste';
+  @override
+  String get toolbarChecklist => 'Checkliste';
   @override
   String get toolbarQuote => 'Zitat';
   @override
@@ -548,11 +643,6 @@ final class GermanStrings extends Strings {
   String get showPreviewTooltip => 'Vorschau zeigen';
   @override
   String get showEditorTooltip => 'Editor zeigen';
-  @override
-  String get enterFullScreenTooltip => 'Vollbild';
-  @override
-  String get exitFullScreenTooltip => 'Vollbild beenden';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rohe HTML-Tabelle)';

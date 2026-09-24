@@ -21,6 +21,9 @@ enum NoteMenuAction {
   /// Tidy the note's Markdown (#227).
   format,
 
+  /// The Markdown cheatsheet (#265).
+  cheatsheet,
+
   /// Browse and restore past versions.
   history,
 
@@ -81,6 +84,11 @@ final class NoteMenuButton extends StatelessWidget {
           NoteMenuAction.format,
           Icons.cleaning_services_outlined,
           AppStrings.formatNoteTitle,
+        ),
+        _item(
+          NoteMenuAction.cheatsheet,
+          Icons.menu_book_outlined,
+          AppStrings.cheatsheetTitle,
         ),
         _item(
           NoteMenuAction.history,

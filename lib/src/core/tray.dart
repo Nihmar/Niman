@@ -22,9 +22,13 @@ import 'package:nativeapi/nativeapi.dart'
         MenuItemClickedEvent,
         MenuItemType,
         TrayIcon,
-        TrayIconClickedEvent;
+        TrayIconClickedEvent,
+        TrayIconRightClickedEvent;
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/windows_tray_menu.dart';
 
 /// The tray menu's own entries (#209), beside the quick actions.
 enum TrayCommand {
@@ -64,11 +68,15 @@ abstract interface class TrayService {
   /// The menu's own entries: Open Niman, Quit (#209).
   Stream<TrayCommand> get commands;
 
+  /// Whether the icon is on screen: false before [init], and on a host
+  /// that declined it.
+  bool get shown;
+
   /// Releases the tray icon.
   Future<void> dispose();
 }
 
-/// Which gesture opens the tray menu.
+/// Which gesture has nativeapi open the tray menu.
 ///
 /// Linux: the click *is* the menu. A StatusNotifier item has no right
 /// click of its own, and nativeapi tells the desktop where the menu
@@ -76,14 +84,18 @@ abstract interface class TrayService {
 /// answers the SNI `Menu` property with "/", and KDE, told the item has
 /// no menu, showed nothing at all (0.0.8 test round).
 ///
-/// Windows keeps the right click, where the left one brings the window
-/// back — the convention there, and the reason the two differ.
+/// Windows: none — the right click is answered by [openWindowsTrayMenu],
+/// because nativeapi's own popup, opened on Flutter's thread, flashed and
+/// closed. The left click still brings the window back, the convention
+/// there.
 ///
-/// [isLinux] overrides the host platform for the test.
-ContextMenuTrigger trayContextMenuTrigger({bool? isLinux}) {
-  return (isLinux ?? Platform.isLinux)
-      ? ContextMenuTrigger.clicked
-      : ContextMenuTrigger.rightClicked;
+/// Elsewhere (macOS): the right click.
+///
+/// [isLinux] and [isWindows] override the host platform for the test.
+ContextMenuTrigger trayContextMenuTrigger({bool? isLinux, bool? isWindows}) {
+  if (isLinux ?? Platform.isLinux) return ContextMenuTrigger.clicked;
+  if (isWindows ?? Platform.isWindows) return ContextMenuTrigger.none;
+  return ContextMenuTrigger.rightClicked;
 }
 
 /// Creates the platform service: a real tray on the desktops, a no-op
@@ -128,6 +140,14 @@ final class PlatformTrayService implements TrayService {
   Image? _icon;
   final List<MenuItem> _items = [];
 
+  /// What each item does, by the item's native id: nativeapi's click event
+  /// carries it, and so does the choice [openWindowsTrayMenu] returns.
+  final Map<int, void Function()> _runs = {};
+
+  /// Whether the Windows popup is up: a second right click while it is
+  /// waits for it rather than opening another.
+  bool _windowsMenuOpen = false;
+
   @override
   Stream<ShortcutAction> get actions => _actions.stream;
 
@@ -165,7 +185,7 @@ final class PlatformTrayService implements TrayService {
         return;
       }
       tray
-        ..setTooltip('Niman')
+        ..setTooltip(isTestingBuild ? 'Niman (testing)' : 'Niman')
         ..setContextMenuTrigger(trayContextMenuTrigger());
       final icon = ImageAsset.fromAsset(iconAsset);
       if (icon != null) {
@@ -182,7 +202,27 @@ final class PlatformTrayService implements TrayService {
         ..setContextMenu(built.menu)
         ..addListener((event) {
           if (event is TrayIconClickedEvent) _activated.add(null);
+          if (event is TrayIconRightClickedEvent) {
+            _log.info(
+              'tray: right click (trigger ${tray.getContextMenuTrigger()}, '
+              'menu ${tray.getContextMenu() != null})',
+            );
+            if (Platform.isWindows) unawaited(_openWindowsMenu());
+          }
         });
+      // Windows adds the icon to the notification area only here
+      // (`NIM_ADD` lives in `SetVisible`); without it the tray existed,
+      // said it was ready, and never appeared. Linux and macOS show it
+      // anyway, and take the call as a no-op.
+      if (!tray.setVisible(true)) {
+        _log.warning('tray icon could not be shown');
+        tray.dispose();
+        built.menu.dispose();
+        for (final item in built.items) {
+          item.dispose();
+        }
+        return;
+      }
       _tray = tray;
       _menu = built.menu;
       _items.addAll(built.items);
@@ -193,6 +233,30 @@ final class PlatformTrayService implements TrayService {
       // A session without SNI (or a build without the native library) is a
       // missing convenience, not a reason to fail the launch.
       _log.warning('tray init failed ($error)');
+    }
+  }
+
+  /// Opens the menu from an owner that can take the foreground, and runs what
+  /// was chosen (Windows; see [openWindowsTrayMenu]).
+  Future<void> _openWindowsMenu() async {
+    final menu = _menu;
+    if (menu == null || _windowsMenuOpen) return;
+    _windowsMenuOpen = true;
+    try {
+      final choice = await openWindowsTrayMenu(
+        menu.nativeObject.address,
+        theme: switch (AppThemes.brightness) {
+          AppBrightness.system => TrayMenuTheme.system,
+          AppBrightness.day => TrayMenuTheme.light,
+          AppBrightness.night => TrayMenuTheme.dark,
+        },
+      );
+      _log.info('tray: menu closed (chose ${choice.chosen}; ${choice.report})');
+      if (choice.chosen != 0) _runs[choice.chosen]?.call();
+    } on Object catch (error) {
+      _log.warning('tray: the menu could not be opened ($error)');
+    } finally {
+      _windowsMenuOpen = false;
     }
   }
 
@@ -224,6 +288,7 @@ final class PlatformTrayService implements TrayService {
       _ends = ends;
       old?.dispose();
       for (final item in oldItems) {
+        _runs.remove(item.id);
         item.dispose();
       }
       _log.info('tray relabelled (${labels.length} actions)');
@@ -246,6 +311,7 @@ final class PlatformTrayService implements TrayService {
     void add(String label, void Function() run) {
       final item = MenuItem.createWithLabelAndType(label, MenuItemType.normal);
       if (item == null) return;
+      _runs[item.id] = run;
       item.addListener((event) {
         if (event is! MenuItemClickedEvent || event.itemId != item.id) return;
         run();
@@ -276,6 +342,9 @@ final class PlatformTrayService implements TrayService {
   }
 
   @override
+  bool get shown => _tray != null;
+
+  @override
   Future<void> dispose() async {
     _tray?.dispose();
     _menu?.dispose();
@@ -283,6 +352,7 @@ final class PlatformTrayService implements TrayService {
       item.dispose();
     }
     _icon?.dispose();
+    _runs.clear();
     _tray = null;
     _menu = null;
     _icon = null;
@@ -313,6 +383,9 @@ final class NoopTrayService implements TrayService {
 
   @override
   Stream<TrayCommand> get commands => const Stream<TrayCommand>.empty();
+
+  @override
+  bool get shown => false;
 
   @override
   Future<void> dispose() async {}

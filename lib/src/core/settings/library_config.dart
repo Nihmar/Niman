@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
@@ -136,9 +137,8 @@ const double maxTextScale = 1.8;
 /// The source editor's font size at [defaultTextScale], in logical
 /// pixels.
 ///
-/// It is re_editor's own default, restated here because the note scale
-/// multiplies it: leaving the package to supply the size would make 100%
-/// mean whatever the next version of it decides.
+/// It was the old source editor's default, kept so a note reads at the
+/// size it always had; the note scale multiplies it.
 const double baseNoteFontSize = 13;
 
 /// Reads a text scale out of the settings file, into range.
@@ -281,8 +281,8 @@ String cleanAttachmentsFolder(String folder) =>
 /// tree order, the reminder markers. There is no notion of a library
 /// "overriding" the app — a library simply has its own answers, seeded
 /// from the defaults the first time it is opened. What stays app-wide is
-/// what does not depend on the library at all: the language, the debug
-/// switch, and the preview layout, which follows the screen.
+/// what does not depend on the library at all: the language and the debug
+/// switch.
 @immutable
 final class LibraryConfig {
   /// Creates a library config. [extra] holds keys this build does not
@@ -314,7 +314,6 @@ final class LibraryConfig {
     this.spellDictionaries = const <String>[],
     this.editorKind = EditorKind.source,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
-    this.previewEnabled = true,
     this.extra = const {},
   });
 
@@ -399,7 +398,6 @@ final class LibraryConfig {
       // on. An empty or all-unknown list reads back the same way — the
       // file must never resolve to no editor.
       enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
-      previewEnabled: _boolOr(json['previewEnabled'], true),
       extra: extra,
     );
   }
@@ -490,9 +488,8 @@ final class LibraryConfig {
   /// How much larger than shipped the interface text is (default 1.0).
   ///
   /// Per library rather than per install (user, 2026-09-09): the size a
-  /// library wants to be read at is a property of what is in it, and the
-  /// tablet-vs-phone argument that keeps the preview layout app-wide does
-  /// not apply — a library read on both wants the same text on both.
+  /// library wants to be read at is a property of what is in it, and a
+  /// library read on a tablet and on a phone wants the same text on both.
   final double uiTextScale;
 
   /// How much larger than shipped the note text is, in the editor and in
@@ -516,9 +513,6 @@ final class LibraryConfig {
   /// enables source, WYSIWYG, or both, never none; the note's status row
   /// switches between them only when both are enabled.
   final Set<EditorKind> enabledEditors;
-
-  /// Whether the preview exists at all (default true).
-  final bool previewEnabled;
 
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
@@ -552,7 +546,6 @@ final class LibraryConfig {
     List<String>? spellDictionaries,
     EditorKind? editorKind,
     Set<EditorKind>? enabledEditors,
-    bool? previewEnabled,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -584,7 +577,6 @@ final class LibraryConfig {
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
       editorKind: editorKind ?? this.editorKind,
       enabledEditors: enabledEditors ?? this.enabledEditors,
-      previewEnabled: previewEnabled ?? this.previewEnabled,
       extra: extra,
     );
   }
@@ -616,7 +608,14 @@ final class LibraryConfig {
     'spellDictionary', // Legacy single-dictionary key (read, never written).
     'spellDictionaries',
     'editorKind',
+    // The engine switch, read never written: the unified engine is the
+    // only one now (#247), and a file that still carries the key must not
+    // have it handed back as an unknown one to preserve forever.
+    'markdownEngine',
     'enabledEditors',
+    // Legacy preview switch, read never written: the preview is part of
+    // the app now, and a file that still carries the key must not have it
+    // handed back as an unknown one to preserve forever.
     'previewEnabled',
   };
 
@@ -661,7 +660,6 @@ final class LibraryConfig {
         for (final kind in EditorKind.values)
           if (enabledEditors.contains(kind)) kind.name,
       ],
-      'previewEnabled': previewEnabled,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -746,7 +744,6 @@ final class LibraryConfig {
         editorKind == other.editorKind &&
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
-        previewEnabled == other.previewEnabled &&
         _deepEquals(extra, other.extra);
   }
 
@@ -774,13 +771,42 @@ final class LibraryConfigStore {
   /// The settings file: `<library>/.niman/settings.json`.
   File get file => File(p.join(_libraryPath, '.niman', 'settings.json'));
 
+  /// The settings logger: the fallback to defaults used to be silent, and that
+  /// silence is half of how #258 went unnoticed for days.
+  static const AppLogger _log = AppLogger(name: 'settings');
+
   /// Reads the library's settings; defaults when the file is missing,
   /// unreadable or malformed.
+  ///
+  /// The fallback stays — a library must open whatever its settings file says —
+  /// but it **says which** of the three happened, because the defaults are not
+  /// neutral: the Markdown engine, which editors are on, the toolbar, the tree
+  /// sort and width all revert, and nothing on screen mentions it. A missing
+  /// file in a library that has been written to before is a `warning` (that is
+  /// the shape of a lost or trashed file); a library with no `.niman/` at all is
+  /// an `info`, because that is simply a new one.
   Future<LibraryConfig> read() async {
+    String raw;
     try {
-      final raw = await file.readAsString();
+      raw = await file.readAsString();
+    } on Object catch (error) {
+      if (file.parent.existsSync()) {
+        _log.warning(
+          'settings.json is missing or unreadable in ${file.parent.path} '
+          '($error): this library is on defaults',
+        );
+      } else {
+        _log.info('no settings.json yet: a new library, on defaults');
+      }
+      return LibraryConfig.defaults;
+    }
+    try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map) {
+        _log.warning(
+          'settings.json is not an object in ${file.parent.path}: '
+          'this library is on defaults',
+        );
         return LibraryConfig.defaults;
       }
       // jsonDecode yields `Map<String, dynamic>`; bridge to the typed view.
@@ -788,7 +814,11 @@ final class LibraryConfigStore {
         for (final entry in decoded.entries) entry.key.toString(): entry.value,
       };
       return LibraryConfig.fromJsonMap(json);
-    } on Object catch (_) {
+    } on Object catch (error) {
+      _log.warning(
+        'settings.json could not be parsed in ${file.parent.path} ($error): '
+        'this library is on defaults',
+      );
       return LibraryConfig.defaults;
     }
   }

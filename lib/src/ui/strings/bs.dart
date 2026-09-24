@@ -130,11 +130,6 @@ final class BosnianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Isključeno';
   @override
-  String get settingsPreviewEnabledTitle => 'Pregled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Prikazuje oblikovanu bilješku pored uređivača izvora';
-  @override
   String get switchToWysiwygTooltip => 'Pređi na WYSIWYG uređivač';
   @override
   String get switchToSourceTooltip => 'Pređi na Markdown izvor';
@@ -143,10 +138,6 @@ final class BosnianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ova bilješka je prevelika za WYSIWYG uređivač. Otvorite je u '
-      'Markdown izvoru.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Izgled';
@@ -276,20 +267,6 @@ final class BosnianStrings extends Strings {
       'Uređivač i pregled, koji su uvijek u skladu';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Način pregleda';
-  @override
-  String get previewModeSubtitle =>
-      'Da li pregled dijeli ekran s uređivačem ili ga zamjenjuje';
-  @override
-  String get previewModeAuto => 'Jedan pored drugog';
-  @override
-  String get previewModeSwitch => 'Cijeli ekran';
-  @override
-  String get splitRatioTitle => 'Širina podjele';
-  @override
-  String get splitRatioSubtitle => 'Udio uređivača kada je pregled pored njega';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format veze';
@@ -475,11 +452,131 @@ final class BosnianStrings extends Strings {
   @override
   String get toolbarImage => 'Umetni sliku';
   @override
+  String get toolbarTable => 'Tabela';
+  @override
+  String get tableRow => 'Red';
+  @override
+  String get tableColumn => 'Kolona';
+  @override
+  String get tableAddRowAbove => 'Umetni red iznad';
+  @override
+  String get tableAddRowBelow => 'Umetni red ispod';
+  @override
+  String get tableMoveRowUp => 'Pomjeri red gore';
+  @override
+  String get tableMoveRowDown => 'Pomjeri red dolje';
+  @override
+  String get tableDuplicateRow => 'Dupliciraj red';
+  @override
+  String get tableDeleteRow => 'Izbriši red';
+  @override
+  String get tableAddColumnLeft => 'Umetni kolonu lijevo';
+  @override
+  String get tableAddColumnRight => 'Umetni kolonu desno';
+  @override
+  String get tableMoveColumnLeft => 'Pomjeri kolonu lijevo';
+  @override
+  String get tableMoveColumnRight => 'Pomjeri kolonu desno';
+  @override
+  String get tableAlignLeft => 'Poravnaj lijevo';
+  @override
+  String get tableAlignCenter => 'Centriraj';
+  @override
+  String get tableAlignRight => 'Poravnaj desno';
+  @override
+  String get tableDuplicateColumn => 'Dupliciraj kolonu';
+  @override
+  String get tableDeleteColumn => 'Izbriši kolonu';
+  @override
+  String get tableSortAscending => 'Sortiraj po koloni (A → Ž)';
+  @override
+  String get tableSortDescending => 'Sortiraj po koloni (Ž → A)';
+  @override
+  String get tableAddRow => 'Dodaj red';
+  @override
+  String get tableAddColumn => 'Dodaj kolonu';
+  @override
+  String get cheatsheetTitle => 'Podsjetnik za Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiraj';
+  @override
+  String get cheatsheetCopied => 'Kopirano';
+  @override
+  String get cheatsheetInsert => 'Umetni u bilješku';
+  @override
+  String get cheatsheetWritten => 'Napisano';
+  @override
+  String get cheatsheetShown => 'Prikazano';
+  @override
+  String get cheatHeadings => 'Naslovi';
+  @override
+  String get cheatEmphasis => 'Podebljano, kurziv, precrtano';
+  @override
+  String get cheatHtmlFormats => 'Podvučeno, eksponent, indeks';
+  @override
+  String get cheatLists => 'Liste';
+  @override
+  String get cheatChecklists => 'Kontrolne liste';
+  @override
+  String get cheatQuotes => 'Citati';
+  @override
+  String get cheatLinks => 'Linkovi';
+  @override
+  String get cheatWikilinks => 'Linkovi na bilješke';
+  @override
+  String get cheatEmbeds => 'Slike i ugradnje';
+  @override
+  String get cheatTags => 'Oznake';
+  @override
+  String get cheatInlineCode => 'Kod u rečenici';
+  @override
+  String get cheatCodeBlocks => 'Blokovi koda';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Fusnote';
+  @override
+  String get cheatRule => 'Horizontalna linija';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Rezervisana mjesta šablona';
+  @override
+  String get menuAddLink => 'Dodaj link';
+  @override
+  String get menuAddExternalLink => 'Dodaj vanjski link';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraf';
+  @override
+  String get menuInsert => 'Umetni';
+  @override
+  String get menuBody => 'Obični tekst';
+  @override
+  String get formatSubscript => 'Indeks';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Fusnota';
+  @override
+  String get insertRule => 'Horizontalna linija';
+  @override
+  String get insertCodeBlock => 'Blok koda';
+  @override
+  String get insertMathBlock => 'Matematički blok';
+  @override
+  String get menuHeadingWord => 'Naslov';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';
   @override
   String get toolbarOrderedList => 'Brojčani popis';
+  @override
+  String get toolbarChecklist => 'Kontrolna lista';
   @override
   String get toolbarQuote => 'Citat';
   @override
@@ -547,11 +644,6 @@ final class BosnianStrings extends Strings {
   String get showPreviewTooltip => 'Prikaži pregled';
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
-  @override
-  String get enterFullScreenTooltip => 'Cijeli ekran';
-  @override
-  String get exitFullScreenTooltip => 'Izađi iz cijelog ekrana';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tablica sirovog HTML-a)';

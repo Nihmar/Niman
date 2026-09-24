@@ -7,11 +7,58 @@ Each library writes in one editor (`editorKind` in
 screen can offer source, WYSIWYG, or both (`enabledEditors`); the note's
 status row switches only when both are enabled.
 
-- **Source editor** (`re_editor`): Markdown text with Niman's incremental
+Both are one surface, Niman's own, in two modes: the note's text is the
+same Markdown either way, and only how it is drawn differs. The read view
+(the preview) is the same engine again, with nothing to edit.
+
+- **Source editor**: the Markdown as written, with Niman's incremental
   tokenizer for highlighting. Line numbers and indent width (2–8, default
   2) are per-library settings.
-- **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
-  round-trip codec. What you see is the same `.md` file on disk.
+- **Source editor font**: the source pane is set in a **monospace** face —
+  `monospace`, with `Consolas` / `DejaVu Sans Mono` / `Roboto Mono` as
+  fallbacks — because the source is read as text: its markers, its indents and
+  its columns. The line numbers use the same face at the same size, dimmed, so
+  they line up with the characters they count. Making the face and size a
+  setting is issue #259.
+- **Editing, in both modes**: Enter carries a list on, **Tab and Shift+Tab
+  indent and outdent** (the note keeps the focus), PageUp/PageDown page, and
+  on a phone a **long press selects a word**, with handles to adjust it and a
+  toolbar to cut, copy, paste or select all. Both have the find and replace
+  bar, the spelling underline and its panel, the context menu, Ctrl+click on
+  links, folding, typewriter mode and Zen.
+- **WYSIWYG editor**: the note drawn as it reads — the Markdown stays the
+  note's text, and only where the caret is does it show as written. Headings
+  are set at their size; bold, italic,
+  strikethrough, underline (`<u>`) and superscript (`<sup>`) are drawn as
+  such, and so is a format inside another (`<u>**x**</u>` is bold and
+  underlined); list items get their bullet, number or checkbox — a click or a
+  tap on the checkbox ticks it, one undo step, without moving the caret (in
+  the read view too, where the tick is saved like any edit). A
+  sublist is one column in per level, as the read view draws it, and a
+  line that goes on an item — its wrapped rows, and the lines written
+  under it — starts under the item's text. On the caret's line the marks
+  are written out and the text stays where it was: marks wider than their
+  column, like a task's `- [ ] ` or a `10. `, hang into the margin
+  instead. A quote gets its bar, and what is inside it — a heading, a
+  list, a code block — is drawn as it is outside; `---` a rule; a code
+  block (and an HTML block) its box, in monospace, the code coloured by the
+  language its fence names; a table its grid, which stays a grid while
+  you write in it, as Obsidian's does: only the word the caret is in
+  shows its marks, the delimiter row never shows, the caret goes from
+  cell to cell rather than onto the pipes, and Backspace or Delete stop at
+  the cell's edge. Footnote and link definitions take no room
+  where they are written: the note ends with its footnotes, as in the read
+  view, and a tap on one puts the caret in its definition. The read view is
+  the same page: a blank line is as tall in both, and flipping between
+  them leaves the text where it was. Columns, bullets,
+  checkboxes and numbers grow with the note text size. Display formulas (`$$…$$`) and inline ones
+  (`$…$`) are typeset, and
+  images and `![[embeds]]` are drawn under their line. Put the caret in a word
+  and its syntax appears; put it in a formula block and the block's source
+  appears — so everything stays editable as text.
+- **Any size**: every mode opens a note of any size, novel-length ones
+  included; the note is scanned as it is drawn rather than converted up
+  front, so there is no wait to open it and no cap on any surface.
 
 ### Open notes and tabs
 
@@ -132,9 +179,9 @@ stays visible: this is a writing mode, not a fullscreen.
   the nearest thing first: a find bar closes, a selection collapses, a
   dialog or the palette shuts, and the next `Esc` leaves Zen.
 - **The preview** stays yours: a note read rather than written can be
-  read in Zen in its preview. A split comes apart; the note shows its
-  editor or its preview, as its tab says, and the eye in Zen's bar (or
-  *Show preview* / *Show editor* in the palette) flips between them.
+  read in Zen in its preview. The note shows its editor or its preview,
+  as its tab says, and the eye in Zen's bar (or *Show preview* / *Show
+  editor* in the palette) flips between them.
 - **Split panes.** Zen shows the pane you were in; the other waits
   behind it, notes, undo and all, and comes back on the way out.
 - **Moving between notes.** `Ctrl+Tab`, `Ctrl+O` and the palette work
@@ -196,6 +243,26 @@ Tables, task lists, footnotes, strikethrough, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
+The **Markdown cheatsheet** shows every construct Niman reads, each as it
+is written beside how a note shows it — headings, emphasis, underline and
+super/subscript, lists and checkbox lists, quotes, links and links to
+notes, images and embeds, tags, code, math, tables, footnotes, rules,
+frontmatter and template placeholders. Open it from the note's ⋮ menu,
+*Editor: Markdown cheatsheet* in the palette, or Settings, next to the
+changelog. Every example can be copied; opened from a note, it can also
+be inserted at the caret — one line where the caret is, several on lines
+of their own. On a phone an example's source and its look are stacked.
+Highlight (`==…==`) and callouts (`> [!note]`) are not there because
+Niman does not read them.
+
+One thing to know when a note came from somewhere else: **a list marker has
+to start a line.** `- c)` written inside a sentence — after a formula, or
+wherever the text happened to wrap — is a hyphen and a letter, not an item,
+and no renderer can turn it into one. Put it on a line of its own and it
+becomes an item; a blank line is not needed, because a list can interrupt a
+paragraph. Indentation is what makes a sublist: a marker under an item's own
+text is that item's child, one at the same column is its sibling.
+
 **Tidy the Markdown** — the note's ⋮ menu, or *Editor: Tidy the
 Markdown* in the palette — puts a note's own text in order without
 changing what it says:
@@ -213,6 +280,20 @@ It never reflows your prose, and never touches what it cannot read:
 fenced code, tables, math, frontmatter and HTML come back byte for
 byte. Tidying twice changes nothing the second time. The note is saved
 first, so what is tidied is the note as it stands.
+
+The **checkbox list** button (beside the bulleted and numbered lists)
+makes the selected lines — or the caret's — tasks: a bulleted item gains
+its box, a numbered one keeps its number, a plain line becomes `- [ ] `.
+Pressed on lines that are all tasks already, it takes the boxes off and
+leaves their text. Blank lines in a selection are left alone, and the
+whole change is one undo step. On a task line the button reads as on.
+
+The **table** button writes an empty table — two columns, a header and
+one row — on lines of its own, with the caret in its first header cell:
+it takes the place of a blank line the caret is on, goes above a line
+the caret is at the start of, and below one the caret is anywhere else
+in, with a blank line kept from the text around it. One undo step takes
+it away. Rows and columns are added from the table itself in live mode.
 
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
@@ -232,13 +313,29 @@ in the window's title.
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
 in the note's bar offers the same actions.
 
-The same formatting is also on the **context menu**: right-click in either
-editor (long-press on a phone). Under cut, copy and paste come the toolbar's
-buttons, with the same icons, names and grouping, and a format that is
-on at the caret reads as on, just as it does on the toolbar. They apply
-to the selection, so a word picked with the mouse can be made bold where
-it is. The toolbar stays; the menu is a second way in. It lists the
-buttons you keep on the toolbar, in the same order.
+The same formatting is also on the **context menu**: right-click in the
+editor (long-press on a phone). It is grouped by what you are doing, as
+Obsidian's is:
+
+- the spelling's suggestions for a misspelled word, and a table's
+  **Row ›**, **Column ›** and sorts on a table's cell, first;
+- **Add link** (`[[…]]`) and **Add external link** (`[…](https://)`);
+- **Format ›** — bold, italic, strikethrough, underline, superscript,
+  subscript, code — **Paragraph ›** — headings 1 to 6, **Body** (the
+  heading taken off), bulleted, numbered and checkbox lists, quote — and
+  **Insert ›** — footnote, table, horizontal rule, code block, math
+  block, image;
+- the clipboard last: Cut, Copy, Paste, Select all. What cannot run now
+  (Cut with nothing selected) stays in its place, greyed out, so nothing
+  moves under the pointer.
+
+On the desktop a submenu opens in the menu's place, with the way back at
+its top; on a phone the groups sit in the selection bar's overflow and
+open as a sheet. What is on at the caret reads as on, as on the toolbar
+— the heading level the line has, the format the word is in.
+**Insert › Footnote** cites the next free number at the caret and
+writes its definition under the paragraph, the caret on it to write the
+note.
 
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item
@@ -246,6 +343,36 @@ gives you a fresh empty box. Enter on an item you have not typed
 anything into ends the list instead — the usual second Enter. Inside a
 fenced code block, a math block or the frontmatter it does nothing: a
 dash there is a dash.
+
+### Tables in live mode
+
+A table in live mode is drawn as the read view draws it, and edited as a
+table (as Obsidian does):
+
+- **The two `+`** add a column at the table's right edge and a row at its
+  foot. On the desktop they show while the mouse is on the table; on a
+  phone, while the caret is in it.
+- **Right-click a cell** (long-press on a phone) for **Row ›** — add a row
+  above or below, move it up or down, duplicate or delete it — **Column
+  ›** — add a column to the left or right, move it, align it left, centre
+  or right, duplicate or delete it — and **Sort by column**, A → Z or
+  Z → A. On the desktop Row and Column open in the menu's place, with the
+  way back at the top; on a phone they open a sheet. What does not apply
+  to the cell is greyed out: a row above the header, moving the last
+  column right, deleting the only column.
+- **Tab** goes to the next cell and Shift+Tab to the one before, the
+  cell's text selected so what you type replaces it; Tab past the last
+  cell adds a row. Outside a table Tab indents, as ever.
+- The header stays the header: it is not moved, sorted or deleted. The
+  sort compares numbers as numbers and the rest ignoring case, and rows
+  that tie keep their order.
+
+Every action is one change to the note's Markdown and one undo step, and
+the caret lands in the cell the action leaves it in. A table written with
+its columns padded to one width is written back padded, the pipes under
+one another; one written with a single space round each cell stays that
+way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
+view and live mode.
 
 ## Tools
 
@@ -299,10 +426,18 @@ yours to do.
 
 ## Preview
 
-Side by side with the editor at 600 dp and up (`auto` mode), one pane on
-narrow screens. Per-library toggles: `previewEnabled`, split ratio
-(0.2–0.8, default 0.55). The preview renders Markdown + math + code
-highlighting.
+The note is one pane, and it holds one of the two: the editor you write
+in, or the rendered note you read. The eye flips between them — in the
+note's status row on a wide window, in the app bar on a phone, or *Show
+preview* / *Show editor* in the palette anywhere. What you leave behind
+keeps its place: the caret, the undo history, the typeset math and the
+images are all there when you come back. The note stays where you were
+reading it, too: flipping to the preview, back to
+the editor, or between source and live keeps the line at the top of the
+pane at its top, however differently the two draw what is above it.
+
+The rendered note shows Markdown, math, and fenced code coloured by the
+language its fence names.
 
 Extras: word count, heading outline, heading folding.
 

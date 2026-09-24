@@ -62,7 +62,7 @@ final class _SettingsTabState extends State<SettingsTab> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < splitBreakpoint) {
+        if (constraints.maxWidth < wideBreakpoint) {
           return SettingsBody(
             controller: widget.controller,
             spellCheck: widget.spellCheck,

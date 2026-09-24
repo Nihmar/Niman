@@ -13,6 +13,7 @@ import 'dart:io';
 import 'package:ffi/ffi.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/spellcheck/windows_spell_checker.dart';
 import 'package:path/path.dart' as p;
 
 /// The shared libraries to try, in order (Linux, macOS, Windows).
@@ -257,9 +258,22 @@ final class HunspellSpellChecker implements SpellChecker {
   }
 }
 
-/// The best checker this machine can offer.
+/// The best checker this machine can offer: on Windows the system's own,
+/// then hunspell wherever it is installed.
 ///
 /// [dictionary] names the user's chosen dictionary (null = the locale's).
 SpellChecker createSpellChecker({String? dictionary}) =>
+    (Platform.isWindows
+        ? WindowsSpellChecker.open(language: dictionary)
+        : null) ??
     HunspellSpellChecker.open(dictionary: dictionary) ??
     const NoopSpellChecker();
+
+/// The dictionaries the settings offer: the languages Windows spellchecks,
+/// or every hunspell pair found on the machine.
+List<String> availableSpellDictionaries() {
+  final names = Platform.isWindows
+      ? windowsSpellLanguages()
+      : discoverDictionaries().keys.toList();
+  return names..sort();
+}

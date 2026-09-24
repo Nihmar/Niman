@@ -7,9 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/text_scale.dart';
-import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/library/library_state.dart';
-import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/tree.dart';
@@ -182,8 +183,7 @@ void main() {
               showLineNumbers: true,
               autofocusEditor: false,
               showPreview: preview,
-              splitPreview: preview,
-              readNote: (_) async => '# Hello',
+              readNote: (_) async => '# Hello\n\n- item',
             ),
           ),
         ),
@@ -196,8 +196,8 @@ void main() {
       await pumpNotePane(tester, preview: false);
 
       expect(
-        tester.widget<NoteEditor>(find.byType(NoteEditor)).fontSize,
-        closeTo(baseNoteFontSize * 1.6, 1e-9),
+        scalerAt(tester, find.byType(MarkdownSurface)).scale(10),
+        closeTo(16, 1e-9),
       );
     });
 
@@ -208,8 +208,8 @@ void main() {
       await pumpNotePane(tester, preview: false);
 
       expect(
-        tester.widget<NoteEditor>(find.byType(NoteEditor)).fontSize,
-        closeTo(baseNoteFontSize, 1e-9),
+        scalerAt(tester, find.byType(MarkdownSurface)).scale(10),
+        closeTo(10, 1e-9),
       );
     });
 
@@ -220,16 +220,57 @@ void main() {
       await controller.setNoteTextScale(1.2);
       await pumpNotePane(tester, preview: true);
 
-      // The editor's size and the preview's scale agree — 1.2 either way
-      // — and the interface's 1.8 reaches neither.
+      // The editor's scale and the preview's agree — 1.2 either way — and
+      // the interface's 1.8 reaches neither. The editor stays mounted
+      // behind the preview, out of the default finders' reach.
       expect(
-        scalerAt(tester, find.byType(MarkdownPreview)).scale(10),
+        scalerAt(tester, find.byType(MarkdownReadView)).scale(10),
         closeTo(12, 1e-9),
       );
       expect(
-        tester.widget<NoteEditor>(find.byType(NoteEditor)).fontSize,
-        closeTo(baseNoteFontSize * 1.2, 1e-9),
+        scalerAt(
+          tester,
+          find.byType(MarkdownSurface, skipOffstage: false),
+        ).scale(10),
+        closeTo(12, 1e-9),
       );
+    });
+
+    testWidgets("the unified note's columns grow with the note's size", (
+      tester,
+    ) async {
+      // The note's size is a scaler, which scales its text and nothing
+      // else: the list's column and the spacing stayed at 100% around text
+      // half as big again. The interface's size reaches neither.
+      await controller.setUiTextScale(1.8);
+      for (final preview in [false, true]) {
+        await controller.setNoteTextScale(1);
+        await pumpNotePane(tester, preview: preview);
+        await tester.pump();
+        final base = _column(tester, preview: preview);
+        await controller.setNoteTextScale(1.5);
+        await pumpNotePane(tester, preview: preview);
+        await tester.pump();
+        expect(
+          _column(tester, preview: preview),
+          closeTo(base * 1.5, 1e-9),
+          reason: preview ? 'read' : 'edit',
+        );
+      }
     });
   });
 }
+
+/// The list column the unified note is drawn with: the editor's, or the
+/// read view's when [preview].
+double _column(WidgetTester tester, {required bool preview}) => preview
+    ? tester
+          .widget<BlockView>(find.byType(BlockView).first)
+          .theme
+          .listIndentPerLevel
+    : tester
+          .widget<MarkdownSurface>(
+            find.byType(MarkdownSurface, skipOffstage: false),
+          )
+          .theme
+          .listIndentPerLevel;

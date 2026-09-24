@@ -73,10 +73,10 @@ void main() {
 
   test('trailing spaces go; a hard break is left alone', () {
     expect(tidy('a line \n'), 'a line\n');
-    // A paragraph carrying a hard break is one the codec keeps verbatim,
-    // and what it keeps verbatim this keeps verbatim: the break survives
-    // exactly as it was written.
-    expect(tidy('a break   \nnext\n'), 'a break   \nnext\n');
+    // A hard break survives, written as exactly two spaces: the rule the
+    // tidying states. (It was kept as written, three spaces and all, while
+    // the WYSIWYG codec's blocks decided what the tidying touched.)
+    expect(tidy('a break   \nnext\n'), 'a break  \nnext\n');
     // A trailing break on the last line of a block breaks nothing.
     expect(tidy('last  \n'), 'last\n');
   });

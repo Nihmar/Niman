@@ -51,6 +51,8 @@ Future<SyncReport?> runSyncFromUi(
     if (aborted == SyncAbort.notConfirmed) return report;
     messenger.showSnackBar(
       SnackBar(
+        // An action would keep it up until it is dismissed by hand.
+        persist: false,
         key: const Key('sync-aborted-snack'),
         content: Text(syncAbortTitle(aborted)),
         action: onShowPanel == null
@@ -64,6 +66,8 @@ Future<SyncReport?> runSyncFromUi(
   } else if (report.conflicts.isNotEmpty || report.failures.isNotEmpty) {
     messenger.showSnackBar(
       SnackBar(
+        // An action would keep it up until it is dismissed by hand.
+        persist: false,
         key: const Key('sync-warnings-snack'),
         content: Text(
           report.conflicts.isNotEmpty
@@ -81,6 +85,8 @@ Future<SyncReport?> runSyncFromUi(
   } else if (trashed > 0) {
     messenger.showSnackBar(
       SnackBar(
+        // An action would keep it up until it is dismissed by hand.
+        persist: false,
         key: const Key('sync-trashed-snack'),
         content: Text(AppStrings.syncTrashedSnack(trashed)),
         action: onShowTrash == null

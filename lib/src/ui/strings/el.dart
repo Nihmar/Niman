@@ -129,12 +129,6 @@ final class GreekStrings extends Strings {
   @override
   String get settingsToggleOff => 'Ανενεργό';
   @override
-  String get settingsPreviewEnabledTitle => 'Προεπισκόπηση';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Εμφανίζει τη μορφοποιημένη σημείωση δίπλα στον επεξεργαστή '
-      'πηγής';
-  @override
   String get switchToWysiwygTooltip => 'Μετάβαση στον επεξεργαστή WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Μετάβαση στην πηγή Markdown';
@@ -143,10 +137,6 @@ final class GreekStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Αυτή η σημείωση είναι πολύ μεγάλη για τον επεξεργαστή WYSIWYG. '
-      'Ανοίξτε την στην πηγή Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Εμφάνιση';
@@ -278,22 +268,6 @@ final class GreekStrings extends Strings {
       'Επεξεργαστής και προεπισκόπηση, πάντα συγχρονισμένοι';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Λειτουργία προεπισκόπησης';
-  @override
-  String get previewModeSubtitle =>
-      'Αν η προεπισκόπηση μοιράζεται την οθόνη με τον επεξεργαστή ή '
-      'την αντικαθιστά';
-  @override
-  String get previewModeAuto => 'Παράλληλα';
-  @override
-  String get previewModeSwitch => 'Πλήρης οθόνη';
-  @override
-  String get splitRatioTitle => 'Ρυθμός διαίρεσης';
-  @override
-  String get splitRatioSubtitle =>
-      'Μέρος του επεξεργαστή όταν η προεπισκόπηση είναι δίπλα του';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Μορφή συνδέσμου';
@@ -481,11 +455,131 @@ final class GreekStrings extends Strings {
   @override
   String get toolbarImage => 'Εισαγωγή εικόνας';
   @override
+  String get toolbarTable => 'Πίνακας';
+  @override
+  String get tableRow => 'Γραμμή';
+  @override
+  String get tableColumn => 'Στήλη';
+  @override
+  String get tableAddRowAbove => 'Εισαγωγή γραμμής από πάνω';
+  @override
+  String get tableAddRowBelow => 'Εισαγωγή γραμμής από κάτω';
+  @override
+  String get tableMoveRowUp => 'Μετακίνηση γραμμής πάνω';
+  @override
+  String get tableMoveRowDown => 'Μετακίνηση γραμμής κάτω';
+  @override
+  String get tableDuplicateRow => 'Διπλασιασμός γραμμής';
+  @override
+  String get tableDeleteRow => 'Διαγραφή γραμμής';
+  @override
+  String get tableAddColumnLeft => 'Εισαγωγή στήλης αριστερά';
+  @override
+  String get tableAddColumnRight => 'Εισαγωγή στήλης δεξιά';
+  @override
+  String get tableMoveColumnLeft => 'Μετακίνηση στήλης αριστερά';
+  @override
+  String get tableMoveColumnRight => 'Μετακίνηση στήλης δεξιά';
+  @override
+  String get tableAlignLeft => 'Στοίχιση αριστερά';
+  @override
+  String get tableAlignCenter => 'Στο κέντρο';
+  @override
+  String get tableAlignRight => 'Στοίχιση δεξιά';
+  @override
+  String get tableDuplicateColumn => 'Διπλασιασμός στήλης';
+  @override
+  String get tableDeleteColumn => 'Διαγραφή στήλης';
+  @override
+  String get tableSortAscending => 'Ταξινόμηση κατά στήλη (Α → Ω)';
+  @override
+  String get tableSortDescending => 'Ταξινόμηση κατά στήλη (Ω → Α)';
+  @override
+  String get tableAddRow => 'Προσθήκη γραμμής';
+  @override
+  String get tableAddColumn => 'Προσθήκη στήλης';
+  @override
+  String get cheatsheetTitle => 'Σκονάκι Markdown';
+  @override
+  String get cheatsheetCopy => 'Αντιγραφή';
+  @override
+  String get cheatsheetCopied => 'Αντιγράφηκε';
+  @override
+  String get cheatsheetInsert => 'Εισαγωγή στη σημείωση';
+  @override
+  String get cheatsheetWritten => 'Γραμμένο';
+  @override
+  String get cheatsheetShown => 'Εμφάνιση';
+  @override
+  String get cheatHeadings => 'Επικεφαλίδες';
+  @override
+  String get cheatEmphasis => 'Έντονα, πλάγια, διαγραμμένα';
+  @override
+  String get cheatHtmlFormats => 'Υπογράμμιση, εκθέτης, δείκτης';
+  @override
+  String get cheatLists => 'Λίστες';
+  @override
+  String get cheatChecklists => 'Λίστες ελέγχου';
+  @override
+  String get cheatQuotes => 'Παραθέσεις';
+  @override
+  String get cheatLinks => 'Σύνδεσμοι';
+  @override
+  String get cheatWikilinks => 'Σύνδεσμοι σε σημειώσεις';
+  @override
+  String get cheatEmbeds => 'Εικόνες και ενσωματώσεις';
+  @override
+  String get cheatTags => 'Ετικέτες';
+  @override
+  String get cheatInlineCode => 'Κώδικας σε πρόταση';
+  @override
+  String get cheatCodeBlocks => 'Μπλοκ κώδικα';
+  @override
+  String get cheatMath => 'Μαθηματικά';
+  @override
+  String get cheatTables => 'Πίνακες';
+  @override
+  String get cheatFootnotes => 'Υποσημειώσεις';
+  @override
+  String get cheatRule => 'Οριζόντια γραμμή';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Σύμβολα κράτησης προτύπων';
+  @override
+  String get menuAddLink => 'Προσθήκη συνδέσμου';
+  @override
+  String get menuAddExternalLink => 'Προσθήκη εξωτερικού συνδέσμου';
+  @override
+  String get menuFormat => 'Μορφή';
+  @override
+  String get menuParagraph => 'Παράγραφος';
+  @override
+  String get menuInsert => 'Εισαγωγή';
+  @override
+  String get menuBody => 'Κανονικό κείμενο';
+  @override
+  String get formatSubscript => 'Δείκτης';
+  @override
+  String get formatInlineCode => 'Κώδικας';
+  @override
+  String get insertFootnote => 'Υποσημείωση';
+  @override
+  String get insertRule => 'Οριζόντια γραμμή';
+  @override
+  String get insertCodeBlock => 'Μπλοκ κώδικα';
+  @override
+  String get insertMathBlock => 'Μπλοκ μαθηματικών';
+  @override
+  String get menuHeadingWord => 'Επικεφαλίδα';
+  @override
   String get toolbarHeading => 'Τίτλος';
   @override
   String get toolbarList => 'Λίστα';
   @override
   String get toolbarOrderedList => 'Αριθμημένη λίστα';
+  @override
+  String get toolbarChecklist => 'Λίστα ελέγχου';
   @override
   String get toolbarQuote => 'Παράθεση';
   @override
@@ -555,11 +649,6 @@ final class GreekStrings extends Strings {
   String get showPreviewTooltip => 'Εμφάνιση προεπισκόπησης';
   @override
   String get showEditorTooltip => 'Εμφάνιση επεξεργαστή';
-  @override
-  String get enterFullScreenTooltip => 'Πλήρης οθόνη';
-  @override
-  String get exitFullScreenTooltip => 'Έξοδος από πλήρη οθόνη';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(μη αναλυμένος HTML πίνακας)';

@@ -125,11 +125,6 @@ final class HungarianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Ki';
   @override
-  String get settingsPreviewEnabledTitle => 'Előnézet';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'A renderelt jegyzet megjelenítése a forrásszerkesztő mellett';
-  @override
   String get switchToWysiwygTooltip => 'Váltás WYSIWYG szerkesztőre';
   @override
   String get switchToSourceTooltip => 'Váltás Markdown forrásra';
@@ -138,10 +133,6 @@ final class HungarianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ez a jegyzet túl nagy a WYSIWYG szerkesztőhöz. Nyisd meg Markdown '
-      'forrásként.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Megjelenés';
@@ -271,22 +262,6 @@ final class HungarianStrings extends Strings {
       'A szerkesztő és az előnézet mindig azonos';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Előnézeti mód';
-  @override
-  String get previewModeSubtitle =>
-      'Hogy az előnézet megosztja-e a képernyőt a szerkesztővel, vagy '
-      'lecseréli';
-  @override
-  String get previewModeAuto => 'Mellette';
-  @override
-  String get previewModeSwitch => 'Teljes képernyő';
-  @override
-  String get splitRatioTitle => 'Osztási arány szélessége';
-  @override
-  String get splitRatioSubtitle =>
-      'A szerkesztő aránya, amikor az előnézet mellette van';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Hivatkozás formátuma';
@@ -470,11 +445,131 @@ final class HungarianStrings extends Strings {
   @override
   String get toolbarImage => 'Kép beszúrása';
   @override
+  String get toolbarTable => 'Táblázat';
+  @override
+  String get tableRow => 'Sor';
+  @override
+  String get tableColumn => 'Oszlop';
+  @override
+  String get tableAddRowAbove => 'Sor beszúrása fölé';
+  @override
+  String get tableAddRowBelow => 'Sor beszúrása alá';
+  @override
+  String get tableMoveRowUp => 'Sor feljebb';
+  @override
+  String get tableMoveRowDown => 'Sor lejjebb';
+  @override
+  String get tableDuplicateRow => 'Sor megkettőzése';
+  @override
+  String get tableDeleteRow => 'Sor törlése';
+  @override
+  String get tableAddColumnLeft => 'Oszlop beszúrása balra';
+  @override
+  String get tableAddColumnRight => 'Oszlop beszúrása jobbra';
+  @override
+  String get tableMoveColumnLeft => 'Oszlop balra';
+  @override
+  String get tableMoveColumnRight => 'Oszlop jobbra';
+  @override
+  String get tableAlignLeft => 'Balra igazítás';
+  @override
+  String get tableAlignCenter => 'Középre';
+  @override
+  String get tableAlignRight => 'Jobbra igazítás';
+  @override
+  String get tableDuplicateColumn => 'Oszlop megkettőzése';
+  @override
+  String get tableDeleteColumn => 'Oszlop törlése';
+  @override
+  String get tableSortAscending => 'Rendezés oszlop szerint (A → Z)';
+  @override
+  String get tableSortDescending => 'Rendezés oszlop szerint (Z → A)';
+  @override
+  String get tableAddRow => 'Sor hozzáadása';
+  @override
+  String get tableAddColumn => 'Oszlop hozzáadása';
+  @override
+  String get cheatsheetTitle => 'Markdown puska';
+  @override
+  String get cheatsheetCopy => 'Másolás';
+  @override
+  String get cheatsheetCopied => 'Másolva';
+  @override
+  String get cheatsheetInsert => 'Beszúrás a jegyzetbe';
+  @override
+  String get cheatsheetWritten => 'Leírva';
+  @override
+  String get cheatsheetShown => 'Megjelenítve';
+  @override
+  String get cheatHeadings => 'Címsorok';
+  @override
+  String get cheatEmphasis => 'Félkövér, dőlt, áthúzott';
+  @override
+  String get cheatHtmlFormats => 'Aláhúzott, felső index, alsó index';
+  @override
+  String get cheatLists => 'Listák';
+  @override
+  String get cheatChecklists => 'Ellenőrzőlisták';
+  @override
+  String get cheatQuotes => 'Idézetek';
+  @override
+  String get cheatLinks => 'Hivatkozások';
+  @override
+  String get cheatWikilinks => 'Hivatkozások jegyzetekre';
+  @override
+  String get cheatEmbeds => 'Képek és beágyazások';
+  @override
+  String get cheatTags => 'Címkék';
+  @override
+  String get cheatInlineCode => 'Kód a mondatban';
+  @override
+  String get cheatCodeBlocks => 'Kódblokkok';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Táblázatok';
+  @override
+  String get cheatFootnotes => 'Lábjegyzetek';
+  @override
+  String get cheatRule => 'Vízszintes vonal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Sablon-helyőrzők';
+  @override
+  String get menuAddLink => 'Hivatkozás hozzáadása';
+  @override
+  String get menuAddExternalLink => 'Külső hivatkozás hozzáadása';
+  @override
+  String get menuFormat => 'Formázás';
+  @override
+  String get menuParagraph => 'Bekezdés';
+  @override
+  String get menuInsert => 'Beszúrás';
+  @override
+  String get menuBody => 'Törzsszöveg';
+  @override
+  String get formatSubscript => 'Alsó index';
+  @override
+  String get formatInlineCode => 'Kód';
+  @override
+  String get insertFootnote => 'Lábjegyzet';
+  @override
+  String get insertRule => 'Vízszintes vonal';
+  @override
+  String get insertCodeBlock => 'Kódblokk';
+  @override
+  String get insertMathBlock => 'Matematikai blokk';
+  @override
+  String get menuHeadingWord => 'Címsor';
+  @override
   String get toolbarHeading => 'Cím';
   @override
   String get toolbarList => 'Lista';
   @override
   String get toolbarOrderedList => 'Számozott lista';
+  @override
+  String get toolbarChecklist => 'Jelölőnégyzetes lista';
   @override
   String get toolbarQuote => 'Idézet';
   @override
@@ -544,11 +639,6 @@ final class HungarianStrings extends Strings {
   String get showPreviewTooltip => 'Előnézet megjelenítése';
   @override
   String get showEditorTooltip => 'Szerkesztő megjelenítése';
-  @override
-  String get enterFullScreenTooltip => 'Teljes képernyő';
-  @override
-  String get exitFullScreenTooltip => 'Kilépés teljes képernyőből';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(nyers HTML táblázat)';

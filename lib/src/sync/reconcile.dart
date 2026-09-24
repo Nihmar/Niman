@@ -24,13 +24,22 @@ bool isSyncablePath(String path) {
   if (path.isEmpty) return false;
   final segments = path.split('/');
   if (segments.any((s) => s.isEmpty)) return false;
-  if (path == '.niman/settings.json' || path == '.niman/counters.json') {
-    return true;
-  }
+  if (libraryFiles.contains(path)) return true;
   if (segments.any((s) => s.startsWith('.'))) return false;
   final name = segments.last.toLowerCase();
   return !_systemJunk.contains(name);
 }
+
+/// The library's own files, the ones that belong on every device rather than
+/// being one note among many.
+///
+/// They are also the files **every** device writes, which is why a *remote
+/// deletion* of one is never treated as an instruction to lose the local copy:
+/// see [reconcilePath] (#258).
+const Set<String> libraryFiles = <String>{
+  '.niman/settings.json',
+  '.niman/counters.json',
+};
 
 const _systemJunk = {'thumbs.db', 'desktop.ini'};
 
@@ -346,6 +355,21 @@ SyncDecision reconcilePath({
     ifNoneMatch: guardIfNoneMatch,
     checkRemoteFirst: !guardIfNoneMatch,
   );
+
+  // A library file the remote lost goes back up, and the local copy stays.
+  //
+  // The table below sends an unchanged local file to the trash when the remote
+  // is gone, which is right for a *note* — a deletion on the other device is an
+  // instruction — and wrong for the two files every device writes. Losing
+  // `.niman/settings.json` resets the whole library to defaults (the Markdown
+  // engine, which editors are on, the toolbar, the tree) and says nothing; the
+  // machine this was found on had **thirteen** copies of it in `.trash/`, one
+  // of them written and trashed inside the same minute (#258).
+  if (local != null &&
+      r.change == SideChange.deleted &&
+      libraryFiles.contains(path)) {
+    return createRemote();
+  }
 
   return switch ((l.change, r.change)) {
     (SideChange.unchanged, SideChange.unchanged) => decide(

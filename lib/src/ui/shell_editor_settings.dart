@@ -27,11 +27,8 @@ final class ShellEditorSettings {
     this.noteColumn = const NoteColumn(),
     this.typewriter = false,
     this.autofocusEditor = false,
-    this.previewMode = PreviewLayoutMode.auto,
-    this.splitRatio = defaultSplitRatio,
     this.editorKind = EditorKind.source,
     this.editorsEnabled = const {EditorKind.source, EditorKind.wysiwyg},
-    this.previewEnabled = true,
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
@@ -56,22 +53,12 @@ final class ShellEditorSettings {
   /// Whether opening a note raises the keyboard.
   final bool autofocusEditor;
 
-  /// The preview layout override (T-M2-08); the effective mode is
-  /// resolved at build, width × override.
-  final PreviewLayoutMode previewMode;
-
-  /// The editor's share of the split, persisted per library.
-  final double splitRatio;
-
   /// Which editor the library writes in (T-WYS-05).
   final EditorKind editorKind;
 
   /// Which editors the library offers (T-WYS-03): both, or one alone.
   /// The note's status row switches editors only when both are on.
   final Set<EditorKind> editorsEnabled;
-
-  /// Whether the preview exists at all.
-  final bool previewEnabled;
 
   /// What the editor's link button inserts.
   final LinkType linkType;
@@ -108,8 +95,6 @@ final class ShellEditorSettings {
     final noteColumnWidth = await session.noteColumnWidth;
     final typewriter = await session.typewriter;
     final autofocus = await session.editorAutofocusEnabled;
-    final previewMode = await session.previewMode;
-    final splitRatio = await session.splitRatio;
     final linkType = await session.linkType;
     final missingNoteLocation = await session.missingNoteLocation;
     final attachmentsFolder =
@@ -120,7 +105,6 @@ final class ShellEditorSettings {
     final toolbar = await session.editorToolbar;
     final editorKind = await session.editorKind;
     final editorsEnabled = await session.enabledEditors;
-    final previewEnabled = await session.previewEnabled;
     final enabled = editorsEnabled.isEmpty
         ? const {EditorKind.source, EditorKind.wysiwyg}
         : editorsEnabled;
@@ -132,15 +116,12 @@ final class ShellEditorSettings {
       ),
       typewriter: typewriter,
       autofocusEditor: autofocus,
-      previewMode: previewMode,
-      splitRatio: splitRatio,
       editorKind: enabled.contains(editorKind)
           ? editorKind
           : enabled.contains(EditorKind.source)
           ? EditorKind.source
           : EditorKind.wysiwyg,
       editorsEnabled: {...enabled},
-      previewEnabled: previewEnabled,
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
@@ -152,11 +133,13 @@ final class ShellEditorSettings {
   }
 
   /// A copy with the given fields replaced: what the controls that change
-  /// one setting on the spot (the split drag, the tree sort, the preview
-  /// mode, the editor switch) hand back to the shell.
+  /// one setting on the spot (the tree sort, the editor switch) hand back
+  /// to the shell.
+  ///
+  /// Every other field is carried over: one that was not came back as its
+  /// default, and switching typewriter on once swapped the editor under
+  /// the writer (a 246 MB note froze the app).
   ShellEditorSettings copyWith({
-    PreviewLayoutMode? previewMode,
-    double? splitRatio,
     EditorKind? editorKind,
     TreeSort? treeSort,
     double? treeWidth,
@@ -167,11 +150,8 @@ final class ShellEditorSettings {
       noteColumn: noteColumn,
       typewriter: typewriter ?? this.typewriter,
       autofocusEditor: autofocusEditor,
-      previewMode: previewMode ?? this.previewMode,
-      splitRatio: splitRatio ?? this.splitRatio,
       editorKind: editorKind ?? this.editorKind,
       editorsEnabled: editorsEnabled,
-      previewEnabled: previewEnabled,
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
@@ -190,11 +170,8 @@ final class ShellEditorSettings {
         noteColumn == other.noteColumn &&
         typewriter == other.typewriter &&
         autofocusEditor == other.autofocusEditor &&
-        previewMode == other.previewMode &&
-        splitRatio == other.splitRatio &&
         editorKind == other.editorKind &&
         setEquals(editorsEnabled, other.editorsEnabled) &&
-        previewEnabled == other.previewEnabled &&
         linkType == other.linkType &&
         missingNoteLocation == other.missingNoteLocation &&
         attachmentsFolder == other.attachmentsFolder &&
@@ -212,11 +189,8 @@ final class ShellEditorSettings {
     noteColumn,
     typewriter,
     autofocusEditor,
-    previewMode,
-    splitRatio,
     editorKind,
     Object.hashAllUnordered(editorsEnabled),
-    previewEnabled,
     linkType,
     missingNoteLocation,
     attachmentsFolder,

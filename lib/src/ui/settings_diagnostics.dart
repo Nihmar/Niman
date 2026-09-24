@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/text_input_probe.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/changelog.dart';
+import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -287,6 +289,30 @@ final class _SettingsDiagnosticsScreenState
                 MaterialPageRoute<void>(
                   builder: (context) => const ChangelogScreen(),
                 ),
+              ),
+            ),
+          ),
+          // Help, beside the changelog (#265): from here there is no note
+          // to insert an example in, so it copies.
+          HighlightRow(
+            key: SettingsKeys.cheatsheet,
+            child: SettingsValueRow(
+              title: AppStrings.cheatsheetTitle,
+              onTap: () => showMarkdownCheatsheet(context),
+            ),
+          ),
+          // The phase-3 spike (§8.7.1): a bare `TextInputConnection` that
+          // writes down what the keyboard sends. Not a setting and not
+          // searchable — a maintainer's instrument, kept where a device
+          // can reach it.
+          SettingsActionRow(
+            key: const Key('text-input-probe'),
+            title: 'Text input probe',
+            description: 'What the keyboard sends, for the IME gate',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const TextInputProbeScreen(),
               ),
             ),
           ),

@@ -125,11 +125,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Joaktiv';
   @override
-  String get settingsPreviewEnabledTitle => 'Parapamja';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Tregon shënimin e formatuar pranë redaktorit të burimit';
-  @override
   String get switchToWysiwygTooltip => 'Kalo te redaktori WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Kalo te burimi Markdown';
@@ -138,10 +133,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Kjo shënim është tepër i madh për redaktorin WYSIWYG. Hape te '
-      'burimi Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Paraqitja';
@@ -271,21 +262,6 @@ final class AlbanianStrings extends Strings {
       'Redaktori dhe parapamja, gjithmonë të bashkërenditura';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modi i parapamjes';
-  @override
-  String get previewModeSubtitle =>
-      'A e ndan parapamja ekranin me redaktorin apo e zëvendëson';
-  @override
-  String get previewModeAuto => 'Ngjitur';
-  @override
-  String get previewModeSwitch => 'Ekran i plotë';
-  @override
-  String get splitRatioTitle => 'Gjerësia e ndarjes';
-  @override
-  String get splitRatioSubtitle =>
-      'Pjesa e redaktorit kur parapamja është ngjitur me të';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formati i lidhjes';
@@ -469,11 +445,131 @@ final class AlbanianStrings extends Strings {
   @override
   String get toolbarImage => 'Vendos foto';
   @override
+  String get toolbarTable => 'Tabelë';
+  @override
+  String get tableRow => 'Rresht';
+  @override
+  String get tableColumn => 'Kolonë';
+  @override
+  String get tableAddRowAbove => 'Shto rresht sipër';
+  @override
+  String get tableAddRowBelow => 'Shto rresht poshtë';
+  @override
+  String get tableMoveRowUp => 'Lëviz rreshtin lart';
+  @override
+  String get tableMoveRowDown => 'Lëviz rreshtin poshtë';
+  @override
+  String get tableDuplicateRow => 'Dyfisho rreshtin';
+  @override
+  String get tableDeleteRow => 'Fshi rreshtin';
+  @override
+  String get tableAddColumnLeft => 'Shto kolonë majtas';
+  @override
+  String get tableAddColumnRight => 'Shto kolonë djathtas';
+  @override
+  String get tableMoveColumnLeft => 'Lëviz kolonën majtas';
+  @override
+  String get tableMoveColumnRight => 'Lëviz kolonën djathtas';
+  @override
+  String get tableAlignLeft => 'Rreshto majtas';
+  @override
+  String get tableAlignCenter => 'Në qendër';
+  @override
+  String get tableAlignRight => 'Rreshto djathtas';
+  @override
+  String get tableDuplicateColumn => 'Dyfisho kolonën';
+  @override
+  String get tableDeleteColumn => 'Fshi kolonën';
+  @override
+  String get tableSortAscending => 'Rendit sipas kolonës (A → Z)';
+  @override
+  String get tableSortDescending => 'Rendit sipas kolonës (Z → A)';
+  @override
+  String get tableAddRow => 'Shto rresht';
+  @override
+  String get tableAddColumn => 'Shto kolonë';
+  @override
+  String get cheatsheetTitle => 'Përmbledhje e Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopjo';
+  @override
+  String get cheatsheetCopied => 'U kopjua';
+  @override
+  String get cheatsheetInsert => 'Fut në shënim';
+  @override
+  String get cheatsheetWritten => 'Shkruar';
+  @override
+  String get cheatsheetShown => 'Shfaqur';
+  @override
+  String get cheatHeadings => 'Titujt';
+  @override
+  String get cheatEmphasis => 'I trashë, i pjerrët, i vijëzuar';
+  @override
+  String get cheatHtmlFormats => 'I nënvizuar, eksponent, indeks';
+  @override
+  String get cheatLists => 'Listat';
+  @override
+  String get cheatChecklists => 'Lista kontrolli';
+  @override
+  String get cheatQuotes => 'Citimet';
+  @override
+  String get cheatLinks => 'Lidhjet';
+  @override
+  String get cheatWikilinks => 'Lidhje me shënime';
+  @override
+  String get cheatEmbeds => 'Imazhe dhe ngulitje';
+  @override
+  String get cheatTags => 'Etiketat';
+  @override
+  String get cheatInlineCode => 'Kod në fjali';
+  @override
+  String get cheatCodeBlocks => 'Blloqe kodi';
+  @override
+  String get cheatMath => 'Matematikë';
+  @override
+  String get cheatTables => 'Tabelat';
+  @override
+  String get cheatFootnotes => 'Shënimet në fund';
+  @override
+  String get cheatRule => 'Vijë horizontale';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Vendmbajtësit e shablloneve';
+  @override
+  String get menuAddLink => 'Shto lidhje';
+  @override
+  String get menuAddExternalLink => 'Shto lidhje të jashtme';
+  @override
+  String get menuFormat => 'Formati';
+  @override
+  String get menuParagraph => 'Paragrafi';
+  @override
+  String get menuInsert => 'Fut';
+  @override
+  String get menuBody => 'Tekst i thjeshtë';
+  @override
+  String get formatSubscript => 'Indeks';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Shënim në fund';
+  @override
+  String get insertRule => 'Vijë horizontale';
+  @override
+  String get insertCodeBlock => 'Bllok kodi';
+  @override
+  String get insertMathBlock => 'Bllok matematik';
+  @override
+  String get menuHeadingWord => 'Titull';
+  @override
   String get toolbarHeading => 'Titull';
   @override
   String get toolbarList => 'Listë';
   @override
   String get toolbarOrderedList => 'Listë me numra';
+  @override
+  String get toolbarChecklist => 'Listë kontrolli';
   @override
   String get toolbarQuote => 'Citat';
   @override
@@ -541,11 +637,6 @@ final class AlbanianStrings extends Strings {
   String get showPreviewTooltip => 'Shfaq parapamjen';
   @override
   String get showEditorTooltip => 'Shfaq redaktorin';
-  @override
-  String get enterFullScreenTooltip => 'Ekran i plotë';
-  @override
-  String get exitFullScreenTooltip => 'Dil nga ekran i plotë';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabela HTML e thjeshtë)';

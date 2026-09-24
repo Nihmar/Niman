@@ -48,7 +48,6 @@ choices.
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
-| `previewEnabled` | true | Whether the preview exists at all |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `treeSort` | `nameAsc` | Tree order (`nameAsc`, `nameDesc`) |
@@ -61,7 +60,7 @@ choices.
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `editorToolbar` | "" (= shipped) | Arranged toolbar layout |
 | `uiTextScale` | 1.0 | Interface text size (0.8–1.8) |
-| `noteTextScale` | 1.0 | Note text size, editor + preview (0.8–1.8) |
+| `noteTextScale` | 1.0 | Note text size, editor + preview (0.8–1.8); in the unified surfaces the list and quote columns, the spacing, the bullets, checkboxes and numbers grow with it |
 | `treeWidth` | 340 | Tree pane width, px (200–600) |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
@@ -80,8 +79,7 @@ takes the app down. Writes are atomic (temp file + rename).
 ## App settings (on device)
 
 Brightness (day / night / system) × palette (system or Catppuccin),
-preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
-ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
+UI language, last opened library, debug
 log toggle (default on), the keyboard shortcuts and the formatting keys,
 the commands pinned in the palette, and — on the desktops — *Close to the
 tray* (default on: the window's × hides Niman and leaves it running).
@@ -115,4 +113,7 @@ The last section, **About**, holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens
 the full list of shipped versions, newest first. The same changelog
 appears as a dialog on the first launch after an update, listing only
-what is new since the version you last saw.
+what is new since the version you last saw. Beside them, the **Markdown
+cheatsheet**: every construct Niman reads, written and shown (see
+[editing](editing.md#markdown-support)); from here its examples are
+copied, since no note is open to insert them in.

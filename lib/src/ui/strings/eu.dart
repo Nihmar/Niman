@@ -124,11 +124,6 @@ final class BasqueStrings extends Strings {
   @override
   String get settingsToggleOff => 'Desaktibatuta';
   @override
-  String get settingsPreviewEnabledTitle => 'Aurrebista';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Erakutsi errenderatutako oharra iturri-erreditoraren ondoan';
-  @override
   String get switchToWysiwygTooltip => 'Pasatu WYSIWYG erreditorra';
   @override
   String get switchToSourceTooltip => 'Pasatu Markdown-iturrira';
@@ -137,9 +132,6 @@ final class BasqueStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ohar honek ez du WYSIWYG erreditorrentzat. Ireki Markdown-iturrian.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Itxura';
@@ -269,22 +261,6 @@ final class BasqueStrings extends Strings {
       'Erreditorra eta aurrebista, beti bat etorritakoak';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Aurrebista-eredua';
-  @override
-  String get previewModeSubtitle =>
-      'Aurrebistak pantaila erreditorarekin banatzen du edo ordezkatzen '
-      'du';
-  @override
-  String get previewModeAuto => 'Bata bestearen ondoan';
-  @override
-  String get previewModeSwitch => 'Pantaila osoa';
-  @override
-  String get splitRatioTitle => 'Banaketa-zabalera';
-  @override
-  String get splitRatioSubtitle =>
-      'Erreditorearen partea aurrebista bat bestearrekin ondoan badu';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Esteka-forma';
@@ -468,11 +444,131 @@ final class BasqueStrings extends Strings {
   @override
   String get toolbarImage => 'Txertatu irudia';
   @override
+  String get toolbarTable => 'Taula';
+  @override
+  String get tableRow => 'Errenkada';
+  @override
+  String get tableColumn => 'Zutabea';
+  @override
+  String get tableAddRowAbove => 'Txertatu errenkada gainean';
+  @override
+  String get tableAddRowBelow => 'Txertatu errenkada azpian';
+  @override
+  String get tableMoveRowUp => 'Igo errenkada';
+  @override
+  String get tableMoveRowDown => 'Jaitsi errenkada';
+  @override
+  String get tableDuplicateRow => 'Bikoiztu errenkada';
+  @override
+  String get tableDeleteRow => 'Ezabatu errenkada';
+  @override
+  String get tableAddColumnLeft => 'Txertatu zutabea ezkerrean';
+  @override
+  String get tableAddColumnRight => 'Txertatu zutabea eskuinean';
+  @override
+  String get tableMoveColumnLeft => 'Eraman zutabea ezkerrera';
+  @override
+  String get tableMoveColumnRight => 'Eraman zutabea eskuinera';
+  @override
+  String get tableAlignLeft => 'Lerrokatu ezkerrean';
+  @override
+  String get tableAlignCenter => 'Erdiratu';
+  @override
+  String get tableAlignRight => 'Lerrokatu eskuinean';
+  @override
+  String get tableDuplicateColumn => 'Bikoiztu zutabea';
+  @override
+  String get tableDeleteColumn => 'Ezabatu zutabea';
+  @override
+  String get tableSortAscending => 'Ordenatu zutabearen arabera (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordenatu zutabearen arabera (Z → A)';
+  @override
+  String get tableAddRow => 'Gehitu errenkada';
+  @override
+  String get tableAddColumn => 'Gehitu zutabea';
+  @override
+  String get cheatsheetTitle => 'Markdown gida azkarra';
+  @override
+  String get cheatsheetCopy => 'Kopiatu';
+  @override
+  String get cheatsheetCopied => 'Kopiatuta';
+  @override
+  String get cheatsheetInsert => 'Txertatu oharrean';
+  @override
+  String get cheatsheetWritten => 'Idatzita';
+  @override
+  String get cheatsheetShown => 'Erakutsita';
+  @override
+  String get cheatHeadings => 'Izenburuak';
+  @override
+  String get cheatEmphasis => 'Lodia, etzana, marratua';
+  @override
+  String get cheatHtmlFormats => 'Azpimarratua, goi-indizea, azpiindizea';
+  @override
+  String get cheatLists => 'Zerrendak';
+  @override
+  String get cheatChecklists => 'Egiaztapen-zerrendak';
+  @override
+  String get cheatQuotes => 'Aipuak';
+  @override
+  String get cheatLinks => 'Estekak';
+  @override
+  String get cheatWikilinks => 'Oharretarako estekak';
+  @override
+  String get cheatEmbeds => 'Irudiak eta txertaketak';
+  @override
+  String get cheatTags => 'Etiketak';
+  @override
+  String get cheatInlineCode => 'Kodea esaldi batean';
+  @override
+  String get cheatCodeBlocks => 'Kode-blokeak';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Taulak';
+  @override
+  String get cheatFootnotes => 'Oin-oharrak';
+  @override
+  String get cheatRule => 'Marra horizontala';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Txantiloien lekukoak';
+  @override
+  String get menuAddLink => 'Gehitu esteka';
+  @override
+  String get menuAddExternalLink => 'Gehitu kanpoko esteka';
+  @override
+  String get menuFormat => 'Formatua';
+  @override
+  String get menuParagraph => 'Paragrafoa';
+  @override
+  String get menuInsert => 'Txertatu';
+  @override
+  String get menuBody => 'Testu arrunta';
+  @override
+  String get formatSubscript => 'Azpiindizea';
+  @override
+  String get formatInlineCode => 'Kodea';
+  @override
+  String get insertFootnote => 'Oin-oharra';
+  @override
+  String get insertRule => 'Marra horizontala';
+  @override
+  String get insertCodeBlock => 'Kode-blokea';
+  @override
+  String get insertMathBlock => 'Matematika-blokea';
+  @override
+  String get menuHeadingWord => 'Izenburua';
+  @override
   String get toolbarHeading => 'Izenburua';
   @override
   String get toolbarList => 'Zerrenda';
   @override
   String get toolbarOrderedList => 'Zerrenda zenbatua';
+  @override
+  String get toolbarChecklist => 'Egiaztapen-zerrenda';
   @override
   String get toolbarQuote => 'Aipua';
   @override
@@ -542,11 +638,6 @@ final class BasqueStrings extends Strings {
   String get showPreviewTooltip => 'Erakutsi aurrebista';
   @override
   String get showEditorTooltip => 'Erakutsi erreditorra';
-  @override
-  String get enterFullScreenTooltip => 'Pantaila osoa';
-  @override
-  String get exitFullScreenTooltip => 'Irten pantaila osoetik';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(HTML taula krudoa)';
