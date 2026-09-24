@@ -48,6 +48,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   bool _readableLineLength = true;
   double _noteColumnWidth = defaultNoteColumnWidth;
   bool _typewriter = false;
+  bool _tidyOnClose = true;
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
   MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
@@ -76,6 +77,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final readableLineLength = await controller.readableLineLength;
     final noteColumnWidth = await controller.noteColumnWidth;
     final typewriter = await controller.typewriter;
+    final tidyOnClose = await controller.tidyOnClose;
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
     final missingNoteLocation = await controller.missingNoteLocation;
@@ -89,6 +91,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _readableLineLength = readableLineLength;
       _noteColumnWidth = noteColumnWidth;
       _typewriter = typewriter;
+      _tidyOnClose = tidyOnClose;
       _autofocusEditor = autofocus;
       _linkType = linkType;
       _missingNoteLocation = missingNoteLocation;
@@ -130,6 +133,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     await controller.setTypewriter(enabled: value);
     controller.notify();
     if (mounted) setState(() => _typewriter = value);
+  }
+
+  /// Persists tidy-on-close; the shell picks it up through its refresh,
+  /// so the next note closed after an edit follows it.
+  Future<void> _toggleTidyOnClose(bool value) async {
+    final controller = widget.controller;
+    await controller.setTidyOnClose(enabled: value);
+    controller.notify();
+    if (mounted) setState(() => _tidyOnClose = value);
   }
 
   /// Asks how wide the note column is.
@@ -512,6 +524,17 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               subtitle: AppStrings.indentWidthSubtitle,
               value: AppStrings.indentWidthValue(_indentWidth),
               onTap: () => unawaited(_chooseIndentWidth()),
+            ),
+          ),
+          // Next to the indentation: both decide how the library's
+          // Markdown is written out.
+          HighlightRow(
+            key: SettingsKeys.tidyOnClose,
+            child: SettingsSwitchRow(
+              title: AppStrings.tidyOnCloseTitle,
+              description: AppStrings.tidyOnCloseSubtitle,
+              value: _tidyOnClose,
+              onChanged: (value) => unawaited(_toggleTidyOnClose(value)),
             ),
           ),
           if (spell != null && spell.available) ...[

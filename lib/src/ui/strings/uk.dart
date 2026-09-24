@@ -1531,6 +1531,13 @@ final class UkrainianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override
+  String get tidyOnCloseTitle => 'Упорядковувати Markdown під час закриття';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Коли ви закриваєте нотатку, яку редагували, її Markdown '
+      'упорядковується, як командою «Упорядкувати Markdown». Нотатки понад '
+      '4 МБ залишаються як є.';
+  @override
   String get typewriterSubtitle =>
       'Рядок, який ви пишете, залишається посередині редактора';
   @override

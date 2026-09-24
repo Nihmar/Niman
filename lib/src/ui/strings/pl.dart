@@ -1545,6 +1545,13 @@ final class PolishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override
+  String get tidyOnCloseTitle => 'Porządkuj Markdown przy zamykaniu';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Gdy zamykasz edytowaną notatkę, jej Markdown jest porządkowany jak '
+      'poleceniem „Uporządkuj Markdown”. Notatki większe niż 4 MB pozostają '
+      'bez zmian.';
+  @override
   String get typewriterSubtitle =>
       'Wiersz, który piszesz, zostaje na środku edytora';
   @override

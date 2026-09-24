@@ -1395,6 +1395,11 @@ final class ChineseStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override
+  String get tidyOnCloseTitle => '关闭时整理 Markdown';
+  @override
+  String get tidyOnCloseSubtitle =>
+      '关闭编辑过的笔记时，其 Markdown 会像“整理 Markdown”命令一样被整理。超过 4 MB 的笔记保持原样。';
+  @override
   String get typewriterSubtitle => '让正在书写的行保持在编辑器中央';
   @override
   String get zenMode => '禅模式';

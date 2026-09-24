@@ -137,6 +137,7 @@ final class NoteView extends StatefulWidget {
     this.active = true,
     this.initialMemento,
     this.onMemento,
+    this.onEditedNoteClosed,
     this.onLoaded,
     this.kindMode = true,
     this.onNoteKindChanged,
@@ -283,6 +284,12 @@ final class NoteView extends StatefulWidget {
   /// Receives where the note is left: when its tab goes behind another,
   /// and when the view goes away.
   final void Function(String path, NoteMemento memento)? onMemento;
+
+  /// Told the path of a note that was edited while it was open, once it is
+  /// closed — another note taking its place, or the view going away — and
+  /// its last edit is on disk: where the library tidies it
+  /// (`LibraryConfig.tidyOnClose`). A note only read is never reported.
+  final void Function(String path)? onEditedNoteClosed;
 
   /// Told the note's length once it is loaded: the tabs keep a note this
   /// large alive behind others only up to a point (#23).
@@ -627,6 +634,10 @@ final class _NoteViewState extends State<NoteView>
   int _revision = 0;
   int _lastSavedRevision = 0;
 
+  /// Whether the note on screen was edited since it was opened: what makes
+  /// its closing worth reporting ([NoteView.onEditedNoteClosed]).
+  bool _edited = false;
+
   /// Process-wide source of [_editSession] ids.
   static int _editSessions = 0;
 
@@ -733,9 +744,10 @@ final class _NoteViewState extends State<NoteView>
       // replaced by the incoming one (its text is read synchronously at the
       // start of _save, before the _load below resets the buffer). An
       // in-flight save already holds the outgoing text + path: skip.
-      if (!_saving && _revision != _lastSavedRevision) {
-        unawaited(_save(path: oldWidget.path));
-      }
+      final saved = !_saving && _revision != _lastSavedRevision
+          ? _save(path: oldWidget.path)
+          : _activeSave ?? Future<void>.value();
+      _closed(oldWidget.path, saved);
       // The tracker now sees the incoming path (the adapter reads it
       // live) — re-read the dirty set so the guard does not act on the
       // outgoing note.
@@ -771,7 +783,10 @@ final class _NoteViewState extends State<NoteView>
     _statsTimer?.cancel();
     _previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    if (_revision != _lastSavedRevision) unawaited(_save());
+    final saved = _revision != _lastSavedRevision
+        ? _save()
+        : _activeSave ?? Future<void>.value();
+    _closed(widget.path, saved);
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _sourceFind.dispose();
@@ -782,6 +797,25 @@ final class _NoteViewState extends State<NoteView>
     _previewScroll.dispose();
     _mathCache.dispose();
     super.dispose();
+  }
+
+  /// The note at [path] is closed: once [saved] — its last save — is on
+  /// disk, [NoteView.onEditedNoteClosed] hears of it, if it was edited
+  /// while it was open.
+  void _closed(String path, Future<void> saved) {
+    final edited = _edited;
+    _edited = false;
+    final report = widget.onEditedNoteClosed;
+    if (!edited || report == null) return;
+    unawaited(
+      saved.then(
+        (_) => report(path),
+        // A save that failed left the note as it was; there is nothing
+        // of this session's to tidy on disk.
+        onError: (Object error) =>
+            _log.warning('closed unsaved: $path ($error)'),
+      ),
+    );
   }
 
   /// Hands where the note at [path] was left to [NoteView.onMemento]:
@@ -1055,6 +1089,7 @@ final class _NoteViewState extends State<NoteView>
   /// everything downstream — the save debounce, the unsaved marker, the
   /// statistics, the preview text — is one code path for every mode.
   void _noteChanged({required int caretLine, SourceEdit? edit}) {
+    _edited = true;
     if (edit != null) {
       // Before the revision moves: the count follows the edit's own lines,
       // which is the whole point of keeping it per line.

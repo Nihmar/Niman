@@ -10,6 +10,8 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 
+import '../fakes/fake_library_session.dart';
+
 void main() {
   // Every field away from its default, so a field `copyWith` forgets comes
   // back as the default and the comparison sees it.
@@ -26,6 +28,7 @@ void main() {
     indentWidth: 4,
     treeSort: TreeSort.nameDesc,
     treeWidth: 321,
+    tidyOnClose: false,
   );
 
   test('a copy that changes nothing is the same settings', () {
@@ -48,6 +51,19 @@ void main() {
       expect(copy.missingNoteLocation, MissingNoteLocation.libraryRoot);
       expect(copy.attachmentsFolder, 'media');
       expect(copy.indentWidth, 4);
+      expect(copy.tidyOnClose, isFalse);
     }
+  });
+
+  test('tidyOnClose tells two settings apart', () {
+    expect(settings.copyWith(tidyOnClose: true), isNot(settings));
+    expect(ShellEditorSettings.defaults.tidyOnClose, isTrue);
+  });
+
+  test('the read picks up tidyOnClose from the library', () async {
+    final session = FakeLibrarySession();
+    expect((await ShellEditorSettings.read(session)).tidyOnClose, isTrue);
+    await session.setTidyOnClose(enabled: false);
+    expect((await ShellEditorSettings.read(session)).tidyOnClose, isFalse);
   });
 }

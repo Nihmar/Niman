@@ -1428,6 +1428,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override
+  String get tidyOnCloseTitle => '閉じるときに Markdown を整える';
+  @override
+  String get tidyOnCloseSubtitle =>
+      '編集したノートを閉じると、「Markdown を整える」コマンドと同じように Markdown が整えられます。4 MB '
+      'を超えるノートはそのままです。';
+  @override
   String get typewriterSubtitle => '書いている行をエディタの中央に保つ';
   @override
   String get zenMode => 'Zen モード';

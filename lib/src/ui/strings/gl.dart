@@ -1539,6 +1539,13 @@ final class GalicianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override
+  String get tidyOnCloseTitle => 'Arranxar o Markdown ao pechar';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Cando pechas unha nota que editaches, o seu Markdown arránxase como '
+      'coa orde «Arranxar o Markdown». As notas de máis de 4 MB quedan como '
+      'están.';
+  @override
   String get typewriterSubtitle =>
       'Mantén a liña que escribes no medio do editor';
   @override

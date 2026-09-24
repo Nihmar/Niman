@@ -1520,6 +1520,13 @@ final class SlovenianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override
+  String get tidyOnCloseTitle => 'Pospravi Markdown ob zaprtju';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Ko zaprete zapisek, ki ste ga urejali, se njegov Markdown pospravi '
+      'kot z ukazom „Pospravi Markdown“. Zapiski, večji od 4 MB, ostanejo '
+      'takšni, kot so.';
+  @override
   String get typewriterSubtitle =>
       'Vrstica, ki jo pišete, ostane na sredini urejevalnika';
   @override

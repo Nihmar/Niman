@@ -12,6 +12,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
+import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -389,6 +390,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setReminderShowTokens({required bool enabled}) async {
     _config = _config.copyWith(reminderShowTokens: enabled);
+  }
+
+  @override
+  Future<bool> get tidyOnClose async => _config.tidyOnClose;
+
+  @override
+  Future<void> setTidyOnClose({required bool enabled}) async {
+    _config = _config.copyWith(tidyOnClose: enabled);
   }
 
   @override
@@ -814,6 +823,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     streamedSaves.add((path, text, editSession));
     (_findRow(path) ?? _addRow(path, isDir: false)).content = text;
     _bump();
+  }
+
+  /// Every [tidyNote] call, in order.
+  final List<String> tidied = [];
+
+  @override
+  Future<bool> tidyNote(String path) async {
+    tidied.add(path);
+    final row = _requireRow(path);
+    final tidy = formatMarkdown(row.content);
+    if (tidy == row.content) return false;
+    row.content = tidy;
+    _bump();
+    return true;
   }
 
   /// Kept versions by note path: `(version, text)`, oldest first.

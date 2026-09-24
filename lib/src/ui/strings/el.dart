@@ -1574,6 +1574,13 @@ final class GreekStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override
+  String get tidyOnCloseTitle => 'Τακτοποίηση του Markdown στο κλείσιμο';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Όταν κλείνετε μια σημείωση που επεξεργαστήκατε, το Markdown της '
+      'τακτοποιείται όπως με την εντολή «Τακτοποίηση του Markdown». Οι '
+      'σημειώσεις άνω των 4 MB μένουν όπως είναι.';
+  @override
   String get typewriterSubtitle =>
       'Η γραμμή που γράφετε μένει στη μέση του επεξεργαστή';
   @override

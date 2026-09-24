@@ -1508,6 +1508,13 @@ final class EstonianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override
+  String get tidyOnCloseTitle => 'Korrasta Markdown sulgemisel';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Kui sulged märkme, mida muutsid, korrastatakse selle Markdown nagu '
+      'käsuga „Korrasta Markdown“. Üle 4 MB märkmed jäävad nii, nagu need '
+      'on.';
+  @override
   String get typewriterSubtitle =>
       'Rida, mida kirjutad, püsib redaktori keskel';
   @override
