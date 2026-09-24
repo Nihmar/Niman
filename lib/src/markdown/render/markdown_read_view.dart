@@ -49,7 +49,6 @@ final class MarkdownReadView extends StatefulWidget {
     this.controller,
     this.padding = const EdgeInsets.symmetric(vertical: 8),
     this.column = NoteColumn.off,
-    this.lineNumbers = false,
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
@@ -78,10 +77,6 @@ final class MarkdownReadView extends StatefulWidget {
   /// The inset above and below the content, and any beyond the note's own
   /// on the sides ([noteTextInsets]).
   final EdgeInsets padding;
-
-  /// Whether the editor draws line numbers: the read view keeps their room
-  /// without drawing them, so its text stands where the editor's does.
-  final bool lineNumbers;
 
   /// The shell's note column: the text set in a centred column of its
   /// width, as the legacy preview and the source pane set it. Without it
@@ -739,15 +734,11 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         final pane = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
+        // No room for line numbers: a page that is only read draws none,
+        // and kept their gutter empty down its left.
         final insets = noteTextInsets(
           side: widget.column.sideSpaceIn(pane),
-          numbers: widget.lineNumbers
-              ? lineNumbersWidth(
-                  _shown!.lineCount,
-                  (_theme ?? _fallbackTheme).body,
-                  MediaQuery.textScalerOf(context),
-                )
-              : 0,
+          numbers: 0,
         );
         return _scrollView(
           heights,
