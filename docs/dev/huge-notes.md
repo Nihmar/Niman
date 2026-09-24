@@ -384,7 +384,7 @@ written next to it.
     the full scan lands. A jump past the top waits for it, and the place the
     reader reached in the top is kept when the whole note takes over.
 
-12. **A save's reindex works out again what the save had in hand.** Of the
+12. ~~**A save's reindex works out again what the save had in hand.**~~ Of the
     10.6 s a reindex of the stress note takes (item 8's table), the digest
     (1.9 s) and the tags and links (5.1 s) are the editor's own: the bytes
     went through the write, and the blocks are the scan the editor keeps.
@@ -393,8 +393,17 @@ written next to it.
       the reindex behind it takes that digest while the file is the one
       written, same size and time before its read and after
       (`KnownContent`).
-    - The tags and links: kept per block by the editor, the changed blocks
-      read again, and handed to the save.
+    - ~~The tags and links.~~ Done (2026-09-24): a note long enough to be
+      read in the background keeps them block by block
+      (`NoteReferenceCache`, read on that isolate with the scan). The block
+      scanner keeps a record of its splices per reader, so the cache
+      follows the edits the way the read pane's heights do — the entries of
+      the blocks an edit replaced go, the new ones are read when the save
+      asks, and a link definition changed reads the blocks whose Markdown
+      links it decided. The save hands them over with the text, and the
+      reindex takes them on the same terms as the digest. What a reindex
+      still reads is the text, for the full-text row: one row per note, and
+      FTS5 wants it whole.
 
 ## The statistics, measured on the 247 MB note
 

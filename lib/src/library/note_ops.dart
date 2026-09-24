@@ -16,6 +16,7 @@ import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 
@@ -460,8 +461,14 @@ final class NoteOps implements NoteOperations {
     String path,
     NoteContentProducer content, {
     int? editSession,
+    NoteReferences? references,
   }) async {
-    await writer.save(path, content, editSession: editSession);
+    await writer.save(
+      path,
+      content,
+      editSession: editSession,
+      references: references,
+    );
     _hint(path, SyncOpKind.changed);
   }
 

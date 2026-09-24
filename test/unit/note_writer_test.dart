@@ -9,6 +9,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_writer.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -138,6 +139,32 @@ void main() {
         await indexedSha('a.md'),
         sha256.convert(utf8.encode('the text')).toString(),
       );
+    });
+
+    Future<List<String>> indexedTags(String rel) async {
+      final row = (await indexer.dao.find(rel))!;
+      final tags = await (db.select(
+        db.noteTags,
+      )..where((t) => t.noteId.equals(row.id))).get();
+      return [for (final tag in tags) tag.tag];
+    }
+
+    test('the tags and links the editor kept are taken with it', () async {
+      // Reading them was 5.1 s of the stress note's reindex; the editor has
+      // them block by block. A tag the text does not have proves the index
+      // took the editor's.
+      const kept = NoteReferences(tags: ['from-the-editor'], links: []);
+      await waiting.save('a.md', 'first');
+      await waiting.indexed;
+      await waiting.save('a.md', 'the #text', references: kept);
+      await waiting.indexed;
+      expect(await indexedTags('a.md'), ['from-the-editor']);
+
+      // Changed on disk since: read from the file.
+      await waiting.save('a.md', 'the #text again', references: kept);
+      File(p.join(root.path, 'a.md')).writeAsStringSync('now #mine');
+      await waiting.indexed;
+      expect(await indexedTags('a.md'), ['mine']);
     });
 
     test('is not taken once the file changed', () async {

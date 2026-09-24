@@ -49,49 +49,82 @@ final class NoteReferences {
 NoteReferences noteReferencesOf(String text) {
   final buffer = SourceBuffer.fromText(text);
   final blocks = BlockScanner(buffer).index.blocks;
-  const masker = ExtensionMasker();
   final parser = BlockParser();
   DocumentScope? scope;
-  final tags = <String>{};
+  DocumentScope scopeOf() =>
+      scope ??= DocumentScope.scan(buffer, buffer.revision);
+  return collectReferences([
+    for (final block in blocks)
+      blockReferencesOf(block, buffer, parser, scopeOf),
+  ]);
+}
+
+/// The tags and links of one block: what a note's references are made of,
+/// block by block, for a reader that keeps them per block and reads again
+/// only the blocks an edit changed (`NoteReferenceCache`).
+///
+/// `scoped` says the answer read the note's link definitions — a
+/// Markdown link was parsed, and `[text][label]` is a link or not by them
+/// — so it is to be read again when they change.
+typedef BlockReferences = ({
+  List<String> tags,
+  List<ParsedLink> links,
+  bool scoped,
+});
+
+/// A block with no tag and no link.
+const BlockReferences noBlockReferences = (
+  tags: <String>[],
+  links: <ParsedLink>[],
+  scoped: false,
+);
+
+/// The references of [block] in [buffer]; [scope] is asked only when a
+/// Markdown link can be in it. A link's offsets are where the note had it
+/// when the block was read.
+BlockReferences blockReferencesOf(
+  Block block,
+  SourceBuffer buffer,
+  BlockParser parser,
+  DocumentScope Function() scope,
+) {
+  if (!_hasInlineText(block.kind)) return noBlockReferences;
+  final raw = BlockParser.blockText(block, buffer);
+  if (!raw.contains('#') && !raw.contains('[')) return noBlockReferences;
+  const masker = ExtensionMasker();
+  final tags = <String>[];
   final links = <ParsedLink>[];
-  for (final block in blocks) {
-    if (!_hasInlineText(block.kind)) continue;
-    final raw = BlockParser.blockText(block, buffer);
-    if (!raw.contains('#') && !raw.contains('[')) continue;
-    final source = _SourceOffsets(block, raw, buffer);
-    final masked = masker.mask(BlockParser.contentText(block, raw));
-    for (final span in masked.spans) {
-      switch (span.kind) {
-        case ExtensionKind.tag:
-          tags.add(normalizeTag(span.text));
-        case ExtensionKind.wikilink:
-          final ref = parseWikiRef(span.inner);
-          // `[[]]`, `[[|]]` and `[[#]]` carry nothing to resolve or show.
-          if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
-            continue;
-          }
-          links.add(
-            WikiLink(
-              start: source.of(span.start),
-              end: source.of(span.end),
-              ref: ref,
-            ),
-          );
-        case ExtensionKind.embed ||
-            ExtensionKind.inlineMath ||
-            ExtensionKind.displayMath ||
-            ExtensionKind.codeSpan:
-          break;
-      }
+  final source = _SourceOffsets(block, raw, buffer);
+  final masked = masker.mask(BlockParser.contentText(block, raw));
+  for (final span in masked.spans) {
+    switch (span.kind) {
+      case ExtensionKind.tag:
+        tags.add(normalizeTag(span.text));
+      case ExtensionKind.wikilink:
+        final ref = parseWikiRef(span.inner);
+        // `[[]]`, `[[|]]` and `[[#]]` carry nothing to resolve or show.
+        if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
+          continue;
+        }
+        links.add(
+          WikiLink(
+            start: source.of(span.start),
+            end: source.of(span.end),
+            ref: ref,
+          ),
+        );
+      case ExtensionKind.embed ||
+          ExtensionKind.inlineMath ||
+          ExtensionKind.displayMath ||
+          ExtensionKind.codeSpan:
+        break;
     }
-    // A Markdown link needs a `[` the masker left: one inside a wikilink, a
-    // code span or a formula is not the start of one.
-    if (!masked.text.contains('[')) continue;
-    final parsed = parser.parseText(
-      block,
-      _footnoteBodyAsText(raw),
-      () => scope ??= DocumentScope.scan(buffer, buffer.revision),
-    );
+  }
+  // A Markdown link needs a `[` the masker left: one inside a wikilink, a
+  // code span or a formula is not the start of one.
+  final scoped = masked.text.contains('[');
+  if (scoped) {
+    final parsed = parser.parseText(block, _footnoteBodyAsText(raw), scope);
     for (final run in parsed.runs) {
       final href = run.href;
       if (run.kind != StyleKind.link || href == null) continue;
@@ -107,7 +140,22 @@ NoteReferences noteReferencesOf(String text) {
       );
     }
   }
+  if (tags.isEmpty && links.isEmpty && !scoped) return noBlockReferences;
   links.sort((a, b) => a.start.compareTo(b.start));
+  return (tags: tags, links: links, scoped: scoped);
+}
+
+/// A note's references out of its blocks', given in the blocks' order: each
+/// tag once, in the order it first appears, and the links in the order the
+/// note has them.
+NoteReferences collectReferences(Iterable<BlockReferences> blocks) {
+  final tags = <String>{};
+  final links = <ParsedLink>[];
+  for (final block in blocks) {
+    if (identical(block, noBlockReferences)) continue;
+    tags.addAll(block.tags);
+    links.addAll(block.links);
+  }
   return NoteReferences(tags: tags.toList(), links: links);
 }
 

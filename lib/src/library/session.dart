@@ -15,6 +15,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
@@ -95,10 +96,14 @@ abstract interface class NoteOperations {
   /// The same save as [saveNote] in every other way — the same history
   /// step, the same bytes on disk, the same reindex behind it — for a note
   /// too long to join on the UI isolate (see `docs/dev/huge-notes.md`).
+  /// [references] are its tags and links as of the text, when the editor
+  /// keeps them: the reindex behind the save takes them instead of reading
+  /// the note for them.
   Future<void> saveNoteStream(
     String path,
     NoteContentProducer content, {
     int? editSession,
+    NoteReferences? references,
   });
 
   /// Tidies the note at [path]'s Markdown, in its turn among the note's

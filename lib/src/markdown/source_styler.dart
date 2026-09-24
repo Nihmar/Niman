@@ -28,6 +28,8 @@ library;
 import 'dart:collection';
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
+
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
@@ -35,6 +37,8 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/note_reference_cache.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
@@ -67,22 +71,69 @@ final class SourceStyler {
   /// The isolate reads a copy taken by the call, so the answer is of the
   /// revision [buffer] had then; a caller whose buffer moved on since drops
   /// it ([revision] says which it is).
+  ///
+  /// A note read this way is one long enough for its references to be kept
+  /// block by block ([references]), and the isolate reads them too: the
+  /// note's first save then hands the index what the edits changed rather
+  /// than the whole note's worth of reading.
   static Future<SourceStyler> inBackground(SourceBuffer buffer) async {
     final revision = buffer.revision;
-    final (scanner, scope, definers) = await Isolate.run(() {
+    final (scanner, scope, definers, references) = await Isolate.run(() {
       final definers = _definersOf(buffer);
+      final scanner = BlockScanner(buffer);
+      final scope = DocumentScope.ofLines(buffer, revision, definers);
       return (
-        BlockScanner(buffer),
-        DocumentScope.ofLines(buffer, revision, definers),
+        scanner,
+        scope,
         definers,
+        NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
       );
     });
-    return SourceStyler._adopt(
+    final styler = SourceStyler._adopt(
       buffer,
       BlockScanner.rebound(scanner, buffer),
       scope.on(buffer, revision),
       definers,
     ).._revision = revision;
+    styler._references.adopt(references);
+    // The record of what the edits do to the list starts at the list read.
+    styler._scanner.takeChanges(styler);
+    return styler;
+  }
+
+  /// The note's references, block by block, while they are kept: for a
+  /// note read in the background ([inBackground]), the long ones whose
+  /// reindex they spare.
+  final NoteReferenceCache _references = NoteReferenceCache();
+
+  /// The cache behind [references], for the tests that count its reads.
+  @visibleForTesting
+  NoteReferenceCache get referenceCache => _references;
+
+  /// The parser the references read their blocks with: the colours' own
+  /// keeps a count a test reads, of the blocks drawn.
+  final BlockParser _referenceParser = BlockParser();
+
+  /// The note's tags and links as of the buffer's revision, for its save
+  /// to hand the index — or null when they are not kept (a short note,
+  /// whose reindex reads them in no time), or the scan behind them is not
+  /// current ([settled]).
+  ///
+  /// O(blocks) to gather, and the blocks the edits changed since the last
+  /// call are read: a save of the 247 MB stress note reads the few blocks
+  /// written into, where the reindex read the note (5.1 s, item 8 of
+  /// `docs/dev/huge-notes.md`).
+  NoteReferences? references() {
+    if (!_references.kept || revision != buffer.revision || !settled) {
+      return null;
+    }
+    _references.follow(_scanner.takeChanges(this));
+    return _references.references(
+      _scanner.index.blocks,
+      buffer,
+      _referenceParser,
+      () => _scope,
+    );
   }
 
   /// The text being coloured.
@@ -161,7 +212,15 @@ final class SourceStyler {
     _byStart.clear();
     if (_touchesDefinitions(edit)) {
       final scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
-      if (!_sameDefinitions(scope, _scope)) _parses.clear();
+      if (!_sameDefinitions(scope, _scope)) {
+        _parses.clear();
+        if (_references.kept) {
+          // By block index, so on the list as it is now.
+          _references
+            ..follow(_scanner.takeChanges(this))
+            ..definitionsChanged();
+        }
+      }
       _scope = scope;
     }
   }
