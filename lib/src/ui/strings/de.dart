@@ -247,11 +247,73 @@ final class GermanStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Dunkel';
   @override
-  String get themePaletteTitle => 'Farbpalette';
+  String get themeTitle => 'Design';
   @override
-  String get themePaletteSubtitle => 'Die Farben der Oberfläche und der Notiz';
+  String get themeSubtitle => 'Die Farben der Oberfläche und der Notiz';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Designs';
+  @override
+  String get themesInUse => 'In Verwendung';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Neues Design';
+  @override
+  String get themeNewName => 'Name';
+  @override
+  String get themeNewStartFrom => 'Beginnen mit';
+  @override
+  String get themeNewRandom => 'Zufällige Farben';
+  @override
+  String get themeNameTaken => 'Ein Design mit diesem Namen gibt es schon';
+  @override
+  String themeDeleteBody(String name) =>
+      '„$name“ löschen? Seine Farben sind dann endgültig weg.';
+  @override
+  String get themeDuplicate => 'Duplizieren';
+  @override
+  String get themeMenuTooltip => 'Design-Aktionen';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Bearbeiten';
+  @override
+  String get themeEditorTitle => 'Design bearbeiten';
+  @override
+  String get themeEditorChrome => 'Oberfläche';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Jede Farbe heißt so, wie die exportierte Datei sie nennt';
+  @override
+  String get themeEditorDiscardTitle => 'Änderungen verwerfen';
+  @override
+  String get themeEditorDiscardBody =>
+      'Die Farben, die du geändert hast, werden nicht gespeichert';
+  @override
+  String get themeEditorDiscard => 'Verwerfen';
+  @override
+  String get themeEditorBadColor => '#RRGGBB verwenden';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportieren';
+  @override
+  String themeExportDone(String where) => 'Design exportiert nach $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Das Design konnte nicht übertragen werden: $error';
+  @override
+  String get themeImport => 'Importieren';
+  @override
+  String get themeImportInvalid => 'Diese Datei ist kein Niman-Design';
+  @override
+  String themeImportVersion(int version) =>
+      'Dieses Design stammt aus einem neueren Niman (Version $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Die Datei gibt keine Farbe für „$role“ an';
 
   // Settings: text size (T-M6-12).
   @override

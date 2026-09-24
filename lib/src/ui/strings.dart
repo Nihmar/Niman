@@ -211,8 +211,35 @@ final class AppStrings {
   static String get themeBrightnessSystem => _s.themeBrightnessSystem;
   static String get themeBrightnessDay => _s.themeBrightnessDay;
   static String get themeBrightnessNight => _s.themeBrightnessNight;
-  static String get themePaletteTitle => _s.themePaletteTitle;
-  static String get themePaletteSubtitle => _s.themePaletteSubtitle;
+  static String get themeTitle => _s.themeTitle;
+  static String get themeSubtitle => _s.themeSubtitle;
+  static String get settingsSectionThemes => _s.settingsSectionThemes;
+  static String get themesInUse => _s.themesInUse;
+  static String get themeNewTitle => _s.themeNewTitle;
+  static String get themeNewName => _s.themeNewName;
+  static String get themeNewStartFrom => _s.themeNewStartFrom;
+  static String get themeNewRandom => _s.themeNewRandom;
+  static String get themeNameTaken => _s.themeNameTaken;
+  static String themeDeleteBody(String name) => _s.themeDeleteBody(name);
+  static String get themeDuplicate => _s.themeDuplicate;
+  static String get themeMenuTooltip => _s.themeMenuTooltip;
+  static String get themeEdit => _s.themeEdit;
+  static String get themeEditorTitle => _s.themeEditorTitle;
+  static String get themeEditorChrome => _s.themeEditorChrome;
+  static String get themeEditorMarkdown => _s.themeEditorMarkdown;
+  static String get themeEditorRolesHint => _s.themeEditorRolesHint;
+  static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
+  static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;
+  static String get themeEditorDiscard => _s.themeEditorDiscard;
+  static String get themeEditorBadColor => _s.themeEditorBadColor;
+  static String get themeExport => _s.themeExport;
+  static String themeExportDone(String where) => _s.themeExportDone(where);
+  static String themeFileFailed(String error) => _s.themeFileFailed(error);
+  static String get themeImport => _s.themeImport;
+  static String get themeImportInvalid => _s.themeImportInvalid;
+  static String themeImportVersion(int version) =>
+      _s.themeImportVersion(version);
+  static String themeImportBadRole(String role) => _s.themeImportBadRole(role);
 
   /// The device-colors palette. Named for what it does rather than for
   /// Material You: on a device that offers nothing it is the colors the

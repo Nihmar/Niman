@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/diff/two_way_merge.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 
 /// Merges two sides over their [base], or without one when it is null;
 /// the default runs off the UI isolate for long texts.

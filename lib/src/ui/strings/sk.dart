@@ -247,11 +247,71 @@ final class SlovakStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tmavé';
   @override
-  String get themePaletteTitle => 'Farbová paleta';
+  String get themeTitle => 'Téma';
   @override
-  String get themePaletteSubtitle => 'Farby rozhrania a poznámky';
+  String get themeSubtitle => 'Farby rozhrania a poznámky';
   @override
   String get themePaletteSystem => 'Systém';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Témy';
+  @override
+  String get themesInUse => 'Používa sa';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nový motív';
+  @override
+  String get themeNewName => 'Názov';
+  @override
+  String get themeNewStartFrom => 'Začať od';
+  @override
+  String get themeNewRandom => 'Náhodné farby';
+  @override
+  String get themeNameTaken => 'Motív s týmto názvom už existuje';
+  @override
+  String themeDeleteBody(String name) =>
+      'Odstrániť „$name“? Jeho farby zmiznú navždy.';
+  @override
+  String get themeDuplicate => 'Duplikovať';
+  @override
+  String get themeMenuTooltip => 'Akcie motívu';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Upraviť';
+  @override
+  String get themeEditorTitle => 'Upraviť motív';
+  @override
+  String get themeEditorChrome => 'Rozhranie';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Každá farba sa volá ako v exportovanom súbore';
+  @override
+  String get themeEditorDiscardTitle => 'Zahodiť zmeny';
+  @override
+  String get themeEditorDiscardBody => 'Farby, ktoré ste zmenili, sa neuložia';
+  @override
+  String get themeEditorDiscard => 'Zahodiť';
+  @override
+  String get themeEditorBadColor => 'Použite #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportovať';
+  @override
+  String themeExportDone(String where) => 'Motív exportovaný do $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Motív sa nepodarilo preniesť: $error';
+  @override
+  String get themeImport => 'Importovať';
+  @override
+  String get themeImportInvalid => 'Tento súbor nie je motív Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Tento motív je z novšieho Nimanu (verzia $version)';
+  @override
+  String themeImportBadRole(String role) => 'Súbor neuvádza farbu pre „$role“';
 
   // Settings: text size (T-M6-12).
   @override

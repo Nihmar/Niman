@@ -245,12 +245,73 @@ final class DutchStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Donker';
   @override
-  String get themePaletteTitle => 'Kleurenpalet';
+  String get themeTitle => 'Thema';
   @override
-  String get themePaletteSubtitle =>
-      'De kleuren van de interface en van de notitie';
+  String get themeSubtitle => 'De kleuren van de interface en van de notitie';
   @override
   String get themePaletteSystem => 'Systeem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => "Thema's";
+  @override
+  String get themesInUse => 'In gebruik';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nieuw thema';
+  @override
+  String get themeNewName => 'Naam';
+  @override
+  String get themeNewStartFrom => 'Beginnen met';
+  @override
+  String get themeNewRandom => 'Willekeurige kleuren';
+  @override
+  String get themeNameTaken => 'Er bestaat al een thema met deze naam';
+  @override
+  String themeDeleteBody(String name) =>
+      '„$name” verwijderen? De kleuren zijn dan definitief weg.';
+  @override
+  String get themeDuplicate => 'Dupliceren';
+  @override
+  String get themeMenuTooltip => 'Thema-acties';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Bewerken';
+  @override
+  String get themeEditorTitle => 'Thema bewerken';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
+  @override
+  String get themeEditorDiscardTitle => 'Wijzigingen verwerpen';
+  @override
+  String get themeEditorDiscardBody =>
+      'De kleuren die je hebt gewijzigd worden niet opgeslagen';
+  @override
+  String get themeEditorDiscard => 'Verwerpen';
+  @override
+  String get themeEditorBadColor => 'Gebruik #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exporteren';
+  @override
+  String themeExportDone(String where) => 'Thema geëxporteerd naar $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Het thema kon niet worden verplaatst: $error';
+  @override
+  String get themeImport => 'Importeren';
+  @override
+  String get themeImportInvalid => 'Dit bestand is geen Niman-thema';
+  @override
+  String themeImportVersion(int version) =>
+      'Dit thema komt uit een nieuwere Niman (versie $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Het bestand geeft geen kleur voor „$role”';
 
   // Settings: text size (T-M6-12).
   @override

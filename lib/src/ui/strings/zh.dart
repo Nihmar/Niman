@@ -226,11 +226,67 @@ final class ChineseStrings extends Strings {
   @override
   String get themeBrightnessNight => '深色';
   @override
-  String get themePaletteTitle => '配色';
+  String get themeTitle => '主题';
   @override
-  String get themePaletteSubtitle => '界面和笔记的颜色';
+  String get themeSubtitle => '界面和笔记的颜色';
   @override
   String get themePaletteSystem => '跟随系统';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => '主题';
+  @override
+  String get themesInUse => '使用中';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => '新建主题';
+  @override
+  String get themeNewName => '名称';
+  @override
+  String get themeNewStartFrom => '基于';
+  @override
+  String get themeNewRandom => '随机配色';
+  @override
+  String get themeNameTaken => '已存在同名主题';
+  @override
+  String themeDeleteBody(String name) => '删除“$name”?其颜色将永久丢失。';
+  @override
+  String get themeDuplicate => '创建副本';
+  @override
+  String get themeMenuTooltip => '主题操作';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => '编辑';
+  @override
+  String get themeEditorTitle => '编辑主题';
+  @override
+  String get themeEditorChrome => '界面';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint => '每个颜色的名称与导出文件一致';
+  @override
+  String get themeEditorDiscardTitle => '放弃更改';
+  @override
+  String get themeEditorDiscardBody => '你改动的颜色不会被保存';
+  @override
+  String get themeEditorDiscard => '放弃';
+  @override
+  String get themeEditorBadColor => '请使用 #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => '导出';
+  @override
+  String themeExportDone(String where) => '主题已导出到 $where';
+  @override
+  String themeFileFailed(String error) => '无法移动主题:$error';
+  @override
+  String get themeImport => '导入';
+  @override
+  String get themeImportInvalid => '该文件不是 Niman 主题';
+  @override
+  String themeImportVersion(int version) => '该主题来自更新的 Niman(版本 $version)';
+  @override
+  String themeImportBadRole(String role) => '文件中没有“$role”的颜色';
 
   // Settings: text size (T-M6-12).
   @override

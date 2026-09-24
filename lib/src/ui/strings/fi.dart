@@ -244,11 +244,71 @@ final class FinnishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tumma';
   @override
-  String get themePaletteTitle => 'Väripaletti';
+  String get themeTitle => 'Teema';
   @override
-  String get themePaletteSubtitle => 'Käyttöliittymän ja muistiinpanon värit';
+  String get themeSubtitle => 'Käyttöliittymän ja muistiinpanon värit';
   @override
   String get themePaletteSystem => 'Järjestelmä';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teemat';
+  @override
+  String get themesInUse => 'Käytössä';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Uusi teema';
+  @override
+  String get themeNewName => 'Nimi';
+  @override
+  String get themeNewStartFrom => 'Aloita';
+  @override
+  String get themeNewRandom => 'Satunnaiset värit';
+  @override
+  String get themeNameTaken => 'Samanniminen teema on jo olemassa';
+  @override
+  String themeDeleteBody(String name) =>
+      'Poistetaanko „$name“? Sen värit katoavat lopullisesti.';
+  @override
+  String get themeDuplicate => 'Kopioi';
+  @override
+  String get themeMenuTooltip => 'Teeman toiminnot';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Muokkaa';
+  @override
+  String get themeEditorTitle => 'Muokkaa teemaa';
+  @override
+  String get themeEditorChrome => 'Käyttöliittymä';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Jokainen väri on nimetty viedyn tiedoston mukaan';
+  @override
+  String get themeEditorDiscardTitle => 'Hylkää muutokset';
+  @override
+  String get themeEditorDiscardBody => 'Muuttamiasi värejä ei tallenneta';
+  @override
+  String get themeEditorDiscard => 'Hylkää';
+  @override
+  String get themeEditorBadColor => 'Käytä muotoa #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Vie';
+  @override
+  String themeExportDone(String where) => 'Teema viety kohteeseen $where';
+  @override
+  String themeFileFailed(String error) => 'Teemaa ei voitu siirtää: $error';
+  @override
+  String get themeImport => 'Tuo';
+  @override
+  String get themeImportInvalid => 'Tämä tiedosto ei ole Niman-teema';
+  @override
+  String themeImportVersion(int version) =>
+      'Tämä teema on uudemmasta Nimanista (versio $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Tiedosto ei anna väriä kohteelle „$role“';
 
   // Settings: text size (T-M6-12).
   @override

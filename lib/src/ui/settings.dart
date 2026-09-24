@@ -366,6 +366,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     }
 
     Widget list() => ListView(
+      key: const Key('settings-areas'),
       padding: const EdgeInsets.only(bottom: 16),
       children: [
         SettingsSection(AppStrings.settingsGroupApp),

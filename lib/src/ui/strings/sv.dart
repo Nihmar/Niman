@@ -246,12 +246,71 @@ final class SwedishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Mörk';
   @override
-  String get themePaletteTitle => 'Färgpalett';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle =>
-      'Färgerna i gränssnittet och i anteckningen';
+  String get themeSubtitle => 'Färgerna i gränssnittet och i anteckningen';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teman';
+  @override
+  String get themesInUse => 'Används';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nytt tema';
+  @override
+  String get themeNewName => 'Namn';
+  @override
+  String get themeNewStartFrom => 'Utgå från';
+  @override
+  String get themeNewRandom => 'Slumpmässiga färger';
+  @override
+  String get themeNameTaken => 'Det finns redan ett tema med det namnet';
+  @override
+  String themeDeleteBody(String name) =>
+      'Ta bort ”$name”? Dess färger försvinner för gott.';
+  @override
+  String get themeDuplicate => 'Duplicera';
+  @override
+  String get themeMenuTooltip => 'Temaåtgärder';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Redigera';
+  @override
+  String get themeEditorTitle => 'Redigera tema';
+  @override
+  String get themeEditorChrome => 'Gränssnitt';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Varje färg heter det den exporterade filen kallar den';
+  @override
+  String get themeEditorDiscardTitle => 'Kasta ändringarna';
+  @override
+  String get themeEditorDiscardBody => 'Färgerna du ändrade sparas inte';
+  @override
+  String get themeEditorDiscard => 'Kasta';
+  @override
+  String get themeEditorBadColor => 'Använd #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportera';
+  @override
+  String themeExportDone(String where) => 'Temat exporterades till $where';
+  @override
+  String themeFileFailed(String error) => 'Temat kunde inte flyttas: $error';
+  @override
+  String get themeImport => 'Importera';
+  @override
+  String get themeImportInvalid => 'Den filen är inte ett Niman-tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Detta tema kommer från en nyare Niman (version $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Filen anger ingen färg för ”$role”';
 
   // Settings: text size (T-M6-12).
   @override

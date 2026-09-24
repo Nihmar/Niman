@@ -249,11 +249,72 @@ final class BulgarianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Тъмна';
   @override
-  String get themePaletteTitle => 'Палитра на цветовете';
+  String get themeTitle => 'Тема';
   @override
-  String get themePaletteSubtitle => 'Цветовете на интерфейса и бележките';
+  String get themeSubtitle => 'Цветовете на интерфейса и бележките';
   @override
   String get themePaletteSystem => 'Система';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Теми';
+  @override
+  String get themesInUse => 'Използва се';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Нова тема';
+  @override
+  String get themeNewName => 'Име';
+  @override
+  String get themeNewStartFrom => 'Начало от';
+  @override
+  String get themeNewRandom => 'Случайни цветове';
+  @override
+  String get themeNameTaken => 'Вече има тема с това име';
+  @override
+  String themeDeleteBody(String name) =>
+      'Да изтриете „$name“? Цветовете му ще изчезнат завинаги.';
+  @override
+  String get themeDuplicate => 'Дублиране';
+  @override
+  String get themeMenuTooltip => 'Действия с тема';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Редактиране';
+  @override
+  String get themeEditorTitle => 'Редактиране на тема';
+  @override
+  String get themeEditorChrome => 'Интерфейс';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Всеки цвят е с името, което използва експортираният файл';
+  @override
+  String get themeEditorDiscardTitle => 'Отказ от промените';
+  @override
+  String get themeEditorDiscardBody =>
+      'Цветовете, които променихте, не са запазени';
+  @override
+  String get themeEditorDiscard => 'Откажи';
+  @override
+  String get themeEditorBadColor => 'Използвайте #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Изнасяне';
+  @override
+  String themeExportDone(String where) => 'Темата е изнесена в $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Темата не може да бъде преместена: $error';
+  @override
+  String get themeImport => 'Внасяне';
+  @override
+  String get themeImportInvalid => 'Този файл не е тема на Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Тази тема е от по-нова версия на Niman (версия $version)';
+  @override
+  String themeImportBadRole(String role) => 'Файлът не дава цвят за „$role“';
 
   // Settings: text size (T-M6-12).
   @override

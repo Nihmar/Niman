@@ -1,18 +1,22 @@
-// T-M6-05: the brightness and the palette are chosen in the settings,
-// they reach every screen at once, and they are still there next time.
+// T-M6-05 and issue #269: brightness and the theme are chosen on the
+// Themes page, they reach every screen at once, and they are still there
+// next time.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/sample_themes.dart';
 import '../fakes/shell_harness.dart';
 
 void main() {
@@ -77,37 +81,61 @@ void main() {
   ThemeData themeOfTree(WidgetTester tester) =>
       Theme.of(tester.element(find.byType(NoteTree)));
 
-  group('the settings rows', () {
-    testWidgets('brightness starts on the device, palette on Niman', (
+  group('the Themes page', () {
+    testWidgets('brightness starts on the device, the theme on Niman', (
       tester,
     ) async {
       await pumpSettings(tester);
-      await openArea(tester, const Key('settings-area-appearance'));
+      await openArea(tester, const Key('settings-area-themes'));
 
-      expect(find.byKey(const Key('theme-brightness-setting')), findsOneWidget);
-      expect(find.byKey(const Key('theme-palette-setting')), findsOneWidget);
-      // Brightness and language read "System"; a fresh install wears the
-      // app's own palette, so that row reads "Niman".
+      expect(find.byKey(SettingsKeys.brightness), findsOneWidget);
+      expect(find.byKey(SettingsKeys.theme), findsOneWidget);
+      // Brightness reads "System", and so does the theme by that name; a
+      // fresh install wears Niman's own colors.
       expect(find.text('System'), findsNWidgets(2));
       expect(find.text('Niman'), findsOneWidget);
+      // The mark sits on the theme in use, and nowhere else.
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('niman')),
+          matching: find.byIcon(Icons.check_circle),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('niman')),
+          matching: find.byIcon(Icons.circle_outlined),
+        ),
+        findsNothing,
+      );
     });
 
-    testWidgets('the palette is remembered and applied at once', (
-      tester,
-    ) async {
+    testWidgets('the colors left Appearance', (tester) async {
       await pumpSettings(tester);
       await openArea(tester, const Key('settings-area-appearance'));
-      await choose(
-        tester,
-        row: const Key('theme-palette-setting'),
-        value: AppPalette.gruvbox,
-      );
 
-      expect(await controller.themePalette, AppPalette.gruvbox);
-      expect(AppThemes.palette, AppPalette.gruvbox);
-      // The row reads what was picked.
-      expect(find.text('Gruvbox'), findsOneWidget);
-      // And the brightness stayed where it was.
+      expect(find.byKey(SettingsKeys.language), findsOneWidget);
+      expect(find.byKey(SettingsKeys.brightness), findsNothing);
+      expect(find.byKey(SettingsKeys.theme), findsNothing);
+    });
+
+    testWidgets('a theme is remembered and applied at once', (tester) async {
+      await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-themes'));
+      await tester.tap(find.byKey(SettingsKeys.themeRow('gruvbox')));
+      await tester.pumpAndSettle();
+
+      expect(await controller.theme, const BuiltinAppTheme(AppPalette.gruvbox));
+      expect(AppThemes.theme, const BuiltinAppTheme(AppPalette.gruvbox));
+      // The mark moved with it, and the brightness stayed where it was.
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('gruvbox')),
+          matching: find.byIcon(Icons.check_circle),
+        ),
+        findsOneWidget,
+      );
       expect(AppThemes.brightness, AppBrightness.system);
     });
 
@@ -115,38 +143,82 @@ void main() {
       tester,
     ) async {
       await pumpSettings(tester);
-      await openArea(tester, const Key('settings-area-appearance'));
+      await openArea(tester, const Key('settings-area-themes'));
       await choose(
         tester,
-        row: const Key('theme-brightness-setting'),
+        row: SettingsKeys.brightness,
         value: AppBrightness.night,
       );
 
       expect(await controller.themeBrightness, AppBrightness.night);
       expect(AppThemes.mode, ThemeMode.dark);
-      // The palette is untouched, so it stays on the install default.
-      expect(AppThemes.palette, AppPalette.niman);
+      // The theme is untouched, so it stays on the install default.
+      expect(AppThemes.theme, const BuiltinAppTheme(AppPalette.niman));
     });
 
-    testWidgets('every palette the app ships is offered', (tester) async {
+    testWidgets('every theme the app ships is offered', (tester) async {
       await pumpSettings(tester);
-      await openArea(tester, const Key('settings-area-appearance'));
-      await tester.tap(find.byKey(const Key('theme-palette-setting')));
-      await tester.pumpAndSettle();
+      await openArea(tester, const Key('settings-area-themes'));
 
       for (final palette in AppPalette.values) {
         expect(
-          find.byKey(Key('settings-choice-$palette')),
+          find.byKey(SettingsKeys.themeRow(palette.id)),
           findsOneWidget,
-          reason: '${palette.id} is not in the dialog',
+          reason: '${palette.id} is not in the list',
         );
       }
+    });
+
+    testWidgets("a theme of the user's own is listed and can be worn", (
+      tester,
+    ) async {
+      final custom = sampleCustomTheme(id: 'mine', name: 'My theme');
+      await controller.saveCustomTheme(custom);
+      await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-themes'));
+
+      expect(find.text('My theme'), findsOneWidget);
+      await tester.tap(find.byKey(SettingsKeys.themeRow('custom:mine')));
+      await tester.pumpAndSettle();
+
+      expect(await controller.theme, CustomAppTheme(custom));
+      expect(AppThemes.theme, CustomAppTheme(custom));
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('custom:mine')),
+          matching: find.byIcon(Icons.check_circle),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('niman')),
+          matching: find.byIcon(Icons.circle_outlined),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the list is a searchable row of its own', (tester) async {
+      await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-themes'));
+
+      // Every row keeps its own key, so nothing rides on the position it
+      // has in the list.
+      expect(find.byKey(SettingsKeys.themeRow('solarized')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('solarized')),
+          matching: find.byIcon(Icons.circle_outlined),
+        ),
+        findsOneWidget,
+      );
     });
   });
 
   group('what the choice reaches', () {
     testWidgets('the stored theme is on screen from the start', (tester) async {
-      await controller.setThemePalette(AppPalette.gruvbox);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.gruvbox));
       await controller.setThemeBrightness(AppBrightness.night);
 
       await pumpApp(tester);
@@ -157,15 +229,27 @@ void main() {
     });
 
     testWidgets('the Markdown colors travel with it', (tester) async {
-      await controller.setThemePalette(AppPalette.gruvbox);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.gruvbox));
       await pumpApp(tester);
 
       // The editor and the preview read them from the theme, not from a
-      // global: a palette change repaints them with everything else.
+      // global: a theme change repaints them with everything else.
       expect(
         SyntaxColors.of(tester.element(find.byType(NoteTree))),
         gruvboxSyntax(Brightness.light),
       );
+    });
+
+    testWidgets("a theme of the user's own reaches the app", (tester) async {
+      final custom = sampleCustomTheme();
+      // A theme the session cannot read back is not one it can wear.
+      await controller.saveCustomTheme(custom);
+      await controller.setTheme(CustomAppTheme(custom));
+      await pumpApp(tester);
+
+      final theme = themeOfTree(tester);
+      expect(theme.colorScheme.primary, sampleDayAccent);
+      expect(theme.colorScheme.surface, sampleDayBackground);
     });
 
     testWidgets('night is dark on a device set to light', (tester) async {
@@ -178,9 +262,9 @@ void main() {
     });
 
     testWidgets('the device colors reach a running app', (tester) async {
-      // The device's colors are the `system` palette; the app now installs
+      // The device's colors are the `system` theme; the app now installs
       // on its own, so this one has to be asked for.
-      await controller.setThemePalette(AppPalette.system);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.system));
       await pumpApp(tester);
       final before = themeOfTree(tester).colorScheme.primary;
 
@@ -198,8 +282,8 @@ void main() {
       expect(themeOfTree(tester).colorScheme.primary, isNot(before));
     });
 
-    testWidgets('a named palette ignores the device colors', (tester) async {
-      await controller.setThemePalette(AppPalette.gruvbox);
+    testWidgets('a named theme ignores the device colors', (tester) async {
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.gruvbox));
       await pumpApp(tester);
 
       AppThemes.setDeviceColors(
@@ -217,9 +301,9 @@ void main() {
       );
     });
 
-    testWidgets('the system palette wears the shipped seed with no device '
+    testWidgets('the system theme wears the shipped seed with no device '
         'colors', (tester) async {
-      await controller.setThemePalette(AppPalette.system);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.system));
       await pumpApp(tester);
 
       expect(

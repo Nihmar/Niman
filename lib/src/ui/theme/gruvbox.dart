@@ -5,7 +5,7 @@
 // interface, which is the color the theme is known by.
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 
 /// Gruvbox's chrome at [brightness].
 PaletteTokens gruvboxTokens(Brightness brightness) =>

@@ -246,11 +246,70 @@ final class UkrainianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Темна';
   @override
-  String get themePaletteTitle => 'Палітра кольорів';
+  String get themeTitle => 'Тема';
   @override
-  String get themePaletteSubtitle => 'Кольори інтерфейсу та нотаток';
+  String get themeSubtitle => 'Кольори інтерфейсу та нотаток';
   @override
   String get themePaletteSystem => 'Система';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Теми';
+  @override
+  String get themesInUse => 'Використовується';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Нова тема';
+  @override
+  String get themeNewName => 'Назва';
+  @override
+  String get themeNewStartFrom => 'Почати з';
+  @override
+  String get themeNewRandom => 'Випадкові кольори';
+  @override
+  String get themeNameTaken => 'Тема з такою назвою вже є';
+  @override
+  String themeDeleteBody(String name) =>
+      'Видалити «$name»? Його кольори зникнуть назавжди.';
+  @override
+  String get themeDuplicate => 'Дублювати';
+  @override
+  String get themeMenuTooltip => 'Дії з темою';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Редагувати';
+  @override
+  String get themeEditorTitle => 'Редагувати тему';
+  @override
+  String get themeEditorChrome => 'Інтерфейс';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Кожен колір названо так, як у файлі експорту';
+  @override
+  String get themeEditorDiscardTitle => 'Скасувати зміни';
+  @override
+  String get themeEditorDiscardBody => 'Кольори, які ви змінили, не збережено';
+  @override
+  String get themeEditorDiscard => 'Скасувати';
+  @override
+  String get themeEditorBadColor => 'Використайте #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Експортувати';
+  @override
+  String themeExportDone(String where) => 'Тему експортовано до $where';
+  @override
+  String themeFileFailed(String error) => 'Тему не вдалося перенести: $error';
+  @override
+  String get themeImport => 'Імпортувати';
+  @override
+  String get themeImportInvalid => 'Цей файл не є темою Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Ця тема з новішого Niman (версія $version)';
+  @override
+  String themeImportBadRole(String role) => 'Файл не дає кольору для «$role»';
 
   // Settings: text size (T-M6-12).
   @override

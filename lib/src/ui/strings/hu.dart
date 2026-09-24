@@ -243,11 +243,73 @@ final class HungarianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Sötét';
   @override
-  String get themePaletteTitle => 'Színpaletta';
+  String get themeTitle => 'Téma';
   @override
-  String get themePaletteSubtitle => 'A felület és a jegyzet színei';
+  String get themeSubtitle => 'A felület és a jegyzet színei';
   @override
   String get themePaletteSystem => 'Rendszer';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Témák';
+  @override
+  String get themesInUse => 'Használatban';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Új motívum';
+  @override
+  String get themeNewName => 'Név';
+  @override
+  String get themeNewStartFrom => 'Kiindulás';
+  @override
+  String get themeNewRandom => 'Véletlen színek';
+  @override
+  String get themeNameTaken => 'Már van ilyen nevű motívum';
+  @override
+  String themeDeleteBody(String name) =>
+      'Törli a(z) „$name” motívumot? A színei végleg elvesznek.';
+  @override
+  String get themeDuplicate => 'Duplikálás';
+  @override
+  String get themeMenuTooltip => 'Motívumműveletek';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Szerkesztés';
+  @override
+  String get themeEditorTitle => 'Motívum szerkesztése';
+  @override
+  String get themeEditorChrome => 'Felület';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Minden szín neve az exportált fájlban szereplő név';
+  @override
+  String get themeEditorDiscardTitle => 'Módosítások elvetése';
+  @override
+  String get themeEditorDiscardBody =>
+      'A módosított színek nem kerülnek mentésre';
+  @override
+  String get themeEditorDiscard => 'Elvetés';
+  @override
+  String get themeEditorBadColor => 'Használj #RRGGBB alakot';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportálás';
+  @override
+  String themeExportDone(String where) => 'Motívum exportálva ide: $where';
+  @override
+  String themeFileFailed(String error) =>
+      'A motívumot nem sikerült átmozgatni: $error';
+  @override
+  String get themeImport => 'Importálás';
+  @override
+  String get themeImportInvalid => 'Ez a fájl nem Niman-motívum';
+  @override
+  String themeImportVersion(int version) =>
+      'Ez a motívum újabb Nimanból származik (verzió: $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'A fájl nem ad színt ehhez: „$role”';
 
   // Settings: text size (T-M6-12).
   @override

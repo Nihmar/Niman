@@ -1,31 +1,37 @@
 import 'dart:ui' show Brightness;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/widget/widget_theme.dart';
+
+import '../fakes/sample_themes.dart';
 
 void main() {
   group('resolveWidgetTheme', () {
     test('day forces light, night forces dark', () {
-      AppThemes.apply(brightness: AppBrightness.day, palette: AppPalette.niman);
+      AppThemes.apply(
+        brightness: AppBrightness.day,
+        theme: const BuiltinAppTheme(AppPalette.niman),
+      );
       final day = resolveWidgetTheme(platform: Brightness.dark);
       expect(day.dark, isFalse);
       AppThemes.apply(
         brightness: AppBrightness.night,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
       final night = resolveWidgetTheme(platform: Brightness.light);
       expect(night.dark, isTrue);
       AppThemes.apply(
         brightness: AppBrightness.system,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
     });
 
     test('system follows the platform', () {
       AppThemes.apply(
         brightness: AppBrightness.system,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
       expect(resolveWidgetTheme(platform: Brightness.dark).dark, isTrue);
       expect(resolveWidgetTheme(platform: Brightness.light).dark, isFalse);
@@ -34,7 +40,7 @@ void main() {
     test('colors are opaque-friendly #AARRGGBB hex', () {
       AppThemes.apply(
         brightness: AppBrightness.night,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
       final theme = resolveWidgetTheme(platform: Brightness.dark);
       for (final color in [
@@ -49,25 +55,41 @@ void main() {
       expect(theme.background.substring(1, 3), 'E6');
       AppThemes.apply(
         brightness: AppBrightness.system,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
     });
 
     test('the palette moves the accent', () {
       AppThemes.apply(
         brightness: AppBrightness.night,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
       final niman = resolveWidgetTheme(platform: Brightness.dark);
       AppThemes.apply(
         brightness: AppBrightness.night,
-        palette: AppPalette.gruvbox,
+        theme: const BuiltinAppTheme(AppPalette.gruvbox),
       );
       final gruvbox = resolveWidgetTheme(platform: Brightness.dark);
       expect(gruvbox.accent, isNot(niman.accent));
       AppThemes.apply(
         brightness: AppBrightness.system,
-        palette: AppPalette.niman,
+        theme: const BuiltinAppTheme(AppPalette.niman),
+      );
+    });
+
+    test('a custom theme reaches the widgets too', () {
+      final custom = sampleCustomTheme();
+      AppThemes.apply(
+        brightness: AppBrightness.night,
+        theme: CustomAppTheme(custom),
+      );
+      final theme = resolveWidgetTheme(platform: Brightness.light);
+      expect(theme.dark, isTrue);
+      // The widget wears the custom theme's accent, not the shipped one.
+      expect(theme.accent, '#FF7FD1C1');
+      AppThemes.apply(
+        brightness: AppBrightness.system,
+        theme: const BuiltinAppTheme(AppPalette.niman),
       );
     });
   });

@@ -246,11 +246,70 @@ final class LithuanianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tamsi';
   @override
-  String get themePaletteTitle => 'Spalvų paletė';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Sąsajos ir pastabų spalvos';
+  String get themeSubtitle => 'Sąsajos ir pastabų spalvos';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temos';
+  @override
+  String get themesInUse => 'Naudojama';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nauja tema';
+  @override
+  String get themeNewName => 'Pavadinimas';
+  @override
+  String get themeNewStartFrom => 'Pradėti nuo';
+  @override
+  String get themeNewRandom => 'Atsitiktinės spalvos';
+  @override
+  String get themeNameTaken => 'Tema tokiu pavadinimu jau yra';
+  @override
+  String themeDeleteBody(String name) =>
+      'Ištrinti „$name“? Jos spalvos dings visam laikui.';
+  @override
+  String get themeDuplicate => 'Dubliuoti';
+  @override
+  String get themeMenuTooltip => 'Temos veiksmai';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Redaguoti';
+  @override
+  String get themeEditorTitle => 'Redaguoti temą';
+  @override
+  String get themeEditorChrome => 'Sąsaja';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Kiekviena spalva pavadinta taip, kaip eksportuotame faile';
+  @override
+  String get themeEditorDiscardTitle => 'Atmesti pakeitimus';
+  @override
+  String get themeEditorDiscardBody => 'Pakeistos spalvos nebus išsaugotos';
+  @override
+  String get themeEditorDiscard => 'Atmesti';
+  @override
+  String get themeEditorBadColor => 'Naudokite #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksportuoti';
+  @override
+  String themeExportDone(String where) => 'Tema eksportuota į $where';
+  @override
+  String themeFileFailed(String error) => 'Temos perkelti nepavyko: $error';
+  @override
+  String get themeImport => 'Importuoti';
+  @override
+  String get themeImportInvalid => 'Šis failas nėra Niman tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Ši tema iš naujesnio Niman (versija $version)';
+  @override
+  String themeImportBadRole(String role) => 'Failas nenurodo spalvos „$role“';
 
   // Settings: text size (T-M6-12).
   @override

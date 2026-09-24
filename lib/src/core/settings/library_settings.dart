@@ -167,19 +167,19 @@ final class AppSettingsRepo {
     );
   }
 
-  /// The stored palette (T-M6-05); a fresh install wears [AppPalette.niman].
-  Future<AppPalette> themePalette() async {
+  /// The stored theme (T-M6-05); a fresh install wears Niman's own
+  /// colors. The value is an id: a shipped palette's, or `custom:<id>`
+  /// for a theme of the user's own (issue #269).
+  Future<String> themeId() async {
     final rows = await _db.select(_db.appSettings).get();
-    return rows.isEmpty
-        ? AppPalette.niman
-        : AppPalette.fromId(rows.first.themePalette);
+    return rows.isEmpty ? AppPalette.niman.id : rows.first.themePalette;
   }
 
-  /// Persists the palette.
-  Future<void> setThemePalette(AppPalette palette) async {
+  /// Persists the theme id.
+  Future<void> setThemeId(String id) async {
     await _ensureRow();
     await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(themePalette: Value(palette.id)),
+      AppSettingsCompanion(themePalette: Value(id)),
     );
   }
 

@@ -19,6 +19,7 @@ library;
 
 import 'dart:ui' show Brightness, Color, PlatformDispatcher;
 
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
 
@@ -49,7 +50,7 @@ const String widgetThemeSecondaryKey = 'fs';
 const String widgetThemeAccentKey = 'ac';
 
 /// The theme the widgets wear right now: the app's brightness choice
-/// (the device brightness for `system`) in the app's palette.
+/// (the device brightness for `system`) in the app's theme.
 ///
 /// [platform] is injected in tests; production reads the dispatcher,
 /// which also answers in the background isolate.
@@ -60,7 +61,7 @@ WidgetTheme resolveWidgetTheme({Brightness? platform}) {
     AppBrightness.system =>
       platform ?? PlatformDispatcher.instance.platformBrightness,
   };
-  final scheme = paletteColors(AppThemes.palette, brightness).scheme;
+  final scheme = themeColors(AppThemes.effective, brightness).scheme;
   return (
     dark: brightness == Brightness.dark,
     // The card stays translucent like the shipped colors (#E6 alpha).

@@ -165,6 +165,33 @@ class LibraryDeviceSettings extends Table {
   Set<Column> get primaryKey => {libraryPath};
 }
 
+/// A theme of the user's own making (issue #269): its name and the
+/// colors it fills in at day and at night, as JSON role maps.
+///
+/// App-side on purpose, like [KnownLibraries]: a theme is how this
+/// installation looks, so a copied library folder must not carry someone
+/// else's colors and a synced library must not spread them. The name is
+/// unique without regard to case (the index the migration creates), so
+/// the list is one row per name and an import can say which name is
+/// taken.
+@DataClassName('CustomThemeRow')
+class CustomThemes extends Table {
+  /// The id the theme carries; the primary key.
+  TextColumn get id => text()();
+
+  /// What the user calls it.
+  TextColumn get name => text()();
+
+  /// The daylight colors, as `ThemeColors.toJson` writes them.
+  TextColumn get dayColors => text().named('day_colors')();
+
+  /// The night colors, the same shape.
+  TextColumn get nightColors => text().named('night_colors')();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// A library the app knows about: one row per entry on the home screen
 /// (T-ML-04).
 ///
@@ -350,6 +377,7 @@ class SyncOps extends Table {
     SyncOps,
     Workspaces,
     LibraryDeviceSettings,
+    CustomThemes,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -357,7 +385,16 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 29;
+  int get schemaVersion => 30;
+
+  /// The index that makes a custom theme's name unique without regard to
+  /// case, and the name it answers to (issue #269).
+  ///
+  /// SQLite compares text case-sensitively by default, and the list shows
+  /// one row per name: `Niman` and `niman` are one theme to the user, so
+  /// the index says the same. Created by hand because
+  /// [Migrator.createTable] makes tables, not the indexes on them.
+  static const String customThemeNameIndex = 'custom_themes_name';
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -412,17 +449,25 @@ class AppDatabase extends _$AppDatabase {
   /// databases gain `library_device_settings`, empty: each library fills
   /// its row from its `settings.json` the first time it is opened, and
   /// pre-v29 databases gain `sync_items.base_text`, null: the settings
-  /// files merge without a base until their next agreement records one.
+  /// files merge without a base until their next agreement records one,
+  /// and pre-v30 databases gain `custom_themes` (issue #269), empty: a
+  /// fresh install has no themes of its own, and an upgrade keeps the
+  /// shipped ones.
   ///
   /// v27 to v29 were numbered on two branches at once — one took v27 for
   /// the columns, the other v27 and v28 for the table and `base_text` — so
   /// a testing build of either may have stamped a database with a number
   /// whose step here is another one. Each of the three therefore looks at
   /// what the database has instead of trusting the number, and runs for
-  /// anything below v29.
+  /// anything below v29. v30 is the same story a third time: the themes
+  /// branch took v27 for `custom_themes`, so that step too looks for the
+  /// table rather than at the number.
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      await _createCustomThemeNameIndex(m);
+    },
     onUpgrade: (m, from, to) async {
       // Drift calls this for a downgrade too, and then writes the older
       // version over the newer one: a release opening a testing build's
@@ -615,6 +660,13 @@ class AppDatabase extends _$AppDatabase {
           'ALTER TABLE sync_items ADD COLUMN base_text TEXT',
         );
       }
+      // A themes testing build stamped v27 with the table already made.
+      if (from < 30) {
+        if (!await _hasTable('custom_themes')) {
+          await m.createTable(customThemes);
+        }
+        await _createCustomThemeNameIndex(m);
+      }
     },
   );
 
@@ -632,6 +684,14 @@ class AppDatabase extends _$AppDatabase {
     final rows = await customSelect('PRAGMA table_info($table)').get();
     return <String>{for (final row in rows) row.read<String>('name')};
   }
+
+  /// The unique index on a custom theme's name, for both the database
+  /// that is created fresh and the one being upgraded from below v30.
+  static Future<void> _createCustomThemeNameIndex(Migrator m) =>
+      m.database.customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS $customThemeNameIndex '
+        'ON custom_themes (name COLLATE NOCASE)',
+      );
 
   /// The columns v17 hands to the libraries (T-ML-10).
   ///

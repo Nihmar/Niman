@@ -117,8 +117,37 @@ abstract base class Strings {
   String get themeBrightnessSystem;
   String get themeBrightnessDay;
   String get themeBrightnessNight;
-  String get themePaletteTitle;
-  String get themePaletteSubtitle;
+  String get themeTitle;
+  String get themeSubtitle;
+
+  /// The settings area the colors live in, and the mark on the
+  /// theme in use (issue #269).
+  String get settingsSectionThemes;
+  String get themesInUse;
+  String get themeNewTitle;
+  String get themeNewName;
+  String get themeNewStartFrom;
+  String get themeNewRandom;
+  String get themeNameTaken;
+  String themeDeleteBody(String name);
+  String get themeDuplicate;
+  String get themeMenuTooltip;
+  String get themeEdit;
+  String get themeEditorTitle;
+  String get themeEditorChrome;
+  String get themeEditorMarkdown;
+  String get themeEditorRolesHint;
+  String get themeEditorDiscardTitle;
+  String get themeEditorDiscardBody;
+  String get themeEditorDiscard;
+  String get themeEditorBadColor;
+  String get themeExport;
+  String themeExportDone(String where);
+  String themeFileFailed(String error);
+  String get themeImport;
+  String get themeImportInvalid;
+  String themeImportVersion(int version);
+  String themeImportBadRole(String role);
   String get themePaletteSystem;
 
   // Settings: text size (T-M6-12).

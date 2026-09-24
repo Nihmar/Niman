@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/custom_theme_repo.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
+
+import '../fakes/sample_themes.dart';
 
 /// The `library_settings` table as it stood through v13, before T-ML-02
 /// dropped it. A rewound database has to bring it back itself: the
@@ -87,6 +90,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 30) await db.customStatement('DROP TABLE custom_themes');
   if (version < 29) await drop('sync_items', 'base_text');
   if (version < 28) {
     await db.customStatement('DROP TABLE library_device_settings');
@@ -747,7 +751,7 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final repo = AppSettingsRepo(db);
       expect(await repo.themeBrightness(), AppBrightness.system);
-      expect(await repo.themePalette(), AppPalette.system);
+      expect(await repo.themeId(), 'system');
       expect((await db.select(db.appSettings).get()).single.language, 'it');
       await db.close();
     });
@@ -756,21 +760,23 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final repo = AppSettingsRepo(db);
       await repo.setThemeBrightness(AppBrightness.night);
-      await repo.setThemePalette(AppPalette.gruvbox);
+      await repo.setThemeId('gruvbox');
 
       expect(await repo.themeBrightness(), AppBrightness.night);
-      expect(await repo.themePalette(), AppPalette.gruvbox);
+      expect(await repo.themeId(), 'gruvbox');
       await db.close();
     });
 
-    test('a palette this build never heard of reads as the default', () async {
-      // A settings row written by a later build, or edited by hand.
+    test('a stored id is kept as it is, never rewritten', () async {
+      // The id reads as a theme in `themeFromId`; storing it is what the
+      // repo does, and an id from a later build has to survive untouched
+      // for that build to find it again.
       final db = AppDatabase(NativeDatabase(dbFile));
       await db.customStatement(
         'INSERT INTO app_settings (id, theme_palette) '
         "VALUES (1, 'dracula')",
       );
-      expect(await AppSettingsRepo(db).themePalette(), AppPalette.system);
+      expect(await AppSettingsRepo(db).themeId(), 'dracula');
       await db.close();
     });
   });
@@ -821,6 +827,7 @@ void main() {
         'sync_ops',
         'workspaces',
         'library_device_settings',
+        'custom_themes',
       ]),
     );
     expect(await db.select(db.appSettings).get(), isEmpty);
@@ -1216,6 +1223,74 @@ void main() {
       final row = await db.select(db.syncItems).getSingle();
       expect(row.path, '.niman/settings.json');
       expect(row.baseText, equals(null));
+      await db.close();
+    });
+  });
+
+  group('v29 → v30: custom themes appear (#269)', () {
+    test("the themes branch's v27 opens with its themes kept", () async {
+      {
+        // A testing build of the themes branch stamped v27 on top of v26:
+        // the table there, the split columns too, nothing from v27–v29.
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 26);
+        await db.createMigrator().createTable(db.customThemes);
+        await db.customStatement(
+          'CREATE UNIQUE INDEX ${AppDatabase.customThemeNameIndex} '
+          'ON custom_themes (name COLLATE NOCASE)',
+        );
+        await CustomThemeRepo(db)
+            .save(sampleCustomTheme(id: 'mine', name: 'Mine'));
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path) '
+          "VALUES (1, '/lib/Work')",
+        );
+        await db.customStatement('PRAGMA user_version = 27');
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(
+        await CustomThemeRepo(db).byId('mine'),
+        sampleCustomTheme(id: 'mine', name: 'Mine'),
+      );
+      expect(await DbDeviceSettingsStore(db).read('/lib/Work'), equals(null));
+      final columns = await db
+          .customSelect('PRAGMA table_info(app_settings)')
+          .get();
+      expect(
+        columns.map((row) => row.read<String>('name')),
+        isNot(contains('preview_mode')),
+      );
+      await db.close();
+    });
+
+    test('an existing install upgrades with none of its own', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 29);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path) '
+          "VALUES (1, '/lib/Work')",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = CustomThemeRepo(db);
+      // Empty: the shipped palettes are still there, the user's own start
+      // from nothing.
+      expect(await repo.list(), isEmpty);
+
+      final theme = sampleCustomTheme(id: 'mine', name: 'Mine');
+      await repo.save(theme);
+      expect(await repo.byId('mine'), theme);
+
+      // The name index the migration had to create by hand, since
+      // `createTable` makes tables and not the indexes on them.
+      await expectLater(
+        repo.save(sampleCustomTheme(id: 'other', name: 'mine')),
+        throwsA(isA<Exception>()),
+      );
       await db.close();
     });
   });

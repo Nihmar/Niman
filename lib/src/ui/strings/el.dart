@@ -249,11 +249,73 @@ final class GreekStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Σκούρο';
   @override
-  String get themePaletteTitle => 'Παλέτα';
+  String get themeTitle => 'Θέμα';
   @override
-  String get themePaletteSubtitle => 'Χρώματα της διεπαφής και της σημείωσης';
+  String get themeSubtitle => 'Χρώματα της διεπαφής και της σημείωσης';
   @override
   String get themePaletteSystem => 'Σύστημα';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Θέματα';
+  @override
+  String get themesInUse => 'Σε χρήση';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Νέο θέμα';
+  @override
+  String get themeNewName => 'Όνομα';
+  @override
+  String get themeNewStartFrom => 'Αφετηρία';
+  @override
+  String get themeNewRandom => 'Τυχαία χρώματα';
+  @override
+  String get themeNameTaken => 'Υπάρχει ήδη θέμα με αυτό το όνομα';
+  @override
+  String themeDeleteBody(String name) =>
+      'Διαγραφή του «$name»; Τα χρώματά του χάνονται για πάντα.';
+  @override
+  String get themeDuplicate => 'Διπλότυπο';
+  @override
+  String get themeMenuTooltip => 'Ενέργειες θέματος';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Επεξεργασία';
+  @override
+  String get themeEditorTitle => 'Επεξεργασία θέματος';
+  @override
+  String get themeEditorChrome => 'Διεπαφή';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Κάθε χρώμα έχει το όνομα που χρησιμοποιεί το εξαγόμενο αρχείο';
+  @override
+  String get themeEditorDiscardTitle => 'Απόρριψη αλλαγών';
+  @override
+  String get themeEditorDiscardBody =>
+      'Τα χρώματα που άλλαξες δεν αποθηκεύονται';
+  @override
+  String get themeEditorDiscard => 'Απόρριψη';
+  @override
+  String get themeEditorBadColor => 'Χρησιμοποίησε #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Εξαγωγή';
+  @override
+  String themeExportDone(String where) => 'Το θέμα εξήχθη στο $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Το θέμα δεν μπόρεσε να μεταφερθεί: $error';
+  @override
+  String get themeImport => 'Εισαγωγή';
+  @override
+  String get themeImportInvalid => 'Το αρχείο δεν είναι θέμα του Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Αυτό το θέμα προέρχεται από νεότερο Niman (έκδοση $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Το αρχείο δεν δίνει χρώμα για «$role»';
 
   // Settings: text size (T-M6-12).
   @override
