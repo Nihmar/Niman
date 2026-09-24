@@ -106,6 +106,20 @@ The themes are the palettes Niman ships:
 | Solarized | Schoonover's light and dark |
 | Gruvbox | The medium light and dark variants |
 
+**Themes of your own.** *New theme*, at the end of the list, asks for a
+name and where the colors start from: a theme already in the list, shipped
+or your own, or *Random colors* — a complete theme invented around a random
+accent. Each theme in the list carries a ⋮ menu:
+
+- *Duplicate* makes a theme of your own out of the one it is on, named
+after it (`Gruvbox 2`) and worn at once. The shipped themes offer only
+this: they can be copied, not renamed away.
+- *Rename* and *Delete* act on your own themes. Deleting one asks first,
+and deleting the theme in use leaves the app Niman's own colors.
+
+Themes live on this device, in the app's own database — not in the
+library, so a copied library folder does not carry them.
+
 ### Sync
 
 **Sync → WebDAV** holds the open library's sync destination: folder

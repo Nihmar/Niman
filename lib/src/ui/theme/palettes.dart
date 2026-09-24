@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/theme_colors.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/theme/catppuccin.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
@@ -24,13 +25,20 @@ import 'package:niman/src/ui/theme/solarized.dart';
 /// falls back to where the OS has no colors to offer.
 const Color shippedSeed = Color(0xFF45475A);
 
-/// A theme resolved at one brightness: the Material scheme the whole
-/// interface reads, and the Markdown colors the editor and the preview
-/// paint with.
+/// A theme resolved at one brightness: the roles it fills in, the
+/// Material scheme the whole interface reads, and the Markdown colors the
+/// editor and the preview paint with.
+///
+/// The roles ride along because a custom theme is made by copying one:
+/// the colors a theme wears are exactly the tokens it was built from, and
+/// going back through the scheme would lose what the mapping did.
 @immutable
 final class PaletteColors {
-  /// Creates the pair.
-  const new({required this.scheme, required this.syntax});
+  /// Creates the trio.
+  const new({required this.tokens, required this.scheme, required this.syntax});
+
+  /// The roles the scheme was built from.
+  final PaletteTokens tokens;
 
   /// The Material scheme.
   final ColorScheme scheme;
@@ -73,6 +81,27 @@ ThemeData buildAppTheme(AppTheme theme, Brightness brightness) {
 }
 
 final Map<(AppTheme, Brightness, ColorScheme?), ThemeData> _themes = {};
+
+/// A custom theme made from [theme]: the colors it wears at day and at
+/// night, under [id] and [name] (issue #269).
+///
+/// The way a copy is made, and the way a shipped theme becomes one the
+/// user can edit: what is on screen is what gets stored, so a copy of the
+/// device's own colors is a fixed copy of them.
+CustomTheme customThemeCopyOf(
+  AppTheme theme, {
+  required String id,
+  required String name,
+}) {
+  final day = themeColors(theme, Brightness.light);
+  final night = themeColors(theme, Brightness.dark);
+  return CustomTheme(
+    id: id,
+    name: name,
+    day: ThemeColors(tokens: day.tokens, syntax: day.syntax),
+    night: ThemeColors(tokens: night.tokens, syntax: night.syntax),
+  );
+}
 
 /// A shipped palette at [brightness].
 PaletteColors _builtin(AppPalette palette, Brightness brightness) {
@@ -122,6 +151,18 @@ PaletteColors _deviceColors(Brightness brightness) {
       ? SyntaxColors.fallbackDark
       : SyntaxColors.fallbackLight;
   return PaletteColors(
+    tokens: PaletteTokens(
+      background: scheme.surface,
+      backdrop: scheme.surfaceContainerLowest,
+      surface: scheme.surfaceContainer,
+      surfaceHigh: scheme.surfaceContainerHigh,
+      text: scheme.onSurface,
+      muted: scheme.onSurfaceVariant,
+      outline: scheme.outline,
+      accent: scheme.primary,
+      onAccent: scheme.onPrimary,
+      error: scheme.error,
+    ),
     scheme: scheme,
     syntax: shipped.copyWith(wikilink: scheme.primary),
   );
@@ -131,5 +172,8 @@ PaletteColors _mapped(
   PaletteTokens tokens,
   SyntaxColors syntax,
   Brightness brightness,
-) =>
-    PaletteColors(scheme: schemeFromTokens(tokens, brightness), syntax: syntax);
+) => PaletteColors(
+  tokens: tokens,
+  scheme: schemeFromTokens(tokens, brightness),
+  syntax: syntax,
+);

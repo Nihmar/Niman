@@ -267,6 +267,24 @@ final class GalicianStrings extends Strings {
   String get settingsSectionThemes => 'Temas';
   @override
   String get themesInUse => 'En uso';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Tema novo';
+  @override
+  String get themeNewName => 'Nome';
+  @override
+  String get themeNewStartFrom => 'Partir de';
+  @override
+  String get themeNewRandom => 'Cores aleatorias';
+  @override
+  String get themeNameTaken => 'Xa existe un tema con ese nome';
+  @override
+  String themeDeleteBody(String name) =>
+      '¿Eliminar «$name»? As súas cores pérdense para sempre.';
+  @override
+  String get themeDuplicate => 'Duplicar';
+  @override
+  String get themeMenuTooltip => 'Accións do tema';
 
   // Settings: text size (T-M6-12).
   @override

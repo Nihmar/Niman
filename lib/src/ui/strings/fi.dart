@@ -263,6 +263,24 @@ final class FinnishStrings extends Strings {
   String get settingsSectionThemes => 'Teemat';
   @override
   String get themesInUse => 'Käytössä';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Uusi teema';
+  @override
+  String get themeNewName => 'Nimi';
+  @override
+  String get themeNewStartFrom => 'Aloita';
+  @override
+  String get themeNewRandom => 'Satunnaiset värit';
+  @override
+  String get themeNameTaken => 'Samanniminen teema on jo olemassa';
+  @override
+  String themeDeleteBody(String name) =>
+      'Poistetaanko „$name“? Sen värit katoavat lopullisesti.';
+  @override
+  String get themeDuplicate => 'Kopioi';
+  @override
+  String get themeMenuTooltip => 'Teeman toiminnot';
 
   // Settings: text size (T-M6-12).
   @override

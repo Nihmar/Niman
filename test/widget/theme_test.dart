@@ -81,12 +81,6 @@ void main() {
   ThemeData themeOfTree(WidgetTester tester) =>
       Theme.of(tester.element(find.byType(NoteTree)));
 
-  /// Whether the mark on [id]'s row says the app is wearing it.
-  Finder markOn(String id) => find.descendant(
-    of: find.byKey(SettingsKeys.themeRow(id)),
-    matching: find.byType(Icon),
-  );
-
   group('the Themes page', () {
     testWidgets('brightness starts on the device, the theme on Niman', (
       tester,
@@ -212,7 +206,13 @@ void main() {
       // Every row keeps its own key, so nothing rides on the position it
       // has in the list.
       expect(find.byKey(SettingsKeys.themeRow('solarized')), findsOneWidget);
-      expect(markOn('solarized'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(SettingsKeys.themeRow('solarized')),
+          matching: find.byIcon(Icons.circle_outlined),
+        ),
+        findsOneWidget,
+      );
     });
   });
 
@@ -242,6 +242,8 @@ void main() {
 
     testWidgets("a theme of the user's own reaches the app", (tester) async {
       final custom = sampleCustomTheme();
+      // A theme the session cannot read back is not one it can wear.
+      await controller.saveCustomTheme(custom);
       await controller.setTheme(CustomAppTheme(custom));
       await pumpApp(tester);
 

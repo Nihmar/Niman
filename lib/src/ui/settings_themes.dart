@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/theme_generator.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
+import 'package:niman/src/ui/theme/theme_dialogs.dart';
+import 'package:niman/src/ui/theme/theme_row.dart';
 
 /// The Themes area of the settings home (issue #269): how bright the app
-/// is, and the theme it wears — the palettes the app ships, and the
-/// themes the user made.
+/// is, and the theme it wears — the palettes the app ships, and the themes
+/// the user made.
 ///
 /// One page owns the app's look, brightness included: the two choices
 /// answer the same question, and splitting them across two screens made
@@ -28,8 +31,11 @@ final class SettingsThemesScreen extends StatefulWidget {
   /// The row the settings search landed on, flashed once.
   final Key? highlight;
 
+  /// The New theme row's key.
+  static const Key newTheme = Key('theme-new-action');
+
   /// What a shipped palette reads as, in the list, the search and the
-  /// dialog that explains it.
+  /// dialog that starts a new theme from it.
   static String builtinName(AppPalette palette) => switch (palette) {
     AppPalette.system => AppStrings.themePaletteSystem,
     AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
@@ -72,6 +78,20 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
     });
   }
 
+  /// Re-reads what an action may have changed: the themes themselves, and
+  /// the one in use, which a rename or a delete changes with the rows.
+  Future<void> _reload() async {
+    final controller = widget.controller;
+    final custom = await controller.customThemes();
+    final theme = await controller.theme;
+    if (!mounted) return;
+    AppThemes.theme = theme;
+    setState(() {
+      _custom = custom;
+      _theme = theme;
+    });
+  }
+
   /// Persists the brightness and applies it immediately (T-M6-05): the
   /// app root listens to [AppThemes] and rebuilds every screen.
   Future<void> _setBrightness(AppBrightness brightness) async {
@@ -108,12 +128,113 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
     if (brightness != null) await _setBrightness(brightness);
   }
 
+  /// The names the list already answers to, lowercased: the user's own,
+  /// and the shipped ones, which read just as much like a theme's name.
+  Set<String> get _takenNames => {
+    for (final theme in _custom) theme.name.toLowerCase(),
+    for (final palette in AppPalette.values)
+      SettingsThemesScreen.builtinName(palette).toLowerCase(),
+  };
+
   /// Every theme the page lists: the palettes the app ships, in their own
   /// order, then the user's own, by name.
   List<AppTheme> get _themes => [
     for (final palette in AppPalette.values) BuiltinAppTheme(palette),
     for (final theme in _custom) CustomAppTheme(theme),
   ];
+
+  /// Asks for a new theme and stores it, worn.
+  Future<void> _newTheme() async {
+    final request = await showNewThemeDialog(
+      context,
+      sources: [
+        for (final theme in _themes)
+          (theme: theme, label: SettingsThemesScreen.themeName(theme)),
+      ],
+      takenNames: _takenNames,
+    );
+    if (request == null || !mounted) return;
+    final from = request.from;
+    await _save(
+      from == null
+          ? randomCustomTheme(id: newCustomThemeId(), name: request.name)
+          : customThemeCopyOf(from, id: newCustomThemeId(), name: request.name),
+    );
+  }
+
+  /// Copies [theme] into a theme of the user's own, named after it.
+  Future<void> _duplicate(AppTheme theme) async {
+    await _save(
+      customThemeCopyOf(
+        theme,
+        id: newCustomThemeId(),
+        name: uniqueThemeName(
+          SettingsThemesScreen.themeName(theme),
+          _takenNames,
+        ),
+      ),
+    );
+  }
+
+  /// Stores [theme] and wears it: making one and copying one both end with
+  /// the new theme in front of the user, where it can be looked at.
+  Future<void> _save(CustomTheme theme) async {
+    await widget.controller.saveCustomTheme(theme);
+    await _setTheme(CustomAppTheme(theme));
+    await _reload();
+  }
+
+  /// Asks for another name and stores it.
+  Future<void> _rename(AppTheme theme) async {
+    if (theme is! CustomAppTheme) return;
+    final taken = _takenNames..remove(theme.theme.name.toLowerCase());
+    final name = await showThemeNameDialog(
+      context,
+      title: AppStrings.actionRename,
+      initial: theme.theme.name,
+      takenNames: taken,
+    );
+    if (name == null || !mounted) return;
+    await widget.controller.renameCustomTheme(theme.theme.id, name);
+    await _reload();
+  }
+
+  /// Asks first, then deletes [theme]; the theme in use falls back to the
+  /// app's own colors when the deleted one was it.
+  Future<void> _delete(AppTheme theme) async {
+    if (theme is! CustomAppTheme) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppStrings.actionDelete),
+        content: Text(AppStrings.themeDeleteBody(theme.theme.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppStrings.actionDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await widget.controller.deleteCustomTheme(theme.theme.id);
+    await _reload();
+  }
+
+  Future<void> _act(ThemeRowAction action, AppTheme theme) async {
+    switch (action) {
+      case ThemeRowAction.duplicate:
+        await _duplicate(theme);
+      case ThemeRowAction.rename:
+        await _rename(theme);
+      case ThemeRowAction.delete:
+        await _delete(theme);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,105 +260,30 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
           ),
           // The whole list is one searchable setting ("Theme"), so the
           // search lands on it and flashes it; each row keeps its own key
-          // for the tests and, later, for the actions that grow from its
-          // trailing edge (issue #269).
+          // for the tests and for the actions at its trailing edge.
           HighlightRow(
             key: SettingsKeys.theme,
             child: Column(
               children: [
                 for (final theme in _themes)
-                  _ThemeRow(
+                  ThemeRow(
                     key: SettingsKeys.themeRow(theme.id),
                     theme: theme,
+                    label: SettingsThemesScreen.themeName(theme),
                     selected: theme == _theme,
                     onTap: () => unawaited(_setTheme(theme)),
+                    onAction: (action) => unawaited(_act(action, theme)),
                   ),
+                SettingsActionRow(
+                  key: SettingsThemesScreen.newTheme,
+                  title: AppStrings.themeNewTitle,
+                  onTap: () => unawaited(_newTheme()),
+                ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-/// One theme in the list: what it is called, its colors at a glance, and
-/// the mark that says this is the one the app wears.
-///
-/// The mark keeps its place whether or not the theme is in use — outline
-/// for the ones that are not, filled for the one that is — so nothing on
-/// the row moves under a thumb already on it.
-final class _ThemeRow extends StatelessWidget {
-  /// Creates the row for [theme].
-  const new({
-    required this.theme,
-    required this.selected,
-    required this.onTap,
-    super.key,
-  });
-
-  /// The theme this row is about.
-  final AppTheme theme;
-
-  /// Whether the app is wearing it.
-  final bool selected;
-
-  /// Selects it.
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return SettingsRowFrame(
-      title: SettingsThemesScreen.themeName(theme),
-      onTap: onTap,
-      trailing: Icon(
-        selected ? Icons.check_circle : Icons.circle_outlined,
-        color: selected ? scheme.primary : scheme.onSurfaceVariant,
-        semanticLabel: selected ? AppStrings.themesInUse : null,
-      ),
-      control: _ThemeSwatches(theme: theme),
-    );
-  }
-}
-
-/// A theme's colors at a glance: the ground, the rows raised above it,
-/// the text on them, the accent that carries the interface and the error
-/// color, resolved at the brightness on screen so the strip reads the way
-/// choosing the theme would.
-final class _ThemeSwatches extends StatelessWidget {
-  /// Creates the strip for [theme].
-  const new({required this.theme});
-
-  /// The theme to show.
-  final AppTheme theme;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = themeColors(theme, Theme.of(context).brightness).scheme;
-    final colors = [
-      scheme.surface,
-      scheme.surfaceContainerHigh,
-      scheme.onSurface,
-      scheme.primary,
-      scheme.error,
-    ];
-    return Row(
-      children: [
-        for (final color in colors)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 6),
-            child: Container(
-              width: 28,
-              height: 18,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: scheme.outlineVariant),
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

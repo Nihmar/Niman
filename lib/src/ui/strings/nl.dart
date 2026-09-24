@@ -264,6 +264,24 @@ final class DutchStrings extends Strings {
   String get settingsSectionThemes => "Thema's";
   @override
   String get themesInUse => 'In gebruik';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nieuw thema';
+  @override
+  String get themeNewName => 'Naam';
+  @override
+  String get themeNewStartFrom => 'Beginnen met';
+  @override
+  String get themeNewRandom => 'Willekeurige kleuren';
+  @override
+  String get themeNameTaken => 'Er bestaat al een thema met deze naam';
+  @override
+  String themeDeleteBody(String name) =>
+      '„$name” verwijderen? De kleuren zijn dan definitief weg.';
+  @override
+  String get themeDuplicate => 'Dupliceren';
+  @override
+  String get themeMenuTooltip => 'Thema-acties';
 
   // Settings: text size (T-M6-12).
   @override

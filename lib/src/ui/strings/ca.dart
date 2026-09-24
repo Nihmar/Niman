@@ -266,6 +266,24 @@ final class CatalanStrings extends Strings {
   String get settingsSectionThemes => 'Temes';
   @override
   String get themesInUse => 'En ús';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Tema nou';
+  @override
+  String get themeNewName => 'Nom';
+  @override
+  String get themeNewStartFrom => 'Parteix de';
+  @override
+  String get themeNewRandom => 'Colors aleatoris';
+  @override
+  String get themeNameTaken => 'Ja existeix un tema amb aquest nom';
+  @override
+  String themeDeleteBody(String name) =>
+      'Voleu suprimir «$name»? Els seus colors es perdran per sempre.';
+  @override
+  String get themeDuplicate => 'Duplica';
+  @override
+  String get themeMenuTooltip => 'Accions del tema';
 
   // Settings: text size (T-M6-12).
   @override

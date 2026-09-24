@@ -265,6 +265,24 @@ final class SwedishStrings extends Strings {
   String get settingsSectionThemes => 'Teman';
   @override
   String get themesInUse => 'Används';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nytt tema';
+  @override
+  String get themeNewName => 'Namn';
+  @override
+  String get themeNewStartFrom => 'Utgå från';
+  @override
+  String get themeNewRandom => 'Slumpmässiga färger';
+  @override
+  String get themeNameTaken => 'Det finns redan ett tema med det namnet';
+  @override
+  String themeDeleteBody(String name) =>
+      'Ta bort ”$name”? Dess färger försvinner för gott.';
+  @override
+  String get themeDuplicate => 'Duplicera';
+  @override
+  String get themeMenuTooltip => 'Temaåtgärder';
 
   // Settings: text size (T-M6-12).
   @override

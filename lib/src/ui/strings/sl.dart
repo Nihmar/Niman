@@ -267,6 +267,24 @@ final class SlovenianStrings extends Strings {
   String get settingsSectionThemes => 'Teme';
   @override
   String get themesInUse => 'V uporabi';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nova tema';
+  @override
+  String get themeNewName => 'Ime';
+  @override
+  String get themeNewStartFrom => 'Začni od';
+  @override
+  String get themeNewRandom => 'Naključne barve';
+  @override
+  String get themeNameTaken => 'Tema s tem imenom že obstaja';
+  @override
+  String themeDeleteBody(String name) =>
+      'Izbrisati „$name“? Njegove barve bodo za vedno izginile.';
+  @override
+  String get themeDuplicate => 'Podvoji';
+  @override
+  String get themeMenuTooltip => 'Dejanja teme';
 
   // Settings: text size (T-M6-12).
   @override

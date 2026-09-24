@@ -263,6 +263,24 @@ final class BelarusianStrings extends Strings {
   String get settingsSectionThemes => 'Тэмы';
   @override
   String get themesInUse => 'Ужываецца';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Новая тэма';
+  @override
+  String get themeNewName => 'Назва';
+  @override
+  String get themeNewStartFrom => 'Пачаць з';
+  @override
+  String get themeNewRandom => 'Выпадковыя колеры';
+  @override
+  String get themeNameTaken => 'Тэма з такой назвай ужо ёсць';
+  @override
+  String themeDeleteBody(String name) =>
+      'Выдаліць «$name»? Яго колеры знікнуць назаўсёды.';
+  @override
+  String get themeDuplicate => 'Дубляваць';
+  @override
+  String get themeMenuTooltip => 'Дзеянні з тэмай';
 
   // Settings: text size (T-M6-12).
   @override

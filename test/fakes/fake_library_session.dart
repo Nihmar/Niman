@@ -571,7 +571,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<AppTheme> get theme async => _theme;
+  Future<AppTheme> get theme async {
+    final theme = _theme;
+    if (theme is! CustomAppTheme) return theme;
+    // Like the real session: a custom theme is read back by id, so a
+    // rename or a color change reaches whoever is wearing it, and one
+    // that has gone falls back to the app's own colors.
+    final stored = await customTheme(theme.theme.id);
+    if (stored == null) {
+      return _theme = const BuiltinAppTheme(AppPalette.niman);
+    }
+    return CustomAppTheme(stored);
+  }
 
   @override
   Future<void> setTheme(AppTheme theme) async {

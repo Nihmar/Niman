@@ -265,6 +265,24 @@ final class UkrainianStrings extends Strings {
   String get settingsSectionThemes => 'Теми';
   @override
   String get themesInUse => 'Використовується';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Нова тема';
+  @override
+  String get themeNewName => 'Назва';
+  @override
+  String get themeNewStartFrom => 'Почати з';
+  @override
+  String get themeNewRandom => 'Випадкові кольори';
+  @override
+  String get themeNameTaken => 'Тема з такою назвою вже є';
+  @override
+  String themeDeleteBody(String name) =>
+      'Видалити «$name»? Його кольори зникнуть назавжди.';
+  @override
+  String get themeDuplicate => 'Дублювати';
+  @override
+  String get themeMenuTooltip => 'Дії з темою';
 
   // Settings: text size (T-M6-12).
   @override

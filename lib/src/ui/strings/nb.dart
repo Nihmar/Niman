@@ -262,6 +262,24 @@ final class NorwegianStrings extends Strings {
   String get settingsSectionThemes => 'Temaer';
   @override
   String get themesInUse => 'I bruk';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nytt tema';
+  @override
+  String get themeNewName => 'Navn';
+  @override
+  String get themeNewStartFrom => 'Start fra';
+  @override
+  String get themeNewRandom => 'Tilfeldige farger';
+  @override
+  String get themeNameTaken => 'Det finnes allerede et tema med det navnet';
+  @override
+  String themeDeleteBody(String name) =>
+      'Slette «$name»? Fargene forsvinner for godt.';
+  @override
+  String get themeDuplicate => 'Dupliser';
+  @override
+  String get themeMenuTooltip => 'Temahandlinger';
 
   // Settings: text size (T-M6-12).
   @override

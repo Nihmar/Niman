@@ -242,6 +242,23 @@ final class ChineseStrings extends Strings {
   String get settingsSectionThemes => '主题';
   @override
   String get themesInUse => '使用中';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => '新建主题';
+  @override
+  String get themeNewName => '名称';
+  @override
+  String get themeNewStartFrom => '基于';
+  @override
+  String get themeNewRandom => '随机配色';
+  @override
+  String get themeNameTaken => '已存在同名主题';
+  @override
+  String themeDeleteBody(String name) => '删除“$name”?其颜色将永久丢失。';
+  @override
+  String get themeDuplicate => '创建副本';
+  @override
+  String get themeMenuTooltip => '主题操作';
 
   // Settings: text size (T-M6-12).
   @override

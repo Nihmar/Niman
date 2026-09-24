@@ -269,6 +269,24 @@ final class GreekStrings extends Strings {
   String get settingsSectionThemes => 'Θέματα';
   @override
   String get themesInUse => 'Σε χρήση';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Νέο θέμα';
+  @override
+  String get themeNewName => 'Όνομα';
+  @override
+  String get themeNewStartFrom => 'Αφετηρία';
+  @override
+  String get themeNewRandom => 'Τυχαία χρώματα';
+  @override
+  String get themeNameTaken => 'Υπάρχει ήδη θέμα με αυτό το όνομα';
+  @override
+  String themeDeleteBody(String name) =>
+      'Διαγραφή του «$name»; Τα χρώματά του χάνονται για πάντα.';
+  @override
+  String get themeDuplicate => 'Διπλότυπο';
+  @override
+  String get themeMenuTooltip => 'Ενέργειες θέματος';
 
   // Settings: text size (T-M6-12).
   @override

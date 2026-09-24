@@ -242,6 +242,23 @@ final class JapaneseStrings extends Strings {
   String get settingsSectionThemes => 'テーマ';
   @override
   String get themesInUse => '使用中';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => '新しいテーマ';
+  @override
+  String get themeNewName => '名前';
+  @override
+  String get themeNewStartFrom => '開始元';
+  @override
+  String get themeNewRandom => 'ランダムな色';
+  @override
+  String get themeNameTaken => '同じ名前のテーマがすでにあります';
+  @override
+  String themeDeleteBody(String name) => '「$name」を削除しますか?色は元に戻せません。';
+  @override
+  String get themeDuplicate => '複製';
+  @override
+  String get themeMenuTooltip => 'テーマの操作';
 
   // Settings: text size (T-M6-12).
   @override

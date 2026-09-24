@@ -265,6 +265,24 @@ final class LithuanianStrings extends Strings {
   String get settingsSectionThemes => 'Temos';
   @override
   String get themesInUse => 'Naudojama';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nauja tema';
+  @override
+  String get themeNewName => 'Pavadinimas';
+  @override
+  String get themeNewStartFrom => 'Pradėti nuo';
+  @override
+  String get themeNewRandom => 'Atsitiktinės spalvos';
+  @override
+  String get themeNameTaken => 'Tema tokiu pavadinimu jau yra';
+  @override
+  String themeDeleteBody(String name) =>
+      'Ištrinti „$name“? Jos spalvos dings visam laikui.';
+  @override
+  String get themeDuplicate => 'Dubliuoti';
+  @override
+  String get themeMenuTooltip => 'Temos veiksmai';
 
   // Settings: text size (T-M6-12).
   @override

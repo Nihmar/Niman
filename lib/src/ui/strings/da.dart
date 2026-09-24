@@ -263,6 +263,24 @@ final class DanishStrings extends Strings {
   String get settingsSectionThemes => 'Temaer';
   @override
   String get themesInUse => 'I brug';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nyt tema';
+  @override
+  String get themeNewName => 'Navn';
+  @override
+  String get themeNewStartFrom => 'Start fra';
+  @override
+  String get themeNewRandom => 'Tilfældige farver';
+  @override
+  String get themeNameTaken => 'Der findes allerede et tema med det navn';
+  @override
+  String themeDeleteBody(String name) =>
+      'Slet „$name“? Farverne forsvinder for altid.';
+  @override
+  String get themeDuplicate => 'Dupliker';
+  @override
+  String get themeMenuTooltip => 'Temahandlinger';
 
   // Settings: text size (T-M6-12).
   @override

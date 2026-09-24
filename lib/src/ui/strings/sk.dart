@@ -266,6 +266,24 @@ final class SlovakStrings extends Strings {
   String get settingsSectionThemes => 'Témy';
   @override
   String get themesInUse => 'Používa sa';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nový motív';
+  @override
+  String get themeNewName => 'Názov';
+  @override
+  String get themeNewStartFrom => 'Začať od';
+  @override
+  String get themeNewRandom => 'Náhodné farby';
+  @override
+  String get themeNameTaken => 'Motív s týmto názvom už existuje';
+  @override
+  String themeDeleteBody(String name) =>
+      'Odstrániť „$name“? Jeho farby zmiznú navždy.';
+  @override
+  String get themeDuplicate => 'Duplikovať';
+  @override
+  String get themeMenuTooltip => 'Akcie motívu';
 
   // Settings: text size (T-M6-12).
   @override

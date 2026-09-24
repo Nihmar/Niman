@@ -267,6 +267,24 @@ final class SerbianStrings extends Strings {
   String get settingsSectionThemes => 'Теме';
   @override
   String get themesInUse => 'У употреби';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Нова тема';
+  @override
+  String get themeNewName => 'Назив';
+  @override
+  String get themeNewStartFrom => 'Почетак од';
+  @override
+  String get themeNewRandom => 'Случајне боје';
+  @override
+  String get themeNameTaken => 'Већ постоји тема са тим именом';
+  @override
+  String themeDeleteBody(String name) =>
+      'Обрисати „$name“? Његове боје нестају заувек.';
+  @override
+  String get themeDuplicate => 'Дуплирај';
+  @override
+  String get themeMenuTooltip => 'Радње за тему';
 
   // Settings: text size (T-M6-12).
   @override

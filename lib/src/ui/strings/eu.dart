@@ -260,6 +260,24 @@ final class BasqueStrings extends Strings {
   String get settingsSectionThemes => 'Gaiak';
   @override
   String get themesInUse => 'Erabiltzen';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Gai berria';
+  @override
+  String get themeNewName => 'Izena';
+  @override
+  String get themeNewStartFrom => 'Hasi';
+  @override
+  String get themeNewRandom => 'Kolore aleatorioak';
+  @override
+  String get themeNameTaken => 'Badago izen hori duen gai bat';
+  @override
+  String themeDeleteBody(String name) =>
+      '«$name» ezabatu? Bere koloreak betiko galduko dira.';
+  @override
+  String get themeDuplicate => 'Bikoiztu';
+  @override
+  String get themeMenuTooltip => 'Gaiaren ekintzak';
 
   // Settings: text size (T-M6-12).
   @override

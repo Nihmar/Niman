@@ -266,6 +266,24 @@ final class GermanStrings extends Strings {
   String get settingsSectionThemes => 'Designs';
   @override
   String get themesInUse => 'In Verwendung';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Neues Design';
+  @override
+  String get themeNewName => 'Name';
+  @override
+  String get themeNewStartFrom => 'Beginnen mit';
+  @override
+  String get themeNewRandom => 'Zufällige Farben';
+  @override
+  String get themeNameTaken => 'Ein Design mit diesem Namen gibt es schon';
+  @override
+  String themeDeleteBody(String name) =>
+      '„$name“ löschen? Seine Farben sind dann endgültig weg.';
+  @override
+  String get themeDuplicate => 'Duplizieren';
+  @override
+  String get themeMenuTooltip => 'Design-Aktionen';
 
   // Settings: text size (T-M6-12).
   @override

@@ -267,6 +267,24 @@ final class ItalianStrings extends Strings {
   String get settingsSectionThemes => 'Temi';
   @override
   String get themesInUse => 'In uso';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nuovo tema';
+  @override
+  String get themeNewName => 'Nome';
+  @override
+  String get themeNewStartFrom => 'Parti da';
+  @override
+  String get themeNewRandom => 'Colori casuali';
+  @override
+  String get themeNameTaken => 'Esiste già un tema con questo nome';
+  @override
+  String themeDeleteBody(String name) =>
+      'Eliminare «$name»? I suoi colori spariranno per sempre.';
+  @override
+  String get themeDuplicate => 'Duplica';
+  @override
+  String get themeMenuTooltip => 'Azioni del tema';
 
   // Settings: text size (T-M6-12).
   @override

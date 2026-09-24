@@ -268,6 +268,24 @@ final class RomanianStrings extends Strings {
   String get settingsSectionThemes => 'Teme';
   @override
   String get themesInUse => 'În uz';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Temă nouă';
+  @override
+  String get themeNewName => 'Nume';
+  @override
+  String get themeNewStartFrom => 'Pornește de la';
+  @override
+  String get themeNewRandom => 'Culori aleatorii';
+  @override
+  String get themeNameTaken => 'Există deja o temă cu acest nume';
+  @override
+  String themeDeleteBody(String name) =>
+      'Ștergi „$name”? Culorile se pierd definitiv.';
+  @override
+  String get themeDuplicate => 'Duplică';
+  @override
+  String get themeMenuTooltip => 'Acțiuni pentru temă';
 
   // Settings: text size (T-M6-12).
   @override
