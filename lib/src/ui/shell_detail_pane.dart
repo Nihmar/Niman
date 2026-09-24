@@ -202,8 +202,12 @@ final class ShellDetailPane extends StatelessWidget {
   }
 
   Widget _view(String root, DetailTab tab) => isShownAttachment(tab.path)
-      // A picture or a PDF, shown rather than read as a note.
-      ? AttachmentView(key: tab.key, path: p.join(root, tab.path))
+      // A picture, a PDF or a book, shown rather than read as a note.
+      ? AttachmentView(
+          key: tab.key,
+          path: p.join(root, tab.path),
+          column: noteColumn,
+        )
       : _noteView(root, tab);
 
   Widget _noteView(String root, DetailTab tab) => NoteView(
