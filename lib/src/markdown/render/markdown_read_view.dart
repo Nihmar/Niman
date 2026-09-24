@@ -464,7 +464,13 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     final changes = scan.changes;
     if (!_follow(changes, scan.blocks)) {
       _blocks = _pieced(scan.blocks);
-      _heights = BlockHeightMap(count: _blocks.length, estimate: _estimateOf);
+      // A block's estimate when a frame first comes near it: every block of
+      // the 246 MB stress note, 2.4 M, was most of the frame that showed it.
+      _heights = BlockHeightMap.lazy(
+        count: _blocks.length,
+        estimate: _estimateOf,
+        estimateSpan: _estimateSpanOf,
+      );
       _built = 0;
     }
     _handed = changes?.token;
@@ -638,6 +644,19 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       BlockKind.paragraph ||
       BlockKind.quote => block.lineCount * line,
     };
+  }
+
+  /// Blocks `[first, end)`'s height before they are asked one by one: a line
+  /// each of their lines, O(1) — the lines they span are where the first
+  /// starts and the next begins. What [_estimateOf] adds by kind (a
+  /// heading's size, a formula's height) comes in as the blocks are asked.
+  double _estimateSpanOf(int first, int end) {
+    final from = _blocks[first].startLine;
+    final to = end < _blocks.length
+        ? _blocks[end].startLine
+        : _blocks[end - 1].endLine;
+    final theme = _theme ?? _fallbackTheme;
+    return (to - from) * _textScaler.scale(theme.lineHeight);
   }
 
   MarkdownTheme? _theme;

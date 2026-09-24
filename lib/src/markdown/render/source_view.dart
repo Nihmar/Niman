@@ -48,6 +48,7 @@ import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -480,6 +481,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: widget.buffer,
     onRecord: _history.record,
     onNewline: _newline,
+    onTyped: _typed,
     onTokenizer: (edit, buffer) => _styleEdited(edit),
     selection: () => _selection,
     onSelection: (next) {
@@ -527,6 +529,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ownSelection =
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
+      _brackets.clear();
       _restyle();
       _folds.clear();
       _heights = _map();
@@ -547,6 +550,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (oldWidget.selection != widget.selection ||
         oldWidget.caretWidth != widget.caretWidth) {
       _scheduleCaret();
+    } else if (oldWidget.hideMarkers != widget.hideMarkers ||
+        !identical(oldWidget.theme, widget.theme) ||
+        oldWidget.showLineNumbers != widget.showLineNumbers ||
+        oldWidget.column != widget.column ||
+        oldWidget.padding != widget.padding) {
+      // The caret's line is drawn another way — source to live and back
+      // above all — and the caret kept the place and the height it had.
+      _measureCaretAfterFrame();
     }
     // Switched on while writing: the caret goes to the middle at once.
     if (widget.typewriter && !oldWidget.typewriter) _followCaret();
@@ -1043,6 +1054,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _replaceRange(selection.start, selection.end, '');
       return;
     }
+    if (motion == CaretMotion.characterLeft &&
+        _applyBracket(_brackets.backspace(widget.buffer, selection.extent))) {
+      return;
+    }
     final other = _withinCell(
       selection.extent,
       moveCaret(selection, motion, buffer: widget.buffer).extent,
@@ -1065,6 +1080,37 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final cell = LiveTables.cellAround(buffer.lineAt(line), caret - start);
     if (cell == null) return other;
     return other.clamp(start + cell.$1, start + cell.$2);
+  }
+
+  /// The brackets typed in pairs, and the closing ones they wrote.
+  final BracketPairs _brackets = BracketPairs();
+
+  /// [inserted] typed over `[start, end)` by the platform, outside a
+  /// composition: a bracket's pair written, a closing bracket stepped over,
+  /// or — the soft keyboard's delete, one character before the caret — an
+  /// empty pair taken whole. Answers whether it did one of them.
+  bool _typed(int start, int end, String inserted) {
+    if (inserted.isEmpty) {
+      final caret = _selection;
+      if (end - start != 1 || !caret.isCollapsed || caret.extent != end) {
+        return false;
+      }
+      return _applyBracket(_brackets.backspace(widget.buffer, end));
+    }
+    if (inserted.length != 1) return false;
+    return _applyBracket(_brackets.typed(widget.buffer, start, end, inserted));
+  }
+
+  /// Makes [edit], when there is one; answers whether there was.
+  bool _applyBracket(BracketEdit? edit) {
+    if (edit == null) return false;
+    final caret = SelectionModel(anchor: edit.anchor, extent: edit.extent);
+    if (edit.text.isEmpty && edit.start == edit.end) {
+      placeCaret(edit.extent);
+    } else {
+      _replaceRange(edit.start, edit.end, edit.text, caret: caret);
+    }
+    return true;
   }
 
   /// A line break typed over `[start, end)`, when it means more than a line
@@ -1982,10 +2028,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final row = _rowHeight;
     final buffer = widget.buffer;
     if (_folds.isEmpty) {
-      return BlockHeightMap(
+      // A line's estimate when a frame first comes near it, a chunk of lines
+      // at a time: the map is built on the frame that opens the note, and
+      // asking every line was 2.9 M estimates on the 246 MB stress note.
+      return BlockHeightMap.lazy(
         count: lineCount,
         estimate: (line) =>
             _estimateOf(buffer.lineLengthAt(line), columns, row),
+        estimateSpan: (first, end) =>
+            _estimateSpanOf(buffer, first, end, columns, row),
       );
     }
     return BlockHeightMap(
@@ -2045,6 +2096,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The height of a line [length] long, [columns] to a row of [row].
   static double _estimateOf(int length, double columns, double row) =>
       (length == 0 ? 1 : (length / columns).ceil()) * row;
+
+  /// The height of lines `[first, end)` of [buffer] before they are asked
+  /// one by one: from their characters alone, O(log lines).
+  ///
+  /// A line of `l` characters takes `l / columns` rows rounded up — half a
+  /// row more than the division, on average — and one row at least. So
+  /// lines holding `c` characters between them take about `c / columns +
+  /// lines / 2` rows, and never fewer than one each.
+  static double _estimateSpanOf(
+    SourceBuffer buffer,
+    int first,
+    int end,
+    double columns,
+    double row,
+  ) {
+    final lines = end - first;
+    final to = end < buffer.lineCount
+        ? buffer.offsetOfLine(end)
+        : buffer.length;
+    // The terminators are not text: about one character a line.
+    final text = to - buffer.offsetOfLine(first) - lines;
+    final rows = text / columns + lines / 2;
+    return (rows < lines ? lines : rows) * row;
+  }
 
   /// Roughly how many monospace characters fit a line at this width and size.
   ///
@@ -2163,6 +2238,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
+  /// Measures the caret again once the next frame has laid its line out:
+  /// the caret stayed where it was while its line was laid out anew, in
+  /// another mode or at another width.
+  void _measureCaretAfterFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _measureCaret();
+    });
+  }
+
   /// Where the caret is, from the caret line's own layout.
   void _measureCaret() {
     final line = _caretLineIndex;
@@ -2171,6 +2255,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // toolbar hears which formats are on at it.
     final spot = _spotOf();
     _caretSpot.value = spot;
+    // A closing bracket a pair wrote is stepped over only on its own line.
+    _brackets.caretOnLine(line);
     _publishActive(spot);
     final paragraph = _paragraphAt(line);
     if (paragraph == null || line < 0) {
@@ -2241,8 +2327,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final scaler = MediaQuery.textScalerOf(context);
+            // Another width or text size wraps the caret's line anew.
+            if (_paneWidth != constraints.maxWidth || _textScaler != scaler) {
+              _measureCaretAfterFrame();
+            }
             _paneWidth = constraints.maxWidth;
-            _textScaler = MediaQuery.textScalerOf(context);
+            _textScaler = scaler;
             // The legacy editor's box, to the pixel (`note_editor.dart`):
             // `side` is the note column's side space, the gutter is
             // `side + 16 - 5` when there is a column (and never narrower than
@@ -2413,12 +2504,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 gutterWidth: _gutter,
                                 // Past the numbers, only the gap the fold
                                 // arrows live in is empty, and a list line
-                                // has none.
-                                margin:
-                                    _leftInset +
-                                    (widget.showLineNumbers
-                                        ? _gutterGap
-                                        : _gutter),
+                                // has none. The field's inset is left of
+                                // the gutter, not between the numbers and
+                                // the text: counted in, an H1's `#` sat on
+                                // its number.
+                                margin: widget.showLineNumbers
+                                    ? _gutterGap
+                                    : _leftInset + _gutter,
                                 theme: widget.theme,
                                 syntax: syntax,
                                 dark: widget.dark,
@@ -3542,6 +3634,13 @@ final class _Line extends StatelessWidget {
       style: typeset || folded
           ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
           : _lineStyle(revealed: revealed),
+      // A table row is at least a line of its text tall. A row of empty
+      // cells is all room between cells, drawn in glyphs of no size, and
+      // without a floor it closed to nothing: no row to click into, where
+      // the read view draws a line's height.
+      strutStyle: table != null && !folded
+          ? StrutStyle.fromTextStyle(_lineStyle(revealed: revealed))
+          : null,
     );
     if (folded) return paragraph;
     if (inline.isNotEmpty) {
@@ -3801,9 +3900,12 @@ final class _Line extends StatelessWidget {
         (shape.code == null ? 0 : theme.codePadding);
     if (base == 0 && _prefixEnd == 0) return 0;
     // Marks wider than their column hang into the margin, as far as there
-    // is one: the text moves only by what is left over.
+    // is one: the text moves only by what is left over. A line with a fold
+    // arrow has none: the arrow stands right against the text, and hung
+    // marks covered it and took its clicks (a heading's `#`).
+    final room = fold == _FoldMark.none ? margin : 0.0;
     return math.max<double>(
-      -margin,
+      -room,
       base -
           (_textStart(context, revealed: revealed) -
               _glyphLeft(context, const <InlineSpan>[])),
