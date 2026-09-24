@@ -547,6 +547,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (oldWidget.selection != widget.selection ||
         oldWidget.caretWidth != widget.caretWidth) {
       _scheduleCaret();
+    } else if (oldWidget.hideMarkers != widget.hideMarkers ||
+        !identical(oldWidget.theme, widget.theme) ||
+        oldWidget.showLineNumbers != widget.showLineNumbers ||
+        oldWidget.column != widget.column ||
+        oldWidget.padding != widget.padding) {
+      // The caret's line is drawn another way — source to live and back
+      // above all — and the caret kept the place and the height it had.
+      _measureCaretAfterFrame();
     }
     // Switched on while writing: the caret goes to the middle at once.
     if (widget.typewriter && !oldWidget.typewriter) _followCaret();
@@ -2163,6 +2171,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     });
   }
 
+  /// Measures the caret again once the next frame has laid its line out:
+  /// the caret stayed where it was while its line was laid out anew, in
+  /// another mode or at another width.
+  void _measureCaretAfterFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _measureCaret();
+    });
+  }
+
   /// Where the caret is, from the caret line's own layout.
   void _measureCaret() {
     final line = _caretLineIndex;
@@ -2241,8 +2258,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final scaler = MediaQuery.textScalerOf(context);
+            // Another width or text size wraps the caret's line anew.
+            if (_paneWidth != constraints.maxWidth || _textScaler != scaler) {
+              _measureCaretAfterFrame();
+            }
             _paneWidth = constraints.maxWidth;
-            _textScaler = MediaQuery.textScalerOf(context);
+            _textScaler = scaler;
             // The legacy editor's box, to the pixel (`note_editor.dart`):
             // `side` is the note column's side space, the gutter is
             // `side + 16 - 5` when there is a column (and never narrower than
