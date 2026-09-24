@@ -1,14 +1,27 @@
 # Search
 
 Full-text search across titles, body, and tags, powered by SQLite FTS5.
-Designed to stay fast up to ~1M notes: queries hit the index, never a
-full file scan.
+
+The index keeps the words of every note, not a copy of its text: it stays
+small, whatever the size of your notes. The text shown under a result is
+read from the note itself, when its row comes on screen.
 
 ## Word search
 
 Type words; every token is matched literally (quotes, hyphens, FTS
 operators in your input are text, not syntax). Only the last token gets
-prefix matching, so search grows as you type.
+prefix matching, so search grows as you type. Accents do not matter:
+`perche` finds `perché`.
+
+A word search asks the index, so it stays fast up to ~1M notes.
+
+## Contains
+
+**Contains** finds any piece of text, inside words too (`ell` finds
+`hello`), ignoring case and accents. It reads the notes themselves, in
+path order, each only as far as its first match — so it is slower than a
+word search, and slower the larger the library. Typing again stops the
+search in progress.
 
 ## Tag search
 

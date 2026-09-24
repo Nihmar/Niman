@@ -512,6 +512,9 @@ final class _SlowSource implements SearchSource {
   }) {
     return search(pattern, id: id, limit: limit);
   }
+
+  @override
+  Future<String> excerpt(SearchHit hit, String userText) async => '';
 }
 
 /// A source whose queries stay pending until [complete] — for the
@@ -552,4 +555,7 @@ final class _HangingSource implements SearchSource {
   }) {
     return search(pattern, id: id, limit: limit);
   }
+
+  @override
+  Future<String> excerpt(SearchHit hit, String userText) async => '';
 }

@@ -277,9 +277,9 @@ final class LibraryController implements LibrarySession {
 
   @override
   Future<SearchSource?> get searchSource async {
-    // The search connection is background-isolate backed: the MATCH +
-    // snippet() work for large result sets (and novel-length bodies) never
-    // runs on the UI isolate. One connection per open library, created
+    // The search connection is background-isolate backed: the MATCH work
+    // for large result sets never runs on the UI isolate. One connection
+    // per open library, created
     // once: a fresh connection per call leaked one worker isolate per
     // SearchScreen mount (drift keeps the worker alive until closed) and
     // left nothing to recover when its startup failed. It is dropped with
@@ -291,7 +291,7 @@ final class LibraryController implements LibrarySession {
     if (source == null) {
       final db = await _searchDbFactory(root);
       _searchDb = identical(db, indexDb) ? null : db;
-      source = SearchRepo(db);
+      source = SearchRepo(db, root: root);
       _searchSource = source;
     }
     return source;
@@ -1391,20 +1391,20 @@ Future<IndexDatabase> defaultIndexDatabase(String libraryPath) async {
   return IndexDatabase(
     NativeDatabase.createInBackground(
       await libraryIndexFile(libraryPath),
-      setup: _databaseSetup,
+      setup: indexDatabaseSetup,
     ),
   );
 }
 
 /// The search connection over the same library's index file, with drift's
-/// background-isolate executor: `MATCH` + `snippet()` over large result
-/// sets run off the UI isolate (T-M3-09 fix: many results with
-/// novel-length bodies stalled every frame).
+/// background-isolate executor: `MATCH` over large result sets runs off the
+/// UI isolate (T-M3-09 fix: many results with novel-length bodies stalled
+/// every frame).
 Future<IndexDatabase> defaultSearchDatabase(String libraryPath) async {
   return IndexDatabase(
     NativeDatabase.createInBackground(
       await libraryIndexFile(libraryPath),
-      setup: _databaseSetup,
+      setup: indexDatabaseSetup,
     ),
   );
 }

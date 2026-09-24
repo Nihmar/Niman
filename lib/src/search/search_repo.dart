@@ -1,16 +1,23 @@
-/// FTS5 word search over the index's own copy of the text
-/// (design.md: search/search_repo.dart).
+/// FTS5 word search over the index's word index, and the contains scan
+/// over the notes themselves (design.md: search/search_repo.dart).
 ///
 /// The query text is built by `buildFtsQuery` — it is never passed to the
 /// engine raw. Ranking is `bm25(notes_fts, 10.0, 1.0)` (title weighted ten
-/// times the body, lower is better); every result carries a body `snippet()`
-/// around the first match.
+/// times the body, lower is better).
+///
+/// The index keeps no copy of the text (`IndexDatabase`), so what is read
+/// out of a note — a word result's excerpt, a contains match — is read from
+/// the note on disk, off the UI isolate and no further than its first match
+/// (`search_excerpt.dart`).
 library;
+
+import 'dart:isolate';
 
 import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/search/search_excerpt.dart';
+import 'package:path/path.dart' as p;
 
 /// One ranked search hit.
 final class SearchHit {
@@ -28,11 +35,12 @@ final class SearchHit {
   /// Library-relative note path.
   final String path;
 
-  /// The FTS title (frontmatter title or filename fallback).
+  /// The frontmatter title, or the filename without `.md`.
   final String title;
 
-  /// A body snippet around the first match, with `<mark>`/`</mark>` tags
-  /// around the matched terms; empty when the match is title-only.
+  /// The text around the first match, with `<mark>`/`</mark>` around it;
+  /// empty when there is none to show, or none yet — a word result's is
+  /// read on demand ([SearchSource.excerpt]).
   final String snippet;
 }
 
@@ -57,15 +65,21 @@ abstract interface class SearchSource {
     int limit = 200,
   });
 
-  /// The contains-mode hits: notes whose FTS body copy contains [pattern]
-  /// (case-insensitive, `LIKE` semantics), in path order, each with an
-  /// excerpt cut around the first match. [id] from [begin]; superseded
-  /// queries return no hits.
+  /// The contains-mode hits: notes whose text contains [pattern]
+  /// (case- and accent-insensitive, a literal string), in path order, each
+  /// with an excerpt cut around the first match. [id] from [begin];
+  /// superseded queries return no hits.
   Future<List<SearchHit>> searchContains(
     String pattern, {
     required int id,
     int limit = 200,
   });
+
+  /// The excerpt of word result [hit] for the words typed as [userText]:
+  /// read from the note when a row asks for it, so a search answers with
+  /// its list and reads only the notes whose rows are shown. Empty when the
+  /// words are only in the title.
+  Future<String> excerpt(SearchHit hit, String userText);
 }
 
 /// Runs the word search and drops the results of a superseded query.
@@ -75,10 +89,18 @@ abstract interface class SearchSource {
 /// been issued in the meantime — the invocation-id guard. Not stateful
 /// beyond the counter, so one instance can back several screens.
 final class SearchRepo implements SearchSource {
-  /// Creates the repo over [IndexDatabase].
-  new(this._db);
+  /// Creates the repo over [IndexDatabase], for the library at [root] — the
+  /// notes the excerpts and the contains scan are read from.
+  new(this._db, {required this.root});
 
   final IndexDatabase _db;
+
+  /// Absolute path of the library root.
+  final String root;
+
+  /// How many notes one step of the contains scan reads before it asks
+  /// whether its query is still the current one.
+  static const int _scanBatch = 200;
 
   int _invocation = 0;
 
@@ -101,8 +123,7 @@ final class SearchRepo implements SearchSource {
     try {
       rows = await _db
           .customSelect(
-            'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
-            "snippet(notes_fts, 1, '<mark>', '</mark>', '…', 12) AS snippet "
+            'SELECT notes.id, notes.path, notes.name, notes.title '
             'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
             'WHERE notes_fts MATCH ?1 '
             'ORDER BY bm25(notes_fts, 10.0, 1.0) '
@@ -124,15 +145,19 @@ final class SearchRepo implements SearchSource {
       'word "$query" -> ${rows.length} hit(s) '
       'in ${clock.elapsedMilliseconds} ms',
     );
-    return [
-      for (final row in rows)
-        SearchHit(
-          noteId: row.read<int>('id'),
-          path: row.read<String>('path'),
-          title: row.read<String>('title'),
-          snippet: row.read<String?>('snippet') ?? '',
-        ),
-    ];
+    return [for (final row in rows) _hitOf(row, snippet: '')];
+  }
+
+  @override
+  Future<String> excerpt(SearchHit hit, String userText) async {
+    final terms = wordTermsOf(userText);
+    if (terms.isEmpty) return '';
+    try {
+      return await _wordExcerpt(p.join(root, hit.path), terms) ?? '';
+    } on Object catch (e) {
+      const AppLogger(name: 'search').warning('excerpt of ${hit.path}: $e');
+      return '';
+    }
   }
 
   @override
@@ -141,71 +166,87 @@ final class SearchRepo implements SearchSource {
     required int id,
     int limit = 200,
   }) async {
-    // The scan runs against the index's own copy of the text (the FTS
-    // table's body column), never against the note files on disk. The
-    // pattern is LIKE-escaped and lowercased, and SQL's lower() does the
-    // comparison, so wildcards in the input are literal and the match is
-    // case-insensitive.
-    final lower = pattern.toLowerCase();
-    if (lower.isEmpty) return const [];
+    // A scan of the notes themselves, in path order: the index keeps no
+    // copy of their text to scan instead. The notes are listed a batch at
+    // a time and each batch read on an isolate — every note only up to its
+    // first match — with the query asked after each batch whether it is
+    // still the one wanted, so a keystroke stops the scan it replaces.
+    if (foldForSearch(pattern).isEmpty) return const [];
     const log = AppLogger(name: 'search');
     final clock = Stopwatch()..start();
-    List<QueryRow> rows;
+    final hits = <SearchHit>[];
+    var after = '';
+    var read = 0;
     try {
-      rows = await _db
-          .customSelect(
-            'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
-            'notes_fts.body AS body '
-            'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
-            r"WHERE lower(notes_fts.body) LIKE ?1 ESCAPE '\'"
-            ' ORDER BY notes.path '
-            'LIMIT ?2',
-            variables: [
-              Variable<String>('%${sqlLikeEscape(lower)}%'),
-              Variable<int>(limit),
-            ],
-          )
-          .get();
+      while (hits.length < limit) {
+        final rows = await _db
+            .customSelect(
+              'SELECT id, path, name, title FROM notes '
+              "WHERE is_dir = 0 AND lower(substr(name, -3)) = '.md' "
+              'AND path > ?1 ORDER BY path LIMIT ?2',
+              variables: [
+                Variable<String>(after),
+                const Variable<int>(_scanBatch),
+              ],
+            )
+            .get();
+        if (rows.isEmpty) break;
+        after = rows.last.read<String>('path');
+        final paths = [
+          for (final row in rows) p.join(root, row.read<String>('path')),
+        ];
+        final excerpts = await _containsExcerpts(paths, pattern);
+        read += rows.length;
+        if (!isCurrent(id)) {
+          log.debug(
+            'contains "$pattern" (id $id): superseded by id $_invocation '
+            'after $read note(s) — dropped',
+          );
+          return const [];
+        }
+        for (var i = 0; i < rows.length && hits.length < limit; i++) {
+          final excerpt = excerpts[i];
+          if (excerpt != null) hits.add(_hitOf(rows[i], snippet: excerpt));
+        }
+      }
     } on Object catch (e) {
       log.warning('contains search failed for "$pattern": $e');
       return const [];
     }
-    if (!isCurrent(id)) {
-      log.debug(
-        'contains "$pattern" (id $id): superseded by id $_invocation — dropped',
-      );
-      return const [];
-    }
     log.debug(
-      'contains "$pattern" -> ${rows.length} hit(s) '
+      'contains "$pattern" -> ${hits.length} hit(s) from $read note(s) '
       'in ${clock.elapsedMilliseconds} ms',
     );
-    return [
-      for (final row in rows)
-        SearchHit(
-          noteId: row.read<int>('id'),
-          path: row.read<String>('path'),
-          title: row.read<String>('title'),
-          snippet: _excerpt(row.read<String>('body'), lower),
-        ),
-    ];
+    return hits;
   }
 
-  /// Cuts [body] around its first (case-insensitive) occurrence of
-  /// [lower] and marks it; `…` ellipses at the cut ends.
-  static String _excerpt(String body, String lower) {
-    final index = body.toLowerCase().indexOf(lower);
-    if (index < 0) return '';
-    const radius = 40;
-    var start = index - radius;
-    var end = index + lower.length + radius;
-    if (start < 0) start = 0;
-    if (end > body.length) end = body.length;
-    final before = start > 0 ? '…' : '';
-    final after = end < body.length ? '…' : '';
-    final match = body.substring(index, index + lower.length);
-    return '$before${body.substring(start, index)}'
-        '<mark>$match</mark>'
-        '${body.substring(index + lower.length, end)}$after';
+  static SearchHit _hitOf(QueryRow row, {required String snippet}) {
+    final name = row.read<String>('name');
+    return SearchHit(
+      noteId: row.read<int>('id'),
+      path: row.read<String>('path'),
+      title:
+          row.read<String?>('title') ??
+          (name.toLowerCase().endsWith('.md')
+              ? name.substring(0, name.length - 3)
+              : name),
+      snippet: snippet,
+    );
   }
 }
+
+// The isolate runs are top-level so each closure captures only the plain
+// values it is handed: inside a method it would capture the method's
+// context, which holds the async body's future and cannot be sent.
+
+/// The word excerpt of the note at [abs], on an isolate.
+Future<String?> _wordExcerpt(String abs, List<String> terms) =>
+    Isolate.run(() => excerptInFile(abs, wordFinder(terms)));
+
+/// The contains excerpt of each note at [paths], null where it has none,
+/// on an isolate.
+Future<List<String?>> _containsExcerpts(List<String> paths, String pattern) =>
+    Isolate.run(() async {
+      final find = containsFinder(pattern);
+      return [for (final path in paths) await excerptInFile(path, find)];
+    });

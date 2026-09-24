@@ -54,4 +54,11 @@ final class FakeSearchSource implements SearchSource {
           hit,
     ];
   }
+
+  /// The excerpts a word result's row reads, by path; none by default.
+  final Map<String, String> excerpts = {};
+
+  @override
+  Future<String> excerpt(SearchHit hit, String userText) async =>
+      excerpts[hit.path] ?? '';
 }

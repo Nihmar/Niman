@@ -97,6 +97,10 @@ final class Indexer {
       // The content index can still be incomplete (a v7-era database
       // predates the M3 tables): in that case the no-write exit is skipped
       // and the content pass rebuilds FTS/tags/links for every note.
+      // The pages the writes since the last scan freed — a note's old
+      // full-text rows — go back to the disk: without it the file only
+      // grows (`indexDatabaseSetup`). Free when there are none.
+      await _db.customStatement('PRAGMA incremental_vacuum');
       if (!_treeChanged(old, entries)) {
         if (await _store.contentIndexComplete()) {
           _log.info('fullScan: index already mirrors disk, no write');

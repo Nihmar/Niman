@@ -22,7 +22,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `editor/` | What the surface is driven by: the incremental tokenizer (`highlighting.dart`), the Markdown commands (`md_editing.dart`), toolbar and its layout, context menu, find bar, outline, word count, list tally, typewriter and note column |
 | `preview/` | KaTeX math (typesetting, cache, rasterizing), code highlight, image aspect — what the surface draws with |
 | `links/` | Wikilink/Markdown-link parse + resolve (single parse rule shared by editor, preview, indexer) |
-| `search/` | FTS query builder (user text is never raw FTS), field/tag queries, replace |
+| `search/` | FTS query builder (user text is never raw FTS), field/tag queries, excerpts and the contains scan read from the notes, replace |
 | `frontmatter/` | YAML parse, known fields (`title tags date pinned aliases`), field repo |
 | `templates/` | Substitution engine (`engine.dart`), directives, includes, `ask`/`choice` prompts, counters |
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
@@ -61,7 +61,11 @@ lines or when responsibilities mix.
   which is what made #103 unreadable until the gauge went in.
 - **Search:** `search/query.dart` builds a safe FTS5 MATCH (tokens quoted,
   prefix `*` on last token only); `key = value` and `#tag` take the field
-  and tag paths instead.
+  and tag paths instead. The FTS table is contentless (`content=''`): it
+  holds the word index and no copy of the text, which made the index file
+  as large as the notes. A word result's excerpt and the contains scan read
+  the note on disk, on an isolate and only up to the first match
+  (`search/search_excerpt.dart`).
 - **Reminders:** first valid `rem:YYYY-MM-DDTHH:MM` per task schedules an
   exact alarm (Android plugin backend, desktop backend); health/warnings
   surface permission problems.
