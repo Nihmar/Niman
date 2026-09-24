@@ -170,6 +170,46 @@ void main() {
       expect(writes, isEmpty);
     });
 
+    testWidgets('an edit after a reload that added lines is counted', (
+      tester,
+    ) async {
+      // A reload replaced the text and left the word count on the note it
+      // had been: one line, where the disk now had two, and the first edit
+      // on the second threw a RangeError (crash reports, 2026-09-24).
+      var disk = 'one line';
+      Future<void> write(String _, String _) async {}
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => disk,
+            writeNote: write,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      disk = 'one line\ntwo words';
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => disk,
+            writeNote: write,
+            reloadToken: 1,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(_editorText(tester), 'one line\ntwo words');
+
+      _surface(tester).replaceText(18, 18, ' more');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text('5 words'), findsOneWidget);
+    });
+
     testWidgets('unsaved edits win over the disk', (tester) async {
       var disk = '- [ ] one';
       final writes = <String>[];

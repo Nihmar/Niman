@@ -334,8 +334,12 @@ final class MarkdownSurfaceController {
 
   /// Makes the note say [text] because it changed *elsewhere* — the disk, the
   /// WYSIWYG — and forgets the history: undoing past it would write the old
-  /// text back over the other change. Not an edit: nothing is reported.
+  /// text back over the other change. Not an edit: nothing is reported, and
+  /// the word count, which only edits keep, is dropped for the caller to
+  /// build again — kept, it counted the old lines, and the first edit on a
+  /// line the old text did not have threw.
   void replaceAll(String text) {
+    words.forget();
     final view = _view;
     if (view != null) {
       view.replaceAll(text);

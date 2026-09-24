@@ -1026,8 +1026,12 @@ final class _NoteViewState extends State<NoteView>
     // Mute the programmatic change like _load does: the listener returns
     // before the revision bump and the save schedule.
     _loading = true;
-    // The buffer adopts the disk's text.
-    _surface?.replaceAll(text);
+    // The buffer adopts the disk's text, and the word count is built again
+    // for it.
+    if (_surface case final surface?) {
+      surface.replaceAll(text);
+      _adoptWords(surface);
+    }
     _lastSavedRevision = _revision;
     // Text taken from disk again: edits from here on are a new session.
     _editSession = ++_editSessions;
