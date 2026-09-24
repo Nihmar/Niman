@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/editor/note_editor.dart';
-import 'package:niman/src/preview/markdown_preview.dart';
-import 'package:niman/src/preview/preview_work_failure.dart';
+import 'package:niman/src/markdown/note_read_failure.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
 
@@ -16,7 +16,6 @@ NoteView _view({
   required String path,
   Future<String> Function(String)? readNote,
   Future<void> Function(String, String)? writeNote,
-  CodeLineEditingController? controller,
   bool showLineNumbers = true,
   bool autofocusEditor = false,
   bool showPreview = false,
@@ -30,12 +29,20 @@ NoteView _view({
   path: path,
   readNote: readNote,
   writeNote: writeNote,
-  controller: controller,
   initialCaretOffset: initialCaretOffset,
 );
 
-String _editorText(WidgetTester tester) =>
-    tester.widget<NoteEditor>(find.byType(NoteEditor)).controller.text;
+/// The note's source pane.
+MarkdownSourceViewState _surface(WidgetTester tester) =>
+    tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
+
+String _editorText(WidgetTester tester) => _surface(tester).widget.buffer.text;
+
+/// The note made to say [text], as typing would: one edit to the pane.
+void _setText(WidgetTester tester, String text) {
+  final surface = _surface(tester);
+  surface.replaceText(0, surface.widget.buffer.length, text);
+}
 
 void main() {
   group('NoteView', () {
@@ -54,7 +61,7 @@ void main() {
       );
       await tester.pump(); // let the async load land.
       expect(readPath, '/notes/a.md');
-      expect(find.byType(NoteEditor), findsOneWidget);
+      expect(find.byType(MarkdownSourceView), findsOneWidget);
       // CRLF is normalized to LF on load.
       expect(_editorText(tester), '# Hello\nworld');
       expect(find.text('Saved'), findsOneWidget);
@@ -92,39 +99,36 @@ void main() {
       );
       await tester.pump();
       await tester.pump();
-      expect(find.byType(NoteEditor), findsOneWidget);
-      expect(find.byType(MarkdownPreview), findsNothing);
+      expect(find.byType(MarkdownSourceView), findsOneWidget);
+      expect(find.byType(MarkdownReadView), findsNothing);
       await tester.tap(find.byKey(const Key('editor-preview-toggle')));
       await tester.pump();
-      expect(find.byType(MarkdownPreview), findsOneWidget);
-      expect(find.byType(NoteEditor), findsNothing);
+      expect(find.byType(MarkdownReadView), findsOneWidget);
+      expect(find.byType(MarkdownSourceView), findsNothing);
       await tester.tap(find.byKey(const Key('editor-preview-toggle')));
       await tester.pump();
-      expect(find.byType(NoteEditor), findsOneWidget);
-      expect(find.byType(MarkdownPreview), findsNothing);
+      expect(find.byType(MarkdownSourceView), findsOneWidget);
+      expect(find.byType(MarkdownReadView), findsNothing);
     });
 
     testWidgets('autosaves ~500 ms after the last edit', (tester) async {
       final writes = <String>[];
-      final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
         _app(
           _view(
             path: '/notes/a.md',
             readNote: (_) async => 'start',
             writeNote: (p, c) async => writes.add(c),
-            controller: controller,
           ),
         ),
       );
       await tester.pump();
-      controller.text = 'start!';
+      _setText(tester, 'start!');
       await tester.pump();
       expect(writes, isEmpty);
       await tester.pump(const Duration(milliseconds: 600));
       expect(writes, ['start!']);
       expect(find.text('Saved'), findsOneWidget);
-      controller.dispose();
     });
 
     testWidgets('saves go through saveNote with one session per opening', (
@@ -132,7 +136,6 @@ void main() {
     ) async {
       final saves = <(String, String, int)>[];
       var seamWrites = 0;
-      final controller = CodeLineEditingController.fromText('start');
       Widget view(String path) => _app(
         NoteView(
           showLineNumbers: true,
@@ -142,14 +145,13 @@ void main() {
           writeNote: (_, _) async => seamWrites++,
           saveNote: (path, content, {required editSession}) async =>
               saves.add((path, content, editSession)),
-          controller: controller,
         ),
       );
       await tester.pumpWidget(view('/notes/a.md'));
       await tester.pump();
-      controller.text = 'one';
+      _setText(tester, 'one');
       await tester.pump(const Duration(milliseconds: 600));
-      controller.text = 'two';
+      _setText(tester, 'two');
       await tester.pump(const Duration(milliseconds: 600));
 
       expect(saves.map((s) => s.$2), ['one', 'two']);
@@ -161,37 +163,30 @@ void main() {
 
       await tester.pumpWidget(view('/notes/b.md'));
       await tester.pump();
-      controller.text = 'three';
+      _setText(tester, 'three');
       await tester.pump(const Duration(milliseconds: 600));
       expect(saves.last.$1, '/notes/b.md');
       expect(saves.last.$3, isNot(saves[0].$3));
-      controller.dispose();
     });
 
     testWidgets('a selection-only change does not schedule a save', (
       tester,
     ) async {
       final writes = <String>[];
-      final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
         _app(
           _view(
             path: '/notes/a.md',
             readNote: (_) async => 'start',
             writeNote: (p, c) async => writes.add(c),
-            controller: controller,
           ),
         ),
       );
       await tester.pump();
-      controller.selection = const CodeLineSelection.collapsed(
-        index: 0,
-        offset: 1,
-      );
+      _surface(tester).placeCaret(1);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
       expect(writes, isEmpty);
-      controller.dispose();
     });
 
     testWidgets('the line-numbers toggle reaches the editor', (tester) async {
@@ -205,7 +200,9 @@ void main() {
         ),
       );
       await tester.pump();
-      final editor = tester.widget<NoteEditor>(find.byType(NoteEditor));
+      final editor = tester.widget<MarkdownSurface>(
+        find.byType(MarkdownSurface),
+      );
       expect(editor.showLineNumbers, isFalse);
     });
 
@@ -222,7 +219,9 @@ void main() {
         ),
       );
       await tester.pump(); // let the load land; autofocus takes effect.
-      final editor = tester.widget<NoteEditor>(find.byType(NoteEditor));
+      final editor = tester.widget<MarkdownSurface>(
+        find.byType(MarkdownSurface),
+      );
       expect(editor.autofocus, isTrue);
       // Let the focus-driven cursor-blink timer lapse (re_editor schedules
       // a 100 ms one-shot on Android) so none is pending at teardown.
@@ -234,26 +233,23 @@ void main() {
       tester,
     ) async {
       final writes = <String>[];
-      final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
         _app(
           _view(
             path: '/notes/a.md',
             readNote: (_) async => 'start',
             writeNote: (p, c) async => writes.add(c),
-            controller: controller,
           ),
         ),
       );
       await tester.pump();
-      controller.text = 'start!';
+      _setText(tester, 'start!');
       await tester.pump();
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: SizedBox())),
       );
       await tester.pump();
       expect(writes, ['start!']);
-      controller.dispose();
     });
 
     // Issue #156: an attachment opened from the tree used to show the
@@ -266,14 +262,14 @@ void main() {
           _view(
             path: '/notes/photo.jpg',
             readNote: (_) async =>
-                throw const PreviewWorkFailure('bad utf-8', notText: true),
+                throw const NoteReadFailure('bad utf-8', notText: true),
           ),
         ),
       );
       await tester.pump();
       expect(find.text(AppStrings.noteNotText), findsOneWidget);
       expect(find.textContaining('bad utf-8'), findsNothing);
-      expect(find.byType(NoteEditor), findsNothing);
+      expect(find.byType(MarkdownSourceView), findsNothing);
       expect(find.text(AppStrings.noteStatusSaved), findsNothing);
     });
 
@@ -297,34 +293,19 @@ void main() {
     // the buffer may land on a file that did not load — here, a picture.
     testWidgets('edits never land on a file that did not load', (tester) async {
       final writes = <(String, String)>[];
-      final controller = CodeLineEditingController.fromText('start');
       Future<String> read(String path) async => path.endsWith('.md')
           ? 'start'
-          : throw const PreviewWorkFailure('bad utf-8', notText: true);
+          : throw const NoteReadFailure('bad utf-8', notText: true);
       Future<void> write(String path, String content) async =>
           writes.add((path, content));
       await tester.pumpWidget(
-        _app(
-          _view(
-            path: '/notes/a.md',
-            readNote: read,
-            writeNote: write,
-            controller: controller,
-          ),
-        ),
+        _app(_view(path: '/notes/a.md', readNote: read, writeNote: write)),
       );
       await tester.pump();
-      controller.text = 'start!';
+      _setText(tester, 'start!');
       await tester.pump();
       await tester.pumpWidget(
-        _app(
-          _view(
-            path: '/notes/photo.jpg',
-            readNote: read,
-            writeNote: write,
-            controller: controller,
-          ),
-        ),
+        _app(_view(path: '/notes/photo.jpg', readNote: read, writeNote: write)),
       );
       await tester.pump();
       expect(find.text(AppStrings.noteNotText), findsOneWidget);
@@ -334,7 +315,6 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
       expect(writes, [('/notes/a.md', 'start!')]);
-      controller.dispose();
     });
 
     // The preview has no editable: flipping the switch must dismiss the
@@ -363,8 +343,8 @@ void main() {
       await tester.pump(); // load lands, the editor mounts and autofocuses.
       await tester.pump();
       final editorFocus = tester
-          .widget<NoteEditor>(find.byType(NoteEditor))
-          .focusNode;
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!;
       expect(editorFocus.hasPrimaryFocus, isTrue);
       // Let the focus-driven blink one-shot lapse while the editor is
       // still mounted (re_editor never cancels it, so disposing the
@@ -555,7 +535,7 @@ void main() {
       await tester.pump();
       await tester.pump();
       final scrollable = find.descendant(
-        of: find.byType(MarkdownPreview),
+        of: find.byType(MarkdownReadView),
         matching: find.byType(Scrollable),
       );
       expect(scrollable, findsOneWidget);
@@ -568,46 +548,6 @@ void main() {
       await tester.pumpWidget(view(preview: true));
       await tester.pump();
       expect(tester.state<ScrollableState>(scrollable).position.pixels, offset);
-    });
-
-    testWidgets('a preview switch does not rebuild the editor subtree', (
-      tester,
-    ) async {
-      Widget view({required bool preview, bool numbers = true}) => _app(
-        _view(
-          path: '/notes/a.md',
-          readNote: (_) async => '# Title\n\nbody\n',
-          showPreview: preview,
-          showLineNumbers: numbers,
-        ),
-      );
-      await tester.pumpWidget(view(preview: false));
-      await tester.pump();
-      final editor = tester.widget<NoteEditor>(find.byType(NoteEditor));
-      final codeElement = tester.element(find.byType(CodeEditor));
-      // Flip to the preview and back: same note, same toggles.
-      await tester.pumpWidget(view(preview: true));
-      await tester.pump();
-      await tester.pumpWidget(view(preview: false));
-      await tester.pump();
-      // Identical pane widget, untouched element: the framework skipped the
-      // whole editor subtree, fold markers included.
-      expect(
-        identical(tester.widget<NoteEditor>(find.byType(NoteEditor)), editor),
-        isTrue,
-      );
-      expect(
-        identical(tester.element(find.byType(CodeEditor)), codeElement),
-        isTrue,
-      );
-      // A real input change still rebuilds the pane once.
-      await tester.pumpWidget(view(preview: false, numbers: false));
-      await tester.pump();
-      expect(
-        identical(tester.widget<NoteEditor>(find.byType(NoteEditor)), editor),
-        isFalse,
-      );
-      expect(tester.takeException(), isNull);
     });
 
     testWidgets('an initial caret offset lands the caret after load', (
@@ -623,19 +563,17 @@ void main() {
         ),
       );
       await tester.pump();
-      final selection = tester
-          .widget<NoteEditor>(find.byType(NoteEditor))
-          .controller
-          .selection;
-      expect(selection.baseIndex, 2);
-      expect(selection.baseOffset, 0);
-      expect(selection.extentIndex, 2);
-      expect(selection.extentOffset, 0);
+      final selection = _surface(tester).selection;
+      expect(selection.anchor, 6);
+      expect(selection.extent, 6, reason: 'line 2, column 0');
       // The caret blinks on timers while focused (periodic tick plus a
       // one-shot on Android): let them fire, then unfocus before
       // teardown, or the test invariant fails on a live timer.
       await tester.pump(const Duration(milliseconds: 200));
-      tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.unfocus();
+      tester
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!
+          .unfocus();
       await tester.pump();
       expect(tester.takeException(), isNull);
     });
@@ -654,12 +592,18 @@ void main() {
       );
       await tester.pump();
       expect(
-        tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.hasFocus,
+        tester
+            .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+            .focusNode!
+            .hasFocus,
         isTrue,
       );
       // Same blink-timer teardown as above.
       await tester.pump(const Duration(milliseconds: 200));
-      tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.unfocus();
+      tester
+          .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+          .focusNode!
+          .unfocus();
       await tester.pump();
       expect(tester.takeException(), isNull);
     });
@@ -672,7 +616,10 @@ void main() {
       );
       await tester.pump();
       expect(
-        tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.hasFocus,
+        tester
+            .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+            .focusNode!
+            .hasFocus,
         isFalse,
       );
       expect(tester.takeException(), isNull);

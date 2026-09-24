@@ -18,8 +18,9 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `sync/` | Sync state store (`sync_destinations`, `sync_items`, `sync_ops`), secure password store, pure reconcile, the engine (full and quick runs), the trigger scheduler and network monitor, and `LibrarySyncService` for the UI |
 | `ui/sync/` | WebDAV settings screen (with the trigger options), status icon and panel (with the queue), first-sync and mass-deletion dialogs, conflict screen (merge by region, or whole copies) |
 | `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); indexer, scan, tree materialization |
-| `editor/` | Source editor (`re_editor` + own incremental tokenizer `highlighting.dart`), WYSIWYG (`flutter_quill` + Markdown codec — the replacements measured and rejected are in [editor-alternatives.md](editor-alternatives.md)), toolbar, find panel, folding, outline, word count |
-| `preview/` | Markdown render (`flutter_markdown_plus` + `markdown` AST), KaTeX math, code highlight, scroll sync |
+| `markdown/` | The one Markdown surface ([unified-surface.md](unified-surface.md)): `SourceBuffer`, the block scanner and parser (over the `markdown` AST), the styler, the surface controller, and under `render/` the source view (modes `source` and `live`, the WYSIWYG) and the read view (the preview); `edit/` holds selection, caret motion, input, history and find |
+| `editor/` | What the surface is driven by: the incremental tokenizer (`highlighting.dart`), the Markdown commands (`md_editing.dart`), toolbar and its layout, context menu, find bar, outline, word count, list tally, typewriter and note column |
+| `preview/` | KaTeX math (typesetting, cache, rasterizing), code highlight, image aspect — what the surface draws with |
 | `links/` | Wikilink/Markdown-link parse + resolve (single parse rule shared by editor, preview, indexer) |
 | `search/` | FTS query builder (user text is never raw FTS), field/tag queries, replace |
 | `frontmatter/` | YAML parse, known fields (`title tags date pinned aliases`), field repo |
@@ -41,7 +42,7 @@ lines or when responsibilities mix.
   upsert into `IndexDatabase` on main.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
-  index. Preview and editor share one tokenizer for links.
+  index. Every mode of the surface shares one tokenizer for links.
 - **Sync download:** a note lands the same way (snapshot + rename on an
   isolate). An **attachment** has no snapshot, so it lands through
   `swapFileIn` on the calling isolate instead — a stat, a mkdir and a
@@ -71,10 +72,7 @@ lines or when responsibilities mix.
 
 ## Planned, not built
 
-- **One Markdown surface.** The source editor, the WYSIWYG editor and the
-  preview are three surfaces today. [unified-surface.md](unified-surface.md)
-  is the research and design for replacing all three with one widget in pure
-  Flutter/Dart, uniform in functionality, performance and rendering. It is a
-  proposal, not a description of shipped code — the module map above is still
-  what the app is. The measured record of the packages that proposal would
-  replace is [editor-alternatives.md](editor-alternatives.md).
+- Nothing large at the moment. The one Markdown surface that was planned
+  here is built (#247): [unified-surface.md](unified-surface.md) is its
+  design and record, and [editor-alternatives.md](editor-alternatives.md) the
+  measured record of the packages it replaced.

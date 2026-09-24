@@ -919,18 +919,6 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(enabledEditors: {...editors}));
   }
 
-  /// Which engine draws a note (default [MarkdownEngine.legacy]).
-  @override
-  Future<MarkdownEngine> get markdownEngine async =>
-      (await _library).markdownEngine;
-
-  /// Sets (and persists) the markdown engine.
-  @override
-  Future<void> setMarkdownEngine(MarkdownEngine engine) async {
-    _log.info('markdown engine set to ${engine.name}');
-    await _editLibrary((c) => c.copyWith(markdownEngine: engine));
-  }
-
   /// The library tree sort order.
   @override
   Future<TreeSort> get treeSort async => (await _library).treeSort;

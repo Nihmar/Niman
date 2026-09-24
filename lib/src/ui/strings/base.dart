@@ -184,12 +184,6 @@ abstract base class Strings {
   String get closeToTrayTitle;
   String get closeToTraySubtitle;
 
-  // The note's engine (docs/dev/unified-surface.md). English only for now:
-  // the setting is experimental and unnamed in every translation until the
-  // engine it switches to can replace the preview it is compared against.
-  String get markdownEngineTitle => 'Markdown engine';
-  String get markdownEngineLegacy => 'The preview the app has always had';
-  String get markdownEngineUnified => 'The unified surface (experimental)';
   String get shortcutNewTodo;
   String get shortcutNewNote;
   String get shortcutNewList;

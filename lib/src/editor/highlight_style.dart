@@ -1,5 +1,5 @@
-/// Display styles for the source editor's highlighting (M2a E7-influence,
-/// now over re_editor's per-line `spanBuilder`).
+/// Display styles for the source editor's highlighting (M2a
+/// E7-influence), per token over each line's span.
 ///
 /// [markdownTokenStyle] maps a [TokenKind] to a [TextStyle] *override* for
 /// the line span; [TokenKind.plain] maps to null (the base editor style

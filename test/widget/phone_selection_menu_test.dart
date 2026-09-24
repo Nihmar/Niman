@@ -1,13 +1,13 @@
 // 0.0.8 test round (Android): the menu a selection brings up stayed on
 // screen after a tap elsewhere. The editor sits in the note column's
 // LayoutBuilder (#171), so the keyboard coming up rebuilt it — and every
-// build handed re_editor a new toolbar controller, which had nothing to
-// hide when the tap came.
+// build handed the old editor a new toolbar controller, which had nothing
+// to hide when the tap came.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
-import 'package:re_editor/re_editor.dart';
 
 Widget _app(double height) => MaterialApp(
   home: Scaffold(
@@ -35,7 +35,7 @@ void main() {
       'after the editor was rebuilt', (tester) async {
     await tester.pumpWidget(_app(700));
     await tester.pumpAndSettle();
-    final editor = find.byType(CodeEditor);
+    final editor = find.byType(MarkdownSourceView);
     final at = tester.getTopLeft(editor) + const Offset(40, 14);
     await tester.longPressAt(at);
     await tester.pumpAndSettle();

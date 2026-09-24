@@ -20,8 +20,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_highlight/themes/atom-one-dark.dart';
-import 'package:flutter_highlight/themes/atom-one-light.dart';
+import 'package:niman/src/markdown/render/code_themes.dart';
 
 /// How far an ordered item's number ends before the item's text, in the
 /// prose's size: the read view and `live` both set it there, and it grows

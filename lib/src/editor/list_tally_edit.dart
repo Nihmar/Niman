@@ -1,14 +1,9 @@
 /// Placing a tally in a Markdown document (#136).
 ///
-/// Between the counting (`list_tally.dart`) and the source editor: finds
-/// the list the caret is in, finds the block a previous run left after
-/// it, and splices the new rows in. Pure text in, [MarkdownEdit] out, so
-/// the whole of where-the-block-goes is testable without an editor.
-///
-/// The WYSIWYG does not come through here — it has the Quill block at
-/// the caret and does not need to find anything by line — but it does
-/// use the same `list_tally.dart` underneath, so the two surfaces count
-/// alike even though they place alike by different means.
+/// Between the counting (`list_tally.dart`) and the editor: finds the
+/// list the caret is in, finds the block a previous run left after it,
+/// and splices the new rows in. Pure text in, [MarkdownEdit] out, so the
+/// whole of where-the-block-goes is testable without an editor.
 library;
 
 import 'package:flutter/services.dart';
@@ -101,7 +96,7 @@ bool blockList(Iterable<Block> blocks) {
 /// The blocks of [text], for [blockList].
 ///
 /// The fallback for a note whose pane is not on screen and has no scan of
-/// its own: O(note), so only the legacy path takes it.
+/// its own: O(note), so only a pane that is not drawn takes it.
 List<Block> scannedBlocksOf(String text) =>
     BlockScanner(SourceBuffer.fromText(text)).index.blocks;
 

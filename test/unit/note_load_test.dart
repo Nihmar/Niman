@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/note_load.dart';
+import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/preview/preview_work_failure.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -53,8 +53,8 @@ void main() {
     final file = File(p.join(dir.path, 'image.md'))
       ..writeAsBytesSync(<int>[0xFF, 0xFE, 0x00, 0xC3]);
     final loaded = await loadNote(file.path);
-    expect(loaded, isA<PreviewWorkFailure>());
-    expect((loaded as PreviewWorkFailure).notText, isTrue);
+    expect(loaded, isA<NoteReadFailure>());
+    expect((loaded as NoteReadFailure).notText, isTrue);
   });
 
   test('line endings are made LF, and an LF note is left as it is', () {

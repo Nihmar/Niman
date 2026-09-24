@@ -7,7 +7,6 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
-        MarkdownEngine,
         TreeSort,
         defaultAttachmentsFolder,
         defaultListFolder;
@@ -185,31 +184,21 @@ void main() {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       expect((await store.read()).editorKind, EditorKind.source);
-      // The unified engine is opt-in: an older file must read back as the
-      // surfaces the app has always shipped.
-      expect((await store.read()).markdownEngine, MarkdownEngine.legacy);
     });
 
-    test('round trips the markdown engine', () async {
-      final lib = await makeLibrary();
-      final store = LibraryConfigStore(lib.path);
-      const config = LibraryConfig(
-        trashEnabled: true,
-        historyVersions: 10,
-        quickNotePath: null,
-        listNoteFolder: 'Lists',
-        markdownEngine: MarkdownEngine.unified,
-      );
-      await store.write(config);
-      expect((await store.read()).markdownEngine, MarkdownEngine.unified);
-    });
-
-    test('an unknown engine reads back as the shipped one', () async {
+    test('the retired engine switch is read and let go (#247)', () async {
+      // One engine now: a file written while there were two still opens,
+      // and the key is not handed back as an unknown one to keep forever.
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       await store.file.create(recursive: true);
-      store.file.writeAsStringSync('{"markdownEngine": "something-newer"}');
-      expect((await store.read()).markdownEngine, MarkdownEngine.legacy);
+      store.file.writeAsStringSync(
+        '{"markdownEngine": "unified", "editorKind": "wysiwyg"}',
+      );
+      final config = await store.read();
+      expect(config.editorKind, EditorKind.wysiwyg);
+      await store.write(config);
+      expect(store.file.readAsStringSync(), isNot(contains('markdownEngine')));
     });
 
     test('round trips the editor kind', () async {

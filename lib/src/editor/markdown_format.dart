@@ -33,9 +33,9 @@
 /// hold for every case they cover.
 library;
 
-import 'dart:convert';
-
-import 'package:niman/src/editor/wysiwyg/markdown_blocks.dart';
+import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 
 /// The line separator the app normalizes to.
 const String _newline = '\n';
@@ -51,23 +51,23 @@ final RegExp _heading = RegExp(r'^(\s{0,3})(#{1,6})[ \t]*(\S.*)?$');
 String formatMarkdown(String source) {
   if (source.trim().isEmpty) return source.isEmpty ? source : _newline;
   final out = <String>[];
-  for (final block in splitMarkdownBlocks(source)) {
-    // Frontmatter, fences, tables, math, HTML: whatever the codec keeps
-    // verbatim, this keeps verbatim too. The one exception is the
-    // trailing blank lines a block carries, which the joining below
-    // decides instead.
-    final lines = const LineSplitter().convert(block.source);
-    final tidied = block.opaque
-        ? lines
-        : switch (block.tag) {
-            'ul' || 'ol' => _list(lines),
-            'h1' || 'h2' || 'h3' || 'h4' || 'h5' || 'h6' => _headings(lines),
-            _ => lines.map(_trimEnd).toList(),
-          };
+  for (final block in _units(source)) {
+    // Frontmatter, fences, tables, math, HTML: kept verbatim. The one
+    // exception is the trailing blank lines a block carries, which the
+    // joining below decides instead.
+    final lines = block.lines;
+    final tidied = switch (block.kind) {
+      _Unit.opaque => lines,
+      _Unit.list => _list(lines),
+      _Unit.heading => _headings(lines),
+      _Unit.prose => lines.map(_trimEnd).toList(),
+    };
     final body = _withoutTrailingBlanks(tidied);
     if (body.isEmpty) continue;
     // A break on the last line of a block breaks nothing.
-    if (!block.opaque) body[body.length - 1] = body.last.trimRight();
+    if (block.kind != _Unit.opaque) {
+      body[body.length - 1] = body.last.trimRight();
+    }
     if (out.isNotEmpty) out.add('');
     out.addAll(body);
   }
@@ -137,4 +137,70 @@ List<String> _withoutTrailingBlanks(List<String> lines) {
     out.removeAt(0);
   }
   return out;
+}
+
+/// What a stretch of the note is, to the tidying.
+enum _Unit {
+  /// Kept as written: frontmatter, code, math, HTML, a table.
+  opaque,
+
+  /// A list, its items and the lines that go on them, blank lines between
+  /// items included.
+  list,
+
+  /// A heading.
+  heading,
+
+  /// Anything else: a paragraph, a quote, a rule.
+  prose,
+}
+
+/// [source] cut into the stretches the tidying treats as one, read by the
+/// engine's own block scanner: a block apiece, but a list whole across the
+/// blank lines between its items, and blank lines left out.
+List<({_Unit kind, List<String> lines})> _units(String source) {
+  final buffer = SourceBuffer.fromText(source);
+  final blocks = BlockScanner(buffer).index.blocks;
+  final units = <({_Unit kind, List<String> lines})>[];
+  List<String> linesOf(Block block) => [
+    for (var line = block.startLine; line < block.endLine; line++)
+      buffer.lineAt(line),
+  ];
+  for (var at = 0; at < blocks.length; at++) {
+    final block = blocks[at];
+    if (block.kind == BlockKind.blank) continue;
+    if (block.kind == BlockKind.listItem) {
+      final lines = linesOf(block);
+      // The list goes on over blank lines as long as another item follows.
+      while (at + 1 < blocks.length) {
+        var next = at + 1;
+        final gap = <String>[];
+        while (next < blocks.length && blocks[next].kind == BlockKind.blank) {
+          gap.addAll(linesOf(blocks[next]));
+          next++;
+        }
+        if (next >= blocks.length || blocks[next].kind != BlockKind.listItem) {
+          break;
+        }
+        lines
+          ..addAll(gap)
+          ..addAll(linesOf(blocks[next]));
+        at = next;
+      }
+      units.add((kind: _Unit.list, lines: lines));
+      continue;
+    }
+    final kind = switch (block.kind) {
+      BlockKind.frontmatter ||
+      BlockKind.fencedCode ||
+      BlockKind.indentedCode ||
+      BlockKind.math ||
+      BlockKind.html ||
+      BlockKind.table => _Unit.opaque,
+      BlockKind.heading => _Unit.heading,
+      _ => _Unit.prose,
+    };
+    units.add((kind: kind, lines: linesOf(block)));
+  }
+  return units;
 }

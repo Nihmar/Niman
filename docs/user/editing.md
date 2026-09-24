@@ -7,7 +7,11 @@ Each library writes in one editor (`editorKind` in
 screen can offer source, WYSIWYG, or both (`enabledEditors`); the note's
 status row switches only when both are enabled.
 
-- **Source editor** (`re_editor`): Markdown text with Niman's incremental
+Both are one surface, Niman's own, in two modes: the note's text is the
+same Markdown either way, and only how it is drawn differs. The read view
+(the preview) is the same engine again, with nothing to edit.
+
+- **Source editor**: the Markdown as written, with Niman's incremental
   tokenizer for highlighting. Line numbers and indent width (2–8, default
   2) are per-library settings.
 - **Source editor font**: the source pane is set in a **monospace** face —
@@ -16,25 +20,20 @@ status row switches only when both are enabled.
   its columns. The line numbers use the same face at the same size, dimmed, so
   they line up with the characters they count. Making the face and size a
   setting is issue #259.
-- **The unified source pane** (experimental, behind the unified engine
-  setting): the same note in Niman's own editing surface instead of
-  `re_editor`. Enter carries a list on, **Tab and Shift+Tab indent and
-  outdent** (the note keeps the focus), PageUp/PageDown page, and on a phone a
-  **long press selects a word**, with handles to adjust it and a toolbar to
-  cut, copy, paste or select all. It also has the find and replace bar, the
-  spelling underline and its panel, the desktop context menu, Ctrl+click on
-  links, folding, typewriter mode and Zen, and line numbers. It is still
-  behind the flag: `editorKind: source` opens `re_editor`, and the unified
-  surface needs the unified engine setting.
-- **The unified WYSIWYG pane** (experimental, behind the same unified engine
-  setting): the note drawn as it reads, in the same surface as the unified
-  source pane — the Markdown stays the note's text, and only where the caret is
-  does it show as written. Headings are set at their size; bold, italic,
+- **Editing, in both modes**: Enter carries a list on, **Tab and Shift+Tab
+  indent and outdent** (the note keeps the focus), PageUp/PageDown page, and
+  on a phone a **long press selects a word**, with handles to adjust it and a
+  toolbar to cut, copy, paste or select all. Both have the find and replace
+  bar, the spelling underline and its panel, the context menu, Ctrl+click on
+  links, folding, typewriter mode and Zen.
+- **WYSIWYG editor**: the note drawn as it reads — the Markdown stays the
+  note's text, and only where the caret is does it show as written. Headings
+  are set at their size; bold, italic,
   strikethrough, underline (`<u>`) and superscript (`<sup>`) are drawn as
   such, and so is a format inside another (`<u>**x**</u>` is bold and
   underlined); list items get their bullet, number or checkbox — a click or a
   tap on the checkbox ticks it, one undo step, without moving the caret (in
-  the unified read view too, where the tick is saved like any edit). A
+  the read view too, where the tick is saved like any edit). A
   sublist is one column in per level, as the read view draws it, and a
   line that goes on an item — its wrapped rows, and the lines written
   under it — starts under the item's text. On the caret's line the marks
@@ -57,12 +56,9 @@ status row switches only when both are enabled.
   images and `![[embeds]]` are drawn under their line. Put the caret in a word
   and its syntax appears; put it in a formula block and the block's source
   appears — so everything stays editable as text.
-- **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
-  round-trip codec. What you see is the same `.md` file on disk. It opens a
-  note of **any size** — the 934 KB geometry note included — and the price of
-  a large one is the *wait*: the whole document is converted when it opens, so
-  a note that size takes a couple of seconds to appear. There is no cap on any
-  surface.
+- **Any size**: every mode opens a note of any size, novel-length ones
+  included; the note is scanned as it is drawn rather than converted up
+  front, so there is no wait to open it and no cap on any surface.
 
 ### Open notes and tabs
 
@@ -318,8 +314,8 @@ On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
 in the note's bar offers the same actions.
 
 The same formatting is also on the **context menu**: right-click in the
-editor (long-press on a phone). With the unified engine it is grouped by
-what you are doing, as Obsidian's is:
+editor (long-press on a phone). It is grouped by what you are doing, as
+Obsidian's is:
 
 - the spelling's suggestions for a misspelled word, and a table's
   **Row ›**, **Column ›** and sorts on a table's cell, first;
@@ -339,8 +335,7 @@ open as a sheet. What is on at the caret reads as on, as on the toolbar
 — the heading level the line has, the format the word is in.
 **Insert › Footnote** cites the next free number at the caret and
 writes its definition under the paragraph, the caret on it to write the
-note. The legacy editors keep the flat menu: under cut, copy and paste
-the toolbar's buttons, in the toolbar's order.
+note.
 
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item
@@ -436,8 +431,8 @@ in, or the rendered note you read. The eye flips between them — in the
 note's status row on a wide window, in the app bar on a phone, or *Show
 preview* / *Show editor* in the palette anywhere. What you leave behind
 keeps its place: the caret, the undo history, the typeset math and the
-images are all there when you come back. With the unified engine the note
-stays where you were reading it, too: flipping to the preview, back to
+images are all there when you come back. The note stays where you were
+reading it, too: flipping to the preview, back to
 the editor, or between source and live keeps the line at the top of the
 pane at its top, however differently the two draw what is above it.
 

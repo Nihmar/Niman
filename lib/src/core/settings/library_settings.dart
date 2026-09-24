@@ -5,28 +5,11 @@ import 'package:niman/src/db/app_database.dart';
 
 /// Which editor a library writes in (T-WYS-03, default source).
 enum EditorKind {
-  /// The Markdown source editor (re_editor).
+  /// The Markdown source, markers shown (the surface's `source` mode).
   source,
 
-  /// The WYSIWYG surface (flutter_quill).
+  /// The note drawn as it reads (the surface's `live` mode).
   wysiwyg,
-}
-
-/// Which engine draws a note's Markdown.
-///
-/// The switch exists because the two are meant to be compared. `legacy` is what
-/// the app ships today: the source editor, the WYSIWYG editor and the preview,
-/// each with its own parser, its own styling and its own idea of where a note
-/// begins. `unified` is the one engine of
-/// `docs/dev/unified-surface.md` — one parse, one theme, three modes over the
-/// same pipeline — and it is opt-in until its render agrees with the preview
-/// it is meant to replace.
-enum MarkdownEngine {
-  /// The three surfaces of today.
-  legacy,
-
-  /// The unified surface.
-  unified,
 }
 
 /// The library tree sort order (T-UI-03).

@@ -1,16 +1,12 @@
-// The read mode behind the flag, at the level the app actually uses it: a
-// `NoteView` with a note in it, pumped both ways. This is the test that says
-// the branch is reachable and that turning it on does not break the note —
-// what it draws is the block view's business, tested next door.
+// The read mode at the level the app actually uses it: a `NoteView` with a
+// note in it. What it draws is the block view's business, tested next door.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/surface.dart';
-import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
-import 'package:re_editor/re_editor.dart';
 
 import '../fakes/item_mark_finder.dart';
 
@@ -30,15 +26,14 @@ A paragraph with **bold** text and a `code span`.
 | 1 | 2 |
 ''';
 
-/// A note view over [_note], with the flag set as asked.
-Widget _app({required bool unified, bool showPreview = true}) => MaterialApp(
+/// A note view over [_note].
+Widget _app({bool showPreview = true}) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: '/tmp/niman-unified-test.md',
       showLineNumbers: true,
       autofocusEditor: false,
       showPreview: showPreview,
-      unifiedMarkdown: unified,
       readNote: (_) async => _note,
       writeNote: (_, _) async {},
     ),
@@ -77,7 +72,6 @@ void main() {
             showLineNumbers: true,
             autofocusEditor: false,
             showPreview: true,
-            unifiedMarkdown: true,
             readNote: (_) async => note.toString(),
             writeNote: (_, _) async {},
           ),
@@ -100,32 +94,19 @@ void main() {
     );
   });
 
-  testWidgets('the flag off is the preview the app has always had', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_app(unified: false));
-    await tester.pumpAndSettle();
-    expect(find.byType(MarkdownReadView), findsNothing);
-    expect(find.byType(MarkdownPreview), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('the flag on draws the unified read mode', (tester) async {
-    await tester.pumpWidget(_app(unified: true));
+  testWidgets('the read mode is the unified read view', (tester) async {
+    await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
     expect(find.byType(MarkdownReadView), findsOneWidget);
-    expect(find.byType(MarkdownPreview), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('the unified mode shows the note, markers out', (tester) async {
-    await tester.pumpWidget(_app(unified: true));
+    await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
-    // Scoped to the read pane: with the flag on, the *editor* pane is the
-    // unified
-    // surface too, and a source view shows its markers by design. What this
-    // test
-    // is about is that the read mode takes them out.
+    // Scoped to the read pane: the *editor* pane is the surface too, and a
+    // source view shows its markers by design. What this test is about is
+    // that the read mode takes them out.
     final screen = StringBuffer();
     for (final widget in tester.widgetList<Text>(
       find.descendant(
@@ -149,28 +130,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('the flag on turns the source pane into the surface', (
-    tester,
-  ) async {
-    // The wiring's property: with the flag on and the preview hidden, the
-    // editor
-    // pane is the unified surface rather than re_editor — and the note it shows
-    // is
-    // the note the file has.
-    await tester.pumpWidget(_app(unified: true, showPreview: false));
+  testWidgets('the source pane is the surface', (tester) async {
+    // With the preview hidden, the editor pane is the unified surface.
+    await tester.pumpWidget(_app(showPreview: false));
     await tester.pumpAndSettle();
     expect(find.byType(MarkdownSurface), findsOneWidget);
-    expect(find.byType(CodeEditor), findsNothing);
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('without the flag the source pane is still re_editor', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_app(unified: false, showPreview: false));
-    await tester.pumpAndSettle();
-    expect(find.byType(MarkdownSurface), findsNothing);
-    expect(find.byType(CodeEditor), findsOneWidget);
   });
 
   testWidgets('the read pane takes the blocks the editor already has', (
@@ -193,7 +158,6 @@ void main() {
           showLineNumbers: true,
           autofocusEditor: false,
           showPreview: showPreview,
-          unifiedMarkdown: true,
           readNote: (_) async => note.toString(),
           writeNote: (_, _) async {},
         ),
@@ -235,7 +199,6 @@ void main() {
             showLineNumbers: true,
             autofocusEditor: false,
             showPreview: true,
-            unifiedMarkdown: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},
           ),
@@ -271,20 +234,6 @@ void main() {
       reason: 'one tick, one undo step',
     );
     await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('flipping the flag over a live note does not throw', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_app(unified: false));
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(_app(unified: true));
-    await tester.pumpAndSettle();
-    expect(find.byType(MarkdownReadView), findsOneWidget);
-    await tester.pumpWidget(_app(unified: false));
-    await tester.pumpAndSettle();
-    expect(find.byType(MarkdownPreview), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

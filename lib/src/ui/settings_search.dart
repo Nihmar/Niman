@@ -148,15 +148,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
         open: () => pushAppearance(SettingsKeys.closeToTray),
       ),
     SettingsSearchEntry(
-      title: AppStrings.markdownEngineTitle,
-      area: appearance,
-      rowKey: SettingsKeys.markdownEngine,
-      value: () async =>
-          onOff(on: await controller.markdownEngine == MarkdownEngine.unified),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.markdownEngine),
-    ),
-    SettingsSearchEntry(
       title: AppStrings.toolbarSettingsTitle,
       area: editor,
       rowKey: SettingsKeys.toolbar,

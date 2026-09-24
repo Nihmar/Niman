@@ -546,12 +546,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// subscription needed.
   ShellEditorSettings _editorSettings = ShellEditorSettings.defaults;
 
-  /// Whether the unified engine draws notes in this library — the setting a
-  /// file opened outside it inherits, since such a file has no library config
-  /// of its own (`openOutsideFile`).
-  bool get _unifiedEngine =>
-      _editorSettings.markdownEngine == MarkdownEngine.unified;
-
   /// Whether the wide layout's tree pane shows (the title bar's toggle;
   /// the rail always stays, T-PP-22).
   bool _sidebarVisible = true;
@@ -957,7 +951,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       indentWidth: _editorSettings.indentWidth,
       toolbarLayout: _editorSettings.toolbarLayout,
       showPreview: _notePreview,
-      unifiedMarkdown: _unifiedEngine,
       showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
       // A single enabled editor has nowhere to switch to: the note hides
       // its switch instead of offering a dead toggle.
@@ -2587,7 +2580,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       context,
       widget.outsideFiles,
       EditorOnlyDocument(path),
-      unifiedMarkdown: _unifiedEngine,
     );
   }
 
@@ -3059,7 +3051,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         onToggleTypewriter: _toggleTypewriter,
         onLoaded: _workspace.noteLoaded,
         showLineNumbers: _editorSettings.lineNumbers,
-        unifiedMarkdown: _unifiedEngine,
         noteColumn: _editorSettings.noteColumn,
         // The kind toggles and ⋮ sit at the end of the note's
         // one row of chrome (#173); there is no header above.

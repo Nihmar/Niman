@@ -60,7 +60,6 @@ NoteView _note({
   showLineNumbers: true,
   autofocusEditor: autofocus,
   toolbarTop: toolbarTop,
-  unifiedMarkdown: true,
   reloadToken: reloadToken,
   unsavedTracker: tracker,
   active: active,
