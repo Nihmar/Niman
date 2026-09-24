@@ -297,7 +297,15 @@ final class Indexer {
   /// calls this for every note it rewrote — it knows the content changed
   /// because it wrote it. [onChanged] fires after the writes, when any row
   /// changed.
-  Future<void> rescanFiles(String root, List<String> paths) {
+  ///
+  /// [known] is what the writer knows of notes it wrote, by
+  /// library-relative path ([KnownContent]): taken where the file is still
+  /// the one it wrote.
+  Future<void> rescanFiles(
+    String root,
+    List<String> paths, {
+    Map<String, KnownContent> known = const {},
+  }) {
     return _synchronized(() async {
       final seen = <String>{};
       final absList = <String>[];
@@ -325,7 +333,7 @@ final class Indexer {
       final contents = await _tree.readRelContents(root, <String>[
         for (final rel in live.keys)
           if (isNoteFile(p.basename(rel))) rel,
-      ]);
+      ], known: known);
       var wrote = false;
       final changed = <NoteContent>[];
       for (final entry in live.entries) {

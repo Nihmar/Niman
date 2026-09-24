@@ -78,6 +78,12 @@ final class NoteContent {
   final String? frontmatterError;
 }
 
+/// What the app knows of a note it has just written, so its reindex does
+/// not work it out again from the file: the digest of the bytes it wrote —
+/// computed as they were written — and the file as the write left it,
+/// which says whether it is still that file.
+typedef KnownContent = ({String sha256, int size, DateTime modified});
+
 /// Reads and parses the notes at [rels] (library-relative, under [root]) —
 /// one file read per note returning digest **and** text, with frontmatter,
 /// inline tags and links extracted on this (index) isolate.
@@ -93,6 +99,7 @@ Future<List<NoteContent>> readNoteContents(
   String root,
   List<String> rels, {
   SendPort? progress,
+  Map<String, KnownContent> known = const {},
 }) async {
   final out = <NoteContent>[];
   for (final rel in rels) {
@@ -100,13 +107,28 @@ Future<List<NoteContent>> readNoteContents(
     // worked on rather than the one just finished.
     progress?.send(rel);
     try {
-      final bytes = await File(p.join(root, rel)).readAsBytes();
+      final file = File(p.join(root, rel));
+      final wrote = known[rel];
+      final before = wrote == null ? null : file.statSync();
+      final bytes = await file.readAsBytes();
       var text = utf8.decode(bytes, allowMalformed: true);
       // A UTF-8 BOM is content for FTS but noise for matching the editor.
       if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
         text = text.substring(1);
       }
-      final sha = sha256.convert(bytes).toString();
+      // The digest the write made, when the file is still the one it
+      // wrote — as it was before the read and after it, so a file swapped
+      // in between is not taken for it: 1.9 s of hashing on the 247 MB
+      // stress note (`docs/dev/huge-notes.md`, item 8), for bytes that were
+      // hashed as they were written.
+      final String sha;
+      if (wrote != null &&
+          _isAsWritten(before!, wrote) &&
+          _isAsWritten(file.statSync(), wrote)) {
+        sha = wrote.sha256;
+      } else {
+        sha = sha256.convert(bytes).toString();
+      }
       out.add(_extractContent(rel, sha, text));
     } on FileSystemException {
       continue;
@@ -114,6 +136,11 @@ Future<List<NoteContent>> readNoteContents(
   }
   return out;
 }
+
+bool _isAsWritten(FileStat stat, KnownContent wrote) =>
+    stat.type == FileSystemEntityType.file &&
+    stat.size == wrote.size &&
+    stat.modified == wrote.modified;
 
 /// Runs one [readNoteContents] batch on a background isolate.
 ///
@@ -124,9 +151,12 @@ Future<List<NoteContent>> readNoteContents(
 Future<List<NoteContent>> readBatchOnIsolate(
   String root,
   List<String> batch,
-  SendPort? progress,
-) {
-  return Isolate.run(() => readNoteContents(root, batch, progress: progress));
+  SendPort? progress, [
+  Map<String, KnownContent> known = const {},
+]) {
+  return Isolate.run(
+    () => readNoteContents(root, batch, progress: progress, known: known),
+  );
 }
 
 /// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links).
