@@ -73,7 +73,9 @@ final class ThemeActions {
     }
   }
 
-  /// Asks for a new theme and stores it, worn.
+  /// Asks for a new theme, stores it, worn, and opens it in the editor: a
+  /// theme is made to be given its own colors, and landing back on the
+  /// list left the user to find it and open it again.
   Future<void> newTheme(BuildContext context) async {
     final request = await showNewThemeDialog(
       context,
@@ -86,11 +88,14 @@ final class ThemeActions {
       return;
     }
     final from = request.from;
-    await _save(
-      from == null
-          ? randomCustomTheme(id: newCustomThemeId(), name: request.name)
-          : customThemeCopyOf(from, id: newCustomThemeId(), name: request.name),
-    );
+    final theme = from == null
+        ? randomCustomTheme(id: newCustomThemeId(), name: request.name)
+        : customThemeCopyOf(from, id: newCustomThemeId(), name: request.name);
+    await _save(theme);
+    if (!context.mounted) {
+      return;
+    }
+    await edit(context, CustomAppTheme(theme));
   }
 
   /// Copies [theme] into a theme of the user's own, named after it.

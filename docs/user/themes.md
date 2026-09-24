@@ -26,7 +26,9 @@ the editor and the preview always agree with the interface around them.
 *New theme*, at the end of the list, asks for a name and where the colors
 start from: a theme already in the list, shipped or your own, or *Random
 colors* — a whole theme invented around one random hue, complete at day
-and at night. Nothing has to be filled in from a blank page.
+and at night. Nothing has to be filled in from a blank page. The new
+theme is worn at once and opens in the editor, to be given its own
+colors; back from it, it is in the list, marked as the one in use.
 
 Each theme in the list carries a ⋮ menu:
 
