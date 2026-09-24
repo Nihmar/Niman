@@ -56,6 +56,7 @@ import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
@@ -392,6 +393,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// time, and [headings] waits for it — and while a long note is still
   /// being read in the background, when there are no blocks at all.
   bool get scanSettled => _styler?.settled ?? false;
+
+  /// The note's tags and links as of the buffer's revision, when the scan
+  /// behind the colours keeps them ([SourceStyler.references]): a long note's
+  /// save hands them to the index, which then does not read the note for
+  /// them. Null otherwise.
+  NoteReferences? references() => _styler?.references();
 
   /// The note's blocks, as the scan behind the colours has them, or null
   /// while there is no scan yet.

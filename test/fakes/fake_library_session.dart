@@ -24,6 +24,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
@@ -812,6 +813,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     String path,
     NoteContentProducer content, {
     int? editSession,
+    NoteReferences? references,
   }) async {
     final buffer = StringBuffer();
     for (var index = 0; ; index++) {
