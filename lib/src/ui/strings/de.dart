@@ -542,6 +542,32 @@ final class GermanStrings extends Strings {
   @override
   String get cheatTemplates => 'Vorlagen-Platzhalter';
   @override
+  String get menuAddLink => 'Link hinzufügen';
+  @override
+  String get menuAddExternalLink => 'Externen Link hinzufügen';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Absatz';
+  @override
+  String get menuInsert => 'Einfügen';
+  @override
+  String get menuBody => 'Fließtext';
+  @override
+  String get formatSubscript => 'Tiefgestellt';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Fußnote';
+  @override
+  String get insertRule => 'Trennlinie';
+  @override
+  String get insertCodeBlock => 'Codeblock';
+  @override
+  String get insertMathBlock => 'Mathematikblock';
+  @override
+  String get menuHeadingWord => 'Überschrift';
+  @override
   String get toolbarHeading => 'Überschrift';
   @override
   String get toolbarList => 'Liste';

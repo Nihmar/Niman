@@ -542,6 +542,32 @@ final class DutchStrings extends Strings {
   @override
   String get cheatTemplates => 'Sjabloonplaatshouders';
   @override
+  String get menuAddLink => 'Link toevoegen';
+  @override
+  String get menuAddExternalLink => 'Externe link toevoegen';
+  @override
+  String get menuFormat => 'Opmaak';
+  @override
+  String get menuParagraph => 'Alinea';
+  @override
+  String get menuInsert => 'Invoegen';
+  @override
+  String get menuBody => 'Platte tekst';
+  @override
+  String get formatSubscript => 'Subscript';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Voetnoot';
+  @override
+  String get insertRule => 'Horizontale lijn';
+  @override
+  String get insertCodeBlock => 'Codeblok';
+  @override
+  String get insertMathBlock => 'Wiskundeblok';
+  @override
+  String get menuHeadingWord => 'Kop';
+  @override
   String get toolbarHeading => 'Kop';
   @override
   String get toolbarList => 'Lijst';

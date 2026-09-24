@@ -541,6 +541,32 @@ final class CroatianStrings extends Strings {
   @override
   String get cheatTemplates => 'Rezervirana mjesta predložaka';
   @override
+  String get menuAddLink => 'Dodaj poveznicu';
+  @override
+  String get menuAddExternalLink => 'Dodaj vanjsku poveznicu';
+  @override
+  String get menuFormat => 'Oblik';
+  @override
+  String get menuParagraph => 'Odlomak';
+  @override
+  String get menuInsert => 'Umetni';
+  @override
+  String get menuBody => 'Obični tekst';
+  @override
+  String get formatSubscript => 'Indeks';
+  @override
+  String get formatInlineCode => 'Kôd';
+  @override
+  String get insertFootnote => 'Fusnota';
+  @override
+  String get insertRule => 'Vodoravna crta';
+  @override
+  String get insertCodeBlock => 'Blok kôda';
+  @override
+  String get insertMathBlock => 'Matematički blok';
+  @override
+  String get menuHeadingWord => 'Naslov';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

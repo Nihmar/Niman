@@ -544,6 +544,32 @@ final class ItalianStrings extends Strings {
   @override
   String get cheatTemplates => 'Segnaposto dei modelli';
   @override
+  String get menuAddLink => 'Aggiungi link';
+  @override
+  String get menuAddExternalLink => 'Aggiungi link esterno';
+  @override
+  String get menuFormat => 'Formato';
+  @override
+  String get menuParagraph => 'Paragrafo';
+  @override
+  String get menuInsert => 'Inserisci';
+  @override
+  String get menuBody => 'Testo normale';
+  @override
+  String get formatSubscript => 'Pedice';
+  @override
+  String get formatInlineCode => 'Codice';
+  @override
+  String get insertFootnote => 'Nota a piè di pagina';
+  @override
+  String get insertRule => 'Linea orizzontale';
+  @override
+  String get insertCodeBlock => 'Blocco di codice';
+  @override
+  String get insertMathBlock => 'Blocco matematico';
+  @override
+  String get menuHeadingWord => 'Titolo';
+  @override
   String get toolbarHeading => 'Titolo';
   @override
   String get toolbarList => 'Elenco';

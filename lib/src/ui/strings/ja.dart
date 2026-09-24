@@ -511,6 +511,32 @@ final class JapaneseStrings extends Strings {
   @override
   String get cheatTemplates => 'テンプレートのプレースホルダー';
   @override
+  String get menuAddLink => 'リンクを追加';
+  @override
+  String get menuAddExternalLink => '外部リンクを追加';
+  @override
+  String get menuFormat => '書式';
+  @override
+  String get menuParagraph => '段落';
+  @override
+  String get menuInsert => '挿入';
+  @override
+  String get menuBody => '本文';
+  @override
+  String get formatSubscript => '下付き';
+  @override
+  String get formatInlineCode => 'コード';
+  @override
+  String get insertFootnote => '脚注';
+  @override
+  String get insertRule => '水平線';
+  @override
+  String get insertCodeBlock => 'コードブロック';
+  @override
+  String get insertMathBlock => '数式ブロック';
+  @override
+  String get menuHeadingWord => '見出し';
+  @override
   String get toolbarHeading => '見出し';
   @override
   String get toolbarList => 'リスト';

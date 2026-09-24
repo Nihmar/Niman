@@ -547,6 +547,32 @@ final class FrenchStrings extends Strings {
   @override
   String get cheatTemplates => 'Espaces réservés des modèles';
   @override
+  String get menuAddLink => 'Ajouter un lien';
+  @override
+  String get menuAddExternalLink => 'Ajouter un lien externe';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraphe';
+  @override
+  String get menuInsert => 'Insérer';
+  @override
+  String get menuBody => 'Corps du texte';
+  @override
+  String get formatSubscript => 'Indice';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Note de bas de page';
+  @override
+  String get insertRule => 'Ligne horizontale';
+  @override
+  String get insertCodeBlock => 'Bloc de code';
+  @override
+  String get insertMathBlock => 'Bloc mathématique';
+  @override
+  String get menuHeadingWord => 'Titre';
+  @override
   String get toolbarHeading => 'Titre';
   @override
   String get toolbarList => 'Liste';

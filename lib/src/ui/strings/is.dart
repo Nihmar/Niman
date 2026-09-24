@@ -538,6 +538,32 @@ final class IcelandicStrings extends Strings {
   @override
   String get cheatTemplates => 'Staðgenglar sniðmáta';
   @override
+  String get menuAddLink => 'Bæta við tengli';
+  @override
+  String get menuAddExternalLink => 'Bæta við ytri tengli';
+  @override
+  String get menuFormat => 'Snið';
+  @override
+  String get menuParagraph => 'Málsgrein';
+  @override
+  String get menuInsert => 'Setja inn';
+  @override
+  String get menuBody => 'Meginmál';
+  @override
+  String get formatSubscript => 'Lágvísir';
+  @override
+  String get formatInlineCode => 'Kóði';
+  @override
+  String get insertFootnote => 'Neðanmálsgrein';
+  @override
+  String get insertRule => 'Lárétt lína';
+  @override
+  String get insertCodeBlock => 'Kóðablokk';
+  @override
+  String get insertMathBlock => 'Stærðfræðiblokk';
+  @override
+  String get menuHeadingWord => 'Fyrirsögn';
+  @override
   String get toolbarHeading => 'Titill';
   @override
   String get toolbarList => 'Listi';

@@ -539,6 +539,32 @@ final class FinnishStrings extends Strings {
   @override
   String get cheatTemplates => 'Mallipohjien paikkamerkit';
   @override
+  String get menuAddLink => 'Lisää linkki';
+  @override
+  String get menuAddExternalLink => 'Lisää ulkoinen linkki';
+  @override
+  String get menuFormat => 'Muotoilu';
+  @override
+  String get menuParagraph => 'Kappale';
+  @override
+  String get menuInsert => 'Lisää';
+  @override
+  String get menuBody => 'Leipäteksti';
+  @override
+  String get formatSubscript => 'Alaindeksi';
+  @override
+  String get formatInlineCode => 'Koodi';
+  @override
+  String get insertFootnote => 'Alaviite';
+  @override
+  String get insertRule => 'Vaakaviiva';
+  @override
+  String get insertCodeBlock => 'Koodilohko';
+  @override
+  String get insertMathBlock => 'Matematiikkalohko';
+  @override
+  String get menuHeadingWord => 'Otsikko';
+  @override
   String get toolbarHeading => 'Otsikko';
   @override
   String get toolbarList => 'Lista';

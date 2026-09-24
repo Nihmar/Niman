@@ -545,6 +545,32 @@ final class CatalanStrings extends Strings {
   @override
   String get cheatTemplates => 'Marcadors de les plantilles';
   @override
+  String get menuAddLink => 'Afegeix un enllaç';
+  @override
+  String get menuAddExternalLink => 'Afegeix un enllaç extern';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paràgraf';
+  @override
+  String get menuInsert => 'Insereix';
+  @override
+  String get menuBody => 'Text normal';
+  @override
+  String get formatSubscript => 'Subíndex';
+  @override
+  String get formatInlineCode => 'Codi';
+  @override
+  String get insertFootnote => 'Nota al peu';
+  @override
+  String get insertRule => 'Línia horitzontal';
+  @override
+  String get insertCodeBlock => 'Bloc de codi';
+  @override
+  String get insertMathBlock => 'Bloc matemàtic';
+  @override
+  String get menuHeadingWord => 'Títol';
+  @override
   String get toolbarHeading => 'Títol';
   @override
   String get toolbarList => 'Llista';

@@ -537,6 +537,32 @@ final class HungarianStrings extends Strings {
   @override
   String get cheatTemplates => 'Sablon-helyőrzők';
   @override
+  String get menuAddLink => 'Hivatkozás hozzáadása';
+  @override
+  String get menuAddExternalLink => 'Külső hivatkozás hozzáadása';
+  @override
+  String get menuFormat => 'Formázás';
+  @override
+  String get menuParagraph => 'Bekezdés';
+  @override
+  String get menuInsert => 'Beszúrás';
+  @override
+  String get menuBody => 'Törzsszöveg';
+  @override
+  String get formatSubscript => 'Alsó index';
+  @override
+  String get formatInlineCode => 'Kód';
+  @override
+  String get insertFootnote => 'Lábjegyzet';
+  @override
+  String get insertRule => 'Vízszintes vonal';
+  @override
+  String get insertCodeBlock => 'Kódblokk';
+  @override
+  String get insertMathBlock => 'Matematikai blokk';
+  @override
+  String get menuHeadingWord => 'Címsor';
+  @override
   String get toolbarHeading => 'Cím';
   @override
   String get toolbarList => 'Lista';

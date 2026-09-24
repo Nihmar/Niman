@@ -548,6 +548,32 @@ final class RomanianStrings extends Strings {
   @override
   String get cheatTemplates => 'Substituenți de șabloane';
   @override
+  String get menuAddLink => 'Adaugă link';
+  @override
+  String get menuAddExternalLink => 'Adaugă link extern';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraf';
+  @override
+  String get menuInsert => 'Inserează';
+  @override
+  String get menuBody => 'Text normal';
+  @override
+  String get formatSubscript => 'Indice';
+  @override
+  String get formatInlineCode => 'Cod';
+  @override
+  String get insertFootnote => 'Notă de subsol';
+  @override
+  String get insertRule => 'Linie orizontală';
+  @override
+  String get insertCodeBlock => 'Bloc de cod';
+  @override
+  String get insertMathBlock => 'Bloc matematic';
+  @override
+  String get menuHeadingWord => 'Titlu';
+  @override
   String get toolbarHeading => 'Titlu';
   @override
   String get toolbarList => 'Listă';

@@ -543,6 +543,32 @@ final class CzechStrings extends Strings {
   @override
   String get cheatTemplates => 'Zástupné symboly šablon';
   @override
+  String get menuAddLink => 'Přidat odkaz';
+  @override
+  String get menuAddExternalLink => 'Přidat externí odkaz';
+  @override
+  String get menuFormat => 'Formát';
+  @override
+  String get menuParagraph => 'Odstavec';
+  @override
+  String get menuInsert => 'Vložit';
+  @override
+  String get menuBody => 'Běžný text';
+  @override
+  String get formatSubscript => 'Dolní index';
+  @override
+  String get formatInlineCode => 'Kód';
+  @override
+  String get insertFootnote => 'Poznámka pod čarou';
+  @override
+  String get insertRule => 'Vodorovná čára';
+  @override
+  String get insertCodeBlock => 'Blok kódu';
+  @override
+  String get insertMathBlock => 'Matematický blok';
+  @override
+  String get menuHeadingWord => 'Nadpis';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Seznam';

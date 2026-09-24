@@ -544,6 +544,32 @@ final class GalicianStrings extends Strings {
   @override
   String get cheatTemplates => 'Marcadores dos modelos';
   @override
+  String get menuAddLink => 'Engadir ligazón';
+  @override
+  String get menuAddExternalLink => 'Engadir ligazón externa';
+  @override
+  String get menuFormat => 'Formato';
+  @override
+  String get menuParagraph => 'Parágrafo';
+  @override
+  String get menuInsert => 'Inserir';
+  @override
+  String get menuBody => 'Texto normal';
+  @override
+  String get formatSubscript => 'Subíndice';
+  @override
+  String get formatInlineCode => 'Código';
+  @override
+  String get insertFootnote => 'Nota ao pé';
+  @override
+  String get insertRule => 'Liña horizontal';
+  @override
+  String get insertCodeBlock => 'Bloque de código';
+  @override
+  String get insertMathBlock => 'Bloque matemático';
+  @override
+  String get menuHeadingWord => 'Título';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

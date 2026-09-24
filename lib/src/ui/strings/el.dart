@@ -547,6 +547,32 @@ final class GreekStrings extends Strings {
   @override
   String get cheatTemplates => 'Σύμβολα κράτησης προτύπων';
   @override
+  String get menuAddLink => 'Προσθήκη συνδέσμου';
+  @override
+  String get menuAddExternalLink => 'Προσθήκη εξωτερικού συνδέσμου';
+  @override
+  String get menuFormat => 'Μορφή';
+  @override
+  String get menuParagraph => 'Παράγραφος';
+  @override
+  String get menuInsert => 'Εισαγωγή';
+  @override
+  String get menuBody => 'Κανονικό κείμενο';
+  @override
+  String get formatSubscript => 'Δείκτης';
+  @override
+  String get formatInlineCode => 'Κώδικας';
+  @override
+  String get insertFootnote => 'Υποσημείωση';
+  @override
+  String get insertRule => 'Οριζόντια γραμμή';
+  @override
+  String get insertCodeBlock => 'Μπλοκ κώδικα';
+  @override
+  String get insertMathBlock => 'Μπλοκ μαθηματικών';
+  @override
+  String get menuHeadingWord => 'Επικεφαλίδα';
+  @override
   String get toolbarHeading => 'Τίτλος';
   @override
   String get toolbarList => 'Λίστα';

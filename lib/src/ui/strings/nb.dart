@@ -537,6 +537,32 @@ final class NorwegianStrings extends Strings {
   @override
   String get cheatTemplates => 'Malplassholdere';
   @override
+  String get menuAddLink => 'Legg til lenke';
+  @override
+  String get menuAddExternalLink => 'Legg til ekstern lenke';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Avsnitt';
+  @override
+  String get menuInsert => 'Sett inn';
+  @override
+  String get menuBody => 'Brødtekst';
+  @override
+  String get formatSubscript => 'Senket';
+  @override
+  String get formatInlineCode => 'Kode';
+  @override
+  String get insertFootnote => 'Fotnote';
+  @override
+  String get insertRule => 'Horisontal linje';
+  @override
+  String get insertCodeBlock => 'Kodeblokk';
+  @override
+  String get insertMathBlock => 'Matematikkblokk';
+  @override
+  String get menuHeadingWord => 'Overskrift';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

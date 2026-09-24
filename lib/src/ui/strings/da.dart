@@ -537,6 +537,32 @@ final class DanishStrings extends Strings {
   @override
   String get cheatTemplates => 'Skabelonpladsholdere';
   @override
+  String get menuAddLink => 'Tilføj link';
+  @override
+  String get menuAddExternalLink => 'Tilføj eksternt link';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Afsnit';
+  @override
+  String get menuInsert => 'Indsæt';
+  @override
+  String get menuBody => 'Brødtekst';
+  @override
+  String get formatSubscript => 'Sænket';
+  @override
+  String get formatInlineCode => 'Kode';
+  @override
+  String get insertFootnote => 'Fodnote';
+  @override
+  String get insertRule => 'Vandret linje';
+  @override
+  String get insertCodeBlock => 'Kodeblok';
+  @override
+  String get insertMathBlock => 'Matematikblok';
+  @override
+  String get menuHeadingWord => 'Overskrift';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

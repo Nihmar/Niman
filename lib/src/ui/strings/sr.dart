@@ -544,6 +544,32 @@ final class SerbianStrings extends Strings {
   @override
   String get cheatTemplates => 'Чувари места у шаблонима';
   @override
+  String get menuAddLink => 'Додај везу';
+  @override
+  String get menuAddExternalLink => 'Додај спољну везу';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Пасус';
+  @override
+  String get menuInsert => 'Уметни';
+  @override
+  String get menuBody => 'Обичан текст';
+  @override
+  String get formatSubscript => 'Индекс';
+  @override
+  String get formatInlineCode => 'Кôд';
+  @override
+  String get insertFootnote => 'Фуснота';
+  @override
+  String get insertRule => 'Хоризонтална линија';
+  @override
+  String get insertCodeBlock => 'Блок кôда';
+  @override
+  String get insertMathBlock => 'Математички блок';
+  @override
+  String get menuHeadingWord => 'Наслов';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Списак';

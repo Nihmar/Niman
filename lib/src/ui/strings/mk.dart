@@ -545,6 +545,32 @@ final class MacedonianStrings extends Strings {
   @override
   String get cheatTemplates => 'Резервирани места во шаблоните';
   @override
+  String get menuAddLink => 'Додај врска';
+  @override
+  String get menuAddExternalLink => 'Додај надворешна врска';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Пасус';
+  @override
+  String get menuInsert => 'Вметни';
+  @override
+  String get menuBody => 'Обичен текст';
+  @override
+  String get formatSubscript => 'Долен индекс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Фуснота';
+  @override
+  String get insertRule => 'Хоризонтална линија';
+  @override
+  String get insertCodeBlock => 'Блок код';
+  @override
+  String get insertMathBlock => 'Математички блок';
+  @override
+  String get menuHeadingWord => 'Наслов';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Листа';

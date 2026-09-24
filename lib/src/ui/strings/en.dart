@@ -538,6 +538,32 @@ final class EnglishStrings extends Strings {
   @override
   String get cheatTemplates => 'Template placeholders';
   @override
+  String get menuAddLink => 'Add link';
+  @override
+  String get menuAddExternalLink => 'Add external link';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraph';
+  @override
+  String get menuInsert => 'Insert';
+  @override
+  String get menuBody => 'Body';
+  @override
+  String get formatSubscript => 'Subscript';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Footnote';
+  @override
+  String get insertRule => 'Horizontal rule';
+  @override
+  String get insertCodeBlock => 'Code block';
+  @override
+  String get insertMathBlock => 'Math block';
+  @override
+  String get menuHeadingWord => 'Heading';
+  @override
   String get toolbarHeading => 'Heading';
   @override
   String get toolbarList => 'List';

@@ -533,6 +533,32 @@ final class EstonianStrings extends Strings {
   @override
   String get cheatTemplates => 'Mallide kohatäited';
   @override
+  String get menuAddLink => 'Lisa link';
+  @override
+  String get menuAddExternalLink => 'Lisa väline link';
+  @override
+  String get menuFormat => 'Vorming';
+  @override
+  String get menuParagraph => 'Lõik';
+  @override
+  String get menuInsert => 'Lisa';
+  @override
+  String get menuBody => 'Põhitekst';
+  @override
+  String get formatSubscript => 'Alaindeks';
+  @override
+  String get formatInlineCode => 'Kood';
+  @override
+  String get insertFootnote => 'Joonealune märkus';
+  @override
+  String get insertRule => 'Horisontaaljoon';
+  @override
+  String get insertCodeBlock => 'Koodiplokk';
+  @override
+  String get insertMathBlock => 'Matemaatikaplokk';
+  @override
+  String get menuHeadingWord => 'Pealkiri';
+  @override
   String get toolbarHeading => 'Pealkiri';
   @override
   String get toolbarList => 'Loetelu';

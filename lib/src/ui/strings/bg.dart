@@ -542,6 +542,32 @@ final class BulgarianStrings extends Strings {
   @override
   String get cheatTemplates => 'Заместители в шаблоните';
   @override
+  String get menuAddLink => 'Добави връзка';
+  @override
+  String get menuAddExternalLink => 'Добави външна връзка';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Абзац';
+  @override
+  String get menuInsert => 'Вмъкни';
+  @override
+  String get menuBody => 'Обикновен текст';
+  @override
+  String get formatSubscript => 'Долен индекс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Бележка под линия';
+  @override
+  String get insertRule => 'Хоризонтална линия';
+  @override
+  String get insertCodeBlock => 'Блок код';
+  @override
+  String get insertMathBlock => 'Математически блок';
+  @override
+  String get menuHeadingWord => 'Заглавие';
+  @override
   String get toolbarHeading => 'Заглавие';
   @override
   String get toolbarList => 'Списък';

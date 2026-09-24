@@ -544,6 +544,32 @@ final class SlovenianStrings extends Strings {
   @override
   String get cheatTemplates => 'Ograde predlog';
   @override
+  String get menuAddLink => 'Dodaj povezavo';
+  @override
+  String get menuAddExternalLink => 'Dodaj zunanjo povezavo';
+  @override
+  String get menuFormat => 'Oblika';
+  @override
+  String get menuParagraph => 'Odstavek';
+  @override
+  String get menuInsert => 'Vstavi';
+  @override
+  String get menuBody => 'Navadno besedilo';
+  @override
+  String get formatSubscript => 'Podpisano';
+  @override
+  String get formatInlineCode => 'Koda';
+  @override
+  String get insertFootnote => 'Opomba';
+  @override
+  String get insertRule => 'Vodoravna črta';
+  @override
+  String get insertCodeBlock => 'Blok kode';
+  @override
+  String get insertMathBlock => 'Matematični blok';
+  @override
+  String get menuHeadingWord => 'Naslov';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Seznam';

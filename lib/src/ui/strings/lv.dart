@@ -540,6 +540,32 @@ final class LatvianStrings extends Strings {
   @override
   String get cheatTemplates => 'Veidņu vietturi';
   @override
+  String get menuAddLink => 'Pievienot saiti';
+  @override
+  String get menuAddExternalLink => 'Pievienot ārēju saiti';
+  @override
+  String get menuFormat => 'Formāts';
+  @override
+  String get menuParagraph => 'Rindkopa';
+  @override
+  String get menuInsert => 'Ievietot';
+  @override
+  String get menuBody => 'Pamatteksts';
+  @override
+  String get formatSubscript => 'Apakšraksts';
+  @override
+  String get formatInlineCode => 'Kods';
+  @override
+  String get insertFootnote => 'Vēre';
+  @override
+  String get insertRule => 'Horizontāla līnija';
+  @override
+  String get insertCodeBlock => 'Koda bloks';
+  @override
+  String get insertMathBlock => 'Matemātikas bloks';
+  @override
+  String get menuHeadingWord => 'Virsraksts';
+  @override
   String get toolbarHeading => 'Virsraksts';
   @override
   String get toolbarList => 'Saraksts';

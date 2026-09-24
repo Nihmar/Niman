@@ -543,6 +543,32 @@ final class SlovakStrings extends Strings {
   @override
   String get cheatTemplates => 'Zástupné symboly šablón';
   @override
+  String get menuAddLink => 'Pridať odkaz';
+  @override
+  String get menuAddExternalLink => 'Pridať externý odkaz';
+  @override
+  String get menuFormat => 'Formát';
+  @override
+  String get menuParagraph => 'Odsek';
+  @override
+  String get menuInsert => 'Vložiť';
+  @override
+  String get menuBody => 'Bežný text';
+  @override
+  String get formatSubscript => 'Dolný index';
+  @override
+  String get formatInlineCode => 'Kód';
+  @override
+  String get insertFootnote => 'Poznámka pod čiarou';
+  @override
+  String get insertRule => 'Vodorovná čiara';
+  @override
+  String get insertCodeBlock => 'Blok kódu';
+  @override
+  String get insertMathBlock => 'Matematický blok';
+  @override
+  String get menuHeadingWord => 'Nadpis';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Zoznam';

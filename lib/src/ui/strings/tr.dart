@@ -535,6 +535,32 @@ final class TurkishStrings extends Strings {
   @override
   String get cheatTemplates => 'Şablon yer tutucuları';
   @override
+  String get menuAddLink => 'Bağlantı ekle';
+  @override
+  String get menuAddExternalLink => 'Dış bağlantı ekle';
+  @override
+  String get menuFormat => 'Biçim';
+  @override
+  String get menuParagraph => 'Paragraf';
+  @override
+  String get menuInsert => 'Ekle';
+  @override
+  String get menuBody => 'Düz metin';
+  @override
+  String get formatSubscript => 'Alt simge';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Dipnot';
+  @override
+  String get insertRule => 'Yatay çizgi';
+  @override
+  String get insertCodeBlock => 'Kod bloğu';
+  @override
+  String get insertMathBlock => 'Matematik bloğu';
+  @override
+  String get menuHeadingWord => 'Başlık';
+  @override
   String get toolbarHeading => 'Başlık';
   @override
   String get toolbarList => 'Liste';

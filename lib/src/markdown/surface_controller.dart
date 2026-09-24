@@ -191,11 +191,17 @@ final class MarkdownSurfaceController {
   ) {
     final first = buffer.lineOf(start);
     final last = buffer.lineOf(end);
+    // The range ends where its last line does, before that line's
+    // terminator: the terminator is the text after the range, not the
+    // range's. Counted as the range's, an edit whose last line was empty
+    // matched the new text's closing line break against it and lost one.
+    String terminatorOf(int line) =>
+        line == last ? '' : buffer.terminatorAt(line);
     var head = first;
     var textAt = 0;
     while (head < last + 1) {
       final line = buffer.lineAt(head);
-      final terminator = buffer.terminatorAt(head);
+      final terminator = terminatorOf(head);
       final whole = line.length + terminator.length;
       if (textAt + whole > text.length) break;
       if (!_sameAt(text, textAt, line) ||
@@ -219,7 +225,7 @@ final class MarkdownSurfaceController {
     var textEnd = text.length;
     while (tail - 1 >= head) {
       final line = buffer.lineAt(tail - 1);
-      final terminator = buffer.terminatorAt(tail - 1);
+      final terminator = terminatorOf(tail - 1);
       final whole = line.length + terminator.length;
       if (textEnd - whole < textAt) break;
       final lineAt = textEnd - whole;
@@ -267,16 +273,19 @@ final class MarkdownSurfaceController {
   ///
   /// A command that looks at the lines around the ones it changes — an
   /// inserted table keeps a blank line from its neighbours — asks for
-  /// [context] lines either side, and gets them.
+  /// [context] lines either side, and gets them; one that reaches further
+  /// down — a footnote defined under its paragraph — asks for the lines
+  /// [through] a line of its own.
   void applyLineCommand(
     MarkdownEdit Function(String text, TextSelection selection) command, {
     int context = 0,
+    int? through,
   }) {
     final current = _caretSelection(selection);
     final first = math.max(0, buffer.lineOf(current.start) - context);
     final last = math.min(
       buffer.lineCount - 1,
-      buffer.lineOf(current.end) + context,
+      math.max(buffer.lineOf(current.end) + context, through ?? 0),
     );
     final start = buffer.offsetOfLine(first);
     final end = buffer.offsetOfLine(last) + buffer.lineLengthAt(last);

@@ -539,6 +539,32 @@ final class PortugueseStrings extends Strings {
   @override
   String get cheatTemplates => 'Marcadores de modelos';
   @override
+  String get menuAddLink => 'Adicionar ligação';
+  @override
+  String get menuAddExternalLink => 'Adicionar ligação externa';
+  @override
+  String get menuFormat => 'Formato';
+  @override
+  String get menuParagraph => 'Parágrafo';
+  @override
+  String get menuInsert => 'Inserir';
+  @override
+  String get menuBody => 'Texto normal';
+  @override
+  String get formatSubscript => 'Subscrito';
+  @override
+  String get formatInlineCode => 'Código';
+  @override
+  String get insertFootnote => 'Nota de rodapé';
+  @override
+  String get insertRule => 'Linha horizontal';
+  @override
+  String get insertCodeBlock => 'Bloco de código';
+  @override
+  String get insertMathBlock => 'Bloco matemático';
+  @override
+  String get menuHeadingWord => 'Título';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

@@ -527,6 +527,32 @@ final class HindiStrings extends Strings {
   @override
   String get cheatTemplates => 'टेम्पलेट प्लेसहोल्डर';
   @override
+  String get menuAddLink => 'लिंक जोड़ें';
+  @override
+  String get menuAddExternalLink => 'बाहरी लिंक जोड़ें';
+  @override
+  String get menuFormat => 'फ़ॉर्मैट';
+  @override
+  String get menuParagraph => 'अनुच्छेद';
+  @override
+  String get menuInsert => 'डालें';
+  @override
+  String get menuBody => 'सामान्य पाठ';
+  @override
+  String get formatSubscript => 'सबस्क्रिप्ट';
+  @override
+  String get formatInlineCode => 'कोड';
+  @override
+  String get insertFootnote => 'फ़ुटनोट';
+  @override
+  String get insertRule => 'क्षैतिज रेखा';
+  @override
+  String get insertCodeBlock => 'कोड ब्लॉक';
+  @override
+  String get insertMathBlock => 'गणित ब्लॉक';
+  @override
+  String get menuHeadingWord => 'शीर्षक';
+  @override
   String get toolbarHeading => 'हेडिंग';
   @override
   String get toolbarList => 'सूची';

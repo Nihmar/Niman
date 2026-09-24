@@ -34,6 +34,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlight_style.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -117,6 +118,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.syntax,
     this.dark = false,
     this.formatMenu,
+    this.editorMenu,
     this.spellCheck,
     this.findMatches,
     this.onOpenLink,
@@ -206,6 +208,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The toolbar's formatting actions, for the context menu (#174); null
   /// offers the clipboard alone.
   final FormatMenuBuilder? formatMenu;
+
+  /// The context menu grouped by what the writer is doing (#260): the
+  /// links, then Format, Paragraph and Insert. With it the menu shows this
+  /// rather than [formatMenu], and the clipboard last.
+  final ContextMenuPart Function()? editorMenu;
 
   /// The note's spelling: the words it underlines, and the context menu's
   /// suggestions and Add to dictionary. Null checks nothing.
@@ -331,6 +338,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// Where the caret is, and what it has selected.
   SelectionModel get selection => _selection;
+
+  /// The footnote labels the note cites or defines, as the scan behind the
+  /// colours has them: what a new footnote's number must pass.
+  Iterable<String> get footnoteLabels {
+    final styler = _styler;
+    if (styler == null) return const <String>[];
+    return {
+      ...styler.scope.footnoteCounts.keys,
+      for (final footnote in styler.footnotes) footnote.label,
+    };
+  }
 
   /// The note's headings, as the scan behind the colours has them, or null
   /// while there is no scan yet (a long note reads in the background, see
@@ -2829,9 +2847,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           child: EditorContextMenu(
             anchors: TextSelectionToolbarAnchors(primaryAnchor: local),
             clipboard: _clipboardItems(hideContextMenu),
-            formats: widget.formatMenu?.call() ?? const <FormatMenuEntry>[],
+            formats: widget.editorMenu != null
+                ? const <FormatMenuEntry>[]
+                : widget.formatMenu?.call() ?? const <FormatMenuEntry>[],
             extras: _spellingItems(hideContextMenu),
             table: _tableCommands()?.menu(),
+            structure: widget.editorMenu?.call(),
             onDismiss: hideContextMenu,
           ),
         ),
@@ -2849,28 +2870,35 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }) {
     final selection = _selection.clampTo(widget.buffer.length);
     final collapsed = selection.isCollapsed;
+    // The grouped menu keeps what cannot run in its place, greyed out, so
+    // nothing moves under the pointer (#260); the flat one leaves it out.
+    final keep = widget.editorMenu != null;
     return <ContextMenuButtonItem>[
-      if (!collapsed)
+      if (!collapsed || keep)
         ContextMenuButtonItem(
           type: ContextMenuButtonType.cut,
-          onPressed: () {
-            dismiss();
-            unawaited(cutSelection());
-          },
+          onPressed: collapsed
+              ? null
+              : () {
+                  dismiss();
+                  unawaited(cutSelection());
+                },
         ),
-      if (!collapsed)
+      if (!collapsed || keep)
         ContextMenuButtonItem(
           type: ContextMenuButtonType.copy,
-          onPressed: () {
-            unawaited(copySelection());
-            // By touch the handles stay, so the selection can be pasted over
-            // or extended; the toolbar goes.
-            if (touch) {
-              _showTouch(toolbar: false);
-            } else {
-              dismiss();
-            }
-          },
+          onPressed: collapsed
+              ? null
+              : () {
+                  unawaited(copySelection());
+                  // By touch the handles stay, so the selection can be
+                  // pasted over or extended; the toolbar goes.
+                  if (touch) {
+                    _showTouch(toolbar: false);
+                  } else {
+                    dismiss();
+                  }
+                },
         ),
       ContextMenuButtonItem(
         type: ContextMenuButtonType.paste,
@@ -2879,17 +2907,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           unawaited(paste());
         },
       ),
-      if (selection.start > 0 || selection.end < widget.buffer.length)
+      if (selection.start > 0 || selection.end < widget.buffer.length || keep)
         ContextMenuButtonItem(
           type: ContextMenuButtonType.selectAll,
-          onPressed: () {
-            selectAll();
-            if (touch) {
-              _showTouch(toolbar: true);
-            } else {
-              dismiss();
-            }
-          },
+          onPressed:
+              selection.start == 0 && selection.end == widget.buffer.length
+              ? null
+              : () {
+                  selectAll();
+                  if (touch) {
+                    _showTouch(toolbar: true);
+                  } else {
+                    dismiss();
+                  }
+                },
         ),
     ];
   }
@@ -2974,9 +3005,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       showHandles: _touchHandles && !collapsed,
       showToolbar: _touchToolbar,
       buttons: _clipboardItems(_hideTouch, touch: true),
-      formats: _touchToolbar
+      formats: _touchToolbar && widget.editorMenu == null
           ? widget.formatMenu?.call() ?? const <FormatMenuEntry>[]
           : const <FormatMenuEntry>[],
+      structure: _touchToolbar ? widget.editorMenu?.call() : null,
       extras: _touchToolbar
           ? _spellingItems(_hideTouch)
           : const <ContextMenuButtonItem>[],

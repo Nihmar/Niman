@@ -1,16 +1,16 @@
-/// The phone's face of a table's submenu (#261).
+/// The phone's face of a context menu's submenu (#260, #261).
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/editor/table_menu.dart';
+import 'package:niman/src/editor/context_menu_items.dart';
 
-/// The phone's face of a table's submenu: a sheet of its actions, the
-/// menu gone first.
-void showTableMenuSheet(
+/// The phone's face of a submenu: a sheet of its actions, the menu gone
+/// first.
+void showMenuGroupSheet(
   BuildContext context,
-  TableMenuGroup group, {
+  ContextMenuGroup group, {
   required VoidCallback onDismiss,
 }) {
   final navigator = Navigator.of(context);
@@ -27,7 +27,7 @@ void showTableMenuSheet(
               if (i > 0) const Divider(),
               for (final action in section)
                 ListTile(
-                  key: Key('table-${action.id}'),
+                  key: Key(action.id),
                   leading: Icon(action.icon),
                   title: Text(action.label),
                   enabled: action.onPressed != null,
