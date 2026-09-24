@@ -54,6 +54,7 @@ final class SourceInput implements DeltaTextInputClient {
     required this.onTokenizer,
     this.onRecord,
     this.onNewline,
+    this.onTyped,
   });
 
   /// The frames this surface's edits are logged under.
@@ -74,6 +75,12 @@ final class SourceInput implements DeltaTextInputClient {
   /// in which case the platform's line break is not applied and the platform
   /// is told what the note now says.
   final bool Function(int start, int end)? onNewline;
+
+  /// Asked when the platform types `inserted` over `[start, end)` outside a
+  /// composition — a keystroke, or the soft keyboard's delete: true when the
+  /// surface made an edit of its own instead (a bracket's pair), in which
+  /// case the platform's is not applied and it is told what the note says.
+  final bool Function(int start, int end, String inserted)? onTyped;
 
   /// Where the caret is now.
   final SelectionModel Function() selection;
@@ -497,6 +504,9 @@ final class SourceInput implements DeltaTextInputClient {
         _reportSelection(_caretOf(delta.selection, origin));
       } else if (inserted == '\n' && (onNewline?.call(start, end) ?? false)) {
         known = false;
+      } else if (!_composes(delta) &&
+          (onTyped?.call(start, end, inserted) ?? false)) {
+        known = false;
       } else {
         _replace(start, end, inserted, _caretOf(delta.selection, origin));
       }
@@ -505,6 +515,11 @@ final class SourceInput implements DeltaTextInputClient {
     }
     _platformNowHas(known ? value : null);
   }
+
+  /// Whether [delta] is part of a composition, which an IME may still
+  /// change: a bracket in it is not typed yet.
+  static bool _composes(TextEditingDelta delta) =>
+      delta.composing.isValid && !delta.composing.isCollapsed;
 
   /// [range], a platform range in a window at [origin], in note offsets.
   static TextRange _shifted(TextRange range, int origin) =>

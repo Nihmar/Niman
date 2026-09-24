@@ -47,6 +47,7 @@ import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -480,6 +481,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     buffer: widget.buffer,
     onRecord: _history.record,
     onNewline: _newline,
+    onTyped: _typed,
     onTokenizer: (edit, buffer) => _styleEdited(edit),
     selection: () => _selection,
     onSelection: (next) {
@@ -527,6 +529,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ownSelection =
           widget.surface?.initialSelection ?? const SelectionModel.at(0);
       _input = _makeInput();
+      _brackets.clear();
       _restyle();
       _folds.clear();
       _heights = _map();
@@ -1051,6 +1054,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _replaceRange(selection.start, selection.end, '');
       return;
     }
+    if (motion == CaretMotion.characterLeft &&
+        _applyBracket(_brackets.backspace(widget.buffer, selection.extent))) {
+      return;
+    }
     final other = _withinCell(
       selection.extent,
       moveCaret(selection, motion, buffer: widget.buffer).extent,
@@ -1073,6 +1080,37 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final cell = LiveTables.cellAround(buffer.lineAt(line), caret - start);
     if (cell == null) return other;
     return other.clamp(start + cell.$1, start + cell.$2);
+  }
+
+  /// The brackets typed in pairs, and the closing ones they wrote.
+  final BracketPairs _brackets = BracketPairs();
+
+  /// [inserted] typed over `[start, end)` by the platform, outside a
+  /// composition: a bracket's pair written, a closing bracket stepped over,
+  /// or — the soft keyboard's delete, one character before the caret — an
+  /// empty pair taken whole. Answers whether it did one of them.
+  bool _typed(int start, int end, String inserted) {
+    if (inserted.isEmpty) {
+      final caret = _selection;
+      if (end - start != 1 || !caret.isCollapsed || caret.extent != end) {
+        return false;
+      }
+      return _applyBracket(_brackets.backspace(widget.buffer, end));
+    }
+    if (inserted.length != 1) return false;
+    return _applyBracket(_brackets.typed(widget.buffer, start, end, inserted));
+  }
+
+  /// Makes [edit], when there is one; answers whether there was.
+  bool _applyBracket(BracketEdit? edit) {
+    if (edit == null) return false;
+    final caret = SelectionModel(anchor: edit.anchor, extent: edit.extent);
+    if (edit.text.isEmpty && edit.start == edit.end) {
+      placeCaret(edit.extent);
+    } else {
+      _replaceRange(edit.start, edit.end, edit.text, caret: caret);
+    }
+    return true;
   }
 
   /// A line break typed over `[start, end)`, when it means more than a line
@@ -2188,6 +2226,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // toolbar hears which formats are on at it.
     final spot = _spotOf();
     _caretSpot.value = spot;
+    // A closing bracket a pair wrote is stepped over only on its own line.
+    _brackets.caretOnLine(line);
     _publishActive(spot);
     final paragraph = _paragraphAt(line);
     if (paragraph == null || line < 0) {
