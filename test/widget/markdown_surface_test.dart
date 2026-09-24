@@ -269,6 +269,57 @@ void main() {
     expect(hidden(under), isFalse);
   });
 
+  // 2026-09-24 report: from source to live and back the caret kept the
+  // place and the height it had, over a line drawn another way.
+  testWidgets('a mode switch measures the caret again', (tester) async {
+    const text = '# Hello\n\nSome text.\n';
+    final buffer = SourceBuffer.fromText(text);
+    const caret = 5; // # Hel|lo
+    Future<MarkdownSourceViewState> pump(MarkdownSurfaceMode mode) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: buffer,
+              mode: mode,
+              theme: _theme,
+              selection: const SelectionModel.at(caret),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+    }
+
+    /// Where the caret belongs on the line as it is drawn now.
+    Rect expected() {
+      final paragraph = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .firstWhere((p) => p.text.toPlainText().contains('Hello'));
+      const position = TextPosition(offset: caret);
+      final at = paragraph.getOffsetForCaret(position, Rect.zero);
+      return Rect.fromLTWH(
+        at.dx,
+        at.dy,
+        0,
+        paragraph.getFullHeightForCaret(position),
+      ).shift(paragraph.localToGlobal(Offset.zero));
+    }
+
+    final first = await pump(MarkdownSurfaceMode.live);
+    for (final mode in [MarkdownSurfaceMode.source, MarkdownSurfaceMode.live]) {
+      final state = await pump(mode);
+      expect(identical(state, first), isTrue, reason: 'the same surface');
+      final want = expected();
+      final got = state.caretRect!;
+      expect(got.left, closeTo(want.left, 0.5), reason: '$mode: its place');
+      expect(got.height, closeTo(want.height, 0.5), reason: '$mode: height');
+    }
+  });
+
   testWidgets(
     'the caret is drawn where its character is, on an indented line',
     (tester) async {
