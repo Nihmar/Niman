@@ -281,6 +281,26 @@ final class BelarusianStrings extends Strings {
   String get themeDuplicate => 'Дубляваць';
   @override
   String get themeMenuTooltip => 'Дзеянні з тэмай';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Змяніць';
+  @override
+  String get themeEditorTitle => 'Змяніць тэму';
+  @override
+  String get themeEditorChrome => 'Інтэрфейс';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Кожны колер названы так, як яго называе файл экспарту';
+  @override
+  String get themeEditorDiscardTitle => 'Адмяніць змены';
+  @override
+  String get themeEditorDiscardBody => 'Колеры, якія вы змянілі, не захаваны';
+  @override
+  String get themeEditorDiscard => 'Адмяніць';
+  @override
+  String get themeEditorBadColor => 'Выкарыстайце #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

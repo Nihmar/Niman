@@ -281,6 +281,26 @@ final class DanishStrings extends Strings {
   String get themeDuplicate => 'Dupliker';
   @override
   String get themeMenuTooltip => 'Temahandlinger';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Rediger';
+  @override
+  String get themeEditorTitle => 'Rediger tema';
+  @override
+  String get themeEditorChrome => 'Grænseflade';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Hver farve hedder det, den eksporterede fil kalder den';
+  @override
+  String get themeEditorDiscardTitle => 'Kassér ændringer';
+  @override
+  String get themeEditorDiscardBody => 'De farver, du flyttede, gemmes ikke';
+  @override
+  String get themeEditorDiscard => 'Kassér';
+  @override
+  String get themeEditorBadColor => 'Brug #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

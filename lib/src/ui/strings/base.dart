@@ -135,6 +135,15 @@ abstract base class Strings {
   String themeDeleteBody(String name);
   String get themeDuplicate;
   String get themeMenuTooltip;
+  String get themeEdit;
+  String get themeEditorTitle;
+  String get themeEditorChrome;
+  String get themeEditorMarkdown;
+  String get themeEditorRolesHint;
+  String get themeEditorDiscardTitle;
+  String get themeEditorDiscardBody;
+  String get themeEditorDiscard;
+  String get themeEditorBadColor;
   String get themePaletteSystem;
 
   // Settings: text size (T-M6-12).

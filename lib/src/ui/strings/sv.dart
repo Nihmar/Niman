@@ -283,6 +283,26 @@ final class SwedishStrings extends Strings {
   String get themeDuplicate => 'Duplicera';
   @override
   String get themeMenuTooltip => 'Temaåtgärder';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Redigera';
+  @override
+  String get themeEditorTitle => 'Redigera tema';
+  @override
+  String get themeEditorChrome => 'Gränssnitt';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Varje färg heter det den exporterade filen kallar den';
+  @override
+  String get themeEditorDiscardTitle => 'Kasta ändringarna';
+  @override
+  String get themeEditorDiscardBody => 'Färgerna du ändrade sparas inte';
+  @override
+  String get themeEditorDiscard => 'Kasta';
+  @override
+  String get themeEditorBadColor => 'Använd #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

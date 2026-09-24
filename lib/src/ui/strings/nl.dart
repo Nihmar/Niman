@@ -282,6 +282,27 @@ final class DutchStrings extends Strings {
   String get themeDuplicate => 'Dupliceren';
   @override
   String get themeMenuTooltip => 'Thema-acties';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Bewerken';
+  @override
+  String get themeEditorTitle => 'Thema bewerken';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Elke kleur heet zoals het geëxporteerde bestand hem noemt';
+  @override
+  String get themeEditorDiscardTitle => 'Wijzigingen verwerpen';
+  @override
+  String get themeEditorDiscardBody =>
+      'De kleuren die je hebt gewijzigd worden niet opgeslagen';
+  @override
+  String get themeEditorDiscard => 'Verwerpen';
+  @override
+  String get themeEditorBadColor => 'Gebruik #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

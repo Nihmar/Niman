@@ -284,6 +284,26 @@ final class MacedonianStrings extends Strings {
   String get themeDuplicate => 'Дуплирај';
   @override
   String get themeMenuTooltip => 'Дејства за тема';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Уреди';
+  @override
+  String get themeEditorTitle => 'Уреди тема';
+  @override
+  String get themeEditorChrome => 'Интерфејс';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Секоја боја е именувана како во извезената датотека';
+  @override
+  String get themeEditorDiscardTitle => 'Отфрли ги промените';
+  @override
+  String get themeEditorDiscardBody => 'Боите што ги сменивте не се зачувуваат';
+  @override
+  String get themeEditorDiscard => 'Отфрли';
+  @override
+  String get themeEditorBadColor => 'Користи #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

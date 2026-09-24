@@ -285,6 +285,26 @@ final class PolishStrings extends Strings {
   String get themeDuplicate => 'Duplikuj';
   @override
   String get themeMenuTooltip => 'Działania motywu';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Edytuj';
+  @override
+  String get themeEditorTitle => 'Edytuj motyw';
+  @override
+  String get themeEditorChrome => 'Interfejs';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Każdy kolor nazywa się tak jak w wyeksportowanym pliku';
+  @override
+  String get themeEditorDiscardTitle => 'Odrzuć zmiany';
+  @override
+  String get themeEditorDiscardBody => 'Zmienione kolory nie zostaną zapisane';
+  @override
+  String get themeEditorDiscard => 'Odrzuć';
+  @override
+  String get themeEditorBadColor => 'Użyj #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

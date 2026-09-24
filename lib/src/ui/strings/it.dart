@@ -285,6 +285,27 @@ final class ItalianStrings extends Strings {
   String get themeDuplicate => 'Duplica';
   @override
   String get themeMenuTooltip => 'Azioni del tema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Modifica';
+  @override
+  String get themeEditorTitle => 'Modifica il tema';
+  @override
+  String get themeEditorChrome => 'Interfaccia';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Ogni colore porta il nome che usa il file esportato';
+  @override
+  String get themeEditorDiscardTitle => 'Annulla le modifiche';
+  @override
+  String get themeEditorDiscardBody =>
+      'I colori che hai cambiato non vengono salvati';
+  @override
+  String get themeEditorDiscard => 'Annulla';
+  @override
+  String get themeEditorBadColor => 'Usa #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

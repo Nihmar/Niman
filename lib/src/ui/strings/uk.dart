@@ -283,6 +283,26 @@ final class UkrainianStrings extends Strings {
   String get themeDuplicate => 'Дублювати';
   @override
   String get themeMenuTooltip => 'Дії з темою';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Редагувати';
+  @override
+  String get themeEditorTitle => 'Редагувати тему';
+  @override
+  String get themeEditorChrome => 'Інтерфейс';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Кожен колір названо так, як у файлі експорту';
+  @override
+  String get themeEditorDiscardTitle => 'Скасувати зміни';
+  @override
+  String get themeEditorDiscardBody => 'Кольори, які ви змінили, не збережено';
+  @override
+  String get themeEditorDiscard => 'Скасувати';
+  @override
+  String get themeEditorBadColor => 'Використайте #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

@@ -285,6 +285,27 @@ final class SlovenianStrings extends Strings {
   String get themeDuplicate => 'Podvoji';
   @override
   String get themeMenuTooltip => 'Dejanja teme';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Uredi';
+  @override
+  String get themeEditorTitle => 'Uredi temo';
+  @override
+  String get themeEditorChrome => 'Vmesnik';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Vsaka barva je poimenovana kot v izvoženi datoteki';
+  @override
+  String get themeEditorDiscardTitle => 'Zavrzi spremembe';
+  @override
+  String get themeEditorDiscardBody =>
+      'Barve, ki si jih spremenil, se ne shranijo';
+  @override
+  String get themeEditorDiscard => 'Zavrzi';
+  @override
+  String get themeEditorBadColor => 'Uporabi #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

@@ -285,6 +285,26 @@ final class SerbianStrings extends Strings {
   String get themeDuplicate => 'Дуплирај';
   @override
   String get themeMenuTooltip => 'Радње за тему';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Уреди';
+  @override
+  String get themeEditorTitle => 'Уреди тему';
+  @override
+  String get themeEditorChrome => 'Сучеље';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Свака боја носи име које користи извезена датотека';
+  @override
+  String get themeEditorDiscardTitle => 'Одбаци измене';
+  @override
+  String get themeEditorDiscardBody => 'Боје које сте изменили нису сачуване';
+  @override
+  String get themeEditorDiscard => 'Одбаци';
+  @override
+  String get themeEditorBadColor => 'Користи #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

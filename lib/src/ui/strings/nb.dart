@@ -280,6 +280,26 @@ final class NorwegianStrings extends Strings {
   String get themeDuplicate => 'Dupliser';
   @override
   String get themeMenuTooltip => 'Temahandlinger';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Rediger';
+  @override
+  String get themeEditorTitle => 'Rediger tema';
+  @override
+  String get themeEditorChrome => 'Grensesnitt';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Hver farge heter det den eksporterte filen kaller den';
+  @override
+  String get themeEditorDiscardTitle => 'Forkast endringer';
+  @override
+  String get themeEditorDiscardBody => 'Fargene du endret lagres ikke';
+  @override
+  String get themeEditorDiscard => 'Forkast';
+  @override
+  String get themeEditorBadColor => 'Bruk #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

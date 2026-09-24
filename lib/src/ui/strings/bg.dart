@@ -286,6 +286,27 @@ final class BulgarianStrings extends Strings {
   String get themeDuplicate => 'Дублиране';
   @override
   String get themeMenuTooltip => 'Действия с тема';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Редактиране';
+  @override
+  String get themeEditorTitle => 'Редактиране на тема';
+  @override
+  String get themeEditorChrome => 'Интерфейс';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Всеки цвят е с името, което използва експортираният файл';
+  @override
+  String get themeEditorDiscardTitle => 'Отказ от промените';
+  @override
+  String get themeEditorDiscardBody =>
+      'Цветовете, които променихте, не са запазени';
+  @override
+  String get themeEditorDiscard => 'Откажи';
+  @override
+  String get themeEditorBadColor => 'Използвайте #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

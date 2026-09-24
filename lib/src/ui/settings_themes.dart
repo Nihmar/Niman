@@ -12,6 +12,7 @@ import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
 import 'package:niman/src/ui/theme/theme_dialogs.dart';
+import 'package:niman/src/ui/theme/theme_editor_screen.dart';
 import 'package:niman/src/ui/theme/theme_row.dart';
 
 /// The Themes area of the settings home (issue #269): how bright the app
@@ -225,8 +226,25 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
     await _reload();
   }
 
+  /// Opens the editor on [theme]; the app wears the draft while it is
+  /// open, and the rows come back re-read whatever came of it.
+  Future<void> _edit(AppTheme theme) async {
+    if (theme is! CustomAppTheme) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<CustomTheme>(
+        builder: (context) => ThemeEditorScreen(
+          controller: widget.controller,
+          theme: theme.theme,
+        ),
+      ),
+    );
+    await _reload();
+  }
+
   Future<void> _act(ThemeRowAction action, AppTheme theme) async {
     switch (action) {
+      case ThemeRowAction.edit:
+        await _edit(theme);
       case ThemeRowAction.duplicate:
         await _duplicate(theme);
       case ThemeRowAction.rename:

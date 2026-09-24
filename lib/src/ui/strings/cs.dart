@@ -283,6 +283,26 @@ final class CzechStrings extends Strings {
   String get themeDuplicate => 'Duplikovat';
   @override
   String get themeMenuTooltip => 'Akce motivu';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Upravit';
+  @override
+  String get themeEditorTitle => 'Upravit motiv';
+  @override
+  String get themeEditorChrome => 'Rozhraní';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Každá barva se jmenuje jako v exportovaném souboru';
+  @override
+  String get themeEditorDiscardTitle => 'Zahodit změny';
+  @override
+  String get themeEditorDiscardBody => 'Barvy, které jste změnili, se neuloží';
+  @override
+  String get themeEditorDiscard => 'Zahodit';
+  @override
+  String get themeEditorBadColor => 'Použijte #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

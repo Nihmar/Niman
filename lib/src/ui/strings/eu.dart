@@ -278,6 +278,27 @@ final class BasqueStrings extends Strings {
   String get themeDuplicate => 'Bikoiztu';
   @override
   String get themeMenuTooltip => 'Gaiaren ekintzak';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editatu';
+  @override
+  String get themeEditorTitle => 'Editatu gaia';
+  @override
+  String get themeEditorChrome => 'Interfazea';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Kolore bakoitzak esportatutako fitxategiak duen izena du';
+  @override
+  String get themeEditorDiscardTitle => 'Baztertu aldaketak';
+  @override
+  String get themeEditorDiscardBody =>
+      'Aldatu dituzun koloreak ez dira gordeko';
+  @override
+  String get themeEditorDiscard => 'Baztertu';
+  @override
+  String get themeEditorBadColor => 'Erabili #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

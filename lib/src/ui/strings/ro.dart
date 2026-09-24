@@ -286,6 +286,27 @@ final class RomanianStrings extends Strings {
   String get themeDuplicate => 'Duplică';
   @override
   String get themeMenuTooltip => 'Acțiuni pentru temă';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editează';
+  @override
+  String get themeEditorTitle => 'Editează tema';
+  @override
+  String get themeEditorChrome => 'Interfață';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Fiecare culoare poartă numele din fișierul exportat';
+  @override
+  String get themeEditorDiscardTitle => 'Renunță la modificări';
+  @override
+  String get themeEditorDiscardBody =>
+      'Culorile pe care le-ai modificat nu se salvează';
+  @override
+  String get themeEditorDiscard => 'Renunță';
+  @override
+  String get themeEditorBadColor => 'Folosește #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

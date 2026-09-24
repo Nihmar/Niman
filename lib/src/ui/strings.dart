@@ -231,6 +231,15 @@ final class AppStrings {
   static String themeDeleteBody(String name) => _s.themeDeleteBody(name);
   static String get themeDuplicate => _s.themeDuplicate;
   static String get themeMenuTooltip => _s.themeMenuTooltip;
+  static String get themeEdit => _s.themeEdit;
+  static String get themeEditorTitle => _s.themeEditorTitle;
+  static String get themeEditorChrome => _s.themeEditorChrome;
+  static String get themeEditorMarkdown => _s.themeEditorMarkdown;
+  static String get themeEditorRolesHint => _s.themeEditorRolesHint;
+  static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
+  static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;
+  static String get themeEditorDiscard => _s.themeEditorDiscard;
+  static String get themeEditorBadColor => _s.themeEditorBadColor;
 
   /// The device-colors palette. Named for what it does rather than for
   /// Material You: on a device that offers nothing it is the colors the

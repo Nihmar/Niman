@@ -270,6 +270,27 @@ final class HindiStrings extends Strings {
   String get themeDuplicate => 'प्रतिलिपि बनाएँ';
   @override
   String get themeMenuTooltip => 'थीम क्रियाएँ';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'संपादित करें';
+  @override
+  String get themeEditorTitle => 'थीम संपादित करें';
+  @override
+  String get themeEditorChrome => 'इंटरफ़ेस';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
+  @override
+  String get themeEditorDiscardTitle => 'बदलाव छोड़ें';
+  @override
+  String get themeEditorDiscardBody =>
+      'आपने जो रंग बदले हैं वे सहेजे नहीं जाएँगे';
+  @override
+  String get themeEditorDiscard => 'छोड़ें';
+  @override
+  String get themeEditorBadColor => '#RRGGBB इस्तेमाल करें';
 
   // Settings: text size (T-M6-12).
   @override

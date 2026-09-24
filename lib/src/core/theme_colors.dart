@@ -21,8 +21,8 @@ final class ThemeColors {
   /// The Markdown roles.
   final SyntaxColors syntax;
 
-  /// Every role, chrome first, in the order a theme file lists them.
-  static const List<String> roleNames = [
+  /// The chrome roles, in the order [PaletteTokens] names them.
+  static const List<String> chromeRoles = [
     'background',
     'backdrop',
     'surface',
@@ -33,6 +33,10 @@ final class ThemeColors {
     'accent',
     'onAccent',
     'error',
+  ];
+
+  /// The Markdown roles, in the order [SyntaxColors] names them.
+  static const List<String> markdownRoles = [
     'dim',
     'code',
     'codeMuted',
@@ -44,6 +48,26 @@ final class ThemeColors {
     'math',
     'tag',
   ];
+
+  /// Every role, chrome first, in the order a theme file lists them.
+  static const List<String> roleNames = [...chromeRoles, ...markdownRoles];
+
+  /// The color [role] holds, or null when this build does not know the
+  /// role.
+  Color? colorOf(String role) {
+    final hex = toJson()[role];
+    return hex == null ? null : colorFromHex(hex);
+  }
+
+  /// These colors with [role] set to [color] (issue #269).
+  ///
+  /// Through the role map, rounding the color to `#RRGGBB` on the way: a
+  /// color the editor cannot store is a color the preview must not show,
+  /// or the theme would change the moment it is saved.
+  ThemeColors withRole(String role, Color color) {
+    final json = toJson()..[role] = colorToHex(color);
+    return ThemeColors.fromJson(json)!;
+  }
 
   /// The colors as role → `#RRGGBB`, ready to be written out.
   Map<String, String> toJson() => {

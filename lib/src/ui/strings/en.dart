@@ -281,6 +281,26 @@ final class EnglishStrings extends Strings {
   String get themeDuplicate => 'Duplicate';
   @override
   String get themeMenuTooltip => 'Theme actions';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Edit';
+  @override
+  String get themeEditorTitle => 'Edit theme';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Each color is named as the exported file names it';
+  @override
+  String get themeEditorDiscardTitle => 'Discard changes';
+  @override
+  String get themeEditorDiscardBody => 'The colors you moved are not saved';
+  @override
+  String get themeEditorDiscard => 'Discard';
+  @override
+  String get themeEditorBadColor => 'Use #RRGGBB';
 
   // Settings: text size (T-M6-12).
   @override

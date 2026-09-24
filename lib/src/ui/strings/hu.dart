@@ -280,6 +280,27 @@ final class HungarianStrings extends Strings {
   String get themeDuplicate => 'Duplikálás';
   @override
   String get themeMenuTooltip => 'Motívumműveletek';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Szerkesztés';
+  @override
+  String get themeEditorTitle => 'Motívum szerkesztése';
+  @override
+  String get themeEditorChrome => 'Felület';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Minden szín neve az exportált fájlban szereplő név';
+  @override
+  String get themeEditorDiscardTitle => 'Módosítások elvetése';
+  @override
+  String get themeEditorDiscardBody =>
+      'A módosított színek nem kerülnek mentésre';
+  @override
+  String get themeEditorDiscard => 'Elvetés';
+  @override
+  String get themeEditorBadColor => 'Használj #RRGGBB alakot';
 
   // Settings: text size (T-M6-12).
   @override
