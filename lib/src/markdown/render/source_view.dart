@@ -3542,6 +3542,13 @@ final class _Line extends StatelessWidget {
       style: typeset || folded
           ? _lineStyle(revealed: revealed).copyWith(fontSize: 0.01, height: 1)
           : _lineStyle(revealed: revealed),
+      // A table row is at least a line of its text tall. A row of empty
+      // cells is all room between cells, drawn in glyphs of no size, and
+      // without a floor it closed to nothing: no row to click into, where
+      // the read view draws a line's height.
+      strutStyle: table != null && !folded
+          ? StrutStyle.fromTextStyle(_lineStyle(revealed: revealed))
+          : null,
     );
     if (folded) return paragraph;
     if (inline.isNotEmpty) {

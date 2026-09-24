@@ -205,6 +205,119 @@ void main() {
       expect(find.byKey(const Key('table-add-row')), findsNothing);
     }, variant: desktop);
 
+    // 2026-09-24 report: after a + the new cells could not be clicked into
+    // and written in, and the caret showed only after a click.
+    testWidgets('a + keeps the keyboard, and a new cell takes a click', (
+      tester,
+    ) async {
+      final view = await _pump(tester);
+      final buffer = view.widget.buffer;
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(mouse.removePointer);
+      final uno = tester.getCenter(
+        find.textContaining('uno', findRichText: true).first,
+      );
+      Future<void> click(Offset at) async {
+        await mouse.moveTo(at);
+        await tester.pump();
+        await mouse.down(at);
+        await tester.pump();
+        await mouse.up();
+        await tester.pumpAndSettle();
+      }
+
+      await mouse.addPointer(location: uno);
+      await click(uno);
+      expect(view.isKeyboardAttached, isTrue);
+      await mouse.moveTo(uno + const Offset(1, 0));
+      await tester.pumpAndSettle();
+      await click(tester.getCenter(find.byKey(const Key('table-add-row'))));
+      const added = '|  |  |';
+      expect(buffer.text, contains('| due | 1 |\n$added\n'));
+      final row = buffer.text.indexOf(added);
+      // The caret went to the new row, and the keyboard with it.
+      expect(buffer.lineOf(view.selection.extent), buffer.lineOf(row));
+      expect(view.isKeyboardAttached, isTrue, reason: 'the + kept the focus');
+
+      // A click in the new row's second cell, under `2`.
+      await mouse.moveTo(uno);
+      await tester.pumpAndSettle();
+      final paragraphs = tester.renderObjectList<RenderParagraph>(
+        find.byType(RichText),
+      );
+      // An empty row is all room between cells, drawn as tiny glyphs.
+      final newRow = paragraphs.firstWhere(
+        (p) => p.text.toPlainText() == 'x' * added.length,
+      );
+      expect(
+        newRow.size.height,
+        greaterThan(10),
+        reason: 'a row of empty cells is a line tall, as in the read view',
+      );
+      final unoRow = paragraphs.firstWhere(
+        (p) => p.text.toPlainText().contains('uno'),
+      );
+      final at = unoRow.text.toPlainText().indexOf('2');
+      final two = unoRow.localToGlobal(
+        unoRow
+            .getBoxesForSelection(
+              TextSelection(baseOffset: at, extentOffset: at + 1),
+            )
+            .first
+            .toRect()
+            .center,
+      );
+      final target = Offset(
+        two.dx,
+        newRow.localToGlobal(newRow.size.center(Offset.zero)).dy,
+      );
+      await click(target);
+      final secondCell = row + added.indexOf('|', 1) + 1;
+      expect(
+        view.selection.extent,
+        inInclusiveRange(secondCell, secondCell + 1),
+        reason: 'the caret is in the second cell',
+      );
+      expect(view.isKeyboardAttached, isTrue);
+    }, variant: desktop);
+
+    testWidgets('a new column takes a click', (tester) async {
+      final view = await _pump(tester);
+      final buffer = view.widget.buffer;
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(mouse.removePointer);
+      Future<void> click(Offset at) async {
+        await mouse.moveTo(at);
+        await tester.pump();
+        await mouse.down(at);
+        await tester.pump();
+        await mouse.up();
+        await tester.pumpAndSettle();
+      }
+
+      final uno = tester.getCenter(
+        find.textContaining('uno', findRichText: true).first,
+      );
+      await mouse.addPointer(location: uno);
+      await mouse.moveTo(uno + const Offset(1, 0));
+      await tester.pumpAndSettle();
+      await click(tester.getCenter(find.byKey(const Key('table-add-column'))));
+      expect(buffer.text, contains('| uno | 2 |  |\n'));
+      // Just inside the grid's right edge, which the column handle stands
+      // off, on the row of `uno`.
+      await mouse.moveTo(uno);
+      await tester.pumpAndSettle();
+      final handle = tester.getRect(find.byKey(const Key('table-add-column')));
+      await click(Offset(handle.left - 6, uno.dy));
+      final line = buffer.text.indexOf('| uno | 2 |  |');
+      final third = line + '| uno | 2 | '.length;
+      expect(
+        view.selection.extent,
+        inInclusiveRange(third - 1, third),
+        reason: 'the caret is in the new cell',
+      );
+    }, variant: desktop);
+
     testWidgets('on a phone they show while the caret is in the table', (
       tester,
     ) async {
