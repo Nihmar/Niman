@@ -1444,6 +1444,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Патрэбна адкрытая нататка';
   @override
+  String get commandNeedTextNote => 'Патрэбна адкрытая тэкставая нататка';
+  @override
   String get commandNeedWideWindow => 'Толькі ў шырокім акне';
   @override
   String get commandNeedDockRoom =>

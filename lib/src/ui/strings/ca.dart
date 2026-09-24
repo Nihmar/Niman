@@ -1472,6 +1472,8 @@ final class CatalanStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Cal una nota oberta';
   @override
+  String get commandNeedTextNote => 'Cal una nota de text oberta';
+  @override
   String get commandNeedWideWindow => 'Només amb finestra ampla';
   @override
   String get commandNeedDockRoom =>

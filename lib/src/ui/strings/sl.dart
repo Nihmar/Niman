@@ -1438,6 +1438,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Potrebuje odprt zapisek';
   @override
+  String get commandNeedTextNote => 'Potrebuje odprt besedilni zapisek';
+  @override
   String get commandNeedWideWindow => 'Samo v širokem oknu';
   @override
   String get commandNeedDockRoom =>

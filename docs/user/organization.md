@@ -141,7 +141,12 @@ library.
   desktop offers **Open in default app** right there.
 
 Nothing is written to such a file, ever — it is never reported as saved,
-because there is nothing of it in the editor to save.
+because there is nothing of it in the editor to save. A picture, a PDF or
+a book is shown, not edited, so the editor's controls are not offered
+around it: no editor/preview switch, and its ⋮ menu (on a phone) keeps
+the file's own actions — rename, move, delete — without the outline,
+tags, typewriter, **Tidy Markdown**, cheatsheet or history. The palette
+leaves those commands out too.
 
 ## Opening a file outside any library
 

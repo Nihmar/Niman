@@ -15,6 +15,10 @@ enum CommandNeed {
   /// A note is on screen.
   openNote,
 
+  /// The note on screen is text: not a picture, a PDF or a book, which
+  /// the pane shows rather than edits.
+  textNote,
+
   /// The window is wide enough for tabs and panes.
   wideWindow,
 
@@ -45,18 +49,18 @@ enum CommandNeed {
 /// What [command] waits on; empty for one that can always run.
 Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.togglePreview => const {
-    CommandNeed.openNote,
+    CommandNeed.textNote,
     CommandNeed.previewToggle,
   },
   AppCommand.switchEditor => const {
-    CommandNeed.openNote,
+    CommandNeed.textNote,
     CommandNeed.twoEditors,
   },
   AppCommand.renameNote ||
   AppCommand.moveNote ||
-  AppCommand.deleteNote ||
+  AppCommand.deleteNote => const {CommandNeed.openNote},
   AppCommand.formatNote ||
-  AppCommand.noteHistory => const {CommandNeed.openNote},
+  AppCommand.noteHistory => const {CommandNeed.textNote},
   AppCommand.closeTab ||
   AppCommand.nextTab ||
   AppCommand.previousTab => const {CommandNeed.wideWindow},
@@ -91,6 +95,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
 /// [need] in words, for the Commands page.
 String commandNeedLabel(CommandNeed need) => switch (need) {
   CommandNeed.openNote => AppStrings.commandNeedOpenNote,
+  CommandNeed.textNote => AppStrings.commandNeedTextNote,
   CommandNeed.wideWindow => AppStrings.commandNeedWideWindow,
   CommandNeed.dockRoom => AppStrings.commandNeedDockRoom,
   CommandNeed.desktop => AppStrings.commandNeedDesktop,

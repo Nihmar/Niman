@@ -1355,6 +1355,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'ノートを開いている必要があります';
   @override
+  String get commandNeedTextNote => 'テキストのノートを開いている必要があります';
+  @override
   String get commandNeedWideWindow => '広いウィンドウのみ';
   @override
   String get commandNeedDockRoom => 'サイドパネルが入る幅のウィンドウが必要です';

@@ -1447,6 +1447,8 @@ final class SwedishStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Kräver en öppen anteckning';
   @override
+  String get commandNeedTextNote => 'Kräver en öppen textanteckning';
+  @override
   String get commandNeedWideWindow => 'Bara i brett fönster';
   @override
   String get commandNeedDockRoom =>

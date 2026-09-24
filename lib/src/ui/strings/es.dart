@@ -1472,6 +1472,8 @@ final class SpanishStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Necesita una nota abierta';
   @override
+  String get commandNeedTextNote => 'Necesita una nota de texto abierta';
+  @override
   String get commandNeedWideWindow => 'Solo con ventana ancha';
   @override
   String get commandNeedDockRoom =>

@@ -1444,6 +1444,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Reikia atidarytos pastabos';
   @override
+  String get commandNeedTextNote => 'Reikia atidarytos tekstinės pastabos';
+  @override
   String get commandNeedWideWindow => 'Tik plačiame lange';
   @override
   String get commandNeedDockRoom =>

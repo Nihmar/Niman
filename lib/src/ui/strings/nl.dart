@@ -1460,6 +1460,8 @@ final class DutchStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Vereist een geopende notitie';
   @override
+  String get commandNeedTextNote => 'Vereist een geopende tekstnotitie';
+  @override
   String get commandNeedWideWindow => 'Alleen in een breed venster';
   @override
   String get commandNeedDockRoom =>

@@ -1455,6 +1455,8 @@ final class RomanianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Necesită o notă deschisă';
   @override
+  String get commandNeedTextNote => 'Necesită o notă text deschisă';
+  @override
   String get commandNeedWideWindow => 'Doar în fereastră lată';
   @override
   String get commandNeedDockRoom =>

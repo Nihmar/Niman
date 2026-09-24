@@ -1442,6 +1442,8 @@ final class CroatianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';
   @override
+  String get commandNeedTextNote => 'Potrebna je otvorena tekstualna bilješka';
+  @override
   String get commandNeedWideWindow => 'Samo u širokom prozoru';
   @override
   String get commandNeedDockRoom =>

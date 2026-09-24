@@ -689,6 +689,7 @@ abstract base class Strings {
   String get keyboardShortcutsSubtitle;
   String get commandNeedNone;
   String get commandNeedOpenNote;
+  String get commandNeedTextNote;
   String get commandNeedWideWindow;
   String get commandNeedDockRoom;
   String get commandNeedDesktop;

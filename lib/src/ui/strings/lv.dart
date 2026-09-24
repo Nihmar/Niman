@@ -1441,6 +1441,8 @@ final class LatvianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Nepieciešama atvērta piezīme';
   @override
+  String get commandNeedTextNote => 'Nepieciešama atvērta teksta piezīme';
+  @override
   String get commandNeedWideWindow => 'Tikai platā logā';
   @override
   String get commandNeedDockRoom =>
