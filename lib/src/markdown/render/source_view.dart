@@ -2679,6 +2679,58 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     showContextMenu(global);
   }
 
+  /// Tab and Shift+Tab: the next cell or the one before in a table in
+  /// `live`, its text selected so what is typed replaces it; past the last
+  /// cell a new row, as a spreadsheet goes on. Anywhere else the line's
+  /// indent, as before.
+  void _tab({required bool forward}) {
+    final commands = _tableCommands();
+    if (commands == null) {
+      forward ? indent() : outdent();
+      return;
+    }
+    final buffer = widget.buffer;
+    final block = commands.block;
+    // The table's rows, the delimiter row left out, and the cells of each.
+    final rows = <int>[
+      for (var line = block.startLine; line < block.endLine; line++)
+        if (line != block.startLine + 1) line,
+    ];
+    final cell = commands.cell;
+    var row = cell.row;
+    var column = cell.column + (forward ? 1 : -1);
+    List<(int, int)> cellsOf(int row) =>
+        LiveTables.cellsOf(buffer.lineAt(rows[row]));
+    if (column >= cellsOf(row).length) {
+      row++;
+      column = 0;
+    } else if (column < 0) {
+      row--;
+      if (row < 0) return;
+      column = cellsOf(row).length - 1;
+    }
+    if (row >= rows.length) {
+      commands.addRowAtEnd();
+      return;
+    }
+    final cells = cellsOf(row);
+    if (cells.isEmpty) return;
+    final (start, end) = cells[column.clamp(0, cells.length - 1)];
+    final lineStart = buffer.offsetOfLine(rows[row]);
+    _moveSelection(
+      SelectionModel(anchor: lineStart + start, extent: lineStart + end),
+    );
+  }
+
+  /// Makes [next] the selection, and tells everyone who needs to know.
+  void _moveSelection(SelectionModel next) {
+    _publishSelection(next.clampTo(widget.buffer.length));
+    widget.onSelection?.call(_selection);
+    _input.sendSelection();
+    _scheduleCaret();
+    _ensureCaretVisible();
+  }
+
   /// The table the caret is in and what can be done to it, in `live`; null
   /// anywhere else (#261). A menu reads it as it opens, so it is the
   /// caret's cell now.
@@ -3134,8 +3186,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           _page(1, extend: true),
       // Tab is the note's: left to the app it moves the focus away, and the
       // keyboard with it.
-      const SingleActivator(LogicalKeyboardKey.tab): indent,
-      const SingleActivator(LogicalKeyboardKey.tab, shift: true): outdent,
+      // In a table in `live` it goes from cell to cell instead (#261).
+      const SingleActivator(LogicalKeyboardKey.tab): () => _tab(forward: true),
+      const SingleActivator(LogicalKeyboardKey.tab, shift: true): () =>
+          _tab(forward: false),
       const SingleActivator(LogicalKeyboardKey.keyC, control: true):
           copySelection,
       const SingleActivator(LogicalKeyboardKey.keyC, meta: true): copySelection,

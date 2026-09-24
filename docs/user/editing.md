@@ -348,6 +348,9 @@ table (as Obsidian does):
   way back at the top; on a phone they open a sheet. What does not apply
   to the cell is greyed out: a row above the header, moving the last
   column right, deleting the only column.
+- **Tab** goes to the next cell and Shift+Tab to the one before, the
+  cell's text selected so what you type replaces it; Tab past the last
+  cell adds a row. Outside a table Tab indents, as ever.
 - The header stays the header: it is not moved, sorted or deleted. The
   sort compares numbers as numbers and the rest ignoring case, and rows
   that tie keep their order.

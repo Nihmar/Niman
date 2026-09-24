@@ -63,6 +63,16 @@ void main() {
       expect(table.toLines(), ['  a | b', '  --- | ---', '  1 | 2']);
     });
 
+    test('a table tight against its pipes stays tight', () {
+      const compact = '|a|b|\n|---|---|\n|1|2|';
+      expect(_table(compact).toLines().join('\n'), compact);
+      expect(
+        _lines(TableEdits.addRowAtEnd(_table('| a | b |\n|---|---|'))),
+        '| a | b |\n|---|---|\n|  |  |',
+        reason: 'the rows spaced, the delimiter row tight, each as it was',
+      );
+    });
+
     test('not a table', () {
       expect(MarkdownTable.parse(['| a |', 'text']), isNull);
     });
@@ -149,7 +159,7 @@ void main() {
     });
 
     test('aligned: its own dashes change, the others keep theirs', () {
-      final table = _table('| a | b |\n| - | ---- |');
+      final table = _table('| a | b |\n| - | -- |');
       expect(
         _lines(
           TableEdits.alignColumn(table, (row: 0, column: 1), TableAlign.center),
