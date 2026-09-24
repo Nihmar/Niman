@@ -60,7 +60,7 @@ final class TypewriterFollow {
   bool _disposed = false;
 
   /// How many frames a caret whose row is not laid out yet is waited for:
-  /// as many as re_editor gives its own jump to an unseen line.
+  /// as many as the old source editor gave its own jump to an unseen line.
   static const int _tries = 10;
 
   /// The caret moved, or the text under it did.

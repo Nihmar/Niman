@@ -310,7 +310,6 @@ void main() {
             showLineNumbers: false,
             autofocusEditor: true,
             toolbarTop: true,
-            unifiedMarkdown: true,
             // The WYSIWYG pane: the same menu over the `live` surface.
             showWysiwyg: mode == _Mode.live,
             readNote: (_) async => 'hello',
@@ -355,7 +354,6 @@ void main() {
               showLineNumbers: false,
               autofocusEditor: true,
               toolbarTop: true,
-              unifiedMarkdown: true,
               showWysiwyg: mode == _Mode.live,
               readNote: (_) async => text,
               writeNote: (_, _) async {},
@@ -453,7 +451,6 @@ void main() {
               showLineNumbers: false,
               autofocusEditor: true,
               toolbarTop: true,
-              unifiedMarkdown: true,
               showWysiwyg: true,
               readNote: (_) async => 'hello world',
               writeNote: (_, _) async {},

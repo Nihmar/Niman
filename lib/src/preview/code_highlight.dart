@@ -1,5 +1,4 @@
 import 'package:flutter/painting.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:highlight/highlight.dart' show Node, highlight;
 
 /// A run of a code line's text and how it is coloured, its offsets the
@@ -12,10 +11,7 @@ typedef CodeRun = ({int start, int end, TextStyle style});
 /// `atomOneLightTheme` / `atomOneDarkTheme` by brightness); [language] is the
 /// fence's info string.
 ///
-/// The read view is where this is used in production: the preview's
-/// `syntaxHighlighter` hook was never wired (only a test passed one), so a code
-/// block in the old preview was a single monospace colour.
-final class CodeHighlighter implements SyntaxHighlighter {
+final class CodeHighlighter {
   /// Creates a highlighter for [language] with [theme].
   const new({required this.language, required this.theme});
 
@@ -25,7 +21,7 @@ final class CodeHighlighter implements SyntaxHighlighter {
   /// The flutter_highlight theme map for this highlighter.
   final Map<String, TextStyle> theme;
 
-  @override
+  /// [code] as one span of coloured runs.
   TextSpan format(String code) {
     final trimmed = code.replaceAll(RegExp(r'\n$'), '');
     final language = this.language.toLowerCase();

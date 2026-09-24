@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:katex/katex.dart';
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
-import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/preview/math_box_painter.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_line_break.dart';
@@ -46,102 +44,6 @@ final class MathStyle {
 
   /// The math color; null inherits the ambient text color.
   final Color? color;
-}
-
-/// The inline-math builder: renders the `math` element (from
-/// splitInlineMath) as a baselined span inside the paragraph's own text.
-/// The box is cached per tex — no re-parse on rebuild; a placeholder box
-/// shows while the render is in flight.
-///
-/// Returns a [Text], not the view directly: the package builds every block
-/// as a `Wrap` of its inline children, merging adjacent text widgets into
-/// one [RichText] but keeping every other widget as its own wrap child —
-/// a bare view would strand the formula (and its neighbours) alone on a
-/// line (device report, 2026-09-11). A `Text` merges, so the paragraph
-/// stays one [RichText] and the formula is a [WidgetSpan] in it, breaking
-/// with the line like any other run.
-final class MathInlineBuilder extends MarkdownElementBuilder {
-  /// Creates an inline builder over [cache] with [style].
-  new({required this.cache, required this.style});
-
-  /// The render cache the builder serves from.
-  final MathCache cache;
-
-  /// The math style (size/color).
-  final MathStyle style;
-
-  @override
-  Widget? visitElementAfterWithContext(
-    BuildContext context,
-    md.Element element,
-    TextStyle? preferredStyle,
-    TextStyle? parentStyle,
-  ) {
-    return Text.rich(
-      TextSpan(
-        children: <InlineSpan>[
-          WidgetSpan(
-            alignment: PlaceholderAlignment.baseline,
-            baseline: TextBaseline.alphabetic,
-            child: InlineMathView(
-              cache: cache,
-              tex: _latexOf(element),
-              style: style,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The display-math block builder: renders the `mathblock` element (from
-/// MathBlockSyntax) centered, as its own block widget.
-final class MathBlockBuilder extends MarkdownElementBuilder {
-  /// Creates a block builder over [cache] with [style].
-  new({required this.cache, required this.style});
-
-  /// The cache the block builder serves from.
-  final MathCache cache;
-
-  /// The math style (size/color).
-  final MathStyle style;
-
-  @override
-  bool isBlockElement() => true;
-
-  @override
-  Widget? visitElementAfterWithContext(
-    BuildContext context,
-    md.Element element,
-    TextStyle? preferredStyle,
-    TextStyle? parentStyle,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Center(
-        child: BlockMathView(
-          cache: cache,
-          // The package hands a builder no width, and the pane's own is the
-          // best a builder can know: a formula wider than it is broken across
-          // lines rather than cut (#257).
-          maxWidth: MediaQuery.sizeOf(context).width - 32,
-          tex: _latexOf(element),
-          style: style,
-        ),
-      ),
-    );
-  }
-}
-
-String _latexOf(md.Element element) {
-  final attr = element.attributes['latex'];
-  if (attr != null) return attr;
-  final children = element.children;
-  if (children != null && children.isNotEmpty && children.first is md.Text) {
-    return (children.first as md.Text).text;
-  }
-  return '';
 }
 
 /// A baselined inline math widget, rendering from [cache].

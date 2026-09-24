@@ -1,10 +1,7 @@
 /// The find & replace bar over a surface's own find state (T-WYS-08, #245).
 ///
-/// The same face as the legacy source editor's panel, over whichever
-/// [FindBarModel] the surface keeps — the WYSIWYG's over the Quill document,
-/// the unified surface's over its buffer — instead of re_editor's find
-/// machinery: the query row, the replace row, the match counter and the
-/// navigation buttons.
+/// Over the [FindBarModel] the surface keeps over its buffer: the query
+/// row, the replace row, the match counter and the navigation buttons.
 library;
 
 import 'package:flutter/material.dart';
@@ -112,7 +109,7 @@ final class FindBar extends StatelessWidget implements PreferredSizeWidget {
         const SingleActivator(LogicalKeyboardKey.f3): controller.nextMatch,
         const SingleActivator(LogicalKeyboardKey.f3, shift: true):
             controller.previousMatch,
-        // The legacy bar's: the page keys walk the results.
+        // The page keys walk the results.
         const SingleActivator(LogicalKeyboardKey.pageDown):
             controller.nextMatch,
         const SingleActivator(LogicalKeyboardKey.pageUp):

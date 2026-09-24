@@ -3,7 +3,7 @@
 // whether the editor or the preview shows.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -39,7 +39,8 @@ void main() {
   ) async {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
-    NoteEditor editor() => tester.widget<NoteEditor>(find.byType(NoteEditor));
+    MarkdownSurface editor() =>
+        tester.widget<MarkdownSurface>(find.byType(MarkdownSurface));
     expect(find.byType(NoteTopBar), findsOne);
     expect(find.byType(NoteStatusRow), findsOne);
     expect(editor().showLineNumbers, isTrue);

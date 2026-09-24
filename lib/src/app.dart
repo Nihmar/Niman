@@ -80,9 +80,8 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         // The interface slider, applied once for the whole app (T-M6-12).
         // It multiplies the platform scaler rather than replacing it, so
         // the OS accessibility setting still counts; the note text does
-        // not come through here — re_editor paints its own text and never
-        // reads a scaler, and the preview carries the note scale in a
-        // MediaQuery of its own.
+        // not come through here — the note pane carries the note scale in
+        // a MediaQuery of its own.
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: ComposedTextScaler(

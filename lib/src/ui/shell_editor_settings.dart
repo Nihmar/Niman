@@ -29,7 +29,6 @@ final class ShellEditorSettings {
     this.autofocusEditor = false,
     this.editorKind = EditorKind.source,
     this.editorsEnabled = const {EditorKind.source, EditorKind.wysiwyg},
-    this.markdownEngine = MarkdownEngine.legacy,
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
@@ -60,9 +59,6 @@ final class ShellEditorSettings {
   /// Which editors the library offers (T-WYS-03): both, or one alone.
   /// The note's status row switches editors only when both are on.
   final Set<EditorKind> editorsEnabled;
-
-  /// Which engine draws a note (default [MarkdownEngine.legacy]).
-  final MarkdownEngine markdownEngine;
 
   /// What the editor's link button inserts.
   final LinkType linkType;
@@ -109,7 +105,6 @@ final class ShellEditorSettings {
     final toolbar = await session.editorToolbar;
     final editorKind = await session.editorKind;
     final editorsEnabled = await session.enabledEditors;
-    final markdownEngine = await session.markdownEngine;
     final enabled = editorsEnabled.isEmpty
         ? const {EditorKind.source, EditorKind.wysiwyg}
         : editorsEnabled;
@@ -127,7 +122,6 @@ final class ShellEditorSettings {
           ? EditorKind.source
           : EditorKind.wysiwyg,
       editorsEnabled: {...enabled},
-      markdownEngine: markdownEngine,
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
@@ -142,10 +136,9 @@ final class ShellEditorSettings {
   /// one setting on the spot (the tree sort, the editor switch) hand back
   /// to the shell.
   ///
-  /// Every other field is carried over — and one that was not, the Markdown
-  /// engine, came back as its default: switching typewriter on in the
-  /// unified WYSIWYG put the legacy one in its place, which then read the
-  /// whole note (a 246 MB one froze the app).
+  /// Every other field is carried over: one that was not came back as its
+  /// default, and switching typewriter on once swapped the editor under
+  /// the writer (a 246 MB note froze the app).
   ShellEditorSettings copyWith({
     EditorKind? editorKind,
     TreeSort? treeSort,
@@ -159,7 +152,6 @@ final class ShellEditorSettings {
       autofocusEditor: autofocusEditor,
       editorKind: editorKind ?? this.editorKind,
       editorsEnabled: editorsEnabled,
-      markdownEngine: markdownEngine,
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
@@ -180,7 +172,6 @@ final class ShellEditorSettings {
         autofocusEditor == other.autofocusEditor &&
         editorKind == other.editorKind &&
         setEquals(editorsEnabled, other.editorsEnabled) &&
-        markdownEngine == other.markdownEngine &&
         linkType == other.linkType &&
         missingNoteLocation == other.missingNoteLocation &&
         attachmentsFolder == other.attachmentsFolder &&
@@ -200,7 +191,6 @@ final class ShellEditorSettings {
     autofocusEditor,
     editorKind,
     Object.hashAllUnordered(editorsEnabled),
-    markdownEngine,
     linkType,
     missingNoteLocation,
     attachmentsFolder,

@@ -1,6 +1,6 @@
 /// Pure Markdown editing commands (T-UI-08): text + selection in, new text
 /// + selection out. No editor/model dependency - unit-testable and applied
-/// through the re_editor controller by the toolbar (see ui/note_view.dart).
+/// to the surface by the toolbar and the menu (see ui/note_view.dart).
 library;
 
 import 'package:flutter/services.dart';

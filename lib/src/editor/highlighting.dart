@@ -38,8 +38,8 @@ enum TokenKind {
   /// Strikethrough (`~~…~~`).
   strike,
 
-  /// `<u>…</u>`. Made by the unified engine's styler only: the legacy
-  /// tokenizer reads HTML tags as text.
+  /// `<u>…</u>`. Made by the surface's styler only: this tokenizer reads
+  /// HTML tags as text.
   underline,
 
   /// `<sup>…</sup>`, the unified engine's only.
@@ -267,9 +267,9 @@ final class _Line {
 final class HighlightDocument {
   new _();
 
-  /// An empty document. The editor grows it through [replaceLines] as the
-  /// re_editor buffer is loaded/edited, so a big note costs only the lines
-  /// it actually touches instead of one eager whole-file pass at open.
+  /// An empty document, grown through [replaceLines] as lines are loaded
+  /// or edited, so a big note costs only the lines it actually touches
+  /// instead of one eager whole-file pass at open.
   factory empty() => HighlightDocument._();
 
   /// Tokenizes [text] fully.
@@ -452,9 +452,8 @@ final class HighlightDocument {
   /// Applies a line-granularity edit: [removed] lines starting at line
   /// [first] are replaced by [replacement] (each a line without a newline).
   ///
-  /// This is the re_editor-side entry point: the buffer is a line list, and
-  /// offsets are hard to recover across edits, so the model is always
-  /// edited line-based. Only the replaced lines (plus the following ones
+  /// The model is always edited line-based: offsets are hard to recover
+  /// across edits. Only the replaced lines (plus the following ones
   /// until the carried state converges) are re-tokenized; the unchanged
   /// tail is shared.
   void replaceLines(int first, int removed, List<String> replacement) {

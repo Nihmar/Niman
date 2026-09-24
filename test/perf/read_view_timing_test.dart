@@ -24,12 +24,8 @@
 // run asserts a **backstop** instead — ten times the ceiling — which is what a
 // real regression looks like and no calibration explains away.
 //
-// Only the unified engine is timed here, and that is deliberate. The preview is
-// asynchronous — its first frames are a spinner and its parse happens on a real
-// isolate — and a widget test's clock is fake, so its work never completes
-// inside the test. Timing it here would measure the spinner and report the work
-// as free. The one fixture where it does complete synchronously is kept, as a
-// live cross-check.
+// The preview this was first held against is gone (#247, phase 5); its
+// numbers stay in the design document, measured on a device.
 @Timeout(Duration(minutes: 5))
 library;
 
@@ -44,9 +40,7 @@ import 'package:katex_dart/katex_dart.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
-import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/preview/math_cache.dart';
-import 'package:niman/src/preview/scroll_map.dart';
 import 'package:path/path.dart' as p;
 
 /// The design's hard ceiling for text to first visible content, in
@@ -218,40 +212,4 @@ void main() {
       expect(state.blockCount, greaterThan(0));
     });
   }
-
-  testWidgets('fixture-50kb.md: the preview, for a live cross-check', (
-    tester,
-  ) async {
-    // The one fixture where the preview completes synchronously in a test, so
-    // the two engines can be held side by side. It is context, not a gate: the
-    // preview's own numbers for a big note are in the design document, measured
-    // on a device.
-    final file = File(_fixtures.first);
-    tester.view.physicalSize = const Size(900, 1400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final markdown = file.readAsStringSync();
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-    final watch = Stopwatch()..start();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MarkdownPreview(
-            data: markdown,
-            controller: controller,
-            scrollMap: ScrollMap(),
-            mathCache: _mathCache(),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    watch.stop();
-    print(
-      '${p.basename(file.path)}: the preview draws its first content in '
-      '${watch.elapsedMilliseconds}ms',
-    );
-    expect(watch.elapsedMilliseconds, greaterThan(0));
-  });
 }

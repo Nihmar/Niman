@@ -19,8 +19,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
-import 'package:niman/src/preview/preview_work_failure.dart';
 
 /// A note as the unified surface takes it: its text with the line endings
 /// the editor holds, and the buffer over that text.
@@ -42,12 +42,26 @@ String normalizedLineEndings(String text) => text.contains('\r')
     : text;
 
 /// Reads the note at [path] and makes it ready, in an isolate: a
-/// [LoadedNote], or a [PreviewWorkFailure] saying the file is not text.
+/// [LoadedNote], or a [NoteReadFailure] saying the file is not text.
 ///
 /// The closure crosses to the isolate with nothing but [path] in it, which
 /// is why this is a top-level function: one made inside a widget's state
 /// carries the state with it, and the isolate refuses it.
 Future<Object> loadNote(String path) => Isolate.run(() => _loadNote(path));
+
+/// Reads the text of the note at [path], in an isolate: the text as it is
+/// written, or a [NoteReadFailure] saying the file is not text. What a
+/// reload compares against the note on screen.
+Future<Object> readNoteText(String path) => Isolate.run(() => _readText(path));
+
+Object _readText(String path) {
+  final bytes = File(path).readAsBytesSync();
+  try {
+    return utf8.decode(bytes);
+  } on FormatException catch (error) {
+    return NoteReadFailure('$path: $error', notText: true);
+  }
+}
 
 Object _loadNote(String path) {
   final bytes = File(path).readAsBytesSync();
@@ -55,7 +69,7 @@ Object _loadNote(String path) {
   try {
     decoded = utf8.decode(bytes);
   } on FormatException catch (error) {
-    return PreviewWorkFailure('$path: $error', notText: true);
+    return NoteReadFailure('$path: $error', notText: true);
   }
   final text = normalizedLineEndings(decoded);
   return LoadedNote(text: text, buffer: SourceBuffer.fromText(text));

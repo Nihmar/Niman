@@ -416,15 +416,6 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<MarkdownEngine> get markdownEngine async => _config.markdownEngine;
-
-  @override
-  Future<void> setMarkdownEngine(MarkdownEngine engine) async {
-    _config = _config.copyWith(markdownEngine: engine);
-    _bump();
-  }
-
-  @override
   Future<TreeSort> get treeSort async => _config.treeSort;
 
   @override

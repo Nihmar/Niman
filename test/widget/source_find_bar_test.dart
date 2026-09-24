@@ -43,7 +43,6 @@ Future<MarkdownSourceViewState> _open(
           path: '/n/find.md',
           showLineNumbers: false,
           autofocusEditor: true,
-          unifiedMarkdown: true,
           // The same tests in both unified modes: `source` is the pane as
           // written, `live` the pane with the markers hidden and the caret's
           // own shown. The shell around them does not change.

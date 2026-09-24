@@ -11841,6 +11841,31 @@ launch (D8, [§6.5.7](#657-math-fonts-availability-licensing-bundling)).
 the three headless integration tests green, APK + Linux + Windows builds
 green, and the dependency graph smaller by 55 packages.
 
+**Status (2026-09-24): done, with one deliberate exception.** The engine
+switch is gone — the setting is read once from an old `settings.json` and
+dropped, never written — and so are `re_editor`, `flutter_quill`,
+`flutter_markdown_plus`, `flutter_highlight` and `flutter_smooth_markdown`,
+the legacy editors (`editor/wysiwyg/`, `note_editor.dart`,
+`markdown_editing_controller.dart`, the find panel, the highlight sync), the
+legacy preview (`markdown_preview.dart`, its scroll map, block parse, work
+isolate and HTML tables) and their tests: about 7 700 lines of `lib/` and
+8 000 of tests. `pubspec.lock` is 52 packages lighter. What the surface still
+used from `editor/` and `preview/` stays, where it is: the tokenizer, the
+Markdown commands, the toolbar, the menu, the find bar, the outline, the
+word count and the list tally; the math typesetting, cache and raster, and
+the code highlight (whose two colour themes moved into
+`markdown/render/code_themes.dart` with their MIT notice, since the package
+that carried them is gone). A note is now read by `readNoteText`
+(`markdown/note_load.dart`), and `formatMarkdown` walks the block scanner's
+units rather than the old block parse.
+
+**The exception: `katex` and `katex_dart` stay.** The deliverable above lists
+them, but §8.8.1 already weighed it — a typesetter of Niman's own is 8–12k
+lines to start and 30k to match — and recommends keeping KaTeX behind a seam
+the surface owns, which is what `preview/math_*` is. Removing them is a
+project of its own, not a deletion, and its fonts stay the package's (D8
+holds: nothing about a note's appearance changes).
+
 ## 10.4 What to spike first, before committing to the plan
 
 Six unknowns can invalidate the design. Each should be answered by a

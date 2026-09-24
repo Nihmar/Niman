@@ -381,16 +381,6 @@ abstract interface class LibrarySession {
   /// the library must never resolve to no editor.
   Future<void> setEnabledEditors(Set<EditorKind> editors);
 
-  /// Which engine draws a note (default [MarkdownEngine.legacy]).
-  ///
-  /// Opt-in: the unified surface is compared against the preview before it
-  /// replaces it, so a library that has never been configured reads back as the
-  /// surfaces the app has always shipped.
-  Future<MarkdownEngine> get markdownEngine;
-
-  /// Sets (and persists) the markdown engine.
-  Future<void> setMarkdownEngine(MarkdownEngine engine);
-
   /// The library tree sort order (default [TreeSort.nameAsc]).
   Future<TreeSort> get treeSort;
 

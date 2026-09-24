@@ -20,7 +20,6 @@ void main() {
     autofocusEditor: true,
     editorKind: EditorKind.wysiwyg,
     editorsEnabled: {EditorKind.wysiwyg},
-    markdownEngine: MarkdownEngine.unified,
     linkType: LinkType.markdown,
     missingNoteLocation: MissingNoteLocation.libraryRoot,
     attachmentsFolder: 'media',
@@ -41,7 +40,6 @@ void main() {
       settings.copyWith(treeSort: TreeSort.nameAsc),
       settings.copyWith(treeWidth: 400),
     ]) {
-      expect(copy.markdownEngine, MarkdownEngine.unified);
       expect(copy.lineNumbers, isFalse);
       expect(copy.noteColumn, settings.noteColumn);
       expect(copy.autofocusEditor, isTrue);
@@ -51,12 +49,5 @@ void main() {
       expect(copy.attachmentsFolder, 'media');
       expect(copy.indentWidth, 4);
     }
-  });
-
-  test('two settings that differ only in the engine hash apart', () {
-    const legacy = ShellEditorSettings.defaults;
-    const unified = ShellEditorSettings(markdownEngine: MarkdownEngine.unified);
-    expect(legacy == unified, isFalse);
-    expect(legacy.hashCode == unified.hashCode, isFalse);
   });
 }

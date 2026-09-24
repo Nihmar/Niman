@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:path/path.dart' as p;
-import 'package:re_editor/re_editor.dart';
 
 /// External-change reloads (home-screen widget toggles edit the note in
 /// a background isolate): the shell bumps `reloadToken` when the
@@ -18,7 +16,6 @@ NoteView _view({
   required String path,
   required Future<String> Function(String) readNote,
   Future<void> Function(String, String)? writeNote,
-  CodeLineEditingController? controller,
   int reloadToken = 0,
 }) => NoteView(
   path: path,
@@ -26,12 +23,13 @@ NoteView _view({
   autofocusEditor: false,
   readNote: readNote,
   writeNote: writeNote,
-  controller: controller,
   reloadToken: reloadToken,
 );
 
-String _editorText(WidgetTester tester) =>
-    tester.widget<NoteEditor>(find.byType(NoteEditor)).controller.text;
+MarkdownSourceViewState _surface(WidgetTester tester) =>
+    tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
+
+String _editorText(WidgetTester tester) => _surface(tester).widget.buffer.text;
 
 void main() {
   // The gate in front of the read (docs/dev/huge-notes.md item 4): a watcher
@@ -56,12 +54,7 @@ void main() {
       File(path).writeAsStringSync('one two three');
       await tester.pumpWidget(
         _app(
-          NoteView(
-            path: path,
-            showLineNumbers: false,
-            autofocusEditor: false,
-            unifiedMarkdown: true,
-          ),
+          NoteView(path: path, showLineNumbers: false, autofocusEditor: false),
         ),
       );
       // The real read is an isolate: give it its turn.
@@ -88,7 +81,6 @@ void main() {
             path: path,
             showLineNumbers: false,
             autofocusEditor: false,
-            unifiedMarkdown: true,
             reloadToken: 1,
           ),
         ),
@@ -108,12 +100,7 @@ void main() {
       File(path).writeAsStringSync('one two three');
       await tester.pumpWidget(
         _app(
-          NoteView(
-            path: path,
-            showLineNumbers: false,
-            autofocusEditor: false,
-            unifiedMarkdown: true,
-          ),
+          NoteView(path: path, showLineNumbers: false, autofocusEditor: false),
         ),
       );
       await tester.runAsync(
@@ -131,7 +118,6 @@ void main() {
             path: path,
             showLineNumbers: false,
             autofocusEditor: false,
-            unifiedMarkdown: true,
             reloadToken: 1,
           ),
         ),
@@ -187,19 +173,17 @@ void main() {
     testWidgets('unsaved edits win over the disk', (tester) async {
       var disk = '- [ ] one';
       final writes = <String>[];
-      final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
         _app(
           _view(
             path: '/notes/a.md',
             readNote: (_) async => disk,
             writeNote: (_, c) async => writes.add(c),
-            controller: controller,
           ),
         ),
       );
       await tester.pump();
-      controller.text = '- [ ] one (typed)';
+      _surface(tester).replaceText(9, 9, ' (typed)');
       await tester.pump();
       disk = '- [x] one';
 
@@ -209,7 +193,6 @@ void main() {
             path: '/notes/a.md',
             readNote: (_) async => disk,
             writeNote: (_, c) async => writes.add(c),
-            controller: controller,
             reloadToken: 1,
           ),
         ),
@@ -219,7 +202,6 @@ void main() {
       expect(_editorText(tester), '- [ ] one (typed)');
       await tester.pump(const Duration(milliseconds: 600));
       expect(writes, ['- [ ] one (typed)']);
-      controller.dispose();
     });
 
     testWidgets('identical content is a no-op', (tester) async {

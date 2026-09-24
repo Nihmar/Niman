@@ -335,9 +335,6 @@ final class AppStrings {
   static String get trayQuit => _s.trayQuit;
   static String get closeToTrayTitle => _s.closeToTrayTitle;
   static String get closeToTraySubtitle => _s.closeToTraySubtitle;
-  static String get markdownEngineTitle => _s.markdownEngineTitle;
-  static String get markdownEngineLegacy => _s.markdownEngineLegacy;
-  static String get markdownEngineUnified => _s.markdownEngineUnified;
   static String get shortcutNewTodo => _s.shortcutNewTodo;
   static String get shortcutNewNote => _s.shortcutNewNote;
   static String get shortcutNewList => _s.shortcutNewList;
@@ -496,8 +493,7 @@ final class AppStrings {
   static String get replaceCancel => _s.replaceCancel;
   static String get replaceUnavailable => _s.replaceUnavailable;
 
-  // Editor find & replace (the classic in-note bar, re_editor's find
-  // controller + NimanFindPanel).
+  // Editor find & replace (the in-note bar).
   static String get findInNoteTooltip => _s.findInNoteTooltip;
   static String get editorFindHint => _s.editorFindHint;
   static String get editorReplaceHint => _s.editorReplaceHint;

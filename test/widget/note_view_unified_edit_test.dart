@@ -1,14 +1,10 @@
 // The unified source pane inside the shell: what the shell does to the note
-// has to reach the note, and what reaches the note has to reach the disk.
-//
-// Every command here used to edit the legacy editor's controller, which the
-// unified pane does not show — the command's work went nowhere, and the save it
-// scheduled wrote the note without it. So each test ends where a writer's work
-// ends: in the text handed to `writeNote`.
+// has to reach the note, and what reaches the note has to reach the disk. So
+// each test ends where a writer's work ends: in the text handed to
+// `writeNote`.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/toolbar.dart';
-import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -22,13 +18,11 @@ NoteView _view({
   required List<String> writes,
   int reloadToken = 0,
   bool showWysiwyg = false,
-  bool unified = true,
 }) => NoteView(
   path: '/notes/a.md',
   showLineNumbers: false,
   autofocusEditor: false,
   toolbarTop: true,
-  unifiedMarkdown: unified,
   showWysiwyg: showWysiwyg,
   readNote: readNote,
   writeNote: (_, text) async => writes.add(text),
@@ -156,38 +150,12 @@ void main() {
     if (writes.isNotEmpty) expect(writes.last, 'prima e dopo');
   });
 
-  testWidgets('the legacy editor takes the note when the engine goes back', (
-    tester,
-  ) async {
-    // The legacy controller is left empty under the unified engine — filling
-    // it froze the app on a 22 MB note — so switching back has to fill it
-    // with what the unified pane holds, edits included.
-    final writes = <String>[];
-    await _pump(tester, _view(readNote: (_) async => 'prima', writes: writes));
-    _surface(tester)
-      ..placeCaret(5)
-      ..replaceText(5, 5, ' e dopo');
-    await tester.pump();
-    await _pump(
-      tester,
-      _view(readNote: (_) async => 'prima', writes: writes, unified: false),
-    );
-    expect(find.byType(MarkdownSourceView), findsNothing);
-    // And forward again: the unified buffer takes what the legacy controller
-    // holds, so the edit is still there only if the legacy editor got it.
-    await _pump(tester, _view(readNote: (_) async => 'prima', writes: writes));
-    expect(_surface(tester).widget.buffer.text, 'prima e dopo');
-    await _settleSave(tester);
-    expect(writes.last, 'prima e dopo');
-  });
-
   testWidgets('the WYSIWYG pane is the unified surface in live mode', (
     tester,
   ) async {
-    // Phase 4's wiring (#246): with the unified engine on, the WYSIWYG pane is
-    // the *same* surface in `live` mode — the markers hidden by style and the
-    // caret's own revealed — and not the Quill editor it was. One engine, two
-    // modes, one flag between them.
+    // Phase 4's wiring (#246): the WYSIWYG pane is the *same* surface in
+    // `live` mode — the markers hidden by style and the caret's own
+    // revealed. One engine, two modes.
     final writes = <String>[];
     await _pump(
       tester,
@@ -203,11 +171,6 @@ void main() {
           .hideMarkers,
       isTrue,
       reason: 'the WYSIWYG pane is live: the markers are hidden',
-    );
-    expect(
-      find.byType(WysiwygEditor),
-      findsNothing,
-      reason: 'and the Quill editor is not what drew it',
     );
     // A command from the shell reaches the pane it is looking at, as it does
     // in source mode: the toolbar is the same toolbar over the same surface.
@@ -290,7 +253,6 @@ void main() {
         path: '/notes/a.md',
         showLineNumbers: false,
         autofocusEditor: false,
-        unifiedMarkdown: true,
         showWysiwyg: true,
         readNote: (_) async => 'una riga\n',
         writeNote: (_, text) async => writes.add(text),

@@ -14,9 +14,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/close_guard.dart';
@@ -26,7 +27,6 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
-import 'package:re_editor/re_editor.dart';
 
 import '../fakes/fake_window_controller.dart';
 
@@ -41,7 +41,6 @@ Widget _deck(
   Future<void> Function(String, String)? write,
 }) => ShellDetailPane(
   root: '/lib',
-  unifiedMarkdown: false,
   tabs: [
     for (final path in ['a.md', 'b.md'])
       DetailTab(
@@ -74,22 +73,23 @@ Widget _deck(
   spellCheck: EditorSpellCheck(createChecker: (_) => const _NoSpelling()),
 );
 
-/// The editor controller of the note at [path], mounted or behind.
-CodeLineEditingController _editorOf(WidgetTester tester, String path) {
+/// The editor of the note at [path], mounted or behind.
+MarkdownSourceViewState _editorOf(WidgetTester tester, String path) {
   final view = find.byWidgetPredicate(
     (w) => w is NoteView && w.path.endsWith(path),
     skipOffstage: false,
   );
-  return tester
-      .widget<NoteEditor>(
-        find.descendant(
-          of: view,
-          matching: find.byType(NoteEditor, skipOffstage: false),
-          skipOffstage: false,
-        ),
-      )
-      .controller;
+  return tester.state<MarkdownSourceViewState>(
+    find.descendant(
+      of: view,
+      matching: find.byType(MarkdownSourceView, skipOffstage: false),
+      skipOffstage: false,
+    ),
+  );
 }
+
+/// The text of the note [editor] holds.
+String _textOf(MarkdownSourceViewState editor) => editor.widget.buffer.text;
 
 /// A checker with nothing to say: the criteria are not about spelling.
 final class _NoSpelling implements SpellChecker {
@@ -118,26 +118,22 @@ void main() {
     await tester.pumpWidget(app('a.md'));
     await tester.pumpAndSettle();
 
-    final a = _editorOf(tester, 'a.md')
-      ..selection = const CodeLineSelection.collapsed(index: 0, offset: 10)
-      ..replaceSelection(' + A');
+    final a = _editorOf(tester, 'a.md')..replaceText(10, 10, ' + A');
     await tester.pumpWidget(app('b.md'));
     await tester.pumpAndSettle();
-    final b = _editorOf(tester, 'b.md')
-      ..selection = const CodeLineSelection.collapsed(index: 0, offset: 9)
-      ..replaceSelection(' + B');
+    final b = _editorOf(tester, 'b.md')..replaceText(9, 9, ' + B');
     await tester.pumpWidget(app('a.md'));
     await tester.pumpAndSettle();
 
     // Each kept its own text, in its own editor...
     expect(identical(_editorOf(tester, 'a.md'), a), isTrue);
-    expect(a.text, 'alpha text + A');
-    expect(b.text, 'beta text + B');
+    expect(_textOf(a), 'alpha text + A');
+    expect(_textOf(b), 'beta text + B');
     // ...and its own undo: undoing A leaves B alone.
     expect(a.canUndo, isTrue);
     a.undo();
-    expect(a.text, 'alpha text');
-    expect(b.text, 'beta text + B');
+    expect(_textOf(a), 'alpha text');
+    expect(_textOf(b), 'beta text + B');
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 1));
   });
@@ -159,12 +155,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    _editorOf(tester, 'a.md').selection = const CodeLineSelection(
-      baseIndex: 0,
-      baseOffset: 6,
-      extentIndex: 0,
-      extentOffset: 10,
-    );
+    _editorOf(
+      tester,
+      'a.md',
+    ).select(const SelectionModel(anchor: 6, extent: 10));
     await tester.pump();
     // Quitting takes the views down; each hands in where it was left.
     await tester.pumpWidget(const SizedBox());
@@ -185,7 +179,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final selection = _editorOf(tester, 'a.md').selection;
-    expect((selection.baseOffset, selection.extentOffset), (6, 10));
+    expect((selection.anchor, selection.extent), (6, 10));
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 1));
   });
@@ -209,10 +203,10 @@ void main() {
     );
     await tester.pumpWidget(app('a.md'));
     await tester.pumpAndSettle();
-    _editorOf(tester, 'a.md').replaceSelection('x');
+    _editorOf(tester, 'a.md').replaceText(0, 0, 'x');
     await tester.pumpWidget(app('b.md'));
     await tester.pump();
-    _editorOf(tester, 'b.md').replaceSelection('y');
+    _editorOf(tester, 'b.md').replaceText(0, 0, 'y');
     await tester.pump();
     // Both before their autosave: one showing, one kept behind.
     expect(tracker.unsavedPaths, hasLength(2));
