@@ -1499,6 +1499,13 @@ final class HindiStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
   @override
+  String get tidyOnCloseTitle => 'बंद करते समय मार्कडाउन व्यवस्थित करें';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'जब आप किसी संपादित नोट को बंद करते हैं, तो उसका मार्कडाउन “मार्कडाउन '
+      'व्यवस्थित करें” कमांड की तरह व्यवस्थित हो जाता है। 4 MB से बड़े नोट '
+      'जैसे हैं वैसे ही रहते हैं।';
+  @override
   String get typewriterSubtitle =>
       'जिस पंक्ति पर आप लिख रहे हैं उसे एडिटर के बीच में रखें';
   @override

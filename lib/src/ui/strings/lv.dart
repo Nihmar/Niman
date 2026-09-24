@@ -1522,6 +1522,13 @@ final class LatvianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override
+  String get tidyOnCloseTitle => 'Sakārtot Markdown, aizverot';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Kad aizverat piezīmi, kuru rediģējāt, tās Markdown tiek sakārtots kā '
+      'ar komandu „Sakārtot Markdown“. Piezīmes, kas lielākas par 4 MB, '
+      'paliek, kā ir.';
+  @override
   String get typewriterSubtitle => 'Rinda, kuru rakstāt, paliek redaktora vidū';
   @override
   String get zenMode => 'Zen režīms';

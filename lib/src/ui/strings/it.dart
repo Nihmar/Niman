@@ -1542,6 +1542,13 @@ final class ItalianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override
+  String get tidyOnCloseTitle => 'Sistema il Markdown alla chiusura';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Quando chiudi una nota che hai modificato, il suo Markdown viene '
+      'sistemato come con il comando «Sistema il Markdown». Le note oltre '
+      '4 MB restano come sono.';
+  @override
   String get typewriterSubtitle =>
       'Tieni la riga che stai scrivendo al centro dell’editor';
   @override

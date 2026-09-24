@@ -1538,6 +1538,13 @@ final class FinnishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override
+  String get tidyOnCloseTitle => 'Siivoa Markdown suljettaessa';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Kun suljet muistiinpanon, jota olet muokannut, sen Markdown '
+      'siivotaan kuten komennolla ”Siivoa Markdown”. Yli 4 Mt:n '
+      'muistiinpanot jätetään ennalleen.';
+  @override
   String get typewriterSubtitle => 'Pidä kirjoitettava rivi editorin keskellä';
   @override
   String get zenMode => 'Zen-tila';

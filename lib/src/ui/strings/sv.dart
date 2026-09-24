@@ -1530,6 +1530,13 @@ final class SwedishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override
+  String get tidyOnCloseTitle => 'Städa upp i Markdown vid stängning';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'När du stänger en anteckning som du har redigerat städas dess '
+      'Markdown upp som med kommandot ”Städa upp i Markdown”. Anteckningar '
+      'större än 4 MB lämnas som de är.';
+  @override
   String get typewriterSubtitle =>
       'Håll raden du skriver på mitt i redigeraren';
   @override

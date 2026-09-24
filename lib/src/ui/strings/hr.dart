@@ -1525,6 +1525,13 @@ final class CroatianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
+  String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Kad zatvorite bilješku koju ste uređivali, njezin se Markdown '
+      'posloži kao naredbom „Posloži Markdown“. Bilješke veće od 4 MB '
+      'ostaju kakve jesu.';
+  @override
   String get typewriterSubtitle =>
       'Redak koji pišete ostaje u sredini uređivača';
   @override

@@ -1524,6 +1524,13 @@ final class IcelandicStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override
+  String get tidyOnCloseTitle => 'Taka til í Markdown við lokun';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Þegar þú lokar glósu sem þú breyttir er tekið til í Markdown hennar '
+      'eins og með skipuninni „Taka til í Markdown“. Glósur yfir 4 MB eru '
+      'látnar óbreyttar.';
+  @override
   String get typewriterSubtitle =>
       'Línan sem þú skrifar helst fyrir miðju ritilsins';
   @override

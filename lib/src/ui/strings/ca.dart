@@ -1556,6 +1556,13 @@ final class CatalanStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override
+  String get tidyOnCloseTitle => 'Endreça el Markdown en tancar';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Quan tanqueu una nota que heu editat, el seu Markdown s’endreça com '
+      'amb l’ordre «Endreça el Markdown». Les notes de més de 4 MB es '
+      'queden com estan.';
+  @override
   String get typewriterSubtitle =>
       'Mantén la línia que escriviu al mig de l’editor';
   @override

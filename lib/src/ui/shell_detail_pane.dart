@@ -44,6 +44,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,
+    this.onEditedNoteClosed,
     this.readNote,
     this.writeNote,
     this.saveNote,
@@ -69,6 +70,12 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Told each note's length once it loads.
   final void Function(String path, int length)? onLoaded;
+
+  /// Forwarded to every [NoteView] ([NoteView.onEditedNoteClosed]): the
+  /// absolute path of a note edited and closed. Absolute as the view has
+  /// it, since the note closed is not always the tab's current one — a
+  /// link followed in a tab closes the note it left.
+  final void Function(String path)? onEditedNoteClosed;
 
   /// Test seams, handed to every [NoteView]: a widget test's library is
   /// not on disk.
@@ -206,6 +213,7 @@ final class ShellDetailPane extends StatelessWidget {
     onLoaded: onLoaded == null
         ? null
         : (_, length) => onLoaded!(tab.path, length),
+    onEditedNoteClosed: onEditedNoteClosed,
     showLineNumbers: showLineNumbers,
     noteColumn: noteColumn,
     barActions: barActions,

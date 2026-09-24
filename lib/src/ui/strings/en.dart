@@ -1511,6 +1511,13 @@ final class EnglishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override
+  String get tidyOnCloseTitle => 'Tidy the Markdown on close';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'When a note you edited is closed, its Markdown is tidied, as with '
+      'the “Tidy the Markdown” command. Notes over 4 MB are left as they '
+      'are.';
+  @override
   String get typewriterSubtitle =>
       'Keep the line you are writing in the middle of the editor';
   @override

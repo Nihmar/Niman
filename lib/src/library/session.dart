@@ -101,6 +101,12 @@ abstract interface class NoteOperations {
     int? editSession,
   });
 
+  /// Tidies the note at [path]'s Markdown, in its turn among the note's
+  /// saves, as the note stands once they are done; answers whether it
+  /// changed. What a note edited and closed gets, when the library asks
+  /// for it (`LibraryConfig.tidyOnClose`).
+  Future<bool> tidyNote(String path);
+
   /// The kept history of the note at [path]: its versions, oldest first,
   /// and the pinned ones (issue #55).
   Future<HistoryManifest> noteHistory(String path);
@@ -372,6 +378,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the reminder-markers toggle.
   Future<void> setReminderShowTokens({required bool enabled});
+
+  /// Whether a note edited and then closed has its Markdown tidied, as
+  /// the "Tidy the Markdown" command does (default true).
+  Future<bool> get tidyOnClose;
+
+  /// Sets (and persists) the tidy-on-close toggle.
+  Future<void> setTidyOnClose({required bool enabled});
 
   /// The hunspell dictionaries the spell checker uses (`<name>`s found
   /// on the machine), in selection order; empty means the locale default.

@@ -895,6 +895,17 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(reminderShowTokens: enabled));
   }
 
+  /// Whether a note edited and then closed has its Markdown tidied.
+  @override
+  Future<bool> get tidyOnClose async => (await _library).tidyOnClose;
+
+  /// Sets (and persists) the tidy-on-close toggle.
+  @override
+  Future<void> setTidyOnClose({required bool enabled}) async {
+    _log.info('tidy on close set to $enabled');
+    await _editLibrary((c) => c.copyWith(tidyOnClose: enabled));
+  }
+
   /// The spell-check dictionary names, in selection order.
   @override
   Future<List<String>> get spellDictionaries async =>

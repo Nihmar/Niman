@@ -1540,6 +1540,13 @@ final class BulgarianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override
+  String get tidyOnCloseTitle => 'Подреждане на Markdown при затваряне';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Когато затворите бележка, която сте редактирали, нейният Markdown се '
+      'подрежда като с командата „Подреди Markdown“. Бележките над 4 МБ '
+      'остават такива, каквито са.';
+  @override
   String get typewriterSubtitle =>
       'Редът, който пишете, остава в средата на редактора';
   @override
