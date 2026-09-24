@@ -136,6 +136,7 @@ abstract base class Strings {
   String get themeEditorTitle;
   String get themeEditorChrome;
   String get themeEditorMarkdown;
+  String get themeEditorTaskLists;
   String get themeEditorRolesHint;
   String get themeEditorDiscardTitle;
   String get themeEditorDiscardBody;

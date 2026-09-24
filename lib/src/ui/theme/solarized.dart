@@ -3,7 +3,8 @@
 // Solarized is eight monotones and eight accents, and the two schemes are
 // the same colors read from opposite ends: dark builds on base03, light on
 // base3, and both take their text from the middle of the ramp. Blue is the
-// accent, as in the original's UI examples.
+// accent, as in the original's UI examples. Yellow, the one accent the
+// Markdown roles leave free, marks a task's priority.
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
@@ -17,6 +18,7 @@ SyntaxColors solarizedSyntax(Brightness brightness) =>
     brightness == Brightness.dark ? _darkSyntax : _lightSyntax;
 
 // The accents, shared by both schemes — that is the point of Solarized.
+const Color _yellow = Color(0xFFB58900);
 const Color _orange = Color(0xFFCB4B16);
 const Color _red = Color(0xFFDC322F);
 const Color _magenta = Color(0xFFD33682);
@@ -62,6 +64,12 @@ const SyntaxColors _darkSyntax = SyntaxColors(
   quote: _base00,
   math: _magenta,
   tag: _orange,
+  todoPriority: _yellow,
+  todoDate: _base00,
+  todoProject: _violet,
+  todoContext: _blue,
+  todoKeyValue: _cyan,
+  todoDone: _base01,
 );
 
 // Light. Only two monotones sit above base1, so the raised surfaces run
@@ -90,4 +98,10 @@ const SyntaxColors _lightSyntax = SyntaxColors(
   quote: _base01,
   math: _magenta,
   tag: _orange,
+  todoPriority: _yellow,
+  todoDate: _base0,
+  todoProject: _violet,
+  todoContext: _blue,
+  todoKeyValue: _cyan,
+  todoDone: _base1,
 );

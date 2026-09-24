@@ -272,6 +272,8 @@ final class HindiStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'कार्य सूचियाँ (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
   @override

@@ -24,6 +24,7 @@ import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
+import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
@@ -88,8 +89,12 @@ final class MarkdownSurface extends StatelessWidget {
     this.typewriter = false,
     this.autofocus = false,
     this.viewKey,
+    this.lineTokens,
     super.key,
   });
+
+  /// See [MarkdownSourceView.lineTokens].
+  final List<Token> Function(String line)? lineTokens;
 
   /// The note.
   final SourceBuffer buffer;
@@ -224,5 +229,6 @@ final class MarkdownSurface extends StatelessWidget {
     caretWidth: caretWidth,
     typewriter: typewriter,
     autofocus: autofocus,
+    lineTokens: lineTokens,
   );
 }

@@ -281,6 +281,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Lista detyrash (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
   @override

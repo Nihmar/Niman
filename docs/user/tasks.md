@@ -21,6 +21,17 @@ a menu, or swipe it to the left (drag it, with a mouse) and confirm. Deleting re
 Done view) outright: there is no trash for tasks. To keep a finished
 task, check it instead.
 
+## The files themselves
+
+`todo.txt` and `done.txt` also open in the editor, as text, coloured as a
+task list: the priority, the dates at the head of a task, `+projects`,
+`@contexts`, `#tags` and `key:value` tags (`due:`, `rem:`) each in their
+own color, and a completed task struck through. They open in the source
+editor only — the preview and the WYSIWYG editor read Markdown, and would
+run the lines together — so their switches stay in place, off. The colors
+are the theme's, under **Task lists (todo.txt)** in the theme editor
+([themes](themes.md)).
+
 ## Reminders
 
 Add `rem:2026-09-20T09:00` to a task and Niman schedules an exact alarm

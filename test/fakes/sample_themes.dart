@@ -1,6 +1,6 @@
 // Sample themes for the tests (issue #269).
 //
-// A custom theme fills in twenty roles at each brightness, which makes
+// A custom theme fills in twenty-six roles at each brightness, which makes
 // one written out by hand in every test unreadable. These helpers fill
 // them all in from two colors — a ground and an accent — so a test says
 // only which of the two it is about.

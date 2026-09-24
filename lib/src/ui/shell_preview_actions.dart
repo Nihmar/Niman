@@ -24,8 +24,9 @@ final class PreviewToggleAction extends StatelessWidget {
   /// Whether the preview is the pane on screen.
   final bool previewVisible;
 
-  /// Flips the pane.
-  final VoidCallback onToggle;
+  /// Flips the pane; null leaves the eye in its place, off — a file with
+  /// no preview, a todo.txt.
+  final VoidCallback? onToggle;
 
   /// Whether the action sits in a tight row (the editor header).
   final bool compact;

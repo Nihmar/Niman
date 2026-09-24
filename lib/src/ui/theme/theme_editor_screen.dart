@@ -212,6 +212,18 @@ final class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               ),
             SettingsSection(AppStrings.themeEditorMarkdown),
             for (final role in ThemeColors.markdownRoles)
+              if (!ThemeColors.taskListRoles.contains(role))
+                _RoleRow(
+                  key: Key('theme-role-$role'),
+                  role: role,
+                  color: _colors.colorOf(role)!,
+                  onTap: () => unawaited(_editRole(role)),
+                ),
+            // A task list is Markdown's neighbour, not part of a note: its
+            // roles are the last of the Markdown ones, under their own
+            // heading so they are found where a task list is thought of.
+            SettingsSection(AppStrings.themeEditorTaskLists),
+            for (final role in ThemeColors.taskListRoles)
               _RoleRow(
                 key: Key('theme-role-$role'),
                 role: role,

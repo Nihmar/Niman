@@ -1,8 +1,11 @@
 // Issue #269: custom themes live in the app's own database, by name, and
 // a row this build cannot read is skipped rather than fatal.
+import 'dart:convert';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/custom_theme_repo.dart';
+import 'package:niman/src/core/theme_colors.dart';
 import 'package:niman/src/db/app_database.dart';
 
 import '../fakes/sample_themes.dart';
@@ -75,6 +78,28 @@ void main() {
     );
     expect(await repo.list(), isEmpty);
     expect(await repo.byId('bad'), isNull);
+  });
+
+  test('a row saved before the task-list roles still loads', () async {
+    // Written by a build that did not have them: the theme is kept, and a
+    // task list wears what it wore then.
+    final theme = sampleCustomTheme(id: 'old', name: 'Old');
+    String older(ThemeColors colors) => jsonEncode(
+      colors.toJson()
+        ..removeWhere((role, _) => ThemeColors.taskListRoles.contains(role)),
+    );
+    await db.customStatement(
+      'INSERT INTO custom_themes (id, name, day_colors, night_colors) '
+      'VALUES (?, ?, ?, ?)',
+      ['old', 'Old', older(theme.day), older(theme.night)],
+    );
+
+    final loaded = (await repo.byId('old'))!;
+    expect(loaded.day.tokens, theme.day.tokens);
+    expect(loaded.day.syntax.todoPriority, theme.day.syntax.task);
+    expect(loaded.night.syntax.todoProject, theme.night.syntax.wikilink);
+    expect(loaded.night.syntax.todoDone, theme.night.syntax.dim);
+    expect(await repo.list(), hasLength(1));
   });
 
   test('renaming keeps the id, deleting takes the row away', () async {

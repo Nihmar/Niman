@@ -282,6 +282,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Спісы заданняў (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Кожны колер названы так, як яго называе файл экспарту';
   @override

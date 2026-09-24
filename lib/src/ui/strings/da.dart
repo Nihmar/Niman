@@ -282,6 +282,8 @@ final class DanishStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Opgavelister (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Hver farve hedder det, den eksporterede fil kalder den';
   @override

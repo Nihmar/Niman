@@ -285,6 +285,8 @@ final class CroatianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Popisi zadaća (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override
