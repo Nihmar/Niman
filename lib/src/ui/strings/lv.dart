@@ -1610,6 +1610,12 @@ final class LatvianStrings extends Strings {
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override
   String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';
+  @override
+  String get attachmentUnreadable => 'Šo failu neizdevās parādīt.';
+  @override
+  String get attachmentMissing => 'Šī faila diskā nav.';
+  @override
+  String get attachmentOpenFailed => 'Šo failu neizdevās atvērt ārpus Niman.';
 
   @override
   String get movedToTrash => 'Pārvietots konteinerā';

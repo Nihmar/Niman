@@ -1643,6 +1643,15 @@ final class GermanStrings extends Strings {
   @override
   String get openFileFailed =>
       'Diese Notiz konnte außerhalb von Niman nicht geöffnet werden';
+  @override
+  String get attachmentUnreadable =>
+      'Diese Datei konnte nicht angezeigt werden.';
+  @override
+  String get attachmentMissing =>
+      'Diese Datei liegt nicht auf dem Datenträger.';
+  @override
+  String get attachmentOpenFailed =>
+      'Diese Datei konnte außerhalb von Niman nicht geöffnet werden.';
 
   @override
   String get movedToTrash => 'In den Papierkorb verschoben';

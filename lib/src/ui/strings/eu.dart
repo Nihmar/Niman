@@ -1622,6 +1622,13 @@ final class BasqueStrings extends Strings {
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override
   String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';
+  @override
+  String get attachmentUnreadable => 'Ezin izan da fitxategi hau erakutsi.';
+  @override
+  String get attachmentMissing => 'Fitxategi hau ez dago diskoan.';
+  @override
+  String get attachmentOpenFailed =>
+      'Ezin izan da fitxategi hau Nimanetik kanpo ireki.';
 
   @override
   String get movedToTrash => 'Zakarrontzira mugitua';

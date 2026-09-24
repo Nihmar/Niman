@@ -1608,6 +1608,13 @@ final class SlovenianStrings extends Strings {
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override
   String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';
+  @override
+  String get attachmentUnreadable => 'Te datoteke ni bilo mogoče prikazati.';
+  @override
+  String get attachmentMissing => 'Te datoteke ni na disku.';
+  @override
+  String get attachmentOpenFailed =>
+      'Te datoteke ni bilo mogoče odpreti zunaj Nimana.';
 
   @override
   String get movedToTrash => 'Preneseno v koš';

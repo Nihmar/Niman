@@ -1602,6 +1602,12 @@ final class NorwegianStrings extends Strings {
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override
   String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';
+  @override
+  String get attachmentUnreadable => 'Denne filen kunne ikke vises.';
+  @override
+  String get attachmentMissing => 'Denne filen finnes ikke på disken.';
+  @override
+  String get attachmentOpenFailed => 'Filen kunne ikke åpnes utenfor Niman.';
 
   @override
   String get movedToTrash => 'Flyttet til papirkorg';

@@ -1630,6 +1630,13 @@ final class MacedonianStrings extends Strings {
   @override
   String get openFileFailed =>
       'Белешката не можеше да се отвори надвор од Niman';
+  @override
+  String get attachmentUnreadable => 'Оваа датотека не можеше да се прикаже.';
+  @override
+  String get attachmentMissing => 'Оваа датотека не е на дискот.';
+  @override
+  String get attachmentOpenFailed =>
+      'Датотеката не можеше да се отвори надвор од Niman.';
 
   @override
   String get movedToTrash => 'Преместено во корпа';

@@ -1645,6 +1645,13 @@ final class CatalanStrings extends Strings {
   @override
   String get openFileFailed =>
       'No s’ha pogut obrir aquesta nota fora del Niman';
+  @override
+  String get attachmentUnreadable => 'No s’ha pogut mostrar aquest fitxer.';
+  @override
+  String get attachmentMissing => 'Aquest fitxer no és al disc.';
+  @override
+  String get attachmentOpenFailed =>
+      'No s’ha pogut obrir aquest fitxer fora del Niman.';
 
   @override
   String get movedToTrash => 'Moguda a la paperera';
