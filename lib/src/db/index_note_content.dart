@@ -80,9 +80,15 @@ final class NoteContent {
 
 /// What the app knows of a note it has just written, so its reindex does
 /// not work it out again from the file: the digest of the bytes it wrote —
-/// computed as they were written — and the file as the write left it,
-/// which says whether it is still that file.
-typedef KnownContent = ({String sha256, int size, DateTime modified});
+/// computed as they were written — the tags and links of the text, when
+/// the editor keeps them, and the file as the write left it, which says
+/// whether it is still that file.
+typedef KnownContent = ({
+  String sha256,
+  int size,
+  DateTime modified,
+  NoteReferences? references,
+});
 
 /// Reads and parses the notes at [rels] (library-relative, under [root]) —
 /// one file read per note returning digest **and** text, with frontmatter,
@@ -121,15 +127,21 @@ Future<List<NoteContent>> readNoteContents(
       // in between is not taken for it: 1.9 s of hashing on the 247 MB
       // stress note (`docs/dev/huge-notes.md`, item 8), for bytes that were
       // hashed as they were written.
-      final String sha;
-      if (wrote != null &&
+      // And the tags and links the editor kept, block by block: 5.1 s of
+      // that reindex, for blocks it had read as they were written.
+      final asWritten =
+          wrote != null &&
           _isAsWritten(before!, wrote) &&
-          _isAsWritten(file.statSync(), wrote)) {
-        sha = wrote.sha256;
-      } else {
-        sha = sha256.convert(bytes).toString();
-      }
-      out.add(_extractContent(rel, sha, text));
+          _isAsWritten(file.statSync(), wrote);
+      final sha = asWritten ? wrote.sha256 : sha256.convert(bytes).toString();
+      out.add(
+        _extractContent(
+          rel,
+          sha,
+          text,
+          references: asWritten ? wrote.references : null,
+        ),
+      );
     } on FileSystemException {
       continue;
     }
@@ -159,12 +171,18 @@ Future<List<NoteContent>> readBatchOnIsolate(
   );
 }
 
-/// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links).
-NoteContent _extractContent(String rel, String sha, String text) {
+/// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links);
+/// [references] are its tags and links when they are known already.
+NoteContent _extractContent(
+  String rel,
+  String sha,
+  String text, {
+  NoteReferences? references,
+}) {
   // Read by the unified engine, and only where a tag or a link can be: a
   // whole-note tokenize was two minutes of a first index on a 247 MB note
   // (`docs/dev/huge-notes.md`, item 8).
-  final references = noteReferencesOf(text);
+  references ??= noteReferencesOf(text);
   final fm = parseFrontmatter(text);
   return NoteContent(
     rel: rel,
