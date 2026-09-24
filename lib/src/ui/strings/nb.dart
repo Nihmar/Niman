@@ -1514,6 +1514,13 @@ final class NorwegianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override
+  String get tidyOnCloseTitle => 'Rydd opp i Markdown ved lukking';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Når du lukker et notat du har redigert, blir Markdown-en ryddet opp '
+      'som med kommandoen «Rydd opp i Markdown». Notater over 4 MB blir '
+      'stående som de er.';
+  @override
   String get typewriterSubtitle =>
       'Hold linjen du skriver på midt i redigeringsfeltet';
   @override

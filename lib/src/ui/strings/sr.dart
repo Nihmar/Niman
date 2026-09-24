@@ -1532,6 +1532,12 @@ final class SerbianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override
+  String get tidyOnCloseTitle => 'Сложи Markdown при затварању';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Када затворите белешку коју сте уређивали, њен Markdown се сложи као '
+      'командом „Сложи Markdown“. Белешке веће од 4 МБ остају какве јесу.';
+  @override
   String get typewriterSubtitle => 'Ред који пишете остаје у средини уређивача';
   @override
   String get zenMode => 'Зен режим';

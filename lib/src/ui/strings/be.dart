@@ -1526,6 +1526,13 @@ final class BelarusianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';
   @override
+  String get tidyOnCloseTitle => 'Упарадкоўваць Markdown пры закрыцці';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Калі вы закрываеце нататку, якую змянялі, яе Markdown '
+      'упарадкоўваецца, як камандай «Упарадкаваць Markdown». Нататкі '
+      'большыя за 4 МБ застаюцца як ёсць.';
+  @override
   String get typewriterSubtitle =>
       'Трымаць радок, які вы пішаце, пасярэдзіне рэдактара';
   @override

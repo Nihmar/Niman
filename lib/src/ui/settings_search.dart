@@ -251,6 +251,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.indentWidth),
     ),
     SettingsSearchEntry(
+      title: AppStrings.tidyOnCloseTitle,
+      area: editor,
+      rowKey: SettingsKeys.tidyOnClose,
+      value: () async => onOff(on: await controller.tidyOnClose),
+      areaId: SettingsAreaId.editor,
+      open: () => pushEditor(SettingsKeys.tidyOnClose),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.listFolderTitle,
       area: folders,
       rowKey: SettingsKeys.listFolder,

@@ -1525,6 +1525,13 @@ final class LithuanianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
   @override
+  String get tidyOnCloseTitle => 'Sutvarkyti Markdown uždarant';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Uždarius pastabą, kurią redagavote, jos Markdown sutvarkomas kaip '
+      'komanda „Sutvarkyti Markdown“. Didesnės nei 4 MB pastabos paliekamos '
+      'tokios, kokios yra.';
+  @override
   String get typewriterSubtitle =>
       'Eilutė, kurią rašote, lieka redaktoriaus viduryje';
   @override

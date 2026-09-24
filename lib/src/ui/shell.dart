@@ -970,6 +970,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         final root = controller.root;
         if (root != null) _workspace.remember(relPath(path, root), memento);
       },
+      onEditedNoteClosed: _tidyClosedNote,
       showLineNumbers: _editorSettings.lineNumbers,
       typewriter: _editorSettings.typewriter,
       // No switch in the phone's status row: it has no room left for one.
@@ -2776,6 +2777,35 @@ final class _LibraryShellState extends State<_LibraryShell>
     });
   }
 
+  /// Tidies the note at absolute [path], edited and now closed, when the
+  /// library asks for it ([ShellEditorSettings.tidyOnClose]).
+  ///
+  /// Quiet, unlike the command: the note has left the screen, and a
+  /// snackbar about it would be about a note nobody is looking at. The
+  /// tidy runs in the note's own turn among its saves (`NoteWriter.tidy`),
+  /// so it tidies what the last save wrote and a note opened again and
+  /// typed in meanwhile keeps what was typed. A note back on screen by the
+  /// time the tidy lands re-reads it, when it has nothing unsaved.
+  void _tidyClosedNote(String path) {
+    final controller = widget.controller;
+    final root = controller.root;
+    final ops = controller.ops;
+    if (root == null || ops == null || !_editorSettings.tidyOnClose) return;
+    final rel = relPath(path, root);
+    unawaited(
+      ops
+          .tidyNote(rel)
+          .then(
+            (changed) {
+              if (changed && mounted) setState(() => _noteReloadToken++);
+            },
+            onError: (Object error) {
+              const AppLogger(name: 'shell').warning('tidy of $rel: $error');
+            },
+          ),
+    );
+  }
+
   /// Re-reads the library into its index, saying when it is done.
   Future<void> _reindex() => _guard(() async {
     await widget.controller.rescanNow();
@@ -3189,6 +3219,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         typewriter: _editorSettings.typewriter,
         onToggleTypewriter: _toggleTypewriter,
         onLoaded: _workspace.noteLoaded,
+        onEditedNoteClosed: _tidyClosedNote,
         showLineNumbers: _editorSettings.lineNumbers,
         noteColumn: _editorSettings.noteColumn,
         // The kind toggles and ⋮ sit at the end of the note's

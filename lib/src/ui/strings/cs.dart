@@ -1518,6 +1518,13 @@ final class CzechStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override
+  String get tidyOnCloseTitle => 'Uklidit Markdown při zavření';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Když zavřete poznámku, kterou jste upravovali, její Markdown se '
+      'uklidí jako příkazem „Uklidit Markdown“. Poznámky větší než 4 MB '
+      'zůstanou, jak jsou.';
+  @override
   String get typewriterSubtitle =>
       'Řádek, který píšete, zůstává uprostřed editoru';
   @override

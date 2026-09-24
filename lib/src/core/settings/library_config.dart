@@ -280,10 +280,11 @@ String cleanAttachmentsFolder(String folder) =>
 ///
 /// One model, two homes. The settings that shape the library — its
 /// trash, history, folders, links, indentation, quick note, reminder
-/// markers, dictionaries — are written to that file and travel with it.
-/// The ones that describe this screen and this person ([deviceKeys]: the
-/// tree's width and order, the text scale, the editor and its toggles)
-/// are kept on the device, per library, by a [DeviceSettingsStore]: a
+/// markers, tidying on close, dictionaries — are written to that file and
+/// travel with it. The ones that describe this screen and this person
+/// ([deviceKeys]: the tree's width and order, the text scale, the editor
+/// and its toggles) are kept on the device, per library, by a
+/// [DeviceSettingsStore]: a
 /// width set on a desktop means nothing on a phone, and every tweak of
 /// one used to rewrite the shared file and sync it everywhere. There is
 /// no notion of a library "overriding" the app — a library simply has its
@@ -310,6 +311,7 @@ final class LibraryConfig {
     this.noteColumnWidth = defaultNoteColumnWidth,
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
+    this.tidyOnClose = true,
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
@@ -373,6 +375,7 @@ final class LibraryConfig {
       noteColumnWidth: normalizeNoteColumnWidth(json['noteColumnWidth']),
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
+      tidyOnClose: _boolOr(json['tidyOnClose'], true),
       treeSort: switch (json['treeSort']) {
         'nameDesc' => TreeSort.nameDesc,
         _ => TreeSort.nameAsc,
@@ -478,6 +481,12 @@ final class LibraryConfig {
   /// and `#tag` markers (default false).
   final bool reminderShowTokens;
 
+  /// Whether a note edited and then closed has its Markdown tidied, as
+  /// the "Tidy the Markdown" command does (default true). Library-wide:
+  /// it decides how the library's files are written, so it travels with
+  /// them.
+  final bool tidyOnClose;
+
   /// The tree's sort order (default [TreeSort.nameAsc]).
   final TreeSort treeSort;
 
@@ -547,6 +556,7 @@ final class LibraryConfig {
     double? noteColumnWidth,
     bool? editorAutofocus,
     bool? reminderShowTokens,
+    bool? tidyOnClose,
     TreeSort? treeSort,
     LinkType? linkType,
     MissingNoteLocation? missingNoteLocation,
@@ -579,6 +589,7 @@ final class LibraryConfig {
       noteColumnWidth: noteColumnWidth ?? this.noteColumnWidth,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
+      tidyOnClose: tidyOnClose ?? this.tidyOnClose,
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
       missingNoteLocation: missingNoteLocation ?? this.missingNoteLocation,
@@ -640,6 +651,7 @@ final class LibraryConfig {
     'noteColumnWidth',
     'editorAutofocus',
     'reminderShowTokens',
+    'tidyOnClose',
     'treeSort',
     'linkType',
     'missingNoteLocation',
@@ -689,6 +701,7 @@ final class LibraryConfig {
       'noteColumnWidth': noteColumnWidth,
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
+      'tidyOnClose': tidyOnClose,
       'treeSort': treeSort.name,
       'linkType': linkType.name,
       'missingNoteLocation': missingNoteLocation.name,
@@ -777,6 +790,7 @@ final class LibraryConfig {
         noteColumnWidth == other.noteColumnWidth &&
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&
+        tidyOnClose == other.tidyOnClose &&
         treeSort == other.treeSort &&
         linkType == other.linkType &&
         missingNoteLocation == other.missingNoteLocation &&

@@ -407,6 +407,7 @@ void main() {
         readableLineLength: false,
         noteColumnWidth: 900,
         typewriter: true,
+        tidyOnClose: false,
       );
       await store.write(config);
       expect(await store.read(), config);
@@ -435,6 +436,7 @@ void main() {
         'readableLineLength',
         'noteColumnWidth',
         'typewriter',
+        'tidyOnClose',
       ]) {
         expect(content, contains('"$key"'), reason: key);
       }
@@ -557,6 +559,32 @@ void main() {
       expect(config.noteColumnWidth, defaultNoteColumnWidth);
       // #70: typewriter mode is asked for, never assumed.
       expect(config.typewriter, isFalse);
+      // A note closed after an edit is tidied unless someone says otherwise.
+      expect(config.tidyOnClose, isTrue);
+    });
+
+    test('tidyOnClose is on unless the file says false', () {
+      bool tidyOf(Object? raw) =>
+          LibraryConfig.fromJsonMap({'tidyOnClose': raw}).tidyOnClose;
+      expect(LibraryConfig.fromJsonMap(const {}).tidyOnClose, isTrue);
+      expect(tidyOf(false), isFalse);
+      expect(tidyOf(true), isTrue);
+      // A value nobody can read is the default, not "off".
+      expect(tidyOf('no'), isTrue);
+      expect(tidyOf(0), isTrue);
+      final off = LibraryConfig.defaults.copyWith(tidyOnClose: false);
+      expect(off.toJsonMap()['tidyOnClose'], isFalse);
+      expect(LibraryConfig.fromJsonMap(off.toJsonMap()), off);
+      expect(off, isNot(LibraryConfig.defaults));
+    });
+
+    test('tidyOnClose travels with the library, not the device', () {
+      // It decides how the library's files are written, so every device
+      // opening the library must read the same answer.
+      final off = LibraryConfig.defaults.copyWith(tidyOnClose: false);
+      expect(LibraryConfig.deviceKeys, isNot(contains('tidyOnClose')));
+      expect(off.libraryJsonMap()['tidyOnClose'], isFalse);
+      expect(off.deviceJsonMap().containsKey('tidyOnClose'), isFalse);
     });
 
     test('an out-of-range indentWidth is brought into range', () {

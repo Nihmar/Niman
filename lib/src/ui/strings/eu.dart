@@ -1534,6 +1534,13 @@ final class BasqueStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override
+  String get tidyOnCloseTitle => 'Markdown txukundu ixtean';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Editatu duzun ohar bat ixten duzunean, haren Markdown-a txukundu '
+      'egiten da, «Markdown txukundu» komandoarekin bezala. 4 MB baino '
+      'handiagoak diren oharrak dauden bezala geratzen dira.';
+  @override
   String get typewriterSubtitle =>
       'Idazten ari zaren lerroa editorearen erdian mantentzen da';
   @override

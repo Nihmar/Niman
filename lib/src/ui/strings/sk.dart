@@ -1525,6 +1525,13 @@ final class SlovakStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override
+  String get tidyOnCloseTitle => 'Upratať Markdown pri zatvorení';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Keď zatvoríte poznámku, ktorú ste upravovali, jej Markdown sa uprace '
+      'ako príkazom „Upratať Markdown“. Poznámky väčšie ako 4 MB zostanú '
+      'tak, ako sú.';
+  @override
   String get typewriterSubtitle =>
       'Riadok, ktorý píšete, zostáva v strede editora';
   @override

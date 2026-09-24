@@ -724,6 +724,8 @@ abstract base class Strings {
   String get formatNoteTitle;
   String get formatNoteDone;
   String get formatNoteAlreadyTidy;
+  String get tidyOnCloseTitle;
+  String get tidyOnCloseSubtitle;
   String get typewriterSubtitle;
   String get zenMode;
   String get zenModeEnter;

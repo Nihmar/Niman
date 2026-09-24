@@ -1541,6 +1541,13 @@ final class MacedonianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override
+  String get tidyOnCloseTitle => 'Средување на Markdown при затворање';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Кога ќе затворите белешка што сте ја уредувале, нејзиниот Markdown '
+      'се средува како со командата „Средиго Markdown“. Белешките поголеми '
+      'од 4 МБ остануваат какви што се.';
+  @override
   String get typewriterSubtitle =>
       'Редот што го пишувате останува во средината на уредувачот';
   @override

@@ -905,6 +905,8 @@ final class AppStrings {
   static String get formatNoteTitle => _s.formatNoteTitle;
   static String get formatNoteDone => _s.formatNoteDone;
   static String get formatNoteAlreadyTidy => _s.formatNoteAlreadyTidy;
+  static String get tidyOnCloseTitle => _s.tidyOnCloseTitle;
+  static String get tidyOnCloseSubtitle => _s.tidyOnCloseSubtitle;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zenModeEnter => _s.zenModeEnter;

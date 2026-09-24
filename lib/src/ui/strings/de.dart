@@ -1551,6 +1551,13 @@ final class GermanStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override
+  String get tidyOnCloseTitle => 'Markdown beim Schließen aufräumen';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Wenn Sie eine bearbeitete Notiz schließen, wird ihr Markdown '
+      'aufgeräumt wie mit dem Befehl „Markdown aufräumen“. Notizen über '
+      '4 MB bleiben, wie sie sind.';
+  @override
   String get typewriterSubtitle =>
       'Die Zeile, in der Sie schreiben, bleibt in der Mitte des Editors';
   @override

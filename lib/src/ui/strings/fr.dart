@@ -1566,6 +1566,13 @@ final class FrenchStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
   @override
+  String get tidyOnCloseTitle => 'Ranger le Markdown à la fermeture';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Quand une note que vous avez modifiée est fermée, son Markdown est '
+      'rangé comme avec la commande « Ranger le Markdown ». Les notes de '
+      'plus de 4 Mo restent telles quelles.';
+  @override
   String get typewriterSubtitle =>
       'Garder la ligne en cours d’écriture au milieu de l’éditeur';
   @override

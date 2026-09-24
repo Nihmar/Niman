@@ -1534,6 +1534,13 @@ final class PortugueseStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'A nota já estava arrumada.';
   @override
+  String get tidyOnCloseTitle => 'Arrumar o Markdown ao fechar';
+  @override
+  String get tidyOnCloseSubtitle =>
+      'Quando fecha uma nota que editou, o seu Markdown é arrumado como com '
+      'o comando «Arrumar o Markdown». As notas com mais de 4 MB ficam como '
+      'estão.';
+  @override
   String get typewriterSubtitle =>
       'Manter a linha que está a escrever no meio do editor';
   @override

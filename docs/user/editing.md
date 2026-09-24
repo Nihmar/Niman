@@ -304,6 +304,11 @@ fenced code, tables, math, frontmatter and HTML come back byte for
 byte. Tidying twice changes nothing the second time. The note is saved
 first, so what is tidied is the note as it stands.
 
+It also runs by itself: a note you edited is tidied when it is closed.
+That is a setting of the library (**Settings → Editor → Tidy the
+Markdown on close**, on by default), so every device writes the
+library's notes the same way. Notes over 4 MB are left as they are.
+
 The **checkbox list** button (beside the bulleted and numbered lists)
 makes the selected lines — or the caret's — tasks: a bulleted item gains
 its box, a numbered one keeps its number, a plain line becomes `- [ ] `.
