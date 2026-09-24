@@ -496,6 +496,9 @@ final class HungarianStrings extends Strings {
   String get toolbarItalic => 'Dőlt';
   @override
   String get toolbarStrikethrough => 'Áthúzott';
+
+  @override
+  String get toolbarHighlight => 'Kiemelés';
   @override
   String get toolbarSuperscript => 'Felírott';
   @override
@@ -574,6 +577,9 @@ final class HungarianStrings extends Strings {
   String get cheatChecklists => 'Ellenőrzőlisták';
   @override
   String get cheatQuotes => 'Idézetek';
+
+  @override
+  String get cheatCallouts => 'Kiemelt dobozok';
   @override
   String get cheatLinks => 'Hivatkozások';
   @override

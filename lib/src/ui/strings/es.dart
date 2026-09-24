@@ -503,6 +503,9 @@ final class SpanishStrings extends Strings {
   String get toolbarItalic => 'Cursiva';
   @override
   String get toolbarStrikethrough => 'Tachado';
+
+  @override
+  String get toolbarHighlight => 'Resaltado';
   @override
   String get toolbarSuperscript => 'Superíndice';
   @override
@@ -581,6 +584,9 @@ final class SpanishStrings extends Strings {
   String get cheatChecklists => 'Listas de verificación';
   @override
   String get cheatQuotes => 'Citas';
+
+  @override
+  String get cheatCallouts => 'Destacados';
   @override
   String get cheatLinks => 'Enlaces';
   @override

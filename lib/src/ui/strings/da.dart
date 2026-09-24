@@ -494,6 +494,9 @@ final class DanishStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Gennemstregning';
+
+  @override
+  String get toolbarHighlight => 'Fremhævning';
   @override
   String get toolbarSuperscript => 'Hævet';
   @override
@@ -572,6 +575,9 @@ final class DanishStrings extends Strings {
   String get cheatChecklists => 'Tjeklister';
   @override
   String get cheatQuotes => 'Citater';
+
+  @override
+  String get cheatCallouts => 'Fremhævede blokke';
   @override
   String get cheatLinks => 'Links';
   @override

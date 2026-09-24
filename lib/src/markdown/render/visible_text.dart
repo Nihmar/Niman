@@ -209,6 +209,8 @@ List<(int, int)> _markersOf(String text, StyleRun run) {
     case StyleKind.strong:
     case StyleKind.strikethrough:
       return _delimiterRuns(text, run, <int>[0x2A, 0x5F, 0x7E]);
+    case StyleKind.highlight:
+      return _delimiterRuns(text, run, const <int>[0x3D]);
     case StyleKind.code:
       return _delimiterRuns(text, run, const <int>[0x60]);
     case StyleKind.underline:

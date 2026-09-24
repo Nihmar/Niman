@@ -500,6 +500,9 @@ final class LithuanianStrings extends Strings {
   String get toolbarItalic => 'Kursyvas';
   @override
   String get toolbarStrikethrough => 'Perbrauktas';
+
+  @override
+  String get toolbarHighlight => 'Paryškinimas';
   @override
   String get toolbarSuperscript => 'Viršutinis indeksas';
   @override
@@ -578,6 +581,9 @@ final class LithuanianStrings extends Strings {
   String get cheatChecklists => 'Kontroliniai sąrašai';
   @override
   String get cheatQuotes => 'Citatos';
+
+  @override
+  String get cheatCallouts => 'Išskirti blokai';
   @override
   String get cheatLinks => 'Nuorodos';
   @override

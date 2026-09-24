@@ -502,6 +502,9 @@ final class SlovenianStrings extends Strings {
   String get toolbarItalic => 'Ležeče';
   @override
   String get toolbarStrikethrough => 'Prečrtano';
+
+  @override
+  String get toolbarHighlight => 'Poudarjeno';
   @override
   String get toolbarSuperscript => 'Nadpisanje';
   @override
@@ -580,6 +583,9 @@ final class SlovenianStrings extends Strings {
   String get cheatChecklists => 'Kontrolni seznami';
   @override
   String get cheatQuotes => 'Citati';
+
+  @override
+  String get cheatCallouts => 'Poudarjeni bloki';
   @override
   String get cheatLinks => 'Povezave';
   @override

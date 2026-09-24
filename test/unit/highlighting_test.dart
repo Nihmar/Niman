@@ -42,6 +42,19 @@ void main() {
       ]);
     });
 
+    test('highlight, and not a comparison (#279)', () {
+      final doc = HighlightDocument.fromText('a ==mark== and a == b == c');
+      final tokens = doc.lines.single.tokens;
+      expect(tokens.map((t) => t.kind), [TokenKind.highlight]);
+      expect(
+        'a ==mark== and a == b == c'.substring(
+          tokens.single.start,
+          tokens.single.end,
+        ),
+        '==mark==',
+      );
+    });
+
     test('image token covers the whole ![alt](url)', () {
       final doc = HighlightDocument.fromText('see ![alt](img.png) end');
       final t = doc.lines.single.tokens.single;

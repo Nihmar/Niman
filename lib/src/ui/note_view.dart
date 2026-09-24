@@ -2196,6 +2196,7 @@ final class _NoteViewState extends State<NoteView>
       ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
       ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
       ToolbarItem.strikethrough: () => _wrapSelection(left: '~~', right: '~~'),
+      ToolbarItem.highlight: () => _wrapSelection(left: '==', right: '=='),
       ToolbarItem.superscript: () =>
           _wrapSelection(left: '<sup>', right: '</sup>'),
       ToolbarItem.underline: () => _wrapSelection(left: '<u>', right: '</u>'),

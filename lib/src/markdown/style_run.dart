@@ -27,6 +27,9 @@ enum StyleKind {
   /// `~~x~~`.
   strikethrough,
 
+  /// `==x==`: highlighted, as Obsidian and Bear read it (#279).
+  highlight,
+
   /// `<u>x</u>`: the one underline Markdown has, written as HTML — which is
   /// what the toolbar's underline writes.
   underline,

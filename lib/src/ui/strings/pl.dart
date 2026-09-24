@@ -506,6 +506,9 @@ final class PolishStrings extends Strings {
   String get toolbarItalic => 'Kursywa';
   @override
   String get toolbarStrikethrough => 'Przekreślenie';
+
+  @override
+  String get toolbarHighlight => 'Wyróżnienie';
   @override
   String get toolbarSuperscript => 'Indeks górny';
   @override
@@ -584,6 +587,9 @@ final class PolishStrings extends Strings {
   String get cheatChecklists => 'Listy kontrolne';
   @override
   String get cheatQuotes => 'Cytaty';
+
+  @override
+  String get cheatCallouts => 'Wyróżnione bloki';
   @override
   String get cheatLinks => 'Linki';
   @override

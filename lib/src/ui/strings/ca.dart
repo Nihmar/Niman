@@ -502,6 +502,9 @@ final class CatalanStrings extends Strings {
   String get toolbarItalic => 'Cursiva';
   @override
   String get toolbarStrikethrough => 'Ratllat';
+
+  @override
+  String get toolbarHighlight => 'Ressaltat';
   @override
   String get toolbarSuperscript => 'Exponent';
   @override
@@ -580,6 +583,9 @@ final class CatalanStrings extends Strings {
   String get cheatChecklists => 'Llistes de control';
   @override
   String get cheatQuotes => 'Cites';
+
+  @override
+  String get cheatCallouts => 'Destacats';
   @override
   String get cheatLinks => 'Enllaços';
   @override

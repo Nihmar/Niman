@@ -465,6 +465,9 @@ final class JapaneseStrings extends Strings {
   String get toolbarItalic => '斜体';
   @override
   String get toolbarStrikethrough => '取り消し線';
+
+  @override
+  String get toolbarHighlight => 'ハイライト';
   @override
   String get toolbarSuperscript => '上付き文字';
   @override
@@ -543,6 +546,9 @@ final class JapaneseStrings extends Strings {
   String get cheatChecklists => 'チェックリスト';
   @override
   String get cheatQuotes => '引用';
+
+  @override
+  String get cheatCallouts => 'コールアウト';
   @override
   String get cheatLinks => 'リンク';
   @override

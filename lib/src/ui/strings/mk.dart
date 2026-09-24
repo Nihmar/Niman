@@ -503,6 +503,9 @@ final class MacedonianStrings extends Strings {
   String get toolbarItalic => 'Курсив';
   @override
   String get toolbarStrikethrough => 'Пречртано';
+
+  @override
+  String get toolbarHighlight => 'Истакнато';
   @override
   String get toolbarSuperscript => 'Суперскрипт';
   @override
@@ -581,6 +584,9 @@ final class MacedonianStrings extends Strings {
   String get cheatChecklists => 'Листи за проверка';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Истакнати блокови';
   @override
   String get cheatLinks => 'Врски';
   @override

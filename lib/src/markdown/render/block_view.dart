@@ -38,8 +38,10 @@ import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/extension_span.dart';
 import 'package:niman/src/markdown/parsed_block.dart';
+import 'package:niman/src/markdown/render/callout_box.dart';
 import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
@@ -282,6 +284,22 @@ final class BlockView extends StatelessWidget {
   /// quote inside it as a paragraph and a list as its dashes. The pattern
   /// is the table cell's: the same engine, over the smaller text.
   Widget _quote(BuildContext context) {
+    // A quote whose first line is `[!type]` is a callout (#279): its box,
+    // its title, and the rest of it under them.
+    final text = parsed.text;
+    final firstEnd = text.indexOf('\n');
+    final callout = Callout.of(
+      firstEnd < 0 ? text : text.substring(0, firstEnd),
+    );
+    if (callout != null && quoteNesting < _maxQuoteNesting) {
+      return CalloutBox(
+        callout: callout,
+        theme: theme,
+        body: firstEnd < 0
+            ? const <Widget>[]
+            : _contentViews(_quoteContent(text.substring(firstEnd + 1)), 1),
+      );
+    }
     // The bar is inside the quote's indent, as `live` draws it: a box adds
     // its border to its padding, and the text stood the bar's width further
     // in than past the bar in `live`.
@@ -290,11 +308,8 @@ final class BlockView extends StatelessWidget {
         left: BorderSide(color: theme.quoteBar, width: theme.quoteBarWidth),
       ),
     );
-    final inner = quoteNesting < _maxQuoteNesting ? _quoteContent() : null;
+    final inner = quoteNesting < _maxQuoteNesting ? _quoteContent(text) : null;
     if (inner != null && inner.isNotEmpty) {
-      final start = parsed.block.startLine;
-      final toggle = onToggleTask;
-      final width = availableWidth;
       return Container(
         decoration: bar,
         padding: EdgeInsets.only(
@@ -302,27 +317,7 @@ final class BlockView extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            for (var at = 0; at < inner.length; at++)
-              BlockView(
-                parsed: inner[at],
-                theme: theme.quoted,
-                mathCache: mathCache,
-                availableWidth: width == null
-                    ? null
-                    : width - theme.quoteIndentPerLevel,
-                onTapLink: onTapLink,
-                onTapWikiLink: onTapWikiLink,
-                embedResolver: embedResolver,
-                // The content's lines are the quote's, one for one: its
-                // marks were taken off each line, not the lines.
-                onToggleTask: toggle == null
-                    ? null
-                    : (line) => toggle(start + line),
-                scope: scope,
-                quoteNesting: quoteNesting + 1,
-              ),
-          ],
+          children: _contentViews(inner, 0),
         ),
       );
     }
@@ -350,10 +345,38 @@ final class BlockView extends StatelessWidget {
     );
   }
 
-  /// The quote's content — its text, the marks already off it — as blocks
-  /// of its own, the blank ones at its end left out.
-  List<ParsedBlock> _quoteContent() {
-    final buffer = SourceBuffer.fromText(parsed.text);
+  /// A quote's content blocks, each drawn as any block is, inside the
+  /// quote's indent. [skipped] is how many of the quote's lines come
+  /// before the content: a callout's title line.
+  List<Widget> _contentViews(List<ParsedBlock> inner, int skipped) {
+    final start = parsed.block.startLine + skipped;
+    final toggle = onToggleTask;
+    final width = availableWidth;
+    return <Widget>[
+      for (var at = 0; at < inner.length; at++)
+        BlockView(
+          parsed: inner[at],
+          theme: theme.quoted,
+          mathCache: mathCache,
+          availableWidth: width == null
+              ? null
+              : width - theme.quoteIndentPerLevel,
+          onTapLink: onTapLink,
+          onTapWikiLink: onTapWikiLink,
+          embedResolver: embedResolver,
+          // The content's lines are the quote's, one for one: its marks
+          // were taken off each line, not the lines.
+          onToggleTask: toggle == null ? null : (line) => toggle(start + line),
+          scope: scope,
+          quoteNesting: quoteNesting + 1,
+        ),
+    ];
+  }
+
+  /// A quote's content, [text] — the marks already off it — as blocks of
+  /// its own, the blank ones at its end left out.
+  List<ParsedBlock> _quoteContent(String text) {
+    final buffer = SourceBuffer.fromText(text);
     final blocks = <Block>[...BlockScanner(buffer).index.blocks];
     while (blocks.isNotEmpty && blocks.last.kind == BlockKind.blank) {
       blocks.removeLast();
@@ -747,6 +770,7 @@ final class _InlineBuilder {
       StyleKind.strikethrough => base.copyWith(
         decoration: TextDecoration.lineThrough,
       ),
+      StyleKind.highlight => base.copyWith(backgroundColor: theme.highlight),
       StyleKind.underline => base.copyWith(
         decoration: TextDecoration.underline,
       ),

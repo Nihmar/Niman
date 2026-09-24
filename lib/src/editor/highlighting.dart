@@ -38,6 +38,9 @@ enum TokenKind {
   /// Strikethrough (`~~…~~`).
   strike,
 
+  /// Highlighted (`==…==`, #279).
+  highlight,
+
   /// `<u>…</u>`. Made by the surface's styler only: this tokenizer reads
   /// HTML tags as text.
   underline,
@@ -863,6 +866,7 @@ final class _InlineScanner {
   static final RegExp _boldStar = RegExp(r'\*\*[^*\n]+\*\*');
   static final RegExp _boldUnder = RegExp('__(?:[^_]|_(?:[^_]))+__');
   static final RegExp _strike = RegExp(r'~~[^~\n]+~~');
+  static final RegExp _highlight = RegExp(r'==[^\s=](?:[^=\n]*[^\s=])?==');
   static final RegExp _italicStar = RegExp(r'\*[^*\n]+\*');
   static final RegExp _italicUnder = RegExp('_(?:[^_]|_(?:[^_]))+_');
   static final RegExp _tag = RegExp(r'#([\w/-]+)');
@@ -919,6 +923,10 @@ final class _InlineScanner {
       final strike = _first(_strike, line, pos);
       if (strike != null) {
         consider(TokenKind.strike, strike.start, strike.end);
+      }
+      final highlight = _first(_highlight, line, pos);
+      if (highlight != null) {
+        consider(TokenKind.highlight, highlight.start, highlight.end);
       }
       final italicStar = _findItalicStar(line, pos);
       if (italicStar != null) {

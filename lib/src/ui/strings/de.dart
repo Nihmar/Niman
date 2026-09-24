@@ -501,6 +501,9 @@ final class GermanStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Durchgestrichen';
+
+  @override
+  String get toolbarHighlight => 'Hervorheben';
   @override
   String get toolbarSuperscript => 'Oberhalb';
   @override
@@ -579,6 +582,9 @@ final class GermanStrings extends Strings {
   String get cheatChecklists => 'Checklisten';
   @override
   String get cheatQuotes => 'Zitate';
+
+  @override
+  String get cheatCallouts => 'Callouts';
   @override
   String get cheatLinks => 'Links';
   @override

@@ -506,6 +506,9 @@ final class RomanianStrings extends Strings {
   String get toolbarItalic => 'Cursiv';
   @override
   String get toolbarStrikethrough => 'Tăiat';
+
+  @override
+  String get toolbarHighlight => 'Evidențiat';
   @override
   String get toolbarSuperscript => 'Indice sus';
   @override
@@ -584,6 +587,9 @@ final class RomanianStrings extends Strings {
   String get cheatChecklists => 'Liste de verificare';
   @override
   String get cheatQuotes => 'Citate';
+
+  @override
+  String get cheatCallouts => 'Casete evidențiate';
   @override
   String get cheatLinks => 'Linkuri';
   @override

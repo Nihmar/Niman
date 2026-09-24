@@ -493,6 +493,9 @@ final class NorwegianStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Gjennomstreking';
+
+  @override
+  String get toolbarHighlight => 'Utheving';
   @override
   String get toolbarSuperscript => 'Opphøyd';
   @override
@@ -571,6 +574,9 @@ final class NorwegianStrings extends Strings {
   String get cheatChecklists => 'Sjekklister';
   @override
   String get cheatQuotes => 'Sitater';
+
+  @override
+  String get cheatCallouts => 'Uthevede blokker';
   @override
   String get cheatLinks => 'Lenker';
   @override

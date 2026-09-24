@@ -500,6 +500,9 @@ final class DutchStrings extends Strings {
   String get toolbarItalic => 'Cursief';
   @override
   String get toolbarStrikethrough => 'Doorhalen';
+
+  @override
+  String get toolbarHighlight => 'Markeren';
   @override
   String get toolbarSuperscript => 'Superscript';
   @override
@@ -578,6 +581,9 @@ final class DutchStrings extends Strings {
   String get cheatChecklists => 'Checklists';
   @override
   String get cheatQuotes => 'Citaten';
+
+  @override
+  String get cheatCallouts => 'Callouts';
   @override
   String get cheatLinks => 'Links';
   @override

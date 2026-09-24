@@ -490,6 +490,9 @@ final class EstonianStrings extends Strings {
   String get toolbarItalic => 'Kalded';
   @override
   String get toolbarStrikethrough => 'Läbijoonitud';
+
+  @override
+  String get toolbarHighlight => 'Esiletõst';
   @override
   String get toolbarSuperscript => 'Üleind';
   @override
@@ -568,6 +571,9 @@ final class EstonianStrings extends Strings {
   String get cheatChecklists => 'Kontrollnimekirjad';
   @override
   String get cheatQuotes => 'Tsitaadid';
+
+  @override
+  String get cheatCallouts => 'Esiletõstetud plokid';
   @override
   String get cheatLinks => 'Lingid';
   @override

@@ -496,6 +496,9 @@ final class FinnishStrings extends Strings {
   String get toolbarItalic => 'Kursivointi';
   @override
   String get toolbarStrikethrough => 'Yläviiva';
+
+  @override
+  String get toolbarHighlight => 'Korostus';
   @override
   String get toolbarSuperscript => 'Yläindeksi';
   @override
@@ -574,6 +577,9 @@ final class FinnishStrings extends Strings {
   String get cheatChecklists => 'Tarkistuslistat';
   @override
   String get cheatQuotes => 'Lainaukset';
+
+  @override
+  String get cheatCallouts => 'Korostuslaatikot';
   @override
   String get cheatLinks => 'Linkit';
   @override

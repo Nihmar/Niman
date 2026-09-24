@@ -501,6 +501,9 @@ final class GalicianStrings extends Strings {
   String get toolbarItalic => 'Itálica';
   @override
   String get toolbarStrikethrough => 'Rachado';
+
+  @override
+  String get toolbarHighlight => 'Resaltado';
   @override
   String get toolbarSuperscript => 'Superíndice';
   @override
@@ -579,6 +582,9 @@ final class GalicianStrings extends Strings {
   String get cheatChecklists => 'Listas de verificación';
   @override
   String get cheatQuotes => 'Citas';
+
+  @override
+  String get cheatCallouts => 'Destacados';
   @override
   String get cheatLinks => 'Ligazóns';
   @override
