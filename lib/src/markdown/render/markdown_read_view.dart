@@ -136,6 +136,21 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// is done in place, so the first frame already has the blocks.
   @visibleForTesting
   static int backgroundLines = 50000;
+
+  /// How many lines of a note scanned in the background are drawn while it
+  /// is: a phone's screens of them, in a few milliseconds of scan
+  /// ([DocumentScan.head]).
+  @visibleForTesting
+  static int headLines = 5000;
+
+  /// Whether [_blocks] are the top of the note alone, drawn while the whole
+  /// of it is scanned.
+  bool _head = false;
+
+  /// Whether [line] is past what the pane has blocks for yet: a jump there
+  /// waits for the scan.
+  bool _notYet(int line) =>
+      _scanning && (_blocks.isEmpty || (_head && line >= _blocks.last.endLine));
   BlockHeightMap? _heights;
   int _built = 0;
 
@@ -153,7 +168,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// What the shell asks when it needs something the scan already found —
   /// a list to count, so far — rather than reading the note for it.
-  List<Block>? get blocks => _shown == null ? null : _blocks;
+  List<Block>? get blocks => _shown == null || _head ? null : _blocks;
 
   /// The note's headings, read off the blocks this pane already scanned for
   /// the page, or null before the first scan lands.
@@ -162,7 +177,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// on screen — no second walk of the text (see [outlineOfBlocks]).
   List<OutlineEntry>? get headings {
     final shown = _shown;
-    if (shown == null || _blocks.isEmpty) return null;
+    if (shown == null || _head || _blocks.isEmpty) return null;
     return outlineOfBlocks(
       BlockIndex(blocks: _blocks, revision: shown.revision),
       shown.lineAt,
@@ -193,7 +208,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   ///
   /// Does nothing without a controller, or for a line past the last block.
   void jumpToLine(int line) {
-    if (_blocks.isEmpty && _scanning) {
+    if (_notYet(line)) {
       _pendingJump = line;
       return;
     }
@@ -300,7 +315,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// it landed among, as [jumpToLine] does. Taken once the scan lands, for
   /// a note still being read.
   void showAnchor(ScrollAnchor anchor) {
-    if (_blocks.isEmpty && _scanning) {
+    if (_notYet(anchor.line)) {
       _pendingAnchor = anchor;
       return;
     }
@@ -413,6 +428,17 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     }
     _scanning = true;
     if (identical(_shown, buffer)) _clear();
+    if (_shown == null) {
+      // Nothing to draw for the wait, which on a phone was 22 s of an empty
+      // pane for the 247 MB note (device log, 2026-09-24): the top of the
+      // note goes on screen now, and the rest comes with the scan.
+      _show(buffer, DocumentScan.head(buffer, headLines));
+      _head = true;
+      _log.debug(
+        'scan: the top shown, ${_blocks.length} blocks, '
+        'in ${clock.elapsedMilliseconds}ms; the rest in the background',
+      );
+    }
     unawaited(
       scanInBackground(buffer).then((result) {
         if (!mounted || scan != _scans) return;
@@ -424,10 +450,19 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
           'scan: ${result.blocks.length} blocks, ${buffer.lineCount} lines '
           'in ${clock.elapsedMilliseconds}ms, in the background',
         );
+        // Where the reader is in the top, to be kept when the whole note
+        // takes its place: its blocks are the same, their measurements not.
+        final kept = _head ? topAnchor : null;
         setState(() {
           _scanning = false;
+          _head = false;
           _show(buffer, result);
         });
+        if (kept != null && (kept.line > 0 || kept.fraction > 0)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) showAnchor(kept);
+          });
+        }
         final jump = _pendingJump;
         _pendingJump = null;
         if (jump != null) {
@@ -523,6 +558,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
 
   /// Draws nothing until the next scan lands.
   void _clear() {
+    _head = false;
     _shown = null;
     _blocks = const <Block>[];
     _pieces.clear();
@@ -773,6 +809,17 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             ),
           ),
         ),
+        // The top of the note is all there is yet: said where the reader
+        // runs out of it, rather than a page that just ends.
+        if (_head)
+          SliverPadding(
+            padding: padding + const EdgeInsets.symmetric(vertical: 16),
+            sliver: const SliverToBoxAdapter(
+              child: LinearProgressIndicator(
+                key: Key('read-view-reading-rest'),
+              ),
+            ),
+          ),
         // The definitions a note ends with. They are not blocks — no block
         // can draw them, because the definitions never reach the block that
         // cites them — so the section is appended, and through a *lazy* list

@@ -50,6 +50,35 @@ final class DocumentScan {
     revision: buffer.revision,
   );
 
+  /// Scans the top of [buffer] here, now: its first [lines] lines, and on to
+  /// the next blank line so the last block is not cut — up to [lines] more.
+  ///
+  /// What a pane draws while the whole note is scanned in the background:
+  /// the blocks of the top are the whole note's, since a block is decided
+  /// by the lines above it, and the rest arrives with the full scan. Only
+  /// the definitions are the top's alone — a citation whose definition is
+  /// further down reads as text until then.
+  factory head(SourceBuffer buffer, int lines) {
+    final total = buffer.lineCount;
+    var end = lines < total ? lines : total;
+    final limit = end + lines < total ? end + lines : total;
+    while (end < limit && buffer.lineAt(end).trim().isNotEmpty) {
+      end++;
+    }
+    final top = end < total
+        ? SourceBuffer.fromText(buffer.substring(0, buffer.offsetOfLine(end)))
+        : buffer;
+    return DocumentScan(
+      blocks: BlockScanner(top).index.blocks,
+      scope: DocumentScope.ofLines(
+        buffer,
+        buffer.revision,
+        Iterable<int>.generate(end),
+      ),
+      revision: buffer.revision,
+    );
+  }
+
   /// The blocks, in line order.
   final List<Block> blocks;
 
