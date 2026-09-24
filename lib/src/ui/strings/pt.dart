@@ -517,6 +517,9 @@ final class PortugueseStrings extends Strings {
   String get cheatChecklists => 'Listas de verificação';
   @override
   String get cheatQuotes => 'Citações';
+
+  @override
+  String get cheatCallouts => 'Destaques';
   @override
   String get cheatLinks => 'Ligações';
   @override

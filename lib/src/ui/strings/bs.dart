@@ -522,6 +522,9 @@ final class BosnianStrings extends Strings {
   String get cheatChecklists => 'Kontrolne liste';
   @override
   String get cheatQuotes => 'Citati';
+
+  @override
+  String get cheatCallouts => 'Istaknuti blokovi';
   @override
   String get cheatLinks => 'Linkovi';
   @override

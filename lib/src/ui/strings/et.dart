@@ -511,6 +511,9 @@ final class EstonianStrings extends Strings {
   String get cheatChecklists => 'Kontrollnimekirjad';
   @override
   String get cheatQuotes => 'Tsitaadid';
+
+  @override
+  String get cheatCallouts => 'Esiletõstetud plokid';
   @override
   String get cheatLinks => 'Lingid';
   @override

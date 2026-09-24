@@ -522,6 +522,9 @@ final class SerbianStrings extends Strings {
   String get cheatChecklists => 'Контролне листе';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Истакнути блокови';
   @override
   String get cheatLinks => 'Везе';
   @override

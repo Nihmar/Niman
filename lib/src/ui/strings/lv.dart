@@ -518,6 +518,9 @@ final class LatvianStrings extends Strings {
   String get cheatChecklists => 'Kontrolsaraksti';
   @override
   String get cheatQuotes => 'Citāti';
+
+  @override
+  String get cheatCallouts => 'Izcelti bloki';
   @override
   String get cheatLinks => 'Saites';
   @override

@@ -521,6 +521,9 @@ final class CzechStrings extends Strings {
   String get cheatChecklists => 'Kontrolní seznamy';
   @override
   String get cheatQuotes => 'Citace';
+
+  @override
+  String get cheatCallouts => 'Zvýrazněné bloky';
   @override
   String get cheatLinks => 'Odkazy';
   @override

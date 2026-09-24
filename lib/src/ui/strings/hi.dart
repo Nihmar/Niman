@@ -505,6 +505,9 @@ final class HindiStrings extends Strings {
   String get cheatChecklists => 'चेकलिस्ट';
   @override
   String get cheatQuotes => 'उद्धरण';
+
+  @override
+  String get cheatCallouts => 'कॉलआउट';
   @override
   String get cheatLinks => 'लिंक';
   @override

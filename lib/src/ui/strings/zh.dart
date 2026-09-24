@@ -489,6 +489,9 @@ final class ChineseStrings extends Strings {
   String get cheatChecklists => '复选框列表';
   @override
   String get cheatQuotes => '引用';
+
+  @override
+  String get cheatCallouts => '标注块';
   @override
   String get cheatLinks => '链接';
   @override

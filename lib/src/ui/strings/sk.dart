@@ -521,6 +521,9 @@ final class SlovakStrings extends Strings {
   String get cheatChecklists => 'Kontrolné zoznamy';
   @override
   String get cheatQuotes => 'Citáty';
+
+  @override
+  String get cheatCallouts => 'Zvýraznené bloky';
   @override
   String get cheatLinks => 'Odkazy';
   @override

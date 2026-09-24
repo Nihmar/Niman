@@ -516,6 +516,9 @@ final class EnglishStrings extends Strings {
   String get cheatChecklists => 'Checkbox lists';
   @override
   String get cheatQuotes => 'Quotes';
+
+  @override
+  String get cheatCallouts => 'Callouts';
   @override
   String get cheatLinks => 'Links';
   @override

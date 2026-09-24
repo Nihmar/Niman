@@ -525,6 +525,9 @@ final class GreekStrings extends Strings {
   String get cheatChecklists => 'Λίστες ελέγχου';
   @override
   String get cheatQuotes => 'Παραθέσεις';
+
+  @override
+  String get cheatCallouts => 'Πλαίσια επισήμανσης';
   @override
   String get cheatLinks => 'Σύνδεσμοι';
   @override

@@ -515,6 +515,9 @@ final class NorwegianStrings extends Strings {
   String get cheatChecklists => 'Sjekklister';
   @override
   String get cheatQuotes => 'Sitater';
+
+  @override
+  String get cheatCallouts => 'Uthevede blokker';
   @override
   String get cheatLinks => 'Lenker';
   @override

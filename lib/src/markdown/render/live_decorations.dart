@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/item_marks.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -55,6 +56,23 @@ enum CodeRow {
   bool get closes => this == bottom || this == only;
 }
 
+/// A line of a callout (#279), as `live` draws it: the callout's style,
+/// whether the line is its title line, where on that line the mark
+/// (`[!type]`, a fold sign, the spaces after) starts and ends — the room its
+/// icon is drawn in while the caret is elsewhere — and, for a callout with
+/// no title written, the one it is given, drawn after the icon.
+typedef LiveCallout = ({
+  CalloutStyle style,
+  bool title,
+  int markStart,
+  int markEnd,
+  String? label,
+});
+
+/// How wide the room for a callout's icon is at [em], the note's text size
+/// as it is drawn: the icon and a gap after it, as the read view sets them.
+double calloutIconSlot(double em) => em * 1.2 * 1.4;
+
 /// The shape a line has in its block: what `live` draws beside its text.
 @immutable
 final class LineShape {
@@ -72,12 +90,20 @@ final class LineShape {
     this.codeIndented = false,
     this.codeFence = false,
     this.heading = 0,
+    this.callout,
   });
 
   /// The shape of [line], whose block is [block] and whose index is [index];
   /// [quoted] is what the line is inside its quote, for a quote's line —
-  /// which is drawn as that block, as the read view draws it.
-  factory of(StyledLine line, Block? block, int index, {QuotedLine? quoted}) {
+  /// which is drawn as that block, as the read view draws it — and
+  /// [callout] what it is in its callout, for a callout's line.
+  factory of(
+    StyledLine line,
+    Block? block,
+    int index, {
+    QuotedLine? quoted,
+    LiveCallout? callout,
+  }) {
     var markers = 0;
     int? marker;
     int? box;
@@ -159,6 +185,7 @@ final class LineShape {
       codeIndented: inner?.kind == BlockKind.indentedCode,
       codeFence: codeFence,
       heading: heading,
+      callout: callout,
     );
   }
 
@@ -213,6 +240,9 @@ final class LineShape {
   /// heading is set at its size, as the read view sets it.
   final int heading;
 
+  /// What the line is in its callout, for a callout's line (#279).
+  final LiveCallout? callout;
+
   /// A line with no shape to draw.
   static const LineShape none = LineShape();
 
@@ -230,7 +260,8 @@ final class LineShape {
       other.code == code &&
       other.codeIndented == codeIndented &&
       other.codeFence == codeFence &&
-      other.heading == heading;
+      other.heading == heading &&
+      other.callout == callout;
 
   @override
   int get hashCode => Object.hash(
@@ -246,6 +277,7 @@ final class LineShape {
     codeIndented,
     codeFence,
     heading,
+    callout,
   );
 }
 
@@ -352,17 +384,92 @@ final class LiveDecorationPainter extends CustomPainter {
     if (revealed) return;
     if (shape.rule) _paintRule(canvas, size);
     if (shape.marker != null) _paintItem(canvas);
+    final callout = shape.callout;
+    if (callout != null && callout.title) _paintCalloutIcon(canvas, callout);
   }
 
   void _paintQuoteBars(Canvas canvas, Size size) {
+    final callout = shape.callout;
+    // A callout's box, the whole row wide, behind its bar (#279).
+    if (callout != null) {
+      canvas.drawRect(
+        Offset.zero & size,
+        Paint()..color = calloutBackground(callout.style.color),
+      );
+    }
     final paint = Paint()..color = theme.quoteBar;
     for (var level = 0; level < shape.quoteDepth; level++) {
       final left = level * theme.quoteIndentPerLevel;
       canvas.drawRect(
         Rect.fromLTWH(left, 0, theme.quoteBarWidth, size.height),
-        paint,
+        level == 0 && callout != null
+            ? (Paint()..color = callout.style.color)
+            : paint,
       );
     }
+  }
+
+  /// A callout's icon, in the room its hidden mark leaves on the title
+  /// line, centred on the line's first row; and after it the title the
+  /// callout is given when none is written, as the read view titles it.
+  void _paintCalloutIcon(Canvas canvas, LiveCallout callout) {
+    final box = paragraph.currentContext?.findRenderObject();
+    if (box is! RenderParagraph || !box.hasSize) return;
+    final left =
+        textLeft +
+        box
+            .getOffsetForCaret(
+              TextPosition(offset: callout.markStart),
+              Rect.zero,
+            )
+            .dx;
+    // The first row, read off the title's first character: the mark is set
+    // in glyphs of no size, and a caret in it has next to no height. A
+    // title line with no title is that one row.
+    final text = box.text.toPlainText(includeSemanticsLabels: false);
+    final title = TextPosition(offset: callout.markEnd);
+    final (top, row) = callout.markEnd < text.length
+        ? (
+            box.getOffsetForCaret(title, Rect.zero).dy,
+            box.getFullHeightForCaret(title),
+          )
+        : (0.0, box.size.height);
+    final em = box.textScaler.scale(theme.body.fontSize!);
+    final size = em * 1.2;
+    final icon = callout.style.icon;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          fontSize: size,
+          color: callout.style.color,
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(canvas, Offset(left, top + (row - painter.height) / 2));
+    painter.dispose();
+    final label = callout.label;
+    if (label == null) return;
+    final written = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: theme.body.copyWith(
+          color: callout.style.color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textScaler: box.textScaler,
+    )..layout();
+    written.paint(
+      canvas,
+      Offset(left + calloutIconSlot(em), top + (row - written.height) / 2),
+    );
+    written.dispose();
   }
 
   /// The line's part of its code block's box: from a padding before the

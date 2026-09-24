@@ -515,6 +515,9 @@ final class DanishStrings extends Strings {
   String get cheatChecklists => 'Tjeklister';
   @override
   String get cheatQuotes => 'Citater';
+
+  @override
+  String get cheatCallouts => 'Fremhævede blokke';
   @override
   String get cheatLinks => 'Links';
   @override

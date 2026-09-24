@@ -514,6 +514,9 @@ final class BasqueStrings extends Strings {
   String get cheatChecklists => 'Egiaztapen-zerrendak';
   @override
   String get cheatQuotes => 'Aipuak';
+
+  @override
+  String get cheatCallouts => 'Nabarmendutako blokeak';
   @override
   String get cheatLinks => 'Estekak';
   @override

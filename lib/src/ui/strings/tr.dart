@@ -513,6 +513,9 @@ final class TurkishStrings extends Strings {
   String get cheatChecklists => 'Onay listeleri';
   @override
   String get cheatQuotes => 'Alıntılar';
+
+  @override
+  String get cheatCallouts => 'Vurgu kutuları';
   @override
   String get cheatLinks => 'Bağlantılar';
   @override

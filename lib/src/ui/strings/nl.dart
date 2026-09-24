@@ -520,6 +520,9 @@ final class DutchStrings extends Strings {
   String get cheatChecklists => 'Checklists';
   @override
   String get cheatQuotes => 'Citaten';
+
+  @override
+  String get cheatCallouts => 'Callouts';
   @override
   String get cheatLinks => 'Links';
   @override

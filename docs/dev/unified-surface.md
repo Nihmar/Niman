@@ -12085,9 +12085,8 @@ the only one there is — and a finding goes into this list or into an issue.
 
 **Outside the plan, noticed on the way**
 
-- `==highlight==` and callouts (`> [!note]`) are not read by the engine: they
-  show as their source, and the cheatsheet and the menus leave them out rather
-  than teach something that does not render.
+- `==highlight==` and callouts (`> [!note]`) are read since #279, in the
+  read view and in `live`, and taught by the cheatsheet and the menus.
 
 # 11. Risks, alternatives and open questions
 

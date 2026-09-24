@@ -47,6 +47,7 @@ import 'package:niman/src/markdown/active_formats.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
@@ -55,6 +56,7 @@ import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_height_map.dart';
+import 'package:niman/src/markdown/render/callout_style.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/live_blocks.dart';
@@ -279,6 +281,33 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A quote's content read again as blocks, so `live` draws a quote's lines
   /// as the blocks they are inside it, as the read view does.
   final LiveQuoteContent _quotes = LiveQuoteContent();
+
+  /// What line [index] is in its callout, when [block] — its quote — is one
+  /// (#279): the callout's style, and on the title line where its mark is.
+  LiveCallout? _calloutLine(int index, Block? block) {
+    final callout = _quotes.calloutOf(block, widget.buffer);
+    if (callout == null) return null;
+    final title = index == block!.startLine;
+    var markStart = 0;
+    var markEnd = 0;
+    String? label;
+    if (title) {
+      final text = widget.buffer.lineAt(index);
+      final prefix = BlockParser.quotePrefixLength(text, block.quoteDepth);
+      final rest = text.substring(prefix);
+      markStart = prefix + rest.length - rest.trimLeft().length;
+      markEnd = prefix + Callout.markLength(rest);
+      // No title written: the type's, drawn after the icon.
+      if (text.substring(markEnd).trim().isEmpty) label = callout.title;
+    }
+    return (
+      style: calloutStyleOf(callout.type),
+      title: title,
+      markStart: markStart,
+      markEnd: markEnd,
+      label: label,
+    );
+  }
 
   /// The note's tables, laid out as the read view lays them out.
   final LiveTables _tables = LiveTables();
@@ -2451,6 +2480,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                         block,
                                         index,
                                         quoted: quoted,
+                                        callout: _calloutLine(index, block),
                                       )
                                     : LineShape.none,
                                 pictures:
@@ -3668,6 +3698,13 @@ final class _Line extends StatelessWidget {
     final inline = typeset || folded
         ? const <InlineFormula>[]
         : _inlineFormulas(run: mine ? (at.runStart, at.runEnd) : null);
+    // A callout's mark (#279), where the caret is not: as wide as the icon
+    // drawn in its place.
+    final callout = hideMarkers && !mine ? shape.callout : null;
+    final calloutMark =
+        callout != null && callout.title && callout.markEnd > callout.markStart
+        ? callout
+        : null;
     final concealed = <_Concealed>[
       if (typeset || folded)
         (0, styled.text.length, _hiddenMarker, whole: false),
@@ -3679,6 +3716,18 @@ final class _Line extends StatelessWidget {
           formula.start,
           formula.end,
           spacerStyleFor(formula, theme.lineHeight),
+          whole: true,
+        ),
+      if (calloutMark != null)
+        (
+          calloutMark.markStart,
+          calloutMark.markEnd,
+          LiveTables.gapStyle(
+            calloutIconSlot(
+                  MediaQuery.textScalerOf(context).scale(theme.body.fontSize!),
+                ) /
+                (calloutMark.markEnd - calloutMark.markStart),
+          ),
           whole: true,
         ),
       // A table's pipes, and the spaces round its cells' text, as wide as
@@ -3919,6 +3968,15 @@ final class _Line extends StatelessWidget {
     }
     // Code reads as the read view draws it: in monospace, fences and all.
     if (shape.code != null) return theme.code;
+    // A callout's title, as the read view sets it (#279) — the caret on it
+    // or not: revealing the mark is no reason to restyle the line.
+    final callout = shape.callout;
+    if (callout != null && callout.title) {
+      return theme.body.copyWith(
+        color: callout.style.color,
+        fontWeight: FontWeight.w600,
+      );
+    }
     // A heading inside a quote is set at its size, as the read view sets it.
     if (shape.heading > 0) return theme.heading(shape.heading);
     // Quoted prose reads as the read view draws it: in the quote's own style.

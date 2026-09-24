@@ -19,6 +19,7 @@ library;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/callout.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// A line's block inside the quotes it is in: the block, the line's index
@@ -42,18 +43,7 @@ final class LiveQuoteContent {
   /// null for a line of no quote, or one the content has no block for.
   QuotedLine? of(int line, Block? quote, SourceBuffer buffer) {
     if (quote == null || quote.kind != BlockKind.quote) return null;
-    if (!identical(buffer, _buffer) || buffer.revision != _revision) {
-      _quotes.clear();
-      _buffer = buffer;
-      _revision = buffer.revision;
-    }
-    var scanned = _quotes.putIfAbsent(quote.startLine, () {
-      final lines = <String>[
-        for (var at = quote.startLine; at < quote.endLine; at++)
-          _unquoted(buffer.lineAt(at), quote.quoteDepth),
-      ];
-      return _scan(lines);
-    });
+    var scanned = _scannedOf(quote, buffer);
     var local = line - quote.startLine;
     // Down through the quotes inside the quote, to the block that is not one.
     for (var depth = 0; depth < _maxDepth; depth++) {
@@ -70,6 +60,30 @@ final class LiveQuoteContent {
       scanned = _scan(inner);
     }
     return null;
+  }
+
+  /// The callout [quote] is, when its first line says it is one (#279);
+  /// null for a quote that is only a quote, and for anything else.
+  Callout? calloutOf(Block? quote, SourceBuffer buffer) {
+    if (quote == null || quote.kind != BlockKind.quote) return null;
+    final lines = _scannedOf(quote, buffer).lines;
+    return lines.isEmpty ? null : Callout.of(lines.first);
+  }
+
+  /// [quote]'s content scanned, kept until the note changes.
+  _Scanned _scannedOf(Block quote, SourceBuffer buffer) {
+    if (!identical(buffer, _buffer) || buffer.revision != _revision) {
+      _quotes.clear();
+      _buffer = buffer;
+      _revision = buffer.revision;
+    }
+    return _quotes.putIfAbsent(quote.startLine, () {
+      final lines = <String>[
+        for (var at = quote.startLine; at < quote.endLine; at++)
+          _unquoted(buffer.lineAt(at), quote.quoteDepth),
+      ];
+      return _scan(lines);
+    });
   }
 
   /// How many quotes inside one another are read again, as the read view

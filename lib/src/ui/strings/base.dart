@@ -256,6 +256,7 @@ abstract base class Strings {
   String get cheatLists;
   String get cheatChecklists;
   String get cheatQuotes;
+  String get cheatCallouts;
   String get cheatLinks;
   String get cheatWikilinks;
   String get cheatEmbeds;

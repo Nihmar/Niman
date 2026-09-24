@@ -407,6 +407,7 @@ final class AppStrings {
   static String get cheatLists => _s.cheatLists;
   static String get cheatChecklists => _s.cheatChecklists;
   static String get cheatQuotes => _s.cheatQuotes;
+  static String get cheatCallouts => _s.cheatCallouts;
   static String get cheatLinks => _s.cheatLinks;
   static String get cheatWikilinks => _s.cheatWikilinks;
   static String get cheatEmbeds => _s.cheatEmbeds;

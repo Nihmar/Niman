@@ -520,6 +520,9 @@ final class GermanStrings extends Strings {
   String get cheatChecklists => 'Checklisten';
   @override
   String get cheatQuotes => 'Zitate';
+
+  @override
+  String get cheatCallouts => 'Callouts';
   @override
   String get cheatLinks => 'Links';
   @override

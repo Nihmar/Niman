@@ -520,6 +520,9 @@ final class BelarusianStrings extends Strings {
   String get cheatChecklists => 'Кантрольныя спісы';
   @override
   String get cheatQuotes => 'Цытаты';
+
+  @override
+  String get cheatCallouts => 'Вылучаныя блокі';
   @override
   String get cheatLinks => 'Спасылкі';
   @override
