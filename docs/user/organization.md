@@ -121,14 +121,22 @@ note stays exactly as it was.
 ### Files that are not notes
 
 The tree also shows the files that are not text — the images and audio
-clips in the attachments folder, a PDF dropped into the library.
+clips in the attachments folder, a PDF or an e-book dropped into the
+library.
 
 - **Pictures** (PNG, JPEG, GIF, WebP, BMP) and **PDFs** open in the note
   pane, on every platform: a picture fitted to the pane, zoomed with a
   pinch or the mouse wheel and dragged around; a PDF page after page,
   zoomed the same way. The row under them names the file and, on
   desktop, offers **Open in default app**.
-- **Anything else** (an audio clip, an e-book, an archive) does not go
+- **EPUB books** open in the note pane too, on every platform, and read
+  like a note: the note's text size, the theme's colours and the note
+  column. The book's own styles are not used — its headings, emphasis,
+  lists, quotes, tables and pictures are, in Niman's typography. The
+  **Outline** button on the row below lists the book's table of contents,
+  the chapter being read marked, and jumps to the entry picked; a link
+  inside the book jumps within it, a web link opens in the browser.
+- **Anything else** (an audio clip, an archive) does not go
   in the editor: the pane says the file is not a text note, and on
   desktop offers **Open in default app** right there.
 

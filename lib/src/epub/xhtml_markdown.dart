@@ -92,9 +92,6 @@ final class XhtmlMarkdown {
         _anchorsWithin(element, out);
         final table = _table(element);
         if (table != null) out.add(context.wrap(table));
-      case 'img' || 'image' || 'svg':
-        final picture = _pictureOf(element);
-        if (picture != null) out.add(context.wrap(picture));
       default:
         // A container — section, div, figure, article, aside…: its blocks.
         _blocks(element, out, context);
@@ -181,7 +178,7 @@ final class XhtmlMarkdown {
     if (img == null) return null;
     final src =
         img.attributes['src'] ??
-        img.attributes['xlink:href'] ??
+        _attribute(img, 'xlink:href') ??
         img.attributes['href'];
     if (src == null || src.isEmpty) return null;
     final name = picture(src);
@@ -189,6 +186,15 @@ final class XhtmlMarkdown {
     final alt = _escape(_collapse(img.attributes['alt'] ?? ''));
     return '![$alt]($name)';
   }
+
+  /// [element]'s attribute [name], looked up by how it prints: inside an
+  /// SVG the parser keys `xlink:href` by an `AttributeName`, not a string.
+  static String? _attribute(Element element, String name) => element
+      .attributes
+      .entries
+      .where((entry) => entry.key.toString() == name)
+      .firstOrNull
+      ?.value;
 
   /// The inline Markdown of [nodes].
   String _inlineOf(List<Node> nodes) {

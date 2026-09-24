@@ -16,6 +16,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:archive/archive.dart';
+import 'package:crypto/crypto.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html;
 import 'package:niman/src/epub/xhtml_markdown.dart';
@@ -69,12 +70,22 @@ final class EpubDocument {
   }
 }
 
-/// Reads the EPUB at [path] on an isolate, its pictures extracted under
-/// [pictureDir].
+/// Reads the EPUB at [path] on an isolate, its pictures extracted to a
+/// folder of [cacheDir] of that book's own ([pictureDirOf]).
 ///
-/// Top-level for `Isolate.run`: it carries the two paths.
-Future<EpubDocument> openEpub(String path, String pictureDir) =>
-    Isolate.run(() => readEpub(path, pictureDir));
+/// Top-level for `Isolate.run`: it carries the two paths. The file is
+/// stat'ed there too, not on the UI isolate.
+Future<EpubDocument> openEpub(String path, String cacheDir) =>
+    Isolate.run(() => readEpub(path, pictureDirOf(path, cacheDir)));
+
+/// The folder of [cacheDir] the pictures of the EPUB at [path] go to: named
+/// by the book's path, size and modification time, so a book opened again
+/// finds its pictures and a book changed on disk gets new ones.
+String pictureDirOf(String path, String cacheDir) {
+  final stat = File(path).statSync();
+  final key = '$path\n${stat.size}\n${stat.modified.microsecondsSinceEpoch}';
+  return p.join(cacheDir, sha1.convert(utf8.encode(key)).toString());
+}
 
 /// Reads the EPUB at [path], here; see [openEpub].
 ///

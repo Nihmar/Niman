@@ -959,11 +959,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
-    // A picture or a PDF, shown rather than read as a note.
+    // A picture, a PDF or a book, shown rather than read as a note.
     if (isShownAttachment(selectedPath)) {
       return AttachmentView(
         key: _phoneNoteKey,
         path: p.join(controller.root ?? '', selectedPath),
+        column: _editorSettings.noteColumn,
       );
     }
     return NoteView(
