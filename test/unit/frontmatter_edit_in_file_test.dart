@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/edit_in_file.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -38,7 +39,7 @@ void main() {
     for (final pin in [true, false]) {
       test('$name, ${pin ? 'pinned' : 'unpinned'}', () async {
         final file = File(p.join(dir.path, 'note.md'))..writeAsStringSync(text);
-        final changed = await editFrontmatterKeyInFile(
+        final head = await editFrontmatterKeyInFile(
           file.path,
           'pinned',
           pin ? 'true' : null,
@@ -47,7 +48,16 @@ void main() {
             ? setFrontmatterKey(text, 'pinned', 'true')
             : removeFrontmatterKey(text, 'pinned');
         expect(file.readAsStringSync(), whole);
-        expect(changed, whole != text);
+        expect(head != null, whole != text);
+        // The head says what the whole note's frontmatter says: it is what
+        // the index records the pin from.
+        if (head != null) {
+          final fromHead = parseFrontmatter(head);
+          final fromWhole = parseFrontmatter(whole);
+          expect(fromHead?.fields, fromWhole?.fields);
+          expect(fromHead?.pinned, fromWhole?.pinned);
+          expect(whole.startsWith(head), isTrue);
+        }
         // Nothing left beside it.
         expect(dir.listSync(), hasLength(1));
       });

@@ -9,6 +9,7 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/edit_in_file.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -404,9 +405,12 @@ final class NoteOps implements NoteOperations {
   /// file goes back to what it looked like before, instead of collecting
   /// a line that says nothing.
   ///
-  /// Re-indexed through [Indexer.rescanFiles], not `applyEvents`: the
-  /// rewrite can leave the size unchanged within the same second, which
-  /// the (size, mtime) shortcut would read as "nothing happened".
+  /// The index records the new frontmatter at once, from the head the edit
+  /// wrote ([Indexer.applyFrontmatter]); the note itself is read back later,
+  /// as a save's is ([NoteWriter.reindexWhenQuiet]). Read back before the
+  /// pin was answered, the 247 MB stress note kept the pin on screen for
+  /// the 15 to 34 s a phone takes to read it — or for good, when the app
+  /// was closed first (device log, 2026-09-24).
   @override
   Future<Note> setPinned(String path, {required bool pinned}) {
     return _synchronized(() async {
@@ -423,14 +427,15 @@ final class NoteOps implements NoteOperations {
       final file = File(_abs(path));
       // The head of the note, not the note: off the UI isolate, the rest
       // of the file copied behind the edited frontmatter as it is.
-      final changed = await editFrontmatterKeyOnIsolate(
+      final head = await editFrontmatterKeyOnIsolate(
         file.path,
         'pinned',
         pinned ? 'true' : null,
       );
-      if (!changed) return row;
+      if (head == null) return row;
       _hint(path, SyncOpKind.changed);
-      await indexer.rescanFiles(root, [file.path]);
+      await indexer.applyFrontmatter(path, parseFrontmatter(head));
+      writer.reindexWhenQuiet(path, bytes: row.size);
       return await _mustFind(path);
     });
   }

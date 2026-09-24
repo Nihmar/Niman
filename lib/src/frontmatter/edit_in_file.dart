@@ -20,10 +20,15 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 
 /// Sets the top-level frontmatter [key] of the note at [path] to [value],
-/// or removes it when [value] is null. Answers whether the note changed.
+/// or removes it when [value] is null.
+///
+/// Answers the note's new head — its frontmatter block as the file now
+/// opens, empty when the edit took the block out — or null when the note
+/// did not change. The head is all a caller needs to know what the
+/// frontmatter now says: the body was copied, not changed.
 ///
 /// Top-level for `Isolate.run`: the paths and the key are all it carries.
-Future<bool> editFrontmatterKeyInFile(
+Future<String?> editFrontmatterKeyInFile(
   String path,
   String key,
   String? value,
@@ -41,12 +46,12 @@ Future<bool> editFrontmatterKeyInFile(
     // No block: nothing to remove, and a new one goes on top, the body a
     // blank line below it with its leading blank space gone — as
     // `setFrontmatterKey` shapes a whole note.
-    if (value == null) return false;
+    if (value == null) return null;
     final eol = head.crlf ? '\r\n' : '\n';
     edited = '---$eol$key: $value$eol---$eol$eol';
     skip = head.leadingBlank;
   }
-  if (head.block && edited == text) return false;
+  if (head.block && edited == text) return null;
   final tmp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
   try {
     final sink = tmp.openWrite();
@@ -60,7 +65,7 @@ Future<bool> editFrontmatterKeyInFile(
     if (tmp.existsSync()) await tmp.delete();
     rethrow;
   }
-  return true;
+  return edited;
 }
 
 /// [editFrontmatterKeyInFile] on a background isolate, off the UI's.
@@ -68,7 +73,7 @@ Future<bool> editFrontmatterKeyInFile(
 /// Top-level so the `Isolate.run` closure captures only these three
 /// sendable values: inlined in a method it captures the method's context,
 /// which holds the caller's future chain, and cannot be sent.
-Future<bool> editFrontmatterKeyOnIsolate(
+Future<String?> editFrontmatterKeyOnIsolate(
   String path,
   String key,
   String? value,

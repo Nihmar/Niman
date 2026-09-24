@@ -360,6 +360,17 @@ written next to it.
    waiting reindex at once, since whoever asks wants the index as the disk has
    it.
 
+10. ~~**A pin reads the whole note, twice.**~~ Done (2026-09-24). Unpinning
+    the stress note ran a phone out of memory: the edit read the whole note to
+    change one line of it. It now reads the note's head, up to the end of its
+    frontmatter, and copies the rest behind the edited head as bytes
+    (`frontmatter/edit_in_file.dart`). The second read was the index's: the
+    pin waited for the note to be read back — 15 to 34 s on a phone — and the
+    tree kept the pin for that long, or for good when the app was closed
+    first (device log, 2026-09-24). The index now records the pin from the
+    head the edit wrote (`Indexer.applyFrontmatter`) and reads the note back
+    later, as a save does (`NoteWriter.reindexWhenQuiet`).
+
 ## The statistics, measured on the 247 MB note
 
 `dart run tool/stats_bench.dart "Quicknote.md"` (246 867 656 chars,
