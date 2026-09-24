@@ -130,6 +130,43 @@ final class Indexer {
     });
   }
 
+  /// The first index of a library, the tree alone: when the index is empty,
+  /// the walk's rows — paths, sizes, times, the names links resolve by —
+  /// written without reading a note. Answers whether it did, in which case
+  /// the content (the search body, tags, links, frontmatter, digests) is
+  /// owed, and a [fullScan] builds it: it finds every note without a
+  /// content row and reads it.
+  ///
+  /// What makes a first open wait for the tree and not for the notes: a
+  /// library holding the 247 MB stress note took some eleven seconds to
+  /// read on a desktop before it opened at all (`docs/dev/huge-notes.md`,
+  /// item 8), for rows the tree does not need. On an index that has rows a
+  /// scan writes digests it read, and a row written without one would lose
+  /// the digest the rename pairing keys on — so this is the empty index's
+  /// alone.
+  Future<bool> indexTreeFirst(String root) {
+    return _synchronized(() async {
+      if (await _dao.allRows().then((rows) => rows.isNotEmpty)) return false;
+      final entries = await _tree.walk(root, root);
+      if (entries.isEmpty) return false;
+      _log.info(
+        'first index $root: the tree first, ${entries.length} entr(ies); '
+        'the notes after it',
+      );
+      await _db.transaction(() async {
+        await _tree.applyDiff(
+          entries: entries,
+          old: const <String, Note>{},
+          shas: const <String, String>{},
+          contents: const <String, NoteContent>{},
+        );
+      });
+      final cb = onChanged;
+      if (cb != null) cb();
+      return true;
+    });
+  }
+
   /// Applies a batch of changed absolute paths incrementally.
   ///
   /// The batch is reconciled in one pass: probes batched on a background
