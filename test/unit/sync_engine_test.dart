@@ -455,11 +455,15 @@ void main() {
       b.write('.niman/settings.json', '{"historyVersions": 7}');
       report = await b.sync();
       expect(report.skipped, isEmpty, reason: report.summary());
-      expect(remoteText('.niman/settings.json'), '{"historyVersions": 7}');
+      // The settings merge key by key and are written back formatted: the
+      // JSON is what they agree on, not the bytes.
+      expect(jsonOf(remoteText('.niman/settings.json')), {
+        'historyVersions': 7,
+      });
 
       report = await a.sync();
       expect(report.skipped, isEmpty, reason: report.summary());
-      expect(a.read('.niman/settings.json'), '{"historyVersions": 7}');
+      expect(jsonOf(a.read('.niman/settings.json')), {'historyVersions': 7});
       expect((await a.sync()).summary(), 'nothing to do');
       expect((await b.sync()).summary(), 'nothing to do');
     },
