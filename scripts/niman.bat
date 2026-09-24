@@ -2,7 +2,7 @@
 rem Niman dev helper for Windows hosts: terse output, full logs under
 rem %TEMP%\niman. Mirrors scripts/niman.sh and adds the windows build,
 rem which cannot be cross-built from Linux.
-rem Commands: analyze, test, check, integration, apk [beta], windows.
+rem Commands: analyze, test, check, integration, apk [beta], windows [beta].
 setlocal enabledelayedexpansion
 
 where flutter >nul 2>&1
@@ -91,14 +91,21 @@ echo error: the linux build needs a Linux host 1>&2
 exit /b 1
 
 :windows
-call flutter build windows --release >"%log%" 2>&1
+rem beta: the testing build. APP_CHANNEL=testing gives it its own support
+rem folder (niman-testing: settings, indexes, log, single instance), so it
+rem never shares a database with the installed release.
+if "%flavor%"=="beta" (
+  call flutter build windows --release --dart-define=APP_CHANNEL=testing >"%log%" 2>&1
+) else (
+  call flutter build windows --release >"%log%" 2>&1
+)
 set "status=%errorlevel%"
 powershell -NoProfile -Command "Get-Content -Tail 3 '%log%'"
 if "%status%"=="0" echo artifact: build\windows\x64\runner\Release\niman.exe
 exit /b %status%
 
 :usage
-echo usage: scripts\niman.bat ^<analyze^|test^|check^|integration^|apk [beta]^|windows^>
+echo usage: scripts\niman.bat ^<analyze^|test^|check^|integration^|apk [beta]^|windows [beta]^>
 echo   analyze  flutter analyze --fatal-infos (issue lines + summary only)
 echo   test     flutter test (tail only)
 echo   check    analyze + test; use before committing
@@ -107,5 +114,6 @@ echo            sync_e2e needs a Linux host with a display
 echo   apk      flutter build apk --release
 echo            (beta: the testing build, app ID dev.niman.niman.beta)
 echo   windows  flutter build windows --release
+echo            (beta: the testing build, its own data folder niman-testing)
 echo Full logs: %%TEMP%%\niman\niman-^<cmd^>.log
 exit /b 1

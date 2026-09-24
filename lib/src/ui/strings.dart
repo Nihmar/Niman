@@ -143,15 +143,10 @@ final class AppStrings {
       _s.settingsSearchResults(count);
   static String get settingsToggleOn => _s.settingsToggleOn;
   static String get settingsToggleOff => _s.settingsToggleOff;
-  static String get settingsPreviewEnabledTitle =>
-      _s.settingsPreviewEnabledTitle;
-  static String get settingsPreviewEnabledSubtitle =>
-      _s.settingsPreviewEnabledSubtitle;
   static String get switchToWysiwygTooltip => _s.switchToWysiwygTooltip;
   static String get switchToSourceTooltip => _s.switchToSourceTooltip;
   static String get switchToSourceLabel => _s.switchToSourceLabel;
   static String get switchToWysiwygLabel => _s.switchToWysiwygLabel;
-  static String get wysiwygTooLarge => _s.wysiwygTooLarge;
 
   // Settings: the section headings the list is grouped under.
   static String get settingsSectionAppearance => _s.settingsSectionAppearance;
@@ -210,9 +205,6 @@ final class AppStrings {
   /// The indent width as a row's value, e.g. "4 spaces".
   static String indentWidthValue(int spaces) => _s.indentWidthValue(spaces);
 
-  /// The editor's share of a split, as a row's value, e.g. "50%".
-  static String splitRatioValue(double ratio) => '${(ratio * 100).round()}%';
-
   // Settings: theme (T-M6-05).
   static String get themeBrightnessTitle => _s.themeBrightnessTitle;
   static String get themeBrightnessSubtitle => _s.themeBrightnessSubtitle;
@@ -244,14 +236,6 @@ final class AppStrings {
 
   /// A text size as a row's value, e.g. "120%".
   static String textScaleValue(double scale) => '${(scale * 100).round()}%';
-
-  // Settings: preview mode.
-  static String get previewModeTitle => _s.previewModeTitle;
-  static String get previewModeSubtitle => _s.previewModeSubtitle;
-  static String get previewModeAuto => _s.previewModeAuto;
-  static String get previewModeSwitch => _s.previewModeSwitch;
-  static String get splitRatioTitle => _s.splitRatioTitle;
-  static String get splitRatioSubtitle => _s.splitRatioSubtitle;
 
   // Settings: editor formatting.
   static String get linkTypeTitle => _s.linkTypeTitle;
@@ -388,9 +372,69 @@ final class AppStrings {
   static String get toolbarLink => _s.toolbarLink;
   static String get toolbarCode => _s.toolbarCode;
   static String get toolbarImage => _s.toolbarImage;
+  static String get toolbarTable => _s.toolbarTable;
+  static String get tableRow => _s.tableRow;
+  static String get tableColumn => _s.tableColumn;
+  static String get tableAddRowAbove => _s.tableAddRowAbove;
+  static String get tableAddRowBelow => _s.tableAddRowBelow;
+  static String get tableMoveRowUp => _s.tableMoveRowUp;
+  static String get tableMoveRowDown => _s.tableMoveRowDown;
+  static String get tableDuplicateRow => _s.tableDuplicateRow;
+  static String get tableDeleteRow => _s.tableDeleteRow;
+  static String get tableAddColumnLeft => _s.tableAddColumnLeft;
+  static String get tableAddColumnRight => _s.tableAddColumnRight;
+  static String get tableMoveColumnLeft => _s.tableMoveColumnLeft;
+  static String get tableMoveColumnRight => _s.tableMoveColumnRight;
+  static String get tableAlignLeft => _s.tableAlignLeft;
+  static String get tableAlignCenter => _s.tableAlignCenter;
+  static String get tableAlignRight => _s.tableAlignRight;
+  static String get tableDuplicateColumn => _s.tableDuplicateColumn;
+  static String get tableDeleteColumn => _s.tableDeleteColumn;
+  static String get tableSortAscending => _s.tableSortAscending;
+  static String get tableSortDescending => _s.tableSortDescending;
+  static String get tableAddRow => _s.tableAddRow;
+  static String get tableAddColumn => _s.tableAddColumn;
+  static String get cheatsheetTitle => _s.cheatsheetTitle;
+  static String get cheatsheetCopy => _s.cheatsheetCopy;
+  static String get cheatsheetCopied => _s.cheatsheetCopied;
+  static String get cheatsheetInsert => _s.cheatsheetInsert;
+  static String get cheatsheetWritten => _s.cheatsheetWritten;
+  static String get cheatsheetShown => _s.cheatsheetShown;
+  static String get cheatHeadings => _s.cheatHeadings;
+  static String get cheatEmphasis => _s.cheatEmphasis;
+  static String get cheatHtmlFormats => _s.cheatHtmlFormats;
+  static String get cheatLists => _s.cheatLists;
+  static String get cheatChecklists => _s.cheatChecklists;
+  static String get cheatQuotes => _s.cheatQuotes;
+  static String get cheatLinks => _s.cheatLinks;
+  static String get cheatWikilinks => _s.cheatWikilinks;
+  static String get cheatEmbeds => _s.cheatEmbeds;
+  static String get cheatTags => _s.cheatTags;
+  static String get cheatInlineCode => _s.cheatInlineCode;
+  static String get cheatCodeBlocks => _s.cheatCodeBlocks;
+  static String get cheatMath => _s.cheatMath;
+  static String get cheatTables => _s.cheatTables;
+  static String get cheatFootnotes => _s.cheatFootnotes;
+  static String get cheatRule => _s.cheatRule;
+  static String get cheatFrontmatter => _s.cheatFrontmatter;
+  static String get cheatTemplates => _s.cheatTemplates;
+  static String get menuAddLink => _s.menuAddLink;
+  static String get menuAddExternalLink => _s.menuAddExternalLink;
+  static String get menuFormat => _s.menuFormat;
+  static String get menuParagraph => _s.menuParagraph;
+  static String get menuInsert => _s.menuInsert;
+  static String get menuBody => _s.menuBody;
+  static String get formatSubscript => _s.formatSubscript;
+  static String get formatInlineCode => _s.formatInlineCode;
+  static String get insertFootnote => _s.insertFootnote;
+  static String get insertRule => _s.insertRule;
+  static String get insertCodeBlock => _s.insertCodeBlock;
+  static String get insertMathBlock => _s.insertMathBlock;
+  static String get menuHeadingWord => _s.menuHeadingWord;
   static String get toolbarHeading => _s.toolbarHeading;
   static String get toolbarList => _s.toolbarList;
   static String get toolbarOrderedList => _s.toolbarOrderedList;
+  static String get toolbarChecklist => _s.toolbarChecklist;
   static String get toolbarQuote => _s.toolbarQuote;
   static String get toolbarIndent => _s.toolbarIndent;
   static String get toolbarOutdent => _s.toolbarOutdent;
@@ -426,9 +470,6 @@ final class AppStrings {
   // Preview switch (phone mode).
   static String get showPreviewTooltip => _s.showPreviewTooltip;
   static String get showEditorTooltip => _s.showEditorTooltip;
-  static String get enterFullScreenTooltip => _s.enterFullScreenTooltip;
-  static String get exitFullScreenTooltip => _s.exitFullScreenTooltip;
-
   // Raw-HTML table fallback.
   static String get htmlTableFallback => _s.htmlTableFallback;
 
@@ -452,8 +493,7 @@ final class AppStrings {
   static String get replaceCancel => _s.replaceCancel;
   static String get replaceUnavailable => _s.replaceUnavailable;
 
-  // Editor find & replace (the classic in-note bar, re_editor's find
-  // controller + NimanFindPanel).
+  // Editor find & replace (the in-note bar).
   static String get findInNoteTooltip => _s.findInNoteTooltip;
   static String get editorFindHint => _s.editorFindHint;
   static String get editorReplaceHint => _s.editorReplaceHint;

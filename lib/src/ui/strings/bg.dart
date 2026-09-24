@@ -129,11 +129,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Изкл.';
   @override
-  String get settingsPreviewEnabledTitle => 'Преглед';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Показва оформения бележка до редактора на източника';
-  @override
   String get switchToWysiwygTooltip => 'Превключване към WYSIWYG редактор';
   @override
   String get switchToSourceTooltip =>
@@ -144,10 +139,6 @@ final class BulgarianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Тази бележка е твърде голяма за WYSIWYG редактора. Отворете я като '
-      'изходен Markdown код.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Външен вид';
@@ -278,20 +269,6 @@ final class BulgarianStrings extends Strings {
       'Редакторът и прегледът винаги са синхронизирани';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Режим на преглед';
-  @override
-  String get previewModeSubtitle =>
-      'Прегледът споделя екрана с редактора или го замества';
-  @override
-  String get previewModeAuto => 'Редом';
-  @override
-  String get previewModeSwitch => 'Цял екран';
-  @override
-  String get splitRatioTitle => 'Съотношение на разделението';
-  @override
-  String get splitRatioSubtitle => 'Дял на редактора, когато прегледът е редом';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат на връзката';
@@ -473,11 +450,131 @@ final class BulgarianStrings extends Strings {
   @override
   String get toolbarImage => 'Вмъкване на изображение';
   @override
+  String get toolbarTable => 'Таблица';
+  @override
+  String get tableRow => 'Ред';
+  @override
+  String get tableColumn => 'Колона';
+  @override
+  String get tableAddRowAbove => 'Вмъкни ред отгоре';
+  @override
+  String get tableAddRowBelow => 'Вмъкни ред отдолу';
+  @override
+  String get tableMoveRowUp => 'Премести реда нагоре';
+  @override
+  String get tableMoveRowDown => 'Премести реда надолу';
+  @override
+  String get tableDuplicateRow => 'Дублирай реда';
+  @override
+  String get tableDeleteRow => 'Изтрий реда';
+  @override
+  String get tableAddColumnLeft => 'Вмъкни колона вляво';
+  @override
+  String get tableAddColumnRight => 'Вмъкни колона вдясно';
+  @override
+  String get tableMoveColumnLeft => 'Премести колоната наляво';
+  @override
+  String get tableMoveColumnRight => 'Премести колоната надясно';
+  @override
+  String get tableAlignLeft => 'Подравни вляво';
+  @override
+  String get tableAlignCenter => 'Центрирай';
+  @override
+  String get tableAlignRight => 'Подравни вдясно';
+  @override
+  String get tableDuplicateColumn => 'Дублирай колоната';
+  @override
+  String get tableDeleteColumn => 'Изтрий колоната';
+  @override
+  String get tableSortAscending => 'Сортирай по колона (А → Я)';
+  @override
+  String get tableSortDescending => 'Сортирай по колона (Я → А)';
+  @override
+  String get tableAddRow => 'Добави ред';
+  @override
+  String get tableAddColumn => 'Добави колона';
+  @override
+  String get cheatsheetTitle => 'Пищов за Markdown';
+  @override
+  String get cheatsheetCopy => 'Копирай';
+  @override
+  String get cheatsheetCopied => 'Копирано';
+  @override
+  String get cheatsheetInsert => 'Вмъкни в бележката';
+  @override
+  String get cheatsheetWritten => 'Написано';
+  @override
+  String get cheatsheetShown => 'Показано';
+  @override
+  String get cheatHeadings => 'Заглавия';
+  @override
+  String get cheatEmphasis => 'Удебелен, курсив, зачертан';
+  @override
+  String get cheatHtmlFormats => 'Подчертан, горен индекс, долен индекс';
+  @override
+  String get cheatLists => 'Списъци';
+  @override
+  String get cheatChecklists => 'Списъци със задачи';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Връзки';
+  @override
+  String get cheatWikilinks => 'Връзки към бележки';
+  @override
+  String get cheatEmbeds => 'Изображения и вграждания';
+  @override
+  String get cheatTags => 'Етикети';
+  @override
+  String get cheatInlineCode => 'Код в изречение';
+  @override
+  String get cheatCodeBlocks => 'Блокове код';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Таблици';
+  @override
+  String get cheatFootnotes => 'Бележки под линия';
+  @override
+  String get cheatRule => 'Хоризонтална линия';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Заместители в шаблоните';
+  @override
+  String get menuAddLink => 'Добави връзка';
+  @override
+  String get menuAddExternalLink => 'Добави външна връзка';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Абзац';
+  @override
+  String get menuInsert => 'Вмъкни';
+  @override
+  String get menuBody => 'Обикновен текст';
+  @override
+  String get formatSubscript => 'Долен индекс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Бележка под линия';
+  @override
+  String get insertRule => 'Хоризонтална линия';
+  @override
+  String get insertCodeBlock => 'Блок код';
+  @override
+  String get insertMathBlock => 'Математически блок';
+  @override
+  String get menuHeadingWord => 'Заглавие';
+  @override
   String get toolbarHeading => 'Заглавие';
   @override
   String get toolbarList => 'Списък';
   @override
   String get toolbarOrderedList => 'Номериран списък';
+  @override
+  String get toolbarChecklist => 'Списък със задачи';
   @override
   String get toolbarQuote => 'Цитат';
   @override
@@ -546,11 +643,6 @@ final class BulgarianStrings extends Strings {
   String get showPreviewTooltip => 'Покажи преглед';
   @override
   String get showEditorTooltip => 'Покажи редактор';
-  @override
-  String get enterFullScreenTooltip => 'Цял екран';
-  @override
-  String get exitFullScreenTooltip => 'Изход от цял екран';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(неоформена HTML таблица)';

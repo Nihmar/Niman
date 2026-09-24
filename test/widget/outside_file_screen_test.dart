@@ -11,9 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/editor_only.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/window_controller.dart';
-import 'package:re_editor/re_editor.dart';
 
 import '../fakes/fake_window_controller.dart';
 
@@ -56,6 +57,7 @@ void main() {
     WidgetTester tester,
     EditorOnlyDocument first, {
     bool customTitleBar = false,
+    bool unifiedMarkdown = false,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -84,8 +86,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  String editorText(WidgetTester tester) =>
-      tester.widget<CodeEditor>(find.byType(CodeEditor)).controller!.text;
+  MarkdownSourceViewState surface(WidgetTester tester) =>
+      tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
+
+  String editorText(WidgetTester tester) => surface(tester).widget.buffer.text;
 
   testWidgets('it opens with its name and where it is, frontmatter as text '
       'and no image button', (tester) async {
@@ -103,16 +107,28 @@ void main() {
       findsOne,
     );
     // A `type` in its frontmatter draws no list: it is not a note.
-    expect(find.byType(CodeEditor), findsOne);
+    expect(find.byType(MarkdownSourceView), findsOne);
     expect(editorText(tester), contains('type: list'));
     expect(find.byKey(const Key('insert-image')), findsNothing);
+  });
+
+  testWidgets('a file opened outside a library reads in the read view', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      _FakeDocument('/tmp/draft.md', '# A title\n\nA paragraph.'),
+    );
+    await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+    await tester.pumpAndSettle();
+    expect(find.byType(MarkdownReadView), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('an edit is written back to the file', (tester) async {
     final draft = _FakeDocument('/tmp/draft.md', 'one');
     await pump(tester, draft);
-    tester.widget<CodeEditor>(find.byType(CodeEditor)).controller!.text =
-        'one two';
+    surface(tester).replaceText(3, 3, ' two');
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
     expect(draft.writes.last, 'one two');
@@ -153,7 +169,7 @@ void main() {
     files.close('/tmp/b.md');
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('open')), findsOne);
-    expect(find.byType(CodeEditor), findsNothing);
+    expect(find.byType(MarkdownSourceView), findsNothing);
   });
 
   testWidgets('back closes them all', (tester) async {

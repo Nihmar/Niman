@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:path/path.dart' as p;
 
+final DateTime _epoch = DateTime.fromMillisecondsSinceEpoch(0);
+
 void main() {
   late Directory tempDir;
 
@@ -201,6 +203,37 @@ void main() {
       expect(p.basename(temp.path), startsWith('.'));
       expect(p.basename(temp.path), contains(p.basename(file.path)));
       expect(atomicTempPath(file, 456).path, isNot(temp.path));
+    });
+  });
+
+  group('DiskStamp', () {
+    test('matches the file it stamped, and not a changed one', () async {
+      final file = File(p.join(tempDir.path, 'stamp.md'))
+        ..writeAsStringSync('one two three');
+      final stamp = DiskStamp.of(file.path);
+      expect(stamp, isNotNull);
+      expect(stamp!.matches(file.path), isTrue);
+
+      // A different size.
+      file.writeAsStringSync('one two three four');
+      expect(stamp.matches(file.path), isFalse);
+
+      // A different time, the same size: what a one-letter swap looks like.
+      // The filesystem's stamp has to move, so write, take the stamp, wait,
+      // and write again with the same length.
+      final kept = DiskStamp.of(file.path)!;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      file.writeAsStringSync('one two three five');
+      expect(kept.matches(file.path), isFalse);
+    });
+
+    test('a file that is not there does not match', () {
+      final stamp = DiskStamp.of(p.join(tempDir.path, 'gone.md'));
+      expect(stamp, isNull);
+      expect(
+        DiskStamp(size: 0, modified: _epoch).matches(tempDir.path),
+        isFalse,
+      );
     });
   });
 

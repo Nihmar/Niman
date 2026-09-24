@@ -1,0 +1,50 @@
+# Examples the `markdown` package does not match, with the reason each one is
+# accepted rather than chased.
+#
+# Format: `<suite>/<example> <bucket>: <reason>`, where the bucket is one of
+# the three the design document names (D2 / Phase 1):
+#
+#   fix   the app's own behaviour needs this example to pass
+#   pin   the divergence is deliberate, inherited, or does not reach a user
+#   mask  the extension zone Niman handles itself, which the package never sees
+#
+# `flutter test` fails if an example outside this file fails, and fails again
+# if an example inside it starts passing, so the list cannot rot.
+#
+# THE GATE MEASURES THE PACKAGE, NOT THE APP. It compares the package's HTML
+# for a whole document, which is the right question for "is the parser
+# conformant" and the wrong one for "what will the app show". The engine's own
+# gate is `test/unit/engine_parity_test.dart`, which proves the property that
+# makes the package's conformance inherited: on every block the engine does not
+# mask, its parse is byte-identical to the package's — 3 583 blocks across both
+# suites, no exceptions. Each entry below says which of the two it is about.
+#
+# Measured 2026-09-21 with `dart run tool/markdown_spec.dart`.
+
+# --- inherited from the package, and proved to leave the app correct ---------
+
+commonmark/0.31.2/6 pin: inherited — a tab in a nested container loses its indentation; the engine reproduces the package block for block, and the app's own worst note contains zero tabs (measured: 0 in Geometria 1.md)
+gfm/0.29-gfm/6 pin: inherited — the same tab case as commonmark/0.31.2/6
+commonmark/0.31.2/207 pin: the package's HTML for a lone link reference definition is whitespace where the spec asks for nothing; the engine's runs for that block are empty, so the app shows nothing (engine_parity_test.dart)
+gfm/0.29-gfm/176 pin: the same lone-definition case as commonmark/0.31.2/207
+gfm/0.29-gfm/188 pin: the same, with the definition indented inside a block
+gfm/0.29-gfm/633 pin: fixed in the engine's run model — the scheme is joined back to its link (engine_parity_test.dart); the HTML comparison still sees the package's split, which the app does not
+gfm/0.29-gfm/634 pin: the package links the address with the wrong scheme and stops before the path; joining it needs the whole scheme-prefixed run, which the masking layer will take when the renderer has a span for it
+gfm/0.29-gfm/635 pin: the same xmpp: path case as gfm/0.29-gfm/634
+
+# --- divergences the spec and the package take deliberately ------------------
+
+commonmark/0.31.2/143 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+commonmark/0.31.2/146 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+commonmark/0.31.2/354 pin: the CommonMark 0.31.2 currency-emphasis rule, which GFM's own example set omits
+commonmark/0.31.2/625 pin: the CommonMark 0.31.2 WHATWG HTML-comment rule; GFM keeps the older one and Niman is GFM-first
+commonmark/0.31.2/626 pin: the CommonMark 0.31.2 WHATWG HTML-comment rule; GFM keeps the older one and Niman is GFM-first
+gfm/0.29-gfm/113 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+gfm/0.29-gfm/116 pin: fenced-code metadata becomes a data-metadata attribute; Niman reads the AST, not this HTML
+gfm/0.29-gfm/279 pin: task-list items gain class attributes the spec does not ask for; Niman draws its own checkbox
+gfm/0.29-gfm/280 pin: task-list items gain class attributes the spec does not ask for; Niman draws its own checkbox
+gfm/0.29-gfm/493 pin: the GFM strikethrough prose contradicts its own example; one behaviour is pinned, deliberately
+gfm/0.29-gfm/617 pin: the published GFM HTML inherits CommonMark's bare-URL example; GFM itself autolinks, as does the app
+gfm/0.29-gfm/620 pin: the published GFM HTML inherits CommonMark's bare-URL example; GFM itself autolinks, as does the app
+gfm/0.29-gfm/621 pin: the published GFM HTML inherits CommonMark's bare-URL example; GFM itself autolinks, as does the app
+gfm/0.29-gfm/657 pin: tagfilter sanitizes raw HTML for GitHub's pages; a notes app renders its own notes as written

@@ -115,10 +115,6 @@ final class ChineseStrings extends Strings {
   @override
   String get settingsToggleOff => '关';
   @override
-  String get settingsPreviewEnabledTitle => '预览';
-  @override
-  String get settingsPreviewEnabledSubtitle => '在源码编辑器旁边显示渲染后的笔记';
-  @override
   String get switchToWysiwygTooltip => '切换到所见即所得编辑器';
   @override
   String get switchToSourceTooltip => '切换到 Markdown 源码';
@@ -127,8 +123,6 @@ final class ChineseStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge => '此笔记对所见即所得编辑器来说太大了。请在 Markdown 源码中打开。';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => '外观';
@@ -249,19 +243,6 @@ final class ChineseStrings extends Strings {
   String get noteTextScaleSubtitle => '编辑器与预览，两者始终一致';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => '预览模式';
-  @override
-  String get previewModeSubtitle => '预览是与编辑器分屏还是替换编辑器';
-  @override
-  String get previewModeAuto => '分屏';
-  @override
-  String get previewModeSwitch => '全屏';
-  @override
-  String get splitRatioTitle => '分屏宽度';
-  @override
-  String get splitRatioSubtitle => '预览与编辑器并排时编辑器所占的比例';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => '链接格式';
@@ -438,11 +419,131 @@ final class ChineseStrings extends Strings {
   @override
   String get toolbarImage => '插入图片';
   @override
+  String get toolbarTable => '表格';
+  @override
+  String get tableRow => '行';
+  @override
+  String get tableColumn => '列';
+  @override
+  String get tableAddRowAbove => '在上方插入行';
+  @override
+  String get tableAddRowBelow => '在下方插入行';
+  @override
+  String get tableMoveRowUp => '上移行';
+  @override
+  String get tableMoveRowDown => '下移行';
+  @override
+  String get tableDuplicateRow => '复制行';
+  @override
+  String get tableDeleteRow => '删除行';
+  @override
+  String get tableAddColumnLeft => '在左侧插入列';
+  @override
+  String get tableAddColumnRight => '在右侧插入列';
+  @override
+  String get tableMoveColumnLeft => '左移列';
+  @override
+  String get tableMoveColumnRight => '右移列';
+  @override
+  String get tableAlignLeft => '左对齐';
+  @override
+  String get tableAlignCenter => '居中';
+  @override
+  String get tableAlignRight => '右对齐';
+  @override
+  String get tableDuplicateColumn => '复制列';
+  @override
+  String get tableDeleteColumn => '删除列';
+  @override
+  String get tableSortAscending => '按列排序 (A → Z)';
+  @override
+  String get tableSortDescending => '按列排序 (Z → A)';
+  @override
+  String get tableAddRow => '添加行';
+  @override
+  String get tableAddColumn => '添加列';
+  @override
+  String get cheatsheetTitle => 'Markdown 速查表';
+  @override
+  String get cheatsheetCopy => '复制';
+  @override
+  String get cheatsheetCopied => '已复制';
+  @override
+  String get cheatsheetInsert => '插入到笔记';
+  @override
+  String get cheatsheetWritten => '写法';
+  @override
+  String get cheatsheetShown => '效果';
+  @override
+  String get cheatHeadings => '标题';
+  @override
+  String get cheatEmphasis => '粗体、斜体、删除线';
+  @override
+  String get cheatHtmlFormats => '下划线、上标、下标';
+  @override
+  String get cheatLists => '列表';
+  @override
+  String get cheatChecklists => '复选框列表';
+  @override
+  String get cheatQuotes => '引用';
+  @override
+  String get cheatLinks => '链接';
+  @override
+  String get cheatWikilinks => '指向笔记的链接';
+  @override
+  String get cheatEmbeds => '图片与嵌入';
+  @override
+  String get cheatTags => '标签';
+  @override
+  String get cheatInlineCode => '句中代码';
+  @override
+  String get cheatCodeBlocks => '代码块';
+  @override
+  String get cheatMath => '数学公式';
+  @override
+  String get cheatTables => '表格';
+  @override
+  String get cheatFootnotes => '脚注';
+  @override
+  String get cheatRule => '水平线';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => '模板占位符';
+  @override
+  String get menuAddLink => '添加链接';
+  @override
+  String get menuAddExternalLink => '添加外部链接';
+  @override
+  String get menuFormat => '格式';
+  @override
+  String get menuParagraph => '段落';
+  @override
+  String get menuInsert => '插入';
+  @override
+  String get menuBody => '正文';
+  @override
+  String get formatSubscript => '下标';
+  @override
+  String get formatInlineCode => '代码';
+  @override
+  String get insertFootnote => '脚注';
+  @override
+  String get insertRule => '水平线';
+  @override
+  String get insertCodeBlock => '代码块';
+  @override
+  String get insertMathBlock => '数学块';
+  @override
+  String get menuHeadingWord => '标题';
+  @override
   String get toolbarHeading => '标题';
   @override
   String get toolbarList => '列表';
   @override
   String get toolbarOrderedList => '编号列表';
+  @override
+  String get toolbarChecklist => '复选框列表';
   @override
   String get toolbarQuote => '引用';
   @override
@@ -508,11 +609,6 @@ final class ChineseStrings extends Strings {
   String get showPreviewTooltip => '显示预览';
   @override
   String get showEditorTooltip => '显示编辑器';
-  @override
-  String get enterFullScreenTooltip => '全屏';
-  @override
-  String get exitFullScreenTooltip => '退出全屏';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '（原始 HTML 表格）';

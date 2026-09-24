@@ -1014,6 +1014,24 @@ final class SyncEngine {
         }
       }
     }
+    // The library's own files live in a dot folder, and some servers — or
+    // the proxy in front of them — leave dot entries out of a folder listing
+    // while still serving them by path. The listing then says the file is not
+    // there, the check before the upload finds it, and the upload is skipped
+    // as "changed during the sync" on every run. So a walk from the root that
+    // did not see their folder asks for them by name: at most two `Depth: 0`
+    // requests, and only when the listing hid them.
+    if (from.isEmpty) {
+      for (final path in libraryFiles) {
+        if (files.containsKey(path) || folders.contains(_parentOf(path))) {
+          continue;
+        }
+        final item = await client.stat(path);
+        if (item == null || item.isCollection) continue;
+        files[path] = item;
+        _addFolderChain(folders, _parentOf(path));
+      }
+    }
     return (files: files, folders: folders);
   }
 

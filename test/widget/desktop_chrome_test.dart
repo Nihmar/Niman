@@ -104,19 +104,6 @@ void main() {
       matching: find.byKey(const Key('note-menu')),
     );
     expect(menu, findsOne);
-    // The view controls stay in the status row (T-PP-22).
-    final statusRow = find.byKey(const Key('status-row'));
-    expect(
-      find.descendant(
-        of: statusRow,
-        matching: find.byKey(const Key('layout-mode')),
-      ),
-      findsOne,
-    );
-    expect(
-      find.descendant(of: bar, matching: find.byKey(const Key('layout-mode'))),
-      findsNothing,
-    );
   });
 
   testWidgets('wide: the todo panel holds switch, add and help; no FAB', (

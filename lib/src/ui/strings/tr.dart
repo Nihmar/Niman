@@ -123,11 +123,6 @@ final class TurkishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Kapalı';
   @override
-  String get settingsPreviewEnabledTitle => 'Önizleme';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Biçimlendirilmiş notu kaynak düzenleyicinin yanında gösterir';
-  @override
   String get switchToWysiwygTooltip => 'WYSIWYG düzenleyicisine geç';
   @override
   String get switchToSourceTooltip => 'Markdown kaynağına geç';
@@ -136,10 +131,6 @@ final class TurkishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Bu not WYSIWYG düzenleyicisi için çok büyük. Markdown kaynağında '
-      'açın.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Görünüm';
@@ -266,21 +257,6 @@ final class TurkishStrings extends Strings {
       'Düzenleyici ve önizleme, her zaman senkronize';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Önizleme modu';
-  @override
-  String get previewModeSubtitle =>
-      'Önizleme, ekranı düzenleyiciyle paylaşır mı yoksa onun yerini '
-      'alır mı';
-  @override
-  String get previewModeAuto => 'Yan yana';
-  @override
-  String get previewModeSwitch => 'Tam ekran';
-  @override
-  String get splitRatioTitle => 'Bölme oranı';
-  @override
-  String get splitRatioSubtitle => 'Önizleme yanındayken düzenleyicinin payı';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Bağlantı biçimi';
@@ -467,11 +443,131 @@ final class TurkishStrings extends Strings {
   @override
   String get toolbarImage => 'Görsel ekle';
   @override
+  String get toolbarTable => 'Tablo';
+  @override
+  String get tableRow => 'Satır';
+  @override
+  String get tableColumn => 'Sütun';
+  @override
+  String get tableAddRowAbove => 'Üstüne satır ekle';
+  @override
+  String get tableAddRowBelow => 'Altına satır ekle';
+  @override
+  String get tableMoveRowUp => 'Satırı yukarı taşı';
+  @override
+  String get tableMoveRowDown => 'Satırı aşağı taşı';
+  @override
+  String get tableDuplicateRow => 'Satırı çoğalt';
+  @override
+  String get tableDeleteRow => 'Satırı sil';
+  @override
+  String get tableAddColumnLeft => 'Soluna sütun ekle';
+  @override
+  String get tableAddColumnRight => 'Sağına sütun ekle';
+  @override
+  String get tableMoveColumnLeft => 'Sütunu sola taşı';
+  @override
+  String get tableMoveColumnRight => 'Sütunu sağa taşı';
+  @override
+  String get tableAlignLeft => 'Sola hizala';
+  @override
+  String get tableAlignCenter => 'Ortala';
+  @override
+  String get tableAlignRight => 'Sağa hizala';
+  @override
+  String get tableDuplicateColumn => 'Sütunu çoğalt';
+  @override
+  String get tableDeleteColumn => 'Sütunu sil';
+  @override
+  String get tableSortAscending => 'Sütuna göre sırala (A → Z)';
+  @override
+  String get tableSortDescending => 'Sütuna göre sırala (Z → A)';
+  @override
+  String get tableAddRow => 'Satır ekle';
+  @override
+  String get tableAddColumn => 'Sütun ekle';
+  @override
+  String get cheatsheetTitle => 'Markdown kopya kâğıdı';
+  @override
+  String get cheatsheetCopy => 'Kopyala';
+  @override
+  String get cheatsheetCopied => 'Kopyalandı';
+  @override
+  String get cheatsheetInsert => 'Nota ekle';
+  @override
+  String get cheatsheetWritten => 'Yazılan';
+  @override
+  String get cheatsheetShown => 'Gösterilen';
+  @override
+  String get cheatHeadings => 'Başlıklar';
+  @override
+  String get cheatEmphasis => 'Kalın, italik, üstü çizili';
+  @override
+  String get cheatHtmlFormats => 'Altı çizili, üst simge, alt simge';
+  @override
+  String get cheatLists => 'Listeler';
+  @override
+  String get cheatChecklists => 'Onay listeleri';
+  @override
+  String get cheatQuotes => 'Alıntılar';
+  @override
+  String get cheatLinks => 'Bağlantılar';
+  @override
+  String get cheatWikilinks => 'Notlara bağlantılar';
+  @override
+  String get cheatEmbeds => 'Görseller ve gömmeler';
+  @override
+  String get cheatTags => 'Etiketler';
+  @override
+  String get cheatInlineCode => 'Cümle içinde kod';
+  @override
+  String get cheatCodeBlocks => 'Kod blokları';
+  @override
+  String get cheatMath => 'Matematik';
+  @override
+  String get cheatTables => 'Tablolar';
+  @override
+  String get cheatFootnotes => 'Dipnotlar';
+  @override
+  String get cheatRule => 'Yatay çizgi';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Şablon yer tutucuları';
+  @override
+  String get menuAddLink => 'Bağlantı ekle';
+  @override
+  String get menuAddExternalLink => 'Dış bağlantı ekle';
+  @override
+  String get menuFormat => 'Biçim';
+  @override
+  String get menuParagraph => 'Paragraf';
+  @override
+  String get menuInsert => 'Ekle';
+  @override
+  String get menuBody => 'Düz metin';
+  @override
+  String get formatSubscript => 'Alt simge';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Dipnot';
+  @override
+  String get insertRule => 'Yatay çizgi';
+  @override
+  String get insertCodeBlock => 'Kod bloğu';
+  @override
+  String get insertMathBlock => 'Matematik bloğu';
+  @override
+  String get menuHeadingWord => 'Başlık';
+  @override
   String get toolbarHeading => 'Başlık';
   @override
   String get toolbarList => 'Liste';
   @override
   String get toolbarOrderedList => 'Numaralı liste';
+  @override
+  String get toolbarChecklist => 'Onay listesi';
   @override
   String get toolbarQuote => 'Alıntı';
   @override
@@ -540,11 +636,6 @@ final class TurkishStrings extends Strings {
   String get showPreviewTooltip => 'Önizlemeyi göster';
   @override
   String get showEditorTooltip => 'Düzenleyiciyi göster';
-  @override
-  String get enterFullScreenTooltip => 'Tam ekran';
-  @override
-  String get exitFullScreenTooltip => 'Tam ekrandan çık';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(çözümlenmemiş HTML tablo)';

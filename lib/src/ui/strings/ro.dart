@@ -130,11 +130,6 @@ final class RomanianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Dezactivat';
   @override
-  String get settingsPreviewEnabledTitle => 'Previzualizare';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Afișează nota renderizată lângă editorul de sursă';
-  @override
   String get switchToWysiwygTooltip => 'Comută la editorul WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Comută la sursa Markdown';
@@ -143,10 +138,6 @@ final class RomanianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Această notă este prea mare pentru editorul WYSIWYG. Deschide-o în '
-      'sursa Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Aspect';
@@ -277,21 +268,6 @@ final class RomanianStrings extends Strings {
       'Editorul și previzualizarea, mereu de acord';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Modul de previzualizare';
-  @override
-  String get previewModeSubtitle =>
-      'Dacă previzualizarea împarte ecranul cu editorul sau îl înlocuiește';
-  @override
-  String get previewModeAuto => 'Pe lângă';
-  @override
-  String get previewModeSwitch => 'Ecran întreg';
-  @override
-  String get splitRatioTitle => 'Lățimea diviziunii';
-  @override
-  String get splitRatioSubtitle =>
-      'Cota editorului când previzualizarea este pe lângă';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formatul linkului';
@@ -480,11 +456,131 @@ final class RomanianStrings extends Strings {
   @override
   String get toolbarImage => 'Inserează imagine';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
+  String get tableRow => 'Rând';
+  @override
+  String get tableColumn => 'Coloană';
+  @override
+  String get tableAddRowAbove => 'Inserează rând deasupra';
+  @override
+  String get tableAddRowBelow => 'Inserează rând dedesubt';
+  @override
+  String get tableMoveRowUp => 'Mută rândul în sus';
+  @override
+  String get tableMoveRowDown => 'Mută rândul în jos';
+  @override
+  String get tableDuplicateRow => 'Duplică rândul';
+  @override
+  String get tableDeleteRow => 'Șterge rândul';
+  @override
+  String get tableAddColumnLeft => 'Inserează coloană la stânga';
+  @override
+  String get tableAddColumnRight => 'Inserează coloană la dreapta';
+  @override
+  String get tableMoveColumnLeft => 'Mută coloana la stânga';
+  @override
+  String get tableMoveColumnRight => 'Mută coloana la dreapta';
+  @override
+  String get tableAlignLeft => 'Aliniază la stânga';
+  @override
+  String get tableAlignCenter => 'Centrează';
+  @override
+  String get tableAlignRight => 'Aliniază la dreapta';
+  @override
+  String get tableDuplicateColumn => 'Duplică coloana';
+  @override
+  String get tableDeleteColumn => 'Șterge coloana';
+  @override
+  String get tableSortAscending => 'Sortează după coloană (A → Z)';
+  @override
+  String get tableSortDescending => 'Sortează după coloană (Z → A)';
+  @override
+  String get tableAddRow => 'Adaugă rând';
+  @override
+  String get tableAddColumn => 'Adaugă coloană';
+  @override
+  String get cheatsheetTitle => 'Fițuică Markdown';
+  @override
+  String get cheatsheetCopy => 'Copiază';
+  @override
+  String get cheatsheetCopied => 'Copiat';
+  @override
+  String get cheatsheetInsert => 'Inserează în notă';
+  @override
+  String get cheatsheetWritten => 'Scris';
+  @override
+  String get cheatsheetShown => 'Afișat';
+  @override
+  String get cheatHeadings => 'Titluri';
+  @override
+  String get cheatEmphasis => 'Aldin, cursiv, tăiat';
+  @override
+  String get cheatHtmlFormats => 'Subliniat, exponent, indice';
+  @override
+  String get cheatLists => 'Liste';
+  @override
+  String get cheatChecklists => 'Liste de verificare';
+  @override
+  String get cheatQuotes => 'Citate';
+  @override
+  String get cheatLinks => 'Linkuri';
+  @override
+  String get cheatWikilinks => 'Linkuri către note';
+  @override
+  String get cheatEmbeds => 'Imagini și încorporări';
+  @override
+  String get cheatTags => 'Etichete';
+  @override
+  String get cheatInlineCode => 'Cod într-o propoziție';
+  @override
+  String get cheatCodeBlocks => 'Blocuri de cod';
+  @override
+  String get cheatMath => 'Matematică';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Note de subsol';
+  @override
+  String get cheatRule => 'Linie orizontală';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Substituenți de șabloane';
+  @override
+  String get menuAddLink => 'Adaugă link';
+  @override
+  String get menuAddExternalLink => 'Adaugă link extern';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraf';
+  @override
+  String get menuInsert => 'Inserează';
+  @override
+  String get menuBody => 'Text normal';
+  @override
+  String get formatSubscript => 'Indice';
+  @override
+  String get formatInlineCode => 'Cod';
+  @override
+  String get insertFootnote => 'Notă de subsol';
+  @override
+  String get insertRule => 'Linie orizontală';
+  @override
+  String get insertCodeBlock => 'Bloc de cod';
+  @override
+  String get insertMathBlock => 'Bloc matematic';
+  @override
+  String get menuHeadingWord => 'Titlu';
+  @override
   String get toolbarHeading => 'Titlu';
   @override
   String get toolbarList => 'Listă';
   @override
   String get toolbarOrderedList => 'Listă numerotată';
+  @override
+  String get toolbarChecklist => 'Listă de verificare';
   @override
   String get toolbarQuote => 'Citat';
   @override
@@ -553,11 +649,6 @@ final class RomanianStrings extends Strings {
   String get showPreviewTooltip => 'Afișează previzualizarea';
   @override
   String get showEditorTooltip => 'Afișează editorul';
-  @override
-  String get enterFullScreenTooltip => 'Ecran întreg';
-  @override
-  String get exitFullScreenTooltip => 'Ieși din ecranul întreg';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(tabel HTML brut)';

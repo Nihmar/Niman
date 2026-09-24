@@ -129,11 +129,6 @@ final class PolishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Wyłączone';
   @override
-  String get settingsPreviewEnabledTitle => 'Podgląd';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Pokaż wyrenderowaną notatkę obok edytora źródła';
-  @override
   String get switchToWysiwygTooltip => 'Przełącz na edytor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Przełącz na źródło Markdown';
@@ -142,10 +137,6 @@ final class PolishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ta notatka jest zbyt duża dla edytora WYSIWYG. Otwórz ją w '
-      'źródle Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Wygląd';
@@ -276,20 +267,6 @@ final class PolishStrings extends Strings {
       'Edytor i podgląd, zawsze zsynchronizowane';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Tryb podglądu';
-  @override
-  String get previewModeSubtitle =>
-      'Czy podgląd dzieli ekran z edytorem, czy go zastępuje';
-  @override
-  String get previewModeAuto => 'Obok siebie';
-  @override
-  String get previewModeSwitch => 'Pełny ekran';
-  @override
-  String get splitRatioTitle => 'Szerokość podziału';
-  @override
-  String get splitRatioSubtitle => 'Część edytora, gdy podgląd jest obok';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Format linku';
@@ -479,11 +456,131 @@ final class PolishStrings extends Strings {
   @override
   String get toolbarImage => 'Wstaw obraz';
   @override
+  String get toolbarTable => 'Tabela';
+  @override
+  String get tableRow => 'Wiersz';
+  @override
+  String get tableColumn => 'Kolumna';
+  @override
+  String get tableAddRowAbove => 'Wstaw wiersz powyżej';
+  @override
+  String get tableAddRowBelow => 'Wstaw wiersz poniżej';
+  @override
+  String get tableMoveRowUp => 'Przesuń wiersz w górę';
+  @override
+  String get tableMoveRowDown => 'Przesuń wiersz w dół';
+  @override
+  String get tableDuplicateRow => 'Duplikuj wiersz';
+  @override
+  String get tableDeleteRow => 'Usuń wiersz';
+  @override
+  String get tableAddColumnLeft => 'Wstaw kolumnę po lewej';
+  @override
+  String get tableAddColumnRight => 'Wstaw kolumnę po prawej';
+  @override
+  String get tableMoveColumnLeft => 'Przesuń kolumnę w lewo';
+  @override
+  String get tableMoveColumnRight => 'Przesuń kolumnę w prawo';
+  @override
+  String get tableAlignLeft => 'Wyrównaj do lewej';
+  @override
+  String get tableAlignCenter => 'Wyśrodkuj';
+  @override
+  String get tableAlignRight => 'Wyrównaj do prawej';
+  @override
+  String get tableDuplicateColumn => 'Duplikuj kolumnę';
+  @override
+  String get tableDeleteColumn => 'Usuń kolumnę';
+  @override
+  String get tableSortAscending => 'Sortuj według kolumny (A → Z)';
+  @override
+  String get tableSortDescending => 'Sortuj według kolumny (Z → A)';
+  @override
+  String get tableAddRow => 'Dodaj wiersz';
+  @override
+  String get tableAddColumn => 'Dodaj kolumnę';
+  @override
+  String get cheatsheetTitle => 'Ściągawka Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiuj';
+  @override
+  String get cheatsheetCopied => 'Skopiowano';
+  @override
+  String get cheatsheetInsert => 'Wstaw do notatki';
+  @override
+  String get cheatsheetWritten => 'Zapis';
+  @override
+  String get cheatsheetShown => 'Wygląd';
+  @override
+  String get cheatHeadings => 'Nagłówki';
+  @override
+  String get cheatEmphasis => 'Pogrubienie, kursywa, przekreślenie';
+  @override
+  String get cheatHtmlFormats => 'Podkreślenie, indeks górny, indeks dolny';
+  @override
+  String get cheatLists => 'Listy';
+  @override
+  String get cheatChecklists => 'Listy kontrolne';
+  @override
+  String get cheatQuotes => 'Cytaty';
+  @override
+  String get cheatLinks => 'Linki';
+  @override
+  String get cheatWikilinks => 'Linki do notatek';
+  @override
+  String get cheatEmbeds => 'Obrazy i osadzenia';
+  @override
+  String get cheatTags => 'Tagi';
+  @override
+  String get cheatInlineCode => 'Kod w zdaniu';
+  @override
+  String get cheatCodeBlocks => 'Bloki kodu';
+  @override
+  String get cheatMath => 'Matematyka';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Przypisy';
+  @override
+  String get cheatRule => 'Linia pozioma';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Symbole zastępcze szablonów';
+  @override
+  String get menuAddLink => 'Dodaj link';
+  @override
+  String get menuAddExternalLink => 'Dodaj link zewnętrzny';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Akapit';
+  @override
+  String get menuInsert => 'Wstaw';
+  @override
+  String get menuBody => 'Zwykły tekst';
+  @override
+  String get formatSubscript => 'Indeks dolny';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Przypis';
+  @override
+  String get insertRule => 'Linia pozioma';
+  @override
+  String get insertCodeBlock => 'Blok kodu';
+  @override
+  String get insertMathBlock => 'Blok matematyczny';
+  @override
+  String get menuHeadingWord => 'Nagłówek';
+  @override
   String get toolbarHeading => 'Nagłówek';
   @override
   String get toolbarList => 'Lista';
   @override
   String get toolbarOrderedList => 'Lista numerowana';
+  @override
+  String get toolbarChecklist => 'Lista kontrolna';
   @override
   String get toolbarQuote => 'Cytat';
   @override
@@ -552,11 +649,6 @@ final class PolishStrings extends Strings {
   String get showPreviewTooltip => 'Pokaż podgląd';
   @override
   String get showEditorTooltip => 'Pokaż edytor';
-  @override
-  String get enterFullScreenTooltip => 'Pełny ekran';
-  @override
-  String get exitFullScreenTooltip => 'Opuść pełny ekran';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(surowa tabela HTML)';

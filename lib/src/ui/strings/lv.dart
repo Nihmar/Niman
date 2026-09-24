@@ -126,11 +126,6 @@ final class LatvianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Izslēgts';
   @override
-  String get settingsPreviewEnabledTitle => 'Priekšskatījums';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Rāda izveidoto piezīmi blakus avota redaktoram';
-  @override
   String get switchToWysiwygTooltip => 'Pārslēgt uz WYSIWYG redaktoru';
   @override
   String get switchToSourceTooltip => 'Pārslēgt uz Markdown avotu';
@@ -139,10 +134,6 @@ final class LatvianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Šī piezīme ir pārāk liela WYSIWYG redaktoram. Atveriet to kā Markdown '
-      'avotu.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Izskats';
@@ -270,21 +261,6 @@ final class LatvianStrings extends Strings {
       'Redaktors un priekšskatījums vienmēr ir saskaņā';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Priekšskatījuma režīms';
-  @override
-  String get previewModeSubtitle =>
-      'Vai priekšskatījums dala ekrānu ar redaktoru vai to aizvieto';
-  @override
-  String get previewModeAuto => 'Blakus';
-  @override
-  String get previewModeSwitch => 'Pilnekrāns';
-  @override
-  String get splitRatioTitle => 'Dalījuma attiecība';
-  @override
-  String get splitRatioSubtitle =>
-      'Redaktora daļa, kad priekšskatījums ir blakus';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Saites formāts';
@@ -472,11 +448,131 @@ final class LatvianStrings extends Strings {
   @override
   String get toolbarImage => 'Ievietot attēlu';
   @override
+  String get toolbarTable => 'Tabula';
+  @override
+  String get tableRow => 'Rinda';
+  @override
+  String get tableColumn => 'Kolonna';
+  @override
+  String get tableAddRowAbove => 'Ievietot rindu virs';
+  @override
+  String get tableAddRowBelow => 'Ievietot rindu zem';
+  @override
+  String get tableMoveRowUp => 'Pārvietot rindu augšup';
+  @override
+  String get tableMoveRowDown => 'Pārvietot rindu lejup';
+  @override
+  String get tableDuplicateRow => 'Dublēt rindu';
+  @override
+  String get tableDeleteRow => 'Dzēst rindu';
+  @override
+  String get tableAddColumnLeft => 'Ievietot kolonnu pa kreisi';
+  @override
+  String get tableAddColumnRight => 'Ievietot kolonnu pa labi';
+  @override
+  String get tableMoveColumnLeft => 'Pārvietot kolonnu pa kreisi';
+  @override
+  String get tableMoveColumnRight => 'Pārvietot kolonnu pa labi';
+  @override
+  String get tableAlignLeft => 'Līdzināt pa kreisi';
+  @override
+  String get tableAlignCenter => 'Centrēt';
+  @override
+  String get tableAlignRight => 'Līdzināt pa labi';
+  @override
+  String get tableDuplicateColumn => 'Dublēt kolonnu';
+  @override
+  String get tableDeleteColumn => 'Dzēst kolonnu';
+  @override
+  String get tableSortAscending => 'Kārtot pēc kolonnas (A → Z)';
+  @override
+  String get tableSortDescending => 'Kārtot pēc kolonnas (Z → A)';
+  @override
+  String get tableAddRow => 'Pievienot rindu';
+  @override
+  String get tableAddColumn => 'Pievienot kolonnu';
+  @override
+  String get cheatsheetTitle => 'Markdown špikeris';
+  @override
+  String get cheatsheetCopy => 'Kopēt';
+  @override
+  String get cheatsheetCopied => 'Nokopēts';
+  @override
+  String get cheatsheetInsert => 'Ievietot piezīmē';
+  @override
+  String get cheatsheetWritten => 'Rakstīts';
+  @override
+  String get cheatsheetShown => 'Parādīts';
+  @override
+  String get cheatHeadings => 'Virsraksti';
+  @override
+  String get cheatEmphasis => 'Treknraksts, slīpraksts, pārsvītrots';
+  @override
+  String get cheatHtmlFormats => 'Pasvītrots, augšraksts, apakšraksts';
+  @override
+  String get cheatLists => 'Saraksti';
+  @override
+  String get cheatChecklists => 'Kontrolsaraksti';
+  @override
+  String get cheatQuotes => 'Citāti';
+  @override
+  String get cheatLinks => 'Saites';
+  @override
+  String get cheatWikilinks => 'Saites uz piezīmēm';
+  @override
+  String get cheatEmbeds => 'Attēli un iegulumi';
+  @override
+  String get cheatTags => 'Birkas';
+  @override
+  String get cheatInlineCode => 'Kods teikumā';
+  @override
+  String get cheatCodeBlocks => 'Koda bloki';
+  @override
+  String get cheatMath => 'Matemātika';
+  @override
+  String get cheatTables => 'Tabulas';
+  @override
+  String get cheatFootnotes => 'Vēres';
+  @override
+  String get cheatRule => 'Horizontāla līnija';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Veidņu vietturi';
+  @override
+  String get menuAddLink => 'Pievienot saiti';
+  @override
+  String get menuAddExternalLink => 'Pievienot ārēju saiti';
+  @override
+  String get menuFormat => 'Formāts';
+  @override
+  String get menuParagraph => 'Rindkopa';
+  @override
+  String get menuInsert => 'Ievietot';
+  @override
+  String get menuBody => 'Pamatteksts';
+  @override
+  String get formatSubscript => 'Apakšraksts';
+  @override
+  String get formatInlineCode => 'Kods';
+  @override
+  String get insertFootnote => 'Vēre';
+  @override
+  String get insertRule => 'Horizontāla līnija';
+  @override
+  String get insertCodeBlock => 'Koda bloks';
+  @override
+  String get insertMathBlock => 'Matemātikas bloks';
+  @override
+  String get menuHeadingWord => 'Virsraksts';
+  @override
   String get toolbarHeading => 'Virsraksts';
   @override
   String get toolbarList => 'Saraksts';
   @override
   String get toolbarOrderedList => 'Numurēts saraksts';
+  @override
+  String get toolbarChecklist => 'Kontrolsaraksts';
   @override
   String get toolbarQuote => 'Citāts';
   @override
@@ -545,11 +641,6 @@ final class LatvianStrings extends Strings {
   String get showPreviewTooltip => 'Rādīt priekšskatījumu';
   @override
   String get showEditorTooltip => 'Rādīt redaktoru';
-  @override
-  String get enterFullScreenTooltip => 'Pilnekrāns';
-  @override
-  String get exitFullScreenTooltip => 'Iziet no pilnekrāna';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(neapstrādāta HTML tabula)';

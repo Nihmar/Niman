@@ -115,10 +115,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get settingsToggleOff => 'オフ';
   @override
-  String get settingsPreviewEnabledTitle => 'プレビュー';
-  @override
-  String get settingsPreviewEnabledSubtitle => 'ソースエディタの横にレンダリング済みノートを表示する';
-  @override
   String get switchToWysiwygTooltip => 'WYSIWYG エディタに切り替え';
   @override
   String get switchToSourceTooltip => 'Markdown ソースに切り替え';
@@ -127,9 +123,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'このノートは WYSIWYG エディタが大きすぎます。Markdown ソースで開いてください。';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => '外観';
@@ -249,19 +242,6 @@ final class JapaneseStrings extends Strings {
   String get noteTextScaleSubtitle => 'エディタとプレビューは常に同じです';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'プレビューモード';
-  @override
-  String get previewModeSubtitle => 'プレビューが画面をエディタと分かち合うか置き換えるか';
-  @override
-  String get previewModeAuto => '並列表示';
-  @override
-  String get previewModeSwitch => '全画面';
-  @override
-  String get splitRatioTitle => '分割幅';
-  @override
-  String get splitRatioSubtitle => 'プレビューが横にあるときのエディタの比率';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'リンクの形式';
@@ -439,11 +419,131 @@ final class JapaneseStrings extends Strings {
   @override
   String get toolbarImage => '画像の挿入';
   @override
+  String get toolbarTable => '表';
+  @override
+  String get tableRow => '行';
+  @override
+  String get tableColumn => '列';
+  @override
+  String get tableAddRowAbove => '上に行を挿入';
+  @override
+  String get tableAddRowBelow => '下に行を挿入';
+  @override
+  String get tableMoveRowUp => '行を上へ移動';
+  @override
+  String get tableMoveRowDown => '行を下へ移動';
+  @override
+  String get tableDuplicateRow => '行を複製';
+  @override
+  String get tableDeleteRow => '行を削除';
+  @override
+  String get tableAddColumnLeft => '左に列を挿入';
+  @override
+  String get tableAddColumnRight => '右に列を挿入';
+  @override
+  String get tableMoveColumnLeft => '列を左へ移動';
+  @override
+  String get tableMoveColumnRight => '列を右へ移動';
+  @override
+  String get tableAlignLeft => '左揃え';
+  @override
+  String get tableAlignCenter => '中央揃え';
+  @override
+  String get tableAlignRight => '右揃え';
+  @override
+  String get tableDuplicateColumn => '列を複製';
+  @override
+  String get tableDeleteColumn => '列を削除';
+  @override
+  String get tableSortAscending => '列で並べ替え (A → Z)';
+  @override
+  String get tableSortDescending => '列で並べ替え (Z → A)';
+  @override
+  String get tableAddRow => '行を追加';
+  @override
+  String get tableAddColumn => '列を追加';
+  @override
+  String get cheatsheetTitle => 'Markdown チートシート';
+  @override
+  String get cheatsheetCopy => 'コピー';
+  @override
+  String get cheatsheetCopied => 'コピーしました';
+  @override
+  String get cheatsheetInsert => 'ノートに挿入';
+  @override
+  String get cheatsheetWritten => '記法';
+  @override
+  String get cheatsheetShown => '表示';
+  @override
+  String get cheatHeadings => '見出し';
+  @override
+  String get cheatEmphasis => '太字・斜体・取り消し線';
+  @override
+  String get cheatHtmlFormats => '下線・上付き・下付き';
+  @override
+  String get cheatLists => 'リスト';
+  @override
+  String get cheatChecklists => 'チェックリスト';
+  @override
+  String get cheatQuotes => '引用';
+  @override
+  String get cheatLinks => 'リンク';
+  @override
+  String get cheatWikilinks => 'ノートへのリンク';
+  @override
+  String get cheatEmbeds => '画像と埋め込み';
+  @override
+  String get cheatTags => 'タグ';
+  @override
+  String get cheatInlineCode => '文中のコード';
+  @override
+  String get cheatCodeBlocks => 'コードブロック';
+  @override
+  String get cheatMath => '数式';
+  @override
+  String get cheatTables => '表';
+  @override
+  String get cheatFootnotes => '脚注';
+  @override
+  String get cheatRule => '水平線';
+  @override
+  String get cheatFrontmatter => 'フロントマター';
+  @override
+  String get cheatTemplates => 'テンプレートのプレースホルダー';
+  @override
+  String get menuAddLink => 'リンクを追加';
+  @override
+  String get menuAddExternalLink => '外部リンクを追加';
+  @override
+  String get menuFormat => '書式';
+  @override
+  String get menuParagraph => '段落';
+  @override
+  String get menuInsert => '挿入';
+  @override
+  String get menuBody => '本文';
+  @override
+  String get formatSubscript => '下付き';
+  @override
+  String get formatInlineCode => 'コード';
+  @override
+  String get insertFootnote => '脚注';
+  @override
+  String get insertRule => '水平線';
+  @override
+  String get insertCodeBlock => 'コードブロック';
+  @override
+  String get insertMathBlock => '数式ブロック';
+  @override
+  String get menuHeadingWord => '見出し';
+  @override
   String get toolbarHeading => '見出し';
   @override
   String get toolbarList => 'リスト';
   @override
   String get toolbarOrderedList => '番号付きリスト';
+  @override
+  String get toolbarChecklist => 'チェックリスト';
   @override
   String get toolbarQuote => '引用';
   @override
@@ -509,11 +609,6 @@ final class JapaneseStrings extends Strings {
   String get showPreviewTooltip => 'プレビューを表示';
   @override
   String get showEditorTooltip => 'エディタを表示';
-  @override
-  String get enterFullScreenTooltip => '全画面';
-  @override
-  String get exitFullScreenTooltip => '全画面を終了';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '（生の HTML テーブル）';

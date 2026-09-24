@@ -403,7 +403,12 @@ one runs joins it.
 2. **Scan:** the local tree off the UI isolate (size + mtime, dot
    folders skipped except `.niman`), the remote tree with `Depth: 1` per
    folder. A missing remote folder stops the run — it never reads as an
-   empty one.
+   empty one. Some servers (or the proxy in front of them) leave dot
+   entries out of a listing while still serving them by path, so a walk
+   that did not see `.niman/` asks for `settings.json` and `counters.json`
+   by name (`Depth: 0`): otherwise the look before the upload finds a file
+   the scan said was not there, and the upload is skipped as "changed
+   during the sync" on every run.
 3. **Plan:** `planSync`, then up to three hashing passes (local files
    hashed streamed in an isolate; remote ones downloaded to a discarding
    sink) until nothing waits for a hash.

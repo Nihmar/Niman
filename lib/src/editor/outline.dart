@@ -9,6 +9,9 @@
 library;
 
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_index.dart';
+import 'package:niman/src/markdown/block_list.dart';
 
 /// One heading in the outline.
 final class OutlineEntry {
@@ -43,6 +46,45 @@ List<OutlineEntry> outlineOfText(String text) {
     (line, level, heading) =>
         out.add(OutlineEntry(line: line, level: level, text: heading)),
   );
+  return out;
+}
+
+/// The headings of a scanned note, one per heading block, in line order.
+///
+/// The answer [outlineOfText] gives, read off the [index] the editor's own
+/// scan already produced instead of walking the text again: on a 246 MB note
+/// that walk is most of a second per refresh, and the blocks are on screen
+/// already (0.0.9 stress test). A heading is an ATX block, which is what the
+/// scanner calls [BlockKind.heading]; the level is its `#` count, and the
+/// text is the rest of its line, trimmed — the same three things the
+/// tokenizer reports.
+///
+/// [line] reads a line's text by its index; the caller holds the buffer.
+List<OutlineEntry> outlineOfBlocks(
+  BlockIndex index,
+  String Function(int line) line,
+) {
+  final out = <OutlineEntry>[];
+  bool isHeading(Block block) =>
+      block.kind == BlockKind.heading && block.headingLevel > 0;
+  final blocks = index.blocks;
+  // A scanner's list moves its blocks a chunk at a time, and reading each
+  // one where it is makes a block: only the headings are asked for there.
+  final headings = blocks is BlockList
+      ? blocks.matching(isHeading)
+      : blocks.where(isHeading);
+  for (final block in headings) {
+    final text = line(block.startLine);
+    out.add(
+      OutlineEntry(
+        line: block.startLine,
+        level: block.headingLevel,
+        text: text.length > block.headingLevel
+            ? text.substring(block.headingLevel).trim()
+            : '',
+      ),
+    );
+  }
   return out;
 }
 

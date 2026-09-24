@@ -124,11 +124,6 @@ final class EstonianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Väljas';
   @override
-  String get settingsPreviewEnabledTitle => 'Eelvaade';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Kuvab kujundatud märgise allika redaktori kõrval';
-  @override
   String get switchToWysiwygTooltip => 'Lülita WYSIWYG-redaktorile';
   @override
   String get switchToSourceTooltip => 'Lülita Markdowni allikale';
@@ -137,10 +132,6 @@ final class EstonianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'See märge on WYSIWYG-redaktoriks liiga suur. Ava see Markdowni '
-      'allikana.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Välimus';
@@ -269,20 +260,6 @@ final class EstonianStrings extends Strings {
       'Redaktor ja eelvaade on alati sünkroonis';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Eelvaate režiim';
-  @override
-  String get previewModeSubtitle =>
-      'Kas eelvaade jagab ekraani redaktoriga või asendab selle';
-  @override
-  String get previewModeAuto => 'Kõrval';
-  @override
-  String get previewModeSwitch => 'Täisekraan';
-  @override
-  String get splitRatioTitle => 'Jagunisuhe';
-  @override
-  String get splitRatioSubtitle => 'Redaktori osa, kui eelvaade on kõrval';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Viide formaat';
@@ -464,11 +441,131 @@ final class EstonianStrings extends Strings {
   @override
   String get toolbarImage => 'Sisesta pilt';
   @override
+  String get toolbarTable => 'Tabel';
+  @override
+  String get tableRow => 'Rida';
+  @override
+  String get tableColumn => 'Veerg';
+  @override
+  String get tableAddRowAbove => 'Lisa rida üles';
+  @override
+  String get tableAddRowBelow => 'Lisa rida alla';
+  @override
+  String get tableMoveRowUp => 'Liiguta rida üles';
+  @override
+  String get tableMoveRowDown => 'Liiguta rida alla';
+  @override
+  String get tableDuplicateRow => 'Kopeeri rida';
+  @override
+  String get tableDeleteRow => 'Kustuta rida';
+  @override
+  String get tableAddColumnLeft => 'Lisa veerg vasakule';
+  @override
+  String get tableAddColumnRight => 'Lisa veerg paremale';
+  @override
+  String get tableMoveColumnLeft => 'Liiguta veergu vasakule';
+  @override
+  String get tableMoveColumnRight => 'Liiguta veergu paremale';
+  @override
+  String get tableAlignLeft => 'Joonda vasakule';
+  @override
+  String get tableAlignCenter => 'Joonda keskele';
+  @override
+  String get tableAlignRight => 'Joonda paremale';
+  @override
+  String get tableDuplicateColumn => 'Kopeeri veerg';
+  @override
+  String get tableDeleteColumn => 'Kustuta veerg';
+  @override
+  String get tableSortAscending => 'Sordi veeru järgi (A → Z)';
+  @override
+  String get tableSortDescending => 'Sordi veeru järgi (Z → A)';
+  @override
+  String get tableAddRow => 'Lisa rida';
+  @override
+  String get tableAddColumn => 'Lisa veerg';
+  @override
+  String get cheatsheetTitle => 'Markdowni spikker';
+  @override
+  String get cheatsheetCopy => 'Kopeeri';
+  @override
+  String get cheatsheetCopied => 'Kopeeritud';
+  @override
+  String get cheatsheetInsert => 'Lisa märkmesse';
+  @override
+  String get cheatsheetWritten => 'Kirjutatud';
+  @override
+  String get cheatsheetShown => 'Näidatud';
+  @override
+  String get cheatHeadings => 'Pealkirjad';
+  @override
+  String get cheatEmphasis => 'Paks, kaldkiri, läbikriipsutatud';
+  @override
+  String get cheatHtmlFormats => 'Allajoonitud, ülaindeks, alaindeks';
+  @override
+  String get cheatLists => 'Loendid';
+  @override
+  String get cheatChecklists => 'Kontrollnimekirjad';
+  @override
+  String get cheatQuotes => 'Tsitaadid';
+  @override
+  String get cheatLinks => 'Lingid';
+  @override
+  String get cheatWikilinks => 'Lingid märkmetele';
+  @override
+  String get cheatEmbeds => 'Pildid ja manused';
+  @override
+  String get cheatTags => 'Sildid';
+  @override
+  String get cheatInlineCode => 'Kood lauses';
+  @override
+  String get cheatCodeBlocks => 'Koodiplokid';
+  @override
+  String get cheatMath => 'Matemaatika';
+  @override
+  String get cheatTables => 'Tabelid';
+  @override
+  String get cheatFootnotes => 'Joonealused märkused';
+  @override
+  String get cheatRule => 'Horisontaaljoon';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Mallide kohatäited';
+  @override
+  String get menuAddLink => 'Lisa link';
+  @override
+  String get menuAddExternalLink => 'Lisa väline link';
+  @override
+  String get menuFormat => 'Vorming';
+  @override
+  String get menuParagraph => 'Lõik';
+  @override
+  String get menuInsert => 'Lisa';
+  @override
+  String get menuBody => 'Põhitekst';
+  @override
+  String get formatSubscript => 'Alaindeks';
+  @override
+  String get formatInlineCode => 'Kood';
+  @override
+  String get insertFootnote => 'Joonealune märkus';
+  @override
+  String get insertRule => 'Horisontaaljoon';
+  @override
+  String get insertCodeBlock => 'Koodiplokk';
+  @override
+  String get insertMathBlock => 'Matemaatikaplokk';
+  @override
+  String get menuHeadingWord => 'Pealkiri';
+  @override
   String get toolbarHeading => 'Pealkiri';
   @override
   String get toolbarList => 'Loetelu';
   @override
   String get toolbarOrderedList => 'Numbreeritud loetelu';
+  @override
+  String get toolbarChecklist => 'Kontrollnimekiri';
   @override
   String get toolbarQuote => 'Tsitaat';
   @override
@@ -537,11 +634,6 @@ final class EstonianStrings extends Strings {
   String get showPreviewTooltip => 'Kuva eelvaadet';
   @override
   String get showEditorTooltip => 'Kuva redaktorit';
-  @override
-  String get enterFullScreenTooltip => 'Täisekraan';
-  @override
-  String get exitFullScreenTooltip => 'Välju täisekraanist';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(toore HTML-tabel)';

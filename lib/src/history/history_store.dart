@@ -144,11 +144,20 @@ SnapshotOutcome snapshotBeforeWrite(
 ) {
   final clock = Stopwatch()..start();
   final note = File(p.join(root, rel));
-  final bytes = note.existsSync() ? note.readAsBytesSync() : null;
+  final exists = note.existsSync();
+  final manifest = exists ? readHistoryManifest(root, rel) : HistoryManifest();
+  // The manifest alone often decides: the note is read only when it can.
+  final early = exists
+      ? skipWithoutReading(manifest: manifest, request: request)
+      : null;
+  if (early != null) {
+    return SnapshotOutcome(
+      decision: early,
+      elapsedMs: clock.elapsedMilliseconds,
+    );
+  }
+  final bytes = exists ? note.readAsBytesSync() : null;
   final oldSha = bytes == null ? null : sha256.convert(bytes).toString();
-  final manifest = bytes == null
-      ? HistoryManifest()
-      : readHistoryManifest(root, rel);
   final decision = decideSnapshot(
     manifest: manifest,
     oldSha: oldSha,

@@ -124,11 +124,6 @@ final class EnglishStrings extends Strings {
   @override
   String get settingsToggleOff => 'Off';
   @override
-  String get settingsPreviewEnabledTitle => 'Preview';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Show the rendered note beside the source editor';
-  @override
   String get switchToWysiwygTooltip => 'Switch to the WYSIWYG editor';
   @override
   String get switchToSourceTooltip => 'Switch to the Markdown source';
@@ -137,10 +132,6 @@ final class EnglishStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'This note is too large for the WYSIWYG editor. Open it in the Markdown '
-      'source.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Appearance';
@@ -273,22 +264,6 @@ final class EnglishStrings extends Strings {
       'The editor and the preview, which always agree';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Preview mode';
-  @override
-  String get previewModeSubtitle =>
-      'Whether the preview shares the screen with the editor, or replaces '
-      'it';
-  @override
-  String get previewModeAuto => 'Side by side';
-  @override
-  String get previewModeSwitch => 'Full screen';
-  @override
-  String get splitRatioTitle => 'Split width';
-  @override
-  String get splitRatioSubtitle =>
-      'The editor’s share when the preview is side by side';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Link format';
@@ -471,11 +446,131 @@ final class EnglishStrings extends Strings {
   @override
   String get toolbarImage => 'Insert image';
   @override
+  String get toolbarTable => 'Table';
+  @override
+  String get tableRow => 'Row';
+  @override
+  String get tableColumn => 'Column';
+  @override
+  String get tableAddRowAbove => 'Add row above';
+  @override
+  String get tableAddRowBelow => 'Add row below';
+  @override
+  String get tableMoveRowUp => 'Move row up';
+  @override
+  String get tableMoveRowDown => 'Move row down';
+  @override
+  String get tableDuplicateRow => 'Duplicate row';
+  @override
+  String get tableDeleteRow => 'Delete row';
+  @override
+  String get tableAddColumnLeft => 'Add column to the left';
+  @override
+  String get tableAddColumnRight => 'Add column to the right';
+  @override
+  String get tableMoveColumnLeft => 'Move column left';
+  @override
+  String get tableMoveColumnRight => 'Move column right';
+  @override
+  String get tableAlignLeft => 'Align left';
+  @override
+  String get tableAlignCenter => 'Align center';
+  @override
+  String get tableAlignRight => 'Align right';
+  @override
+  String get tableDuplicateColumn => 'Duplicate column';
+  @override
+  String get tableDeleteColumn => 'Delete column';
+  @override
+  String get tableSortAscending => 'Sort by column (A → Z)';
+  @override
+  String get tableSortDescending => 'Sort by column (Z → A)';
+  @override
+  String get tableAddRow => 'Add row';
+  @override
+  String get tableAddColumn => 'Add column';
+  @override
+  String get cheatsheetTitle => 'Markdown cheatsheet';
+  @override
+  String get cheatsheetCopy => 'Copy';
+  @override
+  String get cheatsheetCopied => 'Copied';
+  @override
+  String get cheatsheetInsert => 'Insert in the note';
+  @override
+  String get cheatsheetWritten => 'Written';
+  @override
+  String get cheatsheetShown => 'Shown';
+  @override
+  String get cheatHeadings => 'Headings';
+  @override
+  String get cheatEmphasis => 'Bold, italic, strikethrough';
+  @override
+  String get cheatHtmlFormats => 'Underline, superscript, subscript';
+  @override
+  String get cheatLists => 'Lists';
+  @override
+  String get cheatChecklists => 'Checkbox lists';
+  @override
+  String get cheatQuotes => 'Quotes';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links to notes';
+  @override
+  String get cheatEmbeds => 'Images and embeds';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code in a sentence';
+  @override
+  String get cheatCodeBlocks => 'Code blocks';
+  @override
+  String get cheatMath => 'Math';
+  @override
+  String get cheatTables => 'Tables';
+  @override
+  String get cheatFootnotes => 'Footnotes';
+  @override
+  String get cheatRule => 'Horizontal rule';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Template placeholders';
+  @override
+  String get menuAddLink => 'Add link';
+  @override
+  String get menuAddExternalLink => 'Add external link';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraph';
+  @override
+  String get menuInsert => 'Insert';
+  @override
+  String get menuBody => 'Body';
+  @override
+  String get formatSubscript => 'Subscript';
+  @override
+  String get formatInlineCode => 'Code';
+  @override
+  String get insertFootnote => 'Footnote';
+  @override
+  String get insertRule => 'Horizontal rule';
+  @override
+  String get insertCodeBlock => 'Code block';
+  @override
+  String get insertMathBlock => 'Math block';
+  @override
+  String get menuHeadingWord => 'Heading';
+  @override
   String get toolbarHeading => 'Heading';
   @override
   String get toolbarList => 'List';
   @override
   String get toolbarOrderedList => 'Numbered list';
+  @override
+  String get toolbarChecklist => 'Checkbox list';
   @override
   String get toolbarQuote => 'Quote';
   @override
@@ -543,11 +638,6 @@ final class EnglishStrings extends Strings {
   String get showPreviewTooltip => 'Show preview';
   @override
   String get showEditorTooltip => 'Show editor';
-  @override
-  String get enterFullScreenTooltip => 'Full screen';
-  @override
-  String get exitFullScreenTooltip => 'Exit full screen';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(raw HTML table)';

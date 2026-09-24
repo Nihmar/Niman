@@ -135,7 +135,7 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
   Widget build(BuildContext context) {
     final window = ref.watch(windowControllerProvider);
     final active = widget.files.active;
-    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
+    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     final title = active?.name ?? '';
     return Scaffold(
       appBar: window.customTitleBar

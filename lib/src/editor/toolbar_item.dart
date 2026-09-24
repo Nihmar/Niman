@@ -37,6 +37,9 @@ enum ToolbarItem {
   /// Pick an image, copy it into the library, link it.
   image('image', 'insert-image', Icons.add_photo_alternate_outlined),
 
+  /// An empty table at the caret, on lines of its own (#262).
+  table('table', 'toolbar-table', Icons.table_chart_outlined),
+
   /// The heading-level dialog.
   heading('heading', 'toolbar-heading', Icons.title),
 
@@ -49,6 +52,9 @@ enum ToolbarItem {
     'toolbar-ordered-list',
     Icons.format_list_numbered,
   ),
+
+  /// A checkbox (task) list: `- [ ] ` toggled on the lines (#263).
+  checklist('checklist', 'toolbar-checklist', Icons.checklist),
 
   /// A block quote.
   quote('quote', 'toolbar-quote', Icons.format_quote),
@@ -91,9 +97,11 @@ enum ToolbarItem {
     ToolbarItem.link => AppStrings.toolbarLink,
     ToolbarItem.code => AppStrings.toolbarCode,
     ToolbarItem.image => AppStrings.toolbarImage,
+    ToolbarItem.table => AppStrings.toolbarTable,
     ToolbarItem.heading => AppStrings.toolbarHeading,
     ToolbarItem.list => AppStrings.toolbarList,
     ToolbarItem.orderedList => AppStrings.toolbarOrderedList,
+    ToolbarItem.checklist => AppStrings.toolbarChecklist,
     ToolbarItem.quote => AppStrings.toolbarQuote,
     ToolbarItem.outdent => AppStrings.toolbarOutdent,
     ToolbarItem.indent => AppStrings.toolbarIndent,
@@ -112,12 +120,14 @@ enum ToolbarItem {
     ToolbarItem.heading ||
     ToolbarItem.list ||
     ToolbarItem.orderedList ||
+    ToolbarItem.checklist ||
     ToolbarItem.quote ||
     ToolbarItem.outdent ||
     ToolbarItem.indent => ToolbarGroup.block,
     ToolbarItem.link ||
     ToolbarItem.code ||
     ToolbarItem.image ||
+    ToolbarItem.table ||
     ToolbarItem.tools => ToolbarGroup.insert,
   };
 

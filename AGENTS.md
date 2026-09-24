@@ -26,8 +26,17 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
   - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`),
     plus `scripts\niman.bat integration` for the headless files there
 - On Windows, ~20 tests fail on path separators and temp-dir cleanup (pre-existing, green on Linux). Use `pwsh scripts/newfail.ps1` — it prints only failures not in `scripts/known-failures.txt`. Exit code 1 = something new broke. Options: optional path filter, `-Update` to rewrite the baseline.
-- `flutter analyze --fatal-infos` (infos are fatal).
+- `flutter analyze --fatal-infos` (infos are fatal, and `flutter test` does not
+  catch one in a file it merely compiles: re-run analyze after adding any file).
 - `flutter test` runs `test/unit/` + `test/widget/`. Single test: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
+- **Performance tests print; the absolutes do not gate.** `test/perf/` measures
+  wall-clock, and a shared CI runner read 365 ms for the fixture this host reads
+  at 168 **on the same commit** — a ceiling calibrated here fails there for the
+  hardware, not for the code. So every run asserts a backstop, and the design's
+  ceiling is asserted by a run that asks for it:
+  `NIMAN_PERF=1 flutter test test/perf/<file>.dart`. A new perf test follows that
+  shape: print the number, say which bar it was held to, and put the absolute
+  one behind `NIMAN_PERF`.
 - `integration_test/` = E2E, not part of the default `flutter test` run,
   and it rots when nothing runs it (#241): `app_boot` + `template_backlink`
   run headless (in CI too); `sync_e2e` needs `-d linux` on a Linux host

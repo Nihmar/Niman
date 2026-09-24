@@ -30,6 +30,12 @@ final class _Note implements NoteViewHandle {
 
   @override
   void jumpToHeading(int line) => jumps.add(line);
+
+  @override
+  bool get canInsert => true;
+
+  @override
+  void insertAtCaret(String markdown) => currentText += markdown;
 }
 
 final class _Tags implements TagSource {

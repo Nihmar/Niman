@@ -119,11 +119,6 @@ final class HindiStrings extends Strings {
   @override
   String get settingsToggleOff => 'बंद';
   @override
-  String get settingsPreviewEnabledTitle => 'पूर्वावलोकन';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'स्रोत एडिटर के बगल में रेंडर किया गया नोट दिखाएँ';
-  @override
   String get switchToWysiwygTooltip => 'WYSIWYG एडिटर पर जाएँ';
   @override
   String get switchToSourceTooltip => 'Markdown स्रोत पर जाएँ';
@@ -132,9 +127,6 @@ final class HindiStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'यह नोट WYSIWYG एडिटर के लिए बहुत बड़ा है। इसे Markdown स्रोत में खोलें।';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'दिखावट';
@@ -261,20 +253,6 @@ final class HindiStrings extends Strings {
       'एडिटर और पूर्वावलोकन, जो हमेशा एक-दूसरे से मिलते हैं';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'पूर्वावलोकन मोड';
-  @override
-  String get previewModeSubtitle =>
-      'पूर्वावलोकन स्क्रीन एडिटर के साथ बाँटता है या उसकी जगह लेता है';
-  @override
-  String get previewModeAuto => 'साथ-साथ';
-  @override
-  String get previewModeSwitch => 'फुल स्क्रीन';
-  @override
-  String get splitRatioTitle => 'विभाजन की चौड़ाई';
-  @override
-  String get splitRatioSubtitle => 'पूर्वावलोकन साथ-साथ है तो एडिटर का हिस्सा';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'लिंक का फ़ॉर्मेट';
@@ -457,11 +435,131 @@ final class HindiStrings extends Strings {
   @override
   String get toolbarImage => 'छवि डालें';
   @override
+  String get toolbarTable => 'तालिका';
+  @override
+  String get tableRow => 'पंक्ति';
+  @override
+  String get tableColumn => 'स्तंभ';
+  @override
+  String get tableAddRowAbove => 'ऊपर पंक्ति जोड़ें';
+  @override
+  String get tableAddRowBelow => 'नीचे पंक्ति जोड़ें';
+  @override
+  String get tableMoveRowUp => 'पंक्ति ऊपर ले जाएँ';
+  @override
+  String get tableMoveRowDown => 'पंक्ति नीचे ले जाएँ';
+  @override
+  String get tableDuplicateRow => 'पंक्ति की प्रतिलिपि बनाएँ';
+  @override
+  String get tableDeleteRow => 'पंक्ति हटाएँ';
+  @override
+  String get tableAddColumnLeft => 'बाईं ओर स्तंभ जोड़ें';
+  @override
+  String get tableAddColumnRight => 'दाईं ओर स्तंभ जोड़ें';
+  @override
+  String get tableMoveColumnLeft => 'स्तंभ बाईं ओर ले जाएँ';
+  @override
+  String get tableMoveColumnRight => 'स्तंभ दाईं ओर ले जाएँ';
+  @override
+  String get tableAlignLeft => 'बाएँ संरेखित करें';
+  @override
+  String get tableAlignCenter => 'बीच में संरेखित करें';
+  @override
+  String get tableAlignRight => 'दाएँ संरेखित करें';
+  @override
+  String get tableDuplicateColumn => 'स्तंभ की प्रतिलिपि बनाएँ';
+  @override
+  String get tableDeleteColumn => 'स्तंभ हटाएँ';
+  @override
+  String get tableSortAscending => 'स्तंभ के अनुसार क्रमबद्ध करें (A → Z)';
+  @override
+  String get tableSortDescending => 'स्तंभ के अनुसार क्रमबद्ध करें (Z → A)';
+  @override
+  String get tableAddRow => 'पंक्ति जोड़ें';
+  @override
+  String get tableAddColumn => 'स्तंभ जोड़ें';
+  @override
+  String get cheatsheetTitle => 'Markdown चीटशीट';
+  @override
+  String get cheatsheetCopy => 'कॉपी करें';
+  @override
+  String get cheatsheetCopied => 'कॉपी हो गया';
+  @override
+  String get cheatsheetInsert => 'नोट में डालें';
+  @override
+  String get cheatsheetWritten => 'लिखा हुआ';
+  @override
+  String get cheatsheetShown => 'दिखाया गया';
+  @override
+  String get cheatHeadings => 'शीर्षक';
+  @override
+  String get cheatEmphasis => 'बोल्ड, इटैलिक, स्ट्राइकथ्रू';
+  @override
+  String get cheatHtmlFormats => 'अंडरलाइन, सुपरस्क्रिप्ट, सबस्क्रिप्ट';
+  @override
+  String get cheatLists => 'सूचियाँ';
+  @override
+  String get cheatChecklists => 'चेकलिस्ट';
+  @override
+  String get cheatQuotes => 'उद्धरण';
+  @override
+  String get cheatLinks => 'लिंक';
+  @override
+  String get cheatWikilinks => 'नोट्स के लिंक';
+  @override
+  String get cheatEmbeds => 'चित्र और एम्बेड';
+  @override
+  String get cheatTags => 'टैग';
+  @override
+  String get cheatInlineCode => 'वाक्य में कोड';
+  @override
+  String get cheatCodeBlocks => 'कोड ब्लॉक';
+  @override
+  String get cheatMath => 'गणित';
+  @override
+  String get cheatTables => 'तालिकाएँ';
+  @override
+  String get cheatFootnotes => 'फ़ुटनोट';
+  @override
+  String get cheatRule => 'क्षैतिज रेखा';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'टेम्पलेट प्लेसहोल्डर';
+  @override
+  String get menuAddLink => 'लिंक जोड़ें';
+  @override
+  String get menuAddExternalLink => 'बाहरी लिंक जोड़ें';
+  @override
+  String get menuFormat => 'फ़ॉर्मैट';
+  @override
+  String get menuParagraph => 'अनुच्छेद';
+  @override
+  String get menuInsert => 'डालें';
+  @override
+  String get menuBody => 'सामान्य पाठ';
+  @override
+  String get formatSubscript => 'सबस्क्रिप्ट';
+  @override
+  String get formatInlineCode => 'कोड';
+  @override
+  String get insertFootnote => 'फ़ुटनोट';
+  @override
+  String get insertRule => 'क्षैतिज रेखा';
+  @override
+  String get insertCodeBlock => 'कोड ब्लॉक';
+  @override
+  String get insertMathBlock => 'गणित ब्लॉक';
+  @override
+  String get menuHeadingWord => 'शीर्षक';
+  @override
   String get toolbarHeading => 'हेडिंग';
   @override
   String get toolbarList => 'सूची';
   @override
   String get toolbarOrderedList => 'क्रमांकित सूची';
+  @override
+  String get toolbarChecklist => 'चेकलिस्ट';
   @override
   String get toolbarQuote => 'उद्धरण';
   @override
@@ -530,11 +628,6 @@ final class HindiStrings extends Strings {
   String get showPreviewTooltip => 'पूर्वावलोकन दिखाएँ';
   @override
   String get showEditorTooltip => 'एडिटर दिखाएँ';
-  @override
-  String get enterFullScreenTooltip => 'फुल स्क्रीन';
-  @override
-  String get exitFullScreenTooltip => 'फुल स्क्रीन से बाहर';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(कच्चा HTML तालिका)';

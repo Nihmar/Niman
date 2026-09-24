@@ -24,14 +24,12 @@ abstract final class SettingsKeys {
   static const brightness = Key('theme-brightness-setting');
   static const palette = Key('theme-palette-setting');
   static const uiTextScale = Key('ui-text-scale-setting');
-  static const splitRatio = Key('split-ratio-setting');
   static const closeToTray = Key('close-to-tray-setting');
 
   // Editor.
   static const toolbar = Key('toolbar-setting');
   static const editorSource = Key('editor-source-setting');
   static const editorWysiwyg = Key('editor-wysiwyg-setting');
-  static const previewEnabled = Key('preview-enabled-setting');
   static const lineNumbers = Key('line-numbers-setting');
   static const readableLineLength = Key('readable-line-length-setting');
   static const noteColumnWidth = Key('note-column-width-setting');
@@ -65,6 +63,7 @@ abstract final class SettingsKeys {
   static const debugLogs = Key('debug-logs-setting');
   static const exportLog = Key('export-log-setting');
   static const changelog = Key('changelog-setting');
+  static const cheatsheet = Key('cheatsheet-setting');
 
   // Reminders.
   static const reminderShowTokens = Key('reminder-show-tokens');

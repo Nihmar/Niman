@@ -38,11 +38,28 @@ enum TokenKind {
   /// Strikethrough (`~~…~~`).
   strike,
 
+  /// `<u>…</u>`. Made by the surface's styler only: this tokenizer reads
+  /// HTML tags as text.
+  underline,
+
+  /// `<sup>…</sup>`, the unified engine's only.
+  superscript,
+
+  /// `<sub>…</sub>`, the unified engine's only.
+  subscript,
+
   /// An inline code span (`` `…` ``).
   codeInline,
 
-  /// A line of a fenced code block (fence lines and content).
+  /// A line of a fenced code block (fence lines and content), or, from the
+  /// unified engine, a fence line alone: the syntax around a code block.
   codeFence,
+
+  /// A line of a code block's content — fenced or indented — from the
+  /// unified engine: the code itself, drawn in every mode. It is told apart
+  /// from its fences because `live` hides the fences and showed nothing of
+  /// a block whose code was a fence's.
+  codeBlock,
 
   /// The language info on a fence-opening line.
   codeLanguage,
@@ -89,10 +106,28 @@ enum TokenKind {
 @immutable
 final class Token {
   /// Creates a token of [kind] covering [start]..[end).
-  const new(this.kind, this.start, this.end);
+  const new(
+    this.kind,
+    this.start,
+    this.end, {
+    this.marker = false,
+    this.outer = const <TokenKind>[],
+  });
 
   /// The style of the run.
   final TokenKind kind;
+
+  /// The inline constructs the run sits inside, outermost first: the
+  /// underline around `**x**` in `<u>**x**</u>`. A line's tokens are disjoint,
+  /// so a stretch is one token of the innermost construct over it, and this
+  /// is what keeps the ones around it — without it the underline was lost.
+  /// Only the unified surface's styler fills it.
+  final List<TokenKind> outer;
+
+  /// Whether the run is the syntax of a construct rather than its text: the
+  /// `**` of a bold run, a link's `](href)`. What `live` mode hides. Only the
+  /// unified surface's styler tells them apart; this tokenizer never does.
+  final bool marker;
 
   /// Offset of the first character of the run.
   final int start;
@@ -109,10 +144,21 @@ final class Token {
       other is Token &&
       other.kind == kind &&
       other.start == start &&
-      other.end == end;
+      other.end == end &&
+      other.marker == marker &&
+      _sameKinds(other.outer, outer);
 
   @override
-  int get hashCode => Object.hash(kind, start, end);
+  int get hashCode =>
+      Object.hash(kind, start, end, marker, Object.hashAll(outer));
+
+  static bool _sameKinds(List<TokenKind> a, List<TokenKind> b) {
+    if (a.length != b.length) return false;
+    for (var at = 0; at < a.length; at++) {
+      if (a[at] != b[at]) return false;
+    }
+    return true;
+  }
 }
 
 /// One line of the display text with its tokens; anything not covered by a
@@ -208,6 +254,10 @@ final class _Line {
   _State? entering;
   _State? exit;
   List<Token>? tokens;
+
+  /// Whether [tokens] were made for the note's first line, which alone can
+  /// open a frontmatter: a line moved to or from line 0 is tokenized again.
+  bool tokensAtZero = false;
 }
 
 /// Incremental highlighter over a plain-text buffer.
@@ -217,9 +267,9 @@ final class _Line {
 final class HighlightDocument {
   new _();
 
-  /// An empty document. The editor grows it through [replaceLines] as the
-  /// re_editor buffer is loaded/edited, so a big note costs only the lines
-  /// it actually touches instead of one eager whole-file pass at open.
+  /// An empty document, grown through [replaceLines] as lines are loaded
+  /// or edited, so a big note costs only the lines it actually touches
+  /// instead of one eager whole-file pass at open.
   factory empty() => HighlightDocument._();
 
   /// Tokenizes [text] fully.
@@ -237,7 +287,22 @@ final class HighlightDocument {
       .._materializedUntil = lines.length;
     return doc;
   }
-  List<_Line> _lines = const [];
+
+  /// A document over [lines] (each without its terminator), tokenized lazily:
+  /// a line is tokenized the first time something asks for it, in order, so
+  /// building one over a whole note costs a list and no tokenizing.
+  ///
+  /// The source surface's constructor: it hands over its buffer's own lines,
+  /// which are already split — and split on the note's *own* line endings, so
+  /// a CRLF note's lines carry no `\r` that the tokenizer's patterns trip on.
+  factory fromLines(List<String> lines) {
+    final raw = lines.isEmpty ? const <String>[''] : lines;
+    return HighlightDocument._()
+      .._lines = <_Line>[for (final text in raw) _Line(text)]
+      .._materializedUntil = 0;
+  }
+
+  List<_Line> _lines = <_Line>[];
 
   /// The count of *materialized* leading lines: lines below this index keep
   /// valid tokens/state for the current buffer; at and above it they are
@@ -261,22 +326,55 @@ final class HighlightDocument {
       throw RangeError.range(line, 0, _lines.length - 1, 'line');
     }
     _materialize(line);
-    return StyledLine(_lines[line].text, _lines[line].tokens!);
+    return StyledLine(_lines[line].text, _tokensOf(line));
+  }
+
+  /// Line [index]'s tokens, made the first time they are asked for: the
+  /// block state carried into it is already known ([_materialize]).
+  List<Token> _tokensOf(int index) {
+    final line = _lines[index];
+    final tokens = line.tokens;
+    if (tokens != null && line.tokensAtZero == (index == 0)) return tokens;
+    line.tokensAtZero = index == 0;
+    return line.tokens = _lineTokens(line.text, line.entering!, index);
   }
 
   /// The styled lines (all of them; O(lineCount) — materializes the whole
   /// document).
   List<StyledLine> get lines {
     if (_lines.isNotEmpty) _materialize(_lines.length - 1);
-    return _lines.map((l) => StyledLine(l.text, l.tokens!)).toList();
+    return <StyledLine>[
+      for (var at = 0; at < _lines.length; at++)
+        StyledLine(_lines[at].text, _tokensOf(at)),
+    ];
   }
 
-  /// Tokenizes lines up to [upTo] (inclusive) — only the gap since the last
-  /// materialized line, walking forward so the carried state is exact.
+  /// Carries the block state through lines up to [upTo] (inclusive) — only
+  /// the gap since the last materialized line, walking forward so the state
+  /// is exact.
+  ///
+  /// The state, not the tokens. What a line's colours depend on from the
+  /// lines above it is the block it is in — a fence, display maths, the
+  /// frontmatter — and that is a few comparisons a line; its inline tokens
+  /// are the costly part and depend on nothing above it but that state. A
+  /// note reopened at its end asked for line 2.7 million and inline-scanned
+  /// every line before it: 163 s and 2.8 GB of tokens nobody drew (0.0.9
+  /// stress test). Now the walk carries the state, and a line's tokens are
+  /// made when it is drawn ([_tokensOf]) — kept while the state entering it
+  /// stays what it was.
   void _materialize(int upTo) {
+    // Already tokenized: asking for a line above the watermark must not pull
+    // the watermark *down*, or every line below it is tokenized again on the
+    // next ask — which is what a viewport rebuilt from its top line did.
+    if (upTo < _materializedUntil) return;
     var i = _materializedUntil;
     while (i <= upTo) {
-      _tokenizeAt(_lines, i, _lines[i]);
+      final line = _lines[i];
+      final entering = i == 0 ? _State.initial : _lines[i - 1].exit!;
+      if (line.entering != entering) line.tokens = null;
+      line
+        ..entering = entering
+        ..exit = _stateAfter(line.text, entering, i);
       i++;
     }
     _materializedUntil = upTo + 1;
@@ -354,9 +452,8 @@ final class HighlightDocument {
   /// Applies a line-granularity edit: [removed] lines starting at line
   /// [first] are replaced by [replacement] (each a line without a newline).
   ///
-  /// This is the re_editor-side entry point: the buffer is a line list, and
-  /// offsets are hard to recover across edits, so the model is always
-  /// edited line-based. Only the replaced lines (plus the following ones
+  /// The model is always edited line-based: offsets are hard to recover
+  /// across edits. Only the replaced lines (plus the following ones
   /// until the carried state converges) are re-tokenized; the unchanged
   /// tail is shared.
   void replaceLines(int first, int removed, List<String> replacement) {
@@ -369,11 +466,12 @@ final class HighlightDocument {
     final end = first + removed > _lines.length
         ? _lines.length
         : first + removed;
-    _lines = <_Line>[
-      ..._lines.sublist(0, first),
+    // In place: a keystroke replaces one line, and copying the whole list to
+    // do it was O(lineCount) on every one. (Every list this document holds is
+    // one it built, so it is growable.)
+    _lines.replaceRange(first, end, <_Line>[
       for (final text in replacement) _Line(text),
-      ..._lines.sublist(end),
-    ];
+    ]);
     // The materialized prefix ends at `first`: everything at/above it is
     // (re)tokenized lazily on the next lineAt, in order, so stale tokens
     // are overwritten before they are ever read — no eager invalidation
@@ -386,6 +484,7 @@ final class HighlightDocument {
     line.entering = entering;
     line.exit = _stateAfter(line.text, entering, index);
     line.tokens = _lineTokens(line.text, entering, index);
+    line.tokensAtZero = index == 0;
   }
 
   List<int> _lineStarts() {

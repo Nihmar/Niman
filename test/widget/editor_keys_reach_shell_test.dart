@@ -4,9 +4,8 @@
 // keyboard exactly where the hands are.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 void main() {
@@ -57,10 +56,10 @@ void main() {
       await tester.pumpAndSettle();
       // The caret is in the editor: the focus sits inside it.
       final focused = FocusManager.instance.primaryFocus!.context!;
-      final inEditor = wysiwyg
-          ? focused.findAncestorWidgetOfExactType<quill.QuillEditor>()
-          : focused.findAncestorWidgetOfExactType<NoteEditor>();
-      expect(inEditor, isNotNull);
+      expect(
+        focused.findAncestorWidgetOfExactType<MarkdownSourceView>(),
+        isNotNull,
+      );
 
       Future<void> chord(LogicalKeyboardKey key, {bool shift = false}) async {
         await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);

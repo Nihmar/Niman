@@ -9,6 +9,7 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
@@ -84,6 +85,18 @@ abstract interface class NoteOperations {
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
   Future<void> saveNote(String path, String content, {int? editSession});
+
+  /// Saves a note whose text is never joined: [content] makes the bytes one
+  /// slice at a time and the write takes them as they arrive.
+  ///
+  /// The same save as [saveNote] in every other way — the same history
+  /// step, the same bytes on disk, the same reindex behind it — for a note
+  /// too long to join on the UI isolate (see `docs/dev/huge-notes.md`).
+  Future<void> saveNoteStream(
+    String path,
+    NoteContentProducer content, {
+    int? editSession,
+  });
 
   /// The kept history of the note at [path]: its versions, oldest first,
   /// and the pinned ones (issue #55).
@@ -367,25 +380,6 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the enabled editors; an empty set is ignored —
   /// the library must never resolve to no editor.
   Future<void> setEnabledEditors(Set<EditorKind> editors);
-
-  /// Whether the preview exists at all (default true).
-  Future<bool> get previewEnabled;
-
-  /// Sets (and persists) the preview switch.
-  Future<void> setPreviewEnabled({required bool enabled});
-
-  /// The preview layout mode (default `auto`: split on wide screens,
-  /// full-screen switch on phones).
-  Future<PreviewLayoutMode> get previewMode;
-
-  /// Sets (and persists) the preview layout mode.
-  Future<void> setPreviewMode(PreviewLayoutMode mode);
-
-  /// The editor|preview split ratio (0..1, default 0.55).
-  Future<double> get splitRatio;
-
-  /// Sets (and persists) the split ratio.
-  Future<void> setSplitRatio(double ratio);
 
   /// The library tree sort order (default [TreeSort.nameAsc]).
   Future<TreeSort> get treeSort;

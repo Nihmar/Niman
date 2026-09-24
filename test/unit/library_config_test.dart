@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show
@@ -38,6 +39,45 @@ void main() {
       await store.write(LibraryConfig.defaults);
       expect(store.file.existsSync(), isTrue);
     });
+
+    test(
+      'a lost settings file says so, and a new library does not shout',
+      () async {
+        // #258's second half: the fallback to defaults is not neutral — engine,
+        // editors, toolbar and tree all revert — and it used to happen with no
+        // line anywhere. A library that has been written to before and has no
+        // settings file is a warning; one with no `.niman/` at all is just new.
+        final lib = await makeLibrary();
+        final store = LibraryConfigStore(lib.path);
+        AppLog.clear();
+        expect(await store.read(), LibraryConfig.defaults);
+        expect(
+          AppLog.lines().where((line) => line.contains('WARNING')).length,
+          0,
+          reason: 'a new library is not a problem: ${AppLog.lines()}',
+        );
+
+        await store.write(LibraryConfig.defaults);
+        store.file.deleteSync();
+        AppLog.clear();
+        expect(await store.read(), LibraryConfig.defaults);
+        final warnings = AppLog.lines()
+            .where((line) => line.contains('WARNING'))
+            .toList();
+        expect(warnings, hasLength(1));
+        expect(warnings.single, contains('settings.json is missing'));
+        expect(warnings.single, contains('on defaults'));
+
+        store.file.writeAsStringSync('{ not json');
+        AppLog.clear();
+        expect(await store.read(), LibraryConfig.defaults);
+        expect(
+          AppLog.lines().any((line) => line.contains('could not be parsed')),
+          isTrue,
+          reason: AppLog.lines().join('\n'),
+        );
+      },
+    );
 
     test('round trips a config through the file', () async {
       final lib = await makeLibrary();
@@ -144,10 +184,24 @@ void main() {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       expect((await store.read()).editorKind, EditorKind.source);
-      expect((await store.read()).previewEnabled, isTrue);
     });
 
-    test('round trips the editor kind and the preview switch', () async {
+    test('the retired engine switch is read and let go (#247)', () async {
+      // One engine now: a file written while there were two still opens,
+      // and the key is not handed back as an unknown one to keep forever.
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.file.create(recursive: true);
+      store.file.writeAsStringSync(
+        '{"markdownEngine": "unified", "editorKind": "wysiwyg"}',
+      );
+      final config = await store.read();
+      expect(config.editorKind, EditorKind.wysiwyg);
+      await store.write(config);
+      expect(store.file.readAsStringSync(), isNot(contains('markdownEngine')));
+    });
+
+    test('round trips the editor kind', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       const config = LibraryConfig(
@@ -156,12 +210,31 @@ void main() {
         quickNotePath: null,
         listNoteFolder: 'Lists',
         editorKind: EditorKind.wysiwyg,
-        previewEnabled: false,
       );
       await store.write(config);
       final read = await store.read();
       expect(read.editorKind, EditorKind.wysiwyg);
-      expect(read.previewEnabled, isFalse);
+      expect(read, config);
+    });
+
+    test('the dropped preview switch is read but never written back', () async {
+      // The key stays understood — a file that carries it must not have it
+      // handed back as an unknown one to preserve forever — and the preview
+      // is part of the app now, so nothing writes it again.
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.file.parent.create(recursive: true);
+      await store.file.writeAsString(
+        '{"previewEnabled": false, "lineNumbers": false}',
+      );
+      final read = await store.read();
+      expect(read.extra, isNot(contains('previewEnabled')));
+      expect(read.lineNumbers, isFalse);
+      await store.write(read);
+      expect(
+        await store.file.readAsString(),
+        isNot(contains('previewEnabled')),
+      );
     });
 
     test('round trips a single enabled editor', () async {

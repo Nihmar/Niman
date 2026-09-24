@@ -152,4 +152,93 @@ void main() {
       expect(partial.pins, isEmpty);
     });
   });
+
+  group('skipWithoutReading', () {
+    final young = HistoryManifest(versions: [version(3, t0)]);
+
+    test('a version younger than the interval decides without the bytes', () {
+      final d = skipWithoutReading(
+        manifest: young,
+        request: request(now: t0.add(const Duration(minutes: 1))),
+      );
+      expect(d?.take, isFalse);
+    });
+
+    test('history off decides without them', () {
+      expect(
+        skipWithoutReading(
+          manifest: HistoryManifest(),
+          request: request(limit: 0),
+        )?.take,
+        isFalse,
+      );
+    });
+
+    test('a session start, a forced version, an old one or none need them', () {
+      final later = t0.add(const Duration(minutes: 1));
+      expect(
+        skipWithoutReading(
+          manifest: young,
+          request: request(now: later, sessionStart: true),
+        ),
+        isNull,
+      );
+      expect(
+        skipWithoutReading(
+          manifest: young,
+          request: request(now: later, forced: HistoryReason.restore),
+        ),
+        isNull,
+      );
+      expect(
+        skipWithoutReading(
+          manifest: young,
+          request: request(now: t0.add(const Duration(minutes: 6))),
+        ),
+        isNull,
+      );
+      expect(
+        skipWithoutReading(manifest: HistoryManifest(), request: request()),
+        isNull,
+      );
+    });
+
+    test(
+      'whenever it skips, the full decision skips too, whatever the bytes',
+      () {
+        final manifests = [
+          HistoryManifest(),
+          young,
+          HistoryManifest(versions: [version(3, t0, sha: 'current')]),
+        ];
+        for (final manifest in manifests) {
+          for (final minutes in [0, 1, 4, 5, 9]) {
+            for (final session in [false, true]) {
+              for (final forced in [null, HistoryReason.restore]) {
+                for (final limit in [0, 10]) {
+                  final r = request(
+                    now: t0.add(Duration(minutes: minutes)),
+                    sessionStart: session,
+                    forced: forced,
+                    limit: limit,
+                  );
+                  if (skipWithoutReading(manifest: manifest, request: r) ==
+                      null) {
+                    continue;
+                  }
+                  for (final sha in [null, emptySha256, 'old', 'current']) {
+                    expect(
+                      decide(manifest, r, oldSha: sha).take,
+                      isFalse,
+                      reason: '$minutes min, session $session, $forced, $sha',
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+    );
+  });
 }

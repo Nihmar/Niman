@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/language.dart';
@@ -15,6 +16,7 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -414,36 +416,6 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<bool> get previewEnabled async => _config.previewEnabled;
-
-  @override
-  Future<void> setPreviewEnabled({required bool enabled}) async {
-    _config = _config.copyWith(previewEnabled: enabled);
-    _bump();
-  }
-
-  // The preview layout is app-wide: it follows the screen, not the
-  // library.
-  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
-  double _splitRatio = defaultSplitRatio;
-
-  @override
-  Future<PreviewLayoutMode> get previewMode async => _previewMode;
-
-  @override
-  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
-    _previewMode = mode;
-  }
-
-  @override
-  Future<double> get splitRatio async => _splitRatio;
-
-  @override
-  Future<void> setSplitRatio(double ratio) async {
-    _splitRatio = ratio;
-  }
-
-  @override
   Future<TreeSort> get treeSort async => _config.treeSort;
 
   @override
@@ -738,6 +710,27 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> saveNote(String path, String content, {int? editSession}) async {
     saves.add((path, content, editSession));
     (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
+    _bump();
+  }
+
+  /// Every [saveNoteStream] call, in order: `(path, content, editSession)`.
+  final List<(String, String, int?)> streamedSaves = [];
+
+  @override
+  Future<void> saveNoteStream(
+    String path,
+    NoteContentProducer content, {
+    int? editSession,
+  }) async {
+    final buffer = StringBuffer();
+    for (var index = 0; ; index++) {
+      final slice = await content(index);
+      if (slice == null) break;
+      buffer.write(utf8.decode(slice));
+    }
+    final text = buffer.toString();
+    streamedSaves.add((path, text, editSession));
+    (_findRow(path) ?? _addRow(path, isDir: false)).content = text;
     _bump();
   }
 

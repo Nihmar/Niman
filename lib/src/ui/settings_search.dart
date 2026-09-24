@@ -137,15 +137,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.uiTextScale),
     ),
-    SettingsSearchEntry(
-      title: AppStrings.splitRatioTitle,
-      area: appearance,
-      rowKey: SettingsKeys.splitRatio,
-      value: () async =>
-          AppStrings.splitRatioValue(await controller.splitRatio),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.splitRatio),
-    ),
     // The desktops only (#209): elsewhere there is no tray to close into.
     if (Platform.isLinux || Platform.isWindows)
       SettingsSearchEntry(
@@ -181,14 +172,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
         on: (await controller.enabledEditors).contains(EditorKind.wysiwyg),
       ),
       open: () => pushEditor(SettingsKeys.editorWysiwyg),
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.settingsPreviewEnabledTitle,
-      area: editor,
-      rowKey: SettingsKeys.previewEnabled,
-      value: () async => onOff(on: await controller.previewEnabled),
-      areaId: SettingsAreaId.editor,
-      open: () => pushEditor(SettingsKeys.previewEnabled),
     ),
     SettingsSearchEntry(
       title: AppStrings.lineNumbersTitle,
@@ -393,6 +376,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       value: noValue,
       areaId: SettingsAreaId.diagnostics,
       open: () => pushDiagnostics(SettingsKeys.changelog),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.cheatsheetTitle,
+      area: AppStrings.settingsAreaDiagnostics,
+      rowKey: SettingsKeys.cheatsheet,
+      value: noValue,
+      areaId: SettingsAreaId.diagnostics,
+      open: () => pushDiagnostics(SettingsKeys.cheatsheet),
     ),
     SettingsSearchEntry(
       title: AppStrings.reminderShowTokensTitle,

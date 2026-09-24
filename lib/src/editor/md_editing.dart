@@ -1,6 +1,6 @@
 /// Pure Markdown editing commands (T-UI-08): text + selection in, new text
 /// + selection out. No editor/model dependency - unit-testable and applied
-/// through the re_editor controller by the toolbar (see ui/note_view.dart).
+/// to the surface by the toolbar and the menu (see ui/note_view.dart).
 library;
 
 import 'package:flutter/services.dart';
@@ -155,6 +155,210 @@ MarkdownEdit orderedList({
       endLine: endLine,
     ),
   );
+}
+
+/// Makes every line the [selection] touches a task (`- [ ] `), or takes the
+/// task off them all when every one of them is a task already (#263).
+///
+/// A bulleted item keeps its marker and gains the box, a numbered one its
+/// number (`1. [ ] `, a task in GFM too), and any other line becomes a
+/// bulleted task at its own indent. A blank line among several is left
+/// alone: a list is made of the lines that say something. Taking the task
+/// off leaves the line's text, as the list buttons' second press would.
+MarkdownEdit toggleTaskList({
+  required String text,
+  required TextSelection selection,
+}) {
+  final startLine = _lineIndexOf(text, selection.start);
+  final endLine = _lineIndexOf(text, selection.end);
+  final lines = text.split('\n');
+  final newLines = <String>[...lines];
+  final several = endLine > startLine;
+  bool skipped(String line) => several && line.trim().isEmpty;
+  var allTasks = true;
+  for (var i = startLine; i <= endLine; i++) {
+    if (skipped(lines[i])) continue;
+    if (!(listItemHead(lines[i])?.box ?? false)) allTasks = false;
+  }
+  for (var i = startLine; i <= endLine; i++) {
+    final line = lines[i];
+    if (skipped(line)) continue;
+    final head = listItemHead(line);
+    if (allTasks) {
+      newLines[i] = '${head!.indent}${head.content}';
+    } else if (head == null) {
+      final indent = line.length - line.trimLeft().length;
+      newLines[i] =
+          '${line.substring(0, indent)}- [ ] ${line.substring(indent)}';
+    } else if (!head.box) {
+      newLines[i] = '${head.indent}${head.marker} [ ] ${head.content}';
+    }
+  }
+  final newText = newLines.join('\n');
+  return MarkdownEdit(
+    text: newText,
+    selection: _shiftSelectionForLines(
+      oldText: text,
+      newText: newText,
+      selection: selection,
+      startLine: startLine,
+      endLine: endLine,
+    ),
+  );
+}
+
+/// Inserts an empty table of [columns] columns and [rows] body rows, on
+/// lines of its own, with the caret in its first header cell (#262).
+MarkdownEdit insertTable({
+  required String text,
+  required TextSelection selection,
+  int columns = 2,
+  int rows = 1,
+}) {
+  String row(String cell) =>
+      '|${List<String>.filled(columns, ' $cell ').join('|')}|';
+  return insertBlock(
+    text: text,
+    selection: selection,
+    block: <String>[
+      row('  '),
+      row('---'),
+      for (var body = 0; body < rows; body++) row('  '),
+    ],
+    // The first header cell's text starts two columns in: `| `.
+    caret: (line: 0, column: 2),
+  );
+}
+
+/// Inserts [block]'s lines on lines of their own, the caret at [caret] in
+/// them — at the end of the last one without it.
+///
+/// Where they go follows the caret: a blank line is replaced by them, a
+/// caret at the very start of a line puts them above that line, and
+/// anywhere else puts them below. A block glued to a paragraph is read as
+/// the paragraph's text, so a blank line keeps it from its neighbours on
+/// either side, where there is not one already. A selection is not
+/// replaced: the block goes by the caret's end of it.
+MarkdownEdit insertBlock({
+  required String text,
+  required TextSelection selection,
+  required List<String> block,
+  ({int line, int column})? caret,
+}) {
+  final lines = text.split('\n');
+  final at0 = selection.extentOffset;
+  final line = _lineIndexOf(text, at0);
+  final column = at0 - _lineStart(text, line);
+  final blank = lines[line].trim().isEmpty;
+  final at = blank || column == 0 ? line : line + 1;
+  final remove = blank ? 1 : 0;
+  final before = at > 0 && lines[at - 1].trim().isNotEmpty;
+  final afterIndex = at + remove;
+  final after =
+      afterIndex < lines.length && lines[afterIndex].trim().isNotEmpty;
+  final inserted = <String>[if (before) '', ...block, if (after) ''];
+  final newLines = <String>[...lines]..replaceRange(at, at + remove, inserted);
+  final target = caret ?? (line: block.length - 1, column: block.last.length);
+  final newText = newLines.join('\n');
+  final offset =
+      _lineStart(newText, at + (before ? 1 : 0) + target.line) + target.column;
+  return MarkdownEdit(
+    text: newText,
+    selection: TextSelection.collapsed(offset: offset),
+  );
+}
+
+/// Inserts [snippet] at the caret, in place of the selection: a snippet of
+/// one line where the caret is, one of several lines on lines of its own
+/// ([insertBlock]). The caret lands after it.
+MarkdownEdit insertSnippet({
+  required String text,
+  required TextSelection selection,
+  required String snippet,
+}) {
+  if (!snippet.contains('\n')) {
+    final newText = text.replaceRange(selection.start, selection.end, snippet);
+    return MarkdownEdit(
+      text: newText,
+      selection: TextSelection.collapsed(
+        offset: selection.start + snippet.length,
+      ),
+    );
+  }
+  return insertBlock(
+    text: text,
+    selection: selection,
+    block: snippet.split('\n'),
+  );
+}
+
+/// Takes the heading off every line the [selection] touches: the text of a
+/// heading becomes a paragraph's — Obsidian's "Body" (#260).
+MarkdownEdit removeHeading({
+  required String text,
+  required TextSelection selection,
+}) {
+  final startLine = _lineIndexOf(text, selection.start);
+  final endLine = _lineIndexOf(text, selection.end);
+  final lines = text.split('\n');
+  final newLines = <String>[...lines];
+  for (var i = startLine; i <= endLine; i++) {
+    final match = _headingPrefix.matchAsPrefix(lines[i]);
+    if (match != null) newLines[i] = lines[i].substring(match[0]!.length);
+  }
+  final newText = newLines.join('\n');
+  return MarkdownEdit(
+    text: newText,
+    selection: _shiftSelectionForLines(
+      oldText: text,
+      newText: newText,
+      selection: selection,
+      startLine: startLine,
+      endLine: endLine,
+    ),
+  );
+}
+
+/// Cites footnote [label] at the caret and writes its definition under
+/// the caret's paragraph, the caret left on it to be written (#260).
+///
+/// Under the paragraph rather than at the note's end: a definition can
+/// stand anywhere, and there it is found beside what cites it — and the
+/// edit is the paragraph's, not the note's. [text] need hold the caret's
+/// paragraph from its line on; the definition goes after the first blank
+/// line, or at the end of [text] when it has none.
+MarkdownEdit insertFootnote({
+  required String text,
+  required TextSelection selection,
+  required String label,
+}) {
+  final caret = selection.extentOffset;
+  final reference = '[^$label]';
+  final withReference = text.replaceRange(caret, caret, reference);
+  final lines = withReference.split('\n');
+  var end = _lineIndexOf(withReference, caret + reference.length);
+  while (end + 1 < lines.length && lines[end + 1].trim().isNotEmpty) {
+    end++;
+  }
+  final definition = '[^$label]: ';
+  final newLines = <String>[...lines]..insertAll(end + 1, ['', definition]);
+  final newText = newLines.join('\n');
+  final at = _lineStart(newText, end + 2) + definition.length;
+  return MarkdownEdit(
+    text: newText,
+    selection: TextSelection.collapsed(offset: at),
+  );
+}
+
+/// The next number a new footnote can take: one past the highest of
+/// [labels] that are numbers.
+String nextFootnoteLabel(Iterable<String> labels) {
+  var highest = 0;
+  for (final label in labels) {
+    final number = int.tryParse(label);
+    if (number != null && number > highest) highest = number;
+  }
+  return '${highest + 1}';
 }
 
 /// Indents (or outdents, with [outdent] true) every line the [selection]

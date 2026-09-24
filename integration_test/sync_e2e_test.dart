@@ -235,10 +235,14 @@ void main() {
     await waitUntil(
       tester,
       // Both markers: the server already holds the remote line from the
-      // conflict setup, so waiting for it alone returns at once.
+      // conflict setup, so waiting for it alone returns at once. And the
+      // conflict gone: the upload lands before the resolution records the
+      // agreement and takes the conflict off the panel, so the server
+      // holding the merge alone says the resolution is still going.
       () =>
           remote('Plan.md').contains('on the phone') &&
-          remote('Plan.md').contains('on the NAS'),
+          remote('Plan.md').contains('on the NAS') &&
+          controller.sync!.status.conflicts.isEmpty,
       'the merged text to reach the server',
       timeout: const Duration(seconds: 60),
     );

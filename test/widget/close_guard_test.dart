@@ -45,7 +45,10 @@ Widget _host(UnsavedTracker tracker, WindowController window) {
 
 void main() {
   setUp(() => CloseToTray.enabled.value = false);
-  tearDown(() => CloseToTray.enabled.value = false);
+  tearDown(() {
+    CloseToTray.enabled.value = false;
+    CloseToTray.trayShown.value = true;
+  });
 
   // #209: with close-to-tray on, the × hides the window and nothing ends.
   group('close to tray', () {
@@ -79,6 +82,23 @@ void main() {
       // Nothing was asked and nothing was written: the app is still here.
       expect(find.text(AppStrings.closeUnsavedTitle), findsNothing);
       expect(note.saveCalls, 0);
+    });
+
+    testWidgets('with no icon on screen, the × closes instead of hiding', (
+      tester,
+    ) async {
+      final tracker = UnsavedTracker();
+      final window = FakeWindowController();
+      CloseToTray.enabled.value = true;
+      CloseToTray.trayShown.value = false;
+      await tester.pumpWidget(_host(tracker, window));
+      await tester.pump();
+      expect(window.preventHistory, isEmpty, reason: 'nothing to hide into');
+
+      window.onCloseRequested!();
+      await tester.pumpAndSettle();
+      expect(window.hideCalls, 0);
+      expect(window.closeCalls, 1);
     });
 
     testWidgets("the tray's Quit closes for real, asking about unsaved", (

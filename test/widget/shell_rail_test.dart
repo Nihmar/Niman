@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/todo/todo_source.dart';
@@ -280,42 +279,44 @@ void main() {
     expect(find.byType(AlertDialog), findsOne);
   });
 
-  testWidgets('wide: the layout menu switches split and single', (
-    tester,
-  ) async {
-    await pumpWide(tester);
-    await controller.createNote(parentPath: '', name: 'alpha');
-    await settle(tester);
-    await tester.tap(noteRow('alpha.md'));
-    await settle(tester);
+  testWidgets(
+    "wide: right-clicking the tree's empty space creates at the root",
+    (tester) async {
+      await pumpWide(tester);
+      await controller.createFolder(parentPath: '', name: 'Docs');
+      await settle(tester);
 
-    // Auto on wide = side by side, so no editor/preview eye toggle. (The
-    // note body itself still loads off-isolate, which the fake session
-    // cannot drive — the eye toggle is the load-independent signal of
-    // the effective layout.)
-    expect(find.byKey(const Key('layout-mode')), findsOne);
-    expect(find.byKey(const Key('editor-preview-toggle')), findsNothing);
+      // Well below the one row: the tree's background.
+      final tree = tester.getRect(noteTree());
+      await tester.tapAt(
+        Offset(tree.center.dx, tree.top + tree.height * 0.7),
+        buttons: kSecondaryMouseButton,
+      );
+      await settle(tester);
+      expect(find.byKey(const Key('tree-menu-new-note')), findsOne);
+      expect(find.byKey(const Key('tree-menu-new-folder')), findsOne);
+      expect(find.byKey(const Key('menu-new-note')), findsNothing);
 
-    await tester.tap(find.byKey(const Key('layout-mode')));
-    // No pumpAndSettle here: the note body still shows its loading
-    // spinner, which animates forever.
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text(AppStrings.previewModeSwitch));
-    await settle(tester);
-
-    expect(find.byKey(const Key('editor-preview-toggle')), findsOne);
-    expect(await controller.previewMode, PreviewLayoutMode.fullScreen);
-
-    await tester.tap(find.byKey(const Key('layout-mode')));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text(AppStrings.previewModeAuto));
-    await settle(tester);
-
-    expect(find.byKey(const Key('editor-preview-toggle')), findsNothing);
-    expect(await controller.previewMode, PreviewLayoutMode.auto);
-  });
+      await tester.tap(find.byKey(const Key('tree-menu-new-folder')));
+      await settle(tester);
+      expect(find.byType(AlertDialog), findsOne);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Radice',
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(FilledButton),
+        ),
+      );
+      await settle(tester);
+      expect(noteRow('Radice'), findsOne, reason: 'at the root, beside Docs');
+    },
+  );
 
   testWidgets('wide: quick-note chooser is inline, rail persists', (
     tester,

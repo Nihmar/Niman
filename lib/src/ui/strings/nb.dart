@@ -124,11 +124,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Av';
   @override
-  String get settingsPreviewEnabledTitle => 'Forhåndsvising';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Vis det renderte notatet ved siden av kildeeditoren';
-  @override
   String get switchToWysiwygTooltip => 'Bytt til WYSIWYG-editoren';
   @override
   String get switchToSourceTooltip => 'Bytt til Markdown-kilden';
@@ -137,10 +132,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Dette notatet er for stort for WYSIWYG-editoren. Åpne det i '
-      'Markdown-kilden.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Utseende';
@@ -271,22 +262,6 @@ final class NorwegianStrings extends Strings {
       'Editoren og forhåndsvisingen, som alltid er enige';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Forhåndsvisningsmodus';
-  @override
-  String get previewModeSubtitle =>
-      'Om forhåndsvisingen deler skjermen med editoren eller erstatter '
-      'den';
-  @override
-  String get previewModeAuto => 'Side ved side';
-  @override
-  String get previewModeSwitch => 'Fullskjerm';
-  @override
-  String get splitRatioTitle => 'Oppdelingsbredde';
-  @override
-  String get splitRatioSubtitle =>
-      'Editors andel når forhåndsvisingen er side ved side';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Lenkeformat';
@@ -470,11 +445,131 @@ final class NorwegianStrings extends Strings {
   @override
   String get toolbarImage => 'Sett inn bilde';
   @override
+  String get toolbarTable => 'Tabell';
+  @override
+  String get tableRow => 'Rad';
+  @override
+  String get tableColumn => 'Kolonne';
+  @override
+  String get tableAddRowAbove => 'Sett inn rad over';
+  @override
+  String get tableAddRowBelow => 'Sett inn rad under';
+  @override
+  String get tableMoveRowUp => 'Flytt rad opp';
+  @override
+  String get tableMoveRowDown => 'Flytt rad ned';
+  @override
+  String get tableDuplicateRow => 'Dupliser rad';
+  @override
+  String get tableDeleteRow => 'Slett rad';
+  @override
+  String get tableAddColumnLeft => 'Sett inn kolonne til venstre';
+  @override
+  String get tableAddColumnRight => 'Sett inn kolonne til høyre';
+  @override
+  String get tableMoveColumnLeft => 'Flytt kolonne til venstre';
+  @override
+  String get tableMoveColumnRight => 'Flytt kolonne til høyre';
+  @override
+  String get tableAlignLeft => 'Venstrejuster';
+  @override
+  String get tableAlignCenter => 'Midtstill';
+  @override
+  String get tableAlignRight => 'Høyrejuster';
+  @override
+  String get tableDuplicateColumn => 'Dupliser kolonne';
+  @override
+  String get tableDeleteColumn => 'Slett kolonne';
+  @override
+  String get tableSortAscending => 'Sorter etter kolonne (A → Å)';
+  @override
+  String get tableSortDescending => 'Sorter etter kolonne (Å → A)';
+  @override
+  String get tableAddRow => 'Legg til rad';
+  @override
+  String get tableAddColumn => 'Legg til kolonne';
+  @override
+  String get cheatsheetTitle => 'Markdown-jukselapp';
+  @override
+  String get cheatsheetCopy => 'Kopier';
+  @override
+  String get cheatsheetCopied => 'Kopiert';
+  @override
+  String get cheatsheetInsert => 'Sett inn i notatet';
+  @override
+  String get cheatsheetWritten => 'Skrevet';
+  @override
+  String get cheatsheetShown => 'Vist';
+  @override
+  String get cheatHeadings => 'Overskrifter';
+  @override
+  String get cheatEmphasis => 'Fet, kursiv, gjennomstreket';
+  @override
+  String get cheatHtmlFormats => 'Understreket, hevet, senket';
+  @override
+  String get cheatLists => 'Lister';
+  @override
+  String get cheatChecklists => 'Sjekklister';
+  @override
+  String get cheatQuotes => 'Sitater';
+  @override
+  String get cheatLinks => 'Lenker';
+  @override
+  String get cheatWikilinks => 'Lenker til notater';
+  @override
+  String get cheatEmbeds => 'Bilder og innbygginger';
+  @override
+  String get cheatTags => 'Tagger';
+  @override
+  String get cheatInlineCode => 'Kode i en setning';
+  @override
+  String get cheatCodeBlocks => 'Kodeblokker';
+  @override
+  String get cheatMath => 'Matematikk';
+  @override
+  String get cheatTables => 'Tabeller';
+  @override
+  String get cheatFootnotes => 'Fotnoter';
+  @override
+  String get cheatRule => 'Horisontal linje';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Malplassholdere';
+  @override
+  String get menuAddLink => 'Legg til lenke';
+  @override
+  String get menuAddExternalLink => 'Legg til ekstern lenke';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Avsnitt';
+  @override
+  String get menuInsert => 'Sett inn';
+  @override
+  String get menuBody => 'Brødtekst';
+  @override
+  String get formatSubscript => 'Senket';
+  @override
+  String get formatInlineCode => 'Kode';
+  @override
+  String get insertFootnote => 'Fotnote';
+  @override
+  String get insertRule => 'Horisontal linje';
+  @override
+  String get insertCodeBlock => 'Kodeblokk';
+  @override
+  String get insertMathBlock => 'Matematikkblokk';
+  @override
+  String get menuHeadingWord => 'Overskrift';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';
   @override
   String get toolbarOrderedList => 'Nummerert liste';
+  @override
+  String get toolbarChecklist => 'Sjekkliste';
   @override
   String get toolbarQuote => 'Sitat';
   @override
@@ -542,11 +637,6 @@ final class NorwegianStrings extends Strings {
   String get showPreviewTooltip => 'Vis forhåndsvising';
   @override
   String get showEditorTooltip => 'Vis editor';
-  @override
-  String get enterFullScreenTooltip => 'Fullskjerm';
-  @override
-  String get exitFullScreenTooltip => 'Forlat fullskjerm';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(rå HTML-tabell)';

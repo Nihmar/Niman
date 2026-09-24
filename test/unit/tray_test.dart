@@ -26,8 +26,13 @@ void main() {
   // the desktop the item has no menu.
   test('Linux opens the menu on the click; Windows on the right one', () {
     expect(trayContextMenuTrigger(isLinux: true), ContextMenuTrigger.clicked);
+    // Windows opens its own popup on the right click (WindowsTrayMenu).
     expect(
-      trayContextMenuTrigger(isLinux: false),
+      trayContextMenuTrigger(isLinux: false, isWindows: true),
+      ContextMenuTrigger.none,
+    );
+    expect(
+      trayContextMenuTrigger(isLinux: false, isWindows: false),
       ContextMenuTrigger.rightClicked,
     );
   });

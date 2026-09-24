@@ -130,11 +130,6 @@ final class SerbianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Искључено';
   @override
-  String get settingsPreviewEnabledTitle => 'Преглед';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Приказује обележану белешку поред уредитеља извора';
-  @override
   String get switchToWysiwygTooltip => 'Пређи на WYSIWYG уредитељ';
   @override
   String get switchToSourceTooltip => 'Пређи на Markdown извор';
@@ -143,10 +138,6 @@ final class SerbianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ова белешка је превелика за WYSIWYG уредитељ. Отворите је у '
-      'Markdown извору.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Изглед';
@@ -276,20 +267,6 @@ final class SerbianStrings extends Strings {
       'Уредитељ и преглед, који су увек у складу';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Начин прегледа';
-  @override
-  String get previewModeSubtitle =>
-      'Да ли преглед дели екран са уредитељем или га замењује';
-  @override
-  String get previewModeAuto => 'Један поред другог';
-  @override
-  String get previewModeSwitch => 'Цели екран';
-  @override
-  String get splitRatioTitle => 'Ширина поделе';
-  @override
-  String get splitRatioSubtitle => 'Удео уредитеља када је преглед поред њега';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат везе';
@@ -475,11 +452,131 @@ final class SerbianStrings extends Strings {
   @override
   String get toolbarImage => 'Уметни слику';
   @override
+  String get toolbarTable => 'Табела';
+  @override
+  String get tableRow => 'Ред';
+  @override
+  String get tableColumn => 'Колона';
+  @override
+  String get tableAddRowAbove => 'Уметни ред изнад';
+  @override
+  String get tableAddRowBelow => 'Уметни ред испод';
+  @override
+  String get tableMoveRowUp => 'Помери ред горе';
+  @override
+  String get tableMoveRowDown => 'Помери ред доле';
+  @override
+  String get tableDuplicateRow => 'Дуплирај ред';
+  @override
+  String get tableDeleteRow => 'Обриши ред';
+  @override
+  String get tableAddColumnLeft => 'Уметни колону лево';
+  @override
+  String get tableAddColumnRight => 'Уметни колону десно';
+  @override
+  String get tableMoveColumnLeft => 'Помери колону лево';
+  @override
+  String get tableMoveColumnRight => 'Помери колону десно';
+  @override
+  String get tableAlignLeft => 'Поравнај лево';
+  @override
+  String get tableAlignCenter => 'Центрирај';
+  @override
+  String get tableAlignRight => 'Поравнај десно';
+  @override
+  String get tableDuplicateColumn => 'Дуплирај колону';
+  @override
+  String get tableDeleteColumn => 'Обриши колону';
+  @override
+  String get tableSortAscending => 'Сортирај по колони (А → Ш)';
+  @override
+  String get tableSortDescending => 'Сортирај по колони (Ш → А)';
+  @override
+  String get tableAddRow => 'Додај ред';
+  @override
+  String get tableAddColumn => 'Додај колону';
+  @override
+  String get cheatsheetTitle => 'Подсетник за Markdown';
+  @override
+  String get cheatsheetCopy => 'Копирај';
+  @override
+  String get cheatsheetCopied => 'Копирано';
+  @override
+  String get cheatsheetInsert => 'Уметни у белешку';
+  @override
+  String get cheatsheetWritten => 'Написано';
+  @override
+  String get cheatsheetShown => 'Приказано';
+  @override
+  String get cheatHeadings => 'Наслови';
+  @override
+  String get cheatEmphasis => 'Подебљано, курзив, прецртано';
+  @override
+  String get cheatHtmlFormats => 'Подвучено, експонент, индекс';
+  @override
+  String get cheatLists => 'Листе';
+  @override
+  String get cheatChecklists => 'Контролне листе';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Везе';
+  @override
+  String get cheatWikilinks => 'Везе ка белешкама';
+  @override
+  String get cheatEmbeds => 'Слике и уграђивања';
+  @override
+  String get cheatTags => 'Ознаке';
+  @override
+  String get cheatInlineCode => 'Кôд у реченици';
+  @override
+  String get cheatCodeBlocks => 'Блокови кôда';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Табеле';
+  @override
+  String get cheatFootnotes => 'Фусноте';
+  @override
+  String get cheatRule => 'Хоризонтална линија';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Чувари места у шаблонима';
+  @override
+  String get menuAddLink => 'Додај везу';
+  @override
+  String get menuAddExternalLink => 'Додај спољну везу';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Пасус';
+  @override
+  String get menuInsert => 'Уметни';
+  @override
+  String get menuBody => 'Обичан текст';
+  @override
+  String get formatSubscript => 'Индекс';
+  @override
+  String get formatInlineCode => 'Кôд';
+  @override
+  String get insertFootnote => 'Фуснота';
+  @override
+  String get insertRule => 'Хоризонтална линија';
+  @override
+  String get insertCodeBlock => 'Блок кôда';
+  @override
+  String get insertMathBlock => 'Математички блок';
+  @override
+  String get menuHeadingWord => 'Наслов';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Списак';
   @override
   String get toolbarOrderedList => 'Бројчани списак';
+  @override
+  String get toolbarChecklist => 'Контролна листа';
   @override
   String get toolbarQuote => 'Цитат';
   @override
@@ -547,11 +644,6 @@ final class SerbianStrings extends Strings {
   String get showPreviewTooltip => 'Прикажи преглед';
   @override
   String get showEditorTooltip => 'Прикажи уредитељ';
-  @override
-  String get enterFullScreenTooltip => 'Цели екран';
-  @override
-  String get exitFullScreenTooltip => 'Изађи из целог екрана';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(HTML табела извора)';

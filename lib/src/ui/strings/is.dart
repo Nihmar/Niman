@@ -126,11 +126,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get settingsToggleOff => 'Slökkt';
   @override
-  String get settingsPreviewEnabledTitle => 'Forsýning';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Sýnir formgerða athugasraðuna við hlið ritara upprunatextans';
-  @override
   String get switchToWysiwygTooltip => 'Skipta yfir í WYSIWYG ritara';
   @override
   String get switchToSourceTooltip => 'Skipta yfir í Markdown upprunatexta';
@@ -139,10 +134,6 @@ final class IcelandicStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Þetta minnisblað er of stórt fyrir WYSIWYG-ritilinn. Opnaðu það í '
-      'Markdown upprunatexta.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Útlit';
@@ -270,21 +261,6 @@ final class IcelandicStrings extends Strings {
   String get noteTextScaleSubtitle => 'Ritari og forsýning, alltaf samstilltir';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Forsýningarhamur';
-  @override
-  String get previewModeSubtitle =>
-      'Hvort forsýningin deilir skjánum við ritara eða tekur sæti hans';
-  @override
-  String get previewModeAuto => 'Hlið við hlið';
-  @override
-  String get previewModeSwitch => 'Heilskjár';
-  @override
-  String get splitRatioTitle => 'Skilhlutfall';
-  @override
-  String get splitRatioSubtitle =>
-      'Hluti ritara þegar forsýningin er við hlið hans';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Tengjaform';
@@ -470,11 +446,131 @@ final class IcelandicStrings extends Strings {
   @override
   String get toolbarImage => 'Setja inn mynd';
   @override
+  String get toolbarTable => 'Tafla';
+  @override
+  String get tableRow => 'Röð';
+  @override
+  String get tableColumn => 'Dálkur';
+  @override
+  String get tableAddRowAbove => 'Setja inn röð fyrir ofan';
+  @override
+  String get tableAddRowBelow => 'Setja inn röð fyrir neðan';
+  @override
+  String get tableMoveRowUp => 'Færa röð upp';
+  @override
+  String get tableMoveRowDown => 'Færa röð niður';
+  @override
+  String get tableDuplicateRow => 'Tvöfalda röð';
+  @override
+  String get tableDeleteRow => 'Eyða röð';
+  @override
+  String get tableAddColumnLeft => 'Setja inn dálk til vinstri';
+  @override
+  String get tableAddColumnRight => 'Setja inn dálk til hægri';
+  @override
+  String get tableMoveColumnLeft => 'Færa dálk til vinstri';
+  @override
+  String get tableMoveColumnRight => 'Færa dálk til hægri';
+  @override
+  String get tableAlignLeft => 'Vinstrijafna';
+  @override
+  String get tableAlignCenter => 'Miðja';
+  @override
+  String get tableAlignRight => 'Hægrijafna';
+  @override
+  String get tableDuplicateColumn => 'Tvöfalda dálk';
+  @override
+  String get tableDeleteColumn => 'Eyða dálki';
+  @override
+  String get tableSortAscending => 'Raða eftir dálki (A → Ö)';
+  @override
+  String get tableSortDescending => 'Raða eftir dálki (Ö → A)';
+  @override
+  String get tableAddRow => 'Bæta við röð';
+  @override
+  String get tableAddColumn => 'Bæta við dálki';
+  @override
+  String get cheatsheetTitle => 'Markdown-minnisblað';
+  @override
+  String get cheatsheetCopy => 'Afrita';
+  @override
+  String get cheatsheetCopied => 'Afritað';
+  @override
+  String get cheatsheetInsert => 'Setja inn í minnismiðann';
+  @override
+  String get cheatsheetWritten => 'Skrifað';
+  @override
+  String get cheatsheetShown => 'Birt';
+  @override
+  String get cheatHeadings => 'Fyrirsagnir';
+  @override
+  String get cheatEmphasis => 'Feitletrað, skáletrað, yfirstrikað';
+  @override
+  String get cheatHtmlFormats => 'Undirstrikað, hávísir, lágvísir';
+  @override
+  String get cheatLists => 'Listar';
+  @override
+  String get cheatChecklists => 'Gátlistar';
+  @override
+  String get cheatQuotes => 'Tilvitnanir';
+  @override
+  String get cheatLinks => 'Tenglar';
+  @override
+  String get cheatWikilinks => 'Tenglar í minnismiða';
+  @override
+  String get cheatEmbeds => 'Myndir og ívafningar';
+  @override
+  String get cheatTags => 'Merki';
+  @override
+  String get cheatInlineCode => 'Kóði í setningu';
+  @override
+  String get cheatCodeBlocks => 'Kóðablokkir';
+  @override
+  String get cheatMath => 'Stærðfræði';
+  @override
+  String get cheatTables => 'Töflur';
+  @override
+  String get cheatFootnotes => 'Neðanmálsgreinar';
+  @override
+  String get cheatRule => 'Lárétt lína';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Staðgenglar sniðmáta';
+  @override
+  String get menuAddLink => 'Bæta við tengli';
+  @override
+  String get menuAddExternalLink => 'Bæta við ytri tengli';
+  @override
+  String get menuFormat => 'Snið';
+  @override
+  String get menuParagraph => 'Málsgrein';
+  @override
+  String get menuInsert => 'Setja inn';
+  @override
+  String get menuBody => 'Meginmál';
+  @override
+  String get formatSubscript => 'Lágvísir';
+  @override
+  String get formatInlineCode => 'Kóði';
+  @override
+  String get insertFootnote => 'Neðanmálsgrein';
+  @override
+  String get insertRule => 'Lárétt lína';
+  @override
+  String get insertCodeBlock => 'Kóðablokk';
+  @override
+  String get insertMathBlock => 'Stærðfræðiblokk';
+  @override
+  String get menuHeadingWord => 'Fyrirsögn';
+  @override
   String get toolbarHeading => 'Titill';
   @override
   String get toolbarList => 'Listi';
   @override
   String get toolbarOrderedList => 'Talnalista';
+  @override
+  String get toolbarChecklist => 'Gátlisti';
   @override
   String get toolbarQuote => 'Vist';
   @override
@@ -543,11 +639,6 @@ final class IcelandicStrings extends Strings {
   String get showPreviewTooltip => 'Sýna forsýningu';
   @override
   String get showEditorTooltip => 'Sýna ritara';
-  @override
-  String get enterFullScreenTooltip => 'Heilskjár';
-  @override
-  String get exitFullScreenTooltip => 'Hætta í heilskjá';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(hálfraðinn HTML borð)';

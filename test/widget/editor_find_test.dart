@@ -1,14 +1,9 @@
-// The classic in-editor find & replace bar (re_editor find machinery +
-// NimanFindPanel): opens from the status-row action, expands to the
-// replace row, and closes back to a clean editor.
-//
-// Note: typing a pattern starts the package's isolate-backed search, which
-// does not run under the fake-async test zone — these tests exercise the
-// bar's structure and state toggles, not the match results.
+// The in-editor find & replace bar: opens from the status-row action,
+// expands to the replace row, and closes back to a clean editor. The
+// matches themselves are source_find_bar_test.dart's.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/note_view.dart';
-import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
 
@@ -28,19 +23,19 @@ void main() {
     await tester.pump();
     await tester.pump();
     // Closed: no bar.
-    expect(find.byKey(const Key('editor-find-input')), findsNothing);
+    expect(find.byKey(const Key('source-find-input')), findsNothing);
 
     await tester.tap(find.byKey(const Key('editor-find-open')));
     await tester.pump();
     await tester.pump();
     // Find row open, replace row hidden.
-    expect(find.byKey(const Key('editor-find-input')), findsOneWidget);
-    expect(find.byKey(const Key('editor-replace-input')), findsNothing);
+    expect(find.byKey(const Key('source-find-input')), findsOneWidget);
+    expect(find.byKey(const Key('source-replace-input')), findsNothing);
 
-    await tester.tap(find.byKey(const Key('editor-find-mode')));
+    await tester.tap(find.byKey(const Key('source-find-mode')));
     await tester.pump();
     await tester.pump();
-    expect(find.byKey(const Key('editor-replace-input')), findsOneWidget);
+    expect(find.byKey(const Key('source-replace-input')), findsOneWidget);
     // Still one editor only.
     expect(find.byType(NoteView), findsOneWidget);
   });
@@ -54,13 +49,13 @@ void main() {
     await tester.tap(find.byKey(const Key('editor-find-open')));
     await tester.pump();
     await tester.pump();
-    expect(find.byKey(const Key('editor-find-input')), findsOneWidget);
+    expect(find.byKey(const Key('source-find-input')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('editor-find-close')));
+    await tester.tap(find.byKey(const Key('source-find-close')));
     await tester.pump();
     await tester.pump();
-    expect(find.byKey(const Key('editor-find-input')), findsNothing);
-    expect(find.byKey(const Key('editor-replace-input')), findsNothing);
+    expect(find.byKey(const Key('source-find-input')), findsNothing);
+    expect(find.byKey(const Key('source-replace-input')), findsNothing);
     // Closing refocuses the editor: release the focus (stops the cursor
     // blink) and let the one-shot focus timer fire before the invariant
     // check.
@@ -71,25 +66,17 @@ void main() {
   testWidgets('the find button keeps the keyboard up through the tap', (
     tester,
   ) async {
-    // With the keyboard up, tapping find closed it on tap-down (the
-    // button sat outside the editor's tap region) and the find field
-    // reopened it a frame later. The button joins the region like the
-    // formatting toolbar, so focus moves straight to the find field.
+    // With the keyboard up, tapping find closed it on tap-down and the
+    // find field reopened it a frame later: focus moves straight to the
+    // find field instead.
     await tester.pumpWidget(_app(_view()));
     await tester.pump();
     await tester.pump();
-    expect(
-      find.ancestor(
-        of: find.byKey(const Key('editor-find-open')),
-        matching: find.byType(CodeEditorTapRegion),
-      ),
-      findsOneWidget,
-    );
 
     await tester.tap(find.byKey(const Key('editor-find-open')));
     await tester.pump();
     await tester.pump();
-    final input = find.byKey(const Key('editor-find-input'));
+    final input = find.byKey(const Key('source-find-input'));
     expect(input, findsOneWidget);
     expect(tester.widget<TextField>(input).focusNode?.hasFocus, isTrue);
 

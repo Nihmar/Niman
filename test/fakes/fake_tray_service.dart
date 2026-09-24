@@ -24,6 +24,11 @@ final class FakeTrayService implements TrayService {
   String? openLabel;
   String? quitLabel;
 
+  /// Whether the icon made it on screen; a test sets it false to play a
+  /// host that declined it.
+  @override
+  bool shown = true;
+
   /// Delivers a click on the icon itself.
   void activate() => _activated.add(null);
 

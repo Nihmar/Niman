@@ -1,0 +1,503 @@
+# Niman crash report
+# captured: 2026-09-22T07:21:28.770065
+
+flutter error
+RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+#0      State.widget (package:flutter/src/widgets/framework.dart)
+#1      MarkdownSourceViewState._estimate (package:niman/src/markdown/render/source_view.dart:724)
+#2      new BlockHeightMap (package:niman/src/markdown/render/block_height_map.dart:38)
+#3      MarkdownSourceViewState._map (package:niman/src/markdown/render/source_view.dart:694)
+#4      MarkdownSourceViewState.initState.<anonymous closure>.<anonymous closure> (package:niman/src/markdown/render/source_view.dart:222)
+#5      State.setState (package:flutter/src/widgets/framework.dart:1201)
+#6      MarkdownSourceViewState.initState.<anonymous closure> (package:niman/src/markdown/render/source_view.dart:221)
+#7      SourceInput._apply (package:niman/src/markdown/edit/source_input.dart:179)
+#8      SourceInput._replace (package:niman/src/markdown/edit/source_input.dart:202)
+#9      SourceInput.updateEditingValueWithDeltas (package:niman/src/markdown/edit/source_input.dart:273)
+#10     TextInput._handleTextInputInvocation (package:flutter/src/services/text_input.dart:2274)
+#11     TextInput._loudlyHandleTextInputInvocation (package:flutter/src/services/text_input.dart:2145)
+#12     MethodChannel._handleAsMethodCall (package:flutter/src/services/platform_channel.dart:607)
+#13     MethodChannel.setMethodCallHandler.<anonymous closure> (package:flutter/src/services/platform_channel.dart:597)
+#14     _DefaultBinaryMessenger.setMessageHandler.<anonymous closure> (package:flutter/src/services/binding.dart:664)
+#15     _invoke2 (dart:ui/hooks.dart:473)
+#16     _ChannelCallbackRecord.invoke (dart:ui/channel_buffers.dart:45)
+#17     _Channel.push (dart:ui/channel_buffers.dart:136)
+#18     ChannelBuffers.push (dart:ui/channel_buffers.dart:344)
+#19     PlatformDispatcher._dispatchPlatformMessage (dart:ui/platform_dispatcher.dart:825)
+#20     _dispatchPlatformMessage (dart:ui/hooks.dart:369)
+
+
+--- AppLog buffer (oldest first) ---
+2026-09-22 07:21:00.821 INFO [log] log file attached: /home/alessandro/.local/share/dev.niman.niman/niman-log.txt
+2026-09-22 07:21:00.828 INFO [instance] no session answering (SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = 127.0.0.1, port = 36660)
+2026-09-22 07:21:00.839 INFO [instance] first instance, listening on 41685
+2026-09-22 07:21:00.860 INFO [tray] tray ready (5 actions)
+2026-09-22 07:21:00.860 INFO [session] resume: lastLibraryPath=/home/alessandro/Vaults/Libraries/Notes
+2026-09-22 07:21:00.860 INFO [session] open start: /home/alessandro/Vaults/Libraries/Notes create=false blockingScan=false
+2026-09-22 07:21:00.861 INFO [watcher] watcher start: "/home/alessandro/Vaults/Libraries/Notes" (recursive)
+2026-09-22 07:21:00.861 INFO [session] open: watcher started for /home/alessandro/Vaults/Libraries/Notes
+2026-09-22 07:21:00.910 INFO [transcription] settings loaded in 67 ms: model -, language app (no file)
+2026-09-22 07:21:00.913 INFO [transcription] models scanned in 2 ms: installed none; partial none
+2026-09-22 07:21:00.913 INFO [transcription] loaded in 69 ms: 0 installed (0 b), 0 interrupted, default -
+2026-09-22 07:21:00.924 INFO [theme] device colors: system accent
+2026-09-22 07:21:00.931 INFO [session] open complete: ready root=/home/alessandro/Vaults/Libraries/Notes
+2026-09-22 07:21:00.934 INFO [todo] todo open: root=/home/alessandro/Vaults/Libraries/Notes
+2026-09-22 07:21:00.936 DEBUG [tree.ui] mount
+2026-09-22 07:21:00.940 DEBUG [tree.ui] flatten: 4ms (13 rows, 0 pinned)
+2026-09-22 07:21:00.943 INFO [todo] todo migrate: open 5->5, done 16->16
+2026-09-22 07:21:00.943 INFO [window] custom title bar applied
+2026-09-22 07:21:00.943 INFO [window] window controller ready
+2026-09-22 07:21:00.949 INFO [todo] todo reload: 5 open, 16 done
+2026-09-22 07:21:00.949 DEBUG [widgets] todo refresh: placed=[]
+2026-09-22 07:21:00.949 INFO [todo] todo reminders: 0 pending at startup []
+2026-09-22 07:21:00.949 INFO [todo] todo reminders: reconcile 0 wanted, notifications allowed, alarms inexact, battery unrestricted
+2026-09-22 07:21:00.949 INFO [todo] todo reminders reconciled: 0 scheduled
+2026-09-22 07:21:00.949 INFO [sync] scheduler: start (network unmetered, phone false)
+2026-09-22 07:21:00.950 INFO [sync] scheduler: periodic full sync every 60s
+2026-09-22 07:21:00.950 INFO [sync] scheduler: full sync (library opened)
+2026-09-22 07:21:00.950 INFO [sync] run: full start for /home/alessandro/Vaults/Libraries/Notes (0 queued hints)
+2026-09-22 07:21:00.972 INFO [spellcheck] hunspell ready: /home/alessandro/.local/share/hunspell/en_US.dic
+2026-09-22 07:21:00.983 DEBUG [sync] secret: read for /home/alessandro/Vaults/Libraries/Notes: present
+2026-09-22 07:21:00.983 DEBUG [sync] capabilities: stored, no file etags (size + mtime, hash on doubt); no collection etags (Depth 1 per folder); no If-Match (PROPFIND before PUT); no If-None-Match (PROPFIND before PUT); no MOVE (DELETE + PUT); no file ids (renames = delete + create); no checksums (sha256 while streaming); no X-OC-Mtime (server's mtime)
+2026-09-22 07:21:00.985 DEBUG [editor] edit session 1: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md
+2026-09-22 07:21:00.986 INFO [editor] note loaded: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (105 chars, 23 ms)
+2026-09-22 07:21:01.000 DEBUG [editor] note open first frame (105 chars): first frame 14.07ms after call
+2026-09-22 07:21:01.009 INFO [spellcheck] hunspell ready: /home/alessandro/.local/share/hunspell/en_US.dic
+2026-09-22 07:21:01.009 DEBUG [read] scan: 1 blocks, 1 lines in 0ms
+2026-09-22 07:21:01.034 INFO [read] first content: 1 blocks, 1 built, 21ms after the view was created
+2026-09-22 07:21:01.052 DEBUG [read] scan: 8 blocks, 13 lines in 0ms
+2026-09-22 07:21:01.560 INFO [webdav] PROPFIND / -> 207, depth 1, 14 items, 4501 chars, 574 ms
+2026-09-22 07:21:01.610 INFO [webdav] PROPFIND Lists -> 207, depth 1, 4 items, 1372 chars, 49 ms
+2026-09-22 07:21:01.643 INFO [webdav] PROPFIND assets -> 207, depth 1, 2 items, 765 chars, 33 ms
+2026-09-22 07:21:01.678 INFO [webdav] PROPFIND Attachments -> 207, depth 1, 11 items, 4324 chars, 34 ms
+2026-09-22 07:21:01.678 INFO [sync] scan: 25 local files, 24 remote files, 4 remote folders known, 25 of 25 agreed rows (694 ms)
+2026-09-22 07:21:01.678 INFO [sync] plan: upload 1 (0 destructive of 25 rows)
+2026-09-22 07:21:01.678 DEBUG [sync] plan: upload .niman/settings.json: local same size and mtime; remote deleted
+2026-09-22 07:21:01.713 INFO [webdav] PROPFIND .niman/settings.json -> 207, depth 0, 1 items, 419 chars, 33 ms
+2026-09-22 07:21:01.713 INFO [sync] apply: skipped upload ".niman/settings.json": a side changed during the run, decided again next time
+2026-09-22 07:21:01.715 INFO [sync] destination: sync of /home/alessandro/Vaults/Libraries/Notes succeeded
+2026-09-22 07:21:01.715 INFO [sync] run: full done for /home/alessandro/Vaults/Libraries/Notes in 765 ms: 1 skipped
+2026-09-22 07:21:01.942 WARNING [frames] slow frame: total 23.7 ms (build 5.7 ms, raster 1.3 ms, vsync 16.6 ms)
+2026-09-22 07:21:01.942 WARNING [frames] slow frame: total 30.9 ms (build 17.6 ms, raster 2.1 ms, vsync 11.2 ms)
+2026-09-22 07:21:01.942 WARNING [frames] slow frame: total 33.3 ms (build 31.5 ms, raster 1.7 ms, vsync 0.1 ms)
+2026-09-22 07:21:03.871 INFO [edit] attach: connecting the keyboard to the note
+2026-09-22 07:21:05.932 INFO [session] periodic rescan start: /home/alessandro/Vaults/Libraries/Notes
+2026-09-22 07:21:05.933 DEBUG [isolate] #1 start: walk "/home/alessandro/Vaults/Libraries/Notes" (in flight 1, peak 1)
+2026-09-22 07:21:05.934 DEBUG [isolate] #1 done: walk "/home/alessandro/Vaults/Libraries/Notes" (1 ms, in flight 0)
+2026-09-22 07:21:05.934 DEBUG [indexer] walk: skip hidden entry ".history"
+2026-09-22 07:21:05.934 DEBUG [indexer] walk: skip hidden entry ".niman"
+2026-09-22 07:21:05.934 DEBUG [indexer] walk: skip hidden entry ".trash"
+2026-09-22 07:21:05.934 INFO [indexer] fullScan /home/alessandro/Vaults/Libraries/Notes: found 27 entr(ies) (24 file, 3 dir)
+2026-09-22 07:21:05.934 DEBUG [indexer] fullScan entries: 27 path(s)
+2026-09-22 07:21:05.939 INFO [indexer] fullScan: index already mirrors disk, no write
+2026-09-22 07:21:05.939 INFO [session] periodic rescan complete
+2026-09-22 07:21:13.511 INFO [editor] save start: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (106 chars, join 0 ms, session 1)
+2026-09-22 07:21:13.511 DEBUG [save] save start: "Quicknote.md" (106 chars, session 1, waited 0 ms)
+2026-09-22 07:21:13.511 DEBUG [isolate] #2 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 07:21:13.513 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054473512389"
+2026-09-22 07:21:13.513 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054473512389"
+2026-09-22 07:21:13.515 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054473512389"
+2026-09-22 07:21:13.515 DEBUG [watcher] watcher event: move "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054473512389" -> /home/alessandro/Vaults/Libraries/Notes/Quicknote.md
+2026-09-22 07:21:13.515 DEBUG [isolate] #2 done: write "Quicknote.md" (3 ms, in flight 0)
+2026-09-22 07:21:13.515 DEBUG [history] snapshot "Quicknote.md": skip (unchanged since v25) in 0 ms
+2026-09-22 07:21:13.515 INFO [save] saved: "Quicknote.md" (106 bytes, encode 0 ms, write 2 ms, total 3 ms)
+2026-09-22 07:21:13.515 INFO [editor] note saved: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (106 chars, 3 ms)
+2026-09-22 07:21:13.515 DEBUG [isolate] #3 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:13.516 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:13.518 DEBUG [isolate] #3 done: probe 1 path(s) (2 ms, in flight 0)
+2026-09-22 07:21:13.518 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 07:21:13.519 DEBUG [read] scan: 8 blocks, 13 lines in 0ms
+2026-09-22 07:21:13.528 DEBUG [save] reindexed: "Quicknote.md" (13 ms)
+2026-09-22 07:21:13.528 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:13.540 DEBUG [tree.ui] flatten: 4ms (13 rows, 0 pinned)
+2026-09-22 07:21:13.764 DEBUG [session] watch batch: 2 path(s), 1 resync dir(s)
+2026-09-22 07:21:13.764 DEBUG [indexer] resync: skip "/home/alessandro/Vaults/Libraries/Notes" (outside root, root itself, or hidden)
+2026-09-22 07:21:13.764 DEBUG [indexer] applyEvents: skip "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054473512389" (outside root, root itself, or hidden)
+2026-09-22 07:21:13.764 DEBUG [isolate] #4 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:13.766 DEBUG [isolate] #4 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:13.766 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 07:21:13.766 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 07:21:13.766 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:13.771 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:13.832 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 07:21:18.773 INFO [sync] scheduler: quick sync (after edits)
+2026-09-22 07:21:18.773 INFO [sync] run: quick start for /home/alessandro/Vaults/Libraries/Notes (1 queued hints)
+2026-09-22 07:21:18.778 DEBUG [sync] secret: read for /home/alessandro/Vaults/Libraries/Notes: present
+2026-09-22 07:21:18.778 DEBUG [sync] capabilities: stored, no file etags (size + mtime, hash on doubt); no collection etags (Depth 1 per folder); no If-Match (PROPFIND before PUT); no If-None-Match (PROPFIND before PUT); no MOVE (DELETE + PUT); no file ids (renames = delete + create); no checksums (sha256 while streaming); no X-OC-Mtime (server's mtime)
+2026-09-22 07:21:18.855 INFO [webdav] PROPFIND / -> 207, depth 0, 1 items, 369 chars, 76 ms
+2026-09-22 07:21:18.890 INFO [webdav] PROPFIND Quicknote.md -> 207, depth 0, 1 items, 411 chars, 34 ms
+2026-09-22 07:21:18.890 INFO [sync] scan: quick, 1 local files, 1 remote files, 1 remote folders known, 1 of 25 agreed rows (112 ms)
+2026-09-22 07:21:18.893 INFO [sync] hash: 1 local, 0 remote (3 ms)
+2026-09-22 07:21:18.893 INFO [sync] plan: upload 1 (0 destructive of 25 rows)
+2026-09-22 07:21:18.893 DEBUG [sync] plan: upload Quicknote.md: local sha 679605c2→df8966a6; remote same size and mtime
+2026-09-22 07:21:18.928 INFO [webdav] PROPFIND Quicknote.md -> 207, depth 0, 1 items, 411 chars, 34 ms
+2026-09-22 07:21:18.965 INFO [webdav] PUT Quicknote.md -> 204, 106 b, 35 ms
+2026-09-22 07:21:19.001 INFO [webdav] PROPFIND Quicknote.md -> 207, depth 0, 1 items, 411 chars, 35 ms
+2026-09-22 07:21:19.006 INFO [history] sync base "Quicknote.md" -> v26 (df8966a6, kept as a new sync version, rotated out v15, 4 ms)
+2026-09-22 07:21:19.007 DEBUG [sync] items: recorded 1 (Quicknote.md)
+2026-09-22 07:21:19.007 INFO [sync] apply: upload Quicknote.md: local sha 679605c2→df8966a6; remote same size and mtime (113 ms)
+2026-09-22 07:21:19.008 DEBUG [sync] queue: done changed Quicknote.md
+2026-09-22 07:21:19.009 INFO [sync] destination: sync of /home/alessandro/Vaults/Libraries/Notes succeeded
+2026-09-22 07:21:19.009 INFO [sync] run: quick done for /home/alessandro/Vaults/Libraries/Notes in 235 ms: upload 1; hints 1 done, 0 backing off
+2026-09-22 07:21:19.591 INFO [editor] save start: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (120 chars, join 0 ms, session 1)
+2026-09-22 07:21:19.591 DEBUG [save] save start: "Quicknote.md" (120 chars, session 1, waited 0 ms)
+2026-09-22 07:21:19.591 DEBUG [isolate] #5 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 07:21:19.593 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054479592284"
+2026-09-22 07:21:19.593 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054479592284"
+2026-09-22 07:21:19.595 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054479592284"
+2026-09-22 07:21:19.595 DEBUG [watcher] watcher event: move "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054479592284" -> /home/alessandro/Vaults/Libraries/Notes/Quicknote.md
+2026-09-22 07:21:19.595 DEBUG [isolate] #5 done: write "Quicknote.md" (3 ms, in flight 0)
+2026-09-22 07:21:19.595 DEBUG [history] snapshot "Quicknote.md": skip (unchanged since v26) in 0 ms
+2026-09-22 07:21:19.595 INFO [save] saved: "Quicknote.md" (120 bytes, encode 0 ms, write 1 ms, total 3 ms)
+2026-09-22 07:21:19.595 INFO [editor] note saved: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (120 chars, 3 ms)
+2026-09-22 07:21:19.595 DEBUG [isolate] #6 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:19.596 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:19.597 DEBUG [isolate] #6 done: probe 1 path(s) (2 ms, in flight 0)
+2026-09-22 07:21:19.597 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 07:21:19.601 DEBUG [save] reindexed: "Quicknote.md" (6 ms)
+2026-09-22 07:21:19.601 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:19.605 DEBUG [read] scan: 8 blocks, 15 lines in 0ms
+2026-09-22 07:21:19.609 DEBUG [tree.ui] flatten: 4ms (13 rows, 0 pinned)
+2026-09-22 07:21:19.844 DEBUG [session] watch batch: 2 path(s), 1 resync dir(s)
+2026-09-22 07:21:19.844 DEBUG [indexer] resync: skip "/home/alessandro/Vaults/Libraries/Notes" (outside root, root itself, or hidden)
+2026-09-22 07:21:19.844 DEBUG [indexer] applyEvents: skip "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054479592284" (outside root, root itself, or hidden)
+2026-09-22 07:21:19.844 DEBUG [isolate] #7 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:19.846 DEBUG [isolate] #7 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:19.846 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 07:21:19.846 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 07:21:19.846 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:19.848 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:19.905 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 07:21:21.142 INFO [editor] save start: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (135 chars, join 0 ms, session 1)
+2026-09-22 07:21:21.142 DEBUG [save] save start: "Quicknote.md" (135 chars, session 1, waited 0 ms)
+2026-09-22 07:21:21.142 DEBUG [isolate] #8 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 07:21:21.144 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054481143299"
+2026-09-22 07:21:21.144 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054481143299"
+2026-09-22 07:21:21.146 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054481143299"
+2026-09-22 07:21:21.146 DEBUG [watcher] watcher event: move "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054481143299" -> /home/alessandro/Vaults/Libraries/Notes/Quicknote.md
+2026-09-22 07:21:21.146 DEBUG [isolate] #8 done: write "Quicknote.md" (3 ms, in flight 0)
+2026-09-22 07:21:21.146 DEBUG [history] snapshot "Quicknote.md": skip (v26 is 2 s old, interval 300 s not reached) in 0 ms
+2026-09-22 07:21:21.146 INFO [save] saved: "Quicknote.md" (135 bytes, encode 0 ms, write 1 ms, total 3 ms)
+2026-09-22 07:21:21.146 INFO [editor] note saved: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (135 chars, 3 ms)
+2026-09-22 07:21:21.146 DEBUG [isolate] #9 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:21.147 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:21.148 DEBUG [isolate] #9 done: probe 1 path(s) (2 ms, in flight 0)
+2026-09-22 07:21:21.148 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 07:21:21.153 DEBUG [save] reindexed: "Quicknote.md" (6 ms)
+2026-09-22 07:21:21.153 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:21.155 DEBUG [read] scan: 8 blocks, 16 lines in 0ms
+2026-09-22 07:21:21.159 DEBUG [tree.ui] flatten: 4ms (13 rows, 0 pinned)
+2026-09-22 07:21:21.395 DEBUG [session] watch batch: 2 path(s), 1 resync dir(s)
+2026-09-22 07:21:21.395 DEBUG [indexer] resync: skip "/home/alessandro/Vaults/Libraries/Notes" (outside root, root itself, or hidden)
+2026-09-22 07:21:21.395 DEBUG [indexer] applyEvents: skip "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054481143299" (outside root, root itself, or hidden)
+2026-09-22 07:21:21.395 DEBUG [isolate] #10 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:21.397 DEBUG [isolate] #10 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:21.397 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 07:21:21.397 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 07:21:21.397 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:21.399 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:21.456 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 07:21:24.246 INFO [editor] save start: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (270 chars, join 0 ms, session 1)
+2026-09-22 07:21:24.246 DEBUG [save] save start: "Quicknote.md" (270 chars, session 1, waited 0 ms)
+2026-09-22 07:21:24.246 DEBUG [isolate] #11 start: write "Quicknote.md" (in flight 1, peak 1)
+2026-09-22 07:21:24.248 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054484247331"
+2026-09-22 07:21:24.248 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054484247331"
+2026-09-22 07:21:24.250 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054484247331"
+2026-09-22 07:21:24.250 DEBUG [watcher] watcher event: move "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054484247331" -> /home/alessandro/Vaults/Libraries/Notes/Quicknote.md
+2026-09-22 07:21:24.250 DEBUG [isolate] #11 done: write "Quicknote.md" (3 ms, in flight 0)
+2026-09-22 07:21:24.250 DEBUG [history] snapshot "Quicknote.md": skip (v26 is 5 s old, interval 300 s not reached) in 0 ms
+2026-09-22 07:21:24.250 INFO [save] saved: "Quicknote.md" (270 bytes, encode 0 ms, write 1 ms, total 3 ms)
+2026-09-22 07:21:24.250 INFO [editor] note saved: /home/alessandro/Vaults/Libraries/Notes/Quicknote.md (270 chars, 3 ms)
+2026-09-22 07:21:24.250 DEBUG [isolate] #12 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:24.251 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:24.253 DEBUG [read] scan: 14 blocks, 31 lines in 0ms
+2026-09-22 07:21:24.256 DEBUG [isolate] #12 done: probe 1 path(s) (6 ms, in flight 0)
+2026-09-22 07:21:24.256 DEBUG [indexer] contents: reading 1 note(s)
+2026-09-22 07:21:24.261 DEBUG [save] reindexed: "Quicknote.md" (11 ms)
+2026-09-22 07:21:24.261 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:24.273 DEBUG [tree.ui] flatten: 4ms (13 rows, 0 pinned)
+2026-09-22 07:21:24.499 DEBUG [session] watch batch: 2 path(s), 1 resync dir(s)
+2026-09-22 07:21:24.499 DEBUG [indexer] resync: skip "/home/alessandro/Vaults/Libraries/Notes" (outside root, root itself, or hidden)
+2026-09-22 07:21:24.499 DEBUG [indexer] applyEvents: skip "/home/alessandro/Vaults/Libraries/Notes/.Quicknote.md.niman-tmp-1790054484247331" (outside root, root itself, or hidden)
+2026-09-22 07:21:24.499 DEBUG [isolate] #13 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:24.501 DEBUG [isolate] #13 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:24.501 DEBUG [indexer] applyEvents: "Quicknote.md" -> upsert file
+2026-09-22 07:21:24.501 DEBUG [indexer] upsert "Quicknote.md": unchanged
+2026-09-22 07:21:24.501 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:24.503 INFO [sync] queue: changed Quicknote.md
+2026-09-22 07:21:24.565 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 07:21:24.753 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:24.760 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.761 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.761 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.762 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:24.769 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:24.775 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 26
+2026-09-22 07:21:24.778 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 27
+2026-09-22 07:21:24.782 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 28
+2026-09-22 07:21:24.786 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 29
+2026-09-22 07:21:24.790 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 30
+2026-09-22 07:21:24.799 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.801 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.801 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.803 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt"
+2026-09-22 07:21:24.803 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:24.803 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:24.803 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:24.803 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:24.803 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:24.803 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072124.txt
+2026-09-22 07:21:25.012 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:25.012 DEBUG [isolate] #14 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:25.013 DEBUG [isolate] #14 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:25.013 DEBUG [indexer] applyEvents: "niman-crash-20260922-072124.txt" -> upsert file
+2026-09-22 07:21:25.013 DEBUG [indexer] upsert "niman-crash-20260922-072124.txt": insert (parent "")
+2026-09-22 07:21:25.016 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:25.016 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:25.018 INFO [sync] queue: changed niman-crash-20260922-072124.txt
+2026-09-22 07:21:25.039 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:25.046 DEBUG [tree.ui] flatten: 10ms (14 rows, 0 pinned)
+2026-09-22 07:21:25.049 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.050 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.051 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.054 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt
+2026-09-22 07:21:25.106 WARNING [frames] slow frame: total 29.0 ms (build 26.2 ms, raster 0.8 ms, vsync 2.0 ms)
+2026-09-22 07:21:25.301 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:25.301 DEBUG [isolate] #15 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:25.303 DEBUG [isolate] #15 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:25.303 DEBUG [indexer] applyEvents: "niman-crash-20260922-072125.txt" -> upsert file
+2026-09-22 07:21:25.303 DEBUG [indexer] upsert "niman-crash-20260922-072125.txt": insert (parent "")
+2026-09-22 07:21:25.306 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:25.306 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:25.307 INFO [sync] queue: changed niman-crash-20260922-072125.txt
+2026-09-22 07:21:25.322 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:25.330 DEBUG [tree.ui] flatten: 11ms (15 rows, 0 pinned)
+2026-09-22 07:21:25.333 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.333 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.339 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.339 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt
+2026-09-22 07:21:25.584 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:25.584 DEBUG [isolate] #16 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:25.586 DEBUG [isolate] #16 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:25.586 DEBUG [indexer] applyEvents: "niman-crash-20260922-072125.txt" -> upsert file
+2026-09-22 07:21:25.586 DEBUG [indexer] upsert "niman-crash-20260922-072125.txt": update (parent "")
+2026-09-22 07:21:25.588 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:25.588 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:25.589 INFO [sync] queue: changed niman-crash-20260922-072125.txt
+2026-09-22 07:21:25.604 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:25.611 DEBUG [tree.ui] flatten: 9ms (15 rows, 0 pinned)
+2026-09-22 07:21:25.614 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.615 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.615 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.616 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt
+2026-09-22 07:21:25.865 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:25.865 DEBUG [isolate] #17 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:25.867 DEBUG [isolate] #17 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:25.867 DEBUG [indexer] applyEvents: "niman-crash-20260922-072125.txt" -> upsert file
+2026-09-22 07:21:25.867 DEBUG [indexer] upsert "niman-crash-20260922-072125.txt": update (parent "")
+2026-09-22 07:21:25.869 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:25.869 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:25.870 INFO [sync] queue: changed niman-crash-20260922-072125.txt
+2026-09-22 07:21:25.888 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:25.895 DEBUG [tree.ui] flatten: 9ms (15 rows, 0 pinned)
+2026-09-22 07:21:25.898 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.898 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.900 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt"
+2026-09-22 07:21:25.900 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072125.txt
+2026-09-22 07:21:26.149 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:26.149 DEBUG [isolate] #18 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:26.151 DEBUG [isolate] #18 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:26.151 DEBUG [indexer] applyEvents: "niman-crash-20260922-072125.txt" -> upsert file
+2026-09-22 07:21:26.151 DEBUG [indexer] upsert "niman-crash-20260922-072125.txt": update (parent "")
+2026-09-22 07:21:26.153 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:26.153 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:26.154 INFO [sync] queue: changed niman-crash-20260922-072125.txt
+2026-09-22 07:21:26.158 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:26.166 DEBUG [tree.ui] flatten: 10ms (15 rows, 0 pinned)
+2026-09-22 07:21:26.169 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.170 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.170 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.171 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt
+2026-09-22 07:21:26.420 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:26.420 DEBUG [isolate] #19 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:26.421 DEBUG [isolate] #19 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:26.421 DEBUG [indexer] applyEvents: "niman-crash-20260922-072126.txt" -> upsert file
+2026-09-22 07:21:26.422 DEBUG [indexer] upsert "niman-crash-20260922-072126.txt": insert (parent "")
+2026-09-22 07:21:26.425 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:26.425 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:26.426 INFO [sync] queue: changed niman-crash-20260922-072126.txt
+2026-09-22 07:21:26.438 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:26.446 DEBUG [tree.ui] flatten: 9ms (16 rows, 0 pinned)
+2026-09-22 07:21:26.448 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.452 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.455 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.455 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt
+2026-09-22 07:21:26.700 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:26.700 DEBUG [isolate] #20 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:26.702 DEBUG [isolate] #20 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:26.702 DEBUG [indexer] applyEvents: "niman-crash-20260922-072126.txt" -> upsert file
+2026-09-22 07:21:26.702 DEBUG [indexer] upsert "niman-crash-20260922-072126.txt": update (parent "")
+2026-09-22 07:21:26.704 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:26.704 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:26.706 INFO [sync] queue: changed niman-crash-20260922-072126.txt
+2026-09-22 07:21:26.721 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:26.728 DEBUG [tree.ui] flatten: 9ms (16 rows, 0 pinned)
+2026-09-22 07:21:26.731 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.732 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.733 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt"
+2026-09-22 07:21:26.733 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072126.txt
+2026-09-22 07:21:26.982 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:26.982 DEBUG [isolate] #21 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:26.984 DEBUG [isolate] #21 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:26.984 DEBUG [indexer] applyEvents: "niman-crash-20260922-072126.txt" -> upsert file
+2026-09-22 07:21:26.984 DEBUG [indexer] upsert "niman-crash-20260922-072126.txt": update (parent "")
+2026-09-22 07:21:26.986 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:26.986 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:26.987 INFO [sync] queue: changed niman-crash-20260922-072126.txt
+2026-09-22 07:21:27.004 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:27.011 DEBUG [tree.ui] flatten: 9ms (16 rows, 0 pinned)
+2026-09-22 07:21:27.015 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.016 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.016 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.017 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt
+2026-09-22 07:21:27.266 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:27.266 DEBUG [isolate] #22 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:27.268 DEBUG [isolate] #22 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:27.268 DEBUG [indexer] applyEvents: "niman-crash-20260922-072127.txt" -> upsert file
+2026-09-22 07:21:27.268 DEBUG [indexer] upsert "niman-crash-20260922-072127.txt": insert (parent "")
+2026-09-22 07:21:27.270 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:27.270 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:27.272 INFO [sync] queue: changed niman-crash-20260922-072127.txt
+2026-09-22 07:21:27.287 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:27.295 DEBUG [tree.ui] flatten: 9ms (17 rows, 0 pinned)
+2026-09-22 07:21:27.297 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.299 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.299 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.300 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt
+2026-09-22 07:21:27.549 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:27.549 DEBUG [isolate] #23 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:27.553 DEBUG [isolate] #23 done: probe 1 path(s) (3 ms, in flight 0)
+2026-09-22 07:21:27.553 DEBUG [indexer] applyEvents: "niman-crash-20260922-072127.txt" -> upsert file
+2026-09-22 07:21:27.553 DEBUG [indexer] upsert "niman-crash-20260922-072127.txt": update (parent "")
+2026-09-22 07:21:27.555 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:27.555 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:27.556 INFO [sync] queue: changed niman-crash-20260922-072127.txt
+2026-09-22 07:21:27.572 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:27.579 DEBUG [tree.ui] flatten: 9ms (17 rows, 0 pinned)
+2026-09-22 07:21:27.582 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.583 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.583 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.586 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt
+2026-09-22 07:21:27.833 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:27.833 DEBUG [isolate] #24 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:27.835 DEBUG [isolate] #24 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:27.835 DEBUG [indexer] applyEvents: "niman-crash-20260922-072127.txt" -> upsert file
+2026-09-22 07:21:27.835 DEBUG [indexer] upsert "niman-crash-20260922-072127.txt": update (parent "")
+2026-09-22 07:21:27.837 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:27.837 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:27.838 INFO [sync] queue: changed niman-crash-20260922-072127.txt
+2026-09-22 07:21:27.854 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..24: 25
+2026-09-22 07:21:27.862 DEBUG [tree.ui] flatten: 9ms (17 rows, 0 pinned)
+2026-09-22 07:21:27.864 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.864 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.867 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt"
+2026-09-22 07:21:27.867 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072127.txt
+2026-09-22 07:21:28.041 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.047 DEBUG [watcher] watcher event: create "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.048 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.048 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.049 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.113 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.119 DEBUG [session] watch batch: 2 path(s), 0 resync dir(s)
+2026-09-22 07:21:28.119 DEBUG [isolate] #25 start: probe 2 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:28.119 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.120 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.120 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.120 DEBUG [isolate] #25 done: probe 2 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:28.120 DEBUG [indexer] applyEvents: "niman-crash-20260922-072127.txt" -> upsert file
+2026-09-22 07:21:28.120 DEBUG [indexer] upsert "niman-crash-20260922-072127.txt": update (parent "")
+2026-09-22 07:21:28.122 DEBUG [indexer] applyEvents: "niman-crash-20260922-072128.txt" -> upsert file
+2026-09-22 07:21:28.122 DEBUG [indexer] upsert "niman-crash-20260922-072128.txt": insert (parent "")
+2026-09-22 07:21:28.125 DEBUG [sync] queue: 2 hints from the watcher
+2026-09-22 07:21:28.125 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:28.126 INFO [sync] queue: changed niman-crash-20260922-072127.txt
+2026-09-22 07:21:28.127 INFO [sync] queue: changed niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.129 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.133 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.134 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.142 DEBUG [tree.ui] flatten: 5ms (18 rows, 0 pinned)
+2026-09-22 07:21:28.142 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.142 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.149 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.225 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.231 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.232 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.232 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.233 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.273 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.279 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.280 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.280 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.281 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.370 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:28.370 DEBUG [isolate] #26 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:28.372 DEBUG [isolate] #26 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:28.372 DEBUG [indexer] applyEvents: "niman-crash-20260922-072128.txt" -> upsert file
+2026-09-22 07:21:28.372 DEBUG [indexer] upsert "niman-crash-20260922-072128.txt": update (parent "")
+2026-09-22 07:21:28.374 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:28.374 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:28.375 INFO [sync] queue: changed niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.391 DEBUG [tree.ui] flatten: 4ms (18 rows, 0 pinned)
+2026-09-22 07:21:28.425 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.432 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.433 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.438 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.438 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.441 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.444 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.444 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.445 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.523 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.532 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.533 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.538 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.538 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.541 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.545 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.550 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.550 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.552 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.556 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.557 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.559 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.559 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.559 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.560 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.677 DEBUG [todo] todo reload skipped (files unchanged)
+2026-09-22 07:21:28.682 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.687 DEBUG [session] watch batch: 1 path(s), 0 resync dir(s)
+2026-09-22 07:21:28.687 DEBUG [isolate] #27 start: probe 1 path(s) (in flight 1, peak 1)
+2026-09-22 07:21:28.687 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.689 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.689 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.689 DEBUG [isolate] #27 done: probe 1 path(s) (1 ms, in flight 0)
+2026-09-22 07:21:28.689 DEBUG [indexer] applyEvents: "niman-crash-20260922-072128.txt" -> upsert file
+2026-09-22 07:21:28.689 DEBUG [indexer] upsert "niman-crash-20260922-072128.txt": update (parent "")
+2026-09-22 07:21:28.690 DEBUG [sync] queue: 1 hints from the watcher
+2026-09-22 07:21:28.690 DEBUG [widgets] note refresh: placed=[]
+2026-09-22 07:21:28.692 INFO [sync] queue: changed niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.694 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.708 DEBUG [tree.ui] flatten: 5ms (18 rows, 0 pinned)
+2026-09-22 07:21:28.712 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.718 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.722 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.722 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.723 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.730 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.736 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.739 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.739 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.741 INFO [crash] crash report saved: /home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt
+2026-09-22 07:21:28.762 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+2026-09-22 07:21:28.768 DEBUG [watcher] watcher event: modify "/home/alessandro/Vaults/Libraries/Notes/niman-crash-20260922-072128.txt"
+2026-09-22 07:21:28.770 ERROR [crash] flutter error: RangeError (length): Invalid value: Not in inclusive range 0..9: 10
+

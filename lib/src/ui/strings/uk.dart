@@ -129,11 +129,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Вимк.';
   @override
-  String get settingsPreviewEnabledTitle => 'Перегляд';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Показує оформлену нотатку поруч із редактором джерела';
-  @override
   String get switchToWysiwygTooltip => 'Перемкнути на WYSIWYG-редактор';
   @override
   String get switchToSourceTooltip => 'Перемкнути на Markdown-джерело';
@@ -142,10 +137,6 @@ final class UkrainianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Ця нотатка занадто велика для WYSIWYG-редактора. Відкрийте її як '
-      'Markdown-джерело.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Зовнішній вигляд';
@@ -274,20 +265,6 @@ final class UkrainianStrings extends Strings {
       'Редактор і перегляд завжди синхронізовані';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Режим перегляду';
-  @override
-  String get previewModeSubtitle =>
-      'Чи перегляд ділить екран з редактором, чи заміняє його';
-  @override
-  String get previewModeAuto => 'Поруч';
-  @override
-  String get previewModeSwitch => 'Весь екран';
-  @override
-  String get splitRatioTitle => 'Співвідношення розділу';
-  @override
-  String get splitRatioSubtitle => 'Частка редактора, коли перегляд поруч';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Формат посилання';
@@ -475,11 +452,131 @@ final class UkrainianStrings extends Strings {
   @override
   String get toolbarImage => 'Вставити зображення';
   @override
+  String get toolbarTable => 'Таблиця';
+  @override
+  String get tableRow => 'Рядок';
+  @override
+  String get tableColumn => 'Стовпець';
+  @override
+  String get tableAddRowAbove => 'Вставити рядок вище';
+  @override
+  String get tableAddRowBelow => 'Вставити рядок нижче';
+  @override
+  String get tableMoveRowUp => 'Перемістити рядок вгору';
+  @override
+  String get tableMoveRowDown => 'Перемістити рядок вниз';
+  @override
+  String get tableDuplicateRow => 'Дублювати рядок';
+  @override
+  String get tableDeleteRow => 'Видалити рядок';
+  @override
+  String get tableAddColumnLeft => 'Вставити стовпець ліворуч';
+  @override
+  String get tableAddColumnRight => 'Вставити стовпець праворуч';
+  @override
+  String get tableMoveColumnLeft => 'Перемістити стовпець ліворуч';
+  @override
+  String get tableMoveColumnRight => 'Перемістити стовпець праворуч';
+  @override
+  String get tableAlignLeft => 'Вирівняти ліворуч';
+  @override
+  String get tableAlignCenter => 'По центру';
+  @override
+  String get tableAlignRight => 'Вирівняти праворуч';
+  @override
+  String get tableDuplicateColumn => 'Дублювати стовпець';
+  @override
+  String get tableDeleteColumn => 'Видалити стовпець';
+  @override
+  String get tableSortAscending => 'Сортувати за стовпцем (А → Я)';
+  @override
+  String get tableSortDescending => 'Сортувати за стовпцем (Я → А)';
+  @override
+  String get tableAddRow => 'Додати рядок';
+  @override
+  String get tableAddColumn => 'Додати стовпець';
+  @override
+  String get cheatsheetTitle => 'Шпаргалка з Markdown';
+  @override
+  String get cheatsheetCopy => 'Копіювати';
+  @override
+  String get cheatsheetCopied => 'Скопійовано';
+  @override
+  String get cheatsheetInsert => 'Вставити в нотатку';
+  @override
+  String get cheatsheetWritten => 'Написано';
+  @override
+  String get cheatsheetShown => 'Показано';
+  @override
+  String get cheatHeadings => 'Заголовки';
+  @override
+  String get cheatEmphasis => 'Жирний, курсив, закреслений';
+  @override
+  String get cheatHtmlFormats => 'Підкреслений, верхній індекс, нижній індекс';
+  @override
+  String get cheatLists => 'Списки';
+  @override
+  String get cheatChecklists => 'Контрольні списки';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Посилання';
+  @override
+  String get cheatWikilinks => 'Посилання на нотатки';
+  @override
+  String get cheatEmbeds => 'Зображення та вбудовування';
+  @override
+  String get cheatTags => 'Теги';
+  @override
+  String get cheatInlineCode => 'Код у реченні';
+  @override
+  String get cheatCodeBlocks => 'Блоки коду';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Таблиці';
+  @override
+  String get cheatFootnotes => 'Виноски';
+  @override
+  String get cheatRule => 'Горизонтальна лінія';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Заповнювачі шаблонів';
+  @override
+  String get menuAddLink => 'Додати посилання';
+  @override
+  String get menuAddExternalLink => 'Додати зовнішнє посилання';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Абзац';
+  @override
+  String get menuInsert => 'Вставити';
+  @override
+  String get menuBody => 'Звичайний текст';
+  @override
+  String get formatSubscript => 'Нижній індекс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Виноска';
+  @override
+  String get insertRule => 'Горизонтальна лінія';
+  @override
+  String get insertCodeBlock => 'Блок коду';
+  @override
+  String get insertMathBlock => 'Математичний блок';
+  @override
+  String get menuHeadingWord => 'Заголовок';
+  @override
   String get toolbarHeading => 'Заголовок';
   @override
   String get toolbarList => 'Список';
   @override
   String get toolbarOrderedList => 'Нумерований список';
+  @override
+  String get toolbarChecklist => 'Контрольний список';
   @override
   String get toolbarQuote => 'Цитата';
   @override
@@ -548,11 +645,6 @@ final class UkrainianStrings extends Strings {
   String get showPreviewTooltip => 'Показати перегляд';
   @override
   String get showEditorTooltip => 'Показати редактор';
-  @override
-  String get enterFullScreenTooltip => 'Весь екран';
-  @override
-  String get exitFullScreenTooltip => 'Вийти з режиму всього екрана';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(необроблена HTML-таблиця)';

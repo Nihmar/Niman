@@ -47,7 +47,6 @@ import 'package:niman/src/widget/widget_libraries.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 /// Coarse lifecycle of a library session.
@@ -920,44 +919,6 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(enabledEditors: {...editors}));
   }
 
-  /// Whether the preview exists at all (default true).
-  @override
-  Future<bool> get previewEnabled async => (await _library).previewEnabled;
-
-  /// Sets (and persists) the preview switch.
-  @override
-  Future<void> setPreviewEnabled({required bool enabled}) async {
-    _log.info('preview enabled set to $enabled');
-    await _editLibrary((c) => c.copyWith(previewEnabled: enabled));
-  }
-
-  /// The preview layout mode.
-  ///
-  /// App-wide, with the split ratio: both follow the screen rather than
-  /// the library, so carrying them in the library folder would move a
-  /// tablet's layout onto a phone.
-  @override
-  Future<PreviewLayoutMode> get previewMode async =>
-      await AppSettingsRepo(await appDatabase).previewMode();
-
-  /// Sets (and persists) the preview layout mode.
-  @override
-  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
-    _log.info('preview mode set to ${mode.name}');
-    await AppSettingsRepo(await appDatabase).setPreviewMode(mode);
-  }
-
-  /// The editor|preview split ratio.
-  @override
-  Future<double> get splitRatio async =>
-      await AppSettingsRepo(await appDatabase).splitRatio();
-
-  /// Sets (and persists) the split ratio.
-  @override
-  Future<void> setSplitRatio(double ratio) async {
-    await AppSettingsRepo(await appDatabase).setSplitRatio(ratio);
-  }
-
   /// The library tree sort order.
   @override
   Future<TreeSort> get treeSort async => (await _library).treeSort;
@@ -1291,7 +1252,7 @@ final class LibraryController implements LibrarySession {
 /// It has held that name since M1, when it was the index too; T-ML-03
 /// moved the index into [libraryIndexFile] and left the settings here.
 Future<File> defaultAppDbFile() async {
-  final dir = await getApplicationSupportDirectory();
+  final dir = await appSupportDirectory();
   return File(p.join(dir.path, 'niman.db'));
 }
 
@@ -1307,9 +1268,7 @@ Future<File> defaultAppDbFile() async {
 /// on disk are the source of truth, and `.niman/` is for what the user
 /// would want to keep.
 Future<File> libraryIndexFile(String libraryPath) async {
-  final dir = Directory(
-    p.join((await getApplicationSupportDirectory()).path, 'indexes'),
-  );
+  final dir = Directory(p.join((await appSupportDirectory()).path, 'indexes'));
   if (!dir.existsSync()) {
     await dir.create(recursive: true);
   }
@@ -1333,10 +1292,20 @@ Future<AppDatabase> defaultAppDatabase() async {
   );
 }
 
-/// Opens the index of the library at [libraryPath].
+/// Opens the index of the library at [libraryPath], on drift's background
+/// isolate.
+///
+/// Every write of the index — a saved note's text into the full-text table,
+/// its tags, stems and links — ran on the UI isolate: sqlite is synchronous,
+/// and a 100 MB note held the frame for seconds while its body went in, the
+/// tree's menu waiting behind it (0.0.9 stress test). The search connection
+/// was moved off first (T-M3-09); the index follows it.
 Future<IndexDatabase> defaultIndexDatabase(String libraryPath) async {
   return IndexDatabase(
-    NativeDatabase(await libraryIndexFile(libraryPath), setup: _databaseSetup),
+    NativeDatabase.createInBackground(
+      await libraryIndexFile(libraryPath),
+      setup: _databaseSetup,
+    ),
   );
 }
 

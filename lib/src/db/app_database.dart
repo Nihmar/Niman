@@ -40,19 +40,6 @@ class AppSettings extends Table {
   IntColumn get lastUpdateCheckMs =>
       integer().named('last_update_check_ms').nullable()();
 
-  /// The preview layout mode: `auto` (width-based), `split` or `switch`
-  /// (forced; default `auto`).
-  ///
-  /// App-wide, with the split ratio: unlike the editor settings T-ML-10
-  /// moved into the library folder, these two follow the screen. Carrying
-  /// them in the folder would move a tablet's layout onto a phone.
-  TextColumn get previewMode =>
-      text().named('preview_mode').withDefault(const Constant('auto'))();
-
-  /// The editor|preview split fraction (0..1; default 0.55).
-  RealColumn get splitRatio =>
-      real().named('split_ratio').withDefault(const Constant(0.55))();
-
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
   TextColumn get language => text().withDefault(const Constant('system'))();
@@ -340,7 +327,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 26;
+  int get schemaVersion => 27;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -388,11 +375,25 @@ class AppDatabase extends _$AppDatabase {
   /// pre-v25 databases gain `pinned_commands` (issue #208), null: the
   /// palette opens on what was used lately, as it did, and pre-v26
   /// databases gain `close_to_tray` (issue #209), on: the window's × puts
-  /// Niman in the tray, where the reminders keep firing.
+  /// Niman in the tray, where the reminders keep firing, and pre-v27
+  /// databases lose `preview_mode` + `split_ratio`: the editor and the
+  /// preview are one pane now, and neither a layout override nor a width
+  /// share means anything without two panes to share it with.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
     onUpgrade: (m, from, to) async {
+      // Drift calls this for a downgrade too, and then writes the older
+      // version over the newer one: a release opening a testing build's
+      // database would run none of the steps, stamp it with its own number,
+      // and leave the next upgrade to redo steps already done. Refused
+      // instead: the database belongs to a newer Niman.
+      if (from > to) {
+        throw StateError(
+          'this database is schema v$from, newer than this Niman (v$to): '
+          'it was opened by a newer build',
+        );
+      }
       if (from == 1) {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN debug_logs_enabled '
@@ -551,8 +552,25 @@ class AppDatabase extends _$AppDatabase {
           'BOOLEAN NOT NULL DEFAULT 1',
         );
       }
+      if (from < 27) {
+        // Only the ones still there: a database stamped back down by an
+        // older build (see above) has already lost them.
+        final existing = await _columnsOf('app_settings');
+        for (final column in ['preview_mode', 'split_ratio']) {
+          if (!existing.contains(column)) continue;
+          await m.database.customStatement(
+            'ALTER TABLE app_settings DROP COLUMN $column',
+          );
+        }
+      }
     },
   );
+
+  /// The column names of [table] as the database has them.
+  Future<Set<String>> _columnsOf(String table) async {
+    final rows = await customSelect('PRAGMA table_info($table)').get();
+    return <String>{for (final row in rows) row.read<String>('name')};
+  }
 
   /// The columns v17 hands to the libraries (T-ML-10).
   ///

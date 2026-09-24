@@ -254,6 +254,24 @@ void main() {
     );
   });
 
+  testWidgets('the notice with its Undo goes away by itself', (tester) async {
+    await pump(tester, '---\ntype: audio\n---\n![](assets/a.wav)\n');
+    await tester.tap(find.byKey(const ValueKey('audio-menu-0')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('audio-transcribe-0')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await settle(tester, () => transcriber.pending.length == 1);
+    transcriber.pending.single.complete('Ciao');
+    await settle(tester, () => key.currentState!.text.contains('> Ciao'));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.transcriptionSaved), findsOne);
+
+    // A snack bar with an action persists unless it is told not to.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.transcriptionSaved), findsNothing);
+  });
+
   /// Transcribes clip 0 over an existing description, answering the
   /// dialog with [choice] (null cancels it).
   Future<void> transcribeOver(WidgetTester tester, Key? choice) async {

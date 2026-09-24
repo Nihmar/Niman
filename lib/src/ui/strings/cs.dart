@@ -128,11 +128,6 @@ final class CzechStrings extends Strings {
   @override
   String get settingsToggleOff => 'Vypnuto';
   @override
-  String get settingsPreviewEnabledTitle => 'Náhled';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Zobrazí renderovanou poznámku vedle zdrojového editoru';
-  @override
   String get switchToWysiwygTooltip => 'Přepnout na editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Přepnout na zdrojový Markdown';
@@ -141,10 +136,6 @@ final class CzechStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Tato poznámka je příliš velká pro editor WYSIWYG. Otevřete ji ve '
-      'zdrojovém Markdown.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Vzhled';
@@ -273,20 +264,6 @@ final class CzechStrings extends Strings {
   String get noteTextScaleSubtitle => 'Editor a náhled, vždy v souladu';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Režim náhledu';
-  @override
-  String get previewModeSubtitle =>
-      'Zda náhled sdílí obrazovku s editorem nebo ho nahrazuje';
-  @override
-  String get previewModeAuto => 'Po bocích';
-  @override
-  String get previewModeSwitch => 'Celá obrazovka';
-  @override
-  String get splitRatioTitle => 'Šířka rozdělení';
-  @override
-  String get splitRatioSubtitle => 'Podíl editoru, když je náhled po bocích';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Formát odkazu';
@@ -474,11 +451,131 @@ final class CzechStrings extends Strings {
   @override
   String get toolbarImage => 'Vložit obrázek';
   @override
+  String get toolbarTable => 'Tabulka';
+  @override
+  String get tableRow => 'Řádek';
+  @override
+  String get tableColumn => 'Sloupec';
+  @override
+  String get tableAddRowAbove => 'Vložit řádek nad';
+  @override
+  String get tableAddRowBelow => 'Vložit řádek pod';
+  @override
+  String get tableMoveRowUp => 'Posunout řádek nahoru';
+  @override
+  String get tableMoveRowDown => 'Posunout řádek dolů';
+  @override
+  String get tableDuplicateRow => 'Duplikovat řádek';
+  @override
+  String get tableDeleteRow => 'Smazat řádek';
+  @override
+  String get tableAddColumnLeft => 'Vložit sloupec vlevo';
+  @override
+  String get tableAddColumnRight => 'Vložit sloupec vpravo';
+  @override
+  String get tableMoveColumnLeft => 'Posunout sloupec doleva';
+  @override
+  String get tableMoveColumnRight => 'Posunout sloupec doprava';
+  @override
+  String get tableAlignLeft => 'Zarovnat vlevo';
+  @override
+  String get tableAlignCenter => 'Na střed';
+  @override
+  String get tableAlignRight => 'Zarovnat vpravo';
+  @override
+  String get tableDuplicateColumn => 'Duplikovat sloupec';
+  @override
+  String get tableDeleteColumn => 'Smazat sloupec';
+  @override
+  String get tableSortAscending => 'Seřadit podle sloupce (A → Z)';
+  @override
+  String get tableSortDescending => 'Seřadit podle sloupce (Z → A)';
+  @override
+  String get tableAddRow => 'Přidat řádek';
+  @override
+  String get tableAddColumn => 'Přidat sloupec';
+  @override
+  String get cheatsheetTitle => 'Tahák k Markdownu';
+  @override
+  String get cheatsheetCopy => 'Kopírovat';
+  @override
+  String get cheatsheetCopied => 'Zkopírováno';
+  @override
+  String get cheatsheetInsert => 'Vložit do poznámky';
+  @override
+  String get cheatsheetWritten => 'Zápis';
+  @override
+  String get cheatsheetShown => 'Zobrazení';
+  @override
+  String get cheatHeadings => 'Nadpisy';
+  @override
+  String get cheatEmphasis => 'Tučné, kurzíva, přeškrtnuté';
+  @override
+  String get cheatHtmlFormats => 'Podtržené, horní index, dolní index';
+  @override
+  String get cheatLists => 'Seznamy';
+  @override
+  String get cheatChecklists => 'Kontrolní seznamy';
+  @override
+  String get cheatQuotes => 'Citace';
+  @override
+  String get cheatLinks => 'Odkazy';
+  @override
+  String get cheatWikilinks => 'Odkazy na poznámky';
+  @override
+  String get cheatEmbeds => 'Obrázky a vložení';
+  @override
+  String get cheatTags => 'Štítky';
+  @override
+  String get cheatInlineCode => 'Kód ve větě';
+  @override
+  String get cheatCodeBlocks => 'Bloky kódu';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tabulky';
+  @override
+  String get cheatFootnotes => 'Poznámky pod čarou';
+  @override
+  String get cheatRule => 'Vodorovná čára';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Zástupné symboly šablon';
+  @override
+  String get menuAddLink => 'Přidat odkaz';
+  @override
+  String get menuAddExternalLink => 'Přidat externí odkaz';
+  @override
+  String get menuFormat => 'Formát';
+  @override
+  String get menuParagraph => 'Odstavec';
+  @override
+  String get menuInsert => 'Vložit';
+  @override
+  String get menuBody => 'Běžný text';
+  @override
+  String get formatSubscript => 'Dolní index';
+  @override
+  String get formatInlineCode => 'Kód';
+  @override
+  String get insertFootnote => 'Poznámka pod čarou';
+  @override
+  String get insertRule => 'Vodorovná čára';
+  @override
+  String get insertCodeBlock => 'Blok kódu';
+  @override
+  String get insertMathBlock => 'Matematický blok';
+  @override
+  String get menuHeadingWord => 'Nadpis';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Seznam';
   @override
   String get toolbarOrderedList => 'Očíslovaný seznam';
+  @override
+  String get toolbarChecklist => 'Kontrolní seznam';
   @override
   String get toolbarQuote => 'Citace';
   @override
@@ -546,11 +643,6 @@ final class CzechStrings extends Strings {
   String get showPreviewTooltip => 'Zobrazit náhled';
   @override
   String get showEditorTooltip => 'Zobrazit editor';
-  @override
-  String get enterFullScreenTooltip => 'Celá obrazovka';
-  @override
-  String get exitFullScreenTooltip => 'Opuštět celou obrazovku';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(surová HTML tabulka)';

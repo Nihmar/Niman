@@ -17,8 +17,11 @@ never links, everywhere.
 
 ## Markdown links
 
-Standard `[text](href)` links. `href` may be a relative `.md` path, a
-`#anchor`, or an external URL. `![alt](src)` images are not links.
+Standard `[text](href)` links, and reference links — `[text][label]` with a
+`[label]: href` line anywhere in the note. `href` may be a relative `.md`
+path, a `#anchor`, or an external URL. `![alt](src)` images are not links,
+and neither is a footnote reference (`[^1]`); a link written inside a
+footnote's own text is.
 
 ## Dead links
 

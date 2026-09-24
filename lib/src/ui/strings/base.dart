@@ -53,13 +53,10 @@ abstract base class Strings {
   String settingsSearchResults(int count);
   String get settingsToggleOn;
   String get settingsToggleOff;
-  String get settingsPreviewEnabledTitle;
-  String get settingsPreviewEnabledSubtitle;
   String get switchToWysiwygTooltip;
   String get switchToSourceTooltip;
   String get switchToSourceLabel;
   String get switchToWysiwygLabel;
-  String get wysiwygTooLarge;
 
   // Settings: the section headings the list is grouped under.
   String get settingsSectionAppearance;
@@ -131,13 +128,6 @@ abstract base class Strings {
   String get noteTextScaleSubtitle;
 
   // Settings: preview mode.
-  String get previewModeTitle;
-  String get previewModeSubtitle;
-  String get previewModeAuto;
-  String get previewModeSwitch;
-  String get splitRatioTitle;
-  String get splitRatioSubtitle;
-
   // Settings: editor formatting.
   String get linkTypeTitle;
   String get linkTypeSubtitle;
@@ -193,6 +183,7 @@ abstract base class Strings {
   String get trayQuit;
   String get closeToTrayTitle;
   String get closeToTraySubtitle;
+
   String get shortcutNewTodo;
   String get shortcutNewNote;
   String get shortcutNewList;
@@ -230,9 +221,69 @@ abstract base class Strings {
   String get toolbarLink;
   String get toolbarCode;
   String get toolbarImage;
+  String get toolbarTable;
+  String get tableRow;
+  String get tableColumn;
+  String get tableAddRowAbove;
+  String get tableAddRowBelow;
+  String get tableMoveRowUp;
+  String get tableMoveRowDown;
+  String get tableDuplicateRow;
+  String get tableDeleteRow;
+  String get tableAddColumnLeft;
+  String get tableAddColumnRight;
+  String get tableMoveColumnLeft;
+  String get tableMoveColumnRight;
+  String get tableAlignLeft;
+  String get tableAlignCenter;
+  String get tableAlignRight;
+  String get tableDuplicateColumn;
+  String get tableDeleteColumn;
+  String get tableSortAscending;
+  String get tableSortDescending;
+  String get tableAddRow;
+  String get tableAddColumn;
+  String get cheatsheetTitle;
+  String get cheatsheetCopy;
+  String get cheatsheetCopied;
+  String get cheatsheetInsert;
+  String get cheatsheetWritten;
+  String get cheatsheetShown;
+  String get cheatHeadings;
+  String get cheatEmphasis;
+  String get cheatHtmlFormats;
+  String get cheatLists;
+  String get cheatChecklists;
+  String get cheatQuotes;
+  String get cheatLinks;
+  String get cheatWikilinks;
+  String get cheatEmbeds;
+  String get cheatTags;
+  String get cheatInlineCode;
+  String get cheatCodeBlocks;
+  String get cheatMath;
+  String get cheatTables;
+  String get cheatFootnotes;
+  String get cheatRule;
+  String get cheatFrontmatter;
+  String get cheatTemplates;
+  String get menuAddLink;
+  String get menuAddExternalLink;
+  String get menuFormat;
+  String get menuParagraph;
+  String get menuInsert;
+  String get menuBody;
+  String get formatSubscript;
+  String get formatInlineCode;
+  String get insertFootnote;
+  String get insertRule;
+  String get insertCodeBlock;
+  String get insertMathBlock;
+  String get menuHeadingWord;
   String get toolbarHeading;
   String get toolbarList;
   String get toolbarOrderedList;
+  String get toolbarChecklist;
   String get toolbarQuote;
   String get toolbarIndent;
   String get toolbarOutdent;
@@ -269,9 +320,6 @@ abstract base class Strings {
   // Preview switch (phone mode).
   String get showPreviewTooltip;
   String get showEditorTooltip;
-  String get enterFullScreenTooltip;
-  String get exitFullScreenTooltip;
-
   // Raw-HTML table fallback.
   String get htmlTableFallback;
 

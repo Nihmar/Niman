@@ -1,20 +1,50 @@
 // Issue #60: a misspelled word offers "Add to dictionary" in the
-// right-click menu, in both editors, and tapping the entry writes the
+// right-click menu, in both unified modes, and tapping the entry writes the
 // word to the library's dictionary file and unflags the word.
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/note_editor.dart';
-import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:re_editor/re_editor.dart';
+
+const MarkdownTheme _theme = MarkdownTheme(
+  body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
+  heading1: TextStyle(fontSize: 25),
+  heading2: TextStyle(fontSize: 21),
+  heading3: TextStyle(fontSize: 18),
+  heading4: TextStyle(fontSize: 16),
+  heading5: TextStyle(fontSize: 14),
+  heading6: TextStyle(fontSize: 13),
+  code: TextStyle(fontSize: 14, fontFamily: 'monospace'),
+  quote: TextStyle(fontSize: 14),
+  tableCell: TextStyle(fontSize: 14),
+  tableHeader: TextStyle(fontSize: 14),
+  link: TextStyle(fontSize: 14),
+  wikilink: TextStyle(fontSize: 14),
+  tag: TextStyle(fontSize: 14),
+  marker: TextStyle(fontSize: 14),
+  codeHighlight: <String, TextStyle>{},
+  rule: Color(0xFF888888),
+  codeBackground: Color(0xFFEEEEEE),
+  quoteBar: Color(0xFFCCCCCC),
+  tableBorder: Color(0xFFCCCCCC),
+  markerDim: Color(0xFF999999),
+  blockSpacing: 10,
+  listIndentPerLevel: 22,
+  quoteIndentPerLevel: 12,
+  codePadding: 8,
+  quoteBarWidth: 3,
+  ruleThickness: 1,
+  tableCellPadding: EdgeInsets.all(4),
+  lineHeight: 21,
+);
 
 /// A checker whose only misspelling is 'wrold'.
 final class _FakeChecker implements SpellChecker {
@@ -61,191 +91,96 @@ Future<void> _settle(
   }
 }
 
+/// Column [column] of line 0, as the view lays the text out (14 px a
+/// glyph, a 5 px inset, an 8 px top margin).
+Offset _at(int column) => Offset(5 + column * 14.0 + 7, 8 + 10);
+
+/// The desktop's menu: flutter_test runs as Android unless told.
+final TargetPlatformVariant _desktop = TargetPlatformVariant.only(
+  TargetPlatform.linux,
+);
+
+Future<void> _pump(
+  WidgetTester tester,
+  String text,
+  EditorSpellCheck check, {
+  required bool live,
+}) async {
+  tester.view.physicalSize = const Size(700, 500);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: MarkdownSourceView(
+          buffer: SourceBuffer.fromText(text),
+          theme: _theme,
+          showLineNumbers: false,
+          spellCheck: check,
+          hideMarkers: live,
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
+/// A right click at column [column] of the first line.
+Future<void> _rightClick(WidgetTester tester, int column) async {
+  await tester.tapAt(
+    _at(column),
+    buttons: kSecondaryButton,
+    kind: PointerDeviceKind.mouse,
+  );
+  await tester.pump();
+}
+
 void main() {
-  testWidgets('the source editor offers the entry and adds the word', (
-    tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-    final dictionary = await _openDictionary(tester);
-    final check = EditorSpellCheck(
-      createChecker: (_) => const _FakeChecker(),
-      dictionary: dictionary,
-    );
-    final controller = CodeLineEditingController.fromText('hello wrold');
-    final focus = FocusNode();
-    // The caret sits in 'wrold': a right click only shows the menu, it
-    // does not move the caret.
-    controller.selection = const CodeLineSelection.collapsed(
-      index: 0,
-      offset: 6,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NoteEditor(
-            controller: controller,
-            focusNode: focus,
-            spellCheck: check,
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
+  for (final live in [false, true]) {
+    final mode = live ? 'live' : 'source';
 
-    await tester.tapAt(
-      tester.getCenter(find.byType(CodeEditor)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    expect(find.text(AppStrings.addWordToDictionary), findsOneWidget);
+    testWidgets('the entry adds the word ($mode)', (tester) async {
+      final dictionary = await _openDictionary(tester);
+      final check = EditorSpellCheck(
+        createChecker: (_) => const _FakeChecker(),
+        dictionary: dictionary,
+      );
+      addTearDown(check.dispose);
+      await _pump(tester, 'hello wrold\n', check, live: live);
 
-    await tester.tap(find.text(AppStrings.addWordToDictionary));
-    await tester.pump();
-    // The entry closed the menu and fired the disk write; let it land.
-    await _settle(tester, dictionary, 'wrold');
-    expect(find.text(AppStrings.addWordToDictionary), findsNothing);
-    expect(File(dictionary.path).readAsStringSync(), 'wrold\n');
-    expect(check.isMisspelled('wrold'), isFalse);
+      // In 'wrold'.
+      await _rightClick(tester, 8);
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.addWordToDictionary), findsOneWidget);
 
-    // A second menu: 'wrold' is now a dictionary word, no entry.
-    await tester.tapAt(
-      tester.getCenter(find.byType(CodeEditor)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
-    expect(find.text(AppStrings.addWordToDictionary), findsNothing);
+      await tester.tap(find.text(AppStrings.addWordToDictionary));
+      await tester.pump();
+      // The entry closed the menu and fired the disk write; let it land.
+      await _settle(tester, dictionary, 'wrold');
+      expect(find.text(AppStrings.addWordToDictionary), findsNothing);
+      expect(File(dictionary.path).readAsStringSync(), 'wrold\n');
+      expect(check.isMisspelled('wrold'), isFalse);
 
-    // Back inside the body before the tearDowns run.
-    debugDefaultTargetPlatformOverride = null;
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SizedBox())),
-    );
-    controller.dispose();
-    focus.dispose();
-    check.dispose();
-  });
+      // A second menu: 'wrold' is now a dictionary word, no entry.
+      await _rightClick(tester, 8);
+      expect(find.text(AppStrings.addWordToDictionary), findsNothing);
+    }, variant: _desktop);
 
-  testWidgets('a right word in the source editor offers no entry', (
-    tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-    final dictionary = await _openDictionary(tester);
-    final check = EditorSpellCheck(
-      createChecker: (_) => const _FakeChecker(),
-      dictionary: dictionary,
-    );
-    final controller = CodeLineEditingController.fromText('hello world');
-    final focus = FocusNode();
-    // The caret sits in 'world', which the checker accepts.
-    controller.selection = const CodeLineSelection.collapsed(
-      index: 0,
-      offset: 6,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NoteEditor(
-            controller: controller,
-            focusNode: focus,
-            spellCheck: check,
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
+    testWidgets('a right word offers no entry ($mode)', (tester) async {
+      final dictionary = await _openDictionary(tester);
+      final check = EditorSpellCheck(
+        createChecker: (_) => const _FakeChecker(),
+        dictionary: dictionary,
+      );
+      addTearDown(check.dispose);
+      await _pump(tester, 'hello world\n', check, live: live);
 
-    await tester.tapAt(
-      tester.getCenter(find.byType(CodeEditor)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    // The menu still offers the platform items...
-    expect(find.text('Paste'), findsOneWidget);
-    // ...but not the dictionary entry.
-    expect(find.text(AppStrings.addWordToDictionary), findsNothing);
-
-    debugDefaultTargetPlatformOverride = null;
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SizedBox())),
-    );
-    controller.dispose();
-    focus.dispose();
-    check.dispose();
-  });
-
-  testWidgets('the WYSIWYG editor offers the entry and adds the word', (
-    tester,
-  ) async {
-    final dictionary = await _openDictionary(tester);
-    final check = EditorSpellCheck(
-      createChecker: (_) => const _FakeChecker(),
-      dictionary: dictionary,
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: WysiwygEditor(
-            data: 'hello wrold',
-            spellCheck: check,
-            onChanged: (value) {},
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    // A right click offers the menu only when the editor already has focus
-    // (the writer's caret is there in the app): quill opens the toolbar
-    // from a post-frame callback that checks focus before the first
-    // right click can take it.
-    tester
-        .state<WysiwygEditorState>(find.byType(WysiwygEditor))
-        .requestEditorFocus();
-    await tester.pump();
-
-    // The caret sits in 'wrold' (offset 6).
-    final editor = tester.state<quill.QuillEditorState>(
-      find.byType(quill.QuillEditor),
-    );
-    editor.controller.updateSelection(
-      const TextSelection.collapsed(offset: 6),
-      quill.ChangeSource.local,
-    );
-    await tester.pump();
-    final raw = tester.state<quill.QuillRawEditorState>(
-      find.byType(quill.QuillRawEditor),
-    );
-    expect(
-      raw.textEditingValue.selection,
-      const TextSelection.collapsed(offset: 6),
-    );
-
-    // A right click shows the menu at the caret.
-    await tester.tapAt(
-      tester.getCenter(find.byType(quill.QuillEditor)),
-      buttons: kSecondaryButton,
-    );
-    await tester.pump();
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    expect(find.text(AppStrings.addWordToDictionary), findsOneWidget);
-
-    await tester.tap(find.text(AppStrings.addWordToDictionary));
-    await tester.pump();
-    // The entry closed the menu and fired the disk write; let it land.
-    await _settle(tester, dictionary, 'wrold');
-    expect(find.text(AppStrings.addWordToDictionary), findsNothing);
-    expect(File(dictionary.path).readAsStringSync(), 'wrold\n');
-    expect(check.isMisspelled('wrold'), isFalse);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SizedBox())),
-    );
-    check.dispose();
-  });
+      await _rightClick(tester, 8);
+      expect(tester.takeException(), isNull);
+      // The menu still offers the clipboard...
+      expect(find.text('Paste'), findsOneWidget);
+      // ...but not the dictionary entry.
+      expect(find.text(AppStrings.addWordToDictionary), findsNothing);
+    }, variant: _desktop);
+  }
 }

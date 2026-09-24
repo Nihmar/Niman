@@ -127,11 +127,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get settingsToggleOff => 'Выкл.';
   @override
-  String get settingsPreviewEnabledTitle => 'Прагляд';
-  @override
-  String get settingsPreviewEnabledSubtitle =>
-      'Паказвае афармленую заўвагу побач з рэдактарам крыніцы';
-  @override
   String get switchToWysiwygTooltip => 'Пераключыць на WYSIWYG-рэдактар';
   @override
   String get switchToSourceTooltip => 'Пераключыць на Markdown-крэйс';
@@ -140,10 +135,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get switchToWysiwygLabel => 'WYSIWYG';
   @override
-  String get wysiwygTooLarge =>
-      'Гэтая заўвага занадта вялікая для WYSIWYG-рэдактара. Адкрыйце яе як '
-      'Markdown-крэйс.';
-
   // Settings: the section headings the list is grouped under.
   @override
   String get settingsSectionAppearance => 'Знешні выгляд';
@@ -272,20 +263,6 @@ final class BelarusianStrings extends Strings {
       'Рэдактар і прагляд заўсёды сінхранізаваны';
 
   // Settings: preview mode.
-  @override
-  String get previewModeTitle => 'Рэжым прагляду';
-  @override
-  String get previewModeSubtitle =>
-      'Ці прагляд дзеліць экран з рэдактаром, ці замяняе яго';
-  @override
-  String get previewModeAuto => 'Побач';
-  @override
-  String get previewModeSwitch => 'Увесь экран';
-  @override
-  String get splitRatioTitle => 'Спавношэнне падзелу';
-  @override
-  String get splitRatioSubtitle => 'Частка рэдактара, калі прагляд побач';
-
   // Settings: editor formatting.
   @override
   String get linkTypeTitle => 'Фармат спасылкі';
@@ -473,11 +450,131 @@ final class BelarusianStrings extends Strings {
   @override
   String get toolbarImage => 'Уставіць выяву';
   @override
+  String get toolbarTable => 'Табліца';
+  @override
+  String get tableRow => 'Радок';
+  @override
+  String get tableColumn => 'Слупок';
+  @override
+  String get tableAddRowAbove => 'Уставіць радок вышэй';
+  @override
+  String get tableAddRowBelow => 'Уставіць радок ніжэй';
+  @override
+  String get tableMoveRowUp => 'Перамясціць радок уверх';
+  @override
+  String get tableMoveRowDown => 'Перамясціць радок уніз';
+  @override
+  String get tableDuplicateRow => 'Дубляваць радок';
+  @override
+  String get tableDeleteRow => 'Выдаліць радок';
+  @override
+  String get tableAddColumnLeft => 'Уставіць слупок злева';
+  @override
+  String get tableAddColumnRight => 'Уставіць слупок справа';
+  @override
+  String get tableMoveColumnLeft => 'Перамясціць слупок улева';
+  @override
+  String get tableMoveColumnRight => 'Перамясціць слупок управа';
+  @override
+  String get tableAlignLeft => 'Выраўнаваць злева';
+  @override
+  String get tableAlignCenter => 'Па цэнтры';
+  @override
+  String get tableAlignRight => 'Выраўнаваць справа';
+  @override
+  String get tableDuplicateColumn => 'Дубляваць слупок';
+  @override
+  String get tableDeleteColumn => 'Выдаліць слупок';
+  @override
+  String get tableSortAscending => 'Сартаваць па слупку (А → Я)';
+  @override
+  String get tableSortDescending => 'Сартаваць па слупку (Я → А)';
+  @override
+  String get tableAddRow => 'Дадаць радок';
+  @override
+  String get tableAddColumn => 'Дадаць слупок';
+  @override
+  String get cheatsheetTitle => 'Шпаргалка па Markdown';
+  @override
+  String get cheatsheetCopy => 'Капіяваць';
+  @override
+  String get cheatsheetCopied => 'Скапіявана';
+  @override
+  String get cheatsheetInsert => 'Уставіць у нататку';
+  @override
+  String get cheatsheetWritten => 'Напісана';
+  @override
+  String get cheatsheetShown => 'Паказана';
+  @override
+  String get cheatHeadings => 'Загалоўкі';
+  @override
+  String get cheatEmphasis => 'Тоўсты, курсіў, закрэслены';
+  @override
+  String get cheatHtmlFormats => 'Падкрэслены, верхні індэкс, ніжні індэкс';
+  @override
+  String get cheatLists => 'Спісы';
+  @override
+  String get cheatChecklists => 'Кантрольныя спісы';
+  @override
+  String get cheatQuotes => 'Цытаты';
+  @override
+  String get cheatLinks => 'Спасылкі';
+  @override
+  String get cheatWikilinks => 'Спасылкі на нататкі';
+  @override
+  String get cheatEmbeds => 'Выявы і ўбудаванні';
+  @override
+  String get cheatTags => 'Тэгі';
+  @override
+  String get cheatInlineCode => 'Код у сказе';
+  @override
+  String get cheatCodeBlocks => 'Блокі кода';
+  @override
+  String get cheatMath => 'Матэматыка';
+  @override
+  String get cheatTables => 'Табліцы';
+  @override
+  String get cheatFootnotes => 'Зноскі';
+  @override
+  String get cheatRule => 'Гарызантальная лінія';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Запаўняльнікі шаблонаў';
+  @override
+  String get menuAddLink => 'Дадаць спасылку';
+  @override
+  String get menuAddExternalLink => 'Дадаць знешнюю спасылку';
+  @override
+  String get menuFormat => 'Фармат';
+  @override
+  String get menuParagraph => 'Абзац';
+  @override
+  String get menuInsert => 'Уставіць';
+  @override
+  String get menuBody => 'Звычайны тэкст';
+  @override
+  String get formatSubscript => 'Ніжні індэкс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Зноска';
+  @override
+  String get insertRule => 'Гарызантальная лінія';
+  @override
+  String get insertCodeBlock => 'Блок кода';
+  @override
+  String get insertMathBlock => 'Матэматычны блок';
+  @override
+  String get menuHeadingWord => 'Загаловак';
+  @override
   String get toolbarHeading => 'Загаловак';
   @override
   String get toolbarList => 'Спіс';
   @override
   String get toolbarOrderedList => 'Нумараваны спіс';
+  @override
+  String get toolbarChecklist => 'Кантрольны спіс';
   @override
   String get toolbarQuote => 'Цытата';
   @override
@@ -545,11 +642,6 @@ final class BelarusianStrings extends Strings {
   String get showPreviewTooltip => 'Паказаць прагляд';
   @override
   String get showEditorTooltip => 'Паказаць рэдактар';
-  @override
-  String get enterFullScreenTooltip => 'Увесь экран';
-  @override
-  String get exitFullScreenTooltip => 'Выйсці з рэжыму ўсяго экрана';
-
   // Raw-HTML table fallback.
   @override
   String get htmlTableFallback => '(HTML-табліца без апрацоўкі)';

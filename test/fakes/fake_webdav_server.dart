@@ -85,6 +85,12 @@ final class FakeWebDavServer {
   /// `If-Match` / `If-None-Match` on PUT are honored.
   bool preconditions = true;
 
+  /// A folder's `Depth: 1` listing leaves out children whose name starts
+  /// with a dot, while `Depth: 0` still answers for them by path — what a
+  /// real server (or the proxy in front of it) did to `.niman/`, which made
+  /// the library settings "change during the sync" on every run.
+  bool hideDotEntries = false;
+
   /// `MOVE` is implemented.
   bool supportMove = true;
 
@@ -396,7 +402,11 @@ final class FakeWebDavServer {
       path,
       if (depth == '1' && node.folder)
         for (final key in _tree.keys)
-          if (key.isNotEmpty && key != path && _parent(key) == path) key,
+          if (key.isNotEmpty &&
+              key != path &&
+              _parent(key) == path &&
+              !(hideDotEntries && key.split('/').last.startsWith('.')))
+            key,
     ];
     final p = prefix.isEmpty ? '' : '$prefix:';
     final ns = prefix.isEmpty ? 'xmlns="DAV:"' : 'xmlns:$prefix="DAV:"';
