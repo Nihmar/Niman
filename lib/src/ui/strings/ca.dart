@@ -455,6 +455,48 @@ final class CatalanStrings extends Strings {
   @override
   String get toolbarTable => 'Taula';
   @override
+  String get tableRow => 'Fila';
+  @override
+  String get tableColumn => 'Columna';
+  @override
+  String get tableAddRowAbove => 'Insereix una fila a sobre';
+  @override
+  String get tableAddRowBelow => 'Insereix una fila a sota';
+  @override
+  String get tableMoveRowUp => 'Puja la fila';
+  @override
+  String get tableMoveRowDown => 'Baixa la fila';
+  @override
+  String get tableDuplicateRow => 'Duplica la fila';
+  @override
+  String get tableDeleteRow => 'Suprimeix la fila';
+  @override
+  String get tableAddColumnLeft => "Insereix una columna a l'esquerra";
+  @override
+  String get tableAddColumnRight => 'Insereix una columna a la dreta';
+  @override
+  String get tableMoveColumnLeft => "Mou la columna a l'esquerra";
+  @override
+  String get tableMoveColumnRight => 'Mou la columna a la dreta';
+  @override
+  String get tableAlignLeft => "Alinea a l'esquerra";
+  @override
+  String get tableAlignCenter => 'Centra';
+  @override
+  String get tableAlignRight => 'Alinea a la dreta';
+  @override
+  String get tableDuplicateColumn => 'Duplica la columna';
+  @override
+  String get tableDeleteColumn => 'Suprimeix la columna';
+  @override
+  String get tableSortAscending => 'Ordena per columna (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordena per columna (Z → A)';
+  @override
+  String get tableAddRow => 'Afegeix una fila';
+  @override
+  String get tableAddColumn => 'Afegeix una columna';
+  @override
   String get toolbarHeading => 'Títol';
   @override
   String get toolbarList => 'Llista';

@@ -454,6 +454,48 @@ final class GalicianStrings extends Strings {
   @override
   String get toolbarTable => 'Táboa';
   @override
+  String get tableRow => 'Fila';
+  @override
+  String get tableColumn => 'Columna';
+  @override
+  String get tableAddRowAbove => 'Inserir fila enriba';
+  @override
+  String get tableAddRowBelow => 'Inserir fila debaixo';
+  @override
+  String get tableMoveRowUp => 'Subir fila';
+  @override
+  String get tableMoveRowDown => 'Baixar fila';
+  @override
+  String get tableDuplicateRow => 'Duplicar fila';
+  @override
+  String get tableDeleteRow => 'Eliminar fila';
+  @override
+  String get tableAddColumnLeft => 'Inserir columna á esquerda';
+  @override
+  String get tableAddColumnRight => 'Inserir columna á dereita';
+  @override
+  String get tableMoveColumnLeft => 'Mover columna á esquerda';
+  @override
+  String get tableMoveColumnRight => 'Mover columna á dereita';
+  @override
+  String get tableAlignLeft => 'Aliñar á esquerda';
+  @override
+  String get tableAlignCenter => 'Centrar';
+  @override
+  String get tableAlignRight => 'Aliñar á dereita';
+  @override
+  String get tableDuplicateColumn => 'Duplicar columna';
+  @override
+  String get tableDeleteColumn => 'Eliminar columna';
+  @override
+  String get tableSortAscending => 'Ordenar pola columna (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordenar pola columna (Z → A)';
+  @override
+  String get tableAddRow => 'Engadir fila';
+  @override
+  String get tableAddColumn => 'Engadir columna';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

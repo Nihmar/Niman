@@ -454,6 +454,48 @@ final class UkrainianStrings extends Strings {
   @override
   String get toolbarTable => 'Таблиця';
   @override
+  String get tableRow => 'Рядок';
+  @override
+  String get tableColumn => 'Стовпець';
+  @override
+  String get tableAddRowAbove => 'Вставити рядок вище';
+  @override
+  String get tableAddRowBelow => 'Вставити рядок нижче';
+  @override
+  String get tableMoveRowUp => 'Перемістити рядок вгору';
+  @override
+  String get tableMoveRowDown => 'Перемістити рядок вниз';
+  @override
+  String get tableDuplicateRow => 'Дублювати рядок';
+  @override
+  String get tableDeleteRow => 'Видалити рядок';
+  @override
+  String get tableAddColumnLeft => 'Вставити стовпець ліворуч';
+  @override
+  String get tableAddColumnRight => 'Вставити стовпець праворуч';
+  @override
+  String get tableMoveColumnLeft => 'Перемістити стовпець ліворуч';
+  @override
+  String get tableMoveColumnRight => 'Перемістити стовпець праворуч';
+  @override
+  String get tableAlignLeft => 'Вирівняти ліворуч';
+  @override
+  String get tableAlignCenter => 'По центру';
+  @override
+  String get tableAlignRight => 'Вирівняти праворуч';
+  @override
+  String get tableDuplicateColumn => 'Дублювати стовпець';
+  @override
+  String get tableDeleteColumn => 'Видалити стовпець';
+  @override
+  String get tableSortAscending => 'Сортувати за стовпцем (А → Я)';
+  @override
+  String get tableSortDescending => 'Сортувати за стовпцем (Я → А)';
+  @override
+  String get tableAddRow => 'Додати рядок';
+  @override
+  String get tableAddColumn => 'Додати стовпець';
+  @override
   String get toolbarHeading => 'Заголовок';
   @override
   String get toolbarList => 'Список';

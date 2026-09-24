@@ -452,6 +452,48 @@ final class BulgarianStrings extends Strings {
   @override
   String get toolbarTable => 'Таблица';
   @override
+  String get tableRow => 'Ред';
+  @override
+  String get tableColumn => 'Колона';
+  @override
+  String get tableAddRowAbove => 'Вмъкни ред отгоре';
+  @override
+  String get tableAddRowBelow => 'Вмъкни ред отдолу';
+  @override
+  String get tableMoveRowUp => 'Премести реда нагоре';
+  @override
+  String get tableMoveRowDown => 'Премести реда надолу';
+  @override
+  String get tableDuplicateRow => 'Дублирай реда';
+  @override
+  String get tableDeleteRow => 'Изтрий реда';
+  @override
+  String get tableAddColumnLeft => 'Вмъкни колона вляво';
+  @override
+  String get tableAddColumnRight => 'Вмъкни колона вдясно';
+  @override
+  String get tableMoveColumnLeft => 'Премести колоната наляво';
+  @override
+  String get tableMoveColumnRight => 'Премести колоната надясно';
+  @override
+  String get tableAlignLeft => 'Подравни вляво';
+  @override
+  String get tableAlignCenter => 'Центрирай';
+  @override
+  String get tableAlignRight => 'Подравни вдясно';
+  @override
+  String get tableDuplicateColumn => 'Дублирай колоната';
+  @override
+  String get tableDeleteColumn => 'Изтрий колоната';
+  @override
+  String get tableSortAscending => 'Сортирай по колона (А → Я)';
+  @override
+  String get tableSortDescending => 'Сортирай по колона (Я → А)';
+  @override
+  String get tableAddRow => 'Добави ред';
+  @override
+  String get tableAddColumn => 'Добави колона';
+  @override
   String get toolbarHeading => 'Заглавие';
   @override
   String get toolbarList => 'Списък';

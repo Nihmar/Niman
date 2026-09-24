@@ -458,6 +458,48 @@ final class PolishStrings extends Strings {
   @override
   String get toolbarTable => 'Tabela';
   @override
+  String get tableRow => 'Wiersz';
+  @override
+  String get tableColumn => 'Kolumna';
+  @override
+  String get tableAddRowAbove => 'Wstaw wiersz powyżej';
+  @override
+  String get tableAddRowBelow => 'Wstaw wiersz poniżej';
+  @override
+  String get tableMoveRowUp => 'Przesuń wiersz w górę';
+  @override
+  String get tableMoveRowDown => 'Przesuń wiersz w dół';
+  @override
+  String get tableDuplicateRow => 'Duplikuj wiersz';
+  @override
+  String get tableDeleteRow => 'Usuń wiersz';
+  @override
+  String get tableAddColumnLeft => 'Wstaw kolumnę po lewej';
+  @override
+  String get tableAddColumnRight => 'Wstaw kolumnę po prawej';
+  @override
+  String get tableMoveColumnLeft => 'Przesuń kolumnę w lewo';
+  @override
+  String get tableMoveColumnRight => 'Przesuń kolumnę w prawo';
+  @override
+  String get tableAlignLeft => 'Wyrównaj do lewej';
+  @override
+  String get tableAlignCenter => 'Wyśrodkuj';
+  @override
+  String get tableAlignRight => 'Wyrównaj do prawej';
+  @override
+  String get tableDuplicateColumn => 'Duplikuj kolumnę';
+  @override
+  String get tableDeleteColumn => 'Usuń kolumnę';
+  @override
+  String get tableSortAscending => 'Sortuj według kolumny (A → Z)';
+  @override
+  String get tableSortDescending => 'Sortuj według kolumny (Z → A)';
+  @override
+  String get tableAddRow => 'Dodaj wiersz';
+  @override
+  String get tableAddColumn => 'Dodaj kolumnę';
+  @override
   String get toolbarHeading => 'Nagłówek';
   @override
   String get toolbarList => 'Lista';

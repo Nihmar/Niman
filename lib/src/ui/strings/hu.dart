@@ -447,6 +447,48 @@ final class HungarianStrings extends Strings {
   @override
   String get toolbarTable => 'Táblázat';
   @override
+  String get tableRow => 'Sor';
+  @override
+  String get tableColumn => 'Oszlop';
+  @override
+  String get tableAddRowAbove => 'Sor beszúrása fölé';
+  @override
+  String get tableAddRowBelow => 'Sor beszúrása alá';
+  @override
+  String get tableMoveRowUp => 'Sor feljebb';
+  @override
+  String get tableMoveRowDown => 'Sor lejjebb';
+  @override
+  String get tableDuplicateRow => 'Sor megkettőzése';
+  @override
+  String get tableDeleteRow => 'Sor törlése';
+  @override
+  String get tableAddColumnLeft => 'Oszlop beszúrása balra';
+  @override
+  String get tableAddColumnRight => 'Oszlop beszúrása jobbra';
+  @override
+  String get tableMoveColumnLeft => 'Oszlop balra';
+  @override
+  String get tableMoveColumnRight => 'Oszlop jobbra';
+  @override
+  String get tableAlignLeft => 'Balra igazítás';
+  @override
+  String get tableAlignCenter => 'Középre';
+  @override
+  String get tableAlignRight => 'Jobbra igazítás';
+  @override
+  String get tableDuplicateColumn => 'Oszlop megkettőzése';
+  @override
+  String get tableDeleteColumn => 'Oszlop törlése';
+  @override
+  String get tableSortAscending => 'Rendezés oszlop szerint (A → Z)';
+  @override
+  String get tableSortDescending => 'Rendezés oszlop szerint (Z → A)';
+  @override
+  String get tableAddRow => 'Sor hozzáadása';
+  @override
+  String get tableAddColumn => 'Oszlop hozzáadása';
+  @override
   String get toolbarHeading => 'Cím';
   @override
   String get toolbarList => 'Lista';

@@ -449,6 +449,48 @@ final class PortugueseStrings extends Strings {
   @override
   String get toolbarTable => 'Tabela';
   @override
+  String get tableRow => 'Linha';
+  @override
+  String get tableColumn => 'Coluna';
+  @override
+  String get tableAddRowAbove => 'Inserir linha acima';
+  @override
+  String get tableAddRowBelow => 'Inserir linha abaixo';
+  @override
+  String get tableMoveRowUp => 'Mover linha para cima';
+  @override
+  String get tableMoveRowDown => 'Mover linha para baixo';
+  @override
+  String get tableDuplicateRow => 'Duplicar linha';
+  @override
+  String get tableDeleteRow => 'Eliminar linha';
+  @override
+  String get tableAddColumnLeft => 'Inserir coluna à esquerda';
+  @override
+  String get tableAddColumnRight => 'Inserir coluna à direita';
+  @override
+  String get tableMoveColumnLeft => 'Mover coluna para a esquerda';
+  @override
+  String get tableMoveColumnRight => 'Mover coluna para a direita';
+  @override
+  String get tableAlignLeft => 'Alinhar à esquerda';
+  @override
+  String get tableAlignCenter => 'Centrar';
+  @override
+  String get tableAlignRight => 'Alinhar à direita';
+  @override
+  String get tableDuplicateColumn => 'Duplicar coluna';
+  @override
+  String get tableDeleteColumn => 'Eliminar coluna';
+  @override
+  String get tableSortAscending => 'Ordenar pela coluna (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordenar pela coluna (Z → A)';
+  @override
+  String get tableAddRow => 'Adicionar linha';
+  @override
+  String get tableAddColumn => 'Adicionar coluna';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

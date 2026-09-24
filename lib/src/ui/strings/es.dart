@@ -454,6 +454,48 @@ final class SpanishStrings extends Strings {
   @override
   String get toolbarTable => 'Tabla';
   @override
+  String get tableRow => 'Fila';
+  @override
+  String get tableColumn => 'Columna';
+  @override
+  String get tableAddRowAbove => 'Insertar fila encima';
+  @override
+  String get tableAddRowBelow => 'Insertar fila debajo';
+  @override
+  String get tableMoveRowUp => 'Subir fila';
+  @override
+  String get tableMoveRowDown => 'Bajar fila';
+  @override
+  String get tableDuplicateRow => 'Duplicar fila';
+  @override
+  String get tableDeleteRow => 'Eliminar fila';
+  @override
+  String get tableAddColumnLeft => 'Insertar columna a la izquierda';
+  @override
+  String get tableAddColumnRight => 'Insertar columna a la derecha';
+  @override
+  String get tableMoveColumnLeft => 'Mover columna a la izquierda';
+  @override
+  String get tableMoveColumnRight => 'Mover columna a la derecha';
+  @override
+  String get tableAlignLeft => 'Alinear a la izquierda';
+  @override
+  String get tableAlignCenter => 'Centrar';
+  @override
+  String get tableAlignRight => 'Alinear a la derecha';
+  @override
+  String get tableDuplicateColumn => 'Duplicar columna';
+  @override
+  String get tableDeleteColumn => 'Eliminar columna';
+  @override
+  String get tableSortAscending => 'Ordenar por columna (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordenar por columna (Z → A)';
+  @override
+  String get tableAddRow => 'Añadir fila';
+  @override
+  String get tableAddColumn => 'Añadir columna';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

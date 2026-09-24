@@ -320,6 +320,33 @@ anything into ends the list instead — the usual second Enter. Inside a
 fenced code block, a math block or the frontmatter it does nothing: a
 dash there is a dash.
 
+### Tables in live mode
+
+A table in live mode is drawn as the read view draws it, and edited as a
+table (as Obsidian does):
+
+- **The two `+`** add a column at the table's right edge and a row at its
+  foot. On the desktop they show while the mouse is on the table; on a
+  phone, while the caret is in it.
+- **Right-click a cell** (long-press on a phone) for **Row ›** — add a row
+  above or below, move it up or down, duplicate or delete it — **Column
+  ›** — add a column to the left or right, move it, align it left, centre
+  or right, duplicate or delete it — and **Sort by column**, A → Z or
+  Z → A. On the desktop Row and Column open in the menu's place, with the
+  way back at the top; on a phone they open a sheet. What does not apply
+  to the cell is greyed out: a row above the header, moving the last
+  column right, deleting the only column.
+- The header stays the header: it is not moved, sorted or deleted. The
+  sort compares numbers as numbers and the rest ignoring case, and rows
+  that tie keep their order.
+
+Every action is one change to the note's Markdown and one undo step, and
+the caret lands in the cell the action leaves it in. A table written with
+its columns padded to one width is written back padded, the pipes under
+one another; one written with a single space round each cell stays that
+way. A column's alignment (`:--`, `:-:`, `--:`) is drawn in both the read
+view and live mode.
+
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are

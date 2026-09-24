@@ -179,3 +179,37 @@ is assumed, from the same renderer family, and not verified — if Windows
 turns out to smooth paths itself, `MathRaster.enabled` should drop it,
 since the image costs a little sharpness a smooth renderer does not need
 to pay. Android's Vulkan surface is multisampled and is left out.
+
+## Tables edited as tables (#261, 2026-09-24)
+
+`markdown/table/` reads a table's lines into cells, alignments and how it
+was written (`MarkdownTable`) and writes them back; `TableEdits` are the
+menu's edits on it, each a table and the cell the caret goes to. In `live`
+`LiveTableCommands` runs one over the caret's table and writes the table's
+lines back in one replacement — one undo step — and builds the menu's
+table part; `LiveTableHandles` are the two `+`, drawn in an overlay so they
+take no room and the page stays the read view's.
+
+Decisions taken without the writer, to revisit if they read wrong:
+
+- **The submenus open in the menu's place** on the desktop (a back row
+  on top), not as a flyout: the menu is a selection toolbar, with nowhere
+  steady for a flyout to stand. On a phone Row and Column open a sheet.
+- **Padded** means every row puts its pipes where the header does. A
+  padded table is rewritten with each column as wide as its widest cell,
+  three at least (a delimiter cell's minimum); an unpadded one keeps a
+  space round each cell and each column's own dashes until its alignment
+  changes. A padded right- or centre-aligned column pads on that side.
+- **Sorting** compares two numbers as numbers (a decimal comma read as a
+  point), anything else as text ignoring case; it is stable, and the
+  header is never sorted.
+- **The caret** goes to the new row's or column's cell after an add, with
+  the moved cell after a move, to the nearest cell after a delete, and
+  stays after a sort or an alignment.
+- **Alignment is drawn**: the read view sets a cell's text by its
+  column's alignment, and `live` gives the room before it (`LiveTables`);
+  `read_live_page_test` holds the two to the pixel. It was not drawn at
+  all before, which the menu's Align would have made plain.
+- **Not done**: Tab to the next cell, and a size picker for an inserted
+  table (#262 has two columns and one row; the `+` add the rest).
+

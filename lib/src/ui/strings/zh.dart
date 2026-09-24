@@ -421,6 +421,48 @@ final class ChineseStrings extends Strings {
   @override
   String get toolbarTable => '表格';
   @override
+  String get tableRow => '行';
+  @override
+  String get tableColumn => '列';
+  @override
+  String get tableAddRowAbove => '在上方插入行';
+  @override
+  String get tableAddRowBelow => '在下方插入行';
+  @override
+  String get tableMoveRowUp => '上移行';
+  @override
+  String get tableMoveRowDown => '下移行';
+  @override
+  String get tableDuplicateRow => '复制行';
+  @override
+  String get tableDeleteRow => '删除行';
+  @override
+  String get tableAddColumnLeft => '在左侧插入列';
+  @override
+  String get tableAddColumnRight => '在右侧插入列';
+  @override
+  String get tableMoveColumnLeft => '左移列';
+  @override
+  String get tableMoveColumnRight => '右移列';
+  @override
+  String get tableAlignLeft => '左对齐';
+  @override
+  String get tableAlignCenter => '居中';
+  @override
+  String get tableAlignRight => '右对齐';
+  @override
+  String get tableDuplicateColumn => '复制列';
+  @override
+  String get tableDeleteColumn => '删除列';
+  @override
+  String get tableSortAscending => '按列排序 (A → Z)';
+  @override
+  String get tableSortDescending => '按列排序 (Z → A)';
+  @override
+  String get tableAddRow => '添加行';
+  @override
+  String get tableAddColumn => '添加列';
+  @override
   String get toolbarHeading => '标题';
   @override
   String get toolbarList => '列表';

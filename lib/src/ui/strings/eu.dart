@@ -446,6 +446,48 @@ final class BasqueStrings extends Strings {
   @override
   String get toolbarTable => 'Taula';
   @override
+  String get tableRow => 'Errenkada';
+  @override
+  String get tableColumn => 'Zutabea';
+  @override
+  String get tableAddRowAbove => 'Txertatu errenkada gainean';
+  @override
+  String get tableAddRowBelow => 'Txertatu errenkada azpian';
+  @override
+  String get tableMoveRowUp => 'Igo errenkada';
+  @override
+  String get tableMoveRowDown => 'Jaitsi errenkada';
+  @override
+  String get tableDuplicateRow => 'Bikoiztu errenkada';
+  @override
+  String get tableDeleteRow => 'Ezabatu errenkada';
+  @override
+  String get tableAddColumnLeft => 'Txertatu zutabea ezkerrean';
+  @override
+  String get tableAddColumnRight => 'Txertatu zutabea eskuinean';
+  @override
+  String get tableMoveColumnLeft => 'Eraman zutabea ezkerrera';
+  @override
+  String get tableMoveColumnRight => 'Eraman zutabea eskuinera';
+  @override
+  String get tableAlignLeft => 'Lerrokatu ezkerrean';
+  @override
+  String get tableAlignCenter => 'Erdiratu';
+  @override
+  String get tableAlignRight => 'Lerrokatu eskuinean';
+  @override
+  String get tableDuplicateColumn => 'Bikoiztu zutabea';
+  @override
+  String get tableDeleteColumn => 'Ezabatu zutabea';
+  @override
+  String get tableSortAscending => 'Ordenatu zutabearen arabera (A → Z)';
+  @override
+  String get tableSortDescending => 'Ordenatu zutabearen arabera (Z → A)';
+  @override
+  String get tableAddRow => 'Gehitu errenkada';
+  @override
+  String get tableAddColumn => 'Gehitu zutabea';
+  @override
   String get toolbarHeading => 'Izenburua';
   @override
   String get toolbarList => 'Zerrenda';

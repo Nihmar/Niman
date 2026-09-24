@@ -450,6 +450,48 @@ final class LatvianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabula';
   @override
+  String get tableRow => 'Rinda';
+  @override
+  String get tableColumn => 'Kolonna';
+  @override
+  String get tableAddRowAbove => 'Ievietot rindu virs';
+  @override
+  String get tableAddRowBelow => 'Ievietot rindu zem';
+  @override
+  String get tableMoveRowUp => 'Pārvietot rindu augšup';
+  @override
+  String get tableMoveRowDown => 'Pārvietot rindu lejup';
+  @override
+  String get tableDuplicateRow => 'Dublēt rindu';
+  @override
+  String get tableDeleteRow => 'Dzēst rindu';
+  @override
+  String get tableAddColumnLeft => 'Ievietot kolonnu pa kreisi';
+  @override
+  String get tableAddColumnRight => 'Ievietot kolonnu pa labi';
+  @override
+  String get tableMoveColumnLeft => 'Pārvietot kolonnu pa kreisi';
+  @override
+  String get tableMoveColumnRight => 'Pārvietot kolonnu pa labi';
+  @override
+  String get tableAlignLeft => 'Līdzināt pa kreisi';
+  @override
+  String get tableAlignCenter => 'Centrēt';
+  @override
+  String get tableAlignRight => 'Līdzināt pa labi';
+  @override
+  String get tableDuplicateColumn => 'Dublēt kolonnu';
+  @override
+  String get tableDeleteColumn => 'Dzēst kolonnu';
+  @override
+  String get tableSortAscending => 'Kārtot pēc kolonnas (A → Z)';
+  @override
+  String get tableSortDescending => 'Kārtot pēc kolonnas (Z → A)';
+  @override
+  String get tableAddRow => 'Pievienot rindu';
+  @override
+  String get tableAddColumn => 'Pievienot kolonnu';
+  @override
   String get toolbarHeading => 'Virsraksts';
   @override
   String get toolbarList => 'Saraksts';

@@ -457,6 +457,48 @@ final class FrenchStrings extends Strings {
   @override
   String get toolbarTable => 'Tableau';
   @override
+  String get tableRow => 'Ligne';
+  @override
+  String get tableColumn => 'Colonne';
+  @override
+  String get tableAddRowAbove => 'Insérer une ligne au-dessus';
+  @override
+  String get tableAddRowBelow => 'Insérer une ligne en dessous';
+  @override
+  String get tableMoveRowUp => 'Monter la ligne';
+  @override
+  String get tableMoveRowDown => 'Descendre la ligne';
+  @override
+  String get tableDuplicateRow => 'Dupliquer la ligne';
+  @override
+  String get tableDeleteRow => 'Supprimer la ligne';
+  @override
+  String get tableAddColumnLeft => 'Insérer une colonne à gauche';
+  @override
+  String get tableAddColumnRight => 'Insérer une colonne à droite';
+  @override
+  String get tableMoveColumnLeft => 'Déplacer la colonne à gauche';
+  @override
+  String get tableMoveColumnRight => 'Déplacer la colonne à droite';
+  @override
+  String get tableAlignLeft => 'Aligner à gauche';
+  @override
+  String get tableAlignCenter => 'Centrer';
+  @override
+  String get tableAlignRight => 'Aligner à droite';
+  @override
+  String get tableDuplicateColumn => 'Dupliquer la colonne';
+  @override
+  String get tableDeleteColumn => 'Supprimer la colonne';
+  @override
+  String get tableSortAscending => 'Trier par colonne (A → Z)';
+  @override
+  String get tableSortDescending => 'Trier par colonne (Z → A)';
+  @override
+  String get tableAddRow => 'Ajouter une ligne';
+  @override
+  String get tableAddColumn => 'Ajouter une colonne';
+  @override
   String get toolbarHeading => 'Titre';
   @override
   String get toolbarList => 'Liste';

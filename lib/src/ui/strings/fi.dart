@@ -449,6 +449,48 @@ final class FinnishStrings extends Strings {
   @override
   String get toolbarTable => 'Taulukko';
   @override
+  String get tableRow => 'Rivi';
+  @override
+  String get tableColumn => 'Sarake';
+  @override
+  String get tableAddRowAbove => 'Lisää rivi yläpuolelle';
+  @override
+  String get tableAddRowBelow => 'Lisää rivi alapuolelle';
+  @override
+  String get tableMoveRowUp => 'Siirrä riviä ylös';
+  @override
+  String get tableMoveRowDown => 'Siirrä riviä alas';
+  @override
+  String get tableDuplicateRow => 'Monista rivi';
+  @override
+  String get tableDeleteRow => 'Poista rivi';
+  @override
+  String get tableAddColumnLeft => 'Lisää sarake vasemmalle';
+  @override
+  String get tableAddColumnRight => 'Lisää sarake oikealle';
+  @override
+  String get tableMoveColumnLeft => 'Siirrä saraketta vasemmalle';
+  @override
+  String get tableMoveColumnRight => 'Siirrä saraketta oikealle';
+  @override
+  String get tableAlignLeft => 'Tasaa vasemmalle';
+  @override
+  String get tableAlignCenter => 'Keskitä';
+  @override
+  String get tableAlignRight => 'Tasaa oikealle';
+  @override
+  String get tableDuplicateColumn => 'Monista sarake';
+  @override
+  String get tableDeleteColumn => 'Poista sarake';
+  @override
+  String get tableSortAscending => 'Lajittele sarakkeen mukaan (A → Ö)';
+  @override
+  String get tableSortDescending => 'Lajittele sarakkeen mukaan (Ö → A)';
+  @override
+  String get tableAddRow => 'Lisää rivi';
+  @override
+  String get tableAddColumn => 'Lisää sarake';
+  @override
   String get toolbarHeading => 'Otsikko';
   @override
   String get toolbarList => 'Lista';

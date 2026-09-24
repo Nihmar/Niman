@@ -452,6 +452,48 @@ final class GermanStrings extends Strings {
   @override
   String get toolbarTable => 'Tabelle';
   @override
+  String get tableRow => 'Zeile';
+  @override
+  String get tableColumn => 'Spalte';
+  @override
+  String get tableAddRowAbove => 'Zeile darüber einfügen';
+  @override
+  String get tableAddRowBelow => 'Zeile darunter einfügen';
+  @override
+  String get tableMoveRowUp => 'Zeile nach oben';
+  @override
+  String get tableMoveRowDown => 'Zeile nach unten';
+  @override
+  String get tableDuplicateRow => 'Zeile duplizieren';
+  @override
+  String get tableDeleteRow => 'Zeile löschen';
+  @override
+  String get tableAddColumnLeft => 'Spalte links einfügen';
+  @override
+  String get tableAddColumnRight => 'Spalte rechts einfügen';
+  @override
+  String get tableMoveColumnLeft => 'Spalte nach links';
+  @override
+  String get tableMoveColumnRight => 'Spalte nach rechts';
+  @override
+  String get tableAlignLeft => 'Linksbündig';
+  @override
+  String get tableAlignCenter => 'Zentriert';
+  @override
+  String get tableAlignRight => 'Rechtsbündig';
+  @override
+  String get tableDuplicateColumn => 'Spalte duplizieren';
+  @override
+  String get tableDeleteColumn => 'Spalte löschen';
+  @override
+  String get tableSortAscending => 'Nach Spalte sortieren (A → Z)';
+  @override
+  String get tableSortDescending => 'Nach Spalte sortieren (Z → A)';
+  @override
+  String get tableAddRow => 'Zeile hinzufügen';
+  @override
+  String get tableAddColumn => 'Spalte hinzufügen';
+  @override
   String get toolbarHeading => 'Überschrift';
   @override
   String get toolbarList => 'Liste';

@@ -421,6 +421,48 @@ final class JapaneseStrings extends Strings {
   @override
   String get toolbarTable => '表';
   @override
+  String get tableRow => '行';
+  @override
+  String get tableColumn => '列';
+  @override
+  String get tableAddRowAbove => '上に行を挿入';
+  @override
+  String get tableAddRowBelow => '下に行を挿入';
+  @override
+  String get tableMoveRowUp => '行を上へ移動';
+  @override
+  String get tableMoveRowDown => '行を下へ移動';
+  @override
+  String get tableDuplicateRow => '行を複製';
+  @override
+  String get tableDeleteRow => '行を削除';
+  @override
+  String get tableAddColumnLeft => '左に列を挿入';
+  @override
+  String get tableAddColumnRight => '右に列を挿入';
+  @override
+  String get tableMoveColumnLeft => '列を左へ移動';
+  @override
+  String get tableMoveColumnRight => '列を右へ移動';
+  @override
+  String get tableAlignLeft => '左揃え';
+  @override
+  String get tableAlignCenter => '中央揃え';
+  @override
+  String get tableAlignRight => '右揃え';
+  @override
+  String get tableDuplicateColumn => '列を複製';
+  @override
+  String get tableDeleteColumn => '列を削除';
+  @override
+  String get tableSortAscending => '列で並べ替え (A → Z)';
+  @override
+  String get tableSortDescending => '列で並べ替え (Z → A)';
+  @override
+  String get tableAddRow => '行を追加';
+  @override
+  String get tableAddColumn => '列を追加';
+  @override
   String get toolbarHeading => '見出し';
   @override
   String get toolbarList => 'リスト';

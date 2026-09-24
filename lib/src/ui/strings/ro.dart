@@ -458,6 +458,48 @@ final class RomanianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabel';
   @override
+  String get tableRow => 'Rând';
+  @override
+  String get tableColumn => 'Coloană';
+  @override
+  String get tableAddRowAbove => 'Inserează rând deasupra';
+  @override
+  String get tableAddRowBelow => 'Inserează rând dedesubt';
+  @override
+  String get tableMoveRowUp => 'Mută rândul în sus';
+  @override
+  String get tableMoveRowDown => 'Mută rândul în jos';
+  @override
+  String get tableDuplicateRow => 'Duplică rândul';
+  @override
+  String get tableDeleteRow => 'Șterge rândul';
+  @override
+  String get tableAddColumnLeft => 'Inserează coloană la stânga';
+  @override
+  String get tableAddColumnRight => 'Inserează coloană la dreapta';
+  @override
+  String get tableMoveColumnLeft => 'Mută coloana la stânga';
+  @override
+  String get tableMoveColumnRight => 'Mută coloana la dreapta';
+  @override
+  String get tableAlignLeft => 'Aliniază la stânga';
+  @override
+  String get tableAlignCenter => 'Centrează';
+  @override
+  String get tableAlignRight => 'Aliniază la dreapta';
+  @override
+  String get tableDuplicateColumn => 'Duplică coloana';
+  @override
+  String get tableDeleteColumn => 'Șterge coloana';
+  @override
+  String get tableSortAscending => 'Sortează după coloană (A → Z)';
+  @override
+  String get tableSortDescending => 'Sortează după coloană (Z → A)';
+  @override
+  String get tableAddRow => 'Adaugă rând';
+  @override
+  String get tableAddColumn => 'Adaugă coloană';
+  @override
   String get toolbarHeading => 'Titlu';
   @override
   String get toolbarList => 'Listă';

@@ -454,6 +454,48 @@ final class LithuanianStrings extends Strings {
   @override
   String get toolbarTable => 'Lentelė';
   @override
+  String get tableRow => 'Eilutė';
+  @override
+  String get tableColumn => 'Stulpelis';
+  @override
+  String get tableAddRowAbove => 'Įterpti eilutę virš';
+  @override
+  String get tableAddRowBelow => 'Įterpti eilutę po';
+  @override
+  String get tableMoveRowUp => 'Perkelti eilutę aukštyn';
+  @override
+  String get tableMoveRowDown => 'Perkelti eilutę žemyn';
+  @override
+  String get tableDuplicateRow => 'Dubliuoti eilutę';
+  @override
+  String get tableDeleteRow => 'Ištrinti eilutę';
+  @override
+  String get tableAddColumnLeft => 'Įterpti stulpelį kairėje';
+  @override
+  String get tableAddColumnRight => 'Įterpti stulpelį dešinėje';
+  @override
+  String get tableMoveColumnLeft => 'Perkelti stulpelį kairėn';
+  @override
+  String get tableMoveColumnRight => 'Perkelti stulpelį dešinėn';
+  @override
+  String get tableAlignLeft => 'Lygiuoti kairėje';
+  @override
+  String get tableAlignCenter => 'Centruoti';
+  @override
+  String get tableAlignRight => 'Lygiuoti dešinėje';
+  @override
+  String get tableDuplicateColumn => 'Dubliuoti stulpelį';
+  @override
+  String get tableDeleteColumn => 'Ištrinti stulpelį';
+  @override
+  String get tableSortAscending => 'Rikiuoti pagal stulpelį (A → Z)';
+  @override
+  String get tableSortDescending => 'Rikiuoti pagal stulpelį (Z → A)';
+  @override
+  String get tableAddRow => 'Pridėti eilutę';
+  @override
+  String get tableAddColumn => 'Pridėti stulpelį';
+  @override
   String get toolbarHeading => 'Antraštė';
   @override
   String get toolbarList => 'Sąrašas';

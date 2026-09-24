@@ -443,6 +443,48 @@ final class EstonianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabel';
   @override
+  String get tableRow => 'Rida';
+  @override
+  String get tableColumn => 'Veerg';
+  @override
+  String get tableAddRowAbove => 'Lisa rida üles';
+  @override
+  String get tableAddRowBelow => 'Lisa rida alla';
+  @override
+  String get tableMoveRowUp => 'Liiguta rida üles';
+  @override
+  String get tableMoveRowDown => 'Liiguta rida alla';
+  @override
+  String get tableDuplicateRow => 'Kopeeri rida';
+  @override
+  String get tableDeleteRow => 'Kustuta rida';
+  @override
+  String get tableAddColumnLeft => 'Lisa veerg vasakule';
+  @override
+  String get tableAddColumnRight => 'Lisa veerg paremale';
+  @override
+  String get tableMoveColumnLeft => 'Liiguta veergu vasakule';
+  @override
+  String get tableMoveColumnRight => 'Liiguta veergu paremale';
+  @override
+  String get tableAlignLeft => 'Joonda vasakule';
+  @override
+  String get tableAlignCenter => 'Joonda keskele';
+  @override
+  String get tableAlignRight => 'Joonda paremale';
+  @override
+  String get tableDuplicateColumn => 'Kopeeri veerg';
+  @override
+  String get tableDeleteColumn => 'Kustuta veerg';
+  @override
+  String get tableSortAscending => 'Sordi veeru järgi (A → Z)';
+  @override
+  String get tableSortDescending => 'Sordi veeru järgi (Z → A)';
+  @override
+  String get tableAddRow => 'Lisa rida';
+  @override
+  String get tableAddColumn => 'Lisa veerg';
+  @override
   String get toolbarHeading => 'Pealkiri';
   @override
   String get toolbarList => 'Loetelu';

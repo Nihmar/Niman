@@ -24,6 +24,7 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/table/markdown_table.dart';
 
 /// A stretch of a row's source drawn as nothing `width` wide: the pipes and
 /// the spaces between two cells' text.
@@ -131,7 +132,7 @@ final class LiveTables {
       final text = lines[row];
       final delimiter = _isDelimiter(text);
       delimiters.add(delimiter);
-      final own = delimiter ? const <(int, int)>[] : _cellsOf(text);
+      final own = delimiter ? const <(int, int)>[] : cellsOf(text);
       cells.add(own);
       final style = row == 0 ? theme.tableHeader : theme.tableCell;
       widths.add(<_Measured>[
@@ -163,6 +164,11 @@ final class LiveTables {
       edges.add(edges.last + width + 2 * pad);
     }
     final tiny = _tinyAdvance(scaler);
+    // The columns' alignments, from the delimiter row: a right-aligned
+    // column's text stands at its right edge, as the read view sets it.
+    final aligns = lines.length > 1
+        ? MarkdownTable.alignsOf(lines[1])
+        : const <TableAlign>[];
     return <LiveTableRow>[
       for (var row = 0; row < lines.length; row++)
         (
@@ -175,6 +181,7 @@ final class LiveTables {
             pad,
             tiny,
             (row == 0 ? theme.tableHeader : theme.tableCell).letterSpacing ?? 0,
+            aligns,
           ),
           header: row == 0,
           delimiter: delimiters[row],
@@ -201,6 +208,7 @@ final class LiveTables {
     double pad,
     double tiny,
     double ambient,
+    List<TableAlign> aligns,
   ) {
     final gaps = <LiveTableGap>[];
     void gap(int start, int end, double width) {
@@ -223,9 +231,23 @@ final class LiveTables {
       final (start, end) = cells[at];
       final cell = widths[at];
       final lead = cell.lead * tiny;
-      gap(from, start, edges[at] + pad - lead - x);
+      // The room its column leaves beside its text: before it for a
+      // right-aligned column, half of it for a centred one.
+      final room = edges[at + 1] - edges[at] - 2 * pad - cell.visible;
+      // The read view's paragraph measures its text with the trailing half
+      // of its last glyph's spacing, and sets the first half before it: a
+      // text moved off its column's start stands half a spacing short of
+      // the room it was given.
+      final shift = at >= aligns.length || room <= 0
+          ? 0.0
+          : switch (aligns[at]) {
+              TableAlign.right => room - ambient / 2,
+              TableAlign.center => room / 2 - ambient / 2,
+              TableAlign.none || TableAlign.left => 0.0,
+            };
+      gap(from, start, edges[at] + pad + shift - lead - x);
       from = end;
-      x = edges[at] + pad - lead + cell.visible + cell.hidden * tiny;
+      x = edges[at] + pad + shift - lead + cell.visible + cell.hidden * tiny;
     }
     if (cells.isNotEmpty) {
       final last = cells.length;
@@ -244,7 +266,7 @@ final class LiveTables {
   /// row): the caret leaves the line.
   static int? cellColumn(String text, int column, int direction) {
     if (_isDelimiter(text)) return null;
-    final cells = _cellsOf(text);
+    final cells = cellsOf(text);
     int? before;
     int? after;
     for (final (start, end) in cells) {
@@ -264,7 +286,7 @@ final class LiveTables {
   /// delimiter row).
   static (int, int)? cellAround(String text, int column) {
     if (_isDelimiter(text)) return null;
-    for (final (start, end) in _cellsOf(text)) {
+    for (final (start, end) in cellsOf(text)) {
       if (column >= start && column <= end) return (start, end);
     }
     return null;
@@ -274,7 +296,7 @@ final class LiveTables {
   /// pipes, as the read view reads them — a pipe at either end is the
   /// row's edge, not a cell's, and an empty cell's text starts past its
   /// pipe.
-  static List<(int, int)> _cellsOf(String text) {
+  static List<(int, int)> cellsOf(String text) {
     var start = 0;
     var end = text.length;
     while (start < end && _space(text.codeUnitAt(start))) {
