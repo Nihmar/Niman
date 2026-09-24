@@ -322,6 +322,23 @@ final class FinnishStrings extends Strings {
   String get noteTextScaleTitle => 'Muistiinpanon tekstin koko';
   @override
   String get noteTextScaleSubtitle => 'Muokkain ja esikatselu aina samassa';
+  @override
+  String get epubLookTitle => 'Kirjojen ulkoasu';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB-kirjojen teema, fontti ja tekstin koko, muistiinpanoista erillään';
+  @override
+  String get epubSameAsApp => 'Kuten sovellus';
+  @override
+  String get epubFontTitle => 'Fontti';
+  @override
+  String get epubFontSerif => 'Päätteellinen';
+  @override
+  String get epubFontSans => 'Päätteetön';
+  @override
+  String get epubFontMono => 'Tasalevyinen';
+  @override
+  String get epubTextSizeTitle => 'Tekstin koko';
 
   // Settings: preview mode.
   // Settings: editor formatting.

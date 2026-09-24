@@ -1,6 +1,6 @@
 // An EPUB picked in the tree is read in the note pane (#280): drawn by the
-// note's read view, its contents a sheet from the row below that jumps to
-// the chapter picked.
+// note's read view in the books' own look, its contents a sheet from the
+// row below that jumps to the chapter picked.
 //
 // XHTML is written in pieces, and a space between two would be a word
 // of the book: its literals run on without one.
@@ -9,6 +9,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/epub/epub_look.dart';
+import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/epub_pane.dart';
@@ -19,9 +22,16 @@ import '../fakes/epub_builder.dart';
 void main() {
   late Directory dir;
   setUp(() => dir = Directory.systemTemp.createTempSync('niman_epub_pane_'));
-  tearDown(() => dir.deleteSync(recursive: true));
+  tearDown(() {
+    dir.deleteSync(recursive: true);
+    EpubLooks.reset();
+  });
 
-  Future<void> pump(WidgetTester tester, String path) async {
+  Future<void> pump(
+    WidgetTester tester,
+    String path, {
+    VoidCallback? onEditLook,
+  }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
     await tester.runAsync(() async {
@@ -31,6 +41,7 @@ void main() {
             body: EpubPane(
               path: path,
               cacheDir: () async => p.join(dir.path, 'cache'),
+              onEditLook: onEditLook,
             ),
           ),
         ),
@@ -117,6 +128,36 @@ void main() {
       find.byKey(const Key('epub-contents-button')),
     );
     expect(button.onPressed, isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets("the book wears the books' look, and follows it", (tester) async {
+    EpubLooks.apply(
+      const EpubLook(
+        brightness: AppBrightness.night,
+        font: EpubFont.mono,
+        textScale: 1.5,
+      ),
+    );
+    await pump(tester, twoChapters());
+    BuildContext book() => tester.element(find.byType(MarkdownReadView));
+    expect(Theme.of(book()).brightness, Brightness.dark);
+    expect(Theme.of(book()).textTheme.bodyMedium?.fontFamily, 'monospace');
+    expect(MediaQuery.textScalerOf(book()).scale(10), closeTo(15, 0.001));
+
+    EpubLooks.apply(const EpubLook(brightness: AppBrightness.day));
+    await tester.pump();
+    expect(Theme.of(book()).brightness, Brightness.light);
+    expect(Theme.of(book()).textTheme.bodyMedium?.fontFamily, 'Literata');
+    expect(MediaQuery.textScalerOf(book()).scale(10), closeTo(10, 0.001));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('its Aa button opens the look', (tester) async {
+    var opened = 0;
+    await pump(tester, twoChapters(), onEditLook: () => opened++);
+    await tester.tap(find.byKey(const Key('epub-look-button')));
+    expect(opened, 1);
     await tester.pumpWidget(const SizedBox());
   });
 

@@ -261,6 +261,14 @@ final class AppStrings {
   static String get uiTextScaleSubtitle => _s.uiTextScaleSubtitle;
   static String get noteTextScaleTitle => _s.noteTextScaleTitle;
   static String get noteTextScaleSubtitle => _s.noteTextScaleSubtitle;
+  static String get epubLookTitle => _s.epubLookTitle;
+  static String get epubLookSubtitle => _s.epubLookSubtitle;
+  static String get epubSameAsApp => _s.epubSameAsApp;
+  static String get epubFontTitle => _s.epubFontTitle;
+  static String get epubFontSerif => _s.epubFontSerif;
+  static String get epubFontSans => _s.epubFontSans;
+  static String get epubFontMono => _s.epubFontMono;
+  static String get epubTextSizeTitle => _s.epubTextSizeTitle;
 
   /// A text size as a row's value, e.g. "120%".
   static String textScaleValue(double scale) => '${(scale * 100).round()}%';

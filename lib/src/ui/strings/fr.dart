@@ -331,6 +331,23 @@ final class FrenchStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'L’éditeur et l’aperçu, qui restent d’accord';
+  @override
+  String get epubLookTitle => 'Apparence des livres';
+  @override
+  String get epubLookSubtitle =>
+      'Thème, police et taille du texte des livres EPUB, à part des notes';
+  @override
+  String get epubSameAsApp => "Comme l'application";
+  @override
+  String get epubFontTitle => 'Police';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Chasse fixe';
+  @override
+  String get epubTextSizeTitle => 'Taille du texte';
 
   // Settings: preview mode.
   // Settings: editor formatting.

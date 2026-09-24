@@ -324,6 +324,24 @@ final class HungarianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'A szerkesztő és az előnézet mindig azonos';
+  @override
+  String get epubLookTitle => 'Könyvek megjelenése';
+  @override
+  String get epubLookSubtitle =>
+      'Az EPUB könyvek témája, betűtípusa és szövegmérete, a jegyzetektől '
+      'külön';
+  @override
+  String get epubSameAsApp => 'Mint az alkalmazás';
+  @override
+  String get epubFontTitle => 'Betűtípus';
+  @override
+  String get epubFontSerif => 'Talpas';
+  @override
+  String get epubFontSans => 'Talpatlan';
+  @override
+  String get epubFontMono => 'Fix szélességű';
+  @override
+  String get epubTextSizeTitle => 'Szövegméret';
 
   // Settings: preview mode.
   // Settings: editor formatting.

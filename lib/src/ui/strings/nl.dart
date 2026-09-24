@@ -327,6 +327,23 @@ final class DutchStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'De editor en het voorbeeld, die altijd overeenkomen';
+  @override
+  String get epubLookTitle => 'Uiterlijk van boeken';
+  @override
+  String get epubLookSubtitle =>
+      'Thema, lettertype en tekstgrootte van EPUB-boeken, los van de notities';
+  @override
+  String get epubSameAsApp => 'Zoals de app';
+  @override
+  String get epubFontTitle => 'Lettertype';
+  @override
+  String get epubFontSerif => 'Schreef';
+  @override
+  String get epubFontSans => 'Schreefloos';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Tekstgrootte';
 
   // Settings: preview mode.
   // Settings: editor formatting.

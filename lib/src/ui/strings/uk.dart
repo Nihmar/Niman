@@ -324,6 +324,23 @@ final class UkrainianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Редактор і перегляд завжди синхронізовані';
+  @override
+  String get epubLookTitle => 'Вигляд книжок';
+  @override
+  String get epubLookSubtitle =>
+      'Тема, шрифт і розмір тексту книжок EPUB, окремо від нотаток';
+  @override
+  String get epubSameAsApp => 'Як у застосунку';
+  @override
+  String get epubFontTitle => 'Шрифт';
+  @override
+  String get epubFontSerif => 'Із засічками';
+  @override
+  String get epubFontSans => 'Без засічок';
+  @override
+  String get epubFontMono => 'Моноширинний';
+  @override
+  String get epubTextSizeTitle => 'Розмір тексту';
 
   // Settings: preview mode.
   // Settings: editor formatting.

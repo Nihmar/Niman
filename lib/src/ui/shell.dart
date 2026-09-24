@@ -47,6 +47,7 @@ import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
+import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
@@ -974,6 +975,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         key: _phoneNoteKey,
         path: p.join(controller.root ?? '', selectedPath),
         column: _editorSettings.noteColumn,
+        onEditEpubLook: () => _editEpubLook(controller),
       );
     }
     return NoteView(
@@ -3278,9 +3280,14 @@ final class _LibraryShellState extends State<_LibraryShell>
         createMissingNote: _missingNoteCreator(controller),
         statusActions: _statusActionsFor(pane),
         header: _journalHeader,
+        onEditEpubLook: () => _editEpubLook(controller),
       ),
     ),
   );
+
+  /// Opens the sheet that sets how the books look (#280).
+  void _editEpubLook(LibrarySession controller) =>
+      unawaited(showEpubLookSheet(context, session: controller));
 
   /// The journal's strip over [path] when it is an entry (#7), else null.
   Widget? _journalHeader(String path, {bool compact = false}) {

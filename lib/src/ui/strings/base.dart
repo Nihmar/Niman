@@ -156,6 +156,14 @@ abstract base class Strings {
   String get uiTextScaleSubtitle;
   String get noteTextScaleTitle;
   String get noteTextScaleSubtitle;
+  String get epubLookTitle;
+  String get epubLookSubtitle;
+  String get epubSameAsApp;
+  String get epubFontTitle;
+  String get epubFontSerif;
+  String get epubFontSans;
+  String get epubFontMono;
+  String get epubTextSizeTitle;
 
   // Settings: preview mode.
   // Settings: editor formatting.

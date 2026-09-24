@@ -25,6 +25,8 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/epub/epub_look.dart';
+import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
@@ -490,6 +492,7 @@ final class LibraryController implements LibrarySession {
         ui: settings.uiTextScale,
         note: settings.noteTextScale,
       );
+      await _publishEpubLook(settings.epubLook);
       _phase = LibraryPhase.ready;
       currentRootPath = abs;
       // Warm the tree's first query while the caller still shows its
@@ -1088,6 +1091,46 @@ final class LibraryController implements LibrarySession {
     AppTextScales.note = clamped;
   }
 
+  /// How the library's books look (#280).
+  @override
+  Future<EpubLook> get epubLook async => (await _library).epubLook;
+
+  /// Sets (and persists) how the books look, and puts it on screen.
+  @override
+  Future<void> setEpubLook(EpubLook look) async {
+    _log.info(
+      'books set to ${look.theme ?? 'the app theme'}, '
+      '${look.brightness?.id ?? 'the app brightness'}, '
+      '${look.font.name} at ${look.textScale}',
+    );
+    await _editLibrary((c) => c.copyWith(epubLook: look));
+    await _publishEpubLook(look);
+  }
+
+  /// Puts [look] on screen with the theme it names: a shipped palette, or
+  /// a custom theme of this device's — none, the app's, when that is gone.
+  Future<void> _publishEpubLook(EpubLook look) async {
+    final id = look.theme;
+    AppTheme? theme;
+    if (id != null) {
+      final customId = AppTheme.customIdIn(id);
+      if (customId == null) {
+        theme = themeFromId(id);
+      } else {
+        final custom = await CustomThemeRepo(await appDatabase).byId(customId);
+        if (custom != null) theme = themeFromId(id, custom: custom);
+      }
+    }
+    EpubLooks.apply(look, theme: theme);
+  }
+
+  /// Publishes the books' look again: a custom theme it may name was
+  /// changed or deleted.
+  Future<void> _republishEpubLook() async {
+    if (_phase != LibraryPhase.ready) return;
+    await _publishEpubLook(await epubLook);
+  }
+
   /// The UI language.
   @override
   Future<AppLanguage> get language async {
@@ -1173,6 +1216,7 @@ final class LibraryController implements LibrarySession {
   Future<void> saveCustomTheme(CustomTheme theme) async {
     _log.info('custom theme ${theme.id} saved as "${theme.name}"');
     await CustomThemeRepo(await appDatabase).save(theme);
+    await _republishEpubLook();
   }
 
   /// Renames the custom theme with [id].
@@ -1189,6 +1233,7 @@ final class LibraryController implements LibrarySession {
   Future<AppTheme> deleteCustomTheme(String id) async {
     _log.info('custom theme $id deleted');
     await CustomThemeRepo(await appDatabase).delete(id);
+    await _republishEpubLook();
     // Reading it back repairs a setting that pointed at the deleted
     // theme, so what comes out is what the app wears from here on.
     return await theme;
@@ -1253,6 +1298,7 @@ final class LibraryController implements LibrarySession {
     // The text sizes belonged to the library that just went away; the
     // home screen is nobody's library and reads at the shipped sizes.
     AppTextScales.reset();
+    EpubLooks.reset();
     // Nulled before the awaits: a caller that races us must not find a
     // half-closed database.
     final searchDb = _searchDb;

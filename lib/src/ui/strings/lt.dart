@@ -324,6 +324,23 @@ final class LithuanianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Redaktorius ir peržiūra visada suderinami';
+  @override
+  String get epubLookTitle => 'Knygų išvaizda';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB knygų tema, šriftas ir teksto dydis, atskirai nuo pastabų';
+  @override
+  String get epubSameAsApp => 'Kaip programoje';
+  @override
+  String get epubFontTitle => 'Šriftas';
+  @override
+  String get epubFontSerif => 'Su užraitais';
+  @override
+  String get epubFontSans => 'Be užraitų';
+  @override
+  String get epubFontMono => 'Lygiaplotis';
+  @override
+  String get epubTextSizeTitle => 'Teksto dydis';
 
   // Settings: preview mode.
   // Settings: editor formatting.

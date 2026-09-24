@@ -1,24 +1,27 @@
 /// An EPUB, read in the note pane (#280).
 ///
 /// The book is read into Markdown off the UI isolate ([openEpub]) and drawn
-/// by the note's own read view: the note's text size, the theme's colours,
-/// the note column. Its pictures come from the app's cache, its own links
-/// jump within it, and its table of contents is a button on the row below.
+/// by the note's own read view, in the note column, with a look of its own:
+/// the library's theme, brightness, face and text size for its books
+/// ([EpubLooks]), set from the Aa button on the row below. Its pictures
+/// come from the app's cache, its own links jump within it, and its table
+/// of contents is a button on that row too.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/epub/epub_document.dart';
+import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
+import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -37,6 +40,7 @@ final class EpubPane extends StatefulWidget {
     this.launcher = const OsLauncher(),
     this.column = NoteColumn.off,
     this.cacheDir = _epubCacheDir,
+    this.onEditLook,
     super.key,
   });
 
@@ -52,6 +56,10 @@ final class EpubPane extends StatefulWidget {
   /// Where the books' pictures are extracted: the app's cache, or a test's
   /// own folder.
   final Future<String> Function() cacheDir;
+
+  /// Opens the sheet that sets how the books look; null leaves its button
+  /// on the row, disabled.
+  final VoidCallback? onEditLook;
 
   @override
   State<EpubPane> createState() => EpubPaneState();
@@ -178,48 +186,67 @@ final class EpubPaneState extends State<EpubPane> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: EpubLooks.revision,
+    // The whole pane wears the book's look, its row included.
+    builder: (context, _) => Theme(
+      data: epubThemeOf(context),
+      child: Builder(builder: _pane),
+    ),
+  );
+
+  Widget _pane(BuildContext context) {
     final document = _document;
     final buffer = _buffer;
-    return Column(
-      children: [
-        Expanded(
-          child: _failed
-              ? _unreadable()
-              : document == null || buffer == null
-              ? const Center(child: CircularProgressIndicator())
-              : _book(context, document, buffer),
-        ),
-        AttachmentBar(
-          path: widget.path,
-          launcher: widget.launcher,
-          actions: [
-            // Kept on the row while the book is read, and when it has no
-            // contents, so the row does not move under a thumb.
-            IconButton(
-              key: const Key('epub-contents-button'),
-              tooltip: AppStrings.outlineTooltip,
-              icon: const Icon(Icons.toc),
-              visualDensity: VisualDensity.compact,
-              onPressed: document == null || document.contents.isEmpty
-                  ? null
-                  : () => unawaited(_showContents()),
-            ),
-          ],
-        ),
-      ],
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: Column(
+        children: [
+          Expanded(
+            child: _failed
+                ? _unreadable()
+                : document == null || buffer == null
+                ? const Center(child: CircularProgressIndicator())
+                : _book(context, document, buffer),
+          ),
+          AttachmentBar(
+            path: widget.path,
+            launcher: widget.launcher,
+            actions: [
+              IconButton(
+                key: const Key('epub-look-button'),
+                tooltip: AppStrings.epubLookTitle,
+                icon: const Icon(Icons.format_size),
+                visualDensity: VisualDensity.compact,
+                onPressed: widget.onEditLook,
+              ),
+              // Kept on the row while the book is read, and when it has no
+              // contents, so the row does not move under a thumb.
+              IconButton(
+                key: const Key('epub-contents-button'),
+                tooltip: AppStrings.outlineTooltip,
+                icon: const Icon(Icons.toc),
+                visualDensity: VisualDensity.compact,
+                onPressed: document == null || document.contents.isEmpty
+                    ? null
+                    : () => unawaited(_showContents()),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  /// The book, at the note text size rather than the interface one, as a
-  /// note's read view is.
+  /// The book, at the books' text size rather than the interface one, as
+  /// a note's read view is at the note's.
   Widget _book(
     BuildContext context,
     EpubDocument document,
     SourceBuffer buffer,
   ) => MediaQuery(
     data: MediaQuery.of(context)
-        .copyWith(textScaler: noteTextScalerOf(context)),
+        .copyWith(textScaler: epubTextScalerOf(context)),
     child: MarkdownReadView(
       key: _readKey,
       buffer: buffer,

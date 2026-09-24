@@ -327,6 +327,23 @@ final class SerbianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Уредитељ и преглед, који су увек у складу';
+  @override
+  String get epubLookTitle => 'Изглед књига';
+  @override
+  String get epubLookSubtitle =>
+      'Тема, фонт и величина текста EPUB књига, одвојено од белешки';
+  @override
+  String get epubSameAsApp => 'Као апликација';
+  @override
+  String get epubFontTitle => 'Фонт';
+  @override
+  String get epubFontSerif => 'Серифни';
+  @override
+  String get epubFontSans => 'Без серифа';
+  @override
+  String get epubFontMono => 'Моноспејс';
+  @override
+  String get epubTextSizeTitle => 'Величина текста';
 
   // Settings: preview mode.
   // Settings: editor formatting.
