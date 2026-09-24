@@ -40,6 +40,24 @@ final class BlockHeightMap {
       // whatever changed.
       _extents = PrefixSums.generate(count, estimate);
 
+  /// A map over [count] items that asks `estimate` for an item's height
+  /// only when a frame first reaches the chunk of items it is in, and until
+  /// then counts the chunk at `estimateSpan(first, end)`: the heights of
+  /// items `[first, end)` as best known without asking each of them.
+  ///
+  /// O(chunks) to make where the map above is O(count): a map over every
+  /// line of a note is built on the frame that opens it, and on the 246 MB
+  /// stress note that was 2.9 M estimates, most of that frame (profile
+  /// build, 2026-09-24). Each item is still asked once — the index it is
+  /// asked with is the one it has then, after whatever [splice]s came
+  /// before, so `estimate` reads the note as it is.
+  new lazy({
+    required int count,
+    required double Function(int index) estimate,
+    required double Function(int first, int end) estimateSpan,
+  }) : _measured = Uint8List(count),
+       _extents = PrefixSums.lazy(count, estimate, estimate: estimateSpan);
+
   /// Replaces [removed] blocks from [first] on with [inserted] new ones,
   /// estimated by [estimate] (asked with the blocks' *new* indices), and keeps
   /// every other block's measurement.

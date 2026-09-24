@@ -78,4 +78,54 @@ void main() {
     expect(buffer.lineCount, _rows);
     expect(ms, lessThan(bar));
   });
+
+  // The map the source surface builds over the note's lines, asking each
+  // line's length of the buffer: 202 ms of the frame that opened the 246 MB
+  // note in the profile build (2026-09-24), 2.76 M lines. Made lazy, a
+  // chunk of lines stands at an estimate from its characters until a frame
+  // reaches it, and the frame that opens the note asks about one screen.
+  test('the height map over a million lines, and the first screen', () {
+    final text = List<String>.generate(
+      _rows,
+      (at) => 'line $at of a note that is long enough to be read',
+    ).join('\n');
+    final buffer = SourceBuffer.fromText(text);
+    const columns = 80.0;
+    const row = 21.0;
+    double estimate(int line) =>
+        ((buffer.lineLengthAt(line) / columns).ceil().clamp(1, 1 << 30)) * row;
+    // One screen, as a first frame asks for it: where the top is, and each
+    // row's offset down to the bottom.
+    void firstScreen(BlockHeightMap map) {
+      final top = map.indexAt(0) ?? 0;
+      for (var line = top; line < top + 60; line++) {
+        map.offsetOf(line);
+      }
+    }
+
+    final eager = _best(3, () {
+      firstScreen(BlockHeightMap(count: _rows, estimate: estimate));
+    });
+    late BlockHeightMap lazy;
+    final ms = _best(3, () {
+      lazy = BlockHeightMap.lazy(
+        count: _rows,
+        estimate: estimate,
+        estimateSpan: (first, end) => (end - first) * row,
+      );
+      firstScreen(lazy);
+    });
+    // Every line asked: 17.6 ms here; a chunk at a time: 0.1. The
+    // backstop is a fifth of the eager build on the same run, which holds
+    // on any runner; the ceiling is the design's.
+    const ceiling = 5.0;
+    final bar = _referenceHost ? ceiling : eager / 5;
+    print(
+      'height map over $_rows lines, first screen: eager '
+      '${eager.toStringAsFixed(1)} ms, lazy ${ms.toStringAsFixed(1)} ms '
+      '(held to ${bar.toStringAsFixed(1)} ms)',
+    );
+    expect(lazy.length, _rows);
+    expect(ms, lessThan(bar));
+  });
 }
