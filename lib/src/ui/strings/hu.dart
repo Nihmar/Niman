@@ -252,11 +252,16 @@ final class HungarianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Sötét';
   @override
-  String get themePaletteTitle => 'Színpaletta';
+  String get themeTitle => 'Téma';
   @override
-  String get themePaletteSubtitle => 'A felület és a jegyzet színei';
+  String get themeSubtitle => 'A felület és a jegyzet színei';
   @override
   String get themePaletteSystem => 'Rendszer';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Témák';
+  @override
+  String get themesInUse => 'Használatban';
 
   // Settings: text size (T-M6-12).
   @override

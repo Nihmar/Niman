@@ -257,11 +257,16 @@ final class SpanishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Oscuro';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Los colores de la interfaz y de la nota';
+  String get themeSubtitle => 'Los colores de la interfaz y de la nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temas';
+  @override
+  String get themesInUse => 'En uso';
 
   // Settings: text size (T-M6-12).
   @override

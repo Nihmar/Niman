@@ -257,11 +257,16 @@ final class GalicianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Escuro';
   @override
-  String get themePaletteTitle => 'Paleta de cores';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'As cores da interfaz e da nota';
+  String get themeSubtitle => 'As cores da interfaz e da nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temas';
+  @override
+  String get themesInUse => 'En uso';
 
   // Settings: text size (T-M6-12).
   @override

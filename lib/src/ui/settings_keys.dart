@@ -21,11 +21,20 @@ import 'package:flutter/widgets.dart';
 abstract final class SettingsKeys {
   // Appearance.
   static const language = Key('language-choice');
-  static const brightness = Key('theme-brightness-setting');
-  static const palette = Key('theme-palette-setting');
   static const uiTextScale = Key('ui-text-scale-setting');
   static const splitRatio = Key('split-ratio-setting');
   static const closeToTray = Key('close-to-tray-setting');
+
+  // Themes (issue #269).
+  static const brightness = Key('theme-brightness-setting');
+
+  /// The theme the app wears: the whole list of them, which is one
+  /// setting with one screenful of choices.
+  static const theme = Key('theme-setting');
+
+  /// One theme's row, by the id it is stored under: a shipped palette's
+  /// (`gruvbox`) or a custom theme's (`custom:<id>`).
+  static Key themeRow(String id) => Key('theme-row-$id');
 
   // Editor.
   static const toolbar = Key('toolbar-setting');

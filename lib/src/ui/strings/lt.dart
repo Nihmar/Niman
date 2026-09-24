@@ -255,11 +255,16 @@ final class LithuanianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tamsi';
   @override
-  String get themePaletteTitle => 'Spalvų paletė';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Sąsajos ir pastabų spalvos';
+  String get themeSubtitle => 'Sąsajos ir pastabų spalvos';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temos';
+  @override
+  String get themesInUse => 'Naudojama';
 
   // Settings: text size (T-M6-12).
   @override

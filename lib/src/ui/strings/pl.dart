@@ -257,11 +257,16 @@ final class PolishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Ciemny';
   @override
-  String get themePaletteTitle => 'Paleta kolorów';
+  String get themeTitle => 'Motyw';
   @override
-  String get themePaletteSubtitle => 'Kolory interfejsu i notatki';
+  String get themeSubtitle => 'Kolory interfejsu i notatki';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Motywy';
+  @override
+  String get themesInUse => 'W użyciu';
 
   // Settings: text size (T-M6-12).
   @override

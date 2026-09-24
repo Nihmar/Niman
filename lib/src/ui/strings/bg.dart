@@ -258,11 +258,16 @@ final class BulgarianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Тъмна';
   @override
-  String get themePaletteTitle => 'Палитра на цветовете';
+  String get themeTitle => 'Тема';
   @override
-  String get themePaletteSubtitle => 'Цветовете на интерфейса и бележките';
+  String get themeSubtitle => 'Цветовете на интерфейса и бележките';
   @override
   String get themePaletteSystem => 'Система';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Теми';
+  @override
+  String get themesInUse => 'Използва се';
 
   // Settings: text size (T-M6-12).
   @override

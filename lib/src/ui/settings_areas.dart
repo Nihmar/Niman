@@ -18,6 +18,7 @@ import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
 import 'package:niman/src/ui/settings_reminders.dart';
+import 'package:niman/src/ui/settings_themes.dart';
 import 'package:niman/src/ui/settings_transcription.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
 import 'package:niman/src/ui/settings_updates.dart';
@@ -28,8 +29,11 @@ import 'package:path/path.dart' as p;
 
 /// Which area a settings row lives in.
 enum SettingsAreaId {
-  /// Language, theme, text sizes.
+  /// The app's own look: language, text sizes, layout.
   appearance,
+
+  /// How bright the app is, and the theme it wears (issue #269).
+  themes,
 
   /// The editors and how they behave.
   editor,
@@ -145,12 +149,23 @@ List<SettingsArea> settingsAreas({
       id: SettingsAreaId.appearance,
       group: SettingsGroup.app,
       rowKey: const Key('settings-area-appearance'),
-      icon: () => Icons.palette_outlined,
+      icon: () => Icons.tune,
       title: AppStrings.settingsSectionAppearance,
       build: (highlight) => SettingsAppearanceScreen(
         controller: controller,
         highlight: highlight,
       ),
+    ),
+    // The look has its own area (issue #269): the brightness, and the
+    // theme the app wears, shipped or made.
+    SettingsArea(
+      id: SettingsAreaId.themes,
+      group: SettingsGroup.app,
+      rowKey: const Key('settings-area-themes'),
+      icon: () => Icons.palette_outlined,
+      title: AppStrings.settingsSectionThemes,
+      build: (highlight) =>
+          SettingsThemesScreen(controller: controller, highlight: highlight),
     ),
     SettingsArea(
       id: SettingsAreaId.editor,

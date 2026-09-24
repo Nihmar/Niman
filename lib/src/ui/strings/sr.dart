@@ -257,11 +257,16 @@ final class SerbianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Тамна';
   @override
-  String get themePaletteTitle => 'Палета';
+  String get themeTitle => 'Тема';
   @override
-  String get themePaletteSubtitle => 'Боје сучеља и белешке';
+  String get themeSubtitle => 'Боје сучеља и белешке';
   @override
   String get themePaletteSystem => 'Систем';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Теме';
+  @override
+  String get themesInUse => 'У употреби';
 
   // Settings: text size (T-M6-12).
   @override

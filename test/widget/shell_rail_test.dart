@@ -220,6 +220,17 @@ void main() {
     await pumpWide(tester);
     await tester.tap(railDest('settings'));
     await settle(tester);
+    // The areas list is longer than the window; the maintenance group is
+    // at its end.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('reindex-setting')),
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('settings-areas')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await settle(tester);
     expect(find.byKey(const Key('reindex-setting')), findsOne);
     expect(find.byKey(const Key('switch-library-setting')), findsNothing);
     expect(find.byKey(const Key('close-library-setting')), findsNothing);

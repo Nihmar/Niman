@@ -252,11 +252,16 @@ final class AlbanianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'E errët';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Ngjyrat e ndërfaqes dhe të shënit';
+  String get themeSubtitle => 'Ngjyrat e ndërfaqes dhe të shënit';
   @override
   String get themePaletteSystem => 'Sistemi';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temat';
+  @override
+  String get themesInUse => 'Në përdorim';
 
   // Settings: text size (T-M6-12).
   @override

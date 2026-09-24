@@ -254,11 +254,16 @@ final class PortugueseStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Escuro';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'As cores da interface e da nota';
+  String get themeSubtitle => 'As cores da interface e da nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temas';
+  @override
+  String get themesInUse => 'Em uso';
 
   // Settings: text size (T-M6-12).
   @override

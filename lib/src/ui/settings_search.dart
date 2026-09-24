@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
-import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -13,10 +12,10 @@ import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
-import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
+import 'package:niman/src/ui/settings_themes.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
@@ -81,6 +80,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
   void pushAppearance(Key row) => openArea(SettingsAreaId.appearance, row);
+  void pushThemes(Key row) => openArea(SettingsAreaId.themes, row);
   void pushEditor(Key row) => openArea(SettingsAreaId.editor, row);
   void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
   void pushTrash(Key row) => openArea(SettingsAreaId.trashHistory, row);
@@ -95,6 +95,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
 
   final ops = controller.ops;
   final appearance = AppStrings.settingsSectionAppearance;
+  final themes = AppStrings.settingsSectionThemes;
   final editor = AppStrings.settingsSectionEditor;
   final folders = libraryArea(AppStrings.settingsAreaFolders);
   final trashHistory = libraryArea(AppStrings.settingsAreaTrashHistory);
@@ -110,27 +111,23 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ),
     SettingsSearchEntry(
       title: AppStrings.themeBrightnessTitle,
-      area: appearance,
+      area: themes,
       rowKey: SettingsKeys.brightness,
       value: () async => switch (await controller.themeBrightness) {
         AppBrightness.system => AppStrings.themeBrightnessSystem,
         AppBrightness.day => AppStrings.themeBrightnessDay,
         AppBrightness.night => AppStrings.themeBrightnessNight,
       },
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.brightness),
+      areaId: SettingsAreaId.themes,
+      open: () => pushThemes(SettingsKeys.brightness),
     ),
     SettingsSearchEntry(
-      title: AppStrings.themePaletteTitle,
-      area: appearance,
-      rowKey: SettingsKeys.palette,
-      value: () async =>
-          SettingsAppearanceScreen.paletteName(switch (await controller.theme) {
-            BuiltinAppTheme(:final palette) => palette,
-            CustomAppTheme() => AppPalette.niman,
-          }),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.palette),
+      title: AppStrings.themeTitle,
+      area: themes,
+      rowKey: SettingsKeys.theme,
+      value: () async => SettingsThemesScreen.themeName(await controller.theme),
+      areaId: SettingsAreaId.themes,
+      open: () => pushThemes(SettingsKeys.theme),
     ),
     SettingsSearchEntry(
       title: AppStrings.uiTextScaleTitle,

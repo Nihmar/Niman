@@ -253,11 +253,16 @@ final class DanishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Mørk';
   @override
-  String get themePaletteTitle => 'Farvepalette';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Farverne i grænsefladen og i noten';
+  String get themeSubtitle => 'Farverne i grænsefladen og i noten';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temaer';
+  @override
+  String get themesInUse => 'I brug';
 
   // Settings: text size (T-M6-12).
   @override

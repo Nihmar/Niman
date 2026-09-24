@@ -252,11 +252,16 @@ final class NorwegianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Mørk';
   @override
-  String get themePaletteTitle => 'Fargepalett';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Fargene i grensesnittet og i notatet';
+  String get themeSubtitle => 'Fargene i grensesnittet og i notatet';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temaer';
+  @override
+  String get themesInUse => 'I bruk';
 
   // Settings: text size (T-M6-12).
   @override

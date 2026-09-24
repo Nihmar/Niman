@@ -255,11 +255,16 @@ final class CzechStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tmavý';
   @override
-  String get themePaletteTitle => 'Barevná paleta';
+  String get themeTitle => 'Motiv';
   @override
-  String get themePaletteSubtitle => 'Barvy rozhraní a poznámek';
+  String get themeSubtitle => 'Barvy rozhraní a poznámek';
   @override
   String get themePaletteSystem => 'Systém';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Motivy';
+  @override
+  String get themesInUse => 'Používá se';
 
   // Settings: text size (T-M6-12).
   @override

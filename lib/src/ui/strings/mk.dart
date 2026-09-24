@@ -256,11 +256,16 @@ final class MacedonianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Темно';
   @override
-  String get themePaletteTitle => 'Палета';
+  String get themeTitle => 'Тема';
   @override
-  String get themePaletteSubtitle => 'Бои на интерфејсот и на белешката';
+  String get themeSubtitle => 'Бои на интерфејсот и на белешката';
   @override
   String get themePaletteSystem => 'Систем';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Теми';
+  @override
+  String get themesInUse => 'Се користи';
 
   // Settings: text size (T-M6-12).
   @override

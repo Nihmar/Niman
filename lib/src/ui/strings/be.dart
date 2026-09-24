@@ -253,11 +253,16 @@ final class BelarusianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Цёмная';
   @override
-  String get themePaletteTitle => 'Палітра колераў';
+  String get themeTitle => 'Тэма';
   @override
-  String get themePaletteSubtitle => 'Колеры інтэрфейсу і заўваг';
+  String get themeSubtitle => 'Колеры інтэрфейсу і заўваг';
   @override
   String get themePaletteSystem => 'Сістэма';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Тэмы';
+  @override
+  String get themesInUse => 'Ужываецца';
 
   // Settings: text size (T-M6-12).
   @override

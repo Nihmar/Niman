@@ -257,11 +257,16 @@ final class ItalianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Scura';
   @override
-  String get themePaletteTitle => 'Palette';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'I colori dell’interfaccia e della nota';
+  String get themeSubtitle => 'I colori dell’interfaccia e della nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temi';
+  @override
+  String get themesInUse => 'In uso';
 
   // Settings: text size (T-M6-12).
   @override

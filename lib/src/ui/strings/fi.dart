@@ -253,11 +253,16 @@ final class FinnishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tumma';
   @override
-  String get themePaletteTitle => 'Väripaletti';
+  String get themeTitle => 'Teema';
   @override
-  String get themePaletteSubtitle => 'Käyttöliittymän ja muistiinpanon värit';
+  String get themeSubtitle => 'Käyttöliittymän ja muistiinpanon värit';
   @override
   String get themePaletteSystem => 'Järjestelmä';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teemat';
+  @override
+  String get themesInUse => 'Käytössä';
 
   // Settings: text size (T-M6-12).
   @override

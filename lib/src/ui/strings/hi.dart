@@ -242,11 +242,16 @@ final class HindiStrings extends Strings {
   @override
   String get themeBrightnessNight => 'डार्क';
   @override
-  String get themePaletteTitle => 'पैलेट';
+  String get themeTitle => 'थीम';
   @override
-  String get themePaletteSubtitle => 'इंटरफ़ेस और नोट के रंग';
+  String get themeSubtitle => 'इंटरफ़ेस और नोट के रंग';
   @override
   String get themePaletteSystem => 'सिस्टम';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'थीम';
+  @override
+  String get themesInUse => 'उपयोग में';
 
   // Settings: text size (T-M6-12).
   @override

@@ -253,12 +253,16 @@ final class EnglishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Dark';
   @override
-  String get themePaletteTitle => 'Palette';
+  String get themeTitle => 'Theme';
   @override
-  String get themePaletteSubtitle =>
-      'The colors of the interface and of the note';
+  String get themeSubtitle => 'The colors of the interface and of the note';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Themes';
+  @override
+  String get themesInUse => 'In use';
 
   // Settings: text size (T-M6-12).
   @override

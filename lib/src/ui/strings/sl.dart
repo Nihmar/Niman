@@ -257,11 +257,16 @@ final class SlovenianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Temna';
   @override
-  String get themePaletteTitle => 'Barvna paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Barve vmesnika in opomb';
+  String get themeSubtitle => 'Barve vmesnika in opomb';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'V uporabi';
 
   // Settings: text size (T-M6-12).
   @override

@@ -258,11 +258,16 @@ final class RomanianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Întunecat';
   @override
-  String get themePaletteTitle => 'Paletă de culori';
+  String get themeTitle => 'Temă';
   @override
-  String get themePaletteSubtitle => 'Culorile interfeței și ale notei';
+  String get themeSubtitle => 'Culorile interfeței și ale notei';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'În uz';
 
   // Settings: text size (T-M6-12).
   @override

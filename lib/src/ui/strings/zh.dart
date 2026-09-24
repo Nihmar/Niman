@@ -232,11 +232,16 @@ final class ChineseStrings extends Strings {
   @override
   String get themeBrightnessNight => '深色';
   @override
-  String get themePaletteTitle => '配色';
+  String get themeTitle => '主题';
   @override
-  String get themePaletteSubtitle => '界面和笔记的颜色';
+  String get themeSubtitle => '界面和笔记的颜色';
   @override
   String get themePaletteSystem => '跟随系统';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => '主题';
+  @override
+  String get themesInUse => '使用中';
 
   // Settings: text size (T-M6-12).
   @override

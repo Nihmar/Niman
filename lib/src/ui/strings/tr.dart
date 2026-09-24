@@ -247,11 +247,16 @@ final class TurkishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Koyu';
   @override
-  String get themePaletteTitle => 'Renk paleti';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Arayüz ve not renkleri';
+  String get themeSubtitle => 'Arayüz ve not renkleri';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temalar';
+  @override
+  String get themesInUse => 'Kullanımda';
 
   // Settings: text size (T-M6-12).
   @override
