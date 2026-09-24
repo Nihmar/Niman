@@ -87,6 +87,14 @@ final class _SearchScreenState extends State<SearchScreen> {
   List<SearchHit> _hits = const [];
   int _shown = 0;
 
+  /// The words [_hits] were searched for, when they came from a word
+  /// search: its excerpts are read from the notes as their rows are built
+  /// ([SearchSource.excerpt]), and null for results that carry their own.
+  String? _excerptWords;
+
+  /// The excerpts asked for so far, by path, for [_hits].
+  final Map<String, Future<String>> _excerpts = {};
+
   @override
   void initState() {
     super.initState();
@@ -273,6 +281,8 @@ final class _SearchScreenState extends State<SearchScreen> {
       _searched = true;
       _hits = results;
       _shown = _pageSize < results.length ? _pageSize : results.length;
+      _excerpts.clear();
+      _excerptWords = field == null && !contains ? text : null;
     });
     logNextFrame('search.ui', 'results first frame (id $id)');
   }
@@ -450,10 +460,22 @@ final class _SearchScreenState extends State<SearchScreen> {
                 ),
               ),
               if (hit.snippet.isNotEmpty)
-                Text.rich(
-                  _highlight(theme, hit.snippet),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                _snippet(theme, hit.snippet)
+              else if ((_excerptWords, _source) case (
+                final words?,
+                final source?,
+              ))
+                FutureBuilder<String>(
+                  future: _excerpts.putIfAbsent(
+                    hit.path,
+                    () => source.excerpt(hit, words),
+                  ),
+                  builder: (context, excerpt) {
+                    final text = excerpt.data ?? '';
+                    return text.isEmpty
+                        ? const SizedBox.shrink()
+                        : _snippet(theme, text);
+                  },
                 ),
             ],
           ),
@@ -463,6 +485,12 @@ final class _SearchScreenState extends State<SearchScreen> {
       },
     );
   }
+
+  Widget _snippet(ThemeData theme, String snippet) => Text.rich(
+    _highlight(theme, snippet),
+    maxLines: 2,
+    overflow: TextOverflow.ellipsis,
+  );
 
   /// The result-row long-press menu (T-M3-10): the single-note replace.
   Future<void> _showNoteActions(SearchHit hit) async {

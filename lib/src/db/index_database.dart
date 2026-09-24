@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 part 'index_database.g.dart';
 
@@ -157,6 +158,22 @@ class NoteLinks extends Table {
   Set<Column> get primaryKey => {fromNote, toNote, kind};
 }
 
+/// The pragmas an index connection opens with: those of every connection
+/// of the app, and incremental auto-vacuum.
+///
+/// A note rewritten gives its old full-text pages back to the file's free
+/// list, and without auto-vacuum the file never shrinks after a big note
+/// is shortened or deleted. Incremental, not full: full moves pages at
+/// every commit, a save's included; this gives them back when a full scan
+/// asks (`PRAGMA incremental_vacuum`, `Indexer.fullScan`). The mode takes
+/// on a new file, or on an old one at its next vacuum.
+void indexDatabaseSetup(sqlite3.Database db) {
+  db
+    ..execute('PRAGMA auto_vacuum = INCREMENTAL')
+    ..execute('PRAGMA busy_timeout = 5000')
+    ..execute('PRAGMA journal_mode = WAL');
+}
+
 /// One library's note index.
 ///
 /// Every table here is derived: deleting the file and rescanning the
@@ -178,16 +195,26 @@ class IndexDatabase extends _$IndexDatabase {
 
   /// v1: M3's tree, stems, tags and links. v2: the frontmatter fields
   /// table and the three known-field columns on `notes` (T-M4-02). v3:
-  /// the six indexes the million-note pass showed missing (T-M6-01).
+  /// the six indexes the million-note pass showed missing (T-M6-01). v4:
+  /// the full-text table keeps its word index and no copy of the text.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
   /// search ranking). `IF NOT EXISTS` keeps a re-open idempotent.
+  ///
+  /// Contentless (`content=''`): the table is the index of the words and
+  /// holds no copy of the text they came from. The copy made the file as
+  /// big as the library's notes put together — the 247 MB stress note was
+  /// 247 MB of it — for what the notes on disk already hold: a result's
+  /// excerpt and the contains scan read the note instead
+  /// (`search/search_excerpt.dart`). `contentless_delete=1` lets a note's row
+  /// be deleted by its rowid alone, which a rewrite of the note does.
   static const String _createFts =
       'CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING '
-      "fts5(title, body, tokenize = 'unicode61 remove_diacritics 2')";
+      "fts5(title, body, content = '', contentless_delete = 1, "
+      "tokenize = 'unicode61 remove_diacritics 2')";
 
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
@@ -223,6 +250,12 @@ class IndexDatabase extends _$IndexDatabase {
       // Belt and braces: an index file that predates the FTS table (or
       // lost it) rebuilds it here rather than failing every search.
       await customStatement(_createFts);
+      // Dropping the old tables freed their pages but kept them in the
+      // file: without this, an index that held every note's text stays
+      // that size, empty. The vacuum also puts the file on the
+      // incremental auto-vacuum the connection asks for, which it can only
+      // take up on a vacuum (`indexDatabaseSetup`).
+      if (details.hadUpgrade) await customStatement('VACUUM');
     },
   );
 }

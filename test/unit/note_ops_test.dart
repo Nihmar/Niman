@@ -41,14 +41,19 @@ void main() {
     await dbDir.delete(recursive: true);
   });
 
-  Future<String> ftsBody(int id) async {
-    final row = await db
+  /// Whether the full-text row of note [id] has [word] in its body — asked
+  /// of the index, which keeps no text to read back.
+  Future<bool> ftsBodyHas(int id, String word) async {
+    final rows = await db
         .customSelect(
-          'SELECT body FROM notes_fts WHERE rowid = ?',
-          variables: [Variable.withInt(id)],
+          'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1 AND rowid = ?2',
+          variables: [
+            Variable.withString('body : $word'),
+            Variable.withInt(id),
+          ],
         )
-        .getSingle();
-    return row.read<String>('body');
+        .get();
+    return rows.isNotEmpty;
   }
 
   group('create', () {
@@ -300,7 +305,7 @@ void main() {
       expect(row.pinned, isTrue);
       expect(row.sha256, before.sha256, reason: 'the note was not read');
       expect(
-        (await ftsBody(row.id)).startsWith('---'),
+        await ftsBodyHas(row.id, 'pinned'),
         isFalse,
         reason: 'the full-text row is the one read before the pin',
       );
@@ -311,7 +316,7 @@ void main() {
       expect(after.sha256, sha256.convert(bytes).toString());
       expect(after.size, bytes.length);
       expect(after.pinned, isTrue);
-      expect(await ftsBody(row.id), startsWith('---\npinned: true\n---\n'));
+      expect(await ftsBodyHas(row.id, 'pinned'), isTrue);
     });
 
     test('unpinning clears the fields the block held', () async {
