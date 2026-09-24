@@ -403,6 +403,42 @@ void main() {
       expect(surface.focusNode.hasFocus, isTrue);
     });
 
+    // 2026-09-24 report: the caret was drawn on `{{cursor}}`, but nothing
+    // typed reached the note until a click. The template is picked from a
+    // screen where something already has the focus — the tree, the button
+    // it was picked from — and `autofocus` gives way to that.
+    testWidgets('takes the keyboard from what had the focus', (tester) async {
+      final elsewhere = FocusNode(debugLabel: 'elsewhere');
+      addTearDown(elsewhere.dispose);
+      Widget page({required bool note}) => _app(
+        Column(
+          children: [
+            Focus(focusNode: elsewhere, child: const SizedBox(height: 10)),
+            if (note)
+              Expanded(
+                child: _note(text: '# Titolo\n\ncorpo\n', initialCaret: 10),
+              ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(page(note: false));
+      elsewhere.requestFocus();
+      await tester.pump();
+      expect(elsewhere.hasFocus, isTrue);
+
+      await tester.pumpWidget(page(note: true));
+      await tester.pumpAndSettle();
+      final surface = _surface(tester);
+      expect(surface.selection, const SelectionModel.at(10));
+      expect(surface.focusNode.hasFocus, isTrue);
+      expect(
+        tester
+            .state<MarkdownSourceViewState>(find.byType(MarkdownSourceView))
+            .isKeyboardAttached,
+        isTrue,
+      );
+    });
+
     testWidgets('wins over a memento', (tester) async {
       await tester.pumpWidget(
         _app(
