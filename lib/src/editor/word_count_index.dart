@@ -68,6 +68,11 @@ final class WordCount {
   /// being worked out elsewhere.
   bool get isCounted => _sums != null;
 
+  /// Drops the count: the note's text was replaced whole, not edited, so no
+  /// line of the count is known to still be one of the note's. [words]
+  /// answers zero and [edited] waits until the count is built again.
+  void forget() => _sums = null;
+
   /// Takes [counted]'s count as this one's: the count [countInBackground]
   /// worked out elsewhere, so it is not worked out again here.
   void adoptCount(WordCount counted) => _sums = counted._sums;
