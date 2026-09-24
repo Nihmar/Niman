@@ -13,6 +13,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
 
 /// Builds and maintains the notes index so it mirrors the library on disk.
@@ -349,6 +350,34 @@ final class Indexer {
         final cb = onChanged;
         if (cb != null) cb();
       }
+    });
+  }
+
+  /// Records the frontmatter [head] of the note at [rel] (library-relative)
+  /// — the fields, and the title, date and pin the tree shows — without
+  /// reading the note.
+  ///
+  /// For an edit that changed only the note's frontmatter and knows what
+  /// the block now says: a pin. The rest of what the index holds of the
+  /// note — its digest, its full-text row, its tags and links, its size
+  /// and time — is left as it was, so the note still reads as changed to
+  /// every scan, and the next reindex of it brings those up to date. On the
+  /// 247 MB stress note that reindex is 15 to 34 s on a phone; the pin is
+  /// on screen at once.
+  Future<void> applyFrontmatter(String rel, Frontmatter? head) {
+    return _synchronized(() async {
+      final row = await _dao.find(rel);
+      if (row == null || row.isDir || !isNoteFile(row.name)) return;
+      await _db.transaction(
+        () => _store.writeFields(
+          row.id,
+          fields: head?.fields ?? const {},
+          date: head?.date,
+          pinned: head?.pinned ?? false,
+        ),
+      );
+      final cb = onChanged;
+      if (cb != null) cb();
     });
   }
 

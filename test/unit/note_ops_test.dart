@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -38,6 +40,16 @@ void main() {
     await root.delete(recursive: true);
     await dbDir.delete(recursive: true);
   });
+
+  Future<String> ftsBody(int id) async {
+    final row = await db
+        .customSelect(
+          'SELECT body FROM notes_fts WHERE rowid = ?',
+          variables: [Variable.withInt(id)],
+        )
+        .getSingle();
+    return row.read<String>('body');
+  }
 
   group('create', () {
     test('creates an empty note file and index row', () async {
@@ -271,6 +283,50 @@ void main() {
       expect(row.pinned, isFalse);
       expect(File(p.join(root.path, 'Note.md')).readAsStringSync(), 'body\n');
       expect((await dao.find('Note.md'))!.pinned, isFalse);
+    });
+
+    test('the pin is on the row before the note is read back', () async {
+      // Unpinning the 247 MB stress note waited for the whole note to be
+      // read back into the index, 15 to 34 s on a phone, and the app was
+      // closed before it ended: the tree kept the pin (2026-09-24). The pin
+      // is recorded from the head the edit wrote; the rest follows as a
+      // save's does, once the note is quiet — past 2 MB, seconds later.
+      final body = '${'word ' * 600000}\n';
+      await ops.createNote(parentPath: '', name: 'Big', content: body);
+      final before = (await dao.find('Big.md'))!;
+
+      final row = await ops.setPinned('Big.md', pinned: true);
+
+      expect(row.pinned, isTrue);
+      expect(row.sha256, before.sha256, reason: 'the note was not read');
+      expect(
+        (await ftsBody(row.id)).startsWith('---'),
+        isFalse,
+        reason: 'the full-text row is the one read before the pin',
+      );
+
+      await ops.writer.indexed;
+      final after = (await dao.find('Big.md'))!;
+      final bytes = File(p.join(root.path, 'Big.md')).readAsBytesSync();
+      expect(after.sha256, sha256.convert(bytes).toString());
+      expect(after.size, bytes.length);
+      expect(after.pinned, isTrue);
+      expect(await ftsBody(row.id), startsWith('---\npinned: true\n---\n'));
+    });
+
+    test('unpinning clears the fields the block held', () async {
+      await ops.createNote(
+        parentPath: '',
+        name: 'Note',
+        content: '---\npinned: true\n---\nbody\n',
+      );
+
+      await ops.setPinned('Note.md', pinned: false);
+
+      final row = (await dao.find('Note.md'))!;
+      expect(row.pinned, isFalse);
+      final fields = await db.select(db.frontmatterFields).get();
+      expect(fields.where((f) => f.noteId == row.id), isEmpty);
     });
 
     test('pinning an already pinned note rewrites nothing', () async {
