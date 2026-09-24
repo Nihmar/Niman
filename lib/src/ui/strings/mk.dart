@@ -1460,6 +1460,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Потребна е отворена белешка';
   @override
+  String get commandNeedTextNote => 'Потребна е отворена текстуална белешка';
+  @override
   String get commandNeedWideWindow => 'Само во широк прозорец';
   @override
   String get commandNeedDockRoom =>

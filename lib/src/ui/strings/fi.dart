@@ -1457,6 +1457,8 @@ final class FinnishStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Vaatii avoimen muistiinpanon';
   @override
+  String get commandNeedTextNote => 'Vaatii avoimen tekstimuistiinpanon';
+  @override
   String get commandNeedWideWindow => 'Vain leveässä ikkunassa';
   @override
   String get commandNeedDockRoom =>

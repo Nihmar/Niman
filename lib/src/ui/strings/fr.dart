@@ -1482,6 +1482,8 @@ final class FrenchStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Nécessite une note ouverte';
   @override
+  String get commandNeedTextNote => 'Nécessite une note texte ouverte';
+  @override
   String get commandNeedWideWindow => 'Fenêtre large uniquement';
   @override
   String get commandNeedDockRoom =>

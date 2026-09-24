@@ -1444,6 +1444,8 @@ final class SlovakStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Vyžaduje otvorenú poznámku';
   @override
+  String get commandNeedTextNote => 'Vyžaduje otvorenú textovú poznámku';
+  @override
   String get commandNeedWideWindow => 'Len v širokom okne';
   @override
   String get commandNeedDockRoom => 'Vyžaduje okno dosť široké pre bočný panel';

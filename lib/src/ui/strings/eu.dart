@@ -1452,6 +1452,8 @@ final class BasqueStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Ohar ireki bat behar du';
   @override
+  String get commandNeedTextNote => 'Testu-ohar ireki bat behar du';
+  @override
   String get commandNeedWideWindow => 'Leiho zabalean soilik';
   @override
   String get commandNeedDockRoom =>

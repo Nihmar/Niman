@@ -1438,6 +1438,8 @@ final class CzechStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Vyžaduje otevřenou poznámku';
   @override
+  String get commandNeedTextNote => 'Vyžaduje otevřenou textovou poznámku';
+  @override
   String get commandNeedWideWindow => 'Jen v širokém okně';
   @override
   String get commandNeedDockRoom => 'Vyžaduje okno dost široké pro boční panel';

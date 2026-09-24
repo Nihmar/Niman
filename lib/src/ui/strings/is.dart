@@ -1442,6 +1442,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get commandNeedOpenNote => 'Krefst opinnar glósu';
   @override
+  String get commandNeedTextNote => 'Krefst opinnar textaglósu';
+  @override
   String get commandNeedWideWindow => 'Aðeins í breiðum glugga';
   @override
   String get commandNeedDockRoom =>
