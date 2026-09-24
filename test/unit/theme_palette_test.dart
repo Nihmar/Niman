@@ -1,11 +1,15 @@
-// T-M6-05: brightness × palette. Every combination has to produce a
-// readable theme, the named palettes have to be mappings and nothing
-// else, and the device's own colors have to reach the `system` one.
+// T-M6-05 and issue #269: brightness × theme. Every combination has to
+// produce a readable theme, the shipped palettes have to be mappings and
+// nothing else, a custom theme has to wear its own colors at both
+// brightnesses, and the device's own colors have to reach `system`.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
+
+import '../fakes/sample_themes.dart';
 
 /// The WCAG contrast ratio between two opaque colors.
 double _contrast(Color a, Color b) {
@@ -15,6 +19,8 @@ double _contrast(Color a, Color b) {
   final darker = one > two ? two : one;
   return (lighter + 0.05) / (darker + 0.05);
 }
+
+const BuiltinAppTheme _gruvbox = BuiltinAppTheme(AppPalette.gruvbox);
 
 void main() {
   setUp(AppThemes.reset);
@@ -36,6 +42,31 @@ void main() {
       }
     });
 
+    test('a stored id reads back as the theme it names', () {
+      final custom = sampleCustomTheme();
+      expect(themeFromId('gruvbox'), _gruvbox);
+      expect(
+        themeFromId('custom:sample', custom: custom),
+        CustomAppTheme(custom),
+      );
+      // A palette from a build after this one, or a row edited by hand.
+      expect(themeFromId('dracula'), const BuiltinAppTheme(AppPalette.system));
+      // A custom id whose theme is gone is not a palette either: the
+      // session turns it into Niman's own colors before it gets here.
+      expect(
+        themeFromId('custom:gone'),
+        const BuiltinAppTheme(AppPalette.system),
+      );
+    });
+
+    test('a theme is stored under its own id', () {
+      expect(_gruvbox.id, 'gruvbox');
+      expect(CustomAppTheme(sampleCustomTheme(id: 'mine')).id, 'custom:mine');
+      expect(AppTheme.customIdIn('custom:mine'), 'mine');
+      expect(AppTheme.customIdIn('gruvbox'), isNull);
+      expect(AppTheme.customIdIn('custom:'), isNull);
+    });
+
     test('the brightness choice is what MaterialApp is handed', () {
       expect(AppThemes.mode, ThemeMode.system);
       AppThemes.brightness = AppBrightness.night;
@@ -46,18 +77,30 @@ void main() {
 
     test('a change bumps the revision, an unchanged value does not', () {
       final start = AppThemes.revision.value;
-      AppThemes.palette = AppPalette.gruvbox;
+      AppThemes.theme = _gruvbox;
       expect(AppThemes.revision.value, start + 1);
-      AppThemes.palette = AppPalette.gruvbox;
+      AppThemes.theme = _gruvbox;
       expect(AppThemes.revision.value, start + 1);
+    });
+
+    test('the draft is what the app wears while one is being edited', () {
+      AppThemes.theme = _gruvbox;
+      final custom = CustomAppTheme(sampleCustomTheme());
+      AppThemes.setDraft(custom);
+
+      expect(AppThemes.theme, _gruvbox);
+      expect(AppThemes.effective, custom);
+
+      AppThemes.setDraft(null);
+      expect(AppThemes.effective, _gruvbox);
     });
   });
 
-  group('every palette at every brightness', () {
+  group('every shipped palette at every brightness', () {
     for (final palette in AppPalette.values) {
       for (final brightness in Brightness.values) {
         test('${palette.id} renders in $brightness', () {
-          final theme = buildAppTheme(palette, brightness);
+          final theme = buildAppTheme(BuiltinAppTheme(palette), brightness);
           final scheme = theme.colorScheme;
 
           expect(scheme.brightness, brightness);
@@ -85,13 +128,16 @@ void main() {
 
     test('the named palettes are not the shipped one', () {
       final shipped = buildAppTheme(
-        AppPalette.system,
+        const BuiltinAppTheme(AppPalette.system),
         Brightness.dark,
       ).colorScheme.primary;
       for (final palette in AppPalette.values) {
         if (palette == AppPalette.system) continue;
         expect(
-          buildAppTheme(palette, Brightness.dark).colorScheme.primary,
+          buildAppTheme(
+            BuiltinAppTheme(palette),
+            Brightness.dark,
+          ).colorScheme.primary,
           isNot(shipped),
           reason: '${palette.id} wears the default accent',
         );
@@ -100,8 +146,9 @@ void main() {
 
     test('day and night are different colors, not the same ones', () {
       for (final palette in AppPalette.values) {
-        final day = paletteColors(palette, Brightness.light);
-        final night = paletteColors(palette, Brightness.dark);
+        final theme = BuiltinAppTheme(palette);
+        final day = themeColors(theme, Brightness.light);
+        final night = themeColors(theme, Brightness.dark);
         expect(day.scheme.surface, isNot(night.scheme.surface));
         if (palette != AppPalette.system) {
           expect(day.syntax, isNot(night.syntax));
@@ -114,24 +161,96 @@ void main() {
       // scheme each time is work worth doing once.
       expect(
         identical(
-          buildAppTheme(AppPalette.catppuccin, Brightness.dark),
-          buildAppTheme(AppPalette.catppuccin, Brightness.dark),
+          buildAppTheme(
+            const BuiltinAppTheme(AppPalette.catppuccin),
+            Brightness.dark,
+          ),
+          buildAppTheme(
+            const BuiltinAppTheme(AppPalette.catppuccin),
+            Brightness.dark,
+          ),
         ),
         isTrue,
       );
     });
   });
 
+  group('a custom theme', () {
+    test('wears its own colors at both brightnesses', () {
+      final custom = sampleCustomTheme();
+      final theme = CustomAppTheme(custom);
+
+      final day = themeColors(theme, Brightness.light);
+      expect(day.scheme.primary, const Color(0xFF00695C));
+      expect(day.scheme.surface, sampleDayBackground);
+      expect(day.scheme.onSurface, isNot(day.scheme.surface));
+
+      final night = themeColors(theme, Brightness.dark);
+      expect(night.scheme.primary, const Color(0xFF7FD1C1));
+      expect(night.scheme.surface, sampleNightBackground);
+      expect(night.scheme.brightness, Brightness.dark);
+    });
+
+    test('paints the Markdown roles it was given', () {
+      final custom = sampleCustomTheme();
+      final colors = themeColors(CustomAppTheme(custom), Brightness.dark);
+      expect(colors.syntax.wikilink, const Color(0xFF7FD1C1));
+      expect(colors.syntax.dim, SyntaxColors.fallbackDark.dim);
+      expect(
+        buildAppTheme(
+          CustomAppTheme(custom),
+          Brightness.dark,
+        ).extension<SyntaxColors>(),
+        colors.syntax,
+      );
+    });
+
+    test('an edit is a new theme, not the cached one', () {
+      final custom = sampleCustomTheme();
+      final before = buildAppTheme(CustomAppTheme(custom), Brightness.light);
+      // The same colors are still the same theme, cache and all.
+      expect(
+        identical(
+          before,
+          buildAppTheme(CustomAppTheme(custom), Brightness.light),
+        ),
+        isTrue,
+      );
+
+      final edited = CustomAppTheme(
+        custom.copyWith(
+          day: sampleThemeColors(
+            background: sampleDayBackground,
+            accent: const Color(0xFF9A3412),
+            dark: false,
+          ),
+        ),
+      );
+      final after = buildAppTheme(edited, Brightness.light);
+      expect(after.colorScheme.primary, const Color(0xFF9A3412));
+      expect(after, isNot(before));
+    });
+
+    test('the device colors leave it alone', () {
+      final custom = CustomAppTheme(sampleCustomTheme());
+      AppThemes.setDeviceColors(
+        light: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
+      );
+      expect(
+        themeColors(custom, Brightness.light).scheme.primary,
+        const Color(0xFF00695C),
+      );
+    });
+  });
+
   group('Material You', () {
     test('the device colors reach the system palette', () {
-      final before = paletteColors(
-        AppPalette.system,
-        Brightness.light,
-      ).scheme.primary;
+      const system = BuiltinAppTheme(AppPalette.system);
+      final before = themeColors(system, Brightness.light).scheme.primary;
       final device = ColorScheme.fromSeed(seedColor: const Color(0xFF00695C));
       AppThemes.setDeviceColors(light: device, dark: device);
 
-      final after = paletteColors(AppPalette.system, Brightness.light);
+      final after = themeColors(system, Brightness.light);
       expect(after.scheme.primary, device.primary);
       expect(after.scheme.primary, isNot(before));
       // Wikilinks take the accent, which is how the device's color shows
@@ -143,7 +262,7 @@ void main() {
     });
 
     test('a named palette ignores them', () {
-      final before = paletteColors(AppPalette.gruvbox, Brightness.dark).scheme;
+      final before = themeColors(_gruvbox, Brightness.dark).scheme;
       AppThemes.setDeviceColors(
         light: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
         dark: ColorScheme.fromSeed(
@@ -153,7 +272,7 @@ void main() {
       );
 
       expect(
-        paletteColors(AppPalette.gruvbox, Brightness.dark).scheme.primary,
+        themeColors(_gruvbox, Brightness.dark).scheme.primary,
         before.primary,
       );
     });
@@ -161,13 +280,17 @@ void main() {
     test('a device with nothing to say leaves the shipped seed', () {
       expect(AppThemes.hasDeviceColors, isFalse);
       expect(
-        paletteColors(AppPalette.system, Brightness.light).scheme.primary,
+        themeColors(
+          const BuiltinAppTheme(AppPalette.system),
+          Brightness.light,
+        ).scheme.primary,
         ColorScheme.fromSeed(seedColor: shippedSeed).primary,
       );
     });
 
     test('the cached theme is rebuilt when they arrive', () {
-      final before = buildAppTheme(AppPalette.system, Brightness.light);
+      const system = BuiltinAppTheme(AppPalette.system);
+      final before = buildAppTheme(system, Brightness.light);
       AppThemes.setDeviceColors(
         light: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
         dark: ColorScheme.fromSeed(
@@ -176,7 +299,7 @@ void main() {
         ),
       );
 
-      final after = buildAppTheme(AppPalette.system, Brightness.light);
+      final after = buildAppTheme(system, Brightness.light);
       expect(after.colorScheme.primary, isNot(before.colorScheme.primary));
     });
   });
@@ -191,14 +314,15 @@ void main() {
 
     test('they compare by value, so a repaint can be decided on them', () {
       // The editor caches one span per line and drops the cache when the
-      // palette moves; identity would drop it on every rebuild instead.
+      // theme moves; identity would drop it on every rebuild instead.
+      const solarized = BuiltinAppTheme(AppPalette.solarized);
       expect(
-        paletteColors(AppPalette.solarized, Brightness.dark).syntax,
-        paletteColors(AppPalette.solarized, Brightness.dark).syntax,
+        themeColors(solarized, Brightness.dark).syntax,
+        themeColors(solarized, Brightness.dark).syntax,
       );
       expect(
-        paletteColors(AppPalette.solarized, Brightness.dark).syntax,
-        isNot(paletteColors(AppPalette.gruvbox, Brightness.dark).syntax),
+        themeColors(solarized, Brightness.dark).syntax,
+        isNot(themeColors(_gruvbox, Brightness.dark).syntax),
       );
     });
   });

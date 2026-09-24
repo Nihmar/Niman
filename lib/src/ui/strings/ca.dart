@@ -247,11 +247,71 @@ final class CatalanStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Fosc';
   @override
-  String get themePaletteTitle => 'Paleta de colors';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Els colors de la interfície i de la nota';
+  String get themeSubtitle => 'Els colors de la interfície i de la nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temes';
+  @override
+  String get themesInUse => 'En ús';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Tema nou';
+  @override
+  String get themeNewName => 'Nom';
+  @override
+  String get themeNewStartFrom => 'Parteix de';
+  @override
+  String get themeNewRandom => 'Colors aleatoris';
+  @override
+  String get themeNameTaken => 'Ja existeix un tema amb aquest nom';
+  @override
+  String themeDeleteBody(String name) =>
+      'Voleu suprimir «$name»? Els seus colors es perdran per sempre.';
+  @override
+  String get themeDuplicate => 'Duplica';
+  @override
+  String get themeMenuTooltip => 'Accions del tema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Edita';
+  @override
+  String get themeEditorTitle => 'Edita el tema';
+  @override
+  String get themeEditorChrome => 'Interfície';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Cada color porta el nom que fa servir el fitxer exportat';
+  @override
+  String get themeEditorDiscardTitle => 'Descarta els canvis';
+  @override
+  String get themeEditorDiscardBody => 'Els colors que has canviat no es desen';
+  @override
+  String get themeEditorDiscard => 'Descarta';
+  @override
+  String get themeEditorBadColor => 'Fes servir #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exporta';
+  @override
+  String themeExportDone(String where) => 'Tema exportat a $where';
+  @override
+  String themeFileFailed(String error) => 'No s’ha pogut moure el tema: $error';
+  @override
+  String get themeImport => 'Importa';
+  @override
+  String get themeImportInvalid => 'Aquest fitxer no és un tema del Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Aquest tema és d’un Niman més nou (versió $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'El fitxer no dona cap color per a «$role»';
 
   // Settings: text size (T-M6-12).
   @override

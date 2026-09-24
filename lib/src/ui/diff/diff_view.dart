@@ -4,9 +4,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/diff/line_diff.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 
 /// Computes the diff of two texts; the default runs off the UI isolate
 /// for long texts.

@@ -245,11 +245,72 @@ final class PortugueseStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Escuro';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'As cores da interface e da nota';
+  String get themeSubtitle => 'As cores da interface e da nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temas';
+  @override
+  String get themesInUse => 'Em uso';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Tema novo';
+  @override
+  String get themeNewName => 'Nome';
+  @override
+  String get themeNewStartFrom => 'Partir de';
+  @override
+  String get themeNewRandom => 'Cores aleatórias';
+  @override
+  String get themeNameTaken => 'Já existe um tema com este nome';
+  @override
+  String themeDeleteBody(String name) =>
+      'Eliminar «$name»? As suas cores desaparecem para sempre.';
+  @override
+  String get themeDuplicate => 'Duplicar';
+  @override
+  String get themeMenuTooltip => 'Ações do tema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editar';
+  @override
+  String get themeEditorTitle => 'Editar o tema';
+  @override
+  String get themeEditorChrome => 'Interface';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Cada cor tem o nome que usa o ficheiro exportado';
+  @override
+  String get themeEditorDiscardTitle => 'Descartar as alterações';
+  @override
+  String get themeEditorDiscardBody => 'As cores que alterou não são guardadas';
+  @override
+  String get themeEditorDiscard => 'Descartar';
+  @override
+  String get themeEditorBadColor => 'Usa #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportar';
+  @override
+  String themeExportDone(String where) => 'Tema exportado para $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Não foi possível mover o tema: $error';
+  @override
+  String get themeImport => 'Importar';
+  @override
+  String get themeImportInvalid => 'Este ficheiro não é um tema do Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Este tema vem de um Niman mais recente (versão $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'O ficheiro não dá cor para «$role»';
 
   // Settings: text size (T-M6-12).
   @override

@@ -248,11 +248,72 @@ final class BosnianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tamna';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Boje sučelja i bilješke';
+  String get themeSubtitle => 'Boje sučelja i bilješke';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'U upotrebi';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nova tema';
+  @override
+  String get themeNewName => 'Naziv';
+  @override
+  String get themeNewStartFrom => 'Početak od';
+  @override
+  String get themeNewRandom => 'Slučajne boje';
+  @override
+  String get themeNameTaken => 'Tema s tim nazivom već postoji';
+  @override
+  String themeDeleteBody(String name) =>
+      'Izbrisati „$name“? Njegove boje nestaju zauvijek.';
+  @override
+  String get themeDuplicate => 'Dupliciraj';
+  @override
+  String get themeMenuTooltip => 'Radnje za temu';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Uredi';
+  @override
+  String get themeEditorTitle => 'Uredi temu';
+  @override
+  String get themeEditorChrome => 'Sučelje';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Svaka boja nosi ime koje koristi izvezena datoteka';
+  @override
+  String get themeEditorDiscardTitle => 'Odbaci izmjene';
+  @override
+  String get themeEditorDiscardBody =>
+      'Boje koje ste promijenili nisu sačuvane';
+  @override
+  String get themeEditorDiscard => 'Odbaci';
+  @override
+  String get themeEditorBadColor => 'Koristi #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Izvezi';
+  @override
+  String themeExportDone(String where) => 'Tema izvezena u $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Temu nije bilo moguće prenijeti: $error';
+  @override
+  String get themeImport => 'Uvezi';
+  @override
+  String get themeImportInvalid => 'Ta datoteka nije Niman tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Ova tema je iz novije verzije Nimana (verzija $version)';
+  @override
+  String themeImportBadRole(String role) => 'Datoteka ne daje boju za „$role“';
 
   // Settings: text size (T-M6-12).
   @override

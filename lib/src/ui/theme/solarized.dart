@@ -6,7 +6,7 @@
 // accent, as in the original's UI examples.
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 
 /// Solarized's chrome at [brightness].
 PaletteTokens solarizedTokens(Brightness brightness) =>

@@ -22,6 +22,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
@@ -128,7 +129,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: buildAppTheme(AppPalette.catppuccin, brightness),
+        theme: buildAppTheme(
+          const BuiltinAppTheme(AppPalette.catppuccin),
+          brightness,
+        ),
         home: Scaffold(
           body: RepaintBoundary(
             key: const Key('page'),

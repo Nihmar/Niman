@@ -11,7 +11,8 @@ library.
 ## The Settings screen
 
 Settings is split into areas, grouped by what they change: **App**
-(appearance, editor, keyboard shortcuts, commands, updates, diagnostics),
+(appearance, themes, editor, keyboard shortcuts, commands, updates,
+diagnostics),
 the open **Library** (folders, journal, trash and history, sync, transcription,
 reminders), and **Maintenance** (re-index, switch or close the library;
 in the settings window only re-index, since the rail's library window
@@ -99,11 +100,24 @@ takes the app down. Writes are atomic (temp file + rename).
 
 ## App settings (on device)
 
-Brightness (day / night / system) × palette (system or Catppuccin),
-UI language, last opened library, debug
-log toggle (default on), the keyboard shortcuts and the formatting keys,
-the commands pinned in the palette, and — on the desktops — *Close to the
+Brightness (day / night / system) and the theme the app wears are on
+**Themes** (below); UI language, last opened library, debug log toggle
+(default on), the keyboard shortcuts and the formatting keys, the
+commands pinned in the palette, and — on the desktops — *Close to the
 tray* (default on: the window's × hides Niman and leaves it running).
+
+### Themes
+
+The app's colors have their own area: **Settings → Themes**. Brightness —
+day, night, or whatever the device says — is its first row, and under it
+sit the themes, each with its colors in front of you: the palettes Niman
+ships (System, Niman, Catppuccin, Solarized, Gruvbox) and the themes of
+your own.
+
+Making one, editing its colors, renaming it, deleting it, exporting it
+into a `.json` file and importing one back are all there. The whole story
+is in [themes.md](themes.md); the themes do not live in the library — they
+are the installation's, so a copied folder does not carry them.
 
 ### Sync
 

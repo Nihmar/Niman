@@ -225,11 +225,68 @@ final class JapaneseStrings extends Strings {
   @override
   String get themeBrightnessNight => 'ダーク';
   @override
-  String get themePaletteTitle => 'カラーパレット';
+  String get themeTitle => 'テーマ';
   @override
-  String get themePaletteSubtitle => 'UI とノートの色';
+  String get themeSubtitle => 'UI とノートの色';
   @override
   String get themePaletteSystem => 'システム';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'テーマ';
+  @override
+  String get themesInUse => '使用中';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => '新しいテーマ';
+  @override
+  String get themeNewName => '名前';
+  @override
+  String get themeNewStartFrom => '開始元';
+  @override
+  String get themeNewRandom => 'ランダムな色';
+  @override
+  String get themeNameTaken => '同じ名前のテーマがすでにあります';
+  @override
+  String themeDeleteBody(String name) => '「$name」を削除しますか?色は元に戻せません。';
+  @override
+  String get themeDuplicate => '複製';
+  @override
+  String get themeMenuTooltip => 'テーマの操作';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => '編集';
+  @override
+  String get themeEditorTitle => 'テーマを編集';
+  @override
+  String get themeEditorChrome => 'インターフェース';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint => '各色の名前は書き出したファイルと同じです';
+  @override
+  String get themeEditorDiscardTitle => '変更を破棄';
+  @override
+  String get themeEditorDiscardBody => '変更した色は保存されません';
+  @override
+  String get themeEditorDiscard => '破棄';
+  @override
+  String get themeEditorBadColor => '#RRGGBB の形式で入力';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => '書き出す';
+  @override
+  String themeExportDone(String where) => '$where に書き出しました';
+  @override
+  String themeFileFailed(String error) => 'テーマを移動できませんでした: $error';
+  @override
+  String get themeImport => '読み込む';
+  @override
+  String get themeImportInvalid => 'このファイルは Niman のテーマではありません';
+  @override
+  String themeImportVersion(int version) =>
+      'このテーマは新しい Niman のものです (バージョン $version)';
+  @override
+  String themeImportBadRole(String role) => '「$role」の色がファイルにありません';
 
   // Settings: text size (T-M6-12).
   @override

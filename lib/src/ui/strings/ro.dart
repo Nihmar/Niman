@@ -249,11 +249,72 @@ final class RomanianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Întunecat';
   @override
-  String get themePaletteTitle => 'Paletă de culori';
+  String get themeTitle => 'Temă';
   @override
-  String get themePaletteSubtitle => 'Culorile interfeței și ale notei';
+  String get themeSubtitle => 'Culorile interfeței și ale notei';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'În uz';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Temă nouă';
+  @override
+  String get themeNewName => 'Nume';
+  @override
+  String get themeNewStartFrom => 'Pornește de la';
+  @override
+  String get themeNewRandom => 'Culori aleatorii';
+  @override
+  String get themeNameTaken => 'Există deja o temă cu acest nume';
+  @override
+  String themeDeleteBody(String name) =>
+      'Ștergi „$name”? Culorile se pierd definitiv.';
+  @override
+  String get themeDuplicate => 'Duplică';
+  @override
+  String get themeMenuTooltip => 'Acțiuni pentru temă';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editează';
+  @override
+  String get themeEditorTitle => 'Editează tema';
+  @override
+  String get themeEditorChrome => 'Interfață';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Fiecare culoare poartă numele din fișierul exportat';
+  @override
+  String get themeEditorDiscardTitle => 'Renunță la modificări';
+  @override
+  String get themeEditorDiscardBody =>
+      'Culorile pe care le-ai modificat nu se salvează';
+  @override
+  String get themeEditorDiscard => 'Renunță';
+  @override
+  String get themeEditorBadColor => 'Folosește #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportă';
+  @override
+  String themeExportDone(String where) => 'Tema exportată în $where';
+  @override
+  String themeFileFailed(String error) => 'Tema nu a putut fi mutată: $error';
+  @override
+  String get themeImport => 'Importă';
+  @override
+  String get themeImportInvalid => 'Acest fișier nu este o temă Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Această temă provine dintr-un Niman mai nou (versiunea $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Fișierul nu dă nicio culoare pentru „$role”';
 
   // Settings: text size (T-M6-12).
   @override

@@ -244,11 +244,71 @@ final class IcelandicStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Dimmt';
   @override
-  String get themePaletteTitle => 'Litapalletta';
+  String get themeTitle => 'Þema';
   @override
-  String get themePaletteSubtitle => 'Litir viðkomumlegs og athugasraðans';
+  String get themeSubtitle => 'Litir viðkomumlegs og athugasraðans';
   @override
   String get themePaletteSystem => 'Kerfi';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Þemu';
+  @override
+  String get themesInUse => 'Í notkun';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nýtt þema';
+  @override
+  String get themeNewName => 'Heiti';
+  @override
+  String get themeNewStartFrom => 'Byrja frá';
+  @override
+  String get themeNewRandom => 'Slemmir litir';
+  @override
+  String get themeNameTaken => 'Þema með þessu heiti er þegar til';
+  @override
+  String themeDeleteBody(String name) =>
+      'Eyða „$name“? Litirnir hverfa fyrir fullt og allt.';
+  @override
+  String get themeDuplicate => 'Tvífalda';
+  @override
+  String get themeMenuTooltip => 'Aðgerðir þema';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Breyta';
+  @override
+  String get themeEditorTitle => 'Breyta þema';
+  @override
+  String get themeEditorChrome => 'Viðmót';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Hver litur heitir því sem útflutta skráin kallar hann';
+  @override
+  String get themeEditorDiscardTitle => 'Henda breytingum';
+  @override
+  String get themeEditorDiscardBody => 'Litirnir sem þú breyttir vistast ekki';
+  @override
+  String get themeEditorDiscard => 'Henda';
+  @override
+  String get themeEditorBadColor => 'Nota #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Flytja út';
+  @override
+  String themeExportDone(String where) => 'Þema flutt út í $where';
+  @override
+  String themeFileFailed(String error) => 'Ekki tókst að flytja þemað: $error';
+  @override
+  String get themeImport => 'Flytja inn';
+  @override
+  String get themeImportInvalid => 'Þessi skrá er ekki Niman-þema';
+  @override
+  String themeImportVersion(int version) =>
+      'Þetta þema kemur frá nýrri Niman (útgáfa $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Skráin gefur engan lit fyrir „$role“';
 
   // Settings: text size (T-M6-12).
   @override

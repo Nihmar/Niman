@@ -12,12 +12,12 @@ import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
-import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
+import 'package:niman/src/ui/theme/theme_row.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 import 'package:niman/src/ui/trash.dart';
 
@@ -80,6 +80,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
   void pushAppearance(Key row) => openArea(SettingsAreaId.appearance, row);
+  void pushThemes(Key row) => openArea(SettingsAreaId.themes, row);
   void pushEditor(Key row) => openArea(SettingsAreaId.editor, row);
   void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
   void pushJournal(Key row) => openArea(SettingsAreaId.journal, row);
@@ -95,6 +96,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
 
   final ops = controller.ops;
   final appearance = AppStrings.settingsSectionAppearance;
+  final themes = AppStrings.settingsSectionThemes;
   final editor = AppStrings.settingsSectionEditor;
   final folders = libraryArea(AppStrings.settingsAreaFolders);
   final journal = libraryArea(AppStrings.paletteGroupJournal);
@@ -111,24 +113,23 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ),
     SettingsSearchEntry(
       title: AppStrings.themeBrightnessTitle,
-      area: appearance,
+      area: themes,
       rowKey: SettingsKeys.brightness,
       value: () async => switch (await controller.themeBrightness) {
         AppBrightness.system => AppStrings.themeBrightnessSystem,
         AppBrightness.day => AppStrings.themeBrightnessDay,
         AppBrightness.night => AppStrings.themeBrightnessNight,
       },
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.brightness),
+      areaId: SettingsAreaId.themes,
+      open: () => pushThemes(SettingsKeys.brightness),
     ),
     SettingsSearchEntry(
-      title: AppStrings.themePaletteTitle,
-      area: appearance,
-      rowKey: SettingsKeys.palette,
-      value: () async =>
-          SettingsAppearanceScreen.paletteName(await controller.themePalette),
-      areaId: SettingsAreaId.appearance,
-      open: () => pushAppearance(SettingsKeys.palette),
+      title: AppStrings.themeTitle,
+      area: themes,
+      rowKey: SettingsKeys.theme,
+      value: () async => themeLabel(await controller.theme),
+      areaId: SettingsAreaId.themes,
+      open: () => pushThemes(SettingsKeys.theme),
     ),
     SettingsSearchEntry(
       title: AppStrings.uiTextScaleTitle,

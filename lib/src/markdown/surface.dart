@@ -21,6 +21,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
@@ -35,7 +36,6 @@ import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 
 /// What the surface is showing.
 enum MarkdownSurfaceMode {

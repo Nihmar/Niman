@@ -1,3 +1,5 @@
+import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -507,11 +509,37 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the brightness choice.
   Future<void> setThemeBrightness(AppBrightness brightness);
 
-  /// The palette the app wears ([AppPalette.system] by default).
-  Future<AppPalette> get themePalette;
+  /// The theme the app wears ([AppPalette.niman] by default).
+  ///
+  /// A setting that points at a custom theme this installation no longer
+  /// holds reads as that default, and the setting is repaired to match:
+  /// there is always something to wear.
+  Future<AppTheme> get theme;
 
-  /// Sets (and persists) the palette.
-  Future<void> setThemePalette(AppPalette palette);
+  /// Sets (and persists) the theme, by its id.
+  Future<void> setTheme(AppTheme theme);
+
+  /// The custom themes this installation holds, by name (issue #269).
+  Future<List<CustomTheme>> customThemes();
+
+  /// The custom theme with [id], or null when there is none (or its
+  /// stored colors are unreadable).
+  Future<CustomTheme?> customTheme(String id);
+
+  /// Stores [theme]: the row with its id, or a new one.
+  Future<void> saveCustomTheme(CustomTheme theme);
+
+  /// Renames the custom theme with [id].
+  Future<void> renameCustomTheme(String id, String name);
+
+  /// Deletes the custom theme with [id], and returns the theme in force
+  /// afterwards: deleting the one being worn falls back to the app's own
+  /// colors.
+  Future<AppTheme> deleteCustomTheme(String id);
+
+  /// Whether [name] is a custom theme's name already,
+  /// case-insensitively.
+  Future<bool> customThemeNameTaken(String name);
 
   /// Notifies listeners that state changed without an index mutation.
   void notify();

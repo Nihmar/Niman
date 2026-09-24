@@ -8,7 +8,7 @@
 // since the logo names only the one accent.
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 
 /// Niman's chrome at [brightness].
 PaletteTokens nimanTokens(Brightness brightness) =>

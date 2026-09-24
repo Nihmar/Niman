@@ -241,11 +241,71 @@ final class EstonianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tume';
   @override
-  String get themePaletteTitle => 'Värvipaleett';
+  String get themeTitle => 'Teema';
   @override
-  String get themePaletteSubtitle => 'Kasutajaliides ja märgiste värvid';
+  String get themeSubtitle => 'Kasutajaliides ja märgiste värvid';
   @override
   String get themePaletteSystem => 'Süsteem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teemad';
+  @override
+  String get themesInUse => 'Kasutusel';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Uus teema';
+  @override
+  String get themeNewName => 'Nimi';
+  @override
+  String get themeNewStartFrom => 'Alusta';
+  @override
+  String get themeNewRandom => 'Juhuslikud värvid';
+  @override
+  String get themeNameTaken => 'Selle nimega teema on juba olemas';
+  @override
+  String themeDeleteBody(String name) =>
+      'Kas kustutada „$name“? Selle värvid kaovad jäädavalt.';
+  @override
+  String get themeDuplicate => 'Dubleeri';
+  @override
+  String get themeMenuTooltip => 'Teema toimingud';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Muuda';
+  @override
+  String get themeEditorTitle => 'Muuda teemat';
+  @override
+  String get themeEditorChrome => 'Kasutajaliides';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Iga värv on nimetatud nii, nagu seda nimetab eksporditud fail';
+  @override
+  String get themeEditorDiscardTitle => 'Loobu muudatustest';
+  @override
+  String get themeEditorDiscardBody => 'Muudetud värve ei salvestata';
+  @override
+  String get themeEditorDiscard => 'Loobu';
+  @override
+  String get themeEditorBadColor => 'Kasuta #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Ekspordi';
+  @override
+  String themeExportDone(String where) => 'Teema eksporditud asukohta $where';
+  @override
+  String themeFileFailed(String error) => 'Teemat ei saanud teisaldada: $error';
+  @override
+  String get themeImport => 'Impordi';
+  @override
+  String get themeImportInvalid => 'See fail ei ole Niman teema';
+  @override
+  String themeImportVersion(int version) =>
+      'See teema on uuemast Nimanist (versioon $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Fail ei anna värve rollile „$role“';
 
   // Settings: text size (T-M6-12).
   @override

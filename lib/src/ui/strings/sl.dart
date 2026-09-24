@@ -248,11 +248,72 @@ final class SlovenianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Temna';
   @override
-  String get themePaletteTitle => 'Barvna paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Barve vmesnika in opomb';
+  String get themeSubtitle => 'Barve vmesnika in opomb';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'V uporabi';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Nova tema';
+  @override
+  String get themeNewName => 'Ime';
+  @override
+  String get themeNewStartFrom => 'Začni od';
+  @override
+  String get themeNewRandom => 'Naključne barve';
+  @override
+  String get themeNameTaken => 'Tema s tem imenom že obstaja';
+  @override
+  String themeDeleteBody(String name) =>
+      'Izbrisati „$name“? Njegove barve bodo za vedno izginile.';
+  @override
+  String get themeDuplicate => 'Podvoji';
+  @override
+  String get themeMenuTooltip => 'Dejanja teme';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Uredi';
+  @override
+  String get themeEditorTitle => 'Uredi temo';
+  @override
+  String get themeEditorChrome => 'Vmesnik';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Vsaka barva je poimenovana kot v izvoženi datoteki';
+  @override
+  String get themeEditorDiscardTitle => 'Zavrzi spremembe';
+  @override
+  String get themeEditorDiscardBody =>
+      'Barve, ki si jih spremenil, se ne shranijo';
+  @override
+  String get themeEditorDiscard => 'Zavrzi';
+  @override
+  String get themeEditorBadColor => 'Uporabi #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Izvozi';
+  @override
+  String themeExportDone(String where) => 'Tema izvožena v $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Teme ni bilo mogoče premakniti: $error';
+  @override
+  String get themeImport => 'Uvozi';
+  @override
+  String get themeImportInvalid => 'Ta datoteka ni tema Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Ta tema je iz novejšega Nimana (različica $version)';
+  @override
+  String themeImportBadRole(String role) => 'Datoteka ne da barve za „$role“';
 
   // Settings: text size (T-M6-12).
   @override

@@ -238,11 +238,70 @@ final class TurkishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Koyu';
   @override
-  String get themePaletteTitle => 'Renk paleti';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Arayüz ve not renkleri';
+  String get themeSubtitle => 'Arayüz ve not renkleri';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temalar';
+  @override
+  String get themesInUse => 'Kullanımda';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Yeni tema';
+  @override
+  String get themeNewName => 'Ad';
+  @override
+  String get themeNewStartFrom => 'Şundan başla';
+  @override
+  String get themeNewRandom => 'Rastgele renkler';
+  @override
+  String get themeNameTaken => 'Bu adla bir tema zaten var';
+  @override
+  String themeDeleteBody(String name) =>
+      '“$name” silinsin mi? Renkleri kalıcı olarak kaybolur.';
+  @override
+  String get themeDuplicate => 'Çoğalt';
+  @override
+  String get themeMenuTooltip => 'Tema işlemleri';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Düzenle';
+  @override
+  String get themeEditorTitle => 'Temayı düzenle';
+  @override
+  String get themeEditorChrome => 'Arayüz';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Her renk, dışa aktarılan dosyadaki adı taşır';
+  @override
+  String get themeEditorDiscardTitle => 'Değişiklikleri geri al';
+  @override
+  String get themeEditorDiscardBody => 'Değiştirdiğiniz renkler kaydedilmez';
+  @override
+  String get themeEditorDiscard => 'Geri al';
+  @override
+  String get themeEditorBadColor => '#RRGGBB kullan';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Dışa aktar';
+  @override
+  String themeExportDone(String where) => 'Tema şuraya aktarıldı: $where';
+  @override
+  String themeFileFailed(String error) => 'Tema taşınamadı: $error';
+  @override
+  String get themeImport => 'İçe aktar';
+  @override
+  String get themeImportInvalid => 'Bu dosya bir Niman teması değil';
+  @override
+  String themeImportVersion(int version) =>
+      'Bu tema daha yeni bir Niman’dan (sürüm $version)';
+  @override
+  String themeImportBadRole(String role) => 'Dosya “$role” için renk vermiyor';
 
   // Settings: text size (T-M6-12).
   @override

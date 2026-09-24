@@ -307,7 +307,19 @@ void main() {
     // The row sits in the pushed Folders area (issue #104).
     await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('settings-area-folders')));
+    // The areas list is longer than the window; the row is built as it
+    // scrolls in.
+    final foldersArea = find.byKey(const Key('settings-area-folders'));
+    await tester.scrollUntilVisible(
+      foldersArea,
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('settings-areas')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await settle(tester);
+    await tester.tap(foldersArea);
     await settle(tester);
     // The folders list builds lazily and subtitles made the rows
     // tall: drag the area screen's own list (not the home's behind

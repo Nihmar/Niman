@@ -234,11 +234,73 @@ final class HindiStrings extends Strings {
   @override
   String get themeBrightnessNight => 'डार्क';
   @override
-  String get themePaletteTitle => 'पैलेट';
+  String get themeTitle => 'थीम';
   @override
-  String get themePaletteSubtitle => 'इंटरफ़ेस और नोट के रंग';
+  String get themeSubtitle => 'इंटरफ़ेस और नोट के रंग';
   @override
   String get themePaletteSystem => 'सिस्टम';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'थीम';
+  @override
+  String get themesInUse => 'उपयोग में';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'नई थीम';
+  @override
+  String get themeNewName => 'नाम';
+  @override
+  String get themeNewStartFrom => 'से शुरू करें';
+  @override
+  String get themeNewRandom => 'यादृच्छिक रंग';
+  @override
+  String get themeNameTaken => 'इस नाम की थीम पहले से मौजूद है';
+  @override
+  String themeDeleteBody(String name) =>
+      '“$name” हटाएँ? इसके रंग हमेशा के लिए चले जाएँगे।';
+  @override
+  String get themeDuplicate => 'प्रतिलिपि बनाएँ';
+  @override
+  String get themeMenuTooltip => 'थीम क्रियाएँ';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'संपादित करें';
+  @override
+  String get themeEditorTitle => 'थीम संपादित करें';
+  @override
+  String get themeEditorChrome => 'इंटरफ़ेस';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'हर रंग का नाम वही है जो निर्यात की गई फ़ाइल में है';
+  @override
+  String get themeEditorDiscardTitle => 'बदलाव छोड़ें';
+  @override
+  String get themeEditorDiscardBody =>
+      'आपने जो रंग बदले हैं वे सहेजे नहीं जाएँगे';
+  @override
+  String get themeEditorDiscard => 'छोड़ें';
+  @override
+  String get themeEditorBadColor => '#RRGGBB इस्तेमाल करें';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'निर्यात करें';
+  @override
+  String themeExportDone(String where) => 'थीम $where पर निर्यात की गई';
+  @override
+  String themeFileFailed(String error) =>
+      'थीम को स्थानांतरित नहीं किया जा सका: $error';
+  @override
+  String get themeImport => 'आयात करें';
+  @override
+  String get themeImportInvalid => 'यह फ़ाइल Niman थीम नहीं है';
+  @override
+  String themeImportVersion(int version) =>
+      'यह थीम नए Niman से है (संस्करण $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'फ़ाइल “$role” के लिए कोई रंग नहीं देती';
 
   // Settings: text size (T-M6-12).
   @override

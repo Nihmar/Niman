@@ -13,8 +13,8 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/highlighting.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The style of the *heading text* — the region after a `#…` marker,
 /// which the tokenizer leaves unmarked: bold, at the base row size.

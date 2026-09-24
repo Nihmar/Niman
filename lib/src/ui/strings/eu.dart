@@ -242,11 +242,72 @@ final class BasqueStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Iluna';
   @override
-  String get themePaletteTitle => 'Kolore-paleta';
+  String get themeTitle => 'Gaia';
   @override
-  String get themePaletteSubtitle => 'Interfazearen eta oharreko koloreak';
+  String get themeSubtitle => 'Interfazearen eta oharreko koloreak';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Gaiak';
+  @override
+  String get themesInUse => 'Erabiltzen';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Gai berria';
+  @override
+  String get themeNewName => 'Izena';
+  @override
+  String get themeNewStartFrom => 'Hasi';
+  @override
+  String get themeNewRandom => 'Kolore aleatorioak';
+  @override
+  String get themeNameTaken => 'Badago izen hori duen gai bat';
+  @override
+  String themeDeleteBody(String name) =>
+      '«$name» ezabatu? Bere koloreak betiko galduko dira.';
+  @override
+  String get themeDuplicate => 'Bikoiztu';
+  @override
+  String get themeMenuTooltip => 'Gaiaren ekintzak';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Editatu';
+  @override
+  String get themeEditorTitle => 'Editatu gaia';
+  @override
+  String get themeEditorChrome => 'Interfazea';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Kolore bakoitzak esportatutako fitxategiak duen izena du';
+  @override
+  String get themeEditorDiscardTitle => 'Baztertu aldaketak';
+  @override
+  String get themeEditorDiscardBody =>
+      'Aldatu dituzun koloreak ez dira gordeko';
+  @override
+  String get themeEditorDiscard => 'Baztertu';
+  @override
+  String get themeEditorBadColor => 'Erabili #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Esportatu';
+  @override
+  String themeExportDone(String where) => 'Gaia hona esportatu da: $where';
+  @override
+  String themeFileFailed(String error) => 'Ezin izan da gaia mugitu: $error';
+  @override
+  String get themeImport => 'Inportatu';
+  @override
+  String get themeImportInvalid => 'Fitxategi hori ez da Niman gaia';
+  @override
+  String themeImportVersion(int version) =>
+      'Gai hori Niman berriago batetik dator (bertsioa $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Fitxategiak ez du kolorearik ematen «$role»-rentzat';
 
   // Settings: text size (T-M6-12).
   @override

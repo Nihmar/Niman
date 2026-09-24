@@ -243,11 +243,71 @@ final class AlbanianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'E errët';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Ngjyrat e ndërfaqes dhe të shënit';
+  String get themeSubtitle => 'Ngjyrat e ndërfaqes dhe të shënit';
   @override
   String get themePaletteSystem => 'Sistemi';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temat';
+  @override
+  String get themesInUse => 'Në përdorim';
+  // Settings: making, renaming, deleting (issue #269).
+  @override
+  String get themeNewTitle => 'Temë e re';
+  @override
+  String get themeNewName => 'Emri';
+  @override
+  String get themeNewStartFrom => 'Nisur nga';
+  @override
+  String get themeNewRandom => 'Ngjyra të rastësishme';
+  @override
+  String get themeNameTaken => 'Ekziston tashmë një temë me këtë emër';
+  @override
+  String themeDeleteBody(String name) =>
+      'Të fshihet „$name“? Ngjyrat e tij humbin përgjithmonë.';
+  @override
+  String get themeDuplicate => 'Dyfisho';
+  @override
+  String get themeMenuTooltip => 'Veprime për temën';
+  // Settings: the theme editor (issue #269).
+  @override
+  String get themeEdit => 'Modifiko';
+  @override
+  String get themeEditorTitle => 'Modifiko temën';
+  @override
+  String get themeEditorChrome => 'Ndërfaqja';
+  @override
+  String get themeEditorMarkdown => 'Markdown';
+  @override
+  String get themeEditorRolesHint =>
+      'Çdo ngjyrë mban emrin që përdor skedari i eksportuar';
+  @override
+  String get themeEditorDiscardTitle => 'Hiq dorë nga ndryshimet';
+  @override
+  String get themeEditorDiscardBody => 'Ngjyrat që ndryshove nuk ruhen';
+  @override
+  String get themeEditorDiscard => 'Hiq';
+  @override
+  String get themeEditorBadColor => 'Përdor #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksporto';
+  @override
+  String themeExportDone(String where) => 'Tema u eksportua në $where';
+  @override
+  String themeFileFailed(String error) => 'Tema nuk mund të zhvendosej: $error';
+  @override
+  String get themeImport => 'Importo';
+  @override
+  String get themeImportInvalid => 'Ky skedar nuk është një temë Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Kjo temë vjen nga një Niman më i re (versioni $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Skedari nuk jep ngjyrë për „$role“';
 
   // Settings: text size (T-M6-12).
   @override
