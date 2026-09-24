@@ -295,6 +295,22 @@ final class TurkishStrings extends Strings {
   String get themeEditorDiscard => 'Geri al';
   @override
   String get themeEditorBadColor => '#RRGGBB kullan';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Dışa aktar';
+  @override
+  String themeExportDone(String where) => 'Tema şuraya aktarıldı: $where';
+  @override
+  String themeFileFailed(String error) => 'Tema taşınamadı: $error';
+  @override
+  String get themeImport => 'İçe aktar';
+  @override
+  String get themeImportInvalid => 'Bu dosya bir Niman teması değil';
+  @override
+  String themeImportVersion(int version) =>
+      'Bu tema daha yeni bir Niman’dan (sürüm $version)';
+  @override
+  String themeImportBadRole(String role) => 'Dosya “$role” için renk vermiyor';
 
   // Settings: text size (T-M6-12).
   @override

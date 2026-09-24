@@ -306,6 +306,23 @@ final class SlovenianStrings extends Strings {
   String get themeEditorDiscard => 'Zavrzi';
   @override
   String get themeEditorBadColor => 'Uporabi #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Izvozi';
+  @override
+  String themeExportDone(String where) => 'Tema izvožena v $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Teme ni bilo mogoče premakniti: $error';
+  @override
+  String get themeImport => 'Uvozi';
+  @override
+  String get themeImportInvalid => 'Ta datoteka ni tema Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Ta tema je iz novejšega Nimana (različica $version)';
+  @override
+  String themeImportBadRole(String role) => 'Datoteka ne da barve za „$role“';
 
   // Settings: text size (T-M6-12).
   @override

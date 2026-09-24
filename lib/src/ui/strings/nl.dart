@@ -303,6 +303,24 @@ final class DutchStrings extends Strings {
   String get themeEditorDiscard => 'Verwerpen';
   @override
   String get themeEditorBadColor => 'Gebruik #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exporteren';
+  @override
+  String themeExportDone(String where) => 'Thema geëxporteerd naar $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Het thema kon niet worden verplaatst: $error';
+  @override
+  String get themeImport => 'Importeren';
+  @override
+  String get themeImportInvalid => 'Dit bestand is geen Niman-thema';
+  @override
+  String themeImportVersion(int version) =>
+      'Dit thema komt uit een nieuwere Niman (versie $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Het bestand geeft geen kleur voor „$role”';
 
   // Settings: text size (T-M6-12).
   @override

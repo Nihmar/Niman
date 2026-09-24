@@ -278,6 +278,21 @@ final class ChineseStrings extends Strings {
   String get themeEditorDiscard => '放弃';
   @override
   String get themeEditorBadColor => '请使用 #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => '导出';
+  @override
+  String themeExportDone(String where) => '主题已导出到 $where';
+  @override
+  String themeFileFailed(String error) => '无法移动主题:$error';
+  @override
+  String get themeImport => '导入';
+  @override
+  String get themeImportInvalid => '该文件不是 Niman 主题';
+  @override
+  String themeImportVersion(int version) => '该主题来自更新的 Niman(版本 $version)';
+  @override
+  String themeImportBadRole(String role) => '文件中没有“$role”的颜色';
 
   // Settings: text size (T-M6-12).
   @override

@@ -300,6 +300,23 @@ final class AlbanianStrings extends Strings {
   String get themeEditorDiscard => 'Hiq';
   @override
   String get themeEditorBadColor => 'Përdor #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksporto';
+  @override
+  String themeExportDone(String where) => 'Tema u eksportua në $where';
+  @override
+  String themeFileFailed(String error) => 'Tema nuk mund të zhvendosej: $error';
+  @override
+  String get themeImport => 'Importo';
+  @override
+  String get themeImportInvalid => 'Ky skedar nuk është një temë Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Kjo temë vjen nga një Niman më i re (versioni $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Skedari nuk jep ngjyrë për „$role“';
 
   // Settings: text size (T-M6-12).
   @override

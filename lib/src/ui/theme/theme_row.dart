@@ -23,6 +23,9 @@ enum ThemeRowAction {
   /// Give a theme of the user's own another name.
   rename,
 
+  /// Write a theme of the user's own out into a file.
+  export,
+
   /// Take a theme of the user's own away.
   delete,
 }
@@ -98,6 +101,11 @@ final class ThemeRow extends StatelessWidget {
                   ThemeRowAction.rename,
                   Icons.edit_outlined,
                   AppStrings.actionRename,
+                ),
+                _item(
+                  ThemeRowAction.export,
+                  Icons.file_upload_outlined,
+                  AppStrings.themeExport,
                 ),
                 _item(
                   ThemeRowAction.delete,

@@ -299,6 +299,22 @@ final class LatvianStrings extends Strings {
   String get themeEditorDiscard => 'Atmest';
   @override
   String get themeEditorBadColor => 'Lieto #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksportēt';
+  @override
+  String themeExportDone(String where) => 'Tēma eksportēta uz $where';
+  @override
+  String themeFileFailed(String error) => 'Tēmu neizdevās pārvietot: $error';
+  @override
+  String get themeImport => 'Importēt';
+  @override
+  String get themeImportInvalid => 'Šis fails nav Niman tēma';
+  @override
+  String themeImportVersion(int version) =>
+      'Šī tēma ir no jaunāka Niman (versija $version)';
+  @override
+  String themeImportBadRole(String role) => 'Fails nenorāda krāsu „$role“';
 
   // Settings: text size (T-M6-12).
   @override

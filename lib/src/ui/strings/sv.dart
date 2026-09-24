@@ -303,6 +303,23 @@ final class SwedishStrings extends Strings {
   String get themeEditorDiscard => 'Kasta';
   @override
   String get themeEditorBadColor => 'Använd #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportera';
+  @override
+  String themeExportDone(String where) => 'Temat exporterades till $where';
+  @override
+  String themeFileFailed(String error) => 'Temat kunde inte flyttas: $error';
+  @override
+  String get themeImport => 'Importera';
+  @override
+  String get themeImportInvalid => 'Den filen är inte ett Niman-tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Detta tema kommer från en nyare Niman (version $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Filen anger ingen färg för ”$role”';
 
   // Settings: text size (T-M6-12).
   @override

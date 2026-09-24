@@ -305,6 +305,23 @@ final class GalicianStrings extends Strings {
   String get themeEditorDiscard => 'Descartar';
   @override
   String get themeEditorBadColor => 'Usa #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportar';
+  @override
+  String themeExportDone(String where) => 'Tema exportado a $where';
+  @override
+  String themeFileFailed(String error) => 'Non se puido mover o tema: $error';
+  @override
+  String get themeImport => 'Importar';
+  @override
+  String get themeImportInvalid => 'Este ficheiro non é un tema de Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Este tema vén dun Niman máis novo (versión $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'O ficheiro non dá cor para «$role»';
 
   // Settings: text size (T-M6-12).
   @override

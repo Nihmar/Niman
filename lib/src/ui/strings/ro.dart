@@ -307,6 +307,23 @@ final class RomanianStrings extends Strings {
   String get themeEditorDiscard => 'Renunță';
   @override
   String get themeEditorBadColor => 'Folosește #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportă';
+  @override
+  String themeExportDone(String where) => 'Tema exportată în $where';
+  @override
+  String themeFileFailed(String error) => 'Tema nu a putut fi mutată: $error';
+  @override
+  String get themeImport => 'Importă';
+  @override
+  String get themeImportInvalid => 'Acest fișier nu este o temă Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Această temă provine dintr-un Niman mai nou (versiunea $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Fișierul nu dă nicio culoare pentru „$role”';
 
   // Settings: text size (T-M6-12).
   @override

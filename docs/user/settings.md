@@ -90,42 +90,16 @@ and leaves it running).
 
 ### Themes
 
-The app's colors have their own area: **Settings → Themes**. Brightness
-is the first row — day, night, or whatever the device says — and under it
-sit the themes, each with its colors in front of you. The one in use is
-marked; tapping another wears it at once, everywhere, and it is
-remembered on this device.
+The app's colors have their own area: **Settings → Themes**. Brightness —
+day, night, or whatever the device says — is its first row, and under it
+sit the themes, each with its colors in front of you: the palettes Niman
+ships (System, Niman, Catppuccin, Solarized, Gruvbox) and the themes of
+your own.
 
-The themes are the palettes Niman ships:
-
-| Theme | What it is |
-|-------|------------|
-| System | The device's own colors: the wallpaper palette (Material You), or the accent color, falling back to Niman's if the OS offers neither |
-| Niman | The app's own colors, taken from the logo (the default) |
-| Catppuccin | Latte by day, Mocha by night |
-| Solarized | Schoonover's light and dark |
-| Gruvbox | The medium light and dark variants |
-
-**Themes of your own.** *New theme*, at the end of the list, asks for a
-name and where the colors start from: a theme already in the list, shipped
-or your own, or *Random colors* — a complete theme invented around a random
-accent. Each theme in the list carries a ⋮ menu:
-
-- *Edit*, on a theme of your own, opens it color by color: the interface
-roles first, the Markdown ones after, each with the color it holds and the
-name the exported file uses. The app wears the colors as they are moved, so
-a color is chosen by seeing it in place; *Save* keeps them, and leaving
-puts back what was there, after asking. The Light/Dark switch at the top
-picks the side being edited — and previews it, since editing the night
-colors in daylight is editing blind.
-- *Duplicate* makes a theme of your own out of the one it is on, named
-after it (`Gruvbox 2`) and worn at once. The shipped themes offer only
-this: they can be copied, not renamed away.
-- *Rename* and *Delete* act on your own themes. Deleting one asks first,
-and deleting the theme in use leaves the app Niman's own colors.
-
-Themes live on this device, in the app's own database — not in the
-library, so a copied library folder does not carry them.
+Making one, editing its colors, renaming it, deleting it, exporting it
+into a `.json` file and importing one back are all there. The whole story
+is in [themes.md](themes.md); the themes do not live in the library — they
+are the installation's, so a copied folder does not carry them.
 
 ### Sync
 

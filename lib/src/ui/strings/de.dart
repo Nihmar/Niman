@@ -305,6 +305,24 @@ final class GermanStrings extends Strings {
   String get themeEditorDiscard => 'Verwerfen';
   @override
   String get themeEditorBadColor => '#RRGGBB verwenden';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exportieren';
+  @override
+  String themeExportDone(String where) => 'Design exportiert nach $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Das Design konnte nicht übertragen werden: $error';
+  @override
+  String get themeImport => 'Importieren';
+  @override
+  String get themeImportInvalid => 'Diese Datei ist kein Niman-Design';
+  @override
+  String themeImportVersion(int version) =>
+      'Dieses Design stammt aus einem neueren Niman (Version $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Die Datei gibt keine Farbe für „$role“ an';
 
   // Settings: text size (T-M6-12).
   @override

@@ -301,6 +301,23 @@ final class DanishStrings extends Strings {
   String get themeEditorDiscard => 'Kassér';
   @override
   String get themeEditorBadColor => 'Brug #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksportér';
+  @override
+  String themeExportDone(String where) => 'Temaet er eksporteret til $where';
+  @override
+  String themeFileFailed(String error) => 'Temaet kunne ikke flyttes: $error';
+  @override
+  String get themeImport => 'Importér';
+  @override
+  String get themeImportInvalid => 'Den fil er ikke et Niman-tema';
+  @override
+  String themeImportVersion(int version) =>
+      'Dette tema er fra en nyere Niman (version $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Filen giver ingen farve til „$role“';
 
   // Settings: text size (T-M6-12).
   @override

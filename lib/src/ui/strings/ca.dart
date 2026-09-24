@@ -304,6 +304,23 @@ final class CatalanStrings extends Strings {
   String get themeEditorDiscard => 'Descarta';
   @override
   String get themeEditorBadColor => 'Fes servir #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Exporta';
+  @override
+  String themeExportDone(String where) => 'Tema exportat a $where';
+  @override
+  String themeFileFailed(String error) => 'No s’ha pogut moure el tema: $error';
+  @override
+  String get themeImport => 'Importa';
+  @override
+  String get themeImportInvalid => 'Aquest fitxer no és un tema del Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Aquest tema és d’un Niman més nou (versió $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'El fitxer no dona cap color per a «$role»';
 
   // Settings: text size (T-M6-12).
   @override

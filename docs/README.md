@@ -3,8 +3,8 @@
 Two audiences, two folders:
 
 - **`user/`** — how to use Niman: libraries, editing, search, templates,
-  tasks and reminders, home-screen widgets, settings, shortcuts, sync,
-  platform notes.
+  themes, tasks and reminders, home-screen widgets, settings, shortcuts,
+  sync, platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
   instructions, code conventions, release process, the note history,
   WebDAV sync and workspace (open notes and tabs) design.

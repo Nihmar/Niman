@@ -305,6 +305,24 @@ final class PolishStrings extends Strings {
   String get themeEditorDiscard => 'Odrzuć';
   @override
   String get themeEditorBadColor => 'Użyj #RRGGBB';
+  // Settings: moving a theme in and out (issue #269).
+  @override
+  String get themeExport => 'Eksportuj';
+  @override
+  String themeExportDone(String where) => 'Motyw wyeksportowany do $where';
+  @override
+  String themeFileFailed(String error) =>
+      'Nie udało się przenieść motywu: $error';
+  @override
+  String get themeImport => 'Importuj';
+  @override
+  String get themeImportInvalid => 'Ten plik nie jest motywem Niman';
+  @override
+  String themeImportVersion(int version) =>
+      'Ten motyw pochodzi z nowszego Nimana (wersja $version)';
+  @override
+  String themeImportBadRole(String role) =>
+      'Plik nie podaje koloru dla „$role”';
 
   // Settings: text size (T-M6-12).
   @override
