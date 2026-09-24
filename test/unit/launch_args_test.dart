@@ -4,6 +4,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:path/path.dart' as p;
+
+/// The root of this host's file system: `/`, or the current drive.
+final String _root = p.rootPrefix(p.current);
 
 void main() {
   test('each flag maps to its launcher action', () {
@@ -42,15 +46,17 @@ void main() {
   test('a relative path is made absolute against where it was typed', () {
     // The first instance started somewhere else: `niman ../a.md` must
     // reach it as the file the user meant.
-    final launch = parseLaunchArgs(['../notes/a.md'], cwd: '/home/u/work');
-    expect(launch.openPath, '/home/u/notes/a.md');
+    // Typed with `/`, which every desktop accepts; the result is spelled
+    // the host's way.
+    final launch = parseLaunchArgs([
+      '../notes/a.md',
+    ], cwd: p.join(_root, 'home', 'u', 'work'));
+    expect(launch.openPath, p.join(_root, 'home', 'u', 'notes', 'a.md'));
   });
 
   test('a file URI, as some file managers pass it, is its path', () {
-    expect(
-      parseLaunchArgs(['file:///home/u/My%20notes/a.md']).openPath,
-      '/home/u/My notes/a.md',
-    );
+    final path = p.join(_root, 'home', 'u', 'My notes', 'a.md');
+    expect(parseLaunchArgs([Uri.file(path).toString()]).openPath, path);
     // Not a file this process can open.
     expect(parseLaunchArgs(['file://server/share/a.md']).openPath, isNull);
   });

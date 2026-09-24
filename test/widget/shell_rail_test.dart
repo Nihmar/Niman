@@ -23,6 +23,7 @@ import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/todo_tab.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
@@ -147,7 +148,8 @@ void main() {
     await settle(tester);
     expect(find.byKey(const Key('library-window')), findsNothing);
     expect(find.byType(ShellRail), findsOne);
-    expect(controller.root, '/elsewhere/second');
+    // Joined with `p.join`, as the app joins it: the host's separator.
+    expect(controller.root, p.join('/elsewhere', 'second'));
   });
 
   testWidgets('wide: a library opened from disk in the library window is '
