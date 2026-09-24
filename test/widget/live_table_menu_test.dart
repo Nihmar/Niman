@@ -76,8 +76,12 @@ void main() {
     expect(find.byKey(const Key('table-column')), findsOneWidget);
     await tester.tap(find.byKey(const Key('table-row')));
     await tester.pumpAndSettle();
-    // The submenu in the menu's place, the way back on top.
-    expect(find.byKey(const Key('table-row-back')), findsOneWidget);
+    // The submenu beside the menu, which stays.
+    expect(find.byKey(const Key('table-row-submenu')), findsOneWidget);
+    expect(find.byKey(const Key('table-column')), findsOneWidget);
+    final menu = tester.getRect(find.byKey(const Key('table-row')));
+    final submenu = tester.getRect(find.byKey(const Key('table-row-submenu')));
+    expect(submenu.left, greaterThanOrEqualTo(menu.right - 2));
     await tester.tap(find.byKey(const Key('table-row-below')));
     await tester.pumpAndSettle();
     expect(
@@ -92,6 +96,44 @@ void main() {
     );
     expect(view.undo(), isTrue);
     expect(buffer.text, _note);
+  }, variant: desktop);
+
+  // 2026-09-24 report: a group opens as the pointer comes onto it, as a
+  // desktop menu's submenus do, and another row closes it.
+  testWidgets('a submenu opens on hover, and closes on another row', (
+    tester,
+  ) async {
+    await _pump(tester);
+    // One mouse for the right click and the moves after it.
+    final mouse = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(mouse.removePointer);
+    final uno = tester.getCenter(
+      find.textContaining('uno', findRichText: true).first,
+    );
+    await mouse.addPointer(location: uno);
+    await mouse.down(uno);
+    await mouse.up();
+    await tester.pumpAndSettle();
+    await mouse.moveTo(
+      tester.getCenter(find.byKey(const Key('table-sort-ascending'))),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('table-row-submenu')), findsNothing);
+    await mouse.moveTo(tester.getCenter(find.byKey(const Key('table-row'))));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('table-row-submenu')), findsOneWidget);
+    await mouse.moveTo(tester.getCenter(find.byKey(const Key('table-column'))));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('table-row-submenu')), findsNothing);
+    expect(find.byKey(const Key('table-column-submenu')), findsOneWidget);
+    await mouse.moveTo(
+      tester.getCenter(find.byKey(const Key('table-sort-ascending'))),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('table-column-submenu')), findsNothing);
   }, variant: desktop);
 
   testWidgets('a row above the header does not apply', (tester) async {
@@ -134,7 +176,7 @@ void main() {
   ) async {
     await _pump(tester, mode: MarkdownSurfaceMode.source);
     await _menuOn(tester, 'uno');
-    expect(find.byKey(const Key('context-copy')), findsNothing);
+    expect(find.byKey(const Key('table-sort-ascending')), findsNothing);
     expect(find.byKey(const Key('table-row')), findsNothing);
   }, variant: desktop);
 

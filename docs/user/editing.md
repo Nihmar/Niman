@@ -352,8 +352,8 @@ Obsidian's is:
   (Cut with nothing selected) stays in its place, greyed out, so nothing
   moves under the pointer.
 
-On the desktop a submenu opens in the menu's place, with the way back at
-its top; on a phone the groups sit in the selection bar's overflow and
+On the desktop a submenu opens beside its row as the mouse comes onto
+it, and closes as it moves to another; on a phone the groups sit in the selection bar's overflow and
 open as a sheet. What is on at the caret reads as on, as on the toolbar
 — the heading level the line has, the format the word is in.
 **Insert › Footnote** cites the next free number at the caret and
@@ -388,8 +388,8 @@ table (as Obsidian does):
   above or below, move it up or down, duplicate or delete it — **Column
   ›** — add a column to the left or right, move it, align it left, centre
   or right, duplicate or delete it — and **Sort by column**, A → Z or
-  Z → A. On the desktop Row and Column open in the menu's place, with the
-  way back at the top; on a phone they open a sheet. What does not apply
+  Z → A. On the desktop Row and Column open beside the menu as the mouse
+  comes onto them; on a phone they open a sheet. What does not apply
   to the cell is greyed out: a row above the header, moving the last
   column right, deleting the only column.
 - **Tab** goes to the next cell and Shift+Tab to the one before, the
