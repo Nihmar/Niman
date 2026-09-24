@@ -2413,12 +2413,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 gutterWidth: _gutter,
                                 // Past the numbers, only the gap the fold
                                 // arrows live in is empty, and a list line
-                                // has none.
-                                margin:
-                                    _leftInset +
-                                    (widget.showLineNumbers
-                                        ? _gutterGap
-                                        : _gutter),
+                                // has none. The field's inset is left of
+                                // the gutter, not between the numbers and
+                                // the text: counted in, an H1's `#` sat on
+                                // its number.
+                                margin: widget.showLineNumbers
+                                    ? _gutterGap
+                                    : _leftInset + _gutter,
                                 theme: widget.theme,
                                 syntax: syntax,
                                 dark: widget.dark,
@@ -3808,9 +3809,12 @@ final class _Line extends StatelessWidget {
         (shape.code == null ? 0 : theme.codePadding);
     if (base == 0 && _prefixEnd == 0) return 0;
     // Marks wider than their column hang into the margin, as far as there
-    // is one: the text moves only by what is left over.
+    // is one: the text moves only by what is left over. A line with a fold
+    // arrow has none: the arrow stands right against the text, and hung
+    // marks covered it and took its clicks (a heading's `#`).
+    final room = fold == _FoldMark.none ? margin : 0.0;
     return math.max<double>(
-      -margin,
+      -room,
       base -
           (_textStart(context, revealed: revealed) -
               _glyphLeft(context, const <InlineSpan>[])),

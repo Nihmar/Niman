@@ -77,7 +77,9 @@ const MarkdownTheme _wideColumns = MarkdownTheme(
   markerDim: Color(0xFF999999),
   blockSpacing: 10,
   listIndentPerLevel: 80,
-  quoteIndentPerLevel: 12,
+  // A `> ` in the test font is 28 wide: 16 leaves it 12 to hang into the
+  // numbers' gap, which is 14 and all the room there is past the numbers.
+  quoteIndentPerLevel: 16,
   codePadding: 8,
   quoteBarWidth: 3,
   ruleThickness: 1,
