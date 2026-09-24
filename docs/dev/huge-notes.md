@@ -384,6 +384,18 @@ written next to it.
     the full scan lands. A jump past the top waits for it, and the place the
     reader reached in the top is kept when the whole note takes over.
 
+12. **A save's reindex works out again what the save had in hand.** Of the
+    10.6 s a reindex of the stress note takes (item 8's table), the digest
+    (1.9 s) and the tags and links (5.1 s) are the editor's own: the bytes
+    went through the write, and the blocks are the scan the editor keeps.
+    - ~~The digest.~~ Done (2026-09-24): the write hashes the bytes as it
+      writes them — whole, or slice by slice on the streaming save — and
+      the reindex behind it takes that digest while the file is the one
+      written, same size and time before its read and after
+      (`KnownContent`).
+    - The tags and links: kept per block by the editor, the changed blocks
+      read again, and handed to the save.
+
 ## The statistics, measured on the 247 MB note
 
 `dart run tool/stats_bench.dart "Quicknote.md"` (246 867 656 chars,
