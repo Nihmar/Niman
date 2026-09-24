@@ -256,6 +256,16 @@ final class NoteWriter {
     _reindexWhenQuiet(path, abs, created: result.created, bytes: result.bytes);
   }
 
+  /// Reads the note at library-relative [path], of [bytes] bytes, back into
+  /// the index as a save of it does: once it has been left alone for
+  /// [quietBeforeReindex], and once however many changes come before that.
+  ///
+  /// For a change made outside the writer whose index rows are owed —
+  /// a pin, which records the frontmatter at once and leaves the rest of
+  /// the note to this.
+  void reindexWhenQuiet(String path, {required int bytes}) =>
+      _reindexWhenQuiet(path, p.join(root, path), created: false, bytes: bytes);
+
   /// Reindexes [path] once it has been left alone for
   /// [quietBeforeReindex] — each save of it starting the wait again. A new
   /// note has no row yet and is indexed at once.

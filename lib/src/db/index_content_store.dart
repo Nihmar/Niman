@@ -245,7 +245,7 @@ final class IndexContentStore {
     await replaceFileStems(row.id, row.name);
     await _writeAliasStems(row.id, c);
     await _writeTags(row.id, c);
-    await _writeFields(row.id, c);
+    await writeFields(row.id, fields: c.fields, date: c.date, pinned: c.pinned);
     await _writeLinks(row.id, c, resolved);
   }
 
@@ -257,20 +257,25 @@ final class IndexContentStore {
   /// what a `key = value` filter reads. A note whose block was removed —
   /// or never parsed — writes them back as null/false, so a title that is
   /// gone stops overriding the filename.
-  Future<void> _writeFields(int noteId, NoteContent c) async {
+  Future<void> writeFields(
+    int noteId, {
+    required Map<String, List<String>> fields,
+    required DateTime? date,
+    required bool pinned,
+  }) async {
     await (_db.update(_db.notes)..where((t) => t.id.equals(noteId))).write(
       NotesCompanion(
-        title: Value(c.fields['title']?.first),
-        date: Value(c.date),
-        pinned: Value(c.pinned),
+        title: Value(fields['title']?.first),
+        date: Value(date),
+        pinned: Value(pinned),
       ),
     );
     await (_db.delete(
       _db.frontmatterFields,
     )..where((f) => f.noteId.equals(noteId))).go();
-    if (c.fields.isEmpty) return;
+    if (fields.isEmpty) return;
     await _db.batch((batch) {
-      for (final entry in c.fields.entries) {
+      for (final entry in fields.entries) {
         for (final value in entry.value) {
           batch.insert(
             _db.frontmatterFields,
