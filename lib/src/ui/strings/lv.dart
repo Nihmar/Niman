@@ -496,6 +496,9 @@ final class LatvianStrings extends Strings {
   String get toolbarItalic => 'Slīps';
   @override
   String get toolbarStrikethrough => 'Nodzīsvilkt';
+
+  @override
+  String get toolbarHighlight => 'Izcelts';
   @override
   String get toolbarSuperscript => 'Augšindekss';
   @override
@@ -574,6 +577,9 @@ final class LatvianStrings extends Strings {
   String get cheatChecklists => 'Kontrolsaraksti';
   @override
   String get cheatQuotes => 'Citāti';
+
+  @override
+  String get cheatCallouts => 'Izcelti bloki';
   @override
   String get cheatLinks => 'Saites';
   @override

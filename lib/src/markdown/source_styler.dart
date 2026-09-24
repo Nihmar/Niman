@@ -515,6 +515,7 @@ final class SourceStyler {
     StyleKind.emphasis => TokenKind.italic,
     StyleKind.strong => TokenKind.bold,
     StyleKind.strikethrough => TokenKind.strike,
+    StyleKind.highlight => TokenKind.highlight,
     StyleKind.underline => TokenKind.underline,
     StyleKind.superscript => TokenKind.superscript,
     StyleKind.subscript => TokenKind.subscript,

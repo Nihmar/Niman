@@ -500,6 +500,9 @@ final class UkrainianStrings extends Strings {
   String get toolbarItalic => 'Курсив';
   @override
   String get toolbarStrikethrough => 'Закреслений';
+
+  @override
+  String get toolbarHighlight => 'Виділення';
   @override
   String get toolbarSuperscript => 'Верхній індекс';
   @override
@@ -578,6 +581,9 @@ final class UkrainianStrings extends Strings {
   String get cheatChecklists => 'Контрольні списки';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Виділені блоки';
   @override
   String get cheatLinks => 'Посилання';
   @override

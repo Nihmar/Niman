@@ -505,6 +505,9 @@ final class FrenchStrings extends Strings {
   String get toolbarItalic => 'Italique';
   @override
   String get toolbarStrikethrough => 'Barré';
+
+  @override
+  String get toolbarHighlight => 'Surligné';
   @override
   String get toolbarSuperscript => 'Exposant';
   @override
@@ -583,6 +586,9 @@ final class FrenchStrings extends Strings {
   String get cheatChecklists => 'Listes de cases à cocher';
   @override
   String get cheatQuotes => 'Citations';
+
+  @override
+  String get cheatCallouts => 'Encadrés';
   @override
   String get cheatLinks => 'Liens';
   @override

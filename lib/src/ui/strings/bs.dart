@@ -502,6 +502,9 @@ final class BosnianStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Precrtano';
+
+  @override
+  String get toolbarHighlight => 'Istaknuto';
   @override
   String get toolbarSuperscript => 'Superskript';
   @override
@@ -580,6 +583,9 @@ final class BosnianStrings extends Strings {
   String get cheatChecklists => 'Kontrolne liste';
   @override
   String get cheatQuotes => 'Citati';
+
+  @override
+  String get cheatCallouts => 'Istaknuti blokovi';
   @override
   String get cheatLinks => 'Linkovi';
   @override

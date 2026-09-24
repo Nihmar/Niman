@@ -494,6 +494,9 @@ final class AlbanianStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'E anashëzvarrë';
+
+  @override
+  String get toolbarHighlight => 'E theksuar';
   @override
   String get toolbarSuperscript => 'Superskript';
   @override
@@ -572,6 +575,9 @@ final class AlbanianStrings extends Strings {
   String get cheatChecklists => 'Lista kontrolli';
   @override
   String get cheatQuotes => 'Citimet';
+
+  @override
+  String get cheatCallouts => 'Blloqe të theksuara';
   @override
   String get cheatLinks => 'Lidhjet';
   @override

@@ -501,6 +501,9 @@ final class SerbianStrings extends Strings {
   String get toolbarItalic => 'Курсиво';
   @override
   String get toolbarStrikethrough => 'Пречртано';
+
+  @override
+  String get toolbarHighlight => 'Истакнуто';
   @override
   String get toolbarSuperscript => 'Суперскрипт';
   @override
@@ -579,6 +582,9 @@ final class SerbianStrings extends Strings {
   String get cheatChecklists => 'Контролне листе';
   @override
   String get cheatQuotes => 'Цитати';
+
+  @override
+  String get cheatCallouts => 'Истакнути блокови';
   @override
   String get cheatLinks => 'Везе';
   @override

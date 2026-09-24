@@ -40,6 +40,8 @@ Formatting, in both editors, on the note's selection:
 - `Ctrl/⌘+Shift+L` — bulleted list, `Ctrl/⌘+Shift+O` — numbered list
 - `Ctrl/⌘+Shift+B` — quote
 - `Ctrl/⌘+M` / `Ctrl/⌘+Shift+M` — indent / outdent
+- highlight (`==…==`) has no key of its own as shipped: give it one in
+  Settings → Keyboard shortcuts → **Formatting**
 
 These do exactly what the toolbar's buttons do, and they are
 changeable like the rest (Settings → Keyboard shortcuts →

@@ -486,6 +486,9 @@ final class HindiStrings extends Strings {
   String get toolbarItalic => 'इटैलिक';
   @override
   String get toolbarStrikethrough => 'स्ट्राइक-थ्रू';
+
+  @override
+  String get toolbarHighlight => 'हाइलाइट';
   @override
   String get toolbarSuperscript => 'सुपरस्क्रिप्ट';
   @override
@@ -564,6 +567,9 @@ final class HindiStrings extends Strings {
   String get cheatChecklists => 'चेकलिस्ट';
   @override
   String get cheatQuotes => 'उद्धरण';
+
+  @override
+  String get cheatCallouts => 'कॉलआउट';
   @override
   String get cheatLinks => 'लिंक';
   @override

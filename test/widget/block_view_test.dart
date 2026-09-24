@@ -121,6 +121,43 @@ void main() {
     expect(_styleOf(tester, 'body text').fontSize, theme.body.fontSize);
   });
 
+  testWidgets('a callout is its box, its title and what it says (#279)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _view('> [!note]\n> What it **says**.', _syncCache()),
+    );
+    await tester.pump();
+    final screen = _screenText(tester);
+    expect(screen, contains('Note'), reason: 'titled by its type');
+    expect(screen, contains('says'));
+    expect(screen, isNot(contains('[!note]')));
+    expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+  });
+
+  testWidgets('a callout written folded opens on a tap (#279)', (tester) async {
+    await tester.pumpWidget(
+      _view('> [!warning]- Mind the gap\n> Hidden at first.', _syncCache()),
+    );
+    await tester.pump();
+    expect(_screenText(tester), contains('Mind the gap'));
+    expect(_screenText(tester), isNot(contains('Hidden at first')));
+    await tester.tap(find.byKey(const Key('callout-fold')));
+    await tester.pump();
+    expect(_screenText(tester), contains('Hidden at first'));
+  });
+
+  testWidgets('==highlight== is drawn marked, without its markers (#279)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_view('a ==marked== word', _syncCache()));
+    await tester.pump();
+    final screen = _screenText(tester);
+    expect(screen, contains('marked'));
+    expect(screen, isNot(contains('==')));
+    expect(_styleOf(tester, 'marked').backgroundColor, isNotNull);
+  });
+
   testWidgets('the markers are not on screen', (tester) async {
     await tester.pumpWidget(
       _view(

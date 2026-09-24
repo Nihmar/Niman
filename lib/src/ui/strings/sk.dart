@@ -500,6 +500,9 @@ final class SlovakStrings extends Strings {
   String get toolbarItalic => 'Kurzíva';
   @override
   String get toolbarStrikethrough => 'Prečiarknuté';
+
+  @override
+  String get toolbarHighlight => 'Zvýraznenie';
   @override
   String get toolbarSuperscript => 'Horný index';
   @override
@@ -578,6 +581,9 @@ final class SlovakStrings extends Strings {
   String get cheatChecklists => 'Kontrolné zoznamy';
   @override
   String get cheatQuotes => 'Citáty';
+
+  @override
+  String get cheatCallouts => 'Zvýraznené bloky';
   @override
   String get cheatLinks => 'Odkazy';
   @override

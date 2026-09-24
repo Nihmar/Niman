@@ -497,6 +497,9 @@ final class PortugueseStrings extends Strings {
   String get toolbarItalic => 'Itálico';
   @override
   String get toolbarStrikethrough => 'Riscado';
+
+  @override
+  String get toolbarHighlight => 'Realce';
   @override
   String get toolbarSuperscript => 'Sobrescrito';
   @override
@@ -575,6 +578,9 @@ final class PortugueseStrings extends Strings {
   String get cheatChecklists => 'Listas de verificação';
   @override
   String get cheatQuotes => 'Citações';
+
+  @override
+  String get cheatCallouts => 'Destaques';
   @override
   String get cheatLinks => 'Ligações';
   @override

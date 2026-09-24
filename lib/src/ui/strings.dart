@@ -394,6 +394,7 @@ final class AppStrings {
   static String get toolbarBold => _s.toolbarBold;
   static String get toolbarItalic => _s.toolbarItalic;
   static String get toolbarStrikethrough => _s.toolbarStrikethrough;
+  static String get toolbarHighlight => _s.toolbarHighlight;
   static String get toolbarSuperscript => _s.toolbarSuperscript;
   static String get toolbarUnderline => _s.toolbarUnderline;
   static String get toolbarLink => _s.toolbarLink;
@@ -433,6 +434,7 @@ final class AppStrings {
   static String get cheatLists => _s.cheatLists;
   static String get cheatChecklists => _s.cheatChecklists;
   static String get cheatQuotes => _s.cheatQuotes;
+  static String get cheatCallouts => _s.cheatCallouts;
   static String get cheatLinks => _s.cheatLinks;
   static String get cheatWikilinks => _s.cheatWikilinks;
   static String get cheatEmbeds => _s.cheatEmbeds;

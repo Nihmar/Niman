@@ -238,6 +238,72 @@ void main() {
     expect(source.where((span) => span.text == '**').any(hidden), isFalse);
   });
 
+  testWidgets('==highlight== is marked, its markers hidden in live (#279)', (
+    tester,
+  ) async {
+    await pumpMode(
+      tester,
+      MarkdownSurfaceMode.live,
+      caret: 0,
+      text: 'caret\n\na ==marked== word\n',
+    );
+    final spans = <TextSpan>[];
+    for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+      widget.text.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+    }
+    bool hidden(TextSpan span) => span.style?.fontSize == 0.01;
+    final markers = spans.where((span) => span.text == '==');
+    expect(markers, hasLength(2));
+    expect(markers.every(hidden), isTrue, reason: 'live hides the markers');
+    final marked = spans.singleWhere((span) => span.text == 'marked');
+    expect(hidden(marked), isFalse);
+    expect(marked.style?.backgroundColor, isNotNull, reason: 'it is marked');
+  });
+
+  testWidgets("a callout's mark is hidden in live, shown under the caret", (
+    tester,
+  ) async {
+    const text = 'caret\n\n> [!tip] Title\n> body\n';
+    Future<List<TextSpan>> spansWith(int caret) async {
+      await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: caret,
+        text: text,
+      );
+      final spans = <TextSpan>[];
+      for (final widget in tester.widgetList<RichText>(find.byType(RichText))) {
+        widget.text.visitChildren((span) {
+          if (span is TextSpan && span.text != null) spans.add(span);
+          return true;
+        });
+      }
+      return spans;
+    }
+
+    bool hidden(TextSpan span) => (span.style?.fontSize ?? 14) < 1;
+    final away = await spansWith(0);
+    // Drawn as room, a glyph of no size a character: the icon stands there.
+    final mark = away.where((span) => span.text == 'x' * '[!tip] '.length);
+    expect(mark, hasLength(1));
+    expect(mark.single.style?.fontSize, 0.01);
+    expect(mark.single.style?.letterSpacing, greaterThan(0));
+    expect(away.any((span) => span.text!.contains('[!tip]')), isFalse);
+    expect(
+      away.any((span) => span.text!.contains('Title') && !hidden(span)),
+      isTrue,
+    );
+    final on = await spansWith(text.indexOf('Title') + 1);
+    expect(
+      on.any((span) => span.text!.contains('[!tip]') && !hidden(span)),
+      isTrue,
+      reason: 'the caret on the title line shows the mark as written',
+    );
+  });
+
   testWidgets('live hides the tags the toolbar writes, and draws them', (
     tester,
   ) async {

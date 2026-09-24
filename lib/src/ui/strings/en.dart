@@ -495,6 +495,9 @@ final class EnglishStrings extends Strings {
   String get toolbarItalic => 'Italic';
   @override
   String get toolbarStrikethrough => 'Strikethrough';
+
+  @override
+  String get toolbarHighlight => 'Highlight';
   @override
   String get toolbarSuperscript => 'Superscript';
   @override
@@ -573,6 +576,9 @@ final class EnglishStrings extends Strings {
   String get cheatChecklists => 'Checkbox lists';
   @override
   String get cheatQuotes => 'Quotes';
+
+  @override
+  String get cheatCallouts => 'Callouts';
   @override
   String get cheatLinks => 'Links';
   @override

@@ -464,6 +464,9 @@ final class ChineseStrings extends Strings {
   String get toolbarItalic => '斜体';
   @override
   String get toolbarStrikethrough => '删除线';
+
+  @override
+  String get toolbarHighlight => '高亮';
   @override
   String get toolbarSuperscript => '上标';
   @override
@@ -542,6 +545,9 @@ final class ChineseStrings extends Strings {
   String get cheatChecklists => '复选框列表';
   @override
   String get cheatQuotes => '引用';
+
+  @override
+  String get cheatCallouts => '标注块';
   @override
   String get cheatLinks => '链接';
   @override

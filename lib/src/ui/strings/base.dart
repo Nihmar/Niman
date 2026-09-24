@@ -245,6 +245,7 @@ abstract base class Strings {
   String get toolbarBold;
   String get toolbarItalic;
   String get toolbarStrikethrough;
+  String get toolbarHighlight;
   String get toolbarSuperscript;
   String get toolbarUnderline;
   String get toolbarLink;
@@ -284,6 +285,7 @@ abstract base class Strings {
   String get cheatLists;
   String get cheatChecklists;
   String get cheatQuotes;
+  String get cheatCallouts;
   String get cheatLinks;
   String get cheatWikilinks;
   String get cheatEmbeds;

@@ -503,6 +503,9 @@ final class ItalianStrings extends Strings {
   String get toolbarItalic => 'Corsivo';
   @override
   String get toolbarStrikethrough => 'Barrato';
+
+  @override
+  String get toolbarHighlight => 'Evidenziato';
   @override
   String get toolbarSuperscript => 'Apice';
   @override
@@ -581,6 +584,9 @@ final class ItalianStrings extends Strings {
   String get cheatChecklists => 'Liste di controllo';
   @override
   String get cheatQuotes => 'Citazioni';
+
+  @override
+  String get cheatCallouts => 'Callout';
   @override
   String get cheatLinks => 'Link';
   @override

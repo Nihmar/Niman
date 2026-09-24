@@ -498,6 +498,9 @@ final class BelarusianStrings extends Strings {
   String get toolbarItalic => 'Курсіў';
   @override
   String get toolbarStrikethrough => 'Закрэслены';
+
+  @override
+  String get toolbarHighlight => 'Вылучэнне';
   @override
   String get toolbarSuperscript => 'Верхні індыкс';
   @override
@@ -576,6 +579,9 @@ final class BelarusianStrings extends Strings {
   String get cheatChecklists => 'Кантрольныя спісы';
   @override
   String get cheatQuotes => 'Цытаты';
+
+  @override
+  String get cheatCallouts => 'Вылучаныя блокі';
   @override
   String get cheatLinks => 'Спасылкі';
   @override
