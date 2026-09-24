@@ -38,7 +38,7 @@ in a table's cell too, whose row stays on the grid.
 |---|---|
 | `4143509` | The read view's bullets and checkboxes are painted by `live`'s own function (`item_marks.dart`), centred in the marker column on the item's first row; its numbers take `live`'s colour. |
 | `09ec542` | A tight list's items touch, a blank line is one spacing (not three), and the spacing between blocks is 1 em. |
-| `3c38d5c` | The text starts and wraps at the same place in both modes, with or without line numbers and a note column (`noteTextInsets`): the read view keeps the numbers' room without drawing them. |
+| `3c38d5c` | The text starts and wraps at the same place in both modes, with or without a note column (`noteTextInsets`). The read view kept the line numbers' room without drawing them, until 2026-09-24: an empty gutter down a page that is only read. It keeps none now, and with the numbers on the text moves by their width at a flip. |
 | `72a392b` | A heading's hidden hashes no longer leave their space before the title in `live`; every line's text stands where a paragraph's first glyph would, half an ambient letter spacing in. |
 | `c02ce9c` | A quote's bar is inside its indent in the read view, as in `live`. |
 | `259bb3a` | **Bug:** `live` hid a code block's code — its content lines were tokens of the fence, and the fence is a marker. The content is now `TokenKind.codeBlock` and drawn. |
