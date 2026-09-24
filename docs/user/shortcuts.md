@@ -48,6 +48,8 @@ Moving and selecting in the source editor, on Windows and Linux:
 - `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word
 - `Home` / `End` — start and end of the line, `Shift` to select
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
+- `Tab` / `Shift+Tab` — indent and outdent the line; in a table in live
+  mode, the next and the previous cell instead
 
 Reading a note in the read view (Markdown notes, with the unified
 engine), which takes the keyboard when you switch to it or click it:

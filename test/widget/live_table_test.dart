@@ -3,6 +3,7 @@
 // kept out of the room between the cells.
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
@@ -160,6 +161,50 @@ void main() {
         ..deleteBackward(word: true);
       await tester.pump();
       expect(state.widget.buffer.lineAt(4), '| **one** |  |');
+    });
+  });
+
+  group('Tab goes from cell to cell', () {
+    Future<MarkdownSourceViewState> at(WidgetTester tester, int offset) async {
+      final state = await _pump(tester, null);
+      await tester.tap(find.byType(MarkdownSourceView));
+      await tester.pump();
+      state.placeCaret(offset);
+      await tester.pump();
+      return state;
+    }
+
+    Future<void> tab(WidgetTester tester, {bool shift = false}) async {
+      if (shift) await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.pump();
+    }
+
+    testWidgets('forward, the next cell’s text selected', (tester) async {
+      final state = await at(tester, _at(2, 'a'));
+      await tab(tester);
+      expect(state.selectedText, 'b');
+      // Past the header's last cell: the first row's first cell, the
+      // delimiter row passed over.
+      await tab(tester);
+      expect(state.selectedText, '**one**');
+    });
+
+    testWidgets('back, and past the first row to the header', (tester) async {
+      final state = await at(tester, _at(4, 'one'));
+      await tab(tester, shift: true);
+      expect(state.selectedText, 'b');
+    });
+
+    testWidgets('past the last cell, a new row', (tester) async {
+      final state = await at(tester, _at(4, 'two'));
+      await tab(tester);
+      expect(
+        state.widget.buffer.text,
+        'caret\n\n| a | b |\n|---|---|\n| **one** | two |\n|  |  |\n\nafter',
+      );
+      expect(state.widget.buffer.lineOf(state.selection.extent), 5);
     });
   });
 }

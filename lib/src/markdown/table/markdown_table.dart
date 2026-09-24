@@ -31,6 +31,8 @@ final class MarkdownTable {
     this.outerPipes = true,
     this.indent = '',
     this.delimiters,
+    this.spaced = true,
+    this.delimiterSpaced = true,
   });
 
   /// Reads [lines], a table's lines: its header, its delimiter row, its
@@ -59,6 +61,8 @@ final class MarkdownTable {
       outerPipes: first.trim().startsWith('|'),
       indent: indent,
       delimiters: [for (final cell in delimiter) cell.trim()],
+      spaced: _isSpaced(first),
+      delimiterSpaced: _isSpaced(lines[1]),
     );
   }
 
@@ -86,6 +90,14 @@ final class MarkdownTable {
   /// unpadded column keeps its own dashes until its alignment changes.
   final List<String>? delimiters;
 
+  /// Whether its rows are written with a space either side of each cell
+  /// (`| a | b |`), not tight against the pipes (`|a|b|`).
+  final bool spaced;
+
+  /// The same, for the delimiter row: `| --- |` or `|---|`, which writers
+  /// choose apart from the rows.
+  final bool delimiterSpaced;
+
   /// How many columns it has.
   int get columns => aligns.length;
 
@@ -104,6 +116,8 @@ final class MarkdownTable {
     outerPipes: outerPipes,
     indent: indent,
     delimiters: dropDelimiters ? null : delimiters ?? this.delimiters,
+    spaced: spaced,
+    delimiterSpaced: delimiterSpaced,
   );
 
   /// The table's lines: header, delimiter row, body.
@@ -140,17 +154,25 @@ final class MarkdownTable {
       };
     }
 
-    String line(List<String> cells) {
-      final inner = cells.map((text) => ' $text ').join('|');
+    String line(List<String> cells, {required bool spaced}) {
+      final inner = cells
+          .map((text) => spaced || padded ? ' $text ' : text)
+          .join('|');
       final row = outerPipes ? '|$inner|' : inner.trim();
       return '$indent$row';
     }
 
     return [
-      line([for (var at = 0; at < columns; at++) cell(header[at], at)]),
-      line([for (var at = 0; at < columns; at++) delimiterCell(at)]),
+      line([
+        for (var at = 0; at < columns; at++) cell(header[at], at),
+      ], spaced: spaced),
+      line([
+        for (var at = 0; at < columns; at++) delimiterCell(at),
+      ], spaced: delimiterSpaced),
       for (final row in rows)
-        line([for (var at = 0; at < columns; at++) cell(row[at], at)]),
+        line([
+          for (var at = 0; at < columns; at++) cell(row[at], at),
+        ], spaced: spaced),
     ];
   }
 
@@ -213,17 +235,39 @@ final class MarkdownTable {
     return TableAlign.none;
   }
 
-  /// Whether every row of [lines] puts its pipes where the first one does:
-  /// a table written with its columns padded to one width.
+  /// Whether [lines] were padded by their writer: a cell with more than a
+  /// space either side of its text, or a delimiter cell longer than three
+  /// dashes. What padding looks like, rather than whether the pipes line
+  /// up — a padded table one cell of which has since grown is still one
+  /// to pad, and a table of one-letter cells lines up by chance.
   static bool _isPadded(List<String> lines) {
-    List<int> pipes(String line) => [
-      for (var at = 0; at < line.length; at++)
-        if (line[at] == '|' && (at == 0 || line[at - 1] != r'\')) at,
-    ];
-    final first = pipes(lines.first.trimRight());
-    if (first.length < 2) return false;
-    for (final line in lines.skip(1)) {
-      if (!listEquals(pipes(line.trimRight()), first)) return false;
+    for (final (index, line) in lines.indexed) {
+      for (final raw in splitRow(line)) {
+        final text = raw.trim();
+        if (index == 1) {
+          if (text.replaceAll(':', '').length > 3) return true;
+          continue;
+        }
+        if (text.isEmpty) {
+          if (raw.length > 2) return true;
+          continue;
+        }
+        final lead = raw.length - raw.trimLeft().length;
+        final trail = raw.length - raw.trimRight().length;
+        if (lead > 1 || trail > 1) return true;
+      }
+    }
+    return false;
+  }
+
+  /// Whether [line]'s cells stand a space off their pipes: a row with no
+  /// cell tight against one.
+  static bool _isSpaced(String line) {
+    final text = line.trim();
+    for (var at = 0; at < text.length; at++) {
+      if (text[at] != '|' || (at > 0 && text[at - 1] == r'\')) continue;
+      if (at + 1 < text.length && text[at + 1] != ' ') return false;
+      if (at > 0 && text[at - 1] != ' ') return false;
     }
     return true;
   }

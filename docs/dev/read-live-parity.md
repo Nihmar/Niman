@@ -195,11 +195,19 @@ Decisions taken without the writer, to revisit if they read wrong:
 - **The submenus open in the menu's place** on the desktop (a back row
   on top), not as a flyout: the menu is a selection toolbar, with nowhere
   steady for a flyout to stand. On a phone Row and Column open a sheet.
-- **Padded** means every row puts its pipes where the header does. A
-  padded table is rewritten with each column as wide as its widest cell,
-  three at least (a delimiter cell's minimum); an unpadded one keeps a
-  space round each cell and each column's own dashes until its alignment
-  changes. A padded right- or centre-aligned column pads on that side.
+- **Padded** means the writer padded: a cell with more than one space
+  either side of its text, or a delimiter cell of more than three dashes.
+  Not whether the pipes line up — a padded table one cell of which has
+  grown since is re-padded whole, and a table of one-letter cells lines
+  up by chance. A padded table is rewritten with each column as wide as
+  its widest cell, three at least (a delimiter cell's minimum); an
+  unpadded one keeps a space round each cell or none (`|a|b|`) as its
+  rows had it, the delimiter row's own way apart, and each column's own
+  dashes until its alignment changes. A padded right- or centre-aligned
+  column pads on that side.
+- **Tab** in a table goes to the next cell, Shift+Tab to the one before,
+  the cell's text selected so typing replaces it; Tab past the last cell
+  adds a row. Outside a table, and in `source`, Tab indents as before.
 - **Sorting** compares two numbers as numbers (a decimal comma read as a
   point), anything else as text ignoring case; it is stable, and the
   header is never sorted.
@@ -210,6 +218,6 @@ Decisions taken without the writer, to revisit if they read wrong:
   column's alignment, and `live` gives the room before it (`LiveTables`);
   `read_live_page_test` holds the two to the pixel. It was not drawn at
   all before, which the menu's Align would have made plain.
-- **Not done**: Tab to the next cell, and a size picker for an inserted
-  table (#262 has two columns and one row; the `+` add the rest).
+- **Not done**: a size picker for an inserted table (#262 has two
+  columns and one row; the `+` and Tab add the rest).
 
