@@ -1,6 +1,8 @@
 // Issue #175: the dock's three panes, on a note of their own — the
 // outline jumps, the tags list and open onto their notes, the history
 // lists the kept versions newest first.
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -59,6 +61,31 @@ final class _Tags implements TagSource {
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
+/// An outline of [length] headings that counts how many of them were read.
+final class _CountedOutline extends ListBase<OutlineEntry> {
+  new(this.length);
+
+  @override
+  int length;
+
+  /// How many headings were asked for.
+  int read = 0;
+
+  @override
+  OutlineEntry operator [](int index) {
+    read++;
+    return OutlineEntry(
+      line: index * 10,
+      level: index % 3 + 1,
+      text: 'Heading $index',
+    );
+  }
+
+  @override
+  void operator []=(int index, OutlineEntry value) =>
+      throw UnsupportedError('read only');
+}
+
 void main() {
   test('a note’s tags: its frontmatter’s, then its #tags, once', () {
     expect(noteTagsOf('---\ntags: [Work, idea]\n---\nsome #idea and #plan\n'), [
@@ -81,6 +108,34 @@ void main() {
     await tester.pump();
     expect(find.text('Galassia'), findsOne);
     expect(find.text('Celestia'), findsNothing);
+  });
+
+  testWidgets('a long outline builds the headings on screen, not all of them', (
+    tester,
+  ) async {
+    // The 246 MB stress note's count: every row was built on every outline
+    // the note published, a frame of O(headings) whatever was on screen.
+    const headings = 22260;
+    final note = _Note('');
+    final outline = _CountedOutline(headings);
+    note.outline.value = outline;
+    await tester.pumpWidget(_app(OutlineDockPane(note: note)));
+    // A screen of rows and the list's cache, against one per heading.
+    expect(outline.read, lessThan(100));
+    expect(find.text('Heading 0'), findsOne);
+    // A new outline — the note was edited — reads a screen again.
+    final next = _CountedOutline(headings);
+    note.outline.value = next;
+    await tester.pump();
+    expect(next.read, lessThan(100));
+    // The far end is there to scroll to, and its rows still jump.
+    await tester.scrollUntilVisible(
+      find.text('Heading ${headings - 1}'),
+      50000,
+      scrollable: find.byType(Scrollable),
+    );
+    await tester.tap(find.text('Heading ${headings - 1}'));
+    expect(note.jumps, [(headings - 1) * 10]);
   });
 
   testWidgets('the tags list, each opening onto its notes', (tester) async {
