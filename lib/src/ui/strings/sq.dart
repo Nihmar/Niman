@@ -537,6 +537,32 @@ final class AlbanianStrings extends Strings {
   @override
   String get cheatTemplates => 'Vendmbajtësit e shablloneve';
   @override
+  String get menuAddLink => 'Shto lidhje';
+  @override
+  String get menuAddExternalLink => 'Shto lidhje të jashtme';
+  @override
+  String get menuFormat => 'Formati';
+  @override
+  String get menuParagraph => 'Paragrafi';
+  @override
+  String get menuInsert => 'Fut';
+  @override
+  String get menuBody => 'Tekst i thjeshtë';
+  @override
+  String get formatSubscript => 'Indeks';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Shënim në fund';
+  @override
+  String get insertRule => 'Vijë horizontale';
+  @override
+  String get insertCodeBlock => 'Bllok kodi';
+  @override
+  String get insertMathBlock => 'Bllok matematik';
+  @override
+  String get menuHeadingWord => 'Titull';
+  @override
   String get toolbarHeading => 'Titull';
   @override
   String get toolbarList => 'Listë';

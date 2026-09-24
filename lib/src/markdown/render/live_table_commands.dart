@@ -2,7 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/editor/table_menu.dart';
+import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -103,25 +103,26 @@ final class LiveTableCommands {
   /// A new column at the table's right edge: the `+` beside it.
   void addColumnAtEnd() => run(TableEdits.addColumnAtEnd(table));
 
-  /// The table's part of the context menu, for [cell].
-  TableMenu menu() {
-    TableMenuAction action(
+  /// The table's part of the context menu, for [cell]: its row's and its
+  /// column's submenus, and the sorts.
+  ContextMenuPart menu() {
+    ContextMenuAction action(
       String id,
       String label,
       IconData icon,
       TableEdit? edit,
-    ) => TableMenuAction(
-      id: id,
+    ) => ContextMenuAction(
+      id: 'table-$id',
       label: label,
       icon: icon,
       onPressed: edit == null ? null : () => run(edit),
     );
 
     final at = cell;
-    return TableMenu(
-      groups: [
-        TableMenuGroup(
-          id: 'row',
+    return [
+      [
+        ContextMenuGroup(
+          id: 'table-row',
           label: AppStrings.tableRow,
           icon: Icons.table_rows_outlined,
           sections: [
@@ -169,8 +170,8 @@ final class LiveTableCommands {
             ],
           ],
         ),
-        TableMenuGroup(
-          id: 'column',
+        ContextMenuGroup(
+          id: 'table-column',
           label: AppStrings.tableColumn,
           icon: Icons.view_column_outlined,
           sections: [
@@ -238,8 +239,6 @@ final class LiveTableCommands {
             ],
           ],
         ),
-      ],
-      actions: [
         action(
           'sort-ascending',
           AppStrings.tableSortAscending,
@@ -253,7 +252,7 @@ final class LiveTableCommands {
           TableEdits.sortByColumn(table, at, descending: true),
         ),
       ],
-    );
+    ];
   }
 
   static List<String> _lines(SourceBuffer buffer, Block block) => [

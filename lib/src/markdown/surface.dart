@@ -21,6 +21,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -76,6 +77,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.syntax,
     this.dark = false,
     this.formatMenu,
+    this.editorMenu,
     this.spellCheck,
     this.findMatches,
     this.onOpenLink,
@@ -141,6 +143,10 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// The toolbar's formatting actions, for the context menu.
   final FormatMenuBuilder? formatMenu;
+
+  /// The context menu grouped by what the writer is doing (#260); with it
+  /// the menu shows this rather than [formatMenu].
+  final ContextMenuPart Function()? editorMenu;
 
   /// The note's spelling: its underline and its menu entries.
   final EditorSpellCheck? spellCheck;
@@ -208,6 +214,7 @@ final class MarkdownSurface extends StatelessWidget {
     dark: dark,
     hideMarkers: hidesMarkers,
     formatMenu: formatMenu,
+    editorMenu: editorMenu,
     spellCheck: spellCheck,
     findMatches: findMatches,
     onOpenLink: onOpenLink,

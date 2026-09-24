@@ -88,6 +88,16 @@ void main() {
   });
 
   group('applyEdit', () {
+    test('a range whose last line is empty keeps the break after it', () {
+      // The range ends before its last line's terminator: an empty last
+      // line matched against the new text's closing break lost one.
+      final buffer = SourceBuffer.fromText('a\n\nb');
+      MarkdownSurfaceController(
+        buffer,
+      ).applyEdit('a\nX\n', const TextSelection.collapsed(offset: 0), end: 2);
+      expect(buffer.text, 'a\nX\n\nb');
+    });
+
     /// What a kind GUI does: hand back the whole note after one change.
     void handBack(
       MarkdownSurfaceController controller,

@@ -220,4 +220,37 @@ void main() {
       expect(edit.selection, _sel(edit.text.length));
     });
   });
+
+  group('the context menu’s own commands (#260)', () {
+    test('Body takes the heading off', () {
+      expect(
+        removeHeading(text: '## Titolo\ntesto', selection: _sel(5)).text,
+        'Titolo\ntesto',
+      );
+      expect(
+        removeHeading(text: 'già testo', selection: _sel(2)).text,
+        'già testo',
+      );
+    });
+
+    test('a footnote is cited at the caret, defined under the paragraph', () {
+      final edit = insertFootnote(
+        text: 'Una frase\nche va avanti.\n\nAltro.',
+        selection: _sel(9),
+        label: '3',
+      );
+      expect(edit.text, 'Una frase[^3]\nche va avanti.\n\n[^3]: \n\nAltro.');
+      expect(edit.selection, _sel(edit.text.indexOf('[^3]: ') + 6));
+    });
+
+    test('at the end of the note, the definition closes it', () {
+      final edit = insertFootnote(text: 'Fine', selection: _sel(4), label: '1');
+      expect(edit.text, 'Fine[^1]\n\n[^1]: ');
+    });
+
+    test('the next footnote number', () {
+      expect(nextFootnoteLabel(['1', 'nota', '4']), '5');
+      expect(nextFootnoteLabel(const <String>[]), '1');
+    });
+  });
 }

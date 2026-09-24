@@ -548,6 +548,32 @@ final class PolishStrings extends Strings {
   @override
   String get cheatTemplates => 'Symbole zastępcze szablonów';
   @override
+  String get menuAddLink => 'Dodaj link';
+  @override
+  String get menuAddExternalLink => 'Dodaj link zewnętrzny';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Akapit';
+  @override
+  String get menuInsert => 'Wstaw';
+  @override
+  String get menuBody => 'Zwykły tekst';
+  @override
+  String get formatSubscript => 'Indeks dolny';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Przypis';
+  @override
+  String get insertRule => 'Linia pozioma';
+  @override
+  String get insertCodeBlock => 'Blok kodu';
+  @override
+  String get insertMathBlock => 'Blok matematyczny';
+  @override
+  String get menuHeadingWord => 'Nagłówek';
+  @override
   String get toolbarHeading => 'Nagłówek';
   @override
   String get toolbarList => 'Lista';

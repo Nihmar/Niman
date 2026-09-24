@@ -544,6 +544,32 @@ final class UkrainianStrings extends Strings {
   @override
   String get cheatTemplates => 'Заповнювачі шаблонів';
   @override
+  String get menuAddLink => 'Додати посилання';
+  @override
+  String get menuAddExternalLink => 'Додати зовнішнє посилання';
+  @override
+  String get menuFormat => 'Формат';
+  @override
+  String get menuParagraph => 'Абзац';
+  @override
+  String get menuInsert => 'Вставити';
+  @override
+  String get menuBody => 'Звичайний текст';
+  @override
+  String get formatSubscript => 'Нижній індекс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Виноска';
+  @override
+  String get insertRule => 'Горизонтальна лінія';
+  @override
+  String get insertCodeBlock => 'Блок коду';
+  @override
+  String get insertMathBlock => 'Математичний блок';
+  @override
+  String get menuHeadingWord => 'Заголовок';
+  @override
   String get toolbarHeading => 'Заголовок';
   @override
   String get toolbarList => 'Список';

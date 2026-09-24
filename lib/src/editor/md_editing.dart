@@ -292,6 +292,75 @@ MarkdownEdit insertSnippet({
   );
 }
 
+/// Takes the heading off every line the [selection] touches: the text of a
+/// heading becomes a paragraph's — Obsidian's "Body" (#260).
+MarkdownEdit removeHeading({
+  required String text,
+  required TextSelection selection,
+}) {
+  final startLine = _lineIndexOf(text, selection.start);
+  final endLine = _lineIndexOf(text, selection.end);
+  final lines = text.split('\n');
+  final newLines = <String>[...lines];
+  for (var i = startLine; i <= endLine; i++) {
+    final match = _headingPrefix.matchAsPrefix(lines[i]);
+    if (match != null) newLines[i] = lines[i].substring(match[0]!.length);
+  }
+  final newText = newLines.join('\n');
+  return MarkdownEdit(
+    text: newText,
+    selection: _shiftSelectionForLines(
+      oldText: text,
+      newText: newText,
+      selection: selection,
+      startLine: startLine,
+      endLine: endLine,
+    ),
+  );
+}
+
+/// Cites footnote [label] at the caret and writes its definition under
+/// the caret's paragraph, the caret left on it to be written (#260).
+///
+/// Under the paragraph rather than at the note's end: a definition can
+/// stand anywhere, and there it is found beside what cites it — and the
+/// edit is the paragraph's, not the note's. [text] need hold the caret's
+/// paragraph from its line on; the definition goes after the first blank
+/// line, or at the end of [text] when it has none.
+MarkdownEdit insertFootnote({
+  required String text,
+  required TextSelection selection,
+  required String label,
+}) {
+  final caret = selection.extentOffset;
+  final reference = '[^$label]';
+  final withReference = text.replaceRange(caret, caret, reference);
+  final lines = withReference.split('\n');
+  var end = _lineIndexOf(withReference, caret + reference.length);
+  while (end + 1 < lines.length && lines[end + 1].trim().isNotEmpty) {
+    end++;
+  }
+  final definition = '[^$label]: ';
+  final newLines = <String>[...lines]..insertAll(end + 1, ['', definition]);
+  final newText = newLines.join('\n');
+  final at = _lineStart(newText, end + 2) + definition.length;
+  return MarkdownEdit(
+    text: newText,
+    selection: TextSelection.collapsed(offset: at),
+  );
+}
+
+/// The next number a new footnote can take: one past the highest of
+/// [labels] that are numbers.
+String nextFootnoteLabel(Iterable<String> labels) {
+  var highest = 0;
+  for (final label in labels) {
+    final number = int.tryParse(label);
+    if (number != null && number > highest) highest = number;
+  }
+  return '${highest + 1}';
+}
+
 /// Indents (or outdents, with [outdent] true) every line the [selection]
 /// touches by [width] spaces: indent adds [width] spaces at each line's
 /// start; outdent removes up to [width] leading spaces (never content).

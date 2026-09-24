@@ -536,6 +536,32 @@ final class BasqueStrings extends Strings {
   @override
   String get cheatTemplates => 'Txantiloien lekukoak';
   @override
+  String get menuAddLink => 'Gehitu esteka';
+  @override
+  String get menuAddExternalLink => 'Gehitu kanpoko esteka';
+  @override
+  String get menuFormat => 'Formatua';
+  @override
+  String get menuParagraph => 'Paragrafoa';
+  @override
+  String get menuInsert => 'Txertatu';
+  @override
+  String get menuBody => 'Testu arrunta';
+  @override
+  String get formatSubscript => 'Azpiindizea';
+  @override
+  String get formatInlineCode => 'Kodea';
+  @override
+  String get insertFootnote => 'Oin-oharra';
+  @override
+  String get insertRule => 'Marra horizontala';
+  @override
+  String get insertCodeBlock => 'Kode-blokea';
+  @override
+  String get insertMathBlock => 'Matematika-blokea';
+  @override
+  String get menuHeadingWord => 'Izenburua';
+  @override
   String get toolbarHeading => 'Izenburua';
   @override
   String get toolbarList => 'Zerrenda';

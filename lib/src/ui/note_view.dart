@@ -14,6 +14,7 @@ import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/editor_tool.dart';
@@ -66,6 +67,7 @@ import 'package:niman/src/preview/scroll_map.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
@@ -1710,6 +1712,7 @@ final class _NoteViewState extends State<NoteView>
         indentWidth: widget.indentWidth,
         column: widget.noteColumn,
         formatMenu: _formatMenu,
+        editorMenu: _editorMenu,
         spellCheck: widget.spellCheck,
         activeItems: _activeFormats,
         // What `live` draws in place of the source it hides: the formulas
@@ -2978,6 +2981,69 @@ final class _NoteViewState extends State<NoteView>
           ),
     ];
   }
+
+  /// The unified surface's context menu, grouped (#260): read as it
+  /// opens, so its lit entries are the caret's now.
+  ContextMenuPart _editorMenu() {
+    final surface = _surface;
+    var level = 0;
+    if (surface != null) {
+      final buffer = surface.buffer;
+      final line = buffer.lineOf(surface.selection.extent);
+      final text = buffer.lineAt(line);
+      while (level < text.length && level < 7 && text[level] == '#') {
+        level++;
+      }
+      if (level > 6 || (level < text.length && text[level] != ' ')) level = 0;
+    }
+    return editorMenu(
+      active: _activeFormats.value,
+      headingLevel: level,
+      run: _runCommand,
+      onImage: _insertImage,
+      onFootnote: _insertFootnote,
+    );
+  }
+
+  /// A footnote cited at the caret, defined under its paragraph, numbered
+  /// one past the note's highest (#260).
+  void _insertFootnote() {
+    final surface = _surface;
+    if (_unified && surface != null) {
+      final labels = _sourceViewKey.currentState?.footnoteLabels;
+      final label = nextFootnoteLabel(labels ?? const <String>[]);
+      // The caret's paragraph, as far as its first blank line: the lines
+      // the definition goes under.
+      final buffer = surface.buffer;
+      final start = buffer.lineOf(surface.selection.extent);
+      var last = start;
+      while (last + 1 < buffer.lineCount &&
+          last - start < _footnoteReach &&
+          buffer.lineAt(last + 1).trim().isNotEmpty) {
+        last++;
+      }
+      surface.applyLineCommand(
+        (text, selection) =>
+            insertFootnote(text: text, selection: selection, label: label),
+        through: last + 1,
+      );
+      _focus.requestFocus();
+      return;
+    }
+    final text = _controller.text;
+    final label = nextFootnoteLabel([
+      for (final match in RegExp(r'\[\^([^\]\s]+)\]').allMatches(text))
+        match[1]!,
+    ]);
+    _runCommand(
+      (text, selection) =>
+          insertFootnote(text: text, selection: selection, label: label),
+    );
+  }
+
+  /// How far down a paragraph the footnote's definition is looked for a
+  /// place under it: a paragraph longer than that has it here.
+  static const int _footnoteReach = 2000;
 
   Map<ToolbarItem, VoidCallback> _toolbarActions() {
     if (widget.showWysiwyg && !_unified) return _quillToolbarActions();

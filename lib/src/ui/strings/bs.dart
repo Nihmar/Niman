@@ -544,6 +544,32 @@ final class BosnianStrings extends Strings {
   @override
   String get cheatTemplates => 'Rezervisana mjesta šablona';
   @override
+  String get menuAddLink => 'Dodaj link';
+  @override
+  String get menuAddExternalLink => 'Dodaj vanjski link';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Paragraf';
+  @override
+  String get menuInsert => 'Umetni';
+  @override
+  String get menuBody => 'Obični tekst';
+  @override
+  String get formatSubscript => 'Indeks';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Fusnota';
+  @override
+  String get insertRule => 'Horizontalna linija';
+  @override
+  String get insertCodeBlock => 'Blok koda';
+  @override
+  String get insertMathBlock => 'Matematički blok';
+  @override
+  String get menuHeadingWord => 'Naslov';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

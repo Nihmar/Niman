@@ -2,10 +2,10 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/editor/table_menu.dart';
+import 'package:niman/src/editor/context_menu_items.dart';
 
 /// The desktop menu's rows: the menu itself, or the table's submenu open
-/// in its place (#261).
+/// in its place (#260, #261).
 final class ContextMenuPages extends StatefulWidget {
   /// Creates the pages.
   const new({required this.main, required this.group, super.key});
@@ -13,19 +13,19 @@ final class ContextMenuPages extends StatefulWidget {
   /// The menu's rows, given what opens a submenu.
   final List<Widget> Function(
     BuildContext context,
-    void Function(TableMenuGroup group) open,
+    void Function(ContextMenuGroup group) open,
   )
   main;
 
   /// A submenu's rows, given the way back.
-  final List<Widget> Function(TableMenuGroup group, VoidCallback back) group;
+  final List<Widget> Function(ContextMenuGroup group, VoidCallback back) group;
 
   @override
   State<ContextMenuPages> createState() => _ContextMenuPagesState();
 }
 
 final class _ContextMenuPagesState extends State<ContextMenuPages> {
-  TableMenuGroup? _open;
+  ContextMenuGroup? _open;
 
   @override
   Widget build(BuildContext context) {

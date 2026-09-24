@@ -331,9 +331,154 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await tester.pump();
-    await tester.tap(find.byKey(const Key('context-bold')));
+    // The note's menu is grouped (#260): Bold is under Format.
+    await tester.tap(find.byKey(const Key('menu-format')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('menu-bold')));
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(state.widget.buffer.text, '**hello**');
     expect(saved, '**hello**');
   }, variant: _desktop);
+
+  group("the note's menu, grouped (#260)", () {
+    Future<MarkdownSourceViewState> open(
+      WidgetTester tester,
+      _Mode mode,
+      String text, {
+      required int caret,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NoteView(
+              path: '/n/a.md',
+              showLineNumbers: false,
+              autofocusEditor: true,
+              toolbarTop: true,
+              unifiedMarkdown: true,
+              showWysiwyg: mode == _Mode.live,
+              readNote: (_) async => text,
+              writeNote: (_, _) async {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      )..placeCaret(caret);
+      await tester.pump();
+      state.showContextMenu();
+      await tester.pump();
+      return state;
+    }
+
+    double top(WidgetTester tester, String key) =>
+        tester.getTopLeft(find.byKey(Key(key))).dy;
+
+    both('links, then the groups, then the clipboard, greyed out in place', (
+      tester,
+      mode,
+    ) async {
+      await open(tester, mode, 'hello', caret: 2);
+      expect(top(tester, 'menu-link'), lessThan(top(tester, 'menu-format')));
+      expect(
+        top(tester, 'menu-insert'),
+        lessThan(top(tester, 'context-paste')),
+      );
+      // Nothing is selected: Cut and Copy are there, and do nothing.
+      final cut = tester.widget<InkWell>(find.byKey(const Key('context-cut')));
+      expect(cut.onTap, isNull);
+      // And the toolbar's flat list is not.
+      expect(find.byKey(const Key('context-bold')), findsNothing);
+    }, variant: _desktop);
+
+    both('Paragraph › Heading 2, and Body takes it off', (tester, mode) async {
+      final state = await open(tester, mode, 'titolo', caret: 2);
+      await tester.tap(find.byKey(const Key('menu-paragraph')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('menu-heading-2')));
+      await tester.pumpAndSettle();
+      expect(state.widget.buffer.text, '## titolo');
+      state.showContextMenu();
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('menu-paragraph')));
+      await tester.pump();
+      final lit = tester.widget<Semantics>(
+        find
+            .ancestor(
+              of: find.byKey(const Key('menu-heading-2')),
+              matching: find.byType(Semantics),
+            )
+            .first,
+      );
+      expect(lit.properties.toggled, isTrue, reason: 'the level it is');
+      await tester.tap(find.byKey(const Key('menu-body')));
+      await tester.pumpAndSettle();
+      expect(state.widget.buffer.text, 'titolo');
+    }, variant: _desktop);
+
+    both('Insert › Footnote cites and defines the next number', (
+      tester,
+      mode,
+    ) async {
+      final state = await open(
+        tester,
+        mode,
+        'Una frase[^1].\nche va avanti.\n\nAltro.\n\n[^1]: prima',
+        caret: 'Una frase[^1].'.length,
+      );
+      await tester.tap(find.byKey(const Key('menu-insert')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('menu-footnote')));
+      await tester.pumpAndSettle();
+      expect(
+        state.widget.buffer.text,
+        'Una frase[^1].[^2]\nche va avanti.\n\n[^2]: \n\nAltro.\n\n'
+        '[^1]: prima',
+      );
+      expect(
+        state.selection.extent,
+        state.widget.buffer.text.indexOf('[^2]: ') + 6,
+        reason: 'the caret is on the definition, to write it',
+      );
+    }, variant: _desktop);
+
+    testWidgets('on a phone the groups open as sheets', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NoteView(
+              path: '/n/a.md',
+              showLineNumbers: false,
+              autofocusEditor: true,
+              toolbarTop: true,
+              unifiedMarkdown: true,
+              showWysiwyg: true,
+              readNote: (_) async => 'hello world',
+              writeNote: (_, _) async {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+      await tester.longPressAt(
+        tester.getTopLeft(find.byType(MarkdownSurface)) + const Offset(30, 18),
+      );
+      await tester.pumpAndSettle();
+      // The groups are in the bar's overflow.
+      if (find.byKey(const Key('menu-format')).evaluate().isEmpty) {
+        await tester.tap(find.byIcon(Icons.more_vert).last);
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.byKey(const Key('menu-format')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('menu-bold')));
+      await tester.pumpAndSettle();
+      expect(state.widget.buffer.text, '**hello** world');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 }

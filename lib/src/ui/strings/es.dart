@@ -544,6 +544,32 @@ final class SpanishStrings extends Strings {
   @override
   String get cheatTemplates => 'Marcadores de plantillas';
   @override
+  String get menuAddLink => 'Añadir enlace';
+  @override
+  String get menuAddExternalLink => 'Añadir enlace externo';
+  @override
+  String get menuFormat => 'Formato';
+  @override
+  String get menuParagraph => 'Párrafo';
+  @override
+  String get menuInsert => 'Insertar';
+  @override
+  String get menuBody => 'Texto normal';
+  @override
+  String get formatSubscript => 'Subíndice';
+  @override
+  String get formatInlineCode => 'Código';
+  @override
+  String get insertFootnote => 'Nota al pie';
+  @override
+  String get insertRule => 'Línea horizontal';
+  @override
+  String get insertCodeBlock => 'Bloque de código';
+  @override
+  String get insertMathBlock => 'Bloque matemático';
+  @override
+  String get menuHeadingWord => 'Encabezado';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

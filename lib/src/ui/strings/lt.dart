@@ -544,6 +544,32 @@ final class LithuanianStrings extends Strings {
   @override
   String get cheatTemplates => 'Šablonų vietos rezervavimo ženklai';
   @override
+  String get menuAddLink => 'Pridėti nuorodą';
+  @override
+  String get menuAddExternalLink => 'Pridėti išorinę nuorodą';
+  @override
+  String get menuFormat => 'Formatas';
+  @override
+  String get menuParagraph => 'Pastraipa';
+  @override
+  String get menuInsert => 'Įterpti';
+  @override
+  String get menuBody => 'Pagrindinis tekstas';
+  @override
+  String get formatSubscript => 'Apatinis indeksas';
+  @override
+  String get formatInlineCode => 'Kodas';
+  @override
+  String get insertFootnote => 'Išnaša';
+  @override
+  String get insertRule => 'Horizontali linija';
+  @override
+  String get insertCodeBlock => 'Kodo blokas';
+  @override
+  String get insertMathBlock => 'Matematikos blokas';
+  @override
+  String get menuHeadingWord => 'Antraštė';
+  @override
   String get toolbarHeading => 'Antraštė';
   @override
   String get toolbarList => 'Sąrašas';

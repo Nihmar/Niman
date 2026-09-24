@@ -542,6 +542,32 @@ final class SwedishStrings extends Strings {
   @override
   String get cheatTemplates => 'Mallplatshållare';
   @override
+  String get menuAddLink => 'Lägg till länk';
+  @override
+  String get menuAddExternalLink => 'Lägg till extern länk';
+  @override
+  String get menuFormat => 'Format';
+  @override
+  String get menuParagraph => 'Stycke';
+  @override
+  String get menuInsert => 'Infoga';
+  @override
+  String get menuBody => 'Brödtext';
+  @override
+  String get formatSubscript => 'Nedsänkt';
+  @override
+  String get formatInlineCode => 'Kod';
+  @override
+  String get insertFootnote => 'Fotnot';
+  @override
+  String get insertRule => 'Horisontell linje';
+  @override
+  String get insertCodeBlock => 'Kodblock';
+  @override
+  String get insertMathBlock => 'Matematikblock';
+  @override
+  String get menuHeadingWord => 'Rubrik';
+  @override
   String get toolbarHeading => 'Rubrik';
   @override
   String get toolbarList => 'Lista';

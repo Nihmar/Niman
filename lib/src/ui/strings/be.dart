@@ -542,6 +542,32 @@ final class BelarusianStrings extends Strings {
   @override
   String get cheatTemplates => 'Запаўняльнікі шаблонаў';
   @override
+  String get menuAddLink => 'Дадаць спасылку';
+  @override
+  String get menuAddExternalLink => 'Дадаць знешнюю спасылку';
+  @override
+  String get menuFormat => 'Фармат';
+  @override
+  String get menuParagraph => 'Абзац';
+  @override
+  String get menuInsert => 'Уставіць';
+  @override
+  String get menuBody => 'Звычайны тэкст';
+  @override
+  String get formatSubscript => 'Ніжні індэкс';
+  @override
+  String get formatInlineCode => 'Код';
+  @override
+  String get insertFootnote => 'Зноска';
+  @override
+  String get insertRule => 'Гарызантальная лінія';
+  @override
+  String get insertCodeBlock => 'Блок кода';
+  @override
+  String get insertMathBlock => 'Матэматычны блок';
+  @override
+  String get menuHeadingWord => 'Загаловак';
+  @override
   String get toolbarHeading => 'Загаловак';
   @override
   String get toolbarList => 'Спіс';

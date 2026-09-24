@@ -317,13 +317,30 @@ in the window's title.
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
 in the note's bar offers the same actions.
 
-The same formatting is also on the **context menu**: right-click in either
-editor (long-press on a phone). Under cut, copy and paste come the toolbar's
-buttons, with the same icons, names and grouping, and a format that is
-on at the caret reads as on, just as it does on the toolbar. They apply
-to the selection, so a word picked with the mouse can be made bold where
-it is. The toolbar stays; the menu is a second way in. It lists the
-buttons you keep on the toolbar, in the same order.
+The same formatting is also on the **context menu**: right-click in the
+editor (long-press on a phone). With the unified engine it is grouped by
+what you are doing, as Obsidian's is:
+
+- the spelling's suggestions for a misspelled word, and a table's
+  **Row ›**, **Column ›** and sorts on a table's cell, first;
+- **Add link** (`[[…]]`) and **Add external link** (`[…](https://)`);
+- **Format ›** — bold, italic, strikethrough, underline, superscript,
+  subscript, code — **Paragraph ›** — headings 1 to 6, **Body** (the
+  heading taken off), bulleted, numbered and checkbox lists, quote — and
+  **Insert ›** — footnote, table, horizontal rule, code block, math
+  block, image;
+- the clipboard last: Cut, Copy, Paste, Select all. What cannot run now
+  (Cut with nothing selected) stays in its place, greyed out, so nothing
+  moves under the pointer.
+
+On the desktop a submenu opens in the menu's place, with the way back at
+its top; on a phone the groups sit in the selection bar's overflow and
+open as a sheet. What is on at the caret reads as on, as on the toolbar
+— the heading level the line has, the format the word is in.
+**Insert › Footnote** cites the next free number at the caret and
+writes its definition under the paragraph, the caret on it to write the
+note. The legacy editors keep the flat menu: under cut, copy and paste
+the toolbar's buttons, in the toolbar's order.
 
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item

@@ -511,6 +511,32 @@ final class ChineseStrings extends Strings {
   @override
   String get cheatTemplates => '模板占位符';
   @override
+  String get menuAddLink => '添加链接';
+  @override
+  String get menuAddExternalLink => '添加外部链接';
+  @override
+  String get menuFormat => '格式';
+  @override
+  String get menuParagraph => '段落';
+  @override
+  String get menuInsert => '插入';
+  @override
+  String get menuBody => '正文';
+  @override
+  String get formatSubscript => '下标';
+  @override
+  String get formatInlineCode => '代码';
+  @override
+  String get insertFootnote => '脚注';
+  @override
+  String get insertRule => '水平线';
+  @override
+  String get insertCodeBlock => '代码块';
+  @override
+  String get insertMathBlock => '数学块';
+  @override
+  String get menuHeadingWord => '标题';
+  @override
   String get toolbarHeading => '标题';
   @override
   String get toolbarList => '列表';
