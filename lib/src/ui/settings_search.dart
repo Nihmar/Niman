@@ -15,9 +15,9 @@ import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
-import 'package:niman/src/ui/settings_themes.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
+import 'package:niman/src/ui/theme/theme_row.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 import 'package:niman/src/ui/trash.dart';
 
@@ -125,7 +125,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       title: AppStrings.themeTitle,
       area: themes,
       rowKey: SettingsKeys.theme,
-      value: () async => SettingsThemesScreen.themeName(await controller.theme),
+      value: () async => themeLabel(await controller.theme),
       areaId: SettingsAreaId.themes,
       open: () => pushThemes(SettingsKeys.theme),
     ),

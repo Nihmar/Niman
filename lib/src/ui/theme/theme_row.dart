@@ -8,9 +8,26 @@
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
+
+/// What a shipped palette reads as, in the list, the search and the dialog
+/// that starts a new theme from it.
+String builtinThemeLabel(AppPalette palette) => switch (palette) {
+  AppPalette.system => AppStrings.themePaletteSystem,
+  AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
+  AppPalette.solarized => AppStrings.themePaletteSolarized,
+  AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
+  AppPalette.niman => AppStrings.themePaletteNiman,
+};
+
+/// What [theme] reads as: a shipped palette's name, or the theme's own.
+String themeLabel(AppTheme theme) => switch (theme) {
+  BuiltinAppTheme(:final palette) => builtinThemeLabel(palette),
+  CustomAppTheme(:final theme) => theme.name,
+};
 
 /// What a theme row's menu can do.
 enum ThemeRowAction {
@@ -32,10 +49,9 @@ enum ThemeRowAction {
 
 /// One theme the Themes page lists.
 final class ThemeRow extends StatelessWidget {
-  /// Creates the row for [label]'s [theme].
+  /// Creates the row for [theme].
   const new({
     required this.theme,
-    required this.label,
     required this.selected,
     required this.onTap,
     required this.onAction,
@@ -44,9 +60,6 @@ final class ThemeRow extends StatelessWidget {
 
   /// The theme itself.
   final AppTheme theme;
-
-  /// What it reads as: a shipped palette's name, or the theme's own.
-  final String label;
 
   /// Whether the app is wearing it.
   final bool selected;
@@ -78,7 +91,7 @@ final class ThemeRow extends StatelessWidget {
             color: selected ? scheme.primary : scheme.onSurfaceVariant,
             semanticLabel: selected ? AppStrings.themesInUse : null,
           ),
-          title: Text(label),
+          title: Text(themeLabel(theme)),
           subtitle: _ThemeSwatches(theme: theme),
           trailing: PopupMenuButton<ThemeRowAction>(
             key: Key('theme-menu-${theme.id}'),

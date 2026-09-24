@@ -4,16 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/theme.dart';
-import 'package:niman/src/core/theme_generator.dart';
-import 'package:niman/src/core/theme_transfer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/theme/palettes.dart';
-import 'package:niman/src/ui/theme/theme_dialogs.dart';
-import 'package:niman/src/ui/theme/theme_editor_screen.dart';
+import 'package:niman/src/ui/theme/theme_actions.dart';
 import 'package:niman/src/ui/theme/theme_files.dart';
 import 'package:niman/src/ui/theme/theme_row.dart';
 
@@ -23,7 +19,9 @@ import 'package:niman/src/ui/theme/theme_row.dart';
 ///
 /// One page owns the app's look, brightness included: the two choices
 /// answer the same question, and splitting them across two screens made
-/// the palette row the only way to see a theme's colors.
+/// the palette row the only way to see a theme's colors. What can be done
+/// to a theme lives in [ThemeActions]; this is the list, the choice and
+/// the marks.
 final class SettingsThemesScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
   ///
@@ -55,22 +53,6 @@ final class SettingsThemesScreen extends StatefulWidget {
 
   /// The Import row's key.
   static const Key importTheme = Key('theme-import-action');
-
-  /// What a shipped palette reads as, in the list, the search and the
-  /// dialog that starts a new theme from it.
-  static String builtinName(AppPalette palette) => switch (palette) {
-    AppPalette.system => AppStrings.themePaletteSystem,
-    AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
-    AppPalette.solarized => AppStrings.themePaletteSolarized,
-    AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
-    AppPalette.niman => AppStrings.themePaletteNiman,
-  };
-
-  /// What [theme] reads as: a shipped palette's name, or the theme's own.
-  static String themeName(AppTheme theme) => switch (theme) {
-    BuiltinAppTheme(:final palette) => builtinName(palette),
-    CustomAppTheme(:final theme) => theme.name,
-  };
 
   @override
   State<SettingsThemesScreen> createState() => _SettingsThemesScreenState();
@@ -155,7 +137,7 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
   Set<String> get _takenNames => {
     for (final theme in _custom) theme.name.toLowerCase(),
     for (final palette in AppPalette.values)
-      SettingsThemesScreen.builtinName(palette).toLowerCase(),
+      builtinThemeLabel(palette).toLowerCase(),
   };
 
   /// Every theme the page lists: the palettes the app ships, in their own
@@ -165,215 +147,18 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
     for (final theme in _custom) CustomAppTheme(theme),
   ];
 
-  /// Writes [theme] out into a file the user names.
-  Future<void> _export(AppTheme theme) async {
-    if (theme is! CustomAppTheme) return;
-    final custom = theme.theme;
-    try {
-      final where = await widget.saveThemeFile(
-        name: custom.name,
-        json: encodeThemeFile(
-          name: custom.name,
-          day: custom.day,
-          night: custom.night,
-        ),
-      );
-      if (where == null) return; // Dismissed: nothing to report.
-      _report(AppStrings.themeExportDone(where));
-    } on Object catch (error) {
-      _report(AppStrings.themeFileFailed('$error'));
-    }
-  }
-
-  /// Reads a theme file and stores what it holds, worn like the rest.
-  ///
-  /// A name the list already answers to is refused with the chance to
-  /// import the theme under another one, typed on the spot: two themes
-  /// cannot answer to one name.
-  Future<void> _import() async {
-    final String? source;
-    try {
-      source = await widget.pickThemeFile();
-    } on Object catch (error) {
-      _report(AppStrings.themeFileFailed('$error'));
-      return;
-    }
-    if (source == null || !mounted) return;
-    final result = decodeThemeFile(source);
-    if (result is ThemeFileRefused) {
-      await _refuseImport(result.problem);
-      return;
-    }
-    final read = result as ThemeFileRead;
-    var name = read.name;
-    if (_takenNames.contains(name.toLowerCase())) {
-      final chosen = await showThemeNameDialog(
-        context,
-        title: AppStrings.themeImport,
-        initial: name,
-        takenNames: _takenNames,
-        description: AppStrings.themeNameTaken,
-      );
-      if (chosen == null || !mounted) return;
-      name = chosen;
-    }
-    await _save(
-      CustomTheme(
-        id: newCustomThemeId(),
-        name: name,
-        day: read.day,
-        night: read.night,
-      ),
-    );
-  }
-
-  /// Says why a file could not be read into a theme.
-  Future<void> _refuseImport(ThemeImportProblem problem) async {
-    final reason = switch (problem.kind) {
-      ThemeImportKind.notATheme => AppStrings.themeImportInvalid,
-      ThemeImportKind.newerVersion => AppStrings.themeImportVersion(
-        problem.version ?? 0,
-      ),
-      ThemeImportKind.badRole => AppStrings.themeImportBadRole(
-        problem.role ?? '',
-      ),
-    };
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppStrings.themeImport),
-        content: Text(reason),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppStrings.actionOk),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Says what happened, where the eye already is.
-  void _report(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  /// Asks for a new theme and stores it, worn.
-  Future<void> _newTheme() async {
-    final request = await showNewThemeDialog(
-      context,
-      sources: [
-        for (final theme in _themes)
-          (theme: theme, label: SettingsThemesScreen.themeName(theme)),
-      ],
-      takenNames: _takenNames,
-    );
-    if (request == null || !mounted) return;
-    final from = request.from;
-    await _save(
-      from == null
-          ? randomCustomTheme(id: newCustomThemeId(), name: request.name)
-          : customThemeCopyOf(from, id: newCustomThemeId(), name: request.name),
-    );
-  }
-
-  /// Copies [theme] into a theme of the user's own, named after it.
-  Future<void> _duplicate(AppTheme theme) async {
-    await _save(
-      customThemeCopyOf(
-        theme,
-        id: newCustomThemeId(),
-        name: uniqueThemeName(
-          SettingsThemesScreen.themeName(theme),
-          _takenNames,
-        ),
-      ),
-    );
-  }
-
-  /// Stores [theme] and wears it: making one and copying one both end with
-  /// the new theme in front of the user, where it can be looked at.
-  Future<void> _save(CustomTheme theme) async {
-    await widget.controller.saveCustomTheme(theme);
-    await _setTheme(CustomAppTheme(theme));
-    await _reload();
-  }
-
-  /// Asks for another name and stores it.
-  Future<void> _rename(AppTheme theme) async {
-    if (theme is! CustomAppTheme) return;
-    final taken = _takenNames..remove(theme.theme.name.toLowerCase());
-    final name = await showThemeNameDialog(
-      context,
-      title: AppStrings.actionRename,
-      initial: theme.theme.name,
-      takenNames: taken,
-    );
-    if (name == null || !mounted) return;
-    await widget.controller.renameCustomTheme(theme.theme.id, name);
-    await _reload();
-  }
-
-  /// Asks first, then deletes [theme]; the theme in use falls back to the
-  /// app's own colors when the deleted one was it.
-  Future<void> _delete(AppTheme theme) async {
-    if (theme is! CustomAppTheme) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppStrings.actionDelete),
-        content: Text(AppStrings.themeDeleteBody(theme.theme.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.actionDelete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-    await widget.controller.deleteCustomTheme(theme.theme.id);
-    await _reload();
-  }
-
-  /// Opens the editor on [theme]; the app wears the draft while it is
-  /// open, and the rows come back re-read whatever came of it.
-  Future<void> _edit(AppTheme theme) async {
-    if (theme is! CustomAppTheme) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<CustomTheme>(
-        builder: (context) => ThemeEditorScreen(
-          controller: widget.controller,
-          theme: theme.theme,
-        ),
-      ),
-    );
-    await _reload();
-  }
-
-  Future<void> _act(ThemeRowAction action, AppTheme theme) async {
-    switch (action) {
-      case ThemeRowAction.edit:
-        await _edit(theme);
-      case ThemeRowAction.duplicate:
-        await _duplicate(theme);
-      case ThemeRowAction.rename:
-        await _rename(theme);
-      case ThemeRowAction.export:
-        await _export(theme);
-      case ThemeRowAction.delete:
-        await _delete(theme);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Built with the widget's own file calls on every build, so a caller
+    // that hands in different ones gets them.
+    final actions = ThemeActions(
+      controller: widget.controller,
+      reload: _reload,
+      themes: () => _themes,
+      takenNames: () => _takenNames,
+      saveThemeFile: widget.saveThemeFile,
+      pickThemeFile: widget.pickThemeFile,
+    );
     return SettingsAreaShell(
       title: AppStrings.settingsSectionThemes,
       controller: widget.controller,
@@ -405,20 +190,20 @@ final class _SettingsThemesScreenState extends State<SettingsThemesScreen> {
                   ThemeRow(
                     key: SettingsKeys.themeRow(theme.id),
                     theme: theme,
-                    label: SettingsThemesScreen.themeName(theme),
                     selected: theme == _theme,
                     onTap: () => unawaited(_setTheme(theme)),
-                    onAction: (action) => unawaited(_act(action, theme)),
+                    onAction: (action) =>
+                        unawaited(actions.act(context, action, theme)),
                   ),
                 SettingsActionRow(
                   key: SettingsThemesScreen.newTheme,
                   title: AppStrings.themeNewTitle,
-                  onTap: () => unawaited(_newTheme()),
+                  onTap: () => unawaited(actions.newTheme(context)),
                 ),
                 SettingsActionRow(
                   key: SettingsThemesScreen.importTheme,
                   title: AppStrings.themeImport,
-                  onTap: () => unawaited(_import()),
+                  onTap: () => unawaited(actions.import(context)),
                 ),
               ],
             ),
