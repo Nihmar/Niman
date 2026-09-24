@@ -1,8 +1,13 @@
 # Unified Markdown surface — research and design
 
-**Status:** research dossier and design proposal. No code yet.
+**Status:** built. The research and design below were written first
+(2026-09-20); every phase of [§10.3](#103-the-stages) has since landed in code,
+and the old surfaces are gone (phase 5, 2026-09-24). What is still owed is
+almost all verification on a device, listed in
+[§10.6](#106-what-is-still-owed). The sections that say what *will* be built
+are kept as written; each phase's own status notes say what was.
 **Branch:** `feat/unified-markdown-surface` (cut from remote `main` @ `16691f7`).
-**Date:** 2026-09-20.
+**Date:** 2026-09-20 (design); 2026-09-24 (status).
 **Scope:** replace the source editor, the WYSIWYG editor and the preview with
 one widget, written from scratch in pure Flutter/Dart, uniform in
 functionality, performance and visual rendering, supporting CommonMark, GitHub
@@ -166,6 +171,7 @@ method.
   - [10.3 The stages](#103-the-stages)
   - [10.4 What to spike first, before committing to the plan](#104-what-to-spike-first-before-committing-to-the-plan)
   - [10.5 How this lands in the repo's workflow](#105-how-this-lands-in-the-repos-workflow)
+  - [10.6 What is still owed](#106-what-is-still-owed)
 - [11. Risks, alternatives and open questions](#11-risks-alternatives-and-open-questions)
   - [11.1 The risks, ranked by what they would cost](#111-the-risks-ranked-by-what-they-would-cost)
   - [11.2 Alternatives considered, and why they lose](#112-alternatives-considered-and-why-they-lose)
@@ -11458,6 +11464,13 @@ typewriter mode and folding as missing from the unified source pane, and they
 are all in (see "The rest of the contract", above). That list is corrected in
 this commit.
 
+**Update, 2026-09-24.** The deliverable is reached: phase 5 deleted
+`re_editor` and the engine switch, so `editorKind: source` *is* the unified
+surface, for every library, with no setting to reach it. The debts that
+remain — the second IME, the screen readers, the device round on the huge
+note — are device checks, and they are listed with the rest in
+[§10.6](#106-what-is-still-owed).
+
 Phase 4 therefore starts on a surface that is *usable and wrong in one known
 place*, not on a finished one; and phase 4's own work — `live` mode — does not
 close item 3 either, because `live` is the same surface with the markers hidden.
@@ -11646,9 +11659,10 @@ What the design asks for next, in the order it names them:
   refuses — and it did, on the first run, in two tests that had nothing to do
   with toolbars.
 - What is still owed by this phase, in the order it should be taken:
-  1. **`live` as the default WYSIWYG**, the way `source` is not yet the default
-     editor: the flag is on, but a library that has not switched it still opens
-     Quill.
+  1. ~~**`live` as the default WYSIWYG**, the way `source` is not yet the
+     default editor: the flag is on, but a library that has not switched it
+     still opens Quill.~~ **Done by phase 5** (2026-09-24): Quill and the flag
+     are gone, and `editorKind: wysiwyg` is `live` for every library.
   2. **The parity run the criterion asks for**: the same widget tests over both
      unified modes, rather than a live-mode copy of each. **Done**: every
      surface test that ran in `source` only now runs in both modes. Seven
@@ -11708,7 +11722,8 @@ What the design asks for next, in the order it names them:
        both modes.
   3. **The device round**: policy A at 200 KB and on `Geometria 1.md`, per line
      and per word, no visible thrash — which is the only criterion on this list
-     that needs a phone rather than a host.
+     that needs a phone rather than a host. Still owed; see
+     [§10.6](#106-what-is-still-owed).
   4. **The row-wise reveal, reconsidered and dropped.** It was on this list as
      "the refinement that follows a wrap", on the reading of policy A that a
      wrapped paragraph should show the syntax of the row the caret is on. With
@@ -11866,6 +11881,10 @@ the surface owns, which is what `preview/math_*` is. Removing them is a
 project of its own, not a deletion, and its fonts stay the package's (D8
 holds: nothing about a note's appearance changes).
 
+Of the exit criteria, the Windows build is left to CI (a Windows host builds
+too slowly to do it per commit, `AGENTS.md`), and the `CHANGELOG.md` entry is
+written with the release that ships it, as every entry is.
+
 ## 10.4 What to spike first, before committing to the plan
 
 Six unknowns can invalidate the design. Each should be answered by a
@@ -12015,6 +12034,60 @@ throwaway branch (the repo has done this before — the `spike/*` branches in
 
 
 ---
+
+## 10.6 What is still owed
+
+*As of 2026-09-24, after phase 5.* The code of every phase is in; what follows
+is what has not been checked, and where it came from. Almost all of it needs a
+device, which is why it is a list and not a commit. With the engine switch
+gone, most of it is checked simply by using the app — the unified surface is
+the only one there is — and a finding goes into this list or into an issue.
+
+**Input and accessibility (phase 3, risk K9)**
+
+- A **second Android IME** besides Gboard, composition and autocorrect
+  included.
+- On Android, the IME events the probe never saw: **Backspace**, **Enter** and
+  the platform **closing the connection** (spike 2). The delete path has unit
+  tests; the device has not sent one.
+- **Windows' IME**, and on Linux a recorded answer for **fcitx / ibus** — in
+  scope, or out of it as a decision.
+- **TalkBack** on Android and a **desktop screen reader**: the semantics exist
+  and are held headless (`source_semantics_test.dart`); whether they are usable
+  is what a headless test cannot say.
+- **Platform fonts** (spikes 1 and 2): that a hidden marker has zero advance
+  and that the caret rectangle is right with Android's, Linux's and Windows'
+  fonts, a fallback font and a real bidi paragraph. Held for the test font by
+  `zero_size_run_test.dart` and `caret_rectangle_test.dart`.
+
+**Performance, on a device (phases 3 and 4)**
+
+- **The huge note** (`huge-notes.md` item 3): the bounded edit — a line or two
+  inside a huge block, a 4 096-line budget for an edit that changes the rest
+  of the note — measured on the host; the device round on `Quicknote.md` is
+  owed.
+- **The reveal** (phase 4): policy A at 200 KB and on `Geometria 1.md`, per
+  line and per word, with no visible thrash; and the geometry note opening and
+  editing in `live` on a phone.
+- **Typing latency end to end** on Android, key event to painted frame
+  (spike 7) — never measured.
+- **Maths on Windows**: the 4× supersampled raster (`math_raster.dart`) is
+  enabled on Windows as on Linux, and has been looked at on Linux only.
+
+**Decided, not owed**
+
+- **KaTeX stays** (phase 5's exception, §8.8.1). Spike 5, the math goldens,
+  is the acceptance test for a typesetter of Niman's own and waits with it.
+- **The export seam exists** (`markdown_export.dart`, held by
+  `markdown_export_test.dart`); what spike 8 asked — the eager cost of
+  `Geometria 1.md` laid out offscreen — is unmeasured, and the export itself
+  (pages, margins) was never part of this plan.
+
+**Outside the plan, noticed on the way**
+
+- `==highlight==` and callouts (`> [!note]`) are not read by the engine: they
+  show as their source, and the cheatsheet and the menus leave them out rather
+  than teach something that does not render.
 
 # 11. Risks, alternatives and open questions
 
