@@ -28,10 +28,12 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/history/history_store.dart';
@@ -211,6 +213,19 @@ void _settle(Completer<NoteWriteResult?> answer, Object? message) {
   }
 }
 
+/// Receives the one digest a chunked hash makes, when it is closed.
+final class _DigestSink implements Sink<Digest> {
+  new(this._take);
+
+  final void Function(Digest digest) _take;
+
+  @override
+  void add(Digest data) => _take(data);
+
+  @override
+  void close() {}
+}
+
 /// Told to the writer when the conversation is over: with the note already
 /// ended, the save is renamed into place; without it, the save is abandoned
 /// and its temp file goes.
@@ -320,8 +335,18 @@ final class _Conversation {
       return;
     }
     sink.add(message);
+    _digest.add(message);
     _bytes += message.length;
   }
+
+  /// The digest of the slices written, made as they are: the reindex behind
+  /// the save takes it rather than reading the note back to hash it.
+  late final ByteConversionSink _digest = sha256.startChunkedConversion(
+    _DigestSink((digest) => _digested = digest),
+  );
+
+  /// What [_digest] made, once it is closed.
+  late final Digest _digested;
 
   /// The port closed: whoever was sending the slices has finished with it,
   /// and nothing more follows.
@@ -369,6 +394,7 @@ final class _Conversation {
       _sink = sink;
       for (final slice in _early) {
         sink.add(slice);
+        _digest.add(slice);
         _bytes += slice.length;
       }
       _early.clear();
@@ -389,6 +415,7 @@ final class _Conversation {
       }
       await temp.rename(start.abs);
       _temp = null;
+      _digest.close();
       _answers!.send((
         bytes: _bytes,
         created: _created,
@@ -396,6 +423,8 @@ final class _Conversation {
         writeMs: clock.elapsedMilliseconds,
         snapshot: outcome,
         snapshotError: snapshotError,
+        sha256: _digested.toString(),
+        modified: File(start.abs).statSync().modified,
       ));
     } on Object catch (error, stack) {
       try {

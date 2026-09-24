@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -60,6 +61,21 @@ void main() {
     const text = '# Title\n\none\ntwo\nthree\nfour\nfive';
     await writer.save('Inbox/Deep/Note.md', producerOf(text));
     expect(read('Inbox/Deep/Note.md'), text);
+  });
+
+  test('the digest is made of the slices, as they are written', () async {
+    const text = '# Title\n\none\ntwo\nthree\nfour\nfive\nsix';
+    final result = await saveNoteStream(
+      root: root.path,
+      rel: 'Hashed.md',
+      produce: producerOf(text, linesPerSlice: 3),
+    );
+    final bytes = File(p.join(root.path, 'Hashed.md')).readAsBytesSync();
+    expect(result!.sha256, sha256.convert(bytes).toString());
+    expect(
+      result.modified,
+      File(p.join(root.path, 'Hashed.md')).lastModifiedSync(),
+    );
   });
 
   test('an empty note still writes a file', () async {
