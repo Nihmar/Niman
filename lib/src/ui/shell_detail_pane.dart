@@ -9,6 +9,7 @@ import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -200,7 +201,12 @@ final class ShellDetailPane extends StatelessWidget {
     );
   }
 
-  Widget _view(String root, DetailTab tab) => NoteView(
+  Widget _view(String root, DetailTab tab) => isShownAttachment(tab.path)
+      // A picture or a PDF, shown rather than read as a note.
+      ? AttachmentView(key: tab.key, path: p.join(root, tab.path))
+      : _noteView(root, tab);
+
+  Widget _noteView(String root, DetailTab tab) => NoteView(
     // On the view itself, so the dock reaches its state (#175), and a tab
     // moved to the other pane takes its editor along.
     key: tab.key,

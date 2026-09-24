@@ -1601,6 +1601,12 @@ final class TurkishStrings extends Strings {
   String get openFileMissing => 'Bu notun dosyası diskte yok';
   @override
   String get openFileFailed => 'Bu not Niman dışında açılamadı';
+  @override
+  String get attachmentUnreadable => 'Bu dosya gösterilemedi.';
+  @override
+  String get attachmentMissing => 'Bu dosya diskte yok.';
+  @override
+  String get attachmentOpenFailed => 'Bu dosya Niman dışında açılamadı.';
 
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';

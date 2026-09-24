@@ -1626,6 +1626,12 @@ final class AlbanianStrings extends Strings {
   String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
   @override
   String get openFileFailed => 'Ky shënim nuk u hap dot jashtë Niman';
+  @override
+  String get attachmentUnreadable => 'Ky skedar nuk mund të shfaqej.';
+  @override
+  String get attachmentMissing => 'Ky skedar nuk ndodhet në disk.';
+  @override
+  String get attachmentOpenFailed => 'Ky skedar nuk u hap dot jashtë Niman.';
 
   @override
   String get movedToTrash => 'U zhvendos në kosh';

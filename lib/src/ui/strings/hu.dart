@@ -1627,6 +1627,13 @@ final class HungarianStrings extends Strings {
   @override
   String get openFileFailed =>
       'A jegyzetet nem sikerült a Nimanon kívül megnyitni';
+  @override
+  String get attachmentUnreadable => 'Ezt a fájlt nem sikerült megjeleníteni.';
+  @override
+  String get attachmentMissing => 'Ez a fájl nincs a lemezen.';
+  @override
+  String get attachmentOpenFailed =>
+      'A fájlt nem sikerült a Nimanon kívül megnyitni.';
 
   @override
   String get movedToTrash => 'A kukába került';

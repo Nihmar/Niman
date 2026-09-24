@@ -1666,6 +1666,14 @@ final class GreekStrings extends Strings {
   @override
   String get openFileFailed =>
       'Δεν ήταν δυνατό το άνοιγμα της σημείωσης εκτός του Niman';
+  @override
+  String get attachmentUnreadable =>
+      'Δεν ήταν δυνατή η εμφάνιση αυτού του αρχείου.';
+  @override
+  String get attachmentMissing => 'Αυτό το αρχείο δεν βρίσκεται στον δίσκο.';
+  @override
+  String get attachmentOpenFailed =>
+      'Δεν ήταν δυνατό το άνοιγμα αυτού του αρχείου εκτός του Niman.';
 
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';

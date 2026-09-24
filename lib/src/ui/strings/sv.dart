@@ -1619,6 +1619,13 @@ final class SwedishStrings extends Strings {
   @override
   String get openFileFailed =>
       'Det gick inte att öppna anteckningen utanför Niman';
+  @override
+  String get attachmentUnreadable => 'Den här filen kunde inte visas.';
+  @override
+  String get attachmentMissing => 'Den här filen finns inte på disken.';
+  @override
+  String get attachmentOpenFailed =>
+      'Det gick inte att öppna filen utanför Niman.';
 
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';

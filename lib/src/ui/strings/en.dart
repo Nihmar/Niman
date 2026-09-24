@@ -1598,6 +1598,12 @@ final class EnglishStrings extends Strings {
   String get openFileMissing => 'This note’s file is not on disk';
   @override
   String get openFileFailed => 'Could not open this note outside Niman';
+  @override
+  String get attachmentUnreadable => 'This file could not be shown.';
+  @override
+  String get attachmentMissing => 'This file is not on disk.';
+  @override
+  String get attachmentOpenFailed => 'Could not open this file outside Niman.';
 
   @override
   String get movedToTrash => 'Moved to trash';

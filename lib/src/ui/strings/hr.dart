@@ -1613,6 +1613,13 @@ final class CroatianStrings extends Strings {
   @override
   String get openFileFailed =>
       'Ovu napomenu nije bilo moguće otvoriti izvan Nimana';
+  @override
+  String get attachmentUnreadable => 'Ova se datoteka nije mogla prikazati.';
+  @override
+  String get attachmentMissing => 'Ova datoteka nije na disku.';
+  @override
+  String get attachmentOpenFailed =>
+      'Ovu datoteku nije bilo moguće otvoriti izvan Nimana.';
 
   @override
   String get movedToTrash => 'Premješteno u korpu';

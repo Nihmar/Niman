@@ -1614,6 +1614,13 @@ final class LithuanianStrings extends Strings {
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override
   String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';
+  @override
+  String get attachmentUnreadable => 'Nepavyko parodyti šio failo.';
+  @override
+  String get attachmentMissing => 'Šio failo diske nėra.';
+  @override
+  String get attachmentOpenFailed =>
+      'Nepavyko atverti šio failo už Niman ribų.';
 
   @override
   String get movedToTrash => 'Perkelta į šiukšlinę';

@@ -1588,6 +1588,12 @@ final class HindiStrings extends Strings {
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override
   String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';
+  @override
+  String get attachmentUnreadable => 'यह फ़ाइल दिखाई नहीं जा सकी।';
+  @override
+  String get attachmentMissing => 'यह फ़ाइल डिस्क पर नहीं है।';
+  @override
+  String get attachmentOpenFailed => 'यह फ़ाइल Niman के बाहर नहीं खुल सकी।';
 
   @override
   String get movedToTrash => 'ट्रैश में गया';

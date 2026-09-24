@@ -1615,6 +1615,13 @@ final class BelarusianStrings extends Strings {
   String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
   @override
   String get openFileFailed => 'Не ўдалося адкрыць гэтую заўвагу па-за Niman';
+  @override
+  String get attachmentUnreadable => 'Не ўдалося паказаць гэты файл.';
+  @override
+  String get attachmentMissing => 'Гэтага файла няма на дыску.';
+  @override
+  String get attachmentOpenFailed =>
+      'Не ўдалося адкрыць гэты файл па-за Niman.';
 
   @override
   String get movedToTrash => 'Перамешчана ў кошык';
