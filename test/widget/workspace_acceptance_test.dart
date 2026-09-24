@@ -27,10 +27,15 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_window_controller.dart';
 
-const _notes = {'/lib/a.md': 'alpha text', '/lib/b.md': 'beta text'};
+// The pane joins the root and a tab with `p.join`: the host's separator.
+final Map<String, String> _notes = {
+  p.join('/lib', 'a.md'): 'alpha text',
+  p.join('/lib', 'b.md'): 'beta text',
+};
 
 /// The deck showing [active] of a.md and b.md, both mounted.
 Widget _deck(
@@ -224,7 +229,7 @@ void main() {
     // before the window goes.
     await tester.tap(find.text('Save and close'));
     await tester.pumpAndSettle();
-    expect(written.keys, unorderedEquals(['/lib/a.md', '/lib/b.md']));
+    expect(written.keys, unorderedEquals(_notes.keys));
     expect(tracker.hasUnsaved, isFalse);
     expect(window.closeCalls, 1);
     await tester.pumpWidget(const SizedBox());
