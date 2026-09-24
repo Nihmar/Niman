@@ -40,6 +40,21 @@ Android: the **Niman Todos** widget mirrors the tab's open view —
 due-soonest first — and toggles a task on a row tap, with the app
 closed or not. See [widgets](widgets.md).
 
+## The task dialog
+
+Adding or editing a task opens one dialog: the description, with
+completion for the `+project`, `@context` and `#tag` already in use, the
+priority, the due date and the reminder. A long description wraps and
+the field grows downward, a few lines at most, then scrolls; it is still
+one line of `todo.txt`, so Enter saves and a pasted line break becomes a
+space. On a wide window the dialog is wider.
+
+On a window with the room (a desktop, a tablet), the due date and the
+reminder are picked inside the dialog: the calendar opens under its row,
+and for a reminder the time is typed beside it (`14:30`) and set with
+**OK**. One opens at a time; tapping the row again folds it. A phone
+keeps the system date and time pickers, made for a small screen.
+
 ## Settings
 
 Per library (`.niman/settings.json`): `reminderShowTokens` (default
