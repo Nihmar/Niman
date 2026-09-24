@@ -30,6 +30,9 @@ enum DockPane {
 
   /// The note's kept versions.
   history,
+
+  /// The journal's calendar (#7): not the note's, the library's.
+  journal,
 }
 
 /// Which way the second pane opens.

@@ -1307,6 +1307,66 @@ final class DutchStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ga naar';
   @override
+  String get paletteGroupJournal => 'Dagboek';
+  @override
+  String get journalToday => 'Vandaag';
+  @override
+  String get journalPrevious => 'Vorige notitie';
+  @override
+  String get journalNext => 'Volgende notitie';
+  @override
+  String get commandNeedJournalEntry => 'Vereist een open dagboeknotitie';
+  @override
+  String journalCreateAsk(String day) =>
+      'Nog geen notitie voor $day. Aanmaken?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'De dagboeksjabloon $path kon niet worden gelezen: de notitie is zonder '
+      'gemaakt.';
+  @override
+  String get journalIntro =>
+      'Eén notitie per dag, gemaakt uit een sjabloon de eerste keer dat je '
+      'die dag opent. Deze instellingen reizen mee met de bibliotheek.';
+  @override
+  String get journalFolderTitle => 'Dagboekmap';
+  @override
+  String get journalFolderSubtitle => 'Waar de notities komen';
+  @override
+  String get journalEntryNameTitle => 'Naam van de notitie';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM of M, DD of D voor de datum; / maakt een map; tekst tussen '
+      "'aanhalingstekens' blijft zoals hij is";
+  @override
+  String journalEntryNamePreview(String path) => 'Vandaag: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Vereist YYYY, een maand (MM of M) en een dag (DD of D), en niets wat '
+      'een bestandsnaam niet mag bevatten';
+  @override
+  String get journalTemplateTitle => 'Sjabloon';
+  @override
+  String get journalTemplateSubtitle => 'Waarmee een nieuwe notitie begint';
+  @override
+  String get journalTemplateNone => 'Geen: een kop met de datum';
+  @override
+  String get journalDayStartTitle => 'Een nieuwe dag begint om';
+  @override
+  String get journalDayStartSubtitle =>
+      'Laat op? Om 04:00 blijft de nacht bij de dag ervoor';
+  @override
+  String get journalRecent => 'Recent';
+  @override
+  String get journalNoEntry => 'Geen notitie voor deze dag';
+  @override
+  String get journalOpenEntry => 'Openen';
+  @override
+  String get journalShowCalendar => 'Kalender tonen';
+  @override
+  String get journalFabToday => 'Dagboeknotitie van vandaag';
+  @override
+  String journalDueOn(String day) => 'Vervalt op $day';
+  @override
   String get commandsTitle => 'Opdrachten';
   @override
   String get commandsIntro =>

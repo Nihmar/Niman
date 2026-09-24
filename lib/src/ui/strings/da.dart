@@ -1289,6 +1289,65 @@ final class DanishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå til';
   @override
+  String get paletteGroupJournal => 'Dagbog';
+  @override
+  String get journalToday => 'Dagens indlæg';
+  @override
+  String get journalPrevious => 'Forrige indlæg';
+  @override
+  String get journalNext => 'Næste indlæg';
+  @override
+  String get commandNeedJournalEntry => 'Kræver et åbent dagbogsindlæg';
+  @override
+  String journalCreateAsk(String day) =>
+      'Der er endnu intet indlæg for $day. Opret det?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Dagbogsskabelonen $path kunne ikke læses: indlægget blev oprettet uden.';
+  @override
+  String get journalIntro =>
+      'Én note om dagen, lavet ud fra en skabelon første gang du åbner dagen. '
+      'Disse indstillinger følger med biblioteket.';
+  @override
+  String get journalFolderTitle => 'Dagbogsmappe';
+  @override
+  String get journalFolderSubtitle => 'Hvor indlæggene lægges';
+  @override
+  String get journalEntryNameTitle => 'Indlæggets navn';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM eller M, DD eller D for datoen; / laver en mappe; tekst i '
+      "'citationstegn' bliver som den er";
+  @override
+  String journalEntryNamePreview(String path) => 'Dagens indlæg: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Kræver YYYY, en måned (MM eller M) og en dag (DD eller D), og intet et '
+      'filnavn ikke kan indeholde';
+  @override
+  String get journalTemplateTitle => 'Skabelon';
+  @override
+  String get journalTemplateSubtitle => 'Hvad et nyt indlæg begynder med';
+  @override
+  String get journalTemplateNone => 'Ingen: en overskrift med datoen';
+  @override
+  String get journalDayStartTitle => 'En ny dag begynder kl.';
+  @override
+  String get journalDayStartSubtitle =>
+      'Sent oppe? Kl. 04:00 hører natten stadig til dagen før';
+  @override
+  String get journalRecent => 'Seneste';
+  @override
+  String get journalNoEntry => 'Intet indlæg for denne dag';
+  @override
+  String get journalOpenEntry => 'Åbn';
+  @override
+  String get journalShowCalendar => 'Vis kalenderen';
+  @override
+  String get journalFabToday => 'Dagens dagbogsindlæg';
+  @override
+  String journalDueOn(String day) => 'Forfalder $day';
+  @override
   String get commandsTitle => 'Kommandoer';
   @override
   String get commandsIntro =>

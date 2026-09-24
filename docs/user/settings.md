@@ -12,7 +12,7 @@ library.
 
 Settings is split into areas, grouped by what they change: **App**
 (appearance, editor, keyboard shortcuts, commands, updates, diagnostics),
-the open **Library** (folders, trash and history, sync, transcription,
+the open **Library** (folders, journal, trash and history, sync, transcription,
 reminders), and **Maintenance** (re-index, switch or close the library;
 in the settings window only re-index, since the rail's library window
 switches and closes).
@@ -57,6 +57,10 @@ sync) in `.niman/settings.json`.
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
+| `journalFolder` | `Journal` | Where the [journal](journal.md)'s entries go (empty = the root) |
+| `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
+| `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
+| `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
 
 ## Library settings kept on this device
 

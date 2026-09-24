@@ -1295,6 +1295,64 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Eiti į';
   @override
+  String get paletteGroupJournal => 'Dienoraštis';
+  @override
+  String get journalToday => 'Šiandienos įrašas';
+  @override
+  String get journalPrevious => 'Ankstesnis įrašas';
+  @override
+  String get journalNext => 'Kitas įrašas';
+  @override
+  String get commandNeedJournalEntry => 'Reikia atverto dienoraščio įrašo';
+  @override
+  String journalCreateAsk(String day) => 'Dienai $day dar nėra įrašo. Sukurti?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Nepavyko perskaityti dienoraščio šablono $path: įrašas sukurtas be jo.';
+  @override
+  String get journalIntro =>
+      'Viena pastaba per dieną, sukurta iš šablono, kai tą dieną atveriate '
+      'pirmą kartą. Šie nustatymai keliauja su biblioteka.';
+  @override
+  String get journalFolderTitle => 'Dienoraščio aplankas';
+  @override
+  String get journalFolderSubtitle => 'Kur keliauja įrašai';
+  @override
+  String get journalEntryNameTitle => 'Įrašo pavadinimas';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM arba M, DD arba D datai; / sukuria aplanką; tekstas '
+      "'kabutėse' lieka koks yra";
+  @override
+  String journalEntryNamePreview(String path) => 'Šiandienos įrašas: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Reikia YYYY, mėnesio (MM arba M) ir dienos (DD arba D), ir nieko, ko '
+      'negali turėti failo pavadinimas';
+  @override
+  String get journalTemplateTitle => 'Šablonas';
+  @override
+  String get journalTemplateSubtitle => 'Kuo prasideda naujas įrašas';
+  @override
+  String get journalTemplateNone => 'Jokio: antraštė su data';
+  @override
+  String get journalDayStartTitle => 'Nauja diena prasideda';
+  @override
+  String get journalDayStartSubtitle =>
+      'Vėlai? 04:00 naktis vis dar priklauso ankstesnei dienai';
+  @override
+  String get journalRecent => 'Naujausi';
+  @override
+  String get journalNoEntry => 'Šiai dienai įrašo nėra';
+  @override
+  String get journalOpenEntry => 'Atverti';
+  @override
+  String get journalShowCalendar => 'Rodyti kalendorių';
+  @override
+  String get journalFabToday => 'Šiandienos dienoraščio įrašas';
+  @override
+  String journalDueOn(String day) => 'Terminas $day';
+  @override
   String get commandsTitle => 'Komandos';
   @override
   String get commandsIntro =>

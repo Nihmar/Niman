@@ -20,6 +20,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
@@ -28,10 +29,12 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
+import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
@@ -43,6 +46,10 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/journal/journal_browser.dart';
+import 'package:niman/src/ui/journal/journal_flow.dart';
+import 'package:niman/src/ui/journal/journal_screen.dart';
+import 'package:niman/src/ui/journal/journal_strip.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/library_window.dart';
@@ -191,6 +198,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   Future<void> _publishQuickActions() async {
     final labels = {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
+      ShortcutAction.journalToday: AppStrings.journalFabToday,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
@@ -559,6 +567,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// (issue #73, item 1). Refreshed with the editor settings.
   String? _quickNotePath;
 
+  /// The journal's settings (#7), read with the editor settings: which
+  /// note on screen is an entry, and of which day.
+  JournalSettings _journal = const JournalSettings();
+
   /// Carries focus for the app accelerators (T-PP-10) when nothing else
   /// wants it, so a keyboard-only tab switch is followed by a working next
   /// one: [FocusManager] would otherwise leave nothing focused.
@@ -671,6 +683,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// file; the shell keeps the selection state it reads through callbacks
   /// and the open that follows.
   late final ShellTemplateFlow _templateFlow;
+
+  /// Opens and makes journal entries (#7).
+  late final JournalFlow _journalFlow;
 
   /// Notification taps while running: a todo tap opens the Todo tab.
   StreamSubscription<String?>? _reminderTaps;
@@ -930,6 +945,18 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The phone full-screen note body.
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
+    final view = _phoneNoteView(controller, selectedPath);
+    final above = _journalHeader(selectedPath, compact: true);
+    if (above == null) return view;
+    return Column(
+      children: [
+        above,
+        Expanded(child: view),
+      ],
+    );
+  }
+
+  Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
     return NoteView(
       key: _phoneNoteKey,
       path: p.join(controller.root ?? '', selectedPath),
@@ -1287,6 +1314,13 @@ final class _LibraryShellState extends State<_LibraryShell>
       opensPreviewOnly: _opensPreviewOnly,
       onNoteFiled: _onTemplateNoteFiled,
     );
+    _journalFlow = JournalFlow(
+      controller: widget.controller,
+      templates: _templateFlow,
+      guard: _guard,
+      onOpen: (path) => _openNoteFromLink(path, null),
+      onCreated: _openNewJournalEntry,
+    );
     // The controller loads here, not in TodoTab.initState: T-TD-07
     // reconciles reminders at every library open, and the Todo tab is
     // only reachable in the narrow layout -- a >= 600 px device would
@@ -1464,6 +1498,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     switch (action) {
       case ShortcutAction.quickNote:
         await _openQuickNoteFromTile();
+      case ShortcutAction.journalToday:
+        await _journalFlow.openToday(context);
       case ShortcutAction.newTodo:
         _openTodo();
         await _addTodo();
@@ -1492,7 +1528,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     final spellDictionaries = await controller.spellDictionaries;
     final ops = controller.ops;
     final quickNote = ops == null ? null : await ops.quickNotePath;
+    final journal = ops == null ? null : await ops.journal;
     if (!mounted) return;
+    if (journal != null && journal != _journal) {
+      setState(() => _journal = journal);
+    }
     widget.spellCheck.setDictionaries(spellDictionaries);
     if (settings != _editorSettings) {
       setState(() => _editorSettings = settings);
@@ -2130,6 +2170,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         _closeFab();
         unawaited(_createFlow.createNote(context));
       },
+      onJournalToday: () {
+        _closeFab();
+        unawaited(_journalFlow.openToday(context));
+      },
       onNewListNote: () {
         _closeFab();
         unawaited(_createFlow.createListNote(context));
@@ -2215,6 +2259,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       // Leftmost: it comes and goes, and the row grows from the left, so
       // the buttons a thumb already knows stay where they were.
       if (_workspace.value.tabs.isNotEmpty) _openNotesButton(),
+      IconButton(
+        key: const Key('open-journal'),
+        tooltip: AppStrings.paletteGroupJournal,
+        icon: const Icon(Icons.calendar_today_outlined),
+        onPressed: _showJournalCalendar,
+      ),
       _syncActions.button(context, controller),
       IconButton(
         key: const Key('open-trash'),
@@ -2492,7 +2542,22 @@ final class _LibraryShellState extends State<_LibraryShell>
     CommandNeed.zenRoom => _zen.on || _zenPossible,
     CommandNeed.previewToggle => _previewToggleVisible,
     CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
+    CommandNeed.journalEntry => _shownJournalDay != null,
   };
+
+  /// The day of the journal entry on screen, or null when the note on
+  /// screen is not one (#7).
+  DateTime? get _shownJournalDay => switch (_shownNote) {
+    final path? => _journal.dayOfPath(path),
+    null => null,
+  };
+
+  /// Opens an entry the journal just made, the caret where its template
+  /// put it.
+  void _openNewJournalEntry(String path, int? caret) {
+    _openNoteFromLink(path, null);
+    if (caret != null) setState(() => _pendingCaretOffset = caret);
+  }
 
   /// Every command's handler; [_commandHandlers] keeps the ones that can
   /// run now. A handler whose command needs an open note runs only with
@@ -2512,6 +2577,12 @@ final class _LibraryShellState extends State<_LibraryShell>
         unawaited(_addTodo());
       },
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
+      AppCommand.journalToday: () => unawaited(_journalFlow.openToday(context)),
+      AppCommand.journalPrevious: () =>
+          unawaited(_journalFlow.openPrevious(context, _shownJournalDay!)),
+      AppCommand.journalNext: () =>
+          unawaited(_journalFlow.openNext(context, _shownJournalDay!)),
+      AppCommand.journalCalendar: _showJournalCalendar,
       AppCommand.zenMode: _toggleZen,
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
@@ -2942,7 +3013,67 @@ final class _LibraryShellState extends State<_LibraryShell>
             if (path != null) unawaited(_openHistory(path));
           },
         ),
+        DockPane.journal => JournalBrowser(
+          today: _journal.today(DateTime.now()),
+          entryDays: _journalFlow.entryDays,
+          readEntry: _readJournalEntry,
+          revision: controller.revision,
+          onOpenDay: (day, {confirmed = false}) => unawaited(
+            _journalFlow.openDay(context, day, confirmed: confirmed),
+          ),
+          dueOn: _tasksDueOn,
+          tasksChanged: _todoController,
+          onOpenTasks: _openTodo,
+          focusDay: _shownJournalDay,
+        ),
       },
+    );
+  }
+
+  /// The open tasks due on [day], as the task list reads them: what the
+  /// journal's calendar shows under the day (#7).
+  List<String> _tasksDueOn(DateTime day) => [
+    for (final entry in _todoController.snapshot?.todo ?? const <TodoEntry>[])
+      if (!entry.task.completed && entry.task.due == day)
+        taskDisplayText(entry.task.description),
+  ];
+
+  /// The text of [day]'s journal entry, for the calendar's recent list.
+  Future<String> _readJournalEntry(DateTime day) async {
+    final ops = widget.controller.ops;
+    if (ops == null) return '';
+    return await ops.readNote(_journal.entryPath(day));
+  }
+
+  /// The journal's calendar (#7): the dock's pane where the window has
+  /// room for the dock, the Journal screen everywhere else.
+  void _showJournalCalendar() {
+    if (_dockRoom) {
+      _workspace.controller.update(
+        (w) => w.withDock(open: true, pane: DockPane.journal),
+      );
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (screen) => JournalScreen(
+          today: _journal.today(DateTime.now()),
+          entryDays: _journalFlow.entryDays,
+          readEntry: _readJournalEntry,
+          revision: widget.controller.revision,
+          dueOn: _tasksDueOn,
+          tasksChanged: _todoController,
+          onOpenTasks: () {
+            Navigator.of(screen).pop();
+            _openTodo();
+          },
+          onOpenDay: (day, {confirmed = false}) {
+            // The screen goes first: the entry opens in the shell.
+            Navigator.of(screen).pop();
+            unawaited(_journalFlow.openDay(context, day, confirmed: confirmed));
+          },
+        ),
+      ),
     );
   }
 
@@ -3090,9 +3221,26 @@ final class _LibraryShellState extends State<_LibraryShell>
         saveNoteStream: _noteStreamSaver(controller),
         createMissingNote: _missingNoteCreator(controller),
         statusActions: _statusActionsFor(pane),
+        header: _journalHeader,
       ),
     ),
   );
+
+  /// The journal's strip over [path] when it is an entry (#7), else null.
+  Widget? _journalHeader(String path, {bool compact = false}) {
+    final day = _journal.dayOfPath(path);
+    if (day == null) return null;
+    return JournalStrip(
+      day: day,
+      today: _journal.today(DateTime.now()),
+      entryDays: _journalFlow.entryDays,
+      onPrevious: () => unawaited(_journalFlow.openPrevious(context, day)),
+      onNext: () => unawaited(_journalFlow.openNext(context, day)),
+      onDay: _showJournalCalendar,
+      revision: widget.controller.revision,
+      compact: compact,
+    );
+  }
 
   /// The view controls in [pane]'s status row (T-PP-22): for the note
   /// that pane shows, so each pane's eye says what its own tab does.

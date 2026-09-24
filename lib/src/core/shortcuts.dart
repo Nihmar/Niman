@@ -23,6 +23,12 @@ enum ShortcutAction {
   /// Opens the quick note (the Quick note tab).
   quickNote('quick_note'),
 
+  /// Opens today's journal entry, made first when there is none (#7).
+  ///
+  /// Second: launchers that show only four keep it, at the cost of New
+  /// list, which the + button still offers.
+  journalToday('journal_today'),
+
   /// Opens the Todo tab's add-task dialog.
   newTodo('new_todo'),
 

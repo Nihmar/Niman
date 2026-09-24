@@ -1298,6 +1298,66 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Joan';
   @override
+  String get paletteGroupJournal => 'Egunkaria';
+  @override
+  String get journalToday => 'Gaurko sarrera';
+  @override
+  String get journalPrevious => 'Aurreko sarrera';
+  @override
+  String get journalNext => 'Hurrengo sarrera';
+  @override
+  String get commandNeedJournalEntry => 'Egunkariko sarrera bat ireki behar da';
+  @override
+  String journalCreateAsk(String day) =>
+      'Oraindik ez dago sarrerarik $day egunerako. Sortu?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Ezin izan da $path egunkari-txantiloia irakurri: sarrera hura gabe '
+      'sortu da.';
+  @override
+  String get journalIntro =>
+      'Ohar bat egun bakoitzeko, txantiloi batetik sortua egun hori lehen '
+      'aldiz irekitzean. Ezarpen hauek liburutegiarekin bidaiatzen dute.';
+  @override
+  String get journalFolderTitle => 'Egunkariaren karpeta';
+  @override
+  String get journalFolderSubtitle => 'Sarrerak nora doazen';
+  @override
+  String get journalEntryNameTitle => 'Sarreraren izena';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM edo M, DD edo D datarako; / karpeta bat sortzen du; 'komatxo "
+      "arteko' testua dagoen bezala geratzen da";
+  @override
+  String journalEntryNamePreview(String path) => 'Gaurko sarrera: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'YYYY, hilabete bat (MM edo M) eta egun bat (DD edo D) behar ditu, eta '
+      'fitxategi-izen batek eduki ezin duen ezer ez';
+  @override
+  String get journalTemplateTitle => 'Txantiloia';
+  @override
+  String get journalTemplateSubtitle => 'Zerekin hasten den sarrera berri bat';
+  @override
+  String get journalTemplateNone => 'Bat ere ez: data duen izenburua';
+  @override
+  String get journalDayStartTitle => 'Egun berria ordu honetan hasten da';
+  @override
+  String get journalDayStartSubtitle =>
+      'Berandu? 04:00etan gaua aurreko egunean geratzen da';
+  @override
+  String get journalRecent => 'Azkenak';
+  @override
+  String get journalNoEntry => 'Ez dago sarrerarik egun honetarako';
+  @override
+  String get journalOpenEntry => 'Ireki';
+  @override
+  String get journalShowCalendar => 'Erakutsi egutegia';
+  @override
+  String get journalFabToday => 'Egunkariko gaurko sarrera';
+  @override
+  String journalDueOn(String day) => 'Epea: $day';
+  @override
   String get commandsTitle => 'Komandoak';
   @override
   String get commandsIntro =>

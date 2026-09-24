@@ -1295,6 +1295,64 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Перайсці';
   @override
+  String get paletteGroupJournal => 'Дзённік';
+  @override
+  String get journalToday => 'Сённяшні запіс';
+  @override
+  String get journalPrevious => 'Папярэдні запіс';
+  @override
+  String get journalNext => 'Наступны запіс';
+  @override
+  String get commandNeedJournalEntry => 'Патрэбны адкрыты запіс дзённіка';
+  @override
+  String journalCreateAsk(String day) => 'Для $day яшчэ няма запісу. Стварыць?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Не ўдалося прачытаць шаблон дзённіка $path: запіс створаны без яго.';
+  @override
+  String get journalIntro =>
+      'Адна нататка на дзень, створаная з шаблону, калі ты ўпершыню адкрываеш '
+      'гэты дзень. Гэтыя налады падарожнічаюць разам з бібліятэкай.';
+  @override
+  String get journalFolderTitle => 'Папка дзённіка';
+  @override
+  String get journalFolderSubtitle => 'Куды ідуць запісы';
+  @override
+  String get journalEntryNameTitle => 'Назва запісу';
+  @override
+  String get journalEntryNameSubtitle =>
+      "YYYY, MM або M, DD або D для даты; / стварае папку; тэкст у 'двукоссі' "
+      'застаецца як ёсць';
+  @override
+  String journalEntryNamePreview(String path) => 'Сённяшні запіс: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Патрэбны YYYY, месяц (MM або M) і дзень (DD або D), і нічога, чаго не '
+      'можа змяшчаць назва файла';
+  @override
+  String get journalTemplateTitle => 'Шаблон';
+  @override
+  String get journalTemplateSubtitle => 'З чаго пачынаецца новы запіс';
+  @override
+  String get journalTemplateNone => 'Няма: загаловак з датай';
+  @override
+  String get journalDayStartTitle => 'Новы дзень пачынаецца а';
+  @override
+  String get journalDayStartSubtitle =>
+      'Позна кладзешся? А 04:00 ноч застаецца на папярэднім дні';
+  @override
+  String get journalRecent => 'Нядаўнія';
+  @override
+  String get journalNoEntry => 'Няма запісу на гэты дзень';
+  @override
+  String get journalOpenEntry => 'Адкрыць';
+  @override
+  String get journalShowCalendar => 'Паказаць каляндар';
+  @override
+  String get journalFabToday => 'Сённяшні запіс дзённіка';
+  @override
+  String journalDueOn(String day) => 'Тэрмін $day';
+  @override
   String get commandsTitle => 'Каманды';
   @override
   String get commandsIntro =>

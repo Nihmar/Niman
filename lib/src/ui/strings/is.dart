@@ -1292,6 +1292,66 @@ final class IcelandicStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Fara í';
   @override
+  String get paletteGroupJournal => 'Dagbók';
+  @override
+  String get journalToday => 'Færsla dagsins';
+  @override
+  String get journalPrevious => 'Fyrri færsla';
+  @override
+  String get journalNext => 'Næsta færsla';
+  @override
+  String get commandNeedJournalEntry => 'Þarf opna dagbókarfærslu';
+  @override
+  String journalCreateAsk(String day) =>
+      'Engin færsla enn fyrir $day. Búa hana til?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Ekki tókst að lesa dagbókarsniðmátið $path: færslan var búin til án '
+      'þess.';
+  @override
+  String get journalIntro =>
+      'Ein færsla á dag, búin til úr sniðmáti í fyrsta sinn sem þú opnar '
+      'daginn. Þessar stillingar fylgja safninu.';
+  @override
+  String get journalFolderTitle => 'Dagbókarmappa';
+  @override
+  String get journalFolderSubtitle => 'Hvert færslurnar fara';
+  @override
+  String get journalEntryNameTitle => 'Heiti færslu';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM eða M, DD eða D fyrir dagsetninguna; / býr til möppu; texti '
+      "innan 'gæsalappa' helst óbreyttur";
+  @override
+  String journalEntryNamePreview(String path) => 'Færsla dagsins: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Þarf YYYY, mánuð (MM eða M) og dag (DD eða D), og ekkert sem '
+      'skráarheiti má ekki innihalda';
+  @override
+  String get journalTemplateTitle => 'Sniðmát';
+  @override
+  String get journalTemplateSubtitle => 'Á hverju ný færsla byrjar';
+  @override
+  String get journalTemplateNone => 'Ekkert: fyrirsögn með dagsetningunni';
+  @override
+  String get journalDayStartTitle => 'Nýr dagur hefst kl.';
+  @override
+  String get journalDayStartSubtitle =>
+      'Seint á fótum? Kl. 04:00 tilheyrir nóttin enn deginum á undan';
+  @override
+  String get journalRecent => 'Nýlegt';
+  @override
+  String get journalNoEntry => 'Engin færsla fyrir þennan dag';
+  @override
+  String get journalOpenEntry => 'Opna';
+  @override
+  String get journalShowCalendar => 'Sýna dagatalið';
+  @override
+  String get journalFabToday => 'Dagbókarfærsla dagsins';
+  @override
+  String journalDueOn(String day) => 'Á gjalddaga $day';
+  @override
   String get commandsTitle => 'Skipanir';
   @override
   String get commandsIntro =>

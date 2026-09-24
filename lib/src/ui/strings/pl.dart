@@ -1312,6 +1312,66 @@ final class PolishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Przejdź do';
   @override
+  String get paletteGroupJournal => 'Dziennik';
+  @override
+  String get journalToday => 'Dzisiejszy wpis';
+  @override
+  String get journalPrevious => 'Poprzedni wpis';
+  @override
+  String get journalNext => 'Następny wpis';
+  @override
+  String get commandNeedJournalEntry => 'Wymaga otwartego wpisu dziennika';
+  @override
+  String journalCreateAsk(String day) =>
+      'Brak jeszcze wpisu na $day. Utworzyć?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Nie udało się odczytać szablonu dziennika $path: wpis utworzono bez '
+      'niego.';
+  @override
+  String get journalIntro =>
+      'Jedna notatka dziennie, tworzona z szablonu przy pierwszym otwarciu '
+      'danego dnia. Te ustawienia podróżują z biblioteką.';
+  @override
+  String get journalFolderTitle => 'Folder dziennika';
+  @override
+  String get journalFolderSubtitle => 'Gdzie trafiają wpisy';
+  @override
+  String get journalEntryNameTitle => 'Nazwa wpisu';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM lub M, DD lub D dla daty; / tworzy folder; tekst w '
+      "'cudzysłowie' zostaje bez zmian";
+  @override
+  String journalEntryNamePreview(String path) => 'Dzisiejszy wpis: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Wymaga YYYY, miesiąca (MM lub M) i dnia (DD lub D), i niczego, czego '
+      'nie może zawierać nazwa pliku';
+  @override
+  String get journalTemplateTitle => 'Szablon';
+  @override
+  String get journalTemplateSubtitle => 'Od czego zaczyna się nowy wpis';
+  @override
+  String get journalTemplateNone => 'Brak: nagłówek z datą';
+  @override
+  String get journalDayStartTitle => 'Nowy dzień zaczyna się o';
+  @override
+  String get journalDayStartSubtitle =>
+      'Późno? O 04:00 noc wciąż należy do poprzedniego dnia';
+  @override
+  String get journalRecent => 'Ostatnie';
+  @override
+  String get journalNoEntry => 'Brak wpisu na ten dzień';
+  @override
+  String get journalOpenEntry => 'Otwórz';
+  @override
+  String get journalShowCalendar => 'Pokaż kalendarz';
+  @override
+  String get journalFabToday => 'Dzisiejszy wpis w dzienniku';
+  @override
+  String journalDueOn(String day) => 'Termin: $day';
+  @override
   String get commandsTitle => 'Polecenia';
   @override
   String get commandsIntro =>

@@ -1289,6 +1289,65 @@ final class CzechStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Přejít na';
   @override
+  String get paletteGroupJournal => 'Deník';
+  @override
+  String get journalToday => 'Dnešní záznam';
+  @override
+  String get journalPrevious => 'Předchozí záznam';
+  @override
+  String get journalNext => 'Další záznam';
+  @override
+  String get commandNeedJournalEntry => 'Vyžaduje otevřený záznam deníku';
+  @override
+  String journalCreateAsk(String day) =>
+      'Pro $day zatím není záznam. Vytvořit?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Šablonu deníku $path se nepodařilo přečíst: záznam byl vytvořen bez ní.';
+  @override
+  String get journalIntro =>
+      'Jedna poznámka denně, vytvořená ze šablony při prvním otevření daného '
+      'dne. Tato nastavení cestují s knihovnou.';
+  @override
+  String get journalFolderTitle => 'Složka deníku';
+  @override
+  String get journalFolderSubtitle => 'Kam jdou záznamy';
+  @override
+  String get journalEntryNameTitle => 'Název záznamu';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM nebo M, DD nebo D pro datum; / vytvoří složku; text v '
+      "'uvozovkách' zůstane, jak je";
+  @override
+  String journalEntryNamePreview(String path) => 'Dnešní záznam: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Potřebuje YYYY, měsíc (MM nebo M) a den (DD nebo D), a nic, co název '
+      'souboru nesmí obsahovat';
+  @override
+  String get journalTemplateTitle => 'Šablona';
+  @override
+  String get journalTemplateSubtitle => 'Čím nový záznam začíná';
+  @override
+  String get journalTemplateNone => 'Žádná: nadpis s datem';
+  @override
+  String get journalDayStartTitle => 'Nový den začíná v';
+  @override
+  String get journalDayStartSubtitle =>
+      'Ponocujete? V 04:00 noc ještě patří předchozímu dni';
+  @override
+  String get journalRecent => 'Nedávné';
+  @override
+  String get journalNoEntry => 'Pro tento den není záznam';
+  @override
+  String get journalOpenEntry => 'Otevřít';
+  @override
+  String get journalShowCalendar => 'Zobrazit kalendář';
+  @override
+  String get journalFabToday => 'Dnešní záznam deníku';
+  @override
+  String journalDueOn(String day) => 'Termín $day';
+  @override
   String get commandsTitle => 'Příkazy';
   @override
   String get commandsIntro =>

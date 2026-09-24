@@ -1334,6 +1334,67 @@ final class GreekStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Μετάβαση';
   @override
+  String get paletteGroupJournal => 'Ημερολόγιο';
+  @override
+  String get journalToday => 'Σημερινή καταχώριση';
+  @override
+  String get journalPrevious => 'Προηγούμενη καταχώριση';
+  @override
+  String get journalNext => 'Επόμενη καταχώριση';
+  @override
+  String get commandNeedJournalEntry =>
+      'Χρειάζεται ανοιχτή καταχώριση ημερολογίου';
+  @override
+  String journalCreateAsk(String day) =>
+      'Δεν υπάρχει ακόμη καταχώριση για $day. Να δημιουργηθεί;';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Το πρότυπο ημερολογίου $path δεν διαβάστηκε: η καταχώριση '
+      'δημιουργήθηκε χωρίς αυτό.';
+  @override
+  String get journalIntro =>
+      'Μία σημείωση την ημέρα, από πρότυπο, την πρώτη φορά που ανοίγεις '
+      'εκείνη την ημέρα. Αυτές οι ρυθμίσεις ταξιδεύουν με τη βιβλιοθήκη.';
+  @override
+  String get journalFolderTitle => 'Φάκελος ημερολογίου';
+  @override
+  String get journalFolderSubtitle => 'Πού πηγαίνουν οι καταχωρίσεις';
+  @override
+  String get journalEntryNameTitle => 'Όνομα καταχώρισης';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM ή M, DD ή D για την ημερομηνία· η / φτιάχνει φάκελο· το '
+      "κείμενο σε 'εισαγωγικά' μένει όπως είναι";
+  @override
+  String journalEntryNamePreview(String path) => 'Σημερινή καταχώριση: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Χρειάζονται YYYY, μήνας (MM ή M) και ημέρα (DD ή D), και τίποτα που '
+      'δεν χωράει σε όνομα αρχείου';
+  @override
+  String get journalTemplateTitle => 'Πρότυπο';
+  @override
+  String get journalTemplateSubtitle => 'Με τι ξεκινά μια νέα καταχώριση';
+  @override
+  String get journalTemplateNone => 'Κανένα: επικεφαλίδα με την ημερομηνία';
+  @override
+  String get journalDayStartTitle => 'Η νέα ημέρα ξεκινά στις';
+  @override
+  String get journalDayStartSubtitle =>
+      'Ξενυχτάς; Στις 04:00 η νύχτα μένει στην προηγούμενη ημέρα';
+  @override
+  String get journalRecent => 'Πρόσφατα';
+  @override
+  String get journalNoEntry => 'Καμία καταχώριση για αυτή την ημέρα';
+  @override
+  String get journalOpenEntry => 'Άνοιγμα';
+  @override
+  String get journalShowCalendar => 'Εμφάνιση ημερολογίου';
+  @override
+  String get journalFabToday => 'Σημερινή καταχώριση ημερολογίου';
+  @override
+  String journalDueOn(String day) => 'Προθεσμία $day';
+  @override
   String get commandsTitle => 'Εντολές';
   @override
   String get commandsIntro =>

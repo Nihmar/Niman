@@ -1305,6 +1305,65 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Siirry';
   @override
+  String get paletteGroupJournal => 'Päiväkirja';
+  @override
+  String get journalToday => 'Tämän päivän merkintä';
+  @override
+  String get journalPrevious => 'Edellinen merkintä';
+  @override
+  String get journalNext => 'Seuraava merkintä';
+  @override
+  String get commandNeedJournalEntry => 'Vaatii avoimen päiväkirjamerkinnän';
+  @override
+  String journalCreateAsk(String day) =>
+      'Päivälle $day ei ole vielä merkintää. Luodaanko?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Päiväkirjan mallia $path ei voitu lukea: merkintä luotiin ilman sitä.';
+  @override
+  String get journalIntro =>
+      'Yksi muistiinpano päivässä, tehty mallista, kun avaat päivän '
+      'ensimmäisen kerran. Nämä asetukset kulkevat kirjaston mukana.';
+  @override
+  String get journalFolderTitle => 'Päiväkirjakansio';
+  @override
+  String get journalFolderSubtitle => 'Minne merkinnät menevät';
+  @override
+  String get journalEntryNameTitle => 'Merkinnän nimi';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM tai M, DD tai D päivämäärää varten; / tekee kansion; '
+      "'lainausmerkeissä' oleva teksti jää sellaisenaan";
+  @override
+  String journalEntryNamePreview(String path) => 'Tämän päivän merkintä: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Tarvitaan YYYY, kuukausi (MM tai M) ja päivä (DD tai D), eikä mitään, '
+      'mitä tiedostonimessä ei voi olla';
+  @override
+  String get journalTemplateTitle => 'Malli';
+  @override
+  String get journalTemplateSubtitle => 'Millä uusi merkintä alkaa';
+  @override
+  String get journalTemplateNone => 'Ei mitään: otsikko päivämäärällä';
+  @override
+  String get journalDayStartTitle => 'Uusi päivä alkaa kello';
+  @override
+  String get journalDayStartSubtitle =>
+      'Valvotko? Klo 04:00 yö kuuluu vielä edelliseen päivään';
+  @override
+  String get journalRecent => 'Viimeisimmät';
+  @override
+  String get journalNoEntry => 'Ei merkintää tälle päivälle';
+  @override
+  String get journalOpenEntry => 'Avaa';
+  @override
+  String get journalShowCalendar => 'Näytä kalenteri';
+  @override
+  String get journalFabToday => 'Tämän päivän päiväkirjamerkintä';
+  @override
+  String journalDueOn(String day) => 'Erääntyy $day';
+  @override
   String get commandsTitle => 'Komennot';
   @override
   String get commandsIntro =>

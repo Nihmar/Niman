@@ -1303,6 +1303,66 @@ final class RomanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Mergi la';
   @override
+  String get paletteGroupJournal => 'Jurnal';
+  @override
+  String get journalToday => 'Intrarea de azi';
+  @override
+  String get journalPrevious => 'Intrarea anterioară';
+  @override
+  String get journalNext => 'Intrarea următoare';
+  @override
+  String get commandNeedJournalEntry => 'Necesită o intrare de jurnal deschisă';
+  @override
+  String journalCreateAsk(String day) =>
+      'Încă nu există o intrare pentru $day. O creezi?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Șablonul jurnalului $path nu a putut fi citit: intrarea a fost creată '
+      'fără el.';
+  @override
+  String get journalIntro =>
+      'O notă pe zi, creată dintr-un șablon prima dată când deschizi ziua '
+      'respectivă. Aceste setări călătoresc cu biblioteca.';
+  @override
+  String get journalFolderTitle => 'Dosarul jurnalului';
+  @override
+  String get journalFolderSubtitle => 'Unde merg intrările';
+  @override
+  String get journalEntryNameTitle => 'Numele intrării';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM sau M, DD sau D pentru dată; / creează un dosar; textul între '
+      "'ghilimele' rămâne cum este";
+  @override
+  String journalEntryNamePreview(String path) => 'Intrarea de azi: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Necesită YYYY, o lună (MM sau M) și o zi (DD sau D), și nimic ce un '
+      'nume de fișier nu poate conține';
+  @override
+  String get journalTemplateTitle => 'Șablon';
+  @override
+  String get journalTemplateSubtitle => 'Cu ce începe o intrare nouă';
+  @override
+  String get journalTemplateNone => 'Niciunul: un titlu cu data';
+  @override
+  String get journalDayStartTitle => 'O zi nouă începe la';
+  @override
+  String get journalDayStartSubtitle =>
+      'Stai până târziu? La 04:00 noaptea rămâne în ziua dinainte';
+  @override
+  String get journalRecent => 'Recente';
+  @override
+  String get journalNoEntry => 'Nicio intrare pentru această zi';
+  @override
+  String get journalOpenEntry => 'Deschide';
+  @override
+  String get journalShowCalendar => 'Arată calendarul';
+  @override
+  String get journalFabToday => 'Intrarea de azi din jurnal';
+  @override
+  String journalDueOn(String day) => 'Scadent $day';
+  @override
   String get commandsTitle => 'Comenzi';
   @override
   String get commandsIntro =>

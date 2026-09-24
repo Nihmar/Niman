@@ -234,7 +234,16 @@ void main() {
     await tester.tap(find.byKey(const Key('rail-settings')));
     await settle(tester);
     final trashArea = find.byKey(const Key('settings-area-trash-history'));
-    await tester.ensureVisible(trashArea);
+    await tester.scrollUntilVisible(
+      trashArea,
+      100,
+      scrollable: find
+          .ancestor(
+            of: find.byKey(const Key('settings-area-folders')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await settle(tester);
     await tester.tap(trashArea);
     await settle(tester);

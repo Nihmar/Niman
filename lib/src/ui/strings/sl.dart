@@ -1288,6 +1288,65 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Pojdi na';
   @override
+  String get paletteGroupJournal => 'Dnevnik';
+  @override
+  String get journalToday => 'Današnji vnos';
+  @override
+  String get journalPrevious => 'Prejšnji vnos';
+  @override
+  String get journalNext => 'Naslednji vnos';
+  @override
+  String get commandNeedJournalEntry => 'Zahteva odprt vnos dnevnika';
+  @override
+  String journalCreateAsk(String day) => 'Za $day še ni vnosa. Ga ustvarim?';
+  @override
+  String journalTemplateMissing(String path) =>
+      'Predloge dnevnika $path ni bilo mogoče prebrati: vnos je bil ustvarjen '
+      'brez nje.';
+  @override
+  String get journalIntro =>
+      'Ena opomba na dan, ustvarjena iz predloge, ko ta dan prvič odprete. Te '
+      'nastavitve potujejo s knjižnico.';
+  @override
+  String get journalFolderTitle => 'Mapa dnevnika';
+  @override
+  String get journalFolderSubtitle => 'Kam gredo vnosi';
+  @override
+  String get journalEntryNameTitle => 'Ime vnosa';
+  @override
+  String get journalEntryNameSubtitle =>
+      'YYYY, MM ali M, DD ali D za datum; / ustvari mapo; besedilo v '
+      "'narekovajih' ostane, kakršno je";
+  @override
+  String journalEntryNamePreview(String path) => 'Današnji vnos: $path';
+  @override
+  String get journalEntryNameInvalid =>
+      'Potrebuje YYYY, mesec (MM ali M) in dan (DD ali D) ter nič, česar ime '
+      'datoteke ne sme vsebovati';
+  @override
+  String get journalTemplateTitle => 'Predloga';
+  @override
+  String get journalTemplateSubtitle => 'S čim se začne nov vnos';
+  @override
+  String get journalTemplateNone => 'Brez: naslov z datumom';
+  @override
+  String get journalDayStartTitle => 'Nov dan se začne ob';
+  @override
+  String get journalDayStartSubtitle =>
+      'Pozno pokonci? Ob 04:00 noč še spada k prejšnjemu dnevu';
+  @override
+  String get journalRecent => 'Nedavni';
+  @override
+  String get journalNoEntry => 'Za ta dan ni vnosa';
+  @override
+  String get journalOpenEntry => 'Odpri';
+  @override
+  String get journalShowCalendar => 'Pokaži koledar';
+  @override
+  String get journalFabToday => 'Današnji vnos v dnevnik';
+  @override
+  String journalDueOn(String day) => 'Rok $day';
+  @override
   String get commandsTitle => 'Ukazi';
   @override
   String get commandsIntro =>
