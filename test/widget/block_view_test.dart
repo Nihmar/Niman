@@ -121,6 +121,17 @@ void main() {
     expect(_styleOf(tester, 'body text').fontSize, theme.body.fontSize);
   });
 
+  testWidgets('==highlight== is drawn marked, without its markers (#279)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_view('a ==marked== word', _syncCache()));
+    await tester.pump();
+    final screen = _screenText(tester);
+    expect(screen, contains('marked'));
+    expect(screen, isNot(contains('==')));
+    expect(_styleOf(tester, 'marked').backgroundColor, isNotNull);
+  });
+
   testWidgets('the markers are not on screen', (tester) async {
     await tester.pumpWidget(
       _view(

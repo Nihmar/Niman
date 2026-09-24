@@ -441,6 +441,9 @@ final class BosnianStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Precrtano';
+
+  @override
+  String get toolbarHighlight => 'Istaknuto';
   @override
   String get toolbarSuperscript => 'Superskript';
   @override

@@ -442,6 +442,9 @@ final class MacedonianStrings extends Strings {
   String get toolbarItalic => 'Курсив';
   @override
   String get toolbarStrikethrough => 'Пречртано';
+
+  @override
+  String get toolbarHighlight => 'Истакнато';
   @override
   String get toolbarSuperscript => 'Суперскрипт';
   @override

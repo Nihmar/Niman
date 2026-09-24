@@ -440,6 +440,9 @@ final class CzechStrings extends Strings {
   String get toolbarItalic => 'Kurzíva';
   @override
   String get toolbarStrikethrough => 'Překreslené';
+
+  @override
+  String get toolbarHighlight => 'Zvýraznění';
   @override
   String get toolbarSuperscript => 'Horní index';
   @override

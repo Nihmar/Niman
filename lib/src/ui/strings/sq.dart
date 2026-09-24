@@ -434,6 +434,9 @@ final class AlbanianStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'E anashëzvarrë';
+
+  @override
+  String get toolbarHighlight => 'E theksuar';
   @override
   String get toolbarSuperscript => 'Superskript';
   @override

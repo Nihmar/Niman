@@ -60,6 +60,7 @@ Set<ToolbarItem> activeFormatsOf({
         active.add(ToolbarItem.code);
       // The caret's own text.
       case TokenKind.bold || TokenKind.italic || TokenKind.strike:
+      case TokenKind.highlight:
       case TokenKind.underline || TokenKind.superscript:
       case TokenKind.codeInline:
       case TokenKind.link || TokenKind.wikilink:
@@ -96,6 +97,7 @@ const Set<TokenKind> _inline = <TokenKind>{
   TokenKind.bold,
   TokenKind.italic,
   TokenKind.strike,
+  TokenKind.highlight,
   TokenKind.underline,
   TokenKind.superscript,
   TokenKind.codeInline,
@@ -107,6 +109,7 @@ const Set<TokenKind> _inline = <TokenKind>{
 ToolbarItem _itemOf(TokenKind kind) => switch (kind) {
   TokenKind.italic => ToolbarItem.italic,
   TokenKind.strike => ToolbarItem.strikethrough,
+  TokenKind.highlight => ToolbarItem.highlight,
   TokenKind.underline => ToolbarItem.underline,
   TokenKind.superscript => ToolbarItem.superscript,
   TokenKind.codeInline => ToolbarItem.code,

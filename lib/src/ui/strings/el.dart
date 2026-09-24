@@ -444,6 +444,9 @@ final class GreekStrings extends Strings {
   String get toolbarItalic => 'Πλάγια';
   @override
   String get toolbarStrikethrough => 'Με διαγραφή';
+
+  @override
+  String get toolbarHighlight => 'Επισήμανση';
   @override
   String get toolbarSuperscript => 'Υπεργράμματο';
   @override

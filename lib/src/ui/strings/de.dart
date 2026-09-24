@@ -439,6 +439,9 @@ final class GermanStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Durchgestrichen';
+
+  @override
+  String get toolbarHighlight => 'Hervorheben';
   @override
   String get toolbarSuperscript => 'Oberhalb';
   @override

@@ -439,6 +439,9 @@ final class SwedishStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Genomstrykning';
+
+  @override
+  String get toolbarHighlight => 'Markering';
   @override
   String get toolbarSuperscript => 'Upphöjd';
   @override

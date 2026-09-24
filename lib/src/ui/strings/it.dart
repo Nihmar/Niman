@@ -441,6 +441,9 @@ final class ItalianStrings extends Strings {
   String get toolbarItalic => 'Corsivo';
   @override
   String get toolbarStrikethrough => 'Barrato';
+
+  @override
+  String get toolbarHighlight => 'Evidenziato';
   @override
   String get toolbarSuperscript => 'Apice';
   @override

@@ -445,6 +445,9 @@ final class PolishStrings extends Strings {
   String get toolbarItalic => 'Kursywa';
   @override
   String get toolbarStrikethrough => 'Przekreślenie';
+
+  @override
+  String get toolbarHighlight => 'Wyróżnienie';
   @override
   String get toolbarSuperscript => 'Indeks górny';
   @override

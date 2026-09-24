@@ -110,6 +110,14 @@ ContextMenuPart editorMenu({
               '~~',
               item: ToolbarItem.strikethrough,
             ),
+            wrap(
+              'highlight',
+              AppStrings.toolbarHighlight,
+              ToolbarItem.highlight.icon,
+              '==',
+              '==',
+              item: ToolbarItem.highlight,
+            ),
           ],
           [
             wrap(

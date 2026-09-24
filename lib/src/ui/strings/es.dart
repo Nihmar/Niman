@@ -441,6 +441,9 @@ final class SpanishStrings extends Strings {
   String get toolbarItalic => 'Cursiva';
   @override
   String get toolbarStrikethrough => 'Tachado';
+
+  @override
+  String get toolbarHighlight => 'Resaltado';
   @override
   String get toolbarSuperscript => 'Superíndice';
   @override

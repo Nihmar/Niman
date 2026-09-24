@@ -438,6 +438,9 @@ final class CroatianStrings extends Strings {
   String get toolbarItalic => 'Kurziv';
   @override
   String get toolbarStrikethrough => 'Prekrižano';
+
+  @override
+  String get toolbarHighlight => 'Istaknuto';
   @override
   String get toolbarSuperscript => 'Gornji indeks';
   @override

@@ -435,6 +435,9 @@ final class EnglishStrings extends Strings {
   String get toolbarItalic => 'Italic';
   @override
   String get toolbarStrikethrough => 'Strikethrough';
+
+  @override
+  String get toolbarHighlight => 'Highlight';
   @override
   String get toolbarSuperscript => 'Superscript';
   @override

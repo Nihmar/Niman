@@ -441,6 +441,9 @@ final class LithuanianStrings extends Strings {
   String get toolbarItalic => 'Kursyvas';
   @override
   String get toolbarStrikethrough => 'Perbrauktas';
+
+  @override
+  String get toolbarHighlight => 'Paryškinimas';
   @override
   String get toolbarSuperscript => 'Viršutinis indeksas';
   @override

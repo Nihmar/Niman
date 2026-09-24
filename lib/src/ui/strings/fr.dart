@@ -444,6 +444,9 @@ final class FrenchStrings extends Strings {
   String get toolbarItalic => 'Italique';
   @override
   String get toolbarStrikethrough => 'Barré';
+
+  @override
+  String get toolbarHighlight => 'Surligné';
   @override
   String get toolbarSuperscript => 'Exposant';
   @override

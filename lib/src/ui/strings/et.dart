@@ -430,6 +430,9 @@ final class EstonianStrings extends Strings {
   String get toolbarItalic => 'Kalded';
   @override
   String get toolbarStrikethrough => 'Läbijoonitud';
+
+  @override
+  String get toolbarHighlight => 'Esiletõst';
   @override
   String get toolbarSuperscript => 'Üleind';
   @override

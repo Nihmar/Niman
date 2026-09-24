@@ -441,6 +441,9 @@ final class SlovenianStrings extends Strings {
   String get toolbarItalic => 'Ležeče';
   @override
   String get toolbarStrikethrough => 'Prečrtano';
+
+  @override
+  String get toolbarHighlight => 'Poudarjeno';
   @override
   String get toolbarSuperscript => 'Nadpisanje';
   @override

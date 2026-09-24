@@ -434,6 +434,9 @@ final class NorwegianStrings extends Strings {
   String get toolbarItalic => 'Kursiv';
   @override
   String get toolbarStrikethrough => 'Gjennomstreking';
+
+  @override
+  String get toolbarHighlight => 'Utheving';
   @override
   String get toolbarSuperscript => 'Opphøyd';
   @override

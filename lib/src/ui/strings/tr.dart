@@ -432,6 +432,9 @@ final class TurkishStrings extends Strings {
   String get toolbarItalic => 'İtalik';
   @override
   String get toolbarStrikethrough => 'Üstü çizili';
+
+  @override
+  String get toolbarHighlight => 'Vurgulu';
   @override
   String get toolbarSuperscript => 'Üst simge';
   @override

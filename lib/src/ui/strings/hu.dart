@@ -434,6 +434,9 @@ final class HungarianStrings extends Strings {
   String get toolbarItalic => 'Dőlt';
   @override
   String get toolbarStrikethrough => 'Áthúzott';
+
+  @override
+  String get toolbarHighlight => 'Kiemelés';
   @override
   String get toolbarSuperscript => 'Felírott';
   @override

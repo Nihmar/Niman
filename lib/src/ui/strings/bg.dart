@@ -439,6 +439,9 @@ final class BulgarianStrings extends Strings {
   String get toolbarItalic => 'Курсив';
   @override
   String get toolbarStrikethrough => 'Зачеркано';
+
+  @override
+  String get toolbarHighlight => 'Открояване';
   @override
   String get toolbarSuperscript => 'Надстрочен индекс';
   @override
