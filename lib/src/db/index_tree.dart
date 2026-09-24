@@ -38,6 +38,23 @@ final class IndexTree {
   /// forwards its own setter to this field.
   void Function(IndexProgress)? onProgress;
 
+  /// Whether the note at a library-relative path is one whose reindex its
+  /// writer has scheduled (`NoteWriter.awaits`): a note the app itself
+  /// just wrote, that the writer reads into the index once it is left
+  /// alone.
+  ///
+  /// The scans that are not the writer's leave such a note be. The watcher
+  /// reports every write — the app's own too — and a note's size changes
+  /// with nearly every save, so the event path read it at once: 13.5 s of
+  /// the 247 MB stress note after a pin, and again 30 s later when the
+  /// writer's own reindex ran (log, 2026-09-24) — the wait that reindex
+  /// keeps for a note being written, undone by the watcher at every save.
+  /// Should the app go before the writer reads it, the next open's scan
+  /// finds the row older than the file and reads it then.
+  bool Function(String rel) awaited = _none;
+
+  static bool _none(String rel) => false;
+
   /// How many changed notes are read per isolate call (T-M3-03: a few
   /// hundred).
   static const _contentBatch = 200;
@@ -198,6 +215,12 @@ final class IndexTree {
     for (final e in entries) {
       if (e.isDir || !isNoteFile(e.name)) continue;
       final prev = old[e.rel];
+      if (prev != null && awaited(e.rel)) {
+        // Its writer reads it in a moment: its row stays as it is.
+        final sha = prev.sha256;
+        if (sha != null) shas[e.rel] = sha;
+        continue;
+      }
       if (prev != null &&
           prev.size == e.size &&
           prev.modified == toStoredSecond(e.modified) &&
@@ -213,7 +236,7 @@ final class IndexTree {
     if (!await _store.contentIndexComplete()) {
       _log.info('contents: content index incomplete, rebuilding missing rows');
       for (final rel in await _store.missingFtsPaths()) {
-        if (!todo.contains(rel)) todo.add(rel);
+        if (!todo.contains(rel) && !awaited(rel)) todo.add(rel);
       }
     }
     final contents = await readRelContents(root, todo);
@@ -299,6 +322,10 @@ final class IndexTree {
     var wrote = false;
     for (final e in entries) {
       final prev = old[e.rel];
+      // A note its writer reads in a moment keeps the row it has: updated
+      // here, its size and time would say the row is current while its
+      // content is the text before.
+      if (prev != null && !e.isDir && awaited(e.rel)) continue;
       if (prev != null) {
         final parentId = _resolveParent(
           parentOf(e.rel),

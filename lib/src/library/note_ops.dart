@@ -68,6 +68,9 @@ final class NoteOps implements NoteOperations {
   }) : _dao = NoteDao(db),
        history = NoteHistory(root: root, config: config) {
     writer = NoteWriter(root: root, indexer: indexer, history: history);
+    // A note the writer is about to read into the index is left to it by
+    // the watcher's scans, which would otherwise read it now as well.
+    indexer.awaitedByWriter = writer.awaits;
     config.onWritten = () => _hint(settingsFilePath, SyncOpKind.changed);
   }
 
@@ -435,8 +438,11 @@ final class NoteOps implements NoteOperations {
       );
       if (head == null) return row;
       _hint(path, SyncOpKind.changed);
-      await indexer.applyFrontmatter(path, parseFrontmatter(head));
+      // Scheduled first: from here the watcher's report of this very write
+      // leaves the note to the writer, and the pin below may wait behind a
+      // scan already running.
       writer.reindexWhenQuiet(path, bytes: row.size);
+      await indexer.applyFrontmatter(path, parseFrontmatter(head));
       return await _mustFind(path);
     });
   }

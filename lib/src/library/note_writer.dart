@@ -301,6 +301,11 @@ final class NoteWriter {
     _reindexWhenQuiet(path, abs, created: result.created, bytes: result.bytes);
   }
 
+  /// Whether the note at library-relative [path] waits for a reindex this
+  /// writer will run once it is left alone: the scans that are not the
+  /// writer's leave it be meanwhile (`Indexer.awaitedByWriter`).
+  bool awaits(String path) => _quiet.containsKey(path);
+
   /// Reads the note at library-relative [path], of [bytes] bytes, back into
   /// the index as a save of it does: once it has been left alone for
   /// [quietBeforeReindex], and once however many changes come before that.

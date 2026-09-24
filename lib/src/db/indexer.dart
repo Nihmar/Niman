@@ -58,6 +58,15 @@ final class Indexer {
   /// The forwarded progress callback.
   void Function(IndexProgress)? get onProgress => _tree.onProgress;
 
+  /// Which notes their writer reads in a moment, by library-relative path
+  /// (`NoteWriter.awaits`): every entry point but [rescanFiles] — the
+  /// writer's own — leaves those notes' rows as they are
+  /// (`IndexTree.awaited`).
+  bool Function(String rel) get awaitedByWriter => _tree.awaited;
+
+  set awaitedByWriter(bool Function(String rel) awaited) =>
+      _tree.awaited = awaited;
+
   Future<void> _chain = Future<void>.value();
 
   /// Runs [fn] serially with every other index mutation.
@@ -209,6 +218,10 @@ final class Indexer {
       final gone = <String>{};
       for (var i = 0; i < rels.length; i++) {
         if (probes[i].exists) {
+          if (!probes[i].isDir && _tree.awaited(rels[i])) {
+            _log.debug('applyEvents: "${rels[i]}" -> its writer reads it');
+            continue;
+          }
           live[rels[i]] = probes[i];
         } else {
           gone.add(rels[i]);
@@ -433,6 +446,10 @@ final class Indexer {
     if (probe.isDir) {
       _log.debug('$tag: "$abs" -> resync dir "$rel"');
       return await _tree.syncDirSubtree(root, abs);
+    }
+    if (probe.exists && _tree.awaited(rel)) {
+      _log.debug('$tag: "$rel" -> its writer reads it');
+      return false;
     }
     if (probe.exists) {
       _log.debug('$tag: "$abs" -> upsert file "$rel"');
