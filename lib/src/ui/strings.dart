@@ -227,6 +227,7 @@ final class AppStrings {
   static String get themeEditorTitle => _s.themeEditorTitle;
   static String get themeEditorChrome => _s.themeEditorChrome;
   static String get themeEditorMarkdown => _s.themeEditorMarkdown;
+  static String get themeEditorTaskLists => _s.themeEditorTaskLists;
   static String get themeEditorRolesHint => _s.themeEditorRolesHint;
   static String get themeEditorDiscardTitle => _s.themeEditorDiscardTitle;
   static String get themeEditorDiscardBody => _s.themeEditorDiscardBody;

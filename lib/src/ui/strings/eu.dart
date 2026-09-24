@@ -280,6 +280,8 @@ final class BasqueStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Zeregin-zerrendak (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Kolore bakoitzak esportatutako fitxategiak duen izena du';
   @override

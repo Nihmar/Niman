@@ -286,6 +286,8 @@ final class SerbianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Листе задатака (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Свака боја носи име које користи извезена датотека';
   @override

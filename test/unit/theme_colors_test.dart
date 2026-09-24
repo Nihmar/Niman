@@ -16,7 +16,22 @@ void main() {
     test('every role is there, in the order a file lists them', () {
       final json = _colors().toJson();
       expect(json.keys.toList(), ThemeColors.roleNames);
-      expect(json.length, 20);
+      expect(json.length, 26);
+    });
+
+    test('the task-list roles are the last of the Markdown ones', () {
+      expect(
+        ThemeColors.markdownRoles.sublist(
+          ThemeColors.markdownRoles.length - ThemeColors.taskListRoles.length,
+        ),
+        ThemeColors.taskListRoles,
+      );
+      expect(ThemeColors.taskListRoleSources.keys, ThemeColors.taskListRoles);
+      // Each one is read from a role a theme had before it.
+      for (final source in ThemeColors.taskListRoleSources.values) {
+        expect(ThemeColors.taskListRoles, isNot(contains(source)));
+        expect(ThemeColors.roleNames, contains(source));
+      }
     });
 
     test('a theme survives the round trip', () {
@@ -40,8 +55,62 @@ void main() {
     test('a map missing a role is not a theme', () {
       final json = _colors().toJson();
       for (final role in ThemeColors.roleNames) {
+        if (ThemeColors.taskListRoles.contains(role)) continue;
         final without = Map.of(json)..remove(role);
         expect(ThemeColors.fromJson(without), isNull, reason: '$role missing');
+      }
+    });
+
+    test('a theme from before the task-list roles reads them from the '
+        'roles it was painted with', () {
+      // Stored or exported before the roles existed: the theme loads, and
+      // a task list looks exactly as it did then.
+      final colors = _colors();
+      final json = colors.toJson()
+        ..removeWhere((role, _) => ThemeColors.taskListRoles.contains(role));
+
+      final read = ThemeColors.fromJson(json)!;
+      final syntax = colors.syntax;
+      expect(read.tokens, colors.tokens);
+      expect(read.syntax.todoPriority, syntax.task);
+      expect(read.syntax.todoDate, syntax.dim);
+      expect(read.syntax.todoProject, syntax.wikilink);
+      expect(read.syntax.todoContext, syntax.link);
+      expect(read.syntax.todoKeyValue, syntax.code);
+      expect(read.syntax.todoDone, syntax.dim);
+      // The rest of the Markdown roles are untouched.
+      expect(read.syntax.tag, syntax.tag);
+      expect(read.syntax.math, syntax.math);
+    });
+
+    test('a task-list role left out alone is derived, the rest kept', () {
+      final json = _colors().toJson()
+        ..['todoProject'] = '#123456'
+        ..remove('todoPriority');
+
+      final read = ThemeColors.fromJson(json)!;
+      expect(read.syntax.todoProject, const Color(0xFF123456));
+      expect(read.syntax.todoPriority, _colors().syntax.task);
+    });
+
+    test('a task-list role that is not a color is not a theme', () {
+      // Left out is an older theme; named wrong is a broken one.
+      for (final role in ThemeColors.taskListRoles) {
+        final json = _colors().toJson()..[role] = 'teal';
+        expect(ThemeColors.fromJson(json), isNull, reason: role);
+      }
+    });
+
+    test('each task-list role is a color of its own', () {
+      final colors = _colors();
+      for (final role in ThemeColors.taskListRoles) {
+        final moved = colors.withRole(role, const Color(0xFF010203));
+        expect(moved.colorOf(role), const Color(0xFF010203), reason: role);
+        expect(ThemeColors.fromJson(moved.toJson()), moved, reason: role);
+        for (final other in ThemeColors.roleNames) {
+          if (other == role) continue;
+          expect(moved.colorOf(other), colors.colorOf(other), reason: other);
+        }
       }
     });
 

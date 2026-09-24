@@ -71,6 +71,25 @@ void main() {
     for (final role in ['background', 'accent', 'error', 'wikilink', 'tag']) {
       expect(find.byKey(Key('theme-role-$role')), findsOneWidget, reason: role);
     }
+    // The task-list roles, under their own heading after the Markdown
+    // ones.
+    expect(find.text(AppStrings.themeEditorTaskLists), findsOneWidget);
+    for (final role in ThemeColors.taskListRoles) {
+      expect(find.byKey(Key('theme-role-$role')), findsOneWidget, reason: role);
+      expect(
+        tester.getTopLeft(find.byKey(Key('theme-role-$role'))).dy,
+        greaterThan(
+          tester.getTopLeft(find.text(AppStrings.themeEditorTaskLists)).dy,
+        ),
+        reason: role,
+      );
+    }
+    expect(
+      tester.getTopLeft(find.text(AppStrings.themeEditorTaskLists)).dy,
+      greaterThan(
+        tester.getTopLeft(find.byKey(const Key('theme-role-tag'))).dy,
+      ),
+    );
     // The day side is the one shown: the sample's day accent (which the
     // wikilink shares, hence the row).
     expect(
@@ -112,6 +131,16 @@ void main() {
       (await controller.customTheme('mine'))!.day.colorOf('background'),
       sampleDayBackground,
     );
+  });
+
+  testWidgets('a task-list role is edited like any other', (tester) async {
+    await openEditor(tester);
+    await pick(tester, 'todoPriority', '#AA2200');
+
+    final draft = AppThemes.draft! as CustomAppTheme;
+    expect(draft.theme.day.syntax.todoPriority, const Color(0xFFAA2200));
+    // Its own color: the task boxes it used to borrow are left alone.
+    expect(draft.theme.day.syntax.task, isNot(const Color(0xFFAA2200)));
   });
 
   testWidgets('Save stores the colors and leaves the draft behind', (

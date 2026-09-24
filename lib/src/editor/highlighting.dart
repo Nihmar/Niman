@@ -99,6 +99,24 @@ enum TokenKind {
 
   /// A line of the leading frontmatter block.
   frontmatter,
+
+  /// A task's priority, `(A)`, in a task list (`todo_txt_tokens.dart`).
+  todoPriority,
+
+  /// A task's creation or completion date, at the head of its line.
+  todoDate,
+
+  /// A task's `+project`.
+  todoProject,
+
+  /// A task's `@context`.
+  todoContext,
+
+  /// A task's `key:value` tag — `due:`, `rem:` and the rest.
+  todoKeyValue,
+
+  /// A completed task, the whole line.
+  todoDone,
 }
 
 /// One styled run of a line; offsets are relative to [StyledLine.text].

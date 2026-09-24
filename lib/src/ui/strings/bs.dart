@@ -286,6 +286,8 @@ final class BosnianStrings extends Strings {
   @override
   String get themeEditorMarkdown => 'Markdown';
   @override
+  String get themeEditorTaskLists => 'Liste zadataka (todo.txt)';
+  @override
   String get themeEditorRolesHint =>
       'Svaka boja nosi ime koje koristi izvezena datoteka';
   @override

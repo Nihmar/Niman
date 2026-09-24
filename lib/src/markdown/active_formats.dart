@@ -76,6 +76,13 @@ Set<ToolbarItem> activeFormatsOf({
       case TokenKind.frontmatter:
       // The toolbar has no subscript.
       case TokenKind.subscript:
+      // A task list's runs, which no toolbar button makes.
+      case TokenKind.todoPriority ||
+          TokenKind.todoDate ||
+          TokenKind.todoProject ||
+          TokenKind.todoContext ||
+          TokenKind.todoKeyValue ||
+          TokenKind.todoDone:
         break;
     }
     // The constructs around the caret's text are on too: in `<u>**x**</u>`

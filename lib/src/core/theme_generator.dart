@@ -57,9 +57,10 @@ ThemeColors _variant({required double hue, required bool dark}) {
     error: dark ? _hsl(8, 0.62, 0.72) : _hsl(8, 0.72, 0.38),
   );
   final distant = dark ? 0.72 : 0.34;
+  final code = _hsl(hue + 40, 0.40, distant);
   final syntax = SyntaxColors(
     dim: _blend(ink, ground, 0.45),
-    code: _hsl(hue + 40, 0.40, distant),
+    code: code,
     codeMuted: _blend(ink, ground, 0.55),
     link: _hsl(hue + 200, 0.55, distant),
     wikilink: accent,
@@ -68,6 +69,15 @@ ThemeColors _variant({required double hue, required bool dark}) {
     quote: _blend(ink, ground, 0.42),
     math: _hsl(hue + 270, 0.45, distant),
     tag: _hsl(hue + 160, 0.45, distant),
+    // A task list: the priority louder than the rest of the wheel, the
+    // date between the ink and the markers, the tokens on hues of their
+    // own, and a finished task further back than any marker.
+    todoPriority: _hsl(hue + 80, 0.65, distant),
+    todoDate: _blend(ink, ground, 0.38),
+    todoProject: _hsl(hue + 240, 0.45, distant),
+    todoContext: _hsl(hue + 330, 0.45, distant),
+    todoKeyValue: code,
+    todoDone: _blend(ink, ground, 0.55),
   );
   return ThemeColors(tokens: tokens, syntax: syntax);
 }
