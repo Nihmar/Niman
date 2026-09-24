@@ -14,8 +14,13 @@ final class ContextMenuRow extends StatelessWidget {
     required this.onPressed,
     this.active = false,
     this.trailing,
+    this.onHover,
     super.key,
   });
+
+  /// Called as the pointer comes onto the row: a group's row opens its
+  /// submenu, any other closes the one open.
+  final VoidCallback? onHover;
 
   /// What tests find the row by.
   final Key rowKey;
@@ -42,7 +47,8 @@ final class ContextMenuRow extends StatelessWidget {
     final enabled = onPressed != null;
     final dim = scheme.onSurface.withValues(alpha: 0.38);
     final trailing = this.trailing;
-    return Semantics(
+    final hover = onHover;
+    final row = Semantics(
       toggled: active,
       enabled: enabled,
       child: InkWell(
@@ -85,5 +91,7 @@ final class ContextMenuRow extends StatelessWidget {
         ),
       ),
     );
+    if (hover == null) return row;
+    return MouseRegion(onEnter: (_) => hover(), child: row);
   }
 }

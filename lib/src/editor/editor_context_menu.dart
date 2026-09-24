@@ -14,8 +14,8 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/context_menu_flyout.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
-import 'package:niman/src/editor/context_menu_pages.dart';
 import 'package:niman/src/editor/context_menu_row.dart';
 import 'package:niman/src/editor/menu_group_sheet.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -43,7 +43,8 @@ typedef FormatMenuBuilder = List<FormatMenuEntry> Function();
 /// The context menu at [anchors].
 ///
 /// On the desktop a vertical menu, each entry with its icon and a divider
-/// between groups, a submenu opening in the menu's place; on a phone the
+/// between groups, a submenu opening beside its row as the pointer comes
+/// onto it (`ContextMenuFlyout`); on a phone the
 /// platform's selection bar, whose overflow holds the entries and whose
 /// submenus open as sheets. Every entry closes the menu through
 /// [onDismiss] before it runs, so a dialog it opens (the heading level,
@@ -104,44 +105,26 @@ final class EditorContextMenu extends StatelessWidget {
         children: _mobileChildren(context),
       );
     }
-    // All of the toolbar's buttons make a tall menu: on a short window it
-    // keeps to the window and scrolls, rather than running off its foot.
-    final room = MediaQuery.sizeOf(context).height - 2 * _screenMargin;
-    return AdaptiveTextSelectionToolbar(
-      anchors: anchors,
-      children: [
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: room < 0 ? 0 : room),
-          child: SingleChildScrollView(
-            child: ContextMenuPages(
-              main: _desktopChildren,
-              group: _groupChildren,
-            ),
-          ),
-        ),
-      ],
+    // The menu at the click, a group's submenu beside the row it opens
+    // from as the pointer comes onto it: the desktop's own menus.
+    return ContextMenuFlyout(
+      anchor: anchors.primaryAnchor,
+      main: _desktopChildren,
+      group: _groupChildren,
     );
   }
 
   static const Divider _divider = Divider(height: 9, indent: 8, endIndent: 8);
 
-  /// A submenu, in the menu's place: the way back, then its sections. A
-  /// flyout beside a menu that is itself a selection toolbar has nowhere
-  /// steady to stand; the menu turning into its submenu does.
-  List<Widget> _groupChildren(ContextMenuGroup group, VoidCallback back) => [
-    ContextMenuRow(
-      rowKey: Key('${group.id}-back'),
-      icon: Icons.chevron_left,
-      label: group.label,
-      onPressed: back,
-    ),
-    for (final section in group.sections) ...[
-      _divider,
+  /// A submenu's rows: its sections, set apart.
+  List<Widget> _groupChildren(ContextMenuGroup group) => [
+    for (final (i, section) in group.sections.indexed) ...[
+      if (i > 0) _divider,
       for (final action in section) _actionRow(action),
     ],
   ];
 
-  Widget _actionRow(ContextMenuAction action) {
+  Widget _actionRow(ContextMenuAction action, {VoidCallback? onHover}) {
     final pressed = action.onPressed;
     return ContextMenuRow(
       rowKey: Key(action.id),
@@ -149,16 +132,14 @@ final class EditorContextMenu extends StatelessWidget {
       label: action.label,
       active: action.active,
       onPressed: pressed == null ? null : () => _run(pressed),
+      onHover: onHover,
     );
   }
 
-  /// What the menu leaves free above and below it.
-  static const double _screenMargin = 16;
-
-  List<Widget> _desktopChildren(
-    BuildContext context,
-    void Function(ContextMenuGroup group) open,
-  ) {
+  List<Widget> _desktopChildren(BuildContext context, FlyoutRows rows) {
+    // A row that opens nothing closes the submenu open, as the pointer
+    // comes onto it.
+    void away() => rows.open(null);
     // Every row with its icon, the clipboard's too (0.0.8 test round):
     // one column of icons down the menu, the way the formatting reads.
     Widget plain(ContextMenuButtonItem item) => ContextMenuRow(
@@ -168,15 +149,18 @@ final class EditorContextMenu extends StatelessWidget {
           item.label ??
           AdaptiveTextSelectionToolbar.getButtonLabel(context, item),
       onPressed: item.onPressed,
+      onHover: away,
     );
     Widget row(ContextMenuItem item) => switch (item) {
-      ContextMenuAction() => _actionRow(item),
+      ContextMenuAction() => _actionRow(item, onHover: away),
       ContextMenuGroup() => ContextMenuRow(
+        key: rows.keyOf(item),
         rowKey: Key(item.id),
         icon: item.icon,
         label: item.label,
         trailing: Icons.chevron_right,
-        onPressed: () => open(item),
+        onPressed: () => rows.open(item),
+        onHover: () => rows.open(item),
       ),
     };
     List<List<Widget>> sections(ContextMenuPart? part) => [
@@ -195,6 +179,7 @@ final class EditorContextMenu extends StatelessWidget {
           label: entry.item.label,
           active: entry.active,
           onPressed: () => _run(entry.onPressed),
+          onHover: away,
         ),
       );
     }

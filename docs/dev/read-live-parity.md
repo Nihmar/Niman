@@ -192,9 +192,11 @@ take no room and the page stays the read view's.
 
 Decisions taken without the writer, to revisit if they read wrong:
 
-- **The submenus open in the menu's place** on the desktop (a back row
-  on top), not as a flyout: the menu is a selection toolbar, with nowhere
-  steady for a flyout to stand. On a phone Row and Column open a sheet.
+- **The submenus open beside the menu** on the desktop, as the mouse comes
+  onto their row (2026-09-24): the menu is drawn on the overlay itself
+  (`ContextMenuFlyout`), not as a selection toolbar, so a flyout has a place
+  to stand. It used to open in the menu's place, a back row on top. On a
+  phone Row and Column open a sheet.
 - **Padded** means the writer padded: a cell with more than one space
   either side of its text, or a delimiter cell of more than three dashes.
   Not whether the pipes line up — a padded table one cell of which has
