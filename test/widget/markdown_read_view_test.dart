@@ -557,8 +557,15 @@ void main() {
   });
 
   group('a long note is scanned in the background', () {
-    setUp(() => MarkdownReadViewState.backgroundLines = 20);
-    tearDown(() => MarkdownReadViewState.backgroundLines = 50000);
+    setUp(() {
+      MarkdownReadViewState.backgroundLines = 20;
+      // Three paragraphs of `_note`'s: the top drawn while the rest is read.
+      MarkdownReadViewState.headLines = 9;
+    });
+    tearDown(() {
+      MarkdownReadViewState.backgroundLines = 50000;
+      MarkdownReadViewState.headLines = 5000;
+    });
 
     /// Waits for the isolate, then for the frame that draws its answer.
     Future<void> settle(WidgetTester tester) async {
@@ -588,19 +595,33 @@ void main() {
       ),
     );
 
-    testWidgets('the first look waits for the scan, then draws it', (
+    testWidgets('the first look draws the top, then the whole note', (
       tester,
     ) async {
+      // The pane stayed empty for the whole scan: 22 s on a phone for the
+      // 247 MB note (device log, 2026-09-24).
       final parser = BlockParser();
       await tester.pumpWidget(
         view(SourceBuffer.fromText('${_note(20)}[^1]\n\n[^1]: a note'), parser),
       );
-      expect(find.byKey(const Key('read-view-scanning')), findsOneWidget);
-      await settle(tester);
       final state = tester.state<MarkdownReadViewState>(
         find.byType(MarkdownReadView),
       );
+      expect(state.scanning, isTrue);
+      expect(find.byKey(const Key('read-view-scanning')), findsNothing);
+      expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
+      expect(
+        find.textContaining('Paragraph 5', findRichText: true),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('read-view-reading-rest')), findsOneWidget);
+      expect(state.blocks, isNull, reason: 'the top is not the note to count');
+      expect(state.headings, isNull);
+
+      await settle(tester);
       expect(state.blockCount, greaterThan(20));
+      expect(find.byKey(const Key('read-view-reading-rest')), findsNothing);
+      expect(state.blocks, isNotNull);
       expect(find.textContaining('Paragraph 0', findRichText: true), findsOne);
       // The definitions came back with the blocks, and belong to the note.
       expect(parser.scope?.footnotes.single.body, 'a note');
