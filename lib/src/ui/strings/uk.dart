@@ -255,11 +255,16 @@ final class UkrainianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Темна';
   @override
-  String get themePaletteTitle => 'Палітра кольорів';
+  String get themeTitle => 'Тема';
   @override
-  String get themePaletteSubtitle => 'Кольори інтерфейсу та нотаток';
+  String get themeSubtitle => 'Кольори інтерфейсу та нотаток';
   @override
   String get themePaletteSystem => 'Система';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Теми';
+  @override
+  String get themesInUse => 'Використовується';
 
   // Settings: text size (T-M6-12).
   @override

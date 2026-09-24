@@ -250,11 +250,16 @@ final class EstonianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tume';
   @override
-  String get themePaletteTitle => 'Värvipaleett';
+  String get themeTitle => 'Teema';
   @override
-  String get themePaletteSubtitle => 'Kasutajaliides ja märgiste värvid';
+  String get themeSubtitle => 'Kasutajaliides ja märgiste värvid';
   @override
   String get themePaletteSystem => 'Süsteem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teemad';
+  @override
+  String get themesInUse => 'Kasutusel';
 
   // Settings: text size (T-M6-12).
   @override

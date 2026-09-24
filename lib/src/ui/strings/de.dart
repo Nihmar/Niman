@@ -256,11 +256,16 @@ final class GermanStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Dunkel';
   @override
-  String get themePaletteTitle => 'Farbpalette';
+  String get themeTitle => 'Design';
   @override
-  String get themePaletteSubtitle => 'Die Farben der Oberfläche und der Notiz';
+  String get themeSubtitle => 'Die Farben der Oberfläche und der Notiz';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Designs';
+  @override
+  String get themesInUse => 'In Verwendung';
 
   // Settings: text size (T-M6-12).
   @override

@@ -251,11 +251,16 @@ final class LatvianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tumša';
   @override
-  String get themePaletteTitle => 'Krāsu palete';
+  String get themeTitle => 'Tēma';
   @override
-  String get themePaletteSubtitle => 'Saskarnes un piezīmju krāsas';
+  String get themeSubtitle => 'Saskarnes un piezīmju krāsas';
   @override
   String get themePaletteSystem => 'Sistēma';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Tēmas';
+  @override
+  String get themesInUse => 'Lieto';
 
   // Settings: text size (T-M6-12).
   @override

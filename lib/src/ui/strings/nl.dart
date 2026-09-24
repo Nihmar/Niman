@@ -254,12 +254,16 @@ final class DutchStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Donker';
   @override
-  String get themePaletteTitle => 'Kleurenpalet';
+  String get themeTitle => 'Thema';
   @override
-  String get themePaletteSubtitle =>
-      'De kleuren van de interface en van de notitie';
+  String get themeSubtitle => 'De kleuren van de interface en van de notitie';
   @override
   String get themePaletteSystem => 'Systeem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => "Thema's";
+  @override
+  String get themesInUse => 'In gebruik';
 
   // Settings: text size (T-M6-12).
   @override

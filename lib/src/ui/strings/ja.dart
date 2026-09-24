@@ -232,11 +232,16 @@ final class JapaneseStrings extends Strings {
   @override
   String get themeBrightnessNight => 'ダーク';
   @override
-  String get themePaletteTitle => 'カラーパレット';
+  String get themeTitle => 'テーマ';
   @override
-  String get themePaletteSubtitle => 'UI とノートの色';
+  String get themeSubtitle => 'UI とノートの色';
   @override
   String get themePaletteSystem => 'システム';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'テーマ';
+  @override
+  String get themesInUse => '使用中';
 
   // Settings: text size (T-M6-12).
   @override

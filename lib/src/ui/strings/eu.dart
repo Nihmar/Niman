@@ -250,11 +250,16 @@ final class BasqueStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Iluna';
   @override
-  String get themePaletteTitle => 'Kolore-paleta';
+  String get themeTitle => 'Gaia';
   @override
-  String get themePaletteSubtitle => 'Interfazearen eta oharreko koloreak';
+  String get themeSubtitle => 'Interfazearen eta oharreko koloreak';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Gaiak';
+  @override
+  String get themesInUse => 'Erabiltzen';
 
   // Settings: text size (T-M6-12).
   @override

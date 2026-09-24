@@ -257,11 +257,16 @@ final class BosnianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tamna';
   @override
-  String get themePaletteTitle => 'Paleta';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Boje sučelja i bilješke';
+  String get themeSubtitle => 'Boje sučelja i bilješke';
   @override
   String get themePaletteSystem => 'Sistem';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'U upotrebi';
 
   // Settings: text size (T-M6-12).
   @override

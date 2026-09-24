@@ -253,11 +253,16 @@ final class IcelandicStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Dimmt';
   @override
-  String get themePaletteTitle => 'Litapalletta';
+  String get themeTitle => 'Þema';
   @override
-  String get themePaletteSubtitle => 'Litir viðkomumlegs og athugasraðans';
+  String get themeSubtitle => 'Litir viðkomumlegs og athugasraðans';
   @override
   String get themePaletteSystem => 'Kerfi';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Þemu';
+  @override
+  String get themesInUse => 'Í notkun';
 
   // Settings: text size (T-M6-12).
   @override

@@ -120,8 +120,13 @@ abstract base class Strings {
   String get themeBrightnessSystem;
   String get themeBrightnessDay;
   String get themeBrightnessNight;
-  String get themePaletteTitle;
-  String get themePaletteSubtitle;
+  String get themeTitle;
+  String get themeSubtitle;
+
+  /// The settings area the colors live in, and the mark on the
+  /// theme in use (issue #269).
+  String get settingsSectionThemes;
+  String get themesInUse;
   String get themePaletteSystem;
 
   // Settings: text size (T-M6-12).

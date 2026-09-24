@@ -255,12 +255,16 @@ final class SwedishStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Mörk';
   @override
-  String get themePaletteTitle => 'Färgpalett';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle =>
-      'Färgerna i gränssnittet och i anteckningen';
+  String get themeSubtitle => 'Färgerna i gränssnittet och i anteckningen';
   @override
   String get themePaletteSystem => 'System';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teman';
+  @override
+  String get themesInUse => 'Används';
 
   // Settings: text size (T-M6-12).
   @override

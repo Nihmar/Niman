@@ -259,11 +259,16 @@ final class GreekStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Σκούρο';
   @override
-  String get themePaletteTitle => 'Παλέτα';
+  String get themeTitle => 'Θέμα';
   @override
-  String get themePaletteSubtitle => 'Χρώματα της διεπαφής και της σημείωσης';
+  String get themeSubtitle => 'Χρώματα της διεπαφής και της σημείωσης';
   @override
   String get themePaletteSystem => 'Σύστημα';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Θέματα';
+  @override
+  String get themesInUse => 'Σε χρήση';
 
   // Settings: text size (T-M6-12).
   @override

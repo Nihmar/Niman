@@ -2,11 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -15,8 +13,8 @@ import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The Appearance area of the settings home (issue #104): the app's own
-/// look — language, brightness, palette, the interface text size, and
-/// the split width where the panes split.
+/// look — language, the interface text size, and the split width where
+/// the panes split. The colors have their own area (issue #269).
 final class SettingsAppearanceScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
   const new({required this.controller, this.highlight, super.key});
@@ -27,16 +25,6 @@ final class SettingsAppearanceScreen extends StatefulWidget {
   /// The row the settings search landed on, flashed once.
   final Key? highlight;
 
-  /// What a palette reads as, in the dialog, on the row, and in the
-  /// settings search.
-  static String paletteName(AppPalette palette) => switch (palette) {
-    AppPalette.system => AppStrings.themePaletteSystem,
-    AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
-    AppPalette.solarized => AppStrings.themePaletteSolarized,
-    AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
-    AppPalette.niman => AppStrings.themePaletteNiman,
-  };
-
   @override
   State<SettingsAppearanceScreen> createState() =>
       _SettingsAppearanceScreenState();
@@ -45,20 +33,6 @@ final class SettingsAppearanceScreen extends StatefulWidget {
 final class _SettingsAppearanceScreenState
     extends State<SettingsAppearanceScreen> {
   AppLanguage _language = AppLanguage.system;
-  AppBrightness _themeBrightness = AppBrightness.system;
-
-  /// The theme in use, for the palette row's label. The choice itself
-  /// moves to the Themes page (issue #269); until then this row offers
-  /// the shipped palettes and shows the worn one.
-  AppTheme _theme = const BuiltinAppTheme(AppPalette.niman);
-
-  /// Which shipped palette the row reads: the worn theme when it is one
-  /// of them, Niman's own colors when a custom theme is worn (a custom
-  /// theme's colors show on the Themes page, issue #269).
-  AppPalette get _shownPalette => switch (_theme) {
-    BuiltinAppTheme(:final palette) => palette,
-    CustomAppTheme() => AppPalette.niman,
-  };
   double _uiTextScale = defaultTextScale;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
@@ -84,8 +58,6 @@ final class _SettingsAppearanceScreenState
   Future<void> _load() async {
     final controller = widget.controller;
     final language = await controller.language;
-    final themeBrightness = await controller.themeBrightness;
-    final theme = await controller.theme;
     final uiTextScale = await controller.uiTextScale;
     final splitRatio = await controller.splitRatio;
     final previewMode = await controller.previewMode;
@@ -95,8 +67,6 @@ final class _SettingsAppearanceScreenState
     if (!mounted) return;
     setState(() {
       _language = language;
-      _themeBrightness = themeBrightness;
-      _theme = theme;
       _uiTextScale = uiTextScale;
       _splitRatio = splitRatio;
       _splitLoaded = true;
@@ -114,26 +84,6 @@ final class _SettingsAppearanceScreenState
     AppLanguages.choice = language;
     if (mounted) {
       setState(() => _language = language);
-    }
-  }
-
-  /// Persists the brightness and applies it immediately (T-M6-05): the
-  /// app root listens to [AppThemes] and rebuilds every screen.
-  Future<void> _setThemeBrightness(AppBrightness brightness) async {
-    await widget.controller.setThemeBrightness(brightness);
-    AppThemes.brightness = brightness;
-    if (mounted) {
-      setState(() => _themeBrightness = brightness);
-    }
-  }
-
-  /// Persists the theme and applies it immediately.
-  Future<void> _setThemePalette(AppPalette palette) async {
-    final chosen = BuiltinAppTheme(palette);
-    await widget.controller.setTheme(chosen);
-    AppThemes.theme = chosen;
-    if (mounted) {
-      setState(() => _theme = chosen);
     }
   }
 
@@ -155,42 +105,6 @@ final class _SettingsAppearanceScreenState
       ],
     );
     if (language != null) await _setLanguage(language);
-  }
-
-  /// Asks how bright the app should be.
-  Future<void> _chooseThemeBrightness() async {
-    final brightness = await showSettingsChoice<AppBrightness>(
-      context,
-      dialogKey: const Key('theme-brightness-dialog'),
-      title: AppStrings.themeBrightnessTitle,
-      subtitle: AppStrings.themeBrightnessSubtitle,
-      current: _themeBrightness,
-      options: [
-        SettingsOption(AppBrightness.system, AppStrings.themeBrightnessSystem),
-        SettingsOption(AppBrightness.day, AppStrings.themeBrightnessDay),
-        SettingsOption(AppBrightness.night, AppStrings.themeBrightnessNight),
-      ],
-    );
-    if (brightness != null) await _setThemeBrightness(brightness);
-  }
-
-  /// Asks which palette the app wears.
-  Future<void> _chooseThemePalette() async {
-    final palette = await showSettingsChoice<AppPalette>(
-      context,
-      dialogKey: const Key('theme-palette-dialog'),
-      title: AppStrings.themePaletteTitle,
-      subtitle: AppStrings.themePaletteSubtitle,
-      current: _shownPalette,
-      options: [
-        for (final palette in AppPalette.values)
-          SettingsOption(
-            palette,
-            SettingsAppearanceScreen.paletteName(palette),
-          ),
-      ],
-    );
-    if (palette != null) await _setThemePalette(palette);
   }
 
   /// Asks how large the interface text should be.
@@ -258,28 +172,6 @@ final class _SettingsAppearanceScreenState
               subtitle: AppStrings.languageSubtitle,
               value: AppStrings.languageName(_language),
               onTap: () => unawaited(_chooseLanguage()),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.brightness,
-            child: SettingsValueRow(
-              title: AppStrings.themeBrightnessTitle,
-              subtitle: AppStrings.themeBrightnessSubtitle,
-              value: switch (_themeBrightness) {
-                AppBrightness.system => AppStrings.themeBrightnessSystem,
-                AppBrightness.day => AppStrings.themeBrightnessDay,
-                AppBrightness.night => AppStrings.themeBrightnessNight,
-              },
-              onTap: () => unawaited(_chooseThemeBrightness()),
-            ),
-          ),
-          HighlightRow(
-            key: SettingsKeys.palette,
-            child: SettingsValueRow(
-              title: AppStrings.themePaletteTitle,
-              subtitle: AppStrings.themePaletteSubtitle,
-              value: SettingsAppearanceScreen.paletteName(_shownPalette),
-              onTap: () => unawaited(_chooseThemePalette()),
             ),
           ),
           HighlightRow(

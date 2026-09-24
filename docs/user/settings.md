@@ -8,7 +8,8 @@ device.
 ## The Settings screen
 
 Settings is split into areas, grouped by what they change: **App**
-(appearance, editor, keyboard shortcuts, commands, updates, diagnostics),
+(appearance, themes, editor, keyboard shortcuts, commands, updates,
+diagnostics),
 the open **Library** (folders, trash and history, sync, transcription,
 reminders), and **Maintenance** (re-index, switch or close the library;
 in the settings window only re-index, since the rail's library window
@@ -79,12 +80,31 @@ takes the app down. Writes are atomic (temp file + rename).
 
 ## App settings (on device)
 
-Brightness (day / night / system) × palette (system or Catppuccin),
-preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
-ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
-log toggle (default on), the keyboard shortcuts and the formatting keys,
-the commands pinned in the palette, and — on the desktops — *Close to the
-tray* (default on: the window's × hides Niman and leaves it running).
+Brightness (day / night / system) and the theme the app wears are on
+**Themes** (below); layout (`auto` = split at ≥ 600 dp, or `fullScreen`),
+preview, split ratio (0.2–0.8, default 0.55), UI language, last opened
+library, debug log toggle (default on), the keyboard shortcuts and the
+formatting keys, the commands pinned in the palette, and — on the
+desktops — *Close to the tray* (default on: the window's × hides Niman
+and leaves it running).
+
+### Themes
+
+The app's colors have their own area: **Settings → Themes**. Brightness
+is the first row — day, night, or whatever the device says — and under it
+sit the themes, each with its colors in front of you. The one in use is
+marked; tapping another wears it at once, everywhere, and it is
+remembered on this device.
+
+The themes are the palettes Niman ships:
+
+| Theme | What it is |
+|-------|------------|
+| System | The device's own colors: the wallpaper palette (Material You), or the accent color, falling back to Niman's if the OS offers neither |
+| Niman | The app's own colors, taken from the logo (the default) |
+| Catppuccin | Latte by day, Mocha by night |
+| Solarized | Schoonover's light and dark |
+| Gruvbox | The medium light and dark variants |
 
 ### Sync
 

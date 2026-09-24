@@ -256,11 +256,16 @@ final class SlovakStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tmavé';
   @override
-  String get themePaletteTitle => 'Farbová paleta';
+  String get themeTitle => 'Téma';
   @override
-  String get themePaletteSubtitle => 'Farby rozhrania a poznámky';
+  String get themeSubtitle => 'Farby rozhrania a poznámky';
   @override
   String get themePaletteSystem => 'Systém';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Témy';
+  @override
+  String get themesInUse => 'Používa sa';
 
   // Settings: text size (T-M6-12).
   @override

@@ -256,11 +256,16 @@ final class CatalanStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Fosc';
   @override
-  String get themePaletteTitle => 'Paleta de colors';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Els colors de la interfície i de la nota';
+  String get themeSubtitle => 'Els colors de la interfície i de la nota';
   @override
   String get themePaletteSystem => 'Sistema';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Temes';
+  @override
+  String get themesInUse => 'En ús';
 
   // Settings: text size (T-M6-12).
   @override

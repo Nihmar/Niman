@@ -219,8 +219,10 @@ final class AppStrings {
   static String get themeBrightnessSystem => _s.themeBrightnessSystem;
   static String get themeBrightnessDay => _s.themeBrightnessDay;
   static String get themeBrightnessNight => _s.themeBrightnessNight;
-  static String get themePaletteTitle => _s.themePaletteTitle;
-  static String get themePaletteSubtitle => _s.themePaletteSubtitle;
+  static String get themeTitle => _s.themeTitle;
+  static String get themeSubtitle => _s.themeSubtitle;
+  static String get settingsSectionThemes => _s.settingsSectionThemes;
+  static String get themesInUse => _s.themesInUse;
 
   /// The device-colors palette. Named for what it does rather than for
   /// Material You: on a device that offers nothing it is the colors the

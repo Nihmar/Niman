@@ -256,11 +256,16 @@ final class CroatianStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Tamno';
   @override
-  String get themePaletteTitle => 'Paleta boja';
+  String get themeTitle => 'Tema';
   @override
-  String get themePaletteSubtitle => 'Boje sučelja i napomene';
+  String get themeSubtitle => 'Boje sučelja i napomene';
   @override
   String get themePaletteSystem => 'Sustav';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Teme';
+  @override
+  String get themesInUse => 'U upotrebi';
 
   // Settings: text size (T-M6-12).
   @override

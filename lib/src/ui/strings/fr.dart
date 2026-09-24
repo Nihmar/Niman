@@ -258,12 +258,16 @@ final class FrenchStrings extends Strings {
   @override
   String get themeBrightnessNight => 'Sombre';
   @override
-  String get themePaletteTitle => 'Palette';
+  String get themeTitle => 'Thème';
   @override
-  String get themePaletteSubtitle =>
-      'Les couleurs de l’interface et de la note';
+  String get themeSubtitle => 'Les couleurs de l’interface et de la note';
   @override
   String get themePaletteSystem => 'Système';
+  // Settings: the themes page (issue #269).
+  @override
+  String get settingsSectionThemes => 'Thèmes';
+  @override
+  String get themesInUse => 'Utilisé';
 
   // Settings: text size (T-M6-12).
   @override
