@@ -41,6 +41,7 @@ import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -84,10 +85,15 @@ const double zenCaretWidth = 3;
 /// Saves a note whose text the editor never joins: [content] makes the
 /// bytes a slice at a time, and the save answers when the disk holds them.
 /// See [NoteView.saveNoteStream].
+///
+/// [references] are the note's tags and links as of the text saved, when
+/// the editor keeps them (a long note): the index takes them rather than
+/// reading the note for them.
 typedef NoteStreamSaver = Future<void> Function(
   String path,
   NoteContentProducer content, {
   required int editSession,
+  NoteReferences? references,
 });
 
 /// Opens a note file in the source editor and keeps disk in sync.
@@ -1811,6 +1817,7 @@ final class _NoteViewState extends State<NoteView>
         target,
         (index) => _nextSlice(stream, index),
         editSession: session,
+        references: stream.references,
       );
       if (target == widget.path) {
         _lastSavedRevision = revision;
@@ -1854,7 +1861,12 @@ final class _NoteViewState extends State<NoteView>
     if (buffer == null || buffer.lineCount == 0) {
       return null;
     }
-    return _StreamSave(buffer.snapshot());
+    // The references with the lines, of the same revision: the source
+    // pane's scan follows this very buffer.
+    return _StreamSave(
+      buffer.snapshot(),
+      references: _sourceViewKey.currentState?.references(),
+    );
   }
 
   /// The next slice of [stream]'s buffer, or null when the note is out.
@@ -2441,10 +2453,13 @@ final class _NoteViewState extends State<NoteView>
 /// were when the save started, which no later edit reaches.
 final class _StreamSave {
   /// Saves [buffer]'s lines, slice by slice.
-  const new(this.buffer);
+  const new(this.buffer, {this.references});
 
   /// The note's lines, at the moment the save began.
   final SourceBuffer buffer;
+
+  /// The note's tags and links as of [buffer], when the editor keeps them.
+  final NoteReferences? references;
 
   /// How many slices the save will hand over; for the log only.
   int get slices =>

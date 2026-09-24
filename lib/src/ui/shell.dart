@@ -1246,7 +1246,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final ops = controller.ops;
     final root = controller.root;
     if (ops == null || root == null) return null;
-    return (path, content, {required editSession}) {
+    return (path, content, {required editSession, references}) {
       if (!p.isWithin(root, path)) {
         return Future<void>.error(StateError('"$path" is outside the library'));
       }
@@ -1254,6 +1254,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         relPath(path, root),
         content,
         editSession: editSession,
+        references: references,
       );
     };
   }

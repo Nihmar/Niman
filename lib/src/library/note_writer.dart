@@ -15,6 +15,7 @@ import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/library/note_tidy.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
 /// Saves note text to disk: the one write path the editor goes through.
@@ -102,17 +103,30 @@ final class NoteWriter {
   /// note too long to join on the UI isolate is never joined at all (see
   /// [saveNoteStream]); [contentLength] is then its length in characters,
   /// for the sizes the log reports.
+  ///
+  /// [references] are the note's tags and links as of [content], when the
+  /// editor keeps them: handed to the note's reindex with the digest the
+  /// write makes ([KnownContent]).
   Future<void> save(
     String path,
     NoteText content, {
     int? editSession,
     HistoryReason? forced,
     int? contentLength,
+    NoteReferences? references,
   }) {
     final queuedAt = Stopwatch()..start();
     return _inTurn(
       path,
-      () => _write(path, content, editSession, forced, queuedAt, contentLength),
+      () => _write(
+        path,
+        content,
+        editSession,
+        forced,
+        queuedAt,
+        contentLength,
+        references: references,
+      ),
     );
   }
 
@@ -236,8 +250,9 @@ final class NoteWriter {
     int? editSession,
     HistoryReason? forced,
     Stopwatch queuedAt,
-    int? contentLength,
-  ) async {
+    int? contentLength, {
+    NoteReferences? references,
+  }) async {
     final waitMs = queuedAt.elapsedMilliseconds;
     final abs = p.join(root, path);
     final session = editSession == null ? '' : ', session $editSession';
@@ -275,6 +290,7 @@ final class NoteWriter {
       sha256: result.sha256,
       size: result.bytes,
       modified: result.modified,
+      references: references,
     );
     _log.info(
       'saved: "$path" (${result.bytes} bytes, '

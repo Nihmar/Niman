@@ -35,7 +35,9 @@ final class BlockScanner {
   new(this.buffer, {this.budget = defaultBudget}) : _blocks = BlockList() {
     _rebuild(start: 0, headEnd: 0, tailStart: 0, settledFrom: 0, budget: null);
     // The changes are counted from the list a reader first takes.
-    _changes = BlockChanges();
+    _changes
+      ..clear()
+      ..[_handOver] = BlockChanges();
   }
 
   /// [scanned]'s answer, for [buffer]: a scan made of a copy of the note —
@@ -77,18 +79,29 @@ final class BlockScanner {
   /// Block [index] where it is now.
   Block _at(int index) => _blocks[index];
 
-  /// What the edits did to the block list since the last call — or since the
-  /// scan, the first time — and a fresh record from here on.
+  /// What the edits did to the block list since [reader] last asked, and a
+  /// fresh record for it from here on.
   ///
-  /// For a reader that keeps something per block (the read pane's heights):
-  /// it replays these over what it had instead of starting again.
-  BlockChanges takeChanges() {
-    final taken = _changes;
-    _changes = BlockChanges();
+  /// For a reader that keeps something per block: it replays these over
+  /// what it had instead of starting again. Each reader keeps a record of
+  /// its own, so one taking its changes leaves the others theirs — the read
+  /// pane's heights, handed over by the editor, are the default reader, and
+  /// their record is counted from the scan; any other reader's is counted
+  /// from its first call, which is where it has to take the list whole.
+  BlockChanges takeChanges([Object? reader]) {
+    final key = reader ?? _handOver;
+    final taken = _changes[key] ?? BlockChanges();
+    _changes[key] = BlockChanges();
     return taken;
   }
 
-  BlockChanges _changes = BlockChanges();
+  /// The reader [takeChanges] answers when none is named.
+  static final Object _handOver = Object();
+
+  /// Each reader's record of the splices since it last took them.
+  final Map<Object, BlockChanges> _changes = <Object, BlockChanges>{
+    _handOver: BlockChanges(),
+  };
 
   /// The blocks as of [SourceBuffer.revision], for a reader that wants them.
   ///
@@ -371,7 +384,9 @@ final class BlockScanner {
     }
     // The dropped blocks are the ones between the head and the kept tail.
     _blocks.splice(headEnd, keepFrom, rebuilt);
-    _changes.record(headEnd, keepFrom - headEnd, rebuilt.length);
+    for (final changes in _changes.values) {
+      changes.record(headEnd, keepFrom - headEnd, rebuilt.length);
+    }
     // The frontiers the rebuild passed are behind it; a converged one leaves
     // the ones below it, whose hints it did not reach, and one that stopped
     // short is the first frontier itself.
