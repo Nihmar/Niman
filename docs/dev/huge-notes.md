@@ -371,6 +371,19 @@ written next to it.
     head the edit wrote (`Indexer.applyFrontmatter`) and reads the note back
     later, as a save does (`NoteWriter.reindexWhenQuiet`).
 
+11. ~~**The read view is empty while it scans.**~~ Done (2026-09-24). The
+    read view needs the whole note's blocks — the height map is theirs — and
+    a note past `MarkdownReadViewState.backgroundLines` is scanned on an
+    isolate. The pane drew nothing meanwhile: 22.6 s of an empty preview on
+    a phone for the stress note (device log, 2026-09-24). It now draws the
+    top of the note at once — its first `headLines` lines, cut at the next
+    blank line so no block is a piece of a longer one (`DocumentScan.head`),
+    a few milliseconds of scan — with a bar under it saying the rest is
+    being read. The top's blocks are the whole note's, since a block is
+    decided by the lines above it; its definitions are the top's alone until
+    the full scan lands. A jump past the top waits for it, and the place the
+    reader reached in the top is kept when the whole note takes over.
+
 ## The statistics, measured on the 247 MB note
 
 `dart run tool/stats_bench.dart "Quicknote.md"` (246 867 656 chars,
