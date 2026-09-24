@@ -10,13 +10,23 @@
 /// new raw line, or null on cancel. An edit can also delete the task:
 /// tap is how a row is opened on every platform, so the dialog is where
 /// deleting is found without knowing the long-press menu exists.
+///
+/// The description wraps and grows downward rather than scrolling
+/// sideways (#267), yet stays one todo.txt line: Enter saves, and a line
+/// break never gets in. A wide window gives the dialog more width, and
+/// one with the room picks the due date and the reminder in place, under
+/// their rows, rather than in pickers stacked over the dialog (#268).
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/todo_date_panel.dart';
 
 /// Shows the add ([initial] null) or edit dialog.
 ///
@@ -78,6 +88,13 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   /// rewritten — an untouched edit keeps the text byte-identical).
   bool _dueDirty = false;
   bool _reminderDirty = false;
+
+  /// The date picked in place right now, on a window with the room; one
+  /// at a time.
+  _DatePanel? _open;
+
+  /// Where the open panel is, to bring it into view.
+  final GlobalKey _panelKey = GlobalKey();
 
   @override
   void initState() {
@@ -192,33 +209,66 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     setState(() {});
   }
 
+  /// Opens [panel] in place, or closes it when it is open; the other
+  /// closes. Scrolls it into view once it is laid out.
+  void _toggle(_DatePanel panel) {
+    final opening = _open != panel;
+    _log.debug(
+      'todo dialog ${panel.name} panel ${opening ? 'open' : 'closed'}',
+    );
+    setState(() => _open = opening ? panel : null);
+    if (opening) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _revealPanel());
+    }
+  }
+
+  /// Scrolls the open panel into view: under the last row, it can open
+  /// below the dialog's fold.
+  Future<void> _revealPanel() async {
+    final panelContext = _panelKey.currentContext;
+    if (panelContext == null || !panelContext.mounted) return;
+    await Scrollable.ensureVisible(
+      panelContext,
+      duration: const Duration(milliseconds: 200),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+  }
+
   /// Picks the due date (writes/updates `due:` on save).
   Future<void> _pickDue() async {
+    if (todoPicksInPlace(context)) return _toggle(_DatePanel.due);
     final today = _day(widget.today);
     final picked = await showDatePicker(
       context: context,
       initialDate: _due ?? today,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      firstDate: todoFirstDate,
+      lastDate: todoLastDate,
     );
     if (picked == null || !mounted) {
       return;
     }
+    _setDue(picked);
+  }
+
+  /// Keeps [picked] as the due date, closing the panel it came from.
+  void _setDue(DateTime picked) {
     _log.debug('todo dialog due: ${formatTodoDate(picked)}');
     setState(() {
       _due = picked;
       _dueDirty = true;
+      _open = null;
     });
   }
 
   /// Picks the reminder day and time (writes `rem:` on save).
   Future<void> _pickReminder() async {
+    if (todoPicksInPlace(context)) return _toggle(_DatePanel.reminder);
     final today = _day(widget.today);
     final date = await showDatePicker(
       context: context,
       initialDate: _reminder ?? today,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      firstDate: todoFirstDate,
+      lastDate: todoLastDate,
     );
     if (date == null || !mounted) {
       return;
@@ -230,17 +280,18 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     if (time == null || !mounted) {
       return;
     }
-    final stamp = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
+    _setReminder(
+      DateTime(date.year, date.month, date.day, time.hour, time.minute),
     );
+  }
+
+  /// Keeps [stamp] as the reminder, closing the panel it came from.
+  void _setReminder(DateTime stamp) {
     _log.debug('todo dialog reminder: ${formatTodoStamp(stamp)}');
     setState(() {
       _reminder = stamp;
       _reminderDirty = true;
+      _open = null;
     });
   }
 
@@ -291,139 +342,14 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   Widget build(BuildContext context) {
     final adding = widget.initial == null;
     final tokens = _fieldTokens();
+    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     return AlertDialog(
       title: _title(adding),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Completion is per-token, not whole-value: the word under the
-            // caret is replaced, so a fresh task can type a description and
-            // then pick `+project`/`@context`/`#tag` without losing it.
-            // (flutter's RawAutocomplete would clobber the whole field with
-            // the option, so this inline list replaces it as the overlay.)
-            _fieldBox(context),
-            if (_focus.hasFocus && _completions.isNotEmpty)
-              _completionList(_completions),
-            if (tokens.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [
-                    for (final token in tokens)
-                      InputChip(
-                        key: Key('todo-token-chip-$token'),
-                        label: Text(token),
-                        deleteIcon: const Icon(Icons.cancel_outlined),
-                        visualDensity: VisualDensity.compact,
-                        onDeleted: () => _removeToken(token),
-                      ),
-                  ],
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  for (final kind in <(String, String)>[
-                    ('+', AppStrings.todoAddProject),
-                    ('@', AppStrings.todoAddContext),
-                    ('#', AppStrings.todoAddHashtag),
-                  ])
-                    ActionChip(
-                      key: Key('todo-token-add-${kind.$1}'),
-                      label: Text(kind.$2),
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () => _insertSigil(kind.$1),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              key: const Key('todo-dialog-priority'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Icon(Icons.flag_outlined, size: 20),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: _priorityChips()),
-              ],
-            ),
-            Row(
-              children: [
-                const Icon(Icons.event_outlined, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextButton(
-                    key: const Key('todo-dialog-due'),
-                    onPressed: _pickDue,
-                    style: TextButton.styleFrom(
-                      alignment: Alignment.centerLeft,
-                    ),
-                    child: Text(
-                      _due == null
-                          ? AppStrings.todoNoDueDate
-                          : formatTodoDate(_due!),
-                    ),
-                  ),
-                ),
-                if (_due != null)
-                  IconButton(
-                    key: const Key('todo-dialog-due-clear'),
-                    tooltip: AppStrings.todoNoDueDate,
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _log.debug('todo dialog due cleared');
-                      setState(() {
-                        _due = null;
-                        _dueDirty = true;
-                      });
-                    },
-                  ),
-              ],
-            ),
-            Row(
-              children: [
-                const Icon(Icons.alarm_outlined, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextButton(
-                    key: const Key('todo-dialog-reminder'),
-                    onPressed: _pickReminder,
-                    style: TextButton.styleFrom(
-                      alignment: Alignment.centerLeft,
-                    ),
-                    child: Text(
-                      _reminder == null
-                          ? AppStrings.todoNoReminder
-                          : formatTodoStamp(_reminder!),
-                    ),
-                  ),
-                ),
-                if (_reminder != null)
-                  IconButton(
-                    key: const Key('todo-dialog-reminder-clear'),
-                    tooltip: AppStrings.todoNoReminder,
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _log.debug('todo dialog reminder cleared');
-                      setState(() {
-                        _reminder = null;
-                        _reminderDirty = true;
-                      });
-                    },
-                  ),
-              ],
-            ),
-          ],
-        ),
+      // A phone keeps the dialog's own width; a desktop has the room for a
+      // description to read as a sentence (#267).
+      content: SizedBox(
+        width: wide ? _wideWidth : null,
+        child: _content(context, tokens),
       ),
       actions: [
         TextButton(
@@ -469,23 +395,201 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     onDelete();
   }
 
+  /// The dialog's width on a wide window (#267).
+  static const double _wideWidth = 560;
+
+  /// The dialog's body: the description with its completion and tokens,
+  /// then the managed fields.
+  Widget _content(BuildContext context, List<String> tokens) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Completion is per-token, not whole-value: the word under the
+          // caret is replaced, so a fresh task can type a description and
+          // then pick `+project`/`@context`/`#tag` without losing it.
+          // (flutter's RawAutocomplete would clobber the whole field with
+          // the option, so this inline list replaces it as the overlay.)
+          _fieldBox(context),
+          if (_focus.hasFocus && _completions.isNotEmpty)
+            _completionList(_completions),
+          if (tokens.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: [
+                  for (final token in tokens)
+                    InputChip(
+                      key: Key('todo-token-chip-$token'),
+                      label: Text(token),
+                      deleteIcon: const Icon(Icons.cancel_outlined),
+                      visualDensity: VisualDensity.compact,
+                      onDeleted: () => _removeToken(token),
+                    ),
+                ],
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                for (final kind in <(String, String)>[
+                  ('+', AppStrings.todoAddProject),
+                  ('@', AppStrings.todoAddContext),
+                  ('#', AppStrings.todoAddHashtag),
+                ])
+                  ActionChip(
+                    key: Key('todo-token-add-${kind.$1}'),
+                    label: Text(kind.$2),
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => _insertSigil(kind.$1),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            key: const Key('todo-dialog-priority'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Icon(Icons.flag_outlined, size: 20),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: _priorityChips()),
+            ],
+          ),
+          Row(
+            children: [
+              const Icon(Icons.event_outlined, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextButton(
+                  key: const Key('todo-dialog-due'),
+                  onPressed: _pickDue,
+                  style: TextButton.styleFrom(alignment: Alignment.centerLeft),
+                  child: Text(
+                    _due == null
+                        ? AppStrings.todoNoDueDate
+                        : formatTodoDate(_due!),
+                  ),
+                ),
+              ),
+              if (_due != null)
+                IconButton(
+                  key: const Key('todo-dialog-due-clear'),
+                  tooltip: AppStrings.todoNoDueDate,
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _log.debug('todo dialog due cleared');
+                    setState(() {
+                      _due = null;
+                      _dueDirty = true;
+                      if (_open == _DatePanel.due) _open = null;
+                    });
+                  },
+                ),
+            ],
+          ),
+          if (_open == _DatePanel.due)
+            TodoDatePanel(
+              key: _panelKey,
+              initial: _due ?? _day(widget.today),
+              onPicked: _setDue,
+            ),
+          Row(
+            children: [
+              const Icon(Icons.alarm_outlined, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextButton(
+                  key: const Key('todo-dialog-reminder'),
+                  onPressed: _pickReminder,
+                  style: TextButton.styleFrom(alignment: Alignment.centerLeft),
+                  child: Text(
+                    _reminder == null
+                        ? AppStrings.todoNoReminder
+                        : formatTodoStamp(_reminder!),
+                  ),
+                ),
+              ),
+              if (_reminder != null)
+                IconButton(
+                  key: const Key('todo-dialog-reminder-clear'),
+                  tooltip: AppStrings.todoNoReminder,
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _log.debug('todo dialog reminder cleared');
+                    setState(() {
+                      _reminder = null;
+                      _reminderDirty = true;
+                      if (_open == _DatePanel.reminder) _open = null;
+                    });
+                  },
+                ),
+            ],
+          ),
+          if (_open == _DatePanel.reminder)
+            TodoReminderPanel(
+              key: _panelKey,
+              initial: _reminder ?? widget.today,
+              onPicked: _setReminder,
+            ),
+        ],
+      ),
+    );
+  }
+
   /// The known tokens completing the word under the caret, capped so a huge
   /// vocabulary never floods the dialog.
   List<String> get _completions => _options(_field.value).take(6).toList();
 
-  /// The description entry field (single line, Enter saves).
+  /// The description entry field: it wraps and grows downward up to
+  /// [_fieldMaxLines] lines, then scrolls inside itself (#267).
+  ///
+  /// It is still one todo.txt line. A soft keyboard shows Done, which
+  /// saves; a hardware Enter saves too, caught before the field would
+  /// break the line, unless an input method is composing a word, which
+  /// Enter commits. A line break that comes in anyway (a paste) becomes a
+  /// space.
   Widget _fieldBox(BuildContext context) {
-    return TextField(
-      key: const Key('todo-dialog-field'),
-      controller: _field,
-      focusNode: _focus,
-      autofocus: true,
-      decoration: InputDecoration(hintText: AppStrings.todoDescriptionHint),
-      textInputAction: TextInputAction.done,
-      onChanged: (_) => setState(() {}),
-      onSubmitted: (_) => _save(),
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onKeyEvent: (node, event) {
+        final enter =
+            event.logicalKey == LogicalKeyboardKey.enter ||
+            event.logicalKey == LogicalKeyboardKey.numpadEnter;
+        if (!enter || _field.value.composing.isValid) {
+          return KeyEventResult.ignored;
+        }
+        if (event is KeyDownEvent) _save();
+        return KeyEventResult.handled;
+      },
+      child: TextField(
+        key: const Key('todo-dialog-field'),
+        controller: _field,
+        focusNode: _focus,
+        autofocus: true,
+        minLines: 1,
+        maxLines: _fieldMaxLines,
+        keyboardType: TextInputType.text,
+        inputFormatters: const [_NoLineBreaks()],
+        decoration: InputDecoration(hintText: AppStrings.todoDescriptionHint),
+        textInputAction: TextInputAction.done,
+        onChanged: (_) => setState(() {}),
+        onSubmitted: (_) => _save(),
+      ),
     );
   }
+
+  /// How far the description grows before it scrolls.
+  static const int _fieldMaxLines = 6;
 
   /// The tap-to-pick list of completion [options] under the field.
   ///
@@ -629,4 +733,30 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
 
   /// Truncates [date] to day precision.
   DateTime _day(DateTime date) => DateTime(date.year, date.month, date.day);
+}
+
+/// Turns every line break into a space, one for one, so the caret and
+/// the selection keep their offsets: a task is one todo.txt line.
+final class _NoLineBreaks extends TextInputFormatter {
+  const new();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (!newValue.text.contains(RegExp('[\r\n]'))) return newValue;
+    return newValue.copyWith(
+      text: newValue.text.replaceAll(RegExp('[\r\n]'), ' '),
+    );
+  }
+}
+
+/// The date picked in place.
+enum _DatePanel {
+  /// The due date's calendar.
+  due,
+
+  /// The reminder's calendar and time.
+  reminder,
 }
