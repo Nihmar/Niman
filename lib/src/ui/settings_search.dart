@@ -387,6 +387,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushDiagnostics(SettingsKeys.changelog),
     ),
     SettingsSearchEntry(
+      title: AppStrings.cheatsheetTitle,
+      area: AppStrings.settingsAreaDiagnostics,
+      rowKey: SettingsKeys.cheatsheet,
+      value: noValue,
+      areaId: SettingsAreaId.diagnostics,
+      open: () => pushDiagnostics(SettingsKeys.cheatsheet),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.reminderShowTokensTitle,
       area: libraryArea(AppStrings.settingsSectionReminders),
       rowKey: SettingsKeys.reminderShowTokens,

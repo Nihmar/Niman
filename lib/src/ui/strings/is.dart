@@ -490,6 +490,54 @@ final class IcelandicStrings extends Strings {
   @override
   String get tableAddColumn => 'Bæta við dálki';
   @override
+  String get cheatsheetTitle => 'Markdown-minnisblað';
+  @override
+  String get cheatsheetCopy => 'Afrita';
+  @override
+  String get cheatsheetCopied => 'Afritað';
+  @override
+  String get cheatsheetInsert => 'Setja inn í minnismiðann';
+  @override
+  String get cheatsheetWritten => 'Skrifað';
+  @override
+  String get cheatsheetShown => 'Birt';
+  @override
+  String get cheatHeadings => 'Fyrirsagnir';
+  @override
+  String get cheatEmphasis => 'Feitletrað, skáletrað, yfirstrikað';
+  @override
+  String get cheatHtmlFormats => 'Undirstrikað, hávísir, lágvísir';
+  @override
+  String get cheatLists => 'Listar';
+  @override
+  String get cheatChecklists => 'Gátlistar';
+  @override
+  String get cheatQuotes => 'Tilvitnanir';
+  @override
+  String get cheatLinks => 'Tenglar';
+  @override
+  String get cheatWikilinks => 'Tenglar í minnismiða';
+  @override
+  String get cheatEmbeds => 'Myndir og ívafningar';
+  @override
+  String get cheatTags => 'Merki';
+  @override
+  String get cheatInlineCode => 'Kóði í setningu';
+  @override
+  String get cheatCodeBlocks => 'Kóðablokkir';
+  @override
+  String get cheatMath => 'Stærðfræði';
+  @override
+  String get cheatTables => 'Töflur';
+  @override
+  String get cheatFootnotes => 'Neðanmálsgreinar';
+  @override
+  String get cheatRule => 'Lárétt lína';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Staðgenglar sniðmáta';
+  @override
   String get toolbarHeading => 'Titill';
   @override
   String get toolbarList => 'Listi';

@@ -499,6 +499,54 @@ final class FrenchStrings extends Strings {
   @override
   String get tableAddColumn => 'Ajouter une colonne';
   @override
+  String get cheatsheetTitle => 'Aide-mémoire Markdown';
+  @override
+  String get cheatsheetCopy => 'Copier';
+  @override
+  String get cheatsheetCopied => 'Copié';
+  @override
+  String get cheatsheetInsert => 'Insérer dans la note';
+  @override
+  String get cheatsheetWritten => 'Écrit';
+  @override
+  String get cheatsheetShown => 'Affiché';
+  @override
+  String get cheatHeadings => 'Titres';
+  @override
+  String get cheatEmphasis => 'Gras, italique, barré';
+  @override
+  String get cheatHtmlFormats => 'Souligné, exposant, indice';
+  @override
+  String get cheatLists => 'Listes';
+  @override
+  String get cheatChecklists => 'Listes de cases à cocher';
+  @override
+  String get cheatQuotes => 'Citations';
+  @override
+  String get cheatLinks => 'Liens';
+  @override
+  String get cheatWikilinks => 'Liens vers des notes';
+  @override
+  String get cheatEmbeds => 'Images et intégrations';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code dans une phrase';
+  @override
+  String get cheatCodeBlocks => 'Blocs de code';
+  @override
+  String get cheatMath => 'Mathématiques';
+  @override
+  String get cheatTables => 'Tableaux';
+  @override
+  String get cheatFootnotes => 'Notes de bas de page';
+  @override
+  String get cheatRule => 'Ligne horizontale';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Espaces réservés des modèles';
+  @override
   String get toolbarHeading => 'Titre';
   @override
   String get toolbarList => 'Liste';

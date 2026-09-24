@@ -11,6 +11,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/text_input_probe.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/changelog.dart';
+import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -289,6 +290,15 @@ final class _SettingsDiagnosticsScreenState
                   builder: (context) => const ChangelogScreen(),
                 ),
               ),
+            ),
+          ),
+          // Help, beside the changelog (#265): from here there is no note
+          // to insert an example in, so it copies.
+          HighlightRow(
+            key: SettingsKeys.cheatsheet,
+            child: SettingsValueRow(
+              title: AppStrings.cheatsheetTitle,
+              onTap: () => showMarkdownCheatsheet(context),
             ),
           ),
           // The phase-3 spike (§8.7.1): a bare `TextInputConnection` that

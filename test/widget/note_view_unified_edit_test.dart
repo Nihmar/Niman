@@ -12,6 +12,7 @@ import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 
 import '../fakes/fake_embedder.dart';
 
@@ -275,6 +276,36 @@ void main() {
     _surface(tester).placeCaret(0);
     await tester.pump();
     expect(button().active, isFalse, reason: 'and one word back, it is off');
+  });
+
+  testWidgets('an example from the cheatsheet lands at the caret (#265)', (
+    tester,
+  ) async {
+    final key = GlobalKey<State<NoteView>>();
+    final writes = <String>[];
+    await _pump(
+      tester,
+      NoteView(
+        key: key,
+        path: '/notes/a.md',
+        showLineNumbers: false,
+        autofocusEditor: false,
+        unifiedMarkdown: true,
+        showWysiwyg: true,
+        readNote: (_) async => 'una riga\n',
+        writeNote: (_, text) async => writes.add(text),
+      ),
+    );
+    final handle = key.currentState! as NoteViewHandle;
+    expect(handle.canInsert, isTrue);
+    _surface(tester).placeCaret(3);
+    await tester.pump();
+    handle.insertAtCaret('**x**');
+    await tester.pump();
+    expect(_surface(tester).widget.buffer.text, 'una**x** riga\n');
+    handle.insertAtCaret('> a\n> b');
+    await tester.pump();
+    expect(_surface(tester).widget.buffer.text, 'una**x** riga\n\n> a\n> b\n');
   });
 
   for (final live in <bool>[false, true]) {

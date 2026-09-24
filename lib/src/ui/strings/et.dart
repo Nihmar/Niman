@@ -485,6 +485,54 @@ final class EstonianStrings extends Strings {
   @override
   String get tableAddColumn => 'Lisa veerg';
   @override
+  String get cheatsheetTitle => 'Markdowni spikker';
+  @override
+  String get cheatsheetCopy => 'Kopeeri';
+  @override
+  String get cheatsheetCopied => 'Kopeeritud';
+  @override
+  String get cheatsheetInsert => 'Lisa märkmesse';
+  @override
+  String get cheatsheetWritten => 'Kirjutatud';
+  @override
+  String get cheatsheetShown => 'Näidatud';
+  @override
+  String get cheatHeadings => 'Pealkirjad';
+  @override
+  String get cheatEmphasis => 'Paks, kaldkiri, läbikriipsutatud';
+  @override
+  String get cheatHtmlFormats => 'Allajoonitud, ülaindeks, alaindeks';
+  @override
+  String get cheatLists => 'Loendid';
+  @override
+  String get cheatChecklists => 'Kontrollnimekirjad';
+  @override
+  String get cheatQuotes => 'Tsitaadid';
+  @override
+  String get cheatLinks => 'Lingid';
+  @override
+  String get cheatWikilinks => 'Lingid märkmetele';
+  @override
+  String get cheatEmbeds => 'Pildid ja manused';
+  @override
+  String get cheatTags => 'Sildid';
+  @override
+  String get cheatInlineCode => 'Kood lauses';
+  @override
+  String get cheatCodeBlocks => 'Koodiplokid';
+  @override
+  String get cheatMath => 'Matemaatika';
+  @override
+  String get cheatTables => 'Tabelid';
+  @override
+  String get cheatFootnotes => 'Joonealused märkused';
+  @override
+  String get cheatRule => 'Horisontaaljoon';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Mallide kohatäited';
+  @override
   String get toolbarHeading => 'Pealkiri';
   @override
   String get toolbarList => 'Loetelu';

@@ -489,6 +489,54 @@ final class NorwegianStrings extends Strings {
   @override
   String get tableAddColumn => 'Legg til kolonne';
   @override
+  String get cheatsheetTitle => 'Markdown-jukselapp';
+  @override
+  String get cheatsheetCopy => 'Kopier';
+  @override
+  String get cheatsheetCopied => 'Kopiert';
+  @override
+  String get cheatsheetInsert => 'Sett inn i notatet';
+  @override
+  String get cheatsheetWritten => 'Skrevet';
+  @override
+  String get cheatsheetShown => 'Vist';
+  @override
+  String get cheatHeadings => 'Overskrifter';
+  @override
+  String get cheatEmphasis => 'Fet, kursiv, gjennomstreket';
+  @override
+  String get cheatHtmlFormats => 'Understreket, hevet, senket';
+  @override
+  String get cheatLists => 'Lister';
+  @override
+  String get cheatChecklists => 'Sjekklister';
+  @override
+  String get cheatQuotes => 'Sitater';
+  @override
+  String get cheatLinks => 'Lenker';
+  @override
+  String get cheatWikilinks => 'Lenker til notater';
+  @override
+  String get cheatEmbeds => 'Bilder og innbygginger';
+  @override
+  String get cheatTags => 'Tagger';
+  @override
+  String get cheatInlineCode => 'Kode i en setning';
+  @override
+  String get cheatCodeBlocks => 'Kodeblokker';
+  @override
+  String get cheatMath => 'Matematikk';
+  @override
+  String get cheatTables => 'Tabeller';
+  @override
+  String get cheatFootnotes => 'Fotnoter';
+  @override
+  String get cheatRule => 'Horisontal linje';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Malplassholdere';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

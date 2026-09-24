@@ -489,6 +489,54 @@ final class AlbanianStrings extends Strings {
   @override
   String get tableAddColumn => 'Shto kolonë';
   @override
+  String get cheatsheetTitle => 'Përmbledhje e Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopjo';
+  @override
+  String get cheatsheetCopied => 'U kopjua';
+  @override
+  String get cheatsheetInsert => 'Fut në shënim';
+  @override
+  String get cheatsheetWritten => 'Shkruar';
+  @override
+  String get cheatsheetShown => 'Shfaqur';
+  @override
+  String get cheatHeadings => 'Titujt';
+  @override
+  String get cheatEmphasis => 'I trashë, i pjerrët, i vijëzuar';
+  @override
+  String get cheatHtmlFormats => 'I nënvizuar, eksponent, indeks';
+  @override
+  String get cheatLists => 'Listat';
+  @override
+  String get cheatChecklists => 'Lista kontrolli';
+  @override
+  String get cheatQuotes => 'Citimet';
+  @override
+  String get cheatLinks => 'Lidhjet';
+  @override
+  String get cheatWikilinks => 'Lidhje me shënime';
+  @override
+  String get cheatEmbeds => 'Imazhe dhe ngulitje';
+  @override
+  String get cheatTags => 'Etiketat';
+  @override
+  String get cheatInlineCode => 'Kod në fjali';
+  @override
+  String get cheatCodeBlocks => 'Blloqe kodi';
+  @override
+  String get cheatMath => 'Matematikë';
+  @override
+  String get cheatTables => 'Tabelat';
+  @override
+  String get cheatFootnotes => 'Shënimet në fund';
+  @override
+  String get cheatRule => 'Vijë horizontale';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Vendmbajtësit e shablloneve';
+  @override
   String get toolbarHeading => 'Titull';
   @override
   String get toolbarList => 'Listë';

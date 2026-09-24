@@ -496,6 +496,54 @@ final class UkrainianStrings extends Strings {
   @override
   String get tableAddColumn => 'Додати стовпець';
   @override
+  String get cheatsheetTitle => 'Шпаргалка з Markdown';
+  @override
+  String get cheatsheetCopy => 'Копіювати';
+  @override
+  String get cheatsheetCopied => 'Скопійовано';
+  @override
+  String get cheatsheetInsert => 'Вставити в нотатку';
+  @override
+  String get cheatsheetWritten => 'Написано';
+  @override
+  String get cheatsheetShown => 'Показано';
+  @override
+  String get cheatHeadings => 'Заголовки';
+  @override
+  String get cheatEmphasis => 'Жирний, курсив, закреслений';
+  @override
+  String get cheatHtmlFormats => 'Підкреслений, верхній індекс, нижній індекс';
+  @override
+  String get cheatLists => 'Списки';
+  @override
+  String get cheatChecklists => 'Контрольні списки';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Посилання';
+  @override
+  String get cheatWikilinks => 'Посилання на нотатки';
+  @override
+  String get cheatEmbeds => 'Зображення та вбудовування';
+  @override
+  String get cheatTags => 'Теги';
+  @override
+  String get cheatInlineCode => 'Код у реченні';
+  @override
+  String get cheatCodeBlocks => 'Блоки коду';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Таблиці';
+  @override
+  String get cheatFootnotes => 'Виноски';
+  @override
+  String get cheatRule => 'Горизонтальна лінія';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Заповнювачі шаблонів';
+  @override
   String get toolbarHeading => 'Заголовок';
   @override
   String get toolbarList => 'Список';

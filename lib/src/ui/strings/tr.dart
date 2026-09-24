@@ -487,6 +487,54 @@ final class TurkishStrings extends Strings {
   @override
   String get tableAddColumn => 'Sütun ekle';
   @override
+  String get cheatsheetTitle => 'Markdown kopya kâğıdı';
+  @override
+  String get cheatsheetCopy => 'Kopyala';
+  @override
+  String get cheatsheetCopied => 'Kopyalandı';
+  @override
+  String get cheatsheetInsert => 'Nota ekle';
+  @override
+  String get cheatsheetWritten => 'Yazılan';
+  @override
+  String get cheatsheetShown => 'Gösterilen';
+  @override
+  String get cheatHeadings => 'Başlıklar';
+  @override
+  String get cheatEmphasis => 'Kalın, italik, üstü çizili';
+  @override
+  String get cheatHtmlFormats => 'Altı çizili, üst simge, alt simge';
+  @override
+  String get cheatLists => 'Listeler';
+  @override
+  String get cheatChecklists => 'Onay listeleri';
+  @override
+  String get cheatQuotes => 'Alıntılar';
+  @override
+  String get cheatLinks => 'Bağlantılar';
+  @override
+  String get cheatWikilinks => 'Notlara bağlantılar';
+  @override
+  String get cheatEmbeds => 'Görseller ve gömmeler';
+  @override
+  String get cheatTags => 'Etiketler';
+  @override
+  String get cheatInlineCode => 'Cümle içinde kod';
+  @override
+  String get cheatCodeBlocks => 'Kod blokları';
+  @override
+  String get cheatMath => 'Matematik';
+  @override
+  String get cheatTables => 'Tablolar';
+  @override
+  String get cheatFootnotes => 'Dipnotlar';
+  @override
+  String get cheatRule => 'Yatay çizgi';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Şablon yer tutucuları';
+  @override
   String get toolbarHeading => 'Başlık';
   @override
   String get toolbarList => 'Liste';

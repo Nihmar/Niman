@@ -479,6 +479,54 @@ final class HindiStrings extends Strings {
   @override
   String get tableAddColumn => 'स्तंभ जोड़ें';
   @override
+  String get cheatsheetTitle => 'Markdown चीटशीट';
+  @override
+  String get cheatsheetCopy => 'कॉपी करें';
+  @override
+  String get cheatsheetCopied => 'कॉपी हो गया';
+  @override
+  String get cheatsheetInsert => 'नोट में डालें';
+  @override
+  String get cheatsheetWritten => 'लिखा हुआ';
+  @override
+  String get cheatsheetShown => 'दिखाया गया';
+  @override
+  String get cheatHeadings => 'शीर्षक';
+  @override
+  String get cheatEmphasis => 'बोल्ड, इटैलिक, स्ट्राइकथ्रू';
+  @override
+  String get cheatHtmlFormats => 'अंडरलाइन, सुपरस्क्रिप्ट, सबस्क्रिप्ट';
+  @override
+  String get cheatLists => 'सूचियाँ';
+  @override
+  String get cheatChecklists => 'चेकलिस्ट';
+  @override
+  String get cheatQuotes => 'उद्धरण';
+  @override
+  String get cheatLinks => 'लिंक';
+  @override
+  String get cheatWikilinks => 'नोट्स के लिंक';
+  @override
+  String get cheatEmbeds => 'चित्र और एम्बेड';
+  @override
+  String get cheatTags => 'टैग';
+  @override
+  String get cheatInlineCode => 'वाक्य में कोड';
+  @override
+  String get cheatCodeBlocks => 'कोड ब्लॉक';
+  @override
+  String get cheatMath => 'गणित';
+  @override
+  String get cheatTables => 'तालिकाएँ';
+  @override
+  String get cheatFootnotes => 'फ़ुटनोट';
+  @override
+  String get cheatRule => 'क्षैतिज रेखा';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'टेम्पलेट प्लेसहोल्डर';
+  @override
   String get toolbarHeading => 'हेडिंग';
   @override
   String get toolbarList => 'सूची';

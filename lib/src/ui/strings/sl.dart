@@ -496,6 +496,54 @@ final class SlovenianStrings extends Strings {
   @override
   String get tableAddColumn => 'Dodaj stolpec';
   @override
+  String get cheatsheetTitle => 'Plonkec za Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiraj';
+  @override
+  String get cheatsheetCopied => 'Kopirano';
+  @override
+  String get cheatsheetInsert => 'Vstavi v zapisek';
+  @override
+  String get cheatsheetWritten => 'Zapisano';
+  @override
+  String get cheatsheetShown => 'Prikazano';
+  @override
+  String get cheatHeadings => 'Naslovi';
+  @override
+  String get cheatEmphasis => 'Krepko, ležeče, prečrtano';
+  @override
+  String get cheatHtmlFormats => 'Podčrtano, nadpisano, podpisano';
+  @override
+  String get cheatLists => 'Seznami';
+  @override
+  String get cheatChecklists => 'Kontrolni seznami';
+  @override
+  String get cheatQuotes => 'Citati';
+  @override
+  String get cheatLinks => 'Povezave';
+  @override
+  String get cheatWikilinks => 'Povezave do zapiskov';
+  @override
+  String get cheatEmbeds => 'Slike in vdelave';
+  @override
+  String get cheatTags => 'Oznake';
+  @override
+  String get cheatInlineCode => 'Koda v stavku';
+  @override
+  String get cheatCodeBlocks => 'Bloki kode';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Opombe';
+  @override
+  String get cheatRule => 'Vodoravna črta';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Ograde predlog';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Seznam';

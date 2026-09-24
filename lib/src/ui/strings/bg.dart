@@ -494,6 +494,54 @@ final class BulgarianStrings extends Strings {
   @override
   String get tableAddColumn => 'Добави колона';
   @override
+  String get cheatsheetTitle => 'Пищов за Markdown';
+  @override
+  String get cheatsheetCopy => 'Копирай';
+  @override
+  String get cheatsheetCopied => 'Копирано';
+  @override
+  String get cheatsheetInsert => 'Вмъкни в бележката';
+  @override
+  String get cheatsheetWritten => 'Написано';
+  @override
+  String get cheatsheetShown => 'Показано';
+  @override
+  String get cheatHeadings => 'Заглавия';
+  @override
+  String get cheatEmphasis => 'Удебелен, курсив, зачертан';
+  @override
+  String get cheatHtmlFormats => 'Подчертан, горен индекс, долен индекс';
+  @override
+  String get cheatLists => 'Списъци';
+  @override
+  String get cheatChecklists => 'Списъци със задачи';
+  @override
+  String get cheatQuotes => 'Цитати';
+  @override
+  String get cheatLinks => 'Връзки';
+  @override
+  String get cheatWikilinks => 'Връзки към бележки';
+  @override
+  String get cheatEmbeds => 'Изображения и вграждания';
+  @override
+  String get cheatTags => 'Етикети';
+  @override
+  String get cheatInlineCode => 'Код в изречение';
+  @override
+  String get cheatCodeBlocks => 'Блокове код';
+  @override
+  String get cheatMath => 'Математика';
+  @override
+  String get cheatTables => 'Таблици';
+  @override
+  String get cheatFootnotes => 'Бележки под линия';
+  @override
+  String get cheatRule => 'Хоризонтална линия';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Заместители в шаблоните';
+  @override
   String get toolbarHeading => 'Заглавие';
   @override
   String get toolbarList => 'Списък';

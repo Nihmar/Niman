@@ -496,6 +496,54 @@ final class GalicianStrings extends Strings {
   @override
   String get tableAddColumn => 'Engadir columna';
   @override
+  String get cheatsheetTitle => 'Guía rápida de Markdown';
+  @override
+  String get cheatsheetCopy => 'Copiar';
+  @override
+  String get cheatsheetCopied => 'Copiado';
+  @override
+  String get cheatsheetInsert => 'Inserir na nota';
+  @override
+  String get cheatsheetWritten => 'Escrito';
+  @override
+  String get cheatsheetShown => 'Amosado';
+  @override
+  String get cheatHeadings => 'Títulos';
+  @override
+  String get cheatEmphasis => 'Negra, cursiva, riscado';
+  @override
+  String get cheatHtmlFormats => 'Subliñado, superíndice, subíndice';
+  @override
+  String get cheatLists => 'Listas';
+  @override
+  String get cheatChecklists => 'Listas de verificación';
+  @override
+  String get cheatQuotes => 'Citas';
+  @override
+  String get cheatLinks => 'Ligazóns';
+  @override
+  String get cheatWikilinks => 'Ligazóns a notas';
+  @override
+  String get cheatEmbeds => 'Imaxes e incrustacións';
+  @override
+  String get cheatTags => 'Etiquetas';
+  @override
+  String get cheatInlineCode => 'Código nunha frase';
+  @override
+  String get cheatCodeBlocks => 'Bloques de código';
+  @override
+  String get cheatMath => 'Matemáticas';
+  @override
+  String get cheatTables => 'Táboas';
+  @override
+  String get cheatFootnotes => 'Notas ao pé';
+  @override
+  String get cheatRule => 'Liña horizontal';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Marcadores dos modelos';
+  @override
   String get toolbarHeading => 'Título';
   @override
   String get toolbarList => 'Lista';

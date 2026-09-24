@@ -35,6 +35,7 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
@@ -1879,6 +1880,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _openPalette(),
         NoteMenuAction.format => _formatNote(),
+        NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -2514,6 +2516,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
       AppCommand.formatNote: () => unawaited(_formatNote()),
+      AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
       AppCommand.closeTab: _workspace.closeActive,
@@ -2666,6 +2669,16 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// is saved first, tidied on disk and read back the way an edit from
   /// another program is read back, so both editors show the result and
   /// neither has to know how to rewrite its own document.
+  /// The Markdown cheatsheet (#265); its examples go into the note on
+  /// screen when there is one to take them.
+  Future<void> _openCheatsheet() {
+    final note = _panelNote;
+    return showMarkdownCheatsheet(
+      context,
+      onInsert: note == null || !note.canInsert ? null : note.insertAtCaret,
+    );
+  }
+
   Future<void> _formatNote() async {
     final path = _shownNote;
     final ops = widget.controller.ops;

@@ -496,6 +496,54 @@ final class BosnianStrings extends Strings {
   @override
   String get tableAddColumn => 'Dodaj kolonu';
   @override
+  String get cheatsheetTitle => 'Podsjetnik za Markdown';
+  @override
+  String get cheatsheetCopy => 'Kopiraj';
+  @override
+  String get cheatsheetCopied => 'Kopirano';
+  @override
+  String get cheatsheetInsert => 'Umetni u bilješku';
+  @override
+  String get cheatsheetWritten => 'Napisano';
+  @override
+  String get cheatsheetShown => 'Prikazano';
+  @override
+  String get cheatHeadings => 'Naslovi';
+  @override
+  String get cheatEmphasis => 'Podebljano, kurziv, precrtano';
+  @override
+  String get cheatHtmlFormats => 'Podvučeno, eksponent, indeks';
+  @override
+  String get cheatLists => 'Liste';
+  @override
+  String get cheatChecklists => 'Kontrolne liste';
+  @override
+  String get cheatQuotes => 'Citati';
+  @override
+  String get cheatLinks => 'Linkovi';
+  @override
+  String get cheatWikilinks => 'Linkovi na bilješke';
+  @override
+  String get cheatEmbeds => 'Slike i ugradnje';
+  @override
+  String get cheatTags => 'Oznake';
+  @override
+  String get cheatInlineCode => 'Kod u rečenici';
+  @override
+  String get cheatCodeBlocks => 'Blokovi koda';
+  @override
+  String get cheatMath => 'Matematika';
+  @override
+  String get cheatTables => 'Tabele';
+  @override
+  String get cheatFootnotes => 'Fusnote';
+  @override
+  String get cheatRule => 'Horizontalna linija';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Rezervisana mjesta šablona';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

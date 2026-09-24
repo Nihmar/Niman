@@ -16,4 +16,12 @@ abstract interface class NoteViewHandle {
 
   /// Takes the caret to the heading on source [line] and shows it.
   void jumpToHeading(int line);
+
+  /// Whether the note takes Markdown where its caret is: a Markdown note
+  /// whose text is on screen, not a kind's own view of it.
+  bool get canInsert;
+
+  /// Puts [markdown] at the caret, one undo step: on the caret's line when
+  /// it is one line, on lines of its own when it is more (#265).
+  void insertAtCaret(String markdown);
 }

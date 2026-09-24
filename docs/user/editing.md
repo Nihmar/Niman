@@ -247,6 +247,18 @@ Tables, task lists, footnotes, strikethrough, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
+The **Markdown cheatsheet** shows every construct Niman reads, each as it
+is written beside how a note shows it — headings, emphasis, underline and
+super/subscript, lists and checkbox lists, quotes, links and links to
+notes, images and embeds, tags, code, math, tables, footnotes, rules,
+frontmatter and template placeholders. Open it from the note's ⋮ menu,
+*Editor: Markdown cheatsheet* in the palette, or Settings, next to the
+changelog. Every example can be copied; opened from a note, it can also
+be inserted at the caret — one line where the caret is, several on lines
+of their own. On a phone an example's source and its look are stacked.
+Highlight (`==…==`) and callouts (`> [!note]`) are not there because
+Niman does not read them.
+
 One thing to know when a note came from somewhere else: **a list marker has
 to start a line.** `- c)` written inside a sentence — after a formula, or
 wherever the text happened to wrap — is a hyphen and a letter, not an item,

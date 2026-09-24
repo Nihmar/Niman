@@ -489,6 +489,54 @@ final class DanishStrings extends Strings {
   @override
   String get tableAddColumn => 'Tilføj kolonne';
   @override
+  String get cheatsheetTitle => 'Markdown-snydeark';
+  @override
+  String get cheatsheetCopy => 'Kopiér';
+  @override
+  String get cheatsheetCopied => 'Kopieret';
+  @override
+  String get cheatsheetInsert => 'Indsæt i noten';
+  @override
+  String get cheatsheetWritten => 'Skrevet';
+  @override
+  String get cheatsheetShown => 'Vist';
+  @override
+  String get cheatHeadings => 'Overskrifter';
+  @override
+  String get cheatEmphasis => 'Fed, kursiv, gennemstreget';
+  @override
+  String get cheatHtmlFormats => 'Understreget, hævet, sænket';
+  @override
+  String get cheatLists => 'Lister';
+  @override
+  String get cheatChecklists => 'Tjeklister';
+  @override
+  String get cheatQuotes => 'Citater';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links til noter';
+  @override
+  String get cheatEmbeds => 'Billeder og indlejringer';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Kode i en sætning';
+  @override
+  String get cheatCodeBlocks => 'Kodeblokke';
+  @override
+  String get cheatMath => 'Matematik';
+  @override
+  String get cheatTables => 'Tabeller';
+  @override
+  String get cheatFootnotes => 'Fodnoter';
+  @override
+  String get cheatRule => 'Vandret linje';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Skabelonpladsholdere';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

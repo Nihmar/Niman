@@ -494,6 +494,54 @@ final class BelarusianStrings extends Strings {
   @override
   String get tableAddColumn => 'Дадаць слупок';
   @override
+  String get cheatsheetTitle => 'Шпаргалка па Markdown';
+  @override
+  String get cheatsheetCopy => 'Капіяваць';
+  @override
+  String get cheatsheetCopied => 'Скапіявана';
+  @override
+  String get cheatsheetInsert => 'Уставіць у нататку';
+  @override
+  String get cheatsheetWritten => 'Напісана';
+  @override
+  String get cheatsheetShown => 'Паказана';
+  @override
+  String get cheatHeadings => 'Загалоўкі';
+  @override
+  String get cheatEmphasis => 'Тоўсты, курсіў, закрэслены';
+  @override
+  String get cheatHtmlFormats => 'Падкрэслены, верхні індэкс, ніжні індэкс';
+  @override
+  String get cheatLists => 'Спісы';
+  @override
+  String get cheatChecklists => 'Кантрольныя спісы';
+  @override
+  String get cheatQuotes => 'Цытаты';
+  @override
+  String get cheatLinks => 'Спасылкі';
+  @override
+  String get cheatWikilinks => 'Спасылкі на нататкі';
+  @override
+  String get cheatEmbeds => 'Выявы і ўбудаванні';
+  @override
+  String get cheatTags => 'Тэгі';
+  @override
+  String get cheatInlineCode => 'Код у сказе';
+  @override
+  String get cheatCodeBlocks => 'Блокі кода';
+  @override
+  String get cheatMath => 'Матэматыка';
+  @override
+  String get cheatTables => 'Табліцы';
+  @override
+  String get cheatFootnotes => 'Зноскі';
+  @override
+  String get cheatRule => 'Гарызантальная лінія';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Запаўняльнікі шаблонаў';
+  @override
   String get toolbarHeading => 'Загаловак';
   @override
   String get toolbarList => 'Спіс';

@@ -494,6 +494,54 @@ final class DutchStrings extends Strings {
   @override
   String get tableAddColumn => 'Kolom toevoegen';
   @override
+  String get cheatsheetTitle => 'Markdown-spiekbrief';
+  @override
+  String get cheatsheetCopy => 'Kopiëren';
+  @override
+  String get cheatsheetCopied => 'Gekopieerd';
+  @override
+  String get cheatsheetInsert => 'In de notitie invoegen';
+  @override
+  String get cheatsheetWritten => 'Geschreven';
+  @override
+  String get cheatsheetShown => 'Getoond';
+  @override
+  String get cheatHeadings => 'Koppen';
+  @override
+  String get cheatEmphasis => 'Vet, cursief, doorgehaald';
+  @override
+  String get cheatHtmlFormats => 'Onderstreept, superscript, subscript';
+  @override
+  String get cheatLists => 'Lijsten';
+  @override
+  String get cheatChecklists => 'Checklists';
+  @override
+  String get cheatQuotes => 'Citaten';
+  @override
+  String get cheatLinks => 'Links';
+  @override
+  String get cheatWikilinks => 'Links naar notities';
+  @override
+  String get cheatEmbeds => 'Afbeeldingen en insluitingen';
+  @override
+  String get cheatTags => 'Tags';
+  @override
+  String get cheatInlineCode => 'Code in een zin';
+  @override
+  String get cheatCodeBlocks => 'Codeblokken';
+  @override
+  String get cheatMath => 'Wiskunde';
+  @override
+  String get cheatTables => 'Tabellen';
+  @override
+  String get cheatFootnotes => 'Voetnoten';
+  @override
+  String get cheatRule => 'Horizontale lijn';
+  @override
+  String get cheatFrontmatter => 'Frontmatter';
+  @override
+  String get cheatTemplates => 'Sjabloonplaatshouders';
+  @override
   String get toolbarHeading => 'Kop';
   @override
   String get toolbarList => 'Lijst';
