@@ -2094,10 +2094,6 @@ final class EstonianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Lahenda konflikt';
   @override
-  String get syncConflictLegend =>
-      'Märgiga − read on serveri omad, märgiga + read selle '
-      'seadme omad.';
-  @override
   String get syncConflictBinary =>
       'See pole tekstifail: vali, milline koopia alles jätta.';
   @override
@@ -2108,13 +2104,14 @@ final class EstonianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Jäta serveri oma';
   @override
-  String get syncConflictIdentical => 'Mõlemad versioonid on samad';
-  @override
   String get syncConflictLoadFailed => 'Mõlemat versiooni ei õnnestunud lugeda';
   @override
   String get syncResolveFailed => 'Konflikti ei õnnestunud lahendada';
   @override
   String get syncResolved => 'Konflikt lahendatud';
+  @override
+  String get syncConflictMoved =>
+      'Üks versioon muutus vahepeal: konflikt loeti uuesti, vali uuesti.';
   @override
   String get syncSectionWhen => 'Millal sünkroonida';
   @override
@@ -2181,8 +2178,8 @@ final class EstonianStrings extends Strings {
   String get syncMergeClean => 'Kaks versiooni ühinevad ise: miski ei kattu.';
   @override
   String get syncMergeNoBase =>
-      'Ühist versiooni, mille peal ühendada, pole, seega tuleb valida kogu '
-      'fail.';
+      'Ühendamiseks pole ühist versiooni: igas kohas, kus kaks koopiat '
+      'erinevad, valid sina.';
   @override
   String syncMergeOverlap(int index, int total) => 'Kattuvus $index / $total';
   @override
@@ -2191,6 +2188,8 @@ final class EstonianStrings extends Strings {
   String get syncMergeFromRemote => 'Serverist';
   @override
   String get syncMergeRemovedLines => 'Eemaldatud read';
+  @override
+  String get syncMergeAbsentLines => 'Pole selles koopias';
   @override
   String get syncMergeKeepLocal => 'Minu';
   @override

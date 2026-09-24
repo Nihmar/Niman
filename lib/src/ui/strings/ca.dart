@@ -2161,10 +2161,6 @@ final class CatalanStrings extends Strings {
   @override
   String get syncConflictTitle => 'Resol el conflicte';
   @override
-  String get syncConflictLegend =>
-      'Les línies amb − són del servidor; les línies amb + són '
-      'd’aquest dispositiu.';
-  @override
   String get syncConflictBinary =>
       'No és un fitxer de text: tria quina còpia vols conservar.';
   @override
@@ -2176,14 +2172,16 @@ final class CatalanStrings extends Strings {
   @override
   String get syncKeepRemote => 'Conserva la del servidor';
   @override
-  String get syncConflictIdentical => 'Les dues versions són idèntiques';
-  @override
   String get syncConflictLoadFailed =>
       'No s’han pogut llegir les dues versions';
   @override
   String get syncResolveFailed => 'No s’ha pogut resoldre el conflicte';
   @override
   String get syncResolved => 'Conflicte resolt';
+  @override
+  String get syncConflictMoved =>
+      'Una de les versions ha canviat mentrestant: el conflicte s’ha tornat a '
+      'llegir, torna a triar.';
   @override
   String get syncSectionWhen => 'Quan sincronitzar';
   @override
@@ -2249,8 +2247,8 @@ final class CatalanStrings extends Strings {
       'Les dues versions s’uneixen soles: no hi ha res que se superposi.';
   @override
   String get syncMergeNoBase =>
-      'No hi ha cap versió comuna sobre la qual unir, així que cal triar el '
-      'fitxer sencer.';
+      'No hi ha cap versió comuna per fusionar: tries tu a cada punt on les '
+      'dues còpies difereixen.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Superposició $index de $total';
@@ -2260,6 +2258,8 @@ final class CatalanStrings extends Strings {
   String get syncMergeFromRemote => 'Del servidor';
   @override
   String get syncMergeRemovedLines => 'Línies eliminades';
+  @override
+  String get syncMergeAbsentLines => 'No és en aquesta còpia';
   @override
   String get syncMergeKeepLocal => 'Les meves';
   @override

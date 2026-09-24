@@ -2111,10 +2111,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Løs konflikt';
   @override
-  String get syncConflictLegend =>
-      'Linjer merket − er fra serveren, linjer merket + er fra '
-      'denne enheten.';
-  @override
   String get syncConflictBinary =>
       'Ikke en tekstfil: velg hvilken kopi du vil beholde.';
   @override
@@ -2126,13 +2122,15 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Behold serverens';
   @override
-  String get syncConflictIdentical => 'De to versjonene er identiske';
-  @override
   String get syncConflictLoadFailed => 'Kunne ikke lese begge versjonene';
   @override
   String get syncResolveFailed => 'Kunne ikke løse konflikten';
   @override
   String get syncResolved => 'Konflikten er løst';
+  @override
+  String get syncConflictMoved =>
+      'En av versjonene er endret i mellomtiden: konflikten er lest på nytt, '
+      'velg igjen.';
   @override
   String get syncSectionWhen => 'Når det skal synkroniseres';
   @override
@@ -2200,7 +2198,8 @@ final class NorwegianStrings extends Strings {
       'De to versjonene flettes av seg selv: ingenting overlapper.';
   @override
   String get syncMergeNoBase =>
-      'Ingen felles versjon å flette på, så hele filen må velges.';
+      'Det finnes ingen felles versjon å slå sammen fra: der de to kopiene er '
+      'ulike, velger du.';
   @override
   String syncMergeOverlap(int index, int total) => 'Overlapp $index av $total';
   @override
@@ -2209,6 +2208,8 @@ final class NorwegianStrings extends Strings {
   String get syncMergeFromRemote => 'Fra serveren';
   @override
   String get syncMergeRemovedLines => 'Linjer fjernet';
+  @override
+  String get syncMergeAbsentLines => 'Ikke i denne kopien';
   @override
   String get syncMergeKeepLocal => 'Mine';
   @override

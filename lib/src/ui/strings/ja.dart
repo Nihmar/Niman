@@ -1957,8 +1957,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncConflictTitle => '競合を解決';
   @override
-  String get syncConflictLegend => '− の行はサーバーの内容、+ の行はこのデバイスの内容です。';
-  @override
   String get syncConflictBinary => 'テキストファイルではありません。残すコピーを選んでください。';
   @override
   String get syncConflictKeepNote => '残さなかったコピーはノートの履歴に保存されます。';
@@ -1967,13 +1965,14 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncKeepRemote => 'サーバーの内容を残す';
   @override
-  String get syncConflictIdentical => '2 つのバージョンは同一です';
-  @override
   String get syncConflictLoadFailed => '両方のバージョンを読み込めませんでした';
   @override
   String get syncResolveFailed => '競合を解決できませんでした';
   @override
   String get syncResolved => '競合を解決しました';
+  @override
+  String get syncConflictMoved =>
+      'その間に一方のバージョンが変更されたため、競合を読み直しました。もう一度選んでください。';
   @override
   String get syncSectionWhen => '同期のタイミング';
   @override
@@ -2026,7 +2025,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncMergeClean => '2 つのバージョンはそのまま統合できます。重なりはありません。';
   @override
-  String get syncMergeNoBase => '統合の元になる共通のバージョンがないため、ファイル全体を選ぶ必要があります。';
+  String get syncMergeNoBase => '統合の元になる共通のバージョンがありません。2つのコピーが異なる箇所ごとに選んでください。';
   @override
   String syncMergeOverlap(int index, int total) => '重なり $index / $total';
   @override
@@ -2035,6 +2034,8 @@ final class JapaneseStrings extends Strings {
   String get syncMergeFromRemote => 'サーバーから';
   @override
   String get syncMergeRemovedLines => '削除された行';
+  @override
+  String get syncMergeAbsentLines => 'このコピーにはありません';
   @override
   String get syncMergeKeepLocal => 'このデバイス';
   @override

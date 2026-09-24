@@ -2187,10 +2187,6 @@ final class FrenchStrings extends Strings {
   @override
   String get syncConflictTitle => 'Résoudre le conflit';
   @override
-  String get syncConflictLegend =>
-      'Les lignes marquées − sont celles du serveur, les lignes '
-      'marquées + celles de cet appareil.';
-  @override
   String get syncConflictBinary =>
       'Ce n’est pas un fichier texte : choisissez la copie à '
       'garder.';
@@ -2203,13 +2199,15 @@ final class FrenchStrings extends Strings {
   @override
   String get syncKeepRemote => 'Garder celle du serveur';
   @override
-  String get syncConflictIdentical => 'Les deux versions sont identiques';
-  @override
   String get syncConflictLoadFailed => 'Impossible de lire les deux versions';
   @override
   String get syncResolveFailed => 'Impossible de résoudre le conflit';
   @override
   String get syncResolved => 'Conflit résolu';
+  @override
+  String get syncConflictMoved =>
+      'Une des versions a changé entre-temps : le conflit a été relu, '
+      'choisissez à nouveau.';
   @override
   String get syncSectionWhen => 'Quand synchroniser';
   @override
@@ -2281,8 +2279,8 @@ final class FrenchStrings extends Strings {
       'Les deux versions fusionnent d’elles-mêmes : rien ne se chevauche.';
   @override
   String get syncMergeNoBase =>
-      'Aucune version commune sur laquelle fusionner : il faut choisir le '
-      'fichier entier.';
+      'Aucune version commune pour fusionner : c’est à vous de choisir '
+      'partout où les deux copies diffèrent.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Chevauchement $index sur $total';
@@ -2292,6 +2290,8 @@ final class FrenchStrings extends Strings {
   String get syncMergeFromRemote => 'Du serveur';
   @override
   String get syncMergeRemovedLines => 'Lignes supprimées';
+  @override
+  String get syncMergeAbsentLines => 'Absent de cette copie';
   @override
   String get syncMergeKeepLocal => 'Les miennes';
   @override

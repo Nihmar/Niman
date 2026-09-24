@@ -3,12 +3,14 @@ import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/diff/three_way.dart';
+import 'package:niman/src/diff/two_way_merge.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
-/// Merges three texts; the default runs off the UI isolate for long ones.
+/// Merges two sides over their [base], or without one when it is null;
+/// the default runs off the UI isolate for long texts.
 typedef MergeComputer = Future<MergeResult> Function(
-  String base,
+  String? base,
   String local,
   String remote,
 );
@@ -18,12 +20,15 @@ typedef MergeComputer = Future<MergeResult> Function(
 /// run one.
 const int _inlineMergeLimit = 20000;
 
-/// The three-way merge of [base], [local] and [remote].
-Future<MergeResult> computeMerge(String base, String local, String remote) {
-  if (base.length + local.length + remote.length <= _inlineMergeLimit) {
-    return Future.value(mergeThreeWay(base, local, remote));
-  }
-  return Isolate.run(() => mergeThreeWay(base, local, remote));
+/// The three-way merge of [base], [local] and [remote], or the two-way
+/// one ([mergeTwoWay]) when there is no [base].
+Future<MergeResult> computeMerge(String? base, String local, String remote) {
+  MergeResult merge() => base == null
+      ? mergeTwoWay(local, remote)
+      : mergeThreeWay(base, local, remote);
+  final size = (base?.length ?? 0) + local.length + remote.length;
+  if (size <= _inlineMergeLimit) return Future.value(merge());
+  return Isolate.run(merge);
 }
 
 /// The merge of a conflicted note, region by region (issue #67, mockup
@@ -224,7 +229,12 @@ final class _MergeViewState extends State<MergeView> {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
               child: Text(
-                AppStrings.syncMergeRemovedLines,
+                // An overlap with no base lines only arises without a base
+                // (with one, a side with nothing there did not touch it):
+                // the lines are missing from this copy, not removed.
+                chunk.base.isEmpty
+                    ? AppStrings.syncMergeAbsentLines
+                    : AppStrings.syncMergeRemovedLines,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

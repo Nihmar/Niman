@@ -1907,8 +1907,6 @@ final class ChineseStrings extends Strings {
   @override
   String get syncConflictTitle => '解决冲突';
   @override
-  String get syncConflictLegend => '标记为 − 的行来自服务器，标记为 + 的行来自此设备。';
-  @override
   String get syncConflictBinary => '不是文本文件：请选择要保留的副本。';
   @override
   String get syncConflictKeepNote => '未保留的副本会留在笔记的历史记录中。';
@@ -1917,13 +1915,13 @@ final class ChineseStrings extends Strings {
   @override
   String get syncKeepRemote => '保留服务器的版本';
   @override
-  String get syncConflictIdentical => '两个版本完全相同';
-  @override
   String get syncConflictLoadFailed => '无法读取两个版本';
   @override
   String get syncResolveFailed => '无法解决冲突';
   @override
   String get syncResolved => '冲突已解决';
+  @override
+  String get syncConflictMoved => '其中一个版本在此期间已更改：已重新读取冲突，请重新选择。';
   @override
   String get syncSectionWhen => '何时同步';
   @override
@@ -1976,7 +1974,7 @@ final class ChineseStrings extends Strings {
   @override
   String get syncMergeClean => '两个版本可以自动合并：没有重叠。';
   @override
-  String get syncMergeNoBase => '没有可供合并的共同版本，因此需要选择整个文件。';
+  String get syncMergeNoBase => '没有可用于合并的共同版本：两个副本的每处不同都由你选择。';
   @override
   String syncMergeOverlap(int index, int total) => '第 $index 处重叠，共 $total 处';
   @override
@@ -1985,6 +1983,8 @@ final class ChineseStrings extends Strings {
   String get syncMergeFromRemote => '来自服务器';
   @override
   String get syncMergeRemovedLines => '已删除的行';
+  @override
+  String get syncMergeAbsentLines => '此副本中没有';
   @override
   String get syncMergeKeepLocal => '我的';
   @override

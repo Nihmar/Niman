@@ -2149,10 +2149,6 @@ final class DutchStrings extends Strings {
   @override
   String get syncConflictTitle => 'Conflict oplossen';
   @override
-  String get syncConflictLegend =>
-      'Regels met − zijn van de server, regels met + van dit '
-      'apparaat.';
-  @override
   String get syncConflictBinary =>
       'Geen tekstbestand: kies welke kopie je houdt.';
   @override
@@ -2164,13 +2160,15 @@ final class DutchStrings extends Strings {
   @override
   String get syncKeepRemote => 'Versie van de server houden';
   @override
-  String get syncConflictIdentical => 'De twee versies zijn identiek';
-  @override
   String get syncConflictLoadFailed => 'Kon de twee versies niet lezen';
   @override
   String get syncResolveFailed => 'Kon het conflict niet oplossen';
   @override
   String get syncResolved => 'Conflict opgelost';
+  @override
+  String get syncConflictMoved =>
+      'Een van de versies is intussen gewijzigd: het conflict is opnieuw '
+      'gelezen, kies opnieuw.';
   @override
   String get syncSectionWhen => 'Wanneer synchroniseren';
   @override
@@ -2240,8 +2238,8 @@ final class DutchStrings extends Strings {
       'De twee versies voegen zichzelf samen: niets overlapt.';
   @override
   String get syncMergeNoBase =>
-      'Er is geen gedeelde versie om op samen te voegen, dus het hele bestand '
-      'moet gekozen worden.';
+      'Er is geen gemeenschappelijke versie om op samen te voegen: overal '
+      'waar de kopieën verschillen kies je zelf.';
   @override
   String syncMergeOverlap(int index, int total) => 'Overlap $index van $total';
   @override
@@ -2250,6 +2248,8 @@ final class DutchStrings extends Strings {
   String get syncMergeFromRemote => 'Van de server';
   @override
   String get syncMergeRemovedLines => 'Verwijderde regels';
+  @override
+  String get syncMergeAbsentLines => 'Niet in deze kopie';
   @override
   String get syncMergeKeepLocal => 'Van mij';
   @override

@@ -2142,10 +2142,6 @@ final class SerbianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Реши конфликт';
   @override
-  String get syncConflictLegend =>
-      'Редови означени са − су са сервера, редови означени са + '
-      'са овог уређаја.';
-  @override
   String get syncConflictBinary =>
       'Није текстуални фајл: изаберите коју копију да задржите.';
   @override
@@ -2156,13 +2152,15 @@ final class SerbianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Задржи верзију са сервера';
   @override
-  String get syncConflictIdentical => 'Две верзије су идентичне';
-  @override
   String get syncConflictLoadFailed => 'Није могуће прочитати обе верзије';
   @override
   String get syncResolveFailed => 'Није могуће решити конфликт';
   @override
   String get syncResolved => 'Конфликт је решен';
+  @override
+  String get syncConflictMoved =>
+      'Једна од верзија се у међувремену променила: сукоб је поново учитан, '
+      'изаберите поново.';
   @override
   String get syncSectionWhen => 'Када синхронизовати';
   @override
@@ -2235,7 +2233,8 @@ final class SerbianStrings extends Strings {
       'Две верзије се спајају саме: ништа се не преклапа.';
   @override
   String get syncMergeNoBase =>
-      'Нема заједничке верзије за спајање, па се бира цео фајл.';
+      'Нема заједничке верзије за спајање: где год се две копије разликују, '
+      'бираш ти.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Преклапање $index од $total';
@@ -2245,6 +2244,8 @@ final class SerbianStrings extends Strings {
   String get syncMergeFromRemote => 'Са сервера';
   @override
   String get syncMergeRemovedLines => 'Уклоњени редови';
+  @override
+  String get syncMergeAbsentLines => 'Нема у овој копији';
   @override
   String get syncMergeKeepLocal => 'Моји';
   @override

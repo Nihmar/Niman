@@ -2134,10 +2134,6 @@ final class FinnishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Ratkaise ristiriita';
   @override
-  String get syncConflictLegend =>
-      'Merkillä − merkityt rivit ovat palvelimen, merkillä + '
-      'merkityt tämän laitteen.';
-  @override
   String get syncConflictBinary =>
       'Ei tekstitiedosto: valitse, kumpi kopio säilytetään.';
   @override
@@ -2148,13 +2144,15 @@ final class FinnishStrings extends Strings {
   @override
   String get syncKeepRemote => 'Säilytä palvelimen versio';
   @override
-  String get syncConflictIdentical => 'Versiot ovat samat';
-  @override
   String get syncConflictLoadFailed => 'Molempia versioita ei voitu lukea';
   @override
   String get syncResolveFailed => 'Ristiriitaa ei voitu ratkaista';
   @override
   String get syncResolved => 'Ristiriita ratkaistu';
+  @override
+  String get syncConflictMoved =>
+      'Toinen versioista muuttui sillä välin: ristiriita luettiin uudelleen, '
+      'valitse uudelleen.';
   @override
   String get syncSectionWhen => 'Milloin synkronoidaan';
   @override
@@ -2221,8 +2219,8 @@ final class FinnishStrings extends Strings {
       'Versiot yhdistyvät itsestään: mikään ei mene päällekkäin.';
   @override
   String get syncMergeNoBase =>
-      'Yhteistä versiota ei ole, jonka päälle yhdistää, joten koko tiedosto on '
-      'valittava.';
+      'Yhteistä versiota yhdistämiseen ei ole: valitset itse jokaisessa '
+      'kohdassa, jossa kopiot eroavat.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Päällekkäisyys $index / $total';
@@ -2232,6 +2230,8 @@ final class FinnishStrings extends Strings {
   String get syncMergeFromRemote => 'Palvelimelta';
   @override
   String get syncMergeRemovedLines => 'Poistetut rivit';
+  @override
+  String get syncMergeAbsentLines => 'Ei tässä kopiossa';
   @override
   String get syncMergeKeepLocal => 'Omat';
   @override

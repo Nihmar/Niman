@@ -2143,10 +2143,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Zgjidh konfliktin';
   @override
-  String get syncConflictLegend =>
-      'Rreshtat me − janë të serverit, rreshtat me + të kësaj '
-      'pajisjeje.';
-  @override
   String get syncConflictBinary =>
       'Nuk është skedar teksti: zgjidhni cilën kopje të mbani.';
   @override
@@ -2157,13 +2153,15 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Mbaj versionin e serverit';
   @override
-  String get syncConflictIdentical => 'Dy versionet janë identike';
-  @override
   String get syncConflictLoadFailed => 'Nuk u lexuan dot të dy versionet';
   @override
   String get syncResolveFailed => 'Konflikti nuk u zgjidh dot';
   @override
   String get syncResolved => 'Konflikti u zgjidh';
+  @override
+  String get syncConflictMoved =>
+      'Njëri nga versionet ndryshoi ndërkohë: konflikti u lexua sërish, '
+      'zgjidhni përsëri.';
   @override
   String get syncSectionWhen => 'Kur të sinkronizohet';
   @override
@@ -2230,8 +2228,8 @@ final class AlbanianStrings extends Strings {
       'Dy versionet bashkohen vetë: asgjë nuk mbivendoset.';
   @override
   String get syncMergeNoBase =>
-      'Nuk ka një version të përbashkët për t’u bashkuar, prandaj duhet '
-      'zgjedhur i gjithë skedari.';
+      'Nuk ka version të përbashkët për bashkim: kudo ku dy kopjet '
+      'ndryshojnë, zgjidhni ju.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Mbivendosja $index nga $total';
@@ -2241,6 +2239,8 @@ final class AlbanianStrings extends Strings {
   String get syncMergeFromRemote => 'Nga serveri';
   @override
   String get syncMergeRemovedLines => 'Rreshta të hequr';
+  @override
+  String get syncMergeAbsentLines => 'Nuk është në këtë kopje';
   @override
   String get syncMergeKeepLocal => 'Të miat';
   @override

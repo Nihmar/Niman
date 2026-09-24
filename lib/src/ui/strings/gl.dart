@@ -2139,10 +2139,6 @@ final class GalicianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Resolver o conflito';
   @override
-  String get syncConflictLegend =>
-      'As liñas marcadas con − son do servidor; as marcadas con '
-      '+ son deste dispositivo.';
-  @override
   String get syncConflictBinary =>
       'Non é un ficheiro de texto: escolle que copia conservar.';
   @override
@@ -2153,13 +2149,15 @@ final class GalicianStrings extends Strings {
   @override
   String get syncKeepRemote => 'Conservar a do servidor';
   @override
-  String get syncConflictIdentical => 'As dúas versións son idénticas';
-  @override
   String get syncConflictLoadFailed => 'Non se puideron ler as dúas versións';
   @override
   String get syncResolveFailed => 'Non se puido resolver o conflito';
   @override
   String get syncResolved => 'Conflito resolto';
+  @override
+  String get syncConflictMoved =>
+      'Unha das versións cambiou mentres tanto: o conflito volveuse ler, '
+      'escolle de novo.';
   @override
   String get syncSectionWhen => 'Cando sincronizar';
   @override
@@ -2225,8 +2223,8 @@ final class GalicianStrings extends Strings {
       'As dúas versións únense soas: non hai nada que se superpoña.';
   @override
   String get syncMergeNoBase =>
-      'Non hai unha versión común sobre a que unir, así que hai que escoller o '
-      'ficheiro enteiro.';
+      'Non hai unha versión común sobre a que fusionar: escolles ti en cada '
+      'punto no que as dúas copias difiren.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Superposición $index de $total';
@@ -2236,6 +2234,8 @@ final class GalicianStrings extends Strings {
   String get syncMergeFromRemote => 'Do servidor';
   @override
   String get syncMergeRemovedLines => 'Liñas eliminadas';
+  @override
+  String get syncMergeAbsentLines => 'Non está nesta copia';
   @override
   String get syncMergeKeepLocal => 'As miñas';
   @override

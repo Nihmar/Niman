@@ -2132,9 +2132,6 @@ final class HungarianStrings extends Strings {
   @override
   String get syncConflictTitle => 'Ütközés feloldása';
   @override
-  String get syncConflictLegend =>
-      'A − jelű sorok a szerveréi, a + jelűek ezé a készüléké.';
-  @override
   String get syncConflictBinary =>
       'Nem szövegfájl: válaszd ki, melyik példányt tartod meg.';
   @override
@@ -2145,13 +2142,15 @@ final class HungarianStrings extends Strings {
   @override
   String get syncKeepRemote => 'A szerver változatának megtartása';
   @override
-  String get syncConflictIdentical => 'A két verzió azonos';
-  @override
   String get syncConflictLoadFailed => 'Nem sikerült mindkét verziót beolvasni';
   @override
   String get syncResolveFailed => 'Nem sikerült feloldani az ütközést';
   @override
   String get syncResolved => 'Ütközés feloldva';
+  @override
+  String get syncConflictMoved =>
+      'Az egyik változat közben módosult: az ütközést újra beolvastuk, '
+      'válasszon újra.';
   @override
   String get syncSectionWhen => 'Mikor szinkronizáljon';
   @override
@@ -2218,8 +2217,8 @@ final class HungarianStrings extends Strings {
       'A két verzió magától összeáll: semmi sem fedi egymást.';
   @override
   String get syncMergeNoBase =>
-      'Nincs közös verzió, amelyre össze lehetne fésülni, ezért a '
-      'teljes fájlt kell választani.';
+      'Nincs közös változat az egyesítéshez: ahol a két példány eltér, ott Ön '
+      'választ.';
   @override
   String syncMergeOverlap(int index, int total) => 'Átfedés $index / $total';
   @override
@@ -2228,6 +2227,8 @@ final class HungarianStrings extends Strings {
   String get syncMergeFromRemote => 'A szerverről';
   @override
   String get syncMergeRemovedLines => 'Törölt sorok';
+  @override
+  String get syncMergeAbsentLines => 'Nincs ebben a példányban';
   @override
   String get syncMergeKeepLocal => 'Enyém';
   @override

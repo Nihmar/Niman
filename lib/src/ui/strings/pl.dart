@@ -2154,9 +2154,6 @@ final class PolishStrings extends Strings {
   @override
   String get syncConflictTitle => 'Rozwiąż konflikt';
   @override
-  String get syncConflictLegend =>
-      'Linie z − pochodzą z serwera, linie z + z tego urządzenia.';
-  @override
   String get syncConflictBinary =>
       'To nie jest plik tekstowy: wybierz, którą kopię zachować.';
   @override
@@ -2167,13 +2164,15 @@ final class PolishStrings extends Strings {
   @override
   String get syncKeepRemote => 'Zachowaj z serwera';
   @override
-  String get syncConflictIdentical => 'Obie wersje są identyczne';
-  @override
   String get syncConflictLoadFailed => 'Nie udało się odczytać obu wersji';
   @override
   String get syncResolveFailed => 'Nie udało się rozwiązać konfliktu';
   @override
   String get syncResolved => 'Konflikt rozwiązany';
+  @override
+  String get syncConflictMoved =>
+      'Jedna z wersji zmieniła się w międzyczasie: konflikt wczytano '
+      'ponownie, wybierz jeszcze raz.';
   @override
   String get syncSectionWhen => 'Kiedy synchronizować';
   @override
@@ -2250,7 +2249,8 @@ final class PolishStrings extends Strings {
       'Obie wersje scalają się same: nic się nie nakłada.';
   @override
   String get syncMergeNoBase =>
-      'Brak wspólnej wersji do scalenia, więc trzeba wybrać cały plik.';
+      'Brak wspólnej wersji do scalenia: wszędzie, gdzie kopie się różnią, '
+      'wybierasz ty.';
   @override
   String syncMergeOverlap(int index, int total) => 'Nakładanie $index z $total';
   @override
@@ -2259,6 +2259,8 @@ final class PolishStrings extends Strings {
   String get syncMergeFromRemote => 'Z serwera';
   @override
   String get syncMergeRemovedLines => 'Usunięte linie';
+  @override
+  String get syncMergeAbsentLines => 'Brak w tej kopii';
   @override
   String get syncMergeKeepLocal => 'Moje';
   @override

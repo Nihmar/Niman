@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
@@ -50,11 +51,13 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   bool? confirmed;
 
   /// The texts [conflictTexts] answers.
-  ({String local, String remote, String? base}) texts = (
-    local: 'mine',
-    remote: 'theirs',
-    base: null,
-  );
+  ConflictTexts texts = conflictTextsOf(local: 'mine', remote: 'theirs');
+
+  /// What the next resolutions throw, one each, before any succeeds.
+  final List<SyncFailure> resolveFailures = [];
+
+  /// The versions the last resolution said it was decided on.
+  ConflictTexts? resolvedShown;
 
   /// The text of the last [resolveMerged].
   String? mergedText;
@@ -117,24 +120,34 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   }
 
   @override
-  Future<({String local, String remote, String? base})> conflictTexts(
-    String path,
-  ) async {
+  Future<ConflictTexts> conflictTexts(String path) async {
     calls.add('texts $path');
     return texts;
   }
 
   @override
-  Future<void> resolveMerged(String path, String text) async {
+  Future<void> resolveMerged(
+    String path,
+    String text, {
+    required ConflictTexts shown,
+  }) async {
     calls.add('merge $path');
+    resolvedShown = shown;
+    if (resolveFailures.isNotEmpty) throw resolveFailures.removeAt(0);
     mergedText = text;
     _status.lastReport?.conflicts.removeWhere((c) => c.path == path);
     notifyListeners();
   }
 
   @override
-  Future<void> resolveConflict(String path, {required bool keepLocal}) async {
+  Future<void> resolveConflict(
+    String path, {
+    required bool keepLocal,
+    ConflictTexts? shown,
+  }) async {
     calls.add('resolve $path ${keepLocal ? 'local' : 'remote'}');
+    resolvedShown = shown;
+    if (resolveFailures.isNotEmpty) throw resolveFailures.removeAt(0);
     _status.lastReport?.conflicts.removeWhere((c) => c.path == path);
     notifyListeners();
   }
@@ -196,3 +209,17 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
     lastError: lastError,
   );
 }
+
+/// Conflict texts for a test, with placeholder hashes: the fake never
+/// checks them.
+ConflictTexts conflictTextsOf({
+  required String local,
+  required String remote,
+  String? base,
+}) => ConflictTexts(
+  local: local,
+  remote: remote,
+  base: base,
+  localSha256: 'local-sha',
+  remoteSha256: 'remote-sha',
+);

@@ -2191,10 +2191,6 @@ final class GreekStrings extends Strings {
   @override
   String get syncConflictTitle => 'Επίλυση διένεξης';
   @override
-  String get syncConflictLegend =>
-      'Οι γραμμές με − είναι του διακομιστή, οι γραμμές με + '
-      'αυτής της συσκευής.';
-  @override
   String get syncConflictBinary =>
       'Δεν είναι αρχείο κειμένου: επιλέξτε ποιο αντίγραφο θα '
       'κρατήσετε.';
@@ -2207,14 +2203,16 @@ final class GreekStrings extends Strings {
   @override
   String get syncKeepRemote => 'Διατήρηση έκδοσης διακομιστή';
   @override
-  String get syncConflictIdentical => 'Οι δύο εκδόσεις είναι ίδιες';
-  @override
   String get syncConflictLoadFailed =>
       'Δεν ήταν δυνατή η ανάγνωση των δύο εκδόσεων';
   @override
   String get syncResolveFailed => 'Δεν ήταν δυνατή η επίλυση της διένεξης';
   @override
   String get syncResolved => 'Η διένεξη επιλύθηκε';
+  @override
+  String get syncConflictMoved =>
+      'Μία από τις εκδόσεις άλλαξε στο μεταξύ: η σύγκρουση διαβάστηκε ξανά, '
+      'επιλέξτε πάλι.';
   @override
   String get syncSectionWhen => 'Πότε γίνεται συγχρονισμός';
   @override
@@ -2284,8 +2282,8 @@ final class GreekStrings extends Strings {
       'Οι δύο εκδόσεις ενώνονται μόνες τους: τίποτα δεν επικαλύπτεται.';
   @override
   String get syncMergeNoBase =>
-      'Δεν υπάρχει κοινή έκδοση για την ένωση, οπότε πρέπει να '
-      'επιλεγεί ολόκληρο το αρχείο.';
+      'Δεν υπάρχει κοινή έκδοση για συγχώνευση: όπου διαφέρουν τα δύο '
+      'αντίγραφα, επιλέγετε εσείς.';
   @override
   String syncMergeOverlap(int index, int total) =>
       'Επικάλυψη $index από $total';
@@ -2295,6 +2293,8 @@ final class GreekStrings extends Strings {
   String get syncMergeFromRemote => 'Από τον διακομιστή';
   @override
   String get syncMergeRemovedLines => 'Γραμμές που αφαιρέθηκαν';
+  @override
+  String get syncMergeAbsentLines => 'Δεν υπάρχει σε αυτό το αντίγραφο';
   @override
   String get syncMergeKeepLocal => 'Δικές μου';
   @override
