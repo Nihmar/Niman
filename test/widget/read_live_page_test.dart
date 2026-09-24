@@ -35,7 +35,6 @@ Future<void> _pump(
                   parser: BlockParser(),
                   mathCache: MathCache(),
                   column: column,
-                  lineNumbers: numbers,
                 )
               : MarkdownSurface(
                   buffer: SourceBuffer.fromText(_note),
@@ -131,29 +130,47 @@ int _wrap(WidgetTester tester, String start) {
 }
 
 void main() {
-  for (final numbers in [false, true]) {
-    for (final (name, column) in [
-      ('full width', NoteColumn.off),
-      ('a column', const NoteColumn(width: 500)),
-    ]) {
-      testWidgets('the text starts and wraps where it does in live '
-          '(${numbers ? 'numbers' : 'no numbers'}, $name)', (tester) async {
-        // The read view set its text 16 px in from each side; `live`, with
-        // no column, 5 px — past the numbers when they were on — and 5 px
-        // from the right: the text moved and wrapped elsewhere each time
-        // the pane flipped.
-        tester.view.physicalSize = const Size(900, 700);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-        await _pump(tester, read: false, numbers: numbers, column: column);
-        final live = _glyph(tester, 'plain', 0).dx;
-        final liveWrap = _wrap(tester, 'wrapping');
-        await _pump(tester, read: true, numbers: numbers, column: column);
-        expect(_glyph(tester, 'plain', 0).dx, closeTo(live, 0.01));
-        expect(_wrap(tester, 'wrapping'), liveWrap);
-      });
-    }
+  for (final (name, column) in [
+    ('full width', NoteColumn.off),
+    ('a column', const NoteColumn(width: 500)),
+  ]) {
+    testWidgets('the text starts and wraps where it does in live ($name)', (
+      tester,
+    ) async {
+      // The read view set its text 16 px in from each side; `live`, with no
+      // column, 5 px and 5 px from the right: the text moved and wrapped
+      // elsewhere each time the pane flipped.
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(tester, read: false, numbers: false, column: column);
+      final live = _glyph(tester, 'plain', 0).dx;
+      final liveWrap = _wrap(tester, 'wrapping');
+      await _pump(tester, read: true, numbers: false, column: column);
+      expect(_glyph(tester, 'plain', 0).dx, closeTo(live, 0.01));
+      expect(_wrap(tester, 'wrapping'), liveWrap);
+    });
   }
+
+  // 2026-09-24: the read view kept the room of the editor's line numbers,
+  // drawing none, so the text stood where the editor's does — an empty
+  // gutter down a page that is only read. It keeps none now: the page is
+  // the one `live` draws without numbers.
+  testWidgets("the read view keeps no room for the editor's numbers", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(tester, read: false, numbers: true, column: NoteColumn.off);
+    final numbered = _glyph(tester, 'plain', 0).dx;
+    await _pump(tester, read: false, numbers: false, column: NoteColumn.off);
+    final bare = _glyph(tester, 'plain', 0).dx;
+    await _pump(tester, read: true, numbers: true, column: NoteColumn.off);
+    final read = _glyph(tester, 'plain', 0).dx;
+    expect(read, closeTo(bare, 0.01));
+    expect(read, lessThan(numbered));
+  });
 
   testWidgets("each construct's text starts where it does in live", (
     tester,
