@@ -453,6 +453,48 @@ final class CzechStrings extends Strings {
   @override
   String get toolbarTable => 'Tabulka';
   @override
+  String get tableRow => 'Řádek';
+  @override
+  String get tableColumn => 'Sloupec';
+  @override
+  String get tableAddRowAbove => 'Vložit řádek nad';
+  @override
+  String get tableAddRowBelow => 'Vložit řádek pod';
+  @override
+  String get tableMoveRowUp => 'Posunout řádek nahoru';
+  @override
+  String get tableMoveRowDown => 'Posunout řádek dolů';
+  @override
+  String get tableDuplicateRow => 'Duplikovat řádek';
+  @override
+  String get tableDeleteRow => 'Smazat řádek';
+  @override
+  String get tableAddColumnLeft => 'Vložit sloupec vlevo';
+  @override
+  String get tableAddColumnRight => 'Vložit sloupec vpravo';
+  @override
+  String get tableMoveColumnLeft => 'Posunout sloupec doleva';
+  @override
+  String get tableMoveColumnRight => 'Posunout sloupec doprava';
+  @override
+  String get tableAlignLeft => 'Zarovnat vlevo';
+  @override
+  String get tableAlignCenter => 'Na střed';
+  @override
+  String get tableAlignRight => 'Zarovnat vpravo';
+  @override
+  String get tableDuplicateColumn => 'Duplikovat sloupec';
+  @override
+  String get tableDeleteColumn => 'Smazat sloupec';
+  @override
+  String get tableSortAscending => 'Seřadit podle sloupce (A → Z)';
+  @override
+  String get tableSortDescending => 'Seřadit podle sloupce (Z → A)';
+  @override
+  String get tableAddRow => 'Přidat řádek';
+  @override
+  String get tableAddColumn => 'Přidat sloupec';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Seznam';

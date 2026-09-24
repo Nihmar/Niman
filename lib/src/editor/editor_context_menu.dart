@@ -9,6 +9,10 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/context_menu_pages.dart';
+import 'package:niman/src/editor/context_menu_row.dart';
+import 'package:niman/src/editor/table_menu.dart';
+import 'package:niman/src/editor/table_menu_sheet.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 
 /// One formatting action for the menu: the toolbar's [item], what it
@@ -46,6 +50,7 @@ final class EditorContextMenu extends StatelessWidget {
     required this.onDismiss,
     this.formats = const [],
     this.extras = const [],
+    this.table,
     super.key,
   });
 
@@ -60,6 +65,10 @@ final class EditorContextMenu extends StatelessWidget {
 
   /// What follows the formatting (Add to dictionary).
   final List<ContextMenuButtonItem> extras;
+
+  /// A table's rows and columns, when the menu opened on one of its cells
+  /// (#261): after the clipboard, before the formatting.
+  final TableMenu? table;
 
   /// Closes the menu.
   final VoidCallback onDismiss;
@@ -91,10 +100,9 @@ final class EditorContextMenu extends StatelessWidget {
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: room < 0 ? 0 : room),
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _desktopChildren(context),
+            child: ContextMenuPages(
+              main: _desktopChildren,
+              group: (group, back) => _groupChildren(context, group, back),
             ),
           ),
         ),
@@ -102,14 +110,52 @@ final class EditorContextMenu extends StatelessWidget {
     );
   }
 
+  /// A table's submenu, in the menu's place: the way back, then its
+  /// sections (#261). A flyout beside a menu that is itself a selection
+  /// toolbar has nowhere steady to stand; the menu turning into its
+  /// submenu does.
+  List<Widget> _groupChildren(
+    BuildContext context,
+    TableMenuGroup group,
+    VoidCallback back,
+  ) {
+    const divider = Divider(height: 9, indent: 8, endIndent: 8);
+    return [
+      ContextMenuRow(
+        rowKey: Key('table-${group.id}-back'),
+        icon: Icons.chevron_left,
+        label: group.label,
+        onPressed: back,
+      ),
+      for (final section in group.sections) ...[
+        divider,
+        for (final action in section) _tableRow(action),
+      ],
+    ];
+  }
+
+  Widget _tableRow(TableMenuAction action) {
+    final pressed = action.onPressed;
+    return ContextMenuRow(
+      rowKey: Key('table-${action.id}'),
+      icon: action.icon,
+      label: action.label,
+      onPressed: pressed == null ? null : () => _run(pressed),
+    );
+  }
+
   /// What the menu leaves free above and below it.
   static const double _screenMargin = 16;
 
-  List<Widget> _desktopChildren(BuildContext context) {
+  List<Widget> _desktopChildren(
+    BuildContext context,
+    void Function(TableMenuGroup group) open,
+  ) {
     const divider = Divider(height: 9, indent: 8, endIndent: 8);
+    final table = this.table;
     // Every row with its icon, the clipboard's too (0.0.8 test round):
     // one column of icons down the menu, the way the formatting reads.
-    Widget plain(ContextMenuButtonItem item) => _MenuRow(
+    Widget plain(ContextMenuButtonItem item) => ContextMenuRow(
       rowKey: Key('context-${item.type.name}'),
       icon: _iconOf(item),
       label:
@@ -119,10 +165,22 @@ final class EditorContextMenu extends StatelessWidget {
     );
     return [
       for (final item in clipboard) plain(item),
+      if (table != null) ...[
+        divider,
+        for (final group in table.groups)
+          ContextMenuRow(
+            rowKey: Key('table-${group.id}'),
+            icon: group.icon,
+            label: group.label,
+            trailing: Icons.chevron_right,
+            onPressed: () => open(group),
+          ),
+        for (final action in table.actions) _tableRow(action),
+      ],
       if (formats.isNotEmpty) divider,
       for (final (i, entry) in formats.indexed) ...[
         if (i > 0 && entry.item.group != formats[i - 1].item.group) divider,
-        _MenuRow(
+        ContextMenuRow(
           rowKey: Key('context-${entry.item.id}'),
           icon: entry.item.icon,
           label: entry.item.label,
@@ -149,7 +207,12 @@ final class EditorContextMenu extends StatelessWidget {
 
   List<Widget> _mobileChildren(BuildContext context) {
     final theme = Theme.of(context);
-    final total = clipboard.length + formats.length + extras.length;
+    final table = this.table;
+    final total =
+        clipboard.length +
+        (table == null ? 0 : table.groups.length + table.actions.length) +
+        formats.length +
+        extras.length;
     var index = 0;
     Widget button(Widget child, VoidCallback onPressed) =>
         TextSelectionToolbarTextButton(
@@ -162,6 +225,21 @@ final class EditorContextMenu extends StatelessWidget {
         AdaptiveTextSelectionToolbar.getButtonLabel(context, item);
     return [
       for (final item in clipboard) button(Text(label(item)), item.onPressed!),
+      // A table's row and column open a sheet of their actions: the bar's
+      // overflow is a list of words, with no room for a submenu.
+      if (table != null) ...[
+        for (final group in table.groups)
+          button(
+            Text('${group.label}…', key: Key('table-${group.id}')),
+            () => showTableMenuSheet(context, group, onDismiss: onDismiss),
+          ),
+        for (final action in table.actions)
+          if (action.onPressed case final pressed?)
+            button(
+              Text(action.label, key: Key('table-${action.id}')),
+              () => _run(pressed),
+            ),
+      ],
       // The active state reads the way the toolbar's does: the format
       // that is on stands out.
       for (final entry in formats)
@@ -179,63 +257,5 @@ final class EditorContextMenu extends StatelessWidget {
         ),
       for (final item in extras) button(Text(label(item)), item.onPressed!),
     ];
-  }
-}
-
-/// One row of the desktop menu: an icon, a name, pressed while [active]
-/// (a format that is on at the caret).
-final class _MenuRow extends StatelessWidget {
-  const new({
-    required this.rowKey,
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-    this.active = false,
-  });
-
-  final Key rowKey;
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Semantics(
-      toggled: active,
-      child: InkWell(
-        key: rowKey,
-        onTap: onPressed,
-        canRequestFocus: false,
-        child: Container(
-          height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          color: active ? scheme.primaryContainer : null,
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: active
-                    ? scheme.onPrimaryContainer
-                    : scheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: active ? scheme.onPrimaryContainer : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

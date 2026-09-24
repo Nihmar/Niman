@@ -455,6 +455,48 @@ final class MacedonianStrings extends Strings {
   @override
   String get toolbarTable => 'Табела';
   @override
+  String get tableRow => 'Ред';
+  @override
+  String get tableColumn => 'Колона';
+  @override
+  String get tableAddRowAbove => 'Вметни ред над';
+  @override
+  String get tableAddRowBelow => 'Вметни ред под';
+  @override
+  String get tableMoveRowUp => 'Помести го редот нагоре';
+  @override
+  String get tableMoveRowDown => 'Помести го редот надолу';
+  @override
+  String get tableDuplicateRow => 'Удвои го редот';
+  @override
+  String get tableDeleteRow => 'Избриши го редот';
+  @override
+  String get tableAddColumnLeft => 'Вметни колона лево';
+  @override
+  String get tableAddColumnRight => 'Вметни колона десно';
+  @override
+  String get tableMoveColumnLeft => 'Помести ја колоната лево';
+  @override
+  String get tableMoveColumnRight => 'Помести ја колоната десно';
+  @override
+  String get tableAlignLeft => 'Порамни лево';
+  @override
+  String get tableAlignCenter => 'Центрирај';
+  @override
+  String get tableAlignRight => 'Порамни десно';
+  @override
+  String get tableDuplicateColumn => 'Удвои ја колоната';
+  @override
+  String get tableDeleteColumn => 'Избриши ја колоната';
+  @override
+  String get tableSortAscending => 'Подреди по колона (А → Ш)';
+  @override
+  String get tableSortDescending => 'Подреди по колона (Ш → А)';
+  @override
+  String get tableAddRow => 'Додај ред';
+  @override
+  String get tableAddColumn => 'Додај колона';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Листа';

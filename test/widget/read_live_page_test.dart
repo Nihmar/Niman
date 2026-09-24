@@ -468,12 +468,14 @@ void main() {
   testWidgets("a table's cells stand where they do in live", (tester) async {
     // `live` drew a table as its source, pipes and dashes and all, where
     // the read view draws a grid: every cell moved when the pane flipped.
+    // A centred and a right-aligned column stand where the read view sets
+    // them too (#261).
     tester.view.physicalSize = const Size(900, 700);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     const note =
-        'caret\n\n| Name | Qty | Notes |\n|---|:-:|---|\n'
-        '| apple | 3 | **fresh** |\n| a much longer name | 12 |  |\n\n'
+        'caret\n\n| Name | Qty | Notes |\n|---|:-:|--:|\n'
+        '| apple | 3 | **fresh** |\n| a much longer name | 12 | Qz |\n\n'
         'after table\n';
     const words = [
       'Name',
@@ -484,6 +486,7 @@ void main() {
       'fresh',
       'a much',
       '12',
+      'Qz',
       'after table',
     ];
     Future<List<Offset>> places({required bool read}) async {

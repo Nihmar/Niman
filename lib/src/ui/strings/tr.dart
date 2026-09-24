@@ -445,6 +445,48 @@ final class TurkishStrings extends Strings {
   @override
   String get toolbarTable => 'Tablo';
   @override
+  String get tableRow => 'Satır';
+  @override
+  String get tableColumn => 'Sütun';
+  @override
+  String get tableAddRowAbove => 'Üstüne satır ekle';
+  @override
+  String get tableAddRowBelow => 'Altına satır ekle';
+  @override
+  String get tableMoveRowUp => 'Satırı yukarı taşı';
+  @override
+  String get tableMoveRowDown => 'Satırı aşağı taşı';
+  @override
+  String get tableDuplicateRow => 'Satırı çoğalt';
+  @override
+  String get tableDeleteRow => 'Satırı sil';
+  @override
+  String get tableAddColumnLeft => 'Soluna sütun ekle';
+  @override
+  String get tableAddColumnRight => 'Sağına sütun ekle';
+  @override
+  String get tableMoveColumnLeft => 'Sütunu sola taşı';
+  @override
+  String get tableMoveColumnRight => 'Sütunu sağa taşı';
+  @override
+  String get tableAlignLeft => 'Sola hizala';
+  @override
+  String get tableAlignCenter => 'Ortala';
+  @override
+  String get tableAlignRight => 'Sağa hizala';
+  @override
+  String get tableDuplicateColumn => 'Sütunu çoğalt';
+  @override
+  String get tableDeleteColumn => 'Sütunu sil';
+  @override
+  String get tableSortAscending => 'Sütuna göre sırala (A → Z)';
+  @override
+  String get tableSortDescending => 'Sütuna göre sırala (Z → A)';
+  @override
+  String get tableAddRow => 'Satır ekle';
+  @override
+  String get tableAddColumn => 'Sütun ekle';
+  @override
   String get toolbarHeading => 'Başlık';
   @override
   String get toolbarList => 'Liste';

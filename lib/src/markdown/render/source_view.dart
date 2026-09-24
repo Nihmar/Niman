@@ -60,7 +60,9 @@ import 'package:niman/src/markdown/render/live_code_colors.dart';
 import 'package:niman/src/markdown/render/live_decorations.dart';
 import 'package:niman/src/markdown/render/live_inline_math.dart';
 import 'package:niman/src/markdown/render/live_quote_content.dart';
+import 'package:niman/src/markdown/render/live_table_commands.dart';
 import 'package:niman/src/markdown/render/live_table_grid.dart';
+import 'package:niman/src/markdown/render/live_table_handles.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -76,6 +78,7 @@ import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The colour a selected run is painted with.
@@ -407,12 +410,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The overlay the desktop context menu is drawn in.
   final OverlayPortalController _menuOverlay = OverlayPortalController();
 
+  /// The `+` handles of the table in play (#261): the one under the mouse
+  /// on the desktop, the caret's on a phone.
+  final OverlayPortalController _tableOverlay = OverlayPortalController();
+
+  /// The first line of the table under the mouse, or null.
+  final ValueNotifier<int?> _tableHover = ValueNotifier<int?>(null);
+
+  /// Whether the mouse is on one of the handles, off the table itself.
+  bool _overTableHandles = false;
+
+  /// Lets the handles go a moment after the mouse left the table: the move
+  /// from the table onto a handle leaves the note before it reaches the
+  /// handle, and letting go at once took the handle from under it.
+  Timer? _tableHoverClear;
+
   /// Where the context menu opens, in global coordinates, while it is up.
   Offset? _menuAt;
 
   @override
   void initState() {
     super.initState();
+    // Always up: it draws nothing while no table is in play (#261).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _tableOverlay.show();
+    });
     _restyle();
     _scroll = widget.controller ?? ScrollController();
     _ownsScroll = widget.controller == null;
@@ -519,6 +541,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   @override
   void dispose() {
+    _tableHoverClear?.cancel();
+    _tableHover.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.findMatches?.removeListener(_onSpellingChanged);
@@ -1510,6 +1534,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// read. Selection by touch belongs to the platform's own handles, which is a
   /// separate piece of work.
   Widget _mouseSelection(Widget child) => Listener(
+    onPointerHover: (event) => _hoverTableAt(event.position),
     onPointerDown: (event) {
       _lastPointerKind = event.kind;
       // A mouse asks for the keyboard as it goes down, which is where a click
@@ -2274,6 +2299,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 // arrow (`_Line`).
                 child: MouseRegion(
                   cursor: SystemMouseCursors.text,
+                  onExit: (_) => _leaveTable(),
                   child: CustomScrollView(
                     key: _scrollKey,
                     controller: _scroll,
@@ -2443,8 +2469,149 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           listenable: _scroll,
           builder: (context, _) => _touchSelectionOverlay(),
         ),
-        child: note,
+        child: OverlayPortal(
+          controller: _tableOverlay,
+          overlayChildBuilder: (context) => ListenableBuilder(
+            listenable: Listenable.merge([_scroll, _tableHover, _caretSpot]),
+            builder: (context, _) => _tableHandles(context),
+          ),
+          child: note,
+        ),
       ),
+    );
+  }
+
+  // ---------------------------------------------------------- table handles
+
+  /// Whether this platform's tables show their handles where the caret is,
+  /// having no pointer to hover with.
+  static bool get _touchTables =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
+  /// The table whose handles show: under the mouse, or the caret's on a
+  /// phone. Null in `source`, where a table is text.
+  Block? get _tableInPlay {
+    if (!widget.hideMarkers) return null;
+    final styler = _styler;
+    if (styler == null) return null;
+    final hovered = _tableHover.value;
+    final line = hovered ?? (_touchTables ? _caretSpot.value.line : null);
+    if (line == null || line < 0 || line >= lineCount) return null;
+    final block = styler.blockOf(line);
+    return block?.kind == BlockKind.table ? block : null;
+  }
+
+  /// Follows the mouse over the note: the table it is on, or — while it is
+  /// on the handles' side of the table it was on — that one still.
+  void _hoverTableAt(Offset global) {
+    if (!widget.hideMarkers || _touchTables) return;
+    final offset = offsetAt(global);
+    int? table;
+    if (offset != null) {
+      final line = widget.buffer.lineOf(offset);
+      final block = _styler?.blockOf(line);
+      if (block?.kind == BlockKind.table) table = block!.startLine;
+    }
+    final current = _tableHover.value;
+    if (table == null && current != null) {
+      final block = _styler?.blockOf(current);
+      final grid = block == null ? null : _tableGrid(block);
+      const reach = LiveTableHandles.thickness + 8;
+      if (grid != null &&
+          Rect.fromLTRB(
+            grid.left,
+            grid.top,
+            grid.right + reach,
+            grid.bottom + reach,
+          ).contains(global)) {
+        table = current;
+      }
+    }
+    if (table == null) {
+      _leaveTable();
+      return;
+    }
+    _tableHoverClear?.cancel();
+    _tableHover.value = table;
+    _tableOverlay.show();
+  }
+
+  /// The mouse is off the table: its handles go, unless it is on them.
+  void _leaveTable() {
+    if (_tableHover.value == null) return;
+    _tableHoverClear?.cancel();
+    _tableHoverClear = Timer(const Duration(milliseconds: 200), () {
+      if (mounted && !_overTableHandles) _tableHover.value = null;
+    });
+  }
+
+  /// [block]'s grid, globally: from its first row's top to its last row's
+  /// foot, as wide as its columns — or null while those rows are not drawn.
+  Rect? _tableGrid(Block block) {
+    final first = _paragraphAt(block.startLine);
+    final last = _paragraphAt(block.endLine - 1);
+    if (first == null || last == null) return null;
+    if (!first.attached || !last.attached) return null;
+    if (!first.hasSize || !last.hasSize) return null;
+    final row = _tableRowAt(context, block.startLine, block, _caretSpot.value);
+    if (row == null) return null;
+    final pad = widget.theme.tableCellPadding;
+    final top = first.localToGlobal(Offset.zero);
+    final bottom = last.localToGlobal(Offset(0, last.size.height));
+    return Rect.fromLTRB(
+      top.dx,
+      top.dy - pad.top,
+      top.dx + row.edges.last,
+      bottom.dy + pad.bottom,
+    );
+  }
+
+  /// The handles of the table in play, in the overlay's coordinates.
+  Widget _tableHandles(BuildContext overlayContext) {
+    final block = _tableInPlay;
+    final grid = block == null ? null : _tableGrid(block);
+    final note = _noteBox;
+    final overlay = Overlay.of(overlayContext).context.findRenderObject();
+    if (block == null ||
+        grid == null ||
+        note == null ||
+        overlay is! RenderBox ||
+        !overlay.hasSize) {
+      return const SizedBox.shrink();
+    }
+    Rect local(Rect rect) => Rect.fromPoints(
+      overlay.globalToLocal(rect.topLeft),
+      overlay.globalToLocal(rect.bottomRight),
+    );
+    final box = note.localToGlobal(Offset.zero) & note.size;
+    LiveTableCommands? commands() {
+      final buffer = widget.buffer;
+      return LiveTableCommands.at(
+        buffer,
+        block,
+        buffer.offsetOfLine(block.startLine),
+        replace: (start, end, text, caret) =>
+            replaceText(start, end, text, caret: SelectionModel.at(caret)),
+      );
+    }
+
+    return LiveTableHandles(
+      grid: local(grid),
+      clip: local(box),
+      color: widget.theme.markerDim,
+      addRowLabel: AppStrings.tableAddRow,
+      addColumnLabel: AppStrings.tableAddColumn,
+      onAddRow: () => commands()?.addRowAtEnd(),
+      onAddColumn: () => commands()?.addColumnAtEnd(),
+      onHover: (over) {
+        _overTableHandles = over;
+        if (over) {
+          _tableHoverClear?.cancel();
+        } else {
+          _leaveTable();
+        }
+      },
     );
   }
 
@@ -2507,8 +2674,25 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         !selection.isCollapsed &&
         offset >= selection.start &&
         offset <= selection.end;
-    if (offset != null && !onSelection) placeCaret(offset);
+    // On a table's room, the menu is the nearer cell's (#261).
+    if (offset != null && !onSelection) placeCaret(_inCell(offset, 0));
     showContextMenu(global);
+  }
+
+  /// The table the caret is in and what can be done to it, in `live`; null
+  /// anywhere else (#261). A menu reads it as it opens, so it is the
+  /// caret's cell now.
+  LiveTableCommands? _tableCommands() {
+    if (!widget.hideMarkers) return null;
+    final buffer = widget.buffer;
+    final offset = _selection.extent.clamp(0, buffer.length);
+    return LiveTableCommands.at(
+      buffer,
+      _styler?.blockOf(buffer.lineOf(offset)),
+      offset,
+      replace: (start, end, text, caret) =>
+          replaceText(start, end, text, caret: SelectionModel.at(caret)),
+    );
   }
 
   /// Opens the context menu at [global], or at the caret without one (the
@@ -2595,6 +2779,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             clipboard: _clipboardItems(hideContextMenu),
             formats: widget.formatMenu?.call() ?? const <FormatMenuEntry>[],
             extras: _spellingItems(hideContextMenu),
+            table: _tableCommands()?.menu(),
             onDismiss: hideContextMenu,
           ),
         ),
@@ -2743,6 +2928,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       extras: _touchToolbar
           ? _spellingItems(_hideTouch)
           : const <ContextMenuButtonItem>[],
+      table: _touchToolbar ? _tableCommands()?.menu() : null,
       onDismiss: _hideTouch,
       onHandleDrag: _dragHandle,
       onHandleDragEnd: () => _showTouch(toolbar: true),

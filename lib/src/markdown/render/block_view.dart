@@ -48,6 +48,7 @@ import 'package:niman/src/markdown/render/math_text.dart';
 import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/style_run.dart';
+import 'package:niman/src/markdown/table/markdown_table.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_widget.dart';
@@ -463,6 +464,7 @@ final class BlockView extends StatelessWidget {
   Widget _table(BuildContext context) {
     final rows = _tableRows(parsed.text);
     if (rows.isEmpty) return const SizedBox.shrink();
+    final aligns = _tableAligns(parsed.text);
     // A hairline: one device pixel, wherever the columns end. A table as
     // wide as its columns ends on a fraction of a pixel, and a half-pixel
     // side drawn inside that edge was split across two pixels too faint to
@@ -474,11 +476,19 @@ final class BlockView extends StatelessWidget {
     // As wide as its columns, as `live` draws it: laid out on the pane's
     // width, a table spread what its columns left over evenly across them,
     // and a two-word column stood half the pane wide.
-    return Align(alignment: Alignment.topLeft, child: _grid(rows, border));
+    return Align(
+      alignment: Alignment.topLeft,
+      child: _grid(rows, border, aligns),
+    );
   }
 
-  /// The table's grid: its [rows], their cells, and the [border].
-  Widget _grid(List<List<String>> rows, TableBorder border) {
+  /// The table's grid: its [rows], their cells aligned as [aligns] says,
+  /// and the [border].
+  Widget _grid(
+    List<List<String>> rows,
+    TableBorder border,
+    List<TableAlign> aligns,
+  ) {
     return Table(
       border: border,
       defaultColumnWidth: const IntrinsicColumnWidth(),
@@ -486,12 +496,15 @@ final class BlockView extends StatelessWidget {
         for (var at = 0; at < rows.length; at++)
           TableRow(
             children: <Widget>[
-              for (final cell in rows[at])
+              for (final (column, cell) in rows[at].indexed)
                 Padding(
                   padding: theme.tableCellPadding,
                   child: _cell(
                     cell,
                     at == 0 ? theme.tableHeader : theme.tableCell,
+                    align: column < aligns.length
+                        ? _textAlignOf(aligns[column])
+                        : TextAlign.start,
                   ),
                 ),
             ],
@@ -512,11 +525,17 @@ final class BlockView extends StatelessWidget {
   /// table can have many; a cell is one line, and a note's tables are small.
   /// Anything larger belongs in the block scanner, which is where a cell would
   /// become a block if it ever needs to.
-  Widget _cell(String text, TextStyle style) {
+  Widget _cell(
+    String text,
+    TextStyle style, {
+    TextAlign align = TextAlign.start,
+  }) {
     if (text.isEmpty) return Text('', style: style);
     final buffer = SourceBuffer.fromText(text);
     final scanner = BlockScanner(buffer);
-    if (scanner.index.blocks.isEmpty) return Text(text, style: style);
+    if (scanner.index.blocks.isEmpty) {
+      return Text(text, style: style, textAlign: align);
+    }
     final cell = BlockParser().parse(scanner.index.blocks.first, buffer);
     final spans = _InlineBuilder(
       visible: VisibleText.of(cell),
@@ -527,7 +546,10 @@ final class BlockView extends StatelessWidget {
       onTapWikiLink: onTapWikiLink,
       embedResolver: embedResolver,
     ).build();
-    return Text.rich(TextSpan(children: spans, style: style));
+    return Text.rich(
+      TextSpan(children: spans, style: style),
+      textAlign: align,
+    );
   }
 
   /// What to draw in a list item's marker column.
@@ -612,6 +634,21 @@ final class BlockView extends StatelessWidget {
   }
 
   /// The rows and cells of a GFM table, delimiter row dropped.
+  /// The columns' alignments, from the table's delimiter row.
+  static List<TableAlign> _tableAligns(String text) {
+    for (final line in text.split('\n')) {
+      final aligns = MarkdownTable.alignsOf(line);
+      if (aligns.isNotEmpty) return aligns;
+    }
+    return const <TableAlign>[];
+  }
+
+  static TextAlign _textAlignOf(TableAlign align) => switch (align) {
+    TableAlign.center => TextAlign.center,
+    TableAlign.right => TextAlign.right,
+    TableAlign.none || TableAlign.left => TextAlign.start,
+  };
+
   static List<List<String>> _tableRows(String text) {
     final rows = <List<String>>[];
     for (final line in text.split('\n')) {

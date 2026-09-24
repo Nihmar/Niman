@@ -448,6 +448,48 @@ final class EnglishStrings extends Strings {
   @override
   String get toolbarTable => 'Table';
   @override
+  String get tableRow => 'Row';
+  @override
+  String get tableColumn => 'Column';
+  @override
+  String get tableAddRowAbove => 'Add row above';
+  @override
+  String get tableAddRowBelow => 'Add row below';
+  @override
+  String get tableMoveRowUp => 'Move row up';
+  @override
+  String get tableMoveRowDown => 'Move row down';
+  @override
+  String get tableDuplicateRow => 'Duplicate row';
+  @override
+  String get tableDeleteRow => 'Delete row';
+  @override
+  String get tableAddColumnLeft => 'Add column to the left';
+  @override
+  String get tableAddColumnRight => 'Add column to the right';
+  @override
+  String get tableMoveColumnLeft => 'Move column left';
+  @override
+  String get tableMoveColumnRight => 'Move column right';
+  @override
+  String get tableAlignLeft => 'Align left';
+  @override
+  String get tableAlignCenter => 'Align center';
+  @override
+  String get tableAlignRight => 'Align right';
+  @override
+  String get tableDuplicateColumn => 'Duplicate column';
+  @override
+  String get tableDeleteColumn => 'Delete column';
+  @override
+  String get tableSortAscending => 'Sort by column (A → Z)';
+  @override
+  String get tableSortDescending => 'Sort by column (Z → A)';
+  @override
+  String get tableAddRow => 'Add row';
+  @override
+  String get tableAddColumn => 'Add column';
+  @override
   String get toolbarHeading => 'Heading';
   @override
   String get toolbarList => 'List';

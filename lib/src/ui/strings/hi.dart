@@ -437,6 +437,48 @@ final class HindiStrings extends Strings {
   @override
   String get toolbarTable => 'तालिका';
   @override
+  String get tableRow => 'पंक्ति';
+  @override
+  String get tableColumn => 'स्तंभ';
+  @override
+  String get tableAddRowAbove => 'ऊपर पंक्ति जोड़ें';
+  @override
+  String get tableAddRowBelow => 'नीचे पंक्ति जोड़ें';
+  @override
+  String get tableMoveRowUp => 'पंक्ति ऊपर ले जाएँ';
+  @override
+  String get tableMoveRowDown => 'पंक्ति नीचे ले जाएँ';
+  @override
+  String get tableDuplicateRow => 'पंक्ति की प्रतिलिपि बनाएँ';
+  @override
+  String get tableDeleteRow => 'पंक्ति हटाएँ';
+  @override
+  String get tableAddColumnLeft => 'बाईं ओर स्तंभ जोड़ें';
+  @override
+  String get tableAddColumnRight => 'दाईं ओर स्तंभ जोड़ें';
+  @override
+  String get tableMoveColumnLeft => 'स्तंभ बाईं ओर ले जाएँ';
+  @override
+  String get tableMoveColumnRight => 'स्तंभ दाईं ओर ले जाएँ';
+  @override
+  String get tableAlignLeft => 'बाएँ संरेखित करें';
+  @override
+  String get tableAlignCenter => 'बीच में संरेखित करें';
+  @override
+  String get tableAlignRight => 'दाएँ संरेखित करें';
+  @override
+  String get tableDuplicateColumn => 'स्तंभ की प्रतिलिपि बनाएँ';
+  @override
+  String get tableDeleteColumn => 'स्तंभ हटाएँ';
+  @override
+  String get tableSortAscending => 'स्तंभ के अनुसार क्रमबद्ध करें (A → Z)';
+  @override
+  String get tableSortDescending => 'स्तंभ के अनुसार क्रमबद्ध करें (Z → A)';
+  @override
+  String get tableAddRow => 'पंक्ति जोड़ें';
+  @override
+  String get tableAddColumn => 'स्तंभ जोड़ें';
+  @override
   String get toolbarHeading => 'हेडिंग';
   @override
   String get toolbarList => 'सूची';

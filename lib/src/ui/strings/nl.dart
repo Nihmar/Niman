@@ -452,6 +452,48 @@ final class DutchStrings extends Strings {
   @override
   String get toolbarTable => 'Tabel';
   @override
+  String get tableRow => 'Rij';
+  @override
+  String get tableColumn => 'Kolom';
+  @override
+  String get tableAddRowAbove => 'Rij erboven invoegen';
+  @override
+  String get tableAddRowBelow => 'Rij eronder invoegen';
+  @override
+  String get tableMoveRowUp => 'Rij omhoog';
+  @override
+  String get tableMoveRowDown => 'Rij omlaag';
+  @override
+  String get tableDuplicateRow => 'Rij dupliceren';
+  @override
+  String get tableDeleteRow => 'Rij verwijderen';
+  @override
+  String get tableAddColumnLeft => 'Kolom links invoegen';
+  @override
+  String get tableAddColumnRight => 'Kolom rechts invoegen';
+  @override
+  String get tableMoveColumnLeft => 'Kolom naar links';
+  @override
+  String get tableMoveColumnRight => 'Kolom naar rechts';
+  @override
+  String get tableAlignLeft => 'Links uitlijnen';
+  @override
+  String get tableAlignCenter => 'Centreren';
+  @override
+  String get tableAlignRight => 'Rechts uitlijnen';
+  @override
+  String get tableDuplicateColumn => 'Kolom dupliceren';
+  @override
+  String get tableDeleteColumn => 'Kolom verwijderen';
+  @override
+  String get tableSortAscending => 'Sorteren op kolom (A → Z)';
+  @override
+  String get tableSortDescending => 'Sorteren op kolom (Z → A)';
+  @override
+  String get tableAddRow => 'Rij toevoegen';
+  @override
+  String get tableAddColumn => 'Kolom toevoegen';
+  @override
   String get toolbarHeading => 'Kop';
   @override
   String get toolbarList => 'Lijst';

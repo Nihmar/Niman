@@ -447,6 +447,48 @@ final class NorwegianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabell';
   @override
+  String get tableRow => 'Rad';
+  @override
+  String get tableColumn => 'Kolonne';
+  @override
+  String get tableAddRowAbove => 'Sett inn rad over';
+  @override
+  String get tableAddRowBelow => 'Sett inn rad under';
+  @override
+  String get tableMoveRowUp => 'Flytt rad opp';
+  @override
+  String get tableMoveRowDown => 'Flytt rad ned';
+  @override
+  String get tableDuplicateRow => 'Dupliser rad';
+  @override
+  String get tableDeleteRow => 'Slett rad';
+  @override
+  String get tableAddColumnLeft => 'Sett inn kolonne til venstre';
+  @override
+  String get tableAddColumnRight => 'Sett inn kolonne til høyre';
+  @override
+  String get tableMoveColumnLeft => 'Flytt kolonne til venstre';
+  @override
+  String get tableMoveColumnRight => 'Flytt kolonne til høyre';
+  @override
+  String get tableAlignLeft => 'Venstrejuster';
+  @override
+  String get tableAlignCenter => 'Midtstill';
+  @override
+  String get tableAlignRight => 'Høyrejuster';
+  @override
+  String get tableDuplicateColumn => 'Dupliser kolonne';
+  @override
+  String get tableDeleteColumn => 'Slett kolonne';
+  @override
+  String get tableSortAscending => 'Sorter etter kolonne (A → Å)';
+  @override
+  String get tableSortDescending => 'Sorter etter kolonne (Å → A)';
+  @override
+  String get tableAddRow => 'Legg til rad';
+  @override
+  String get tableAddColumn => 'Legg til kolonne';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

@@ -447,6 +447,48 @@ final class DanishStrings extends Strings {
   @override
   String get toolbarTable => 'Tabel';
   @override
+  String get tableRow => 'Række';
+  @override
+  String get tableColumn => 'Kolonne';
+  @override
+  String get tableAddRowAbove => 'Indsæt række over';
+  @override
+  String get tableAddRowBelow => 'Indsæt række under';
+  @override
+  String get tableMoveRowUp => 'Flyt række op';
+  @override
+  String get tableMoveRowDown => 'Flyt række ned';
+  @override
+  String get tableDuplicateRow => 'Dupliker række';
+  @override
+  String get tableDeleteRow => 'Slet række';
+  @override
+  String get tableAddColumnLeft => 'Indsæt kolonne til venstre';
+  @override
+  String get tableAddColumnRight => 'Indsæt kolonne til højre';
+  @override
+  String get tableMoveColumnLeft => 'Flyt kolonne til venstre';
+  @override
+  String get tableMoveColumnRight => 'Flyt kolonne til højre';
+  @override
+  String get tableAlignLeft => 'Venstrejuster';
+  @override
+  String get tableAlignCenter => 'Centrer';
+  @override
+  String get tableAlignRight => 'Højrejuster';
+  @override
+  String get tableDuplicateColumn => 'Dupliker kolonne';
+  @override
+  String get tableDeleteColumn => 'Slet kolonne';
+  @override
+  String get tableSortAscending => 'Sorter efter kolonne (A → Z)';
+  @override
+  String get tableSortDescending => 'Sorter efter kolonne (Z → A)';
+  @override
+  String get tableAddRow => 'Tilføj række';
+  @override
+  String get tableAddColumn => 'Tilføj kolonne';
+  @override
   String get toolbarHeading => 'Overskrift';
   @override
   String get toolbarList => 'Liste';

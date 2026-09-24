@@ -453,6 +453,48 @@ final class SlovakStrings extends Strings {
   @override
   String get toolbarTable => 'Tabuľka';
   @override
+  String get tableRow => 'Riadok';
+  @override
+  String get tableColumn => 'Stĺpec';
+  @override
+  String get tableAddRowAbove => 'Vložiť riadok nad';
+  @override
+  String get tableAddRowBelow => 'Vložiť riadok pod';
+  @override
+  String get tableMoveRowUp => 'Posunúť riadok nahor';
+  @override
+  String get tableMoveRowDown => 'Posunúť riadok nadol';
+  @override
+  String get tableDuplicateRow => 'Duplikovať riadok';
+  @override
+  String get tableDeleteRow => 'Odstrániť riadok';
+  @override
+  String get tableAddColumnLeft => 'Vložiť stĺpec vľavo';
+  @override
+  String get tableAddColumnRight => 'Vložiť stĺpec vpravo';
+  @override
+  String get tableMoveColumnLeft => 'Posunúť stĺpec doľava';
+  @override
+  String get tableMoveColumnRight => 'Posunúť stĺpec doprava';
+  @override
+  String get tableAlignLeft => 'Zarovnať vľavo';
+  @override
+  String get tableAlignCenter => 'Na stred';
+  @override
+  String get tableAlignRight => 'Zarovnať vpravo';
+  @override
+  String get tableDuplicateColumn => 'Duplikovať stĺpec';
+  @override
+  String get tableDeleteColumn => 'Odstrániť stĺpec';
+  @override
+  String get tableSortAscending => 'Zoradiť podľa stĺpca (A → Z)';
+  @override
+  String get tableSortDescending => 'Zoradiť podľa stĺpca (Z → A)';
+  @override
+  String get tableAddRow => 'Pridať riadok';
+  @override
+  String get tableAddColumn => 'Pridať stĺpec';
+  @override
   String get toolbarHeading => 'Nadpis';
   @override
   String get toolbarList => 'Zoznam';

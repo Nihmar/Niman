@@ -454,6 +454,48 @@ final class SerbianStrings extends Strings {
   @override
   String get toolbarTable => 'Табела';
   @override
+  String get tableRow => 'Ред';
+  @override
+  String get tableColumn => 'Колона';
+  @override
+  String get tableAddRowAbove => 'Уметни ред изнад';
+  @override
+  String get tableAddRowBelow => 'Уметни ред испод';
+  @override
+  String get tableMoveRowUp => 'Помери ред горе';
+  @override
+  String get tableMoveRowDown => 'Помери ред доле';
+  @override
+  String get tableDuplicateRow => 'Дуплирај ред';
+  @override
+  String get tableDeleteRow => 'Обриши ред';
+  @override
+  String get tableAddColumnLeft => 'Уметни колону лево';
+  @override
+  String get tableAddColumnRight => 'Уметни колону десно';
+  @override
+  String get tableMoveColumnLeft => 'Помери колону лево';
+  @override
+  String get tableMoveColumnRight => 'Помери колону десно';
+  @override
+  String get tableAlignLeft => 'Поравнај лево';
+  @override
+  String get tableAlignCenter => 'Центрирај';
+  @override
+  String get tableAlignRight => 'Поравнај десно';
+  @override
+  String get tableDuplicateColumn => 'Дуплирај колону';
+  @override
+  String get tableDeleteColumn => 'Обриши колону';
+  @override
+  String get tableSortAscending => 'Сортирај по колони (А → Ш)';
+  @override
+  String get tableSortDescending => 'Сортирај по колони (Ш → А)';
+  @override
+  String get tableAddRow => 'Додај ред';
+  @override
+  String get tableAddColumn => 'Додај колону';
+  @override
   String get toolbarHeading => 'Наслов';
   @override
   String get toolbarList => 'Списак';

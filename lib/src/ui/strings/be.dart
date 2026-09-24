@@ -452,6 +452,48 @@ final class BelarusianStrings extends Strings {
   @override
   String get toolbarTable => 'Табліца';
   @override
+  String get tableRow => 'Радок';
+  @override
+  String get tableColumn => 'Слупок';
+  @override
+  String get tableAddRowAbove => 'Уставіць радок вышэй';
+  @override
+  String get tableAddRowBelow => 'Уставіць радок ніжэй';
+  @override
+  String get tableMoveRowUp => 'Перамясціць радок уверх';
+  @override
+  String get tableMoveRowDown => 'Перамясціць радок уніз';
+  @override
+  String get tableDuplicateRow => 'Дубляваць радок';
+  @override
+  String get tableDeleteRow => 'Выдаліць радок';
+  @override
+  String get tableAddColumnLeft => 'Уставіць слупок злева';
+  @override
+  String get tableAddColumnRight => 'Уставіць слупок справа';
+  @override
+  String get tableMoveColumnLeft => 'Перамясціць слупок улева';
+  @override
+  String get tableMoveColumnRight => 'Перамясціць слупок управа';
+  @override
+  String get tableAlignLeft => 'Выраўнаваць злева';
+  @override
+  String get tableAlignCenter => 'Па цэнтры';
+  @override
+  String get tableAlignRight => 'Выраўнаваць справа';
+  @override
+  String get tableDuplicateColumn => 'Дубляваць слупок';
+  @override
+  String get tableDeleteColumn => 'Выдаліць слупок';
+  @override
+  String get tableSortAscending => 'Сартаваць па слупку (А → Я)';
+  @override
+  String get tableSortDescending => 'Сартаваць па слупку (Я → А)';
+  @override
+  String get tableAddRow => 'Дадаць радок';
+  @override
+  String get tableAddColumn => 'Дадаць слупок';
+  @override
   String get toolbarHeading => 'Загаловак';
   @override
   String get toolbarList => 'Спіс';

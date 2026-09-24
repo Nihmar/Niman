@@ -448,6 +448,48 @@ final class IcelandicStrings extends Strings {
   @override
   String get toolbarTable => 'Tafla';
   @override
+  String get tableRow => 'Röð';
+  @override
+  String get tableColumn => 'Dálkur';
+  @override
+  String get tableAddRowAbove => 'Setja inn röð fyrir ofan';
+  @override
+  String get tableAddRowBelow => 'Setja inn röð fyrir neðan';
+  @override
+  String get tableMoveRowUp => 'Færa röð upp';
+  @override
+  String get tableMoveRowDown => 'Færa röð niður';
+  @override
+  String get tableDuplicateRow => 'Tvöfalda röð';
+  @override
+  String get tableDeleteRow => 'Eyða röð';
+  @override
+  String get tableAddColumnLeft => 'Setja inn dálk til vinstri';
+  @override
+  String get tableAddColumnRight => 'Setja inn dálk til hægri';
+  @override
+  String get tableMoveColumnLeft => 'Færa dálk til vinstri';
+  @override
+  String get tableMoveColumnRight => 'Færa dálk til hægri';
+  @override
+  String get tableAlignLeft => 'Vinstrijafna';
+  @override
+  String get tableAlignCenter => 'Miðja';
+  @override
+  String get tableAlignRight => 'Hægrijafna';
+  @override
+  String get tableDuplicateColumn => 'Tvöfalda dálk';
+  @override
+  String get tableDeleteColumn => 'Eyða dálki';
+  @override
+  String get tableSortAscending => 'Raða eftir dálki (A → Ö)';
+  @override
+  String get tableSortDescending => 'Raða eftir dálki (Ö → A)';
+  @override
+  String get tableAddRow => 'Bæta við röð';
+  @override
+  String get tableAddColumn => 'Bæta við dálki';
+  @override
   String get toolbarHeading => 'Titill';
   @override
   String get toolbarList => 'Listi';

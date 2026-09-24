@@ -457,6 +457,48 @@ final class GreekStrings extends Strings {
   @override
   String get toolbarTable => 'Πίνακας';
   @override
+  String get tableRow => 'Γραμμή';
+  @override
+  String get tableColumn => 'Στήλη';
+  @override
+  String get tableAddRowAbove => 'Εισαγωγή γραμμής από πάνω';
+  @override
+  String get tableAddRowBelow => 'Εισαγωγή γραμμής από κάτω';
+  @override
+  String get tableMoveRowUp => 'Μετακίνηση γραμμής πάνω';
+  @override
+  String get tableMoveRowDown => 'Μετακίνηση γραμμής κάτω';
+  @override
+  String get tableDuplicateRow => 'Διπλασιασμός γραμμής';
+  @override
+  String get tableDeleteRow => 'Διαγραφή γραμμής';
+  @override
+  String get tableAddColumnLeft => 'Εισαγωγή στήλης αριστερά';
+  @override
+  String get tableAddColumnRight => 'Εισαγωγή στήλης δεξιά';
+  @override
+  String get tableMoveColumnLeft => 'Μετακίνηση στήλης αριστερά';
+  @override
+  String get tableMoveColumnRight => 'Μετακίνηση στήλης δεξιά';
+  @override
+  String get tableAlignLeft => 'Στοίχιση αριστερά';
+  @override
+  String get tableAlignCenter => 'Στο κέντρο';
+  @override
+  String get tableAlignRight => 'Στοίχιση δεξιά';
+  @override
+  String get tableDuplicateColumn => 'Διπλασιασμός στήλης';
+  @override
+  String get tableDeleteColumn => 'Διαγραφή στήλης';
+  @override
+  String get tableSortAscending => 'Ταξινόμηση κατά στήλη (Α → Ω)';
+  @override
+  String get tableSortDescending => 'Ταξινόμηση κατά στήλη (Ω → Α)';
+  @override
+  String get tableAddRow => 'Προσθήκη γραμμής';
+  @override
+  String get tableAddColumn => 'Προσθήκη στήλης';
+  @override
   String get toolbarHeading => 'Τίτλος';
   @override
   String get toolbarList => 'Λίστα';

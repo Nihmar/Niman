@@ -451,6 +451,48 @@ final class CroatianStrings extends Strings {
   @override
   String get toolbarTable => 'Tablica';
   @override
+  String get tableRow => 'Redak';
+  @override
+  String get tableColumn => 'Stupac';
+  @override
+  String get tableAddRowAbove => 'Umetni redak iznad';
+  @override
+  String get tableAddRowBelow => 'Umetni redak ispod';
+  @override
+  String get tableMoveRowUp => 'Pomakni redak gore';
+  @override
+  String get tableMoveRowDown => 'Pomakni redak dolje';
+  @override
+  String get tableDuplicateRow => 'Dupliciraj redak';
+  @override
+  String get tableDeleteRow => 'Izbriši redak';
+  @override
+  String get tableAddColumnLeft => 'Umetni stupac lijevo';
+  @override
+  String get tableAddColumnRight => 'Umetni stupac desno';
+  @override
+  String get tableMoveColumnLeft => 'Pomakni stupac lijevo';
+  @override
+  String get tableMoveColumnRight => 'Pomakni stupac desno';
+  @override
+  String get tableAlignLeft => 'Poravnaj lijevo';
+  @override
+  String get tableAlignCenter => 'Centriraj';
+  @override
+  String get tableAlignRight => 'Poravnaj desno';
+  @override
+  String get tableDuplicateColumn => 'Dupliciraj stupac';
+  @override
+  String get tableDeleteColumn => 'Izbriši stupac';
+  @override
+  String get tableSortAscending => 'Poredaj po stupcu (A → Ž)';
+  @override
+  String get tableSortDescending => 'Poredaj po stupcu (Ž → A)';
+  @override
+  String get tableAddRow => 'Dodaj redak';
+  @override
+  String get tableAddColumn => 'Dodaj stupac';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

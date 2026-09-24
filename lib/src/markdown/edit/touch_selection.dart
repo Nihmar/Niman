@@ -18,6 +18,7 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
+import 'package:niman/src/editor/table_menu.dart';
 
 /// Which end of the selection a handle holds.
 enum SelectionHandle {
@@ -43,6 +44,7 @@ final class TouchSelectionOverlay extends StatelessWidget {
     required this.onHandleDragEnd,
     this.formats = const <FormatMenuEntry>[],
     this.extras = const <ContextMenuButtonItem>[],
+    this.table,
     this.onDismiss,
     super.key,
   });
@@ -67,6 +69,9 @@ final class TouchSelectionOverlay extends StatelessWidget {
 
   /// What follows them: the spelling's entries.
   final List<ContextMenuButtonItem> extras;
+
+  /// A table's rows and columns, when the selection is in one of its cells.
+  final TableMenu? table;
 
   /// Closes the toolbar before a formatting action runs.
   final VoidCallback? onDismiss;
@@ -123,6 +128,7 @@ final class TouchSelectionOverlay extends StatelessWidget {
           clipboard: buttons,
           formats: formats,
           extras: extras,
+          table: table,
           onDismiss: onDismiss ?? () {},
         ),
       );

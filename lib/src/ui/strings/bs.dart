@@ -454,6 +454,48 @@ final class BosnianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabela';
   @override
+  String get tableRow => 'Red';
+  @override
+  String get tableColumn => 'Kolona';
+  @override
+  String get tableAddRowAbove => 'Umetni red iznad';
+  @override
+  String get tableAddRowBelow => 'Umetni red ispod';
+  @override
+  String get tableMoveRowUp => 'Pomjeri red gore';
+  @override
+  String get tableMoveRowDown => 'Pomjeri red dolje';
+  @override
+  String get tableDuplicateRow => 'Dupliciraj red';
+  @override
+  String get tableDeleteRow => 'Izbriši red';
+  @override
+  String get tableAddColumnLeft => 'Umetni kolonu lijevo';
+  @override
+  String get tableAddColumnRight => 'Umetni kolonu desno';
+  @override
+  String get tableMoveColumnLeft => 'Pomjeri kolonu lijevo';
+  @override
+  String get tableMoveColumnRight => 'Pomjeri kolonu desno';
+  @override
+  String get tableAlignLeft => 'Poravnaj lijevo';
+  @override
+  String get tableAlignCenter => 'Centriraj';
+  @override
+  String get tableAlignRight => 'Poravnaj desno';
+  @override
+  String get tableDuplicateColumn => 'Dupliciraj kolonu';
+  @override
+  String get tableDeleteColumn => 'Izbriši kolonu';
+  @override
+  String get tableSortAscending => 'Sortiraj po koloni (A → Ž)';
+  @override
+  String get tableSortDescending => 'Sortiraj po koloni (Ž → A)';
+  @override
+  String get tableAddRow => 'Dodaj red';
+  @override
+  String get tableAddColumn => 'Dodaj kolonu';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Popis';

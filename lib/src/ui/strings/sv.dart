@@ -452,6 +452,48 @@ final class SwedishStrings extends Strings {
   @override
   String get toolbarTable => 'Tabell';
   @override
+  String get tableRow => 'Rad';
+  @override
+  String get tableColumn => 'Kolumn';
+  @override
+  String get tableAddRowAbove => 'Infoga rad ovanför';
+  @override
+  String get tableAddRowBelow => 'Infoga rad nedanför';
+  @override
+  String get tableMoveRowUp => 'Flytta rad uppåt';
+  @override
+  String get tableMoveRowDown => 'Flytta rad nedåt';
+  @override
+  String get tableDuplicateRow => 'Duplicera rad';
+  @override
+  String get tableDeleteRow => 'Ta bort rad';
+  @override
+  String get tableAddColumnLeft => 'Infoga kolumn till vänster';
+  @override
+  String get tableAddColumnRight => 'Infoga kolumn till höger';
+  @override
+  String get tableMoveColumnLeft => 'Flytta kolumn åt vänster';
+  @override
+  String get tableMoveColumnRight => 'Flytta kolumn åt höger';
+  @override
+  String get tableAlignLeft => 'Vänsterjustera';
+  @override
+  String get tableAlignCenter => 'Centrera';
+  @override
+  String get tableAlignRight => 'Högerjustera';
+  @override
+  String get tableDuplicateColumn => 'Duplicera kolumn';
+  @override
+  String get tableDeleteColumn => 'Ta bort kolumn';
+  @override
+  String get tableSortAscending => 'Sortera efter kolumn (A → Ö)';
+  @override
+  String get tableSortDescending => 'Sortera efter kolumn (Ö → A)';
+  @override
+  String get tableAddRow => 'Lägg till rad';
+  @override
+  String get tableAddColumn => 'Lägg till kolumn';
+  @override
   String get toolbarHeading => 'Rubrik';
   @override
   String get toolbarList => 'Lista';

@@ -454,6 +454,48 @@ final class SlovenianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabela';
   @override
+  String get tableRow => 'Vrstica';
+  @override
+  String get tableColumn => 'Stolpec';
+  @override
+  String get tableAddRowAbove => 'Vstavi vrstico zgoraj';
+  @override
+  String get tableAddRowBelow => 'Vstavi vrstico spodaj';
+  @override
+  String get tableMoveRowUp => 'Premakni vrstico gor';
+  @override
+  String get tableMoveRowDown => 'Premakni vrstico dol';
+  @override
+  String get tableDuplicateRow => 'Podvoji vrstico';
+  @override
+  String get tableDeleteRow => 'Izbriši vrstico';
+  @override
+  String get tableAddColumnLeft => 'Vstavi stolpec levo';
+  @override
+  String get tableAddColumnRight => 'Vstavi stolpec desno';
+  @override
+  String get tableMoveColumnLeft => 'Premakni stolpec levo';
+  @override
+  String get tableMoveColumnRight => 'Premakni stolpec desno';
+  @override
+  String get tableAlignLeft => 'Poravnaj levo';
+  @override
+  String get tableAlignCenter => 'Na sredino';
+  @override
+  String get tableAlignRight => 'Poravnaj desno';
+  @override
+  String get tableDuplicateColumn => 'Podvoji stolpec';
+  @override
+  String get tableDeleteColumn => 'Izbriši stolpec';
+  @override
+  String get tableSortAscending => 'Razvrsti po stolpcu (A → Ž)';
+  @override
+  String get tableSortDescending => 'Razvrsti po stolpcu (Ž → A)';
+  @override
+  String get tableAddRow => 'Dodaj vrstico';
+  @override
+  String get tableAddColumn => 'Dodaj stolpec';
+  @override
   String get toolbarHeading => 'Naslov';
   @override
   String get toolbarList => 'Seznam';

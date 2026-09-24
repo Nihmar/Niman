@@ -447,6 +447,48 @@ final class AlbanianStrings extends Strings {
   @override
   String get toolbarTable => 'Tabelë';
   @override
+  String get tableRow => 'Rresht';
+  @override
+  String get tableColumn => 'Kolonë';
+  @override
+  String get tableAddRowAbove => 'Shto rresht sipër';
+  @override
+  String get tableAddRowBelow => 'Shto rresht poshtë';
+  @override
+  String get tableMoveRowUp => 'Lëviz rreshtin lart';
+  @override
+  String get tableMoveRowDown => 'Lëviz rreshtin poshtë';
+  @override
+  String get tableDuplicateRow => 'Dyfisho rreshtin';
+  @override
+  String get tableDeleteRow => 'Fshi rreshtin';
+  @override
+  String get tableAddColumnLeft => 'Shto kolonë majtas';
+  @override
+  String get tableAddColumnRight => 'Shto kolonë djathtas';
+  @override
+  String get tableMoveColumnLeft => 'Lëviz kolonën majtas';
+  @override
+  String get tableMoveColumnRight => 'Lëviz kolonën djathtas';
+  @override
+  String get tableAlignLeft => 'Rreshto majtas';
+  @override
+  String get tableAlignCenter => 'Në qendër';
+  @override
+  String get tableAlignRight => 'Rreshto djathtas';
+  @override
+  String get tableDuplicateColumn => 'Dyfisho kolonën';
+  @override
+  String get tableDeleteColumn => 'Fshi kolonën';
+  @override
+  String get tableSortAscending => 'Rendit sipas kolonës (A → Z)';
+  @override
+  String get tableSortDescending => 'Rendit sipas kolonës (Z → A)';
+  @override
+  String get tableAddRow => 'Shto rresht';
+  @override
+  String get tableAddColumn => 'Shto kolonë';
+  @override
   String get toolbarHeading => 'Titull';
   @override
   String get toolbarList => 'Listë';
