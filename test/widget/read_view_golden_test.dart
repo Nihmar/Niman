@@ -12,9 +12,18 @@
 // difference on an edge, where the antialiasing of the host that made them
 // and of the Linux runner of CI may part, and nothing more.
 //
+// Each desktop host keeps its own images, under `goldens/read/<os>/`. Even
+// the test font is measured by the platform's font manager — FreeType on
+// Linux, DirectWrite on Windows — and the two round its metrics apart, so
+// on Windows every glyph edge sits a fraction of a pixel off the Linux one:
+// the same layout, and thousands of edge pixels no tolerance meant for a
+// faint difference should forgive. Each host is held to its own images,
+// exactly.
+//
 // After a change that moves the page on purpose, look at the failure images
 // the run writes next to this file, then refresh the goldens with
-// `flutter test --update-goldens test/widget/read_view_golden_test.dart`.
+// `flutter test --update-goldens test/widget/read_view_golden_test.dart`
+// on Linux and on Windows both.
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -162,7 +171,7 @@ void main() {
     }
     await expectLater(
       find.byKey(const Key('page')),
-      matchesGoldenFile('goldens/read/$name.png'),
+      matchesGoldenFile('goldens/read/${Platform.operatingSystem}/$name.png'),
     );
   }
 
