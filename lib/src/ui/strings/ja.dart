@@ -1511,6 +1511,12 @@ final class JapaneseStrings extends Strings {
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override
   String get openFileFailed => 'このノートを Niman の外で開けませんでした';
+  @override
+  String get attachmentUnreadable => 'このファイルを表示できませんでした。';
+  @override
+  String get attachmentMissing => 'このファイルはディスクにありません。';
+  @override
+  String get attachmentOpenFailed => 'このファイルを Niman の外で開けませんでした。';
 
   @override
   String get movedToTrash => 'ごみ箱に移動しました';

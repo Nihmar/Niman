@@ -1612,6 +1612,13 @@ final class IcelandicStrings extends Strings {
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override
   String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';
+  @override
+  String get attachmentUnreadable => 'Ekki tókst að sýna þessa skrá.';
+  @override
+  String get attachmentMissing => 'Þessi skrá er ekki á disknum.';
+  @override
+  String get attachmentOpenFailed =>
+      'Ekki tókst að opna þessa skrá utan Niman.';
 
   @override
   String get movedToTrash => 'Fært í korpu';

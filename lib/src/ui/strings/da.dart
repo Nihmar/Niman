@@ -1607,6 +1607,12 @@ final class DanishStrings extends Strings {
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override
   String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';
+  @override
+  String get attachmentUnreadable => 'Denne fil kunne ikke vises.';
+  @override
+  String get attachmentMissing => 'Denne fil findes ikke på disken.';
+  @override
+  String get attachmentOpenFailed => 'Filen kunne ikke åbnes uden for Niman.';
 
   @override
   String get movedToTrash => 'Flyttet til affald';

@@ -1635,6 +1635,13 @@ final class DutchStrings extends Strings {
       'Het bestand van deze notitie staat niet op de schijf';
   @override
   String get openFileFailed => 'Kon deze notitie niet buiten Niman openen';
+  @override
+  String get attachmentUnreadable => 'Dit bestand kon niet worden weergegeven.';
+  @override
+  String get attachmentMissing => 'Dit bestand staat niet op de schijf.';
+  @override
+  String get attachmentOpenFailed =>
+      'Kon dit bestand niet buiten Niman openen.';
 
   @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';

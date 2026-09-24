@@ -77,8 +77,13 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.6
 
-  # State management (app-wide).
+  # The attachment viewer's PDFs (lib/src/ui/attachment_view.dart): PDFium,
+  # bundled on Android, Linux and Windows through Dart build hooks, as
+  # sqlite3 is below — the first build on a machine needs network.
+  pdfrx: ^2.6.5
   record: ^7.1.1
+
+  # State management (app-wide).
   riverpod: ^3.4.3
 
   # The SQLite the index runs on, bundled with the app. Android and Linux

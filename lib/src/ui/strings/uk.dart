@@ -1620,6 +1620,12 @@ final class UkrainianStrings extends Strings {
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override
   String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';
+  @override
+  String get attachmentUnreadable => 'Не вдалося показати цей файл.';
+  @override
+  String get attachmentMissing => 'Цього файлу немає на диску.';
+  @override
+  String get attachmentOpenFailed => 'Не вдалося відкрити цей файл поза Niman.';
 
   @override
   String get movedToTrash => 'Переміщено в кошик';

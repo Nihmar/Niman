@@ -1627,6 +1627,13 @@ final class FinnishStrings extends Strings {
   @override
   String get openFileFailed =>
       'Muistiinpanoa ei voitu avata Nimanin ulkopuolella';
+  @override
+  String get attachmentUnreadable => 'Tätä tiedostoa ei voitu näyttää.';
+  @override
+  String get attachmentMissing => 'Tätä tiedostoa ei ole levyllä.';
+  @override
+  String get attachmentOpenFailed =>
+      'Tiedostoa ei voitu avata Nimanin ulkopuolella.';
 
   @override
   String get movedToTrash => 'Siirretty koriin';

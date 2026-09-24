@@ -121,10 +121,18 @@ note stays exactly as it was.
 ### Files that are not notes
 
 The tree also shows the files that are not text — the images and audio
-clips in the attachments folder, a PDF dropped into the library. Opening
-one does not put it in the editor: the pane says the file is not a text
-note, and on desktop offers **Open in default app** right there. Nothing
-is written to such a file, ever — it is never reported as saved,
+clips in the attachments folder, a PDF dropped into the library.
+
+- **Pictures** (PNG, JPEG, GIF, WebP, BMP) and **PDFs** open in the note
+  pane, on every platform: a picture fitted to the pane, zoomed with a
+  pinch or the mouse wheel and dragged around; a PDF page after page,
+  zoomed the same way. The row under them names the file and, on
+  desktop, offers **Open in default app**.
+- **Anything else** (an audio clip, an e-book, an archive) does not go
+  in the editor: the pane says the file is not a text note, and on
+  desktop offers **Open in default app** right there.
+
+Nothing is written to such a file, ever — it is never reported as saved,
 because there is nothing of it in the editor to save.
 
 ## Opening a file outside any library

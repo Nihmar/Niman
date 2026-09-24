@@ -1657,6 +1657,13 @@ final class FrenchStrings extends Strings {
   @override
   String get openFileFailed =>
       'Impossible d’ouvrir cette note en dehors de Niman';
+  @override
+  String get attachmentUnreadable => 'Impossible d’afficher ce fichier.';
+  @override
+  String get attachmentMissing => 'Ce fichier est introuvable sur le disque.';
+  @override
+  String get attachmentOpenFailed =>
+      'Impossible d’ouvrir ce fichier en dehors de Niman.';
 
   @override
   String get movedToTrash => 'Mis à la corbeille';
