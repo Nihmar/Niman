@@ -8,6 +8,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/note_ops.dart';
+
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
@@ -165,6 +166,43 @@ void main() {
       File(p.join(root.path, 'a.md')).writeAsStringSync('now #mine');
       await waiting.indexed;
       expect(await indexedTags('a.md'), ['mine']);
+    });
+
+    test('the watcher leaves a note to its writer meanwhile', () async {
+      // The watcher reports the app's own writes too, and read the 247 MB
+      // stress note at once after a pin — 13.5 s — then the writer read it
+      // again 30 s later (log, 2026-09-24).
+      final ops = NoteOps(
+        root: root.path,
+        db: db,
+        indexer: indexer,
+        config: LibraryConfigRepo(root.path),
+      );
+      final abs = p.join(root.path, 'a.md');
+      await ops.writer.save('a.md', 'first');
+      await ops.writer.indexed;
+      final before = (await indexer.dao.find('a.md'))!;
+
+      // A write whose reindex waits for the note to be quiet: past 2 MB.
+      await ops.writer.save('a.md', 'x' * (3 << 20));
+      expect(ops.writer.awaits('a.md'), isTrue);
+      await indexer.applyEvents(root.path, [abs]);
+      await indexer.resync(root.path, abs);
+      await indexer.fullScan(root.path);
+      final meanwhile = (await indexer.dao.find('a.md'))!;
+      expect(meanwhile.size, before.size, reason: 'no scan but the writer');
+      expect(meanwhile.sha256, before.sha256);
+
+      await ops.writer.indexed;
+      expect(ops.writer.awaits('a.md'), isFalse);
+      final after = (await indexer.dao.find('a.md'))!;
+      expect(after.size, 3 << 20);
+      expect(after.sha256, shaOf('a.md'));
+
+      // Its own again: the watcher reads what nobody is about to.
+      File(abs).writeAsStringSync('changed elsewhere');
+      await indexer.applyEvents(root.path, [abs]);
+      expect((await indexer.dao.find('a.md'))!.sha256, shaOf('a.md'));
     });
 
     test('is not taken once the file changed', () async {
