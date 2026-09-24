@@ -11,10 +11,10 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The due-date state driving the subtitle styling (overdue and today
 /// stand out; upcoming is plain).

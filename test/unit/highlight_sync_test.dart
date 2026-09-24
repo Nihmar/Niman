@@ -2,8 +2,8 @@
 // tokenizer -> per-line styled spans (the spanBuilder implementation).
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:re_editor/re_editor.dart';
 
 const TextStyle _base = TextStyle(fontFamily: 'monospace', fontSize: 13);

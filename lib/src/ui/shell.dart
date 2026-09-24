@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/language.dart';
@@ -14,7 +15,6 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/storage_access.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
@@ -159,7 +159,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     final session = ref.read(librarySessionProvider);
     AppThemes.apply(
       brightness: await session.themeBrightness,
-      palette: await session.themePalette,
+      theme: await session.theme,
     );
     // The keys this device was given (#159): read once, like the theme.
     AppKeyMap.current.value = KeyMap.fromJson(await session.keyMap);

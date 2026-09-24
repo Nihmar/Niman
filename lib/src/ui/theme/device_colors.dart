@@ -13,8 +13,8 @@
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/theme.dart';
 
 const AppLogger _log = AppLogger(name: 'theme');
 

@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
-import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -103,8 +104,8 @@ void main() {
         value: AppPalette.gruvbox,
       );
 
-      expect(await controller.themePalette, AppPalette.gruvbox);
-      expect(AppThemes.palette, AppPalette.gruvbox);
+      expect(await controller.theme, const BuiltinAppTheme(AppPalette.gruvbox));
+      expect(AppThemes.theme, const BuiltinAppTheme(AppPalette.gruvbox));
       // The row reads what was picked.
       expect(find.text('Gruvbox'), findsOneWidget);
       // And the brightness stayed where it was.
@@ -125,7 +126,7 @@ void main() {
       expect(await controller.themeBrightness, AppBrightness.night);
       expect(AppThemes.mode, ThemeMode.dark);
       // The palette is untouched, so it stays on the install default.
-      expect(AppThemes.palette, AppPalette.niman);
+      expect(AppThemes.theme, const BuiltinAppTheme(AppPalette.niman));
     });
 
     testWidgets('every palette the app ships is offered', (tester) async {
@@ -146,7 +147,7 @@ void main() {
 
   group('what the choice reaches', () {
     testWidgets('the stored theme is on screen from the start', (tester) async {
-      await controller.setThemePalette(AppPalette.gruvbox);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.gruvbox));
       await controller.setThemeBrightness(AppBrightness.night);
 
       await pumpApp(tester);
@@ -157,7 +158,7 @@ void main() {
     });
 
     testWidgets('the Markdown colors travel with it', (tester) async {
-      await controller.setThemePalette(AppPalette.gruvbox);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.gruvbox));
       await pumpApp(tester);
 
       // The editor and the preview read them from the theme, not from a
@@ -180,7 +181,7 @@ void main() {
     testWidgets('the device colors reach a running app', (tester) async {
       // The device's colors are the `system` palette; the app now installs
       // on its own, so this one has to be asked for.
-      await controller.setThemePalette(AppPalette.system);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.system));
       await pumpApp(tester);
       final before = themeOfTree(tester).colorScheme.primary;
 
@@ -199,7 +200,7 @@ void main() {
     });
 
     testWidgets('a named palette ignores the device colors', (tester) async {
-      await controller.setThemePalette(AppPalette.gruvbox);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.gruvbox));
       await pumpApp(tester);
 
       AppThemes.setDeviceColors(
@@ -219,7 +220,7 @@ void main() {
 
     testWidgets('the system palette wears the shipped seed with no device '
         'colors', (tester) async {
-      await controller.setThemePalette(AppPalette.system);
+      await controller.setTheme(const BuiltinAppTheme(AppPalette.system));
       await pumpApp(tester);
 
       expect(

@@ -3908,6 +3908,326 @@ class WorkspacesCompanion extends UpdateCompanion<WorkspaceRow> {
   }
 }
 
+class $CustomThemesTable extends CustomThemes
+    with TableInfo<$CustomThemesTable, CustomThemeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomThemesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayColorsMeta = const VerificationMeta(
+    'dayColors',
+  );
+  @override
+  late final GeneratedColumn<String> dayColors = GeneratedColumn<String>(
+    'day_colors',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nightColorsMeta = const VerificationMeta(
+    'nightColors',
+  );
+  @override
+  late final GeneratedColumn<String> nightColors = GeneratedColumn<String>(
+    'night_colors',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, dayColors, nightColors];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'custom_themes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CustomThemeRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('day_colors')) {
+      context.handle(
+        _dayColorsMeta,
+        dayColors.isAcceptableOrUnknown(data['day_colors']!, _dayColorsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayColorsMeta);
+    }
+    if (data.containsKey('night_colors')) {
+      context.handle(
+        _nightColorsMeta,
+        nightColors.isAcceptableOrUnknown(
+          data['night_colors']!,
+          _nightColorsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_nightColorsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CustomThemeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CustomThemeRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      dayColors: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day_colors'],
+      )!,
+      nightColors: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}night_colors'],
+      )!,
+    );
+  }
+
+  @override
+  $CustomThemesTable createAlias(String alias) {
+    return $CustomThemesTable(attachedDatabase, alias);
+  }
+}
+
+class CustomThemeRow extends DataClass implements Insertable<CustomThemeRow> {
+  /// The id the theme carries; the primary key.
+  final String id;
+
+  /// What the user calls it.
+  final String name;
+
+  /// The daylight colors, as `ThemeColors.toJson` writes them.
+  final String dayColors;
+
+  /// The night colors, the same shape.
+  final String nightColors;
+  const CustomThemeRow({
+    required this.id,
+    required this.name,
+    required this.dayColors,
+    required this.nightColors,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['day_colors'] = Variable<String>(dayColors);
+    map['night_colors'] = Variable<String>(nightColors);
+    return map;
+  }
+
+  CustomThemesCompanion toCompanion(bool nullToAbsent) {
+    return CustomThemesCompanion(
+      id: Value(id),
+      name: Value(name),
+      dayColors: Value(dayColors),
+      nightColors: Value(nightColors),
+    );
+  }
+
+  factory CustomThemeRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CustomThemeRow(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      dayColors: serializer.fromJson<String>(json['dayColors']),
+      nightColors: serializer.fromJson<String>(json['nightColors']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'dayColors': serializer.toJson<String>(dayColors),
+      'nightColors': serializer.toJson<String>(nightColors),
+    };
+  }
+
+  CustomThemeRow copyWith({
+    String? id,
+    String? name,
+    String? dayColors,
+    String? nightColors,
+  }) => CustomThemeRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    dayColors: dayColors ?? this.dayColors,
+    nightColors: nightColors ?? this.nightColors,
+  );
+  CustomThemeRow copyWithCompanion(CustomThemesCompanion data) {
+    return CustomThemeRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      dayColors: data.dayColors.present ? data.dayColors.value : this.dayColors,
+      nightColors: data.nightColors.present
+          ? data.nightColors.value
+          : this.nightColors,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomThemeRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('dayColors: $dayColors, ')
+          ..write('nightColors: $nightColors')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, dayColors, nightColors);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomThemeRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.dayColors == this.dayColors &&
+          other.nightColors == this.nightColors);
+}
+
+class CustomThemesCompanion extends UpdateCompanion<CustomThemeRow> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> dayColors;
+  final Value<String> nightColors;
+  final Value<int> rowid;
+  const CustomThemesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.dayColors = const Value.absent(),
+    this.nightColors = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CustomThemesCompanion.insert({
+    required String id,
+    required String name,
+    required String dayColors,
+    required String nightColors,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       dayColors = Value(dayColors),
+       nightColors = Value(nightColors);
+  static Insertable<CustomThemeRow> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? dayColors,
+    Expression<String>? nightColors,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (dayColors != null) 'day_colors': dayColors,
+      if (nightColors != null) 'night_colors': nightColors,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CustomThemesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? dayColors,
+    Value<String>? nightColors,
+    Value<int>? rowid,
+  }) {
+    return CustomThemesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      dayColors: dayColors ?? this.dayColors,
+      nightColors: nightColors ?? this.nightColors,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (dayColors.present) {
+      map['day_colors'] = Variable<String>(dayColors.value);
+    }
+    if (nightColors.present) {
+      map['night_colors'] = Variable<String>(nightColors.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomThemesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('dayColors: $dayColors, ')
+          ..write('nightColors: $nightColors, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3920,6 +4240,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncItemsTable syncItems = $SyncItemsTable(this);
   late final $SyncOpsTable syncOps = $SyncOpsTable(this);
   late final $WorkspacesTable workspaces = $WorkspacesTable(this);
+  late final $CustomThemesTable customThemes = $CustomThemesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3932,6 +4253,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncItems,
     syncOps,
     workspaces,
+    customThemes,
   ];
 }
 
@@ -5854,6 +6176,198 @@ typedef $$WorkspacesTableProcessedTableManager =
       WorkspaceRow,
       PrefetchHooks Function()
     >;
+typedef $$CustomThemesTableCreateCompanionBuilder =
+    CustomThemesCompanion Function({
+      required String id,
+      required String name,
+      required String dayColors,
+      required String nightColors,
+      Value<int> rowid,
+    });
+typedef $$CustomThemesTableUpdateCompanionBuilder =
+    CustomThemesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> dayColors,
+      Value<String> nightColors,
+      Value<int> rowid,
+    });
+
+class $$CustomThemesTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomThemesTable> {
+  $$CustomThemesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dayColors => $composableBuilder(
+    column: $table.dayColors,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nightColors => $composableBuilder(
+    column: $table.nightColors,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CustomThemesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomThemesTable> {
+  $$CustomThemesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dayColors => $composableBuilder(
+    column: $table.dayColors,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nightColors => $composableBuilder(
+    column: $table.nightColors,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CustomThemesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomThemesTable> {
+  $$CustomThemesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get dayColors =>
+      $composableBuilder(column: $table.dayColors, builder: (column) => column);
+
+  GeneratedColumn<String> get nightColors => $composableBuilder(
+    column: $table.nightColors,
+    builder: (column) => column,
+  );
+}
+
+class $$CustomThemesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CustomThemesTable,
+          CustomThemeRow,
+          $$CustomThemesTableFilterComposer,
+          $$CustomThemesTableOrderingComposer,
+          $$CustomThemesTableAnnotationComposer,
+          $$CustomThemesTableCreateCompanionBuilder,
+          $$CustomThemesTableUpdateCompanionBuilder,
+          (
+            CustomThemeRow,
+            BaseReferences<_$AppDatabase, $CustomThemesTable, CustomThemeRow>,
+          ),
+          CustomThemeRow,
+          PrefetchHooks Function()
+        > {
+  $$CustomThemesTableTableManager(_$AppDatabase db, $CustomThemesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CustomThemesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CustomThemesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CustomThemesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> dayColors = const Value.absent(),
+                Value<String> nightColors = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CustomThemesCompanion(
+                id: id,
+                name: name,
+                dayColors: dayColors,
+                nightColors: nightColors,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String dayColors,
+                required String nightColors,
+                Value<int> rowid = const Value.absent(),
+              }) => CustomThemesCompanion.insert(
+                id: id,
+                name: name,
+                dayColors: dayColors,
+                nightColors: nightColors,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CustomThemesTable, CustomThemeRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CustomThemesTable,
+                    CustomThemeRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CustomThemesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CustomThemesTable,
+      CustomThemeRow,
+      $$CustomThemesTableFilterComposer,
+      $$CustomThemesTableOrderingComposer,
+      $$CustomThemesTableAnnotationComposer,
+      $$CustomThemesTableCreateCompanionBuilder,
+      $$CustomThemesTableUpdateCompanionBuilder,
+      (
+        CustomThemeRow,
+        BaseReferences<_$AppDatabase, $CustomThemesTable, CustomThemeRow>,
+      ),
+      CustomThemeRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5872,4 +6386,6 @@ class $AppDatabaseManager {
       $$SyncOpsTableTableManager(_db, _db.syncOps);
   $$WorkspacesTableTableManager get workspaces =>
       $$WorkspacesTableTableManager(_db, _db.workspaces);
+  $$CustomThemesTableTableManager get customThemes =>
+      $$CustomThemesTableTableManager(_db, _db.customThemes);
 }

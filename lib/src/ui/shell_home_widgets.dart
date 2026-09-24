@@ -10,8 +10,8 @@ library;
 
 import 'dart:async';
 
+import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/widget/widget_host.dart';

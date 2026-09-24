@@ -8,8 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/app_channel.dart';
+import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/custom_theme_repo.dart';
 import 'package:niman/src/core/settings/legacy_library_settings.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
@@ -1143,17 +1146,71 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(await appDatabase).setThemeBrightness(brightness);
   }
 
-  /// The palette the app wears.
+  /// The theme the app wears.
+  ///
+  /// A setting that points at a custom theme this installation no longer
+  /// holds is repaired here, to Niman's own colors: there is always
+  /// something to wear (issue #269).
   @override
-  Future<AppPalette> get themePalette async =>
-      await AppSettingsRepo(await appDatabase).themePalette();
-
-  /// Sets (and persists) the palette.
-  @override
-  Future<void> setThemePalette(AppPalette palette) async {
-    _log.info('palette set to ${palette.id}');
-    await AppSettingsRepo(await appDatabase).setThemePalette(palette);
+  Future<AppTheme> get theme async {
+    final settings = AppSettingsRepo(await appDatabase);
+    final id = await settings.themeId();
+    final customId = AppTheme.customIdIn(id);
+    if (customId == null) return themeFromId(id);
+    final custom = await CustomThemeRepo(await appDatabase).byId(customId);
+    if (custom != null) return themeFromId(id, custom: custom);
+    _log.warning('theme $id is gone; wearing Niman instead');
+    await settings.setThemeId(AppPalette.niman.id);
+    return const BuiltinAppTheme(AppPalette.niman);
   }
+
+  /// Sets (and persists) the theme, by its id.
+  @override
+  Future<void> setTheme(AppTheme theme) async {
+    _log.info('theme set to ${theme.id}');
+    await AppSettingsRepo(await appDatabase).setThemeId(theme.id);
+  }
+
+  /// The custom themes this installation holds, by name (issue #269).
+  @override
+  Future<List<CustomTheme>> customThemes() async =>
+      await CustomThemeRepo(await appDatabase).list();
+
+  /// The custom theme with [id], or null.
+  @override
+  Future<CustomTheme?> customTheme(String id) async =>
+      await CustomThemeRepo(await appDatabase).byId(id);
+
+  /// Stores [theme]: the row with its id, or a new one.
+  @override
+  Future<void> saveCustomTheme(CustomTheme theme) async {
+    _log.info('custom theme ${theme.id} saved as "${theme.name}"');
+    await CustomThemeRepo(await appDatabase).save(theme);
+  }
+
+  /// Renames the custom theme with [id].
+  @override
+  Future<void> renameCustomTheme(String id, String name) async {
+    _log.info('custom theme $id renamed to "$name"');
+    await CustomThemeRepo(await appDatabase).rename(id, name);
+  }
+
+  /// Deletes the custom theme with [id], and returns the theme in force
+  /// afterwards: deleting the one being worn falls back to the app's own
+  /// colors.
+  @override
+  Future<AppTheme> deleteCustomTheme(String id) async {
+    _log.info('custom theme $id deleted');
+    await CustomThemeRepo(await appDatabase).delete(id);
+    // Reading it back repairs a setting that pointed at the deleted
+    // theme, so what comes out is what the app wears from here on.
+    return await theme;
+  }
+
+  /// Whether [name] is a custom theme's name already.
+  @override
+  Future<bool> customThemeNameTaken(String name) async =>
+      await CustomThemeRepo(await appDatabase).nameTaken(name);
 
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).

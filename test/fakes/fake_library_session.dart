@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:niman/src/core/app_theme.dart';
+import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -72,8 +74,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   List<SearchHit> searchHits = [];
   AppLanguage _language = AppLanguage.system;
   AppBrightness _themeBrightness = AppBrightness.system;
-  // A fresh install wears the app's own palette (T-M6-05).
-  AppPalette _themePalette = AppPalette.niman;
+  // A fresh install wears the app's own colors (T-M6-05).
+  AppTheme _theme = const BuiltinAppTheme(AppPalette.niman);
+  final List<CustomTheme> _customThemes = <CustomTheme>[];
 
   @override
   LibraryPhase get phase => _phase;
@@ -568,11 +571,59 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<AppPalette> get themePalette async => _themePalette;
+  Future<AppTheme> get theme async => _theme;
 
   @override
-  Future<void> setThemePalette(AppPalette palette) async {
-    _themePalette = palette;
+  Future<void> setTheme(AppTheme theme) async {
+    _theme = theme;
+  }
+
+  @override
+  Future<List<CustomTheme>> customThemes() async {
+    final themes = List.of(_customThemes)
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return themes;
+  }
+
+  @override
+  Future<CustomTheme?> customTheme(String id) async {
+    for (final theme in _customThemes) {
+      if (theme.id == id) return theme;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> saveCustomTheme(CustomTheme theme) async {
+    final index = _customThemes.indexWhere((t) => t.id == theme.id);
+    if (index == -1) {
+      _customThemes.add(theme);
+    } else {
+      _customThemes[index] = theme;
+    }
+  }
+
+  @override
+  Future<void> renameCustomTheme(String id, String name) async {
+    final index = _customThemes.indexWhere((t) => t.id == id);
+    if (index != -1) {
+      _customThemes[index] = _customThemes[index].copyWith(name: name);
+    }
+  }
+
+  @override
+  Future<AppTheme> deleteCustomTheme(String id) async {
+    _customThemes.removeWhere((t) => t.id == id);
+    if (_theme.id == '${AppTheme.customPrefix}$id') {
+      _theme = const BuiltinAppTheme(AppPalette.niman);
+    }
+    return _theme;
+  }
+
+  @override
+  Future<bool> customThemeNameTaken(String name) async {
+    final wanted = CustomTheme.cleanName(name).toLowerCase();
+    return _customThemes.any((t) => t.name.toLowerCase() == wanted);
   }
 
   @override
