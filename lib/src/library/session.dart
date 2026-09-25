@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
 import 'package:niman/src/core/language.dart';
@@ -81,6 +83,12 @@ abstract interface class NoteOperations {
   /// that need a note's content without opening it — creating one from a
   /// template, so far. Throws when the note is not there.
   Future<String> readNote(String path);
+
+  /// The bytes of the note at [path], as they are on disk — the export's
+  /// own read, for the Markdown payload, which [readNote] would not give
+  /// back: it decodes leniently and drops a BOM. Throws when the note is
+  /// not there.
+  Future<Uint8List> readNoteBytes(String path);
 
   /// Saves [content] as the text of the note at library-relative [path],
   /// creating the file when it is not there.

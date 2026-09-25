@@ -12,6 +12,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:niman/src/core/saved_file.dart';
 import 'package:niman/src/core/theme_transfer.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -41,7 +42,7 @@ Future<String?> saveThemeFileToDisk({
     mimeType: 'application/json',
     dialogTitle: AppStrings.themeExport,
   );
-  return uri?.toString();
+  return uri == null ? null : savedPlace(uri);
 }
 
 /// Asks for a theme file, and reads it.

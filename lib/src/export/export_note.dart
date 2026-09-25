@@ -24,6 +24,31 @@ enum ExportFormat {
 /// What an export writes: `name` as `bytes`, typed `mimeType`.
 typedef ExportPayload = ({String name, Uint8List bytes, String mimeType});
 
+/// What [exportNote] writes.
+///
+/// [ExportFormat.pdf] is not here: a PDF needs a printer to run and a theme
+/// to draw with, and a builder over text and bytes has neither. Asking for
+/// one is a compile-time error instead of a runtime one, and `exportNotePdf`
+/// owns that format.
+enum ExportFileFormat {
+  /// The note's own Markdown, as it is on disk.
+  markdown,
+
+  /// The note as one self-contained HTML page.
+  html,
+}
+
+/// The Markdown file for the note at [path]: its bytes as they are on
+/// disk.
+///
+/// The export reads the file's bytes rather than reading the note and
+/// writing the text back: `readNote` decodes leniently and drops a BOM, so
+/// re-encoding its answer is not the file the user has.
+ExportPayload exportMarkdown({
+  required String path,
+  required Uint8List bytes,
+}) => (name: p.basename(path), bytes: bytes, mimeType: 'text/markdown');
+
 /// The file one note's export makes.
 ///
 /// `text` is the note as it stands — the caller saves the editor first —
@@ -36,17 +61,16 @@ Future<ExportPayload> exportNote({
   required String path,
   required String root,
   required String language,
-  required ExportFormat format,
+  required ExportFileFormat format,
   LinkSource? linkSource,
 }) async {
   switch (format) {
-    case ExportFormat.markdown:
-      return (
-        name: p.basename(path),
+    case ExportFileFormat.markdown:
+      return exportMarkdown(
+        path: path,
         bytes: Uint8List.fromList(utf8.encode(text)),
-        mimeType: 'text/markdown',
       );
-    case ExportFormat.html:
+    case ExportFileFormat.html:
       final source = await ExportSources.forNote(
         text: text,
         title: title,
@@ -60,9 +84,5 @@ Future<ExportPayload> exportNote({
         bytes: Uint8List.fromList(utf8.encode(page)),
         mimeType: 'text/html',
       );
-    case ExportFormat.pdf:
-      // A PDF needs a printer and, without an engine, a theme to draw
-      // with: `exportNotePdf` owns that, and the shell routes it there.
-      throw UnsupportedError('use exportNotePdf for a PDF');
   }
 }

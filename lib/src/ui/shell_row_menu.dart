@@ -337,13 +337,19 @@ List<List<RowMenuEntry>> rowMenuGroups(
   // What the file is: what it is called, where it lives, and — on the
   // desktop — the ways out of Niman, and a tab of its own.
   final file = <RowMenuEntry>[
-    (
-      key: Key(note.isDir ? 'menu-export-folder' : 'menu-export'),
-      icon: Icons.save_alt_outlined,
-      label: note.isDir ? AppStrings.exportFolderTitle : AppStrings.exportTitle,
-      value: note.isDir ? 'exportfolder' : 'export',
-      destructive: false,
-    ),
+    // A folder, or a note: only a Markdown note is exported as a note —
+    // what `_exportNote` reads and writes back — so a picture or a PDF row
+    // does not offer an export that would silently re-encode it (M1).
+    if (note.isDir || isMarkdownNote(note.name))
+      (
+        key: Key(note.isDir ? 'menu-export-folder' : 'menu-export'),
+        icon: Icons.save_alt_outlined,
+        label: note.isDir
+            ? AppStrings.exportFolderTitle
+            : AppStrings.exportTitle,
+        value: note.isDir ? 'exportfolder' : 'export',
+        destructive: false,
+      ),
     if (!note.isDir && offersNewTab)
       (
         key: const Key('menu-open-new-tab'),
