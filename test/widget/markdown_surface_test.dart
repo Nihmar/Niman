@@ -434,18 +434,19 @@ void main() {
     },
   );
 
-  testWidgets("a line's text stays put when the caret reveals its marks", (
+  testWidgets("a line's marks stay on the text when the caret reveals them", (
     tester,
   ) async {
     // The revealed marks are set into the indent where the bullet and the
     // gap past the bar were: the text jumped right by their width every time
     // the caret came onto the line (device screenshot 2026-09-23). Marks
     // wider than their column — a task's `- [ ] `, a `10. `, and in the test
-    // font, whose glyphs are as wide as they are tall, even a `- ` — hang
-    // out into the margin left of the text instead.
+    // font, whose glyphs are as wide as they are tall, even a `- ` — move the
+    // line right by what is left over; they never hang out to the left of the
+    // note's margin (phone report 2026-09-25, #288).
     /// Where the glyph after [prefix] is drawn on the line starting with it,
-    /// and where the line's first glyph is.
-    Future<(double, double)> textLeft(
+    /// where the line's first glyph is, and where the note's margin is.
+    Future<(double, double, double)> textLeft(
       String note,
       int caret,
       String prefix,
@@ -455,19 +456,24 @@ void main() {
         MarkdownSurfaceMode.live,
         caret: caret,
         text: note,
-        // The numbers' gutter keeps the fold arrows' gap empty: the margin
-        // marks wider than their column hang into.
         theme: _wideColumns,
         lineNumbers: true,
       );
       await tester.pump();
-      final paragraph = tester
+      final paragraphs = tester
           .renderObjectList<RenderParagraph>(find.byType(RichText))
-          .firstWhere((p) => p.text.toPlainText().startsWith(prefix));
-      double glyph(int offset) => paragraph
+          .toList();
+      final paragraph = paragraphs.firstWhere(
+        (p) => p.text.toPlainText().startsWith(prefix),
+      );
+      final body = paragraphs.firstWhere(
+        (p) => p.text.toPlainText() == 'caret',
+        orElse: () => paragraph,
+      );
+      double glyph(RenderParagraph p, int offset) => p
           .localToGlobal(
             Offset(
-              paragraph
+              p
                   .getBoxesForSelection(
                     TextSelection(baseOffset: offset, extentOffset: offset + 1),
                   )
@@ -477,7 +483,11 @@ void main() {
             ),
           )
           .dx;
-      return (glyph(prefix.length), glyph(0));
+      return (
+        glyph(paragraph, prefix.length),
+        glyph(paragraph, 0),
+        glyph(body, 0),
+      );
     }
 
     for (final (note, prefix) in [
@@ -488,26 +498,22 @@ void main() {
       ('caret\n\n> quoted\n', '> '),
     ]) {
       final line = note.indexOf(prefix, 7);
-      final (away, _) = await textLeft(note, 0, prefix);
-      final (on, first) = await textLeft(
+      final (away, _, margin) = await textLeft(note, 0, prefix);
+      final (on, first, _) = await textLeft(
         note,
         line + prefix.length + 1,
         prefix,
       );
-      expect(on, closeTo(away, 0.01), reason: note);
-      final surface = tester.getRect(find.byType(MarkdownSurface));
-      expect(first, greaterThanOrEqualTo(surface.left), reason: note);
+      expect(on, greaterThanOrEqualTo(away - 0.01), reason: note);
+      expect(first, greaterThanOrEqualTo(margin - 0.01), reason: note);
     }
-    // Wider than the margin too: the text moves by what is left over, and
-    // the marks stay on the surface.
+    // Wider than the column too: the text moves by what is left over, and
+    // the marks still start on the margin.
     const note = 'caret\n\n1000000. far\n';
-    final (away, _) = await textLeft(note, 0, '1000000. ');
-    final (on, first) = await textLeft(note, 18, '1000000. ');
+    final (away, _, _) = await textLeft(note, 0, '1000000. ');
+    final (on, first, margin) = await textLeft(note, 18, '1000000. ');
     expect(on, greaterThan(away));
-    expect(
-      first,
-      greaterThanOrEqualTo(tester.getRect(find.byType(MarkdownSurface)).left),
-    );
+    expect(first, greaterThanOrEqualTo(margin - 0.01));
   });
   testWidgets("a bullet sits on its text's row, not on the hidden marker", (
     tester,
