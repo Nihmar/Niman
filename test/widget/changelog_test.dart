@@ -19,14 +19,14 @@ final _newVersion = ChangelogVersion(
   version: '1.2.3',
   date: DateTime(2026, 9, 14),
   sections: [
-    ChangelogSection(title: 'Added', items: ['A new feature']),
+    ChangelogSection(title: 'Added', items: ['A **new** feature, with `code`']),
   ],
 );
 
 final _olderVersion = ChangelogVersion(
   version: '1.2.2',
   sections: [
-    ChangelogSection(title: 'Fixed', items: ['An old fix']),
+    ChangelogSection(title: 'Fixed', items: ['An old **fix**']),
   ],
 );
 
@@ -73,7 +73,15 @@ void main() {
     expect(find.text("What's new in 1.2.3"), findsOne);
     expect(find.text('1.2.3 · 2026-09-14'), findsOne);
     expect(find.text('Added'), findsOne);
-    expect(find.text('A new feature'), findsOne);
+    // The bullets are Markdown, drawn by the read view: **bold** and
+    // `code` come out rendered, not as the characters they are written
+    // with.
+    expect(
+      find.textContaining('A new feature, with code', findRichText: true),
+      findsOne,
+    );
+    expect(find.textContaining('**', findRichText: true), findsNothing);
+    expect(find.textContaining('`', findRichText: true), findsNothing);
 
     await tester.tap(find.byKey(const Key('changelog-update-ok')));
     await tester.pumpAndSettle();
@@ -89,7 +97,8 @@ void main() {
     expect(find.text(AppStrings.changelogTitle), findsOne);
     expect(find.text('1.2.3 · 2026-09-14'), findsOne);
     expect(find.text('1.2.2'), findsOne);
-    expect(find.text('An old fix'), findsOne);
+    expect(find.textContaining('An old fix', findRichText: true), findsOne);
+    expect(find.textContaining('**', findRichText: true), findsNothing);
   });
 
   testWidgets('no dialog when there is nothing new', (tester) async {
@@ -113,9 +122,14 @@ void main() {
 
     expect(find.text(AppStrings.changelogTitle), findsOne);
     expect(find.text('1.2.3 · 2026-09-14'), findsOne);
-    expect(find.text('A new feature'), findsOne);
+    expect(
+      find.textContaining('A new feature, with code', findRichText: true),
+      findsOne,
+    );
+    expect(find.textContaining('**', findRichText: true), findsNothing);
+    expect(find.textContaining('`', findRichText: true), findsNothing);
     expect(find.text('1.2.2'), findsOne);
-    expect(find.text('An old fix'), findsOne);
+    expect(find.textContaining('An old fix', findRichText: true), findsOne);
   });
 
   testWidgets('the settings row opens the changelog screen', (tester) async {
@@ -140,6 +154,9 @@ void main() {
     await tester.tap(find.byKey(const Key('changelog-setting')));
     await tester.pumpAndSettle();
     expect(find.byType(ChangelogScreen), findsOneWidget);
-    expect(find.text('A new feature'), findsOne);
+    expect(
+      find.textContaining('A new feature, with code', findRichText: true),
+      findsOne,
+    );
   });
 }
