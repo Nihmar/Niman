@@ -315,6 +315,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 saveExportFile: ref.read(saveExportFileProvider),
                 pickExportFolder: ref.read(pickExportFolderProvider),
                 pdfPrinter: ref.read(pdfPrinterProvider),
+                pdfEngine: ref.watch(pdfEngineProvider).value,
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -348,6 +349,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.saveExportFile,
     required this.pickExportFolder,
     required this.pdfPrinter,
+    required this.pdfEngine,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -396,6 +398,10 @@ final class _LibraryShell extends StatefulWidget {
   /// What prints a note's PDF (#63); a fake in the tests, where no engine
   /// can start.
   final PdfPrinter pdfPrinter;
+
+  /// The browser a folder's PDF zip prints with, or null when this
+  /// machine has none (the format is then not offered for a folder).
+  final String? pdfEngine;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -3023,6 +3029,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         zipPath: zipPath,
         format: format,
         language: AppLanguages.resolved.id,
+        engine: widget.pdfEngine,
       );
     } on Object catch (error) {
       if (mounted) {
@@ -3091,11 +3098,12 @@ final class _LibraryShellState extends State<_LibraryShell>
         : AppStrings.exportFolderTitle;
     final formats = <Widget>[
       for (final format in ExportTreeFormat.values)
-        ListTile(
-          key: Key('export-tree-${format.name}'),
-          title: Text(_treeFormatName(format)),
-          onTap: () => Navigator.of(context).pop(format),
-        ),
+        if (format != ExportTreeFormat.pdf || widget.pdfEngine != null)
+          ListTile(
+            key: Key('export-tree-${format.name}'),
+            title: Text(_treeFormatName(format)),
+            onTap: () => Navigator.of(context).pop(format),
+          ),
     ];
     if (_wide) {
       return showDialog<ExportTreeFormat>(
@@ -3118,6 +3126,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   static String _treeFormatName(ExportTreeFormat format) => switch (format) {
     ExportTreeFormat.markdown => AppStrings.exportFormatMarkdown,
     ExportTreeFormat.html => AppStrings.exportFormatHtml,
+    ExportTreeFormat.pdf => AppStrings.exportFormatPdf,
   };
 
   /// The zip's file name for a folder called [name]: the characters a file

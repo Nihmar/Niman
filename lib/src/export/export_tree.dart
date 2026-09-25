@@ -25,6 +25,7 @@ import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:path/path.dart' as p;
@@ -36,6 +37,9 @@ enum ExportTreeFormat {
 
   /// Every Markdown note as an HTML page; every other file copied as it is.
   html,
+
+  /// Every Markdown note as a PDF page, printed by the browser engine.
+  pdf,
 }
 
 /// How far a running export has got.
@@ -68,6 +72,16 @@ final class ExportCancelled implements Exception {
   String toString() => 'Export cancelled';
 }
 
+/// A PDF folder was asked for with no engine to print with.
+final class TreeExportNoEngine implements Exception {
+  /// Creates the failure.
+  const new();
+
+  /// What a log line reads.
+  @override
+  String toString() => 'No PDF engine was found';
+}
+
 /// One tree export, running on its own isolate.
 final class TreeExport {
   new _(this._isolate, this._zipPath)
@@ -87,12 +101,21 @@ final class TreeExport {
   Future<void> get done => _done.future;
 
   /// Starts exporting [dir] (absolute) into [zipPath].
+  ///
+  /// [engine] is the PDF format's browser (Edge, Chromium): the printer a
+  /// folder of pages goes through. Without one there is nothing to print
+  /// with — [TreeExportNoEngine] — since the raster fallback paints on the
+  /// UI isolate and cannot run here.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
     required ExportTreeFormat format,
     required String language,
+    String? engine,
   }) async {
+    if (format == ExportTreeFormat.pdf && engine == null) {
+      throw const TreeExportNoEngine();
+    }
     final events = ReceivePort();
     final errors = ReceivePort();
     final exits = ReceivePort();
@@ -103,6 +126,7 @@ final class TreeExport {
         zipPath: zipPath,
         format: format,
         language: language,
+        engine: engine,
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -120,12 +144,14 @@ final class TreeExport {
     required String zipPath,
     required ExportTreeFormat format,
     required String language,
+    String? engine,
   }) async {
     final export = await start(
       dir: dir,
       zipPath: zipPath,
       format: format,
       language: language,
+      engine: engine,
     );
     await export.done;
   }
@@ -190,12 +216,17 @@ typedef TreeExportRequest = ({
   String zipPath,
   ExportTreeFormat format,
   String language,
+  String? engine,
   SendPort events,
 });
 
 Future<void> _exportTree(TreeExportRequest request) async {
   final tree = _walk(request.dir);
   final encoder = ZipFileEncoder()..create(request.zipPath);
+  // The PDF format's scratch: one page and one PDF at a time, reused.
+  final scratch = request.format == ExportTreeFormat.pdf
+      ? Directory.systemTemp.createTempSync('niman-tree-pdf-')
+      : null;
   try {
     var done = 0;
     for (final entry in tree.entries) {
@@ -203,16 +234,30 @@ Future<void> _exportTree(TreeExportRequest request) async {
         if (request.format == ExportTreeFormat.markdown) {
           encoder.addArchiveFile(ArchiveFile.directory(entry.rel));
         }
-      } else if (_isNote(entry.rel, request.format)) {
+      } else if (request.format == ExportTreeFormat.markdown) {
+        await encoder.addFile(File(entry.abs), entry.rel);
+      } else if (_isNote(entry.rel)) {
         final page = _page(
           File(entry.abs).readAsStringSync(),
           entry.rel,
           tree,
           request.language,
         );
-        encoder.addArchiveFile(
-          ArchiveFile.string('${_stem(entry.rel)}.html', page),
-        );
+        if (request.format == ExportTreeFormat.pdf) {
+          await _printInto(
+            encoder,
+            scratch!,
+            request.engine!,
+            page,
+            _stem(entry.rel),
+          );
+        } else if (request.format == ExportTreeFormat.html) {
+          encoder.addArchiveFile(
+            ArchiveFile.string('${_stem(entry.rel)}.html', page),
+          );
+        } else {
+          await encoder.addFile(File(entry.abs), entry.rel);
+        }
       } else {
         await encoder.addFile(File(entry.abs), entry.rel);
       }
@@ -236,12 +281,41 @@ Future<void> _exportTree(TreeExportRequest request) async {
       // The first failure is the one worth reporting.
     }
     rethrow;
+  } finally {
+    try {
+      scratch?.deleteSync(recursive: true);
+    } on FileSystemException {
+      // A temp directory left behind is not the export's failure.
+    }
   }
 }
 
-/// Whether [rel] becomes a page: a Markdown note, in the HTML format.
-bool _isNote(String rel, ExportTreeFormat format) =>
-    format == ExportTreeFormat.html && p.extension(rel).toLowerCase() == '.md';
+/// Prints [page] with [engine] and adds the PDF to [encoder] as
+/// `<stem>.pdf`.
+Future<void> _printInto(
+  ZipFileEncoder encoder,
+  Directory scratch,
+  String engine,
+  String page,
+  String stem,
+) async {
+  final htmlPath = p.join(scratch.path, 'page.html');
+  final pdfPath = p.join(scratch.path, 'page.pdf');
+  File(htmlPath).writeAsStringSync(page);
+  final outcome = await ProcessPdfPrinter(engine: engine)
+      .print(htmlPath, pdfPath);
+  switch (outcome) {
+    case PdfPrinted():
+      await encoder.addFile(File(pdfPath), '$stem.pdf');
+    case PdfNoEngine():
+      throw const TreeExportNoEngine();
+    case PdfFailed(:final message):
+      throw StateError('printing "$stem": $message');
+  }
+}
+
+/// Whether [rel] becomes a page: a Markdown note.
+bool _isNote(String rel) => p.extension(rel).toLowerCase() == '.md';
 
 /// The subtree of [dir] in path order: every file and folder whose name
 /// does not start with a dot (settings, trash and history are not part of
