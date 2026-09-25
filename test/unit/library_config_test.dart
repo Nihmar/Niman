@@ -181,6 +181,36 @@ void main() {
       expect((await store.read()).spellDictionaries, ['it_IT']);
     });
 
+    test('the lint rules turned off round trip', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      final config = LibraryConfig.defaults.copyWith(
+        lintRulesOff: const {'tight-lists', 'closing-fence'},
+      );
+      await store.write(config);
+      expect((await store.read()).lintRulesOff, const {
+        'tight-lists',
+        'closing-fence',
+      });
+      // Nothing off writes no key and reads back as every rule on.
+      await store.write(LibraryConfig.defaults);
+      expect((await store.read()).lintRulesOff, isEmpty);
+    });
+
+    test('an unknown or malformed lint rule id is dropped', () async {
+      expect(
+        LibraryConfig.fromJsonMap(const {
+          'lintRulesOff': ['tight-lists', 'byVibes'],
+        }).lintRulesOff,
+        const {'tight-lists'},
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const {'lintRulesOff': 'tight-lists'})
+            .lintRulesOff,
+        isEmpty,
+      );
+    });
+
     test('an older file reads back as the shipped editor defaults', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);

@@ -1546,6 +1546,27 @@ final class LithuanianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
   @override
+  String get lintRulesTitle => 'Markdown taisyklės';
+  @override
+  String get lintRulesSubtitle =>
+      'Ką sutvarko tvarkymas: tuščios eilutės sąrašuose, užduočių langeliai, '
+      'tarpai po žymeklio ir kodo blokai.';
+  @override
+  String get lintRulesReset => 'Atkurti numatytuosius';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Visos $all' : '$on iš $all';
+  @override
+  String get lintRuleTightLists => 'Tankūs sąrašai';
+  @override
+  String get lintRuleTaskMarker => 'Užduočių žymės';
+  @override
+  String get lintRuleListSpacing => 'Sąrašų tarpai';
+  @override
+  String get lintRuleClosingFence => 'Kodo bloko uždarymas';
+  @override
+  String get lintRuleFenceLanguage => 'Kodo bloko kalba';
+  @override
   String get tidyOnCloseTitle => 'Sutvarkyti Markdown uždarant';
   @override
   String get tidyOnCloseSubtitle =>

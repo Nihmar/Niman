@@ -1559,6 +1559,27 @@ final class FinnishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override
+  String get lintRulesTitle => 'Markdown-säännöt';
+  @override
+  String get lintRulesSubtitle =>
+      'Mitä siistiminen hoitaa: tyhjät rivit listoissa, tehtäväruudut, '
+      'välilyönnit merkinnän jälkeen ja koodilohkot.';
+  @override
+  String get lintRulesReset => 'Palauta oletukset';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Kaikki $all' : '$on / $all';
+  @override
+  String get lintRuleTightLists => 'Tiiviit listat';
+  @override
+  String get lintRuleTaskMarker => 'Tehtäväruudut';
+  @override
+  String get lintRuleListSpacing => 'Listojen välit';
+  @override
+  String get lintRuleClosingFence => 'Koodilohkon sulkeminen';
+  @override
+  String get lintRuleFenceLanguage => 'Koodilohkon kieli';
+  @override
   String get tidyOnCloseTitle => 'Siivoa Markdown suljettaessa';
   @override
   String get tidyOnCloseSubtitle =>

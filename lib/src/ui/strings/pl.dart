@@ -1566,6 +1566,27 @@ final class PolishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override
+  String get lintRulesTitle => 'Reguły Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Co porządkuje upraszczanie: puste wiersze na listach, pola zadań, '
+      'odstępy po znaczniku i bloki kodu.';
+  @override
+  String get lintRulesReset => 'Przywróć domyślne';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Wszystkie $all' : '$on z $all';
+  @override
+  String get lintRuleTightLists => 'Zwarte listy';
+  @override
+  String get lintRuleTaskMarker => 'Pola zadań';
+  @override
+  String get lintRuleListSpacing => 'Odstępy listy';
+  @override
+  String get lintRuleClosingFence => 'Zamknięcie bloku kodu';
+  @override
+  String get lintRuleFenceLanguage => 'Język bloku kodu';
+  @override
   String get tidyOnCloseTitle => 'Porządkuj Markdown przy zamykaniu';
   @override
   String get tidyOnCloseSubtitle =>

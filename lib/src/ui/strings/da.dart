@@ -1541,6 +1541,27 @@ final class DanishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
   @override
+  String get lintRulesTitle => 'Markdown-regler';
+  @override
+  String get lintRulesSubtitle =>
+      'Hvad oprydningen ordner: tomme linjer i lister, afkrydsningsfelter, '
+      'mellemrum efter markøren og kodeblokke.';
+  @override
+  String get lintRulesReset => 'Nulstil til standard';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Alle $all' : '$on af $all';
+  @override
+  String get lintRuleTightLists => 'Stramme lister';
+  @override
+  String get lintRuleTaskMarker => 'Afkrydsningsfelter';
+  @override
+  String get lintRuleListSpacing => 'Afstand i lister';
+  @override
+  String get lintRuleClosingFence => 'Lukning af kodeblok';
+  @override
+  String get lintRuleFenceLanguage => 'Sprog i kodeblok';
+  @override
   String get tidyOnCloseTitle => 'Ryd op i Markdown ved lukning';
   @override
   String get tidyOnCloseSubtitle =>

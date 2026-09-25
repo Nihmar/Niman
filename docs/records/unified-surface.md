@@ -521,8 +521,9 @@ are reimplemented twice (`quill_editor_commands.dart`,
 - **Clipboard carries Markdown in both editors**, so the same text copies
   identically from either; pasting Markdown into the WYSIWYG restores
   structure; pasting HTML uses the HTML.
-- **Tidy the Markdown**: never touches fenced code, tables, math, frontmatter
-  or HTML; idempotent; saves first.
+- **Tidy the Markdown**: never touches tables, math, frontmatter or HTML,
+  nor the code inside a fence (only its two fence lines, for their language
+  and closing fence, #72); idempotent; saves first.
 - **Enter inside a list** carries the list on in both editors; inside a fence,
   math block or frontmatter it does nothing — and `_isPlainLine` answers that
   from *the highlighter the editor already keeps*, explicitly so the two

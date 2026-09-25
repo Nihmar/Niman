@@ -1555,6 +1555,27 @@ final class BasqueStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override
+  String get lintRulesTitle => 'Markdown arauak';
+  @override
+  String get lintRulesSubtitle =>
+      'Zer zuzentzen duen: zerrendetako lerro hutsak, zeregin-laukiak, '
+      'markaren ondoko tarteak eta kode-blokeak.';
+  @override
+  String get lintRulesReset => 'Lehenetsitakoak leheneratu';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Guztiak $all' : '$on / $all';
+  @override
+  String get lintRuleTightLists => 'Zerrenda trinkoak';
+  @override
+  String get lintRuleTaskMarker => 'Zeregin-laukiak';
+  @override
+  String get lintRuleListSpacing => 'Zerrenden tarteak';
+  @override
+  String get lintRuleClosingFence => 'Kode-blokearen itxiera';
+  @override
+  String get lintRuleFenceLanguage => 'Kode-blokearen hizkuntza';
+  @override
   String get tidyOnCloseTitle => 'Markdown txukundu ixtean';
   @override
   String get tidyOnCloseSubtitle =>

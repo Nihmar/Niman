@@ -1561,6 +1561,27 @@ final class BulgarianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override
+  String get lintRulesTitle => 'Правила за Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Какво подрежда: празните редове в списъци, отметките на задачи, '
+      'интервалите след маркера и блоковете код.';
+  @override
+  String get lintRulesReset => 'Възстановяване по подразбиране';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Всички $all' : '$on от $all';
+  @override
+  String get lintRuleTightLists => 'Плътни списъци';
+  @override
+  String get lintRuleTaskMarker => 'Отметки на задачи';
+  @override
+  String get lintRuleListSpacing => 'Разстояния в списъци';
+  @override
+  String get lintRuleClosingFence => 'Затваряне на кода';
+  @override
+  String get lintRuleFenceLanguage => 'Език на кода';
+  @override
   String get tidyOnCloseTitle => 'Подреждане на Markdown при затваряне';
   @override
   String get tidyOnCloseSubtitle =>

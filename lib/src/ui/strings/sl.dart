@@ -1541,6 +1541,27 @@ final class SlovenianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override
+  String get lintRulesTitle => 'Pravila Markdowna';
+  @override
+  String get lintRulesSubtitle =>
+      'Kaj urejanje uredi: prazne vrstice na seznamih, potrditvena polja, '
+      'presledki za oznako in bloki kode.';
+  @override
+  String get lintRulesReset => 'Ponastavi na privzeto';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Vsa $all' : '$on od $all';
+  @override
+  String get lintRuleTightLists => 'Tesni seznami';
+  @override
+  String get lintRuleTaskMarker => 'Potrditvena polja';
+  @override
+  String get lintRuleListSpacing => 'Presledki seznama';
+  @override
+  String get lintRuleClosingFence => 'Zaprtje bloka kode';
+  @override
+  String get lintRuleFenceLanguage => 'Jezik bloka kode';
+  @override
   String get tidyOnCloseTitle => 'Pospravi Markdown ob zaprtju';
   @override
   String get tidyOnCloseSubtitle =>

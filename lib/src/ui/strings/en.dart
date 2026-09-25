@@ -1533,6 +1533,27 @@ final class EnglishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override
+  String get lintRulesTitle => 'Markdown rules';
+  @override
+  String get lintRulesSubtitle =>
+      'What tidying settles: list blank lines, task boxes, marker spacing and '
+      'fenced code blocks.';
+  @override
+  String get lintRulesReset => 'Reset to defaults';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'All $all' : '$on of $all';
+  @override
+  String get lintRuleTightLists => 'Tight lists';
+  @override
+  String get lintRuleTaskMarker => 'Task markers';
+  @override
+  String get lintRuleListSpacing => 'List spacing';
+  @override
+  String get lintRuleClosingFence => 'Closing fence';
+  @override
+  String get lintRuleFenceLanguage => 'Fence language';
+  @override
   String get tidyOnCloseTitle => 'Tidy the Markdown on close';
   @override
   String get tidyOnCloseSubtitle =>

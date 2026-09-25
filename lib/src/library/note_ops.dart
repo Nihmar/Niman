@@ -16,6 +16,7 @@ import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -480,8 +481,8 @@ final class NoteOps implements NoteOperations {
   }
 
   @override
-  Future<bool> tidyNote(String path) async {
-    final changed = await writer.tidy(path);
+  Future<bool> tidyNote(String path, {Set<LintRule>? rules}) async {
+    final changed = await writer.tidy(path, rules: rules);
     if (changed) _hint(path, SyncOpKind.changed);
     return changed;
   }

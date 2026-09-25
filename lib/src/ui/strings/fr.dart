@@ -1587,6 +1587,27 @@ final class FrenchStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
   @override
+  String get lintRulesTitle => 'Règles Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Ce que le rangement règle : lignes vides dans les listes, cases de '
+      'tâche, espaces après le marqueur et blocs de code.';
+  @override
+  String get lintRulesReset => 'Rétablir les valeurs par défaut';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Toutes $all' : '$on sur $all';
+  @override
+  String get lintRuleTightLists => 'Listes compactes';
+  @override
+  String get lintRuleTaskMarker => 'Cases de tâche';
+  @override
+  String get lintRuleListSpacing => 'Espacement des listes';
+  @override
+  String get lintRuleClosingFence => 'Fermeture du bloc de code';
+  @override
+  String get lintRuleFenceLanguage => 'Langage du bloc de code';
+  @override
   String get tidyOnCloseTitle => 'Ranger le Markdown à la fermeture';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1552,6 +1552,27 @@ final class UkrainianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override
+  String get lintRulesTitle => 'Правила Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Що виправляє впорядкування: порожні рядки в списках, позначки завдань, '
+      'проміжки після маркера та блоки коду.';
+  @override
+  String get lintRulesReset => 'Відновити типові';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Усі $all' : '$on з $all';
+  @override
+  String get lintRuleTightLists => 'Щільні списки';
+  @override
+  String get lintRuleTaskMarker => 'Позначки завдань';
+  @override
+  String get lintRuleListSpacing => 'Проміжки в списках';
+  @override
+  String get lintRuleClosingFence => 'Закриття блоку коду';
+  @override
+  String get lintRuleFenceLanguage => 'Мова блоку коду';
+  @override
   String get tidyOnCloseTitle => 'Упорядковувати Markdown під час закриття';
   @override
   String get tidyOnCloseSubtitle =>

@@ -301,17 +301,25 @@ changing what it says:
 - runs of blank lines become one, and the trailing ones go;
 - spaces left at the end of a line go, except the ones that mean a line
   break;
+- a list comes back tight: no blank lines between its items, one space
+  after each marker, and a task box written `[ ]` or `[x]` whatever case
+  it was;
+- a fenced code block gets its closing fence when the note forgot one,
+  and its language — the first word of the info string — loses the
+  punctuation around it (`{.dart}` becomes `dart`);
 - the note ends with a single newline.
 
 It never reflows your prose, and never touches what it cannot read:
-fenced code, tables, math, frontmatter and HTML come back byte for
-byte. Tidying twice changes nothing the second time. The note is saved
-first, so what is tidied is the note as it stands.
+tables, math, frontmatter and HTML come back byte for byte, and so does
+the code inside a fence — only its two fence lines are read. Tidying
+twice changes nothing the second time. The note is saved first, so what
+is tidied is the note as it stands.
 
 It also runs by itself: a note you edited is tidied when it is closed.
 That is a setting of the library (**Settings → Editor → Tidy the
 Markdown on close**, on by default), so every device writes the
-library's notes the same way. Notes over 4 MB are left as they are.
+library's notes the same way. **Markdown rules**, right below it, picks
+which of the rules above run; notes over 4 MB are left as they are.
 
 The **checkbox list** button (beside the bulleted and numbered lists)
 makes the selected lines — or the caret's — tasks: a bulleted item gains

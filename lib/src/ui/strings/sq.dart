@@ -1560,6 +1560,27 @@ final class AlbanianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override
+  String get lintRulesTitle => 'Rregullat e Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Çfarë rregullon pastrimi: rreshta bosh në lista, kutitë e detyrave, '
+      'hapësirat pas shënuesit dhe blloqet e kodit.';
+  @override
+  String get lintRulesReset => 'Ktheji te parazgjedhjet';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Të gjitha $all' : '$on nga $all';
+  @override
+  String get lintRuleTightLists => 'Lista të ngjitura';
+  @override
+  String get lintRuleTaskMarker => 'Shënues detyrash';
+  @override
+  String get lintRuleListSpacing => 'Hapësirat e listave';
+  @override
+  String get lintRuleClosingFence => 'Mbyllja e bllokut të kodit';
+  @override
+  String get lintRuleFenceLanguage => 'Gjuha e bllokut të kodit';
+  @override
   String get tidyOnCloseTitle => 'Rregullo Markdown-in në mbyllje';
   @override
   String get tidyOnCloseSubtitle =>
