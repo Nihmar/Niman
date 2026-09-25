@@ -1550,7 +1550,7 @@ final class NorwegianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF-en er et bilde av sidene; installer Chromium for valgbar tekst.';
+      'PDF-en er et bilde av sidene; installer en nettleser for valgbar tekst.';
   @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override

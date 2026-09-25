@@ -1562,7 +1562,7 @@ final class BelarusianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF — гэта малюнак старонак; усталюйце Chromium, каб атрымаць '
+      'PDF — гэта малюнак старонак; усталюйце браўзер, каб атрымаць '
       'выдзяляльны тэкст.';
   @override
   String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';

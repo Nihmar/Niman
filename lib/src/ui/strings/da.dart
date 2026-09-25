@@ -1556,7 +1556,7 @@ final class DanishStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      "PDF'en er et billede af siderne; installér Chromium for "
+      "PDF'en er et billede af siderne; installér en browser for "
       'markérbar tekst.';
   @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';

@@ -1581,7 +1581,7 @@ final class DutchStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      "De PDF is een afbeelding van de pagina's; installeer Chromium "
+      "De PDF is een afbeelding van de pagina's; installeer een browser "
       'voor selecteerbare tekst.';
   @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';

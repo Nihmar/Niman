@@ -1560,7 +1560,7 @@ final class IcelandicStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF-skjalið er mynd af síðunum; settu upp Chromium fyrir valanlegan '
+      'PDF-skjalið er mynd af síðunum; settu upp vafra fyrir valanlegan '
       'texta.';
   @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';

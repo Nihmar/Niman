@@ -1556,7 +1556,7 @@ final class SlovenianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF je slika strani; za izbirno besedilo namestite Chromium.';
+      'PDF je slika strani; za izbirno besedilo namestite brskalnik.';
   @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override

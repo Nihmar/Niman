@@ -1581,7 +1581,7 @@ final class PolishStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF to obraz stron; zainstaluj Chromium, aby tekst można było '
+      'PDF to obraz stron; zainstaluj przeglądarkę, aby tekst można było '
       'zaznaczać.';
   @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';

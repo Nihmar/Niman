@@ -1567,7 +1567,7 @@ final class BosnianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF je slika stranica; instalirajte Chromium za tekst koji se može '
+      'PDF je slika stranica; instalirajte preglednik za tekst koji se može '
       'birati.';
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';

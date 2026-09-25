@@ -1535,7 +1535,7 @@ final class HindiStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF पृष्ठों की तस्वीर है; चुने जा सकने वाले टेक्स्ट के लिए Chromium '
+      'PDF पृष्ठों की तस्वीर है; चुने जा सकने वाले टेक्स्ट के लिए ब्राउज़र '
       'इंस्टॉल करें।';
   @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';

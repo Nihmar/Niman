@@ -1554,7 +1554,7 @@ final class CzechStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF je obrázek stránek; nainstalujte Chromium pro text, který lze '
+      'PDF je obrázek stránek; nainstalujte prohlížeč pro text, který lze '
       'vybrat.';
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';

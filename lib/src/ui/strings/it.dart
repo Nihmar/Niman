@@ -1580,7 +1580,7 @@ final class ItalianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      "Il PDF è un'immagine delle pagine; installa Chromium per "
+      "Il PDF è un'immagine delle pagine; installa un browser per "
       'avere testo selezionabile.';
   @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';

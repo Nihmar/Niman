@@ -1549,7 +1549,7 @@ final class TurkishStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF, sayfaların bir resmidir; seçilebilir metin için Chromium kurun.';
+      'PDF, sayfaların bir resmidir; seçilebilir metin için tarayıcı kurun.';
   @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override

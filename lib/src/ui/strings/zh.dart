@@ -1429,7 +1429,7 @@ final class ChineseStrings extends Strings {
   @override
   String get exportFormatPdf => 'PDF';
   @override
-  String get exportPdfPicture => 'PDF 是页面的图片；安装 Chromium 后文字可选择。';
+  String get exportPdfPicture => 'PDF 是页面的图片；安装浏览器后文字可选择。';
   @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override

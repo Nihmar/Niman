@@ -1576,7 +1576,7 @@ final class GalicianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'O PDF é unha imaxe das páxinas; instala Chromium para ter texto '
+      'O PDF é unha imaxe das páxinas; instala un navegador para ter texto '
       'seleccionable.';
   @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';

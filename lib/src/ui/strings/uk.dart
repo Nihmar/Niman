@@ -1567,7 +1567,7 @@ final class UkrainianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF — це зображення сторінок; встановіть Chromium, щоб текст можна '
+      'PDF — це зображення сторінок; встановіть браузер, щоб текст можна '
       'було виділяти.';
   @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';

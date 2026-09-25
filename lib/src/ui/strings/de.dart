@@ -1587,7 +1587,7 @@ final class GermanStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'Das PDF ist ein Bild der Seiten; mit Chromium wird der Text '
+      'Das PDF ist ein Bild der Seiten; mit einem Browser wird der Text '
       'auswählbar.';
   @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';

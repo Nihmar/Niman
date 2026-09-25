@@ -1567,7 +1567,7 @@ final class SwedishStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF:en är en bild av sidorna; installera Chromium för valbar text.';
+      'PDF:en är en bild av sidorna; installera en webbläsare för valbar text.';
   @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override

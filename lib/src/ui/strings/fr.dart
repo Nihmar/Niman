@@ -1602,7 +1602,7 @@ final class FrenchStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'Le PDF est une image des pages ; installez Chromium pour un texte '
+      'Le PDF est une image des pages ; installez un navigateur pour un texte '
       'sélectionnable.';
   @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';

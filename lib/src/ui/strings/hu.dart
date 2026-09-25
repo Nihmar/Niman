@@ -1572,7 +1572,7 @@ final class HungarianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'A PDF az oldalak képe; választható szöveghez telepítsd a Chromiumot.';
+      'A PDF az oldalak képe; választható szöveghez telepítsd a böngészőt.';
   @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override

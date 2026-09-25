@@ -1544,7 +1544,7 @@ final class EstonianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF on lehekülgede pilt; valitava teksti saamiseks paigalda Chromium.';
+      'PDF on lehekülgede pilt; valitava teksti saamiseks paigalda brauseri.';
   @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override
