@@ -17,7 +17,7 @@ final RegExp listMarker = RegExp(r'^(\s*)([-*+]|\d{1,9}[.)])([ \t]+)');
 /// text — `[](url)`, `[x][ref]` — or a reference's label (`[x]: url`), and
 /// spacing it out as a box would break the link.
 final RegExp _taskBox = RegExp(
-  r'^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\[([ xX]*)\](?![(\[:])[ \t]*',
+  r'^(\s*(?:[-*+]|\d{1,9}[.)]))([ \t]+)\[([ xX]*)\](?![(\[:])[ \t]*',
 );
 
 /// A list block's lines, tidied.
@@ -51,22 +51,30 @@ List<String> tidyList(
     if (marker != null) {
       final indent = marker.group(1)!.length;
       final mark = marker.group(2)!;
-      final padding = marker.group(3)!.length;
+      final gap = marker.group(3)!;
       while (open.isNotEmpty && indent < open.last.was) {
         open.removeLast();
       }
       final shift = open.isEmpty ? 0 : open.last.now - open.last.was;
       final column = indent + shift;
-      final pad = spacing ? 1 : padding;
       final rest = raw.substring(marker.end);
+      // Five columns or more after the marker are one space and then an
+      // indented code block (CommonMark 5.2): the item's text starts one
+      // column in, and the rest of the gap is the code's own indent, which
+      // one space would turn into a paragraph.
+      final code = _startsCode(gap, from: indent + mark.length);
+      // The gap is kept as written when it holds code, or when the rule
+      // is off; otherwise it becomes the one space.
+      final asWritten = code || !spacing;
+      final textAt = code ? 1 : gap.length;
       out.add(
         rest.isEmpty
             ? '${' ' * column}$mark'
-            : '${' ' * column}$mark${' ' * pad}$rest',
+            : '${' ' * column}$mark${asWritten ? gap : ' '}$rest',
       );
       open.add((
-        was: indent + mark.length + padding,
-        now: column + mark.length + pad,
+        was: indent + mark.length + textAt,
+        now: column + mark.length + (asWritten ? textAt : 1),
       ));
       continue;
     }
@@ -84,6 +92,18 @@ List<String> tidyList(
     out.add('${' ' * column}${raw.trimLeft()}');
   }
   return out;
+}
+
+/// Whether [gap], the whitespace after a marker ending at column [from],
+/// spans five columns or more: then the item's text is one column in and
+/// the rest of the gap indents a code block (CommonMark 5.2). A tab runs
+/// to the next multiple of four, as CommonMark counts it.
+bool _startsCode(String gap, {required int from}) {
+  var column = from;
+  for (final unit in gap.codeUnits) {
+    column = unit == 0x09 ? column + 4 - column % 4 : column + 1;
+  }
+  return column - from >= 5;
 }
 
 /// Whether the blank line at [at] sits between two items: the next line
@@ -108,8 +128,12 @@ List<String> normalizeTaskBoxes(List<String> lines, {required bool enabled}) {
 String? _boxed(String line) {
   final match = _taskBox.firstMatch(line);
   if (match == null) return null;
-  final checked = match.group(2)!.toLowerCase().contains('x');
+  final marker = match.group(1)!;
+  final gap = match.group(2)!;
+  // Past five columns the bracket is code, not a box.
+  if (_startsCode(gap, from: marker.length)) return null;
+  final checked = match.group(3)!.toLowerCase().contains('x');
   final rest = line.substring(match.end);
-  return '${match.group(1)}${checked ? '[x]' : '[ ]'}'
+  return '$marker$gap${checked ? '[x]' : '[ ]'}'
       '${rest.isEmpty ? '' : ' $rest'}';
 }

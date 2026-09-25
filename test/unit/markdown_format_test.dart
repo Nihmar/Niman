@@ -161,6 +161,24 @@ void main() {
     expect(tidy('-   a\n\n    - b\n\n- c\n'), '- a\n  - b\n- c\n');
   });
 
+  test('five columns after the marker are code, and keep their indent', () {
+    // One space, then an indented code block: the item's text column is
+    // one in, so the code's next line stays under it.
+    const note = '-     code [X] line\n      more code\n- b\n';
+    expect(tidy(note), note);
+    expect(tidy('-\t\tcode\n- b\n'), '-\t\tcode\n- b\n');
+    // Four columns are still padding, and still go.
+    expect(tidy('-    text\n- b\n'), '- text\n- b\n');
+  });
+
+  test('with the spacing rule off, a tab after the marker stays a tab', () {
+    const note = '-\titem\n-\taltro\n';
+    expect(
+      formatMarkdown(note, rules: {LintRule.tightLists, LintRule.taskMarker}),
+      note,
+    );
+  });
+
   test('a fence keeps its metadata and cleans its language', () {
     expect(
       tidy('```{.dart} title="x"\ncode\n```\n'),
