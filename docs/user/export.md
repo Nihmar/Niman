@@ -14,7 +14,10 @@ one file:
 - **HTML** — one self-contained page: the note as it reads, its pictures
   inside it as `data:` URIs, its formulas drawn as SVG, and a style that
   follows the reader's light or dark system. Nothing else is needed to
-  open it — a mail attachment or a USB stick is enough.
+  open it — a mail attachment or a USB stick is enough. The picture
+  types it can carry are PNG, JPEG, GIF, WebP and BMP; a picture of
+  another type (an SVG, say) stays as the note wrote it rather than
+  breaking the page.
 - **PDF** — the same page printed: A4, its paper style, its formulas and
   pictures in place. The machine prints it with its own browser — Edge on
   Windows, a Chromium-family browser on Linux, the system WebView on

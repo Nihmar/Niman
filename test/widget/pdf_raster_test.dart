@@ -19,12 +19,22 @@ const String _redPng =
     'z8DwnwGM/zMwAAAf7gP9NRsAMwAAAABJRU5ErkJggg==';
 
 /// The pixels of the PDF's one image stream, RGB per pixel.
-Uint8List _pageRgb(Uint8List pdf) {
+Uint8List _pageRgb(Uint8List pdf) => _imageStreams(pdf).single;
+
+/// Every image stream in the PDF, inflated.
+List<Uint8List> _imageStreams(Uint8List pdf) {
   final text = latin1.decode(pdf);
-  final image = text.indexOf('/Subtype /Image');
-  final start = text.indexOf('stream\n', image) + 'stream\n'.length;
-  final end = text.indexOf('\nendstream', start);
-  return Uint8List.fromList(ZLibCodec().decode(pdf.sublist(start, end)));
+  final pages = <Uint8List>[];
+  var at = 0;
+  while (true) {
+    final image = text.indexOf('/Subtype /Image', at);
+    if (image < 0) break;
+    final start = text.indexOf('stream\n', image) + 'stream\n'.length;
+    final end = text.indexOf('\nendstream', start);
+    pages.add(Uint8List.fromList(ZLibCodec().decode(pdf.sublist(start, end))));
+    at = end;
+  }
+  return pages;
 }
 
 void main() {
@@ -85,6 +95,11 @@ void main() {
     final text = latin1.decode(bytes!);
     final count = RegExp(r'/Count (\d+)').firstMatch(text)!.group(1);
     expect(int.parse(count!), greaterThan(1));
+    // The pages are slices of the one recording: each shows its own part
+    // of the note, not the first one repeated.
+    final pages = _imageStreams(bytes);
+    expect(pages.length, int.parse(count));
+    expect(pages.first, isNot(equals(pages[1])));
   });
 
   testWidgets('a picture handed in is drawn on the page', (tester) async {
