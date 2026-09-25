@@ -43,10 +43,16 @@ const double a4HeightPx = a4Height / pointsPerPixel;
 const double pdfPageMarginPx = 18 * 96 / 25.4;
 
 /// Lays [text] out and draws its pages, answering the PDF's bytes.
+///
+/// [images] are the note's pictures, by the target as written, decoded here
+/// and drawn in place: the fallback has no browser to print an HTML page
+/// with, so a picture it is not handed is a picture the note loses (#63,
+/// H3).
 Future<Uint8List> rasterPdf({
   required String text,
   required MarkdownTheme theme,
   required MathCache mathCache,
+  Map<String, Uint8List>? images,
   double pageWidth = a4WidthPx,
   double pageHeight = a4HeightPx,
   double margin = pdfPageMarginPx,
@@ -54,9 +60,17 @@ Future<Uint8List> rasterPdf({
 }) async {
   final contentWidth = pageWidth - 2 * margin;
   final contentHeight = pageHeight - 2 * margin;
+  // Decoded before the tree is built: the offscreen layout has no frame
+  // loop, so an [EmbedView] that resolved and decoded on its own could not
+  // be waited for.
+  final decoded = <String, ui.Image>{};
+  for (final entry in (images ?? const <String, Uint8List>{}).entries) {
+    decoded[entry.key] = await _decode(entry.value);
+  }
   final key = GlobalKey();
   final layout = _OffscreenLayout(
     width: contentWidth,
+    height: pageHeight,
     child: KeyedSubtree(
       key: key,
       child: MarkdownExportView(
@@ -66,6 +80,7 @@ Future<Uint8List> rasterPdf({
         mathCache: mathCache,
         width: contentWidth,
         padding: EdgeInsets.zero,
+        embedImages: decoded.isEmpty ? null : decoded,
       ),
     ),
   );
@@ -73,32 +88,51 @@ Future<Uint8List> rasterPdf({
     final box = layout.layOut();
     final total = box.size.height;
     final count = math.max(1, (total / contentHeight).ceil());
-    final pages = <PdfPageImage>[];
-    for (var page = 0; page < count; page++) {
-      final top = page * contentHeight;
-      final height = math.min(contentHeight, total - top);
-      final image = await MarkdownExport.capture(
-        box,
-        offset: Offset(0, -top),
-        size: Size(contentWidth, height),
-        pixelRatio: pixelRatio,
-      );
-      try {
-        pages.add(await _pageImage(image));
-      } finally {
-        image.dispose();
-      }
-    }
-    // The layout is in logical pixels, the writer in points: the sheet
-    // would come out 4/3 too large on both axes without the conversion.
-    return writePdf(
-      pages,
+    // The note is recorded once and sliced per page: a capture per page
+    // would re-record the whole note for every page, which is quadratic in
+    // the note's length (M6).
+    final recording = MarkdownExport.record(box);
+    final writer = PdfWriter(
       pageWidth: pageWidth * pointsPerPixel,
       pageHeight: pageHeight * pointsPerPixel,
       margin: margin * pointsPerPixel,
     );
+    try {
+      for (var page = 0; page < count; page++) {
+        final top = page * contentHeight;
+        final height = math.min(contentHeight, total - top);
+        final image = await recording.capture(
+          Rect.fromLTWH(0, top, contentWidth, height),
+          pixelRatio: pixelRatio,
+        );
+        try {
+          // Compressed into the file here: the fallback holds one page's
+          // pixels at a time, not every page of the note (M6).
+          writer.addPage(await _pageImage(image));
+        } finally {
+          image.dispose();
+        }
+      }
+    } finally {
+      recording.dispose();
+    }
+    return writer.finish();
   } finally {
     layout.dispose();
+    for (final image in decoded.values) {
+      image.dispose();
+    }
+  }
+}
+
+/// [bytes] as a picture the export can draw.
+Future<ui.Image> _decode(Uint8List bytes) async {
+  final codec = await ui.instantiateImageCodec(bytes);
+  try {
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  } finally {
+    codec.dispose();
   }
 }
 
@@ -128,10 +162,11 @@ int _clamp(int value) => value < 0 ? 0 : (value > 255 ? 255 : value);
 /// windowless `RenderView` whose child gets the width and all the height it
 /// asks for.
 final class _OffscreenLayout {
-  new({required this.child, required this.width});
+  new({required this.child, required this.width, required this.height});
 
   final Widget child;
   final double width;
+  final double height;
 
   final PipelineOwner _pipeline = PipelineOwner();
   final FocusManager _focus = FocusManager();
@@ -154,7 +189,13 @@ final class _OffscreenLayout {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.noScaling),
+          // The page in the reader's terms: the height cap a picture takes
+          // its half of needs a surface to measure against, and the tree
+          // has none of its own.
+          data: MediaQueryData(
+            size: Size(width, height),
+            textScaler: TextScaler.noScaling,
+          ),
           child: child,
         ),
       ),

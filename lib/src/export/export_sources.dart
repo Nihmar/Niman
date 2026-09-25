@@ -9,6 +9,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/html_page.dart';
@@ -66,6 +67,33 @@ abstract final class ExportSources {
       final uri = await pictureDataUri(path);
       if (uri == null) continue;
       images[target] = uri;
+    }
+    return images;
+  }
+
+  /// The pictures [text] shows, resolved and read, by the target as
+  /// written: the bytes themselves, for a caller that decodes and draws
+  /// them itself — the raster PDF fallback, which has no browser to hand
+  /// the page to (#63, H3).
+  static Future<Map<String, Uint8List>> imageBytes({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final images = <String, Uint8List>{};
+    for (final target in pictureTargets(text)) {
+      final path = await _picturePath(target, notePath, root, linkSource);
+      if (path == null) {
+        _log.warning('picture not found: "$target" in $notePath');
+        continue;
+      }
+      if (imageMime(p.extension(path).toLowerCase()) == null) continue;
+      try {
+        images[target] = await Isolate.run(() => File(path).readAsBytesSync());
+      } on FileSystemException catch (error) {
+        _log.warning('picture skipped ($path): $error');
+      }
     }
     return images;
   }

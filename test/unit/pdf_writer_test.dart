@@ -101,6 +101,20 @@ void main() {
     );
   });
 
+  test('the page tree points at the pages, not at their content', () {
+    final first = PdfPageImage(width: 2, height: 2, rgb: _rgb(10));
+    final second = PdfPageImage(width: 2, height: 2, rgb: _rgb(100));
+    final pdf = writePdf(<PdfPageImage>[first, second]);
+    final text = latin1.decode(pdf);
+    // Object 3 is the first page, 6 the second: a kid that pointed at 4
+    // would name the first page's content stream, and no viewer would find
+    // a page at all.
+    expect(text, contains('/Kids [3 0 R 6 0 R ]'));
+    for (final object in <int>[3, 6]) {
+      expect(text, contains('$object 0 obj\n<< /Type /Page '));
+    }
+  });
+
   test('an image is fitted into the content box, not stretched', () {
     // A wide picture in a square content box is limited by the width.
     final wide = PdfPageImage(width: 4, height: 2, rgb: Uint8List(24));

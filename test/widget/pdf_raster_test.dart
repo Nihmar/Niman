@@ -2,6 +2,7 @@
 // the page count, and the file the printer writes.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,20 @@ import 'package:niman/src/export/pdf_raster.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:path/path.dart' as p;
+
+/// A 2×2 PNG, every pixel red: the picture the fallback has to draw.
+const String _redPng =
+    'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAE0lEQVR4nGP4'
+    'z8DwnwGM/zMwAAAf7gP9NRsAMwAAAABJRU5ErkJggg==';
+
+/// The pixels of the PDF's one image stream, RGB per pixel.
+Uint8List _pageRgb(Uint8List pdf) {
+  final text = latin1.decode(pdf);
+  final image = text.indexOf('/Subtype /Image');
+  final start = text.indexOf('stream\n', image) + 'stream\n'.length;
+  final end = text.indexOf('\nendstream', start);
+  return Uint8List.fromList(ZLibCodec().decode(pdf.sublist(start, end)));
+}
 
 void main() {
   late MarkdownTheme theme;
@@ -70,6 +85,29 @@ void main() {
     final text = latin1.decode(bytes!);
     final count = RegExp(r'/Count (\d+)').firstMatch(text)!.group(1);
     expect(int.parse(count!), greaterThan(1));
+  });
+
+  testWidgets('a picture handed in is drawn on the page', (tester) async {
+    await pumpTheme(tester);
+    final bytes = await tester.runAsync(
+      () => rasterPdf(
+        text: 'A red picture:\n\n![red](red.png)\n',
+        theme: theme,
+        mathCache: cache,
+        images: <String, Uint8List>{'red.png': base64Decode(_redPng)},
+      ),
+    );
+    final rgb = _pageRgb(bytes!);
+    // A red pixel is somewhere on the page: without the decode-and-draw the
+    // picture would be the alt text, and no pixel would be red (H3).
+    var red = false;
+    for (var at = 0; at + 2 < rgb.length; at += 3) {
+      if (rgb[at] > 200 && rgb[at + 1] < 60 && rgb[at + 2] < 60) {
+        red = true;
+        break;
+      }
+    }
+    expect(red, isTrue);
   });
 
   testWidgets('the printer writes the file', (tester) async {
