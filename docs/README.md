@@ -7,7 +7,8 @@ Two audiences, two folders:
   sync, platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
   instructions, code conventions, release process, the note history,
-  WebDAV sync and workspace (open notes and tabs) design, and
+  WebDAV sync and workspace (open notes and tabs) design, the EPUB
+  reader and the annotations of PDFs and books, and
   [unified-surface.md](dev/unified-surface.md), the research and design
   for replacing the three Markdown surfaces with one widget (a proposal,
   not built).

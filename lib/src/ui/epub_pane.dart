@@ -13,6 +13,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
@@ -28,13 +29,14 @@ import 'package:niman/src/reading/reading_tracker.dart';
 import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/epub_bar.dart';
 import 'package:niman/src/ui/epub_contents_sheet.dart';
+import 'package:niman/src/ui/epub_links.dart';
+import 'package:niman/src/ui/epub_paragraph_menu.dart';
+import 'package:niman/src/ui/epub_places.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/place_link_button.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// The folder of the app's cache the books' pictures go under.
 Future<String> _epubCacheDir() async =>
@@ -53,6 +55,7 @@ final class EpubPane extends StatefulWidget {
     this.anchor,
     this.reloadToken = 0,
     this.linkType = LinkType.wikilink,
+    this.onAnnotate,
     super.key,
   });
 
@@ -88,6 +91,10 @@ final class EpubPane extends StatefulWidget {
 
   /// How the library writes links, for the one to the place being read.
   final LinkType linkType;
+
+  /// Annotates a paragraph of the book in its companion note (#284); null
+  /// offers no annotating.
+  final void Function(Annotation annotation)? onAnnotate;
 
   @override
   State<EpubPane> createState() => EpubPaneState();
@@ -217,30 +224,6 @@ final class EpubPaneState extends State<EpubPane> {
     if (here != null) _reading.moved(here);
   }
 
-  void _onTapLink(String text, String? href) {
-    if (href == null || href.isEmpty) return;
-    if (href.startsWith('${EpubDocument.linkScheme}:')) {
-      final line = _document?.lineOfLink(href);
-      if (line != null) _readKey.currentState?.jumpToLine(line);
-      return;
-    }
-    final uri = Uri.tryParse(href);
-    if (uri == null || !uri.hasScheme) return;
-    unawaited(_launch(uri));
-  }
-
-  Future<void> _launch(Uri uri) async {
-    var launched = false;
-    try {
-      launched = await launchUrl(uri);
-    } on Object {
-      launched = false;
-    }
-    if (launched || !mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(AppStrings.openLinkFailed)));
-  }
-
   Future<void> _showContents() async {
     final document = _document;
     if (document == null) return;
@@ -249,23 +232,34 @@ final class EpubPaneState extends State<EpubPane> {
     if (line != null) _readKey.currentState?.jumpToLine(line);
   }
 
-  /// The place being read, for a link to it: the line at the top of the
-  /// view, or the next one when the view is mostly past it.
-  PlaceToLink? _here() {
-    final document = _document;
-    final path = widget.positions?.keyOf(widget.path);
-    final anchor = _readKey.currentState?.topAnchor;
-    if (document == null || path == null || anchor == null) return null;
-    final line = anchor.line + (anchor.fraction > 0.5 ? 1 : 0);
-    final place = document.locationAt(line, 0);
-    if (place == null) return null;
-    final name = p.basenameWithoutExtension(widget.path);
-    final entry = document.entryAt(line);
-    return (
-      path: path,
-      place: place,
-      label: entry == -1 ? name : '$name, ${document.contents[entry].title}',
+  /// The book's places, as links and annotations name them.
+  EpubPlaces get _places => EpubPlaces(
+    path: widget.path,
+    positions: widget.positions,
+    document: _document,
+    view: _readKey.currentState,
+  );
+
+  void _annotate(Annotation? annotation) {
+    if (annotation != null) widget.onAnnotate?.call(annotation);
+  }
+
+  /// A paragraph's menu: annotate it, or copy a link to it.
+  Future<void> _paragraphMenu(BlockMenuRequest request) async {
+    final action = await showEpubParagraphMenu(
+      context,
+      request.position,
+      annotate: widget.onAnnotate != null,
     );
+    if (!mounted) return;
+    switch (action) {
+      case EpubParagraphAction.annotate:
+        _annotate(_places.annotation(request.line, request.text));
+      case EpubParagraphAction.copyLink:
+        final at = _places.at(request.line);
+        if (at != null) await copyPlaceLink(context, at, widget.linkType);
+      case null:
+    }
   }
 
   @override
@@ -300,7 +294,15 @@ final class EpubPaneState extends State<EpubPane> {
             onContents: document == null || document.contents.isEmpty
                 ? null
                 : () => unawaited(_showContents()),
-            here: document == null || widget.positions == null ? null : _here,
+            here: document == null || widget.positions == null
+                ? null
+                : () => _places.here(),
+            onAnnotate:
+                document == null ||
+                    widget.positions == null ||
+                    widget.onAnnotate == null
+                ? null
+                : () => _annotate(_places.annotationHere()),
           ),
         ],
       ),
@@ -323,8 +325,17 @@ final class EpubPaneState extends State<EpubPane> {
       mathCache: _mathCache,
       controller: _scroll,
       column: widget.column,
-      onTapLink: _onTapLink,
+      onTapLink: (text, href) => followEpubLink(
+        context,
+        _document,
+        href,
+        jumpToLine: (line) => _readKey.currentState?.jumpToLine(line),
+      ),
       embedResolver: (target) async => document.pictures[target],
+      // A paragraph links, and annotates, only in a library.
+      onBlockMenu: widget.positions == null
+          ? null
+          : (request) => unawaited(_paragraphMenu(request)),
     ),
   );
 }

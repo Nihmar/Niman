@@ -36,8 +36,13 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
+
+/// A block a menu is asked for: its first line, its text, and where the
+/// pointer is, globally.
+typedef BlockMenuRequest = ({int line, String text, Offset position});
 
 /// A note, read.
 final class MarkdownReadView extends StatefulWidget {
@@ -54,8 +59,15 @@ final class MarkdownReadView extends StatefulWidget {
     this.embedResolver,
     this.knownScan,
     this.onToggleTask,
+    this.onBlockMenu,
     super.key,
   });
+
+  /// Called when a block is long-pressed, or clicked with the secondary
+  /// button, with its first line, its text ([plainTextOf]) and where the
+  /// pointer is: a book's paragraph is annotated this way (#284). Null
+  /// leaves the blocks to their own gestures.
+  final void Function(BlockMenuRequest request)? onBlockMenu;
 
   /// Called with a task item's line, in [buffer], when its checkbox is
   /// tapped: the pane reads a copy of the note, so ticking it is the note
@@ -272,6 +284,19 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       }
     }
     return low;
+  }
+
+  /// The block holding source [line]: its first line and its text
+  /// ([plainTextOf]); null when there is none there, or none drawn yet.
+  ({int line, String text})? blockTextAt(int line) {
+    final shown = _shown;
+    final index = _blockIndexAt(line);
+    if (shown == null || index == null) return null;
+    final block = _blocks[index];
+    return (
+      line: block.startLine,
+      text: plainTextOf(widget.parser.of(block, shown)),
+    );
   }
 
   /// The scroll the view is moved by: the shell's, or the view's own.
@@ -868,8 +893,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         theme: _theme ?? _fallbackTheme,
       );
     }
-    return BlockView(
-      parsed: widget.parser.of(block, _shown!),
+    final parsed = widget.parser.of(block, _shown!);
+    final view = BlockView(
+      parsed: parsed,
       theme: _theme ?? _fallbackTheme,
       mathCache: widget.mathCache,
       availableWidth: availableWidth,
@@ -878,6 +904,18 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       embedResolver: widget.embedResolver,
       onToggleTask: widget.onToggleTask,
       scope: widget.parser.scope,
+    );
+    final menu = widget.onBlockMenu;
+    if (menu == null) return view;
+    void ask(Offset position) => menu((
+      line: block.startLine,
+      text: plainTextOf(parsed),
+      position: position,
+    ));
+    return GestureDetector(
+      onLongPressStart: (details) => ask(details.globalPosition),
+      onSecondaryTapUp: (details) => ask(details.globalPosition),
+      child: view,
     );
   }
 }
