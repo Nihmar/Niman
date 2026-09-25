@@ -31,6 +31,7 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/image_import.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/attachment_embed.dart';
+import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -1435,25 +1436,12 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// Resolves an `![[…]]` embed: library-root-relative first (the
-  /// attachments/assets layout), then relative to the note's own folder,
-  /// then by unique name through the link index (`![[foo.png]]` resolving
-  /// to `Attachments/foo.png`, the Obsidian layout).
-  Future<String?> _resolveEmbed(String target) async {
+  /// Resolves an `![[…]]` embed through the shared rule (#24): library
+  /// root first, then the note's own folder, then the link index.
+  Future<String?> _resolveEmbed(String target) {
     final root = widget.libraryRoot;
-    if (root == null || target.isEmpty) return null;
-    var candidate = File(p.join(root, target));
-    if (candidate.existsSync()) return candidate.path;
-    candidate = File(p.join(p.dirname(widget.path), target));
-    if (candidate.existsSync()) return candidate.path;
-    final source = widget.linkSource;
-    if (source == null) return null;
-    final resolved = await source.resolveWiki(target);
-    if (resolved is ResolvedNote) {
-      final viaIndex = File(p.join(root, resolved.note.path));
-      if (viaIndex.existsSync()) return viaIndex.path;
-    }
-    return null;
+    if (root == null) return Future<String?>.value();
+    return resolveEmbedPath(target, widget.path, root, widget.linkSource);
   }
 
   /// Opens a link token's target: [raw] is the token as written, `[[…]]` for
