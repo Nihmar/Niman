@@ -138,4 +138,40 @@ void main() {
     );
     expect(await companions.of('Books/Dune.pdf'), ['a.md', 'b.md']);
   });
+
+  group('where a file was annotated (#285)', () {
+    test("its companions' links to it, not to other files", () async {
+      await write(on('Books/Dune.pdf', 3));
+      await write(on('Books/Dune.pdf', 9));
+      await ops.createNote(
+        parentPath: '',
+        name: 'By hand',
+        content:
+            '---\nannotates: "[[Dune.pdf]]"\n---\n'
+            'See [p. 5](Books/Dune.pdf#page=5) and [[Emma.epub#page=2]].\n',
+      );
+      // A note that is no companion marks nothing.
+      await ops.createNote(
+        parentPath: '',
+        name: 'Elsewhere',
+        content: '[[Books/Dune.pdf#page=7]]\n',
+      );
+      final marks = await companions.marksOf('Books/Dune.pdf');
+      expect(
+        [for (final m in marks) (m.note, (m.place as PdfLocation).page)],
+        [
+          ('Annotations/Dune - Annotation.md', 3),
+          ('Annotations/Dune - Annotation.md', 9),
+          ('By hand.md', 5),
+        ],
+      );
+      final text = read('Annotations/Dune - Annotation.md');
+      expect(text.substring(marks[1].offset), startsWith('## p. 9'));
+      expect(marks[1].title, 'p. 9');
+    });
+
+    test('a file with no companion has no marks', () async {
+      expect(await companions.marksOf('Books/Dune.pdf'), isEmpty);
+    });
+  });
 }
