@@ -1541,6 +1541,16 @@ final class LatvianStrings extends Strings {
   @override
   String get formatNoteDone => 'Piezīme tika sakārtota.';
   @override
+  String get exportTitle => 'Eksportēt';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksportēts uz $place';
+  @override
+  String exportFailed(Object error) => 'Eksportēšana neizdevās: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override
   String get lintRulesTitle => 'Markdown noteikumi';

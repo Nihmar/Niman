@@ -1557,6 +1557,16 @@ final class RomanianStrings extends Strings {
   @override
   String get formatNoteDone => 'Nota a fost aranjată.';
   @override
+  String get exportTitle => 'Exportă';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportat în $place';
+  @override
+  String exportFailed(Object error) => 'Exportul a eșuat: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
   @override
   String get lintRulesTitle => 'Reguli Markdown';

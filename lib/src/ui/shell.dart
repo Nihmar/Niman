@@ -20,6 +20,8 @@ import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/export/export_files.dart';
+import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -40,6 +42,7 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
@@ -301,6 +304,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 shortcuts: ref.read(shortcutServiceProvider),
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
+                saveExportFile: ref.read(saveExportFileProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -331,6 +335,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.shortcuts,
     required this.todoSourceFactory,
     required this.unsavedTracker,
+    required this.saveExportFile,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -369,6 +374,9 @@ final class _LibraryShell extends StatefulWidget {
   /// The open notes' unsaved edits, which the window's close guard reads
   /// (T-PP-11); passed down to every [NoteView].
   final UnsavedTracker unsavedTracker;
+
+  /// Where an export is written (#24); the tests hand in their own.
+  final SaveExportFile saveExportFile;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -1997,6 +2005,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.palette => _openPalette(),
         NoteMenuAction.format => _formatNote(),
+        NoteMenuAction.export => _exportNote(path),
         NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
@@ -2665,6 +2674,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
       AppCommand.formatNote: () => unawaited(_formatNote()),
+      AppCommand.exportNote: () => unawaited(_exportShownNote()),
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
@@ -2852,6 +2862,93 @@ final class _LibraryShellState extends State<_LibraryShell>
           .showSnackBar(SnackBar(content: Text(AppStrings.formatNoteDone)));
     });
   }
+
+  /// Exports the note at [path] as a file (#24): asks which format, reads
+  /// the note (the buffer's edits first) and asks where to save it.
+  Future<void> _exportNote(String path) async {
+    final format = await _chooseExportFormat();
+    if (format == null || !mounted) return;
+    final ops = widget.controller.ops;
+    final root = widget.controller.root;
+    if (ops == null || root == null) return;
+    final save = widget.saveExportFile;
+    await _guard(() async {
+      // What is exported is the note as it stands, not as it was last
+      // written: the editors' pending edits land first.
+      await widget.unsavedTracker.saveAll();
+      final note = await ops.find(path);
+      final text = await ops.readNote(path);
+      final payload = await exportNote(
+        text: text,
+        title: note == null ? p.basename(path) : displayNameOf(note),
+        path: path,
+        root: root,
+        language: AppLanguages.resolved.id,
+        format: format,
+        linkSource: _linkSource,
+      );
+      final String? place;
+      try {
+        place = await save(
+          name: payload.name,
+          bytes: payload.bytes,
+          mimeType: payload.mimeType,
+          dialogTitle: AppStrings.exportTitle,
+        );
+      } on Object catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppStrings.exportFailed(error))),
+          );
+        }
+        return;
+      }
+      if (place == null || !mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AppStrings.exportDone(place))));
+    });
+  }
+
+  /// Exports the note showing, from the palette (#24).
+  Future<void> _exportShownNote() async {
+    final path = _shownNote;
+    if (path == null) return;
+    await _exportNote(path);
+  }
+
+  /// Asks which format to export in: the wide window's dialog, the phone's
+  /// sheet.
+  Future<ExportFormat?> _chooseExportFormat() {
+    final formats = <Widget>[
+      for (final format in ExportFormat.values)
+        ListTile(
+          key: Key('export-format-${format.name}'),
+          title: Text(_exportFormatName(format)),
+          onTap: () => Navigator.of(context).pop(format),
+        ),
+    ];
+    if (_wide) {
+      return showDialog<ExportFormat>(
+        context: context,
+        builder: (context) => AlertDialog(
+          key: const Key('export-dialog'),
+          title: Text(AppStrings.exportTitle),
+          content: Column(mainAxisSize: MainAxisSize.min, children: formats),
+        ),
+      );
+    }
+    return showActionSheet<ExportFormat>(
+      context,
+      title: AppStrings.exportTitle,
+      sheetKey: const Key('export-sheet'),
+      items: (context) => formats,
+    );
+  }
+
+  static String _exportFormatName(ExportFormat format) => switch (format) {
+    ExportFormat.markdown => AppStrings.exportFormatMarkdown,
+    ExportFormat.html => AppStrings.exportFormatHtml,
+  };
 
   /// Tidies the note at absolute [path], edited and now closed, when the
   /// library asks for it ([ShellEditorSettings.tidyOnClose]).

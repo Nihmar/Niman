@@ -1539,6 +1539,16 @@ final class SlovenianStrings extends Strings {
   @override
   String get formatNoteDone => 'Zapisek je bil pospravljen.';
   @override
+  String get exportTitle => 'Izvozi';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Izvoženo v $place';
+  @override
+  String exportFailed(Object error) => 'Izvoz ni uspel: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override
   String get lintRulesTitle => 'Pravila Markdowna';

@@ -1544,6 +1544,16 @@ final class SlovakStrings extends Strings {
   @override
   String get formatNoteDone => 'Poznámka bola upratená.';
   @override
+  String get exportTitle => 'Exportovať';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportované do $place';
+  @override
+  String exportFailed(Object error) => 'Export zlyhal: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override
   String get lintRulesTitle => 'Pravidlá Markdownu';

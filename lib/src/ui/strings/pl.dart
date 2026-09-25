@@ -1564,6 +1564,16 @@ final class PolishStrings extends Strings {
   @override
   String get formatNoteDone => 'Notatka została uporządkowana.';
   @override
+  String get exportTitle => 'Eksportuj';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Wyeksportowano do $place';
+  @override
+  String exportFailed(Object error) => 'Eksport nie powiódł się: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override
   String get lintRulesTitle => 'Reguły Markdown';

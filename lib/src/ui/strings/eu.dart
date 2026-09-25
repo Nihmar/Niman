@@ -1553,6 +1553,16 @@ final class BasqueStrings extends Strings {
   @override
   String get formatNoteDone => 'Oharra txukundu da.';
   @override
+  String get exportTitle => 'Esportatu';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Hona esportatu: $place';
+  @override
+  String exportFailed(Object error) => 'Esportazioak huts egin du: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override
   String get lintRulesTitle => 'Markdown arauak';

@@ -1554,6 +1554,16 @@ final class PortugueseStrings extends Strings {
   @override
   String get formatNoteDone => 'A nota foi arrumada.';
   @override
+  String get exportTitle => 'Exportar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportado para $place';
+  @override
+  String exportFailed(Object error) => 'A exportação falhou: $error';
+  @override
   String get formatNoteAlreadyTidy => 'A nota já estava arrumada.';
   @override
   String get lintRulesTitle => 'Regras de Markdown';

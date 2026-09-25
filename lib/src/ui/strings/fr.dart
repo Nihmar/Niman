@@ -1585,6 +1585,16 @@ final class FrenchStrings extends Strings {
   @override
   String get formatNoteDone => 'La note a été rangée.';
   @override
+  String get exportTitle => 'Exporter';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exporté vers $place';
+  @override
+  String exportFailed(Object error) => 'Échec de l’export : $error';
+  @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
   @override
   String get lintRulesTitle => 'Règles Markdown';

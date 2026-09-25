@@ -1555,6 +1555,16 @@ final class HungarianStrings extends Strings {
   @override
   String get formatNoteDone => 'A jegyzet rendbe lett téve.';
   @override
+  String get exportTitle => 'Exportálás';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportálva ide: $place';
+  @override
+  String exportFailed(Object error) => 'Az exportálás nem sikerült: $error';
+  @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override
   String get lintRulesTitle => 'Markdown-szabályok';

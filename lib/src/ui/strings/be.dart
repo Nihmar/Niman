@@ -1545,6 +1545,16 @@ final class BelarusianStrings extends Strings {
   @override
   String get formatNoteDone => 'Нататка ўпарадкавана.';
   @override
+  String get exportTitle => 'Экспарт';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Экспартавана ў $place';
+  @override
+  String exportFailed(Object error) => 'Не ўдалося экспартаваць: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';
   @override
   String get lintRulesTitle => 'Правілы Markdown';

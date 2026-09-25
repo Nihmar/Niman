@@ -1563,6 +1563,16 @@ final class ItalianStrings extends Strings {
   @override
   String get formatNoteDone => 'Nota sistemata.';
   @override
+  String get exportTitle => 'Esporta';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Esportato in $place';
+  @override
+  String exportFailed(Object error) => 'Esportazione non riuscita: $error';
+  @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override
   String get lintRulesTitle => 'Regole Markdown';

@@ -1539,6 +1539,16 @@ final class DanishStrings extends Strings {
   @override
   String get formatNoteDone => 'Noten blev ryddet op.';
   @override
+  String get exportTitle => 'Eksportér';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksporteret til $place';
+  @override
+  String exportFailed(Object error) => 'Eksport mislykkedes: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
   @override
   String get lintRulesTitle => 'Markdown-regler';

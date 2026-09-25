@@ -1544,6 +1544,16 @@ final class LithuanianStrings extends Strings {
   @override
   String get formatNoteDone => 'Pastaba sutvarkyta.';
   @override
+  String get exportTitle => 'Eksportuoti';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksportuota į $place';
+  @override
+  String exportFailed(Object error) => 'Eksportuoti nepavyko: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
   @override
   String get lintRulesTitle => 'Markdown taisyklės';

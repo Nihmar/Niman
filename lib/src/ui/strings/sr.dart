@@ -1551,6 +1551,16 @@ final class SerbianStrings extends Strings {
   @override
   String get formatNoteDone => 'Белешка је сложена.';
   @override
+  String get exportTitle => 'Извези';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Извезено у $place';
+  @override
+  String exportFailed(Object error) => 'Извоз није успео: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

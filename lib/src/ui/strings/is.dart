@@ -1543,6 +1543,16 @@ final class IcelandicStrings extends Strings {
   @override
   String get formatNoteDone => 'Tekið var til í glósunni.';
   @override
+  String get exportTitle => 'Flytja út';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Flutt út í $place';
+  @override
+  String exportFailed(Object error) => 'Útflutningur mistókst: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override
   String get lintRulesTitle => 'Markdown-reglur';

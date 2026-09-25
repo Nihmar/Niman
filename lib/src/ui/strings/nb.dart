@@ -1533,6 +1533,16 @@ final class NorwegianStrings extends Strings {
   @override
   String get formatNoteDone => 'Notatet ble ryddet.';
   @override
+  String get exportTitle => 'Eksporter';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksportert til $place';
+  @override
+  String exportFailed(Object error) => 'Eksporten mislyktes: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override
   String get lintRulesTitle => 'Markdown-regler';

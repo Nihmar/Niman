@@ -1550,6 +1550,16 @@ final class BosnianStrings extends Strings {
   @override
   String get formatNoteDone => 'Bilješka je posložena.';
   @override
+  String get exportTitle => 'Izvoz';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Izvezeno u $place';
+  @override
+  String exportFailed(Object error) => 'Izvoz nije uspio: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
   String get lintRulesTitle => 'Markdown pravila';

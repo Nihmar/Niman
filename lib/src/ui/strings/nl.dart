@@ -1564,6 +1564,16 @@ final class DutchStrings extends Strings {
   @override
   String get formatNoteDone => 'De notitie is opgeruimd.';
   @override
+  String get exportTitle => 'Exporteren';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Geëxporteerd naar $place';
+  @override
+  String exportFailed(Object error) => 'Export mislukt: $error';
+  @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override
   String get lintRulesTitle => 'Markdown-regels';

@@ -1527,6 +1527,16 @@ final class EstonianStrings extends Strings {
   @override
   String get formatNoteDone => 'Märge korrastati.';
   @override
+  String get exportTitle => 'Ekspordi';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksporditud asukohta $place';
+  @override
+  String exportFailed(Object error) => 'Eksport ebaõnnestus: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override
   String get lintRulesTitle => 'Markdowni reeglid';

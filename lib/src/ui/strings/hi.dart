@@ -1518,6 +1518,16 @@ final class HindiStrings extends Strings {
   @override
   String get formatNoteDone => 'नोट व्यवस्थित कर दिया गया।';
   @override
+  String get exportTitle => 'निर्यात';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '$place पर निर्यात किया';
+  @override
+  String exportFailed(Object error) => 'निर्यात विफल: $error';
+  @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
   @override
   String get lintRulesTitle => 'Markdown नियम';

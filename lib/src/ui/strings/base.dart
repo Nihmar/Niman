@@ -734,6 +734,11 @@ abstract base class Strings {
   String get formatNoteTitle;
   String get formatNoteDone;
   String get formatNoteAlreadyTidy;
+  String get exportTitle;
+  String get exportFormatMarkdown;
+  String get exportFormatHtml;
+  String exportDone(String place);
+  String exportFailed(Object error);
   String get tidyOnCloseTitle;
   String get tidyOnCloseSubtitle;
   String get lintRulesTitle;

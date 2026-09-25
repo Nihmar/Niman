@@ -1413,6 +1413,16 @@ final class ChineseStrings extends Strings {
   @override
   String get formatNoteDone => '已整理该笔记。';
   @override
+  String get exportTitle => '导出';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '已导出到 $place';
+  @override
+  String exportFailed(Object error) => '导出失败：$error';
+  @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override
   String get lintRulesTitle => 'Markdown 规则';
