@@ -61,3 +61,7 @@ final pickExportFolderProvider = Provider<PickExportFolder>(
 final pdfPrinterProvider = Provider<PdfPrinter>(
   (ref) => const ProcessPdfPrinter(),
 );
+
+/// The engine a folder's PDF zip prints with, or null when this machine
+/// has none — found once, so the export chooser can leave the format out.
+final pdfEngineProvider = FutureProvider<String?>((ref) => findPdfEngine());

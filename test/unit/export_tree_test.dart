@@ -94,6 +94,19 @@ void main() {
     expect(a, isNot(contains('Top.html')));
   });
 
+  test('a PDF folder needs an engine', () async {
+    await expectLater(
+      TreeExport.run(
+        dir: notes,
+        zipPath: zip,
+        format: ExportTreeFormat.pdf,
+        language: 'en',
+      ),
+      throwsA(isA<TreeExportNoEngine>()),
+    );
+    expect(File(zip).existsSync(), isFalse);
+  });
+
   test('a cancelled export leaves no zip behind', () async {
     // Enough entries that the isolate is still writing when the cancel
     // lands.

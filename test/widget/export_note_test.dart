@@ -39,6 +39,7 @@ void main() {
   Future<void> pumpShell(
     WidgetTester tester, {
     Size size = const Size(1400, 900),
+    String? pdfEngine,
   }) async {
     setSurfaceSize(tester, size);
     await tester.pumpWidget(
@@ -69,6 +70,8 @@ void main() {
             pickedTitle = dialogTitle;
             return pickedFolder;
           }),
+          // The engine search is the machine's; the tests answer for it.
+          pdfEngineProvider.overrideWith((ref) => pdfEngine),
         ],
         child: const NimanApp(),
       ),
@@ -200,6 +203,33 @@ void main() {
     await settle(tester);
     expect(pickedTitle, AppStrings.exportTitle);
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('a folder is offered PDF where an engine is', (tester) async {
+    await pumpShell(tester, pdfEngine: '/usr/bin/chromium');
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+    await tester.longPress(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-export-folder')));
+    await settle(tester);
+    expect(find.byKey(const Key('export-tree-pdf')), findsOne);
+    await tester.tapAt(const Offset(4, 4));
+    await settle(tester);
+  });
+
+  testWidgets('a folder is not offered PDF where no engine is', (tester) async {
+    await pumpShell(tester);
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+    await tester.longPress(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-export-folder')));
+    await settle(tester);
+    expect(find.byKey(const Key('export-tree-pdf')), findsNothing);
+    expect(find.byKey(const Key('export-tree-markdown')), findsOne);
+    await tester.tapAt(const Offset(4, 4));
+    await settle(tester);
   });
 
   testWidgets('the palette exports the library', (tester) async {
