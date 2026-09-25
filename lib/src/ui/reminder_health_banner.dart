@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/ui/reminder_health_message.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// A banner over the todo list describing [ReminderService.health].
@@ -50,11 +51,11 @@ final class _ReminderHealthBannerState extends State<ReminderHealthBanner> {
             color: scheme.onErrorContainer,
           ),
           content: Text(
-            _message(health),
+            reminderHealthMessage(health),
             style: TextStyle(color: scheme.onErrorContainer),
           ),
           actions: [
-            if (_fixable(health))
+            if (reminderHealthFixable(health))
               TextButton(
                 key: const Key('todo-reminder-health-fix'),
                 onPressed: () => unawaited(widget.service.openHealthSettings()),
@@ -70,18 +71,4 @@ final class _ReminderHealthBannerState extends State<ReminderHealthBanner> {
       },
     );
   }
-
-  /// Whether a system screen can fix [health].
-  ///
-  /// Exact alarms cannot: the privilege is auto-granted, so a build that
-  /// still refuses it offers no toggle either.
-  static bool _fixable(ReminderHealth health) =>
-      health != ReminderHealth.inexactOnly;
-
-  static String _message(ReminderHealth health) => switch (health) {
-    ReminderHealth.notificationsBlocked => AppStrings.todoReminderBlocked,
-    ReminderHealth.batteryRestricted => AppStrings.todoReminderBattery,
-    ReminderHealth.inexactOnly => AppStrings.todoReminderInexact,
-    ReminderHealth.ok => '',
-  };
 }

@@ -37,11 +37,13 @@ are the theme's, under **Task lists (todo.txt)** in the theme editor
 Add `rem:2026-09-20T09:00` to a task and Niman schedules an exact alarm
 in local wall-clock time. It fires with the screen off, the app in the
 background, or the process killed (Android). The app warns when
-notification or battery-optimization settings could block delivery.
-On Android, the battery warning's **Open settings** goes straight to
-Niman's battery page: pick **Unrestricted**, and turn on **Allow
-background activity** if the ROM shows it — an app that is restrictive
-there is not started in the background, so an alarm cannot fire.
+notification or battery-optimization settings could block delivery:
+the banner over the task list, and — as soon as a reminder is set — the
+dialog that set it, both with an **Open settings** action.
+On Android, that action goes straight to Niman's battery page: pick
+**Unrestricted**, and turn on **Allow background activity** if the ROM
+shows it — an app that is restrictive there is not started in the
+background, so an alarm cannot fire.
 
 Notification text is the task's prose without `key:value` tags (and
 without `+`/`@`/`#` markers unless the library's `reminderShowTokens`

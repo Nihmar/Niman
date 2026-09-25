@@ -16,6 +16,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
@@ -424,12 +425,15 @@ final class _TodoTabState extends State<TodoTab> {
 
   /// Opens the edit dialog and applies the result to the visible file.
   Future<void> _edit(TodoEntry entry) async {
+    final reminders = widget.reminders;
     final line = await showTodoTaskDialog(
       context,
       initial: entry.task,
       today: _today,
       knownTokens: _knownTokens(),
       onDelete: () => unawaited(_delete(entry)),
+      health: reminders?.health.value ?? ReminderHealth.ok,
+      onOpenReminderSettings: reminders?.openHealthSettings,
     );
     if (line == null || !mounted) {
       return;

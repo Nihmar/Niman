@@ -25,6 +25,8 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/ui/reminder_health_message.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/todo_date_panel.dart';
 
@@ -40,6 +42,8 @@ Future<String?> showTodoTaskDialog(
   TodoTask? initial,
   Set<String> knownTokens = const <String>{},
   VoidCallback? onDelete,
+  ReminderHealth health = ReminderHealth.ok,
+  Future<bool> Function()? onOpenReminderSettings,
 }) {
   return showDialog<String>(
     context: context,
@@ -48,6 +52,8 @@ Future<String?> showTodoTaskDialog(
       today: today,
       knownTokens: knownTokens,
       onDelete: initial == null ? null : onDelete,
+      health: health,
+      onOpenReminderSettings: onOpenReminderSettings,
     ),
   );
 }
@@ -61,12 +67,23 @@ final class _TodoTaskDialog extends StatefulWidget {
     required this.today,
     required this.knownTokens,
     required this.onDelete,
+    required this.health,
+    required this.onOpenReminderSettings,
   });
 
   final TodoTask? initial;
   final DateTime today;
   final Set<String> knownTokens;
   final VoidCallback? onDelete;
+
+  /// The reminder preconditions as last known; a failing one is warned
+  /// about under the reminder row, when one is set. A reminder scheduled
+  /// silently is the whole bug this guards (T-TD-07).
+  final ReminderHealth health;
+
+  /// Opens the system screen that fixes [health]; null leaves the action
+  /// out.
+  final Future<bool> Function()? onOpenReminderSettings;
 
   @override
   State<_TodoTaskDialog> createState() => _TodoTaskDialogState();
@@ -540,6 +557,11 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
               initial: _reminder ?? widget.today,
               onPicked: _setReminder,
             ),
+          if (_reminder != null && widget.health != ReminderHealth.ok)
+            _ReminderWarning(
+              health: widget.health,
+              onOpenSettings: widget.onOpenReminderSettings,
+            ),
         ],
       ),
     );
@@ -759,4 +781,51 @@ enum _DatePanel {
 
   /// The reminder's calendar and time.
   reminder,
+}
+
+/// A warning under the reminder row: a reminder is set while a
+/// precondition fails, so it would be scheduled silently and never reach
+/// the user (T-TD-07). The same sentence the Todo tab's banner shows,
+/// with the way to the system screen that fixes it.
+final class _ReminderWarning extends StatelessWidget {
+  const new({required this.health, required this.onOpenSettings});
+
+  final ReminderHealth health;
+  final Future<bool> Function()? onOpenSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final open = onOpenSettings;
+    return Padding(
+      key: const Key('todo-dialog-reminder-warning'),
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.warning_amber_outlined,
+              size: 16,
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              reminderHealthMessage(health),
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          if (reminderHealthFixable(health) && open != null)
+            TextButton(
+              key: const Key('todo-dialog-reminder-settings'),
+              onPressed: () => unawaited(open()),
+              child: Text(AppStrings.todoReminderFixAction),
+            ),
+        ],
+      ),
+    );
+  }
 }

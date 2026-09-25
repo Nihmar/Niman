@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 
 void main() {
@@ -202,6 +204,70 @@ void main() {
       await tester.tap(find.byKey(const Key('todo-dialog-due')));
       await tester.pumpAndSettle();
       expect(find.byType(DatePickerDialog), findsOne);
+    });
+  });
+
+  // T-TD-07: a reminder scheduled while a precondition fails is warned
+  // about where it is set, not only in the Todo tab's banner.
+  group('a reminder that cannot reach the user', () {
+    Future<ValueNotifier<int>> openWithHealth(
+      WidgetTester tester,
+      ReminderHealth health,
+    ) async {
+      tester.view.physicalSize = const Size(500, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final opened = ValueNotifier<int>(0);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showTodoTaskDialog(
+                  context,
+                  today: DateTime(2026, 9, 7),
+                  initial: parseTodoLine('call rem:2026-09-08T09:00'),
+                  health: health,
+                  onOpenReminderSettings: () async {
+                    opened.value++;
+                    return true;
+                  },
+                ),
+                child: const Text('open dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open dialog'));
+      await tester.pumpAndSettle();
+      return opened;
+    }
+
+    testWidgets('is warned about under the reminder, with a way out', (
+      tester,
+    ) async {
+      final opened = await openWithHealth(
+        tester,
+        ReminderHealth.batteryRestricted,
+      );
+
+      expect(find.byKey(const Key('todo-dialog-reminder-warning')), findsOne);
+      final fix = find.byKey(const Key('todo-dialog-reminder-settings'));
+      expect(fix, findsOne);
+      await tester.tap(fix);
+      await tester.pump();
+      expect(opened.value, 1);
+    });
+
+    testWidgets('is not warned about while the preconditions hold', (
+      tester,
+    ) async {
+      await openWithHealth(tester, ReminderHealth.ok);
+      expect(
+        find.byKey(const Key('todo-dialog-reminder-warning')),
+        findsNothing,
+      );
     });
   });
 }
