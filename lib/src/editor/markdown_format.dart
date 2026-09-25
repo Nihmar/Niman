@@ -11,10 +11,10 @@
 /// This is the tidying, and it is deliberately a small one. It works on
 /// the note's own lines rather than re-rendering a parsed tree, because
 /// a formatter that rewrites what it did not understand is a formatter
-/// that loses things: fenced code, tables, math, frontmatter and HTML
-/// pass through untouched, and so does the prose inside a paragraph —
-/// no reflowing, no rewrapping, nothing that would make a diff of a note
-/// unreadable.
+/// that loses things: the code inside a fence, tables, math, frontmatter
+/// and HTML pass through untouched, and so does the prose inside a
+/// paragraph — no reflowing, no rewrapping, nothing that would make a
+/// diff of a note unreadable.
 ///
 /// What it does:
 ///
@@ -23,18 +23,20 @@
 /// * a heading gets exactly one space after its hashes (`#Title`, which
 ///   is a paragraph and not a heading at all, is left alone: tidying is
 ///   not the place to change what a line means);
-/// * runs of blank lines collapse to one, and the trailing ones go;
+/// * blocks are set apart by exactly one blank line — runs of blank lines
+///   collapse to one, a heading gets one where it had none, and the
+///   trailing ones go;
 /// * trailing spaces go, except the ones that mean a line break, kept as
 ///   exactly two — and dropped at the end of a block, where they break
 ///   nothing;
 /// * the note ends with exactly one newline.
 ///
-/// The rules #72 added are its switches ([LintRule]): between them, a
-/// list comes back tight — no blank lines between its items, one space
-/// after the marker — its task boxes canonical (`[ ]`, `[x]`), a heading
-/// is set off by a blank line like every other block, and a fence gets
-/// its language and its closing fence. All of them are on by default;
-/// passing `rules` leaves out the ones a library turned off.
+/// Those always run. The rules #72 added are switches ([LintRule]):
+/// between them, a list comes back tight — no blank lines between its
+/// items, one space after the marker — its task boxes canonical (`[ ]`,
+/// `[x]`), and a fence gets its language and its closing fence, its two
+/// fence lines being all of it the tidying reads. All of them are on by
+/// default; passing `rules` leaves out the ones a library turned off.
 ///
 /// Formatting twice changes nothing the second time, which the tests
 /// hold for every case they cover.

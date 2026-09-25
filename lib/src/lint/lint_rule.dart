@@ -1,8 +1,9 @@
 /// The Markdown rules the corrector applies (#72).
 ///
 /// There is no checker UI: the rules are the tidy's own switches
-/// (`formatMarkdown`), applied when a note is closed with "Fix the
-/// Markdown on close" and by the Format note command. Each rule is a
+/// (`formatMarkdown`), applied when a note is closed with "Tidy the
+/// Markdown on close" on and by the "Tidy the Markdown" command. Each rule
+/// is a
 /// branch in that one pass rather than a pass of its own, so a note is
 /// read and written once however many rules run.
 library;
