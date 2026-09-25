@@ -147,4 +147,55 @@ void main() {
       expect(mergeWordList(base: 'a\n', local: '', remote: 'a\n'), '');
     });
   });
+
+  group('reading positions, book by book (#281)', () {
+    Map<String, Object?> at(int page, String when) => {
+      'page': page,
+      'fraction': 0.0,
+      'at': when,
+    };
+
+    test('books read on different sides both land', () {
+      final merged = mergeReadingJson(
+        base: json({}),
+        local: json({'a.pdf': at(3, '2026-09-25T10:00:00Z')}),
+        remote: json({'b.pdf': at(7, '2026-09-25T09:00:00Z')}),
+      );
+      expect(parsed(merged), {
+        'a.pdf': at(3, '2026-09-25T10:00:00Z'),
+        'b.pdf': at(7, '2026-09-25T09:00:00Z'),
+      });
+    });
+
+    test('a book read on both sides keeps the later reading', () {
+      for (final (local, remote, kept) in [
+        ('2026-09-25T10:00:00Z', '2026-09-25T11:00:00Z', 9),
+        ('2026-09-25T12:00:00Z', '2026-09-25T11:00:00Z', 3),
+      ]) {
+        final merged = mergeReadingJson(
+          base: json({'a.pdf': at(1, '2026-09-24T10:00:00Z')}),
+          local: json({'a.pdf': at(3, local)}),
+          remote: json({'a.pdf': at(9, remote)}),
+        );
+        expect((parsed(merged)['a.pdf']! as Map)['page'], kept);
+      }
+    });
+
+    test('a book one side carried to a new name is not brought back', () {
+      final entry = at(3, '2026-09-25T10:00:00Z');
+      final merged = mergeReadingJson(
+        base: json({'old.pdf': entry}),
+        local: json({'new.pdf': entry}),
+        remote: json({'old.pdf': entry}),
+      );
+      expect(parsed(merged), {'new.pdf': entry});
+    });
+
+    test('a side that is not JSON cannot be merged', () {
+      expect(
+        mergeReadingJson(base: null, local: '{', remote: json({})),
+        isNull,
+      );
+    });
+  });
 }
