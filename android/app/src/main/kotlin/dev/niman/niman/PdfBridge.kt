@@ -48,6 +48,10 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
     private var webView: WebView? = null
     private var busy = false
 
+    /** The print the Dart side is waiting on, and whether it was answered. */
+    private var pendingResult: MethodChannel.Result? = null
+    private var pendingAnswer: AtomicBoolean? = null
+
     /** Wires the channel to the Flutter engine. */
     fun attach(messenger: BinaryMessenger) {
         channel = MethodChannel(messenger, CHANNEL).apply {
@@ -64,6 +68,8 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         webView?.destroy()
         webView = null
         busy = false
+        pendingAnswer = null
+        pendingResult = null
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -81,18 +87,45 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
                 }
                 print(htmlPath, pdfPath, result)
             }
+            // The export was cancelled: destroy the view and answer the
+            // waiting print, instead of staying busy until the watchdog.
+            "cancel" -> {
+                cancel(result)
+            }
             else -> result.notImplemented()
         }
+    }
+
+    /** Stops the print in flight, if any, and clears the bridge. */
+    private fun cancel(result: MethodChannel.Result) {
+        watchdog?.let { handler.removeCallbacks(it) }
+        watchdog = null
+        busy = false
+        webView?.destroy()
+        webView = null
+        val answer = pendingAnswer
+        val waiting = pendingResult
+        pendingAnswer = null
+        pendingResult = null
+        // The waiting print is answered after the print's own callback,
+        // which the flag keeps from answering twice.
+        answer?.set(true)
+        waiting?.error("print-cancelled", "the print was cancelled", null)
+        result.success(null)
     }
 
     private fun print(htmlPath: String, pdfPath: String, result: MethodChannel.Result) {
         busy = true
         val answered = AtomicBoolean(false)
+        pendingResult = result
+        pendingAnswer = answered
         fun finish(ok: Boolean, error: String? = null) {
             if (!answered.compareAndSet(false, true)) return
             watchdog?.let { handler.removeCallbacks(it) }
             watchdog = null
             busy = false
+            pendingResult = null
+            pendingAnswer = null
             if (ok) result.success(null) else result.error("print-failed", error, null)
         }
 

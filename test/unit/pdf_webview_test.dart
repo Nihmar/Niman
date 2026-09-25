@@ -89,4 +89,34 @@ void main() {
       isA<PdfFailed>(),
     );
   });
+
+  test('a busy bridge is asked again once', () async {
+    var calls = 0;
+    answer((call) async {
+      calls++;
+      if (calls == 1) {
+        throw PlatformException(
+          code: 'print-busy',
+          message: 'another page is being printed',
+        );
+      }
+      await File(pdfPath).writeAsBytes(<int>[1, 2, 3]);
+      return null;
+    });
+    expect(
+      await const WebViewPdfPrinter().print(htmlPath, pdfPath),
+      isA<PdfPrinted>(),
+    );
+    expect(calls, 2);
+  });
+
+  test('cancel reaches the bridge', () async {
+    String? method;
+    answer((call) async {
+      method = call.method;
+      return null;
+    });
+    await WebViewPdfPrinter.cancel();
+    expect(method, 'cancel');
+  });
 }

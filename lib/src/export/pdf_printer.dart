@@ -9,6 +9,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -54,19 +55,64 @@ abstract interface class PdfPrinter {
 /// What running a program answered.
 typedef ProcessAnswer = ({int exit, String stdout});
 
+/// A process that did not finish in time, and was killed.
+final class ProcessTimedOut implements Exception {
+  /// Creates the timeout.
+  const new();
+
+  @override
+  String toString() => 'the process did not finish';
+}
+
 /// Runs a program with [args], answering its exit code and output.
+///
+/// A program that outlives [timeout] is killed — politely first, then not —
+/// and [ProcessTimedOut] is thrown: a hung headless browser must not hold
+/// the machine, not just the export. The runner owns the timeout, because
+/// only it holds the process to kill.
 typedef ProcessRunner = Future<ProcessAnswer> Function(
   String exe,
-  List<String> args,
-);
+  List<String> args, {
+  Duration? timeout,
+});
 
 /// The size of the file at [path], or null when it is not there.
 typedef FileSize = Future<int?> Function(String path);
 
 /// Runs [exe] with [args], through `dart:io`.
-Future<ProcessAnswer> runProcess(String exe, List<String> args) async {
-  final result = await Process.run(exe, args);
-  return (exit: result.exitCode, stdout: '${result.stdout}');
+Future<ProcessAnswer> runProcess(
+  String exe,
+  List<String> args, {
+  Duration? timeout,
+}) async {
+  final process = await Process.start(exe, args);
+  final stdoutDone = process.stdout.transform(utf8.decoder).join();
+  final stderrDone = process.stderr.drain<void>();
+  try {
+    final exit = timeout == null
+        ? await process.exitCode
+        : await process.exitCode.timeout(timeout);
+    final stdout = await stdoutDone;
+    await stderrDone;
+    return (exit: exit, stdout: stdout);
+  } on TimeoutException {
+    await _kill(process);
+    // The drains end when the process's pipes do; a dying process's output
+    // is not the timeout's problem.
+    unawaited(stdoutDone.then<void>((_) {}, onError: (Object _) {}));
+    unawaited(stderrDone.then<void>((_) {}, onError: (Object _) {}));
+    throw const ProcessTimedOut();
+  }
+}
+
+/// Stops [process]: its own signal first, then SIGKILL when it will not go.
+Future<void> _kill(Process process) async {
+  process.kill();
+  try {
+    await process.exitCode.timeout(const Duration(seconds: 2));
+  } on TimeoutException {
+    process.kill(ProcessSignal.sigkill);
+  }
 }
 
 /// The size of the file at [path], or null when it is not there; a
@@ -206,7 +252,7 @@ List<String?> _windowsRoots() => <String?>[
 final class ProcessPdfPrinter implements PdfPrinter {
   /// Prints with [engine] (found per platform by default), running
   /// processes with [run], and checking the written file with [size].
-  const new({
+  new({
     this.engine,
     this.findEngine,
     this.run = runProcess,
@@ -231,24 +277,35 @@ final class ProcessPdfPrinter implements PdfPrinter {
   /// headless browser must not hold the export open.
   final Duration timeout;
 
-  @override
-  Future<bool> get canPrint async {
-    if (engine != null) return true;
-    final found = await (findEngine ?? _findEngine)();
-    return found != null;
+  /// The engine already found, kept: on Windows discovery runs `reg.exe`,
+  /// and both [canPrint] and [print] ask (L4).
+  String? _found;
+  bool _searched = false;
+
+  Future<String?> _resolveEngine() async {
+    final known = engine;
+    if (known != null) return known;
+    if (!_searched) {
+      _searched = true;
+      _found = await (findEngine ?? _findEngine)();
+    }
+    return _found;
   }
 
   @override
+  Future<bool> get canPrint async => await _resolveEngine() != null;
+
+  @override
   Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
-    final exe = engine ?? await (findEngine ?? _findEngine)();
+    final exe = await _resolveEngine();
     if (exe == null) return const PdfNoEngine();
     final ProcessAnswer answer;
     try {
       answer = await run(exe, <String>[
         ...printFlags(pdfPath),
         Uri.file(htmlPath).toString(),
-      ]).timeout(timeout);
-    } on TimeoutException {
+      ], timeout: timeout);
+    } on ProcessTimedOut {
       return const PdfFailed('the engine did not finish');
     } on Object catch (error) {
       return PdfFailed('$error');

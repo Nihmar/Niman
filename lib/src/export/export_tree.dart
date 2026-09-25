@@ -71,14 +71,21 @@ final class ExportProgress {
 }
 
 /// The export was cancelled before it finished; the half-written zip is
-/// gone.
+/// gone, unless [zipLeftBehind] is true — a handle a killed isolate did
+/// not let go, which happens on Windows when a cancel has to fall back to
+/// killing.
 final class ExportCancelled implements Exception {
   /// Creates the cancellation.
-  const new();
+  const new({this.zipLeftBehind = false});
+
+  /// Whether the half-written zip could not be removed.
+  final bool zipLeftBehind;
 
   /// What a log line reads.
   @override
-  String toString() => 'Export cancelled';
+  String toString() => zipLeftBehind
+      ? 'Export cancelled; the half-written zip could not be removed'
+      : 'Export cancelled';
 }
 
 /// A PDF folder was asked for with no engine to print with.
@@ -93,17 +100,31 @@ final class TreeExportNoEngine implements Exception {
 
 /// One tree export, running on its own isolate.
 final class TreeExport {
-  new _(this._isolate, this._zipPath)
-    : progress = ValueNotifier<ExportProgress?>(null);
+  new _(
+    this._isolate,
+    this._zipPath,
+    this._format,
+    this._events,
+    this._errors,
+    this._exits,
+  ) : progress = ValueNotifier<ExportProgress?>(null);
 
   final Isolate _isolate;
   final String _zipPath;
+  final ExportTreeFormat _format;
+  final ReceivePort _events;
+  final ReceivePort _errors;
+  final ReceivePort _exits;
 
   /// How far it has got; null until the first entry is written.
   final ValueNotifier<ExportProgress?> progress;
 
   final Completer<void> _done = Completer<void>();
   bool _cancelled = false;
+  bool _settling = false;
+
+  /// The isolate's cancellation mailbox, sent over the events port.
+  SendPort? _cancelPort;
 
   /// Completes when the zip is written; errors with the failure, or with
   /// [ExportCancelled].
@@ -154,8 +175,8 @@ final class TreeExport {
       onError: errors.sendPort,
       onExit: exits.sendPort,
     );
-    final export = TreeExport._(isolate, zipPath)
-      .._listen(events, errors, exits);
+    final export = TreeExport._(isolate, zipPath, format, events, errors, exits)
+      .._listen();
     return export;
   }
 
@@ -180,39 +201,86 @@ final class TreeExport {
     await export.done;
   }
 
-  void _listen(ReceivePort events, ReceivePort errors, ReceivePort exits) {
+  void _listen() {
     final gauge = IsolateGauge.begin('export "${p.basename(_zipPath)}"');
-    events.listen((message) {
-      if (message is ExportProgress) progress.value = message;
+    _events.listen((message) {
+      if (message is ExportProgress) {
+        progress.value = message;
+      } else if (message is SendPort) {
+        // The isolate's cancellation mailbox: what lets a cancel close the
+        // zip instead of killing the isolate with a file handle open.
+        _cancelPort = message;
+      }
     });
-    errors.listen((message) => _settle(gauge, error: _errorOf(message)));
-    exits.listen((_) => _settle(gauge));
+    _errors.listen(
+      (message) => unawaited(_settle(gauge, error: _errorOf(message))),
+    );
+    _exits.listen((_) => unawaited(_settle(gauge)));
   }
 
-  void _settle(int gauge, {Object? error}) {
-    if (_done.isCompleted) return;
+  Future<void> _settle(int gauge, {Object? error}) async {
+    if (_settling) return;
+    _settling = true;
     IsolateGauge.finishJob(gauge, error: error);
+    // The isolate is done (or gone): the ports have nothing left to say,
+    // and a cancelled export's zip is removed before `done` answers.
+    _events.close();
+    _errors.close();
+    _exits.close();
     if (_cancelled) {
-      _done.completeError(const ExportCancelled());
+      final removed = await _removeZip();
+      _done.completeError(ExportCancelled(zipLeftBehind: !removed));
     } else if (error != null) {
       _done.completeError(error);
     } else {
       _done.complete();
     }
+    progress.dispose();
   }
 
-  /// Cancels the export: the isolate is killed and the half-written zip
-  /// removed; [done] errors with [ExportCancelled].
+  /// Removes the half-written zip; false when it is still there.
+  Future<bool> _removeZip() async {
+    try {
+      await File(_zipPath).delete();
+      return true;
+    } on FileSystemException {
+      // Never written, or held open by the isolate Windows has not let go
+      // of yet.
+      return !File(_zipPath).existsSync();
+    }
+  }
+
+  /// Cancels the export.
+  ///
+  /// The isolate is asked to stop and close its zip first — killing it
+  /// would leave the file handle open, and Windows refuses to delete a
+  /// file that is still held (M4). A run stuck in a print that cannot be
+  /// interrupted is killed after a short grace instead; [done] errors with
+  /// [ExportCancelled].
   Future<void> cancel() async {
     if (_done.isCompleted) return;
     _cancelled = true;
+    if (_format == ExportTreeFormat.pdf && Platform.isAndroid) {
+      // The platform print is on the main thread and the isolate waits on
+      // it: stopping it is what frees the bridge for the next export (M7).
+      unawaited(WebViewPdfPrinter.cancel());
+    }
+    final mailbox = _cancelPort;
+    if (mailbox != null) {
+      mailbox.send(null);
+      try {
+        await _done.future.timeout(const Duration(seconds: 3));
+        return;
+      } on TimeoutException {
+        // A print that will not come back: kill rather than hold the
+        // export open.
+      } on Object {
+        // The export failed on its own: nothing left to stop.
+        return;
+      }
+    }
     _isolate.kill(priority: Isolate.immediate);
     await _done.future.then<void>((_) {}, onError: (Object _) {});
-    try {
-      await File(_zipPath).delete();
-    } on FileSystemException {
-      // Never written, or already gone.
-    }
   }
 }
 
@@ -258,6 +326,12 @@ Future<void> _exportTree(TreeExportRequest request) async {
     }
   }
   final tree = _walk(request.dir);
+  // The cancellation mailbox: the parent asks the export to stop, and the
+  // encoder is closed on the way out instead of being torn off by a kill.
+  final cancel = ReceivePort();
+  var cancelled = false;
+  cancel.listen((_) => cancelled = true);
+  request.events.send(cancel.sendPort);
   final encoder = ZipFileEncoder()..create(request.zipPath);
   // The PDF format's scratch: one page and one PDF at a time, reused.
   final scratch = request.format == ExportTreeFormat.pdf
@@ -266,10 +340,13 @@ Future<void> _exportTree(TreeExportRequest request) async {
   try {
     var done = 0;
     for (final entry in tree.entries) {
+      // Between entries, where the zip is never half-written.
+      if (cancelled) break;
+      // Every format keeps the tree's folders, empty ones included: a
+      // folder in the Markdown zip and not in the HTML one is a support
+      // question waiting to happen (L8).
       if (entry.isDir) {
-        if (request.format == ExportTreeFormat.markdown) {
-          encoder.addArchiveFile(ArchiveFile.directory(entry.rel));
-        }
+        encoder.addArchiveFile(ArchiveFile.directory(entry.rel));
       } else if (request.format == ExportTreeFormat.markdown) {
         await encoder.addFile(File(entry.abs), entry.rel);
       } else if (_isNote(entry.rel)) {
@@ -326,6 +403,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
     }
     rethrow;
   } finally {
+    cancel.close();
     try {
       scratch?.deleteSync(recursive: true);
     } on FileSystemException {
