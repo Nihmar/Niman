@@ -290,7 +290,26 @@ jobs:
             echo "**Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${PREV}...${CUR}"
           } > notes.md
 
+      - name: Release title from the changelog
+        # The first line of the version's section that is neither a `###`
+        # heading nor a bullet is the release's title; `Niman <version>`
+        # when the section has none (see docs/dev/releasing.md).
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TITLE="$(awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 { found = 1; next }
+            found && index($0, "## [") == 1 { exit }
+            found && $0 ~ /^[[:space:]]*$/ { next }
+            found && $0 ~ /^[[:space:]]*###/ { next }
+            found && $0 ~ /^[[:space:]]*[-*] / { next }
+            found { print; exit }
+          ' CHANGELOG.md | sed -E 's/^[*_[:space:]]+//; s/[*_[:space:]]+$//')"
+          if [ -z "$TITLE" ]; then TITLE="Niman ${VERSION}"; fi
+          echo "RELEASE_TITLE=${TITLE}" >> "$GITHUB_ENV"
+          echo "release title: ${TITLE}"
+
       - uses: softprops/action-gh-release@v2
         with:
+          name: ${{ env.RELEASE_TITLE }}
           files: dist/*
           body_path: notes.md
