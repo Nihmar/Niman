@@ -53,13 +53,15 @@ Future<PdfExport> exportNotePdf({
   MathCache? mathCache,
   Directory? scratch,
 }) async {
-  final chosen = printer ?? const ProcessPdfPrinter();
+  final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
   // the parse, the highlighting — is never built.
   if (!await chosen.canPrint) {
     return await _draw(
       path: path,
       text: text,
+      root: root,
+      linkSource: linkSource,
       theme: theme,
       mathCache: mathCache,
     );
@@ -89,6 +91,8 @@ Future<PdfExport> exportNotePdf({
         return await _draw(
           path: path,
           text: text,
+          root: root,
+          linkSource: linkSource,
           theme: theme,
           mathCache: mathCache,
         );
@@ -97,6 +101,8 @@ Future<PdfExport> exportNotePdf({
         return await _draw(
           path: path,
           text: text,
+          root: root,
+          linkSource: linkSource,
           theme: theme,
           mathCache: mathCache,
         );
@@ -118,11 +124,27 @@ Future<PdfExport> exportNotePdf({
 Future<PdfExport> _draw({
   required String path,
   required String text,
+  required String root,
+  required LinkSource? linkSource,
   required MarkdownTheme? theme,
   required MathCache? mathCache,
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
-  final drawn = await rasterPdf(text: text, theme: theme, mathCache: mathCache);
+  // The pictures are read here, off the UI isolate, and drawn by the
+  // raster pass: there is no browser to embed them, and without them the
+  // note would print with its pictures silently missing (H3).
+  final images = await ExportSources.imageBytes(
+    text: text,
+    notePath: p.join(root, path),
+    root: root,
+    linkSource: linkSource,
+  );
+  final drawn = await rasterPdf(
+    text: text,
+    theme: theme,
+    mathCache: mathCache,
+    images: images,
+  );
   return (payload: _payload(path, drawn), selectable: false);
 }
 
