@@ -13,6 +13,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:window_manager/window_manager.dart' show DragToMoveArea;
@@ -55,10 +56,8 @@ final class AppTitleBar extends StatelessWidget {
     alignment: Alignment.centerLeft,
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Text(
-        title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      child: MarqueeText(
+        text: title,
         style: theme.textTheme.labelMedium?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -156,10 +155,8 @@ final class SlimTitleBar extends StatelessWidget {
             Expanded(
               child: DragToMoveArea(
                 child: Center(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: MarqueeText(
+                    text: title,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

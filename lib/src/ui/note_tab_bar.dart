@@ -14,6 +14,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -457,10 +458,8 @@ final class _NoteTabState extends State<_NoteTab> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Flexible(
-                            child: Text(
-                              noteTabLabel(widget.tab.path),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: MarqueeText(
+                              text: noteTabLabel(widget.tab.path),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: active
                                     ? scheme.onSurface
