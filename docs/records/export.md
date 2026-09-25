@@ -80,7 +80,7 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
   1. An offscreen `WebView` loads the page with `loadDataWithBaseURL`.
   2. On `onPageFinished`, call `createPrintDocumentAdapter`.
   3. `layout` and `write` go to a file through a small helper in the `android.print` package, because its callback constructors are package-private.
-  4. A4, no margins beyond the CSS.
+  4. A4, no margins beyond the CSS, and a 300 dpi resolution: the WebView's adapter refuses a layout whose attributes do not name one — without it every Android PDF silently fell back to a picture.
 
   A `cancel` call destroys the view and answers a waiting print, so a
   cancelled export leaves no busy bridge. No on-device test yet (§4).

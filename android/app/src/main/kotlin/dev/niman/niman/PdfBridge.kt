@@ -38,8 +38,12 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         /** 18 mm in thousandths of an inch. */
         const val MARGIN_MILS = 709
 
-        /** How long a print may run before the watchdog answers it failed. */
-        const val WATCHDOG_MS = 2 * 60 * 1000L
+        /** How long a print may run before the watchdog answers it failed.
+         *  Longer than the route a slow one takes, shorter than the Dart
+         *  side's own timeout: a WebView that is laying a long note out
+         *  gets to finish, and one that never answers is stopped by the
+         *  watchdog itself. */
+        const val WATCHDOG_MS = 4 * 60 * 1000L
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -167,6 +171,12 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
     ) {
         val attributes = PrintAttributes.Builder()
             .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+            // The WebView's adapter refuses a layout whose attributes say
+            // nothing about resolution: without it `onLayout` answers
+            // "attributes must specify print resolution" and every export
+            // fell back to a picture. 300 dpi is the usual print floor;
+            // the text stays vector either way.
+            .setResolution(PrintAttributes.Resolution("niman", "Niman", 300, 300))
             .setMinMargins(
                 PrintAttributes.Margins(MARGIN_MILS, MARGIN_MILS, MARGIN_MILS, MARGIN_MILS),
             )
