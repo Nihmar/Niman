@@ -9,10 +9,15 @@
 /// Every open note is saved first, and the one on screen re-read after:
 /// the companion may be open in another pane, and its editor would write
 /// its own copy back over the annotation.
+///
+/// It is also where a pane asks where its file was annotated (#285), and
+/// how a mark opens its note.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark.dart';
+import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/annotations/companion_notes.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
@@ -22,7 +27,7 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The shell's side of annotating a file.
-final class ShellAnnotationFlow {
+final class ShellAnnotationFlow implements AnnotationMarkSource {
   /// Annotates the files of [controller]'s library.
   const new({
     required this.controller,
@@ -48,6 +53,26 @@ final class ShellAnnotationFlow {
   final void Function(String path, int offset) onOpen;
 
   static const AppLogger _log = AppLogger(name: 'annotations');
+
+  @override
+  Future<List<AnnotationMark>> marksOf(String path) async {
+    final ops = controller.ops;
+    final fields = await controller.fieldSource;
+    final links = await controller.linkSource;
+    if (ops == null || fields == null || links == null) return const [];
+    return await CompanionNotes(
+      fields: fields,
+      links: links,
+      ops: ops,
+    ).marksOf(path);
+  }
+
+  /// Every index change: a companion may have been written.
+  @override
+  Stream<Object?> get changes => controller.events;
+
+  @override
+  void open(AnnotationMark mark) => onOpen(mark.note, mark.offset);
 
   /// Asks for the comment on [annotation], and writes it.
   Future<void> annotate(BuildContext context, Annotation annotation) async {

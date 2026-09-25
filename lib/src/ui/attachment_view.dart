@@ -13,6 +13,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -56,6 +57,7 @@ final class AttachmentView extends StatelessWidget {
     this.reloadToken = 0,
     this.linkType = LinkType.wikilink,
     this.onAnnotate,
+    this.marks,
     super.key,
   });
 
@@ -90,6 +92,10 @@ final class AttachmentView extends StatelessWidget {
   /// null offers no annotating.
   final void Function(Annotation annotation)? onAnnotate;
 
+  /// Where the library's books and PDFs were annotated (#285); null marks
+  /// nothing.
+  final AnnotationMarkSource? marks;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -108,6 +114,7 @@ final class AttachmentView extends StatelessWidget {
         reloadToken: reloadToken,
         linkType: linkType,
         onAnnotate: onAnnotate,
+        marks: marks,
       );
     }
     final theme = Theme.of(context);
@@ -123,6 +130,7 @@ final class AttachmentView extends StatelessWidget {
               anchor: anchor,
               reloadToken: reloadToken,
               onAnnotate: onAnnotate,
+              marks: marks,
             )
           : Column(
               children: [
