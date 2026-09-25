@@ -20,6 +20,14 @@ final RegExp _closing = RegExp(r'^\s{0,3}(`{3,}|~{3,})\s*$');
 /// The language is the first word of the info string; the rest of the
 /// string is metadata and is left as written. The closing fence is the
 /// opener's own run, so a `~~~` block closes with `~~~`.
+///
+/// It goes at the end of the note, not where the code seems to stop: an
+/// unclosed fence already runs to the end of the document for every
+/// reader (CommonMark 4.5), so closing it there changes nothing about how
+/// the note reads. Guessing an earlier end — at a heading, at a blank
+/// line — would turn code into prose on a guess; a note that meant to
+/// close sooner shows it, all code to the end, and the writer moves the
+/// fence.
 List<String> tidyFence(
   List<String> lines, {
   required bool language,

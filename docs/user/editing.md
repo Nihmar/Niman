@@ -302,11 +302,15 @@ changing what it says:
 - spaces left at the end of a line go, except the ones that mean a line
   break;
 - a list comes back tight: no blank lines between its items, one space
-  after each marker, and a task box written `[ ]` or `[x]` whatever case
-  it was (a link such as `[x](…)` or `[](…)` is a link, not a box, and
-  is left alone);
-- a fenced code block gets its closing fence when the note forgot one,
-  and a language written the Pandoc way loses its braces and its dot
+  after each marker (five or more start an indented code block inside
+  the item, and stay), and a task box written `[ ]` or `[x]` whatever
+  case it was (a link such as `[x](…)` or `[](…)` is a link, not a box,
+  and is left alone);
+- a fenced code block gets its closing fence when the note forgot one.
+  The fence goes at the end of the note: an unclosed block already runs
+  to the end for every Markdown reader, so the note reads exactly as it
+  did. If the code was meant to stop sooner, everything after it showing
+  as code is the sign, and moving the fence up is yours to do. A language written the Pandoc way loses its braces and its dot
   (`{.dart}` becomes `dart`). Any other language is left as written,
   punctuation included: `c++`, `c#` and `objective-c` are names;
 - the note ends with a single newline.
