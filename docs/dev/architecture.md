@@ -13,18 +13,18 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, single instance, the tray, the changelog parser |
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
-| `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](workspace.md) |
+| `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](../records/workspace.md) |
 | `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |
 | `reading/` | Where each PDF and each book was left, kept in `.niman/reading.json` |
-| `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](annotations.md) |
-| `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](epub-reader.md) |
-| `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](sync.md) |
+| `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](../records/annotations.md) |
+| `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](../records/epub-reader.md) |
+| `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](../records/sync.md) |
 | `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
-| `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](sync.md) |
+| `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](../records/sync.md) |
 | `sync/` | Sync state store (`sync_destinations`, `sync_items`, `sync_ops`), secure password store, pure reconcile, the engine (full and quick runs), the trigger scheduler and network monitor, and `LibrarySyncService` for the UI |
 | `ui/sync/` | WebDAV settings screen (with the trigger options), status icon and panel (with the queue), first-sync and mass-deletion dialogs, conflict screen (merge by region, or whole copies) |
 | `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); indexer, scan, tree materialization |
-| `markdown/` | The one Markdown surface ([unified-surface.md](unified-surface.md)): `SourceBuffer`, the block scanner and parser (over the `markdown` AST), the styler, the surface controller, and under `render/` the source view (modes `source` and `live`, the WYSIWYG) and the read view (the preview); `edit/` holds selection, caret motion, input, history and find |
+| `markdown/` | The one Markdown surface ([unified-surface.md](../records/unified-surface.md)): `SourceBuffer`, the block scanner and parser (over the `markdown` AST), the styler, the surface controller, and under `render/` the source view (modes `source` and `live`, the WYSIWYG) and the read view (the preview); `edit/` holds selection, caret motion, input, history and find |
 | `editor/` | What the surface is driven by: the incremental tokenizer (`highlighting.dart`), the Markdown commands (`md_editing.dart`), toolbar and its layout, context menu, find bar, outline, word count, list tally, typewriter and note column |
 | `preview/` | KaTeX math (typesetting, cache, rasterizing), code highlight, image aspect — what the surface draws with |
 | `links/` | Wikilink/Markdown-link parse + resolve (single parse rule shared by editor, preview, indexer) |
@@ -33,7 +33,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `templates/` | Substitution engine (`engine.dart`), directives, includes, `ask`/`choice` prompts, counters |
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
 | `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
-| `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](transcription.md) |
+| `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](../records/transcription.md) |
 | `ui/` | Shell, tree, settings screens, shared widgets |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 
@@ -58,7 +58,7 @@ lines or when responsibilities mix.
   attachment of every run, so it is given three seconds and then the
   bytes are copied instead: a workaround for
   [#103](https://github.com/Nihmar/Niman/issues/103). See
-  [sync.md](sync.md) for what has been ruled out.
+  [sync.md](../records/sync.md) for what has been ruled out.
 - **Isolate jobs:** the scan, probe and write passes above go through
   `IsolateGauge.run` (`core/isolate_gauge.dart`) instead of `Isolate.run`
   directly, which logs each job's start and finish with how many are in
@@ -84,6 +84,6 @@ lines or when responsibilities mix.
 ## Planned, not built
 
 - Nothing large at the moment. The one Markdown surface that was planned
-  here is built (#247): [unified-surface.md](unified-surface.md) is its
-  design and record, and [editor-alternatives.md](editor-alternatives.md) the
+  here is built (#247): [unified-surface.md](../records/unified-surface.md) is its
+  design and record, and [editor-alternatives.md](../records/editor-alternatives.md) the
   measured record of the packages it replaced.

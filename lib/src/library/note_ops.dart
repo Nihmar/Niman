@@ -22,7 +22,7 @@ import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 
 /// Hears what a user operation did to a library-relative path, for the
-/// sync queue (docs/dev/sync.md, "Queue and triggers"). A hint, not a
+/// sync queue (docs/records/sync.md, "Queue and triggers"). A hint, not a
 /// command: the reconcile decides what to do.
 typedef SyncHintSink = void Function(
   String path,
@@ -580,7 +580,7 @@ final class NoteOps implements NoteOperations {
     return trashAbs;
   }
 
-  // -- sync (docs/dev/sync.md) -------------------------------------------
+  // -- sync (docs/records/sync.md) -------------------------------------------
 
   /// Whether [path] keeps history: the text notes the editor saves.
   static bool keepsHistory(String path) {

@@ -5,7 +5,7 @@
 /// 246 MB note of the 0.0.9 stress test, and the pass had to join the text
 /// first — another 190 ms. The statistics did that after every pause in the
 /// typing, on an isolate, which is why a note that size waited seconds for
-/// its own word count (see `docs/dev/huge-notes.md`).
+/// its own word count (see `docs/records/huge-notes.md`).
 ///
 /// Here the count is kept per line, in the same chunked storage
 /// [PrefixSums] gives the buffer's spans, so an edit pays for the lines it

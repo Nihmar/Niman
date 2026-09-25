@@ -552,7 +552,7 @@ void main() {
         'or two', () {
       // A paragraph with no blank line and a formula that never closes are
       // each one block, and a rebuild that began at the block's first line
-      // re-scanned the note for every character (`docs/dev/huge-notes.md`
+      // re-scanned the note for every character (`docs/records/huge-notes.md`
       // item 3).
       for (final (label, text) in <(String, String)>[
         (

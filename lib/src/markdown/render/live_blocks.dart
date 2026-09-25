@@ -4,7 +4,7 @@
 /// Both are laid out beside the line's paragraph rather than inside it: the
 /// paragraph keeps the source, every character at its own offset, so the
 /// caret, the hit test and the selection go on measuring text and nothing
-/// else (approach B, `docs/dev/unified-surface.md` §8.6.0). A widget *inside*
+/// else (approach B, `docs/records/unified-surface.md` §8.6.0). A widget *inside*
 /// the paragraph would be a code unit the source does not have — the
 /// correction table §8.6.0 point 3 describes — which the inline cases need
 /// and these do not.

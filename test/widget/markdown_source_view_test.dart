@@ -919,7 +919,7 @@ void main() {
 
     // The caret is on the list line, so the hash on the heading's line is not
     // the revealed one: what this test is about is that the hidden runs keep
-    // their place (`docs/dev/unified-surface.md` §8.6.2).
+    // their place (`docs/records/unified-surface.md` §8.6.2).
     final shown = await render(hide: false, caret: 10);
     final hidden = await render(hide: true, caret: 10);
     // The hash is a run of its own, and in live mode it is transparent.
@@ -964,7 +964,7 @@ void main() {
               hideMarkers: hide,
               // The caret is on the line below: the heading's hash is hidden
               // while the writer is not in it, which is the reveal policy
-              // (`docs/dev/unified-surface.md` §8.6.2).
+              // (`docs/records/unified-surface.md` §8.6.2).
               selection: const SelectionModel.at(12),
             ),
           ),

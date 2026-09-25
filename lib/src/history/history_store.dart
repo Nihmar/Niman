@@ -1,4 +1,4 @@
-/// The `.history/` folder on disk (docs/dev/sync.md, "History").
+/// The `.history/` folder on disk (docs/records/sync.md, "History").
 ///
 /// Everything here is synchronous and top-level: it runs inside
 /// `Isolate.run`, where the app's log buffer is not the main one, so the
@@ -231,7 +231,7 @@ List<int> pinHistoryVersion(
 
 /// Pins, as the sync base of [rel], the version whose content hashes to
 /// [sha] — the content both sides agreed on at a successful sync
-/// (docs/dev/sync.md, "Rotation and the pinned base").
+/// (docs/records/sync.md, "Rotation and the pinned base").
 ///
 /// The newest version with that content is pinned. When there is none and
 /// the note on disk still holds that content, it is kept as a new version

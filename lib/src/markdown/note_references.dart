@@ -4,7 +4,7 @@
 /// links, and nothing else a parse makes. A whole-note parse — the legacy
 /// tokenizer's or the Markdown package's — pays for every run of every line:
 /// two minutes on the 247 MB stress note, for the 3 % of its lines that have
-/// a `#` or a `[` (`docs/dev/huge-notes.md`, item 8). So each layer is asked
+/// a `#` or a `[` (`docs/records/huge-notes.md`, item 8). So each layer is asked
 /// only where its answer can be one:
 ///
 /// * the **block scan** says which blocks have inline text at all — never a

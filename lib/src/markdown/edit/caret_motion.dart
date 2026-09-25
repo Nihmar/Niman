@@ -101,7 +101,7 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
 /// the `**` the writer is editing would stay hidden. A run is everything the
 /// caret can reach without crossing a space, so it *contains* the syntax that
 /// delimits the word, which is exactly what has to be drawn while the caret is
-/// in it (`docs/dev/unified-surface.md` §8.6.2, the per-word refinement).
+/// in it (`docs/records/unified-surface.md` §8.6.2, the per-word refinement).
 ///
 /// An offset that sits on whitespace is that one character: there is no run to
 /// be in, and the caller wants a range either way.

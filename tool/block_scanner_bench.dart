@@ -1,7 +1,7 @@
 /// Measures the block scanner: the cold scan, and what one edit costs.
 ///
 /// The claim it checks is the one the whole design rests on
-/// (`docs/dev/unified-surface.md` §8.5): a re-scan stops at the first line whose
+/// (`docs/records/unified-surface.md` §8.5): a re-scan stops at the first line whose
 /// state is what it was, so an edit costs O(change) lines rather than
 /// O(document). It prints rather than asserts, as the repo's benchmarks do, and
 /// debug mode inflates the absolutes — the ratios carry.

@@ -32,7 +32,7 @@ MarkdownSourceViewState _surface(WidgetTester tester) =>
 String _editorText(WidgetTester tester) => _surface(tester).widget.buffer.text;
 
 void main() {
-  // The gate in front of the read (docs/dev/huge-notes.md item 4): a watcher
+  // The gate in front of the read (docs/records/huge-notes.md item 4): a watcher
   // reports that something happened to a path, and a reload asks the file
   // what it looks like before it reads it. These two use a real file, since
   // the read they are about is the real one — `readNote` is null and the view

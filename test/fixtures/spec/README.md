@@ -2,7 +2,7 @@
 
 The fixtures behind `test/unit/markdown_conformance_test.dart`, which measures
 the `markdown` package against the two specifications Niman promises to
-follow. Decision D2 of `docs/dev/unified-surface.md` makes that package the
+follow. Decision D2 of `docs/records/unified-surface.md` makes that package the
 parser, so these files are where "conformant" stops being an assumption.
 
 ## What is here

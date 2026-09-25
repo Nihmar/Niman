@@ -26,7 +26,7 @@ Full guides live in [`docs/`](docs/):
 - **Contributor:** [architecture](docs/dev/architecture.md),
   [building](docs/dev/building.md), [conventions](docs/dev/conventions.md),
   [releasing](docs/dev/releasing.md), and the design records under
-  [`docs/dev/`](docs/dev/) — the unified Markdown surface, read/live
+  [`docs/records/`](docs/records/) — the unified Markdown surface, read/live
   parity and huge notes, the workspace (open notes and tabs), the EPUB
   reader, annotations, the note history, WebDAV sync and transcription.
 

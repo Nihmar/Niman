@@ -1,5 +1,5 @@
 /// The offset arithmetic around a block's inline placeholders
-/// (`docs/dev/unified-surface.md` §8.6.0, point 3).
+/// (`docs/records/unified-surface.md` §8.6.0, point 3).
 library;
 
 import 'package:meta/meta.dart';

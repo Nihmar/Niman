@@ -1,4 +1,4 @@
-// Phase 2 of the on-device transcription (docs/dev/transcription.md): a
+// Phase 2 of the on-device transcription (docs/records/transcription.md): a
 // clip's menu offers Transcribe, the bubble shows the progress, and the
 // text lands in the clip's description with an Undo.
 import 'dart:async';

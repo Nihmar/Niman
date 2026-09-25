@@ -2,7 +2,7 @@
 ///
 /// This is the generalization of `editor/highlighting.dart`'s private state —
 /// which already carries a fence, inline math and the frontmatter — to the
-/// containers Markdown actually has (`docs/dev/unified-surface.md` §8.5.1). The
+/// containers Markdown actually has (`docs/records/unified-surface.md` §8.5.1). The
 /// point of it is that a line's *block* meaning is a function of the line and
 /// the state entering it, so a scan can stop as soon as the state converges and
 /// everything after it is known to be unchanged.

@@ -1,5 +1,5 @@
 /// Reconcile: what to do with each path, decided from disk now, the
-/// remote now and the row both sides agreed on (docs/dev/sync.md,
+/// remote now and the row both sides agreed on (docs/records/sync.md,
 /// "State: `sync_items`").
 ///
 /// Pure functions over plain values — no I/O, no clock — so every branch
@@ -294,7 +294,7 @@ final class SyncDecision {
 /// compatible mode) and the hashes the engine computed when an earlier
 /// decision asked.
 ///
-/// The table (docs/dev/sync.md):
+/// The table (docs/records/sync.md):
 ///
 /// | local \ remote | unchanged | changed | deleted | absent | created |
 /// |---|---|---|---|---|---|
@@ -467,7 +467,7 @@ final class SyncPlan {
 /// hashes computed for earlier `hashLocal` / `hashRemote` decisions —
 /// the engine loops until [SyncPlan.needsHashes] is false.
 ///
-/// Then pairs renames (docs/dev/sync.md, "Server capabilities"):
+/// Then pairs renames (docs/records/sync.md, "Server capabilities"):
 ///
 /// - a `deleteRemote` of A and an `upload` of a new B whose content is
 ///   A's agreed content become one `moveRemote` A→B, when the server has

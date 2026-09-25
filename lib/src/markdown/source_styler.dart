@@ -122,7 +122,7 @@ final class SourceStyler {
   /// O(blocks) to gather, and the blocks the edits changed since the last
   /// call are read: a save of the 247 MB stress note reads the few blocks
   /// written into, where the reindex read the note (5.1 s, item 8 of
-  /// `docs/dev/huge-notes.md`).
+  /// `docs/records/huge-notes.md`).
   NoteReferences? references() {
     if (!_references.kept || revision != buffer.revision || !settled) {
       return null;

@@ -47,7 +47,7 @@ final class SyncTriggers {
   final bool everSynced;
 }
 
-/// Starts the automatic syncs of one library (docs/dev/sync.md, "Queue
+/// Starts the automatic syncs of one library (docs/records/sync.md, "Queue
 /// and triggers"):
 ///
 /// - a quick sync 5 s after the last hint, 60 s at most while they keep

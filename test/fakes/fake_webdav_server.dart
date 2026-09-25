@@ -47,7 +47,7 @@ DateTime _second(DateTime at) {
 }
 
 /// An in-memory WebDAV server on loopback for the sync tests
-/// (docs/dev/sync.md, "The client").
+/// (docs/records/sync.md, "The client").
 ///
 /// Mounted at `/dav/`. Every optional behaviour is a switch, so one
 /// server can play Nextcloud (everything on) or a bare nginx/OMV share

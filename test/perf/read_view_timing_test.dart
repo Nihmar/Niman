@@ -1,5 +1,5 @@
 // What the read view costs where a reader waits for it, held against the budget
-// the design set for it (`docs/dev/unified-surface.md` §9.4).
+// the design set for it (`docs/records/unified-surface.md` §9.4).
 //
 // The number that matters is **text to first visible content**: the wait
 // between the note's text existing and something being on screen to read. The

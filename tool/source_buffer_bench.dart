@@ -2,7 +2,7 @@
 ///
 /// The design document says a content edit is O(log n) and a line-count change
 /// is O(lines) in a flat loop with a small constant
-/// (`docs/dev/unified-surface.md` §8.2). This is what checks that.
+/// (`docs/records/unified-surface.md` §8.2). This is what checks that.
 ///
 /// ```sh
 /// dart run tool/source_buffer_bench.dart                  # the fixtures

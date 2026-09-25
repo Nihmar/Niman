@@ -1,5 +1,5 @@
 // What opening a huge note costs the UI isolate, piece by piece
-// (`docs/dev/read-live-parity.md`, "Opening the 246 MB note").
+// (`docs/records/read-live-parity.md`, "Opening the 246 MB note").
 //
 // The height map is built on the frame that first draws the note, for every
 // row of it: 413 ms of a frozen window on the 246 MB note (profile build),

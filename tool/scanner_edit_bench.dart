@@ -1,6 +1,6 @@
 /// Measures what one edit costs the block scanner, and why.
 ///
-/// The claim it checks is the one `docs/dev/huge-notes.md` records (item 3):
+/// The claim it checks is the one `docs/records/huge-notes.md` records (item 3):
 /// a keystroke's cost is the *block* it landed in, not the note — unless the
 /// block is the note, which a `$$…$$` block at the head or a run of prose
 /// without a blank line can be. It prints the lines re-scanned and the block

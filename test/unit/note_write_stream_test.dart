@@ -1,4 +1,4 @@
-// The streaming save (docs/dev/huge-notes.md): a note handed to the writer
+// The streaming save (docs/records/huge-notes.md): a note handed to the writer
 // in slices, never joined, lands on disk exactly as the joined path leaves
 // it.
 import 'dart:async';

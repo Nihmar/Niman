@@ -118,7 +118,7 @@ final class NoteHistory {
 
   /// Pins as [path]'s sync base the version holding the content that
   /// hashes to [sha], keeping the note's current text as a `sync` version
-  /// first when no version holds it (docs/dev/sync.md). Returns the pinned
+  /// first when no version holds it (docs/records/sync.md). Returns the pinned
   /// version, or null when the content is gone from both the note and its
   /// history.
   Future<int?> pinSyncBase(String path, String sha) async {

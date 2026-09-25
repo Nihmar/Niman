@@ -228,7 +228,7 @@ void main() {
       // line and found no place to stop until it ended. It begins at the edit
       // now, and stops where the state and the block agree with what was
       // there, which inside a paragraph is the line after the edit
-      // (`docs/dev/huge-notes.md` item 3).
+      // (`docs/records/huge-notes.md` item 3).
       var start = -1;
       for (final block in scanner.index.blocks) {
         if (block.lineCount >= 2000) {

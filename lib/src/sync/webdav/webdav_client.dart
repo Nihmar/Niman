@@ -71,7 +71,7 @@ final class WebDavUpload {
   final bool mtimeAccepted;
 }
 
-/// A WebDAV client for one destination folder (docs/dev/sync.md, "The
+/// A WebDAV client for one destination folder (docs/records/sync.md, "The
 /// client").
 ///
 /// Every path is relative to [baseUrl], `/`-separated, unencoded; `''` is

@@ -3,7 +3,7 @@
 ///
 /// Two callers ask the same two questions. The source buffer asks "which line
 /// is this offset in, and where does line *i* start"; the height map
-/// (`docs/dev/unified-surface.md` §8.4.1) asks "which block is this pixel in,
+/// (`docs/records/unified-surface.md` §8.4.1) asks "which block is this pixel in,
 /// and where does block *i* start". Both are the same arithmetic over
 /// variable-length spans.
 ///

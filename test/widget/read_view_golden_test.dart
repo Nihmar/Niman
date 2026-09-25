@@ -1,4 +1,4 @@
-// The read view, as pixels (phase 2 of docs/dev/unified-surface.md asked for
+// The read view, as pixels (phase 2 of docs/records/unified-surface.md asked for
 // a golden image per fixture, and none was made until 2026-09-23).
 //
 // The other read-view tests hold properties — the blocks built, the text on

@@ -2,7 +2,7 @@
 /// cache saves.
 ///
 /// The parse is split where the measurements say
-/// (`docs/dev/unified-surface.md` §8.5): the block scan is 14 ms on the
+/// (`docs/records/unified-surface.md` §8.5): the block scan is 14 ms on the
 /// geometry note and the inline phase is 378 ms for the same document, so the
 /// inline half is done **per visible block** and kept while it is still true.
 /// This prints both numbers, and the third one that matters — what a document

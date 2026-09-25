@@ -614,7 +614,7 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// The mode the unified surface is built in: the WYSIWYG pane is `live`, the
-  /// source pane is `source` (`docs/dev/unified-surface.md` §8.6.3).
+  /// source pane is `source` (`docs/records/unified-surface.md` §8.6.3).
   MarkdownSurfaceMode get _unifiedMode => _wysiwygIn(widget)
       ? MarkdownSurfaceMode.live
       : MarkdownSurfaceMode.source;
@@ -1353,7 +1353,7 @@ final class _NoteViewState extends State<NoteView>
   );
 
   /// The unified surface's read mode: one engine, the same theme as the editor
-  /// (docs/dev/unified-surface.md).
+  /// (docs/records/unified-surface.md).
   Widget _buildUnifiedPreview(BuildContext context) => MarkdownReadView(
     key: _readViewKey,
     buffer: _unifiedSource,
@@ -1782,7 +1782,7 @@ final class _NoteViewState extends State<NoteView>
   ///
   /// On the unified surface the note is handed over in slices and never
   /// joined whole: the join and the encode of a 246 MB note cost the UI
-  /// isolate 300–530 ms in one go (see `docs/dev/huge-notes.md`), and both
+  /// isolate 300–530 ms in one go (see `docs/records/huge-notes.md`), and both
   /// are cut here into turns of a few milliseconds that leave the frames
   /// their gaps. A note with no streaming writer (a note outside a library, a
   /// test) is joined and saved whole.

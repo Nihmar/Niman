@@ -1,4 +1,4 @@
-/// Why a WebDAV request failed (docs/dev/sync.md, "The client").
+/// Why a WebDAV request failed (docs/records/sync.md, "The client").
 ///
 /// Messages carry a verb, a library-relative path and a status — never
 /// a URL with credentials, a header or file content — so they are safe

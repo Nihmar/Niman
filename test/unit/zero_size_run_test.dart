@@ -1,6 +1,6 @@
 /// The assumption the whole `live` mode rests on, measured.
 ///
-/// `docs/dev/unified-surface.md` §8.6 hides a Markdown marker by *styling* it
+/// `docs/records/unified-surface.md` §8.6 hides a Markdown marker by *styling* it
 /// rather than by removing it: the rendered string stays the source text, and
 /// the marker becomes a run at a zero font size so it takes no width. That
 /// keeps every offset 1:1 — which is what removes the offset map, the IME

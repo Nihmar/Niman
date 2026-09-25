@@ -9,7 +9,7 @@
 /// for the whole corpus in a benchmark.
 ///
 /// The specification, with the measured corpus value each dimension exceeds, is
-/// §5.7 of `docs/dev/unified-surface.md`. Its numbers are the contract:
+/// §5.7 of `docs/records/unified-surface.md`. Its numbers are the contract:
 /// `--check` prints what was generated and `test/unit/worst_note_test.dart`
 /// asserts it, so the fixture cannot drift away from the spec unnoticed.
 ///

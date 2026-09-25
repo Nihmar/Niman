@@ -24,7 +24,7 @@ import 'package:niman/src/todo/todo_store.dart';
 import 'package:path/path.dart' as p;
 
 /// A path both sides changed differently, left untouched for the merge
-/// (docs/dev/sync.md, "Conflicts").
+/// (docs/records/sync.md, "Conflicts").
 @immutable
 final class SyncConflict {
   /// A conflict at [path].
@@ -215,7 +215,7 @@ final class SyncFailure implements Exception {
   String toString() => 'SyncFailure(${moved ? 'moved' : reason.name}: $detail)';
 }
 
-/// Carries out sync runs for one library (docs/dev/sync.md): scans both
+/// Carries out sync runs for one library (docs/records/sync.md): scans both
 /// sides, plans with `reconcile.dart`, and applies the plan through
 /// [NoteOps] locally and a [WebDavClient] remotely, recording what both
 /// sides agreed on in [SyncStore].
@@ -309,7 +309,7 @@ final class SyncEngine {
   /// the stages and, while applying, the count.
   ///
   /// A full sync walks both trees; a [quick] one reconciles only the
-  /// paths of the queued hints that are due (docs/dev/sync.md, "Queue and
+  /// paths of the queued hints that are due (docs/records/sync.md, "Queue and
   /// triggers"), refuses to be a first sync, and leaves local trashing
   /// and moves to the next full sync. Either settles the hints it read:
   /// done when their paths reconciled, backing off when not.
@@ -1514,7 +1514,7 @@ final class SyncEngine {
     }
 
     // Both sides changed: with the version they last agreed on, the edits
-    // that do not overlap merge without asking anyone (docs/dev/sync.md,
+    // that do not overlap merge without asking anyone (docs/records/sync.md,
     // "Conflicts").
     final merge = await _tryMerge(c, d, fetched.temp, remote);
     if (merge != null) {
