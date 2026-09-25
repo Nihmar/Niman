@@ -1559,6 +1559,16 @@ final class GalicianStrings extends Strings {
   @override
   String get formatNoteDone => 'A nota arranxouse.';
   @override
+  String get exportTitle => 'Exportar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportado a $place';
+  @override
+  String exportFailed(Object error) => 'A exportación fallou: $error';
+  @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override
   String get lintRulesTitle => 'Regras de Markdown';

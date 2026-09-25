@@ -21,6 +21,9 @@ enum NoteMenuAction {
   /// Tidy the note's Markdown (#227).
   format,
 
+  /// Write the note out as a file (#24).
+  export,
+
   /// The Markdown cheatsheet (#265).
   cheatsheet,
 
@@ -93,6 +96,11 @@ final class NoteMenuButton extends StatelessWidget {
             NoteMenuAction.format,
             Icons.cleaning_services_outlined,
             AppStrings.formatNoteTitle,
+          ),
+          _item(
+            NoteMenuAction.export,
+            Icons.save_alt_outlined,
+            AppStrings.exportTitle,
           ),
           _item(
             NoteMenuAction.cheatsheet,

@@ -1558,6 +1558,16 @@ final class AlbanianStrings extends Strings {
   @override
   String get formatNoteDone => 'Shënimi u rregullua.';
   @override
+  String get exportTitle => 'Eksporto';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'U eksportua në $place';
+  @override
+  String exportFailed(Object error) => 'Eksportimi dështoi: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override
   String get lintRulesTitle => 'Rregullat e Markdown';

@@ -1550,6 +1550,16 @@ final class UkrainianStrings extends Strings {
   @override
   String get formatNoteDone => 'Нотатку впорядковано.';
   @override
+  String get exportTitle => 'Експортувати';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Експортовано до $place';
+  @override
+  String exportFailed(Object error) => 'Експорт не вдався: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override
   String get lintRulesTitle => 'Правила Markdown';

@@ -1576,6 +1576,16 @@ final class CatalanStrings extends Strings {
   @override
   String get formatNoteDone => 'La nota s’ha endreçat.';
   @override
+  String get exportTitle => 'Exporta';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportat a $place';
+  @override
+  String exportFailed(Object error) => 'L’exportació ha fallat: $error';
+  @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override
   String get lintRulesTitle => 'Regles de Markdown';

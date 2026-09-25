@@ -1594,6 +1594,16 @@ final class GreekStrings extends Strings {
   @override
   String get formatNoteDone => 'Η σημείωση τακτοποιήθηκε.';
   @override
+  String get exportTitle => 'Εξαγωγή';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Εξήχθη στο $place';
+  @override
+  String exportFailed(Object error) => 'Η εξαγωγή απέτυχε: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override
   String get lintRulesTitle => 'Κανόνες Markdown';

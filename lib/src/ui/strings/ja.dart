@@ -1446,6 +1446,16 @@ final class JapaneseStrings extends Strings {
   @override
   String get formatNoteDone => 'ノートを整えました。';
   @override
+  String get exportTitle => 'エクスポート';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '$place に書き出しました';
+  @override
+  String exportFailed(Object error) => 'エクスポートに失敗しました: $error';
+  @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override
   String get lintRulesTitle => 'Markdown ルール';

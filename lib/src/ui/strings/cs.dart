@@ -1537,6 +1537,16 @@ final class CzechStrings extends Strings {
   @override
   String get formatNoteDone => 'Poznámka byla uklizena.';
   @override
+  String get exportTitle => 'Export';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportováno do $place';
+  @override
+  String exportFailed(Object error) => 'Export se nezdařil: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override
   String get lintRulesTitle => 'Pravidla Markdownu';

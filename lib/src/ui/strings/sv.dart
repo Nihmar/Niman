@@ -1550,6 +1550,16 @@ final class SwedishStrings extends Strings {
   @override
   String get formatNoteDone => 'Anteckningen städades.';
   @override
+  String get exportTitle => 'Exportera';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exporterat till $place';
+  @override
+  String exportFailed(Object error) => 'Exporten misslyckades: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override
   String get lintRulesTitle => 'Markdown-regler';

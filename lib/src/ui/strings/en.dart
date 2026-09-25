@@ -1531,6 +1531,16 @@ final class EnglishStrings extends Strings {
   @override
   String get formatNoteDone => 'The note was tidied.';
   @override
+  String get exportTitle => 'Export';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exported to $place';
+  @override
+  String exportFailed(Object error) => 'Export failed: $error';
+  @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override
   String get lintRulesTitle => 'Markdown rules';

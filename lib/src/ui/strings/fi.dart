@@ -1557,6 +1557,16 @@ final class FinnishStrings extends Strings {
   @override
   String get formatNoteDone => 'Muistiinpano siivottiin.';
   @override
+  String get exportTitle => 'Vie';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Viety kohteeseen $place';
+  @override
+  String exportFailed(Object error) => 'Vienti epäonnistui: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override
   String get lintRulesTitle => 'Markdown-säännöt';

@@ -1559,6 +1559,16 @@ final class BulgarianStrings extends Strings {
   @override
   String get formatNoteDone => 'Бележката беше подредена.';
   @override
+  String get exportTitle => 'Изнасяне';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Изнесено в $place';
+  @override
+  String exportFailed(Object error) => 'Изнасянето не успя: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

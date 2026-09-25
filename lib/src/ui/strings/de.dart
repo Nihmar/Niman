@@ -1570,6 +1570,16 @@ final class GermanStrings extends Strings {
   @override
   String get formatNoteDone => 'Die Notiz wurde aufgeräumt.';
   @override
+  String get exportTitle => 'Exportieren';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportiert nach $place';
+  @override
+  String exportFailed(Object error) => 'Export fehlgeschlagen: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override
   String get lintRulesTitle => 'Markdown-Regeln';

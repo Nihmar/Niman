@@ -1560,6 +1560,16 @@ final class MacedonianStrings extends Strings {
   @override
   String get formatNoteDone => 'Белешката е средена.';
   @override
+  String get exportTitle => 'Извези';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Извезено во $place';
+  @override
+  String exportFailed(Object error) => 'Извозот не успеа: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

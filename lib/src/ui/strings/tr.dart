@@ -1532,6 +1532,16 @@ final class TurkishStrings extends Strings {
   @override
   String get formatNoteDone => 'Not düzenlendi.';
   @override
+  String get exportTitle => 'Dışa aktar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '$place konumuna aktarıldı';
+  @override
+  String exportFailed(Object error) => 'Dışa aktarma başarısız: $error';
+  @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override
   String get lintRulesTitle => 'Markdown kuralları';

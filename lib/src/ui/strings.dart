@@ -915,6 +915,11 @@ final class AppStrings {
   static String get formatNoteTitle => _s.formatNoteTitle;
   static String get formatNoteDone => _s.formatNoteDone;
   static String get formatNoteAlreadyTidy => _s.formatNoteAlreadyTidy;
+  static String get exportTitle => _s.exportTitle;
+  static String get exportFormatMarkdown => _s.exportFormatMarkdown;
+  static String get exportFormatHtml => _s.exportFormatHtml;
+  static String exportDone(String place) => _s.exportDone(place);
+  static String exportFailed(Object error) => _s.exportFailed(error);
   static String get tidyOnCloseTitle => _s.tidyOnCloseTitle;
   static String get tidyOnCloseSubtitle => _s.tidyOnCloseSubtitle;
   static String get lintRulesTitle => _s.lintRulesTitle;

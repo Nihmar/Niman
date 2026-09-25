@@ -1574,6 +1574,16 @@ final class SpanishStrings extends Strings {
   @override
   String get formatNoteDone => 'La nota se ha ordenado.';
   @override
+  String get exportTitle => 'Exportar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportado a $place';
+  @override
+  String exportFailed(Object error) => 'La exportación falló: $error';
+  @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override
   String get lintRulesTitle => 'Reglas de Markdown';
