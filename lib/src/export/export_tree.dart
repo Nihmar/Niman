@@ -266,6 +266,9 @@ Future<void> _exportTree(TreeExportRequest request) async {
           entry.rel,
           tree,
           request.language,
+          // A PDF zip holds PDFs: its links point at them, not at pages
+          // the zip does not have.
+          request.format == ExportTreeFormat.pdf ? '.pdf' : '.html',
         );
         if (request.format == ExportTreeFormat.pdf) {
           await _printInto(
@@ -326,6 +329,13 @@ Future<void> _printInto(
   final htmlPath = p.join(scratch.path, 'page.html');
   final pdfPath = p.join(scratch.path, 'page.pdf');
   File(htmlPath).writeAsStringSync(page);
+  // The scratch is reused for every note: a PDF left by the last one must
+  // not pass for this one's, should the printer answer without writing.
+  try {
+    File(pdfPath).deleteSync();
+  } on FileSystemException {
+    // Never written, or already gone.
+  }
   final printer = Platform.isAndroid
       ? const WebViewPdfPrinter()
       : ProcessPdfPrinter(engine: engine);
@@ -384,7 +394,13 @@ _Tree _walk(String dir) {
 /// [rel] without its Markdown extension: the page beside the note.
 String _stem(String rel) => p.withoutExtension(rel);
 
-String _page(String text, String rel, _Tree tree, String language) {
+String _page(
+  String text,
+  String rel,
+  _Tree tree,
+  String language,
+  String linkExtension,
+) {
   final noteDir = p.dirname(rel);
   final title =
       parseFrontmatter(text)?.title ?? p.basenameWithoutExtension(rel);
@@ -392,7 +408,7 @@ String _page(String text, String rel, _Tree tree, String language) {
     text: text,
     title: title,
     images: _imageUrls(text, noteDir, tree),
-    links: _linkUrls(text, noteDir, tree),
+    links: _linkUrls(text, noteDir, tree, linkExtension),
   );
   final html = NoteHtml(source);
   return htmlPage(
@@ -416,20 +432,26 @@ Map<String, String> _imageUrls(String text, String noteDir, _Tree tree) {
 
 /// The note links [text] writes, by the target as written, as URLs
 /// relative to the page. A target outside the subtree is left out: it
-/// becomes highlighted text on the page.
-Map<String, String> _linkUrls(String text, String noteDir, _Tree tree) {
+/// becomes highlighted text on the page. [extension] is what a note link
+/// points at — the page the zip holds, `.html` or `.pdf`.
+Map<String, String> _linkUrls(
+  String text,
+  String noteDir,
+  _Tree tree,
+  String extension,
+) {
   final out = <String, String>{};
   for (final link in parseLinks(text)) {
     switch (link) {
       case WikiLink(:final ref):
         final note = _noteIn(ref.target, noteDir, tree);
         if (note != null) {
-          out[ref.target] = _url(noteDir, '${_stem(note)}.html');
+          out[ref.target] = _url(noteDir, '${_stem(note)}$extension');
         }
       case MarkdownLink(:final href):
         if (!href.toLowerCase().endsWith('.md')) continue;
         final note = _noteIn(href, noteDir, tree);
-        if (note != null) out[href] = _url(noteDir, '${_stem(note)}.html');
+        if (note != null) out[href] = _url(noteDir, '${_stem(note)}$extension');
     }
   }
   return out;

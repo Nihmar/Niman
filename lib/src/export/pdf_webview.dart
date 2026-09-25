@@ -31,6 +31,9 @@ final class WebViewPdfPrinter implements PdfPrinter {
   final Duration timeout;
 
   @override
+  Future<bool> get canPrint async => true;
+
+  @override
   Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
     try {
       await _channel

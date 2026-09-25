@@ -44,6 +44,11 @@ abstract interface class PdfPrinter {
   /// Prints the page at [htmlPath] into [pdfPath]; whether it worked is
   /// the [PdfOutcome].
   Future<PdfOutcome> print(String htmlPath, String pdfPath);
+
+  /// Whether this machine has anything to print with, asked before the
+  /// page is built: with nothing, the note is drawn instead, and its HTML
+  /// is never needed.
+  Future<bool> get canPrint;
 }
 
 /// What running a program answered.
@@ -225,6 +230,13 @@ final class ProcessPdfPrinter implements PdfPrinter {
   /// How long an engine may take before it is called failed: a hung
   /// headless browser must not hold the export open.
   final Duration timeout;
+
+  @override
+  Future<bool> get canPrint async {
+    if (engine != null) return true;
+    final found = await (findEngine ?? _findEngine)();
+    return found != null;
+  }
 
   @override
   Future<PdfOutcome> print(String htmlPath, String pdfPath) async {

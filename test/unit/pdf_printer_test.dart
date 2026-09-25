@@ -72,6 +72,27 @@ void main() {
     });
   });
 
+  group('whether there is anything to print with', () {
+    test('an engine given is a printer', () async {
+      expect(
+        await const ProcessPdfPrinter(engine: '/usr/bin/chromium').canPrint,
+        isTrue,
+      );
+    });
+
+    test('discovery answers when none was given', () async {
+      expect(
+        await ProcessPdfPrinter(findEngine: () async => null).canPrint,
+        isFalse,
+      );
+      expect(
+        await ProcessPdfPrinter(findEngine: () async => '/usr/bin/chromium')
+            .canPrint,
+        isTrue,
+      );
+    });
+  });
+
   group('printing', () {
     test('the command is headless, and the file is checked', () async {
       final calls = <(String, List<String>)>[];

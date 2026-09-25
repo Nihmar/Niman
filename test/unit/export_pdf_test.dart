@@ -11,18 +11,31 @@ final class _Prints implements PdfPrinter {
   const new();
 
   @override
+  Future<bool> get canPrint async => true;
+
+  @override
   Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
     await File(pdfPath).writeAsBytes(<int>[1, 2, 3, 4]);
     return const PdfPrinted();
   }
 }
 
+/// A machine with nothing to print with: its [print] is never reached, and
+/// [calls] is how the tests know it.
 final class _NoEngine implements PdfPrinter {
-  const new();
+  new();
+
+  /// How many times a page was handed over.
+  int calls = 0;
 
   @override
-  Future<PdfOutcome> print(String htmlPath, String pdfPath) async =>
-      const PdfNoEngine();
+  Future<bool> get canPrint async => false;
+
+  @override
+  Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
+    calls++;
+    return const PdfNoEngine();
+  }
 }
 
 void main() {
@@ -52,6 +65,7 @@ void main() {
   });
 
   test('no engine and nothing to draw with is an error', () async {
+    final printer = _NoEngine();
     await expectLater(
       exportNotePdf(
         text: 'x\n',
@@ -59,9 +73,12 @@ void main() {
         path: 'Notes/x.md',
         root: root.path,
         language: 'en',
-        printer: const _NoEngine(),
+        printer: printer,
       ),
       throwsA(isA<NoPdfEngine>()),
     );
+    // A printer that cannot print is never handed a page: the note's HTML
+    // was not built for nothing.
+    expect(printer.calls, 0);
   });
 }
