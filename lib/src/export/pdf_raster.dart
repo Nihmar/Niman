@@ -65,7 +65,12 @@ Future<Uint8List> rasterPdf({
   // be waited for.
   final decoded = <String, ui.Image>{};
   for (final entry in (images ?? const <String, Uint8List>{}).entries) {
-    decoded[entry.key] = await _decode(entry.value);
+    try {
+      decoded[entry.key] = await _decode(entry.value);
+    } on Object {
+      // A picture the engine cannot decode is left as the note's own
+      // words, not made the export's failure.
+    }
   }
   final key = GlobalKey();
   final layout = _OffscreenLayout(
