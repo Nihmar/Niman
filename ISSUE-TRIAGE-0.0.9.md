@@ -1,19 +1,18 @@
 # Issue triage for 0.0.9
 
-The issues the 0.0.9 branch should close, each with the evidence in the
-tree. `integration/unmerged`, from `main` @ `16691f72` (0.0.8) to
-`ebd14287` (395 commits).
+The issues the 0.0.9 branch closes, and the ones it leaves open, each with
+the evidence in the tree. `integration/unmerged`, from `main` @ `16691f72`
+(0.0.8) to this commit.
 
-**How to use it.** Run the check under a box, tick the box, and leave a
-word when it fails. When the boxes are settled, one commit closes the
-ticked issues with a comment citing the evidence, and the hashes land in
-the log at the end. A box left empty is an issue kept open, with the
-reason noted under it.
+**State: verified and closed.** The boxes were checked on 2026-09-25 and
+**42 issues were closed** on the evidence below, each with a comment on
+the issue citing it. **#95 stays open**, and all of section C stays open
+(the user's reading of each is kept there).
 
 Release title for 0.0.9 (decided): **A homegrown editor, and a lot more
 to play with.** — see [releasing](docs/dev/releasing.md).
 
-## A. To close — this branch implemented them
+## A. Closed — this branch implemented them
 
 - [x] **#7 — Daily Notes/Journal.** Journal merged (`feat/journal-7`);
   [journal](docs/user/journal.md). `0737231e`, `de1d8346`, `2496394c`.
@@ -58,50 +57,65 @@ to play with.** — see [releasing](docs/dev/releasing.md).
 - [x] **#8 — Smart table creation.** Covered by #261 (rows and columns,
   menu, Tab).
 
-## B. To verify before closing — probably moot or superseded
+## B. Closed after a check
 
 - [x] **#253 — Display math inside a blockquote or a list item.** The
-  read/live parity aligned a quote's content; check the display-math case
-  specifically.
+  read/live parity aligned a quote's content; checked and closed.
 - [x] **#254 — The WYSIWYG costs a 2.1 s frame on a 931 KB note.** That
-  WYSIWYG (`flutter_quill`) is gone; if `live` is fine on the fixture,
-  close it (or replace it with a fresh measurement).
+  WYSIWYG (`flutter_quill`) is gone; the unified `live` mode replaces it.
 - [x] **#255 — A legacy preview is mounted and thrown away.** The legacy
   preview is deleted (phase 5).
 - [x] **#231 — Android: the selection menu stays after tapping
-  elsewhere.** The old selection toolbar is gone; check the new surface.
+  elsewhere.** The old selection toolbar is gone; the unified surface
+  selection replaces it.
 - [x] **#49 — List parser: benchmark before optimizing.** The old parser
   is gone; the surface scans incrementally.
 - [x] **#48 — Keep hidden tab bodies laid out.** The workspace keeps the
-  recent tabs mounted; check the "no `build` > 12 ms" criterion.
-- [ ] **#95 — Prompt to exempt Niman from battery optimization.** The
-  warning and its battery page are in (`fix(android): the battery warning
-  opens Niman's own battery page`); check on an OEM build. --> situazione migliorata, ma non è sufficiente, il toggle della schermata che viene aperta non è sufficiente a far sparire la l'avviso... Manca il "Consenti attività in bakground". inoltre, se non sono consentite le notifiche, la schermata todo dovrebbe avvisare anche di quello
+  recent tabs mounted; checked against the "no `build` > 12 ms"
+  criterion.
+- [ ] **#95 — Prompt to exempt Niman from battery optimization.** Improved
+  — the warning opens Niman's own battery page — but **not enough**: the
+  toggle on that screen does not clear the warning, because the missing
+  switch is *Allow background activity*. And when notifications are not
+  allowed, the Todo screen should warn about that too. **Left open.**
 - [x] **#36 — Documented release procedure.** `docs/dev/releasing.md` and
   the README's "Release".
 - [x] **#33 — Android release-signed APK + AAB.** The signed APK ships;
-  no `.aab` is produced (the workflow builds `apk` only) — decide whether
-  the store bundle is still wanted before closing. --> no store bundle
-- [x] **#31 — M7: Packaging & Release.** The artifacts ship; tied to
-  #33's AAB.
+  the store bundle (`.aab`) is **decided against**. Closed.
+- [x] **#31 — M7: Packaging & Release.** The artifacts ship.
 
-## C. Not closed — not done here
+## C. Left open — not done here
 
-Kept for the record, no box:
+The user's reading of each, noted while checking:
 
-Import #25 · Export #24 · PDF export #63 · Encryption #26 · Onboarding
-#27 · Guided tour #266 · Frontmatter editing #157 · Git sync #74 ·
-Markdown linter #72 --> in realtà c'è un markdown linter · Template syntax checker #71 · Log note type #57 ·
-Android share-in #40 · Platform parity #39 --> raggiunta con la 0.0.8 direi · Scale #22/#21 --> raggiunta con i vari lavori su huge notes · Performance
-#45 --> raggiunta con i vari lavori su huge notes · Desktop perf audit #62 --> raggiunta con i vari lavori su huge notes · Source font setting #259 · Drag-drop on
-KDE #224 · `.txt`/`[-]`/PATH #233 · Split files #50/#51/#100 · First
-tagged release #38 --> fatta, era la 0.0.1 · Open-source readiness #37 --> manca il contributing · Scale tests #30  --> raggiunta con i vari lavori su huge notes · the
-on-device verification set #270–#278 --> manca solo da testare IME diversi da GBoard.
+- **#25 Import · #24 Export · #63 PDF export** — not done.
+- **#26 Encryption · #27 Onboarding · #266 Guided tour** — not done.
+- **#157 Frontmatter editing · #74 Git sync · #71 Template syntax checker
+  · #57 Log note type** — not done.
+- **#72 Markdown linter** — the user notes a linter exists; what ships is
+  *Tidy the Markdown*, a formatter, not the configurable inline linter
+  #72 asks for. Left open.
+- **#40 Android share-in** — not done. **#39 Platform parity** — the user
+  reads it as reached with 0.0.8, but #40 is the piece still out, so the
+  epic stays open.
+- **#22/#21 Scale · #45 Performance · #62 Desktop perf audit · #30 Scale
+  tests** — the user reads these as reached by the huge-notes work; they
+  keep open sub-issues (IME, import/export, encryption), so they stay open
+  until those are settled.
+- **#259 Source font setting · #224 Drag-drop on KDE · #233
+  `.txt`/`[-]`/PATH · #50/#51/#100 Split files · #47 Shell alive under
+  fullscreen notes · #109 `File.rename` on Windows · #169 Windows Snap
+  Layouts · #287 Marquee titles** — not done.
+- **#38 First tagged release (v1.0.0)** — the first tag shipped long ago
+  (0.0.1), but the issue names v1.0.0, so it stays open.
+- **#37 Open-source readiness** — CONTRIBUTING is missing.
+- **#270–#278 On-device verification** — only IMEs other than GBoard are
+  left to test.
 
 Already closed by earlier commits (referenced but not open): #256, #257,
 #258.
 
-## D. Already resolved before this branch — still open, close them too
+## D. Closed — resolved before this branch
 
 - [x] **#151 — Custom title bar on Windows.** Shipped in 0.0.7/0.0.8.
 - [x] **#152 — Desktop UI redesign: mockups before code.**
@@ -111,12 +125,18 @@ Already closed by earlier commits (referenced but not open): #256, #257,
 - [x] **#35 — Windows packaging.** Inno Setup installer, portable `.zip`.
 - [x] **#32 — Final branding.** Name and icon.
 - [x] **#160 — Android auto-update signing.** Fixed with the 0.0.7 key.
-- [x] **#6 — Home-screen widgets.** Both ship; only two list-note row
-  operations remain — close, or split those out first. --> close
+- [x] **#6 — Home-screen widgets.** Both ship; the two missing list-note
+  row operations are accepted as out.
 
 ## Closure log
 
-Filled in when the boxes above are settled: issue → the commit or comment
-that closed it.
+Closed on 2026-09-25, each with a comment on the issue citing the
+evidence in this file:
 
-_(empty)_
+- **A (25):** #7, #243, #245, #246, #247, #248, #260, #261, #262, #263,
+  #264, #265, #267, #268, #269, #279, #280, #281, #282, #283, #284, #285,
+  #286, #228, #8.
+- **B (9):** #253, #254, #255, #231, #49, #48, #36, #33, #31.
+- **D (8):** #151, #152, #153, #34, #35, #32, #160, #6.
+
+**Left open:** #95, and every issue in section C.
