@@ -129,6 +129,18 @@ final class PluginReminderBackend implements ReminderBackend {
     throw failure ?? Exception('todo reminders: no usable icon');
   }
 
+  /// The runtime permission state (Android 13+), without asking: granted
+  /// at install below 13 (the query answers null there — treated as
+  /// granted); on 13+ the stored answer stands.
+  @override
+  Future<bool> notificationsEnabled() async {
+    final android = _android;
+    if (android == null) {
+      return true;
+    }
+    return await android.areNotificationsEnabled() ?? true;
+  }
+
   /// The runtime permission state (Android 13+): granted at install
   /// below 13 (the query answers null there — treated as granted); on
   /// 13+ the system dialog shows once per process, afterwards the

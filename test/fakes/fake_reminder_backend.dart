@@ -54,6 +54,9 @@ final class FakeReminderBackend implements ReminderBackend {
   }
 
   @override
+  Future<bool> notificationsEnabled() async => allowed;
+
+  @override
   Future<bool> notificationsAllowed() async => allowed;
 
   @override

@@ -39,7 +39,9 @@ in local wall-clock time. It fires with the screen off, the app in the
 background, or the process killed (Android). The app warns when a
 notification or background setting could block delivery — the banner
 over the task list, and, as soon as a reminder is set, the dialog that
-set it. Both **Open settings** actions open Niman's **App info** page
+set it. The banner appears as soon as the app knows a setting is off,
+even before any reminder exists; only the system permission dialog waits
+for the first reminder. Both **Open settings** actions open Niman's **App info** page
 (*Informazioni app*), where the notification switch, the battery usage
 row and the permissions sit together: turn on **Allow background usage**
 (*Consenti l'utilizzo in background*). An app the system will not start

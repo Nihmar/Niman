@@ -35,6 +35,15 @@ abstract interface class ReminderBackend {
   /// alarms alone rather than cancelling what it cannot replace.
   Future<void> ensureReady();
 
+  /// Whether notifications may be posted right now, without asking.
+  ///
+  /// The Todo tab warns from this even when no reminder is set, so the
+  /// permission is surfaced before the first one is created. Off Android
+  /// 13+ a freshly installed app answers false until it asks, which is
+  /// why the warning is not the whole story: [notificationsAllowed]
+  /// still asks when a reminder wants posting.
+  Future<bool> notificationsEnabled();
+
   /// Whether notifications may be posted (asking once if it can).
   Future<bool> notificationsAllowed();
 

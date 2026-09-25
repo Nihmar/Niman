@@ -192,6 +192,19 @@ void main() {
       await service.dispose();
     });
 
+    test('blocked notifications warn even with no reminder', () async {
+      // The Todo tab says the permission is off before the first reminder
+      // exists; only the permission dialog waits for one, so an app with
+      // none never puts a dialog in front of the user.
+      backend.allowed = false;
+      final service = serviceOf();
+      await service.reconcile(const {});
+
+      expect(service.health.value, ReminderHealth.notificationsBlocked);
+      expect(backend.calls, contains('ready'));
+      await service.dispose();
+    });
+
     test('a background restriction outranks inexact alarms', () async {
       // Worst-first: an app the system will not run in the background may
       // never fire at all, while inexact only arrives late.

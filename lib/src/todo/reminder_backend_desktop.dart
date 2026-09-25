@@ -54,6 +54,9 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// system can still be set to hide them, and neither desktop exposes a
   /// query for that, so this is the honest best answer.
   @override
+  Future<bool> notificationsEnabled() async => true;
+
+  @override
   Future<bool> notificationsAllowed() async => true;
 
   /// Always true: a [Timer] is not subject to Doze batching.
