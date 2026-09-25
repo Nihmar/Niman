@@ -1566,6 +1566,27 @@ final class DutchStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override
+  String get lintRulesTitle => 'Markdown-regels';
+  @override
+  String get lintRulesSubtitle =>
+      'Wat het opruimen regelt: lege regels in lijsten, taakvakjes, spaties '
+      'na de markering en codeblokken.';
+  @override
+  String get lintRulesReset => 'Standaardwaarden herstellen';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Alle $all' : '$on van $all';
+  @override
+  String get lintRuleTightLists => 'Compacte lijsten';
+  @override
+  String get lintRuleTaskMarker => 'Taakvakjes';
+  @override
+  String get lintRuleListSpacing => 'Lijstafstand';
+  @override
+  String get lintRuleClosingFence => 'Sluitend hek';
+  @override
+  String get lintRuleFenceLanguage => 'Taal van het codeblok';
+  @override
   String get tidyOnCloseTitle => 'Markdown opruimen bij sluiten';
   @override
   String get tidyOnCloseSubtitle =>

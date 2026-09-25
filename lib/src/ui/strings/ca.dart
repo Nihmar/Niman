@@ -1578,6 +1578,27 @@ final class CatalanStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override
+  String get lintRulesTitle => 'Regles de Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Què arregla l’ordenació: línies buides a les llistes, caselles de '
+      'tasca, espais després del marcador i blocs de codi.';
+  @override
+  String get lintRulesReset => 'Restaura els valors per defecte';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Totes $all' : '$on de $all';
+  @override
+  String get lintRuleTightLists => 'Llistes compactes';
+  @override
+  String get lintRuleTaskMarker => 'Caselles de tasca';
+  @override
+  String get lintRuleListSpacing => 'Espaiat de llistes';
+  @override
+  String get lintRuleClosingFence => 'Tancament del bloc de codi';
+  @override
+  String get lintRuleFenceLanguage => 'Llengua del bloc de codi';
+  @override
   String get tidyOnCloseTitle => 'Endreça el Markdown en tancar';
   @override
   String get tidyOnCloseSubtitle =>

@@ -26,6 +26,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -411,6 +412,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setTidyOnClose({required bool enabled}) async {
     _config = _config.copyWith(tidyOnClose: enabled);
+  }
+
+  @override
+  Future<Set<String>> get lintRulesOff async => _config.lintRulesOff;
+
+  @override
+  Future<void> setLintRulesOff(Set<String> ids) async {
+    _config = _config.copyWith(lintRulesOff: ids);
+    _bump();
   }
 
   @override
@@ -881,10 +891,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   final List<String> tidied = [];
 
   @override
-  Future<bool> tidyNote(String path) async {
+  Future<bool> tidyNote(String path, {Set<LintRule>? rules}) async {
     tidied.add(path);
     final row = _requireRow(path);
-    final tidy = formatMarkdown(row.content);
+    final tidy = formatMarkdown(row.content, rules: rules);
     if (tidy == row.content) return false;
     row.content = tidy;
     _bump();

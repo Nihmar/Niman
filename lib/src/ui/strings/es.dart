@@ -1576,6 +1576,27 @@ final class SpanishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override
+  String get lintRulesTitle => 'Reglas de Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Lo que corrige el ordenado: líneas en blanco en listas, casillas de '
+      'tarea, espacios tras el marcador y bloques de código.';
+  @override
+  String get lintRulesReset => 'Restablecer los valores predeterminados';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Todas $all' : '$on de $all';
+  @override
+  String get lintRuleTightLists => 'Listas compactas';
+  @override
+  String get lintRuleTaskMarker => 'Casillas de tarea';
+  @override
+  String get lintRuleListSpacing => 'Espaciado de listas';
+  @override
+  String get lintRuleClosingFence => 'Cierre del bloque de código';
+  @override
+  String get lintRuleFenceLanguage => 'Lenguaje del bloque de código';
+  @override
   String get tidyOnCloseTitle => 'Ordenar el Markdown al cerrar';
   @override
   String get tidyOnCloseSubtitle =>

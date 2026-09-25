@@ -935,6 +935,17 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(tidyOnClose: enabled));
   }
 
+  /// The #72 rules turned off, by id.
+  @override
+  Future<Set<String>> get lintRulesOff async => (await _library).lintRulesOff;
+
+  /// Sets (and persists) the rules turned off.
+  @override
+  Future<void> setLintRulesOff(Set<String> ids) async {
+    _log.info('lint rules off set to ${ids.join(', ')}');
+    await _editLibrary((c) => c.copyWith(lintRulesOff: ids));
+  }
+
   /// The spell-check dictionary names, in selection order.
   @override
   Future<List<String>> get spellDictionaries async =>

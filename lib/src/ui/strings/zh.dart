@@ -1415,6 +1415,25 @@ final class ChineseStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override
+  String get lintRulesTitle => 'Markdown 规则';
+  @override
+  String get lintRulesSubtitle => '整理会处理：列表空行、任务复选框、标记后的空格和代码块。';
+  @override
+  String get lintRulesReset => '恢复默认';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? '全部 $all 条' : '$all 条中的 $on 条';
+  @override
+  String get lintRuleTightLists => '紧凑列表';
+  @override
+  String get lintRuleTaskMarker => '任务复选框';
+  @override
+  String get lintRuleListSpacing => '列表空格';
+  @override
+  String get lintRuleClosingFence => '代码块闭合';
+  @override
+  String get lintRuleFenceLanguage => '代码块语言';
+  @override
   String get tidyOnCloseTitle => '关闭时整理 Markdown';
   @override
   String get tidyOnCloseSubtitle =>

@@ -15,6 +15,7 @@ import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/library/note_tidy.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
@@ -149,7 +150,8 @@ final class NoteWriter {
   }
 
   /// Tidies the note at [path] (`formatMarkdown`), in its turn among its
-  /// saves; answers whether the note changed.
+  /// saves; answers whether the note changed. [rules] are the #72 rules to
+  /// apply; null applies them all.
   ///
   /// In turn, so the text tidied is the note as its last save left it and
   /// nothing written after the tidying began is written over: a save asked
@@ -157,23 +159,26 @@ final class NoteWriter {
   /// [tidyLimit] bytes is left as it is — tidying reads and rewrites the
   /// whole note, which on the 247 MB stress note is a note-sized job for a
   /// tidy nobody asked of it by name.
-  Future<bool> tidy(String path) => _inTurn(path, () async {
-    final tidied = await _tidiedOffIsolate(p.join(root, path));
-    if (tidied == null) return false;
-    _log.info('tidy: "$path"');
-    await _write(path, tidied, null, null, Stopwatch()..start(), null);
-    return true;
-  });
+  Future<bool> tidy(String path, {Set<LintRule>? rules}) =>
+      _inTurn(path, () async {
+        final tidied = await _tidiedOffIsolate(p.join(root, path), rules);
+        if (tidied == null) return false;
+        _log.info('tidy: "$path"');
+        await _write(path, tidied, null, null, Stopwatch()..start(), null);
+        return true;
+      });
 
   /// The largest note [tidy] tidies.
   static const int tidyLimit = 4 << 20;
 
   /// The tidied text of the note at [abs], or null when it is tidy already,
-  /// past [tidyLimit], or gone. Static so the closure holds the path alone.
-  static Future<String?> _tidiedOffIsolate(String abs) => IsolateGauge.run(
-    () => tidiedNoteText(abs, limit: tidyLimit),
-    'tidy "${p.basename(abs)}"',
-  );
+  /// past [tidyLimit], or gone. Static so the closure holds the path, the
+  /// rules and the limit alone.
+  static Future<String?> _tidiedOffIsolate(String abs, Set<LintRule>? rules) =>
+      IsolateGauge.run(
+        () => tidiedNoteText(abs, limit: tidyLimit, rules: rules),
+        'tidy "${p.basename(abs)}"',
+      );
 
   /// Replaces the file at library-relative [path] with the finished file
   /// at [tempAbs] (a verified sync download next to it), in the same

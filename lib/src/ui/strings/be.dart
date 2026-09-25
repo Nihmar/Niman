@@ -1547,6 +1547,27 @@ final class BelarusianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';
   @override
+  String get lintRulesTitle => 'Правілы Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Што ўпарадкоўвае: пустыя радкі ў спісах, пазнакі задач, прабелы пасля '
+      'маркера і блокі коду.';
+  @override
+  String get lintRulesReset => 'Вярнуць перадвызначаныя';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Усе $all' : '$on з $all';
+  @override
+  String get lintRuleTightLists => 'Шчыльныя спісы';
+  @override
+  String get lintRuleTaskMarker => 'Пазнакі задач';
+  @override
+  String get lintRuleListSpacing => 'Прабелы ў спісах';
+  @override
+  String get lintRuleClosingFence => 'Закрыццё блока коду';
+  @override
+  String get lintRuleFenceLanguage => 'Мова блока коду';
+  @override
   String get tidyOnCloseTitle => 'Упарадкоўваць Markdown пры закрыцці';
   @override
   String get tidyOnCloseSubtitle =>

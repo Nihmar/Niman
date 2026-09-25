@@ -17,6 +17,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:path/path.dart' as p;
 
 /// The number of kept `.history/` versions of a fresh library.
@@ -222,6 +223,20 @@ Set<EditorKind> _enabledEditorsFrom(Object? raw) {
   return kinds.isEmpty ? const {EditorKind.source, EditorKind.wysiwyg} : kinds;
 }
 
+/// Reads a `lintRulesOff` list out of the settings file: the #72 rules
+/// this library has turned off, by [LintRule.id].
+///
+/// The rules *left out* are stored, not the ones on, so a rule added in a
+/// later build runs without a migration — and an unknown id (a rule a
+/// newer build wrote, or one since removed) is dropped.
+Set<String> _lintRulesOffFrom(Object? raw) {
+  if (raw is! List) return const <String>{};
+  return <String>{
+    for (final id in raw)
+      if (id is String && LintRule.values.any((rule) => rule.id == id)) id,
+  };
+}
+
 /// Reads a `spellDictionaries` list out of the settings file.
 ///
 /// Accepts the legacy single `spellDictionary` string as well, so an
@@ -320,6 +335,7 @@ final class LibraryConfig {
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
     this.tidyOnClose = true,
+    this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
@@ -389,6 +405,7 @@ final class LibraryConfig {
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
       tidyOnClose: _boolOr(json['tidyOnClose'], true),
+      lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
       treeSort: switch (json['treeSort']) {
         'nameDesc' => TreeSort.nameDesc,
         _ => TreeSort.nameAsc,
@@ -505,6 +522,13 @@ final class LibraryConfig {
   /// them.
   final bool tidyOnClose;
 
+  /// The #72 rules this library has turned off, by [LintRule.id].
+  ///
+  /// The rules *left out* are stored: a rule added in a later build runs
+  /// without a migration, and an id a newer build wrote is dropped on
+  /// read. Empty — the default — means every rule runs.
+  final Set<String> lintRulesOff;
+
   /// The tree's sort order (default [TreeSort.nameAsc]).
   final TreeSort treeSort;
 
@@ -579,6 +603,7 @@ final class LibraryConfig {
     bool? editorAutofocus,
     bool? reminderShowTokens,
     bool? tidyOnClose,
+    Set<String>? lintRulesOff,
     TreeSort? treeSort,
     LinkType? linkType,
     MissingNoteLocation? missingNoteLocation,
@@ -614,6 +639,7 @@ final class LibraryConfig {
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
+      lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
       missingNoteLocation: missingNoteLocation ?? this.missingNoteLocation,
@@ -679,6 +705,7 @@ final class LibraryConfig {
     'editorAutofocus',
     'reminderShowTokens',
     'tidyOnClose',
+    'lintRulesOff',
     'treeSort',
     'linkType',
     'missingNoteLocation',
@@ -755,6 +782,14 @@ final class LibraryConfig {
     if (spellDictionaries.isNotEmpty) {
       json['spellDictionaries'] = spellDictionaries;
     }
+    if (lintRulesOff.isNotEmpty) {
+      // Canonical order, so the file does not churn on a set rebuilt
+      // insertion-ordered differently.
+      json['lintRulesOff'] = [
+        for (final rule in LintRule.values)
+          if (lintRulesOff.contains(rule.id)) rule.id,
+      ];
+    }
     for (final entry in extra.entries) {
       if (_knownKeys.contains(entry.key)) continue;
       json[entry.key] = entry.value;
@@ -822,6 +857,8 @@ final class LibraryConfig {
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&
         tidyOnClose == other.tidyOnClose &&
+        lintRulesOff.length == other.lintRulesOff.length &&
+        lintRulesOff.containsAll(other.lintRulesOff) &&
         treeSort == other.treeSort &&
         linkType == other.linkType &&
         missingNoteLocation == other.missingNoteLocation &&

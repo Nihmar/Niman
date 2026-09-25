@@ -6,6 +6,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -49,6 +50,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   double _noteColumnWidth = defaultNoteColumnWidth;
   bool _typewriter = false;
   bool _tidyOnClose = true;
+  Set<String> _lintRulesOff = const <String>{};
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
   MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
@@ -78,6 +80,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final noteColumnWidth = await controller.noteColumnWidth;
     final typewriter = await controller.typewriter;
     final tidyOnClose = await controller.tidyOnClose;
+    final lintRulesOff = await controller.lintRulesOff;
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
     final missingNoteLocation = await controller.missingNoteLocation;
@@ -92,6 +95,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _noteColumnWidth = noteColumnWidth;
       _typewriter = typewriter;
       _tidyOnClose = tidyOnClose;
+      _lintRulesOff = lintRulesOff;
       _autofocusEditor = autofocus;
       _linkType = linkType;
       _missingNoteLocation = missingNoteLocation;
@@ -143,6 +147,81 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     controller.notify();
     if (mounted) setState(() => _tidyOnClose = value);
   }
+
+  /// The rules a tidy applies (#72). The dialog edits the *off* set, the
+  /// way the settings file stores it: a rule added in a later build then
+  /// runs with no migration.
+  Future<void> _chooseLintRules() async {
+    final off = <String>{..._lintRulesOff};
+    final choice = await showDialog<Set<String>>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          key: const Key('lint-rules-dialog'),
+          scrollable: true,
+          title: Text(AppStrings.lintRulesTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                AppStrings.lintRulesSubtitle,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final rule in LintRule.values)
+                CheckboxListTile(
+                  key: Key('lint-rule-${rule.id}'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(_lintRuleLabel(rule)),
+                  value: !off.contains(rule.id),
+                  onChanged: (value) => setDialogState(() {
+                    if (value ?? false) {
+                      off.remove(rule.id);
+                    } else {
+                      off.add(rule.id);
+                    }
+                  }),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              key: const Key('lint-rules-reset'),
+              onPressed: () => setDialogState(off.clear),
+              child: Text(AppStrings.lintRulesReset),
+            ),
+            TextButton(
+              key: const Key('lint-rules-cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(AppStrings.actionCancel),
+            ),
+            FilledButton(
+              key: const Key('lint-rules-save'),
+              onPressed: () => Navigator.of(context).pop(off),
+              child: Text(AppStrings.actionSave),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null) return;
+    await widget.controller.setLintRulesOff(choice);
+    widget.controller.notify();
+    if (mounted) setState(() => _lintRulesOff = choice);
+  }
+
+  /// The settings row's name for [rule].
+  static String _lintRuleLabel(LintRule rule) => switch (rule) {
+    LintRule.tightLists => AppStrings.lintRuleTightLists,
+    LintRule.taskMarker => AppStrings.lintRuleTaskMarker,
+    LintRule.listSpacing => AppStrings.lintRuleListSpacing,
+    LintRule.closingFence => AppStrings.lintRuleClosingFence,
+    LintRule.fenceLanguage => AppStrings.lintRuleFenceLanguage,
+  };
 
   /// Asks how wide the note column is.
   Future<void> _chooseNoteColumnWidth() async {
@@ -535,6 +614,20 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               description: AppStrings.tidyOnCloseSubtitle,
               value: _tidyOnClose,
               onChanged: (value) => unawaited(_toggleTidyOnClose(value)),
+            ),
+          ),
+          // The rules that tidy applies (#72): the switch above is the
+          // master, this chooses what it settles.
+          HighlightRow(
+            key: SettingsKeys.lintRules,
+            child: SettingsValueRow(
+              title: AppStrings.lintRulesTitle,
+              subtitle: AppStrings.lintRulesSubtitle,
+              value: AppStrings.lintRulesValue(
+                LintRule.values.length - _lintRulesOff.length,
+                LintRule.values.length,
+              ),
+              onTap: () => unawaited(_chooseLintRules()),
             ),
           ),
           if (spell != null && spell.available) ...[

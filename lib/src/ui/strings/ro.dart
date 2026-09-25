@@ -1559,6 +1559,27 @@ final class RomanianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
   @override
+  String get lintRulesTitle => 'Reguli Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Ce aranjează curățarea: rânduri goale în liste, casete de activitate, '
+      'spații după marcator și blocuri de cod.';
+  @override
+  String get lintRulesReset => 'Revenire la valorile implicite';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Toate $all' : '$on din $all';
+  @override
+  String get lintRuleTightLists => 'Liste compacte';
+  @override
+  String get lintRuleTaskMarker => 'Casete de activitate';
+  @override
+  String get lintRuleListSpacing => 'Spațierea listelor';
+  @override
+  String get lintRuleClosingFence => 'Închiderea blocului de cod';
+  @override
+  String get lintRuleFenceLanguage => 'Limbajul blocului de cod';
+  @override
   String get tidyOnCloseTitle => 'Aranjează Markdown-ul la închidere';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1545,6 +1545,27 @@ final class IcelandicStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override
+  String get lintRulesTitle => 'Markdown-reglur';
+  @override
+  String get lintRulesSubtitle =>
+      'Hvað hreinsunin lagar: auðar línur í listum, gátbox, bil eftir '
+      'merkingu og kóðablokkir.';
+  @override
+  String get lintRulesReset => 'Frumstilla';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Allar $all' : '$on af $all';
+  @override
+  String get lintRuleTightLists => 'Þéttir listar';
+  @override
+  String get lintRuleTaskMarker => 'Gátbox';
+  @override
+  String get lintRuleListSpacing => 'Bil í listum';
+  @override
+  String get lintRuleClosingFence => 'Lokun kóðablokkar';
+  @override
+  String get lintRuleFenceLanguage => 'Tungumál kóðablokkar';
+  @override
   String get tidyOnCloseTitle => 'Taka til í Markdown við lokun';
   @override
   String get tidyOnCloseSubtitle =>

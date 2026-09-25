@@ -16,6 +16,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -111,7 +112,9 @@ abstract interface class NoteOperations {
   /// saves, as the note stands once they are done; answers whether it
   /// changed. What a note edited and closed gets, when the library asks
   /// for it (`LibraryConfig.tidyOnClose`).
-  Future<bool> tidyNote(String path);
+  ///
+  /// [rules] are the #72 rules to apply; null applies them all.
+  Future<bool> tidyNote(String path, {Set<LintRule>? rules});
 
   /// The kept history of the note at [path]: its versions, oldest first,
   /// and the pinned ones (issue #55).
@@ -412,6 +415,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the tidy-on-close toggle.
   Future<void> setTidyOnClose({required bool enabled});
+
+  /// The #72 rules turned off, by id (`LintRule.id`); the rest run when a
+  /// note is tidied. Empty — the default — means every rule runs.
+  Future<Set<String>> get lintRulesOff;
+
+  /// Sets (and persists) the rules turned off.
+  Future<void> setLintRulesOff(Set<String> ids);
 
   /// The hunspell dictionaries the spell checker uses (`<name>`s found
   /// on the machine), in selection order; empty means the locale default.

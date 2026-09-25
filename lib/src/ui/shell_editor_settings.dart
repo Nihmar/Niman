@@ -16,6 +16,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 
 /// What the shell needs to know about the open library to draw it.
 @immutable
@@ -38,6 +39,7 @@ final class ShellEditorSettings {
     this.treeWidth = defaultTreeWidth,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.tidyOnClose = true,
+    this.lintRulesOff = const <String>{},
   });
 
   /// What the shell shows before the first read lands.
@@ -92,6 +94,16 @@ final class ShellEditorSettings {
   /// the "Tidy the Markdown" command does.
   final bool tidyOnClose;
 
+  /// The #72 rules turned off, by id; see [lintRules] for the ones that
+  /// run.
+  final Set<String> lintRulesOff;
+
+  /// The rules a tidy applies: every rule but the ones turned off.
+  Set<LintRule> get lintRules => <LintRule>{
+    for (final rule in LintRule.values)
+      if (!lintRulesOff.contains(rule.id)) rule,
+  };
+
   /// Reads the open library's settings.
   ///
   /// Two of them are answered rather than reported: an `editorsEnabled`
@@ -116,6 +128,7 @@ final class ShellEditorSettings {
     final treeWidth = await session.treeWidth;
     final toolbar = await session.editorToolbar;
     final tidyOnClose = await session.tidyOnClose;
+    final lintRulesOff = await session.lintRulesOff;
     final editorKind = await session.editorKind;
     final editorsEnabled = await session.enabledEditors;
     final enabled = editorsEnabled.isEmpty
@@ -144,6 +157,7 @@ final class ShellEditorSettings {
       treeWidth: treeWidth,
       toolbarLayout: ToolbarLayout.parse(toolbar),
       tidyOnClose: tidyOnClose,
+      lintRulesOff: lintRulesOff,
     );
   }
 
@@ -160,6 +174,7 @@ final class ShellEditorSettings {
     double? treeWidth,
     bool? typewriter,
     bool? tidyOnClose,
+    Set<String>? lintRulesOff,
   }) {
     return ShellEditorSettings(
       lineNumbers: lineNumbers,
@@ -177,6 +192,7 @@ final class ShellEditorSettings {
       treeWidth: treeWidth ?? this.treeWidth,
       toolbarLayout: toolbarLayout,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
+      lintRulesOff: lintRulesOff ?? this.lintRulesOff,
     );
   }
 
@@ -198,6 +214,7 @@ final class ShellEditorSettings {
         treeSort == other.treeSort &&
         treeWidth == other.treeWidth &&
         tidyOnClose == other.tidyOnClose &&
+        setEquals(lintRulesOff, other.lintRulesOff) &&
         // The layout compares by what it is written as: two parses of the
         // same string are two objects.
         toolbarLayout.encode() == other.toolbarLayout.encode();
@@ -220,5 +237,6 @@ final class ShellEditorSettings {
     treeWidth,
     toolbarLayout.encode(),
     tidyOnClose,
+    Object.hashAllUnordered(lintRulesOff),
   );
 }
