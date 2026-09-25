@@ -1609,6 +1609,9 @@ final class GreekStrings extends Strings {
   String get exportLibraryTitle => 'Εξαγωγή βιβλιοθήκης…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε ένα πρόγραμμα '

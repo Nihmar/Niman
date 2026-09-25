@@ -28,6 +28,7 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show BackgroundIsolateBinaryMessenger;
 import 'package:niman/src/core/isolate_gauge.dart';
+import 'package:niman/src/export/epub_book.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
@@ -48,6 +49,9 @@ enum ExportTreeFormat {
 
   /// Every Markdown note as a PDF page, printed by the browser engine.
   pdf,
+
+  /// Every Markdown note as one chapter of a single EPUB book (#303).
+  epub,
 }
 
 /// How far a running export has got.
@@ -331,7 +335,18 @@ Future<void> _exportTree(TreeExportRequest request) async {
   var cancelled = false;
   cancel.listen((_) => cancelled = true);
   request.events.send(cancel.sendPort);
-  final encoder = ZipFileEncoder()..create(request.zipPath);
+  // The EPUB is a zip with a package to end it: the book closes what the
+  // encoder would, and the plain formats have no book.
+  final book = request.format == ExportTreeFormat.epub
+      ? await EpubBook.start(
+          path: request.zipPath,
+          title: p.basename(request.dir),
+          language: request.language,
+        )
+      : null;
+  final encoder = book == null
+      ? (ZipFileEncoder()..create(request.zipPath))
+      : null;
   // The PDF format's scratch: one page and one PDF at a time, reused.
   final scratch = request.format == ExportTreeFormat.pdf
       ? Directory.systemTemp.createTempSync('niman-tree-pdf-')
@@ -345,41 +360,46 @@ Future<void> _exportTree(TreeExportRequest request) async {
       // folder in the Markdown zip and not in the HTML one is a support
       // question waiting to happen (L8).
       if (entry.isDir) {
-        encoder.addArchiveFile(ArchiveFile.directory(entry.rel));
+        encoder?.addArchiveFile(ArchiveFile.directory(entry.rel));
       } else if (request.format == ExportTreeFormat.markdown) {
-        await encoder.addFile(File(entry.abs), entry.rel);
+        await encoder!.addFile(File(entry.abs), entry.rel);
       } else if (_isNote(entry.rel)) {
-        final page = _page(
-          File(entry.abs).readAsStringSync(),
-          entry.rel,
-          tree,
-          request.language,
-          // A PDF zip holds PDFs: its links point at them, not at pages
-          // the zip does not have.
-          request.format == ExportTreeFormat.pdf ? '.pdf' : '.html',
-          // A PDF page is printed from the scratch directory: a picture
-          // beside it in the zip has nothing to resolve against, so it is
-          // embedded as a `data:` URI, as the single note's page is.
-          embedPictures: request.format == ExportTreeFormat.pdf,
-        );
-        if (request.format == ExportTreeFormat.pdf) {
-          await _printInto(
-            encoder,
-            scratch!,
-            request.engine,
-            request.runner,
-            page,
-            _stem(entry.rel),
-          );
-        } else if (request.format == ExportTreeFormat.html) {
-          encoder.addArchiveFile(
-            ArchiveFile.string('${_stem(entry.rel)}.html', page),
-          );
+        if (book != null) {
+          await _addEpubChapter(book, tree, entry);
         } else {
-          await encoder.addFile(File(entry.abs), entry.rel);
+          final page = _page(
+            File(entry.abs).readAsStringSync(),
+            entry.rel,
+            tree,
+            request.language,
+            // A PDF zip holds PDFs: its links point at them, not at pages
+            // the zip does not have.
+            request.format == ExportTreeFormat.pdf ? '.pdf' : '.html',
+            // A PDF page is printed from the scratch directory: a picture
+            // beside it in the zip has nothing to resolve against, so it is
+            // a `file:` URL the engine fetches.
+            embedPictures: request.format == ExportTreeFormat.pdf,
+          );
+          if (request.format == ExportTreeFormat.pdf) {
+            await _printInto(
+              encoder!,
+              scratch!,
+              request.engine,
+              request.runner,
+              page,
+              _stem(entry.rel),
+            );
+          } else {
+            encoder!.addArchiveFile(
+              ArchiveFile.string('${_stem(entry.rel)}.html', page),
+            );
+          }
         }
       } else {
-        await encoder.addFile(File(entry.abs), entry.rel);
+        // The EPUB carries the pictures its chapters reference, not the
+        // whole tree: an attachment nobody cites would only weigh the
+        // book down.
+        if (encoder != null) await encoder.addFile(File(entry.abs), entry.rel);
       }
       done++;
       if (done % 8 == 0 || done == tree.entries.length) {
@@ -392,11 +412,20 @@ Future<void> _exportTree(TreeExportRequest request) async {
         );
       }
     }
-    await encoder.close();
+    if (book != null) {
+      await book.close();
+    } else {
+      await encoder!.close();
+    }
   } on Object {
-    // The encoder holds an open file; close it before the error goes on.
+    // The encoder (or the book's) holds an open file; close it before the
+    // error goes on.
     try {
-      await encoder.close();
+      if (book != null) {
+        await book.close();
+      } else {
+        await encoder!.close();
+      }
     } on Object {
       // The first failure is the one worth reporting.
     }
@@ -409,6 +438,39 @@ Future<void> _exportTree(TreeExportRequest request) async {
       // A temp directory left behind is not the export's failure.
     }
   }
+}
+
+/// Adds one note of the tree to [book] as a chapter (#303).
+Future<void> _addEpubChapter(EpubBook book, _Tree tree, _Entry entry) async {
+  final rel = entry.rel;
+  final noteDir = p.dirname(rel);
+  final href = 'OEBPS/text/${_stem(rel)}.xhtml';
+  final text = File(entry.abs).readAsStringSync();
+  final images = <String, String>{};
+  for (final target in ExportSources.pictureTargets(text)) {
+    final picture = _fileIn(target, noteDir, tree.files);
+    if (picture == null) continue;
+    final url = await book.imageHref(
+      p.posix.dirname(href),
+      p.join(tree.root, picture),
+    );
+    if (url != null) images[target] = url;
+  }
+  final title = _pageTitle(text, rel);
+  final source = NoteHtmlSource(
+    text: text,
+    title: title,
+    images: images,
+    // A book's chapters link to each other, as the HTML zip's pages do.
+    links: _linkUrls(text, noteDir, tree, '.xhtml'),
+  );
+  final html = NoteHtml(source);
+  book.addChapter(
+    href: href,
+    title: title,
+    body: html.body(),
+    fontFaces: html.fontFaces,
+  );
 }
 
 /// Prints [page] with the machine's printer and adds the PDF to [encoder]
@@ -495,6 +557,11 @@ _Tree _walk(String dir) {
 /// [rel] without its Markdown extension: the page beside the note.
 String _stem(String rel) => p.withoutExtension(rel);
 
+/// The title a page or a chapter carries: the note's frontmatter title, or
+/// its file's own name.
+String _pageTitle(String text, String rel) =>
+    parseFrontmatter(text)?.title ?? p.basenameWithoutExtension(rel);
+
 String _page(
   String text,
   String rel,
@@ -504,8 +571,7 @@ String _page(
   bool embedPictures = false,
 }) {
   final noteDir = p.dirname(rel);
-  final title =
-      parseFrontmatter(text)?.title ?? p.basenameWithoutExtension(rel);
+  final title = _pageTitle(text, rel);
   final source = NoteHtmlSource(
     text: text,
     title: title,

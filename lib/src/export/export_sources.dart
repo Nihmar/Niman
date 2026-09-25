@@ -58,17 +58,40 @@ abstract final class ExportSources {
     LinkSource? linkSource,
   }) async {
     final images = <String, String>{};
+    final paths = await imagePaths(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    );
+    for (final entry in paths.entries) {
+      final uri = await pictureDataUri(entry.value);
+      if (uri == null) continue;
+      images[entry.key] = uri;
+    }
+    return images;
+  }
+
+  /// The pictures [text] shows, resolved to the file each one is, by the
+  /// target as written: what a container that carries the pictures
+  /// themselves (the EPUB, #303) copies in, and the one resolution every
+  /// page paths its pictures from.
+  static Future<Map<String, String>> imagePaths({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final paths = <String, String>{};
     for (final target in pictureTargets(text)) {
       final path = await _picturePath(target, notePath, root, linkSource);
       if (path == null) {
         _log.warning('picture not found: "$target" in $notePath');
         continue;
       }
-      final uri = await pictureDataUri(path);
-      if (uri == null) continue;
-      images[target] = uri;
+      paths[target] = path;
     }
-    return images;
+    return paths;
   }
 
   /// The pictures [text] shows, resolved and read, by the target as
@@ -82,15 +105,19 @@ abstract final class ExportSources {
     LinkSource? linkSource,
   }) async {
     final images = <String, Uint8List>{};
-    for (final target in pictureTargets(text)) {
-      final path = await _picturePath(target, notePath, root, linkSource);
-      if (path == null) {
-        _log.warning('picture not found: "$target" in $notePath');
-        continue;
-      }
+    final paths = await imagePaths(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    );
+    for (final entry in paths.entries) {
+      final path = entry.value;
       if (imageMime(p.extension(path).toLowerCase()) == null) continue;
       try {
-        images[target] = await Isolate.run(() => File(path).readAsBytesSync());
+        images[entry.key] = await Isolate.run(
+          () => File(path).readAsBytesSync(),
+        );
       } on FileSystemException catch (error) {
         _log.warning('picture skipped ($path): $error');
       }
@@ -132,16 +159,28 @@ abstract final class ExportSources {
     LinkSource? linkSource,
   }) async {
     final images = <String, String>{};
-    for (final target in pictureTargets(text)) {
-      final path = await _picturePath(target, notePath, root, linkSource);
-      if (path == null) {
-        _log.warning('picture not found: "$target" in $notePath');
-        continue;
-      }
-      images[target] = Uri.file(path).toString();
+    final paths = await imagePaths(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    );
+    for (final entry in paths.entries) {
+      images[entry.key] = Uri.file(entry.value).toString();
     }
     return images;
   }
+
+  /// One chapter's XHTML body for a container (#303), built off the UI
+  /// isolate like [page]: the parse, the highlighting and the formulas
+  /// are the same work whichever file they end in. The fonts go back too:
+  /// a book declares them once, not once per chapter.
+  static Future<({String body, String? fontFaces})> xhtml(
+    NoteHtmlSource source,
+  ) => Isolate.run(() {
+    final html = NoteHtml(source);
+    return (body: html.body(), fontFaces: html.fontFaces);
+  });
 
   /// The whole page for [source], built off the UI isolate (#24): the
   /// parse, the code highlighting and the formulas' SVG are a tenth of a

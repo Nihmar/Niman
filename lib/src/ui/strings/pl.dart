@@ -1579,6 +1579,9 @@ final class PolishStrings extends Strings {
   String get exportLibraryTitle => 'Eksportuj bibliotekę…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF to obraz stron; zainstaluj przeglądarkę, aby tekst można było '

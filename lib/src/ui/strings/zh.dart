@@ -1428,6 +1428,9 @@ final class ChineseStrings extends Strings {
   String get exportLibraryTitle => '导出库…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture => 'PDF 是页面的图片；安装浏览器后文字可选择。';
   @override

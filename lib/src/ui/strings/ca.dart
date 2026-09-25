@@ -1591,6 +1591,9 @@ final class CatalanStrings extends Strings {
   String get exportLibraryTitle => 'Exporta la biblioteca…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'El PDF és una imatge de les pàgines; instal·la un navegador per tenir '

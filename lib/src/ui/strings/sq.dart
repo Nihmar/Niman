@@ -1573,6 +1573,9 @@ final class AlbanianStrings extends Strings {
   String get exportLibraryTitle => 'Eksporto bibliotekën…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF-ja është një pamje e faqeve; instaloni një shfletues për tekst të '

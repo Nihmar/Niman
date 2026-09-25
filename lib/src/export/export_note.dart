@@ -19,6 +19,9 @@ enum ExportFormat {
 
   /// The note as a PDF (#63), printed or drawn.
   pdf,
+
+  /// The note as a one-chapter EPUB (#303), its pictures inside it.
+  epub,
 }
 
 /// What an export writes: `name` as `bytes`, typed `mimeType`.

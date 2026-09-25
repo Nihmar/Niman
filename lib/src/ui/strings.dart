@@ -921,6 +921,7 @@ final class AppStrings {
   static String get exportFolderTitle => _s.exportFolderTitle;
   static String get exportLibraryTitle => _s.exportLibraryTitle;
   static String get exportFormatPdf => _s.exportFormatPdf;
+  static String get exportFormatEpub => _s.exportFormatEpub;
   static String get exportPdfPicture => _s.exportPdfPicture;
   static String exportDone(String place) => _s.exportDone(place);
   static String exportFailed(Object error) => _s.exportFailed(error);

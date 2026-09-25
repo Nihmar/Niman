@@ -1570,6 +1570,9 @@ final class HungarianStrings extends Strings {
   String get exportLibraryTitle => 'Könyvtár exportálása…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'A PDF az oldalak képe; választható szöveghez telepítsd a böngészőt.';

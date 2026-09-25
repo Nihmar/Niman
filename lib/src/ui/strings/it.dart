@@ -1578,6 +1578,9 @@ final class ItalianStrings extends Strings {
   String get exportLibraryTitle => 'Esporta libreria…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       "Il PDF è un'immagine delle pagine; installa un browser per "

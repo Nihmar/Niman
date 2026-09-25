@@ -1575,6 +1575,9 @@ final class MacedonianStrings extends Strings {
   String get exportLibraryTitle => 'Извези библиотека…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF е слика од страниците; инсталирајте прелистувач за текст што може '

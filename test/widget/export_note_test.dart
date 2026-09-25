@@ -109,7 +109,9 @@ void main() {
     expect(find.text(AppStrings.exportDone('/tmp/note.md')), findsOne);
   });
 
-  testWidgets('the chooser offers Markdown, HTML and PDF', (tester) async {
+  testWidgets('the chooser offers Markdown, HTML, PDF and EPUB', (
+    tester,
+  ) async {
     await pumpShell(tester);
     await tester.tap(find.byKey(const Key('note-menu')));
     await settle(tester);
@@ -119,6 +121,7 @@ void main() {
     expect(find.text(AppStrings.exportFormatMarkdown), findsOneWidget);
     expect(find.text(AppStrings.exportFormatHtml), findsOneWidget);
     expect(find.text(AppStrings.exportFormatPdf), findsOneWidget);
+    expect(find.text(AppStrings.exportFormatEpub), findsOneWidget);
     // The page is built off the UI isolate, and the PDF goes through the
     // printer seam: what a widget test's fake-async zone cannot wait on
     // has its own unit tests (`exportNote`'s HTML payload, `exportNotePdf`,
@@ -231,6 +234,8 @@ void main() {
     await tester.tap(find.byKey(const Key('menu-export-folder')));
     await settle(tester);
     expect(find.byKey(const Key('export-tree-pdf')), findsOne);
+    // EPUB needs nothing to print with: it is offered everywhere.
+    expect(find.byKey(const Key('export-tree-epub')), findsOne);
     await tester.tapAt(const Offset(4, 4));
     await settle(tester);
   });

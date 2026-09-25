@@ -21,6 +21,7 @@ import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
@@ -2983,6 +2984,17 @@ final class _LibraryShellState extends State<_LibraryShell>
           progress.dispose();
           cache.dispose();
         }
+      } else if (format == ExportFormat.epub) {
+        // The book carries its pictures itself; the body is the same
+        // exported page the other formats draw (#303).
+        payload = await exportNoteEpub(
+          text: await ops.readNote(path),
+          title: title,
+          path: path,
+          root: root,
+          language: AppLanguages.resolved.id,
+          linkSource: _linkSource,
+        );
       } else {
         payload = await exportNote(
           text: await ops.readNote(path),
@@ -2990,8 +3002,8 @@ final class _LibraryShellState extends State<_LibraryShell>
           path: path,
           root: root,
           language: AppLanguages.resolved.id,
-          // The chooser knows three formats; the builder knows the two it
-          // can build, and PDF went its own way above.
+          // The chooser knows more formats than the builder: PDF and EPUB
+          // went their own ways above.
           format: format == ExportFormat.markdown
               ? ExportFileFormat.markdown
               : ExportFileFormat.html,
@@ -3059,6 +3071,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     ExportFormat.markdown => AppStrings.exportFormatMarkdown,
     ExportFormat.html => AppStrings.exportFormatHtml,
     ExportFormat.pdf => AppStrings.exportFormatPdf,
+    ExportFormat.epub => AppStrings.exportFormatEpub,
   };
 
   /// Exports the folder at library-relative [dir] ('' = the library root)
@@ -3084,9 +3097,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
     if (folder == null || !mounted) return;
     final name = dir.isEmpty ? p.basename(root) : p.basename(dir);
-    // An existing zip is never overwritten silently: a second export of
-    // the same folder writes `name (2).zip` (L6).
-    final zipPath = await _freeZipPath(folder, name);
+    // An existing file is never overwritten silently: a second export of
+    // the same folder writes `name (2).zip` (L6). A book is a `.epub`.
+    final extension = format == ExportTreeFormat.epub ? 'epub' : 'zip';
+    final zipPath = await _freeZipPath(folder, name, extension);
     final TreeExport export;
     try {
       export = await TreeExport.start(
@@ -3210,31 +3224,36 @@ final class _LibraryShellState extends State<_LibraryShell>
     ExportTreeFormat.markdown => AppStrings.exportFormatMarkdown,
     ExportTreeFormat.html => AppStrings.exportFormatHtml,
     ExportTreeFormat.pdf => AppStrings.exportFormatPdf,
+    ExportTreeFormat.epub => AppStrings.exportFormatEpub,
   };
 
   /// The zip's file name for a folder called [name]: the characters a file
   /// name cannot hold become dashes, the names Windows reserves become
   /// something else, and a name of dots reads as "export".
-  static String _zipName(String name) {
+  static String _zipName(String name, String extension) {
     var wanted = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '-').trim();
     // Windows rejects a name that ends in a dot or a space, and treats the
     // device names — CON, NUL, COM1 — as the devices themselves.
     wanted = wanted.replaceAll(RegExp(r'[. ]+$'), '');
     if (_windowsDevices.contains(wanted.toUpperCase())) wanted = 'export';
-    return '${wanted.isEmpty ? 'export' : wanted}.zip';
+    return '${wanted.isEmpty ? 'export' : wanted}.$extension';
   }
 
-  /// A path no file holds yet: [name]'s zip, or `name (2).zip`, `(3)`…
+  /// A path no file holds yet: [name]'s zip, or `name (2).epub`, `(3)`…
   /// beside it. The picker chose the folder, not the name, and truncating
   /// an export the user already has is not a choice to make for them.
-  static Future<String> _freeZipPath(String folder, String name) async {
-    final wanted = _zipName(name);
+  static Future<String> _freeZipPath(
+    String folder,
+    String name,
+    String extension,
+  ) async {
+    final wanted = _zipName(name, extension);
     final stem = p.basenameWithoutExtension(wanted);
     var path = p.join(folder, wanted);
     // A stat, and the one place this app writes a file the user named:
     // sync keeps the loop readable and runs once per export.
     for (var n = 2; File(path).existsSync(); n++) {
-      path = p.join(folder, '$stem ($n).zip');
+      path = p.join(folder, '$stem ($n).$extension');
     }
     return path;
   }

@@ -1566,6 +1566,9 @@ final class SerbianStrings extends Strings {
   String get exportLibraryTitle => 'Извези библиотеку…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF је слика страница; инсталирајте прегледач за текст који се може '

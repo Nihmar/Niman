@@ -1559,6 +1559,9 @@ final class SlovakStrings extends Strings {
   String get exportLibraryTitle => 'Exportovať knižnicu…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF je obrázok stránok; nainštalujte prehliadač pre vyberateľný text.';

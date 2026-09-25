@@ -1559,6 +1559,9 @@ final class LithuanianStrings extends Strings {
   String get exportLibraryTitle => 'Eksportuoti biblioteką…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF yra puslapių paveikslėlis; įdiekite naršyklę, kad tekstą būtų '

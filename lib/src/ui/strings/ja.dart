@@ -1461,6 +1461,9 @@ final class JapaneseStrings extends Strings {
   String get exportLibraryTitle => 'ライブラリをエクスポート…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture => 'PDF はページの画像です。ブラウザーをインストールするとテキストを選択できます。';
   @override

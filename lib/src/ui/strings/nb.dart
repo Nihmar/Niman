@@ -1548,6 +1548,9 @@ final class NorwegianStrings extends Strings {
   String get exportLibraryTitle => 'Eksporter bibliotek…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF-en er et bilde av sidene; installer en nettleser for valgbar tekst.';

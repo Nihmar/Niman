@@ -1547,6 +1547,9 @@ final class TurkishStrings extends Strings {
   String get exportLibraryTitle => 'Kitaplığı dışa aktar…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF, sayfaların bir resmidir; seçilebilir metin için tarayıcı kurun.';

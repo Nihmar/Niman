@@ -1574,6 +1574,9 @@ final class GalicianStrings extends Strings {
   String get exportLibraryTitle => 'Exportar a biblioteca…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'O PDF é unha imaxe das páxinas; instala un navegador para ter texto '

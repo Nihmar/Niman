@@ -1565,6 +1565,9 @@ final class UkrainianStrings extends Strings {
   String get exportLibraryTitle => 'Експортувати бібліотеку…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF — це зображення сторінок; встановіть браузер, щоб текст можна '

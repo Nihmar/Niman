@@ -1574,6 +1574,9 @@ final class BulgarianStrings extends Strings {
   String get exportLibraryTitle => 'Изнасяне на библиотеката…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF е картина на страниците; инсталирайте браузър за избираем текст.';
