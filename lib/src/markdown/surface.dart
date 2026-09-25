@@ -90,11 +90,15 @@ final class MarkdownSurface extends StatelessWidget {
     this.autofocus = false,
     this.viewKey,
     this.lineTokens,
+    this.templateCommands = false,
     super.key,
   });
 
   /// See [MarkdownSourceView.lineTokens].
   final List<Token> Function(String line)? lineTokens;
+
+  /// See [MarkdownSourceView.templateCommands].
+  final bool templateCommands;
 
   /// The note.
   final SourceBuffer buffer;
@@ -230,5 +234,6 @@ final class MarkdownSurface extends StatelessWidget {
     typewriter: typewriter,
     autofocus: autofocus,
     lineTokens: lineTokens,
+    templateCommands: templateCommands,
   );
 }

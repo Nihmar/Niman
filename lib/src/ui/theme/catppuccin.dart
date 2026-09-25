@@ -43,6 +43,7 @@ const SyntaxColors _mochaSyntax = SyntaxColors(
   quote: Color(0xFFA6ADC8), // subtext0
   math: Color(0xFFF5C2E7), // pink
   tag: Color(0xFF74C7EC), // sapphire
+  template: Color(0xFFFAB387), // peach
   todoPriority: Color(0xFFF9E2AF), // yellow
   todoDate: Color(0xFF9399B2), // overlay2
   todoProject: Color(0xFFCBA6F7), // mauve
@@ -79,6 +80,7 @@ const SyntaxColors _latteSyntax = SyntaxColors(
   quote: Color(0xFF6C6F85), // subtext0
   math: Color(0xFFEA76CB), // pink
   tag: Color(0xFF209FB5), // sapphire
+  template: Color(0xFFFE640B), // peach
   todoPriority: Color(0xFFDF8E1D), // yellow
   todoDate: Color(0xFF7C7F93), // overlay2
   todoProject: Color(0xFF8839EF), // mauve

@@ -16,7 +16,7 @@ void main() {
     test('every role is there, in the order a file lists them', () {
       final json = _colors().toJson();
       expect(json.keys.toList(), ThemeColors.roleNames);
-      expect(json.length, 26);
+      expect(json.length, 27);
     });
 
     test('the task-list roles are the last of the Markdown ones', () {
@@ -55,9 +55,23 @@ void main() {
     test('a map missing a role is not a theme', () {
       final json = _colors().toJson();
       for (final role in ThemeColors.roleNames) {
-        if (ThemeColors.taskListRoles.contains(role)) continue;
+        if (ThemeColors.laterRoleSources.containsKey(role)) continue;
         final without = Map.of(json)..remove(role);
         expect(ThemeColors.fromJson(without), isNull, reason: '$role missing');
+      }
+    });
+
+    test('a theme from before the template role reads it from its code '
+        'colour, so a command still stands apart', () {
+      final colors = _colors();
+      final json = colors.toJson()..remove('template');
+      final read = ThemeColors.fromJson(json)!;
+      expect(read.syntax.template, colors.syntax.code);
+      expect(read.syntax.tag, colors.syntax.tag);
+      // Each later role is read from a role every theme has.
+      for (final source in ThemeColors.laterRoleSources.values) {
+        expect(ThemeColors.laterRoleSources.keys, isNot(contains(source)));
+        expect(ThemeColors.roleNames, contains(source));
       }
     });
 

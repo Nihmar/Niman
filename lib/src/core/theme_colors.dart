@@ -48,6 +48,7 @@ final class ThemeColors {
     'quote',
     'math',
     'tag',
+    'template',
     ...taskListRoles,
   ];
 
@@ -79,6 +80,19 @@ final class ThemeColors {
     'todoContext': 'link',
     'todoKeyValue': 'code',
     'todoDone': 'dim',
+  };
+
+  /// Every role that came after the first themes were stored and exported,
+  /// with the role a theme that does not name it reads it from: the
+  /// task-list roles ([taskListRoleSources]), and `template`.
+  ///
+  /// A template command was drawn as plain text before it had a colour of
+  /// its own. Plain text would hide the very thing the role is for, so a
+  /// theme from before reads it from its code colour: the command stands
+  /// apart, in a colour the theme already chose.
+  static const Map<String, String> laterRoleSources = {
+    ...taskListRoleSources,
+    'template': 'code',
   };
 
   /// Every role, chrome first, in the order a theme file lists them.
@@ -123,6 +137,7 @@ final class ThemeColors {
     'quote': colorToHex(syntax.quote),
     'math': colorToHex(syntax.math),
     'tag': colorToHex(syntax.tag),
+    'template': colorToHex(syntax.template),
     'todoPriority': colorToHex(syntax.todoPriority),
     'todoDate': colorToHex(syntax.todoDate),
     'todoProject': colorToHex(syntax.todoProject),
@@ -135,20 +150,19 @@ final class ThemeColors {
   /// not a color. Every role has to be there: a theme with a hole in it
   /// is a theme that would wear a color from somewhere else.
   ///
-  /// The one exception is a theme older than the task-list roles: one
-  /// that leaves them out (rather than giving something that is not a
-  /// color) reads them from [taskListRoleSources].
+  /// The one exception is a theme older than a role: one that leaves a
+  /// later role out (rather than giving something that is not a color)
+  /// reads it from [laterRoleSources].
   static ThemeColors? fromJson(Map<String, Object?> json) {
     final colors = <String, Color>{};
     for (final role in roleNames) {
       final value = json[role];
-      if (value == null && taskListRoleSources.containsKey(role)) continue;
+      if (value == null && laterRoleSources.containsKey(role)) continue;
       final color = value is String ? colorFromHex(value) : null;
       if (color == null) return null;
       colors[role] = color;
     }
-    for (final MapEntry(key: role, value: source)
-        in taskListRoleSources.entries) {
+    for (final MapEntry(key: role, value: source) in laterRoleSources.entries) {
       colors.putIfAbsent(role, () => colors[source]!);
     }
     return ThemeColors(
@@ -175,6 +189,7 @@ final class ThemeColors {
         quote: colors['quote']!,
         math: colors['math']!,
         tag: colors['tag']!,
+        template: colors['template']!,
         todoPriority: colors['todoPriority']!,
         todoDate: colors['todoDate']!,
         todoProject: colors['todoProject']!,

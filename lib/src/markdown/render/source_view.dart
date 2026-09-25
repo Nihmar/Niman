@@ -84,6 +84,7 @@ import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/templates/template_commands.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The colour a selected run is painted with.
@@ -132,6 +133,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.caretWidth,
     this.typewriter = false,
     this.lineTokens,
+    this.templateCommands = false,
     this.autofocus = false,
     super.key,
   });
@@ -255,6 +257,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The colours of a line of a file that is not Markdown, by its text —
   /// a todo.txt's (`todoTxtTokens`) — or null for the Markdown engine's.
   final List<Token> Function(String line)? lineTokens;
+
+  /// Whether the note is a template, whose commands (`{{date}}`) are
+  /// coloured apart from the Markdown they stand in: a note of the
+  /// library's template folder. Elsewhere a `{{…}}` is text like any.
+  final bool templateCommands;
 
   /// Whether the note takes the focus — and the keyboard — as it opens (the
   /// keyboard-on-open setting, and a template's `{{cursor}}`).
@@ -550,6 +557,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   @override
   void didUpdateWidget(MarkdownSourceView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // The note became a template, or stopped being one: its lines are
+    // coloured again at the build this update is part of.
+    if (oldWidget.templateCommands != widget.templateCommands) {
+      setState(() {});
+    }
     if (!identical(oldWidget.surface, widget.surface)) {
       oldWidget.surface?.detachView(this);
       widget.surface?.attachView(this);
@@ -1843,7 +1855,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (styler == null || index < 0 || index >= lineCount) {
       return StyledLine(text, const <Token>[]);
     }
-    return StyledLine(text, styler.tokensOf(index));
+    final tokens = styler.tokensOf(index);
+    if (!widget.templateCommands) return StyledLine(text, tokens);
+    final commands = templateCommandsIn(text);
+    return StyledLine(
+      text,
+      commands.isEmpty
+          ? tokens
+          : overlayTokens(tokens, commands, TokenKind.templateCommand),
+    );
   }
 
   /// The part of the selection that falls inside line [index], as offsets local
