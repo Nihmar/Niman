@@ -305,8 +305,9 @@ changing what it says:
   after each marker, and a task box written `[ ]` or `[x]` whatever case
   it was;
 - a fenced code block gets its closing fence when the note forgot one,
-  and its language — the first word of the info string — loses the
-  punctuation around it (`{.dart}` becomes `dart`);
+  and a language written the Pandoc way loses its braces and its dot
+  (`{.dart}` becomes `dart`). Any other language is left as written,
+  punctuation included: `c++`, `c#` and `objective-c` are names;
 - the note ends with a single newline.
 
 It never reflows your prose, and never touches what it cannot read:

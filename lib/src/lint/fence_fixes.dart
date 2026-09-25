@@ -43,45 +43,51 @@ List<String> tidyFence(
   return out;
 }
 
-/// The opening line with its language cleaned: the first word of the info
-/// string keeps its leading and trailing alphanumerics only, so `{.dart}`
-/// becomes `dart` and `dart-ish` is left alone. The rest of the info
-/// string — the metadata after that first word — is kept as written.
+/// The opening line with its language written the way GFM reads one: as
+/// the info string's first word.
+///
+/// Only Pandoc's spelling is rewritten, since a GFM reader takes it for
+/// another language: `{.dart}` is the class `.dart` in braces, and `.dart`
+/// is a language whose name starts with a dot. The braces go and the class
+/// loses its dot; the block's other attributes stay, as metadata after the
+/// language (`{.dart .numberLines}` is `dart .numberLines`). Every other
+/// first word is a language name as written, punctuation and all: `c++`,
+/// `c#` and `objective-c` trimmed to their letters would name another
+/// language, or none.
 String _tagged(String line, RegExpMatch open) {
   final info = open.group(3)!;
-  final word = RegExp(r'\S+').firstMatch(info);
-  if (word == null) return line;
-  final written = word.group(0)!;
-  final cleaned = _alphanumeric(written);
-  if (cleaned == written) return line;
-  // The fence run ends where the info string begins.
-  final head = open.end - info.length;
-  final before = line.substring(0, head) + info.substring(0, word.start);
-  final after = info.substring(word.end);
-  if (cleaned.isEmpty) {
-    return after.isEmpty ? before.trimRight() : '$before${after.trimLeft()}';
+  final text = info.trimLeft();
+  final String cleaned;
+  if (text.startsWith('{') && text.contains('}')) {
+    final close = text.indexOf('}');
+    final words = text.substring(1, close).trim().split(RegExp(r'\s+'));
+    cleaned =
+        [
+          _undotted(words.first),
+          ...words.skip(1),
+        ].where((word) => word.isNotEmpty).join(' ') +
+        text.substring(close + 1);
+  } else if (text.startsWith('.')) {
+    cleaned = _undotted(text);
+  } else {
+    return line;
   }
-  return '$before$cleaned$after';
+  // The fence run ends where the info string begins; the spaces between
+  // them are the writer's, and stay.
+  final head = line.substring(0, open.end - text.length);
+  final tag = cleaned.trimLeft();
+  return tag.isEmpty ? head.trimRight() : '$head$tag';
 }
 
-/// [word] without the characters at its ends that are not letters or
-/// digits: `{.dart}` is `dart`, `--` is nothing.
-String _alphanumeric(String word) {
+/// [text] without the dots in front of it: Pandoc's class `.dart` is the
+/// language `dart`.
+String _undotted(String text) {
   var start = 0;
-  var end = word.length;
-  while (start < end && !_isAlphanumeric(word.codeUnitAt(start))) {
+  while (start < text.length && text.codeUnitAt(start) == 0x2E) {
     start++;
   }
-  while (end > start && !_isAlphanumeric(word.codeUnitAt(end - 1))) {
-    end--;
-  }
-  return word.substring(start, end);
+  return text.substring(start);
 }
-
-bool _isAlphanumeric(int unit) =>
-    (unit >= 0x30 && unit <= 0x39) ||
-    (unit >= 0x41 && unit <= 0x5A) ||
-    (unit >= 0x61 && unit <= 0x7A);
 
 /// Whether [lines] ends with a fence closing [fence]: the same character
 /// and a run at least as long. The opening line is not a closer.
