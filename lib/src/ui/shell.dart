@@ -55,6 +55,7 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/epub_look_sheet.dart';
+import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
@@ -2915,8 +2916,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         return;
       }
       if (place == null || !mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppStrings.exportDone(place))));
+      _showExportDone(place);
     });
   }
 
@@ -3002,9 +3002,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     try {
       await export.done;
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppStrings.exportDone(zipPath))));
+      _showExportDone(zipPath);
     } on ExportCancelled {
       // The dialog closed itself; a cancelled export says nothing.
     } on Object catch (error) {
@@ -3013,6 +3011,27 @@ final class _LibraryShellState extends State<_LibraryShell>
         context,
       ).showSnackBar(SnackBar(content: Text(AppStrings.exportFailed(error))));
     }
+  }
+
+  /// Says where an export landed, with a way to its folder where the OS
+  /// can be given one (a desktop; on Android the picker already knows).
+  void _showExportDone(String place) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppStrings.exportDone(place)),
+        action: supportsTreeContextActions
+            ? SnackBarAction(
+                label: AppStrings.openInFileManager,
+                onPressed: () => unawaited(
+                  runTreeContextAction(
+                    place,
+                    TreeContextAction.openInFileManager,
+                  ),
+                ),
+              )
+            : null,
+      ),
+    );
   }
 
   /// Asks which format a folder or the library is exported in: the wide
