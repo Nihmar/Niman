@@ -51,6 +51,9 @@ void main() {
     expect(text, contains('/Count 1'));
     expect(text, contains('/Subtype /Image'));
     expect(text, contains('/ColorSpace /DeviceRGB'));
+    // A4 in points, not the layout's logical pixels: the raster pages are
+    // an A4 sheet, not 4/3 of one (#63 review, H2).
+    expect(text, contains('/MediaBox [0 0 595.28 841.89]'));
   });
 
   testWidgets('a long note is several pages', (tester) async {

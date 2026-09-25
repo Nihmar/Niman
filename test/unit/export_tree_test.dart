@@ -7,7 +7,20 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/export/export_tree.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:path/path.dart' as p;
+
+/// The engine's stand-in for a folder's PDF run: writes the page itself as
+/// the "PDF", so the test can read what the page was. Top-level, so the
+/// spawned isolate may take it — a closure cannot cross the boundary.
+Future<ProcessAnswer> _printPage(String exe, List<String> args) async {
+  final pdf = args
+      .firstWhere((arg) => arg.startsWith('--print-to-pdf='))
+      .substring('--print-to-pdf='.length);
+  final html = Uri.parse(args.last).toFilePath();
+  await File(pdf).writeAsString('PDF\n${await File(html).readAsString()}');
+  return (exit: 0, stdout: '');
+}
 
 void main() {
   late Directory lib;
@@ -105,6 +118,44 @@ void main() {
       throwsA(isA<TreeExportNoEngine>()),
     );
     expect(File(zip).existsSync(), isFalse);
+  });
+
+  test('a # or ? in a name is escaped in the page URL', () async {
+    await File(p.join(notes, 'q?x.md')).writeAsString('# Q\n');
+    await File(p.join(notes, 'weird#one.png')).writeAsBytes(<int>[1, 2, 3]);
+    await File(p.join(notes, 'links.md'))
+        .writeAsString('See [[q?x]].\n\n![w](weird#one.png)\n');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.html,
+      language: 'en',
+    );
+    final page = (await contents())['links.html']!;
+    // `#` and `?` are URI delimiters: left alone they would make the URL a
+    // fragment, and the file it names would be dead (#63 review, L3).
+    expect(page, contains('href="q%3Fx.html"'));
+    expect(page, contains('src="weird%23one.png"'));
+  });
+
+  test('a PDF folder embeds its pictures in the page', () async {
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.pdf,
+      language: 'en',
+      engine: '/usr/bin/chromium',
+      runner: _printPage,
+    );
+    final files = await contents();
+    expect(files.keys, containsAll(<String>['a.pdf', 'b.pdf', 'sub/c.pdf']));
+    // The page is printed from a scratch directory, where the zip's
+    // pictures are not: relative, every one of them would be broken
+    // (#63 review, H1).
+    expect(files['a.pdf'], contains('src="data:image/png;base64,'));
+    expect(files['a.pdf'], isNot(contains('src="photo.png"')));
+    // The links point at the PDFs the zip holds.
+    expect(files['a.pdf'], contains('href="b.pdf"'));
   });
 
   test('a cancelled export leaves no zip behind', () async {

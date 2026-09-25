@@ -83,11 +83,26 @@ String _pre(String text, String cls) =>
     '<pre class="$cls"><code>${escapeHtml(text)}</code></pre>';
 
 String _dedent(String line, int indent) {
-  var cut = 0;
-  while (cut < indent && cut < line.length && line.codeUnitAt(cut) == 0x20) {
-    cut++;
+  var column = 0;
+  var at = 0;
+  while (column < indent && at < line.length) {
+    final char = line.codeUnitAt(at);
+    if (char == 0x20) {
+      column++;
+      at++;
+    } else if (char == 0x09) {
+      // A tab advances to the next multiple of four, as CommonMark
+      // counts indentation.
+      column = (column ~/ 4 + 1) * 4;
+      at++;
+    } else {
+      break;
+    }
   }
-  return line.substring(cut);
+  // A tab that reached past the fence's indent is partly that indent and
+  // partly code: the columns past it stay, as spaces.
+  final extra = column > indent ? column - indent : 0;
+  return '${' ' * extra}${line.substring(at)}';
 }
 
 /// [code] coloured by [language]'s grammar, or null when there is none.

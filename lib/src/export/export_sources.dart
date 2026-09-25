@@ -157,7 +157,7 @@ abstract final class ExportSources {
   /// thrown away with it.
   static Future<String?> pictureDataUri(String path) async {
     final result = await Isolate.run(() {
-      final mime = _imageMime(p.extension(path).toLowerCase());
+      final mime = imageMime(p.extension(path).toLowerCase());
       if (mime == null) return (uri: null, skip: 'not an image type');
       try {
         final bytes = File(path).readAsBytesSync();
@@ -172,7 +172,11 @@ abstract final class ExportSources {
     return result.uri;
   }
 
-  static String? _imageMime(String extension) => switch (extension) {
+  /// The MIME type of the picture at [extension] (lower case, with the
+  /// dot), or null when it is not an image type. Public so a caller that
+  /// reads the bytes itself — the tree export, whose pictures are embedded
+  /// by the background isolate — names them the same way.
+  static String? imageMime(String extension) => switch (extension) {
     '.png' => 'image/png',
     '.jpg' || '.jpeg' => 'image/jpeg',
     '.gif' => 'image/gif',
