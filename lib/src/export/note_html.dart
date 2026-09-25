@@ -109,7 +109,10 @@ final class NoteHtml {
   /// for collecting what the page needs ([imageTargets]), so no formula or
   /// code block is typeset.
   List<md.Node> _parsed(String text, {bool rendered = true}) {
-    final buffer = SourceBuffer.fromText(text);
+    // The sentinels are private-use characters the *note* may hold too:
+    // escaped into pieces of their own, they can never read as a token
+    // that indexes into a piece list they do not belong to.
+    final buffer = SourceBuffer.fromText(_escapeSentinels(text));
     final lines = <String>[];
     for (final block in BlockScanner(buffer).index.blocks) {
       final raw = <String>[
@@ -209,6 +212,22 @@ final class NoteHtml {
     return out.toString();
   }
 
+  /// [text] with the token sentinels it literally holds replaced by tokens
+  /// that give them back as the characters they are.
+  String _escapeSentinels(String text) {
+    if (!text.contains(_open) && !text.contains(_close)) return text;
+    final out = StringBuffer();
+    for (final rune in text.runes) {
+      final char = String.fromCharCode(rune);
+      if (char == _open || char == _close) {
+        out.write(_tokenFor((html: escapeHtml(char), plain: char)));
+      } else {
+        out.write(char);
+      }
+    }
+    return out.toString();
+  }
+
   String _tokenFor(HtmlSpan piece) {
     _pieces.add(piece);
     return '$_open${_pieces.length - 1}$_close';
@@ -240,8 +259,8 @@ final class NoteHtml {
     }
   }
 
-  /// The HTML of the block whose token is all [element] holds, when it is
-  /// a paragraph holding one; null otherwise.
+  /// A paragraph's token alone in it: the block, unwrapped; null when the
+  /// text only looks like one.
   String? _onlyToken(md.Element element) {
     if (element.tag != 'p') return null;
     final children = element.children;
@@ -250,19 +269,29 @@ final class NoteHtml {
     if (child is! md.Text) return null;
     final match = _token.firstMatch(child.text.trim());
     if (match == null || match.group(0) != child.text.trim()) return null;
-    final piece = _pieces[int.parse(match.group(1)!)];
+    final piece = _pieceOf(match.group(1)!);
+    if (piece == null) return null;
     return piece.plain.isEmpty ? piece.html : null;
   }
 
-  String _content(String text) => text.replaceAllMapped(
-    _token,
-    (match) => _pieces[int.parse(match.group(1)!)].html,
-  );
+  /// The piece a token's number names, or null when it names none: the
+  /// note's own text may hold the sentinel pair, and that is text, not a
+  /// construct of ours.
+  HtmlSpan? _pieceOf(String number) {
+    final at = int.tryParse(number);
+    if (at == null || at < 0 || at >= _pieces.length) return null;
+    return _pieces[at];
+  }
 
-  String _attribute(String value) => value.replaceAllMapped(
-    _token,
-    (match) => escapeAttribute(_pieces[int.parse(match.group(1)!)].plain),
-  );
+  String _content(String text) => text.replaceAllMapped(_token, (match) {
+    final piece = _pieceOf(match.group(1)!);
+    return piece?.html ?? match.group(0)!;
+  });
+
+  String _attribute(String value) => value.replaceAllMapped(_token, (match) {
+    final piece = _pieceOf(match.group(1)!);
+    return piece == null ? match.group(0)! : escapeAttribute(piece.plain);
+  });
 
   /// Points [element]'s [attribute] at what [targets] has for it, as written
   /// or as the parser percent-encoded it.

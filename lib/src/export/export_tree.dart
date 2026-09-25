@@ -20,6 +20,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui' show RootIsolateToken;
@@ -116,12 +117,17 @@ final class TreeExport {
   /// where there is neither an engine nor a WebView there is nothing to
   /// print with: [TreeExportNoEngine], since the raster fallback paints on
   /// the UI isolate and cannot run here.
+  ///
+  /// [runner] runs the engine's process; null runs the real one, and a test
+  /// hands in a top-level function of its own — a closure cannot cross the
+  /// isolate boundary.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
     required ExportTreeFormat format,
     required String language,
     String? engine,
+    ProcessRunner? runner,
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
@@ -139,6 +145,7 @@ final class TreeExport {
         format: format,
         language: language,
         engine: engine,
+        runner: runner,
         // The root isolate's token, so the spawned isolate may open the
         // WebView channel when Android prints.
         token: RootIsolateToken.instance,
@@ -160,6 +167,7 @@ final class TreeExport {
     required ExportTreeFormat format,
     required String language,
     String? engine,
+    ProcessRunner? runner,
   }) async {
     final export = await start(
       dir: dir,
@@ -167,6 +175,7 @@ final class TreeExport {
       format: format,
       language: language,
       engine: engine,
+      runner: runner,
     );
     await export.done;
   }
@@ -217,8 +226,10 @@ Object _errorOf(Object? message) {
 /// it is a folder.
 typedef _Entry = ({String abs, String rel, bool isDir});
 
-/// The walked tree, and the two lookups links and pictures resolve with.
+/// The walked tree, its root, and the two lookups links and pictures
+/// resolve with.
 typedef _Tree = ({
+  String root,
   List<_Entry> entries,
   Set<String> files,
   Map<String, String> notes,
@@ -232,6 +243,7 @@ typedef TreeExportRequest = ({
   ExportTreeFormat format,
   String language,
   String? engine,
+  ProcessRunner? runner,
   RootIsolateToken? token,
   SendPort events,
 });
@@ -269,12 +281,17 @@ Future<void> _exportTree(TreeExportRequest request) async {
           // A PDF zip holds PDFs: its links point at them, not at pages
           // the zip does not have.
           request.format == ExportTreeFormat.pdf ? '.pdf' : '.html',
+          // A PDF page is printed from the scratch directory: a picture
+          // beside it in the zip has nothing to resolve against, so it is
+          // embedded as a `data:` URI, as the single note's page is.
+          embedPictures: request.format == ExportTreeFormat.pdf,
         );
         if (request.format == ExportTreeFormat.pdf) {
           await _printInto(
             encoder,
             scratch!,
             request.engine,
+            request.runner,
             page,
             _stem(entry.rel),
           );
@@ -323,6 +340,7 @@ Future<void> _printInto(
   ZipFileEncoder encoder,
   Directory scratch,
   String? engine,
+  ProcessRunner? runner,
   String page,
   String stem,
 ) async {
@@ -338,7 +356,7 @@ Future<void> _printInto(
   }
   final printer = Platform.isAndroid
       ? const WebViewPdfPrinter()
-      : ProcessPdfPrinter(engine: engine);
+      : ProcessPdfPrinter(engine: engine, run: runner ?? runProcess);
   final outcome = await printer.print(htmlPath, pdfPath);
   switch (outcome) {
     case PdfPrinted():
@@ -388,7 +406,13 @@ _Tree _walk(String dir) {
     final stem = _stem(file).toLowerCase();
     (stems[stem] ??= <String>[]).add(file);
   }
-  return (entries: entries, files: files, notes: notes, stems: stems);
+  return (
+    root: dir,
+    entries: entries,
+    files: files,
+    notes: notes,
+    stems: stems,
+  );
 }
 
 /// [rel] without its Markdown extension: the page beside the note.
@@ -399,15 +423,18 @@ String _page(
   String rel,
   _Tree tree,
   String language,
-  String linkExtension,
-) {
+  String linkExtension, {
+  bool embedPictures = false,
+}) {
   final noteDir = p.dirname(rel);
   final title =
       parseFrontmatter(text)?.title ?? p.basenameWithoutExtension(rel);
   final source = NoteHtmlSource(
     text: text,
     title: title,
-    images: _imageUrls(text, noteDir, tree),
+    images: embedPictures
+        ? _imageDataUris(text, noteDir, tree)
+        : _imageUrls(text, noteDir, tree),
     links: _linkUrls(text, noteDir, tree, linkExtension),
   );
   final html = NoteHtml(source);
@@ -426,6 +453,30 @@ Map<String, String> _imageUrls(String text, String noteDir, _Tree tree) {
   for (final target in ExportSources.pictureTargets(text)) {
     final picture = _fileIn(target, noteDir, tree.files);
     if (picture != null) out[target] = _url(noteDir, picture);
+  }
+  return out;
+}
+
+/// The pictures [text] shows, by the target as written, as `data:` URIs.
+///
+/// A PDF page is printed from the export's scratch directory, where the
+/// pictures the zip holds are not: left relative, every one of them is a
+/// broken image. The reading happens here, on the export isolate, which is
+/// where the tree's files are read anyway.
+Map<String, String> _imageDataUris(String text, String noteDir, _Tree tree) {
+  final out = <String, String>{};
+  for (final target in ExportSources.pictureTargets(text)) {
+    final picture = _fileIn(target, noteDir, tree.files);
+    if (picture == null) continue;
+    final path = p.join(tree.root, picture);
+    final mime = ExportSources.imageMime(p.extension(path).toLowerCase());
+    if (mime == null) continue;
+    try {
+      final bytes = File(path).readAsBytesSync();
+      out[target] = 'data:$mime;base64,${base64Encode(bytes)}';
+    } on FileSystemException {
+      // A picture that cannot be read stays as the note wrote it.
+    }
   }
   return out;
 }
@@ -513,10 +564,14 @@ String? _noteIn(String target, String noteDir, _Tree tree) {
 }
 
 /// Where [target] sits, from the page in [fromDir] (both tree-relative):
-/// a URL a browser reads, with the spaces of a decoded name encoded.
+/// a URL a browser reads, one path segment at a time.
+///
+/// `Uri.encodeFull` would leave `#` and `?` alone — they are URI delimiters,
+/// not path characters — so a picture named `a#b.png` would export as a
+/// fragment of a path that does not exist.
 String _url(String fromDir, String target) {
   final relative = fromDir.isEmpty || fromDir == '.'
       ? target
       : p.posix.relative(target, from: fromDir);
-  return Uri.encodeFull(relative);
+  return relative.split('/').map(Uri.encodeComponent).join('/');
 }

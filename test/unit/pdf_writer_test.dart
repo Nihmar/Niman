@@ -114,5 +114,7 @@ void main() {
         .firstWhere((s) => ascii.decode(s, allowInvalid: true).contains('cm'));
     final line = ascii.decode(content);
     expect(line, contains('q 180 0 0 90 10 55 cm'));
+    // The page is the one that was asked for, in the writer's own unit.
+    expect(latin1.decode(pdf), contains('/MediaBox [0 0 200 200]'));
   });
 }

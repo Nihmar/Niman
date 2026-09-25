@@ -29,14 +29,18 @@ import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
+/// One logical pixel in PDF points: the layout runs at 96 per inch, the
+/// writer's unit is 1/72 inch, so the same sheet is smaller on the page.
+const double pointsPerPixel = 72 / 96;
+
 /// A4's width in the logical pixels a page is laid out in (96 per inch).
-const double a4WidthPx = 793.7;
+const double a4WidthPx = a4Width / pointsPerPixel;
 
 /// A4's height in logical pixels.
-const double a4HeightPx = 1122.5;
+const double a4HeightPx = a4Height / pointsPerPixel;
 
 /// The page margin the print CSS uses, in logical pixels (18 mm).
-const double pdfPageMarginPx = 68.03;
+const double pdfPageMarginPx = 18 * 96 / 25.4;
 
 /// Lays [text] out and draws its pages, answering the PDF's bytes.
 Future<Uint8List> rasterPdf({
@@ -85,11 +89,13 @@ Future<Uint8List> rasterPdf({
         image.dispose();
       }
     }
+    // The layout is in logical pixels, the writer in points: the sheet
+    // would come out 4/3 too large on both axes without the conversion.
     return writePdf(
       pages,
-      pageWidth: pageWidth,
-      pageHeight: pageHeight,
-      margin: margin,
+      pageWidth: pageWidth * pointsPerPixel,
+      pageHeight: pageHeight * pointsPerPixel,
+      margin: margin * pointsPerPixel,
     );
   } finally {
     layout.dispose();
