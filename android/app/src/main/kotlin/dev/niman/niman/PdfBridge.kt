@@ -138,10 +138,15 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
                 PrintAttributes.Margins(MARGIN_MILS, MARGIN_MILS, MARGIN_MILS, MARGIN_MILS),
             )
             .build()
-        NimanPdfWriter(attributes).print(
-            view.createPrintDocumentAdapter("Niman"),
-            File(pdfPath),
-            done,
-        )
+        try {
+            val adapter = view.createPrintDocumentAdapter("Niman")
+            NimanPdfWriter(attributes).print(adapter, File(pdfPath), done)
+        } catch (error: Throwable) {
+            // The package-private access the writer needs cannot be checked
+            // by the compiler against every device's runtime: a refusal is
+            // an Error, and it must fail the print — the export falls back —
+            // not the process.
+            done(false, error.message ?: error.toString())
+        }
     }
 }
