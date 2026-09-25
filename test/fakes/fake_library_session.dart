@@ -1393,6 +1393,17 @@ final class _FakeFieldSource implements FieldSource {
   }
 
   @override
+  Future<List<({Note note, String value})>> fieldValues(String key) async {
+    final name = key.trim().toLowerCase();
+    final out = [
+      for (final (note, fm) in _session._liveFrontmatter())
+        for (final value in fm?.fields[name] ?? const <String>[])
+          (note: note, value: value),
+    ];
+    return out..sort((a, b) => a.note.path.compareTo(b.note.path));
+  }
+
+  @override
   Future<List<FieldKeyCount>> fieldKeys() async {
     final counts = <String, int>{};
     for (final (_, fm) in _session._liveFrontmatter()) {

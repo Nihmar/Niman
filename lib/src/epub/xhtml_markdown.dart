@@ -10,6 +10,7 @@ library;
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html;
+import 'package:niman/src/markdown/text_escape.dart';
 
 /// What a chapter came to: its Markdown, and where in it each element
 /// with an `id` begins — as a line of the Markdown — for the links that
@@ -48,7 +49,7 @@ final class XhtmlMarkdown {
       if (inline.isEmpty) return;
       final text = _inlineOf(inline).trim();
       inline.clear();
-      if (text.isNotEmpty) out.add(context.wrap(_lineStart(text)));
+      if (text.isNotEmpty) out.add(context.wrap(escapeMarkdownLineStart(text)));
     }
 
     for (final node in parent.nodes) {
@@ -76,7 +77,9 @@ final class XhtmlMarkdown {
       case 'p':
         _anchorsWithin(element, out);
         final text = _inlineOf(element.nodes).trim();
-        if (text.isNotEmpty) out.add(context.wrap(_lineStart(text)));
+        if (text.isNotEmpty) {
+          out.add(context.wrap(escapeMarkdownLineStart(text)));
+        }
       case 'blockquote':
         _blocks(element, out, context.quoted());
       case 'ul' || 'ol':
@@ -125,7 +128,11 @@ final class XhtmlMarkdown {
           if (!(node is Element && _isList(node))) node,
       ];
       final text = _inlineOf(_flatten(words)).trim();
-      out.add(context.wrap('$marker${text.isEmpty ? '' : _lineStart(text)}'));
+      out.add(
+        context.wrap(
+          '$marker${text.isEmpty ? '' : escapeMarkdownLineStart(text)}',
+        ),
+      );
       for (final nested in item.children.where(_isList)) {
         _list(
           nested,
@@ -183,7 +190,7 @@ final class XhtmlMarkdown {
     if (src == null || src.isEmpty) return null;
     final name = picture(src);
     if (name == null) return null;
-    final alt = _escape(_collapse(img.attributes['alt'] ?? ''));
+    final alt = escapeMarkdownText(_collapse(img.attributes['alt'] ?? ''));
     return '![$alt]($name)';
   }
 
@@ -207,7 +214,7 @@ final class XhtmlMarkdown {
 
   void _inline(Node node, StringBuffer out) {
     if (node is Text) {
-      out.write(_escape(_collapse(node.text)));
+      out.write(escapeMarkdownText(_collapse(node.text)));
       return;
     }
     if (node is! Element) return;
@@ -261,27 +268,6 @@ final class XhtmlMarkdown {
   static String _collapse(String text) => text.replaceAll(_blank, ' ');
 
   static final RegExp _blank = RegExp(r'\s+');
-
-  /// [text] with every character Markdown or the app's extensions would
-  /// read as syntax escaped.
-  static String _escape(String text) =>
-      text.replaceAllMapped(_syntax, (match) => '\\${match.group(0)}');
-
-  static final RegExp _syntax = RegExp(r'[\\`*_\[\]<>#$|~=^&!]');
-
-  /// [text], where a line opening a block would open a list, a quote or a
-  /// heading: its first character escaped.
-  static String _lineStart(String text) {
-    final ordered = _orderedStart.firstMatch(text);
-    if (ordered != null) {
-      return '${ordered.group(1)}\\${ordered.group(2)}'
-          '${text.substring(ordered.end)}';
-    }
-    if (text.startsWith('-') || text.startsWith('+')) return '\\$text';
-    return text;
-  }
-
-  static final RegExp _orderedStart = RegExp(r'^(\d{1,9})([.)])');
 
   static bool _isList(Element element) =>
       element.localName == 'ul' || element.localName == 'ol';

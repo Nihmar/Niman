@@ -56,6 +56,10 @@ abstract interface class FieldSource {
 
   /// Every key in use, most declared first (ties alphabetical).
   Future<List<FieldKeyCount>> fieldKeys();
+
+  /// Every value of [key], with the note holding it, in path order: the
+  /// notes that name the file they annotate (#284) ask it of `annotates`.
+  Future<List<({Note note, String value})>> fieldValues(String key);
 }
 
 /// Queries over the frontmatter fields of the open library's index.
@@ -92,6 +96,23 @@ final class FieldRepo implements FieldSource {
           )
           ..orderBy([(n) => OrderingTerm.asc(n.path)]))
         .get();
+  }
+
+  @override
+  Future<List<({Note note, String value})>> fieldValues(String key) async {
+    final fields = _db.frontmatterFields;
+    final notes = _db.notes;
+    final rows =
+        await (_db.select(notes).join([
+                innerJoin(fields, fields.noteId.equalsExp(notes.id)),
+              ])
+              ..where(fields.key.equals(key.trim().toLowerCase()))
+              ..orderBy([OrderingTerm.asc(notes.path)]))
+            .get();
+    return [
+      for (final row in rows)
+        (note: row.readTable(notes), value: row.readTable(fields).value),
+    ];
   }
 
   @override

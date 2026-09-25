@@ -53,11 +53,24 @@ sealed class BookLocation {
       );
     }
     final page = int.tryParse(values['page'] ?? '');
-    if (page != null) return page < 1 ? null : PdfLocation(page: page);
+    if (page != null) {
+      return page < 1
+          ? null
+          : PdfLocation(page: page, chars: _range(values['chars']));
+    }
     final chapter = values['chapter'];
     if (chapter == null || chapter.isEmpty) return null;
     final line = int.tryParse(values['line'] ?? '') ?? 0;
     return EpubLocation(chapter: chapter, line: line < 0 ? 0 : line);
+  }
+
+  /// The character range `chars=120-180` spells, or null.
+  static ({int start, int end})? _range(String? value) {
+    final match = RegExp(r'^(\d+)-(\d+)$').firstMatch(value ?? '');
+    if (match == null) return null;
+    final start = int.parse(match[1]!);
+    final end = int.parse(match[2]!);
+    return end < start ? null : (start: start, end: end);
   }
 
   /// The place as a link's fragment (without its `#`), which
@@ -85,10 +98,12 @@ sealed class BookLocation {
       value is num ? value.toDouble().clamp(0.0, 1.0) : 0.0;
 }
 
-/// A place in a PDF: its page, and how far down it the view's top is.
+/// A place in a PDF: its page, and how far down it the view's top is; or,
+/// for a passage (#284), its characters in the page's text.
 final class PdfLocation extends BookLocation {
-  /// The place [fraction] of the way down [page], counted from 1.
-  const new({required this.page, this.fraction = 0});
+  /// The place [fraction] of the way down [page], counted from 1, or the
+  /// passage [chars] of it.
+  const new({required this.page, this.fraction = 0, this.chars});
 
   /// The page, the first being 1.
   final int page;
@@ -96,11 +111,18 @@ final class PdfLocation extends BookLocation {
   /// How far down the page: 0 at its top, 1 at its bottom.
   final double fraction;
 
+  /// A passage: the range of its characters in the page's text, the end
+  /// excluded; null for the page, or a place on it.
+  final ({int start, int end})? chars;
+
   @override
   Map<String, Object?> toJson() => {'page': page, 'fraction': fraction};
 
   @override
-  String toFragment() => 'page=$page';
+  String toFragment() => switch (chars) {
+    (:final start, :final end) => 'page=$page&chars=$start-$end',
+    null => 'page=$page',
+  };
 
   @override
   bool isNear(BookLocation? other) =>
@@ -110,13 +132,16 @@ final class PdfLocation extends BookLocation {
 
   @override
   bool operator ==(Object other) =>
-      other is PdfLocation && other.page == page && other.fraction == fraction;
+      other is PdfLocation &&
+      other.page == page &&
+      other.fraction == fraction &&
+      other.chars == chars;
 
   @override
-  int get hashCode => Object.hash(page, fraction);
+  int get hashCode => Object.hash(page, fraction, chars);
 
   @override
-  String toString() => 'PdfLocation($page, $fraction)';
+  String toString() => 'PdfLocation($page, $fraction, $chars)';
 }
 
 /// A place in an EPUB: a chapter, a line of the chapter's text, and how far
