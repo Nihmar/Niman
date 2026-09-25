@@ -61,10 +61,12 @@ void main() {
     expect(reminders.settingsOpened, 1);
   });
 
-  testWidgets('battery optimization warns and offers settings', (tester) async {
+  testWidgets('a background restriction warns and offers settings', (
+    tester,
+  ) async {
     reminders.healthState.value = ReminderHealth.batteryRestricted;
     await pumpTab(tester);
-    expect(find.textContaining('Battery optimization'), findsOne);
+    expect(find.textContaining('Background usage'), findsOne);
     expect(find.byKey(const Key('todo-reminder-health-fix')), findsOne);
   });
 

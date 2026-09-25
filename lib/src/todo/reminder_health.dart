@@ -17,14 +17,16 @@ enum ReminderHealth {
   /// Notifications are off: the alarm fires and nothing is shown.
   notificationsBlocked,
 
-  /// The system may sleep the app or drop its alarms.
+  /// The system will not run the app in the background.
   ///
-  /// Two switches on Android report here, because the fix is one screen:
-  /// Doze battery optimization, and the *Restricted* mode some ROMs show
-  /// as an "Allow background activity" switch, off. Several OEM ROMs
-  /// discard pending alarms when an optimized app is swiped away from
-  /// recents, which is when a reminder is most likely to be needed and
-  /// least likely to arrive.
+  /// Android's *Restricted* mode, which several ROMs show on the app's
+  /// battery page as a "Allow background usage" switch, off. It is the
+  /// switch the page Niman opens actually offers, so flipping it clears
+  /// this state; a restricted app is not started in the background, so a
+  /// reminder never fires. Doze optimization is deliberately not part of
+  /// this state: an exact alarm is `setExactAndAllowWhileIdle` and fires
+  /// in Doze, and warning about a switch that page does not control left
+  /// the banner up after the one switch the user could reach was on.
   batteryRestricted,
 
   /// Only inexact alarms are available: Doze can defer them by minutes.

@@ -232,7 +232,6 @@ final class LocalReminderService implements ReminderService {
     _health.value = _healthOf(
       granted: granted,
       exact: exact,
-      batteryExempt: batteryExempt,
       backgroundRestricted: backgroundRestricted,
       wantsAny: wanted.isNotEmpty,
     );
@@ -327,20 +326,23 @@ final class LocalReminderService implements ReminderService {
   ///
   /// Ordered by consequence: a blocked notification hides the reminder
   /// outright, an app the system will not run in the background may never
-  /// get to fire it at all, and inexact only makes it late. The two
-  /// battery holds are reported as one: the fix is the same screen, and
-  /// the message names both switches.
+  /// get to fire it at all, and inexact only makes it late.
+  ///
+  /// Only the background restriction warns, not Doze optimization: the
+  /// page Niman opens offers the background switch, so flipping it is
+  /// what clears the banner — warning about Doze as well kept the banner
+  /// up after the switch the user could actually reach had been turned
+  /// on. And an exact alarm is `setExactAndAllowWhileIdle`: it fires in
+  /// Doze, so optimization alone is not a reason to warn. Doze state is
+  /// still logged, for a diagnosis.
   static ReminderHealth _healthOf({
     required bool granted,
     required bool exact,
-    required bool batteryExempt,
     required bool backgroundRestricted,
     required bool wantsAny,
   }) {
     if (!granted) return ReminderHealth.notificationsBlocked;
-    if (!batteryExempt || backgroundRestricted) {
-      return ReminderHealth.batteryRestricted;
-    }
+    if (backgroundRestricted) return ReminderHealth.batteryRestricted;
     if (!exact && wantsAny) return ReminderHealth.inexactOnly;
     return ReminderHealth.ok;
   }
