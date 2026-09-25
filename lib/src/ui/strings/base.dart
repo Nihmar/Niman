@@ -739,6 +739,8 @@ abstract base class Strings {
   String get exportFormatHtml;
   String get exportFolderTitle;
   String get exportLibraryTitle;
+  String get exportFormatPdf;
+  String get exportPdfPicture;
   String exportDone(String place);
   String exportFailed(Object error);
   String get tidyOnCloseTitle;

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 
 /// Where an exported file is written; the place it landed, or null when
 /// the dialog was dismissed. The tests hand in their own.
@@ -53,4 +54,10 @@ Future<String?> pickExportFolderFromDisk({required String dialogTitle}) =>
 /// The folder seam the shell exports a tree through.
 final pickExportFolderProvider = Provider<PickExportFolder>(
   (ref) => pickExportFolderFromDisk,
+);
+
+/// The printer a note's PDF goes through; tests hand in their own, since
+/// no engine can be started under `flutter test`.
+final pdfPrinterProvider = Provider<PdfPrinter>(
+  (ref) => const ProcessPdfPrinter(),
 );

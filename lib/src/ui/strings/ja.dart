@@ -1460,6 +1460,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get exportLibraryTitle => 'ライブラリをエクスポート…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF はページの画像です。Chromium をインストールするとテキストを選択できます。';
+  @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override
   String get lintRulesTitle => 'Markdown ルール';

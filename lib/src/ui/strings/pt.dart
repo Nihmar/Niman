@@ -1568,6 +1568,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exportar biblioteca…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'O PDF é uma imagem das páginas; instale o Chromium para ter texto '
+      'selecionável.';
+  @override
   String get formatNoteAlreadyTidy => 'A nota já estava arrumada.';
   @override
   String get lintRulesTitle => 'Regras de Markdown';

@@ -1573,6 +1573,12 @@ final class GalicianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exportar a biblioteca…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'O PDF é unha imaxe das páxinas; instala Chromium para ter texto '
+      'seleccionable.';
+  @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override
   String get lintRulesTitle => 'Regras de Markdown';

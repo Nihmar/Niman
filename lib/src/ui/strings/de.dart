@@ -1584,6 +1584,12 @@ final class GermanStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Bibliothek exportieren…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'Das PDF ist ein Bild der Seiten; mit Chromium wird der Text '
+      'auswählbar.';
+  @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override
   String get lintRulesTitle => 'Markdown-Regeln';

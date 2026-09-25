@@ -1546,6 +1546,11 @@ final class TurkishStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Kitaplığı dışa aktar…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF, sayfaların bir resmidir; seçilebilir metin için Chromium kurun.';
+  @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override
   String get lintRulesTitle => 'Markdown kuralları';

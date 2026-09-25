@@ -1555,6 +1555,11 @@ final class LatvianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Eksportēt bibliotēku…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF ir lapu attēls; instalē Chromium, lai tekstu varētu atlasīt.';
+  @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override
   String get lintRulesTitle => 'Markdown noteikumi';

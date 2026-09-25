@@ -1571,6 +1571,11 @@ final class FinnishStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Vie kirjasto…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF on kuva sivuista; asenna Chromium, niin teksti on valittavissa.';
+  @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override
   String get lintRulesTitle => 'Markdown-säännöt';

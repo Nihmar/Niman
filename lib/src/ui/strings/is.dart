@@ -1557,6 +1557,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Flytja safnið út…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF-skjalið er mynd af síðunum; settu upp Chromium fyrir valanlegan '
+      'texta.';
+  @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override
   String get lintRulesTitle => 'Markdown-reglur';

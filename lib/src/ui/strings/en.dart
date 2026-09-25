@@ -1545,6 +1545,12 @@ final class EnglishStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Export library…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'The PDF is a picture of the pages; installing Chromium gives '
+      'selectable text.';
+  @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override
   String get lintRulesTitle => 'Markdown rules';

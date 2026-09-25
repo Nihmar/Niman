@@ -1608,6 +1608,12 @@ final class GreekStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Εξαγωγή βιβλιοθήκης…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε το Chromium για '
+      'επιλέξιμο κείμενο.';
+  @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override
   String get lintRulesTitle => 'Κανόνες Markdown';

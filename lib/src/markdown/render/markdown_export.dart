@@ -122,12 +122,17 @@ abstract final class MarkdownExport {
   /// into an [OffsetLayer] — a `PaintingContext` takes a layer and its bounds,
   /// not a canvas — and the layer is recorded into a picture through
   /// `toImage`, at as many device pixels per logical pixel as [pixelRatio].
+  ///
+  /// [size] crops the recording: a paginating caller asks for one page's
+  /// slice of a tall box by painting it at `-pageTop` and taking a
+  /// page-sized rectangle. It is the box's own size by default.
   static Future<ui.Image> capture(
     RenderBox box, {
     Offset offset = Offset.zero,
+    Size? size,
     double pixelRatio = 1,
   }) async {
-    final bounds = offset & box.size;
+    final bounds = offset & (size ?? box.size);
     final layer = OffsetLayer(offset: offset);
     final context = _RecordingContext(layer, bounds);
     box.paint(context, offset);

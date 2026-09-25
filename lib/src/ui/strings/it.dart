@@ -1577,6 +1577,12 @@ final class ItalianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Esporta libreria…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      "Il PDF è un'immagine delle pagine; installa Chromium per "
+      'avere testo selezionabile.';
+  @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override
   String get lintRulesTitle => 'Regole Markdown';

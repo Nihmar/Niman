@@ -1599,6 +1599,12 @@ final class FrenchStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exporter la bibliothèque…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'Le PDF est une image des pages ; installez Chromium pour un texte '
+      'sélectionnable.';
+  @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
   @override
   String get lintRulesTitle => 'Règles Markdown';
