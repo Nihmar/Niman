@@ -139,32 +139,8 @@ delivery and other background behavior.
 
 ## What's coming
 
-These are tracked as GitHub issues — see the
-[issue tracker](https://github.com/Nihmar/Niman/issues) for details.
-
-- **Import** ([#25](https://github.com/Nihmar/Niman/issues/25)) —
-  Obsidian folders (wikilinks supported) and Notion export zips.
-- **Export a note or folder**
-  ([#24](https://github.com/Nihmar/Niman/issues/24),
-  [#63](https://github.com/Nihmar/Niman/issues/63)) — to `.md`, `.html`
-  (with math rendered) or PDF, and a folder or library to a zip.
-- **Encryption** ([#26](https://github.com/Nihmar/Niman/issues/26)) —
-  optional per-file AES-256-GCM, chosen at library creation.
-- **Onboarding and a guided tour**
-  ([#27](https://github.com/Nihmar/Niman/issues/27),
-  [#266](https://github.com/Nihmar/Niman/issues/266)) — a first launch
-  that shows you around and asks for a library and an encryption choice.
-- **Android share-in** ([#40](https://github.com/Nihmar/Niman/issues/40)) —
-  send text or a `.md` file to Niman from another app.
-- **Git sync** ([#74](https://github.com/Nihmar/Niman/issues/74)) — a
-  library kept as a git repository, beside WebDAV.
-- **Scale and performance**
-  ([#22](https://github.com/Nihmar/Niman/issues/22),
-  [#45](https://github.com/Nihmar/Niman/issues/45)) — background indexing
-  and bounded memory for very large libraries, and editor smoothness on
-  huge notes.
-
-**Stretch goals:** Mermaid diagrams, a Markdown linter.
+What is planned and what is in progress is tracked as GitHub issues — see
+the [issue tracker](https://github.com/Nihmar/Niman/issues).
 
 ## Platforms
 
