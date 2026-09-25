@@ -115,6 +115,15 @@ for the same link followed again; the pane goes there on open, over the
 saved position, and on a new fragment or token later — not on the same
 fragment handed again as a tab comes back.
 
+The link button on the row of a book (`EpubBar`) and of a PDF
+(`PdfDocumentView`, which now brings its own row) is a `PlaceLinkButton`:
+it asks the pane for the place being read — the book's top line, the next
+one when the view is mostly past it, labelled with the contents entry
+being read; the PDF's page, labelled `pdfPageLabel` — and copies
+`placeLink` (`lib/src/links/place_link.dart`): the library-relative path,
+which always resolves, the fragment, and the label as the alias or the
+Markdown text, the href percent-encoded as Obsidian writes one.
+
 `ReadingPositions` keeps them in `.niman/reading.json`, by library-relative
 path, each with the time it was read (`at`); it is a library state file,
 synced and merged book by book (`mergeReadingJson`, see `sync.md`).

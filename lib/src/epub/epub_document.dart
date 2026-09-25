@@ -78,6 +78,11 @@ final class EpubDocument {
     return links[index];
   }
 
+  /// The index of the contents entry being read at [line]: the last one
+  /// opening at or above it; -1 before the first.
+  int entryAt(int line) =>
+      contents.lastIndexWhere((entry) => entry.line <= line);
+
   /// The index of the chapter [name] names: its path in the archive, as
   /// the book spells it, else whatever its case (a Markdown link's
   /// fragment may come lowercased), else its file name alone (a link

@@ -1640,6 +1640,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Nepavyko atverti šio failo už Niman ribų.';
+  @override
+  String get copyPlaceLink => 'Kopijuoti nuorodą į šią vietą';
+  @override
+  String get placeLinkCopied => 'Nuoroda nukopijuota';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Perkelta į šiukšlinę';

@@ -1645,6 +1645,12 @@ final class UkrainianStrings extends Strings {
   String get attachmentMissing => 'Цього файлу немає на диску.';
   @override
   String get attachmentOpenFailed => 'Не вдалося відкрити цей файл поза Niman.';
+  @override
+  String get copyPlaceLink => 'Копіювати посилання на це місце';
+  @override
+  String get placeLinkCopied => 'Посилання скопійовано';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, с. $page';
 
   @override
   String get movedToTrash => 'Переміщено в кошик';

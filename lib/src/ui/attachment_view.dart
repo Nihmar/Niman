@@ -12,13 +12,14 @@ library;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
+import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 /// The picture files the pane shows itself: the ones Flutter decodes on
@@ -52,6 +53,7 @@ final class AttachmentView extends StatelessWidget {
     this.positions,
     this.anchor,
     this.reloadToken = 0,
+    this.linkType = LinkType.wikilink,
     super.key,
   });
 
@@ -78,6 +80,10 @@ final class AttachmentView extends StatelessWidget {
   /// Bumped when the same link is followed again.
   final int reloadToken;
 
+  /// How the library writes links, for the one to the place being read in
+  /// a book or a PDF.
+  final LinkType linkType;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -94,17 +100,28 @@ final class AttachmentView extends StatelessWidget {
         positions: positions,
         anchor: anchor,
         reloadToken: reloadToken,
+        linkType: linkType,
       );
     }
     final theme = Theme.of(context);
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerLowest,
-      child: Column(
-        children: [
-          Expanded(child: _isPdf ? _pdf(context) : _picture(context)),
-          AttachmentBar(path: path, launcher: launcher),
-        ],
-      ),
+      // A PDF brings its own row, with the link to its page.
+      child: _isPdf
+          ? PdfDocumentView(
+              path: path,
+              launcher: launcher,
+              linkType: linkType,
+              positions: positions,
+              anchor: anchor,
+              reloadToken: reloadToken,
+            )
+          : Column(
+              children: [
+                Expanded(child: _picture(context)),
+                AttachmentBar(path: path, launcher: launcher),
+              ],
+            ),
     );
   }
 
@@ -118,26 +135,7 @@ final class AttachmentView extends StatelessWidget {
       child: Image.file(
         File(path),
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stack) => _unreadable(context),
-      ),
-    ),
-  );
-
-  Widget _pdf(BuildContext context) => PdfDocumentView(
-    path: path,
-    unreadable: _unreadable,
-    positions: positions,
-    anchor: anchor,
-    reloadToken: reloadToken,
-  );
-
-  Widget _unreadable(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        AppStrings.attachmentUnreadable,
-        key: const Key('attachment-unreadable'),
-        textAlign: TextAlign.center,
+        errorBuilder: (context, error, stack) => const AttachmentUnreadable(),
       ),
     ),
   );

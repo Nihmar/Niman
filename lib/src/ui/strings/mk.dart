@@ -1656,6 +1656,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Датотеката не можеше да се отвори надвор од Niman.';
+  @override
+  String get copyPlaceLink => 'Копирај врска до ова место';
+  @override
+  String get placeLinkCopied => 'Врската е копирана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, стр. $page';
 
   @override
   String get movedToTrash => 'Преместено во корпа';

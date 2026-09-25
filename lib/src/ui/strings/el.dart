@@ -1694,6 +1694,12 @@ final class GreekStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Δεν ήταν δυνατό το άνοιγμα αυτού του αρχείου εκτός του Niman.';
+  @override
+  String get copyPlaceLink => 'Αντιγραφή συνδέσμου σε αυτό το σημείο';
+  @override
+  String get placeLinkCopied => 'Ο σύνδεσμος αντιγράφηκε';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, σ. $page';
 
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';

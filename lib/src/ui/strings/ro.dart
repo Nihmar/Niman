@@ -1652,6 +1652,12 @@ final class RomanianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Fișierul nu a putut fi deschis în afara Niman.';
+  @override
+  String get copyPlaceLink => 'Copiază linkul către acest loc';
+  @override
+  String get placeLinkCopied => 'Link copiat';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Mutat în coș';

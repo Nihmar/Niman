@@ -129,6 +129,9 @@ library.
   pinch or the mouse wheel and dragged around; a PDF page after page,
   zoomed the same way. The row under them names the file and, on
   desktop, offers **Open in default app**.
+- The row under a PDF or a book has a **link** button: it copies a link
+  to the place being read, to paste into a note (see
+  [links](links.md#links-into-a-pdf-or-a-book)).
 - **A PDF or a book opens where you left it**: its page, or its chapter
   and the line in it, is kept for the library in `.niman/reading.json`
   and syncs with it, so a book put down on the phone opens on the

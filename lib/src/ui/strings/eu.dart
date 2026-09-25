@@ -1648,6 +1648,12 @@ final class BasqueStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Ezin izan da fitxategi hau Nimanetik kanpo ireki.';
+  @override
+  String get copyPlaceLink => 'Kopiatu toki honetarako esteka';
+  @override
+  String get placeLinkCopied => 'Esteka kopiatu da';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, $page. or.';
 
   @override
   String get movedToTrash => 'Zakarrontzira mugitua';

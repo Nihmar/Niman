@@ -1683,6 +1683,12 @@ final class FrenchStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Impossible d’ouvrir ce fichier en dehors de Niman.';
+  @override
+  String get copyPlaceLink => 'Copier le lien vers cet endroit';
+  @override
+  String get placeLinkCopied => 'Lien copié';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Mis à la corbeille';

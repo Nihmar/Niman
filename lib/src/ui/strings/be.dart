@@ -1641,6 +1641,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Не ўдалося адкрыць гэты файл па-за Niman.';
+  @override
+  String get copyPlaceLink => 'Скапіраваць спасылку на гэта месца';
+  @override
+  String get placeLinkCopied => 'Спасылка скапіравана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, с. $page';
 
   @override
   String get movedToTrash => 'Перамешчана ў кошык';

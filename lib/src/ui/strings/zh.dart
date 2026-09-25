@@ -1499,6 +1499,12 @@ final class ChineseStrings extends Strings {
   String get attachmentMissing => '此文件不在磁盘上。';
   @override
   String get attachmentOpenFailed => '无法在 Niman 之外打开此文件。';
+  @override
+  String get copyPlaceLink => '复制指向此处的链接';
+  @override
+  String get placeLinkCopied => '链接已复制';
+  @override
+  String pdfPageLabel(String name, int page) => '$name，第 $page 页';
 
   @override
   String get movedToTrash => '已移入回收站';

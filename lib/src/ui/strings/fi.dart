@@ -1653,6 +1653,12 @@ final class FinnishStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Tiedostoa ei voitu avata Nimanin ulkopuolella.';
+  @override
+  String get copyPlaceLink => 'Kopioi linkki tähän kohtaan';
+  @override
+  String get placeLinkCopied => 'Linkki kopioitu';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Siirretty koriin';

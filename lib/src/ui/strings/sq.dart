@@ -1652,6 +1652,12 @@ final class AlbanianStrings extends Strings {
   String get attachmentMissing => 'Ky skedar nuk ndodhet në disk.';
   @override
   String get attachmentOpenFailed => 'Ky skedar nuk u hap dot jashtë Niman.';
+  @override
+  String get copyPlaceLink => 'Kopjo lidhjen për këtë vend';
+  @override
+  String get placeLinkCopied => 'Lidhja u kopjua';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, f. $page';
 
   @override
   String get movedToTrash => 'U zhvendos në kosh';

@@ -216,6 +216,7 @@ final class ShellDetailPane extends StatelessWidget {
           positions: ReadingPositions(root),
           anchor: tab.anchor,
           reloadToken: reloadToken,
+          linkType: linkType,
         )
       : _noteView(root, tab);
 

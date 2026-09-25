@@ -1635,6 +1635,12 @@ final class LatvianStrings extends Strings {
   String get attachmentMissing => 'Šī faila diskā nav.';
   @override
   String get attachmentOpenFailed => 'Šo failu neizdevās atvērt ārpus Niman.';
+  @override
+  String get copyPlaceLink => 'Kopēt saiti uz šo vietu';
+  @override
+  String get placeLinkCopied => 'Saite nokopēta';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, $page. lpp.';
 
   @override
   String get movedToTrash => 'Pārvietots konteinerā';

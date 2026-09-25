@@ -1646,6 +1646,12 @@ final class SwedishStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Det gick inte att öppna filen utanför Niman.';
+  @override
+  String get copyPlaceLink => 'Kopiera länk till det här stället';
+  @override
+  String get placeLinkCopied => 'Länk kopierad';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';

@@ -1654,6 +1654,12 @@ final class HungarianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'A fájlt nem sikerült a Nimanon kívül megnyitni.';
+  @override
+  String get copyPlaceLink => 'Hivatkozás másolása erre a helyre';
+  @override
+  String get placeLinkCopied => 'Hivatkozás másolva';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, $page. o.';
 
   @override
   String get movedToTrash => 'A kukába került';

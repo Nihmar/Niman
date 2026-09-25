@@ -1627,6 +1627,12 @@ final class NorwegianStrings extends Strings {
   String get attachmentMissing => 'Denne filen finnes ikke på disken.';
   @override
   String get attachmentOpenFailed => 'Filen kunne ikke åpnes utenfor Niman.';
+  @override
+  String get copyPlaceLink => 'Kopier lenke til dette stedet';
+  @override
+  String get placeLinkCopied => 'Lenke kopiert';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Flyttet til papirkorg';

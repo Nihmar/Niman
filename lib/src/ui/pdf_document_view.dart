@@ -6,9 +6,16 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/reading/reading_tracker.dart';
+import 'package:niman/src/ui/attachment_bar.dart';
+import 'package:niman/src/ui/attachment_unreadable.dart';
+import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/place_link_button.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:path/path.dart' as p;
 import 'package:pdfrx/pdfrx.dart';
 
 /// The place of a PDF laid out as [pages], one under the other, at [top]
@@ -24,13 +31,14 @@ PdfLocation? pdfLocationAt(List<Rect> pages, double top) {
   return null;
 }
 
-/// The PDF at [path], an absolute path.
+/// The PDF at [path], an absolute path, and its row: its name, a link to
+/// the page being read (#282), on desktop the system's application.
 final class PdfDocumentView extends StatefulWidget {
-  /// Shows the PDF at [path]; [unreadable] stands in for one that does not
-  /// open.
+  /// Shows the PDF at [path].
   const new({
     required this.path,
-    required this.unreadable,
+    required this.launcher,
+    this.linkType = LinkType.wikilink,
     this.positions,
     this.anchor,
     this.reloadToken = 0,
@@ -40,8 +48,11 @@ final class PdfDocumentView extends StatefulWidget {
   /// The PDF's absolute path.
   final String path;
 
-  /// What the pane shows for a PDF it cannot read.
-  final WidgetBuilder unreadable;
+  /// The OS seam behind the button to the system's application.
+  final OsLauncher launcher;
+
+  /// How the library writes links, for the one to the page being read.
+  final LinkType linkType;
 
   /// Where the library keeps its reading positions; null keeps none, and
   /// the PDF opens at its first page.
@@ -67,6 +78,9 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
   /// The link's fragment last gone to: handed again as a tab comes back,
   /// it does not move the reader.
   String? _anchorTaken;
+
+  /// Whether the PDF is laid out, and has pages to link to.
+  bool _ready = false;
 
   @override
   void initState() {
@@ -96,6 +110,7 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
       return;
     }
     _reading.flush();
+    _ready = false;
     _follow();
   }
 
@@ -117,6 +132,7 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
     final reading = _reading;
     final left = await _left;
     if (!mounted || !identical(reading, _reading)) return;
+    setState(() => _ready = true);
     _anchorTaken = widget.anchor;
     for (final place in [_linked(), if (left is PdfLocation) left]) {
       if (place != null && await _show(controller, place)) {
@@ -157,16 +173,52 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
     if (here != null) _reading.moved(here);
   }
 
+  /// The page being read, for a link to it.
+  PlaceToLink? _here() {
+    final path = widget.positions?.keyOf(widget.path);
+    if (path == null || !_controller.isReady) return null;
+    final place = pdfLocationAt(
+      _controller.layout.pageLayouts,
+      _controller.visibleRect.top,
+    );
+    if (place == null) return null;
+    final name = p.basenameWithoutExtension(widget.path);
+    return (
+      path: path,
+      place: place,
+      label: AppStrings.pdfPageLabel(name, place.page),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => PdfViewer.file(
-    widget.path,
-    key: const Key('attachment-pdf'),
-    controller: _controller,
-    params: PdfViewerParams(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      onViewerReady: (document, controller) => unawaited(_place(controller)),
-      errorBannerBuilder: (context, error, stack, documentRef) =>
-          widget.unreadable(context),
-    ),
+  Widget build(BuildContext context) => Column(
+    children: [
+      Expanded(
+        child: PdfViewer.file(
+          widget.path,
+          key: const Key('attachment-pdf'),
+          controller: _controller,
+          params: PdfViewerParams(
+            backgroundColor: Theme.of(context)
+                .colorScheme
+                .surfaceContainerLowest,
+            onViewerReady: (document, controller) =>
+                unawaited(_place(controller)),
+            errorBannerBuilder: (context, error, stack, documentRef) =>
+                const AttachmentUnreadable(),
+          ),
+        ),
+      ),
+      AttachmentBar(
+        path: widget.path,
+        launcher: widget.launcher,
+        actions: [
+          PlaceLinkButton(
+            here: _ready && widget.positions != null ? _here : null,
+            linkType: widget.linkType,
+          ),
+        ],
+      ),
+    ],
   );
 }

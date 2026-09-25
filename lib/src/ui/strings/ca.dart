@@ -1672,6 +1672,12 @@ final class CatalanStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'No s’ha pogut obrir aquest fitxer fora del Niman.';
+  @override
+  String get copyPlaceLink => "Copia l'enllaç a aquest punt";
+  @override
+  String get placeLinkCopied => 'Enllaç copiat';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Moguda a la paperera';

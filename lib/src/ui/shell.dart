@@ -983,6 +983,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         },
         anchor: _pendingAnchor,
         reloadToken: _noteReloadToken,
+        linkType: _editorSettings.linkType,
       );
     }
     return NoteView(

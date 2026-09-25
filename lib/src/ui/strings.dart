@@ -961,6 +961,10 @@ final class AppStrings {
   static String get attachmentUnreadable => _s.attachmentUnreadable;
   static String get attachmentMissing => _s.attachmentMissing;
   static String get attachmentOpenFailed => _s.attachmentOpenFailed;
+  static String get copyPlaceLink => _s.copyPlaceLink;
+  static String get placeLinkCopied => _s.placeLinkCopied;
+  static String pdfPageLabel(String name, int page) =>
+      _s.pdfPageLabel(name, page);
   static String get movedToTrash => _s.movedToTrash;
   static String get deletedMessage => _s.deletedMessage;
   static String deleteToTrashConfirm(String name) =>
