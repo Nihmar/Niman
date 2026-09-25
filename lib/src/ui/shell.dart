@@ -26,7 +26,9 @@ import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_progress_dialog.dart';
 import 'package:niman/src/export/export_tree.dart';
+import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -2928,6 +2930,35 @@ final class _LibraryShellState extends State<_LibraryShell>
         // cache of its own goes with it.
         final text = await ops.readNote(path);
         final cache = MathCache();
+        // A browser print reports no progress and the drawing fallback can
+        // take minutes on a novel: the dialog says the export is running
+        // and offers the one way to stop it.
+        final progress = ValueNotifier<PdfExportProgress?>(null);
+        final done = Completer<void>();
+        var cancelled = false;
+        if (mounted) {
+          unawaited(
+            showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => PdfExportProgressDialog(
+                title: title,
+                progress: progress,
+                done: done.future,
+                onCancel: () {
+                  cancelled = true;
+                  // Android's WebView print is the one engine that can be
+                  // stopped mid-flight; a desktop process is left to its
+                  // own timeout, and the flag aborts before anything is
+                  // written or drawn.
+                  if (Platform.isAndroid) {
+                    unawaited(WebViewPdfPrinter.cancel());
+                  }
+                },
+              ),
+            ),
+          );
+        }
         try {
           final printed = await exportNotePdf(
             text: text,
@@ -2939,10 +2970,17 @@ final class _LibraryShellState extends State<_LibraryShell>
             printer: widget.pdfPrinter,
             theme: theme,
             mathCache: cache,
+            onProgress: (report) => progress.value = report,
+            isCancelled: () => cancelled,
           );
           payload = printed.payload;
           selectable = printed.selectable;
+        } on PdfExportCancelled {
+          // The dialog closed itself; a cancel says nothing.
+          return;
         } finally {
+          if (!done.isCompleted) done.complete();
+          progress.dispose();
           cache.dispose();
         }
       } else {

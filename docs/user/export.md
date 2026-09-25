@@ -26,7 +26,9 @@ one file:
   instead: a picture of its pages, which cannot be selected, and Niman
   says so when the file is written. The drawn pages show the note's
   pictures too — the fallback reads and draws them, it does not leave
-  them out.
+  them out. A PDF export says it is running while it runs — the engine
+  printing, or the pages being drawn one by one — and can be stopped
+  from the same dialog: a long note is minutes of work, not a hang.
 
 A wikilink becomes highlighted text on a page exported on its own: one
 page has nothing to point at. Export a folder, below, and its links
