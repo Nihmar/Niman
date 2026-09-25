@@ -316,6 +316,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 pickExportFolder: ref.read(pickExportFolderProvider),
                 pdfPrinter: ref.read(pdfPrinterProvider),
                 pdfEngine: ref.watch(pdfEngineProvider).value,
+                pdfAvailable: ref.watch(pdfAvailableProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -350,6 +351,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.pickExportFolder,
     required this.pdfPrinter,
     required this.pdfEngine,
+    required this.pdfAvailable,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -402,6 +404,10 @@ final class _LibraryShell extends StatefulWidget {
   /// The browser a folder's PDF zip prints with, or null when this
   /// machine has none (the format is then not offered for a folder).
   final String? pdfEngine;
+
+  /// Whether PDFs can be printed here: the WebView on Android, or
+  /// [pdfEngine] on the desktop.
+  final bool pdfAvailable;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -3098,7 +3104,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         : AppStrings.exportFolderTitle;
     final formats = <Widget>[
       for (final format in ExportTreeFormat.values)
-        if (format != ExportTreeFormat.pdf || widget.pdfEngine != null)
+        if (format != ExportTreeFormat.pdf || widget.pdfAvailable)
           ListTile(
             key: Key('export-tree-${format.name}'),
             title: Text(_treeFormatName(format)),

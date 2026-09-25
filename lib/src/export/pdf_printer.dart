@@ -1,9 +1,11 @@
 /// Printing an exported page to PDF (#63).
 ///
 /// The page is already HTML, so the machine's own browser engine prints
-/// it: Edge on Windows, a Chromium-family browser on Linux, the WebView on
-/// Android. A platform with none of those reports [PdfNoEngine] — the
-/// caller tells the user, and Linux has the raster fallback to lean on.
+/// it: Edge on Windows, a Chromium-family browser on Linux. Android has no
+/// such engine to run — its WebView prints instead, through the
+/// `niman/pdf` channel (`WebViewPdfPrinter` in `pdf_webview.dart`). A
+/// machine with neither reports [PdfNoEngine] and the caller draws the
+/// note instead.
 library;
 
 import 'dart:async';
@@ -92,6 +94,9 @@ List<String> printFlags(String pdfPath) => <String>[
 ];
 
 /// The desktop engine that prints, or null when this machine has none.
+///
+/// Android has no desktop engine: its WebView prints through the
+/// `niman/pdf` channel instead, and so is not searched for here.
 ///
 /// [isWindows] and [isLinux] default to the platform, [path] to `PATH`'s
 /// directories, [roots] to the Windows install folders, and [run] and
