@@ -26,6 +26,7 @@ import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
@@ -976,6 +977,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         path: p.join(controller.root ?? '', selectedPath),
         column: _editorSettings.noteColumn,
         onEditEpubLook: () => _editEpubLook(controller),
+        positions: switch (controller.root) {
+          final root? => ReadingPositions(root),
+          null => null,
+        },
       );
     }
     return NoteView(

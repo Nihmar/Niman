@@ -91,9 +91,41 @@ Tests: `test/unit/xhtml_markdown_test.dart`,
 `test/widget/epub_pane_test.dart`, `test/widget/epub_look_sheet_test.dart`,
 `test/widget/epub_look_settings_test.dart`.
 
+## Where the reader was left (#281)
+
+`lib/src/reading/`: a `BookLocation` is a place in a document in its own
+terms — a PDF's page and how far down it, an EPUB's chapter (its spine
+path), a line of that chapter and how far into it. Per chapter, not per
+line of the whole book: the book is Markdown converted from its XHTML, so
+a change to `XhtmlMarkdown` moves lines, and kept per chapter the place
+moves within one chapter at most (`EpubDocument.chapters`,
+`locationAt`, `lineOfLocation`, which keeps a place past a shortened
+chapter inside it). Links into a document (#282) and annotations (#284)
+point with the same type, with room for a character range (#283).
+
+`ReadingPositions` keeps them in `.niman/reading.json`, by library-relative
+path, each with the time it was read (`at`); it is a library state file,
+synced and merged book by book (`mergeReadingJson`, see `sync.md`).
+Nothing is cached: a pane reads the file when it opens a document, and the
+writes of a library run one after the other, each reading the file afresh.
+`NoteOps` carries the entries of a file or folder it moves or renames.
+
+`ReadingTracker` is what a pane feeds: `placed` once the document is set
+where it was left, `moved` as the view moves (the EPUB pane from the read
+view's `topAnchor` on every scroll, the PDF view from pdfrx's
+`visibleRect` against its page layout), `flush` when it lets the document
+go. It writes a place once the reader rests a second, and never a place
+the view merely settled on (`BookLocation.isNear`): a book opened and not
+moved is not a reading, and must not outdate, by its newer `at`, the place
+another device wrote.
+
+Tests: `test/unit/reading_positions_test.dart`,
+`test/unit/pdf_location_test.dart`, `test/unit/note_ops_reading_test.dart`,
+the `#281` groups of `test/widget/epub_pane_test.dart` and
+`test/unit/state_merge_test.dart`. The PDF view has no widget test:
+pdfium does not load under `flutter test`.
+
 ## Later, maybe
 
-- Keep the reading position per book (the read view's `topAnchor` /
-  `showAnchor`, stored per path like tab mementos).
 - A chapter-per-scan cache if very long books open slowly: today every
   open converts the whole book on an isolate.
