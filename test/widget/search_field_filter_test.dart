@@ -36,6 +36,10 @@ final class _FakeFieldSource implements FieldSource {
   Future<List<FieldKeyCount>> fieldKeys() async => const [];
 
   @override
+  Future<List<({Note note, String value})>> fieldValues(String key) async =>
+      const [];
+
+  @override
   Future<List<Note>> notesWithField(String key, String value) async {
     queries.add('$key=$value');
     final out = <Note>[];

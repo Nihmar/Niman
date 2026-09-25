@@ -1652,6 +1652,29 @@ final class AlbanianStrings extends Strings {
   String get attachmentMissing => 'Ky skedar nuk ndodhet në disk.';
   @override
   String get attachmentOpenFailed => 'Ky skedar nuk u hap dot jashtë Niman.';
+  @override
+  String get copyPlaceLink => 'Kopjo lidhjen për këtë vend';
+  @override
+  String get placeLinkCopied => 'Lidhja u kopjua';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, f. $page';
+  @override
+  String get annotationsFolderTitle => 'Dosja e anotimeve';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Shënime që anotojnë një PDF ose një libër';
+  @override
+  String get annotationNoteSuffix => 'Anotim';
+  @override
+  String get annotateAction => 'Anoto';
+  @override
+  String get annotationCommentHint => 'Komenti yt';
+  @override
+  String get annotationSaved => 'Anotimi u ruajt';
+  @override
+  String get annotationOpenNote => 'Hap shënimin';
+  @override
+  String get annotationFailed => 'Anotimi nuk mund të ruhej';
 
   @override
   String get movedToTrash => 'U zhvendos në kosh';

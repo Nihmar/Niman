@@ -1623,6 +1623,28 @@ final class EnglishStrings extends Strings {
   String get attachmentMissing => 'This file is not on disk.';
   @override
   String get attachmentOpenFailed => 'Could not open this file outside Niman.';
+  @override
+  String get copyPlaceLink => 'Copy link to this place';
+  @override
+  String get placeLinkCopied => 'Link copied';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Annotations folder';
+  @override
+  String get annotationsFolderSubtitle => 'Notes annotating a PDF or a book';
+  @override
+  String get annotationNoteSuffix => 'Annotation';
+  @override
+  String get annotateAction => 'Annotate';
+  @override
+  String get annotationCommentHint => 'Your comment';
+  @override
+  String get annotationSaved => 'Annotation saved';
+  @override
+  String get annotationOpenNote => 'Open note';
+  @override
+  String get annotationFailed => 'The annotation could not be saved';
 
   @override
   String get movedToTrash => 'Moved to trash';

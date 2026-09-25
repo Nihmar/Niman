@@ -1652,6 +1652,29 @@ final class RomanianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Fișierul nu a putut fi deschis în afara Niman.';
+  @override
+  String get copyPlaceLink => 'Copiază linkul către acest loc';
+  @override
+  String get placeLinkCopied => 'Link copiat';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Dosarul adnotărilor';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Notițe care adnotează un PDF sau o carte';
+  @override
+  String get annotationNoteSuffix => 'Adnotare';
+  @override
+  String get annotateAction => 'Adnotează';
+  @override
+  String get annotationCommentHint => 'Comentariul tău';
+  @override
+  String get annotationSaved => 'Adnotare salvată';
+  @override
+  String get annotationOpenNote => 'Deschide notița';
+  @override
+  String get annotationFailed => 'Adnotarea nu a putut fi salvată';
 
   @override
   String get movedToTrash => 'Mutat în coș';

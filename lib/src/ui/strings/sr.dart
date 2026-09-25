@@ -1645,6 +1645,29 @@ final class SerbianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Није било могуће отворити ову датотеку изван Нимана.';
+  @override
+  String get copyPlaceLink => 'Копирај везу до овог места';
+  @override
+  String get placeLinkCopied => 'Веза је копирана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, стр. $page';
+  @override
+  String get annotationsFolderTitle => 'Фасцикла за анотације';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Белешке које анотирају PDF или књигу';
+  @override
+  String get annotationNoteSuffix => 'Анотација';
+  @override
+  String get annotateAction => 'Анотирај';
+  @override
+  String get annotationCommentHint => 'Ваш коментар';
+  @override
+  String get annotationSaved => 'Анотација је сачувана';
+  @override
+  String get annotationOpenNote => 'Отвори белешку';
+  @override
+  String get annotationFailed => 'Анотација није могла да се сачува';
 
   @override
   String get movedToTrash => 'Премештено у кош';

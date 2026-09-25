@@ -1535,6 +1535,28 @@ final class JapaneseStrings extends Strings {
   String get attachmentMissing => 'このファイルはディスクにありません。';
   @override
   String get attachmentOpenFailed => 'このファイルを Niman の外で開けませんでした。';
+  @override
+  String get copyPlaceLink => 'この位置へのリンクをコピー';
+  @override
+  String get placeLinkCopied => 'リンクをコピーしました';
+  @override
+  String pdfPageLabel(String name, int page) => '$name、$page ページ';
+  @override
+  String get annotationsFolderTitle => '注釈フォルダー';
+  @override
+  String get annotationsFolderSubtitle => 'PDF や本に注釈を付けるノート';
+  @override
+  String get annotationNoteSuffix => '注釈';
+  @override
+  String get annotateAction => '注釈を付ける';
+  @override
+  String get annotationCommentHint => 'コメント';
+  @override
+  String get annotationSaved => '注釈を保存しました';
+  @override
+  String get annotationOpenNote => 'ノートを開く';
+  @override
+  String get annotationFailed => '注釈を保存できませんでした';
 
   @override
   String get movedToTrash => 'ごみ箱に移動しました';

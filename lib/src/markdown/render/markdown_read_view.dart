@@ -33,9 +33,13 @@ import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/marked_block.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
+import 'package:niman/src/markdown/render/range_highlight.dart';
+import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/render/read_view_keys.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
+import 'package:niman/src/markdown/render/visible_text.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
@@ -54,8 +58,24 @@ final class MarkdownReadView extends StatefulWidget {
     this.embedResolver,
     this.knownScan,
     this.onToggleTask,
+    this.marks = const [],
+    this.onTapMark,
+    this.selectionActions,
     super.key,
   });
+
+  /// The blocks marked, by line, ascending: a book's annotated paragraphs
+  /// (#285), or the part of one annotated (#283), tinted as a highlighter
+  /// marks.
+  final List<BlockMark> marks;
+
+  /// Called with a marked block's lines, its first and one past its last,
+  /// when it is tapped.
+  final void Function(int startLine, int endLine)? onTapMark;
+
+  /// What the menu of a selection offers beside Copy and Select all; null
+  /// leaves the text unselectable (#283).
+  final List<ReadSelectionAction>? selectionActions;
 
   /// Called with a task item's line, in [buffer], when its checkbox is
   /// tapped: the pane reads a copy of the note, so ticking it is the note
@@ -272,6 +292,25 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       }
     }
     return low;
+  }
+
+  /// Where the blocks report the part of them selected.
+  final ReadSelectionScope _selection = ReadSelectionScope();
+
+  /// The text selected, where it is; null when none is (#283).
+  ReadSelection? get selection => _selection.selection;
+
+  /// The block holding source [line]: its first line and its text
+  /// ([plainTextOf]); null when there is none there, or none drawn yet.
+  ({int line, String text})? blockTextAt(int line) {
+    final shown = _shown;
+    final index = _blockIndexAt(line);
+    if (shown == null || index == null) return null;
+    final block = _blocks[index];
+    return (
+      line: block.startLine,
+      text: plainTextOf(widget.parser.of(block, shown)),
+    );
   }
 
   /// The scroll the view is moved by: the shell's, or the view's own.
@@ -756,10 +795,19 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
             .scale((_theme ?? _fallbackTheme).lineHeight),
         toEnd: _toEnd,
       ),
-      child: Listener(
-        onPointerDown: (_) => _focus.requestFocus(),
-        child: _page(heights),
-      ),
+      // A selectable view takes the keyboard itself, where it is clicked:
+      // taken back on each click, a selection would be dropped.
+      child: switch (widget.selectionActions) {
+        final actions? => ReadSelectionArea(
+          scope: _selection,
+          actions: actions,
+          child: _page(heights),
+        ),
+        null => Listener(
+          onPointerDown: (_) => _focus.requestFocus(),
+          child: _page(heights),
+        ),
+      },
     );
   }
 
@@ -868,8 +916,9 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
         theme: _theme ?? _fallbackTheme,
       );
     }
-    return BlockView(
-      parsed: widget.parser.of(block, _shown!),
+    final parsed = widget.parser.of(block, _shown!);
+    final view = BlockView(
+      parsed: parsed,
       theme: _theme ?? _fallbackTheme,
       mathCache: widget.mathCache,
       availableWidth: availableWidth,
@@ -879,5 +928,46 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       onToggleTask: widget.onToggleTask,
       scope: widget.parser.scope,
     );
+    final marks = _marksIn(block);
+    final tapMark = widget.onTapMark;
+    Widget drawn = marks.isEmpty
+        ? view
+        : MarkedBlock(
+            key: ValueKey('marked-block-${block.startLine}'),
+            marks: marks,
+            onTap: tapMark == null
+                ? null
+                : () => tapMark(block.startLine, block.endLine),
+            child: view,
+          );
+    if (widget.selectionActions != null) {
+      drawn = SelectableBlock(
+        scope: _selection,
+        line: block.startLine,
+        child: drawn,
+      );
+    }
+    return drawn;
+  }
+
+  /// The marks falling in [block].
+  List<BlockMark> _marksIn(Block block) {
+    final marks = widget.marks;
+    if (marks.isEmpty) return const [];
+    // The first mark at or after the block's start.
+    var low = 0;
+    var high = marks.length;
+    while (low < high) {
+      final middle = (low + high) >> 1;
+      if (marks[middle].line < block.startLine) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    return [
+      for (var i = low; i < marks.length && marks[i].line < block.endLine; i++)
+        marks[i],
+    ];
   }
 }

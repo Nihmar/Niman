@@ -1654,6 +1654,29 @@ final class BulgarianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Файлът не можа да бъде отворен извън Niman.';
+  @override
+  String get copyPlaceLink => 'Копиране на връзка към това място';
+  @override
+  String get placeLinkCopied => 'Връзката е копирана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, с. $page';
+  @override
+  String get annotationsFolderTitle => 'Папка за анотации';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Бележки, които анотират PDF или книга';
+  @override
+  String get annotationNoteSuffix => 'Анотация';
+  @override
+  String get annotateAction => 'Анотирай';
+  @override
+  String get annotationCommentHint => 'Вашият коментар';
+  @override
+  String get annotationSaved => 'Анотацията е запазена';
+  @override
+  String get annotationOpenNote => 'Отвори бележката';
+  @override
+  String get annotationFailed => 'Анотацията не можа да бъде запазена';
 
   @override
   String get movedToTrash => 'Преместен в коша';

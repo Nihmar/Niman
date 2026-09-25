@@ -7,7 +7,9 @@
 /// picker.
 library;
 
+import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:path/path.dart' as p;
 
 /// The normalized stem of a note file name: lowercased, with the `.md`
 /// extension (case-insensitive) stripped. `My Note.md` → `my note`.
@@ -109,8 +111,16 @@ final class LinkResolver implements LinkSource {
     if (h.startsWith('#')) {
       return Future.value(LocalAnchor(heading: h.substring(1)));
     }
-    if (!h.contains('.md')) return Future.value(UnresolvedNote(target: h));
-    return _resolvePath(h);
+    // The path is percent-decoded, as Obsidian writes a Markdown link
+    // (`My%20Note.md`); the fragment is left alone, a book's place (#282)
+    // decoding its own parts.
+    final hash = h.indexOf('#');
+    final path = percentDecoded(hash == -1 ? h : h.substring(0, hash));
+    // A file: a note, or one that is not (a PDF, a book, a picture).
+    if (p.url.extension(path).isEmpty) {
+      return Future.value(UnresolvedNote(target: h));
+    }
+    return _resolvePath(hash == -1 ? path : path + h.substring(hash));
   }
 
   /// Whether [s] starts with a URI scheme (`http://`, `https://`, …).
@@ -120,12 +130,32 @@ final class LinkResolver implements LinkSource {
   /// Normalizes a target for matching: backslashes to slashes, `./` and
   /// whitespace trimmed, lowercased. The `.md` extension and any
   /// `#fragment` are handled by [_resolvePath], in that order.
-  static String normalizeTarget(String target) {
+  static String normalizeTarget(String target) => _clean(target).toLowerCase();
+
+  /// [target] trimmed, its backslashes slashes, its leading `./` gone.
+  static String _clean(String target) {
     var t = target.trim().replaceAll(r'\\', '/');
     while (t.startsWith('./')) {
       t = t.substring(2);
     }
-    return t.toLowerCase();
+    return t;
+  }
+
+  /// [raw] split into its target, normalized ([normalizeTarget], `.md`
+  /// dropped), and its `#fragment`, null when empty. The fragment keeps
+  /// its case: a heading is found by its slug whatever its case, and a
+  /// place in a book (#282) names a file in it, whose name has one.
+  static ({String target, String? fragment}) _split(String raw) {
+    final kept = _clean(raw);
+    final hash = kept.indexOf('#');
+    var target = (hash == -1 ? kept : kept.substring(0, hash)).toLowerCase();
+    if (target.endsWith('.md')) target = target.substring(0, target.length - 3);
+    return (
+      target: target,
+      fragment: hash == -1 || hash == kept.length - 1
+          ? null
+          : kept.substring(hash + 1),
+    );
   }
 
   /// Resolves a path-style target: exact stem first (indexed, O(log n)),
@@ -136,14 +166,8 @@ final class LinkResolver implements LinkSource {
   /// A `#fragment` (markdown hrefs) is split off first and rides along on
   /// the result.
   Future<ResolveResult> _resolvePath(String raw) async {
-    final t0 = normalizeTarget(raw);
-    if (t0.isEmpty) return UnresolvedNote(target: raw);
-    final hash = t0.indexOf('#');
-    var t = hash == -1 ? t0 : t0.substring(0, hash);
-    final heading = hash == -1 || hash == t0.length - 1
-        ? null
-        : t0.substring(hash + 1);
-    if (t.endsWith('.md')) t = t.substring(0, t.length - 3);
+    if (_clean(raw).isEmpty) return UnresolvedNote(target: raw);
+    final (target: t, fragment: heading) = _split(raw);
     if (t.isEmpty) {
       return LocalAnchor(heading: heading ?? '');
     }
@@ -177,17 +201,11 @@ final class LinkResolver implements LinkSource {
     final specs = <String, (String t, String? heading)>{}; // raw -> normalized
     for (final raw in targets) {
       if (out.containsKey(raw)) continue;
-      final t0 = normalizeTarget(raw);
-      if (t0.isEmpty) {
+      if (_clean(raw).isEmpty) {
         out[raw] = UnresolvedNote(target: raw);
         continue;
       }
-      final hash = t0.indexOf('#');
-      var t = hash == -1 ? t0 : t0.substring(0, hash);
-      final heading = hash == -1 || hash == t0.length - 1
-          ? null
-          : t0.substring(hash + 1);
-      if (t.endsWith('.md')) t = t.substring(0, t.length - 3);
+      final (target: t, fragment: heading) = _split(raw);
       if (t.isEmpty) {
         out[raw] = LocalAnchor(heading: heading ?? '');
         continue;

@@ -1661,6 +1661,29 @@ final class PolishStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Nie udało się otworzyć tego pliku poza Nimanem.';
+  @override
+  String get copyPlaceLink => 'Kopiuj link do tego miejsca';
+  @override
+  String get placeLinkCopied => 'Skopiowano link';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Folder adnotacji';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Notatki z adnotacjami do PDF-a lub książki';
+  @override
+  String get annotationNoteSuffix => 'Adnotacja';
+  @override
+  String get annotateAction => 'Dodaj adnotację';
+  @override
+  String get annotationCommentHint => 'Twój komentarz';
+  @override
+  String get annotationSaved => 'Zapisano adnotację';
+  @override
+  String get annotationOpenNote => 'Otwórz notatkę';
+  @override
+  String get annotationFailed => 'Nie udało się zapisać adnotacji';
 
   @override
   String get movedToTrash => 'Przeniesiono do kosza';

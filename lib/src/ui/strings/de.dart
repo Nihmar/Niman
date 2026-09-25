@@ -1671,6 +1671,30 @@ final class GermanStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Diese Datei konnte außerhalb von Niman nicht geöffnet werden.';
+  @override
+  String get copyPlaceLink => 'Link zu dieser Stelle kopieren';
+  @override
+  String get placeLinkCopied => 'Link kopiert';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, S. $page';
+  @override
+  String get annotationsFolderTitle => 'Ordner für Anmerkungen';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Notizen, die ein PDF oder Buch annotieren';
+  @override
+  String get annotationNoteSuffix => 'Anmerkung';
+  @override
+  String get annotateAction => 'Anmerken';
+  @override
+  String get annotationCommentHint => 'Dein Kommentar';
+  @override
+  String get annotationSaved => 'Anmerkung gespeichert';
+  @override
+  String get annotationOpenNote => 'Notiz öffnen';
+  @override
+  String get annotationFailed =>
+      'Die Anmerkung konnte nicht gespeichert werden';
 
   @override
   String get movedToTrash => 'In den Papierkorb verschoben';

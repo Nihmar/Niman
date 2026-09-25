@@ -1641,6 +1641,29 @@ final class BelarusianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Не ўдалося адкрыць гэты файл па-за Niman.';
+  @override
+  String get copyPlaceLink => 'Скапіраваць спасылку на гэта месца';
+  @override
+  String get placeLinkCopied => 'Спасылка скапіравана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, с. $page';
+  @override
+  String get annotationsFolderTitle => 'Папка анатацый';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Нататкі з анатацыямі да PDF ці кнігі';
+  @override
+  String get annotationNoteSuffix => 'Анатацыя';
+  @override
+  String get annotateAction => 'Анатаваць';
+  @override
+  String get annotationCommentHint => 'Ваш каментарый';
+  @override
+  String get annotationSaved => 'Анатацыя захавана';
+  @override
+  String get annotationOpenNote => 'Адкрыць нататку';
+  @override
+  String get annotationFailed => 'Не ўдалося захаваць анатацыю';
 
   @override
   String get movedToTrash => 'Перамешчана ў кошык';

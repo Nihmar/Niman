@@ -1613,6 +1613,28 @@ final class HindiStrings extends Strings {
   String get attachmentMissing => 'यह फ़ाइल डिस्क पर नहीं है।';
   @override
   String get attachmentOpenFailed => 'यह फ़ाइल Niman के बाहर नहीं खुल सकी।';
+  @override
+  String get copyPlaceLink => 'इस स्थान का लिंक कॉपी करें';
+  @override
+  String get placeLinkCopied => 'लिंक कॉपी हो गया';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, पृ. $page';
+  @override
+  String get annotationsFolderTitle => 'एनोटेशन फ़ोल्डर';
+  @override
+  String get annotationsFolderSubtitle => 'PDF या किताब पर एनोटेशन वाले नोट';
+  @override
+  String get annotationNoteSuffix => 'एनोटेशन';
+  @override
+  String get annotateAction => 'एनोटेट करें';
+  @override
+  String get annotationCommentHint => 'आपकी टिप्पणी';
+  @override
+  String get annotationSaved => 'एनोटेशन सहेजा गया';
+  @override
+  String get annotationOpenNote => 'नोट खोलें';
+  @override
+  String get annotationFailed => 'एनोटेशन सहेजा नहीं जा सका';
 
   @override
   String get movedToTrash => 'ट्रैश में गया';

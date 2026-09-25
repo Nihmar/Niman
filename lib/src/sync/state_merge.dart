@@ -44,6 +44,41 @@ String? mergeSettingsJson({
   return _encode(merged);
 }
 
+/// `.niman/reading.json` (#281) merged book by book over [base], as
+/// [mergeSettingsJson] merges keys, except where both sides moved on in
+/// the same book: there the later reading wins, by the entries' own
+/// times, not the whole file's — the file is written for every book
+/// read, so its date says nothing of any one of them.
+///
+/// Returns null when a side does not parse as a JSON object.
+String? mergeReadingJson({
+  required String? base,
+  required String local,
+  required String remote,
+}) {
+  final l = _object(local);
+  final r = _object(remote);
+  if (l == null || r == null) return null;
+  final b = base == null ? null : _object(base);
+  final merged = <String, Object?>{};
+  for (final key in {...l.keys, ...r.keys}) {
+    final pick = _pick(
+      key,
+      local: l,
+      remote: r,
+      base: b,
+      localNewer: !_readAt(r[key]).isAfter(_readAt(l[key])),
+    );
+    if (pick.present) merged[key] = pick.value;
+  }
+  return _encode(merged);
+}
+
+/// When a reading entry was written; the epoch for one that does not say.
+DateTime _readAt(Object? entry) =>
+    (entry is Map ? DateTime.tryParse('${entry['at']}') : null) ??
+    DateTime.utc(1970);
+
 /// `.niman/counters.json` merged: every counter is the highest either
 /// side reached, so a number a template already handed out on one device
 /// is never handed out again on the other.

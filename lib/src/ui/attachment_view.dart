@@ -12,13 +12,17 @@ library;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark_source.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
+import 'package:niman/src/ui/attachment_unreadable.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
-import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:path/path.dart' as p;
-import 'package:pdfrx/pdfrx.dart';
 
 /// The picture files the pane shows itself: the ones Flutter decodes on
 /// every platform.
@@ -48,6 +52,12 @@ final class AttachmentView extends StatelessWidget {
     this.launcher = const OsLauncher(),
     this.column = NoteColumn.off,
     this.onEditEpubLook,
+    this.positions,
+    this.anchor,
+    this.reloadToken = 0,
+    this.linkType = LinkType.wikilink,
+    this.onAnnotate,
+    this.marks,
     super.key,
   });
 
@@ -63,6 +73,29 @@ final class AttachmentView extends StatelessWidget {
   /// Opens the sheet that sets how the books look ([EpubPane.onEditLook]).
   final VoidCallback? onEditEpubLook;
 
+  /// Where the library keeps where each book and PDF was left; null keeps
+  /// none.
+  final ReadingPositions? positions;
+
+  /// The fragment of the link the file was opened by: a place in a book or
+  /// a PDF (#282), which it opens at.
+  final String? anchor;
+
+  /// Bumped when the same link is followed again.
+  final int reloadToken;
+
+  /// How the library writes links, for the one to the place being read in
+  /// a book or a PDF.
+  final LinkType linkType;
+
+  /// Annotates a place of a book or a PDF in its companion note (#284);
+  /// null offers no annotating.
+  final void Function(Annotation annotation)? onAnnotate;
+
+  /// Where the library's books and PDFs were annotated (#285); null marks
+  /// nothing.
+  final AnnotationMarkSource? marks;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -76,17 +109,35 @@ final class AttachmentView extends StatelessWidget {
         launcher: launcher,
         column: column,
         onEditLook: onEditEpubLook,
+        positions: positions,
+        anchor: anchor,
+        reloadToken: reloadToken,
+        linkType: linkType,
+        onAnnotate: onAnnotate,
+        marks: marks,
       );
     }
     final theme = Theme.of(context);
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerLowest,
-      child: Column(
-        children: [
-          Expanded(child: _isPdf ? _pdf(context) : _picture(context)),
-          AttachmentBar(path: path, launcher: launcher),
-        ],
-      ),
+      // A PDF brings its own row, with the link to its page.
+      child: _isPdf
+          ? PdfDocumentView(
+              path: path,
+              launcher: launcher,
+              linkType: linkType,
+              positions: positions,
+              anchor: anchor,
+              reloadToken: reloadToken,
+              onAnnotate: onAnnotate,
+              marks: marks,
+            )
+          : Column(
+              children: [
+                Expanded(child: _picture(context)),
+                AttachmentBar(path: path, launcher: launcher),
+              ],
+            ),
     );
   }
 
@@ -100,30 +151,7 @@ final class AttachmentView extends StatelessWidget {
       child: Image.file(
         File(path),
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stack) => _unreadable(context),
-      ),
-    ),
-  );
-
-  /// A PDF, its pages one under the other, zoomed with a pinch or
-  /// Ctrl+wheel.
-  Widget _pdf(BuildContext context) => PdfViewer.file(
-    path,
-    key: const Key('attachment-pdf'),
-    params: PdfViewerParams(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      errorBannerBuilder: (context, error, stack, documentRef) =>
-          _unreadable(context),
-    ),
-  );
-
-  Widget _unreadable(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        AppStrings.attachmentUnreadable,
-        key: const Key('attachment-unreadable'),
-        textAlign: TextAlign.center,
+        errorBuilder: (context, error, stack) => const AttachmentUnreadable(),
       ),
     ),
   );

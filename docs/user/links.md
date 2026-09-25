@@ -18,10 +18,43 @@ never links, everywhere.
 ## Markdown links
 
 Standard `[text](href)` links, and reference links — `[text][label]` with a
-`[label]: href` line anywhere in the note. `href` may be a relative `.md`
-path, a `#anchor`, or an external URL. `![alt](src)` images are not links,
+`[label]: href` line anywhere in the note. `href` may be a relative path
+to a note or any other file of the library (`Books/Dune.epub`), a
+`#anchor`, or an external URL. The path may be percent-encoded, as
+Obsidian writes it: `[x](My%20Note.md)` is `My Note.md`. A path with no
+extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
 footnote's own text is.
+
+## Links into a PDF or a book
+
+A link can point at a place inside a PDF or an EPUB book; following it
+opens the file in the note pane **there**, instead of where you left it.
+Wikilinks and Markdown links alike:
+
+- `[[Dune.pdf#page=34]]`, `[p. 34](Dune.pdf#page=34)` — page 34 of a
+  PDF, the form Obsidian and PDF readers use. Other parameters, such as
+  an Obsidian embed's `height=400`, are passed over.
+- `[[Dune.epub#chapter=OEBPS/ch5.xhtml&line=12]]` — line 12 of a
+  chapter of a book, the chapter named by its file inside the EPUB (its
+  name alone is enough, `chapter=ch5.xhtml`). Niman's own form: there is
+  no common one for books, and Obsidian opens the book, ignoring it.
+- `&chars=3-40` after either names a passage: its characters in the PDF
+  page's text, or in the text of the book's paragraph on that line. An
+  annotation's link carries it, for the file to mark just the passage;
+  following it goes to the page or the paragraph.
+
+You rarely write one by hand: the **link** button on the row under a PDF
+or a book copies a link to the place you are reading — the page, or the
+chapter's line at the top of the view — as the library writes links
+(`[[Books/Dune.pdf#page=34|Dune, p. 34]]`, or
+`[Dune, p. 34](Books/Dune.pdf#page=34)` with Markdown links), ready to
+paste into a note. The button is disabled for a file opened from outside
+a library.
+
+A link to a file already open moves it to the place; the same link
+followed again goes back there. A place the file no longer has (a page
+past its end, a chapter it lost) opens it where you left it.
 
 ## Dead links
 
