@@ -1528,6 +1528,10 @@ final class HindiStrings extends Strings {
   @override
   String exportFailed(Object error) => 'निर्यात विफल: $error';
   @override
+  String get exportFolderTitle => 'फ़ोल्डर निर्यात करें…';
+  @override
+  String get exportLibraryTitle => 'लाइब्रेरी निर्यात करें…';
+  @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
   @override
   String get lintRulesTitle => 'Markdown नियम';

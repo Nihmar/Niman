@@ -1567,6 +1567,10 @@ final class FinnishStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Vienti epäonnistui: $error';
   @override
+  String get exportFolderTitle => 'Vie kansio…';
+  @override
+  String get exportLibraryTitle => 'Vie kirjasto…';
+  @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override
   String get lintRulesTitle => 'Markdown-säännöt';

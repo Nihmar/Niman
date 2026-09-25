@@ -1573,6 +1573,10 @@ final class ItalianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Esportazione non riuscita: $error';
   @override
+  String get exportFolderTitle => 'Esporta cartella…';
+  @override
+  String get exportLibraryTitle => 'Esporta libreria…';
+  @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override
   String get lintRulesTitle => 'Regole Markdown';

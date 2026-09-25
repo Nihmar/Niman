@@ -1423,6 +1423,10 @@ final class ChineseStrings extends Strings {
   @override
   String exportFailed(Object error) => '导出失败：$error';
   @override
+  String get exportFolderTitle => '导出文件夹…';
+  @override
+  String get exportLibraryTitle => '导出库…';
+  @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override
   String get lintRulesTitle => 'Markdown 规则';

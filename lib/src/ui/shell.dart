@@ -22,6 +22,8 @@ import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_note.dart';
+import 'package:niman/src/export/export_progress_dialog.dart';
+import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -305,6 +307,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
                 saveExportFile: ref.read(saveExportFileProvider),
+                pickExportFolder: ref.read(pickExportFolderProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -336,6 +339,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.todoSourceFactory,
     required this.unsavedTracker,
     required this.saveExportFile,
+    required this.pickExportFolder,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -377,6 +381,9 @@ final class _LibraryShell extends StatefulWidget {
 
   /// Where an export is written (#24); the tests hand in their own.
   final SaveExportFile saveExportFile;
+
+  /// Where a folder's export is written (#24).
+  final PickExportFolder pickExportFolder;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -691,6 +698,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
     onOpenBeside: (path) => _workspace.openBeside(path, SplitAxis.right),
     onHistory: _openHistory,
+    onExport: _exportNote,
+    onExportFolder: (path) => _exportFolder(path, library: false),
   );
 
   /// Note creation from the library's templates (#51, T-M4-07): the flow
@@ -2675,6 +2684,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       AppCommand.typewriterMode: _toggleTypewriter,
       AppCommand.formatNote: () => unawaited(_formatNote()),
       AppCommand.exportNote: () => unawaited(_exportShownNote()),
+      AppCommand.exportLibrary: () =>
+          unawaited(_exportFolder('', library: true)),
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
@@ -2949,6 +2960,104 @@ final class _LibraryShellState extends State<_LibraryShell>
     ExportFormat.markdown => AppStrings.exportFormatMarkdown,
     ExportFormat.html => AppStrings.exportFormatHtml,
   };
+
+  /// Exports the folder at library-relative [dir] ('' = the library root)
+  /// as one zip (#24): asks the format and the destination, runs the
+  /// export behind its progress dialog, and says where the file landed.
+  Future<void> _exportFolder(String dir, {required bool library}) async {
+    final root = widget.controller.root;
+    if (root == null) return;
+    final format = await _chooseExportTreeFormat(library: library);
+    if (format == null || !mounted) return;
+    final folder = await widget.pickExportFolder(
+      dialogTitle: AppStrings.exportTitle,
+    );
+    if (folder == null || !mounted) return;
+    final name = dir.isEmpty ? p.basename(root) : p.basename(dir);
+    final zipPath = p.join(folder, _zipName(name));
+    final TreeExport export;
+    try {
+      export = await TreeExport.start(
+        dir: dir.isEmpty ? root : p.join(root, dir),
+        zipPath: zipPath,
+        format: format,
+        language: AppLanguages.resolved.id,
+      );
+    } on Object catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.exportFailed(error))));
+      }
+      return;
+    }
+    if (!mounted) return;
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => ExportProgressDialog(export: export),
+      ),
+    );
+    try {
+      await export.done;
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppStrings.exportDone(zipPath))));
+    } on ExportCancelled {
+      // The dialog closed itself; a cancelled export says nothing.
+    } on Object catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppStrings.exportFailed(error))));
+    }
+  }
+
+  /// Asks which format a folder or the library is exported in: the wide
+  /// window's dialog, the phone's sheet.
+  Future<ExportTreeFormat?> _chooseExportTreeFormat({required bool library}) {
+    final title = library
+        ? AppStrings.exportLibraryTitle
+        : AppStrings.exportFolderTitle;
+    final formats = <Widget>[
+      for (final format in ExportTreeFormat.values)
+        ListTile(
+          key: Key('export-tree-${format.name}'),
+          title: Text(_treeFormatName(format)),
+          onTap: () => Navigator.of(context).pop(format),
+        ),
+    ];
+    if (_wide) {
+      return showDialog<ExportTreeFormat>(
+        context: context,
+        builder: (context) => AlertDialog(
+          key: const Key('export-tree-dialog'),
+          title: Text(title),
+          content: Column(mainAxisSize: MainAxisSize.min, children: formats),
+        ),
+      );
+    }
+    return showActionSheet<ExportTreeFormat>(
+      context,
+      title: title,
+      sheetKey: const Key('export-tree-sheet'),
+      items: (context) => formats,
+    );
+  }
+
+  static String _treeFormatName(ExportTreeFormat format) => switch (format) {
+    ExportTreeFormat.markdown => AppStrings.exportFormatMarkdown,
+    ExportTreeFormat.html => AppStrings.exportFormatHtml,
+  };
+
+  /// The zip's file name for a folder called [name]: the characters a file
+  /// name cannot hold become dashes.
+  static String _zipName(String name) {
+    final wanted = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '-').trim();
+    return '${wanted.isEmpty ? 'export' : wanted}.zip';
+  }
 
   /// Tidies the note at absolute [path], edited and now closed, when the
   /// library asks for it ([ShellEditorSettings.tidyOnClose]).
@@ -3686,6 +3795,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         await _templateFlow.createFromTemplate(context, parent: '');
       case 'folder':
         await _createFlow.createFolder(context, parent: '');
+      case 'exportlibrary':
+        await _exportFolder('', library: true);
     }
   }
 }

@@ -37,3 +37,20 @@ Future<String?> saveExportFileToDisk({
 final saveExportFileProvider = Provider<SaveExportFile>(
   (ref) => saveExportFileToDisk,
 );
+
+/// Where the folder an export's zip is written into is asked for; its
+/// path, or null when the dialog was dismissed. The tests hand in their
+/// own.
+typedef PickExportFolder = Future<String?> Function({
+  required String dialogTitle,
+});
+
+/// Asks for the folder, through the system's own picker: a directory
+/// dialog on the desktop, SAF on Android.
+Future<String?> pickExportFolderFromDisk({required String dialogTitle}) =>
+    FilePicker.getDirectoryPath(dialogTitle: dialogTitle);
+
+/// The folder seam the shell exports a tree through.
+final pickExportFolderProvider = Provider<PickExportFolder>(
+  (ref) => pickExportFolderFromDisk,
+);

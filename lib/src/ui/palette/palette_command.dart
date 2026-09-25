@@ -60,7 +60,9 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.zenMode ||
   AppCommand.nextTab ||
   AppCommand.previousTab => PaletteGroup.view,
-  AppCommand.reindexLibrary || AppCommand.switchLibrary => PaletteGroup.library,
+  AppCommand.reindexLibrary ||
+  AppCommand.exportLibrary ||
+  AppCommand.switchLibrary => PaletteGroup.library,
   AppCommand.journalToday ||
   AppCommand.journalPrevious ||
   AppCommand.journalNext ||
@@ -83,6 +85,7 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.moveNote ||
   AppCommand.deleteNote ||
   AppCommand.exportNote ||
+  AppCommand.exportLibrary ||
   AppCommand.openFile ||
   AppCommand.switchLibrary => true,
   _ => false,

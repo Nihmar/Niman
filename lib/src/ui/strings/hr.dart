@@ -1554,6 +1554,10 @@ final class CroatianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Izvoz nije uspio: $error';
   @override
+  String get exportFolderTitle => 'Izvezi mapu…';
+  @override
+  String get exportLibraryTitle => 'Izvezi knjižnicu…';
+  @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
   String get lintRulesTitle => 'Markdown pravila';

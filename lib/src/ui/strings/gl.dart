@@ -1569,6 +1569,10 @@ final class GalicianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'A exportación fallou: $error';
   @override
+  String get exportFolderTitle => 'Exportar o cartafol…';
+  @override
+  String get exportLibraryTitle => 'Exportar a biblioteca…';
+  @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override
   String get lintRulesTitle => 'Regras de Markdown';

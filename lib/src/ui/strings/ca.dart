@@ -1586,6 +1586,10 @@ final class CatalanStrings extends Strings {
   @override
   String exportFailed(Object error) => 'L’exportació ha fallat: $error';
   @override
+  String get exportFolderTitle => 'Exporta la carpeta…';
+  @override
+  String get exportLibraryTitle => 'Exporta la biblioteca…';
+  @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override
   String get lintRulesTitle => 'Regles de Markdown';

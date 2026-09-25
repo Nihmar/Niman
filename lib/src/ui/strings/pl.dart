@@ -1574,6 +1574,10 @@ final class PolishStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksport nie powiódł się: $error';
   @override
+  String get exportFolderTitle => 'Eksportuj folder…';
+  @override
+  String get exportLibraryTitle => 'Eksportuj bibliotekę…';
+  @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override
   String get lintRulesTitle => 'Reguły Markdown';

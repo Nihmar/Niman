@@ -85,6 +85,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.typewriterMode ||
   AppCommand.markdownCheatsheet ||
   AppCommand.reindexLibrary ||
+  AppCommand.exportLibrary ||
   AppCommand.switchLibrary ||
   AppCommand.tabFiles ||
   AppCommand.tabTodo ||

@@ -1564,6 +1564,10 @@ final class PortugueseStrings extends Strings {
   @override
   String exportFailed(Object error) => 'A exportação falhou: $error';
   @override
+  String get exportFolderTitle => 'Exportar pasta…';
+  @override
+  String get exportLibraryTitle => 'Exportar biblioteca…';
+  @override
   String get formatNoteAlreadyTidy => 'A nota já estava arrumada.';
   @override
   String get lintRulesTitle => 'Regras de Markdown';

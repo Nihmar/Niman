@@ -1537,6 +1537,10 @@ final class EstonianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksport ebaõnnestus: $error';
   @override
+  String get exportFolderTitle => 'Ekspordi kaust…';
+  @override
+  String get exportLibraryTitle => 'Ekspordi teek…';
+  @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override
   String get lintRulesTitle => 'Markdowni reeglid';

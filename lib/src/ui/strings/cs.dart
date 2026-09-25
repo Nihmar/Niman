@@ -1547,6 +1547,10 @@ final class CzechStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Export se nezdařil: $error';
   @override
+  String get exportFolderTitle => 'Exportovat složku…';
+  @override
+  String get exportLibraryTitle => 'Exportovat knihovnu…';
+  @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override
   String get lintRulesTitle => 'Pravidla Markdownu';

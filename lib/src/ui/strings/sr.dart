@@ -1561,6 +1561,10 @@ final class SerbianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Извоз није успео: $error';
   @override
+  String get exportFolderTitle => 'Извези фасциклу…';
+  @override
+  String get exportLibraryTitle => 'Извези библиотеку…';
+  @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

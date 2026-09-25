@@ -1553,6 +1553,10 @@ final class IcelandicStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Útflutningur mistókst: $error';
   @override
+  String get exportFolderTitle => 'Flytja möppu út…';
+  @override
+  String get exportLibraryTitle => 'Flytja safnið út…';
+  @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override
   String get lintRulesTitle => 'Markdown-reglur';

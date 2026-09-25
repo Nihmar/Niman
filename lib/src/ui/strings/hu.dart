@@ -1565,6 +1565,10 @@ final class HungarianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Az exportálás nem sikerült: $error';
   @override
+  String get exportFolderTitle => 'Mappa exportálása…';
+  @override
+  String get exportLibraryTitle => 'Könyvtár exportálása…';
+  @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override
   String get lintRulesTitle => 'Markdown-szabályok';

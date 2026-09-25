@@ -1554,6 +1554,10 @@ final class SlovakStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Export zlyhal: $error';
   @override
+  String get exportFolderTitle => 'Exportovať priečinok…';
+  @override
+  String get exportLibraryTitle => 'Exportovať knižnicu…';
+  @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override
   String get lintRulesTitle => 'Pravidlá Markdownu';

@@ -1580,6 +1580,10 @@ final class GermanStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Export fehlgeschlagen: $error';
   @override
+  String get exportFolderTitle => 'Ordner exportieren…';
+  @override
+  String get exportLibraryTitle => 'Bibliothek exportieren…';
+  @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override
   String get lintRulesTitle => 'Markdown-Regeln';

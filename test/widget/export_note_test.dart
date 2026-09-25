@@ -24,12 +24,16 @@ void main() {
 
   ({String name, Uint8List bytes, String mimeType, String dialogTitle})? saved;
   String? place;
+  String? pickedFolder;
+  String? pickedTitle;
 
   setUp(() {
     controller = FakeLibrarySession();
     filePicker = useFakeFilePicker();
     saved = null;
     place = null;
+    pickedFolder = null;
+    pickedTitle = null;
   });
 
   Future<void> pumpShell(
@@ -58,6 +62,12 @@ void main() {
               dialogTitle: dialogTitle,
             );
             return place;
+          }),
+          pickExportFolderProvider.overrideWithValue(({
+            required dialogTitle,
+          }) async {
+            pickedTitle = dialogTitle;
+            return pickedFolder;
           }),
         ],
         child: const NimanApp(),
@@ -143,7 +153,7 @@ void main() {
     await settle(tester);
     await tester.enterText(
       find.byKey(const Key('palette-field')),
-      AppStrings.exportTitle,
+      '${AppStrings.paletteGroupNote}: ${AppStrings.exportTitle}',
     );
     await settle(tester);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -169,5 +179,49 @@ void main() {
     await tester.tap(find.byKey(const Key('export-format-markdown')));
     await settle(tester);
     expect(saved?.name, 'note.md');
+  });
+
+  testWidgets('a folder row exports it as one zip', (tester) async {
+    // The destination dialog is dismissed: the picker was asked, and
+    // nothing was written.
+    pickedFolder = null;
+    await pumpShell(tester);
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+    await tester.longPress(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-export-folder')));
+    await settle(tester);
+
+    expect(find.byKey(const Key('export-tree-dialog')), findsOne);
+    await tester.tap(find.byKey(const Key('export-tree-markdown')));
+    await settle(tester);
+    expect(pickedTitle, AppStrings.exportTitle);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('the palette exports the library', (tester) async {
+    pickedFolder = null;
+    await pumpShell(tester);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('palette-field')),
+      AppStrings.exportLibraryTitle,
+    );
+    await settle(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await settle(tester);
+
+    // The format chooser, titled for the library, then the folder picker.
+    expect(find.byKey(const Key('export-tree-dialog')), findsOne);
+    expect(find.text(AppStrings.exportLibraryTitle), findsOneWidget);
+    await tester.tap(find.byKey(const Key('export-tree-markdown')));
+    await settle(tester);
+    expect(pickedTitle, AppStrings.exportTitle);
   });
 }

@@ -1604,6 +1604,10 @@ final class GreekStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Η εξαγωγή απέτυχε: $error';
   @override
+  String get exportFolderTitle => 'Εξαγωγή φακέλου…';
+  @override
+  String get exportLibraryTitle => 'Εξαγωγή βιβλιοθήκης…';
+  @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override
   String get lintRulesTitle => 'Κανόνες Markdown';

@@ -1549,6 +1549,10 @@ final class SlovenianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Izvoz ni uspel: $error';
   @override
+  String get exportFolderTitle => 'Izvozi mapo…';
+  @override
+  String get exportLibraryTitle => 'Izvozi knjižnico…';
+  @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override
   String get lintRulesTitle => 'Pravila Markdowna';

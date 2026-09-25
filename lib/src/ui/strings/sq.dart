@@ -1568,6 +1568,10 @@ final class AlbanianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksportimi dështoi: $error';
   @override
+  String get exportFolderTitle => 'Eksporto dosjen…';
+  @override
+  String get exportLibraryTitle => 'Eksporto bibliotekën…';
+  @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override
   String get lintRulesTitle => 'Rregullat e Markdown';

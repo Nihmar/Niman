@@ -1555,6 +1555,10 @@ final class BelarusianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Не ўдалося экспартаваць: $error';
   @override
+  String get exportFolderTitle => 'Экспарт папкі…';
+  @override
+  String get exportLibraryTitle => 'Экспарт бібліятэкі…';
+  @override
   String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';
   @override
   String get lintRulesTitle => 'Правілы Markdown';
