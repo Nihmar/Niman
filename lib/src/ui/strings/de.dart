@@ -627,6 +627,8 @@ final class GermanStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-Metadaten';
+  @override
   String get cheatTemplates => 'Vorlagen-Platzhalter';
   @override
   String get menuAddLink => 'Link hinzufügen';

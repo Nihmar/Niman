@@ -620,6 +620,8 @@ final class DanishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Skabelonpladsholdere';
   @override
   String get menuAddLink => 'Tilføj link';

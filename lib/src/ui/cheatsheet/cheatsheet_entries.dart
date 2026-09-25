@@ -125,6 +125,24 @@ final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
         '---\ntitle: My note\ntags: [work, idea]\n---\nThe note starts here.',
   ),
   CheatsheetEntry(
+    id: 'epub-metadata',
+    title: () => AppStrings.cheatEpubMetadata,
+    source:
+        '---\n'
+        'title: The book\n'
+        'author: [Ada Lovelace, Alan Turing]\n'
+        'language: en\n'
+        'series: Notes\n'
+        'series_index: 2\n'
+        'cover: cover.png\n'
+        'tags: [geometry, notes]\n'
+        'description: What the book is.\n'
+        'publisher: Niman Press\n'
+        'rights: Public domain\n'
+        '---\n'
+        "A book's first chapter.",
+  ),
+  CheatsheetEntry(
     id: 'templates',
     title: () => AppStrings.cheatTemplates,
     source:

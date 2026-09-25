@@ -628,6 +628,8 @@ final class BosnianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metapodaci';
+  @override
   String get cheatTemplates => 'Rezervisana mjesta šablona';
   @override
   String get menuAddLink => 'Dodaj link';

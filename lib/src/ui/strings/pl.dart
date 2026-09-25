@@ -632,6 +632,8 @@ final class PolishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadane EPUB';
+  @override
   String get cheatTemplates => 'Symbole zastępcze szablonów';
   @override
   String get menuAddLink => 'Dodaj link';

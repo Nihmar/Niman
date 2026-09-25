@@ -633,6 +633,8 @@ final class GreekStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Μεταδεδομένα EPUB';
+  @override
   String get cheatTemplates => 'Σύμβολα κράτησης προτύπων';
   @override
   String get menuAddLink => 'Προσθήκη συνδέσμου';

@@ -455,6 +455,7 @@ final class AppStrings {
   static String get cheatFootnotes => _s.cheatFootnotes;
   static String get cheatRule => _s.cheatRule;
   static String get cheatFrontmatter => _s.cheatFrontmatter;
+  static String get cheatEpubMetadata => _s.cheatEpubMetadata;
   static String get cheatTemplates => _s.cheatTemplates;
   static String get menuAddLink => _s.menuAddLink;
   static String get menuAddExternalLink => _s.menuAddExternalLink;

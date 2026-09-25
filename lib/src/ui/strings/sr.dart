@@ -627,6 +627,8 @@ final class SerbianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'ЕПУБ метаподаци';
+  @override
   String get cheatTemplates => 'Чувари места у шаблонима';
   @override
   String get menuAddLink => 'Додај везу';

@@ -626,6 +626,8 @@ final class DutchStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Sjabloonplaatshouders';
   @override
   String get menuAddLink => 'Link toevoegen';

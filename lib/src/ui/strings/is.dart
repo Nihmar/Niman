@@ -621,6 +621,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB lýsigögn';
+  @override
   String get cheatTemplates => 'Staðgenglar sniðmáta';
   @override
   String get menuAddLink => 'Bæta við tengli';

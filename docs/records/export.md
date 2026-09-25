@@ -169,7 +169,13 @@ demands; the container is `mimetype` (stored, first),
   a shared picture copied once, links between chapters.
 - [ ] Read back by hand in Calibre / Apple Books / KOReader **and** in the
   app's own pane (#280).
-- [ ] Cover: none in v1, a reader draws its own title page.
+- [x] Cover and metadata from the frontmatter: `cover:`, `title`,
+  `author`, `language`/`lang`, `description`, `publisher`, `date`,
+  `tags` (→ `dc:subject`), `series` + `series_index` (EPUB 3
+  `belongs-to-collection`), `rights`, `identifier`/`isbn`. The cover is a
+  `cover.xhtml` page first in the spine, the EPUB 3 `cover-image`
+  property, and the EPUB 2 `meta name="cover"` for older readers. The
+  Markdown cheatsheet documents the keys, in every language.
 - [ ] Nav folded by folder (a flat, tree-ordered list for now).
 
 ## Open questions

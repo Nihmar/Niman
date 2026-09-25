@@ -84,7 +84,12 @@ abstract final class ExportSources {
   }) async {
     final paths = <String, String>{};
     for (final target in pictureTargets(text)) {
-      final path = await _picturePath(target, notePath, root, linkSource);
+      final path = await picturePath(
+        target: target,
+        notePath: notePath,
+        root: root,
+        linkSource: linkSource,
+      );
       if (path == null) {
         _log.warning('picture not found: "$target" in $notePath');
         continue;
@@ -244,14 +249,16 @@ abstract final class ExportSources {
     _ => true,
   };
 
-  /// Resolves [target], then its percent-decoded form — a Markdown image is
-  /// written the way a URL is, where the path is not.
-  static Future<String?> _picturePath(
-    String target,
-    String notePath,
-    String root,
+  /// One picture target resolved to the file it is, or null.
+  ///
+  /// The rule every page resolves its pictures with, for a caller that
+  /// needs a single one: the cover a note's frontmatter named (#303).
+  static Future<String?> picturePath({
+    required String target,
+    required String notePath,
+    required String root,
     LinkSource? linkSource,
-  ) async {
+  }) async {
     final path = await resolveEmbedPath(target, notePath, root, linkSource);
     if (path != null) return path;
     try {

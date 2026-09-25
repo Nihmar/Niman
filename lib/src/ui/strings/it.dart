@@ -629,6 +629,8 @@ final class ItalianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadati EPUB';
+  @override
   String get cheatTemplates => 'Segnaposto dei modelli';
   @override
   String get menuAddLink => 'Aggiungi link';

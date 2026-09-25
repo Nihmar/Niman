@@ -625,6 +625,8 @@ final class CzechStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadata EPUB';
+  @override
   String get cheatTemplates => 'Zástupné symboly šablon';
   @override
   String get menuAddLink => 'Přidat odkaz';

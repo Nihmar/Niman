@@ -629,6 +629,8 @@ final class CatalanStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadades EPUB';
+  @override
   String get cheatTemplates => 'Marcadors de les plantilles';
   @override
   String get menuAddLink => 'Afegeix un enllaç';

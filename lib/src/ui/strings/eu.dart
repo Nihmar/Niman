@@ -620,6 +620,8 @@ final class BasqueStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metadatuak';
+  @override
   String get cheatTemplates => 'Txantiloien lekukoak';
   @override
   String get menuAddLink => 'Gehitu esteka';

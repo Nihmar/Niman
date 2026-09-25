@@ -16,8 +16,10 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:archive/archive_io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/html_text.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
 
 /// The media type of the picture at [extension] (lower case, with the dot),
@@ -33,6 +35,94 @@ String? epubPictureType(String extension) => switch (extension) {
   '.svg' => 'image/svg+xml',
   _ => null,
 };
+
+/// The metadata a book's frontmatter may carry (#303).
+///
+/// A single note's own frontmatter is the book's; a folder's or the
+/// library's is its first chapter's, because a folder has no frontmatter of
+/// its own. The keys are the typical ones, so a note that already reads as
+/// an ebook elsewhere reads the same here.
+@immutable
+final class EpubMetadata {
+  /// Creates a book's metadata.
+  const new({
+    this.title,
+    this.authors = const <String>[],
+    this.language,
+    this.description,
+    this.publisher,
+    this.date,
+    this.subjects = const <String>[],
+    this.series,
+    this.seriesIndex,
+    this.rights,
+    this.identifier,
+    this.cover,
+  });
+
+  /// `title:` — the book's own name, where the export does not know better.
+  final String? title;
+
+  /// `author:` (or `authors:`), one `dc:creator` each.
+  final List<String> authors;
+
+  /// `language:` or `lang:` — a BCP 47 code, overriding the app's.
+  final String? language;
+
+  /// `description:`.
+  final String? description;
+
+  /// `publisher:`.
+  final String? publisher;
+
+  /// `date:`.
+  final String? date;
+
+  /// `tags:`, one `dc:subject` each.
+  final List<String> subjects;
+
+  /// `series:`.
+  final String? series;
+
+  /// `series_index:`.
+  final String? seriesIndex;
+
+  /// `rights:`.
+  final String? rights;
+
+  /// `identifier:` or `isbn:`.
+  final String? identifier;
+
+  /// `cover:` — the target of the cover picture, as the note writes it.
+  final String? cover;
+}
+
+/// The book metadata [text]'s frontmatter carries.
+EpubMetadata epubMetadataOf(String text) {
+  final front = parseFrontmatter(text);
+  if (front == null) return const EpubMetadata();
+  String? first(String key) {
+    final values = front.fields[key];
+    if (values == null || values.isEmpty) return null;
+    final value = values.first.trim();
+    return value.isEmpty ? null : value;
+  }
+
+  return EpubMetadata(
+    title: front.title,
+    authors: front.fields['author'] ?? front.fields['authors'] ?? const [],
+    language: first('language') ?? first('lang'),
+    description: first('description'),
+    publisher: first('publisher'),
+    date: first('date'),
+    subjects: front.tags,
+    series: first('series'),
+    seriesIndex: first('series_index'),
+    rights: first('rights'),
+    identifier: first('identifier') ?? first('isbn'),
+    cover: first('cover'),
+  );
+}
 
 /// Where the container's pieces live.
 const String _opfDir = 'OEBPS';
@@ -57,10 +147,11 @@ const String _containerXml =
 
 /// An EPUB 3 book taking shape.
 final class EpubBook {
-  new _(this._title, this._language);
+  new _(this._title, this._language, this._metadata);
 
   final String _title;
   final String _language;
+  final EpubMetadata _metadata;
 
   late final ZipFileEncoder _encoder = ZipFileEncoder();
   final List<EpubChapterEntry> _chapters = <EpubChapterEntry>[];
@@ -68,17 +159,27 @@ final class EpubBook {
   final List<_EpubPicture> _picturesInOrder = <_EpubPicture>[];
   String? _fonts;
   bool _closed = false;
+  _EpubPicture? _cover;
 
   /// Starts a book at [path], titled [title], in [language] (a BCP 47 code).
   ///
-  /// The `mimetype` entry and the container are written here, first: every
+  /// [metadata] is the frontmatter's own metadata (#303): its title and
+  /// language override [title] and [language] when they name one. [cover]
+  /// is the picture the metadata's `cover:` resolved to, or null. The
+  /// `mimetype` entry and the container are written here, first — every
   /// other entry follows in whatever order the chapters are ready.
   static Future<EpubBook> start({
     required String path,
     required String title,
     required String language,
+    EpubMetadata metadata = const EpubMetadata(),
+    String? cover,
   }) async {
-    final book = EpubBook._(title, language);
+    final book = EpubBook._(
+      metadata.title ?? title,
+      metadata.language ?? language,
+      metadata,
+    );
     book._encoder.create(path);
     final mimetype = ArchiveFile.string('mimetype', 'application/epub+zip')
       ..compression = CompressionType.none;
@@ -86,7 +187,20 @@ final class EpubBook {
     book._encoder.addArchiveFile(
       ArchiveFile.string('META-INF/container.xml', _containerXml),
     );
+    if (cover != null) await book._addCover(cover);
     return book;
+  }
+
+  /// Copies the cover in and names it in the package.
+  ///
+  /// A type an EPUB cannot carry is no cover, not a failed book.
+  Future<void> _addCover(String absolutePath) async {
+    final type = epubPictureType(p.extension(absolutePath).toLowerCase());
+    if (type == null) return;
+    final extension = p.extension(absolutePath).toLowerCase();
+    final href = '$_imageDir/cover$extension';
+    await _encoder.addFile(File(absolutePath), href);
+    _cover = (id: 'cover-image', href: href, path: absolutePath);
   }
 
   /// Copies [absolutePath] into the book once, and answers the URL to use
@@ -140,6 +254,11 @@ final class EpubBook {
     _encoder.addArchiveFile(
       ArchiveFile.string('$_opfDir/fonts.css', _fonts ?? ''),
     );
+    if (_cover != null) {
+      _encoder.addArchiveFile(
+        ArchiveFile.string('$_opfDir/cover.xhtml', _coverXhtml()),
+      );
+    }
     _encoder.addArchiveFile(
       ArchiveFile.string('$_opfDir/nav.xhtml', _navXhtml()),
     );
@@ -147,6 +266,30 @@ final class EpubBook {
       ArchiveFile.string('$_opfDir/content.opf', _contentOpf()),
     );
     await _encoder.close();
+  }
+
+  /// The page that shows the cover: a spine item in front of the chapters,
+  /// so a reader opens on the picture, not on the first chapter.
+  String _coverXhtml() {
+    final cover = _cover!;
+    final src = p.posix.relative(cover.href, from: _opfDir);
+    return '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<!DOCTYPE html>\n'
+        '<html xmlns="http://www.w3.org/1999/xhtml" '
+        'xml:lang="${escapeAttribute(_language)}" '
+        'lang="${escapeAttribute(_language)}">\n'
+        '<head>\n'
+        '  <meta charset="utf-8" />\n'
+        '  <title>${escapeHtml(_title)}</title>\n'
+        '  <style>html, body { margin: 0; padding: 0; height: 100%; } '
+        'img { display: block; margin: 0 auto; max-width: 100%; '
+        'max-height: 100%; }</style>\n'
+        '</head>\n'
+        '<body>\n'
+        '<div><img src="${escapeAttribute(src)}" '
+        'alt="${escapeAttribute(_title)}" /></div>\n'
+        '</body>\n'
+        '</html>\n';
   }
 
   /// The chapter's own XHTML: its title, its body, and the two style sheets
@@ -216,6 +359,18 @@ final class EpubBook {
         '    <item id="css" href="style.css" media-type="text/css" />\n'
         '    <item id="fonts" href="fonts.css" media-type="text/css" />\n',
       );
+    if (_cover != null) {
+      manifest.write(
+        '    <item id="cover-page" href="cover.xhtml" '
+        'media-type="application/xhtml+xml" />\n',
+      );
+      final href = p.posix.relative(_cover!.href, from: _opfDir);
+      final type = epubPictureType(p.extension(_cover!.path).toLowerCase());
+      manifest.write(
+        '    <item id="cover-image" href="${escapeAttribute(href)}" '
+        'media-type="$type" properties="cover-image" />\n',
+      );
+    }
     for (final chapter in _chapters) {
       final href = p.posix.relative(chapter.href, from: _opfDir);
       manifest.write(
@@ -232,19 +387,77 @@ final class EpubBook {
       );
     }
     final spine = StringBuffer();
+    if (_cover != null) {
+      spine.write('    <itemref idref="cover-page" />\n');
+    }
     for (final chapter in _chapters) {
       spine.write('    <itemref idref="${chapter.id}" />\n');
     }
     final modified = DateTime.now().toUtc().toIso8601String().split('.').first;
+    final metadata = StringBuffer()
+      ..write(
+        '    <dc:identifier id="pub-id">urn:uuid:${_uuidV4()}</dc:identifier>\n',
+      )
+      ..write('    <dc:title>${escapeHtml(_title)}</dc:title>\n')
+      ..write('    <dc:language>${escapeAttribute(_language)}</dc:language>\n');
+    for (final author in _metadata.authors) {
+      if (author.trim().isEmpty) continue;
+      metadata.write('    <dc:creator>${escapeHtml(author)}</dc:creator>\n');
+    }
+    if (_metadata.description != null) {
+      metadata.write(
+        '    <dc:description>${escapeHtml(_metadata.description!)}'
+        '</dc:description>\n',
+      );
+    }
+    if (_metadata.publisher != null) {
+      metadata.write(
+        '    <dc:publisher>${escapeHtml(_metadata.publisher!)}</dc:publisher>\n',
+      );
+    }
+    if (_metadata.date != null) {
+      metadata.write('    <dc:date>${escapeHtml(_metadata.date!)}</dc:date>\n');
+    }
+    for (final subject in _metadata.subjects) {
+      if (subject.trim().isEmpty) continue;
+      metadata.write('    <dc:subject>${escapeHtml(subject)}</dc:subject>\n');
+    }
+    if (_metadata.rights != null) {
+      metadata.write(
+        '    <dc:rights>${escapeHtml(_metadata.rights!)}</dc:rights>\n',
+      );
+    }
+    if (_metadata.identifier != null) {
+      metadata.write(
+        '    <dc:identifier>${escapeHtml(_metadata.identifier!)}'
+        '</dc:identifier>\n',
+      );
+    }
+    if (_metadata.series != null) {
+      metadata.write(
+        '    <meta property="belongs-to-collection" id="series">'
+        '${escapeHtml(_metadata.series!)}</meta>\n'
+        '    <meta refines="#series" property="collection-type">series</meta>\n',
+      );
+      if (_metadata.seriesIndex != null) {
+        metadata.write(
+          '    <meta refines="#series" property="group-position">'
+          '${escapeHtml(_metadata.seriesIndex!)}</meta>\n',
+        );
+      }
+    }
+    if (_cover != null) {
+      metadata.write('    <meta name="cover" content="cover-image" />\n');
+    }
+    metadata.write(
+      '    <meta property="dcterms:modified">${modified}Z</meta>\n',
+    );
     return '<?xml version="1.0" encoding="utf-8"?>\n'
         '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" '
         'unique-identifier="pub-id" '
         'xml:lang="${escapeAttribute(_language)}">\n'
         '  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n'
-        '    <dc:identifier id="pub-id">urn:uuid:${_uuidV4()}</dc:identifier>\n'
-        '    <dc:title>${escapeHtml(_title)}</dc:title>\n'
-        '    <dc:language>${escapeAttribute(_language)}</dc:language>\n'
-        '    <meta property="dcterms:modified">${modified}Z</meta>\n'
+        '$metadata'
         '  </metadata>\n'
         '  <manifest>\n$manifest'
         '  </manifest>\n'

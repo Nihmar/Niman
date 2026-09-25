@@ -624,6 +624,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Метаданыя EPUB';
+  @override
   String get cheatTemplates => 'Запаўняльнікі шаблонаў';
   @override
   String get menuAddLink => 'Дадаць спасылку';

@@ -626,6 +626,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Метадані EPUB';
+  @override
   String get cheatTemplates => 'Заповнювачі шаблонів';
   @override
   String get menuAddLink => 'Додати посилання';

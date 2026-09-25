@@ -619,6 +619,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Malplassholdere';
   @override
   String get menuAddLink => 'Legg til lenke';

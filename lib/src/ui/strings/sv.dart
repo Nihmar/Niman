@@ -625,6 +625,8 @@ final class SwedishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Mallplatshållare';
   @override
   String get menuAddLink => 'Lägg till länk';
