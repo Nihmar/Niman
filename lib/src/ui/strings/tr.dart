@@ -1761,6 +1761,12 @@ final class TurkishStrings extends Strings {
       'Bu listeden kaybolur. Klasör, notlar ve içindeki kütüphane '
       'ayarları değişmez; yeniden açınca geri döner.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Bu kitaplık şu anda açık: önce kapanır, sonra listeden çıkar. '
+      'İçindeki klasör, notlar ve kitaplık ayarları olduğu gibi kalır; '
+      'yeniden açtığınızda geri gelir.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Dosya erişimine izin ver';

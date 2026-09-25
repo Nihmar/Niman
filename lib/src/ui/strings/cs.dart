@@ -1765,6 +1765,12 @@ final class CzechStrings extends Strings {
       'Zmizí z tohoto seznamu. Složka, poznámky a nastavení knihovny v '
       'ní zůstanou nedotčená a znovuotevřením se vrátí.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Tato knihovna je právě otevřená: nejprve se zavře a pak zmizí ze '
+      'seznamu. Složka, poznámky a nastavení knihovny v ní zůstávají '
+      'nedotčené a nové otevření je vrátí.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Udělit přístup k souborům';

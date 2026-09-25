@@ -1747,6 +1747,12 @@ final class HindiStrings extends Strings {
       'वह इस सूची से जाती है। फ़ोल्डर, नोट्स और लाइब्रेरी-सेटिंग वहीं '
       'रहती हैं, और फिर खोलने पर वह लौट आती है।';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'यह लाइब्रेरी अभी खुली है: पहले यह बंद होगी, फिर सूची से हट जाएगी। '
+      'इसमें मौजूद फ़ोल्डर, नोट्स और लाइब्रेरी सेटिंग्स अछूते रहते हैं, और '
+      'दोबारा खोलने पर यह लौट आती है।';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'फ़ाइल-प्रवेश दें';

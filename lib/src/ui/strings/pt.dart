@@ -1783,6 +1783,12 @@ final class PortugueseStrings extends Strings {
       'Ela sai desta lista. A pasta, as notas e as configurações da '
       'biblioteca ficam onde estão, e reabrindo ela volta.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Esta biblioteca está aberta agora: fecha primeiro e depois sai da '
+      'lista. A pasta, as notas e as configurações da biblioteca lá dentro '
+      'ficam intactas, e voltar a abri-la traz de volta.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Conceder acesso aos arquivos';

@@ -32,8 +32,9 @@ Future<KnownLibraries> loadKnownLibraries(LibrarySession session) async {
 /// on the device and one on a card, and it is the only thing that tells
 /// those two rows apart.
 ///
-/// A long press offers to forget one (T-ML-07); a swipe would fire by
-/// accident on a list this short.
+/// Every row can be forgotten (#286) — the open one too, which closes
+/// first — through the row's own menu: the overflow button, a right-click
+/// on the desktops, and the long press a phone already knows.
 final class KnownLibraryList extends StatelessWidget {
   /// Creates the list.
   const new({
@@ -57,15 +58,14 @@ final class KnownLibraryList extends StatelessWidget {
   /// Opens the library at the tapped path.
   final void Function(String libraryPath) onOpen;
 
-  /// Forgets the library at the long-pressed path, already confirmed.
+  /// Forgets the library at the chosen path, already confirmed.
   final void Function(String libraryPath) onForget;
 
   /// False while an open or a picker is in flight.
   final bool enabled;
 
-  /// The library open right now, marked as such and not offered for
-  /// forgetting — an app cannot stop listing the library it is showing.
-  /// Null on the home screen, where nothing is open.
+  /// The library open right now, marked as such and closed before it is
+  /// forgotten. Null on the home screen, where nothing is open.
   final String? currentPath;
 
   @override
@@ -91,9 +91,11 @@ final class KnownLibraryList extends StatelessWidget {
             enabled: enabled,
             isCurrent: entry.path == currentPath,
             onOpen: () => onOpen(entry.path),
-            onForget: entry.path == currentPath
-                ? null
-                : () => _confirmForget(context, entry),
+            onForget: () => _confirmForget(
+              context,
+              entry,
+              isOpen: entry.path == currentPath,
+            ),
           ),
       ],
     );
@@ -101,12 +103,23 @@ final class KnownLibraryList extends StatelessWidget {
 
   /// Asks before forgetting, and says what forgetting does and does not
   /// touch — the word invites the reading that it deletes the notes.
-  Future<void> _confirmForget(BuildContext context, KnownLibrary entry) async {
+  ///
+  /// For the library on screen the answer says one thing more: it closes
+  /// first (#286), so the app lands on the home screen either way.
+  Future<void> _confirmForget(
+    BuildContext context,
+    KnownLibrary entry, {
+    required bool isOpen,
+  }) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppStrings.libraryForgetTitle(entry.name)),
-        content: Text(AppStrings.libraryForgetExplained),
+        content: Text(
+          isOpen
+              ? AppStrings.libraryForgetOpenExplained
+              : AppStrings.libraryForgetExplained,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -123,6 +136,10 @@ final class KnownLibraryList extends StatelessWidget {
     if (confirmed ?? false) onForget(entry.path);
   }
 }
+
+/// What a row's menu can do. One value today, and the place a Rename
+/// lands when the registry's `rename` gets a UI.
+enum _RowAction { forget }
 
 /// One row of [KnownLibraryList].
 final class _KnownLibraryTile extends StatelessWidget {
@@ -141,13 +158,13 @@ final class _KnownLibraryTile extends StatelessWidget {
   final bool isCurrent;
   final VoidCallback onOpen;
 
-  /// Null for the open library, which cannot be forgotten.
-  final Future<void> Function()? onForget;
+  /// Asks, then forgets. Every row has it, the open one included.
+  final Future<void> Function() onForget;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTile(
+    final row = ListTile(
       key: Key('known-library-${entry.path}'),
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       selected: isCurrent,
@@ -181,9 +198,58 @@ final class _KnownLibraryTile extends StatelessWidget {
       // An unreachable folder still opens on a tap: the drive may be back
       // by now, and the open path already reports what went wrong.
       onTap: enabled ? onOpen : null,
-      onLongPress: enabled ? onForget?.call : null,
+      onLongPress: enabled ? onForget : null,
+      // The action keeps its place while the list is busy — greyed, not
+      // gone, so nothing moves under a finger that is already there.
+      trailing: PopupMenuButton<_RowAction>(
+        key: Key('known-library-menu-${entry.path}'),
+        icon: const Icon(Icons.more_vert_outlined),
+        enabled: enabled,
+        onSelected: _run,
+        itemBuilder: (context) => _menuEntries(),
+      ),
+    );
+    return GestureDetector(
+      // Right-click is the desktops' long press (#286).
+      onSecondaryTapDown: enabled
+          ? (details) => _openMenuAt(context, details.globalPosition)
+          : null,
+      child: row,
     );
   }
+
+  /// Drops the same menu where the pointer is, so the right-click and the
+  /// overflow button are one thing.
+  Future<void> _openMenuAt(BuildContext context, Offset globalPosition) async {
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final action = await showMenu<_RowAction>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromPoints(globalPosition, globalPosition),
+        Offset.zero & overlay.size,
+      ),
+      items: _menuEntries(),
+    );
+    if (action == null) return;
+    await _run(action);
+  }
+
+  Future<void> _run(_RowAction action) {
+    switch (action) {
+      case _RowAction.forget:
+        return onForget();
+    }
+  }
+
+  /// The row's actions, shared by both ways in.
+  List<PopupMenuEntry<_RowAction>> _menuEntries() => [
+    PopupMenuItem<_RowAction>(
+      key: Key('forget-library-action-${entry.path}'),
+      value: _RowAction.forget,
+      child: Text(AppStrings.libraryForget),
+    ),
+  ];
 
   /// When it was last opened, in the words a person would use for a
   /// recent date and as a date for an old one.

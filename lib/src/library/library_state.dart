@@ -625,8 +625,16 @@ final class LibraryController implements LibrarySession {
   }
 
   /// Drops [libraryPath] from the known list; the folder is untouched.
+  ///
+  /// The library on screen goes first (#286): the index it is reading is
+  /// about to be deleted, and the shell would otherwise keep drawing a
+  /// library the app no longer lists. The caller's unsaved guard still
+  /// runs first — this close is the rule, not the place that saves.
   @override
   Future<void> forgetLibrary(String libraryPath) async {
+    if (_root != null && p.normalize(libraryPath.trim()) == _root) {
+      await close();
+    }
     _log.info('forget library: $libraryPath');
     final db = await appDatabase;
     await LibraryRegistry(db).forget(libraryPath);

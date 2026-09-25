@@ -1782,6 +1782,12 @@ final class SerbianStrings extends Strings {
       'библиотеке у њој остају по стране, и поновно отварање враћа је '
       'на место.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ова библиотека је сада отворена: прво се затвара, а затим нестаје са '
+      'листе. Фасцикла, белешке и поставке библиотеке у њој остају '
+      'нетакнуте, а поновно отварање је враћа назад.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Дај приступ фајловима';

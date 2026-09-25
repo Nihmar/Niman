@@ -1788,6 +1788,12 @@ final class FinnishStrings extends Strings {
       'asetukset jätetään koskematta, ja uudelleen avaaminen palauttaa '
       'sen.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Tämä kirjasto on nyt auki: se suljetaan ensin ja poistuu sitten '
+      'listalta. Kansio, muistiinpanot ja kirjaston asetukset sen sisällä '
+      'jäävät ennalleen, ja uudelleen avaaminen tuo sen takaisin.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Anna tiedostoihin pääsy';

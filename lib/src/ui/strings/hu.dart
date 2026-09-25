@@ -1788,6 +1788,12 @@ final class HungarianStrings extends Strings {
       'Ez a listáról eltűnik. A könyvtár mappája, jegyzetei és beállításai '
       'érintetlenül maradnak, az újra megnyitás visszaállítja.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ez a könyvtár most nyitva van: először bezárul, aztán eltűnik a '
+      'listáról. A mappa, a jegyzetek és a benne lévő könyvtárbeállítások '
+      'érintetlenek maradnak, és az újbóli megnyitás visszahozza.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Fájlhozzáférés megadása';

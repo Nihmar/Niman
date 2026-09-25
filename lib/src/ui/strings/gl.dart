@@ -1788,6 +1788,12 @@ final class GalicianStrings extends Strings {
       'da biblioteca nela non se tocan, e abrila de novo ponla de '
       'volta.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Esta biblioteca está aberta agora: primeiro péchase e despois sae da '
+      'lista. O cartafol, as notas e os axustes da biblioteca que contén '
+      'quedan intactos, e volver abrila tráea de volta.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Dar acceso aos ficheiros';

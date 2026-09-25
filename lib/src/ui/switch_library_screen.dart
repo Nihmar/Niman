@@ -69,6 +69,16 @@ final class _SwitchLibraryScreenState extends State<SwitchLibraryScreen> {
   }
 
   Future<void> _forget(String path) async {
+    // Forgetting the library on screen closes it, like a switch: this
+    // screen has no library left to list (#286).
+    if (path == widget.controller.root) {
+      widget.onSwitched();
+      await widget.controller.forgetLibrary(path);
+      // Normally this screen is gone by now; it is still here if the
+      // caller chose to stay, and then its list has to catch up.
+      if (mounted) await _load();
+      return;
+    }
     await widget.controller.forgetLibrary(path);
     await _load();
   }
