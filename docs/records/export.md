@@ -29,20 +29,20 @@ Checked in a browser on the 10 KB and 50 KB fixtures, light and dark:
 ## 1. Finish HTML (#24)
 
 ### 1.1 Resolving the sources
-- [ ] Extract `NoteViewState._resolveEmbed` into a shared `resolveEmbedPath(target, notePath, root, linkSource)`, used by the read view and the export. Its lookup order stays as it is: library root, then the note's folder, then `LinkSource.resolveWiki`.
-- [ ] `ExportSources` collects a note's picture targets:
+- [x] Extract `NoteViewState._resolveEmbed` into a shared `resolveEmbedPath(target, notePath, root, linkSource)`, used by the read view and the export. Its lookup order stays as it is: library root, then the note's folder, then `LinkSource.resolveWiki`.
+- [x] `ExportSources` collects a note's picture targets:
   - an embed's (`ExtensionMasker` spans of kind `embed`);
   - an image's (`md` `img` `src`, as written and decoded).
 
   Each target is resolved with the shared resolver. Only `EmbedView.imageExtensions` count as pictures.
-- [ ] Bytes become `data:` URIs off the UI isolate (`Isolate.run`), with the MIME type from the extension. There is no size cap; a picture that cannot be read stays as written, and the skip is logged.
-- [ ] The page is built off the UI isolate too: `Isolate.run(() => htmlPage(NoteHtml(source).body() …))`.
-- [ ] Tests: the resolver's order, an unreadable picture, a note with none.
+- [x] Bytes become `data:` URIs off the UI isolate (`Isolate.run`), with the MIME type from the extension. There is no size cap; a picture that cannot be read stays as written, and the skip is logged.
+- [x] The page is built off the UI isolate too: `Isolate.run(() => htmlPage(NoteHtml(source).body() …))`.
+- [x] Tests: the resolver's order, an unreadable picture, a note with none.
 
 ### 1.2 Single note
-- [ ] `.md`: the note's bytes as they are on disk.
-- [ ] `.html`: the page above. Its title is the note's display name (`displayNameOf`) and its `lang` is the app language.
-- [ ] Save through `FilePicker.saveFile(bytes: …)`, as `theme_files.dart` does. Put it behind an injectable typedef so widget tests can replace it. On Android this goes through SAF; on desktop, a save dialog.
+- [x] `.md`: the note's bytes as they are on disk.
+- [x] `.html`: the page above. Its title is the note's display name (`displayNameOf`) and its `lang` is the app language.
+- [x] Save through `FilePicker.saveFile(bytes: …)`, as `theme_files.dart` does. Put it behind an injectable typedef so widget tests can replace it. On Android this goes through SAF; on desktop, a save dialog.
 
 ### 1.3 Folder and library
 - [ ] **Zip of `.md`:** the subtree as it is on disk, attachments included, dot folders (`.niman`, `.trash`, `.history`) left out.
@@ -97,17 +97,17 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
 
 Every entry exists on Android, Linux and Windows.
 
-- [ ] **The note's ⋮ menu.**
+- [x] **The note's ⋮ menu.**
   - Add `NoteMenuAction.export` in `ui/note_menu.dart`, inside `if (textNote)`, next to Format and History; the key is `note-menu-export`.
   - It is handled in `shell.dart`'s `_noteMenu()`.
-  - It opens an **Export** sheet (phone) or dialog (desktop) with the formats Markdown / HTML / PDF.
+  - It opens an **Export** sheet (phone) or dialog (desktop) with the formats Markdown / HTML / PDF. *(PDF in #63.)*
 - [ ] **The tree row menu** (`ui/shell_row_menu.dart`, `rowMenuGroups`, the file group):
   - a note gets "Export…", the same chooser;
   - a folder gets "Export folder…", with Markdown zip / HTML zip / PDF zip.
 
   Dispatch goes in `ui/shell_row_actions.dart` `run`.
 - [ ] **The tree's background menu** (`showTreeBackgroundMenuAt`): "Export library…", the folder chooser for the root.
-- [ ] **Command palette.** Add `AppCommand.exportNote` and `AppCommand.exportLibrary` in `ui/app_shortcuts.dart`, with labels.
+- [x] **Command palette.** Add `AppCommand.exportNote` and `AppCommand.exportLibrary` in `ui/app_shortcuts.dart`, with labels. *(`exportLibrary` waits for 1.3.)*
   - `paletteGroup`: note / library. `paletteAsks`: true.
   - `commandNeeds`: `{CommandNeed.textNote}` for the note.
   - Handlers in `shell.dart` `_allCommandHandlers()`. Key maps and pins pick them up from `AppCommand.values`.
