@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:niman/src/core/changelog.dart';
+import 'package:niman/src/markdown/block_parser.dart';
+import 'package:niman/src/markdown/render/markdown_export.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The full changelog, every shipped version from newest to oldest
@@ -26,15 +31,23 @@ final class ChangelogScreen extends StatelessWidget {
           if (entries.isEmpty) {
             return Center(child: Text(AppStrings.changelogEmpty));
           }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              for (final entry in entries)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: changelogEntryBlock(context, entry),
-                ),
-            ],
+          // The list's own 16-pixel padding each side is not part of the
+          // width a bullet wraps at.
+          return LayoutBuilder(
+            builder: (context, constraints) => ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                for (final entry in entries)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: changelogEntryBlock(
+                      context,
+                      entry,
+                      width: constraints.maxWidth - 32,
+                    ),
+                  ),
+              ],
+            ),
           );
         },
       ),
@@ -54,6 +67,11 @@ Future<void> showChangelogUpdateDialog(
   final title = versions.length == 1
       ? AppStrings.changelogWhatsNew(versions.single.version)
       : AppStrings.changelogTitle;
+  // `AlertDialog` measures its content with an intrinsic pass, and a
+  // `LayoutBuilder` cannot answer one: the bullets are laid out at a width
+  // taken from the window, less the dialog's own inset (40 a side) and
+  // content padding (24 a side). A little over and the constraint clamps it.
+  final width = MediaQuery.sizeOf(context).width - 128;
   return showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
@@ -71,7 +89,7 @@ Future<void> showChangelogUpdateDialog(
               for (final entry in versions)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: changelogEntryBlock(context, entry),
+                  child: changelogEntryBlock(context, entry, width: width),
                 ),
             ],
           ),
@@ -91,43 +109,87 @@ Future<void> showChangelogUpdateDialog(
 /// One version's block, shared by the screen and the launch dialog:
 /// the version (and its date, when it has one) as a header, then each
 /// group — its heading when it has one, then its bullets.
-Widget changelogEntryBlock(BuildContext context, ChangelogVersion entry) {
-  final theme = Theme.of(context);
-  final date = entry.date;
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        date == null
-            ? entry.version
-            : '${entry.version} · ${date.toIso8601String().substring(0, 10)}',
-        style: theme.textTheme.titleMedium,
-      ),
-      const SizedBox(height: 4),
-      for (final section in entry.sections) ...[
-        if (section.title != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 2),
-            child: Text(
-              section.title!,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.primary,
+///
+/// The bullets are drawn as the Markdown they are written in, through the
+/// read view's own block painter (`MarkdownExportView`), so `**bold**` and
+/// `` `code` `` read as they would in a note. [width] is how wide to lay
+/// them out: an `AlertDialog` measures its content intrinsically and cannot
+/// take a `LayoutBuilder`, so the width is handed in rather than read here.
+Widget changelogEntryBlock(
+  BuildContext context,
+  ChangelogVersion entry, {
+  required double width,
+}) => _ChangelogEntry(entry: entry, width: width);
+
+/// One version, drawn with its bullets as Markdown.
+final class _ChangelogEntry extends StatefulWidget {
+  const new({required this.entry, required this.width});
+
+  /// The version to draw.
+  final ChangelogVersion entry;
+
+  /// How wide its bullets lay out.
+  final double width;
+
+  @override
+  State<_ChangelogEntry> createState() => _ChangelogEntryState();
+}
+
+final class _ChangelogEntryState extends State<_ChangelogEntry> {
+  /// The block parser, shared by every section of this version.
+  final BlockParser _parser = BlockParser();
+
+  /// The version's formulas, typeset once.
+  final MathCache _mathCache = MathCache();
+
+  @override
+  void dispose() {
+    _mathCache.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final entry = widget.entry;
+    final date = entry.date;
+    final markdown = markdownThemeOf(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          date == null
+              ? entry.version
+              : '${entry.version} · ${date.toIso8601String().substring(0, 10)}',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 4),
+        for (final section in entry.sections) ...[
+          if (section.title != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 2),
+              child: Text(
+                section.title!,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
-          ),
-        for (final item in section.items)
-          Padding(
-            padding: const EdgeInsets.only(left: 8, top: 2),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('•'),
-                const SizedBox(width: 6),
-                Expanded(child: Text(item)),
-              ],
+          if (section.items.isNotEmpty)
+            MarkdownExportView(
+              buffer: SourceBuffer.fromText(_bulletList(section.items)),
+              parser: _parser,
+              theme: markdown,
+              mathCache: _mathCache,
+              width: widget.width,
+              padding: const EdgeInsets.only(left: 8),
             ),
-          ),
+        ],
       ],
-    ],
-  );
+    );
+  }
 }
+
+/// [items] as the Markdown list the read view draws: one `- ` line each.
+String _bulletList(List<String> items) =>
+    '${items.map((item) => '- $item').join('\n')}\n';

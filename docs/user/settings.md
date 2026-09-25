@@ -152,9 +152,10 @@ immediately when newer; it works even with automatic updates off.
 
 The last section, **About**, holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens
-the full list of shipped versions, newest first. The same changelog
-appears as a dialog on the first launch after an update, listing only
-what is new since the version you last saw. Beside them, the **Markdown
+the full list of shipped versions, newest first. Each entry's bullets are
+Markdown — their bold, code and links read as they would in a note. The
+same changelog appears as a dialog on the first launch after an update,
+listing only what is new since the version you last saw. Beside them, the **Markdown
 cheatsheet**: every construct Niman reads, written and shown (see
 [editing](editing.md#markdown-support)); from here its examples are
 copied, since no note is open to insert them in.
