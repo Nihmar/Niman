@@ -21,13 +21,16 @@ const String webViewPdfChannel = 'niman/pdf';
 /// the caller draws the note instead.
 final class WebViewPdfPrinter implements PdfPrinter {
   /// Creates the printer.
-  const new({this.timeout = const Duration(minutes: 2)});
+  const new({this.timeout = const Duration(minutes: 5)});
 
   /// The channel, by name: the tests answer for it.
   static const MethodChannel _channel = MethodChannel(webViewPdfChannel);
 
   /// How long the WebView may take before its print is called failed: a
-  /// page whose callbacks never arrive must not hold the export open.
+  /// page whose callbacks never arrive must not hold the export open. It
+  /// is longer than the bridge's own watchdog, so a run that is slowly
+  /// working gets the watchdog's clean answer — a long note's SVG layout
+  /// is real work, not a hang.
   final Duration timeout;
 
   @override
@@ -61,6 +64,9 @@ final class WebViewPdfPrinter implements PdfPrinter {
             .timeout(timeout);
         break;
       } on TimeoutException {
+        // The bridge is still printing: stop it, or it refuses the next
+        // export until its own watchdog.
+        unawaited(cancel());
         return const PdfFailed('the WebView did not finish');
       } on MissingPluginException {
         return const PdfNoEngine();

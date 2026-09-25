@@ -1,5 +1,6 @@
 // The Android side of a note's PDF (#63): the WebView channel's print, its
 // failures, and the bridge that is not there.
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -118,5 +119,23 @@ void main() {
     });
     await WebViewPdfPrinter.cancel();
     expect(method, 'cancel');
+  });
+
+  test('a WebView that never answers times out and frees the bridge', () async {
+    final methods = <String>[];
+    answer((call) async {
+      methods.add(call.method);
+      if (call.method == 'cancel') return null;
+      // A print whose callbacks never arrive.
+      await Completer<void>().future;
+      return null;
+    });
+    final outcome = await const WebViewPdfPrinter(
+      timeout: Duration(milliseconds: 50),
+    ).print(htmlPath, pdfPath);
+    expect(outcome, isA<PdfFailed>());
+    await Future<void>.delayed(Duration.zero);
+    // The bridge would otherwise stay busy until its watchdog.
+    expect(methods, contains('cancel'));
   });
 }
