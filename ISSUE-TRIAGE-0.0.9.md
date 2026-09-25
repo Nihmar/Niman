@@ -5,7 +5,7 @@ the evidence in the tree. `integration/unmerged`, from `main` @ `16691f72`
 (0.0.8) to this commit.
 
 **State: verified and closed.** The boxes were checked on 2026-09-25 and
-**42 issues were closed** on the evidence below, each with a comment on
+**43 issues were closed** on the evidence below, each with a comment on
 the issue citing it. **#95 stays open**, and all of section C stays open
 (the user's reading of each is kept there).
 
@@ -106,8 +106,6 @@ The user's reading of each, noted while checking:
   `.txt`/`[-]`/PATH · #50/#51/#100 Split files · #47 Shell alive under
   fullscreen notes · #109 `File.rename` on Windows · #169 Windows Snap
   Layouts · #287 Marquee titles** — not done.
-- **#38 First tagged release (v1.0.0)** — the first tag shipped long ago
-  (0.0.1), but the issue names v1.0.0, so it stays open.
 - **#37 Open-source readiness** — CONTRIBUTING is missing.
 - **#270–#278 On-device verification** — only IMEs other than GBoard are
   left to test.
@@ -127,6 +125,8 @@ Already closed by earlier commits (referenced but not open): #256, #257,
 - [x] **#160 — Android auto-update signing.** Fixed with the 0.0.7 key.
 - [x] **#6 — Home-screen widgets.** Both ship; the two missing list-note
   row operations are accepted as out.
+- [x] **#38 — First tagged release (v1.0.0).** Releases have shipped since
+  0.0.1; the project is already officially released, no v1.0.0 tag needed.
 
 ## Closure log
 
@@ -137,6 +137,6 @@ evidence in this file:
   #264, #265, #267, #268, #269, #279, #280, #281, #282, #283, #284, #285,
   #286, #228, #8.
 - **B (9):** #253, #254, #255, #231, #49, #48, #36, #33, #31.
-- **D (8):** #151, #152, #153, #34, #35, #32, #160, #6.
+- **D (9):** #151, #152, #153, #34, #35, #32, #160, #6, #38.
 
 **Left open:** #95, and every issue in section C.
