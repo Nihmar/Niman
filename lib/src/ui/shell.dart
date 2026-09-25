@@ -707,6 +707,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// widgets (issue 6).
   StreamSubscription<int>? _libraryEvents;
 
+  /// Paths a re-index pruned from the tree: the tabs they held close
+  /// (issue #289).
+  StreamSubscription<Set<String>>? _libraryRemovals;
+
   /// Paths a sync just changed on disk: the open note among them is
   /// re-read (its buffer was saved before the sync started).
   StreamSubscription<Set<String>>? _syncChanges;
@@ -1388,6 +1392,9 @@ final class _LibraryShellState extends State<_LibraryShell>
     _libraryEvents = widget.controller.events.listen(
       (_) => _homeWidgets.pushNotes(),
     );
+    _libraryRemovals = widget.controller.removals.listen(
+      (paths) => _workspace.deletedAll(paths),
+    );
     _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
       // Words added on another device count as soon as they arrive.
       if (paths.contains(_personalDictionaryPath)) {
@@ -1465,6 +1472,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
     unawaited(_libraryEvents?.cancel());
+    unawaited(_libraryRemovals?.cancel());
     unawaited(_syncChanges?.cancel());
     _todoController.removeListener(_homeWidgets.pushTodos);
     unawaited(_trayTaps?.cancel());

@@ -286,6 +286,54 @@ void main() {
     expect(renamed!.name, 'renamed.md');
   });
 
+  group('the paths a re-index pruned (#289)', () {
+    test('a full scan reports the note and the folder it pruned', () async {
+      await indexer.fullScan(root.path);
+      final removed = <String>{};
+      indexer.onRemoved = removed.addAll;
+
+      File(p.join(root.path, 'note1.md')).deleteSync();
+      await Directory(p.join(root.path, 'docs')).delete(recursive: true);
+      await indexer.fullScan(root.path);
+
+      // The folder comes alone: its notes went with it.
+      expect(removed, {'note1.md', 'docs'});
+    });
+
+    test(
+      'a batch reports a pruned note, and a rename is not a prune',
+      () async {
+        await indexer.fullScan(root.path);
+        var removed = <String>{};
+        indexer.onRemoved = (paths) => removed.addAll(paths);
+
+        final goneAbs = p.join(root.path, 'note1.md');
+        File(goneAbs).deleteSync();
+        await indexer.applyEvents(root.path, [goneAbs]);
+        expect(removed, {'note1.md'});
+
+        removed = <String>{};
+        final oldAbs = p.join(root.path, 'note2.md');
+        final newAbs = p.join(root.path, 'renamed.md');
+        await File(oldAbs).rename(newAbs);
+        await indexer.applyEvents(root.path, [oldAbs, newAbs]);
+        expect(removed, isEmpty, reason: 'a rename is paired, not pruned');
+      },
+    );
+
+    test('a resync of a gone path reports it pruned', () async {
+      await indexer.fullScan(root.path);
+      final removed = <String>{};
+      indexer.onRemoved = removed.addAll;
+
+      final abs = p.join(root.path, 'note1.md');
+      File(abs).deleteSync();
+      await indexer.resync(root.path, abs);
+
+      expect(removed, {'note1.md'});
+    });
+  });
+
   test('a renamed directory is pruned via the stale path; '
       'the full rescan recovers the destination', () async {
     await indexer.fullScan(root.path);

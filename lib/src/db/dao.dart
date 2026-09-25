@@ -67,6 +67,18 @@ final class NoteDao {
     return rows.isEmpty ? null : rows.first;
   }
 
+  /// Which of [paths] the index does not hold, in one query: the notes a
+  /// caller keeps open that the tree no longer has (#289).
+  Future<Set<String>> missingAmong(Iterable<String> paths) async {
+    final wanted = paths.toSet();
+    if (wanted.isEmpty) return const <String>{};
+    final rows = await (_db.select(
+      _db.notes,
+    )..where((t) => t.path.isIn(wanted))).get();
+    final found = <String>{for (final row in rows) row.path};
+    return wanted.difference(found);
+  }
+
   /// Notes (not folders) whose name holds [query], case-insensitively:
   /// the command palette's note half (#155). Names that start with it
   /// come first, then the shorter ones, then by path; at most [limit].

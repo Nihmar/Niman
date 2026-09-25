@@ -154,6 +154,11 @@ final class LibraryController implements LibrarySession {
   final NetworkMonitor Function()? syncNetwork;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
+
+  /// Fires with the paths a re-index pruned ([Indexer.onRemoved]); what
+  /// the shell holds open on them closes.
+  final StreamController<Set<String>> _removals =
+      StreamController<Set<String>>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
   LibraryPhase _phase = LibraryPhase.none;
@@ -224,6 +229,10 @@ final class LibraryController implements LibrarySession {
   @override
   Stream<int> get events => _events.stream;
 
+  /// Fires with the library-relative paths a re-index pruned from the tree.
+  @override
+  Stream<Set<String>> get removals => _removals.stream;
+
   /// The app's settings database, opened once per session.
   ///
   /// Unlike the index it does not belong to a library: it holds the
@@ -257,6 +266,13 @@ final class LibraryController implements LibrarySession {
     final db = _indexDb;
     if (db == null) return const [];
     return await NoteDao(db).children(parentId, nameDesc: nameDesc);
+  }
+
+  @override
+  Future<Set<String>> missingPaths(Iterable<String> paths) async {
+    final db = _indexDb;
+    if (db == null) return const <String>{};
+    return await NoteDao(db).missingAmong(paths);
   }
 
   @override
@@ -419,7 +435,9 @@ final class LibraryController implements LibrarySession {
       // costs a reconciliation rather than a full walk.
       final indexDb = await indexDbFactory(abs);
       _indexDb = indexDb;
-      final indexer = Indexer(indexDb)..onChanged = _bump;
+      final indexer = Indexer(indexDb)
+        ..onChanged = _bump
+        ..onRemoved = _onRemoved;
       // One reader of `.niman/settings.json` per session: the four
       // per-library settings and the overrides (T-ML-10) share its cache.
       final config = LibraryConfigRepo(
@@ -1269,6 +1287,9 @@ final class LibraryController implements LibrarySession {
     if (!_events.isClosed) {
       await _events.close();
     }
+    if (!_removals.isClosed) {
+      await _removals.close();
+    }
     final appDb = _appDatabase;
     _appDatabase = null;
     if (appDb != null) {
@@ -1281,6 +1302,11 @@ final class LibraryController implements LibrarySession {
     if (!_events.isClosed) {
       _events.add(_revision);
     }
+  }
+
+  void _onRemoved(Set<String> removed) {
+    if (removed.isEmpty || _removals.isClosed) return;
+    _removals.add(removed);
   }
 
   /// Drops everything that belongs to the open library, the index file

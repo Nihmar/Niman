@@ -47,6 +47,12 @@ final class Indexer {
   /// Callback invoked after each successful index mutation.
   void Function()? onChanged;
 
+  /// Callback invoked with the library-relative paths a scan or a batch
+  /// pruned from the tree — a note or a folder gone from disk. Renames are
+  /// paired, not pruned, so they never arrive here. Lets a caller close
+  /// what it holds open on a path that no longer exists.
+  void Function(Set<String> removed)? onRemoved;
+
   /// Called with each note a content pass reads, while it is set.
   ///
   /// Every content read reports, not only a full scan. The session sets
@@ -121,6 +127,7 @@ final class Indexer {
       final read = await _tree.readContents(root, entries, old);
       var wrote = false;
       var pairedRels = const <String>{};
+      var removed = const <String>{};
       await _db.transaction(() async {
         final result = await _tree.applyDiff(
           entries: entries,
@@ -130,6 +137,7 @@ final class Indexer {
         );
         wrote = result.wrote;
         pairedRels = result.pairedRels;
+        removed = result.removed;
       });
       // Content rows (FTS, tags, links) for the notes whose content
       // actually changed; a paired rename keeps its rows untouched. Runs
@@ -140,6 +148,10 @@ final class Indexer {
       if (wrote) {
         final cb = onChanged;
         if (cb != null) cb();
+      }
+      if (removed.isNotEmpty) {
+        final cb = onRemoved;
+        if (cb != null) cb(removed);
       }
     });
   }
@@ -265,11 +277,17 @@ final class Indexer {
       // content; vanished paths are pruned (pairs applied above count as
       // pruned and are left alone).
       final changed = <NoteContent>[];
+      final removed = <String>{};
       for (final entry in live.entries) {
         if (paired.containsKey(entry.key)) continue;
         if (entry.value.isDir) {
           _log.debug('applyEvents: "$root/${entry.key}" -> resync dir');
-          wrote |= await _tree.syncDirSubtree(root, p.join(root, entry.key));
+          final synced = await _tree.syncDirSubtree(
+            root,
+            p.join(root, entry.key),
+          );
+          wrote |= synced.wrote;
+          removed.addAll(synced.removed);
         } else {
           _log.debug('applyEvents: "${entry.key}" -> upsert file');
           final result = await _tree.upsertFile(
@@ -284,10 +302,12 @@ final class Indexer {
         }
       }
       for (final rel in gone) {
+        if (gone.contains(parentOf(rel))) continue;
         if (pairedOld.contains(rel)) continue;
         final deleted = await _dao.deleteSubtree(rel);
         if (deleted > 0) {
           _log.debug('applyEvents: pruned "$rel" ($deleted row(s))');
+          removed.add(rel);
         }
         wrote |= deleted > 0;
       }
@@ -299,6 +319,10 @@ final class Indexer {
       if (wrote) {
         final cb = onChanged;
         if (cb != null) cb();
+      }
+      if (removed.isNotEmpty) {
+        final cb = onRemoved;
+        if (cb != null) cb(removed);
       }
     });
   }
@@ -410,7 +434,8 @@ final class Indexer {
   /// subtree is re-synced (covering renames/moves whose new path was not in
   /// the event batch), if it is a file it is upserted, and if it is gone its
   /// index rows are pruned. Dot components are ignored. [onChanged] fires
-  /// after the writes, and only when the index actually changed.
+  /// after the writes, and only when the index actually changed; [onRemoved]
+  /// fires with the paths the reconcile pruned.
   Future<void> resync(String root, String abs) {
     return _synchronized(() async {
       final rel = _tree.safeRel(abs, root);
@@ -420,18 +445,22 @@ final class Indexer {
         );
         return;
       }
-      final wrote = await _reconcile(root, abs, rel, 'resync');
-      if (wrote) {
+      final result = await _reconcile(root, abs, rel, 'resync');
+      if (result.wrote) {
         final cb = onChanged;
         if (cb != null) cb();
+      }
+      if (result.removed.isNotEmpty) {
+        final cb = onRemoved;
+        if (cb != null) cb(result.removed);
       }
     });
   }
 
   /// Reconciles one absolute path against disk and the index, returning
-  /// whether the index changed. [tag] is the public entry point, kept in
-  /// the log lines.
-  Future<bool> _reconcile(
+  /// whether the index changed and the top-level paths it pruned. [tag] is
+  /// the public entry point, kept in the log lines.
+  Future<({bool wrote, Set<String> removed})> _reconcile(
     String root,
     String abs,
     String rel,
@@ -449,7 +478,7 @@ final class Indexer {
     }
     if (probe.exists && _tree.awaited(rel)) {
       _log.debug('$tag: "$rel" -> its writer reads it');
-      return false;
+      return (wrote: false, removed: const <String>{});
     }
     if (probe.exists) {
       _log.debug('$tag: "$abs" -> upsert file "$rel"');
@@ -457,14 +486,15 @@ final class Indexer {
       if (result.content != null) {
         await _store.applyContent({rel: result.content!}, paired: const {});
       }
-      return result.wrote;
+      return (wrote: result.wrote, removed: const <String>{});
     }
     _log.debug('$tag: "$abs" -> prune "$rel"');
     final deleted = await _dao.deleteSubtree(rel);
     if (deleted > 0) {
       _log.debug('$tag: pruned "$rel" ($deleted row(s))');
+      return (wrote: true, removed: <String>{rel});
     }
-    return deleted > 0;
+    return (wrote: false, removed: const <String>{});
   }
 
   /// Whether the desired tree differs from [old].
