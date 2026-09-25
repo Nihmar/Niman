@@ -98,6 +98,9 @@ void main() {
   });
 
   testWidgets('what was left open comes back as tabs', (tester) async {
+    // The notes are in the tree, so the store's tabs come back as they are.
+    await controller.saveNote('kept.md', '');
+    await controller.saveNote('other.md', '');
     controller.workspace = Workspace.empty.open('kept.md').open('other.md');
     await pumpShell(tester);
     await settle(tester);

@@ -12,6 +12,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
@@ -168,5 +169,32 @@ void main() {
     await settle(tester);
     expect(shown().path, endsWith('alpha.md'));
     expect(shown().showPreview, isFalse);
+  });
+
+  testWidgets('a re-index that prunes a note closes its tab (#289)', (
+    tester,
+  ) async {
+    await pumpShell(tester);
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    await ctrlClick(tester, noteRow('beta.md'));
+    expect(tabs(), ['alpha.md', 'beta.md']);
+
+    controller.addRemoval({'beta.md'});
+    await settle(tester);
+
+    expect(tabs(), ['alpha.md']);
+    expect(find.byKey(const Key('note-tab-1')), findsNothing);
+  });
+
+  testWidgets('a note gone before the library opened is not restored (#289)', (
+    tester,
+  ) async {
+    // The store still opens it, but this session's tree never had it: no
+    // removal event is coming for it.
+    controller.workspace = Workspace.empty.open('ghost.md');
+    await pumpShell(tester);
+
+    expect(tabs(), isEmpty);
   });
 }

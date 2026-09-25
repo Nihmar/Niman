@@ -310,10 +310,17 @@ final class Workspace {
   }
 
   /// Closes [path]'s tab and, for a folder, every tab under it.
-  Workspace deleted(String path) {
-    final prefix = '$path/';
+  Workspace deleted(String path) => deletedAll(<String>{path});
+
+  /// Closes the tab of every path in [paths], and — for a folder — every
+  /// tab under it. What a re-index pruned from the tree (issue #289): the
+  /// open notes it held close with it.
+  Workspace deletedAll(Set<String> paths) {
+    if (paths.isEmpty) return this;
     return _filtered(
-      (_, _, tab) => tab.path != path && !tab.path.startsWith(prefix),
+      (_, _, tab) => !paths.any(
+        (path) => tab.path == path || tab.path.startsWith('$path/'),
+      ),
     );
   }
 
