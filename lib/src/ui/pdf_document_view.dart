@@ -1,5 +1,6 @@
 /// A PDF in the note pane, its pages one under the other, zoomed with a
-/// pinch or Ctrl+wheel, opening where it was left ([ReadingPositions]).
+/// pinch or Ctrl+wheel, opening where it was left ([ReadingPositions]) or
+/// at the page the link it was opened by names (`#page=34`).
 library;
 
 import 'dart:async';
@@ -31,6 +32,8 @@ final class PdfDocumentView extends StatefulWidget {
     required this.path,
     required this.unreadable,
     this.positions,
+    this.anchor,
+    this.reloadToken = 0,
     super.key,
   });
 
@@ -44,6 +47,14 @@ final class PdfDocumentView extends StatefulWidget {
   /// the PDF opens at its first page.
   final ReadingPositions? positions;
 
+  /// The fragment of the link the PDF was opened by (#282): `page=34`. It
+  /// wins over where the PDF was left.
+  final String? anchor;
+
+  /// Bumped when the same link is followed again, so the PDF goes back to
+  /// its page.
+  final int reloadToken;
+
   @override
   State<PdfDocumentView> createState() => _PdfDocumentViewState();
 }
@@ -52,6 +63,10 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
   final PdfViewerController _controller = PdfViewerController();
   late ReadingTracker _reading;
   late Future<BookLocation?> _left;
+
+  /// The link's fragment last gone to: handed again as a tab comes back,
+  /// it does not move the reader.
+  String? _anchorTaken;
 
   @override
   void initState() {
@@ -63,7 +78,23 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
   @override
   void didUpdateWidget(PdfDocumentView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.path == widget.path) return;
+    if (oldWidget.path == widget.path) {
+      final anchor = widget.anchor;
+      final again =
+          anchor != _anchorTaken || widget.reloadToken != oldWidget.reloadToken;
+      // Not laid out yet, the PDF takes the link when it is.
+      if (anchor == null || !again || !_controller.isReady) return;
+      _anchorTaken = anchor;
+      final place = _linked();
+      if (place == null) return;
+      _reading.flush();
+      unawaited(
+        _show(_controller, place).then((shown) {
+          if (shown) _reading.placed(place);
+        }),
+      );
+      return;
+    }
     _reading.flush();
     _follow();
   }
@@ -80,24 +111,41 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
     _left = _reading.read();
   }
 
-  /// Sets the PDF where it was left, once it is laid out.
+  /// Sets the PDF, once it is laid out, at the link's page, else where it
+  /// was left, else at its first page.
   Future<void> _place(PdfViewerController controller) async {
     final reading = _reading;
     final left = await _left;
     if (!mounted || !identical(reading, _reading)) return;
-    final pages = controller.layout.pageLayouts;
-    if (left is PdfLocation && left.page <= pages.length) {
-      final page = pages[left.page - 1];
-      await controller.goToPosition(
-        documentOffset: Offset(
-          controller.visibleRect.left,
-          page.top + left.fraction * page.height,
-        ),
-      );
-      reading.placed(left);
-    } else {
-      reading.placed(null);
+    _anchorTaken = widget.anchor;
+    for (final place in [_linked(), if (left is PdfLocation) left]) {
+      if (place != null && await _show(controller, place)) {
+        reading.placed(place);
+        return;
+      }
     }
+    reading.placed(null);
+  }
+
+  /// The page the link's fragment names, when it names one.
+  PdfLocation? _linked() =>
+      switch (BookLocation.fromFragment(widget.anchor ?? '')) {
+        final PdfLocation place => place,
+        _ => null,
+      };
+
+  /// Goes to [place], if the PDF has its page.
+  Future<bool> _show(PdfViewerController controller, PdfLocation place) async {
+    final pages = controller.layout.pageLayouts;
+    if (place.page > pages.length) return false;
+    final page = pages[place.page - 1];
+    await controller.goToPosition(
+      documentOffset: Offset(
+        controller.visibleRect.left,
+        page.top + place.fraction * page.height,
+      ),
+    );
+    return true;
   }
 
   void _onMove() {

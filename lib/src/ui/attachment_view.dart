@@ -50,6 +50,8 @@ final class AttachmentView extends StatelessWidget {
     this.column = NoteColumn.off,
     this.onEditEpubLook,
     this.positions,
+    this.anchor,
+    this.reloadToken = 0,
     super.key,
   });
 
@@ -69,6 +71,13 @@ final class AttachmentView extends StatelessWidget {
   /// none.
   final ReadingPositions? positions;
 
+  /// The fragment of the link the file was opened by: a place in a book or
+  /// a PDF (#282), which it opens at.
+  final String? anchor;
+
+  /// Bumped when the same link is followed again.
+  final int reloadToken;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -83,6 +92,8 @@ final class AttachmentView extends StatelessWidget {
         column: column,
         onEditLook: onEditEpubLook,
         positions: positions,
+        anchor: anchor,
+        reloadToken: reloadToken,
       );
     }
     final theme = Theme.of(context);
@@ -116,6 +127,8 @@ final class AttachmentView extends StatelessWidget {
     path: path,
     unreadable: _unreadable,
     positions: positions,
+    anchor: anchor,
+    reloadToken: reloadToken,
   );
 
   Widget _unreadable(BuildContext context) => Center(

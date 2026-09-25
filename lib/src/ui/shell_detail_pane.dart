@@ -214,6 +214,8 @@ final class ShellDetailPane extends StatelessWidget {
           column: noteColumn,
           onEditEpubLook: onEditEpubLook,
           positions: ReadingPositions(root),
+          anchor: tab.anchor,
+          reloadToken: reloadToken,
         )
       : _noteView(root, tab);
 

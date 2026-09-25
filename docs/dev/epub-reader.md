@@ -103,6 +103,18 @@ moves within one chapter at most (`EpubDocument.chapters`,
 chapter inside it). Links into a document (#282) and annotations (#284)
 point with the same type, with room for a character range (#283).
 
+A link names a place in its `#fragment` (#282): `BookLocation.fromFragment`
+reads `page=N` (the PDF open-parameters form Obsidian uses, other keys
+passed over) and `chapter=<path>&line=N`, values percent-decoded
+(`core/percent.dart`); `toFragment` writes them, escaping what would end
+the fragment or the link. `EpubDocument.lineOfLocation` finds a chapter
+by its exact path, else whatever its case (a Markdown href's fragment),
+else its file name alone. The shell hands the fragment to the pane as the
+tab's `anchor`, the one a note gets for a heading, with the reload token
+for the same link followed again; the pane goes there on open, over the
+saved position, and on a new fragment or token later — not on the same
+fragment handed again as a tab comes back.
+
 `ReadingPositions` keeps them in `.niman/reading.json`, by library-relative
 path, each with the time it was read (`at`); it is a library state file,
 synced and merged book by book (`mergeReadingJson`, see `sync.md`).

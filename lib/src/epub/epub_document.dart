@@ -78,6 +78,19 @@ final class EpubDocument {
     return links[index];
   }
 
+  /// The index of the chapter [name] names: its path in the archive, as
+  /// the book spells it, else whatever its case (a Markdown link's
+  /// fragment may come lowercased), else its file name alone (a link
+  /// written by hand); -1 when none does.
+  int _chapterNamed(String name) {
+    final exact = chapters.indexWhere((c) => c.file == name);
+    if (exact != -1) return exact;
+    final lower = name.toLowerCase();
+    final anyCase = chapters.indexWhere((c) => c.file.toLowerCase() == lower);
+    if (anyCase != -1) return anyCase;
+    return chapters.indexWhere((c) => c.file.toLowerCase().endsWith('/$lower'));
+  }
+
   /// [line] of the book's text, [fraction] into it, as a place in its
   /// chapter; null for a book with no chapters.
   EpubLocation? locationAt(int line, double fraction) {
@@ -99,7 +112,7 @@ final class EpubDocument {
   /// chapter when the chapter has grown shorter; null when the book has
   /// no such chapter.
   int? lineOfLocation(EpubLocation location) {
-    final index = chapters.indexWhere((c) => c.file == location.chapter);
+    final index = _chapterNamed(location.chapter);
     if (index == -1) return null;
     final start = chapters[index].line;
     final end = index + 1 < chapters.length

@@ -981,6 +981,8 @@ final class _LibraryShellState extends State<_LibraryShell>
           final root? => ReadingPositions(root),
           null => null,
         },
+        anchor: _pendingAnchor,
+        reloadToken: _noteReloadToken,
       );
     }
     return NoteView(
