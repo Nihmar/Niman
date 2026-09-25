@@ -225,7 +225,14 @@ final class LocalReminderService implements ReminderService {
     // app, and cancelling first would leave nothing behind if the user
     // came back through onResume instead of a fresh reconcile. Nothing is
     // asked while nothing is wanted.
-    final granted = wanted.isEmpty || await _backend.notificationsAllowed();
+    // The Todo tab warns from this even with nothing wanted: whether
+    // notifications are allowed is a fact about the app, not about the
+    // current reminder set. Asking is still reserved for a reminder that
+    // wants posting, so an app with none never puts a permission dialog
+    // in front of the user.
+    final enabled = await _backend.notificationsEnabled();
+    final granted =
+        enabled || (wanted.isNotEmpty && await _backend.notificationsAllowed());
     final exact = granted && wanted.isNotEmpty && await _backend.exactAllowed();
     final batteryExempt = await settings.isBatteryExempt();
     final backgroundRestricted = await settings.isBackgroundRestricted();
