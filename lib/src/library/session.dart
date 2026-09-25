@@ -233,6 +233,16 @@ abstract interface class LibrarySession {
   /// Fires with the new [revision] after every index change.
   Stream<int> get events;
 
+  /// Fires with the library-relative paths a re-index pruned from the tree:
+  /// a note or a folder gone from disk, renamed paths excluded (a rename is
+  /// paired, not pruned). What holds a path open — a tab — closes it here.
+  Stream<Set<String>> get removals;
+
+  /// Which of [paths] the index does not hold — a note pruned before this
+  /// session read the tree, so no [removals] event carries it. What a tab
+  /// holds open on one closes when the workspace loads (#289).
+  Future<Set<String>> missingPaths(Iterable<String> paths);
+
   /// CRUD ops for the open library, or null while closed.
   NoteOperations? get ops;
 

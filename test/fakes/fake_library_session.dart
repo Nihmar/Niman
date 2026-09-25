@@ -61,6 +61,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   final String? resumePath;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
+  final StreamController<Set<String>> _removals =
+      StreamController<Set<String>>.broadcast();
   final List<_Row> _rows = <_Row>[];
   final List<_TrashEntry> _trash = <_TrashEntry>[];
   int _nextId = 1;
@@ -107,6 +109,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Stream<int> get events => _events.stream;
+
+  @override
+  Stream<Set<String>> get removals => _removals.stream;
 
   @override
   NoteOperations? get ops => _phase == LibraryPhase.ready ? this : null;
@@ -653,6 +658,27 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     if (!_events.isClosed) {
       await _events.close();
     }
+    if (!_removals.isClosed) {
+      await _removals.close();
+    }
+  }
+
+  /// Simulates a re-index that pruned [paths] from the tree (issue #289):
+  /// what the shell holds open on them should close.
+  void addRemoval(Set<String> paths) {
+    if (paths.isNotEmpty && !_removals.isClosed) _removals.add(paths);
+  }
+
+  @override
+  Future<Set<String>> missingPaths(Iterable<String> paths) async {
+    final have = <String>{
+      for (final row in _rows)
+        if (!row.trashed) row.path,
+    };
+    return <String>{
+      for (final path in paths)
+        if (!have.contains(path)) path,
+    };
   }
 
   @override

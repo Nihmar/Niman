@@ -54,8 +54,16 @@ final class ShellWorkspace {
   Workspace get value => controller.value;
 
   /// Reads back what was left open in the library on this device.
+  ///
+  /// A note deleted before this session read the tree has no `removals`
+  /// event to arrive on: what the store still opens on one closes here
+  /// (#289).
   Future<void> load() async {
     controller.adopt(await _session.savedWorkspace);
+    final open = [for (final tab in value.tabs) tab.path];
+    if (open.isEmpty) return;
+    final gone = await _session.missingPaths(open);
+    if (gone.isNotEmpty) controller.update((w) => w.deletedAll(gone));
   }
 
   /// Opens [notePath] now: in a new tab when [newTab] (or when one was
@@ -248,6 +256,10 @@ final class ShellWorkspace {
 
   /// [path] is gone: a note, or a folder with notes under it.
   void deleted(String path) => controller.update((w) => w.deleted(path));
+
+  /// Every path in [paths] is gone: a re-index pruned them (issue #289).
+  void deletedAll(Set<String> paths) =>
+      controller.update((w) => w.deletedAll(paths));
 
   /// Writes what is pending and lets go.
   void dispose() => controller.dispose();
