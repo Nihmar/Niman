@@ -1,5 +1,6 @@
 package dev.niman.niman
 
+import android.app.ActivityManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -42,6 +43,8 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "isIgnoringBatteryOptimizations" ->
                         result.success(isIgnoringBatteryOptimizations())
+                    "isBackgroundRestricted" ->
+                        result.success(isBackgroundRestricted())
                     "openBatterySettings" ->
                         result.success(openBatterySettings())
                     "openNotificationSettings" ->
@@ -86,6 +89,21 @@ class MainActivity : FlutterActivity() {
     private fun isIgnoringBatteryOptimizations(): Boolean {
         val power = getSystemService(Context.POWER_SERVICE) as PowerManager
         return power.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    /**
+     * Whether the system restricts Niman's background activity.
+     *
+     * Android's "Restricted" battery mode -- shown on several ROMs as an
+     * "Allow background activity" switch, off -- stops the app being
+     * started in the background at all, a stronger hold than Doze and one
+     * an exact alarm cannot override. It is a separate switch from
+     * [isIgnoringBatteryOptimizations]: an app can be unrestricted for
+     * Doze and still restricted here, which is why both are asked.
+     */
+    private fun isBackgroundRestricted(): Boolean {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return manager.isBackgroundRestricted
     }
 
     /**

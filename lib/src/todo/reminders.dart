@@ -228,19 +228,27 @@ final class LocalReminderService implements ReminderService {
     final granted = wanted.isEmpty || await _backend.notificationsAllowed();
     final exact = granted && wanted.isNotEmpty && await _backend.exactAllowed();
     final batteryExempt = await settings.isBatteryExempt();
+    final backgroundRestricted = await settings.isBackgroundRestricted();
     _health.value = _healthOf(
       granted: granted,
       exact: exact,
       batteryExempt: batteryExempt,
+      backgroundRestricted: backgroundRestricted,
       wantsAny: wanted.isNotEmpty,
     );
     _log.info(
       'todo reminders: reconcile ${wanted.length} wanted, '
       'notifications ${granted ? 'allowed' : 'blocked'}, '
       'alarms ${exact ? 'exact' : 'inexact'}, '
-      'battery ${batteryExempt ? 'unrestricted' : 'optimized'}',
+      'battery ${batteryExempt ? 'unrestricted' : 'optimized'}, '
+      'background ${backgroundRestricted ? 'restricted' : 'allowed'}',
     );
-    await _logOverdue(wanted, exact: exact, batteryExempt: batteryExempt);
+    await _logOverdue(
+      wanted,
+      exact: exact,
+      batteryExempt: batteryExempt,
+      backgroundRestricted: backgroundRestricted,
+    );
     await _cancelStale(wanted);
     if (wanted.isEmpty) {
       _log.info('todo reminders reconciled: 0 scheduled');
@@ -283,6 +291,7 @@ final class LocalReminderService implements ReminderService {
     Map<int, TodoReminder> wanted, {
     required bool exact,
     required bool batteryExempt,
+    required bool backgroundRestricted,
   }) async {
     final now = _clock();
     final overdue = [
@@ -304,6 +313,7 @@ final class LocalReminderService implements ReminderService {
         pending: held,
         exact: exact,
         batteryExempt: batteryExempt,
+        backgroundRestricted: backgroundRestricted,
       );
       _log.warning(
         'todo reminders: overdue ${reminder.id} '
@@ -316,16 +326,21 @@ final class LocalReminderService implements ReminderService {
   /// The worst precondition currently failing.
   ///
   /// Ordered by consequence: a blocked notification hides the reminder
-  /// outright, a battery-managed app may never get to fire it, and
-  /// inexact only makes it late.
+  /// outright, an app the system will not run in the background may never
+  /// get to fire it at all, and inexact only makes it late. The two
+  /// battery holds are reported as one: the fix is the same screen, and
+  /// the message names both switches.
   static ReminderHealth _healthOf({
     required bool granted,
     required bool exact,
     required bool batteryExempt,
+    required bool backgroundRestricted,
     required bool wantsAny,
   }) {
     if (!granted) return ReminderHealth.notificationsBlocked;
-    if (!batteryExempt) return ReminderHealth.batteryRestricted;
+    if (!batteryExempt || backgroundRestricted) {
+      return ReminderHealth.batteryRestricted;
+    }
     if (!exact && wantsAny) return ReminderHealth.inexactOnly;
     return ReminderHealth.ok;
   }

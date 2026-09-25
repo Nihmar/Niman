@@ -1004,8 +1004,9 @@ final class EnglishStrings extends Strings {
       'Notifications are off, so reminders will not appear.';
   @override
   String get todoReminderBattery =>
-      'Battery optimization is on for Niman. The system may sleep the '
-      'app and drop pending reminders.';
+      'Battery optimization or background restrictions are on for Niman. '
+      'Allow background activity and keep Niman unrestricted, or the '
+      'system may sleep the app and drop pending reminders.';
   @override
   String get todoReminderInexact =>
       'This device does not allow exact alarms, so a reminder can arrive '

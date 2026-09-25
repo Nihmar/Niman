@@ -20,10 +20,12 @@ String osAlarmOverdueState({
   required bool pending,
   required bool exact,
   required bool batteryExempt,
+  required bool backgroundRestricted,
 }) =>
     '${pending ? 'STILL PENDING, never fired' : 'no longer pending, fired'}, '
     'alarms ${exact ? 'exact' : 'inexact'}, '
-    'battery ${batteryExempt ? 'unrestricted' : 'optimized'}';
+    'battery ${batteryExempt ? 'unrestricted' : 'optimized'}, '
+    'background ${backgroundRestricted ? 'restricted' : 'allowed'}';
 
 /// The platform operations reminders need.
 abstract interface class ReminderBackend {
@@ -71,6 +73,7 @@ abstract interface class ReminderBackend {
     required bool pending,
     required bool exact,
     required bool batteryExempt,
+    required bool backgroundRestricted,
   });
 
   /// Releases resources.

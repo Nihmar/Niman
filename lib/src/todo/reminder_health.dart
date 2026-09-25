@@ -19,9 +19,12 @@ enum ReminderHealth {
 
   /// The system may sleep the app or drop its alarms.
   ///
-  /// Several OEM ROMs discard pending alarms when an optimized app is
-  /// swiped away from recents, which is when a reminder is most likely to
-  /// be needed and least likely to arrive.
+  /// Two switches on Android report here, because the fix is one screen:
+  /// Doze battery optimization, and the *Restricted* mode some ROMs show
+  /// as an "Allow background activity" switch, off. Several OEM ROMs
+  /// discard pending alarms when an optimized app is swiped away from
+  /// recents, which is when a reminder is most likely to be needed and
+  /// least likely to arrive.
   batteryRestricted,
 
   /// Only inexact alarms are available: Doze can defer them by minutes.

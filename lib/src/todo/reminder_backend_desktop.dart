@@ -106,6 +106,7 @@ final class DesktopReminderBackend implements ReminderBackend {
     required bool pending,
     required bool exact,
     required bool batteryExempt,
+    required bool backgroundRestricted,
   }) {
     if (pending) {
       return 'timer STILL ARMED past its time: the machine slept through '
