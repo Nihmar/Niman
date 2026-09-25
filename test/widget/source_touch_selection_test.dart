@@ -100,6 +100,26 @@ void main() {
     expect(find.text('Copy'), findsOneWidget, reason: 'the toolbar is up');
   });
 
+  both('a double tap takes the word, and shows the handles and the toolbar', (
+    tester,
+    mode,
+  ) async {
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
+    final at = _at(0, 6);
+    await tester.tapAt(at);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(at);
+    await tester.pumpAndSettle();
+    expect(state.selectedText, 'parola');
+    expect(find.byKey(const ValueKey(SelectionHandle.start)), findsOneWidget);
+    expect(find.byKey(const ValueKey(SelectionHandle.end)), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget, reason: 'the toolbar is up');
+  });
+
   both('dragging the end handle moves the end of the selection', (
     tester,
     mode,
