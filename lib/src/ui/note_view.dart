@@ -122,6 +122,7 @@ final class NoteView extends StatefulWidget {
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
+    this.templateFolder,
     this.indentWidth = 2,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.showPreview = false,
@@ -191,6 +192,11 @@ final class NoteView extends StatefulWidget {
   /// The folder (library-relative) picked images are copied into
   /// (settings, issue #56).
   final String attachmentsFolder;
+
+  /// The folder (library-relative) of the library's templates (settings):
+  /// a note in it has its template commands coloured in the source. Null
+  /// colours none.
+  final String? templateFolder;
 
   /// The indent/outdent width in spaces (settings).
   final int indentWidth;
@@ -1160,6 +1166,16 @@ final class _NoteViewState extends State<NoteView>
   static bool _plainTextIn(NoteView view) =>
       isTodoTxtFile(p.basename(view.path));
 
+  /// Whether [view] holds a template: a note of the library's template
+  /// folder, whose `{{…}}` commands the source colours.
+  static bool _templateIn(NoteView view) {
+    final root = view.libraryRoot;
+    final folder = view.templateFolder;
+    if (root == null || folder == null || folder.isEmpty) return false;
+    if (!p.isWithin(root, view.path)) return false;
+    return isUnder(folder, relPath(view.path, root));
+  }
+
   /// Whether [view] shows its note in the WYSIWYG pane.
   static bool _wysiwygIn(NoteView view) =>
       view.showWysiwyg && !_plainTextIn(view);
@@ -1213,6 +1229,7 @@ final class _NoteViewState extends State<NoteView>
         buffer: buffer,
         surface: surface,
         lineTokens: _plainTextIn(widget) ? todoTxtTokens : null,
+        templateCommands: _templateIn(widget),
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.

@@ -123,6 +123,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     required this.quote,
     required this.math,
     required this.tag,
+    required this.template,
     required this.todoPriority,
     required this.todoDate,
     required this.todoProject,
@@ -163,6 +164,10 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
   /// Inline `#tags`.
   final Color tag;
 
+  /// A template command, `{{date}}`, in the source: what the engine will
+  /// write there when a note is made from the template.
+  final Color template;
+
   /// A task's priority, `(A)`, in a task list (todo.txt): the run a list
   /// is read by first, drawn bold.
   final Color todoPriority;
@@ -202,6 +207,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     quote: Color(0xFF6B7280),
     math: Color(0xFFAD1457),
     tag: Color(0xFF00838F),
+    template: Color(0xFF8A6D00),
     todoPriority: Color(0xFFD84315),
     todoDate: Color(0xFF7A7A7A),
     todoProject: Color(0xFF6A1B9A),
@@ -222,6 +228,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     quote: Color(0xFF80868E),
     math: Color(0xFFC678DD),
     tag: Color(0xFF4EC9B0),
+    template: Color(0xFFD7BA7D),
     todoPriority: Color(0xFFE5C07B),
     todoDate: Color(0xFF9E9E9E),
     todoProject: Color(0xFFC678DD),
@@ -242,6 +249,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     Color? quote,
     Color? math,
     Color? tag,
+    Color? template,
     Color? todoPriority,
     Color? todoDate,
     Color? todoProject,
@@ -260,6 +268,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       quote: quote ?? this.quote,
       math: math ?? this.math,
       tag: tag ?? this.tag,
+      template: template ?? this.template,
       todoPriority: todoPriority ?? this.todoPriority,
       todoDate: todoDate ?? this.todoDate,
       todoProject: todoProject ?? this.todoProject,
@@ -283,6 +292,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       quote: Color.lerp(quote, other.quote, t)!,
       math: Color.lerp(math, other.math, t)!,
       tag: Color.lerp(tag, other.tag, t)!,
+      template: Color.lerp(template, other.template, t)!,
       todoPriority: Color.lerp(todoPriority, other.todoPriority, t)!,
       todoDate: Color.lerp(todoDate, other.todoDate, t)!,
       todoProject: Color.lerp(todoProject, other.todoProject, t)!,
@@ -307,6 +317,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
       other.quote == quote &&
       other.math == math &&
       other.tag == tag &&
+      other.template == template &&
       other.todoPriority == todoPriority &&
       other.todoDate == todoDate &&
       other.todoProject == todoProject &&
@@ -326,6 +337,7 @@ final class SyntaxColors extends ThemeExtension<SyntaxColors> {
     quote,
     math,
     tag,
+    template,
     todoPriority,
     todoDate,
     todoProject,

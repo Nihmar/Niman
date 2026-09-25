@@ -32,6 +32,7 @@ final class ShellEditorSettings {
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
+    this.templateFolder = defaultTemplateFolder,
     this.indentWidth = 2,
     this.treeSort = TreeSort.nameAsc,
     this.treeWidth = defaultTreeWidth,
@@ -70,6 +71,10 @@ final class ShellEditorSettings {
   /// The folder new attachments are copied into (issue #56).
   final String attachmentsFolder;
 
+  /// The folder of the library's templates, whose notes have their
+  /// commands coloured in the source.
+  final String templateFolder;
+
   /// Spaces added per indent level.
   final int indentWidth;
 
@@ -104,6 +109,8 @@ final class ShellEditorSettings {
     final missingNoteLocation = await session.missingNoteLocation;
     final attachmentsFolder =
         await session.ops?.attachmentsFolder ?? defaultAttachmentsFolder;
+    final templateFolder =
+        await session.ops?.templateFolder ?? defaultTemplateFolder;
     final indentWidth = await session.indentWidth;
     final treeSort = await session.treeSort;
     final treeWidth = await session.treeWidth;
@@ -131,6 +138,7 @@ final class ShellEditorSettings {
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
+      templateFolder: templateFolder,
       indentWidth: indentWidth,
       treeSort: treeSort,
       treeWidth: treeWidth,
@@ -163,6 +171,7 @@ final class ShellEditorSettings {
       linkType: linkType,
       missingNoteLocation: missingNoteLocation,
       attachmentsFolder: attachmentsFolder,
+      templateFolder: templateFolder,
       indentWidth: indentWidth,
       treeSort: treeSort ?? this.treeSort,
       treeWidth: treeWidth ?? this.treeWidth,
@@ -184,6 +193,7 @@ final class ShellEditorSettings {
         linkType == other.linkType &&
         missingNoteLocation == other.missingNoteLocation &&
         attachmentsFolder == other.attachmentsFolder &&
+        templateFolder == other.templateFolder &&
         indentWidth == other.indentWidth &&
         treeSort == other.treeSort &&
         treeWidth == other.treeWidth &&
@@ -204,6 +214,7 @@ final class ShellEditorSettings {
     linkType,
     missingNoteLocation,
     attachmentsFolder,
+    templateFolder,
     indentWidth,
     treeSort,
     treeWidth,

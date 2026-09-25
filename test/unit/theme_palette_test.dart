@@ -151,6 +151,33 @@ void main() {
       }
     });
 
+    test('each paints a template command apart from the note', () {
+      for (final palette in AppPalette.values) {
+        for (final brightness in Brightness.values) {
+          final colors = themeColors(BuiltinAppTheme(palette), brightness);
+          final syntax = colors.syntax;
+          final reason = '${palette.id} at $brightness';
+          for (final other in [
+            colors.tokens.text,
+            syntax.code,
+            syntax.link,
+            syntax.wikilink,
+            syntax.math,
+            syntax.tag,
+          ]) {
+            expect(syntax.template, isNot(other), reason: reason);
+          }
+          // Read as easily as a tag, near enough: Solarized is low contrast
+          // by design, everything in it is.
+          expect(
+            _contrast(syntax.template, colors.tokens.background),
+            greaterThan(2.4),
+            reason: reason,
+          );
+        }
+      }
+    });
+
     test('the named palettes are not the shipped one', () {
       final shipped = buildAppTheme(
         const BuiltinAppTheme(AppPalette.system),

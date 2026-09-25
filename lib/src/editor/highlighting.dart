@@ -100,6 +100,11 @@ enum TokenKind {
   /// A line of the leading frontmatter block.
   frontmatter,
 
+  /// A template command (`{{date:YYYY-MM-DD}}`, `{{cursor}}`…): a
+  /// placeholder the template engine answers, laid over whatever the line
+  /// holds there (`templates/template_commands.dart`).
+  templateCommand,
+
   /// A task's priority, `(A)`, in a task list (`todo_txt_tokens.dart`).
   todoPriority,
 
@@ -180,6 +185,35 @@ final class Token {
     }
     return true;
   }
+}
+
+/// [tokens], a line's, disjoint and sorted, with [ranges] of the line —
+/// disjoint and in order — laid over them as runs of [kind]: what a token
+/// covered inside a range gives way to it, and what it covered outside
+/// stays, cut where the range begins and ends. A template command
+/// (`{{date}}`) is laid over the Markdown around it this way.
+List<Token> overlayTokens(
+  List<Token> tokens,
+  List<(int, int)> ranges,
+  TokenKind kind,
+) {
+  if (ranges.isEmpty) return tokens;
+  Token piece(Token token, int start, int end) =>
+      Token(token.kind, start, end, marker: token.marker, outer: token.outer);
+  final out = <Token>[
+    for (final (start, end) in ranges) Token(kind, start, end),
+  ];
+  for (final token in tokens) {
+    var at = token.start;
+    for (final (start, end) in ranges) {
+      if (end <= at || start >= token.end) continue;
+      if (start > at) out.add(piece(token, at, start));
+      if (end > at) at = end;
+      if (at >= token.end) break;
+    }
+    if (at < token.end) out.add(piece(token, at, token.end));
+  }
+  return out..sort((a, b) => a.start.compareTo(b.start));
 }
 
 /// One line of the display text with its tokens; anything not covered by a

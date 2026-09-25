@@ -4,6 +4,15 @@ Templates live in the library's `templateFolder` (default `Templates`).
 Creating a note from a template substitutes `{{placeholders}}` and merges
 the template's frontmatter into the new note.
 
+## Commands in the editor
+
+In a note under the template folder, the editor gives every `{{…}}` the
+engine answers a color of its own (`template` in the theme), arguments and
+filters included, so the placeholders stand apart from the Markdown around
+them. A `{{…}}` that names no command stays plain, so a typo reads as one
+before the template is used. A note outside the template folder colors
+nothing.
+
 ## Placeholders
 
 Substitution, not a language — unknown `{{…}}` is copied verbatim:

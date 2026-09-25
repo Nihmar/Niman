@@ -30,6 +30,7 @@ List<TextRange> spellSkipRanges(List<Token> tokens) => <TextRange>[
 ];
 
 const Set<TokenKind> _skipKinds = <TokenKind>{
+  TokenKind.templateCommand,
   TokenKind.codeInline,
   TokenKind.codeFence,
   TokenKind.codeBlock,
