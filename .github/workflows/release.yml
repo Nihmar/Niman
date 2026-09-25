@@ -104,7 +104,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: dist/niman-*-android.apk
+          # Both APKs: the official `-android.apk` and the testing
+          # `-android-testing.apk`. A glob ending in `-android.apk`
+          # matched only the first, so the testing build was built and
+          # staged and then never uploaded -- no release had it.
+          path: dist/niman-*-android*.apk
 
   linux:
     name: Linux tarball, AppImage, Arch pkg
