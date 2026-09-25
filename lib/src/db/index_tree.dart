@@ -302,7 +302,11 @@ final class IndexTree {
   /// digest because the path is new) is paired: the old row is repointed
   /// at the new path in place, keeping its id — and with the id its FTS,
   /// tags and links rows, which key on it.
-  Future<({bool wrote, Set<String> pairedRels})> applyDiff({
+  ///
+  /// `removed` is the top-level paths actually pruned: a gone note, or a
+  /// gone folder (its rows pruned whole). Renames are paired, not removed.
+  Future<({bool wrote, Set<String> pairedRels, Set<String> removed})>
+  applyDiff({
     required List<DiskEntry> entries,
     required Map<String, Note> old,
     required Map<String, String> shas,
@@ -406,13 +410,15 @@ final class IndexTree {
       await _store.replaceFileStems(id, e.name, isDir: e.isDir);
       wrote = true;
     }
+    final removed = <String>{};
     for (final rel in gone) {
       if (gone.contains(parentOf(rel))) continue;
       if (pairedOld.contains(rel)) continue;
       await _dao.deleteSubtree(rel);
+      removed.add(rel);
       wrote = true;
     }
-    return (wrote: wrote, pairedRels: pairedRels);
+    return (wrote: wrote, pairedRels: pairedRels, removed: removed);
   }
 
   /// The gone-path candidate for a content-preserving rename of [e]: a
@@ -468,8 +474,12 @@ final class IndexTree {
   /// Resyncs the subtree rooted at [abs] (which exists as a directory on
   /// disk) against the index: walks the subtree, reuses unchanged digests,
   /// and applies the diff — inserts, updates and deletes — so every row
-  /// whose path survives keeps its id.
-  Future<bool> syncDirSubtree(String root, String abs) async {
+  /// whose path survives keeps its id. `removed` is the top-level paths
+  /// the resync pruned.
+  Future<({bool wrote, Set<String> removed})> syncDirSubtree(
+    String root,
+    String abs,
+  ) async {
     final rel = relPath(abs, root);
     final entries = await walk(root, abs);
     _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
@@ -481,6 +491,7 @@ final class IndexTree {
     final read = await readContents(root, entries, old);
     var wrote = false;
     var pairedRels = const <String>{};
+    var removed = const <String>{};
     await _db.transaction(() async {
       // The scope root's parent lives outside the walk, so it is resolved
       // from the index — the directory chain is ensured when the rows are
@@ -498,9 +509,10 @@ final class IndexTree {
       );
       wrote = result.wrote;
       pairedRels = result.pairedRels;
+      removed = result.removed;
     });
     await _store.applyContent(read.contents, paired: pairedRels);
-    return wrote;
+    return (wrote: wrote, removed: removed);
   }
 
   /// Ensures directory rows exist for every ancestor of [dirRel] (and

@@ -226,6 +226,14 @@ void main() {
       expect(_row(w), '[x.md]');
     });
 
+    test('a re-index prunes every path it names, folders included', () {
+      final w = _opened(['x.md', 'Notes/a.md', 'Notes/b.md', 'y.md'])
+          .activate(0, 1)
+          .deletedAll({'Notes', 'y.md'});
+      expect(_row(w), '[x.md]');
+      expect(w.deletedAll(<String>{}), w, reason: 'no paths, no change');
+    });
+
     test('a note gone from disk stays open, marked', () {
       final w = _opened(['a.md', 'b.md']).withMissing({'a.md'});
       expect(w.tabs.first.missing, isTrue);
