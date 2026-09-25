@@ -2837,7 +2837,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       await widget.unsavedTracker.saveAll();
       // The shell's paths are the library's own, relative to its root.
       final text = await ops.readNote(path);
-      final tidied = formatMarkdown(text);
+      final tidied = formatMarkdown(text, rules: _editorSettings.lintRules);
       if (!mounted) return;
       if (tidied == text) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2870,7 +2870,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final rel = relPath(path, root);
     unawaited(
       ops
-          .tidyNote(rel)
+          .tidyNote(rel, rules: _editorSettings.lintRules)
           .then(
             (changed) {
               if (changed && mounted) setState(() => _noteReloadToken++);

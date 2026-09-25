@@ -1448,6 +1448,26 @@ final class JapaneseStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override
+  String get lintRulesTitle => 'Markdown ルール';
+  @override
+  String get lintRulesSubtitle =>
+      '整える内容: リストの空行、タスクのチェックボックス、マーカー後の空白、コードブロック。';
+  @override
+  String get lintRulesReset => '既定に戻す';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'すべて（$all）' : '$on / $all';
+  @override
+  String get lintRuleTightLists => '詰めたリスト';
+  @override
+  String get lintRuleTaskMarker => 'タスクのチェック';
+  @override
+  String get lintRuleListSpacing => 'リストの空白';
+  @override
+  String get lintRuleClosingFence => 'コードブロックの閉じ';
+  @override
+  String get lintRuleFenceLanguage => 'コードブロックの言語';
+  @override
   String get tidyOnCloseTitle => '閉じるときに Markdown を整える';
   @override
   String get tidyOnCloseSubtitle =>

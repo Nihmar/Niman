@@ -1529,6 +1529,27 @@ final class EstonianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override
+  String get lintRulesTitle => 'Markdowni reeglid';
+  @override
+  String get lintRulesSubtitle =>
+      'Mida korrastamine korda teeb: tühjad read loendites, ülesannete '
+      'märkeruudud, tühikud pärast märgist ja koodiplokid.';
+  @override
+  String get lintRulesReset => 'Lähteväärtuste taastamine';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Kõik $all' : '$on / $all';
+  @override
+  String get lintRuleTightLists => 'Tihedad loendid';
+  @override
+  String get lintRuleTaskMarker => 'Ülesannete märkeruudud';
+  @override
+  String get lintRuleListSpacing => 'Loendi vahed';
+  @override
+  String get lintRuleClosingFence => 'Koodiploki sulgemine';
+  @override
+  String get lintRuleFenceLanguage => 'Koodiploki keel';
+  @override
   String get tidyOnCloseTitle => 'Korrasta Markdown sulgemisel';
   @override
   String get tidyOnCloseSubtitle =>

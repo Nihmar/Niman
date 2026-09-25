@@ -1552,6 +1552,27 @@ final class BosnianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
+  String get lintRulesTitle => 'Markdown pravila';
+  @override
+  String get lintRulesSubtitle =>
+      'Šta sređivanje rješava: prazni redovi u listama, oznake zadataka, '
+      'razmaci nakon markera i blokovi koda.';
+  @override
+  String get lintRulesReset => 'Vrati na zadano';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Sva $all' : '$on od $all';
+  @override
+  String get lintRuleTightLists => 'Zbijene liste';
+  @override
+  String get lintRuleTaskMarker => 'Oznake zadataka';
+  @override
+  String get lintRuleListSpacing => 'Razmaci u listama';
+  @override
+  String get lintRuleClosingFence => 'Zatvaranje koda';
+  @override
+  String get lintRuleFenceLanguage => 'Jezik koda';
+  @override
   String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
   @override
   String get tidyOnCloseSubtitle =>

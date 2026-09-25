@@ -1546,6 +1546,27 @@ final class CroatianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
+  String get lintRulesTitle => 'Markdown pravila';
+  @override
+  String get lintRulesSubtitle =>
+      'Što uređivanje rješava: prazni reci u popisima, oznake zadataka, '
+      'razmaci nakon markera i blokovi koda.';
+  @override
+  String get lintRulesReset => 'Vrati na zadano';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Sva $all' : '$on od $all';
+  @override
+  String get lintRuleTightLists => 'Zbijeni popisi';
+  @override
+  String get lintRuleTaskMarker => 'Oznake zadataka';
+  @override
+  String get lintRuleListSpacing => 'Razmaci u popisima';
+  @override
+  String get lintRuleClosingFence => 'Zatvaranje koda';
+  @override
+  String get lintRuleFenceLanguage => 'Jezik koda';
+  @override
   String get tidyOnCloseTitle => 'Posloži Markdown pri zatvaranju';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1546,6 +1546,27 @@ final class SlovakStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override
+  String get lintRulesTitle => 'Pravidlá Markdownu';
+  @override
+  String get lintRulesSubtitle =>
+      'Čo úprava rieši: prázdne riadky v zoznamoch, začiarkavacie políčka, '
+      'medzery za značkou a bloky kódu.';
+  @override
+  String get lintRulesReset => 'Obnoviť predvolené';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Všetky $all' : '$on z $all';
+  @override
+  String get lintRuleTightLists => 'Husté zoznamy';
+  @override
+  String get lintRuleTaskMarker => 'Začiarkavacie políčka';
+  @override
+  String get lintRuleListSpacing => 'Medzery v zozname';
+  @override
+  String get lintRuleClosingFence => 'Uzavretie bloku kódu';
+  @override
+  String get lintRuleFenceLanguage => 'Jazyk bloku kódu';
+  @override
   String get tidyOnCloseTitle => 'Upratať Markdown pri zatvorení';
   @override
   String get tidyOnCloseSubtitle =>

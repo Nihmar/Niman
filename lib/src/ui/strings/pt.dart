@@ -1556,6 +1556,27 @@ final class PortugueseStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'A nota já estava arrumada.';
   @override
+  String get lintRulesTitle => 'Regras de Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'O que a arrumação resolve: linhas vazias nas listas, caixas de tarefa, '
+      'espaços após o marcador e blocos de código.';
+  @override
+  String get lintRulesReset => 'Restaurar os padrões';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Todas $all' : '$on de $all';
+  @override
+  String get lintRuleTightLists => 'Listas compactas';
+  @override
+  String get lintRuleTaskMarker => 'Caixas de tarefa';
+  @override
+  String get lintRuleListSpacing => 'Espaçamento de listas';
+  @override
+  String get lintRuleClosingFence => 'Fecho do bloco de código';
+  @override
+  String get lintRuleFenceLanguage => 'Linguagem do bloco de código';
+  @override
   String get tidyOnCloseTitle => 'Arrumar o Markdown ao fechar';
   @override
   String get tidyOnCloseSubtitle =>

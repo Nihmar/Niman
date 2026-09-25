@@ -1543,6 +1543,27 @@ final class LatvianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override
+  String get lintRulesTitle => 'Markdown noteikumi';
+  @override
+  String get lintRulesSubtitle =>
+      'Ko sakārto sakārtošana: tukšas rindas sarakstos, uzdevumu rūtiņas, '
+      'atstarpes pēc marķiera un koda bloki.';
+  @override
+  String get lintRulesReset => 'Atjaunot noklusējumu';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Visi $all' : '$on no $all';
+  @override
+  String get lintRuleTightLists => 'Blīvi saraksti';
+  @override
+  String get lintRuleTaskMarker => 'Uzdevumu atzīmes';
+  @override
+  String get lintRuleListSpacing => 'Sarakstu atstarpes';
+  @override
+  String get lintRuleClosingFence => 'Koda bloka aizvēršana';
+  @override
+  String get lintRuleFenceLanguage => 'Koda bloka valoda';
+  @override
   String get tidyOnCloseTitle => 'Sakārtot Markdown, aizverot';
   @override
   String get tidyOnCloseSubtitle =>

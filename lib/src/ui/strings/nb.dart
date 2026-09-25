@@ -1535,6 +1535,27 @@ final class NorwegianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override
+  String get lintRulesTitle => 'Markdown-regler';
+  @override
+  String get lintRulesSubtitle =>
+      'Hva ryddingen ordner: tomme linjer i lister, avkrysningsbokser, '
+      'mellomrom etter markøren og kodeblokker.';
+  @override
+  String get lintRulesReset => 'Tilbakestill til standard';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Alle $all' : '$on av $all';
+  @override
+  String get lintRuleTightLists => 'Tette lister';
+  @override
+  String get lintRuleTaskMarker => 'Avkrysningsbokser';
+  @override
+  String get lintRuleListSpacing => 'Listeavstand';
+  @override
+  String get lintRuleClosingFence => 'Lukking av kodeblokk';
+  @override
+  String get lintRuleFenceLanguage => 'Språk i kodeblokk';
+  @override
   String get tidyOnCloseTitle => 'Rydd opp i Markdown ved lukking';
   @override
   String get tidyOnCloseSubtitle =>

@@ -1553,6 +1553,27 @@ final class SerbianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override
+  String get lintRulesTitle => 'Правила за Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Шта уређивање решава: празни редови у листама, поља задатака, размаци '
+      'после маркера и блокови кода.';
+  @override
+  String get lintRulesReset => 'Врати на подразумевано';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Сва $all' : '$on од $all';
+  @override
+  String get lintRuleTightLists => 'Збијене листе';
+  @override
+  String get lintRuleTaskMarker => 'Ознаке задатака';
+  @override
+  String get lintRuleListSpacing => 'Размаци у листама';
+  @override
+  String get lintRuleClosingFence => 'Затварање кода';
+  @override
+  String get lintRuleFenceLanguage => 'Језик кода';
+  @override
   String get tidyOnCloseTitle => 'Сложи Markdown при затварању';
   @override
   String get tidyOnCloseSubtitle =>

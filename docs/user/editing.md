@@ -301,17 +301,31 @@ changing what it says:
 - runs of blank lines become one, and the trailing ones go;
 - spaces left at the end of a line go, except the ones that mean a line
   break;
+- a list comes back tight: no blank lines between its items, one space
+  after each marker (five or more start an indented code block inside
+  the item, and stay), and a task box written `[ ]` or `[x]` whatever
+  case it was (a link such as `[x](…)` or `[](…)` is a link, not a box,
+  and is left alone);
+- a fenced code block gets its closing fence when the note forgot one.
+  The fence goes at the end of the note: an unclosed block already runs
+  to the end for every Markdown reader, so the note reads exactly as it
+  did. If the code was meant to stop sooner, everything after it showing
+  as code is the sign, and moving the fence up is yours to do. A language written the Pandoc way loses its braces and its dot
+  (`{.dart}` becomes `dart`). Any other language is left as written,
+  punctuation included: `c++`, `c#` and `objective-c` are names;
 - the note ends with a single newline.
 
 It never reflows your prose, and never touches what it cannot read:
-fenced code, tables, math, frontmatter and HTML come back byte for
-byte. Tidying twice changes nothing the second time. The note is saved
-first, so what is tidied is the note as it stands.
+tables, math, frontmatter and HTML come back byte for byte, and so does
+the code inside a fence — only its two fence lines are read. Tidying
+twice changes nothing the second time. The note is saved first, so what
+is tidied is the note as it stands.
 
 It also runs by itself: a note you edited is tidied when it is closed.
 That is a setting of the library (**Settings → Editor → Tidy the
 Markdown on close**, on by default), so every device writes the
-library's notes the same way. Notes over 4 MB are left as they are.
+library's notes the same way. **Markdown rules**, right below it, picks
+which of the rules above run; notes over 4 MB are left as they are.
 
 The **checkbox list** button (beside the bulleted and numbered lists)
 makes the selected lines — or the caret's — tasks: a bulleted item gains

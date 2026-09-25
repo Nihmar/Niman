@@ -1572,6 +1572,27 @@ final class GermanStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override
+  String get lintRulesTitle => 'Markdown-Regeln';
+  @override
+  String get lintRulesSubtitle =>
+      'Was das Aufräumen regelt: Leerzeilen in Listen, Aufgabenkästchen, '
+      'Abstände nach dem Marker und Codeblöcke.';
+  @override
+  String get lintRulesReset => 'Auf Standard zurücksetzen';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Alle $all' : '$on von $all';
+  @override
+  String get lintRuleTightLists => 'Enge Listen';
+  @override
+  String get lintRuleTaskMarker => 'Aufgabenkästchen';
+  @override
+  String get lintRuleListSpacing => 'Listenabstände';
+  @override
+  String get lintRuleClosingFence => 'Schließender Zaun';
+  @override
+  String get lintRuleFenceLanguage => 'Zaunsprache';
+  @override
   String get tidyOnCloseTitle => 'Markdown beim Schließen aufräumen';
   @override
   String get tidyOnCloseSubtitle =>

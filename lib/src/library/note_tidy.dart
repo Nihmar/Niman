@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_load.dart';
 
 /// The note at [abs] tidied, or null when there is nothing to write: it is
@@ -16,8 +17,8 @@ import 'package:niman/src/markdown/note_load.dart';
 /// so a note whose only untidiness is a Windows line ending is left alone,
 /// rather than rewritten for a difference the editor does not show.
 ///
-/// Top-level for an isolate: it carries the path and the limit.
-String? tidiedNoteText(String abs, {required int limit}) {
+/// Top-level for an isolate: it carries the path, the limit and the rules.
+String? tidiedNoteText(String abs, {required int limit, Set<LintRule>? rules}) {
   final file = File(abs);
   final List<int> bytes;
   try {
@@ -32,6 +33,6 @@ String? tidiedNoteText(String abs, {required int limit}) {
   } on FormatException {
     return null;
   }
-  final tidied = formatMarkdown(text);
+  final tidied = formatMarkdown(text, rules: rules);
   return tidied == text ? null : tidied;
 }

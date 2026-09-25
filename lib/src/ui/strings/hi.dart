@@ -1520,6 +1520,27 @@ final class HindiStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
   @override
+  String get lintRulesTitle => 'Markdown नियम';
+  @override
+  String get lintRulesSubtitle =>
+      'सफ़ाई क्या तय करती है: सूचियों की खाली पंक्तियाँ, कार्य बॉक्स, मार्कर '
+      'के बाद का स्थान और कोड ब्लॉक।';
+  @override
+  String get lintRulesReset => 'डिफ़ॉल्ट पर लौटाएँ';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'सभी $all' : '$all में से $on';
+  @override
+  String get lintRuleTightLists => 'घनी सूचियाँ';
+  @override
+  String get lintRuleTaskMarker => 'कार्य चिह्न';
+  @override
+  String get lintRuleListSpacing => 'सूची अंतराल';
+  @override
+  String get lintRuleClosingFence => 'कोड ब्लॉक बंद करना';
+  @override
+  String get lintRuleFenceLanguage => 'कोड ब्लॉक की भाषा';
+  @override
   String get tidyOnCloseTitle => 'बंद करते समय मार्कडाउन व्यवस्थित करें';
   @override
   String get tidyOnCloseSubtitle =>

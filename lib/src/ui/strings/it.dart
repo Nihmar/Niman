@@ -1565,6 +1565,27 @@ final class ItalianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override
+  String get lintRulesTitle => 'Regole Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Cosa sistema la formattazione: righe vuote negli elenchi, caselle '
+      'attività, spazi dopo il marcatore e blocchi di codice.';
+  @override
+  String get lintRulesReset => 'Ripristina i valori predefiniti';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Tutte $all' : '$on di $all';
+  @override
+  String get lintRuleTightLists => 'Elenchi compatti';
+  @override
+  String get lintRuleTaskMarker => 'Caselle attività';
+  @override
+  String get lintRuleListSpacing => 'Spaziatura elenchi';
+  @override
+  String get lintRuleClosingFence => 'Chiusura del blocco di codice';
+  @override
+  String get lintRuleFenceLanguage => 'Linguaggio del blocco di codice';
+  @override
   String get tidyOnCloseTitle => 'Sistema il Markdown alla chiusura';
   @override
   String get tidyOnCloseSubtitle =>

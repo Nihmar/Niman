@@ -1539,6 +1539,27 @@ final class CzechStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override
+  String get lintRulesTitle => 'Pravidla Markdownu';
+  @override
+  String get lintRulesSubtitle =>
+      'Co úprava řeší: prázdné řádky v seznamech, zaškrtávací políčka, mezery '
+      'za značkou a bloky kódu.';
+  @override
+  String get lintRulesReset => 'Obnovit výchozí';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Všechna $all' : '$on z $all';
+  @override
+  String get lintRuleTightLists => 'Husté seznamy';
+  @override
+  String get lintRuleTaskMarker => 'Zaškrtávací políčka';
+  @override
+  String get lintRuleListSpacing => 'Mezery v seznamu';
+  @override
+  String get lintRuleClosingFence => 'Uzavření bloku kódu';
+  @override
+  String get lintRuleFenceLanguage => 'Jazyk bloku kódu';
+  @override
   String get tidyOnCloseTitle => 'Uklidit Markdown při zavření';
   @override
   String get tidyOnCloseSubtitle =>

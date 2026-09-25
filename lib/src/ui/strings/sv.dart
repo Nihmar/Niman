@@ -1552,6 +1552,27 @@ final class SwedishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override
+  String get lintRulesTitle => 'Markdown-regler';
+  @override
+  String get lintRulesSubtitle =>
+      'Vad städningen ordnar: tomma rader i listor, kryssrutor, mellanslag '
+      'efter markören och kodblock.';
+  @override
+  String get lintRulesReset => 'Återställ standard';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Alla $all' : '$on av $all';
+  @override
+  String get lintRuleTightLists => 'Täta listor';
+  @override
+  String get lintRuleTaskMarker => 'Kryssrutor';
+  @override
+  String get lintRuleListSpacing => 'Listavstånd';
+  @override
+  String get lintRuleClosingFence => 'Stängning av kodblock';
+  @override
+  String get lintRuleFenceLanguage => 'Språk i kodblock';
+  @override
   String get tidyOnCloseTitle => 'Städa upp i Markdown vid stängning';
   @override
   String get tidyOnCloseSubtitle =>
