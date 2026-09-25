@@ -151,9 +151,41 @@ void main() {
       expect((r as ResolvedNote).note.path, 'docs/Deep Note.md');
       r = await resolver.resolveMarkdown('docs/Deep Note.md#Heading');
       expect(r, isA<ResolvedNote>());
-      // The fragment is normalized (lowercased) like the rest of the
-      // target; the heading lookup slugs it, so case does not matter.
-      expect((r as ResolvedNote).heading, 'heading');
+      // The fragment keeps its case: the heading lookup slugs it, and a
+      // place in a book names a file whose name has one (#282).
+      expect((r as ResolvedNote).heading, 'Heading');
+    });
+
+    test('a path is percent-decoded, as Obsidian writes it', () async {
+      await addNote('docs/Deep Note.md', stem: 'deep note');
+      final r = await resolver.resolveMarkdown('docs/Deep%20Note.md');
+      expect((r as ResolvedNote).note.path, 'docs/Deep Note.md');
+      // Text around the escapes is kept as written, whatever it is.
+      await addNote('città nota.md', stem: 'città nota');
+      final plain = await resolver.resolveMarkdown('città%20nota.md');
+      expect((plain as ResolvedNote).note.path, 'città nota.md');
+    });
+
+    test(
+      'a file that is not a note resolves, its place along (#282)',
+      () async {
+        await addNote('Books/My Book.pdf', stem: 'my book.pdf');
+        final r = await resolver.resolveMarkdown('Books/My%20Book.pdf#page=34');
+        expect((r as ResolvedNote).note.path, 'Books/My Book.pdf');
+        expect(r.heading, 'page=34');
+        final epub = await resolver.resolveMarkdown(
+          'Books/My%20Book.pdf#chapter=OEBPS%2FCh1.xhtml&line=4',
+        );
+        expect(
+          (epub as ResolvedNote).heading,
+          'chapter=OEBPS%2FCh1.xhtml&line=4',
+        );
+      },
+    );
+
+    test('a path with no extension still names no file', () async {
+      await addNote('Notes.md', stem: 'notes');
+      expect(await resolver.resolveMarkdown('Notes'), isA<UnresolvedNote>());
     });
 
     test('non-md hrefs are unresolved', () async {

@@ -18,8 +18,11 @@ never links, everywhere.
 ## Markdown links
 
 Standard `[text](href)` links, and reference links — `[text][label]` with a
-`[label]: href` line anywhere in the note. `href` may be a relative `.md`
-path, a `#anchor`, or an external URL. `![alt](src)` images are not links,
+`[label]: href` line anywhere in the note. `href` may be a relative path
+to a note or any other file of the library (`Books/Dune.epub`), a
+`#anchor`, or an external URL. The path may be percent-encoded, as
+Obsidian writes it: `[x](My%20Note.md)` is `My Note.md`. A path with no
+extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
 footnote's own text is.
 
