@@ -13,12 +13,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
-import 'package:pdfrx/pdfrx.dart';
 
 /// The picture files the pane shows itself: the ones Flutter decodes on
 /// every platform.
@@ -48,6 +49,7 @@ final class AttachmentView extends StatelessWidget {
     this.launcher = const OsLauncher(),
     this.column = NoteColumn.off,
     this.onEditEpubLook,
+    this.positions,
     super.key,
   });
 
@@ -63,6 +65,10 @@ final class AttachmentView extends StatelessWidget {
   /// Opens the sheet that sets how the books look ([EpubPane.onEditLook]).
   final VoidCallback? onEditEpubLook;
 
+  /// Where the library keeps where each book and PDF was left; null keeps
+  /// none.
+  final ReadingPositions? positions;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
 
   bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
@@ -76,6 +82,7 @@ final class AttachmentView extends StatelessWidget {
         launcher: launcher,
         column: column,
         onEditLook: onEditEpubLook,
+        positions: positions,
       );
     }
     final theme = Theme.of(context);
@@ -105,16 +112,10 @@ final class AttachmentView extends StatelessWidget {
     ),
   );
 
-  /// A PDF, its pages one under the other, zoomed with a pinch or
-  /// Ctrl+wheel.
-  Widget _pdf(BuildContext context) => PdfViewer.file(
-    path,
-    key: const Key('attachment-pdf'),
-    params: PdfViewerParams(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      errorBannerBuilder: (context, error, stack, documentRef) =>
-          _unreadable(context),
-    ),
+  Widget _pdf(BuildContext context) => PdfDocumentView(
+    path: path,
+    unreadable: _unreadable,
+    positions: positions,
   );
 
   Widget _unreadable(BuildContext context) => Center(

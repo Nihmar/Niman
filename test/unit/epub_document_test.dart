@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/epub/epub_document.dart';
+import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/epub_builder.dart';
@@ -78,6 +79,29 @@ void main() {
       final lines = document.markdown.split('\n');
       expect(lines[8], '# Two');
       expect(lines[12], 'deep');
+    });
+
+    test('a line is a place in its chapter, and back (#281)', () {
+      expect(document.chapters, [
+        (file: 'OEBPS/text/ch1.xhtml', line: 0),
+        (file: 'OEBPS/text/ch2.xhtml', line: 8),
+      ]);
+      const deep = EpubLocation(
+        chapter: 'OEBPS/text/ch2.xhtml',
+        line: 4,
+        fraction: 0.5,
+      );
+      expect(document.locationAt(12, 0.5), deep);
+      expect(document.lineOfLocation(deep), 12);
+    });
+
+    test('a place past its chapter stays in it; a lost chapter is none', () {
+      const past = EpubLocation(chapter: 'OEBPS/text/ch1.xhtml', line: 50);
+      expect(document.lineOfLocation(past), 7);
+      const last = EpubLocation(chapter: 'OEBPS/text/ch2.xhtml', line: 50);
+      expect(document.lineOfLocation(last), 14);
+      const gone = EpubLocation(chapter: 'OEBPS/text/ch9.xhtml', line: 1);
+      expect(document.lineOfLocation(gone), isNull);
     });
 
     test('its links go to lines; the ones leaving it do not', () {

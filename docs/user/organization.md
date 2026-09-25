@@ -129,6 +129,12 @@ library.
   pinch or the mouse wheel and dragged around; a PDF page after page,
   zoomed the same way. The row under them names the file and, on
   desktop, offers **Open in default app**.
+- **A PDF or a book opens where you left it**: its page, or its chapter
+  and the line in it, is kept for the library in `.niman/reading.json`
+  and syncs with it, so a book put down on the phone opens on the
+  desktop where the phone stopped. Only reading moves it: opening a
+  book and closing it again changes nothing. A file moved or renamed in
+  Niman, or a folder holding it, keeps its place.
 - **EPUB books** open in the note pane too, on every platform, and read
   like a note, in the note column. The book's own styles are not used —
   its headings, emphasis, lists, quotes, tables and pictures are, in

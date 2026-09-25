@@ -8,6 +8,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -212,6 +213,7 @@ final class ShellDetailPane extends StatelessWidget {
           path: p.join(root, tab.path),
           column: noteColumn,
           onEditEpubLook: onEditEpubLook,
+          positions: ReadingPositions(root),
         )
       : _noteView(root, tab);
 

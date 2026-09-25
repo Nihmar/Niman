@@ -5,7 +5,8 @@
 /// the library's theme, brightness, face and text size for its books
 /// ([EpubLooks]), set from the Aa button on the row below. Its pictures
 /// come from the app's cache, its own links jump within it, and its table
-/// of contents is a button on that row too.
+/// of contents is a button on that row too. It opens where it was left
+/// ([ReadingPositions]).
 library;
 
 import 'dart:async';
@@ -19,6 +20,9 @@ import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/reading/book_location.dart';
+import 'package:niman/src/reading/reading_positions.dart';
+import 'package:niman/src/reading/reading_tracker.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/attachment_bar.dart';
 import 'package:niman/src/ui/epub_theme.dart';
@@ -41,6 +45,7 @@ final class EpubPane extends StatefulWidget {
     this.column = NoteColumn.off,
     this.cacheDir = _epubCacheDir,
     this.onEditLook,
+    this.positions,
     super.key,
   });
 
@@ -60,6 +65,10 @@ final class EpubPane extends StatefulWidget {
   /// Opens the sheet that sets how the books look; null leaves its button
   /// on the row, disabled.
   final VoidCallback? onEditLook;
+
+  /// Where the library keeps its reading positions; null keeps none, and
+  /// the book opens at its start.
+  final ReadingPositions? positions;
 
   @override
   State<EpubPane> createState() => EpubPaneState();
@@ -87,9 +96,12 @@ final class EpubPaneState extends State<EpubPane> {
   /// Counts the opens, so a book replaced while it was read is dropped.
   int _opens = 0;
 
+  late ReadingTracker _reading;
+
   @override
   void initState() {
     super.initState();
+    _scroll.addListener(_onScroll);
     unawaited(_open());
   }
 
@@ -97,6 +109,7 @@ final class EpubPaneState extends State<EpubPane> {
   void didUpdateWidget(EpubPane oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.path == widget.path) return;
+    _reading.flush();
     // The build that follows shows the spinner until the new book is read.
     _document = null;
     _buffer = null;
@@ -106,6 +119,7 @@ final class EpubPaneState extends State<EpubPane> {
 
   @override
   void dispose() {
+    _reading.flush();
     _scroll.dispose();
     _mathCache.dispose();
     super.dispose();
@@ -113,18 +127,46 @@ final class EpubPaneState extends State<EpubPane> {
 
   Future<void> _open() async {
     final open = ++_opens;
+    final reading = _reading = ReadingTracker(widget.positions, widget.path);
     try {
+      final left = reading.read();
       final document = await openEpub(widget.path, await widget.cacheDir());
+      final location = switch (await left) {
+        final EpubLocation location => location,
+        _ => null,
+      };
       if (!mounted || open != _opens) return;
       setState(() {
         _document = document;
         _buffer = SourceBuffer.fromText(document.markdown);
+      });
+      // Once the view is there to be scrolled.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || open != _opens) return;
+        final line = location == null
+            ? null
+            : document.lineOfLocation(location);
+        if (location != null && line != null) {
+          _readKey.currentState?.showAnchor((
+            line: line,
+            fraction: location.fraction,
+          ));
+        }
+        reading.placed(line == null ? null : location);
       });
     } on Object catch (error) {
       _log.warning('could not read ${widget.path}: $error');
       if (!mounted || open != _opens) return;
       setState(() => _failed = true);
     }
+  }
+
+  void _onScroll() {
+    final anchor = _readKey.currentState?.topAnchor;
+    final here = anchor == null
+        ? null
+        : _document?.locationAt(anchor.line, anchor.fraction);
+    if (here != null) _reading.moved(here);
   }
 
   void _onTapLink(String text, String? href) {

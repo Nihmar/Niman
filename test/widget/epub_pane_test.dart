@@ -10,9 +10,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/reading/book_location.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/epub_pane.dart';
 import 'package:path/path.dart' as p;
@@ -31,6 +34,7 @@ void main() {
     WidgetTester tester,
     String path, {
     VoidCallback? onEditLook,
+    ReadingPositions? positions,
   }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
@@ -42,6 +46,7 @@ void main() {
               path: path,
               cacheDir: () async => p.join(dir.path, 'cache'),
               onEditLook: onEditLook,
+              positions: positions,
             ),
           ),
         ),
@@ -159,6 +164,110 @@ void main() {
     await tester.tap(find.byKey(const Key('epub-look-button')));
     expect(opened, 1);
     await tester.pumpWidget(const SizedBox());
+  });
+
+  group('where the book was left (#281)', () {
+    late ReadingPositions positions;
+    setUp(() => positions = ReadingPositions(dir.path));
+
+    /// The file the positions are kept in.
+    File kept() => File(p.join(dir.path, ReadingPositions.filePath));
+
+    /// Lets a write the pane started reach the disk: it runs in the
+    /// test's fake time, its file operations in real time.
+    Future<BookLocation?> settled(WidgetTester tester) async {
+      for (var i = 0; i < 50; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+        if (kept().existsSync()) break;
+      }
+      return await tester.runAsync<BookLocation?>(
+        () => positions.read('novel.epub'),
+      );
+    }
+
+    testWidgets('a book opens where it was left', (tester) async {
+      final path = twoChapters();
+      final two = readEpub(path, p.join(dir.path, 'probe')).chapters[1];
+      await tester.runAsync(
+        () => positions.write(
+          'novel.epub',
+          EpubLocation(chapter: two.file, line: 60),
+        ),
+      );
+      await pump(tester, path, positions: positions);
+      final view = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(view.topAnchor?.line, two.line + 60);
+      expect(find.text('Chapter one'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a place in a chapter the book lost opens it at its start', (
+      tester,
+    ) async {
+      await tester.runAsync(
+        () => positions.write(
+          'novel.epub',
+          const EpubLocation(chapter: 'OEBPS/gone.xhtml', line: 40),
+        ),
+      );
+      await pump(tester, twoChapters(), positions: positions);
+      expect(find.text('Chapter one'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('the place is written down once the reader rests', (
+      tester,
+    ) async {
+      final path = twoChapters();
+      await pump(tester, path, positions: positions);
+      tester
+          .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+          .jumpToLine(100);
+      await tester.pump();
+      expect(kept().existsSync(), isFalse);
+      await tester.pump(const Duration(seconds: 2));
+      final left = await settled(tester);
+      final document = readEpub(path, p.join(dir.path, 'probe'));
+      // The view lands on the paragraph's top, give or take a rounding
+      // that reads as the very end of the blank line above it.
+      expect(
+        left is EpubLocation ? document.lineOfLocation(left) : left,
+        inInclusiveRange(99, 100),
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a book opened and not moved writes nothing', (tester) async {
+      await tester.runAsync(
+        () => positions.write(
+          'novel.epub',
+          const EpubLocation(chapter: 'OEBPS/two.xhtml', line: 30),
+          at: DateTime.utc(2026),
+        ),
+      );
+      await pump(tester, twoChapters(), positions: positions);
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpWidget(const SizedBox());
+      await settled(tester);
+      expect(kept().readAsStringSync(), contains('2026-01-01T00:00:00.000Z'));
+    });
+
+    testWidgets('a pane closed before the rest writes the place anyway', (
+      tester,
+    ) async {
+      await pump(tester, twoChapters(), positions: positions);
+      tester
+          .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+          .jumpToLine(100);
+      await tester.pump();
+      await tester.pumpWidget(const SizedBox());
+      expect(await settled(tester), isA<EpubLocation>());
+    });
   });
 
   testWidgets('a file that is not a book says so', (tester) async {
