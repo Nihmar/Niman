@@ -1629,6 +1629,23 @@ final class EstonianStrings extends Strings {
   String get placeLinkCopied => 'Link kopeeritud';
   @override
   String pdfPageLabel(String name, int page) => '$name, lk $page';
+  @override
+  String get annotationsFolderTitle => 'Märkuste kaust';
+  @override
+  String get annotationsFolderSubtitle =>
+      'PDF-i või raamatu kohta tehtud märkmed';
+  @override
+  String get annotationNoteSuffix => 'Märkus';
+  @override
+  String get annotateAction => 'Lisa märkus';
+  @override
+  String get annotationCommentHint => 'Sinu kommentaar';
+  @override
+  String get annotationSaved => 'Märkus salvestatud';
+  @override
+  String get annotationOpenNote => 'Ava märge';
+  @override
+  String get annotationFailed => 'Märkust ei õnnestunud salvestada';
 
   @override
   String get movedToTrash => 'Liigutatud prügikastu';

@@ -1619,6 +1619,22 @@ final class HindiStrings extends Strings {
   String get placeLinkCopied => 'लिंक कॉपी हो गया';
   @override
   String pdfPageLabel(String name, int page) => '$name, पृ. $page';
+  @override
+  String get annotationsFolderTitle => 'एनोटेशन फ़ोल्डर';
+  @override
+  String get annotationsFolderSubtitle => 'PDF या किताब पर एनोटेशन वाले नोट';
+  @override
+  String get annotationNoteSuffix => 'एनोटेशन';
+  @override
+  String get annotateAction => 'एनोटेट करें';
+  @override
+  String get annotationCommentHint => 'आपकी टिप्पणी';
+  @override
+  String get annotationSaved => 'एनोटेशन सहेजा गया';
+  @override
+  String get annotationOpenNote => 'नोट खोलें';
+  @override
+  String get annotationFailed => 'एनोटेशन सहेजा नहीं जा सका';
 
   @override
   String get movedToTrash => 'ट्रैश में गया';

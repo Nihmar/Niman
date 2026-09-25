@@ -1661,6 +1661,22 @@ final class ItalianStrings extends Strings {
   String get placeLinkCopied => 'Link copiato';
   @override
   String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Cartella delle annotazioni';
+  @override
+  String get annotationsFolderSubtitle => 'Note che annotano un PDF o un libro';
+  @override
+  String get annotationNoteSuffix => 'Annotazione';
+  @override
+  String get annotateAction => 'Annota';
+  @override
+  String get annotationCommentHint => 'Il tuo commento';
+  @override
+  String get annotationSaved => 'Annotazione salvata';
+  @override
+  String get annotationOpenNote => 'Apri la nota';
+  @override
+  String get annotationFailed => "Impossibile salvare l'annotazione";
 
   @override
   String get movedToTrash => 'Spostato nel cestino';

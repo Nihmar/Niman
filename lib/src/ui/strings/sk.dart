@@ -1645,6 +1645,22 @@ final class SlovakStrings extends Strings {
   String get placeLinkCopied => 'Odkaz skopírovaný';
   @override
   String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Priečinok anotácií';
+  @override
+  String get annotationsFolderSubtitle => 'Poznámky k PDF alebo knihe';
+  @override
+  String get annotationNoteSuffix => 'Anotácia';
+  @override
+  String get annotateAction => 'Anotovať';
+  @override
+  String get annotationCommentHint => 'Váš komentár';
+  @override
+  String get annotationSaved => 'Anotácia uložená';
+  @override
+  String get annotationOpenNote => 'Otvoriť poznámku';
+  @override
+  String get annotationFailed => 'Anotáciu sa nepodarilo uložiť';
 
   @override
   String get movedToTrash => 'Presunuté do koša';

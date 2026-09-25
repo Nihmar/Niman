@@ -1646,6 +1646,22 @@ final class LithuanianStrings extends Strings {
   String get placeLinkCopied => 'Nuoroda nukopijuota';
   @override
   String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Anotacijų aplankas';
+  @override
+  String get annotationsFolderSubtitle => 'Užrašai, anotuojantys PDF ar knygą';
+  @override
+  String get annotationNoteSuffix => 'Anotacija';
+  @override
+  String get annotateAction => 'Anotuoti';
+  @override
+  String get annotationCommentHint => 'Jūsų komentaras';
+  @override
+  String get annotationSaved => 'Anotacija išsaugota';
+  @override
+  String get annotationOpenNote => 'Atverti užrašą';
+  @override
+  String get annotationFailed => 'Nepavyko išsaugoti anotacijos';
 
   @override
   String get movedToTrash => 'Perkelta į šiukšlinę';

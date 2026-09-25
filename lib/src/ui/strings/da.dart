@@ -1638,6 +1638,23 @@ final class DanishStrings extends Strings {
   String get placeLinkCopied => 'Link kopieret';
   @override
   String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Mappe til annoteringer';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Noter, der annoterer en PDF eller en bog';
+  @override
+  String get annotationNoteSuffix => 'Annotering';
+  @override
+  String get annotateAction => 'Annotér';
+  @override
+  String get annotationCommentHint => 'Din kommentar';
+  @override
+  String get annotationSaved => 'Annotering gemt';
+  @override
+  String get annotationOpenNote => 'Åbn note';
+  @override
+  String get annotationFailed => 'Annoteringen kunne ikke gemmes';
 
   @override
   String get movedToTrash => 'Flyttet til affald';

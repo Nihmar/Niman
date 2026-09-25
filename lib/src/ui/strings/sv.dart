@@ -1652,6 +1652,23 @@ final class SwedishStrings extends Strings {
   String get placeLinkCopied => 'Länk kopierad';
   @override
   String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Mapp för annoteringar';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Anteckningar som annoterar en PDF eller en bok';
+  @override
+  String get annotationNoteSuffix => 'Annotering';
+  @override
+  String get annotateAction => 'Annotera';
+  @override
+  String get annotationCommentHint => 'Din kommentar';
+  @override
+  String get annotationSaved => 'Annotering sparad';
+  @override
+  String get annotationOpenNote => 'Öppna anteckning';
+  @override
+  String get annotationFailed => 'Annoteringen kunde inte sparas';
 
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';

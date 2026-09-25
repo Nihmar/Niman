@@ -1651,6 +1651,23 @@ final class UkrainianStrings extends Strings {
   String get placeLinkCopied => 'Посилання скопійовано';
   @override
   String pdfPageLabel(String name, int page) => '$name, с. $page';
+  @override
+  String get annotationsFolderTitle => 'Тека анотацій';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Нотатки з анотаціями до PDF чи книги';
+  @override
+  String get annotationNoteSuffix => 'Анотація';
+  @override
+  String get annotateAction => 'Анотувати';
+  @override
+  String get annotationCommentHint => 'Ваш коментар';
+  @override
+  String get annotationSaved => 'Анотацію збережено';
+  @override
+  String get annotationOpenNote => 'Відкрити нотатку';
+  @override
+  String get annotationFailed => 'Не вдалося зберегти анотацію';
 
   @override
   String get movedToTrash => 'Переміщено в кошик';

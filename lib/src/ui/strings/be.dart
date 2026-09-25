@@ -1647,6 +1647,23 @@ final class BelarusianStrings extends Strings {
   String get placeLinkCopied => 'Спасылка скапіравана';
   @override
   String pdfPageLabel(String name, int page) => '$name, с. $page';
+  @override
+  String get annotationsFolderTitle => 'Папка анатацый';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Нататкі з анатацыямі да PDF ці кнігі';
+  @override
+  String get annotationNoteSuffix => 'Анатацыя';
+  @override
+  String get annotateAction => 'Анатаваць';
+  @override
+  String get annotationCommentHint => 'Ваш каментарый';
+  @override
+  String get annotationSaved => 'Анатацыя захавана';
+  @override
+  String get annotationOpenNote => 'Адкрыць нататку';
+  @override
+  String get annotationFailed => 'Не ўдалося захаваць анатацыю';
 
   @override
   String get movedToTrash => 'Перамешчана ў кошык';

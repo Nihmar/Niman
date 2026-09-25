@@ -1505,6 +1505,22 @@ final class ChineseStrings extends Strings {
   String get placeLinkCopied => '链接已复制';
   @override
   String pdfPageLabel(String name, int page) => '$name，第 $page 页';
+  @override
+  String get annotationsFolderTitle => '批注文件夹';
+  @override
+  String get annotationsFolderSubtitle => '为 PDF 或书籍添加批注的笔记';
+  @override
+  String get annotationNoteSuffix => '批注';
+  @override
+  String get annotateAction => '添加批注';
+  @override
+  String get annotationCommentHint => '你的评论';
+  @override
+  String get annotationSaved => '批注已保存';
+  @override
+  String get annotationOpenNote => '打开笔记';
+  @override
+  String get annotationFailed => '无法保存批注';
 
   @override
   String get movedToTrash => '已移入回收站';

@@ -1632,6 +1632,23 @@ final class TurkishStrings extends Strings {
   String get placeLinkCopied => 'Bağlantı kopyalandı';
   @override
   String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Açıklamalar klasörü';
+  @override
+  String get annotationsFolderSubtitle =>
+      "Bir PDF'e veya kitaba açıklama ekleyen notlar";
+  @override
+  String get annotationNoteSuffix => 'Açıklama';
+  @override
+  String get annotateAction => 'Açıklama ekle';
+  @override
+  String get annotationCommentHint => 'Yorumunuz';
+  @override
+  String get annotationSaved => 'Açıklama kaydedildi';
+  @override
+  String get annotationOpenNote => 'Notu aç';
+  @override
+  String get annotationFailed => 'Açıklama kaydedilemedi';
 
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';

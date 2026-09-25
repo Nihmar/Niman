@@ -1641,6 +1641,22 @@ final class LatvianStrings extends Strings {
   String get placeLinkCopied => 'Saite nokopēta';
   @override
   String pdfPageLabel(String name, int page) => '$name, $page. lpp.';
+  @override
+  String get annotationsFolderTitle => 'Anotāciju mape';
+  @override
+  String get annotationsFolderSubtitle => 'Piezīmes, kas anotē PDF vai grāmatu';
+  @override
+  String get annotationNoteSuffix => 'Anotācija';
+  @override
+  String get annotateAction => 'Anotēt';
+  @override
+  String get annotationCommentHint => 'Jūsu komentārs';
+  @override
+  String get annotationSaved => 'Anotācija saglabāta';
+  @override
+  String get annotationOpenNote => 'Atvērt piezīmi';
+  @override
+  String get annotationFailed => 'Anotāciju neizdevās saglabāt';
 
   @override
   String get movedToTrash => 'Pārvietots konteinerā';

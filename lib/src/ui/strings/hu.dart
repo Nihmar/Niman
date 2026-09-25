@@ -1660,6 +1660,23 @@ final class HungarianStrings extends Strings {
   String get placeLinkCopied => 'Hivatkozás másolva';
   @override
   String pdfPageLabel(String name, int page) => '$name, $page. o.';
+  @override
+  String get annotationsFolderTitle => 'Kommentárok mappája';
+  @override
+  String get annotationsFolderSubtitle =>
+      'PDF-et vagy könyvet kommentáló jegyzetek';
+  @override
+  String get annotationNoteSuffix => 'Kommentár';
+  @override
+  String get annotateAction => 'Kommentálás';
+  @override
+  String get annotationCommentHint => 'A megjegyzésed';
+  @override
+  String get annotationSaved => 'Kommentár mentve';
+  @override
+  String get annotationOpenNote => 'Jegyzet megnyitása';
+  @override
+  String get annotationFailed => 'A kommentárt nem sikerült menteni';
 
   @override
   String get movedToTrash => 'A kukába került';

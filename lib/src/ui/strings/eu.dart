@@ -1654,6 +1654,23 @@ final class BasqueStrings extends Strings {
   String get placeLinkCopied => 'Esteka kopiatu da';
   @override
   String pdfPageLabel(String name, int page) => '$name, $page. or.';
+  @override
+  String get annotationsFolderTitle => 'Oharpenen karpeta';
+  @override
+  String get annotationsFolderSubtitle =>
+      'PDF edo liburu bat oharpentzen duten oharrak';
+  @override
+  String get annotationNoteSuffix => 'Oharpena';
+  @override
+  String get annotateAction => 'Oharpena egin';
+  @override
+  String get annotationCommentHint => 'Zure iruzkina';
+  @override
+  String get annotationSaved => 'Oharpena gorde da';
+  @override
+  String get annotationOpenNote => 'Ireki oharra';
+  @override
+  String get annotationFailed => 'Ezin izan da oharpena gorde';
 
   @override
   String get movedToTrash => 'Zakarrontzira mugitua';

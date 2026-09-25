@@ -201,6 +201,19 @@ final class NoteOps implements NoteOperations {
     (c) => c.copyWith(attachmentsFolder: cleanAttachmentsFolder(folder)),
   );
 
+  /// The folder where a note annotating a PDF or a book is made (default
+  /// `Annotations`, #284).
+  @override
+  Future<String> get annotationsFolder async =>
+      (await config.config).annotationsFolder;
+
+  /// Sets the annotations folder (sanitized; an empty result falls back
+  /// to the default).
+  @override
+  Future<void> setAnnotationsFolder({required String folder}) => config.update(
+    (c) => c.copyWith(annotationsFolder: cleanAnnotationsFolder(folder)),
+  );
+
   /// The user-chosen quick note, or null for the default.
   @override
   Future<String?> get quickNotePath async =>

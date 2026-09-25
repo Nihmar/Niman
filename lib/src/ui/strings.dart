@@ -965,6 +965,14 @@ final class AppStrings {
   static String get placeLinkCopied => _s.placeLinkCopied;
   static String pdfPageLabel(String name, int page) =>
       _s.pdfPageLabel(name, page);
+  static String get annotationsFolderTitle => _s.annotationsFolderTitle;
+  static String get annotationsFolderSubtitle => _s.annotationsFolderSubtitle;
+  static String get annotationNoteSuffix => _s.annotationNoteSuffix;
+  static String get annotateAction => _s.annotateAction;
+  static String get annotationCommentHint => _s.annotationCommentHint;
+  static String get annotationSaved => _s.annotationSaved;
+  static String get annotationOpenNote => _s.annotationOpenNote;
+  static String get annotationFailed => _s.annotationFailed;
   static String get movedToTrash => _s.movedToTrash;
   static String get deletedMessage => _s.deletedMessage;
   static String deleteToTrashConfirm(String name) =>

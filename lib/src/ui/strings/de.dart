@@ -1677,6 +1677,24 @@ final class GermanStrings extends Strings {
   String get placeLinkCopied => 'Link kopiert';
   @override
   String pdfPageLabel(String name, int page) => '$name, S. $page';
+  @override
+  String get annotationsFolderTitle => 'Ordner für Anmerkungen';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Notizen, die ein PDF oder Buch annotieren';
+  @override
+  String get annotationNoteSuffix => 'Anmerkung';
+  @override
+  String get annotateAction => 'Anmerken';
+  @override
+  String get annotationCommentHint => 'Dein Kommentar';
+  @override
+  String get annotationSaved => 'Anmerkung gespeichert';
+  @override
+  String get annotationOpenNote => 'Notiz öffnen';
+  @override
+  String get annotationFailed =>
+      'Die Anmerkung konnte nicht gespeichert werden';
 
   @override
   String get movedToTrash => 'In den Papierkorb verschoben';

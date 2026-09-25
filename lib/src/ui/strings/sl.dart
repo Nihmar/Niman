@@ -1640,6 +1640,23 @@ final class SlovenianStrings extends Strings {
   String get placeLinkCopied => 'Povezava kopirana';
   @override
   String pdfPageLabel(String name, int page) => '$name, str. $page';
+  @override
+  String get annotationsFolderTitle => 'Mapa z opombami';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Zapiski, ki označujejo PDF ali knjigo';
+  @override
+  String get annotationNoteSuffix => 'Opomba';
+  @override
+  String get annotateAction => 'Dodaj opombo';
+  @override
+  String get annotationCommentHint => 'Vaš komentar';
+  @override
+  String get annotationSaved => 'Opomba shranjena';
+  @override
+  String get annotationOpenNote => 'Odpri zapisek';
+  @override
+  String get annotationFailed => 'Opombe ni bilo mogoče shraniti';
 
   @override
   String get movedToTrash => 'Preneseno v koš';

@@ -8,6 +8,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         EditorKind,
         LinkType,
         TreeSort,
+        defaultAnnotationsFolder,
         defaultAttachmentsFolder,
         defaultListFolder;
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -542,6 +543,20 @@ void main() {
         defaultAttachmentsFolder,
       );
       expect(LibraryConfig.defaults.attachmentsFolder, 'assets');
+    });
+
+    test('the annotations folder round-trips, sanitized on read (#284)', () {
+      String folderOf(String raw) =>
+          LibraryConfig.fromJsonMap({'annotationsFolder': raw})
+              .annotationsFolder;
+      expect(folderOf('/Reading/Notes/'), 'Reading/Notes');
+      expect(folderOf('  '), defaultAnnotationsFolder);
+      expect(LibraryConfig.defaults.annotationsFolder, 'Annotations');
+      final config = LibraryConfig.defaults.copyWith(annotationsFolder: 'R');
+      expect(
+        LibraryConfig.fromJsonMap(config.toJsonMap()).annotationsFolder,
+        'R',
+      );
     });
 
     test('a fresh library gets the shipped editor settings', () {
