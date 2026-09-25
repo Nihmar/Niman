@@ -19,12 +19,15 @@
 ///   an app can be unrestricted for Doze and still restricted here.
 ///
 /// None is a runtime permission, so all are reached by opening the
-/// system screen. The battery one is deliberately not requested through
+/// system screen. That screen is the app's own **App info** page, not a
+/// battery or notification sub-page: on several ROMs those resolve to the
+/// same activity, so "Open settings" landed somewhere the warning was
+/// not about. App info holds every switch the warnings name — the
+/// notification toggle, the battery usage row, the permissions — one tap
+/// away. The Doze exemption is deliberately not requested through
 /// `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: that one-tap dialog
 /// needs `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which app stores
-/// restrict to a narrow set of categories. Niman's own battery page needs
-/// nothing, and — unlike the system-wide list, which opens filtered to
-/// the apps already exempt — shows the one switch that matters.
+/// restrict to a narrow set of categories.
 library;
 
 import 'dart:io';
@@ -48,16 +51,16 @@ abstract interface class ReminderSettings {
   /// restricted here.
   Future<bool> isBackgroundRestricted();
 
-  /// Opens Niman's battery page in system settings, where the exemption
-  /// is granted.
+  /// Opens Niman's page in the system app settings.
+  ///
+  /// The general App info screen, not a sub-page: it holds the
+  /// notification switch, the battery usage row and the permissions at
+  /// once, so the switch the user needs is one tap away whatever the
+  /// warning was about. The sub-pages resolve differently on different
+  /// ROMs, which is what made "Open settings" unpredictable.
   ///
   /// Returns false when no activity handles it.
-  Future<bool> openBatterySettings();
-
-  /// Opens Niman's page in the system notification settings.
-  ///
-  /// Returns false when no activity handles it.
-  Future<bool> openNotificationSettings();
+  Future<bool> openAppSettings();
 }
 
 /// The real gate: a method channel on Android, inert elsewhere.
@@ -83,15 +86,9 @@ final class PlatformReminderSettings implements ReminderSettings {
   }
 
   @override
-  Future<bool> openBatterySettings() async {
+  Future<bool> openAppSettings() async {
     if (!Platform.isAndroid) return false;
-    return await _invoke('openBatterySettings') ?? false;
-  }
-
-  @override
-  Future<bool> openNotificationSettings() async {
-    if (!Platform.isAndroid) return false;
-    return await _invoke('openNotificationSettings') ?? false;
+    return await _invoke('openAppSettings') ?? false;
   }
 
   /// [method] over the channel, or null when it fails.

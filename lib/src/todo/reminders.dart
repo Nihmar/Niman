@@ -459,9 +459,11 @@ final class LocalReminderService implements ReminderService {
   @override
   Future<bool> openHealthSettings() async {
     return await switch (_health.value) {
-      ReminderHealth.notificationsBlocked =>
-        settings.openNotificationSettings(),
-      ReminderHealth.batteryRestricted => settings.openBatterySettings(),
+      // Both open the same screen: the app's own App info page, where the
+      // notification toggle and the battery usage row both live and the
+      // sub-pages do not resolve the same on every ROM.
+      ReminderHealth.notificationsBlocked ||
+      ReminderHealth.batteryRestricted => settings.openAppSettings(),
       // No in-app remedy: the exact-alarm privilege is auto-granted, so a
       // build that still refuses it is not offering a toggle either.
       ReminderHealth.inexactOnly || ReminderHealth.ok => false,
