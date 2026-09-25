@@ -14,6 +14,9 @@ order. Tick the steps off as they land.
 | `85cfa667` | `MathSvg`: a formula as inline SVG from `katex_dart`. The fonts are stripped from each drawing and declared once by the page, and only when a drawing writes text |
 | `f3d52926` | `wikiDisplayText`: one rule for what a wikilink shows |
 | `aaa94d20` | `NoteHtml` + `htmlPage`: a note as one self-contained HTML page (see below) |
+| `f693ad30` | `ExportSources`: the embed resolver shared with the read view; pictures gathered and read as `data:` URIs off the UI isolate |
+| `2b5cc8ac` | A note as Markdown or one HTML page, behind the `SaveExportFile` seam; the ⋮ menu and the palette |
+| `73e98c8a` | A folder or the library as one zip, streamed with progress and cancel; the tree menus and the library palette command |
 
 **How `NoteHtml` works.**
 - One `md.Document` parse over the whole note, with GFM plus the shared inline syntaxes.
@@ -45,15 +48,15 @@ Checked in a browser on the 10 KB and 50 KB fixtures, light and dark:
 - [x] Save through `FilePicker.saveFile(bytes: …)`, as `theme_files.dart` does. Put it behind an injectable typedef so widget tests can replace it. On Android this goes through SAF; on desktop, a save dialog.
 
 ### 1.3 Folder and library
-- [ ] **Zip of `.md`:** the subtree as it is on disk, attachments included, dot folders (`.niman`, `.trash`, `.history`) left out.
+- [x] **Zip of `.md`:** the subtree as it is on disk, attachments included, dot folders (`.niman`, `.trash`, `.history`) left out.
   - The zip is streamed to a file (`archive`'s `ZipFileEncoder`), never built in memory: a library can be a million notes. Keep the design rule "no O(n) in memory on a hot path".
   - Destination: a folder picked with `FilePicker.getDirectoryPath`, written with `dart:io`. Android can do this too, because the app already has all-files access (`storage_access.dart`); SAF would need the bytes up front.
-- [ ] **Zip of HTML pages:** every note becomes `path/Name.html` at its own relative path.
-  - `links` maps each wikilink target (resolved in batches with `LinkSource.resolveBatch`) to a relative href from the page's own folder, and each `.md` Markdown link to its `.html`.
-  - Pictures are copied into the zip at their library-relative paths, and `images` maps them to relative URLs instead of `data:`, so a picture used by many notes is stored once.
+- [x] **Zip of HTML pages:** every note becomes `path/Name.html` at its own relative path.
+  - `links` and `images` resolve **inside the exported subtree**: a target there becomes a relative URL, one that is not stays as the note wrote it. *Changed from the plan's `LinkSource.resolveBatch`: the index lives on the UI isolate, and resolving against the tree keeps the whole export on the export isolate and gives the behavior the export wants anyway.*
+  - Pictures are copied into the zip at their tree-relative paths, and `images` maps them to relative URLs instead of `data:`, so a picture used by many notes is stored once.
   - Non-note files, and notes that are not Markdown, are copied as they are.
-- [ ] Work runs one note at a time in a background isolate, with progress and cancellation. A cancelled export deletes its partial zip.
-- [ ] Tests:
+- [x] Work runs one entry at a time in a background isolate, with progress and cancellation. A cancelled export deletes its partial zip.
+- [x] Tests:
   - zip contents and relative hrefs across folders;
   - the heading anchor of `[[Note#Part]]`;
   - a link to a note outside the exported folder, which becomes highlighted text;
@@ -101,25 +104,25 @@ Every entry exists on Android, Linux and Windows.
   - Add `NoteMenuAction.export` in `ui/note_menu.dart`, inside `if (textNote)`, next to Format and History; the key is `note-menu-export`.
   - It is handled in `shell.dart`'s `_noteMenu()`.
   - It opens an **Export** sheet (phone) or dialog (desktop) with the formats Markdown / HTML / PDF. *(PDF in #63.)*
-- [ ] **The tree row menu** (`ui/shell_row_menu.dart`, `rowMenuGroups`, the file group):
+- [x] **The tree row menu** (`ui/shell_row_menu.dart`, `rowMenuGroups`, the file group):
   - a note gets "Export…", the same chooser;
-  - a folder gets "Export folder…", with Markdown zip / HTML zip / PDF zip.
+  - a folder gets "Export folder…", with Markdown zip / HTML zip. *(PDF in #63.)*
 
   Dispatch goes in `ui/shell_row_actions.dart` `run`.
-- [ ] **The tree's background menu** (`showTreeBackgroundMenuAt`): "Export library…", the folder chooser for the root.
-- [x] **Command palette.** Add `AppCommand.exportNote` and `AppCommand.exportLibrary` in `ui/app_shortcuts.dart`, with labels. *(`exportLibrary` waits for 1.3.)*
+- [x] **The tree's background menu** (`showTreeBackgroundMenuAt`): "Export library…", the folder chooser for the root.
+- [x] **Command palette.** Add `AppCommand.exportNote` and `AppCommand.exportLibrary` in `ui/app_shortcuts.dart`, with labels.
   - `paletteGroup`: note / library. `paletteAsks`: true.
   - `commandNeeds`: `{CommandNeed.textNote}` for the note.
   - Handlers in `shell.dart` `_allCommandHandlers()`. Key maps and pins pick them up from `AppCommand.values`.
-- [ ] **Progress.** A single note is quick: a snackbar at the end. A folder gets a progress dialog with a cancel button.
-- [ ] **When it is done.** A snackbar with where the file went. On desktop it also offers **Show in folder** (`file_tree_context.dart`).
-- [ ] **Strings** in every locale (`ui/strings/*.dart`).
+- [x] **Progress.** A single note is quick: a snackbar at the end. A folder gets a progress dialog with a cancel button.
+- [x] **When it is done.** A snackbar with where the file went. On desktop it also offers **Show in folder** (`file_tree_context.dart`).
+- [x] **Strings** in every locale (`ui/strings/*.dart`).
 - [ ] **Docs:**
-  - `docs/user/`: a new `export.md`, linked from `organization.md`;
-  - `platforms.md`: the PDF engine per platform and the Linux fallback;
-  - `settings.md`, if a setting appears;
-  - `CHANGELOG.md` at the release.
-- [ ] **Widget tests:** the menu entries, the chooser, the save call through the fake picker, and cancellation.
+  - [x] `docs/user/`: a new `export.md`, linked from `organization.md`;
+  - [ ] `platforms.md`: the PDF engine per platform and the Linux fallback; *(with #63)*
+  - [x] `settings.md`, if a setting appears; *(no setting)*
+  - [ ] `CHANGELOG.md` at the release.
+- [x] **Widget tests:** the menu entries, the chooser, the save call through the fake picker, and cancellation.
 
 ## 4. Order of work
 

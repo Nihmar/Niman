@@ -344,3 +344,9 @@ A WAV recording transcribes on every platform. A recording in another
 format transcribes on Android (a clip is converted first) but not on the
 desktops, where the menu says so under **Transcribe**; convert it to WAV
 with a tool of your own first.
+
+## Exporting
+
+A note, a folder or the whole library can be written out as plain files:
+Markdown, or HTML pages that need nothing else to open. See
+[export](export.md).
