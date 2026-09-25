@@ -318,3 +318,29 @@ frame around the window says so while you drag.
   `pulseaudio-utils` and `ffmpeg` installed.
 - **Templates:** live under `templateFolder` (default `Templates`).
   See [templates](templates.md).
+
+## Transcribing a voice note
+
+A recording can be written down on the device, with nothing uploaded:
+open the vocal's ⋮ menu (a long press or a right click) and pick
+**Transcribe**. Whisper runs locally, and the text is written into the
+vocal's **description** — the `> ` lines right after its embed. An empty
+description is filled; over one already there, you choose first whether to
+**replace** it or **add below**, and the snackbar's **Undo** puts the
+previous description back. Transcription runs in a queue, one recording at
+a time, and each bubble shows its progress; closing the note does not stop
+it, and the text lands when a view of the note takes it.
+
+The first time, Niman asks which **model** to use and downloads it once.
+The models stay in the app's storage on this device — never in the library,
+never synced. **Settings → Library → Transcription** holds the model and
+the **language** spoken in your recordings (naming it beats letting whisper
+detect it, and *Same as the app* follows the app's language). Tiny, base,
+small, medium and large are offered, from fastest-and-least-accurate to
+most-accurate-and-hungry, and a downloaded model can be deleted there to
+free its space.
+
+A WAV recording transcribes on every platform. A recording in another
+format transcribes on Android (a clip is converted first) but not on the
+desktops, where the menu says so under **Transcribe**; convert it to WAV
+with a tool of your own first.

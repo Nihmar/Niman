@@ -10,8 +10,14 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 
 | Module | Contents |
 |--------|----------|
-| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, theme, language, shortcuts/launch args |
-| `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image import |
+| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, single instance, the tray, the changelog parser |
+| `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
+| `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
+| `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](workspace.md) |
+| `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |
+| `reading/` | Where each PDF and each book was left, kept in `.niman/reading.json` |
+| `annotations/` | A file's companion notes, the annotation model and its marks — see [annotations.md](annotations.md) |
+| `epub/` | Reading an EPUB into Markdown, its table of contents, its look and its marks — see [epub-reader.md](epub-reader.md) |
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](sync.md) |
 | `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
 | `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](sync.md) |
