@@ -1494,6 +1494,12 @@ final class UkrainianStrings extends Strings {
       'бібліотеки лишаються недоторканими, і повторне відкриття повертає '
       'її на місце.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ця бібліотека зараз відкрита: спочатку вона закриється, а потім '
+      'зникне зі списку. Тека, нотатки та налаштування бібліотеки в ній '
+      'залишаються недоторканими, і повторне відкриття поверне її назад.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Дозволити доступ до файлів';

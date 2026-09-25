@@ -1492,6 +1492,12 @@ final class BasqueStrings extends Strings {
       'bibliotekararen ezarpenak ez dira ukitzen, berriro irekitzean '
       'itzuliko da.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Biblioteka hau orain irekita dago: lehenengo itxi egiten da eta gero '
+      'zerrendatik ateratzen da. Karpeta, oharrak eta barruko bibliotekaren '
+      'ezarpenak ez dira ukitzen, eta berriro irekitzean itzuli egiten da.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Eman fitxategi sarbidea';

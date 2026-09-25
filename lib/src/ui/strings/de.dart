@@ -1517,6 +1517,13 @@ final class GermanStrings extends Strings {
       'die Bibliothekseinstellungen bleiben, wo sie sind, und das '
       'erneute Öffnen bringt sie zurück.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Diese Bibliothek ist gerade geöffnet: Sie wird zuerst geschlossen '
+      'und verschwindet dann aus der Liste. Der Ordner, die Notizen und die '
+      'Bibliothekseinstellungen darin bleiben unangetastet, und ein '
+      'erneutes Öffnen bringt sie zurück.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Dateizugriff erteilen';

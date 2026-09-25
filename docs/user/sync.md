@@ -149,7 +149,8 @@ In Settings → Sync → WebDAV:
 - **Disconnect this library** stops syncing on this device and forgets
   the password. No file is deleted, here or on the server.
 
-Forgetting a library from the home screen disconnects it too.
+Forgetting a library disconnects it too, from wherever it is done — the
+home screen, the switch screen or the library window.
 
 ## Copying the folder yourself
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/open_library.dart';
@@ -162,6 +163,34 @@ void main() {
       await tester.tap(find.text(AppStrings.actionCancel));
       await tester.pumpAndSettle();
       expect(find.byKey(Key('known-library-$path')), findsOne);
+    });
+
+    testWidgets('the row menu is the same action, in plain sight', (
+      tester,
+    ) async {
+      // #286: a long press is the only way in on a phone, and not the way
+      // a desktop is used — the overflow button says the action exists.
+      final path = makeLibrary('Work');
+      session.seedKnownLibrary(path);
+      await pump(tester);
+      await tester.tap(find.byKey(Key('known-library-menu-$path')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('forget-library-action-$path')));
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.libraryForgetTitle('Work')), findsOne);
+    });
+
+    testWidgets('a right-click opens the same menu', (tester) async {
+      final path = makeLibrary('Work');
+      session.seedKnownLibrary(path);
+      await pump(tester);
+      await tester.tapAt(
+        tester.getCenter(find.byKey(Key('known-library-$path'))),
+        buttons: kSecondaryButton,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(Key('forget-library-action-$path')), findsOne);
     });
 
     testWidgets('confirming drops the row and leaves the folder', (

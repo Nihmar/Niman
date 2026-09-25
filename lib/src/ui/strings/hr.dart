@@ -1484,6 +1484,12 @@ final class CroatianStrings extends Strings {
       'Nestaje s ovog popisa. Direktorij, napomene i postavke biblioteke '
       'ostaju netaknuti, a ponovno otvaranje vraća na mjesto.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ova je knjižnica sada otvorena: prvo se zatvara, a zatim nestaje s '
+      'popisa. Mapa, bilješke i postavke knjižnice u njoj ostaju netaknute, '
+      'a ponovno otvaranje vraća je natrag.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Odobri pristup datotekama';

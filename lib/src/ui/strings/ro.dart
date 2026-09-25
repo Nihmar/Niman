@@ -1498,6 +1498,12 @@ final class RomanianStrings extends Strings {
       'Dispare din această listă. Dosarul, notele și setările bibliotecii '
       'rămân neatinse, iar redeschiderea o pune la loc.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Această bibliotecă este deschisă acum: se închide mai întâi, apoi '
+      'dispare din listă. Folderul, notițele și setările bibliotecii din el '
+      'rămân neatinse, iar redeschiderea o aduce înapoi.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Dă acces la fișiere';

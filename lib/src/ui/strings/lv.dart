@@ -1485,6 +1485,12 @@ final class LatvianStrings extends Strings {
       'iestatījumi paliek neskartri, un atkārtota atvēršana atgriež uz '
       'vietu.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Šī bibliotēka pašlaik ir atvērta: tā vispirms tiek aizvērta un pēc '
+      'tam pazūd no saraksta. Mape, piezīmes un tajā esošie bibliotēkas '
+      'iestatījumi paliek neskarti, un atkārtota atvēršana to atgriež.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Atļaut piekļuvi failiem';

@@ -92,4 +92,26 @@ void main() {
     expect(find.byKey(const Key('library-window-error')), findsOne);
     expect(find.textContaining('disk full'), findsOne);
   });
+
+  testWidgets('forgetting the open library saves the notes first', (
+    tester,
+  ) async {
+    // #286: the library on screen leaves the same way a switch does. The
+    // window closes over a library that is no longer listed, and with the
+    // open notes saved — forgetting is not a way to drop them.
+    controller.seedKnownLibrary('/fake/library', name: 'Library');
+    final note = _Note();
+    unsaved.register(note);
+    await pump(tester);
+    await tester.longPress(
+      find.byKey(const Key('known-library-/fake/library')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirm-forget-library')));
+    await tester.pumpAndSettle();
+
+    expect(note.saves, 1);
+    expect(controller.root, isNull);
+    expect(find.byKey(const Key('library-window')), findsNothing);
+  });
 }

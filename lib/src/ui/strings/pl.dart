@@ -1507,6 +1507,12 @@ final class PolishStrings extends Strings {
       'Zniknie z tej listy. Katalog, notatki i ustawienia biblioteki '
       'w niej nie zostaną dotknięte, a ponowne otwarcie ją przywróci.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ta biblioteka jest teraz otwarta: najpierw zostanie zamknięta, a '
+      'potem zniknie z listy. Folder, notatki i ustawienia biblioteki w nim '
+      'pozostają nietknięte, a ponowne otwarcie przywróci ją z powrotem.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Udziel dostęp do plików';

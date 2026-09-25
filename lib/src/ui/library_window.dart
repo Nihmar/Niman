@@ -150,6 +150,13 @@ final class _LibraryWindowState extends State<LibraryWindow> {
   }
 
   Future<void> _forget(String path) async {
+    // The library on screen leaves through the same path as a switch:
+    // open notes are saved first, the window closes, and only then does
+    // the entry go (#286).
+    if (path == widget.controller.root) {
+      await _leave((session) => session.forgetLibrary(path));
+      return;
+    }
     await widget.controller.forgetLibrary(path);
     await _load();
   }

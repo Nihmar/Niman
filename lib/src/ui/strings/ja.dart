@@ -1384,6 +1384,11 @@ final class JapaneseStrings extends Strings {
       'このリストから消えます。フォルダ、ノート、ライブラリ設定はそのままに、'
       '再度開くと戻ります。';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'このライブラリは現在開いています。先に閉じてからリストから外れます。'
+      '中のフォルダー、ノート、ライブラリ設定はそのまま残り、もう一度開けば戻ってきます。';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'ファイルアクセスを許可';
