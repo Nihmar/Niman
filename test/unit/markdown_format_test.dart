@@ -142,6 +142,16 @@ void main() {
     expect(tidy('- [testo](u)\n'), '- [testo](u)\n');
   });
 
+  test('a link whose text looks like a box stays a link', () {
+    const note =
+        '- [](https://example.com)\n'
+        '- [x](https://x.org)\n'
+        '- [ ](u)\n'
+        '- [X][ref]\n'
+        '- [x]: https://x.org\n';
+    expect(tidy(note), note);
+  });
+
   test('one space after the marker, and the item moves with it', () {
     expect(
       tidy('-   item\n    continuazione\n-   altro\n'),

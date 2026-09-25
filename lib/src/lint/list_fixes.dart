@@ -12,8 +12,12 @@ final RegExp listMarker = RegExp(r'^(\s*)([-*+]|\d{1,9}[.)])([ \t]+)');
 
 /// `[ ]`, `[x]`, `[X]`, `[x ]`, `[]` right after an item's marker: a task
 /// box, however it was spelled, and the spaces after it.
+///
+/// Not when a `(`, a `[` or a `:` follows the bracket: then it is a link's
+/// text — `[](url)`, `[x][ref]` — or a reference's label (`[x]: url`), and
+/// spacing it out as a box would break the link.
 final RegExp _taskBox = RegExp(
-  r'^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\[([ xX]*)\][ \t]*',
+  r'^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\[([ xX]*)\](?![(\[:])[ \t]*',
 );
 
 /// A list block's lines, tidied.
