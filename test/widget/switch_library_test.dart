@@ -73,18 +73,35 @@ void main() {
       expect(session.root, work);
     });
 
-    testWidgets('the open library cannot be forgotten', (tester) async {
-      // Nothing to stop listing: it is the library on screen.
+    testWidgets('the open library can be forgotten, and closes first', (
+      tester,
+    ) async {
+      // #286: nothing stops the list from dropping the library on screen,
+      // and the answer says the two things happen in order.
       await pumpScreen(tester);
       await tester.longPress(find.byKey(Key('known-library-$work')));
       await tester.pumpAndSettle();
-      expect(find.text(AppStrings.libraryForgetTitle('Work')), findsNothing);
+      expect(find.text(AppStrings.libraryForgetTitle('Work')), findsOne);
+      expect(find.text(AppStrings.libraryForgetOpenExplained), findsOne);
+
+      await tester.tap(find.byKey(const Key('confirm-forget-library')));
+      await tester.pumpAndSettle();
+
+      expect(session.root, isNull);
+      expect(
+        (await session.knownLibraries()).map((entry) => entry.path),
+        isNot(contains(work)),
+      );
+      // Forgetting is a list operation; the folder is a library still.
+      expect(Directory(work).existsSync(), isTrue);
     });
 
     testWidgets('another one still can be', (tester) async {
       await pumpScreen(tester);
       await tester.longPress(find.byKey(Key('known-library-$personal')));
       await tester.pumpAndSettle();
+      // Not the open one, so the plain answer — it stays where it is.
+      expect(find.text(AppStrings.libraryForgetExplained), findsOne);
       await tester.tap(find.byKey(const Key('confirm-forget-library')));
       await tester.pumpAndSettle();
       expect(find.byKey(Key('known-library-$personal')), findsNothing);

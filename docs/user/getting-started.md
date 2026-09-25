@@ -19,6 +19,10 @@ disk; the app's SQLite database is only a rebuildable index.
   are saved first; a note that cannot be saved keeps the library open
   and says why. On a phone the same actions are in Settings →
   Maintenance.
+- **Forgetting a library** takes it off that list; the folder, its notes
+  and its settings stay where they are, and opening it again brings it
+  back. It is in the row's own menu (⋯, right-click on a desktop, or a
+  long press on a phone), and the library open right now closes first.
 
 ## First steps
 

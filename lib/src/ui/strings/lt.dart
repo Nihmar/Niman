@@ -1490,6 +1490,12 @@ final class LithuanianStrings extends Strings {
       'nustatymai lieka nepaliesti, ir dar kartą atidarius grįžta į '
       'vietą.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ši biblioteka dabar atidaryta: ji pirmiausia uždaroma, o tada '
+      'dingsta iš sąrašo. Aplankas, užrašai ir joje esantys bibliotekos '
+      'nustatymai lieka nepaliesti, o atidarius ją vėl ji sugrįžta.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Leisti failų prieigą';

@@ -1521,6 +1521,13 @@ final class CatalanStrings extends Strings {
       'configuració de la biblioteca dins d’ella no es toquen, i '
       'tornar a obrir-la la torna a posar.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Aquesta biblioteca està oberta ara: primer es tanca i després surt '
+      'de la llista. La carpeta, les notes i la configuració de la '
+      'biblioteca que hi ha a dins no es toquen, i tornar-la a obrir la '
+      'recupera.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Dóna accés als fitxers';

@@ -1485,6 +1485,12 @@ final class SlovakStrings extends Strings {
       'Zmizne z tohto zoznamu. Priečinok, poznámky a nastavenia knižnice '
       'zostanú nedotknuté, a opätovné otvorenie vráti na miesto.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Táto knižnica je teraz otvorená: najprv sa zatvorí a potom zmizne zo '
+      'zoznamu. Priečinok, poznámky a nastavenia knižnice v nej zostávajú '
+      'nedotknuté a opätovné otvorenie ju vráti späť.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Povoliť prístup k súborom';

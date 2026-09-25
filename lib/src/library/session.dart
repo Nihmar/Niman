@@ -237,6 +237,10 @@ abstract interface class LibrarySession {
   /// Forgetting is a list operation: the folder, its notes and its
   /// `.niman/settings.json` are untouched, so opening it again lists it
   /// again with its settings.
+  ///
+  /// The library open right now can be forgotten too (#286): the session
+  /// closes it first — the index it is reading goes with it — and the
+  /// caller is left with no library open, on the home screen.
   Future<void> forgetLibrary(String libraryPath);
 
   /// The home-screen widget instances reading [libraryPath] (issue 6).

@@ -1489,6 +1489,12 @@ final class BosnianStrings extends Strings {
       'Ona ide s ovog popisa. Mapa, bilješke i podešavanja biblioteke u '
       'njoj ostaju na miru, i ponovno otvaranje vraća je na mjesto.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ova biblioteka je sada otvorena: prvo se zatvara, a zatim nestaje s '
+      'liste. Fascikla, bilješke i postavke biblioteke u njoj ostaju '
+      'netaknute, a ponovno otvaranje je vraća.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Daj pristup datotekama';

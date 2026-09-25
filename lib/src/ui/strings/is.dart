@@ -1486,6 +1486,12 @@ final class IcelandicStrings extends Strings {
       'bókasafnsins haldast óbreytt, og ef það er opnað aftur fer það '
       'aftur á listann.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Þetta bókasafn er opið núna: það lokast fyrst og fer svo af '
+      'listanum. Mappan, minnisblöðin og stillingar bókasafnsins í henni '
+      'haldast óbreytt, og ef það er opnað aftur fer það aftur á listann.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Leyfa aðgang að skjölum';

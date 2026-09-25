@@ -1482,6 +1482,12 @@ final class DanishStrings extends Strings {
       'biblioteksindstillinger i den røres ikke, og at åbne den igen '
       'bringer den tilbage.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Dette bibliotek er åbent nu: det lukkes først og forsvinder derefter '
+      'fra listen. Mappen, noterne og bibliotekets indstillinger i den '
+      'røres ikke, og en ny åbning bringer det tilbage.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Giv filadgang';

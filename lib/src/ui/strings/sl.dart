@@ -1480,6 +1480,12 @@ final class SlovenianStrings extends Strings {
       'Iz tega seznama izgine. Mapa, opombe in nastavitve knjižnice ostanejo '
       'nedotaknjene in ponovno odpiranje vrne na mesto.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Ta knjižnica je zdaj odprta: najprej se zapre, nato izgine s '
+      'seznama. Mapa, opombe in nastavitve knjižnice v njej ostanejo '
+      'nedotaknjene, ponovno odpiranje pa jo vrne nazaj.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Dovoli dostop do datotek';

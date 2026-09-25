@@ -1502,6 +1502,12 @@ final class AlbanianStrings extends Strings {
       'bibliotekës në të mbeten të pandryshuara, dhe hapja përsëri e '
       'kthen në vend.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Kjo bibliotekë është e hapur tani: së pari mbyllet dhe pastaj del '
+      'nga lista. Dosja, shënimet dhe vendosjet e bibliotekës brenda saj '
+      'mbeten të paprekura, dhe hapja përsëri e kthen atë.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Lejo qasjen te skedarët';

@@ -189,6 +189,32 @@ void main() {
     await db.close();
   });
 
+  test('forgetting the open library closes it, index and all', () async {
+    // #286: the library on screen goes first, or the entry that names its
+    // index would be dropped while a live session was reading that index.
+    final controller = LibraryController(
+      appDb,
+      indexDbFactory: indexDb,
+      indexFileOf: (libraryPath) async =>
+          File(p.join(tmp.path, '${p.basename(libraryPath)}.db')),
+      rescanInterval: const Duration(hours: 1),
+      syncSecrets: FakeSyncSecretStore(),
+    );
+    await controller.open(root.path, create: false);
+    final indexFile = File(p.join(tmp.path, 'library.db'));
+    expect(indexFile.existsSync(), isTrue);
+
+    await controller.forgetLibrary(root.path);
+
+    expect(controller.phase, LibraryPhase.none);
+    expect(controller.root, isNull);
+    expect(await LibraryRegistry(await controller.appDatabase).all(), isEmpty);
+    expect(indexFile.existsSync(), isFalse);
+    // The folder is a library still; only the entry is gone.
+    expect(root.existsSync(), isTrue);
+    await controller.dispose();
+  });
+
   test('forgetting a library drops its sync state and password', () async {
     final secrets = FakeSyncSecretStore();
     final controller = LibraryController(

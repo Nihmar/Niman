@@ -1475,6 +1475,12 @@ final class EnglishStrings extends Strings {
       'settings inside it are left alone, and opening it again brings '
       'it back.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'This one is open now: it closes first and then goes off the list. '
+      'The folder, the notes and the library settings inside it are left '
+      'alone, and opening it again brings it back.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Grant file access';
