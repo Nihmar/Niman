@@ -2594,15 +2594,6 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                     ? index + 1
                                     : null,
                                 gutterWidth: _gutter,
-                                // Past the numbers, only the gap the fold
-                                // arrows live in is empty, and a list line
-                                // has none. The field's inset is left of
-                                // the gutter, not between the numbers and
-                                // the text: counted in, an H1's `#` sat on
-                                // its number.
-                                margin: widget.showLineNumbers
-                                    ? _gutterGap
-                                    : _leftInset + _gutter,
                                 theme: widget.theme,
                                 syntax: syntax,
                                 dark: widget.dark,
@@ -3568,7 +3559,6 @@ final class _Line extends StatelessWidget {
     required this.styled,
     required this.number,
     required this.gutterWidth,
-    required this.margin,
     required this.theme,
     required this.syntax,
     required this.dark,
@@ -3630,11 +3620,6 @@ final class _Line extends StatelessWidget {
 
   /// How wide the gutter is, computed from the numbers the note has.
   final double gutterWidth;
-
-  /// How far left of the text's edge the line may draw: the field's inset
-  /// and the gutter's empty room — where marks revealed wider than their
-  /// column hang, rather than push the text right.
-  final double margin;
 
   final MarkdownTheme theme;
   final SyntaxColors syntax;
@@ -3864,8 +3849,8 @@ final class _Line extends StatelessWidget {
         child: paragraph,
       );
     }
-    Widget line = Padding(
-      padding: EdgeInsets.only(left: indent < 0 ? 0 : indent),
+    final line = Padding(
+      padding: EdgeInsets.only(left: indent),
       // The spelling is painted over the paragraph rather than written into
       // its runs: a style has one decoration, and a wavy underline there took
       // a struck word's strike.
@@ -3880,17 +3865,12 @@ final class _Line extends StatelessWidget {
         child: paragraph,
       ),
     );
-    // Marks revealed wider than their column hang out to the left, into the
-    // margin ([_indent]); the transform moves what hit tests see with it.
-    if (indent < 0) {
-      line = Transform.translate(offset: Offset(indent, 0), child: line);
-    }
     if (table != null) {
       // A cell's padding above and below its text, and the grid behind.
       return CustomPaint(
         painter: LiveTableGridPainter(
           row: table,
-          left: indent < 0 ? 0 : indent,
+          left: indent,
           color: theme.tableBorder,
         ),
         child: Padding(
@@ -4112,7 +4092,9 @@ final class _Line extends StatelessWidget {
   /// jumped right by the marks' width each time the caret came onto the
   /// line, and back when it left (device screenshot 2026-09-23, a list
   /// being typed). Marks wider than the column — a task's `- [ ] `, a
-  /// `10. ` — hang out to the left of it, into the [margin]: negative.
+  /// `10. `, a heading's `# ` over its zero column — move the line right by
+  /// what is left over; they start at the note's left margin, never hung
+  /// out into the field left of the text (#288).
   double _indent(BuildContext context, {bool revealed = false}) {
     if (!hideMarkers) return 0;
     final listed = shape.listed
@@ -4123,17 +4105,10 @@ final class _Line extends StatelessWidget {
         shape.quoteDepth * theme.quoteIndentPerLevel +
         (shape.code == null ? 0 : theme.codePadding);
     if (base == 0 && _prefixEnd == 0) return 0;
-    // Marks wider than their column hang into the margin, as far as there
-    // is one: the text moves only by what is left over. A line with a fold
-    // arrow has none: the arrow stands right against the text, and hung
-    // marks covered it and took its clicks (a heading's `#`).
-    final room = fold == _FoldMark.none ? margin : 0.0;
-    return math.max<double>(
-      -room,
-      base -
-          (_textStart(context, revealed: revealed) -
-              _glyphLeft(context, const <InlineSpan>[])),
-    );
+    final marks =
+        _textStart(context, revealed: revealed) -
+        _glyphLeft(context, const <InlineSpan>[]);
+    return math.max<double>(0, base - marks);
   }
 
   /// Whether the line is a heading's: its hashes and the spaces after them
