@@ -617,6 +617,8 @@ final class TurkishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB meta verileri';
+  @override
   String get cheatTemplates => 'Şablon yer tutucuları';
   @override
   String get menuAddLink => 'Bağlantı ekle';

@@ -612,6 +612,8 @@ final class HindiStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB मेटाडेटा';
+  @override
   String get cheatTemplates => 'टेम्पलेट प्लेसहोल्डर';
   @override
   String get menuAddLink => 'लिंक जोड़ें';

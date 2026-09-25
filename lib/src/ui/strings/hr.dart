@@ -625,6 +625,8 @@ final class CroatianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metapodaci';
+  @override
   String get cheatTemplates => 'Rezervirana mjesta predložaka';
   @override
   String get menuAddLink => 'Dodaj poveznicu';

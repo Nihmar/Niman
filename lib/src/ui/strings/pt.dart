@@ -624,6 +624,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadados EPUB';
+  @override
   String get cheatTemplates => 'Marcadores de modelos';
   @override
   String get menuAddLink => 'Adicionar ligação';

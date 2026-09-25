@@ -628,6 +628,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metapodatki EPUB';
+  @override
   String get cheatTemplates => 'Ograde predlog';
   @override
   String get menuAddLink => 'Dodaj povezavo';

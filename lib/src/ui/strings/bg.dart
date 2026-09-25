@@ -626,6 +626,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB метаданни';
+  @override
   String get cheatTemplates => 'Заместители в шаблоните';
   @override
   String get menuAddLink => 'Добави връзка';

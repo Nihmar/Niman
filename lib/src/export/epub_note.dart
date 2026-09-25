@@ -35,10 +35,22 @@ Future<ExportPayload> exportNoteEpub({
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-epub-');
   try {
     final file = p.join(dir.path, '${p.basenameWithoutExtension(path)}.epub');
+    final metadata = epubMetadataOf(text);
+    final coverTarget = metadata.cover;
+    final cover = coverTarget == null
+        ? null
+        : await ExportSources.picturePath(
+            target: coverTarget,
+            notePath: p.join(root, path),
+            root: root,
+            linkSource: linkSource,
+          );
     final book = await EpubBook.start(
       path: file,
       title: title,
       language: language,
+      metadata: metadata,
+      cover: cover,
     );
     try {
       final paths = await ExportSources.imagePaths(

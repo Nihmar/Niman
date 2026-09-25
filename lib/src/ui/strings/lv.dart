@@ -622,6 +622,8 @@ final class LatvianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metadati';
+  @override
   String get cheatTemplates => 'Veidņu vietturi';
   @override
   String get menuAddLink => 'Pievienot saiti';

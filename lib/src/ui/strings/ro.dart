@@ -632,6 +632,8 @@ final class RomanianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadate EPUB';
+  @override
   String get cheatTemplates => 'Substituenți de șabloane';
   @override
   String get menuAddLink => 'Adaugă link';

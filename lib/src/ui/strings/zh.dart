@@ -589,6 +589,8 @@ final class ChineseStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB 元数据';
+  @override
   String get cheatTemplates => '模板占位符';
   @override
   String get menuAddLink => '添加链接';

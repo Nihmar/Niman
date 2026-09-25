@@ -31,12 +31,40 @@ one file:
   from the same dialog: a long note is minutes of work, not a hang.
 - **EPUB** — the note as a book of one chapter, for an e-reader: the same
   page (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the
-  file. A wikilink out has nothing to point at, exactly as on a single
-  HTML page.
+  file. A `cover:` key in the note's frontmatter names a picture the book
+  opens on. A wikilink out has nothing to point at, exactly as on a
+  single HTML page.
 
 A wikilink becomes highlighted text on a page exported on its own: one
 page has nothing to point at. Export a folder, below, and its links
 become links.
+
+### A book's metadata
+
+An EPUB takes its metadata from the frontmatter: the note's own for a
+single note, the first chapter's for a folder or the library. The keys
+are the usual ones, so a note written for another tool reads the same
+here:
+
+```
+---
+title: The book
+author: [Ada Lovelace, Alan Turing]
+language: en
+series: Notes
+series_index: 2
+cover: cover.png
+tags: [geometry, notes]
+description: What the book is.
+publisher: Niman Press
+rights: Public domain
+---
+```
+
+`title` and `language` override the export's own (the note's display name
+and the app's language), `tags` become the book's subjects, and `cover:`
+names the picture the book opens on. The Markdown cheatsheet carries the
+same example, under **EPUB metadata**.
 
 ## A folder, or the whole library
 
@@ -62,8 +90,9 @@ one zip:
   note is a chapter, in the tree's own order, with a table of contents
   and links between the chapters. The pictures the chapters show travel
   inside the book, each one once; an attachment no chapter shows is left
-  out. One EPUB, not one per note — a folder is a book, and the format is
-  what its reader expects.
+  out. The book's cover is the `cover:` picture in its first chapter's
+  frontmatter, when that chapter names one. One EPUB, not one per note —
+  a folder is a book, and the format is what its reader expects.
 
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those

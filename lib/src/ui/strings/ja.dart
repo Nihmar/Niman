@@ -590,6 +590,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get cheatFrontmatter => 'フロントマター';
   @override
+  String get cheatEpubMetadata => 'EPUB メタデータ';
+  @override
   String get cheatTemplates => 'テンプレートのプレースホルダー';
   @override
   String get menuAddLink => 'リンクを追加';

@@ -629,6 +629,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB метаподатоци';
+  @override
   String get cheatTemplates => 'Резервирани места во шаблоните';
   @override
   String get menuAddLink => 'Додај врска';

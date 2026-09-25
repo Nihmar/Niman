@@ -621,6 +621,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadata EPUB';
+  @override
   String get cheatTemplates => 'Vendmbajtësit e shablloneve';
   @override
   String get menuAddLink => 'Shto lidhje';

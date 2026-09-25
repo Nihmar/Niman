@@ -621,6 +621,8 @@ final class EnglishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metadata';
+  @override
   String get cheatTemplates => 'Template placeholders';
   @override
   String get menuAddLink => 'Add link';

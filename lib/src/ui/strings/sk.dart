@@ -626,6 +626,8 @@ final class SlovakStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadáta EPUB';
+  @override
   String get cheatTemplates => 'Zástupné symboly šablón';
   @override
   String get menuAddLink => 'Pridať odkaz';

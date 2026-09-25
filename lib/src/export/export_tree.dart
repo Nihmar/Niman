@@ -336,12 +336,23 @@ Future<void> _exportTree(TreeExportRequest request) async {
   cancel.listen((_) => cancelled = true);
   request.events.send(cancel.sendPort);
   // The EPUB is a zip with a package to end it: the book closes what the
-  // encoder would, and the plain formats have no book.
+  // encoder would, and the plain formats have no book. Its metadata and
+  // cover are the first chapter's frontmatter (#303).
+  final front = request.format == ExportTreeFormat.epub
+      ? _bookFrontmatter(tree)
+      : null;
+  final metadata = front?.metadata ?? const EpubMetadata();
+  final coverTarget = metadata.cover;
+  final cover = coverTarget == null || front == null
+      ? null
+      : _fileIn(coverTarget, front.dir, tree.files);
   final book = request.format == ExportTreeFormat.epub
       ? await EpubBook.start(
           path: request.zipPath,
           title: p.basename(request.dir),
           language: request.language,
+          metadata: metadata,
+          cover: cover == null ? null : p.join(tree.root, cover),
         )
       : null;
   final encoder = book == null
@@ -438,6 +449,20 @@ Future<void> _exportTree(TreeExportRequest request) async {
       // A temp directory left behind is not the export's failure.
     }
   }
+}
+
+/// The frontmatter a folder's book takes: its first chapter's, because a
+/// folder has no frontmatter of its own, and the first note is where its
+/// author writes the book's metadata (#303).
+({EpubMetadata metadata, String dir})? _bookFrontmatter(_Tree tree) {
+  for (final entry in tree.entries) {
+    if (entry.isDir || !_isNote(entry.rel)) continue;
+    return (
+      metadata: epubMetadataOf(File(entry.abs).readAsStringSync()),
+      dir: p.dirname(entry.rel),
+    );
+  }
+  return null;
 }
 
 /// Adds one note of the tree to [book] as a chapter (#303).

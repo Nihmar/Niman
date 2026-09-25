@@ -623,6 +623,8 @@ final class HungarianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metaadatok';
+  @override
   String get cheatTemplates => 'Sablon-helyőrzők';
   @override
   String get menuAddLink => 'Hivatkozás hozzáadása';

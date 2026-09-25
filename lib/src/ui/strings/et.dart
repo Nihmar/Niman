@@ -616,6 +616,8 @@ final class EstonianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metaandmed';
+  @override
   String get cheatTemplates => 'Mallide kohatäited';
   @override
   String get menuAddLink => 'Lisa link';

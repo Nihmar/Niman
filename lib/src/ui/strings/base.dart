@@ -306,6 +306,7 @@ abstract base class Strings {
   String get cheatFootnotes;
   String get cheatRule;
   String get cheatFrontmatter;
+  String get cheatEpubMetadata;
   String get cheatTemplates;
   String get menuAddLink;
   String get menuAddExternalLink;

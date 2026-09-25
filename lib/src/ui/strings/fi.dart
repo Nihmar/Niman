@@ -622,6 +622,8 @@ final class FinnishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metatiedot';
+  @override
   String get cheatTemplates => 'Mallipohjien paikkamerkit';
   @override
   String get menuAddLink => 'Lisää linkki';

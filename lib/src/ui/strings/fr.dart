@@ -631,6 +631,8 @@ final class FrenchStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Métadonnées EPUB';
+  @override
   String get cheatTemplates => 'Espaces réservés des modèles';
   @override
   String get menuAddLink => 'Ajouter un lien';

@@ -626,6 +626,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metaduomenys';
+  @override
   String get cheatTemplates => 'Šablonų vietos rezervavimo ženklai';
   @override
   String get menuAddLink => 'Pridėti nuorodą';
