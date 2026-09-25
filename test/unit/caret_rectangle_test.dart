@@ -1,6 +1,6 @@
 /// Spike 2's second question, measured: **is the caret rectangle right?**
 ///
-/// `docs/dev/unified-surface.md` §8.7.2 says the caret's geometry comes from the
+/// `docs/records/unified-surface.md` §8.7.2 says the caret's geometry comes from the
 /// block's own laid-out `TextPainter` — `getOffsetForCaret` where it starts,
 /// `getFullHeightForCaret` for how tall it is — and never from metrics the
 /// surface computes for itself. That distinction is not academic here: the

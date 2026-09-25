@@ -3,7 +3,7 @@
 ///
 /// The block scanner's list, and the one it hands out: two costs of a flat
 /// list were a note's length where they should have been an edit's
-/// (`docs/dev/huge-notes.md`), on the 246 MB note of 2 M blocks:
+/// (`docs/records/huge-notes.md`), on the 246 MB note of 2 M blocks:
 ///
 /// * **A copy.** The read pane takes the editor's blocks when it opens, and
 ///   the list was copied whole: 13–50 ms.

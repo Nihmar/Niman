@@ -1,7 +1,7 @@
 /// A note's lines and their terminators, kept in chunks that a copy shares.
 ///
 /// Two costs of a flat line array were a note's length where they should
-/// have been an edit's (`docs/dev/huge-notes.md`):
+/// have been an edit's (`docs/records/huge-notes.md`):
 ///
 /// * **A copy** — the read pane is handed a snapshot of the editor's note
 ///   that the editor's edits no longer reach — copied both arrays and rebuilt

@@ -1,7 +1,7 @@
 /// Measures the `markdown` package against the CommonMark and GFM suites.
 ///
 /// This is the first task of the unified Markdown surface's Phase 1
-/// (`docs/dev/unified-surface.md`, decision D2): the parser is the `markdown`
+/// (`docs/records/unified-surface.md`, decision D2): the parser is the `markdown`
 /// package, so the question is not "write a parser" but "how far off is the
 /// one already here". Until this prints a number, conformance is an
 /// assumption.

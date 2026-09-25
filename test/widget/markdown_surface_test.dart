@@ -167,7 +167,7 @@ void main() {
   testWidgets('live hides the marker, source shows it', (tester) async {
     // The caret is *off* the heading's line: the markers are hidden
     // everywhere except where the writer is, which is the policy
-    // (`docs/dev/unified-surface.md` §8.6.2) and is tested by the reveal test
+    // (`docs/records/unified-surface.md` §8.6.2) and is tested by the reveal test
     // below.
     Future<List<TextSpan>> spansAfter(MarkdownSurfaceMode mode) async {
       await pumpMode(tester, mode, caret: 10);

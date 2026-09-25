@@ -6,7 +6,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:path/path.dart' as p;
 
-/// What a queued hint says happened to a path (docs/dev/sync.md, "Queue
+/// What a queued hint says happened to a path (docs/records/sync.md, "Queue
 /// and triggers").
 enum SyncOpKind {
   /// Created or edited.
@@ -40,7 +40,7 @@ Duration syncBackoff(int failures) {
   return wait > cap ? cap : wait;
 }
 
-/// The sync state of the app database (docs/dev/sync.md): destinations,
+/// The sync state of the app database (docs/records/sync.md): destinations,
 /// agreed item states and the hint queue, for any number of libraries.
 ///
 /// Every library path is normalized on the way in, like the rest of the

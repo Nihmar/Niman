@@ -6,7 +6,7 @@
 /// string to the writing isolate — strings are copied between isolates,
 /// never shared — encode it and write it in one go. On the 246 MB note of
 /// the 0.0.9 stress test that is 300–530 ms of the UI isolate's own work
-/// per save (see `docs/dev/huge-notes.md`), a stall the debounce only
+/// per save (see `docs/records/huge-notes.md`), a stall the debounce only
 /// moves to a pause. Here the join and the encode happen a slice at a
 /// time, each slice short enough that the frames keep coming, and the
 /// bytes leave for the writer as they are made, so no full copy of the

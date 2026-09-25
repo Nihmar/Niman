@@ -2,7 +2,7 @@
 /// number or its checkbox, a quote's bar, a thematic break's rule, a code
 /// block's box.
 ///
-/// Approach B (`docs/dev/unified-surface.md` §8.6.0) keeps the line's text the
+/// Approach B (`docs/records/unified-surface.md` §8.6.0) keeps the line's text the
 /// source, character for character, and hides a marker by style — so what the
 /// marker *stood for* is not in the text and has to be drawn beside it. It is
 /// painted behind the line rather than laid out as widgets, which keeps the

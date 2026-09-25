@@ -125,7 +125,7 @@ Future<List<NoteContent>> readNoteContents(
       // The digest the write made, when the file is still the one it
       // wrote — as it was before the read and after it, so a file swapped
       // in between is not taken for it: 1.9 s of hashing on the 247 MB
-      // stress note (`docs/dev/huge-notes.md`, item 8), for bytes that were
+      // stress note (`docs/records/huge-notes.md`, item 8), for bytes that were
       // hashed as they were written.
       // And the tags and links the editor kept, block by block: 5.1 s of
       // that reindex, for blocks it had read as they were written.
@@ -181,7 +181,7 @@ NoteContent _extractContent(
 }) {
   // Read by the unified engine, and only where a tag or a link can be: a
   // whole-note tokenize was two minutes of a first index on a 247 MB note
-  // (`docs/dev/huge-notes.md`, item 8).
+  // (`docs/records/huge-notes.md`, item 8).
   references ??= noteReferencesOf(text);
   final fm = parseFrontmatter(text);
   return NoteContent(

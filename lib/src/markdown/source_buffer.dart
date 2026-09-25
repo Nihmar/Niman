@@ -1,7 +1,7 @@
 /// The note's text, as lines, with an O(log n) offset ↔ line index.
 ///
 /// This is the bottom of the new Markdown surface
-/// (`docs/dev/unified-surface.md` §8.2): the note's Markdown *is* the document,
+/// (`docs/records/unified-surface.md` §8.2): the note's Markdown *is* the document,
 /// and this holds it. Everything above — the block scanner, the inline parser,
 /// the height map, the caret — speaks in absolute source offsets, while
 /// Markdown
@@ -197,7 +197,7 @@ final class SourceBuffer {
   /// whole note as one string for the writer to copy and encode in one go.
   /// Slicing it keeps each turn of the caller's loop to a few milliseconds,
   /// which is what lets the frames through during a save (see
-  /// `docs/dev/huge-notes.md`).
+  /// `docs/records/huge-notes.md`).
   String sliceText(int first, int last, int charLimit) {
     assert(first >= 0 && first < _store.length, 'line $first out of range');
     final end = last > _store.length ? _store.length : last;

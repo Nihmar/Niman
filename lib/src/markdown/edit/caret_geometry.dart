@@ -1,5 +1,5 @@
 /// Where a block's caret and selection are drawn
-/// (`docs/dev/unified-surface.md` §8.7.2).
+/// (`docs/records/unified-surface.md` §8.7.2).
 ///
 /// The block owns a laid-out `TextPainter`; the document owns a
 /// [SelectionModel] in source offsets. This is the seam between them: the

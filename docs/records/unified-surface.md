@@ -349,7 +349,7 @@ through a different interface. That dispatch layer is where most of the
 ## 2.2 What the code already measured (and what it says to keep)
 
 These numbers are in the source comments and in
-[`docs/dev/editor-alternatives.md`](../../docs/dev/editor-alternatives.md).
+[`docs/records/editor-alternatives.md`](../../docs/records/editor-alternatives.md).
 They are the baseline; they are also, in two places, the design that the
 rewrite should keep rather than reinvent.
 
@@ -2408,7 +2408,7 @@ fixtures (no unit is extreme). That is precisely why §7 exists.
 
 ### 5.6.1 The one external number
 
-`docs/dev/editor-alternatives.md` records, for the app's existing editor:
+`docs/records/editor-alternatives.md` records, for the app's existing editor:
 
 > Line layout + paint | 44.7 µs/line (only visible lines are paid for)
 > 
@@ -5770,7 +5770,7 @@ editor+preview surface in Flutter/Dart. No package is adopted, so this is about
 *how things are built*, and for every mechanism the Flutter/Dart equivalent
 that would have to exist.
 
-Read against `docs/dev/editor-alternatives.md`, which measured six Flutter
+Read against `docs/records/editor-alternatives.md`, which measured six Flutter
 packages and rejected them. Its numbers are treated as given and never
 contradicted here without saying so:
 
@@ -10619,7 +10619,7 @@ which the parser is the largest single block ([§10](#10-effort-and-phasing)).
 ## 9.1 How to read a number in this project
 
 The repo has been burned by absolute timings before:
-[`editor-alternatives.md`](../../docs/dev/editor-alternatives.md) says so
+[`editor-alternatives.md`](../../docs/records/editor-alternatives.md) says so
 explicitly — the M2 numbers are debug-mode, in the test harness, on one
 Windows machine, inflated in absolute terms, and **only the ratios carry**.
 The budget below therefore has two layers:
@@ -11845,7 +11845,7 @@ checkbox is drawn but not yet clickable.
 `flutter_highlight`, `katex`, `katex_dart` and `flutter_smooth_markdown`
 removed from `pubspec.yaml` (**`markdown` and `highlight` stay**, D2);
 `lib/src/editor/`, `lib/src/preview/` and their tests deleted;
-`docs/dev/editor-alternatives.md` superseded; `docs/user/editing.md`
+`docs/records/editor-alternatives.md` superseded; `docs/user/editing.md`
 (including the split preview's removal, D4) and `docs/dev/architecture.md`
 rewritten; `CHANGELOG.md` entry; the 55 orphaned packages confirmed gone from
 `pubspec.lock`; and the **KaTeX fonts kept** — they must move from the
@@ -12115,7 +12115,7 @@ the only one there is — and a finding goes into this list or into an issue.
 |---|---|
 | **Do nothing** | The three surfaces are three implementations of the same features, they disagree visually, one has a 200 KB cap it enforces by refusing to open any of the repo's own fixtures, and the preview takes 137–182 ms to show first content and 35–71 ms to land a scroll jump. The uniformity requirement cannot be met by leaving them. |
 | **Fix the three in place** | Deduplicating find, tally, context menu, formatting and scroll-sync across three engines is a large refactor whose end state is *still* three engines with three models. It costs a large fraction of the rewrite without removing the cap, the stalls or the packages. |
-| **Adopt one package for all three** (the `editor-alternatives.md` candidates) | Already measured: every candidate is slower than the plain source editor at the keystroke, and the best model (appflowy_editor) fails this toolchain's analysis and brings an AGPL/MPL choice and 21 direct dependencies. `docs/dev/editor-alternatives.md` is the record. |
+| **Adopt one package for all three** (the `editor-alternatives.md` candidates) | Already measured: every candidate is slower than the plain source editor at the keystroke, and the best model (appflowy_editor) fails this toolchain's analysis and brings an AGPL/MPL choice and 21 direct dependencies. `docs/records/editor-alternatives.md` is the record. |
 | **Keep source-of-truth but reuse `markdown` for the parse** | **Adopted (D2).** Was listed here as the pragmatic variant; the user took it. −20 to −36 days and CommonMark conformance becomes a measurement rather than a rewrite. `highlight` stays for the same reason, with its hazards contained (K13). |
 | **A Delta/rich-text document with a Markdown codec** | Contradicts "disk is source of truth"; the codec is exactly the 648 lines and the fidelity bugs the app already has (#139, #165). |
 | **Render to HTML and use a web view / `flutter_html`** | Not pure Flutter, a plugin on every platform, and no chance of the keystroke numbers. |
@@ -12297,7 +12297,7 @@ flutter pub deps --json > /tmp/niman/pubdeps.json
 
 **This repo**
 
-- [`docs/dev/editor-alternatives.md`](../../docs/dev/editor-alternatives.md) — the six measured and rejected packages.
+- [`docs/records/editor-alternatives.md`](../../docs/records/editor-alternatives.md) — the six measured and rejected packages.
 - [`docs/dev/architecture.md`](../../docs/dev/architecture.md) — the module map and the key flows.
 - [`docs/user/editing.md`](../../docs/user/editing.md) — the user-visible behaviour contract.
 - [`docs/user/shortcuts.md`](../../docs/user/shortcuts.md) — the remappable keys a custom surface must honour.
@@ -12430,7 +12430,7 @@ modified; the one scratch test file used was deleted before this report was
 finished (its full content is in §13.5 so it can be recreated byte for byte).
 
 This is the measurement
-`docs/dev/editor-alternatives.md` (repo path)
+`docs/records/editor-alternatives.md` (repo path)
 asked for: that document establishes that six *candidates* are slower than the
 source editor, and states that **`flutter_quill` itself was never benched** —
 "measuring the incumbent … is the first thing the next evaluation should do".

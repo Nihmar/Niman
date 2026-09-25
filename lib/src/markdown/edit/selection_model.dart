@@ -1,5 +1,5 @@
 /// The caret and the selection, in **source offsets**
-/// (`docs/dev/unified-surface.md` §8.7.2).
+/// (`docs/records/unified-surface.md` §8.7.2).
 ///
 /// One selection for the whole document, whichever blocks it spans. Source
 /// offsets are the point of approach B (§8.6.0): the rendered text *is* the

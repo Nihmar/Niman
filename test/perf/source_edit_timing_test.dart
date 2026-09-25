@@ -4,7 +4,7 @@
 // Two numbers, both of them the design's own:
 //
 // * **the incremental edit: 0.507 ms.** That is the number every editor
-// alternative failed to beat (`editor-alternatives.md`) — an edit is O(change),
+// alternative failed to beat (`docs/records/editor-alternatives.md`) — an edit is O(change),
 // not O(document) — and `SourceInput.retokenize` exists to keep it that way: a
 // keystroke hands the tokenizer the lines it changed and nothing else. What is
 //   timed here is the whole path a keystroke takes through the surface's own
@@ -132,8 +132,8 @@ void main() {
     );
     // The cold open is held to a **backstop** on every host and to nothing
     // tighter, and the reason is measured rather than assumed: this fixture
-    // tokenizes in ~35 ms where `editor-alternatives.md` read 23.95 ms for
-    // *its*
+    // tokenizes in ~35 ms where `docs/records/editor-alternatives.md` read
+    // 23.95 ms for *its*
     // fixture, so the two numbers are not the same measurement and asserting
     // one
     // against the other would be a fiction. What carries across hosts is the

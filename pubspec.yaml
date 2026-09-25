@@ -19,7 +19,7 @@ dependencies:
   audioplayers: ^6.8.1
 
   # The sync's automatic triggers: Wi-Fi only, and a retry as soon as the
-  # network comes back (docs/dev/sync.md, "Queue and triggers").
+  # network comes back (docs/records/sync.md, "Queue and triggers").
   connectivity_plus: ^7.3.1
   crypto: ^3.0.7
   desktop_drop: ^0.8.4
@@ -51,7 +51,7 @@ dependencies:
   flutter_secure_storage: ^11.0.0
 
   flutter_timezone: ^5.1.0
-  # The code lexer (D2 of docs/dev/unified-surface.md): its grammars colour
+  # The code lexer (D2 of docs/records/unified-surface.md): its grammars colour
   # a fence by its language; the drawing is Niman's.
   highlight: ^0.7.0
 
@@ -66,7 +66,7 @@ dependencies:
   katex: ^1.0.0
   katex_dart: ^0.1.1
 
-  # The CommonMark/GFM parser (D2 of docs/dev/unified-surface.md): the
+  # The CommonMark/GFM parser (D2 of docs/records/unified-surface.md): the
   # unified engine walks its AST.
   markdown: ^7.3.1
   # Filesystem location for the library root.

@@ -153,7 +153,7 @@ final class Indexer {
   ///
   /// What makes a first open wait for the tree and not for the notes: a
   /// library holding the 247 MB stress note took some eleven seconds to
-  /// read on a desktop before it opened at all (`docs/dev/huge-notes.md`,
+  /// read on a desktop before it opened at all (`docs/records/huge-notes.md`,
   /// item 8), for rows the tree does not need. On an index that has rows a
   /// scan writes digests it read, and a row written without one would lose
   /// the digest the rename pairing keys on — so this is the empty index's

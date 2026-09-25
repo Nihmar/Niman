@@ -2,7 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
 
-/// Where a library's WebDAV password lives (docs/dev/sync.md,
+/// Where a library's WebDAV password lives (docs/records/sync.md,
 /// "Configuration"): never in the database, never in a log.
 abstract interface class SyncSecretStore {
   /// The password of [libraryPath]'s destination, or null when none is

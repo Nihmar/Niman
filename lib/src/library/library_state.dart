@@ -642,7 +642,7 @@ final class LibraryController implements LibrarySession {
     // longer lists; their rows go with the entry (issue 6).
     await WidgetConfigStore(db).removeForLibrary(libraryPath);
     // Its sync state describes a library the app no longer knows; opened
-    // again, it starts unconfigured (docs/dev/sync.md, "Configuration").
+    // again, it starts unconfigured (docs/records/sync.md, "Configuration").
     await SyncStore(db).removeLibrary(libraryPath);
     // What was left open in it goes too (#23): opened again, it starts
     // with nothing open, like a library the app has never seen.

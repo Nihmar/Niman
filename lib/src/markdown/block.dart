@@ -1,7 +1,7 @@
 /// One top-level block of a note: what it is, and which lines it covers.
 ///
 /// A block is the unit the surface lays out and the unit the parse is cached
-/// by (`docs/dev/unified-surface.md` §8.5). It is deliberately *flat*: a
+/// by (`docs/records/unified-surface.md` §8.5). It is deliberately *flat*: a
 /// blockquote or a list item records its depth instead of owning nested
 /// blocks, because the layout and the inline phase both work a block at a time
 /// and neither needs the nesting to be a tree.

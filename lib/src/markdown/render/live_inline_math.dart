@@ -3,7 +3,7 @@
 ///
 /// A `WidgetSpan` is one code unit the source does not have, so every offset
 /// after it would be off by one: the caret, the hit test, the selection, the
-/// spelling, the IME. §8.6.0 point 3 of `docs/dev/unified-surface.md` accepted
+/// spelling, the IME. §8.6.0 point 3 of `docs/records/unified-surface.md` accepted
 /// that and called for a correction table. This keeps the source instead,
 /// every character where it was, and makes the formula's *source* take the
 /// formula's room: its characters are hidden, and spaced so that together

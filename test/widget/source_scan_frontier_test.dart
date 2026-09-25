@@ -1,5 +1,5 @@
 // An edit that changes what the rest of the note is (#246, and
-// `docs/dev/huge-notes.md` item 3): the keystroke scans a budget of lines, the
+// `docs/records/huge-notes.md` item 3): the keystroke scans a budget of lines, the
 // lines drawn catch the scan up as far as they need, and the rest is carried
 // on while the app is idle — with the same colours a fresh read gives.
 import 'package:flutter/material.dart';

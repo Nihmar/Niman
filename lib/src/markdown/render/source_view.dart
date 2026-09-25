@@ -2062,7 +2062,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   Timer? _scanSlice;
 
   /// Carries on, a slice at a time, the scan an edit left owed
-  /// (`docs/dev/huge-notes.md` item 3).
+  /// (`docs/records/huge-notes.md` item 3).
   ///
   /// An edit that changes what the rest of the note is — a `$$` opened at 50 %
   /// of a 246 MB note — scans its budget of lines and stops, and the lines on
@@ -3994,7 +3994,7 @@ final class _Line extends StatelessWidget {
     // drawn as a heading whether its hashes are shown or not, because what the
     // mode is about is reading the note with the syntax out of the way — and
     // revealing a marker is not a reason to restyle the line under the caret
-    // (`docs/dev/unified-surface.md` §8.6.2, and the test that holds it).
+    // (`docs/records/unified-surface.md` §8.6.2, and the test that holds it).
     if (!hideMarkers) return theme.body;
     // A table's cells are set as the read view sets them.
     if (tableRow != null) {
@@ -4327,7 +4327,7 @@ final class _Line extends StatelessWidget {
 
   /// Whether [token]'s marker is hidden rather than drawn.
   ///
-  /// Policy A of `docs/dev/unified-surface.md` §8.6.2 — the markers are hidden
+  /// Policy A of `docs/records/unified-surface.md` §8.6.2 — the markers are hidden
   /// everywhere except where the writer is — with the per-word refinement D9
   /// asks for. The two granularities are the two things a marker can be the
   /// shape of:
@@ -4562,7 +4562,7 @@ const TextStyle _hiddenMarker = TextStyle(
 /// that matters is *equality*: a caret that moves inside a run produces an
 /// equal [CaretSpot], so no line rebuilds, and one that crosses a run boundary
 /// produces a different one, so exactly the two lines involved do
-/// (`docs/dev/unified-surface.md` §8.6.2's budget).
+/// (`docs/records/unified-surface.md` §8.6.2's budget).
 @immutable
 final class CaretSpot {
   /// The caret's line and its run on it.

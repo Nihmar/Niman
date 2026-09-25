@@ -3,7 +3,7 @@
 /// The three surfaces being replaced had three authorities for how a note
 /// looks — `re_editor`'s code theme, Quill's `DefaultStyles`, and
 /// `flutter_markdown_plus`'s `MarkdownStyleSheet` — which is why the same note
-/// moved when the surface changed (`docs/dev/unified-surface.md` §8.3). This is
+/// moved when the surface changed (`docs/records/unified-surface.md` §8.3). This is
 /// the one place that decides, and every mode reads it.
 ///
 /// Two rules make it *uniform* rather than merely shared:

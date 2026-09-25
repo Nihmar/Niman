@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
-/// Why a history version was taken (docs/dev/sync.md, "What a version is").
+/// Why a history version was taken (docs/records/sync.md, "What a version is").
 enum HistoryReason {
   /// The note as it was when an editing session started.
   session,
@@ -104,7 +104,7 @@ final class HistoryVersion {
       '${sha256.isEmpty ? '?' : sha256.substring(0, 8)})';
 }
 
-/// The pin that holds the sync base (docs/dev/sync.md, "Rotation").
+/// The pin that holds the sync base (docs/records/sync.md, "Rotation").
 const String syncBasePin = 'syncBase';
 
 /// A note's history manifest: `.history/<path>.json`.

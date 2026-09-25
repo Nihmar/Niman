@@ -40,7 +40,7 @@ final class UnsupportedAudioException implements Exception {
 /// whisper.cpp accepts, off the UI isolate.
 ///
 /// The app records with the `record` defaults (44.1 kHz), and whisper.cpp
-/// refuses any other rate (docs/dev/transcription.md). Integer PCM of 8,
+/// refuses any other rate (docs/records/transcription.md). Integer PCM of 8,
 /// 16, 24 or 32 bits and 32/64-bit float are read, any channel count is
 /// averaged to mono, and the rate is converted with a windowed-sinc
 /// filter whose cutoff sits below the new Nyquist frequency, so speech

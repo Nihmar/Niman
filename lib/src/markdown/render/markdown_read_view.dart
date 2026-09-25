@@ -1,7 +1,7 @@
 /// The windowed read view: only the blocks the viewport shows are laid out.
 ///
 /// This is the rule the whole surface is built around
-/// (`docs/dev/unified-surface.md` §8.4). The numbers say why: laying out every
+/// (`docs/records/unified-surface.md` §8.4). The numbers say why: laying out every
 /// block of the geometry note costs 552 ms — 33 frames at 60 Hz — and its
 /// inline phase costs 378 ms for the document against 5 ms for a viewport. So
 /// the view asks the parser for a block only when the sliver hands it one, and

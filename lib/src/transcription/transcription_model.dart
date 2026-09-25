@@ -1,6 +1,6 @@
 import 'package:whisper_ggml/whisper_ggml.dart';
 
-/// One speech-to-text model the app offers (docs/dev/transcription.md).
+/// One speech-to-text model the app offers (docs/records/transcription.md).
 ///
 /// A thin description over the package's [WhisperModel]: what the model
 /// page lists, how big the download is, and where it goes on disk. Only

@@ -11,7 +11,7 @@
 ///
 /// Debug mode, as the repo's benchmarks are: the absolute numbers are inflated
 /// and the ratios are the part that carries. The results are recorded in
-/// `docs/dev/unified-surface.md` — §8.2 for the buffer, §8.5 for the block scan
+/// `docs/records/unified-surface.md` — §8.2 for the buffer, §8.5 for the block scan
 /// and §8.5.5 for the inline phase.
 library;
 

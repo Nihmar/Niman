@@ -1,7 +1,7 @@
 /// Measures the extension masker, and checks the number the design document
 /// claims for it.
 ///
-/// The claim (`docs/dev/unified-surface.md` §8.5.0): `Geometria 1.md` has
+/// The claim (`docs/records/unified-surface.md` §8.5.0): `Geometria 1.md` has
 /// thousands of `_` delimiter runs of which only a handful are real emphasis,
 /// once its math is masked — which is why masking is a correctness requirement
 /// and not an optimisation. This prints both counts.

@@ -213,7 +213,7 @@ class KnownLibraries extends Table {
   Set<Column> get primaryKey => {path};
 }
 
-/// Where a library syncs to: one row per library (M5, docs/dev/sync.md,
+/// Where a library syncs to: one row per library (M5, docs/records/sync.md,
 /// "Configuration").
 ///
 /// App-side on purpose, like [KnownLibraries]: the same server can have a
@@ -261,7 +261,7 @@ class SyncDestinations extends Table {
 }
 
 /// What both sides agreed on at the last successful sync of one file
-/// (docs/dev/sync.md, "State: `sync_items`").
+/// (docs/records/sync.md, "State: `sync_items`").
 ///
 /// This is what tells "deleted here" from "created there", so it cannot
 /// be rebuilt from disk — which is why it lives here and not in the
@@ -318,7 +318,7 @@ class SyncItems extends Table {
 }
 
 /// A hint that something happened to a path since the last sync
-/// (docs/dev/sync.md, "Queue and triggers"): a persisted, coalescing
+/// (docs/records/sync.md, "Queue and triggers"): a persisted, coalescing
 /// queue that survives restarts and carries the retry backoff.
 class SyncOps extends Table {
   /// Row id.

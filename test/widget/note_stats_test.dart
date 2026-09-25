@@ -1,4 +1,4 @@
-// The note view's statistics on the unified surface (docs/dev/huge-notes.md,
+// The note view's statistics on the unified surface (docs/records/huge-notes.md,
 // item 2): the word count follows the edits and the outline comes off the
 // pane's own scan — neither joins the note, and neither waits for a scan of
 // it to be asked again.

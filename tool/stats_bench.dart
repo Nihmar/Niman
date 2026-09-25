@@ -6,7 +6,7 @@
 /// is kept per line and follows the edits, and the headings are read off the
 /// blocks the styling already scanned.
 ///
-/// The claim it checks is the one `docs/dev/huge-notes.md` records: on the
+/// The claim it checks is the one `docs/records/huge-notes.md` records: on the
 /// 247 MB note a refresh was 190 ms of join on the UI isolate plus about
 /// 1.4 s of isolate work, and it is now a lookup — with the count built once,
 /// in the background, and an edit paying for the lines it touched.

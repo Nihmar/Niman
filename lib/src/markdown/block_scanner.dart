@@ -1,7 +1,7 @@
 /// The block scanner: what each line is, and where one block ends.
 ///
 /// Two ideas, both taken from what this repo already does and generalized
-/// (`docs/dev/unified-surface.md` §8.5):
+/// (`docs/records/unified-surface.md` §8.5):
 ///
 /// * **A line's block meaning is a function of the line and the state entering
 ///   it.** `editor/highlighting.dart` already relies on this with a fence, math
@@ -162,7 +162,7 @@ final class BlockScanner {
   /// hints, not answers, until [advance] reaches them. Empty when the whole
   /// note is current.
   ///
-  /// Why a rescan stops short at all is `docs/dev/huge-notes.md` item 3: an
+  /// Why a rescan stops short at all is `docs/records/huge-notes.md` item 3: an
   /// edit can change what the whole rest of the note *is* — the second `$`
   /// of a `$$`, the third backtick of a fence — and then there is nothing to
   /// converge to until the end. That work is the note's, and it cannot be
@@ -295,7 +295,7 @@ final class BlockScanner {
   /// The blocks from [tailStart] on are the ones the scan is compared with;
   /// the ones before it that [edit] touched are read where they were before
   /// it. Both ends of the rebuild are the *edit's*, not the block's
-  /// (`docs/dev/huge-notes.md` item 3): a block can be the whole note — a
+  /// (`docs/records/huge-notes.md` item 3): a block can be the whole note — a
   /// paragraph with no blank line in it, a formula that never closes — and a
   /// keystroke that paid for the block paid for the note.
   ///

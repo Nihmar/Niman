@@ -278,7 +278,7 @@ Future<String> trashDirName(Directory dir, String base) async {
 /// against what was last seen is O(1) — a stat — and it is what tells the two
 /// apart without reading the file back and comparing its text, which on a
 /// note of hundreds of megabytes is hundreds of milliseconds (see
-/// `docs/dev/huge-notes.md`).
+/// `docs/records/huge-notes.md`).
 final class DiskStamp {
   /// Records [size] and [modified].
   const new({required this.size, required this.modified});

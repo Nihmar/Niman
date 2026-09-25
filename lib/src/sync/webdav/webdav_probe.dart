@@ -7,7 +7,7 @@ import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 
 /// What a destination can do, as measured by [probeWebDav]
-/// (docs/dev/sync.md, "Server capabilities").
+/// (docs/records/sync.md, "Server capabilities").
 ///
 /// Every flag off is a working server in compatible mode; the flags only
 /// turn optimizations on.
@@ -153,7 +153,7 @@ final class WebDavCapabilities {
 const _log = AppLogger(name: 'webdav');
 
 /// Measures what the destination behind [client] can do
-/// (docs/dev/sync.md, "The probe").
+/// (docs/records/sync.md, "The probe").
 ///
 /// Works inside a scratch folder `.niman-probe-<random>/` that it deletes
 /// at the end, also on failure. Throws [WebDavAuthFailure] for wrong

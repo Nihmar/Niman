@@ -5,7 +5,7 @@
 /// note open at all. Export is the opposite — a PDF, a print, an image of the
 /// note — and D12 makes it a seam rather than an afterthought, because a
 /// renderer that can only draw what is on screen cannot be made to draw the
-/// rest later without rewriting it (`docs/dev/unified-surface.md` §8.6).
+/// rest later without rewriting it (`docs/records/unified-surface.md` §8.6).
 ///
 /// The seam is in two halves, and both are the ones that matter:
 ///

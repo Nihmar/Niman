@@ -1,4 +1,4 @@
-// The word count kept by the edits (docs/dev/huge-notes.md, item 2).
+// The word count kept by the edits (docs/records/huge-notes.md, item 2).
 //
 // What it has to be: the answer the whole text gives, reached by counting
 // the lines an edit touched and nothing else — and never by joining the

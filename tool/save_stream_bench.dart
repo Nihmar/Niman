@@ -7,7 +7,7 @@
 /// a time on this isolate and send the bytes as they are made, so the
 /// frames keep coming.
 ///
-/// The claim it checks is the one `docs/dev/huge-notes.md` records: on the
+/// The claim it checks is the one `docs/records/huge-notes.md` records: on the
 /// 247 MB note the old save is one 643 ms turn of the UI isolate, and the
 /// new one is a couple of hundred turns under 16 ms. The whole save takes
 /// slightly longer new — the slices and the messages cost — and that is the

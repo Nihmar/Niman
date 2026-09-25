@@ -96,7 +96,7 @@ abstract interface class NoteOperations {
   ///
   /// The same save as [saveNote] in every other way — the same history
   /// step, the same bytes on disk, the same reindex behind it — for a note
-  /// too long to join on the UI isolate (see `docs/dev/huge-notes.md`).
+  /// too long to join on the UI isolate (see `docs/records/huge-notes.md`).
   /// [references] are its tags and links as of the text, when the editor
   /// keeps them: the reindex behind the save takes them instead of reading
   /// the note for them.
@@ -236,7 +236,7 @@ abstract interface class LibrarySession {
   /// CRUD ops for the open library, or null while closed.
   NoteOperations? get ops;
 
-  /// The open library's WebDAV sync (docs/dev/sync.md), or null while
+  /// The open library's WebDAV sync (docs/records/sync.md), or null while
   /// closed. Present for every open library; its status says whether one
   /// is configured.
   SyncService? get sync;

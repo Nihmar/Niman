@@ -1,5 +1,5 @@
 // A note's tags and links as the unified engine reads them — what the index
-// keeps of a note besides its text (`docs/dev/huge-notes.md`, item 8).
+// keeps of a note besides its text (`docs/records/huge-notes.md`, item 8).
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

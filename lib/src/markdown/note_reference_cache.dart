@@ -3,7 +3,7 @@
 /// note for them.
 ///
 /// Reading them is 5.1 s of the 247 MB stress note's reindex
-/// (`docs/dev/huge-notes.md`, item 8), and a save changes a few blocks of
+/// (`docs/records/huge-notes.md`, item 8), and a save changes a few blocks of
 /// its 2 M. So the references are kept per block, in step with the
 /// editor's block scan: its record of what the edits did to the block list
 /// ([BlockScanner.takeChanges], a reader of its own) says which entries

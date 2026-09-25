@@ -427,7 +427,7 @@ a character, an Enter, a join, and a line taken off the end.
 `live` mode hid its markers and showed none of them back, which made it a
 preview rather than somewhere to write: the writer could not see the `#` or
 the `-` they were editing. The reveal policy is now
-`docs/dev/unified-surface.md` §8.6.2's **policy A** — the markers are hidden
+`docs/records/unified-surface.md` §8.6.2's **policy A** — the markers are hidden
 everywhere except on the line the caret is in.
 
 It is a *style*, never the text: `_Line.hidden(token, revealed:, run:)` decides

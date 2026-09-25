@@ -1,4 +1,4 @@
-// Phase 4's first exit criterion (docs/dev/unified-surface.md): typing at the
+// Phase 4's first exit criterion (docs/records/unified-surface.md): typing at the
 // end of a bold, italic, code, link or maths run produces what a writer
 // expects — the character lands *inside* the run, next to what it marks, and
 // the run's markers still hold it.

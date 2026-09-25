@@ -96,7 +96,7 @@ void main() {
 
   group('the digest the write made', () {
     // A reindex after a save hashed the note again: 1.9 s of the 247 MB
-    // stress note's 10.6 (`docs/dev/huge-notes.md`, item 8), for bytes the
+    // stress note's 10.6 (`docs/records/huge-notes.md`, item 8), for bytes the
     // write had in hand.
     late NoteWriter waiting;
 
