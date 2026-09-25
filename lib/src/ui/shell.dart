@@ -315,8 +315,10 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 saveExportFile: ref.read(saveExportFileProvider),
                 pickExportFolder: ref.read(pickExportFolderProvider),
                 pdfPrinter: ref.read(pdfPrinterProvider),
-                pdfEngine: ref.watch(pdfEngineProvider).value,
-                pdfAvailable: ref.watch(pdfAvailableProvider),
+                // The engine search is a process on Windows: looked up when
+                // a folder export actually asks for it, never at startup
+                // (L4), and awaited before the chooser can offer PDF (L5).
+                pdfEngineLookup: () => ref.read(pdfEngineProvider.future),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -350,8 +352,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.saveExportFile,
     required this.pickExportFolder,
     required this.pdfPrinter,
-    required this.pdfEngine,
-    required this.pdfAvailable,
+    required this.pdfEngineLookup,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -401,13 +402,10 @@ final class _LibraryShell extends StatefulWidget {
   /// can start.
   final PdfPrinter pdfPrinter;
 
-  /// The browser a folder's PDF zip prints with, or null when this
-  /// machine has none (the format is then not offered for a folder).
-  final String? pdfEngine;
-
-  /// Whether PDFs can be printed here: the WebView on Android, or
-  /// [pdfEngine] on the desktop.
-  final bool pdfAvailable;
+  /// The browser a folder's PDF zip prints with, looked up on demand: a
+  /// `Future` so the chooser can wait for the answer instead of reading a
+  /// null that is only the search still running.
+  final Future<String?> Function() pdfEngineLookup;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -2915,13 +2913,20 @@ final class _LibraryShellState extends State<_LibraryShell>
       // written: the editors' pending edits land first.
       await widget.unsavedTracker.saveAll();
       final note = await ops.find(path);
-      final text = await ops.readNote(path);
       final title = note == null ? p.basename(path) : displayNameOf(note);
       final ExportPayload payload;
       var selectable = true;
-      if (format == ExportFormat.pdf) {
+      if (format == ExportFormat.markdown) {
+        // The file's own bytes: `readNote` would hand back a leniently
+        // decoded text, and re-encoding that is not the file on disk.
+        payload = exportMarkdown(
+          path: path,
+          bytes: await ops.readNoteBytes(path),
+        );
+      } else if (format == ExportFormat.pdf) {
         // The raster fallback draws with the note's own typography, so a
         // cache of its own goes with it.
+        final text = await ops.readNote(path);
         final cache = MathCache();
         try {
           final printed = await exportNotePdf(
@@ -2942,12 +2947,16 @@ final class _LibraryShellState extends State<_LibraryShell>
         }
       } else {
         payload = await exportNote(
-          text: text,
+          text: await ops.readNote(path),
           title: title,
           path: path,
           root: root,
           language: AppLanguages.resolved.id,
-          format: format,
+          // The chooser knows three formats; the builder knows the two it
+          // can build, and PDF went its own way above.
+          format: format == ExportFormat.markdown
+              ? ExportFileFormat.markdown
+              : ExportFileFormat.html,
           linkSource: _linkSource,
         );
       }
@@ -3020,14 +3029,26 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _exportFolder(String dir, {required bool library}) async {
     final root = widget.controller.root;
     if (root == null) return;
-    final format = await _chooseExportTreeFormat(library: library);
+    // The isolate reads the notes from disk, so the buffers' pending edits
+    // land before it starts — and before the pickers, so the write happens
+    // while the user is choosing (M2).
+    await _guard(() => widget.unsavedTracker.saveAll());
+    // Android's WebView needs no engine at all; the desktop looks for one
+    // now, before the chooser asks whether PDF is on offer.
+    final engine = Platform.isAndroid ? null : await widget.pdfEngineLookup();
+    final format = await _chooseExportTreeFormat(
+      library: library,
+      pdfAvailable: Platform.isAndroid || engine != null,
+    );
     if (format == null || !mounted) return;
     final folder = await widget.pickExportFolder(
       dialogTitle: AppStrings.exportTitle,
     );
     if (folder == null || !mounted) return;
     final name = dir.isEmpty ? p.basename(root) : p.basename(dir);
-    final zipPath = p.join(folder, _zipName(name));
+    // An existing zip is never overwritten silently: a second export of
+    // the same folder writes `name (2).zip` (L6).
+    final zipPath = await _freeZipPath(folder, name);
     final TreeExport export;
     try {
       export = await TreeExport.start(
@@ -3035,7 +3056,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         zipPath: zipPath,
         format: format,
         language: AppLanguages.resolved.id,
-        engine: widget.pdfEngine,
+        engine: engine,
       );
     } on Object catch (error) {
       if (mounted) {
@@ -3057,8 +3078,13 @@ final class _LibraryShellState extends State<_LibraryShell>
       await export.done;
       if (!mounted) return;
       _showExportDone(zipPath);
-    } on ExportCancelled {
-      // The dialog closed itself; a cancelled export says nothing.
+    } on ExportCancelled catch (cancelled) {
+      // The dialog closed itself; a cancel says nothing unless the zip is
+      // still there (a Windows handle the killed isolate did not let go).
+      if (!cancelled.zipLeftBehind || !mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppStrings.exportFailed(cancelled))),
+      );
     } on Object catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -3067,8 +3093,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     }
   }
 
-  /// Says where an export landed, with a way to its folder where the OS
-  /// can be given one (a desktop; on Android the picker already knows).
   /// Says where an export landed, with a way to its folder where the OS
   /// can be given one (a desktop; on Android the picker already knows),
   /// and — for a PDF drawn here — that it is a picture of the pages.
@@ -3084,27 +3108,42 @@ final class _LibraryShellState extends State<_LibraryShell>
         action: supportsTreeContextActions
             ? SnackBarAction(
                 label: AppStrings.openInFileManager,
-                onPressed: () => unawaited(
-                  runTreeContextAction(
-                    place,
-                    TreeContextAction.openInFileManager,
-                  ),
-                ),
+                onPressed: () => unawaited(_revealExport(place)),
               )
             : null,
       ),
     );
   }
 
+  /// Shows the export in the file manager, reporting the outcome: a button
+  /// that silently does nothing is worse than no button.
+  Future<void> _revealExport(String place) async {
+    final outcome = await runTreeContextAction(
+      place,
+      TreeContextAction.openInFileManager,
+    );
+    if (!mounted || outcome == TreeContextOutcome.opened) return;
+    final message = switch (outcome) {
+      TreeContextOutcome.missing => AppStrings.openFileMissing,
+      _ => AppStrings.openFileFailed,
+    };
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
   /// Asks which format a folder or the library is exported in: the wide
-  /// window's dialog, the phone's sheet.
-  Future<ExportTreeFormat?> _chooseExportTreeFormat({required bool library}) {
+  /// window's dialog, the phone's sheet. [pdfAvailable] is decided by the
+  /// caller, after the engine search has answered.
+  Future<ExportTreeFormat?> _chooseExportTreeFormat({
+    required bool library,
+    required bool pdfAvailable,
+  }) {
     final title = library
         ? AppStrings.exportLibraryTitle
         : AppStrings.exportFolderTitle;
     final formats = <Widget>[
       for (final format in ExportTreeFormat.values)
-        if (format != ExportTreeFormat.pdf || widget.pdfAvailable)
+        if (format != ExportTreeFormat.pdf || pdfAvailable)
           ListTile(
             key: Key('export-tree-${format.name}'),
             title: Text(_treeFormatName(format)),
@@ -3136,11 +3175,41 @@ final class _LibraryShellState extends State<_LibraryShell>
   };
 
   /// The zip's file name for a folder called [name]: the characters a file
-  /// name cannot hold become dashes.
+  /// name cannot hold become dashes, the names Windows reserves become
+  /// something else, and a name of dots reads as "export".
   static String _zipName(String name) {
-    final wanted = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '-').trim();
+    var wanted = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '-').trim();
+    // Windows rejects a name that ends in a dot or a space, and treats the
+    // device names — CON, NUL, COM1 — as the devices themselves.
+    wanted = wanted.replaceAll(RegExp(r'[. ]+$'), '');
+    if (_windowsDevices.contains(wanted.toUpperCase())) wanted = 'export';
     return '${wanted.isEmpty ? 'export' : wanted}.zip';
   }
+
+  /// A path no file holds yet: [name]'s zip, or `name (2).zip`, `(3)`…
+  /// beside it. The picker chose the folder, not the name, and truncating
+  /// an export the user already has is not a choice to make for them.
+  static Future<String> _freeZipPath(String folder, String name) async {
+    final wanted = _zipName(name);
+    final stem = p.basenameWithoutExtension(wanted);
+    var path = p.join(folder, wanted);
+    // A stat, and the one place this app writes a file the user named:
+    // sync keeps the loop readable and runs once per export.
+    for (var n = 2; File(path).existsSync(); n++) {
+      path = p.join(folder, '$stem ($n).zip');
+    }
+    return path;
+  }
+
+  /// The names Windows treats as devices, whatever their extension.
+  static final Set<String> _windowsDevices = <String>{
+    'CON',
+    'PRN',
+    'AUX',
+    'NUL',
+    for (var n = 1; n <= 9; n++) 'COM$n',
+    for (var n = 1; n <= 9; n++) 'LPT$n',
+  };
 
   /// Tidies the note at absolute [path], edited and now closed, when the
   /// library asks for it ([ShellEditorSettings.tidyOnClose]).

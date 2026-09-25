@@ -186,6 +186,23 @@ void main() {
     expect(saved?.name, 'note.md');
   });
 
+  testWidgets('a row that is not Markdown offers no export', (tester) async {
+    await pumpShell(tester);
+    await controller.seedFile('picture.png', content: 'not an image');
+    await settle(tester);
+    await tester.longPress(noteRow('picture.png'));
+    await settle(tester);
+    // Exporting a binary as Markdown would re-encode it silently (M1).
+    expect(find.byKey(const Key('menu-export')), findsNothing);
+    await tester.tapAt(const Offset(4, 4));
+    await settle(tester);
+    await tester.longPress(noteRow('note.md'));
+    await settle(tester);
+    expect(find.byKey(const Key('menu-export')), findsOneWidget);
+    await tester.tapAt(const Offset(4, 4));
+    await settle(tester);
+  });
+
   testWidgets('a folder row exports it as one zip', (tester) async {
     // The destination dialog is dismissed: the picker was asked, and
     // nothing was written.

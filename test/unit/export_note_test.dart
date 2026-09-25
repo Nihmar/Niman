@@ -12,7 +12,7 @@ void main() {
       path: 'Notes/T.md',
       root: '/lib',
       language: 'en',
-      format: ExportFormat.markdown,
+      format: ExportFileFormat.markdown,
     );
     expect(payload.name, 'T.md');
     expect(payload.mimeType, 'text/markdown');
@@ -26,7 +26,7 @@ void main() {
       path: 'Notes/T.md',
       root: '/lib',
       language: 'it',
-      format: ExportFormat.html,
+      format: ExportFileFormat.html,
     );
     expect(payload.name, 'T.html');
     expect(payload.mimeType, 'text/html');

@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/saved_file.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 
@@ -20,6 +21,9 @@ typedef SaveExportFile = Future<String?> Function({
 });
 
 /// Asks where to write [bytes] as [name], and writes them there.
+///
+/// Answers with the place — a path on the desktop, the picker's own URI
+/// where there is no path — or null when the dialog was dismissed.
 Future<String?> saveExportFileToDisk({
   required String name,
   required Uint8List bytes,
@@ -32,7 +36,7 @@ Future<String?> saveExportFileToDisk({
     mimeType: mimeType,
     dialogTitle: dialogTitle,
   );
-  return uri?.toString();
+  return uri == null ? null : savedPlace(uri);
 }
 
 /// The save seam the shell writes an export through; widget tests override
@@ -63,17 +67,13 @@ final pickExportFolderProvider = Provider<PickExportFolder>(
 /// in-process through its channel, so nothing is searched for there.
 final pdfPrinterProvider = Provider<PdfPrinter>((ref) {
   if (Platform.isAndroid) return const WebViewPdfPrinter();
-  return const ProcessPdfPrinter();
+  return ProcessPdfPrinter();
 });
 
 /// The desktop engine a folder's PDF zip prints with, or null when this
-/// machine has none — found once, so the export chooser can leave the
-/// format out. Android prints through its WebView and has no engine path:
-/// [pdfAvailableProvider] is what says whether PDF is offered at all.
+/// machine has none.
+///
+/// Read lazily, when a folder export first asks ([FutureProvider] caches
+/// the answer): a user who never exports pays no `reg.exe` on Windows, and
+/// the export can await the answer before offering the format (L4/L5).
 final pdfEngineProvider = FutureProvider<String?>((ref) => findPdfEngine());
-
-/// Whether PDFs can be printed here at all: the system WebView on Android,
-/// a browser engine on the desktop.
-final pdfAvailableProvider = Provider<bool>(
-  (ref) => Platform.isAndroid || ref.watch(pdfEngineProvider).value != null,
-);
