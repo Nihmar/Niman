@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 
@@ -50,5 +51,27 @@ void main() {
     await tester.tapAt(tester.getTopLeft(editor) + const Offset(60, 320));
     await tester.pumpAndSettle();
     expect(menu, findsNothing);
+  });
+
+  testWidgets('the handles and the menu survive the keyboard rising while '
+      'the press is held', (tester) async {
+    await tester.pumpWidget(_app(700));
+    await tester.pumpAndSettle();
+    final editor = find.byType(MarkdownSourceView);
+    final at = tester.getTopLeft(editor) + const Offset(40, 14);
+
+    // The press lands, the word takes the handles, and the pane shrinks
+    // under the finger as the keyboard rises — the selected line's paragraph
+    // is rebuilt in the same frames the overlay draws in (#291).
+    final gesture = await tester.startGesture(at);
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpWidget(_app(400));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOne);
+    expect(find.byKey(const ValueKey(SelectionHandle.start)), findsOneWidget);
+    expect(find.byKey(const ValueKey(SelectionHandle.end)), findsOneWidget);
   });
 }
