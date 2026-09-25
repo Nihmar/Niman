@@ -5,9 +5,10 @@ the evidence in the tree. `integration/unmerged`, from `main` @ `16691f72`
 (0.0.8) to this commit.
 
 **State: verified and closed.** The boxes were checked on 2026-09-25 and
-**43 issues were closed** on the evidence below, each with a comment on
-the issue citing it. **#95 stays open**, and all of section C stays open
-(the user's reading of each is kept there).
+**45 issues were closed** on the evidence below, each with a comment on
+the issue citing it. The last two — **#95** and **#287** — were worked
+and closed after that first pass. Everything in section C stays open (the
+user's reading of each is kept there).
 
 Release title for 0.0.9 (decided): **A homegrown editor, and a lot more
 to play with.** — see [releasing](docs/dev/releasing.md).
@@ -73,11 +74,14 @@ to play with.** — see [releasing](docs/dev/releasing.md).
 - [x] **#48 — Keep hidden tab bodies laid out.** The workspace keeps the
   recent tabs mounted; checked against the "no `build` > 12 ms"
   criterion.
-- [ ] **#95 — Prompt to exempt Niman from battery optimization.** Improved
-  — the warning opens Niman's own battery page — but **not enough**: the
-  toggle on that screen does not clear the warning, because the missing
-  switch is *Allow background activity*. And when notifications are not
-  allowed, the Todo screen should warn about that too. **Left open.**
+- [x] **#95 — Prompt to exempt Niman from battery optimization.** Closed
+after a second pass. The warning follows the switches the system shows:
+the background restriction (`isBackgroundRestricted`), not Doze
+(`isIgnoringBatteryOptimizations`, which the page Niman opened did not
+control, so the switch the user could reach never cleared the banner);
+the notification check now feeds the banner without asking, so it warns
+before the first reminder; the task dialog warns where the reminder is
+set; and **Open settings** opens the App info page.
 - [x] **#36 — Documented release procedure.** `docs/dev/releasing.md` and
   the README's "Release".
 - [x] **#33 — Android release-signed APK + AAB.** The signed APK ships;
@@ -105,7 +109,8 @@ The user's reading of each, noted while checking:
 - **#259 Source font setting · #224 Drag-drop on KDE · #233
   `.txt`/`[-]`/PATH · #50/#51/#100 Split files · #47 Shell alive under
   fullscreen notes · #109 `File.rename` on Windows · #169 Windows Snap
-  Layouts · #287 Marquee titles** — not done.
+  Layouts** — not done. (#287, the scrolling titles, was worked and closed
+  after the triage.)
 - **#37 Open-source readiness** — CONTRIBUTING is missing.
 - **#270–#278 On-device verification** — only IMEs other than GBoard are
   left to test.
@@ -138,5 +143,6 @@ evidence in this file:
   #286, #228, #8.
 - **B (9):** #253, #254, #255, #231, #49, #48, #36, #33, #31.
 - **D (9):** #151, #152, #153, #34, #35, #32, #160, #6, #38.
+- **After the pass (2):** #95, #287.
 
-**Left open:** #95, and every issue in section C.
+**Left open:** every issue in section C.
