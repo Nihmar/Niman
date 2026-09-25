@@ -990,6 +990,51 @@ void main() {
     );
   });
 
+  testWidgets('live reveals an inline formula whose source has spaces', (
+    tester,
+  ) async {
+    final cache = MathCache();
+    addTearDown(cache.dispose);
+    const note = 'caret\n\nsia \$a \\sim b\$ qui\n';
+    Future<void> pumpAt(int caret) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSurface(
+              buffer: SourceBuffer.fromText(note),
+              mode: MarkdownSurfaceMode.live,
+              theme: _theme,
+              selection: SelectionModel.at(caret),
+              showLineNumbers: false,
+              mathCache: cache,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    Iterable<InlineMathPainter> painters() => tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((paint) => paint.foregroundPainter)
+        .whereType<InlineMathPainter>();
+    RenderParagraph line() => tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .firstWhere(
+          (paragraph) => paragraph.text.toPlainText().contains('sia'),
+        );
+
+    // The caret on `b`, a word inside the formula: its source shows.
+    await pumpAt(note.indexOf(r'b$'));
+    expect(painters(), isEmpty, reason: 'the caret is in the formula');
+    expect(line().text.toPlainText(), r'sia $a \sim b$ qui');
+
+    // The caret past it, on `qui`: the formula is typeset as before.
+    await pumpAt(note.indexOf('qui'));
+    expect(painters(), isNotEmpty, reason: 'the caret is outside it');
+  });
+
   testWidgets("an inline formula's room stays on one row", (tester) async {
     // The source has spaces, and a row that ended at one of them split the
     // room in two: the formula, painted whole where its room starts, ran
