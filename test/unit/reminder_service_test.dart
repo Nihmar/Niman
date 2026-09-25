@@ -16,11 +16,15 @@ import '../fakes/fake_reminder_backend.dart';
 /// the health banner asks to open.
 final class _FakeSettings implements ReminderSettings {
   bool batteryExempt = true;
+  bool backgroundRestricted = false;
   int batteryOpened = 0;
   int notificationsOpened = 0;
 
   @override
   Future<bool> isBatteryExempt() async => batteryExempt;
+
+  @override
+  Future<bool> isBackgroundRestricted() async => backgroundRestricted;
 
   @override
   Future<bool> openBatterySettings() async {
@@ -209,6 +213,20 @@ void main() {
       await service.dispose();
     });
 
+    test('a background restriction warns like battery optimization', () async {
+      // Android's "Allow background activity", off: a separate hold from
+      // Doze (an app can be unrestricted for Doze and still restricted
+      // here), and the one the warning used to miss. Same screen fixes it.
+      settings.backgroundRestricted = true;
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1)]));
+
+      expect(service.health.value, ReminderHealth.batteryRestricted);
+      await service.openHealthSettings();
+      expect(settings.batteryOpened, 1);
+      await service.dispose();
+    });
+
     test('inexact alarms still schedule, and report', () async {
       backend.exact = false;
       final service = serviceOf();
@@ -296,6 +314,17 @@ void main() {
       final line = overdueLines().single;
       expect(line, contains('alarms inexact'));
       expect(line, contains('battery optimized'));
+      await service.dispose();
+    });
+
+    test('the line carries a background restriction too', () async {
+      backend = FakeReminderBackend(pending: [1]);
+      settings.backgroundRestricted = true;
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: -1)]));
+
+      final line = overdueLines().single;
+      expect(line, contains('background restricted'));
       await service.dispose();
     });
 

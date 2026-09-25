@@ -185,10 +185,12 @@ final class PluginReminderBackend implements ReminderBackend {
     required bool pending,
     required bool exact,
     required bool batteryExempt,
+    required bool backgroundRestricted,
   }) => osAlarmOverdueState(
     pending: pending,
     exact: exact,
     batteryExempt: batteryExempt,
+    backgroundRestricted: backgroundRestricted,
   );
 
   @override

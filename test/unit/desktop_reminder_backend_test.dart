@@ -45,8 +45,14 @@ void main() {
   // #42: the overdue line has to read true on a desktop, where no OS
   // keeps the alarm: not armed is not the same as fired.
   group('an overdue reminder reads as what happened here', () {
-    String state(TodoReminder r, {required bool pending}) => backend
-        .overdueState(r, pending: pending, exact: true, batteryExempt: true);
+    String state(TodoReminder r, {required bool pending}) =>
+        backend.overdueState(
+          r,
+          pending: pending,
+          exact: true,
+          batteryExempt: true,
+          backgroundRestricted: false,
+        );
 
     test('a timer that fired says how late', () async {
       final r = reminder(const Duration(milliseconds: -5));

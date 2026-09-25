@@ -1,6 +1,6 @@
 /// The system settings that decide whether a reminder can fire (T-TD-07).
 ///
-/// Two of them, both outside the app's control and both silent when
+/// Three of them, all outside the app's control and all silent when
 /// wrong:
 ///
 /// * **Notifications.** Denied or turned off, the alarm still fires and
@@ -12,8 +12,13 @@
 ///   ColorOS, Funtouch) drop its pending alarms outright when it is
 ///   swiped away from recents — so a reminder set for tomorrow never
 ///   arrives.
+/// * **Background activity.** Android's *Restricted* battery mode — an
+///   "Allow background activity" switch, off, on several ROMs — stops
+///   the app being started in the background at all, which an exact alarm
+///   cannot override. It is a separate switch from the exemption above:
+///   an app can be unrestricted for Doze and still restricted here.
 ///
-/// Neither is a runtime permission, so both are reached by opening the
+/// None is a runtime permission, so all are reached by opening the
 /// system screen. The battery one is deliberately not requested through
 /// `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: that one-tap dialog
 /// needs `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which app stores
@@ -33,6 +38,15 @@ import 'package:flutter/services.dart';
 abstract interface class ReminderSettings {
   /// Whether Niman is exempt from battery optimization right now.
   Future<bool> isBatteryExempt();
+
+  /// Whether the system restricts Niman's background activity right now.
+  ///
+  /// Android's *Restricted* battery mode (an "Allow background activity"
+  /// switch, off, on several ROMs): the app is not started in the
+  /// background, so a reminder cannot fire. Separate from
+  /// [isBatteryExempt] — an app can be unrestricted for Doze and still
+  /// restricted here.
+  Future<bool> isBackgroundRestricted();
 
   /// Opens Niman's battery page in system settings, where the exemption
   /// is granted.
@@ -59,6 +73,13 @@ final class PlatformReminderSettings implements ReminderSettings {
     // so there is nothing to warn about off Android.
     if (!Platform.isAndroid) return true;
     return await _invoke('isIgnoringBatteryOptimizations') ?? true;
+  }
+
+  @override
+  Future<bool> isBackgroundRestricted() async {
+    // Off Android the mode does not exist, so the answer is never "yes".
+    if (!Platform.isAndroid) return false;
+    return await _invoke('isBackgroundRestricted') ?? false;
   }
 
   @override
