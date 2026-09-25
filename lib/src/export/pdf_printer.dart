@@ -40,6 +40,41 @@ final class PdfFailed extends PdfOutcome {
   final String message;
 }
 
+/// What a note's PDF is doing, for the dialog that shows it (#63).
+enum PdfExportStage {
+  /// A browser engine (or Android's WebView) is printing the page.
+  printing,
+
+  /// No engine answered: the note is being drawn page by page.
+  drawing,
+}
+
+/// One report from a running PDF export.
+final class PdfExportProgress {
+  /// Creates a report: [done] of [total] pages drawn ([total] is 0 while
+  /// the engine prints, which has no page count to give).
+  const new({required this.stage, this.done = 0, this.total = 0});
+
+  /// What the export is doing.
+  final PdfExportStage stage;
+
+  /// Pages drawn so far.
+  final int done;
+
+  /// Pages the note makes; 0 until the layout is done.
+  final int total;
+}
+
+/// The export was cancelled by the user (the dialog's own button): no file
+/// is written, and nothing is reported as a failure.
+final class PdfExportCancelled implements Exception {
+  /// Creates the cancellation.
+  const new();
+
+  @override
+  String toString() => 'PDF export cancelled';
+}
+
 /// What prints a page.
 abstract interface class PdfPrinter {
   /// Prints the page at [htmlPath] into [pdfPath]; whether it worked is
@@ -140,6 +175,10 @@ const List<String> chromiumExecutables = <String>[
 List<String> printFlags(String pdfPath) => <String>[
   '--headless=new',
   '--disable-gpu',
+  // The page is one local file and its pictures are `file:` URLs into the
+  // library: without this a Chromium treats every file as its own opaque
+  // origin and refuses to load them.
+  '--allow-file-access-from-files',
   '--no-pdf-header-footer',
   '--print-to-pdf=$pdfPath',
 ];

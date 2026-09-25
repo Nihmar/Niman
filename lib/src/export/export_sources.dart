@@ -98,6 +98,51 @@ abstract final class ExportSources {
     return images;
   }
 
+  /// A whole note's page source for the printer: its [text], its [title],
+  /// and its pictures by `file:` URL.
+  ///
+  /// The printed page is not the exported file: the engine (Edge, a
+  /// Chromium, Android's WebView) reads the page from disk and fetches a
+  /// `file:` picture itself, where the HTML export must carry a `data:`
+  /// URI. Embedding a library's photos built pages of hundreds of
+  /// megabytes — the Android PDF read one into its own heap and OOM'd.
+  static Future<NoteHtmlSource> forPrint({
+    required String text,
+    required String title,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async => NoteHtmlSource(
+    text: text,
+    title: title,
+    images: await imageUrls(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    ),
+  );
+
+  /// The pictures [text] shows, resolved, by the target as written: `file:`
+  /// URLs, for a page a browser or a WebView prints from disk.
+  static Future<Map<String, String>> imageUrls({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final images = <String, String>{};
+    for (final target in pictureTargets(text)) {
+      final path = await _picturePath(target, notePath, root, linkSource);
+      if (path == null) {
+        _log.warning('picture not found: "$target" in $notePath');
+        continue;
+      }
+      images[target] = Uri.file(path).toString();
+    }
+    return images;
+  }
+
   /// The whole page for [source], built off the UI isolate (#24): the
   /// parse, the code highlighting and the formulas' SVG are a tenth of a
   /// second on a large note, and a tenth of a second is a visible hang.

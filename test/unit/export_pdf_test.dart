@@ -81,4 +81,34 @@ void main() {
     // was not built for nothing.
     expect(printer.calls, 0);
   });
+
+  test('a printed note reports the printing stage', () async {
+    final stages = <PdfExportStage>[];
+    final result = await exportNotePdf(
+      text: '# T\n',
+      title: 'A title',
+      path: 'Notes/T.md',
+      root: root.path,
+      language: 'en',
+      printer: const _Prints(),
+      onProgress: (report) => stages.add(report.stage),
+    );
+    expect(result.selectable, isTrue);
+    expect(stages, [PdfExportStage.printing]);
+  });
+
+  test('a cancel during the print writes nothing', () async {
+    await expectLater(
+      exportNotePdf(
+        text: '# T\n',
+        title: 'A title',
+        path: 'Notes/T.md',
+        root: root.path,
+        language: 'en',
+        printer: const _Prints(),
+        isCancelled: () => true,
+      ),
+      throwsA(isA<PdfExportCancelled>()),
+    );
+  });
 }
