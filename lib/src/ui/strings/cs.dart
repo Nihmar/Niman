@@ -1552,6 +1552,9 @@ final class CzechStrings extends Strings {
   String get exportLibraryTitle => 'Exportovat knihovnu…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF je obrázek stránek; nainstalujte prohlížeč pro text, který lze '

@@ -1572,6 +1572,9 @@ final class RomanianStrings extends Strings {
   String get exportLibraryTitle => 'Exportă biblioteca…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF-ul este o imagine a paginilor; instalați un browser pentru text '

@@ -1554,6 +1554,9 @@ final class SlovenianStrings extends Strings {
   String get exportLibraryTitle => 'Izvozi knjižnico…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF je slika strani; za izbirno besedilo namestite brskalnik.';

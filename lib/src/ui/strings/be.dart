@@ -1560,6 +1560,9 @@ final class BelarusianStrings extends Strings {
   String get exportLibraryTitle => 'Экспарт бібліятэкі…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF — гэта малюнак старонак; усталюйце браўзер, каб атрымаць '

@@ -1554,6 +1554,9 @@ final class DanishStrings extends Strings {
   String get exportLibraryTitle => 'Eksportér bibliotek…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       "PDF'en er et billede af siderne; installér en browser for "

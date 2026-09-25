@@ -1,4 +1,4 @@
-# Export: plan (#24, #63)
+# Export: plan (#24, #63, #303)
 
 Export a note, a folder or the library as Markdown, HTML and PDF. The
 decisions are in the #24 thread
@@ -146,6 +146,31 @@ Every entry exists on Android, Linux and Windows.
    6. PR `Closes #63`.
 
 Commit each step as it lands. Run analyze and the targeted tests on each commit, and the integration tests before the PR.
+
+## 4. EPUB (#303), after the pages
+
+A note is a one-chapter book; a folder (or the library) is **one** book
+with a chapter per note. The body is the same exported page (`NoteHtml`,
+`MathSvg`, the tree's link and picture resolution) in the XHTML an EPUB
+demands; the container is `mimetype` (stored, first),
+`META-INF/container.xml`, `OEBPS/content.opf`, `OEBPS/nav.xhtml`,
+`style.css` and the pictures under `OEBPS/images/`.
+
+- [x] `EpubBook`: chapters and pictures streamed into the container, the
+  package and the nav written last; a picture copied once whatever the
+  chapter that shows it, the maths fonts declared once for the book.
+- [x] One note → one `.epub`, its pictures inside.
+- [x] Folder/library → one `.epub`, a chapter per note, links between
+  chapters internal, one nav entry per chapter.
+- [x] The EPUB format in both choosers, on every platform, `.epub` file
+  names, strings in every locale.
+- [x] Tests: the container's shape and first-stored `mimetype`, every
+  XHTML and the OPF parsed as XML, math as inline SVG, pictures inside,
+  a shared picture copied once, links between chapters.
+- [ ] Read back by hand in Calibre / Apple Books / KOReader **and** in the
+  app's own pane (#280).
+- [ ] Cover: none in v1, a reader draws its own title page.
+- [ ] Nav folded by folder (a flat, tree-ordered list for now).
 
 ## Open questions
 

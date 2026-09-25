@@ -1533,6 +1533,9 @@ final class HindiStrings extends Strings {
   String get exportLibraryTitle => 'लाइब्रेरी निर्यात करें…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF पृष्ठों की तस्वीर है; चुने जा सकने वाले टेक्स्ट के लिए ब्राउज़र '

@@ -1579,6 +1579,9 @@ final class DutchStrings extends Strings {
   String get exportLibraryTitle => 'Bibliotheek exporteren…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       "De PDF is een afbeelding van de pagina's; installeer een browser "

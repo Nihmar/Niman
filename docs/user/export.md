@@ -29,6 +29,10 @@ one file:
   them out. A PDF export says it is running while it runs — the engine
   printing, or the pages being drawn one by one — and can be stopped
   from the same dialog: a long note is minutes of work, not a hang.
+- **EPUB** — the note as a book of one chapter, for an e-reader: the same
+  page (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the
+  file. A wikilink out has nothing to point at, exactly as on a single
+  HTML page.
 
 A wikilink becomes highlighted text on a page exported on its own: one
 page has nothing to point at. Export a folder, below, and its links
@@ -54,6 +58,12 @@ one zip:
   PDFs. Printing a folder needs something to print with, as a note's PDF
   does; where the machine has neither a browser nor Android's WebView,
   the format is not offered.
+- **EPUB** — the folder (or the library) as **one book**: every Markdown
+  note is a chapter, in the tree's own order, with a table of contents
+  and links between the chapters. The pictures the chapters show travel
+  inside the book, each one once; an attachment no chapter shows is left
+  out. One EPUB, not one per note — a folder is a book, and the format is
+  what its reader expects.
 
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those

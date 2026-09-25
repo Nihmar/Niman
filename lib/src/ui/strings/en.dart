@@ -1546,6 +1546,9 @@ final class EnglishStrings extends Strings {
   String get exportLibraryTitle => 'Export library…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'The PDF is a picture of the pages; a browser engine on this machine '

@@ -1600,6 +1600,9 @@ final class FrenchStrings extends Strings {
   String get exportLibraryTitle => 'Exporter la bibliothèque…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'Le PDF est une image des pages ; installez un navigateur pour un texte '

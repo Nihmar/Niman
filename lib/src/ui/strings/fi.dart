@@ -1572,6 +1572,9 @@ final class FinnishStrings extends Strings {
   String get exportLibraryTitle => 'Vie kirjasto…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF on kuva sivuista; asenna selain, niin teksti on valittavissa.';

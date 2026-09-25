@@ -740,6 +740,7 @@ abstract base class Strings {
   String get exportFolderTitle;
   String get exportLibraryTitle;
   String get exportFormatPdf;
+  String get exportFormatEpub;
   String get exportPdfPicture;
   String exportDone(String place);
   String exportFailed(Object error);

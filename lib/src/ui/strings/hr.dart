@@ -1559,6 +1559,9 @@ final class CroatianStrings extends Strings {
   String get exportLibraryTitle => 'Izvezi knjižnicu…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF je slika stranica; instalirajte preglednik za tekst koji se može '

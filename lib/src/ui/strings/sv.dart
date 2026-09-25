@@ -1565,6 +1565,9 @@ final class SwedishStrings extends Strings {
   String get exportLibraryTitle => 'Exportera bibliotek…';
   @override
   String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
   @override
   String get exportPdfPicture =>
       'PDF:en är en bild av sidorna; installera en webbläsare för valbar text.';
