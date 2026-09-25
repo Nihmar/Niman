@@ -1548,8 +1548,8 @@ final class EnglishStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'The PDF is a picture of the pages; installing Chromium gives '
-      'selectable text.';
+      'The PDF is a picture of the pages; a browser engine on this machine '
+      'gives selectable text.';
   @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override

@@ -1570,7 +1570,7 @@ final class BasqueStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDFa orrialdeen irudia da; instalatu Chromium testua hautatzeko.';
+      'PDFa orrialdeen irudia da; instalatu nabigatzailea testua hautatzeko.';
   @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override

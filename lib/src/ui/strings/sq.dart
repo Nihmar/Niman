@@ -1575,7 +1575,7 @@ final class AlbanianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF-ja është një pamje e faqeve; instaloni Chromium për tekst të '
+      'PDF-ja është një pamje e faqeve; instaloni një shfletues për tekst të '
       'zgjedhshëm.';
   @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';

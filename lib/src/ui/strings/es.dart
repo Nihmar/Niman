@@ -1591,8 +1591,8 @@ final class SpanishStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'El PDF es una imagen de las páginas; instala Chromium para tener texto '
-      'seleccionable.';
+      'El PDF es una imagen de las páginas; instala un navegador para tener '
+      'texto seleccionable.';
   @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override

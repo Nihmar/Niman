@@ -1462,8 +1462,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get exportFormatPdf => 'PDF';
   @override
-  String get exportPdfPicture =>
-      'PDF はページの画像です。Chromium をインストールするとテキストを選択できます。';
+  String get exportPdfPicture => 'PDF はページの画像です。ブラウザーをインストールするとテキストを選択できます。';
   @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override

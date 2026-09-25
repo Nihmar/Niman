@@ -1576,7 +1576,7 @@ final class BulgarianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF е картина на страниците; инсталирайте Chromium за избираем текст.';
+      'PDF е картина на страниците; инсталирайте браузър за избираем текст.';
   @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override

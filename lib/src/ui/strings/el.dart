@@ -1611,8 +1611,8 @@ final class GreekStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε το Chromium για '
-      'επιλέξιμο κείμενο.';
+      'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε ένα πρόγραμμα '
+      'περιήγησης για επιλέξιμο κείμενο.';
   @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override

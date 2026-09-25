@@ -6,7 +6,7 @@ decisions are in the #24 thread
 This file is the working plan: what is done, what is left, and in what
 order. Tick the steps off as they land.
 
-## Done (branch `feat/24-export`)
+## Done (branches `feat/24-export`, then `feat/63-pdf`)
 
 | Commit | What |
 |---|---|
@@ -69,32 +69,34 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
 `break-inside: avoid` on blocks.
 
 ### 2.1 Engines
-- [ ] A `PdfPrinter` interface: `Future<PdfOutcome> print(String htmlPath, String pdfPath)`. `PdfOutcome` is one of: printed, no engine, or failed (with a message).
-- [ ] **Windows: Edge.** Find `msedge.exe` through the `App Paths` registry key, then `Program Files (x86)\Microsoft\Edge\Application`. Run it with:
+- [x] A `PdfPrinter` interface: `Future<PdfOutcome> print(String htmlPath, String pdfPath)`. `PdfOutcome` is one of: printed, no engine, or failed (with a message).
+- [x] **Windows: Edge.** Find `msedge.exe` through the `App Paths` registry key, then `Program Files (x86)\Microsoft\Edge\Application`. Run it with:
   - `--headless=new --disable-gpu --no-pdf-header-footer`
   - `--print-to-pdf=<out> file:///<page>`
 
-  Use a timeout, and check that the file exists and is not empty.
-- [ ] **Linux: Chromium.** Search `PATH` for `chromium`, `chromium-browser`, `google-chrome`, `google-chrome-stable`, `microsoft-edge`, `brave-browser`, with the same flags.
-- [ ] **Android: WebView.** A `MethodChannel` (`niman/pdf`) in `MainActivity`:
+  Use a timeout that kills the engine, and check that the file exists and is not empty.
+- [x] **Linux: Chromium.** Search `PATH` for `chromium`, `chromium-browser`, `google-chrome`, `google-chrome-stable`, `microsoft-edge`, `brave-browser`, with the same flags.
+- [x] **Android: WebView.** A `MethodChannel` (`niman/pdf`) in `MainActivity`:
   1. An offscreen `WebView` loads the page with `loadDataWithBaseURL`.
   2. On `onPageFinished`, call `createPrintDocumentAdapter`.
   3. `layout` and `write` go to a file through a small helper in the `android.print` package, because its callback constructors are package-private.
   4. A4, no margins beyond the CSS.
 
-  Kotlin and a test on a device.
-- [ ] Tests: engine discovery with a fake `PATH` and a fake file system; the command line that is built; the outcomes.
+  A `cancel` call destroys the view and answers a waiting print, so a
+  cancelled export leaves no busy bridge. No on-device test yet (§4).
+- [x] Tests: engine discovery with a fake `PATH` and a fake file system; the command line that is built; the outcomes.
 
 ### 2.2 Raster fallback (Linux without Chromium)
-- [ ] Lay out `MarkdownExportView` offscreen at the page's content width. The pipeline (`RenderView`, `BuildOwner`, `PipelineOwner`) is left to the caller by `markdown_export.dart`, so it lives here.
-- [ ] Page breaks go between blocks, using the blocks' laid-out heights. A block taller than a page is cut at a line boundary where its paragraph says where its lines are, and at the page height otherwise.
-- [ ] Pages are captured with `MarkdownExport.capture` at 2× and written by a small PDF writer of our own. It needs only image XObjects, Flate through `dart:io`'s `ZLibCodec`, and one page per image, so no new dependency.
-- [ ] Afterwards the app says what happened: the PDF is a picture of the pages, and installing Chromium (`sudo apt install chromium`, or the distribution's package) gives selectable text.
-- [ ] Tests: page breaking over known block heights; a writer round trip read back with `pdfrx`.
+- [x] Lay out `MarkdownExportView` offscreen at the page's content width. The pipeline (`RenderView`, `BuildOwner`, `PipelineOwner`) is left to the caller by `markdown_export.dart`, so it lives here.
+- [x] The page is a **slice of the one tall layout**, not a break the layout chose: a line or a picture crossing a slice's edge is cut in two. (The planned block-level page breaks were not built: the printed browser path owns real pagination, and this is the fallback for a machine without one.)
+- [x] The note is recorded **once** and sliced per page; pages go into a `PdfWriter` one at a time, so a novel does not hold every page's pixels at once.
+- [x] Every picture the note shows is decoded and drawn in place — the fallback hands the page its pictures, or the note would silently lose them.
+- [x] Afterwards the app says what happened: the PDF is a picture of the pages, and a browser engine on the machine gives selectable text.
+- [x] Tests: the page count over a known note; the paper is A4 in points; a picture handed in is drawn; the writer round-trips its image streams.
 
 ### 2.3 What gets exported as PDF
-- [ ] A note gives one `.pdf`.
-- [ ] A folder gives a zip with one `.pdf` per note. A combined PDF is an open question (below).
+- [x] A note gives one `.pdf`.
+- [x] A folder gives a zip with one `.pdf` per note, its pictures embedded. A combined PDF is an open question (below).
 
 ## 3. Hooking up the UI
 
@@ -119,7 +121,7 @@ Every entry exists on Android, Linux and Windows.
 - [x] **Strings** in every locale (`ui/strings/*.dart`).
 - [ ] **Docs:**
   - [x] `docs/user/`: a new `export.md`, linked from `organization.md`;
-  - [ ] `platforms.md`: the PDF engine per platform and the Linux fallback; *(with #63)*
+  - [x] `platforms.md`: the PDF engine per platform and the Linux fallback; *(with #63)*
   - [x] `settings.md`, if a setting appears; *(no setting)*
   - [ ] `CHANGELOG.md` at the release.
 - [x] **Widget tests:** the menu entries, the chooser, the save call through the fake picker, and cancellation.

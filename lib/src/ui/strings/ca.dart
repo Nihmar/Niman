@@ -1593,7 +1593,7 @@ final class CatalanStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'El PDF és una imatge de les pàgines; instal·la el Chromium per tenir '
+      'El PDF és una imatge de les pàgines; instal·la un navegador per tenir '
       'text seleccionable.';
   @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';

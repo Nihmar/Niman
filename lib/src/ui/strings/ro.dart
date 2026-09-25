@@ -1574,7 +1574,7 @@ final class RomanianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF-ul este o imagine a paginilor; instalați Chromium pentru text '
+      'PDF-ul este o imagine a paginilor; instalați un browser pentru text '
       'selectabil.';
   @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';

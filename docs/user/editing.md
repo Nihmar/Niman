@@ -310,7 +310,8 @@ changing what it says:
   The fence goes at the end of the note: an unclosed block already runs
   to the end for every Markdown reader, so the note reads exactly as it
   did. If the code was meant to stop sooner, everything after it showing
-  as code is the sign, and moving the fence up is yours to do. A language written the Pandoc way loses its braces and its dot
+  as code is the sign, and moving the fence up is yours to do.
+  A language written the Pandoc way loses its braces and its dot
   (`{.dart}` becomes `dart`). Any other language is left as written,
   punctuation included: `c++`, `c#` and `objective-c` are names;
 - the note ends with a single newline.

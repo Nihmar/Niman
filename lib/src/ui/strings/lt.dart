@@ -1561,7 +1561,7 @@ final class LithuanianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF yra puslapių paveikslėlis; įdiekite Chromium, kad tekstą būtų '
+      'PDF yra puslapių paveikslėlis; įdiekite naršyklę, kad tekstą būtų '
       'galima žymėti.';
   @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';

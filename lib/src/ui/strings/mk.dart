@@ -1577,8 +1577,8 @@ final class MacedonianStrings extends Strings {
   String get exportFormatPdf => 'PDF';
   @override
   String get exportPdfPicture =>
-      'PDF е слика од страниците; инсталирајте Chromium за текст што може да '
-      'се избере.';
+      'PDF е слика од страниците; инсталирајте прелистувач за текст што може '
+      'да се избере.';
   @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override
