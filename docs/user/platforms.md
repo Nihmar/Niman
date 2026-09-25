@@ -20,6 +20,9 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   [shortcuts](shortcuts.md)).
 - **Home-screen widgets:** the Niman Todos and Niman Note widgets
   (see [widgets](widgets.md)).
+- **PDF export:** through the system WebView's print adapter, in-process:
+  no browser is installed or run, and the PDF's text stays selectable.
+  A folder's PDF zip prints each note the same way, one PDF per note.
 
 ## Linux
 
@@ -55,6 +58,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   (over `org.freedesktop.FileManager1`, falling back to `xdg-open` on
   the folder) or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
+- **PDF export:** printed headless by the first Chromium-family browser
+  on `PATH` (`chromium`, `google-chrome`, Microsoft Edge, Brave). On a
+  machine without one, a note is drawn as pictures of its pages — not
+  selectable — and a folder's PDF zip is not offered.
 
 ## Windows
 
@@ -80,6 +87,8 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 - A tree row's right-click menu can show the note in Explorer (selected)
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
+- **PDF export:** printed headless by Edge, found through the shell's
+  App Paths key or its install folder.
 
 ## Density
 
