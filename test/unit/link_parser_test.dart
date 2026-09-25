@@ -230,4 +230,14 @@ void main() {
       expect((links[2] as WikiLink).ref.alias, 'c');
     });
   });
+
+  // What the read view and the export both show for a wikilink.
+  test('a wikilink shows its alias, else its target, else what is written', () {
+    expect(wikiDisplayText('Note|Shown'), 'Shown');
+    expect(wikiDisplayText('Note#Part|Shown'), 'Shown');
+    expect(wikiDisplayText('Note#Part'), 'Note');
+    expect(wikiDisplayText(' Note '), 'Note');
+    expect(wikiDisplayText('Note| '), 'Note');
+    expect(wikiDisplayText('#Part'), '#Part');
+  });
 }

@@ -154,3 +154,20 @@ WikiRef parseWikiRef(String inner) {
     alias: aliasText == null || aliasText.isEmpty ? null : aliasText,
   );
 }
+
+/// What a wikilink whose inside is [inner] shows: its alias, else its
+/// target without the heading, else [inner] as written.
+///
+/// One rule for every place a wikilink is drawn — the read view and the
+/// export — so a link reads the same in the note and out of it.
+String wikiDisplayText(String inner) {
+  final pipe = inner.indexOf('|');
+  if (pipe >= 0) {
+    final alias = inner.substring(pipe + 1).trim();
+    if (alias.isNotEmpty) return alias;
+  }
+  final target = pipe >= 0 ? inner.substring(0, pipe) : inner;
+  final hash = target.indexOf('#');
+  final name = (hash >= 0 ? target.substring(0, hash) : target).trim();
+  return name.isEmpty ? inner : name;
+}
