@@ -76,6 +76,39 @@ final class NoteHtml {
   String? get fontFaces => _math.fontFaces;
 
   String _render(String text) {
+    final nodes = _parsed(text);
+    _rewrite(nodes);
+    return md.renderToHtml(nodes, enableTagfilter: true);
+  }
+
+  /// The `src` of every picture the page will draw, as the parser writes
+  /// them: what an export resolves before the page is built (#24). Nothing
+  /// is typeset for it — the tokens are placeholders.
+  List<String> imageTargets() {
+    final nodes = _parsed(source.text, rendered: false);
+    final out = <String>[];
+    void walk(List<md.Node> nodes) {
+      for (final node in nodes) {
+        if (node is! md.Element) continue;
+        if (node.tag == 'img') {
+          final src = node.attributes['src'];
+          if (src != null && src.isNotEmpty) out.add(src);
+        }
+        final children = node.children;
+        if (children != null) walk(children);
+      }
+    }
+
+    walk(nodes);
+    return out;
+  }
+
+  /// The note's lines as one document, the constructs masked into tokens.
+  ///
+  /// With [rendered] false the pieces are empty placeholders: the parse is
+  /// for collecting what the page needs ([imageTargets]), so no formula or
+  /// code block is typeset.
+  List<md.Node> _parsed(String text, {bool rendered = true}) {
     final buffer = SourceBuffer.fromText(text);
     final lines = <String>[];
     for (final block in BlockScanner(buffer).index.blocks) {
@@ -83,7 +116,7 @@ final class NoteHtml {
         for (var line = block.startLine; line < block.endLine; line++)
           buffer.lineAt(line),
       ];
-      lines.addAll(_lines(block.kind, raw));
+      lines.addAll(_lines(block.kind, raw, rendered: rendered));
     }
     final document = md.Document(
       extensionSet: _extensions,
@@ -93,23 +126,31 @@ final class NoteHtml {
         md.SetextHeaderWithIdSyntax(),
       ],
     );
-    final nodes = document.parseLines(lines);
-    _rewrite(nodes);
-    return md.renderToHtml(nodes, enableTagfilter: true);
+    return document.parseLines(lines);
   }
 
   /// A block's lines as the parser is to see them.
-  List<String> _lines(BlockKind kind, List<String> raw) => switch (kind) {
+  List<String> _lines(
+    BlockKind kind,
+    List<String> raw, {
+    required bool rendered,
+  }) => switch (kind) {
     BlockKind.frontmatter => const <String>[],
     BlockKind.blank || BlockKind.thematicBreak || BlockKind.indentedCode => raw,
-    BlockKind.fencedCode => _block(raw, fencedCodeHtml(raw)),
-    BlockKind.math => _block(raw, mathBlockHtml(raw.join('\n'), _math)),
-    BlockKind.html => _block(raw, htmlSourceHtml(raw.join('\n'))),
-    BlockKind.quote => _quote(raw),
+    BlockKind.fencedCode => _block(raw, rendered ? fencedCodeHtml(raw) : ''),
+    BlockKind.math => _block(
+      raw,
+      rendered ? mathBlockHtml(raw.join('\n'), _math) : '',
+    ),
+    BlockKind.html => _block(
+      raw,
+      rendered ? htmlSourceHtml(raw.join('\n')) : '',
+    ),
+    BlockKind.quote => _quote(raw, rendered: rendered),
     BlockKind.paragraph ||
     BlockKind.heading ||
     BlockKind.listItem ||
-    BlockKind.table => _masked(raw.join('\n')).split('\n'),
+    BlockKind.table => _masked(raw.join('\n'), rendered: rendered).split('\n'),
   };
 
   /// A block drawn as [html], as a token on a line of its own at the
@@ -122,7 +163,7 @@ final class NoteHtml {
 
   /// A quote: a callout's frame around its body, or the quote with its
   /// constructs set aside under its `>` markers.
-  List<String> _quote(List<String> raw) {
+  List<String> _quote(List<String> raw, {required bool rendered}) {
     final firstLevel = _quoteLevel.firstMatch(raw.first);
     final callout = firstLevel == null
         ? null
@@ -131,7 +172,7 @@ final class NoteHtml {
       final inner = [
         for (final line in raw.skip(1)) line.replaceFirst(_quoteLevel, ''),
       ].join('\n');
-      return _block(raw, calloutHtml(callout, _render(inner)));
+      return _block(raw, rendered ? calloutHtml(callout, _render(inner)) : '');
     }
     final marks = [
       for (final line in raw) _quoteMarks.firstMatch(line)?.group(1) ?? '',
@@ -142,7 +183,7 @@ final class NoteHtml {
     ].join('\n');
     // A construct running over a line break joins the lines it spans, so
     // there can be fewer lines than marks; they are all a quote's marks.
-    final masked = _masked(content).split('\n');
+    final masked = _masked(content, rendered: rendered).split('\n');
     return <String>[
       for (var at = 0; at < masked.length; at++)
         '${marks[at < marks.length ? at : marks.length - 1]}${masked[at]}',
@@ -151,7 +192,7 @@ final class NoteHtml {
 
   /// [text] with the constructs the read view draws itself replaced by
   /// tokens.
-  String _masked(String text) {
+  String _masked(String text, {required bool rendered}) {
     final spans = _masker.mask(text).spans;
     if (spans.isEmpty) return text;
     final out = StringBuffer();
@@ -159,7 +200,9 @@ final class NoteHtml {
     for (final span in spans) {
       out
         ..write(text.substring(at, span.start))
-        ..write(_tokenFor(_spans.render(span)));
+        ..write(
+          _tokenFor(rendered ? _spans.render(span) : (html: '', plain: '')),
+        );
       at = span.end;
     }
     out.write(text.substring(at));
