@@ -35,6 +35,7 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
+import 'package:niman/src/links/parser.dart' show wikiDisplayText;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -836,7 +837,7 @@ final class _InlineBuilder {
         );
       case ExtensionKind.wikilink:
         return TextSpan(
-          text: _wikiDisplay(span),
+          text: wikiDisplayText(span.inner),
           style: _tinted(theme.wikilink),
           recognizer: TapGestureRecognizer()
             ..onTap = () => onTapWikiLink?.call(span),
@@ -884,21 +885,6 @@ final class _InlineBuilder {
           ),
         );
     }
-  }
-
-  /// What a wikilink shows: its alias, or its target.
-  static String _wikiDisplay(ExtensionSpan span) {
-    final inner = span.inner;
-    final pipe = inner.indexOf('|');
-    if (pipe >= 0) {
-      final alias = inner.substring(pipe + 1).trim();
-      if (alias.isNotEmpty) return alias;
-    }
-    final target = pipe >= 0 ? inner.substring(0, pipe) : inner;
-    final hash = target.indexOf('#');
-    return (hash >= 0 ? target.substring(0, hash) : target).trim().isEmpty
-        ? inner
-        : (hash >= 0 ? target.substring(0, hash) : target).trim();
   }
 }
 
