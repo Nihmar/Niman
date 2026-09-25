@@ -109,6 +109,7 @@ details.callout > summary { cursor: pointer; }
   .hljs-meta, .hljs-symbol, .hljs-bullet, .hljs-link { color: #56b6c2; }
 }
 @media print {
+  @page { size: A4; margin: 18mm; }
   :root { --text: #000; --bg: #fff; }
   body { padding: 0; font-size: 11pt; }
   .note { max-width: none; }
