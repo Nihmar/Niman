@@ -171,6 +171,60 @@ void main() {
     expect(result!.selectable, isFalse);
     expect(latin1.decode(result.payload.bytes.sublist(0, 8)), '%PDF-1.4');
   });
+
+  testWidgets('drawing reports its pages as it goes', (tester) async {
+    await pumpTheme(tester);
+    final note = StringBuffer();
+    for (var at = 0; at < 120; at++) {
+      note
+        ..writeln('Paragraph $at, long enough to take a line or two. ')
+        ..writeln();
+    }
+    final reports = <int>[];
+    final bytes = await tester.runAsync(
+      () => rasterPdf(
+        text: note.toString(),
+        theme: theme,
+        mathCache: cache,
+        onProgress: (done, _) => reports.add(done),
+      ),
+    );
+    expect(bytes, isNotNull);
+    // 0 first, then one report per page: the caller can say how far it is.
+    expect(reports.first, 0);
+    expect(reports.last, greaterThan(1));
+    expect(reports.last, reports.length - 1);
+    expect(
+      reports,
+      orderedEquals(List<int>.generate(reports.length, (i) => i)),
+    );
+  });
+
+  testWidgets('a cancelled drawing stops before the next page', (tester) async {
+    await pumpTheme(tester);
+    final note = StringBuffer();
+    for (var at = 0; at < 120; at++) {
+      note
+        ..writeln('Paragraph $at, long enough to take a line or two. ')
+        ..writeln();
+    }
+    var cancelled = false;
+    final outcome = await tester.runAsync(() async {
+      try {
+        await rasterPdf(
+          text: note.toString(),
+          theme: theme,
+          mathCache: cache,
+          onProgress: (done, _) => cancelled = done >= 1,
+          isCancelled: () => cancelled,
+        );
+        return 'drawn';
+      } on PdfExportCancelled {
+        return 'cancelled';
+      }
+    });
+    expect(outcome, 'cancelled');
+  });
 }
 
 /// A printer that is there and fails: the note must be drawn anyway.

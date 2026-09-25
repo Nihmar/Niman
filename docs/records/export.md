@@ -91,6 +91,8 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
 - [x] The page is a **slice of the one tall layout**, not a break the layout chose: a line or a picture crossing a slice's edge is cut in two. (The planned block-level page breaks were not built: the printed browser path owns real pagination, and this is the fallback for a machine without one.)
 - [x] The note is recorded **once** and sliced per page; pages go into a `PdfWriter` one at a time, so a novel does not hold every page's pixels at once.
 - [x] Every picture the note shows is decoded and drawn in place — the fallback hands the page its pictures, or the note would silently lose them.
+- [x] The printed page points at its pictures with `file:` URLs, where the exported HTML must carry `data:` URIs: the engine fetches them itself, and embedding a library's photos built pages of hundreds of megabytes — the Android bridge read one into its own heap until it OOM'd.
+- [x] The export says it is running — the engine printing, then the pages drawn — and can be cancelled from the dialog; the fallback checks between pages, and Android's bridge stops a print in flight.
 - [x] Afterwards the app says what happened: the PDF is a picture of the pages, and a browser engine on the machine gives selectable text.
 - [x] Tests: the page count over a known note; the paper is A4 in points; a picture handed in is drawn; the writer round-trips its image streams.
 
