@@ -1573,6 +1573,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Изнасяне на библиотеката…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF е картина на страниците; инсталирайте Chromium за избираем текст.';
+  @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

@@ -1578,6 +1578,12 @@ final class DutchStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Bibliotheek exporteren…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      "De PDF is een afbeelding van de pagina's; installeer Chromium "
+      'voor selecteerbare tekst.';
+  @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override
   String get lintRulesTitle => 'Markdown-regels';

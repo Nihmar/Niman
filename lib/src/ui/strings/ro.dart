@@ -1571,6 +1571,12 @@ final class RomanianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exportă biblioteca…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF-ul este o imagine a paginilor; instalați Chromium pentru text '
+      'selectabil.';
+  @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
   @override
   String get lintRulesTitle => 'Reguli Markdown';

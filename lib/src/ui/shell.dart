@@ -16,14 +16,17 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/storage_access.dart';
+import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_note.dart';
+import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_progress_dialog.dart';
 import 'package:niman/src/export/export_tree.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -31,6 +34,8 @@ import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
@@ -309,6 +314,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
                 saveExportFile: ref.read(saveExportFileProvider),
                 pickExportFolder: ref.read(pickExportFolderProvider),
+                pdfPrinter: ref.read(pdfPrinterProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -341,6 +347,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.unsavedTracker,
     required this.saveExportFile,
     required this.pickExportFolder,
+    required this.pdfPrinter,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -385,6 +392,10 @@ final class _LibraryShell extends StatefulWidget {
 
   /// Where a folder's export is written (#24).
   final PickExportFolder pickExportFolder;
+
+  /// What prints a note's PDF (#63); a fake in the tests, where no engine
+  /// can start.
+  final PdfPrinter pdfPrinter;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -2878,6 +2889,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Exports the note at [path] as a file (#24): asks which format, reads
   /// the note (the buffer's edits first) and asks where to save it.
   Future<void> _exportNote(String path) async {
+    // The theme is read while the context is certainly valid: the dialog
+    // and the export itself both wait.
+    final theme = markdownThemeOf(context, scaler: noteTextScalerOf(context));
     final format = await _chooseExportFormat();
     if (format == null || !mounted) return;
     final ops = widget.controller.ops;
@@ -2890,15 +2904,41 @@ final class _LibraryShellState extends State<_LibraryShell>
       await widget.unsavedTracker.saveAll();
       final note = await ops.find(path);
       final text = await ops.readNote(path);
-      final payload = await exportNote(
-        text: text,
-        title: note == null ? p.basename(path) : displayNameOf(note),
-        path: path,
-        root: root,
-        language: AppLanguages.resolved.id,
-        format: format,
-        linkSource: _linkSource,
-      );
+      final title = note == null ? p.basename(path) : displayNameOf(note);
+      final ExportPayload payload;
+      var selectable = true;
+      if (format == ExportFormat.pdf) {
+        // The raster fallback draws with the note's own typography, so a
+        // cache of its own goes with it.
+        final cache = MathCache();
+        try {
+          final printed = await exportNotePdf(
+            text: text,
+            title: title,
+            path: path,
+            root: root,
+            language: AppLanguages.resolved.id,
+            linkSource: _linkSource,
+            printer: widget.pdfPrinter,
+            theme: theme,
+            mathCache: cache,
+          );
+          payload = printed.payload;
+          selectable = printed.selectable;
+        } finally {
+          cache.dispose();
+        }
+      } else {
+        payload = await exportNote(
+          text: text,
+          title: title,
+          path: path,
+          root: root,
+          language: AppLanguages.resolved.id,
+          format: format,
+          linkSource: _linkSource,
+        );
+      }
       final String? place;
       try {
         place = await save(
@@ -2916,7 +2956,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         return;
       }
       if (place == null || !mounted) return;
-      _showExportDone(place);
+      _showExportDone(place, picture: !selectable);
     });
   }
 
@@ -2959,6 +2999,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   static String _exportFormatName(ExportFormat format) => switch (format) {
     ExportFormat.markdown => AppStrings.exportFormatMarkdown,
     ExportFormat.html => AppStrings.exportFormatHtml,
+    ExportFormat.pdf => AppStrings.exportFormatPdf,
   };
 
   /// Exports the folder at library-relative [dir] ('' = the library root)
@@ -3015,10 +3056,18 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Says where an export landed, with a way to its folder where the OS
   /// can be given one (a desktop; on Android the picker already knows).
-  void _showExportDone(String place) {
+  /// Says where an export landed, with a way to its folder where the OS
+  /// can be given one (a desktop; on Android the picker already knows),
+  /// and — for a PDF drawn here — that it is a picture of the pages.
+  void _showExportDone(String place, {bool picture = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.exportDone(place)),
+        content: Text(
+          picture
+              ? '${AppStrings.exportDone(place)}\n'
+                    '${AppStrings.exportPdfPicture}'
+              : AppStrings.exportDone(place),
+        ),
         action: supportsTreeContextActions
             ? SnackBarAction(
                 label: AppStrings.openInFileManager,

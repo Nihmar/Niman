@@ -1572,6 +1572,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Eksporto bibliotekën…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF-ja është një pamje e faqeve; instaloni Chromium për tekst të '
+      'zgjedhshëm.';
+  @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override
   String get lintRulesTitle => 'Rregullat e Markdown';

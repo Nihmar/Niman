@@ -1578,6 +1578,12 @@ final class PolishStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Eksportuj bibliotekę…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF to obraz stron; zainstaluj Chromium, aby tekst można było '
+      'zaznaczać.';
+  @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override
   String get lintRulesTitle => 'Reguły Markdown';

@@ -1558,6 +1558,11 @@ final class SlovakStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exportovať knižnicu…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF je obrázok stránok; nainštalujte Chromium pre vyberateľný text.';
+  @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override
   String get lintRulesTitle => 'Pravidlá Markdownu';

@@ -1427,6 +1427,10 @@ final class ChineseStrings extends Strings {
   @override
   String get exportLibraryTitle => '导出库…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture => 'PDF 是页面的图片；安装 Chromium 后文字可选择。';
+  @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override
   String get lintRulesTitle => 'Markdown 规则';

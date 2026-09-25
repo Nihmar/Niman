@@ -1565,6 +1565,12 @@ final class SerbianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Извези библиотеку…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF је слика страница; инсталирајте Chromium за текст који се може '
+      'изабрати.';
+  @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

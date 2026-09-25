@@ -1564,6 +1564,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Експортувати бібліотеку…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF — це зображення сторінок; встановіть Chromium, щоб текст можна '
+      'було виділяти.';
+  @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override
   String get lintRulesTitle => 'Правила Markdown';

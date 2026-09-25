@@ -16,6 +16,9 @@ enum ExportFormat {
 
   /// The note as one self-contained HTML page.
   html,
+
+  /// The note as a PDF (#63), printed or drawn.
+  pdf,
 }
 
 /// What an export writes: `name` as `bytes`, typed `mimeType`.
@@ -57,5 +60,9 @@ Future<ExportPayload> exportNote({
         bytes: Uint8List.fromList(utf8.encode(page)),
         mimeType: 'text/html',
       );
+    case ExportFormat.pdf:
+      // A PDF needs a printer and, without an engine, a theme to draw
+      // with: `exportNotePdf` owns that, and the shell routes it there.
+      throw UnsupportedError('use exportNotePdf for a PDF');
   }
 }

@@ -1553,6 +1553,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Izvozi knjižnico…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF je slika strani; za izbirno besedilo namestite Chromium.';
+  @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override
   String get lintRulesTitle => 'Pravila Markdowna';

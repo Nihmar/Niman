@@ -1569,6 +1569,11 @@ final class HungarianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Könyvtár exportálása…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'A PDF az oldalak képe; választható szöveghez telepítsd a Chromiumot.';
+  @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override
   String get lintRulesTitle => 'Markdown-szabályok';

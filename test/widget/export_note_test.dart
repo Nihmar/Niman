@@ -106,7 +106,7 @@ void main() {
     expect(find.text(AppStrings.exportDone('/tmp/note.md')), findsOne);
   });
 
-  testWidgets('the chooser offers Markdown and HTML', (tester) async {
+  testWidgets('the chooser offers Markdown, HTML and PDF', (tester) async {
     await pumpShell(tester);
     await tester.tap(find.byKey(const Key('note-menu')));
     await settle(tester);
@@ -115,9 +115,11 @@ void main() {
 
     expect(find.text(AppStrings.exportFormatMarkdown), findsOneWidget);
     expect(find.text(AppStrings.exportFormatHtml), findsOneWidget);
-    // The HTML page is built off the UI isolate, which a widget test's
-    // fake-async zone cannot wait on: `exportNote`'s HTML payload has its
-    // own unit test.
+    expect(find.text(AppStrings.exportFormatPdf), findsOneWidget);
+    // The page is built off the UI isolate, and the PDF goes through the
+    // printer seam: what a widget test's fake-async zone cannot wait on
+    // has its own unit tests (`exportNote`'s HTML payload, `exportNotePdf`,
+    // the raster pages).
     await tester.tapAt(const Offset(4, 4));
     await settle(tester);
   });

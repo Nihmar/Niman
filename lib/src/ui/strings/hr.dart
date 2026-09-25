@@ -1558,6 +1558,12 @@ final class CroatianStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Izvezi knjižnicu…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF je slika stranica; instalirajte Chromium za tekst koji se može '
+      'označiti.';
+  @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
   String get lintRulesTitle => 'Markdown pravila';

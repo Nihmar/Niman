@@ -1567,6 +1567,11 @@ final class BasqueStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Esportatu liburutegia…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDFa orrialdeen irudia da; instalatu Chromium testua hautatzeko.';
+  @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override
   String get lintRulesTitle => 'Markdown arauak';

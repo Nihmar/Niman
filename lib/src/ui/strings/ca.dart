@@ -1590,6 +1590,12 @@ final class CatalanStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exporta la biblioteca…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'El PDF és una imatge de les pàgines; instal·la el Chromium per tenir '
+      'text seleccionable.';
+  @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override
   String get lintRulesTitle => 'Regles de Markdown';

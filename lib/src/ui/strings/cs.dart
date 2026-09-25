@@ -1551,6 +1551,12 @@ final class CzechStrings extends Strings {
   @override
   String get exportLibraryTitle => 'Exportovat knihovnu…';
   @override
+  String get exportFormatPdf => 'PDF';
+  @override
+  String get exportPdfPicture =>
+      'PDF je obrázek stránek; nainstalujte Chromium pro text, který lze '
+      'vybrat.';
+  @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override
   String get lintRulesTitle => 'Pravidla Markdownu';
