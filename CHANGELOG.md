@@ -6,6 +6,45 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.0.9] - 2026-09-25
+
+**A homegrown editor, and a lot more to play with.** The source editor, the live (WYSIWYG) editor and the read view are one widget of Niman's own now — and around it, the round that reads books and PDFs, annotates them, keeps a journal, and lets you wear colors of your own.
+
+### Added
+- **Books, read in the app.** An EPUB opens in the note pane on every platform and reads like a note — its headings, emphasis, lists, quotes, tables and pictures in Niman's typography — with an **Outline** of its table of contents. A PDF and a picture open there too, paged and zoomed, and the row under a PDF or a book copies a link to the place being read
+- **A book or a PDF opens where you left it.** Its page, or its chapter and the line in it, is kept for the library and syncs with it, so a book put down on the phone opens on the desktop where the phone stopped
+- **Annotate a passage.** Selecting one in a book or a PDF opens a sheet; saving writes a section into a companion note that quotes it and links back to the place. The file shows where it was annotated — tap a mark to open its annotation
+- **Links into a book or a PDF**: a link opens the file at the page or the chapter it names, instead of where you left it
+- **A journal:** one note a day, made the first time you open that day, from a folder, a name and a template you set, with a month calendar, a strip over an entry for the day before and after, the tasks due on the day, and quick actions for today's entry
+- **Themes of your own:** a Themes page where you make one from any shipped palette or a random hue, edit its colors with the whole app wearing them as they move, duplicate, rename and delete it, and export or import it as a `.json` file. Niman, Catppuccin, Solarized and Gruvbox ship beside the system's own colors
+- **One Markdown surface.** The source editor, the live (WYSIWYG) editor and the read view are one widget, written for the app: the note on disk is the same text whichever you write in, and switching modes no longer moves the page. The size cap the old WYSIWYG had is gone
+- **Callouts (`> [!note]`) and `==highlight==`** are read in every mode
+- **Tables, edited as tables** in live mode: rows and columns added, moved, aligned, sorted and deleted from a cell's own menu, and Tab from cell to cell
+- **Insert a table and a checkbox list** from the toolbar and the context menu; the context menu is grouped by what you are doing — links, Format, Paragraph, Insert, the clipboard
+- **An in-app Markdown cheatsheet**: every construct Niman reads, each written beside how a note shows it, to copy or insert
+- **Titles that scroll** when they are too long for their room — a tree row, a tab, the window title, the phone's note bar
+- **Forget a library**, the one open included, from its row's menu — the folder, its notes and its settings stay where they are
+
+### Changed
+- **The template commands** (`{{date}}`, `{{ask}}`, …) are coloured in the template folder, in a color of their own in the theme
+- **`todo.txt` and `done.txt`** open in the editor coloured as task lists: priority, dates, projects, contexts and `key:value` tags, with a completed task struck through. The colors are the theme's, under *Task lists (todo.txt)*
+- **The changelog's bullets** are drawn as the Markdown they are written in, in the update dialog and under Settings → About
+- **Settings → Commands** says it is the palette's reference, and the keys it shows follow Keyboard shortcuts
+- **The task dialog** on a window with the room picks the due date and the reminder in place, under their rows, and its description wraps and grows downward
+- **A note edited and closed has its Markdown tidied** (a library setting, on by default)
+- **A task's reminder warns where it is set**, not only in the Todo tab's banner, and the warning follows the switches the system shows — background usage, and the notification permission even before the first reminder
+- **The search index keeps the words of a note**, not a copy of its text, so it no longer grows with the notes
+- **Library settings sync** by merging key by key, template counters keep the highest number, and the personal dictionary merges word by word; how a library looks on screen stays on each device
+
+### Fixed
+- **Huge notes open and stay editable:** the load runs off the UI isolate, a keystroke costs what it changed rather than the note, the read pane shows the top while the rest is scanned, and a pinned note is edited at its head instead of loading whole
+- A note's word count is built again after a reload from disk
+- A first library open waits for the tree, not for every note
+- The watcher leaves a note to the indexer its writer scheduled
+- The read view keeps no room for the editor's line numbers when the numbers are off
+- Brackets are typed in pairs, in both editors
+- The Windows tray menu wears the app's theme, and opens again after one is dismissed
+
 ## [0.0.8] - 2026-09-20
 
 **Updates over 0.0.7 normally.** The signing key from 0.0.7 carries on, so this installs over it, and the app database migrates itself: the open notes, the shortcuts, the pins and the tray choice land where they belong.
