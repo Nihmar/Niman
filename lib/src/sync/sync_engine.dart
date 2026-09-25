@@ -10,6 +10,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/state_merge.dart';
@@ -1084,7 +1085,7 @@ final class SyncEngine {
     // while still serving them by path. The listing then says the file is not
     // there, the check before the upload finds it, and the upload is skipped
     // as "changed during the sync" on every run. So a walk from the root that
-    // did not see their folder asks for them by name: at most three `Depth: 0`
+    // did not see their folder asks for them by name: at most four `Depth: 0`
     // requests, and only when the listing hid them.
     if (from.isEmpty) {
       for (final path in libraryStateFiles) {
@@ -1541,7 +1542,8 @@ final class SyncEngine {
   });
 
   /// Merges a library state file ([mergeSettingsJson] key by key,
-  /// [mergeCountersJson], [mergeWordList] word by word) and writes the
+  /// [mergeCountersJson], [mergeWordList] word by word, [mergeReadingJson]
+  /// book by book) and writes the
   /// result on whichever side lacks it; false, touching nothing, when a
   /// JSON side does not parse.
   Future<bool> _mergeState(
@@ -1569,6 +1571,11 @@ final class SyncEngine {
         localNewer: localNewer,
       ),
       _personalDictionaryPath => mergeWordList(
+        base: base,
+        local: localText,
+        remote: remoteText,
+      ),
+      ReadingPositions.filePath => mergeReadingJson(
         base: base,
         local: localText,
         remote: remoteText,

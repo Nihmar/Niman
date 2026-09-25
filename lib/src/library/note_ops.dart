@@ -17,6 +17,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 
@@ -348,6 +349,7 @@ final class NoteOps implements NoteOperations {
       }
       _hint(newRel, SyncOpKind.moved, fromPath: path);
       await history.moved(path, newRel, isDir: row.isDir);
+      await _carryReading(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
@@ -386,9 +388,18 @@ final class NoteOps implements NoteOperations {
       }
       _hint(newRel, SyncOpKind.moved, fromPath: path);
       await history.moved(path, newRel, isDir: row.isDir);
+      await _carryReading(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
+  }
+
+  /// Carries the reading positions of what moved from [from] to [to]
+  /// (#281): a book or a PDF, or a folder that may hold some. A note
+  /// keeps none, and costs no read of the file.
+  Future<void> _carryReading(String from, String to, {required bool isDir}) {
+    if (!isDir && isMarkdownNote(from)) return Future<void>.value();
+    return ReadingPositions(root).moved(from, to);
   }
 
   /// The text of the note at [path], decoded leniently (a note with a
