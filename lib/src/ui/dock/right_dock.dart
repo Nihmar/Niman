@@ -35,8 +35,10 @@ final class RightDock extends StatelessWidget {
   /// Builds a pane's body.
   final Widget Function(DockPane pane) paneBuilder;
 
-  /// The dock's width.
-  static const double width = 280;
+  /// The panes a dragged dock always leaves beside it (#297): past this,
+  /// the dock stops growing rather than squeezing the note away. Its own
+  /// width is the library's `dockWidth`.
+  static const double minPanesWidth = 360;
 
   /// A window at least this wide has room for the dock beside a note
   /// column; below it the dock stays shut whatever was chosen.

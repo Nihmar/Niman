@@ -88,6 +88,7 @@ leave the file at its next write.
 | `uiTextScale` | 1.0 | Interface text size (0.8–1.8) |
 | `noteTextScale` | 1.0 | Note text size, editor + preview (0.8–1.8); the list and quote columns, the spacing, the bullets, checkboxes and numbers grow with it |
 | `treeWidth` | 340 | Tree pane width, px (200–600) |
+| `dockWidth` | 280 | Side panel width, px (200–600); drag its left edge |
 | `epubTheme` | none (= the app's) | The theme the EPUB books wear: a theme id, a shipped one or `custom:…` |
 | `epubBrightness` | none (= the app's) | The books' brightness: `system`, `day` or `night` |
 | `epubFont` | `literata` | The books' face: `literata`, `serif`, `sans` or `mono` |
