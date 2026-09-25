@@ -120,6 +120,8 @@ TextStyle? markdownTokenStyle(
       fontStyle: FontStyle.italic,
     ),
     TokenKind.tag => TextStyle(color: syntax.tag),
+    // A template command: what the engine will write there, not text.
+    TokenKind.templateCommand => TextStyle(color: syntax.template),
     TokenKind.frontmatter => TextStyle(
       color: syntax.dim,
       fontStyle: FontStyle.italic,

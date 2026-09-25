@@ -20,10 +20,13 @@ at once, everywhere, and the choice is remembered on this device.
 
 The Markdown colors — code, links, quotes, tags — travel with the theme:
 the editor and the preview always agree with the interface around them.
-So do the colors of a task list (`todo.txt`, `done.txt`), which the editor
-paints with roles of their own: the priority `(A)`, drawn bold; the
-dates; `+projects`; `@contexts`; `key:value` tags such as `due:`; and a
-completed task, struck through and stepped back.
+So does the color of a template command: the `{{…}}` the engine answers
+in a note of the library's template folder wears one of its own, and stays
+plain where it is not a command. So do the colors of a task list
+(`todo.txt`, `done.txt`), which the editor paints with roles of their own:
+the priority `(A)`, drawn bold; the dates; `+projects`; `@contexts`;
+`key:value` tags such as `due:`; and a completed task, struck through and
+stepped back.
 
 ## Themes of your own
 
@@ -38,10 +41,10 @@ Each theme in the list carries a ⋮ menu:
 
 - **Edit** (your own themes) opens the theme color by color: the interface
   roles first — background, text, accent, error — then the Markdown ones,
-  and last, under *Task lists (todo.txt)*, the six a task list is painted
-  with (`todoPriority`, `todoDate`, `todoProject`, `todoContext`,
-  `todoKeyValue`, `todoDone`), each with the color it holds and the name
-  the exported file uses. A
+  the template command among them, and last, under *Task lists
+  (todo.txt)*, the six a task list is painted with (`todoPriority`,
+  `todoDate`, `todoProject`, `todoContext`, `todoKeyValue`, `todoDone`),
+  each with the color it holds and the name the exported file uses. A
   color is opened in a picker with a saturation-and-value square, a hue
   bar and a `#RRGGBB` field, and **the whole app wears the colors as they
   move**, so a color is chosen by seeing it in place. The Light/Dark
@@ -64,7 +67,7 @@ shipped names included — is refused while it is typed.
 - **Export**, in a theme's ⋮ menu, writes that one theme into a single
   `.json` file wherever you say, through the system's own save dialog: the
   name, the format version, and the colors at day and at night. JSON and
-  not an `.ini`, because a theme is two structured maps of twenty-six
+  not an `.ini`, because a theme is two structured maps of twenty-seven
   colors.
 - **Import**, the row after *New theme*, reads such a file back. This is
   how a theme gets to another device: it is stored with the installation,
@@ -73,12 +76,14 @@ shipped names included — is refused while it is typed.
   color is refused with the reason — nothing half-imported lands. A file
   whose theme name is already taken is refused too, and offered to be
   imported under a name typed on the spot. A file exported before the
-  task-list colors existed still imports: each one it leaves out takes
-  the color a task list was painted with then — the priority the task
-  color, dates and completed tasks the markers' grey, projects the
-  wikilink color, contexts the link color, `key:value` tags the code
-  color — so the theme looks exactly as it did. Custom themes saved
-  before them load the same way.
+  template color existed still imports, reading `template` from the code
+  color, so a command still stands apart. So does one exported before the
+  task-list colors existed: each one it leaves out takes the color a task
+  list was painted with then — the priority the task color, dates and
+  completed tasks the markers' grey, projects the wikilink color,
+  contexts the link color, `key:value` tags the code color — so the theme
+  looks exactly as it did. Custom themes saved before them load the same
+  way.
 
 ## Where they live
 
