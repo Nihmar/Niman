@@ -195,6 +195,14 @@ The link goes back to the passage (see [links](links.md#links-into-a-pdf-or-a-bo
 so you can go back and forth between the file and the note. The note's
 outline is the list of its annotations.
 
+The file shows where it was annotated: in a book, the annotated
+paragraph is tinted as a highlighter marks it; in a PDF, the passage is,
+and a page annotated as a whole wears a note button at its top right
+corner. **Tap a mark** to open its annotation in the companion note;
+where several annotate the same place, a sheet asks which. The marks are
+read from the companion notes: edit or delete an annotation there, and
+the file follows.
+
 A companion is a plain note that names its file in its frontmatter,
 `annotates: "[[Books/Dune.pdf]]"` — not by its name or its folder: it can
 live anywhere and be renamed, and you can write one by hand. The first

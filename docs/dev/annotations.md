@@ -52,6 +52,36 @@ paragraph (#283) will add the same key to `EpubLocation`.
   whose **Open note** opens the companion with the caret at the
   annotation (the template flow's `_onTemplateNoteFiled`).
 
+## Marks (#285)
+
+Marks are read from the companions, never stored. `annotationLinksIn`
+(`annotation_mark.dart`, pure, run in an isolate: a companion may be
+long) finds the links of a note that name a place (`BookLocation.fromFragment`),
+each with the section it belongs to: the heading above it, or its own
+line. `CompanionNotes.marksOf` resolves their targets (once each) and
+keeps the ones pointing at the file: `AnnotationMark` — the note, the
+offset its annotation starts at, the place, the heading.
+
+A pane asks an `AnnotationMarkSource` (the shell's `ShellAnnotationFlow`)
+through `FileMarks`, which reads the marks when the file opens and again
+half a second after the library's index changes (`LibrarySession.events`:
+a companion edited, an annotation written). A tap goes through
+`openAnnotationMarks`: one mark opens its note at the annotation, several
+ask which.
+
+- A book: `epubMarkedLines` maps the marks to lines of the book's text;
+  the read view tints the blocks holding them (`markedLines`, the
+  highlighter colour of `==mark==`) and reports a tap on one
+  (`onTapMark`) with its lines, which `epubMarksBetween` turns back into
+  marks.
+- A PDF: `PdfMarkLayer` reads, per marked page, the page's structured text
+  (the one pdfrx's selection indexes, so `chars=` means the same
+  characters), turns each passage into one rectangle per run of text it
+  covers (`passageRects`), and draws them with pdfrx's
+  `pageOverlaysBuilder`, scaled to the page. A page annotation, or a
+  passage whose characters the page no longer has, is pinned at the page's
+  corner.
+
 The file's pane moves to a link's place on its own counter of links
 followed (`_linksFollowed`), not on the note reload token, which also moves
 on a resume, a sync, and an annotation written.

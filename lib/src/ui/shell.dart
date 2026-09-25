@@ -993,6 +993,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         reloadToken: _linksFollowed,
         linkType: _editorSettings.linkType,
         onAnnotate: _annotate,
+        marks: _annotations,
       );
     }
     return NoteView(
@@ -3312,6 +3313,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         reloadToken: _noteReloadToken,
         linksFollowed: _linksFollowed,
         onAnnotate: _annotate,
+        marks: _annotations,
         saveNote: _noteSaver(controller),
         saveNoteStream: _noteStreamSaver(controller),
         createMissingNote: _missingNoteCreator(controller),

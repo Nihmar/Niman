@@ -31,6 +31,7 @@ import 'package:niman/src/markdown/render/block_height_map.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
 import 'package:niman/src/markdown/render/content_clamp_physics.dart';
 import 'package:niman/src/markdown/render/footnote_list.dart';
+import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/markdown/render/markdown_blocks_sliver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/note_margins.dart';
@@ -60,8 +61,18 @@ final class MarkdownReadView extends StatefulWidget {
     this.knownScan,
     this.onToggleTask,
     this.onBlockMenu,
+    this.markedLines = const [],
+    this.onTapMark,
     super.key,
   });
+
+  /// Lines whose block is marked, ascending: a book's annotated
+  /// paragraphs (#285), tinted as a highlighter marks.
+  final List<int> markedLines;
+
+  /// Called with a marked block's lines, its first and one past its last,
+  /// when it is tapped.
+  final void Function(int startLine, int endLine)? onTapMark;
 
   /// Called when a block is long-pressed, or clicked with the secondary
   /// button, with its first line, its text ([plainTextOf]) and where the
@@ -906,16 +917,54 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
       scope: widget.parser.scope,
     );
     final menu = widget.onBlockMenu;
-    if (menu == null) return view;
-    void ask(Offset position) => menu((
+    final marked = _marked(block);
+    final tapMark = widget.onTapMark;
+    if (menu == null && !marked) return view;
+    void ask(Offset position) => menu?.call((
       line: block.startLine,
       text: plainTextOf(parsed),
       position: position,
     ));
     return GestureDetector(
-      onLongPressStart: (details) => ask(details.globalPosition),
-      onSecondaryTapUp: (details) => ask(details.globalPosition),
-      child: view,
+      onLongPressStart: menu == null
+          ? null
+          : (details) => ask(details.globalPosition),
+      onSecondaryTapUp: menu == null
+          ? null
+          : (details) => ask(details.globalPosition),
+      onTap: marked && tapMark != null
+          ? () => tapMark(block.startLine, block.endLine)
+          : null,
+      child: marked
+          ? DecoratedBox(
+              key: ValueKey('marked-block-${block.startLine}'),
+              decoration: BoxDecoration(
+                color: markHighlightFor(
+                  dark: Theme.of(context).brightness == Brightness.dark,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: view,
+            )
+          : view,
     );
+  }
+
+  /// Whether a marked line falls in [block].
+  bool _marked(Block block) {
+    final lines = widget.markedLines;
+    if (lines.isEmpty) return false;
+    // The first marked line at or after the block's start.
+    var low = 0;
+    var high = lines.length;
+    while (low < high) {
+      final middle = (low + high) >> 1;
+      if (lines[middle] < block.startLine) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    return low < lines.length && lines[low] < block.endLine;
   }
 }

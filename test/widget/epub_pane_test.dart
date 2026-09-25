@@ -5,12 +5,15 @@
 // XHTML is written in pieces, and a space between two would be a word
 // of the book: its literals run on without one.
 // ignore_for_file: missing_whitespace_between_adjacent_strings
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark.dart';
+import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_look.dart';
@@ -20,6 +23,7 @@ import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/epub_pane.dart';
+import 'package:niman/src/ui/file_marks.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -40,6 +44,7 @@ void main() {
     String? anchor,
     int reloadToken = 0,
     void Function(Annotation annotation)? onAnnotate,
+    AnnotationMarkSource? marks,
   }) => MaterialApp(
     home: Scaffold(
       body: EpubPane(
@@ -50,6 +55,7 @@ void main() {
         anchor: anchor,
         reloadToken: reloadToken,
         onAnnotate: onAnnotate,
+        marks: marks,
       ),
     ),
   );
@@ -61,6 +67,7 @@ void main() {
     ReadingPositions? positions,
     String? anchor,
     void Function(Annotation annotation)? onAnnotate,
+    AnnotationMarkSource? marks,
   }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
@@ -72,6 +79,7 @@ void main() {
           positions: positions,
           anchor: anchor,
           onAnnotate: onAnnotate,
+          marks: marks,
         ),
       );
       final state = tester.state<EpubPaneState>(find.byType(EpubPane));
@@ -474,6 +482,88 @@ void main() {
     });
   });
 
+  group('where the book was annotated (#285)', () {
+    late String path;
+    late EpubChapter one;
+    late _FakeMarks marks;
+    setUp(() {
+      path = twoChapters();
+      one = readEpub(path, p.join(dir.path, 'probe')).chapters.first;
+      marks = _FakeMarks();
+    });
+    tearDown(() => marks.dispose());
+
+    AnnotationMark on(int line, [String note = 'Novel - Annotation.md']) =>
+        AnnotationMark(
+          note: note,
+          offset: 40,
+          place: EpubLocation(chapter: one.file, line: line),
+          title: 'novel, One',
+        );
+
+    // "It begins." is line 2 of the first chapter.
+    Finder marked(int line) =>
+        find.byKey(ValueKey('marked-block-${one.line + line}'));
+
+    testWidgets('an annotated paragraph is marked, and opens its note', (
+      tester,
+    ) async {
+      marks.marks = [on(2)];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      expect(marked(2), findsOneWidget);
+      expect(marked(0), findsNothing);
+      await tester.tap(find.text('It begins.'));
+      await tester.pumpAndSettle();
+      expect(marks.opened, [on(2)]);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('two annotations of a paragraph ask which', (tester) async {
+      marks.marks = [on(2), on(2, 'Other.md')];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      await tester.tap(find.text('It begins.'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('annotation-marks')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('annotation-mark-1')));
+      await tester.pumpAndSettle();
+      expect(marks.opened.single.note, 'Other.md');
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a note changing marks the book again', (tester) async {
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      expect(marked(2), findsNothing);
+      marks
+        ..marks = [on(2)]
+        ..changed();
+      // The pane follows the marks from where it opened the book: in real
+      // time.
+      await tester.runAsync(
+        () => Future<void>.delayed(
+          FileMarks.settleDelay + const Duration(milliseconds: 100),
+        ),
+      );
+      await tester.pump();
+      expect(marked(2), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
   testWidgets('a file that is not a book says so', (tester) async {
     final file = File(p.join(dir.path, 'broken.epub'))
       ..writeAsStringSync('not a zip');
@@ -482,4 +572,24 @@ void main() {
     expect(find.byType(MarkdownReadView), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
+}
+
+/// Marks set by the test, a change fired by it, the marks opened recorded.
+final class _FakeMarks implements AnnotationMarkSource {
+  List<AnnotationMark> marks = const [];
+  final List<AnnotationMark> opened = [];
+  final StreamController<Object?> _changes = StreamController.broadcast();
+
+  void changed() => _changes.add(null);
+
+  void dispose() => unawaited(_changes.close());
+
+  @override
+  Future<List<AnnotationMark>> marksOf(String path) async => marks;
+
+  @override
+  Stream<Object?> get changes => _changes.stream;
+
+  @override
+  void open(AnnotationMark mark) => opened.add(mark);
 }
