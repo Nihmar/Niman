@@ -80,6 +80,9 @@ the `beta` product flavor.
 - AGP forbids flavor names starting with `test` (reserved for test
   variants), hence `beta`.
 
+A local rebuild after a commit uses **`beta`** by default; the official
+artifacts are built only when asked (see `AGENTS.md`).
+
 ## The desktop testing build
 
 On Windows and Linux both builds are one `niman` executable under one

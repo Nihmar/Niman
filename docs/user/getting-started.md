@@ -29,17 +29,22 @@ disk; the app's SQLite database is only a rebuildable index.
 
 1. Open (or create) a folder as a library.
 2. Create a note with the Files FAB: **New note** or **New list note**.
-3. Write in the source editor or switch to WYSIWYG per note or per
-   library (see [editing](editing.md)).
+3. Write in the source editor or the live (WYSIWYG) editor — switch per
+   note or per library, and read the note in the read view (see
+   [editing](editing.md)).
 4. Organize with folders, [wikilinks](links.md), tags and frontmatter
-   (see [organization](organization.md)).
+   (see [organization](organization.md)), and let the
+   [journal](journal.md) make one note a day for you.
 5. Find notes with full-text [search](search.md).
 
 ## Next
 
-- [Editing](editing.md) — Markdown, math, images, spellcheck, preview.
-- [Organization](organization.md) — trash, history, templates, tags.
+- [Editing](editing.md) — Markdown, math, images, spellcheck, the read view.
+- [Organization](organization.md) — trash, history, templates, tags — and
+  reading pictures, PDFs and books.
+- [Journal](journal.md) — one note per day, with a calendar and a template.
 - [Tasks and reminders](tasks.md) — todo.txt plus `rem:` alarms.
+- [Themes](themes.md) — the shipped palettes, and a theme of your own.
 - [Home-screen widgets](widgets.md) — todo and note widgets (Android).
 - [Platforms](platforms.md) — Android / Linux / Windows notes.
 - [Sync](sync.md) — moving a library between machines today.

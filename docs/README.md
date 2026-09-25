@@ -2,16 +2,15 @@
 
 Two audiences, two folders:
 
-- **`user/`** — how to use Niman: libraries, editing, search, templates,
-  themes, tasks and reminders, home-screen widgets, settings, shortcuts,
-  sync, platform notes.
+- **`user/`** — how to use Niman: getting started, editing, organization,
+  the journal, search, links, templates, tasks and reminders, themes,
+  home-screen widgets, settings, shortcuts, sync, and platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
-  instructions, code conventions, release process, the note history,
-  WebDAV sync and workspace (open notes and tabs) design, the EPUB
-  reader and the annotations of PDFs and books, and
-  [unified-surface.md](dev/unified-surface.md), the research and design
-  for replacing the three Markdown surfaces with one widget (a proposal,
-  not built).
+  instructions, code conventions and the release process, plus the design
+  records behind a feature — the unified Markdown surface (and read/live
+  parity and huge notes), the workspace (open notes and tabs), the EPUB
+  reader, annotations of PDFs and books, the note history, WebDAV sync,
+  transcription, and the measured editor alternatives.
 - **`design/`** — the mockups a round was agreed against, one folder per
   round, with the decision each screen records.
 

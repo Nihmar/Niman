@@ -149,6 +149,4 @@ the tags as sheets and the history as its screen.
 ## Not yet
 
 Share-in on Android — tracked as
-[#39](https://github.com/Nihmar/Niman/issues/39).
-Debug-signed APKs until release keys land (see
-[releasing](../dev/releasing.md)).
+[#40](https://github.com/Nihmar/Niman/issues/40).

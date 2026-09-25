@@ -267,16 +267,15 @@ it says, to be written in. With the caret on the title line its
 `[!type]` shows as written.
 
 The **Markdown cheatsheet** shows every construct Niman reads, each as it
-is written beside how a note shows it — headings, emphasis, underline and
-super/subscript, lists and checkbox lists, quotes and callouts, links and links to
-notes, images and embeds, tags, code, math, tables, footnotes, rules,
-frontmatter and template placeholders. Open it from the note's ⋮ menu,
-*Editor: Markdown cheatsheet* in the palette, or Settings, next to the
-changelog. Every example can be copied; opened from a note, it can also
-be inserted at the caret — one line where the caret is, several on lines
-of their own. On a phone an example's source and its look are stacked.
-Highlight (`==…==`) and callouts (`> [!note]`) are not there because
-Niman does not read them.
+is written beside how a note shows it — headings, emphasis, highlight,
+underline and super/subscript, lists and checkbox lists, quotes and
+callouts, links and links to notes, images and embeds, tags, code, math,
+tables, footnotes, rules, frontmatter and template placeholders. Open it
+from the note's ⋮ menu, *Editor: Markdown cheatsheet* in the palette, or
+Settings, next to the changelog. Every example can be copied; opened from
+a note, it can also be inserted at the caret — one line where the caret
+is, several on lines of their own. On a phone an example's source and its
+look are stacked.
 
 One thing to know when a note came from somewhere else: **a list marker has
 to start a line.** `- c)` written inside a sentence — after a formula, or

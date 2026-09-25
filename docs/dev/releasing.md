@@ -6,11 +6,15 @@ Workflow: `.github/workflows/release.yml`.
 ## Cutting a release
 
 1. Add the release's entries to `CHANGELOG.md` under a new
-   `## [X.Y.Z] - YYYY-MM-DD` heading, and bump `version:` in
-   `pubspec.yaml`; commit both together. The file ships inside the build
-   and feeds the in-app changelog (the launch dialog after an update and
-   the screen under Settings → About), so it must describe the version
-   the tag is about, not the next one.
+   `## [X.Y.Z] - YYYY-MM-DD` heading, bump `version:` in
+   `pubspec.yaml`, and raise the `+N` build number on the same line
+   (`0.0.9+6`). The `+N` is Android's `versionCode`: the installer
+   refuses a package that does not raise it, so it goes up on every tag,
+   including a re-cut of a version already released. Commit the two
+   together. The changelog ships inside the build and feeds the in-app
+   changelog (the launch dialog after an update and the screen under
+   Settings → About), so it must describe the version the tag is about,
+   not the next one.
 2. Tag: `git tag vX.Y.Z`.
 3. Push: `git push origin vX.Y.Z`.
 
@@ -30,8 +34,14 @@ See `packaging/` for AppImage, Arch pkg, and Inno Setup details.
 
 ## Signing
 
-- **Android:** debug-signed until release keys are added as Actions
-  secrets (the workflow picks them up automatically).
+- **Android:** signed with the release key, read from the Actions secrets
+  `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` (the workflow picks them
+  up automatically). Without them the build falls back to the debug key,
+  which changes from run to run — Android then refuses to update over the
+  last install, which is what happened to every release up to v0.0.7
+  ([#160](https://github.com/Nihmar/Niman/issues/160)). Never ship a
+  release from a debug-signed build.
 - **Linux / Windows:** unsigned, as planned for v1.
 
 ## Testing build (Android)
@@ -47,10 +57,12 @@ release channel. See "Testing build" in `docs/dev/building.md`.
 
 ## After each commit (local rebuild)
 
-Rebuild and report outcome + artifact path only (no raw logs):
+Rebuild the **beta** (testing) flavor and report outcome + artifact path
+only (no raw logs). It installs beside the official app and never touches
+the installed release; the official artifacts are built only when asked:
 
-- Linux: `./scripts/niman.sh apk` / `./scripts/niman.sh linux`
-- Windows: `scripts\niman.bat apk` / `scripts\niman.bat windows`
+- Linux: `./scripts/niman.sh apk beta` / `./scripts/niman.sh linux beta`
+- Windows: `scripts\niman.bat apk beta` / `scripts\niman.bat windows beta`
 
 Repo-root `niman-release.apk` / `niman-linux-x64.tar.gz` are gitignored
 build artifacts, not sources.

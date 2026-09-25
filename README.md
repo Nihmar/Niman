@@ -17,77 +17,119 @@ Full guides live in [`docs/`](docs/):
 
 - **User:** [getting started](docs/user/getting-started.md),
   [editing](docs/user/editing.md), [organization](docs/user/organization.md),
-  [search](docs/user/search.md), [links](docs/user/links.md),
-  [templates](docs/user/templates.md), [tasks & reminders](docs/user/tasks.md),
+  [journal](docs/user/journal.md), [search](docs/user/search.md),
+  [links](docs/user/links.md), [templates](docs/user/templates.md),
+  [tasks & reminders](docs/user/tasks.md), [themes](docs/user/themes.md),
   [settings](docs/user/settings.md), [shortcuts](docs/user/shortcuts.md),
-  [sync](docs/user/sync.md), [platform notes](docs/user/platforms.md).
+  [sync](docs/user/sync.md), [home-screen widgets](docs/user/widgets.md),
+  [platform notes](docs/user/platforms.md).
 - **Contributor:** [architecture](docs/dev/architecture.md),
   [building](docs/dev/building.md), [conventions](docs/dev/conventions.md),
-  [releasing](docs/dev/releasing.md).
+  [releasing](docs/dev/releasing.md), and the design records under
+  [`docs/dev/`](docs/dev/) — the unified Markdown surface, read/live
+  parity and huge notes, the workspace (open notes and tabs), the EPUB
+  reader, annotations, the note history, WebDAV sync and transcription.
 
 ## What you get today
 
 ### Writing
 
-- Full **Markdown** support: tables, task lists, footnotes, strikethrough,
-  fenced code blocks with syntax highlighting.
+- **Markdown**, as CommonMark/GFM: tables, task lists, footnotes,
+  strikethrough, `==highlight==`, callouts (`> [!note]`), fenced code
+  blocks with syntax highlighting.
 - **Math** with `$…$` and `$$…$$` (KaTeX).
+- **One Markdown surface, three modes.** The source editor, the live
+  (WYSIWYG) editor and the read view are one widget of Niman's own: the
+  note on disk is the same text whichever you write in, and switching
+  modes does not move the page.
 - **Wikilinks** (`[[note]]`, `[[note|alias]]`, `[[note#heading]]`) and
-  standard Markdown links — click to navigate.
-- **Images** copied into the library on insert (no base64 blobs).
+  standard Markdown links — click to navigate, with a dialog to create a
+  missing note. Links reach any file of the library, and can point at a
+  page of a PDF or a chapter of a book.
+- **Images** copied into the library on insert (no base64 blobs), and
+  **voice notes** whose recordings stay plain audio files — a recording
+  can be transcribed on the device, with nothing uploaded.
 - **Spellcheck** on every platform (system/IME on Android, hunspell on
-  desktop).
-- **WYSIWYG editor** alongside the source editor — switch per note or per
-  library. Both, and the preview, are one Markdown surface of Niman's own:
-  the note on disk is the text either way.
-- Word count, heading outline, heading folding.
+  desktop) with a per-library personal dictionary.
+- Find and replace, word count, heading outline and folding, **typewriter
+  mode** on every platform, and **Zen mode** on the desktop.
+- The **command palette** and **remappable keyboard shortcuts**.
 
-### Libraries
+### Libraries and the workspace
 
 - A **library** is just a folder. Its settings live inside it as
   `.niman/settings.json` — copy the folder to another machine and
   everything travels with it.
 - Each library is independent: its own editor preferences, trash policy,
-  template folder, tree sort order, and so on.
-- Open multiple libraries from a remembered list; switch anytime.
-- **WebDAV sync** per library to Nextcloud, ownCloud, a NAS or any WebDAV
-  folder, `http://` over a VPN included: automatic syncing after edits,
-  on opening and every few minutes (Wi-Fi only if you like), an offline
-  queue that retries by itself, a first sync that deletes nothing, remote
-  deletions landing in the trash, and edits from two devices merged when
-  they are in different places — the rest decided line by line.
+  template folder, journal, tree sort order, and so on.
+- Open multiple libraries from a remembered list; switch anytime, and
+  **forget** one from its row's menu without touching its files.
+- **Tabs and split panes** on the desktop, an open-notes switcher on a
+  phone. The notes you had open, and where each was left, come back.
+- A **side panel** with the note's outline, tags and history, and the
+  **journal** calendar.
+
+### Reading files
+
+- **Pictures, PDFs and EPUB books** open in the note pane on every
+  platform, zoomed and paged where they need it.
+- A **book or PDF opens where you left it**; that place is kept in the
+  library and syncs with it.
+- **Annotate** a passage and it becomes a quoted section in a companion
+  note, linked back to its place; the file marks where it was annotated.
+- Books have a **look of their own** — theme, brightness, font and text
+  size — apart from the notes.
 
 ### Organization
 
+- **Journal:** one note per day, made the first time you open that day,
+  with a folder-, name- and template-pattern you set.
 - **Trash:** soft delete to `.trash/`, or hard delete — your choice per
-  library.
+  library — with an optional automatic empty.
 - **History:** local `.history/` keeps past versions of each note; browse
   them, compare with the current text and restore from the note's menu.
-- **Templates:** with placeholders like `{{title}}`, `{{date:YYYY-MM-DD}}`,
-  `{{time}}`, `{{uuid}}`; frontmatter from the template merges into the new
-  note.
+- **Templates:** `{{placeholders}}` and filters, frontmatter directives,
+  counters, includes and `{{ask}}`/`{{choice}}` prompts; the commands are
+  coloured in the template folder.
 - **Frontmatter:** any YAML key is indexed and searchable. Known fields
   include `title`, `tags`, `date`, `pinned`, `aliases`.
 - **Tags:** in frontmatter or inline `#tags` — both searchable.
 
 ### Search
 
-Full-text search across titles, body, and tags, powered by SQLite FTS5.
+Full-text search across titles, body, and tags, powered by SQLite FTS5,
+with prefix word search, `key = value` field search and `#tag` search.
 Designed to stay fast at scale — the target is 1,000,000 notes.
 
 ### Themes
 
-Brightness (day / night / system) combined with color palettes (system or
-Catppuccin). The layout adapts to screen size: sidebar + editor + preview on
-desktop, full-screen toggle on phones, split on tablets. You can override
-the layout per library.
+Brightness (day / night / system) and a palette: System (the device's
+own colours), Niman, Catppuccin, Solarized or Gruvbox. Build a theme of
+your own, edit it colour by colour with the whole app wearing it as you
+move, and **export or import** one as a `.json` file to carry it to
+another installation.
 
-### Task reminders (Android)
+### Tasks and reminders
 
-Mark a task with `rem:` and Niman schedules an exact alarm — it fires even
-with the screen off, the app in the background, or the process killed.
-The app warns about notification and battery-optimization permissions that
-could prevent delivery.
+- A **Todo tab** over `todo.txt`, with priorities, due dates, projects,
+  contexts and tags; the files are coloured as task lists in the editor.
+- **Reminders** with `rem:YYYY-MM-DDTHH:MM`: exact alarms on Android that
+  fire with the screen off or the app killed, and desktop timers with the
+  tray kept open. The app warns about permission and battery settings
+  that could block delivery.
+- **Home-screen widgets** on Android: the todo list, and a pinned note.
+
+### Sync and the desktop
+
+- **WebDAV sync** per library to Nextcloud, ownCloud, a NAS or any WebDAV
+  folder, `http://` over a VPN included: automatic syncing after edits,
+  on opening and every few minutes (Wi-Fi only if you like), an offline
+  queue that retries by itself, a first sync that deletes nothing, remote
+  deletions landing in the trash, and edits from two devices merged line
+  by line when they are in different places.
+- **Close to tray** with a tray menu, **one Niman per desktop session**,
+  **drag and drop** of files and folders onto the window, and *Open file*
+  for a Markdown file outside any library.
 
 ### Debug log
 
@@ -100,26 +142,29 @@ delivery and other background behavior.
 These are tracked as GitHub issues — see the
 [issue tracker](https://github.com/Nihmar/Niman/issues) for details.
 
-- **Multi-tab editing** ([#23](https://github.com/Nihmar/Niman/issues/23)) —
-  open several notes at once.
-- **Export** ([#24](https://github.com/Nihmar/Niman/issues/24)) —
-  note to `.md` or `.html` (with math rendered), folder/library to zip.
 - **Import** ([#25](https://github.com/Nihmar/Niman/issues/25)) —
   Obsidian folders (wikilinks supported) and Notion export zips.
+- **Export a note or folder**
+  ([#24](https://github.com/Nihmar/Niman/issues/24),
+  [#63](https://github.com/Nihmar/Niman/issues/63)) — to `.md`, `.html`
+  (with math rendered) or PDF, and a folder or library to a zip.
 - **Encryption** ([#26](https://github.com/Nihmar/Niman/issues/26)) —
   optional per-file AES-256-GCM, chosen at library creation.
-- **Onboarding** ([#27](https://github.com/Nihmar/Niman/issues/27)) —
-  a guided first-launch experience.
-- **Scale improvements** ([#22](https://github.com/Nihmar/Niman/issues/22)) —
-  background indexing and bounded memory for very large libraries.
-- **Platform parity** ([#39](https://github.com/Nihmar/Niman/issues/39)) —
-  share-in on Android, file association on desktop, single-instance guard.
-- **Performance** ([#45](https://github.com/Nihmar/Niman/issues/45)) —
-  tab-switch smoothness and editor performance on large notes.
-- **Packaging & release** ([#31](https://github.com/Nihmar/Niman/issues/31)) —
-  final branding, signed builds, and the first public release.
+- **Onboarding and a guided tour**
+  ([#27](https://github.com/Nihmar/Niman/issues/27),
+  [#266](https://github.com/Nihmar/Niman/issues/266)) — a first launch
+  that shows you around and asks for a library and an encryption choice.
+- **Android share-in** ([#40](https://github.com/Nihmar/Niman/issues/40)) —
+  send text or a `.md` file to Niman from another app.
+- **Git sync** ([#74](https://github.com/Nihmar/Niman/issues/74)) — a
+  library kept as a git repository, beside WebDAV.
+- **Scale and performance**
+  ([#22](https://github.com/Nihmar/Niman/issues/22),
+  [#45](https://github.com/Nihmar/Niman/issues/45)) — background indexing
+  and bounded memory for very large libraries, and editor smoothness on
+  huge notes.
 
-**Stretch goals:** Mermaid diagrams, PDF export, LaTeX autocomplete.
+**Stretch goals:** Mermaid diagrams, a Markdown linter.
 
 ## Platforms
 
@@ -132,9 +177,12 @@ Releases are built by CI from version tags only.
 
 ### Cutting a release
 
-1. Bump `version:` in `pubspec.yaml` and commit.
-2. Tag: `git tag v1.2.0` (must match `vX.Y.Z`, no suffixes).
-3. Push: `git push origin v1.2.0`.
+1. Add the version's section to `CHANGELOG.md`, bump `version:` in
+   `pubspec.yaml`, and raise the `+N` build number (Android's
+   `versionCode`: an update that does not raise it is refused).
+2. Commit those together.
+3. Tag: `git tag v1.2.0` (must match `vX.Y.Z`, no suffixes).
+4. Push: `git push origin v1.2.0`.
 
 The workflow builds all platforms and publishes artifacts on the tag's
 GitHub Release page.
@@ -149,21 +197,26 @@ GitHub Release page.
 
 ### Signing
 
-- **Android:** debug-signed until release keys are set up. To sign release
-  builds, store your keystore and passwords as Actions secrets — the
-  workflow picks them up automatically.
-- **Linux / Windows:** unsigned, as planned for v1.
+- **Android:** signed with the release key stored as Actions secrets
+  (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Without them a build falls
+  back to the debug key, which changes from run to run and makes Android
+  refuse to update over the last install — do not ship a release that way.
+- **Linux / Windows:** unsigned.
 
 ### Building locally
 
 ```
-./scripts/niman.sh apk          # Android
-./scripts/niman.sh linux        # Linux bundle
-scripts\niman.bat windows       # Windows (on a Windows host)
+./scripts/niman.sh apk beta     # Android testing flavor (the default)
+./scripts/niman.sh linux beta   # Linux testing bundle
+./scripts/niman.sh apk          # official Android APK
+scripts\niman.bat windows beta  # Windows testing build (on a Windows host)
 ```
 
-See the CI workflow and `packaging/` for AppImage, Arch pkg, and Inno Setup
-details.
+Every build has a **beta** (testing) flavor that installs beside the
+official app, with its own application ID or support folder. It is the
+default for a local build; the official artifacts are built only when
+asked. See [building](docs/dev/building.md).
 
 ## Architecture
 
@@ -174,7 +227,8 @@ details.
   over the `markdown` package's parser, with its own incremental tokenizer,
   `katex_dart` for math and `highlight` for code.
 - **Index:** `drift` (SQLite + FTS5), one database per library.
-- **Credentials:** `flutter_secure_storage`.
+- **Credentials:** `flutter_secure_storage` (the WebDAV password, and
+  whatever secrets a feature needs).
 - **Testing:** `flutter_test` + `integration_test`.
 - **CI:** tag-triggered GitHub Actions.
 
@@ -188,7 +242,11 @@ details.
 | [`drift`](https://pub.dev/packages/drift) | SQLite index + FTS5 search |
 | [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) | State management |
 | [`file_picker`](https://pub.dev/packages/file_picker) | Library/image picker |
-| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | Credentials + encryption key |
+| [`pdfrx`](https://pub.dev/packages/pdfrx) | PDF rendering |
+| [`home_widget`](https://pub.dev/packages/home_widget) | Android home-screen widgets |
+| [`flutter_local_notifications`](https://pub.dev/packages/flutter_local_notifications) | Task reminders |
+| [`whisper_ggml`](https://pub.dev/packages/whisper_ggml) | On-device speech-to-text for audio notes |
+| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | Credentials + secrets |
 
 ## Acknowledgments
 
