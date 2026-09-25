@@ -34,6 +34,7 @@ final class _SettingsFoldersPathsScreenState
   String? _listFolder;
   String? _templateFolder;
   String? _attachmentsFolder;
+  String? _annotationsFolder;
   String? _quickNotePath;
 
   /// The folders the library actually holds, for the "to create" badge:
@@ -63,6 +64,7 @@ final class _SettingsFoldersPathsScreenState
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
     final attachmentsFolder = await ops.attachmentsFolder;
+    final annotationsFolder = await ops.annotationsFolder;
     final quickNotePath = await ops.quickNotePath;
     final folders = await widget.controller.folders();
     if (!mounted) return;
@@ -70,6 +72,7 @@ final class _SettingsFoldersPathsScreenState
       _listFolder = listFolder;
       _templateFolder = templateFolder;
       _attachmentsFolder = attachmentsFolder;
+      _annotationsFolder = annotationsFolder;
       _quickNotePath = quickNotePath;
       _folderPaths = {for (final folder in folders) folder.path};
     });
@@ -150,6 +153,27 @@ final class _SettingsFoldersPathsScreenState
     }
   }
 
+  /// Opens the annotations-folder picker (#284): where a note annotating
+  /// a PDF or a book is made, when the file has none yet.
+  Future<void> _pickAnnotationsFolder() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final folders = await widget.controller.folders();
+    if (!mounted) return;
+    final folder = await showFolderPicker(
+      context,
+      title: AppStrings.annotationsFolderTitle,
+      folders: folders,
+      ops: ops,
+      current: _annotationsFolder ?? defaultAnnotationsFolder,
+    );
+    if (folder == null) return;
+    await ops.setAnnotationsFolder(folder: folder);
+    final saved = await ops.annotationsFolder;
+    widget.controller.notify();
+    if (mounted) setState(() => _annotationsFolder = saved);
+  }
+
   /// Opens the quick-note picker (the chosen note is set from the tree
   /// dialog); the shell picks the value up through the session.
   Future<void> _pickQuickNote() async {
@@ -172,6 +196,7 @@ final class _SettingsFoldersPathsScreenState
     final listFolder = _listFolder ?? defaultListFolder;
     final templateFolder = _templateFolder ?? defaultTemplateFolder;
     final attachmentsFolder = _attachmentsFolder ?? defaultAttachmentsFolder;
+    final annotationsFolder = _annotationsFolder ?? defaultAnnotationsFolder;
     return SettingsAreaShell(
       title: AppStrings.settingsAreaFolders,
       controller: controller,
@@ -229,6 +254,18 @@ final class _SettingsFoldersPathsScreenState
                   ? null
                   : AppStrings.settingsFolderToCreate,
               onTap: _pickAttachmentsFolder,
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.annotationsFolder,
+            child: SettingsValueRow(
+              title: AppStrings.annotationsFolderTitle,
+              subtitle: AppStrings.annotationsFolderSubtitle,
+              value: annotationsFolder,
+              badge: _exists(annotationsFolder)
+                  ? null
+                  : AppStrings.settingsFolderToCreate,
+              onTap: _pickAnnotationsFolder,
             ),
           ),
           HighlightRow(

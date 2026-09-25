@@ -1659,6 +1659,23 @@ final class FinnishStrings extends Strings {
   String get placeLinkCopied => 'Linkki kopioitu';
   @override
   String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Merkintöjen kansio';
+  @override
+  String get annotationsFolderSubtitle =>
+      'PDF:ää tai kirjaa kommentoivat muistiinpanot';
+  @override
+  String get annotationNoteSuffix => 'Merkintä';
+  @override
+  String get annotateAction => 'Merkitse';
+  @override
+  String get annotationCommentHint => 'Kommenttisi';
+  @override
+  String get annotationSaved => 'Merkintä tallennettu';
+  @override
+  String get annotationOpenNote => 'Avaa muistiinpano';
+  @override
+  String get annotationFailed => 'Merkintää ei voitu tallentaa';
 
   @override
   String get movedToTrash => 'Siirretty koriin';

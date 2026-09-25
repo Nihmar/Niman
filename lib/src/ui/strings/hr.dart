@@ -1645,6 +1645,23 @@ final class CroatianStrings extends Strings {
   String get placeLinkCopied => 'Poveznica je kopirana';
   @override
   String pdfPageLabel(String name, int page) => '$name, str. $page';
+  @override
+  String get annotationsFolderTitle => 'Mapa za anotacije';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Bilješke koje anotiraju PDF ili knjigu';
+  @override
+  String get annotationNoteSuffix => 'Anotacija';
+  @override
+  String get annotateAction => 'Anotiraj';
+  @override
+  String get annotationCommentHint => 'Vaš komentar';
+  @override
+  String get annotationSaved => 'Anotacija spremljena';
+  @override
+  String get annotationOpenNote => 'Otvori bilješku';
+  @override
+  String get annotationFailed => 'Anotaciju nije moguće spremiti';
 
   @override
   String get movedToTrash => 'Premješteno u korpu';

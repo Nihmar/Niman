@@ -53,6 +53,7 @@ sync) in `.niman/settings.json`.
 | `listNoteFolder` | `Lists` | Where new list notes go |
 | `templateFolder` | `Templates` | Where note templates live |
 | `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
+| `annotationsFolder` | `Annotations` | Where a note annotating a PDF or a book is made, when the file has none yet (see [organization](organization.md)) |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
 | `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
@@ -92,9 +93,9 @@ leave the file at its next write.
 | `epubFont` | `literata` | The books' face: `literata`, `serif`, `sans` or `mono` |
 | `epubTextScale` | 1.0 | The books' text size (0.8–1.8) |
 
-The three folder keys — `listNoteFolder`, `templateFolder`,
-`attachmentsFolder` — are paths under the library root, created the
-first time something is written there. Their picker lists the folders
+The four folder keys — `listNoteFolder`, `templateFolder`,
+`attachmentsFolder`, `annotationsFolder` — are paths under the library
+root, created the first time something is written there. Their picker lists the folders
 the library actually holds, so a default naming one it has never had
 (`assets`, until an image or a voice clip is copied in) starts out
 unselected: *New folder* then builds it at the library root, and only

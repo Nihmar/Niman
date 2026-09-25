@@ -1659,6 +1659,22 @@ final class GalicianStrings extends Strings {
   String get placeLinkCopied => 'Ligazón copiada';
   @override
   String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Cartafol das anotacións';
+  @override
+  String get annotationsFolderSubtitle => 'Notas que anotan un PDF ou un libro';
+  @override
+  String get annotationNoteSuffix => 'Anotación';
+  @override
+  String get annotateAction => 'Anotar';
+  @override
+  String get annotationCommentHint => 'O teu comentario';
+  @override
+  String get annotationSaved => 'Anotación gardada';
+  @override
+  String get annotationOpenNote => 'Abrir a nota';
+  @override
+  String get annotationFailed => 'Non se puido gardar a anotación';
 
   @override
   String get movedToTrash => 'Movida ao paperilleiro';

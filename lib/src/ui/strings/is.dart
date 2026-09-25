@@ -1644,6 +1644,22 @@ final class IcelandicStrings extends Strings {
   String get placeLinkCopied => 'Tengill afritaður';
   @override
   String pdfPageLabel(String name, int page) => '$name, bls. $page';
+  @override
+  String get annotationsFolderTitle => 'Mappa fyrir athugasemdir';
+  @override
+  String get annotationsFolderSubtitle => 'Glósur sem skýra PDF-skjal eða bók';
+  @override
+  String get annotationNoteSuffix => 'Athugasemd';
+  @override
+  String get annotateAction => 'Skrifa athugasemd';
+  @override
+  String get annotationCommentHint => 'Athugasemdin þín';
+  @override
+  String get annotationSaved => 'Athugasemd vistuð';
+  @override
+  String get annotationOpenNote => 'Opna glósu';
+  @override
+  String get annotationFailed => 'Ekki tókst að vista athugasemdina';
 
   @override
   String get movedToTrash => 'Fært í korpu';

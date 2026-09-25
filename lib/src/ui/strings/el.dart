@@ -1700,6 +1700,23 @@ final class GreekStrings extends Strings {
   String get placeLinkCopied => 'Ο σύνδεσμος αντιγράφηκε';
   @override
   String pdfPageLabel(String name, int page) => '$name, σ. $page';
+  @override
+  String get annotationsFolderTitle => 'Φάκελος σχολιασμών';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Σημειώσεις που σχολιάζουν ένα PDF ή ένα βιβλίο';
+  @override
+  String get annotationNoteSuffix => 'Σχολιασμός';
+  @override
+  String get annotateAction => 'Σχολίασε';
+  @override
+  String get annotationCommentHint => 'Το σχόλιό σας';
+  @override
+  String get annotationSaved => 'Ο σχολιασμός αποθηκεύτηκε';
+  @override
+  String get annotationOpenNote => 'Άνοιγμα σημείωσης';
+  @override
+  String get annotationFailed => 'Δεν ήταν δυνατή η αποθήκευση του σχολιασμού';
 
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';

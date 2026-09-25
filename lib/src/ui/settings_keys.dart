@@ -56,6 +56,7 @@ abstract final class SettingsKeys {
   static const templateFolder = Key('template-folder-setting');
   static const templateHelp = Key('template-help-setting');
   static const attachmentsFolder = Key('attachments-folder-setting');
+  static const annotationsFolder = Key('annotations-folder-setting');
   static const journalFolder = Key('journal-folder-setting');
   static const journalEntryName = Key('journal-entry-name-setting');
   static const journalTemplate = Key('journal-template-setting');
