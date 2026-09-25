@@ -1755,6 +1755,12 @@ final class EstonianStrings extends Strings {
       'Kaob sellest loetelust. Kaust, märgid ja koguse seaded jäävad '
       'puutumatuks ja uuesti avamine viib kohale.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'See teek on praegu avatud: see suletakse esmalt ja kaob siis '
+      'loendist. Kaust, märkmed ja selles olevad teegi seaded jäävad '
+      'puutumata ning uuesti avamine toob selle tagasi.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Luba failidele ligipääs';

@@ -1820,6 +1820,13 @@ final class FrenchStrings extends Strings {
       'de la bibliothèque sont laissés tels quels, et la rouvrir la '
       'ramène.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Cette bibliothèque est ouverte en ce moment : elle se ferme d’abord, '
+      'puis disparaît de la liste. Le dossier, les notes et les réglages de '
+      'la bibliothèque qu’il contient restent intacts, et la rouvrir la '
+      'fait revenir.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Accorder l’accès aux fichiers';

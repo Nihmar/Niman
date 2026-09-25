@@ -851,6 +851,8 @@ abstract base class Strings {
   String libraryForgetTitle(String name);
   String get libraryForgetExplained;
 
+  String get libraryForgetOpenExplained;
+
   // Android storage access.
   String get storageAccessAction;
   String get storageAccessNeeded;

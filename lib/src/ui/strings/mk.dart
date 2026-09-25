@@ -1792,6 +1792,12 @@ final class MacedonianStrings extends Strings {
       'библиотеката во неа остануваат на мир, и повторно отворање ја '
       'враќа на место.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Оваа библиотека е отворена сега: прво се затвора, а потоа исчезнува '
+      'од списокот. Папката, белешките и поставките на библиотеката во неа '
+      'остануваат недопрени, и повторното отворање ја враќа назад.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Дозволи пристап до датотеките';

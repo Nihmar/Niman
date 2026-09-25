@@ -1792,6 +1792,12 @@ final class BulgarianStrings extends Strings {
       'библиотеката остават непроменени и повторното отваряне я връща на '
       'място.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Тази библиотека е отворена сега: първо се затваря, а след това '
+      'изчезва от списъка. Папката, бележките и настройките на библиотеката '
+      'в нея остават непокътнати и повторното отваряне я връща обратно.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Разреши достъп до файлове';

@@ -1780,6 +1780,13 @@ final class SwedishStrings extends Strings {
       'biblioteksinställningarna i den rör inte, och att öppna den igen '
       'tar den tillbaka.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Det här biblioteket är öppet nu: det stängs först och försvinner '
+      'sedan från listan. Mappen, anteckningarna och '
+      'biblioteksinställningarna i det lämnas orörda, och att öppna det '
+      'igen för tillbaka det.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Bevilja filåtkomst';

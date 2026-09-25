@@ -1031,6 +1031,7 @@ final class AppStrings {
   static String get libraryForget => _s.libraryForget;
   static String libraryForgetTitle(String name) => _s.libraryForgetTitle(name);
   static String get libraryForgetExplained => _s.libraryForgetExplained;
+  static String get libraryForgetOpenExplained => _s.libraryForgetOpenExplained;
 
   // Android storage access.
   static String get storageAccessAction => _s.storageAccessAction;

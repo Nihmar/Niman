@@ -1622,6 +1622,10 @@ final class ChineseStrings extends Strings {
   @override
   String get libraryForgetExplained => '它将从此列表消失。文件夹、笔记和文库设置都留在原地，重新打开即可恢复。';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      '这个库当前是打开的：会先关闭，然后从列表中移除。里面的文件夹、笔记和库设置都原样保留，再次打开就会回到列表。';
+
   // Android storage access.
   @override
   String get storageAccessAction => '授予文件访问权限';

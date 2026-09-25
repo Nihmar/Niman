@@ -1798,6 +1798,12 @@ final class DutchStrings extends Strings {
       'bibliotheekinstellingen erin worden onaangetast gelaten, en opnieuw '
       'openen brengt hem terug.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Deze bibliotheek is nu open: hij wordt eerst gesloten en verdwijnt '
+      'dan uit de lijst. De map, de notities en de bibliotheekinstellingen '
+      'erin blijven ongewijzigd, en opnieuw openen brengt hem terug.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Bestandstoegang verlenen';

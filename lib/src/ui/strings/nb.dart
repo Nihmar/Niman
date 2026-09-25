@@ -1762,6 +1762,12 @@ final class NorwegianStrings extends Strings {
       'bibliotekinnstillingene i den røres ikke, og å åpne den igjen tar '
       'den tilbake.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Dette biblioteket er åpent nå: det lukkes først og forsvinner så fra '
+      'listen. Mappen, notatene og bibliotekinnstillingene i det blir ikke '
+      'rørt, og å åpne det igjen henter det tilbake.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Gi filtilgang';

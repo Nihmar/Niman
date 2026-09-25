@@ -179,6 +179,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<void> forgetLibrary(String libraryPath) async {
+    // The same rule as the real controller (#286): the library on screen
+    // closes first, or the list would drop the one the app is showing.
+    if (_root != null && libraryPath == _root) await close();
     _known.removeWhere((entry) => entry.path == libraryPath);
     _bump();
   }

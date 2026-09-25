@@ -1791,6 +1791,12 @@ final class ItalianStrings extends Strings {
       'della libreria restano dove sono, e riaprendola torna '
       'nell’elenco.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Questa libreria è aperta adesso: prima viene chiusa, poi esce '
+      'dall’elenco. La cartella, le note e le impostazioni della libreria '
+      'al suo interno restano intatte, e riaprirla la riporta qui.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Concedi l’accesso ai file';

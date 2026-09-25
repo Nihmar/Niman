@@ -1777,6 +1777,12 @@ final class BelarusianStrings extends Strings {
       'заостаюцца незмененымі, і паўторнае адкрыццё вяртае яе на '
       'месца.';
 
+  @override
+  String get libraryForgetOpenExplained =>
+      'Гэтая бібліятэка зараз адкрыта: спачатку яна зачыніцца, а потым '
+      'знікне са спісу. Тэчка, нататкі і налады бібліятэкі ў ёй застаюцца '
+      'некранутымі, і паўторнае адкрыццё верне яе назад.';
+
   // Android storage access.
   @override
   String get storageAccessAction => 'Дазволіць доступ да файлаў';
