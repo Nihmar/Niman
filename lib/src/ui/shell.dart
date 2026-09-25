@@ -1903,12 +1903,15 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _addTodo() async {
     const AppLogger(name: 'todo').debug('todo add pressed');
     final snapshot = _todoController.snapshot;
+    final reminders = widget.reminders;
     final line = await showTodoTaskDialog(
       context,
       today: DateTime.now(),
       knownTokens: snapshot == null
           ? const <String>{}
           : snapshotTokens(snapshot),
+      health: reminders.health.value,
+      onOpenReminderSettings: reminders.openHealthSettings,
     );
     if (line == null || !mounted) {
       return;
