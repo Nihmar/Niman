@@ -457,6 +457,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The overlay the touch selection's handles and toolbar are drawn in.
   final OverlayPortalController _touchOverlay = OverlayPortalController();
 
+  /// Ticks when the touch overlay should build again: its handles and
+  /// toolbar hang from the selected line's paragraph, and the frame that
+  /// shows them can find it detached — a rebuild (the keyboard coming up, a
+  /// reveal) in the same frame (#291).
+  final ValueNotifier<int> _touchTick = ValueNotifier<int>(0);
+
+  /// How many frames the overlay has asked to be built again, and whether
+  /// one such ask is already queued.
+  int _touchFrames = 0;
+  bool _touchScheduled = false;
+
+  /// How many frames the overlay keeps asking ([_showTouch] resets it):
+  /// enough for the keyboard's rise and a sliver's round of rebuilds, and
+  /// short enough that a selection off screen stops asking.
+  static const int _touchRetryFrames = 30;
+
   /// Whether the selection was made by touch and shows its handles.
   bool _touchHandles = false;
 
@@ -638,6 +654,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _footnoteMath.dispose();
     _caretSpot.dispose();
     _caretOn.dispose();
+    _touchTick.dispose();
     if (_ownsScroll) _scroll.dispose();
     super.dispose();
   }
@@ -1516,6 +1533,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// A tap: one places the caret, two take the word under it, three take the
   /// line.
   ///
+  /// The two- and three-tap selections come up with the touch handles and
+  /// menu, as a long press does: on a phone a word the finger selected is a
+  /// selection the finger can act on, whatever picked it (#291). A mouse's
+  /// second click is a double click and keeps its menu for the right button,
+  /// so the overlay is the finger's alone.
+  ///
   /// Counted here rather than with `onDoubleTap`, because a triple click is a
   /// *third* tap and not a second double one, and because the count has to
   /// survive
@@ -1523,6 +1546,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void _tapUp(Offset position) {
     final offset = offsetAt(position);
     if (offset == null) return;
+    final finger = _lastPointerKind != PointerDeviceKind.mouse;
     final now = DateTime.now();
     final last = _lastClick;
     final lastAt = _lastClickAt;
@@ -1552,6 +1576,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           lineStart + math.min(start, text.length),
           lineStart + math.min(end, text.length),
         );
+        if (finger) _showTouch(toolbar: true);
       default:
         final line = widget.buffer.lineOf(offset);
         _select(
@@ -1559,6 +1584,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
           widget.buffer.offsetOfLine(line) + widget.buffer.lineLengthAt(line),
         );
         _clicks = 0;
+        if (finger) _showTouch(toolbar: true);
     }
   }
 
@@ -2642,7 +2668,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       child: OverlayPortal(
         controller: _touchOverlay,
         overlayChildBuilder: (context) => ListenableBuilder(
-          listenable: _scroll,
+          listenable: Listenable.merge([_scroll, _touchTick]),
           builder: (context, _) => _touchSelectionOverlay(),
         ),
         child: OverlayPortal(
@@ -3225,11 +3251,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   Widget _touchSelectionOverlay() {
     final selection = _selection.clampTo(widget.buffer.length);
     final collapsed = selection.isCollapsed;
+    final start = _caretRectAt(selection.start);
+    final end = _caretRectAt(selection.end);
+    // A line the frame has not laid out yet has no paragraph to hang from:
+    // the overlay is empty, and it asks again next frame (#291).
+    if ((_touchHandles || _touchToolbar) && (start == null || end == null)) {
+      _retryTouchOverlay();
+    }
     // The toolbar is the context menu's phone face: the same clipboard, the
     // toolbar's formats in its overflow, the spelling after them.
     return TouchSelectionOverlay(
-      start: _caretRectAt(selection.start),
-      end: _caretRectAt(selection.end),
+      start: start,
+      end: end,
       showHandles: _touchHandles && !collapsed,
       showToolbar: _touchToolbar,
       buttons: _clipboardItems(_hideTouch, touch: true),
@@ -3276,11 +3309,33 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Shows the touch selection: the handles for a range, and the toolbar when
   /// [toolbar] asks for it.
   void _showTouch({required bool toolbar}) {
+    _touchFrames = 0;
     setState(() {
       _touchHandles = !_selection.isCollapsed;
       _touchToolbar = toolbar;
     });
     _touchOverlay.show();
+    // The frame that shows the handles is the one the gesture landed in; the
+    // next one has the note laid out where the gesture left it.
+    _retryTouchOverlay();
+  }
+
+  /// Asks the touch overlay to build again after this frame: the handles and
+  /// the toolbar hang from the selected line's paragraph, and the frame that
+  /// shows them can find it detached — the keyboard rising relayouts the
+  /// pane and a reveal rebuilds the line — so the overlay is drawn once,
+  /// empty, with nothing to build it again when the paragraph is back
+  /// (#291). Bounded, so a selection that is off screen stops asking.
+  void _retryTouchOverlay() {
+    if (_touchScheduled || _touchFrames >= _touchRetryFrames) return;
+    _touchScheduled = true;
+    _touchFrames++;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _touchScheduled = false;
+      if (mounted && (_touchHandles || _touchToolbar)) {
+        _touchTick.value++;
+      }
+    });
   }
 
   /// Takes the touch selection's handles and toolbar away.
