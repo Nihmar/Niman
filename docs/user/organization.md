@@ -160,6 +160,49 @@ library.
   in the editor: the pane says the file is not a text note, and on
   desktop offers **Open in default app** right there.
 
+### Annotating a PDF or a book
+
+A PDF or a book is annotated in a note of its own, its **companion
+note**, without leaving the file:
+
+- In a book, **long-press a paragraph** (right-click on desktop) and pick
+  **Annotate**; the same menu copies a link to the paragraph. The
+  **annotate** button on the book's row annotates the paragraph at the
+  top of the view.
+- In a PDF, **select a passage** and pick **Annotate** in its menu. The
+  **annotate** button on the PDF's row annotates the passage selected,
+  or the page being read when nothing is — a scanned PDF has no text to
+  select.
+
+A sheet (a dialog on a wide window) shows the place and the passage and
+takes your comment, which may stay empty. **Save** writes it and leaves
+you where you were; the message that says so offers **Open note**, which
+opens the companion at the annotation.
+
+Each annotation is a section of the companion: a heading naming the
+place, the passage quoted with a link back to it, and your comment:
+
+```markdown
+## Dune, p. 34
+
+> The spice must flow.
+> — [[Books/Dune.pdf#page=34&chars=120-180|Dune, p. 34]]
+
+Remember this.
+```
+
+The link goes back to the passage (see [links](links.md#links-into-a-pdf-or-a-book)),
+so you can go back and forth between the file and the note. The note's
+outline is the list of its annotations.
+
+A companion is a plain note that names its file in its frontmatter,
+`annotates: "[[Books/Dune.pdf]]"` — not by its name or its folder: it can
+live anywhere and be renamed, and you can write one by hand. The first
+annotation of a file that has none makes one in the **annotations folder**
+(Settings → Folders and paths, `Annotations` by default), named after the
+file: `Dune - Annotation.md`. Later ones are added at its end. A file with
+several companions gets its annotations in the first, by path.
+
 Nothing is written to such a file, ever — it is never reported as saved,
 because there is nothing of it in the editor to save. A picture, a PDF or
 a book is shown, not edited, so the editor's controls are not offered

@@ -317,3 +317,17 @@ List<(int, int)> _linkMarkers(String text, StyleRun run) {
   }
   return markers;
 }
+
+/// What a reader sees of [block] as one line of plain text, for a passage
+/// quoted out of it (#284): its [VisibleText.plainText], its backslash
+/// escapes read, its lines joined by a space.
+String plainTextOf(ParsedBlock block) =>
+    VisibleText.of(block).plainText
+        .replaceAllMapped(_escape, (m) => m[1]!)
+        .replaceAll(_blank, ' ')
+        .trim();
+
+/// A backslash escaping ASCII punctuation.
+final RegExp _escape = RegExp(r'\\([!-/:-@\[-`{-~])');
+
+final RegExp _blank = RegExp(r'\s+');

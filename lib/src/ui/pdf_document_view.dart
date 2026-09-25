@@ -6,6 +6,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -32,7 +33,9 @@ PdfLocation? pdfLocationAt(List<Rect> pages, double top) {
 }
 
 /// The PDF at [path], an absolute path, and its row: its name, a link to
-/// the page being read (#282), on desktop the system's application.
+/// the page being read (#282), annotating it (#284), on desktop the
+/// system's application. A passage selected is annotated from its menu,
+/// or from the row's button, which annotates the page when nothing is.
 final class PdfDocumentView extends StatefulWidget {
   /// Shows the PDF at [path].
   const new({
@@ -42,6 +45,7 @@ final class PdfDocumentView extends StatefulWidget {
     this.positions,
     this.anchor,
     this.reloadToken = 0,
+    this.onAnnotate,
     super.key,
   });
 
@@ -66,6 +70,10 @@ final class PdfDocumentView extends StatefulWidget {
   /// its page.
   final int reloadToken;
 
+  /// Annotates a passage or a page of the PDF in its companion note
+  /// (#284); null offers no annotating.
+  final void Function(Annotation annotation)? onAnnotate;
+
   @override
   State<PdfDocumentView> createState() => _PdfDocumentViewState();
 }
@@ -81,6 +89,9 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
 
   /// Whether the PDF is laid out, and has pages to link to.
   bool _ready = false;
+
+  /// The text selected, when some is.
+  PdfTextSelection? _selection;
 
   @override
   void initState() {
@@ -182,13 +193,73 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
       _controller.visibleRect.top,
     );
     if (place == null) return null;
-    final name = p.basenameWithoutExtension(widget.path);
-    return (
-      path: path,
-      place: place,
-      label: AppStrings.pdfPageLabel(name, place.page),
+    return (path: path, place: place, label: _label(place.page));
+  }
+
+  /// Whether a passage or a page can be annotated: the PDF is in a
+  /// library, and someone writes annotations.
+  bool get _annotates => widget.onAnnotate != null && widget.positions != null;
+
+  /// Annotates the passage [selection] holds: its first page's characters,
+  /// quoting all of it.
+  Future<void> _annotateSelection(PdfTextSelection selection) async {
+    final key = widget.positions?.keyOf(widget.path);
+    final ranges = await selection.getSelectedTextRanges();
+    if (key == null || ranges.isEmpty) return;
+    final text = await selection.getSelectedText();
+    final first = ranges.first;
+    widget.onAnnotate?.call(
+      Annotation(
+        path: key,
+        place: PdfLocation(
+          page: first.pageNumber,
+          chars: (start: first.start, end: first.end),
+        ),
+        label: _label(first.pageNumber),
+        quote: text,
+      ),
     );
   }
+
+  /// Annotates the passage selected, else the page being read.
+  void _annotateHere() {
+    final selection = _selection;
+    if (selection != null && selection.hasSelectedText) {
+      unawaited(_annotateSelection(selection));
+      return;
+    }
+    final here = _here();
+    if (here == null) return;
+    final page = (here.place as PdfLocation).page;
+    widget.onAnnotate?.call(
+      Annotation(
+        path: here.path,
+        place: PdfLocation(page: page),
+        label: here.label,
+      ),
+    );
+  }
+
+  /// A selection's menu, with the passage's annotation.
+  void _selectionMenu(
+    PdfViewerContextMenuBuilderParams params,
+    List<ContextMenuButtonItem> items,
+  ) {
+    final selection = params.textSelectionDelegate;
+    if (!_annotates || !selection.hasSelectedText) return;
+    items.add(
+      ContextMenuButtonItem(
+        label: AppStrings.annotateAction,
+        onPressed: () {
+          params.dismissContextMenu();
+          unawaited(_annotateSelection(selection));
+        },
+      ),
+    );
+  }
+
+  String _label(int page) =>
+      AppStrings.pdfPageLabel(p.basenameWithoutExtension(widget.path), page);
 
   @override
   Widget build(BuildContext context) => Column(
@@ -206,6 +277,10 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
                 unawaited(_place(controller)),
             errorBannerBuilder: (context, error, stack, documentRef) =>
                 const AttachmentUnreadable(),
+            textSelectionParams: PdfTextSelectionParams(
+              onTextSelectionChange: (selection) => _selection = selection,
+            ),
+            customizeContextMenuItems: _selectionMenu,
           ),
         ),
       ),
@@ -216,6 +291,13 @@ final class _PdfDocumentViewState extends State<PdfDocumentView> {
           PlaceLinkButton(
             here: _ready && widget.positions != null ? _here : null,
             linkType: widget.linkType,
+          ),
+          IconButton(
+            key: const Key('annotate-button'),
+            tooltip: AppStrings.annotateAction,
+            icon: const Icon(Icons.edit_note),
+            visualDensity: VisualDensity.compact,
+            onPressed: _ready && _annotates ? _annotateHere : null,
           ),
         ],
       ),

@@ -1,6 +1,6 @@
 /// A book's row, under it in the note pane (#280): its name, how the books
-/// look, its contents, a link to the place being read (#282), and on
-/// desktop the system's application.
+/// look, its contents, a link to the place being read (#282), annotating
+/// it (#284), and on desktop the system's application.
 library;
 
 import 'package:flutter/material.dart';
@@ -24,6 +24,7 @@ final class EpubBar extends StatelessWidget {
     this.onEditLook,
     this.onContents,
     this.here,
+    this.onAnnotate,
     super.key,
   });
 
@@ -45,6 +46,9 @@ final class EpubBar extends StatelessWidget {
   /// The place being read, for the link to it.
   final PlaceToLink? Function()? here;
 
+  /// Annotates the paragraph being read.
+  final VoidCallback? onAnnotate;
+
   @override
   Widget build(BuildContext context) => AttachmentBar(
     path: path,
@@ -65,6 +69,13 @@ final class EpubBar extends StatelessWidget {
         onPressed: onContents,
       ),
       PlaceLinkButton(here: here, linkType: linkType),
+      IconButton(
+        key: const Key('annotate-button'),
+        tooltip: AppStrings.annotateAction,
+        icon: const Icon(Icons.edit_note),
+        visualDensity: VisualDensity.compact,
+        onPressed: onAnnotate,
+      ),
     ],
   );
 }

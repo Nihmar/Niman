@@ -51,6 +51,15 @@ final class Annotation {
   /// What the reader said; may be empty.
   final String comment;
 
+  /// This annotation, saying [comment].
+  Annotation withComment(String comment) => Annotation(
+    path: path,
+    place: place,
+    label: label,
+    quote: quote,
+    comment: comment,
+  );
+
   /// The annotation as its note holds it, links written as [linkType]
   /// says, ending in a newline.
   String toMarkdown({required LinkType linkType}) {

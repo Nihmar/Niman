@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
@@ -42,6 +43,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.spellCheck,
     this.reloadToken = 0,
     this.linksFollowed = 0,
+    this.onAnnotate,
     this.zen = false,
     this.typewriter = false,
     this.onToggleTypewriter,
@@ -161,6 +163,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// place when the same link is followed again (#282).
   final int linksFollowed;
 
+  /// Annotates a place of a book or a PDF in its companion note (#284).
+  final void Function(Annotation annotation)? onAnnotate;
+
   /// The library's note write path, forwarded to the NoteView; null (no
   /// open library) lets the editor write directly.
   final NoteSaver? saveNote;
@@ -222,6 +227,7 @@ final class ShellDetailPane extends StatelessWidget {
           anchor: tab.anchor,
           reloadToken: linksFollowed,
           linkType: linkType,
+          onAnnotate: onAnnotate,
         )
       : _noteView(root, tab);
 

@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_look.dart';
@@ -38,6 +39,7 @@ void main() {
     ReadingPositions? positions,
     String? anchor,
     int reloadToken = 0,
+    void Function(Annotation annotation)? onAnnotate,
   }) => MaterialApp(
     home: Scaffold(
       body: EpubPane(
@@ -47,6 +49,7 @@ void main() {
         positions: positions,
         anchor: anchor,
         reloadToken: reloadToken,
+        onAnnotate: onAnnotate,
       ),
     ),
   );
@@ -57,6 +60,7 @@ void main() {
     VoidCallback? onEditLook,
     ReadingPositions? positions,
     String? anchor,
+    void Function(Annotation annotation)? onAnnotate,
   }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
@@ -67,6 +71,7 @@ void main() {
           onEditLook: onEditLook,
           positions: positions,
           anchor: anchor,
+          onAnnotate: onAnnotate,
         ),
       );
       final state = tester.state<EpubPaneState>(find.byType(EpubPane));
@@ -402,6 +407,69 @@ void main() {
       await tester.pumpWidget(pane(path, anchor: at(40), reloadToken: 1));
       await tester.pumpAndSettle();
       expect(top(tester), two.line + 40);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('annotating a paragraph (#284)', () {
+    late String path;
+    setUp(() => path = twoChapters());
+
+    testWidgets('a long press offers it, with a link to the paragraph', (
+      tester,
+    ) async {
+      final annotated = <Annotation>[];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        onAnnotate: annotated.add,
+      );
+      await tester.longPress(find.text('It begins.'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('epub-paragraph-link')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('epub-paragraph-annotate')));
+      await tester.pumpAndSettle();
+      expect(annotated, hasLength(1));
+      final annotation = annotated.single;
+      expect(annotation.path, 'novel.epub');
+      expect(annotation.quote, 'It begins.');
+      expect(annotation.label, 'novel, One');
+      final place = annotation.place as EpubLocation;
+      expect(place.chapter, endsWith('one.xhtml'));
+      expect(place.line, 2);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets("the row's button annotates the paragraph being read", (
+      tester,
+    ) async {
+      final annotated = <Annotation>[];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        onAnnotate: annotated.add,
+      );
+      tester
+          .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+          .jumpToLine(100);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('annotate-button')));
+      expect(annotated.single.quote, 'A long paragraph of the book.');
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a book outside a library offers neither', (tester) async {
+      final annotated = <Annotation>[];
+      await pump(tester, path, onAnnotate: annotated.add);
+      await tester.longPress(find.text('It begins.'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('epub-paragraph-annotate')), findsNothing);
+      final button = tester.widget<IconButton>(
+        find.byKey(const Key('annotate-button')),
+      );
+      expect(button.onPressed, isNull);
       await tester.pumpWidget(const SizedBox());
     });
   });
