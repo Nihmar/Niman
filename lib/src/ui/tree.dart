@@ -9,6 +9,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree_row_metrics.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {
@@ -378,6 +379,7 @@ final class _RowTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final metrics = TreeRowMetrics.of(context);
     final middle = onMiddleClick;
     final row = InkWell(
       onTap: () => onSelect(note),
@@ -386,22 +388,33 @@ final class _RowTile extends StatelessWidget {
           ? null
           : (details) => onSecondaryTapDown!(note, details),
       child: Container(
-        height: 40,
+        height: metrics.height,
         color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,
-        padding: EdgeInsets.only(left: depth * 16.0 + 8),
+        padding: EdgeInsets.only(left: depth * metrics.indent + 8),
         child: Row(
           children: [
             if (note.isDir)
               IconButton(
+                // The chevron fills its slot and no more: the button's own
+                // 48 px minimum, and its padded tap target, would widen a
+                // pointer's row back out.
+                constraints: BoxConstraints.tightFor(
+                  width: metrics.leading,
+                  height: metrics.height,
+                ),
+                padding: EdgeInsets.zero,
+                style: IconButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 icon: Icon(
                   isExpanded ? Icons.expand_more : Icons.chevron_right,
-                  size: 18,
+                  size: metrics.chevronSize,
                 ),
                 onPressed: () => onToggle(note.path),
               )
             else
               SizedBox(
-                width: 48,
+                width: metrics.leading,
                 child: Icon(icon ?? fileIconFor(note.name), size: 16),
               ),
             Expanded(

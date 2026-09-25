@@ -13,6 +13,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/file_icon.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/pointer_density.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One entry of the tree-row menu.
@@ -124,35 +125,42 @@ Future<String?> _showEntriesAt(
 }) {
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
   final theme = Theme.of(context);
+  final dense = pointerDense(theme);
+  final error = TextStyle(color: theme.colorScheme.error);
   return showMenu<String>(
     context: context,
     position: RelativeRect.fromRect(
       position & const Size(1, 1),
       Offset.zero & overlay.size,
     ),
+    menuPadding: dense ? _denseMenuPadding : null,
     items: [
       for (final (index, group) in groups.indexed) ...[
-        if (index > 0) const PopupMenuDivider(),
+        if (index > 0)
+          PopupMenuDivider(height: dense ? _denseDividerHeight : 16),
         for (final entry in group)
           PopupMenuItem(
             key: entry.key,
             value: entry.value,
+            height: dense ? _denseItemHeight : kMinInteractiveDimension,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   entry.icon,
-                  size: 20,
+                  size: dense ? 18 : 20,
                   color: entry.destructive ? theme.colorScheme.error : null,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: dense ? 10 : 12),
                 Flexible(
                   child: Text(
                     entry.label,
                     overflow: TextOverflow.ellipsis,
-                    style: entry.destructive
-                        ? TextStyle(color: theme.colorScheme.error)
-                        : null,
+                    style: dense
+                        ? theme.textTheme.bodyMedium?.merge(
+                            entry.destructive ? error : null,
+                          )
+                        : (entry.destructive ? error : null),
                   ),
                 ),
               ],
@@ -162,6 +170,13 @@ Future<String?> _showEntriesAt(
     ],
   );
 }
+
+// A pointer's menu (#296): the phone's 48 px items run thirteen entries
+// most of a screen tall, for a cursor that needs a third of the room. The
+// label drops the phone's medium weight for the tree's own body text.
+const double _denseItemHeight = 32;
+const double _denseDividerHeight = 9;
+const EdgeInsets _denseMenuPadding = EdgeInsets.symmetric(vertical: 4);
 
 /// What the menu acts on: the row's icon, its name, and the folder it
 /// sits in.
