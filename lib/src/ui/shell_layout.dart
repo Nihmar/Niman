@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/palette/palette_swipe.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -196,7 +197,7 @@ final class NarrowShellLayout extends StatelessWidget {
               letterSpacing: 1,
             ),
           ),
-        Text(p.basename(path)),
+        MarqueeText(text: p.basename(path)),
         if (folder != '.')
           Text(
             folder,
