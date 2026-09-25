@@ -1626,6 +1626,12 @@ final class TurkishStrings extends Strings {
   String get attachmentMissing => 'Bu dosya diskte yok.';
   @override
   String get attachmentOpenFailed => 'Bu dosya Niman dışında açılamadı.';
+  @override
+  String get copyPlaceLink => 'Bu konumun bağlantısını kopyala';
+  @override
+  String get placeLinkCopied => 'Bağlantı kopyalandı';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';

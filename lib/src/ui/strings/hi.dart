@@ -1613,6 +1613,12 @@ final class HindiStrings extends Strings {
   String get attachmentMissing => 'यह फ़ाइल डिस्क पर नहीं है।';
   @override
   String get attachmentOpenFailed => 'यह फ़ाइल Niman के बाहर नहीं खुल सकी।';
+  @override
+  String get copyPlaceLink => 'इस स्थान का लिंक कॉपी करें';
+  @override
+  String get placeLinkCopied => 'लिंक कॉपी हो गया';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, पृ. $page';
 
   @override
   String get movedToTrash => 'ट्रैश में गया';

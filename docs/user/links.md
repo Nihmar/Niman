@@ -40,6 +40,14 @@ Wikilinks and Markdown links alike:
   name alone is enough, `chapter=ch5.xhtml`). Niman's own form: there is
   no common one for books, and Obsidian opens the book, ignoring it.
 
+You rarely write one by hand: the **link** button on the row under a PDF
+or a book copies a link to the place you are reading — the page, or the
+chapter's line at the top of the view — as the library writes links
+(`[[Books/Dune.pdf#page=34|Dune, p. 34]]`, or
+`[Dune, p. 34](Books/Dune.pdf#page=34)` with Markdown links), ready to
+paste into a note. The button is disabled for a file opened from outside
+a library.
+
 A link to a file already open moves it to the place; the same link
 followed again goes back there. A place the file no longer has (a page
 past its end, a chapter it lost) opens it where you left it.

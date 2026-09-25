@@ -1535,6 +1535,12 @@ final class JapaneseStrings extends Strings {
   String get attachmentMissing => 'このファイルはディスクにありません。';
   @override
   String get attachmentOpenFailed => 'このファイルを Niman の外で開けませんでした。';
+  @override
+  String get copyPlaceLink => 'この位置へのリンクをコピー';
+  @override
+  String get placeLinkCopied => 'リンクをコピーしました';
+  @override
+  String pdfPageLabel(String name, int page) => '$name、$page ページ';
 
   @override
   String get movedToTrash => 'ごみ箱に移動しました';

@@ -1623,6 +1623,12 @@ final class EstonianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Seda faili ei saanud Nimanist väljaspool avada.';
+  @override
+  String get copyPlaceLink => 'Kopeeri link selle kohani';
+  @override
+  String get placeLinkCopied => 'Link kopeeritud';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, lk $page';
 
   @override
   String get movedToTrash => 'Liigutatud prügikastu';

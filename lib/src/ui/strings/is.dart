@@ -1638,6 +1638,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Ekki tókst að opna þessa skrá utan Niman.';
+  @override
+  String get copyPlaceLink => 'Afrita tengil á þennan stað';
+  @override
+  String get placeLinkCopied => 'Tengill afritaður';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, bls. $page';
 
   @override
   String get movedToTrash => 'Fært í korpu';

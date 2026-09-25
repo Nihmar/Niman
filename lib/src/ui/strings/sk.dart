@@ -1639,6 +1639,12 @@ final class SlovakStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Tento súbor sa nepodarilo otvoriť mimo Nimanu.';
+  @override
+  String get copyPlaceLink => 'Kopírovať odkaz na toto miesto';
+  @override
+  String get placeLinkCopied => 'Odkaz skopírovaný';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Presunuté do koša';

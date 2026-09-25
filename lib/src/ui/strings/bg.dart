@@ -1654,6 +1654,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Файлът не можа да бъде отворен извън Niman.';
+  @override
+  String get copyPlaceLink => 'Копиране на връзка към това място';
+  @override
+  String get placeLinkCopied => 'Връзката е копирана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, с. $page';
 
   @override
   String get movedToTrash => 'Преместен в коша';

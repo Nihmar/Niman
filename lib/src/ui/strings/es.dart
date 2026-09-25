@@ -1668,6 +1668,12 @@ final class SpanishStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'No se pudo abrir este archivo fuera de Niman.';
+  @override
+  String get copyPlaceLink => 'Copiar enlace a este punto';
+  @override
+  String get placeLinkCopied => 'Enlace copiado';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Movido a la papelera';

@@ -1661,6 +1661,12 @@ final class PolishStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Nie udało się otworzyć tego pliku poza Nimanem.';
+  @override
+  String get copyPlaceLink => 'Kopiuj link do tego miejsca';
+  @override
+  String get placeLinkCopied => 'Skopiowano link';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Przeniesiono do kosza';

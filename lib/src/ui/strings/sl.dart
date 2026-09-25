@@ -1634,6 +1634,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Te datoteke ni bilo mogoče odpreti zunaj Nimana.';
+  @override
+  String get copyPlaceLink => 'Kopiraj povezavo do tega mesta';
+  @override
+  String get placeLinkCopied => 'Povezava kopirana';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, str. $page';
 
   @override
   String get movedToTrash => 'Preneseno v koš';

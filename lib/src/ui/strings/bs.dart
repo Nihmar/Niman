@@ -1644,6 +1644,12 @@ final class BosnianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Ovu datoteku nije bilo moguće otvoriti izvan Nimana.';
+  @override
+  String get copyPlaceLink => 'Kopiraj vezu na ovo mjesto';
+  @override
+  String get placeLinkCopied => 'Veza je kopirana';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, str. $page';
 
   @override
   String get movedToTrash => 'Pomaknuto u korpu';

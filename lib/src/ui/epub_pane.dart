@@ -14,6 +14,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_looks.dart';
@@ -24,10 +25,12 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/reading/reading_tracker.dart';
-import 'package:niman/src/ui/action_sheet.dart';
-import 'package:niman/src/ui/attachment_bar.dart';
+import 'package:niman/src/ui/attachment_unreadable.dart';
+import 'package:niman/src/ui/epub_bar.dart';
+import 'package:niman/src/ui/epub_contents_sheet.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/place_link_button.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -49,6 +52,7 @@ final class EpubPane extends StatefulWidget {
     this.positions,
     this.anchor,
     this.reloadToken = 0,
+    this.linkType = LinkType.wikilink,
     super.key,
   });
 
@@ -81,6 +85,9 @@ final class EpubPane extends StatefulWidget {
   /// Bumped when the same link is followed again, so the book goes back to
   /// its place.
   final int reloadToken;
+
+  /// How the library writes links, for the one to the place being read.
+  final LinkType linkType;
 
   @override
   State<EpubPane> createState() => EpubPaneState();
@@ -237,35 +244,28 @@ final class EpubPaneState extends State<EpubPane> {
   Future<void> _showContents() async {
     final document = _document;
     if (document == null) return;
-    // The chapter being read: the last entry opening at or above the top.
     final top = _readKey.currentState?.topAnchor?.line ?? 0;
-    final current = document.contents.lastIndexWhere(
-      (entry) => entry.line <= top,
-    );
-    final line = await showActionSheet<int>(
-      context,
-      sheetKey: const Key('epub-contents'),
-      title: AppStrings.outlineTooltip,
-      items: (context) => [
-        for (final (index, entry) in document.contents.indexed)
-          ListTile(
-            key: Key('epub-contents-$index'),
-            dense: true,
-            selected: index == current,
-            contentPadding: EdgeInsetsDirectional.only(
-              start: 16 + 16.0 * entry.depth,
-              end: 16,
-            ),
-            title: Text(
-              entry.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: () => Navigator.of(context).pop(entry.line),
-          ),
-      ],
-    );
+    final line = await showEpubContents(context, document, top);
     if (line != null) _readKey.currentState?.jumpToLine(line);
+  }
+
+  /// The place being read, for a link to it: the line at the top of the
+  /// view, or the next one when the view is mostly past it.
+  PlaceToLink? _here() {
+    final document = _document;
+    final path = widget.positions?.keyOf(widget.path);
+    final anchor = _readKey.currentState?.topAnchor;
+    if (document == null || path == null || anchor == null) return null;
+    final line = anchor.line + (anchor.fraction > 0.5 ? 1 : 0);
+    final place = document.locationAt(line, 0);
+    if (place == null) return null;
+    final name = p.basenameWithoutExtension(widget.path);
+    final entry = document.entryAt(line);
+    return (
+      path: path,
+      place: place,
+      label: entry == -1 ? name : '$name, ${document.contents[entry].title}',
+    );
   }
 
   @override
@@ -287,34 +287,20 @@ final class EpubPaneState extends State<EpubPane> {
         children: [
           Expanded(
             child: _failed
-                ? _unreadable()
+                ? const AttachmentUnreadable()
                 : document == null || buffer == null
                 ? const Center(child: CircularProgressIndicator())
                 : _book(context, document, buffer),
           ),
-          AttachmentBar(
+          EpubBar(
             path: widget.path,
             launcher: widget.launcher,
-            actions: [
-              IconButton(
-                key: const Key('epub-look-button'),
-                tooltip: AppStrings.epubLookTitle,
-                icon: const Icon(Icons.format_size),
-                visualDensity: VisualDensity.compact,
-                onPressed: widget.onEditLook,
-              ),
-              // Kept on the row while the book is read, and when it has no
-              // contents, so the row does not move under a thumb.
-              IconButton(
-                key: const Key('epub-contents-button'),
-                tooltip: AppStrings.outlineTooltip,
-                icon: const Icon(Icons.toc),
-                visualDensity: VisualDensity.compact,
-                onPressed: document == null || document.contents.isEmpty
-                    ? null
-                    : () => unawaited(_showContents()),
-              ),
-            ],
+            linkType: widget.linkType,
+            onEditLook: widget.onEditLook,
+            onContents: document == null || document.contents.isEmpty
+                ? null
+                : () => unawaited(_showContents()),
+            here: document == null || widget.positions == null ? null : _here,
           ),
         ],
       ),
@@ -339,17 +325,6 @@ final class EpubPaneState extends State<EpubPane> {
       column: widget.column,
       onTapLink: _onTapLink,
       embedResolver: (target) async => document.pictures[target],
-    ),
-  );
-
-  Widget _unreadable() => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        AppStrings.attachmentUnreadable,
-        key: const Key('attachment-unreadable'),
-        textAlign: TextAlign.center,
-      ),
     ),
   );
 }

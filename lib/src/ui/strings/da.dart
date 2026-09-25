@@ -1632,6 +1632,12 @@ final class DanishStrings extends Strings {
   String get attachmentMissing => 'Denne fil findes ikke på disken.';
   @override
   String get attachmentOpenFailed => 'Filen kunne ikke åbnes uden for Niman.';
+  @override
+  String get copyPlaceLink => 'Kopiér link til dette sted';
+  @override
+  String get placeLinkCopied => 'Link kopieret';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
 
   @override
   String get movedToTrash => 'Flyttet til affald';

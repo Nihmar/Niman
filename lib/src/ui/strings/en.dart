@@ -1623,6 +1623,12 @@ final class EnglishStrings extends Strings {
   String get attachmentMissing => 'This file is not on disk.';
   @override
   String get attachmentOpenFailed => 'Could not open this file outside Niman.';
+  @override
+  String get copyPlaceLink => 'Copy link to this place';
+  @override
+  String get placeLinkCopied => 'Link copied';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Moved to trash';

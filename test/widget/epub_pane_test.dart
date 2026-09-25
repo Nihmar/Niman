@@ -8,6 +8,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_document.dart';
@@ -18,6 +19,7 @@ import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/epub_pane.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/epub_builder.dart';
@@ -332,6 +334,51 @@ void main() {
         anchor: 'chapter=gone.xhtml&line=3',
       );
       expect(top(tester), two.line + 60);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('its row copies a link to the place being read', (
+      tester,
+    ) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        anchor: at(20),
+      );
+      await tester.tap(find.byKey(const Key('place-link-button')));
+      await tester.pump();
+      // Labelled with the contents entry being read: this book's has
+      // none for its second chapter.
+      expect(copied, '[[novel.epub#${at(20)}|novel, One]]');
+      expect(find.text(AppStrings.placeLinkCopied), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a book outside a library has no place to link to', (
+      tester,
+    ) async {
+      await pump(tester, path);
+      final button = tester.widget<IconButton>(
+        find.byKey(const Key('place-link-button')),
+      );
+      expect(button.onPressed, isNull);
       await tester.pumpWidget(const SizedBox());
     });
 

@@ -1671,6 +1671,12 @@ final class GermanStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Diese Datei konnte außerhalb von Niman nicht geöffnet werden.';
+  @override
+  String get copyPlaceLink => 'Link zu dieser Stelle kopieren';
+  @override
+  String get placeLinkCopied => 'Link kopiert';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, S. $page';
 
   @override
   String get movedToTrash => 'In den Papierkorb verschoben';

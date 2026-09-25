@@ -1655,6 +1655,12 @@ final class ItalianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Impossibile aprire questo file fuori da Niman.';
+  @override
+  String get copyPlaceLink => 'Copia il link a questo punto';
+  @override
+  String get placeLinkCopied => 'Link copiato';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
 
   @override
   String get movedToTrash => 'Spostato nel cestino';

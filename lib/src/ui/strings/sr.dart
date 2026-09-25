@@ -1645,6 +1645,12 @@ final class SerbianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Није било могуће отворити ову датотеку изван Нимана.';
+  @override
+  String get copyPlaceLink => 'Копирај везу до овог места';
+  @override
+  String get placeLinkCopied => 'Веза је копирана';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, стр. $page';
 
   @override
   String get movedToTrash => 'Премештено у кош';
