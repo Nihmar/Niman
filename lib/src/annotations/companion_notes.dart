@@ -19,7 +19,10 @@
 /// after the file — `Annotations/Dune - Annotation.md`.
 library;
 
+import 'dart:isolate';
+
 import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/session.dart';
@@ -61,6 +64,40 @@ final class CompanionNotes {
       }
     }
     return out;
+  }
+
+  /// Where the file at library-relative [path] was annotated (#285): every
+  /// link of its companions to a place of it, in the companions' order and
+  /// then their text's.
+  Future<List<AnnotationMark>> marksOf(String path) async {
+    final out = <AnnotationMark>[];
+    final pointsHere = <String, bool>{};
+    for (final note in await of(path)) {
+      final text = await ops.readNote(note);
+      final links = await Isolate.run(() => annotationLinksIn(text));
+      for (final link in links) {
+        final key = '${link.markdown}:${link.target}';
+        final here = pointsHere[key] ??= await _pointsAt(link, path);
+        if (!here) continue;
+        out.add(
+          AnnotationMark(
+            note: note,
+            offset: link.offset,
+            place: link.place,
+            title: link.title,
+          ),
+        );
+      }
+    }
+    return out;
+  }
+
+  /// Whether [link] resolves to the file at [path].
+  Future<bool> _pointsAt(AnnotationLink link, String path) async {
+    final resolved = link.markdown
+        ? await links.resolveMarkdown(link.target)
+        : await links.resolveWiki(link.target);
+    return resolved is ResolvedNote && resolved.note.path == path;
   }
 
   /// What a frontmatter [value] names: a wikilink (`[[Books/Dune.epub]]`,
