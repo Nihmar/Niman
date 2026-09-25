@@ -65,10 +65,10 @@ same Markdown either way, and only how it is drawn differs. The read view
 On the desktop the notes you have open are tabs in the title bar,
 starting where the file tree ends.
 
-A name too long for its room — a tab, the window title, or the phone's
-note bar — does not stop at an ellipsis: it scrolls itself to reveal the
-rest, rests a moment, and comes back. A system set to reduce motion keeps
-the ellipsis instead.
+A name too long for its room — a tree row, a tab, the window title, or
+the phone's note bar — does not stop at an ellipsis: it scrolls itself to
+reveal the rest, rests a moment, and comes back. A system set to reduce
+motion keeps the ellipsis instead.
 
 - **A click** on a note in the tree shows it in the tab you are on. A
   note that is already open is shown in its tab rather than opened twice.

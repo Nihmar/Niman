@@ -7,6 +7,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/file_icon.dart';
+import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -404,10 +405,8 @@ final class _RowTile extends StatelessWidget {
                 child: Icon(icon ?? fileIconFor(note.name), size: 16),
               ),
             Expanded(
-              child: Text(
-                displayNameOf(note),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: MarqueeText(
+                text: displayNameOf(note),
                 style: theme.textTheme.bodyMedium,
               ),
             ),
