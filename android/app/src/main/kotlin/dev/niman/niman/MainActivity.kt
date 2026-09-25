@@ -45,10 +45,8 @@ class MainActivity : FlutterActivity() {
                         result.success(isIgnoringBatteryOptimizations())
                     "isBackgroundRestricted" ->
                         result.success(isBackgroundRestricted())
-                    "openBatterySettings" ->
-                        result.success(openBatterySettings())
-                    "openNotificationSettings" ->
-                        result.success(openNotificationSettings())
+                    "openAppSettings" ->
+                        result.success(openAppSettings())
                     else -> result.notImplemented()
                 }
             }
@@ -107,42 +105,21 @@ class MainActivity : FlutterActivity() {
     }
 
     /**
-     * Opens Niman's own battery page, where "Unrestricted" is one tap.
+     * Opens Niman's page in the system app settings.
      *
-     * Not ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS: that list opens
-     * filtered to the apps already exempt, so Niman -- the one app that
-     * is not -- is nowhere on it until the user finds the filter. The
-     * per-app page is Settings' own VIEW_ADVANCED_POWER_USAGE_DETAIL
-     * (exported, not in the SDK constants); a ROM without it falls back
-     * to the app's info page, one "Battery" tap away, then to the list.
-     *
-     * Deliberately not ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: that
-     * one-tap dialog needs the REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-     * permission, which app stores restrict to a narrow set of app
-     * categories. Returns false when no activity handles any of them.
+     * The general App info screen, not a sub-page. It holds the
+     * notification switch, the battery usage row and the permissions in one
+     * place, and it is the same screen on every ROM. The battery and
+     * notification sub-pages resolve differently -- and on some ROMs both to
+     * this very screen -- which is what made "Open settings" land somewhere
+     * the warning was not about. Returns false when no activity handles it.
      */
-    private fun openBatterySettings(): Boolean {
-        val pkg = Uri.fromParts("package", packageName, null)
-        val batteryPage = Intent("android.settings.VIEW_ADVANCED_POWER_USAGE_DETAIL", pkg)
-        val details = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)
-        return open(batteryPage) || open(details) ||
-            open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-    }
-
-    /**
-     * Opens Niman's page in the system notification settings.
-     *
-     * Once POST_NOTIFICATIONS has been denied twice, Android stops
-     * showing the runtime dialog, so this screen is the only way back.
-     */
-    private fun openNotificationSettings(): Boolean {
-        val appPage = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-        val details = Intent(
+    private fun openAppSettings(): Boolean {
+        val intent = Intent(
             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
             Uri.fromParts("package", packageName, null),
         )
-        return open(appPage) || open(details)
+        return open(intent)
     }
 
     /** Starts [intent]; false when no activity handles it. */

@@ -17,8 +17,7 @@ import '../fakes/fake_reminder_backend.dart';
 final class _FakeSettings implements ReminderSettings {
   bool batteryExempt = true;
   bool backgroundRestricted = false;
-  int batteryOpened = 0;
-  int notificationsOpened = 0;
+  int appOpened = 0;
 
   @override
   Future<bool> isBatteryExempt() async => batteryExempt;
@@ -27,14 +26,8 @@ final class _FakeSettings implements ReminderSettings {
   Future<bool> isBackgroundRestricted() async => backgroundRestricted;
 
   @override
-  Future<bool> openBatterySettings() async {
-    batteryOpened++;
-    return true;
-  }
-
-  @override
-  Future<bool> openNotificationSettings() async {
-    notificationsOpened++;
+  Future<bool> openAppSettings() async {
+    appOpened++;
     return true;
   }
 }
@@ -195,7 +188,7 @@ void main() {
       expect(backend.cancelled, <int>[9]);
       expect(service.health.value, ReminderHealth.notificationsBlocked);
       await service.openHealthSettings();
-      expect(settings.notificationsOpened, 1);
+      expect(settings.appOpened, 1);
       await service.dispose();
     });
 
@@ -209,15 +202,15 @@ void main() {
 
       expect(service.health.value, ReminderHealth.batteryRestricted);
       await service.openHealthSettings();
-      expect(settings.batteryOpened, 1);
+      expect(settings.appOpened, 1);
       await service.dispose();
     });
 
     test('Doze optimization alone does not warn', () async {
       // The regression the fix is about: an exact alarm is
-      // setExactAndAllowWhileIdle and fires in Doze, and the battery page
-      // Niman opens offers no Doze switch. Warning about it kept the
-      // banner up after the switch that page does have was turned on.
+      // setExactAndAllowWhileIdle and fires in Doze, and the App info page
+      // Niman opens has no Doze switch. Warning about it kept the banner
+      // up after the switch that page does have was turned on.
       settings.batteryExempt = false;
       final service = serviceOf();
       await service.reconcile(wanted([reminderAt(1)]));
@@ -226,21 +219,18 @@ void main() {
       await service.dispose();
     });
 
-    test(
-      'a background restriction warns and offers the battery page',
-      () async {
-        // Android's "Allow background usage", off, on the app's battery
-        // page: the screen the warning opens, so its switch clears it.
-        settings.backgroundRestricted = true;
-        final service = serviceOf();
-        await service.reconcile(wanted([reminderAt(1)]));
+    test('a background restriction warns and opens the app settings', () async {
+      // Android's "Allow background usage", off, on the app's battery
+      // page: App info holds it, and its switch clears the state.
+      settings.backgroundRestricted = true;
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1)]));
 
-        expect(service.health.value, ReminderHealth.batteryRestricted);
-        await service.openHealthSettings();
-        expect(settings.batteryOpened, 1);
-        await service.dispose();
-      },
-    );
+      expect(service.health.value, ReminderHealth.batteryRestricted);
+      await service.openHealthSettings();
+      expect(settings.appOpened, 1);
+      await service.dispose();
+    });
 
     test('inexact alarms still schedule, and report', () async {
       backend.exact = false;

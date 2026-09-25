@@ -12,9 +12,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 - **FUSE cost:** every file stat/list is a round trip, so all disk reads
   run off the UI isolate (`Isolate.run`); Drift writes stay on main.
 - **Reminders:** exact alarms fire with the screen off or the process
-  killed. Grant notification permission and allow **background usage**
-  on the app's battery page (*Consenti l'utilizzo in background*) — an
-  app the system will not start in the background never fires an alarm.
+  killed. Grant notification permission and, in Niman's **App info** page
+  (*Informazioni app*), turn on **Allow background usage** (*Consenti
+  l'utilizzo in background*) — an app the system will not start in the
+  background never fires an alarm.
 - **Launcher shortcuts:** long-press the icon (see
   [shortcuts](shortcuts.md)).
 - **Home-screen widgets:** the Niman Todos and Niman Note widgets
