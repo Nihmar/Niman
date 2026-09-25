@@ -1560,6 +1560,10 @@ final class BosnianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Izvoz nije uspio: $error';
   @override
+  String get exportFolderTitle => 'Izvezi fasciklu…';
+  @override
+  String get exportLibraryTitle => 'Izvezi biblioteku…';
+  @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override
   String get lintRulesTitle => 'Markdown pravila';

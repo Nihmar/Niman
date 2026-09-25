@@ -1560,6 +1560,10 @@ final class UkrainianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Експорт не вдався: $error';
   @override
+  String get exportFolderTitle => 'Експортувати теку…';
+  @override
+  String get exportLibraryTitle => 'Експортувати бібліотеку…';
+  @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override
   String get lintRulesTitle => 'Правила Markdown';

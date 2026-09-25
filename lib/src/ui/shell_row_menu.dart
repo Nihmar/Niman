@@ -113,6 +113,13 @@ Future<String?> showTreeBackgroundMenuAt(
         value: 'folder',
         destructive: false,
       ),
+      (
+        key: const Key('tree-menu-export'),
+        icon: Icons.save_alt_outlined,
+        label: AppStrings.exportLibraryTitle,
+        value: 'exportlibrary',
+        destructive: false,
+      ),
     ],
   ],
 );
@@ -330,6 +337,13 @@ List<List<RowMenuEntry>> rowMenuGroups(
   // What the file is: what it is called, where it lives, and — on the
   // desktop — the ways out of Niman, and a tab of its own.
   final file = <RowMenuEntry>[
+    (
+      key: Key(note.isDir ? 'menu-export-folder' : 'menu-export'),
+      icon: Icons.save_alt_outlined,
+      label: note.isDir ? AppStrings.exportFolderTitle : AppStrings.exportTitle,
+      value: note.isDir ? 'exportfolder' : 'export',
+      destructive: false,
+    ),
     if (!note.isDir && offersNewTab)
       (
         key: const Key('menu-open-new-tab'),

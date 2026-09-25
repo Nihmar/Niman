@@ -1549,6 +1549,10 @@ final class DanishStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksport mislykkedes: $error';
   @override
+  String get exportFolderTitle => 'Eksportér mappe…';
+  @override
+  String get exportLibraryTitle => 'Eksportér bibliotek…';
+  @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
   @override
   String get lintRulesTitle => 'Markdown-regler';

@@ -1543,6 +1543,10 @@ final class NorwegianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksporten mislyktes: $error';
   @override
+  String get exportFolderTitle => 'Eksporter mappe…';
+  @override
+  String get exportLibraryTitle => 'Eksporter bibliotek…';
+  @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override
   String get lintRulesTitle => 'Markdown-regler';

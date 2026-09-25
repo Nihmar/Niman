@@ -1595,6 +1595,10 @@ final class FrenchStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Échec de l’export : $error';
   @override
+  String get exportFolderTitle => 'Exporter le dossier…';
+  @override
+  String get exportLibraryTitle => 'Exporter la bibliothèque…';
+  @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
   @override
   String get lintRulesTitle => 'Règles Markdown';

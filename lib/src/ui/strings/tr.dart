@@ -1542,6 +1542,10 @@ final class TurkishStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Dışa aktarma başarısız: $error';
   @override
+  String get exportFolderTitle => 'Klasörü dışa aktar…';
+  @override
+  String get exportLibraryTitle => 'Kitaplığı dışa aktar…';
+  @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override
   String get lintRulesTitle => 'Markdown kuralları';

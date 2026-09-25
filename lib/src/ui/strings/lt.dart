@@ -1554,6 +1554,10 @@ final class LithuanianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksportuoti nepavyko: $error';
   @override
+  String get exportFolderTitle => 'Eksportuoti aplanką…';
+  @override
+  String get exportLibraryTitle => 'Eksportuoti biblioteką…';
+  @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
   @override
   String get lintRulesTitle => 'Markdown taisyklės';

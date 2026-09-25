@@ -1574,6 +1574,10 @@ final class DutchStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Export mislukt: $error';
   @override
+  String get exportFolderTitle => 'Map exporteren…';
+  @override
+  String get exportLibraryTitle => 'Bibliotheek exporteren…';
+  @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override
   String get lintRulesTitle => 'Markdown-regels';

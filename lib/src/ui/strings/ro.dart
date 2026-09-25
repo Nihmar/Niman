@@ -1567,6 +1567,10 @@ final class RomanianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Exportul a eșuat: $error';
   @override
+  String get exportFolderTitle => 'Exportă folderul…';
+  @override
+  String get exportLibraryTitle => 'Exportă biblioteca…';
+  @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
   @override
   String get lintRulesTitle => 'Reguli Markdown';

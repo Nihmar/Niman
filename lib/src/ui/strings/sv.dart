@@ -1560,6 +1560,10 @@ final class SwedishStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Exporten misslyckades: $error';
   @override
+  String get exportFolderTitle => 'Exportera mapp…';
+  @override
+  String get exportLibraryTitle => 'Exportera bibliotek…';
+  @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override
   String get lintRulesTitle => 'Markdown-regler';

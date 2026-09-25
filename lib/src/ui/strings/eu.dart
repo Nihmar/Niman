@@ -1563,6 +1563,10 @@ final class BasqueStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Esportazioak huts egin du: $error';
   @override
+  String get exportFolderTitle => 'Esportatu karpeta…';
+  @override
+  String get exportLibraryTitle => 'Esportatu liburutegia…';
+  @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override
   String get lintRulesTitle => 'Markdown arauak';

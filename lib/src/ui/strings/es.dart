@@ -1584,6 +1584,10 @@ final class SpanishStrings extends Strings {
   @override
   String exportFailed(Object error) => 'La exportación falló: $error';
   @override
+  String get exportFolderTitle => 'Exportar carpeta…';
+  @override
+  String get exportLibraryTitle => 'Exportar biblioteca…';
+  @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override
   String get lintRulesTitle => 'Reglas de Markdown';

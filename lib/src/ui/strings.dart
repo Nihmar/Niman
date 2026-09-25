@@ -918,6 +918,8 @@ final class AppStrings {
   static String get exportTitle => _s.exportTitle;
   static String get exportFormatMarkdown => _s.exportFormatMarkdown;
   static String get exportFormatHtml => _s.exportFormatHtml;
+  static String get exportFolderTitle => _s.exportFolderTitle;
+  static String get exportLibraryTitle => _s.exportLibraryTitle;
   static String exportDone(String place) => _s.exportDone(place);
   static String exportFailed(Object error) => _s.exportFailed(error);
   static String get tidyOnCloseTitle => _s.tidyOnCloseTitle;

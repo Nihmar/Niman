@@ -1569,6 +1569,10 @@ final class BulgarianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Изнасянето не успя: $error';
   @override
+  String get exportFolderTitle => 'Изнасяне на папка…';
+  @override
+  String get exportLibraryTitle => 'Изнасяне на библиотеката…';
+  @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

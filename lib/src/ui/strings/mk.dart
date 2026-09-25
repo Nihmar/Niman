@@ -1570,6 +1570,10 @@ final class MacedonianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Извозот не успеа: $error';
   @override
+  String get exportFolderTitle => 'Извези папка…';
+  @override
+  String get exportLibraryTitle => 'Извези библиотека…';
+  @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override
   String get lintRulesTitle => 'Правила за Markdown';

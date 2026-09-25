@@ -1551,6 +1551,10 @@ final class LatvianStrings extends Strings {
   @override
   String exportFailed(Object error) => 'Eksportēšana neizdevās: $error';
   @override
+  String get exportFolderTitle => 'Eksportēt mapi…';
+  @override
+  String get exportLibraryTitle => 'Eksportēt bibliotēku…';
+  @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override
   String get lintRulesTitle => 'Markdown noteikumi';

@@ -1456,6 +1456,10 @@ final class JapaneseStrings extends Strings {
   @override
   String exportFailed(Object error) => 'エクスポートに失敗しました: $error';
   @override
+  String get exportFolderTitle => 'フォルダーをエクスポート…';
+  @override
+  String get exportLibraryTitle => 'ライブラリをエクスポート…';
+  @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override
   String get lintRulesTitle => 'Markdown ルール';

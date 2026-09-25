@@ -37,6 +37,8 @@ final class ShellRowActions {
     required this.onHistory,
     required this.onOpenInNewTab,
     required this.onOpenBeside,
+    required this.onExport,
+    required this.onExportFolder,
   });
 
   /// The open library's session.
@@ -72,6 +74,12 @@ final class ShellRowActions {
   /// Opens the note in the other pane, splitting first if need be.
   final void Function(String path) onOpenBeside;
 
+  /// Writes the note at `path` out as a file (#24).
+  final Future<void> Function(String path) onExport;
+
+  /// Writes the folder at `path` out as one zip (#24).
+  final Future<void> Function(String path) onExportFolder;
+
   /// Runs [action] for [note], creating in [here] where the action makes
   /// something new. A null action (the menu was dismissed) does nothing.
   Future<void> run(
@@ -101,6 +109,10 @@ final class ShellRowActions {
         await pinToWidget(context, note);
       case 'history':
         await onHistory(note.path);
+      case 'export':
+        await onExport(note.path);
+      case 'exportfolder':
+        await onExportFolder(note.path);
       case 'newtab':
         onOpenInNewTab(note.path);
       case 'beside':
