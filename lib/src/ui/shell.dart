@@ -712,6 +712,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
 
+  /// Counts the links followed: a PDF or a book goes back to a link's
+  /// place when it moves (#282). Not [_noteReloadToken], which also moves
+  /// on a resume or a sync, when a file must stay where it is read.
+  int _linksFollowed = 0;
+
   /// A template `{{cursor}}` offset to land the caret on after the created
   /// note opens (#53). Fresh notes only: appended text joins an existing
   /// file whose length the creation flow does not know.
@@ -800,6 +805,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
       _pendingCaretOffset = null;
+      _linksFollowed++;
       _resetNoteKind();
       if (sameNote) _noteReloadToken++;
       _noteOpened();
@@ -982,7 +988,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           null => null,
         },
         anchor: _pendingAnchor,
-        reloadToken: _noteReloadToken,
+        reloadToken: _linksFollowed,
         linkType: _editorSettings.linkType,
       );
     }
@@ -3283,6 +3289,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         unsavedTracker: widget.unsavedTracker,
         spellCheck: widget.spellCheck,
         reloadToken: _noteReloadToken,
+        linksFollowed: _linksFollowed,
         saveNote: _noteSaver(controller),
         saveNoteStream: _noteStreamSaver(controller),
         createMissingNote: _missingNoteCreator(controller),

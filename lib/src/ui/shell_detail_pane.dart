@@ -41,6 +41,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.statusActions,
     required this.spellCheck,
     this.reloadToken = 0,
+    this.linksFollowed = 0,
     this.zen = false,
     this.typewriter = false,
     this.onToggleTypewriter,
@@ -156,6 +157,10 @@ final class ShellDetailPane extends StatelessWidget {
   /// widget toggles); forwarded to the NoteView.
   final int reloadToken;
 
+  /// Counts the links followed, for a PDF or a book to go back to a link's
+  /// place when the same link is followed again (#282).
+  final int linksFollowed;
+
   /// The library's note write path, forwarded to the NoteView; null (no
   /// open library) lets the editor write directly.
   final NoteSaver? saveNote;
@@ -215,7 +220,7 @@ final class ShellDetailPane extends StatelessWidget {
           onEditEpubLook: onEditEpubLook,
           positions: ReadingPositions(root),
           anchor: tab.anchor,
-          reloadToken: reloadToken,
+          reloadToken: linksFollowed,
           linkType: linkType,
         )
       : _noteView(root, tab);
