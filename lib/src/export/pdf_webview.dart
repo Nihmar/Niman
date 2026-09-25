@@ -33,23 +33,48 @@ final class WebViewPdfPrinter implements PdfPrinter {
   @override
   Future<bool> get canPrint async => true;
 
+  /// Stops the platform print in flight, if any.
+  ///
+  /// Android's bridge destroys its WebView and answers the waiting print,
+  /// instead of staying busy until its watchdog: a cancelled export must
+  /// not refuse the next one for two minutes (M7). A no-op where there is
+  /// no bridge.
+  static Future<void> cancel() async {
+    try {
+      await _channel.invokeMethod<void>('cancel');
+    } on MissingPluginException {
+      // Not Android, or no bridge: nothing to stop.
+    } on PlatformException {
+      // A cancel that raced the print's own end is not a failure.
+    }
+  }
+
   @override
   Future<PdfOutcome> print(String htmlPath, String pdfPath) async {
-    try {
-      await _channel
-          .invokeMethod<void>('print', <String, String>{
-            'htmlPath': htmlPath,
-            'pdfPath': pdfPath,
-          })
-          .timeout(timeout);
-    } on TimeoutException {
-      return const PdfFailed('the WebView did not finish');
-    } on MissingPluginException {
-      return const PdfNoEngine();
-    } on PlatformException catch (error) {
-      return PdfFailed(error.message ?? error.code);
-    } on Object catch (error) {
-      return PdfFailed('$error');
+    for (var attempt = 0; ; attempt++) {
+      try {
+        await _channel
+            .invokeMethod<void>('print', <String, String>{
+              'htmlPath': htmlPath,
+              'pdfPath': pdfPath,
+            })
+            .timeout(timeout);
+        break;
+      } on TimeoutException {
+        return const PdfFailed('the WebView did not finish');
+      } on MissingPluginException {
+        return const PdfNoEngine();
+      } on PlatformException catch (error) {
+        // A print refused because the last one had not settled is worth
+        // one retry: a cancel can race that settling (M7).
+        if (error.code == 'print-busy' && attempt == 0) {
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+          continue;
+        }
+        return PdfFailed(error.message ?? error.code);
+      } on Object catch (error) {
+        return PdfFailed('$error');
+      }
     }
     final written = await fileSize(pdfPath);
     if (written == null) return const PdfFailed('no PDF was written');

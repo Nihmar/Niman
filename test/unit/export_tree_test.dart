@@ -13,7 +13,11 @@ import 'package:path/path.dart' as p;
 /// The engine's stand-in for a folder's PDF run: writes the page itself as
 /// the "PDF", so the test can read what the page was. Top-level, so the
 /// spawned isolate may take it — a closure cannot cross the boundary.
-Future<ProcessAnswer> _printPage(String exe, List<String> args) async {
+Future<ProcessAnswer> _printPage(
+  String exe,
+  List<String> args, {
+  Duration? timeout,
+}) async {
   final pdf = args
       .firstWhere((arg) => arg.startsWith('--print-to-pdf='))
       .substring('--print-to-pdf='.length);
@@ -136,6 +140,23 @@ void main() {
     // fragment, and the file it names would be dead (#63 review, L3).
     expect(page, contains('href="q%3Fx.html"'));
     expect(page, contains('src="weird%23one.png"'));
+  });
+
+  test('an empty folder is in every zip', () async {
+    await Directory(p.join(notes, 'empty')).create();
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.html,
+      language: 'en',
+    );
+    final archive = ZipDecoder().decodeBytes(await File(zip).readAsBytes());
+    expect(
+      archive.files.any(
+        (file) => !file.isFile && file.name.startsWith('empty'),
+      ),
+      isTrue,
+    );
   });
 
   test('a PDF folder embeds its pictures in the page', () async {

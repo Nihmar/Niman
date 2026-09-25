@@ -1,8 +1,11 @@
 // Printing an exported page with the machine's own browser engine (#63):
 // which engine is found where, the command it is run with, and what each
 // failure reports.
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   group('finding the engine', () {
@@ -40,7 +43,7 @@ void main() {
         await findPdfEngine(
           isWindows: true,
           isLinux: false,
-          run: (exe, args) async => (
+          run: (exe, args, {timeout}) async => (
             exit: 0,
             stdout:
                 'HKEY_LOCAL_MACHINE\\...\n'
@@ -59,7 +62,7 @@ void main() {
         await findPdfEngine(
           isWindows: true,
           isLinux: false,
-          run: (exe, args) async => (exit: 1, stdout: ''),
+          run: (exe, args, {timeout}) async => (exit: 1, stdout: ''),
           isFile: (path) async => path == edge,
           roots: const [r'C:\Program Files'],
         ),
@@ -75,7 +78,7 @@ void main() {
   group('whether there is anything to print with', () {
     test('an engine given is a printer', () async {
       expect(
-        await const ProcessPdfPrinter(engine: '/usr/bin/chromium').canPrint,
+        await ProcessPdfPrinter(engine: '/usr/bin/chromium').canPrint,
         isTrue,
       );
     });
@@ -98,7 +101,7 @@ void main() {
       final calls = <(String, List<String>)>[];
       final printer = ProcessPdfPrinter(
         engine: '/usr/bin/chromium',
-        run: (exe, args) async {
+        run: (exe, args, {timeout}) async {
           calls.add((exe, args));
           return (exit: 0, stdout: '');
         },
@@ -121,7 +124,7 @@ void main() {
     test('no engine is no engine', () async {
       final printer = ProcessPdfPrinter(
         findEngine: () async => null,
-        run: (_, _) async => (exit: 0, stdout: ''),
+        run: (_, _, {timeout}) async => (exit: 0, stdout: ''),
         size: (path) async => 1,
       );
       expect(await printer.print('a.html', 'b.pdf'), isA<PdfNoEngine>());
@@ -130,7 +133,7 @@ void main() {
     test('a failing engine reports its exit', () async {
       final printer = ProcessPdfPrinter(
         engine: '/usr/bin/chromium',
-        run: (_, _) async => (exit: 2, stdout: ''),
+        run: (_, _, {timeout}) async => (exit: 2, stdout: ''),
         size: (path) async => 1,
       );
       final outcome = await printer.print('a.html', 'b.pdf');
@@ -141,7 +144,7 @@ void main() {
     test('a missing or empty file is a failure', () async {
       Future<PdfOutcome> printed(Future<int?> size) => ProcessPdfPrinter(
         engine: '/usr/bin/chromium',
-        run: (_, _) async => (exit: 0, stdout: ''),
+        run: (_, _, {timeout}) async => (exit: 0, stdout: ''),
         size: (path) => size,
       ).print('a.html', 'b.pdf');
 
@@ -152,16 +155,34 @@ void main() {
     test('an engine that never answers times out', () async {
       final printer = ProcessPdfPrinter(
         engine: '/usr/bin/chromium',
-        run: (_, _) => Future<ProcessAnswer>.delayed(
-          const Duration(seconds: 30),
-          () => (exit: 0, stdout: ''),
-        ),
+        run: (_, _, {timeout}) async => throw const ProcessTimedOut(),
         size: (path) async => 1,
         timeout: const Duration(milliseconds: 20),
       );
       final outcome = await printer.print('a.html', 'b.pdf');
       expect(outcome, isA<PdfFailed>());
       expect((outcome as PdfFailed).message, contains('finish'));
+    });
+  });
+
+  group('running a process', () {
+    test('a process that never answers is killed', () async {
+      final dir = await Directory.current.createTemp('niman_process_');
+      addTearDown(() async {
+        if (dir.existsSync()) await dir.delete(recursive: true);
+      });
+      final script = File(p.join(dir.path, 'hang.dart'));
+      await script.writeAsString('void main() { while (true) {} }\n');
+
+      final started = Stopwatch()..start();
+      await expectLater(
+        runProcess(Platform.resolvedExecutable, <String>[
+          script.path,
+        ], timeout: const Duration(milliseconds: 500)),
+        throwsA(isA<ProcessTimedOut>()),
+      );
+      // Killed, not waited out: the script would run forever.
+      expect(started.elapsed, lessThan(const Duration(seconds: 20)));
     });
   });
 }
