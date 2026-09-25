@@ -104,6 +104,27 @@ void main() {
       expect(document.lineOfLocation(gone), isNull);
     });
 
+    test('a chapter is found whatever its case, or by its name (#282)', () {
+      for (final chapter in [
+        'oebps/TEXT/ch2.xhtml',
+        'ch2.xhtml',
+        'CH2.XHTML',
+      ]) {
+        expect(
+          document.lineOfLocation(EpubLocation(chapter: chapter, line: 4)),
+          12,
+          reason: chapter,
+        );
+      }
+      // A name is a whole file name, not the end of one.
+      expect(
+        document.lineOfLocation(
+          const EpubLocation(chapter: 'h2.xhtml', line: 0),
+        ),
+        isNull,
+      );
+    });
+
     test('its links go to lines; the ones leaving it do not', () {
       expect(document.lineOfLink('epub-link:0'), 12);
       expect(document.lineOfLink('epub-link:1'), 0);

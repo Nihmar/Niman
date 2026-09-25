@@ -30,25 +30,41 @@ void main() {
     EpubLooks.reset();
   });
 
+  Widget pane(
+    String path, {
+    VoidCallback? onEditLook,
+    ReadingPositions? positions,
+    String? anchor,
+    int reloadToken = 0,
+  }) => MaterialApp(
+    home: Scaffold(
+      body: EpubPane(
+        path: path,
+        cacheDir: () async => p.join(dir.path, 'cache'),
+        onEditLook: onEditLook,
+        positions: positions,
+        anchor: anchor,
+        reloadToken: reloadToken,
+      ),
+    ),
+  );
+
   Future<void> pump(
     WidgetTester tester,
     String path, {
     VoidCallback? onEditLook,
     ReadingPositions? positions,
+    String? anchor,
   }) async {
     // Real time: the book is read on an isolate, which fake time never
     // lets finish.
     await tester.runAsync(() async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: EpubPane(
-              path: path,
-              cacheDir: () async => p.join(dir.path, 'cache'),
-              onEditLook: onEditLook,
-              positions: positions,
-            ),
-          ),
+        pane(
+          path,
+          onEditLook: onEditLook,
+          positions: positions,
+          anchor: anchor,
         ),
       );
       final state = tester.state<EpubPaneState>(find.byType(EpubPane));
@@ -267,6 +283,79 @@ void main() {
       await tester.pump();
       await tester.pumpWidget(const SizedBox());
       expect(await settled(tester), isA<EpubLocation>());
+    });
+  });
+
+  group('the place a link names (#282)', () {
+    late String path;
+    late EpubChapter two;
+    setUp(() {
+      path = twoChapters();
+      two = readEpub(path, p.join(dir.path, 'probe')).chapters[1];
+    });
+
+    String at(int line) =>
+        EpubLocation(chapter: two.file, line: line).toFragment();
+
+    int? top(WidgetTester tester) => tester
+        .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+        .topAnchor
+        ?.line;
+
+    testWidgets('opens the book there, over where it was left', (tester) async {
+      final positions = ReadingPositions(dir.path);
+      await tester.runAsync(
+        () => positions.write(
+          'novel.epub',
+          EpubLocation(chapter: two.file, line: 60),
+        ),
+      );
+      await pump(tester, path, positions: positions, anchor: at(20));
+      expect(top(tester), two.line + 20);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a chapter the book lacks opens it where it was left', (
+      tester,
+    ) async {
+      final positions = ReadingPositions(dir.path);
+      await tester.runAsync(
+        () => positions.write(
+          'novel.epub',
+          EpubLocation(chapter: two.file, line: 60),
+        ),
+      );
+      await pump(
+        tester,
+        path,
+        positions: positions,
+        anchor: 'chapter=gone.xhtml&line=3',
+      );
+      expect(top(tester), two.line + 60);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a new link moves the open book; the same one, handed '
+        'again, does not', (tester) async {
+      await pump(tester, path, anchor: at(20));
+      expect(top(tester), two.line + 20);
+      tester
+          .state<MarkdownReadViewState>(find.byType(MarkdownReadView))
+          .jumpToLine(100);
+      await tester.pumpAndSettle();
+      final read = top(tester);
+      // A tab coming back hands the same link again.
+      await tester.pumpWidget(pane(path, anchor: at(20)));
+      await tester.pumpAndSettle();
+      expect(top(tester), read);
+      // The same link followed again.
+      await tester.pumpWidget(pane(path, anchor: at(20), reloadToken: 1));
+      await tester.pumpAndSettle();
+      expect(top(tester), two.line + 20);
+      await tester.pumpWidget(pane(path, anchor: at(40), reloadToken: 1));
+      await tester.pumpAndSettle();
+      expect(top(tester), two.line + 40);
+      await tester.pumpWidget(const SizedBox());
     });
   });
 

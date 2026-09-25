@@ -6,7 +6,8 @@
 /// ([EpubLooks]), set from the Aa button on the row below. Its pictures
 /// come from the app's cache, its own links jump within it, and its table
 /// of contents is a button on that row too. It opens where it was left
-/// ([ReadingPositions]).
+/// ([ReadingPositions]), or where the link it was opened by points
+/// ([BookLocation.fromFragment]).
 library;
 
 import 'dart:async';
@@ -46,6 +47,8 @@ final class EpubPane extends StatefulWidget {
     this.cacheDir = _epubCacheDir,
     this.onEditLook,
     this.positions,
+    this.anchor,
+    this.reloadToken = 0,
     super.key,
   });
 
@@ -69,6 +72,15 @@ final class EpubPane extends StatefulWidget {
   /// Where the library keeps its reading positions; null keeps none, and
   /// the book opens at its start.
   final ReadingPositions? positions;
+
+  /// The fragment of the link the book was opened by (#282), naming a place
+  /// in it: `chapter=OEBPS/ch5.xhtml&line=12`. It wins over where the book
+  /// was left.
+  final String? anchor;
+
+  /// Bumped when the same link is followed again, so the book goes back to
+  /// its place.
+  final int reloadToken;
 
   @override
   State<EpubPane> createState() => EpubPaneState();
@@ -98,6 +110,10 @@ final class EpubPaneState extends State<EpubPane> {
 
   late ReadingTracker _reading;
 
+  /// The link's fragment last gone to: handed again as a tab comes back,
+  /// it does not move the reader.
+  String? _anchorTaken;
+
   @override
   void initState() {
     super.initState();
@@ -108,7 +124,20 @@ final class EpubPaneState extends State<EpubPane> {
   @override
   void didUpdateWidget(EpubPane oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.path == widget.path) return;
+    if (oldWidget.path == widget.path) {
+      final anchor = widget.anchor;
+      final document = _document;
+      final again =
+          anchor != _anchorTaken || widget.reloadToken != oldWidget.reloadToken;
+      if (anchor == null || !again || document == null) return;
+      // Still being read, the book takes the link when it opens.
+      _anchorTaken = anchor;
+      final place = _linked();
+      if (place == null) return;
+      _reading.flush();
+      if (_show(document, place)) _reading.placed(place);
+      return;
+    }
     _reading.flush();
     // The build that follows shows the spinner until the new book is read.
     _document = null;
@@ -131,7 +160,7 @@ final class EpubPaneState extends State<EpubPane> {
     try {
       final left = reading.read();
       final document = await openEpub(widget.path, await widget.cacheDir());
-      final location = switch (await left) {
+      final saved = switch (await left) {
         final EpubLocation location => location,
         _ => null,
       };
@@ -140,25 +169,37 @@ final class EpubPaneState extends State<EpubPane> {
         _document = document;
         _buffer = SourceBuffer.fromText(document.markdown);
       });
-      // Once the view is there to be scrolled.
+      // Once the view is there to be scrolled: the link's place, else
+      // where the book was left, else its start.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || open != _opens) return;
-        final line = location == null
-            ? null
-            : document.lineOfLocation(location);
-        if (location != null && line != null) {
-          _readKey.currentState?.showAnchor((
-            line: line,
-            fraction: location.fraction,
-          ));
-        }
-        reading.placed(line == null ? null : location);
+        _anchorTaken = widget.anchor;
+        final place = [_linked(), saved].firstWhere(
+          (place) => place != null && _show(document, place),
+          orElse: () => null,
+        );
+        reading.placed(place);
       });
     } on Object catch (error) {
       _log.warning('could not read ${widget.path}: $error');
       if (!mounted || open != _opens) return;
       setState(() => _failed = true);
     }
+  }
+
+  /// The place the link's fragment names, when it names one in a book.
+  EpubLocation? _linked() =>
+      switch (BookLocation.fromFragment(widget.anchor ?? '')) {
+        final EpubLocation place => place,
+        _ => null,
+      };
+
+  /// Scrolls to [place], if [document] has it.
+  bool _show(EpubDocument document, EpubLocation place) {
+    final line = document.lineOfLocation(place);
+    if (line == null) return false;
+    _readKey.currentState?.showAnchor((line: line, fraction: place.fraction));
+    return true;
   }
 
   void _onScroll() {

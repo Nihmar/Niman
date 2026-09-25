@@ -59,6 +59,64 @@ void main() {
     });
   });
 
+  group("a link's fragment (#282)", () {
+    test('names a page of a PDF, as Obsidian writes it', () {
+      expect(BookLocation.fromFragment('page=34'), const PdfLocation(page: 34));
+      // An embed's height is not a place.
+      expect(
+        BookLocation.fromFragment('page=3&height=400'),
+        const PdfLocation(page: 3),
+      );
+      expect(BookLocation.fromFragment('PAGE = 2'), const PdfLocation(page: 2));
+    });
+
+    test('names a line of a chapter of a book', () {
+      expect(
+        BookLocation.fromFragment('chapter=OEBPS/ch5.xhtml&line=12'),
+        const EpubLocation(chapter: 'OEBPS/ch5.xhtml', line: 12),
+      );
+      expect(
+        BookLocation.fromFragment('chapter=ch5.xhtml'),
+        const EpubLocation(chapter: 'ch5.xhtml', line: 0),
+      );
+    });
+
+    test('that names no place is none: a heading, a bad page', () {
+      for (final fragment in [
+        '',
+        'My Heading',
+        'page=0',
+        'page=two',
+        'chapter=',
+        'line=4',
+      ]) {
+        expect(BookLocation.fromFragment(fragment), isNull, reason: fragment);
+      }
+    });
+
+    test('is written for a place, and read back', () {
+      const places = <BookLocation>[
+        PdfLocation(page: 7),
+        EpubLocation(chapter: 'OEBPS/Text/ch 5 (a&b)#1.xhtml', line: 3),
+        EpubLocation(chapter: '100%/città.xhtml', line: 0),
+      ];
+      for (final place in places) {
+        final fragment = place.toFragment();
+        expect(fragment, isNot(contains(' ')));
+        expect(fragment.split('#'), hasLength(1));
+        expect(BookLocation.fromFragment(fragment), place, reason: fragment);
+      }
+      expect(
+        const EpubLocation(chapter: 'OEBPS/ch 5.xhtml', line: 3).toFragment(),
+        'chapter=OEBPS/ch%205.xhtml&line=3',
+      );
+    });
+
+    test('goes to its line or page, not into it', () {
+      expect(const PdfLocation(page: 7, fraction: 0.5).toFragment(), 'page=7');
+    });
+  });
+
   group('the positions of a library', () {
     late Directory root;
     late ReadingPositions positions;

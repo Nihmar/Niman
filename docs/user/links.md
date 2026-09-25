@@ -26,6 +26,24 @@ extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
 footnote's own text is.
 
+## Links into a PDF or a book
+
+A link can point at a place inside a PDF or an EPUB book; following it
+opens the file in the note pane **there**, instead of where you left it.
+Wikilinks and Markdown links alike:
+
+- `[[Dune.pdf#page=34]]`, `[p. 34](Dune.pdf#page=34)` — page 34 of a
+  PDF, the form Obsidian and PDF readers use. Other parameters, such as
+  an Obsidian embed's `height=400`, are passed over.
+- `[[Dune.epub#chapter=OEBPS/ch5.xhtml&line=12]]` — line 12 of a
+  chapter of a book, the chapter named by its file inside the EPUB (its
+  name alone is enough, `chapter=ch5.xhtml`). Niman's own form: there is
+  no common one for books, and Obsidian opens the book, ignoring it.
+
+A link to a file already open moves it to the place; the same link
+followed again goes back there. A place the file no longer has (a page
+past its end, a chapter it lost) opens it where you left it.
+
 ## Dead links
 
 Clicking a link whose target note does not exist offers to create it:

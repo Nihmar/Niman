@@ -6,9 +6,18 @@
 /// chapter. The book is Markdown converted from its XHTML, so a change to
 /// the conversion moves its lines; kept per chapter, such a change moves
 /// the place within one chapter at most.
+///
+/// A link names a place in its `#fragment` (#282), `key=value` pairs
+/// joined by `&`: `[[Dune.pdf#page=34]]`, the form Obsidian and PDF
+/// readers use, and `[[Dune.epub#chapter=OEBPS/ch5.xhtml&line=12]]`,
+/// Niman's own, there being no common one for books (Obsidian reads no
+/// EPUB, and an EPUB CFI addresses the XHTML the reader does not keep).
+/// Keys a place does not know are passed over: `#page=3&height=400`, an
+/// Obsidian embed's, is page 3.
 library;
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/percent.dart';
 
 /// Where a reader is in a document.
 @immutable
@@ -31,6 +40,39 @@ sealed class BookLocation {
     }
     return null;
   }
+
+  /// The place a link's [fragment] names (without its `#`), or null when
+  /// it names none: a heading, say.
+  static BookLocation? fromFragment(String fragment) {
+    final values = <String, String>{};
+    for (final pair in fragment.split('&')) {
+      final equals = pair.indexOf('=');
+      if (equals <= 0) continue;
+      values[pair.substring(0, equals).trim().toLowerCase()] = percentDecoded(
+        pair.substring(equals + 1).trim(),
+      );
+    }
+    final page = int.tryParse(values['page'] ?? '');
+    if (page != null) return page < 1 ? null : PdfLocation(page: page);
+    final chapter = values['chapter'];
+    if (chapter == null || chapter.isEmpty) return null;
+    final line = int.tryParse(values['line'] ?? '') ?? 0;
+    return EpubLocation(chapter: chapter, line: line < 0 ? 0 : line);
+  }
+
+  /// The place as a link's fragment (without its `#`), which
+  /// [fromFragment] reads back: to its line or page, not into it.
+  String toFragment();
+
+  /// [value] with what would end the fragment, or the link around it,
+  /// escaped: a chapter's name may hold a space, a `#`, a `&`…
+  static String _escape(String value) => value.replaceAllMapped(
+    _unsafe,
+    (m) => '%${m[0]!.codeUnitAt(0).toRadixString(16).toUpperCase()}',
+  );
+
+  /// What [_escape] escapes: printable ASCII, each two hex digits.
+  static final RegExp _unsafe = RegExp('[%\x20#&=|\\[\\]()<>^]');
 
   /// The location as JSON, which [fromJson] reads back.
   Map<String, Object?> toJson();
@@ -56,6 +98,9 @@ final class PdfLocation extends BookLocation {
 
   @override
   Map<String, Object?> toJson() => {'page': page, 'fraction': fraction};
+
+  @override
+  String toFragment() => 'page=$page';
 
   @override
   bool isNear(BookLocation? other) =>
@@ -96,6 +141,9 @@ final class EpubLocation extends BookLocation {
     'line': line,
     'fraction': fraction,
   };
+
+  @override
+  String toFragment() => 'chapter=${BookLocation._escape(chapter)}&line=$line';
 
   @override
   bool isNear(BookLocation? other) =>
