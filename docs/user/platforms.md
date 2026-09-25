@@ -81,6 +81,15 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
 
+## Density
+
+On Linux and Windows the note tree and its right-click menu are drawn
+for a mouse: shorter rows, a narrower slot for the folder chevron and
+the note icon, and a tighter menu. A phone or a tablet keeps the
+thumb-sized rows and the long-press sheet. The choice follows the
+platform's own density (compact on a desktop), not the window's width,
+so a tablet in landscape keeps the touch sizes.
+
 ## Open notes
 
 On Linux and Windows the open notes are **tabs** in the title bar, and
