@@ -1016,10 +1016,10 @@ final class ItalianStrings extends Strings {
       'Le notifiche sono disattivate, quindi i promemoria non compaiono.';
   @override
   String get todoReminderBattery =>
-      'L’ottimizzazione della batteria o le restrizioni in background sono '
-      'attive per Niman. Consenti l’attività in background e lascia Niman '
-      'senza restrizioni, altrimenti il sistema può sospendere l’app e '
-      'perdere i promemoria in attesa.';
+      'L’utilizzo in background è disattivato per Niman. Il sistema non '
+      'avvia l’app in background, quindi un promemoria non può scattare. '
+      'Consenti l’utilizzo in background nelle impostazioni batteria di '
+      'Niman.';
   @override
   String get todoReminderInexact =>
       'Questo dispositivo non consente sveglie esatte, quindi un '
