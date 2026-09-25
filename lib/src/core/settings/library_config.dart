@@ -179,6 +179,25 @@ double normalizeTreeWidth(Object? raw) {
   return width;
 }
 
+/// The right dock's width in a fresh library (logical pixels, #297).
+const double defaultDockWidth = 280;
+
+/// The narrowest the right dock drags to.
+const double minDockWidth = 200;
+
+/// The widest the right dock drags to.
+const double maxDockWidth = 600;
+
+/// Reads a `dockWidth` out of the settings, clamped into range — the same
+/// bargain as `treeWidth`.
+double normalizeDockWidth(Object? raw) {
+  if (raw is! num) return defaultDockWidth;
+  final width = raw.toDouble();
+  if (width < minDockWidth) return minDockWidth;
+  if (width > maxDockWidth) return maxDockWidth;
+  return width;
+}
+
 /// The note column's width in a fresh library, in logical pixels (#171):
 /// about 80 characters of prose at the shipped text size, the measure
 /// the preview already read at.
@@ -328,6 +347,7 @@ final class LibraryConfig {
     this.uiTextScale = defaultTextScale,
     this.noteTextScale = defaultTextScale,
     this.treeWidth = defaultTreeWidth,
+    this.dockWidth = defaultDockWidth,
     this.spellDictionaries = const <String>[],
     this.editorKind = EditorKind.source,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
@@ -409,6 +429,7 @@ final class LibraryConfig {
       uiTextScale: normalizeTextScale(json['uiTextScale']),
       noteTextScale: normalizeTextScale(json['noteTextScale']),
       treeWidth: normalizeTreeWidth(json['treeWidth']),
+      dockWidth: normalizeDockWidth(json['dockWidth']),
       // The legacy single-dictionary key migrates to the list.
       spellDictionaries: _spellDictionariesFrom(
         json['spellDictionaries'] ?? json['spellDictionary'],
@@ -536,6 +557,10 @@ final class LibraryConfig {
   /// [defaultTreeWidth]), dragged on wide screens.
   final double treeWidth;
 
+  /// The right dock's width in logical pixels (default
+  /// [defaultDockWidth]), dragged on wide screens (#297).
+  final double dockWidth;
+
   /// The hunspell dictionaries the spell checker uses (`<name>`s found
   /// on the machine), in selection order. Empty means the locale's default.
   /// Several are checked at once, a word passing when any of them knows it
@@ -587,6 +612,7 @@ final class LibraryConfig {
     double? uiTextScale,
     double? noteTextScale,
     double? treeWidth,
+    double? dockWidth,
     List<String>? spellDictionaries,
     EditorKind? editorKind,
     Set<EditorKind>? enabledEditors,
@@ -622,6 +648,7 @@ final class LibraryConfig {
       uiTextScale: uiTextScale ?? this.uiTextScale,
       noteTextScale: noteTextScale ?? this.noteTextScale,
       treeWidth: treeWidth ?? this.treeWidth,
+      dockWidth: dockWidth ?? this.dockWidth,
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
       editorKind: editorKind ?? this.editorKind,
       enabledEditors: enabledEditors ?? this.enabledEditors,
@@ -644,6 +671,7 @@ final class LibraryConfig {
     'uiTextScale',
     'noteTextScale',
     'treeWidth',
+    'dockWidth',
     'editorKind',
     'enabledEditors',
     ...EpubLook.keys,
@@ -687,6 +715,7 @@ final class LibraryConfig {
     'uiTextScale',
     'noteTextScale',
     'treeWidth',
+    'dockWidth',
     'spellDictionary', // Legacy single-dictionary key (read, never written).
     'spellDictionaries',
     'editorKind',
@@ -739,6 +768,7 @@ final class LibraryConfig {
       'uiTextScale': uiTextScale,
       'noteTextScale': noteTextScale,
       'treeWidth': treeWidth,
+      'dockWidth': dockWidth,
       'editorKind': editorKind.name,
       // Canonical order, so the file does not churn when the set is
       // rebuilt insertion-ordered differently.
@@ -830,6 +860,7 @@ final class LibraryConfig {
         uiTextScale == other.uiTextScale &&
         noteTextScale == other.noteTextScale &&
         treeWidth == other.treeWidth &&
+        dockWidth == other.dockWidth &&
         _deepEquals(spellDictionaries, other.spellDictionaries) &&
         editorKind == other.editorKind &&
         enabledEditors.length == other.enabledEditors.length &&

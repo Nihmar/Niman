@@ -447,6 +447,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the tree pane's width.
   Future<void> setTreeWidth(double width);
 
+  /// The right dock's width in logical pixels (default
+  /// [defaultDockWidth]).
+  Future<double> get dockWidth;
+
+  /// Sets (and persists) the right dock's width.
+  Future<void> setDockWidth(double width);
+
   /// Whether the tree's pinned section is rolled up (default false).
   ///
   /// Per library, like the sort order: which notes are worth pinning — and

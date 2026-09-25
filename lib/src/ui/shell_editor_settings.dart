@@ -36,6 +36,7 @@ final class ShellEditorSettings {
     this.indentWidth = 2,
     this.treeSort = TreeSort.nameAsc,
     this.treeWidth = defaultTreeWidth,
+    this.dockWidth = defaultDockWidth,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.tidyOnClose = true,
   });
@@ -85,6 +86,10 @@ final class ShellEditorSettings {
   /// library (T-PP-21).
   final double treeWidth;
 
+  /// The right dock's width, dragged and persisted like [treeWidth]
+  /// (#297).
+  final double dockWidth;
+
   /// The editor toolbar the user arranged (T-TB-04).
   final ToolbarLayout toolbarLayout;
 
@@ -114,6 +119,7 @@ final class ShellEditorSettings {
     final indentWidth = await session.indentWidth;
     final treeSort = await session.treeSort;
     final treeWidth = await session.treeWidth;
+    final dockWidth = await session.dockWidth;
     final toolbar = await session.editorToolbar;
     final tidyOnClose = await session.tidyOnClose;
     final editorKind = await session.editorKind;
@@ -142,6 +148,7 @@ final class ShellEditorSettings {
       indentWidth: indentWidth,
       treeSort: treeSort,
       treeWidth: treeWidth,
+      dockWidth: dockWidth,
       toolbarLayout: ToolbarLayout.parse(toolbar),
       tidyOnClose: tidyOnClose,
     );
@@ -158,6 +165,7 @@ final class ShellEditorSettings {
     EditorKind? editorKind,
     TreeSort? treeSort,
     double? treeWidth,
+    double? dockWidth,
     bool? typewriter,
     bool? tidyOnClose,
   }) {
@@ -175,6 +183,7 @@ final class ShellEditorSettings {
       indentWidth: indentWidth,
       treeSort: treeSort ?? this.treeSort,
       treeWidth: treeWidth ?? this.treeWidth,
+      dockWidth: dockWidth ?? this.dockWidth,
       toolbarLayout: toolbarLayout,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
     );
@@ -197,6 +206,7 @@ final class ShellEditorSettings {
         indentWidth == other.indentWidth &&
         treeSort == other.treeSort &&
         treeWidth == other.treeWidth &&
+        dockWidth == other.dockWidth &&
         tidyOnClose == other.tidyOnClose &&
         // The layout compares by what it is written as: two parses of the
         // same string are two objects.
@@ -218,6 +228,7 @@ final class ShellEditorSettings {
     indentWidth,
     treeSort,
     treeWidth,
+    dockWidth,
     toolbarLayout.encode(),
     tidyOnClose,
   );

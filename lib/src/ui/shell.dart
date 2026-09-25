@@ -74,6 +74,7 @@ import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
+import 'package:niman/src/ui/resize_divider.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -1081,7 +1082,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// whose editor holds edits the disk does not have yet.
   Widget _buildTabs(Widget dragArea) {
     // The panes end where the dock begins, when it shows (#175).
-    final dock = _dockShown ? RightDock.width + 1 : 0;
+    final dock = _dockShown ? _dockWidth + ResizeDivider.width : 0;
     return _tabRow(
       dragArea,
       panesWidth: MediaQuery.sizeOf(context).width - _tabsStart - dock,
@@ -1116,7 +1117,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   double get _tabsStart =>
       ShellRail.width +
       1 +
-      (_sidebarVisible ? _editorSettings.treeWidth + _treeDividerWidth : 0);
+      (_sidebarVisible ? _editorSettings.treeWidth + ResizeDivider.width : 0);
 
   /// [pane]'s tab row.
   Widget _paneTabs(int pane, Widget filler) {
@@ -3069,8 +3070,8 @@ final class _LibraryShellState extends State<_LibraryShell>
           ),
         ),
         if (_dockShown && !zen) ...[
-          const VerticalDivider(width: 1),
-          SizedBox(width: RightDock.width, child: _rightDock(controller)),
+          _dockDivider(),
+          SizedBox(width: _dockWidth, child: _rightDock(controller)),
         ],
       ],
     );
@@ -3421,38 +3422,57 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// its editor along — undo and all — instead of starting a new one.
   final Map<String, GlobalKey> _noteKeys = {};
 
-  /// The tree divider's grab width.
-  static const double _treeDividerWidth = 13;
-
-  /// The draggable tree/detail divider (T-PP-21): a 1 px visual with a
-  /// wider grab box and the resize cursor, mirroring the editor split.
-  /// Moves apply live; the lift persists the width to the library.
-  Widget _treeDivider() {
-    return GestureDetector(
-      key: const Key('tree-divider'),
-      behavior: HitTestBehavior.translucent,
-      onHorizontalDragUpdate: (details) => setState(() {
-        _editorSettings = _editorSettings.copyWith(
-          treeWidth: (_editorSettings.treeWidth + details.delta.dx).clamp(
-            minTreeWidth,
-            maxTreeWidth,
-          ),
-        );
-      }),
-      onHorizontalDragEnd: (_) => unawaited(_persistTreeWidth()),
-      child: const MouseRegion(
-        cursor: SystemMouseCursors.resizeColumn,
-        child: SizedBox(
-          width: _treeDividerWidth,
-          child: Center(child: VerticalDivider(width: 1)),
+  /// The draggable tree/detail divider (T-PP-21). Moves apply live; the
+  /// lift persists the width to the library.
+  Widget _treeDivider() => ResizeDivider(
+    key: const Key('tree-divider'),
+    onDrag: (dx) => setState(() {
+      _editorSettings = _editorSettings.copyWith(
+        treeWidth: (_editorSettings.treeWidth + dx).clamp(
+          minTreeWidth,
+          maxTreeWidth,
         ),
-      ),
-    );
-  }
+      );
+    }),
+    onDragEnd: () => unawaited(_persistTreeWidth()),
+  );
 
   /// Persists the dragged tree width to the library settings.
   Future<void> _persistTreeWidth() async {
     await widget.controller.setTreeWidth(_editorSettings.treeWidth);
+    widget.controller.notify();
+  }
+
+  /// The draggable panes/dock divider (#297): the tree's divider on the
+  /// dock's edge, so a move to the left widens the dock.
+  Widget _dockDivider() => ResizeDivider(
+    key: const Key('dock-divider'),
+    onDrag: (dx) => setState(() {
+      _editorSettings = _editorSettings.copyWith(
+        dockWidth: _fitDock(_dockWidth - dx),
+      );
+    }),
+    onDragEnd: () => unawaited(_persistDockWidth()),
+  );
+
+  /// The dock's width on screen: the library's, shrunk as far as its
+  /// minimum when the window leaves the panes less than their share.
+  double get _dockWidth => _fitDock(_editorSettings.dockWidth);
+
+  /// [width] within the dock's range and within what the window can spare
+  /// beside the tree and [RightDock.minPanesWidth] of panes.
+  double _fitDock(double width) {
+    final room =
+        MediaQuery.sizeOf(context).width -
+        _tabsStart -
+        ResizeDivider.width -
+        RightDock.minPanesWidth;
+    return width.clamp(minDockWidth, room.clamp(minDockWidth, maxDockWidth));
+  }
+
+  /// Persists the dragged dock width to the library settings.
+  Future<void> _persistDockWidth() async {
+    await widget.controller.setDockWidth(_editorSettings.dockWidth);
     widget.controller.notify();
   }
 
