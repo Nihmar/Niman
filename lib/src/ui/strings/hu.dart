@@ -1557,6 +1557,27 @@ final class HungarianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override
+  String get lintRulesTitle => 'Markdown-szabályok';
+  @override
+  String get lintRulesSubtitle =>
+      'Mit rendez a tisztítás: üres sorok a listákban, feladatjelölők, a '
+      'jelölő utáni térközök és kódblokkok.';
+  @override
+  String get lintRulesReset => 'Alapértelmezések visszaállítása';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Mind a(z) $all' : '$on / $all';
+  @override
+  String get lintRuleTightLists => 'Sűrű listák';
+  @override
+  String get lintRuleTaskMarker => 'Feladatjelölők';
+  @override
+  String get lintRuleListSpacing => 'Listatérközök';
+  @override
+  String get lintRuleClosingFence => 'Kódblokk lezárása';
+  @override
+  String get lintRuleFenceLanguage => 'Kódblokk nyelve';
+  @override
   String get tidyOnCloseTitle => 'Markdown rendbetétele bezáráskor';
   @override
   String get tidyOnCloseSubtitle =>

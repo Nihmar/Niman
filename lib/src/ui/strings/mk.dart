@@ -1562,6 +1562,27 @@ final class MacedonianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override
+  String get lintRulesTitle => 'Правила за Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Што средува уредувањето: празни редови во списоци, задачи, празни '
+      'места по маркерот и кодни блокови.';
+  @override
+  String get lintRulesReset => 'Врати на стандардно';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Сите $all' : '$on од $all';
+  @override
+  String get lintRuleTightLists => 'Збиени списоци';
+  @override
+  String get lintRuleTaskMarker => 'Ознаки за задачи';
+  @override
+  String get lintRuleListSpacing => 'Празни места во списоци';
+  @override
+  String get lintRuleClosingFence => 'Затворање на кодот';
+  @override
+  String get lintRuleFenceLanguage => 'Јазик на кодот';
+  @override
   String get tidyOnCloseTitle => 'Средување на Markdown при затворање';
   @override
   String get tidyOnCloseSubtitle =>

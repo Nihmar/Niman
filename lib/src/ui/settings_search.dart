@@ -7,6 +7,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
@@ -266,6 +267,20 @@ List<SettingsSearchEntry> settingsSearchEntries({
       value: () async => onOff(on: await controller.tidyOnClose),
       areaId: SettingsAreaId.editor,
       open: () => pushEditor(SettingsKeys.tidyOnClose),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.lintRulesTitle,
+      area: editor,
+      rowKey: SettingsKeys.lintRules,
+      value: () async {
+        final off = await controller.lintRulesOff;
+        return AppStrings.lintRulesValue(
+          LintRule.values.length - off.length,
+          LintRule.values.length,
+        );
+      },
+      areaId: SettingsAreaId.editor,
+      open: () => pushEditor(SettingsKeys.lintRules),
     ),
     SettingsSearchEntry(
       title: AppStrings.listFolderTitle,

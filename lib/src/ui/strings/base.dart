@@ -736,6 +736,15 @@ abstract base class Strings {
   String get formatNoteAlreadyTidy;
   String get tidyOnCloseTitle;
   String get tidyOnCloseSubtitle;
+  String get lintRulesTitle;
+  String get lintRulesSubtitle;
+  String get lintRulesReset;
+  String lintRulesValue(int on, int all);
+  String get lintRuleTightLists;
+  String get lintRuleTaskMarker;
+  String get lintRuleListSpacing;
+  String get lintRuleClosingFence;
+  String get lintRuleFenceLanguage;
   String get typewriterSubtitle;
   String get zenMode;
   String get zenModeEnter;

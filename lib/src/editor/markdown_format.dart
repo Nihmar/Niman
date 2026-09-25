@@ -1,4 +1,4 @@
-/// Tidying a note's Markdown (#227).
+/// Tidying a note's Markdown (#227), the corrector #72's rules included.
 ///
 /// A note is a file someone writes by hand, and hands wander: a list
 /// item wrapped over two lines without indentation, three blank lines
@@ -11,10 +11,10 @@
 /// This is the tidying, and it is deliberately a small one. It works on
 /// the note's own lines rather than re-rendering a parsed tree, because
 /// a formatter that rewrites what it did not understand is a formatter
-/// that loses things: fenced code, tables, math, frontmatter and HTML
-/// pass through untouched, and so does the prose inside a paragraph —
-/// no reflowing, no rewrapping, nothing that would make a diff of a note
-/// unreadable.
+/// that loses things: the code inside a fence, tables, math, frontmatter
+/// and HTML pass through untouched, and so does the prose inside a
+/// paragraph — no reflowing, no rewrapping, nothing that would make a
+/// diff of a note unreadable.
 ///
 /// What it does:
 ///
@@ -23,16 +23,28 @@
 /// * a heading gets exactly one space after its hashes (`#Title`, which
 ///   is a paragraph and not a heading at all, is left alone: tidying is
 ///   not the place to change what a line means);
-/// * runs of blank lines collapse to one, and the trailing ones go;
+/// * blocks are set apart by exactly one blank line — runs of blank lines
+///   collapse to one, a heading gets one where it had none, and the
+///   trailing ones go;
 /// * trailing spaces go, except the ones that mean a line break, kept as
 ///   exactly two — and dropped at the end of a block, where they break
 ///   nothing;
 /// * the note ends with exactly one newline.
 ///
+/// Those always run. The rules #72 added are switches ([LintRule]):
+/// between them, a list comes back tight — no blank lines between its
+/// items, one space after the marker — its task boxes canonical (`[ ]`,
+/// `[x]`), and a fence gets its language and its closing fence, its two
+/// fence lines being all of it the tidying reads. All of them are on by
+/// default; passing `rules` leaves out the ones a library turned off.
+///
 /// Formatting twice changes nothing the second time, which the tests
 /// hold for every case they cover.
 library;
 
+import 'package:niman/src/lint/fence_fixes.dart';
+import 'package:niman/src/lint/lint_rule.dart';
+import 'package:niman/src/lint/list_fixes.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -40,15 +52,14 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// The line separator the app normalizes to.
 const String _newline = '\n';
 
-/// `- `, `* `, `+ `, `1. `, `1) ` — a list item's marker, with the
-/// indent it sits at and the column its text starts in.
-final RegExp _marker = RegExp(r'^(\s*)([-*+]|\d{1,9}[.)])(\s+)');
-
 /// A heading's hashes, however they are spaced from the text.
 final RegExp _heading = RegExp(r'^(\s{0,3})(#{1,6})[ \t]*(\S.*)?$');
 
 /// Tidies [source]; an empty note stays empty.
-String formatMarkdown(String source) {
+///
+/// [rules] are the #72 rules to apply; null applies them all.
+String formatMarkdown(String source, {Set<LintRule>? rules}) {
+  final on = rules ?? LintRule.all;
   if (source.trim().isEmpty) return source.isEmpty ? source : _newline;
   final out = <String>[];
   for (final block in _units(source)) {
@@ -58,56 +69,32 @@ String formatMarkdown(String source) {
     final lines = block.lines;
     final tidied = switch (block.kind) {
       _Unit.opaque => lines,
-      _Unit.list => _list(lines),
+      _Unit.fence => tidyFence(
+        lines,
+        language: on.contains(LintRule.fenceLanguage),
+        closing: on.contains(LintRule.closingFence),
+      ),
+      _Unit.list => tidyList(
+        normalizeTaskBoxes(
+          lines.map(_trimEnd).toList(),
+          enabled: on.contains(LintRule.taskMarker),
+        ),
+        spacing: on.contains(LintRule.listSpacing),
+        tight: on.contains(LintRule.tightLists),
+      ),
       _Unit.heading => _headings(lines),
       _Unit.prose => lines.map(_trimEnd).toList(),
     };
     final body = _withoutTrailingBlanks(tidied);
     if (body.isEmpty) continue;
     // A break on the last line of a block breaks nothing.
-    if (block.kind != _Unit.opaque) {
+    if (block.kind != _Unit.opaque && block.kind != _Unit.fence) {
       body[body.length - 1] = body.last.trimRight();
     }
     if (out.isNotEmpty) out.add('');
     out.addAll(body);
   }
   return '${out.join(_newline)}$_newline';
-}
-
-/// A list block: every item keeps its marker, and a line that continues
-/// one is indented to that item's text.
-///
-/// The continuation is what this is for. `1. a long item` wrapped onto a
-/// bare next line is still that item to a parser, but it is written back
-/// as a paragraph inside the list and the numbering starts again under
-/// it; indented to the item's own text column it survives every trip
-/// through the editors.
-List<String> _list(List<String> lines) {
-  final out = <String>[];
-  var contentColumn = 0;
-  for (final raw in lines) {
-    final line = _trimEnd(raw);
-    if (line.trim().isEmpty) {
-      out.add('');
-      continue;
-    }
-    final marker = _marker.firstMatch(line);
-    if (marker != null) {
-      contentColumn =
-          marker.group(1)!.length +
-          marker.group(2)!.length +
-          marker.group(3)!.length;
-      out.add(line);
-      continue;
-    }
-    final indent = line.length - line.trimLeft().length;
-    if (contentColumn == 0 || indent >= contentColumn) {
-      out.add(line);
-      continue;
-    }
-    out.add('${' ' * contentColumn}${line.trimLeft()}');
-  }
-  return out;
 }
 
 /// A heading block: one space between the hashes and the text.
@@ -141,8 +128,11 @@ List<String> _withoutTrailingBlanks(List<String> lines) {
 
 /// What a stretch of the note is, to the tidying.
 enum _Unit {
-  /// Kept as written: frontmatter, code, math, HTML, a table.
+  /// Kept as written: frontmatter, math, HTML, indented code, a table.
   opaque,
+
+  /// A fenced code block: its fences and the code between them.
+  fence,
 
   /// A list, its items and the lines that go on them, blank lines between
   /// items included.
@@ -192,11 +182,11 @@ List<({_Unit kind, List<String> lines})> _units(String source) {
     }
     final kind = switch (block.kind) {
       BlockKind.frontmatter ||
-      BlockKind.fencedCode ||
       BlockKind.indentedCode ||
       BlockKind.math ||
       BlockKind.html ||
       BlockKind.table => _Unit.opaque,
+      BlockKind.fencedCode => _Unit.fence,
       BlockKind.heading => _Unit.heading,
       _ => _Unit.prose,
     };

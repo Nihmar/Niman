@@ -102,4 +102,18 @@ void main() {
 
     expect(await controller.readNote('note.md'), _tidy);
   });
+
+  testWidgets('a rule switched off leaves its shape as written', (
+    tester,
+  ) async {
+    // The #72 rules are per library: with the tight-list rule off, the
+    // command still tidies — the marker's padding is fixed — and the blank
+    // line between the items stays.
+    await controller.setLintRulesOff({'tight-lists'});
+    await pumpWithNote(tester, '-   a\n\n- b\n');
+    await runFromMenu(tester);
+
+    expect(await controller.readNote('note.md'), '- a\n\n- b\n');
+    expect(find.text(AppStrings.formatNoteDone), findsOne);
+  });
 }

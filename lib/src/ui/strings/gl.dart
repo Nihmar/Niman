@@ -1561,6 +1561,27 @@ final class GalicianStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override
+  String get lintRulesTitle => 'Regras de Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'O que axeita o axuste: liñas baleiras nas listas, caixas de tarefa, '
+      'espazos tras o marcador e bloques de código.';
+  @override
+  String get lintRulesReset => 'Restaurar os valores predeterminados';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Todas $all' : '$on de $all';
+  @override
+  String get lintRuleTightLists => 'Listas compactas';
+  @override
+  String get lintRuleTaskMarker => 'Caixas de tarefa';
+  @override
+  String get lintRuleListSpacing => 'Espazado de listas';
+  @override
+  String get lintRuleClosingFence => 'Pechadura do bloque de código';
+  @override
+  String get lintRuleFenceLanguage => 'Linguaxe do bloque de código';
+  @override
   String get tidyOnCloseTitle => 'Arranxar o Markdown ao pechar';
   @override
   String get tidyOnCloseSubtitle =>

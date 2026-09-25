@@ -1596,6 +1596,27 @@ final class GreekStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override
+  String get lintRulesTitle => 'Κανόνες Markdown';
+  @override
+  String get lintRulesSubtitle =>
+      'Τι τακτοποιεί: κενές γραμμές σε λίστες, πλαίσια εργασιών, κενά μετά '
+      'τον δείκτη και μπλοκ κώδικα.';
+  @override
+  String get lintRulesReset => 'Επαναφορά προεπιλογών';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Όλοι $all' : '$on από $all';
+  @override
+  String get lintRuleTightLists => 'Πυκνές λίστες';
+  @override
+  String get lintRuleTaskMarker => 'Πλαίσια εργασιών';
+  @override
+  String get lintRuleListSpacing => 'Διαστήματα λίστας';
+  @override
+  String get lintRuleClosingFence => 'Κλείσιμο μπλοκ κώδικα';
+  @override
+  String get lintRuleFenceLanguage => 'Γλώσσα μπλοκ κώδικα';
+  @override
   String get tidyOnCloseTitle => 'Τακτοποίηση του Markdown στο κλείσιμο';
   @override
   String get tidyOnCloseSubtitle =>

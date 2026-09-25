@@ -1534,6 +1534,27 @@ final class TurkishStrings extends Strings {
   @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override
+  String get lintRulesTitle => 'Markdown kuralları';
+  @override
+  String get lintRulesSubtitle =>
+      'Düzenlemenin çözdüğü şeyler: listelerdeki boş satırlar, görev '
+      'kutuları, im sonrası boşluklar ve kod blokları.';
+  @override
+  String get lintRulesReset => 'Varsayılanlara sıfırla';
+  @override
+  String lintRulesValue(int on, int all) =>
+      on >= all ? 'Tümü ($all)' : '$all içinden $on';
+  @override
+  String get lintRuleTightLists => 'Sıkı listeler';
+  @override
+  String get lintRuleTaskMarker => 'Görev imleri';
+  @override
+  String get lintRuleListSpacing => 'Liste aralıkları';
+  @override
+  String get lintRuleClosingFence => 'Kod bloğunu kapatma';
+  @override
+  String get lintRuleFenceLanguage => 'Kod bloğu dili';
+  @override
   String get tidyOnCloseTitle => 'Kapatırken Markdown’ı düzenle';
   @override
   String get tidyOnCloseSubtitle =>

@@ -917,6 +917,15 @@ final class AppStrings {
   static String get formatNoteAlreadyTidy => _s.formatNoteAlreadyTidy;
   static String get tidyOnCloseTitle => _s.tidyOnCloseTitle;
   static String get tidyOnCloseSubtitle => _s.tidyOnCloseSubtitle;
+  static String get lintRulesTitle => _s.lintRulesTitle;
+  static String get lintRulesSubtitle => _s.lintRulesSubtitle;
+  static String get lintRulesReset => _s.lintRulesReset;
+  static String lintRulesValue(int on, int all) => _s.lintRulesValue(on, all);
+  static String get lintRuleTightLists => _s.lintRuleTightLists;
+  static String get lintRuleTaskMarker => _s.lintRuleTaskMarker;
+  static String get lintRuleListSpacing => _s.lintRuleListSpacing;
+  static String get lintRuleClosingFence => _s.lintRuleClosingFence;
+  static String get lintRuleFenceLanguage => _s.lintRuleFenceLanguage;
   static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zenModeEnter => _s.zenModeEnter;
