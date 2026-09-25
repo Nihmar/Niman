@@ -4,6 +4,7 @@
 // never reflowed, and formatting twice changes nothing.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/lint/lint_rule.dart';
 
 /// Formats [source], and asserts the second pass changes nothing.
 String tidy(String source) {
@@ -119,5 +120,108 @@ void main() {
       tidy('- [ ] a task that runs on\nand wraps\n- [x] done\n'),
       '- [ ] a task that runs on\n  and wraps\n- [x] done\n',
     );
+  });
+
+  // #72: between them, the rules settle the shapes a writer cannot see.
+  test('a list written loose comes back tight', () {
+    expect(tidy('- a\n\n  - b\n\n- c\n'), '- a\n  - b\n- c\n');
+    expect(tidy('- a\n\n\n- b\n'), '- a\n- b\n');
+  });
+
+  test("an item's own second paragraph keeps its blank line", () {
+    const note = '- primo paragrafo\n\n  secondo paragrafo\n\n- secondo item\n';
+    expect(tidy(note), note);
+  });
+
+  test('a task box is written canonically', () {
+    expect(
+      tidy('- [X] fatto\n- [x ] da fare\n- [] mancante\n- [ ] vuoto\n'),
+      '- [x] fatto\n- [x] da fare\n- [ ] mancante\n- [ ] vuoto\n',
+    );
+    // A link's brackets are not a task box.
+    expect(tidy('- [testo](u)\n'), '- [testo](u)\n');
+  });
+
+  test('one space after the marker, and the item moves with it', () {
+    expect(
+      tidy('-   item\n    continuazione\n-   altro\n'),
+      '- item\n  continuazione\n- altro\n',
+    );
+    // A sublist indented to the old column follows the new one.
+    expect(tidy('-   a\n\n    - b\n\n- c\n'), '- a\n  - b\n- c\n');
+  });
+
+  test('a fence keeps its metadata and cleans its language', () {
+    expect(
+      tidy('```{.dart} title="x"\ncode\n```\n'),
+      '```dart title="x"\ncode\n```\n',
+    );
+    // A word that already reads as a language is left alone.
+    expect(tidy('~~~dart\ncode\n~~~\n'), '~~~dart\ncode\n~~~\n');
+  });
+
+  test("an unclosed fence is closed, with the opener's own run", () {
+    expect(tidy('```{.python}\ncode\n'), '```python\ncode\n```\n');
+    expect(tidy('~~~~\ncode\n'), '~~~~\ncode\n~~~~\n');
+  });
+
+  test('a rule turned off leaves its shape as written', () {
+    const note = '-   item\n\n-   altro\n';
+    expect(formatMarkdown(note, rules: const <LintRule>{}), note);
+  });
+
+  test('every rule at once, on a note that needs them all', () {
+    const written = '''
+---
+title: Note di prova
+---
+# Geometria
+Una relazione è un insieme di coppie ordinate.
+## Definizioni
+
+
+-   una relazione `R` su un insieme `A` 
+
+  - riflessiva
+
+- [X] ogni elemento è in relazione con sé stesso
+- [x ] la relazione è simmetrica
+  vale per ogni coppia
+- [ ] la relazione è transitiva
+
+```{.dart} title="esempio"
+final a = 1;
+```
+
+```{.python}
+print("ciao")
+''';
+    const fixed = '''
+---
+title: Note di prova
+---
+
+# Geometria
+
+Una relazione è un insieme di coppie ordinate.
+
+## Definizioni
+
+- una relazione `R` su un insieme `A`
+  - riflessiva
+- [x] ogni elemento è in relazione con sé stesso
+- [x] la relazione è simmetrica
+  vale per ogni coppia
+- [ ] la relazione è transitiva
+
+```dart title="esempio"
+final a = 1;
+```
+
+```python
+print("ciao")
+```
+''';
+    expect(tidy(written), fixed);
   });
 }
