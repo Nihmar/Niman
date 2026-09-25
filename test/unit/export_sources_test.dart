@@ -98,6 +98,29 @@ void main() {
       expect(source.title, 'A title');
       expect(source.text, 'Just text.\n');
     });
+
+    test('the printed page points at the picture on disk', () async {
+      File(p.join(root.path, 'photo.png')).writeAsBytesSync(<int>[1, 2, 3]);
+      final source = await ExportSources.forPrint(
+        text: '![[photo.png]]\n',
+        title: 'A title',
+        notePath: note,
+        root: root.path,
+      );
+      // The engine fetches the file itself: the page carries no base64.
+      expect(source.images['photo.png'], startsWith('file:'));
+      expect(source.images['photo.png'], contains('photo.png'));
+    });
+
+    test('a type the data-URI export skips still prints', () async {
+      File(p.join(root.path, 'drawing.svg')).writeAsStringSync('<svg/>');
+      final urls = await ExportSources.imageUrls(
+        text: '![alt](drawing.svg)\n',
+        notePath: note,
+        root: root.path,
+      );
+      expect(urls.keys, ['drawing.svg']);
+    });
   });
 
   test('the page is built off the UI isolate', () async {

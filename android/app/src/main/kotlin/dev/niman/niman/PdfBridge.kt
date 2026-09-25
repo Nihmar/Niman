@@ -1,6 +1,7 @@
 package dev.niman.niman
 
 import android.content.Context
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.print.NimanPdfWriter
@@ -136,27 +137,26 @@ class PdfBridge(private val context: Context) : MethodChannel.MethodCallHandler 
         watchdog = timer
         handler.postDelayed(timer, WATCHDOG_MS)
 
-        val html = try {
-            File(htmlPath).readText()
-        } catch (error: Exception) {
-            finish(false, error.message)
-            return
-        }
         // One view at a time: the last print has answered already, and
         // destroying its view outside its own callback keeps that stack
         // clean.
         webView?.destroy()
         val view = WebView(context)
         webView = view
+        // The page is one file whose pictures are `file:` URLs into the
+        // library: the WebView loads it from disk and fetches them itself.
+        // Reading the file into a String first built a page-sized
+        // StringWriter in this process's heap — 256 MB for a note with
+        // many photos — and OOM'd the app.
+        view.settings.allowFileAccess = true
+        view.settings.allowFileAccessFromFileURLs = true
+        view.settings.allowContentAccess = true
         view.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String?) {
                 write(view, pdfPath) { ok, error -> finish(ok, error) }
             }
         }
-        // The base URL only resolves relative URLs: the page is one file,
-        // its pictures data: URIs, so the directory it came from is enough.
-        val base = File(htmlPath).parentFile?.toURI()?.toString() ?: "file:///"
-        view.loadDataWithBaseURL(base, html, "text/html", "utf-8", null)
+        view.loadUrl(Uri.fromFile(File(htmlPath)).toString())
     }
 
     /** Lays the loaded page out and writes its pages into [pdfPath]. */

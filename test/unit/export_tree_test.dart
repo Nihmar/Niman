@@ -172,8 +172,9 @@ void main() {
     expect(files.keys, containsAll(<String>['a.pdf', 'b.pdf', 'sub/c.pdf']));
     // The page is printed from a scratch directory, where the zip's
     // pictures are not: relative, every one of them would be broken
-    // (#63 review, H1).
-    expect(files['a.pdf'], contains('src="data:image/png;base64,'));
+    // (#63 review, H1). A `file:` URL points at the tree itself.
+    expect(files['a.pdf'], contains('src="file:'));
+    expect(files['a.pdf'], contains('photo.png'));
     expect(files['a.pdf'], isNot(contains('src="photo.png"')));
     // The links point at the PDFs the zip holds.
     expect(files['a.pdf'], contains('href="b.pdf"'));

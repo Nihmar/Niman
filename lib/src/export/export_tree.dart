@@ -20,7 +20,6 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui' show RootIsolateToken;
@@ -511,7 +510,7 @@ String _page(
     text: text,
     title: title,
     images: embedPictures
-        ? _imageDataUris(text, noteDir, tree)
+        ? _imageFileUrls(text, noteDir, tree)
         : _imageUrls(text, noteDir, tree),
     links: _linkUrls(text, noteDir, tree, linkExtension),
   );
@@ -535,26 +534,19 @@ Map<String, String> _imageUrls(String text, String noteDir, _Tree tree) {
   return out;
 }
 
-/// The pictures [text] shows, by the target as written, as `data:` URIs.
+/// The pictures [text] shows, by the target as written, as `file:` URLs.
 ///
 /// A PDF page is printed from the export's scratch directory, where the
 /// pictures the zip holds are not: left relative, every one of them is a
-/// broken image. The reading happens here, on the export isolate, which is
-/// where the tree's files are read anyway.
-Map<String, String> _imageDataUris(String text, String noteDir, _Tree tree) {
+/// broken image. A `file:` URL points at the tree itself, and the engine
+/// fetches it — the page stays the note's size, where embedding a
+/// library's photos as base64 built one no phone could hold.
+Map<String, String> _imageFileUrls(String text, String noteDir, _Tree tree) {
   final out = <String, String>{};
   for (final target in ExportSources.pictureTargets(text)) {
     final picture = _fileIn(target, noteDir, tree.files);
     if (picture == null) continue;
-    final path = p.join(tree.root, picture);
-    final mime = ExportSources.imageMime(p.extension(path).toLowerCase());
-    if (mime == null) continue;
-    try {
-      final bytes = File(path).readAsBytesSync();
-      out[target] = 'data:$mime;base64,${base64Encode(bytes)}';
-    } on FileSystemException {
-      // A picture that cannot be read stays as the note wrote it.
-    }
+    out[target] = Uri.file(p.join(tree.root, picture)).toString();
   }
   return out;
 }

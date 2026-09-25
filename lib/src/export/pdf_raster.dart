@@ -48,11 +48,17 @@ const double pdfPageMarginPx = 18 * 96 / 25.4;
 /// and drawn in place: the fallback has no browser to print an HTML page
 /// with, so a picture it is not handed is a picture the note loses (#63,
 /// H3).
+///
+/// [onProgress] reports how many of the note's pages have been drawn, and
+/// [isCancelled] is asked between pages: a cancel stops before the next
+/// page and throws [PdfExportCancelled].
 Future<Uint8List> rasterPdf({
   required String text,
   required MarkdownTheme theme,
   required MathCache mathCache,
   Map<String, Uint8List>? images,
+  void Function(int done, int total)? onProgress,
+  bool Function()? isCancelled,
   double pageWidth = a4WidthPx,
   double pageHeight = a4HeightPx,
   double margin = pdfPageMarginPx,
@@ -64,9 +70,10 @@ Future<Uint8List> rasterPdf({
   // loop, so an [EmbedView] that resolved and decoded on its own could not
   // be waited for.
   final decoded = <String, ui.Image>{};
+  final maxPicture = math.max(1, (contentWidth * pixelRatio).round());
   for (final entry in (images ?? const <String, Uint8List>{}).entries) {
     try {
-      decoded[entry.key] = await _decode(entry.value);
+      decoded[entry.key] = await _decode(entry.value, maxPicture);
     } on Object {
       // A picture the engine cannot decode is left as the note's own
       // words, not made the export's failure.
@@ -93,6 +100,7 @@ Future<Uint8List> rasterPdf({
     final box = layout.layOut();
     final total = box.size.height;
     final count = math.max(1, (total / contentHeight).ceil());
+    onProgress?.call(0, count);
     // The note is recorded once and sliced per page: a capture per page
     // would re-record the whole note for every page, which is quadratic in
     // the note's length (M6).
@@ -104,6 +112,7 @@ Future<Uint8List> rasterPdf({
     );
     try {
       for (var page = 0; page < count; page++) {
+        if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
         final top = page * contentHeight;
         final height = math.min(contentHeight, total - top);
         final image = await recording.capture(
@@ -117,6 +126,7 @@ Future<Uint8List> rasterPdf({
         } finally {
           image.dispose();
         }
+        onProgress?.call(page + 1, count);
       }
     } finally {
       recording.dispose();
@@ -130,9 +140,15 @@ Future<Uint8List> rasterPdf({
   }
 }
 
-/// [bytes] as a picture the export can draw.
-Future<ui.Image> _decode(Uint8List bytes) async {
-  final codec = await ui.instantiateImageCodec(bytes);
+/// [bytes] as a picture the export can draw: never wider than the page
+/// needs, so a phone photo does not decode to a screenful of pixels per
+/// pixel of the note.
+Future<ui.Image> _decode(Uint8List bytes, int maxWidth) async {
+  final codec = await ui.instantiateImageCodec(
+    bytes,
+    targetWidth: maxWidth,
+    allowUpscaling: false,
+  );
   try {
     final frame = await codec.getNextFrame();
     return frame.image;

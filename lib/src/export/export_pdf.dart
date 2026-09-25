@@ -36,11 +36,19 @@ final class NoPdfEngine implements Exception {
 /// (a browser printed it) or it is a picture of the pages.
 typedef PdfExport = ({ExportPayload payload, bool selectable});
 
+/// Hears what a running [exportNotePdf] is doing.
+typedef PdfProgressListener = void Function(PdfExportProgress progress);
+
 /// Prints the note at [path] (relative to [root]) into a PDF.
 ///
 /// [printer] defaults to the desktop engine search; [theme] and
 /// [mathCache] are what the raster fallback draws with — without them a
 /// machine with no engine has no PDF at all.
+///
+/// [onProgress] reports the engine print and, when the engine will not
+/// answer, the pages the fallback draws; [isCancelled] is asked at stage
+/// boundaries and between drawn pages, and answers with
+/// [PdfExportCancelled] rather than a file.
 Future<PdfExport> exportNotePdf({
   required String text,
   required String title,
@@ -52,6 +60,8 @@ Future<PdfExport> exportNotePdf({
   MarkdownTheme? theme,
   MathCache? mathCache,
   Directory? scratch,
+  PdfProgressListener? onProgress,
+  bool Function()? isCancelled,
 }) async {
   final chosen = printer ?? ProcessPdfPrinter();
   // Nothing to print with: the note is drawn, and its page — the reads,
@@ -64,9 +74,11 @@ Future<PdfExport> exportNotePdf({
       linkSource: linkSource,
       theme: theme,
       mathCache: mathCache,
+      onProgress: onProgress,
+      isCancelled: isCancelled,
     );
   }
-  final source = await ExportSources.forNote(
+  final source = await ExportSources.forPrint(
     text: text,
     title: title,
     notePath: p.join(root, path),
@@ -79,7 +91,11 @@ Future<PdfExport> exportNotePdf({
     final htmlPath = p.join(dir.path, 'page.html');
     final pdfPath = p.join(dir.path, 'page.pdf');
     await File(htmlPath).writeAsString(page);
+    onProgress?.call(const PdfExportProgress(stage: PdfExportStage.printing));
     final outcome = await chosen.print(htmlPath, pdfPath);
+    // A cancel during the print cannot stop a running engine, but its
+    // answer is not the user's: nothing is written.
+    if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
     switch (outcome) {
       case PdfPrinted():
         return (
@@ -95,6 +111,8 @@ Future<PdfExport> exportNotePdf({
           linkSource: linkSource,
           theme: theme,
           mathCache: mathCache,
+          onProgress: onProgress,
+          isCancelled: isCancelled,
         );
       case PdfFailed(:final message):
         _log.warning('the PDF engine failed ($message): drawing the note');
@@ -128,6 +146,8 @@ Future<PdfExport> _draw({
   required LinkSource? linkSource,
   required MarkdownTheme? theme,
   required MathCache? mathCache,
+  PdfProgressListener? onProgress,
+  bool Function()? isCancelled,
 }) async {
   if (theme == null || mathCache == null) throw const NoPdfEngine();
   // The pictures are read here, off the UI isolate, and drawn by the
@@ -144,6 +164,16 @@ Future<PdfExport> _draw({
     theme: theme,
     mathCache: mathCache,
     images: images,
+    onProgress: onProgress == null
+        ? null
+        : (done, total) => onProgress(
+            PdfExportProgress(
+              stage: PdfExportStage.drawing,
+              done: done,
+              total: total,
+            ),
+          ),
+    isCancelled: isCancelled,
   );
   return (payload: _payload(path, drawn), selectable: false);
 }
