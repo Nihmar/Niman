@@ -328,6 +328,23 @@ final class BosnianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Uređivač i pregled, koji su uvijek u skladu';
+  @override
+  String get epubLookTitle => 'Izgled knjiga';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, font i veličina teksta EPUB knjiga, odvojeno od bilješki';
+  @override
+  String get epubSameAsApp => 'Kao aplikacija';
+  @override
+  String get epubFontTitle => 'Font';
+  @override
+  String get epubFontSerif => 'Serifni';
+  @override
+  String get epubFontSans => 'Bez serifa';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Veličina teksta';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1447,6 +1464,8 @@ final class BosnianStrings extends Strings {
   String get commandNeedNone => 'Uvijek dostupno';
   @override
   String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';
+  @override
+  String get commandNeedTextNote => 'Potrebna je otvorena tekstualna bilješka';
   @override
   String get commandNeedWideWindow => 'Samo u širokom prozoru';
   @override

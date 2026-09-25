@@ -1,17 +1,20 @@
 /// An attachment, shown in the note pane rather than handed to another
-/// application: a picture, zoomed and panned, or a PDF, page by page.
+/// application: a picture, zoomed and panned, a PDF, page by page, or an
+/// EPUB, read like a note ([EpubPane]).
 ///
-/// The tree lists every file of a library, and a picture or a PDF picked
-/// there opened as a note that is not text — a message, and on a desktop a
-/// button to the system's application, with nothing at all on a phone. The
-/// common ones are shown here instead, on every platform; the rest still
-/// get the message and the button.
+/// The tree lists every file of a library, and a picture, a PDF or a book
+/// picked there opened as a note that is not text — a message, and on a
+/// desktop a button to the system's application, with nothing at all on a
+/// phone. The common ones are shown here instead, on every platform; the
+/// rest still get the message and the button.
 library;
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/ui/attachment_bar.dart';
+import 'package:niman/src/ui/epub_pane.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -29,10 +32,12 @@ const Set<String> pictureExtensions = {
 };
 
 /// Whether the file at [path] is an attachment the pane shows: a picture
-/// ([pictureExtensions]) or a PDF.
+/// ([pictureExtensions]), a PDF or an EPUB.
 bool isShownAttachment(String path) {
   final extension = p.extension(path).toLowerCase();
-  return extension == '.pdf' || pictureExtensions.contains(extension);
+  return extension == '.pdf' ||
+      extension == '.epub' ||
+      pictureExtensions.contains(extension);
 }
 
 /// The attachment at [path], an absolute path, in the note pane.
@@ -41,6 +46,8 @@ final class AttachmentView extends StatelessWidget {
   const new({
     required this.path,
     this.launcher = const OsLauncher(),
+    this.column = NoteColumn.off,
+    this.onEditEpubLook,
     super.key,
   });
 
@@ -50,17 +57,34 @@ final class AttachmentView extends StatelessWidget {
   /// The OS seam behind the button to the system's application.
   final OsLauncher launcher;
 
+  /// The shell's note column: a book is set in it like a note.
+  final NoteColumn column;
+
+  /// Opens the sheet that sets how the books look ([EpubPane.onEditLook]).
+  final VoidCallback? onEditEpubLook;
+
   bool get _isPdf => p.extension(path).toLowerCase() == '.pdf';
+
+  bool get _isEpub => p.extension(path).toLowerCase() == '.epub';
 
   @override
   Widget build(BuildContext context) {
+    // A book reads on the note's own ground, and brings its own row.
+    if (_isEpub) {
+      return EpubPane(
+        path: path,
+        launcher: launcher,
+        column: column,
+        onEditLook: onEditEpubLook,
+      );
+    }
     final theme = Theme.of(context);
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerLowest,
       child: Column(
         children: [
           Expanded(child: _isPdf ? _pdf(context) : _picture(context)),
-          _AttachmentBar(path: path, launcher: launcher),
+          AttachmentBar(path: path, launcher: launcher),
         ],
       ),
     );
@@ -103,60 +127,4 @@ final class AttachmentView extends StatelessWidget {
       ),
     ),
   );
-}
-
-/// The row under an attachment: its name, and where the platform has one,
-/// the way to the system's own application for it.
-final class _AttachmentBar extends StatelessWidget {
-  const new({required this.path, required this.launcher});
-
-  final String path;
-
-  final OsLauncher launcher;
-
-  Future<void> _openOutside(BuildContext context) async {
-    final outcome = await runTreeContextAction(
-      path,
-      TreeContextAction.openInDefaultApp,
-      launcher: launcher,
-    );
-    if (!context.mounted || outcome == TreeContextOutcome.opened) return;
-    final text = outcome == TreeContextOutcome.missing
-        ? AppStrings.attachmentMissing
-        : AppStrings.attachmentOpenFailed;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                p.basename(path),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            if (supportsTreeContextActions)
-              IconButton(
-                key: const Key('attachment-open-outside'),
-                tooltip: AppStrings.openInDefaultApp,
-                icon: const Icon(Icons.open_in_new),
-                visualDensity: VisualDensity.compact,
-                onPressed: () => unawaited(_openOutside(context)),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }

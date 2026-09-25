@@ -7,6 +7,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
+import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/journal/journal_settings.dart';
@@ -500,6 +501,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the note text size.
   Future<void> setNoteTextScale(double scale);
+
+  /// How the library's books look (#280): their theme, brightness, font
+  /// and text size.
+  Future<EpubLook> get epubLook;
+
+  /// Sets (and persists) how the books look, and puts it on screen.
+  Future<void> setEpubLook(EpubLook look);
 
   /// The UI language ([AppLanguage.system] by default).
   Future<AppLanguage> get language;

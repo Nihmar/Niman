@@ -321,6 +321,23 @@ final class NorwegianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Editoren og forhåndsvisingen, som alltid er enige';
+  @override
+  String get epubLookTitle => 'Bøkenes utseende';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, skrift og tekststørrelse for EPUB-bøker, adskilt fra notatene';
+  @override
+  String get epubSameAsApp => 'Som appen';
+  @override
+  String get epubFontTitle => 'Skrift';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Tekststørrelse';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1432,6 +1449,8 @@ final class NorwegianStrings extends Strings {
   String get commandNeedNone => 'Alltid tilgjengelig';
   @override
   String get commandNeedOpenNote => 'Krever et åpent notat';
+  @override
+  String get commandNeedTextNote => 'Krever et åpent tekstnotat';
   @override
   String get commandNeedWideWindow => 'Bare i bredt vindu';
   @override

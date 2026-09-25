@@ -10,6 +10,7 @@ import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_areas.dart';
@@ -139,6 +140,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
           AppStrings.textScaleValue(await controller.uiTextScale),
       areaId: SettingsAreaId.appearance,
       open: () => pushAppearance(SettingsKeys.uiTextScale),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.epubLookTitle,
+      area: appearance,
+      rowKey: SettingsKeys.epubLook,
+      value: () async => epubLookSummary(await controller.epubLook),
+      areaId: SettingsAreaId.appearance,
+      open: () => pushAppearance(SettingsKeys.epubLook),
     ),
     // The desktops only (#209): elsewhere there is no tray to close into.
     if (Platform.isLinux || Platform.isWindows)

@@ -321,6 +321,23 @@ final class IcelandicStrings extends Strings {
   String get noteTextScaleTitle => 'Stærð texta minnisblaða';
   @override
   String get noteTextScaleSubtitle => 'Ritari og forsýning, alltaf samstilltir';
+  @override
+  String get epubLookTitle => 'Útlit bóka';
+  @override
+  String get epubLookSubtitle =>
+      'Þema, letur og textastærð EPUB-bóka, aðskilið frá glósunum';
+  @override
+  String get epubSameAsApp => 'Eins og forritið';
+  @override
+  String get epubFontTitle => 'Letur';
+  @override
+  String get epubFontSerif => 'Með þverendum';
+  @override
+  String get epubFontSans => 'Án þverenda';
+  @override
+  String get epubFontMono => 'Jafnbreitt';
+  @override
+  String get epubTextSizeTitle => 'Textastærð';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1441,6 +1458,8 @@ final class IcelandicStrings extends Strings {
   String get commandNeedNone => 'Alltaf tiltæk';
   @override
   String get commandNeedOpenNote => 'Krefst opinnar glósu';
+  @override
+  String get commandNeedTextNote => 'Krefst opinnar textaglósu';
   @override
   String get commandNeedWideWindow => 'Aðeins í breiðum glugga';
   @override

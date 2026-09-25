@@ -299,6 +299,22 @@ final class ChineseStrings extends Strings {
   String get noteTextScaleTitle => '笔记文字大小';
   @override
   String get noteTextScaleSubtitle => '编辑器与预览，两者始终一致';
+  @override
+  String get epubLookTitle => '书籍外观';
+  @override
+  String get epubLookSubtitle => 'EPUB 书籍的主题、字体和文字大小，与笔记分开';
+  @override
+  String get epubSameAsApp => '与应用相同';
+  @override
+  String get epubFontTitle => '字体';
+  @override
+  String get epubFontSerif => '衬线';
+  @override
+  String get epubFontSans => '无衬线';
+  @override
+  String get epubFontMono => '等宽';
+  @override
+  String get epubTextSizeTitle => '文字大小';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1323,6 +1339,8 @@ final class ChineseStrings extends Strings {
   String get commandNeedNone => '始终可用';
   @override
   String get commandNeedOpenNote => '需要打开一条笔记';
+  @override
+  String get commandNeedTextNote => '需要打开一条文本笔记';
   @override
   String get commandNeedWideWindow => '仅限宽窗口';
   @override

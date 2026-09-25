@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
+import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:path/path.dart' as p;
@@ -283,8 +284,8 @@ String cleanAttachmentsFolder(String folder) =>
 /// markers, tidying on close, dictionaries — are written to that file and
 /// travel with it. The ones that describe this screen and this person
 /// ([deviceKeys]: the tree's width and order, the text scale, the editor
-/// and its toggles) are kept on the device, per library, by a
-/// [DeviceSettingsStore]: a
+/// and its toggles, the books' look) are kept on the device, per library,
+/// by a [DeviceSettingsStore]: a
 /// width set on a desktop means nothing on a phone, and every tweak of
 /// one used to rewrite the shared file and sync it everywhere. There is
 /// no notion of a library "overriding" the app — a library simply has its
@@ -324,6 +325,7 @@ final class LibraryConfig {
     this.editorKind = EditorKind.source,
     this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
     this.journal = const JournalSettings(),
+    this.epubLook = const EpubLook(),
     this.extra = const {},
   });
 
@@ -410,6 +412,7 @@ final class LibraryConfig {
       // file must never resolve to no editor.
       enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
       journal: JournalSettings.fromJson(json),
+      epubLook: EpubLook.fromJson(json),
       extra: extra,
     );
   }
@@ -535,6 +538,9 @@ final class LibraryConfig {
   /// The journal's settings (#7).
   final JournalSettings journal;
 
+  /// How the library's books look (#280).
+  final EpubLook epubLook;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -569,6 +575,7 @@ final class LibraryConfig {
     EditorKind? editorKind,
     Set<EditorKind>? enabledEditors,
     JournalSettings? journal,
+    EpubLook? epubLook,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -602,6 +609,7 @@ final class LibraryConfig {
       editorKind: editorKind ?? this.editorKind,
       enabledEditors: enabledEditors ?? this.enabledEditors,
       journal: journal ?? this.journal,
+      epubLook: epubLook ?? this.epubLook,
       extra: extra,
     );
   }
@@ -621,6 +629,7 @@ final class LibraryConfig {
     'treeWidth',
     'editorKind',
     'enabledEditors',
+    ...EpubLook.keys,
   };
 
   /// What `settings.json` holds: [toJsonMap] without the [deviceKeys].
@@ -673,6 +682,7 @@ final class LibraryConfig {
     // handed back as an unknown one to preserve forever.
     'previewEnabled',
     ...JournalSettings.keys,
+    ...EpubLook.keys,
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -718,6 +728,7 @@ final class LibraryConfig {
           if (enabledEditors.contains(kind)) kind.name,
       ],
       ...journal.toJson(),
+      ...epubLook.toJson(),
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -804,6 +815,7 @@ final class LibraryConfig {
         enabledEditors.length == other.enabledEditors.length &&
         enabledEditors.containsAll(other.enabledEditors) &&
         journal == other.journal &&
+        epubLook == other.epubLook &&
         _deepEquals(extra, other.extra);
   }
 

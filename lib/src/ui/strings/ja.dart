@@ -299,6 +299,22 @@ final class JapaneseStrings extends Strings {
   String get noteTextScaleTitle => 'ノートの文字サイズ';
   @override
   String get noteTextScaleSubtitle => 'エディタとプレビューは常に同じです';
+  @override
+  String get epubLookTitle => '本の表示';
+  @override
+  String get epubLookSubtitle => 'EPUB の本のテーマ、フォント、文字サイズ（ノートとは別）';
+  @override
+  String get epubSameAsApp => 'アプリと同じ';
+  @override
+  String get epubFontTitle => 'フォント';
+  @override
+  String get epubFontSerif => '明朝体';
+  @override
+  String get epubFontSans => 'ゴシック体';
+  @override
+  String get epubFontMono => '等幅';
+  @override
+  String get epubTextSizeTitle => '文字サイズ';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1354,6 +1370,8 @@ final class JapaneseStrings extends Strings {
   String get commandNeedNone => '常に利用可能';
   @override
   String get commandNeedOpenNote => 'ノートを開いている必要があります';
+  @override
+  String get commandNeedTextNote => 'テキストのノートを開いている必要があります';
   @override
   String get commandNeedWideWindow => '広いウィンドウのみ';
   @override

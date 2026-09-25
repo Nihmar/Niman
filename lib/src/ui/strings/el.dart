@@ -330,6 +330,24 @@ final class GreekStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Επεξεργαστής και προεπισκόπηση, πάντα συγχρονισμένοι';
+  @override
+  String get epubLookTitle => 'Εμφάνιση βιβλίων';
+  @override
+  String get epubLookSubtitle =>
+      'Θέμα, γραμματοσειρά και μέγεθος κειμένου των βιβλίων EPUB, χωριστά από '
+      'τις σημειώσεις';
+  @override
+  String get epubSameAsApp => 'Όπως η εφαρμογή';
+  @override
+  String get epubFontTitle => 'Γραμματοσειρά';
+  @override
+  String get epubFontSerif => 'Με πατούρες';
+  @override
+  String get epubFontSans => 'Χωρίς πατούρες';
+  @override
+  String get epubFontMono => 'Σταθερού πλάτους';
+  @override
+  String get epubTextSizeTitle => 'Μέγεθος κειμένου';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1489,6 +1507,8 @@ final class GreekStrings extends Strings {
   String get commandNeedNone => 'Πάντα διαθέσιμη';
   @override
   String get commandNeedOpenNote => 'Χρειάζεται ανοιχτή σημείωση';
+  @override
+  String get commandNeedTextNote => 'Χρειάζεται ανοιχτή σημείωση κειμένου';
   @override
   String get commandNeedWideWindow => 'Μόνο σε φαρδύ παράθυρο';
   @override

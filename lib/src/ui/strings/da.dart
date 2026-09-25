@@ -323,6 +323,23 @@ final class DanishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Editoren og forhåndsvisningen, som altid er enige';
+  @override
+  String get epubLookTitle => 'Bøgernes udseende';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, skrifttype og tekststørrelse for EPUB-bøger, adskilt fra noterne';
+  @override
+  String get epubSameAsApp => 'Som appen';
+  @override
+  String get epubFontTitle => 'Skrifttype';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Tekststørrelse';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1437,6 +1454,8 @@ final class DanishStrings extends Strings {
   String get commandNeedNone => 'Altid tilgængelig';
   @override
   String get commandNeedOpenNote => 'Kræver en åben note';
+  @override
+  String get commandNeedTextNote => 'Kræver en åben tekstnote';
   @override
   String get commandNeedWideWindow => 'Kun i bredt vindue';
   @override

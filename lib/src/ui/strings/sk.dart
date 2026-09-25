@@ -325,6 +325,23 @@ final class SlovakStrings extends Strings {
   String get noteTextScaleTitle => 'Veľkosť textu poznámky';
   @override
   String get noteTextScaleSubtitle => 'Editor a náhľad sú vždy v súlade';
+  @override
+  String get epubLookTitle => 'Vzhľad kníh';
+  @override
+  String get epubLookSubtitle =>
+      'Motív, písmo a veľkosť textu kníh EPUB, oddelene od poznámok';
+  @override
+  String get epubSameAsApp => 'Ako aplikácia';
+  @override
+  String get epubFontTitle => 'Písmo';
+  @override
+  String get epubFontSerif => 'Pätkové';
+  @override
+  String get epubFontSans => 'Bezpätkové';
+  @override
+  String get epubFontMono => 'Neproporcionálne';
+  @override
+  String get epubTextSizeTitle => 'Veľkosť textu';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1443,6 +1460,8 @@ final class SlovakStrings extends Strings {
   String get commandNeedNone => 'Vždy k dispozícii';
   @override
   String get commandNeedOpenNote => 'Vyžaduje otvorenú poznámku';
+  @override
+  String get commandNeedTextNote => 'Vyžaduje otvorenú textovú poznámku';
   @override
   String get commandNeedWideWindow => 'Len v širokom okne';
   @override

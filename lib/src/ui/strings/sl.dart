@@ -328,6 +328,23 @@ final class SlovenianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Urejevalnik in predogled sta vedno v koraku';
+  @override
+  String get epubLookTitle => 'Videz knjig';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, pisava in velikost besedila knjig EPUB, ločeno od zapiskov';
+  @override
+  String get epubSameAsApp => 'Kot aplikacija';
+  @override
+  String get epubFontTitle => 'Pisava';
+  @override
+  String get epubFontSerif => 'Serifna';
+  @override
+  String get epubFontSans => 'Brez serifov';
+  @override
+  String get epubFontMono => 'Enakomerno široka';
+  @override
+  String get epubTextSizeTitle => 'Velikost besedila';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1437,6 +1454,8 @@ final class SlovenianStrings extends Strings {
   String get commandNeedNone => 'Vedno na voljo';
   @override
   String get commandNeedOpenNote => 'Potrebuje odprt zapisek';
+  @override
+  String get commandNeedTextNote => 'Potrebuje odprt besedilni zapisek';
   @override
   String get commandNeedWideWindow => 'Samo v širokem oknu';
   @override

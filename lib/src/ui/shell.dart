@@ -47,6 +47,7 @@ import 'package:niman/src/ui/dock/history_dock_pane.dart';
 import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
+import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/journal/journal_browser.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
@@ -737,8 +738,10 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Whether the app bar shows the editor/preview eye action: hidden in
   /// kind mode (the note is a list, not a document) unless the user is
-  /// in raw-edit mode.
-  bool get _previewToggleVisible => _kindGui == null || _kindRawMode;
+  /// in raw-edit mode, and on an attachment, which has no editor to flip
+  /// from.
+  bool get _previewToggleVisible =>
+      !_shownIsAttachment && (_kindGui == null || _kindRawMode);
 
   /// The kind toggle actions (T-TK-05): a note whose kind has a GUI offers
   /// the raw editor (pencil); in raw mode the kind GUI is offered back.
@@ -824,6 +827,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// selection.
   String? get _shownNote =>
       _wide ? _workspace.value.activePath : (_selectedIsDir ? null : _selected);
+
+  /// Whether the note on screen is a picture, a PDF or a book: shown by
+  /// the pane rather than edited, so none of the editor's controls apply.
+  bool get _shownIsAttachment => switch (_shownNote) {
+    final path? => isShownAttachment(path),
+    null => false,
+  };
 
   /// Which editor [memento]'s tab shows: its own, while the library
   /// still offers it; otherwise the library's.
@@ -959,11 +969,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
-    // A picture or a PDF, shown rather than read as a note.
+    // A picture, a PDF or a book, shown rather than read as a note.
     if (isShownAttachment(selectedPath)) {
       return AttachmentView(
         key: _phoneNoteKey,
         path: p.join(controller.root ?? '', selectedPath),
+        column: _editorSettings.noteColumn,
+        onEditEpubLook: () => _editEpubLook(controller),
       );
     }
     return NoteView(
@@ -1924,6 +1936,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the wide layout's editor header.
   Widget _noteMenu() => NoteMenuButton(
     typewriter: _editorSettings.typewriter,
+    textNote: !_shownIsAttachment,
     // The phone has no key for the palette (#206); the wide layout has.
     palette: !_wide,
     onSelected: (action) {
@@ -2549,6 +2562,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// decides which commands the palette offers and the keys answer to.
   bool _meets(CommandNeed need) => switch (need) {
     CommandNeed.openNote => _shownNote != null,
+    CommandNeed.textNote => _shownNote != null && !_shownIsAttachment,
     CommandNeed.wideWindow => _wide,
     CommandNeed.dockRoom => _dockRoom,
     CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
@@ -3266,9 +3280,14 @@ final class _LibraryShellState extends State<_LibraryShell>
         createMissingNote: _missingNoteCreator(controller),
         statusActions: _statusActionsFor(pane),
         header: _journalHeader,
+        onEditEpubLook: () => _editEpubLook(controller),
       ),
     ),
   );
+
+  /// Opens the sheet that sets how the books look (#280).
+  void _editEpubLook(LibrarySession controller) =>
+      unawaited(showEpubLookSheet(context, session: controller));
 
   /// The journal's strip over [path] when it is an entry (#7), else null.
   Widget? _journalHeader(String path, {bool compact = false}) {

@@ -329,6 +329,23 @@ final class RomanianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Editorul și previzualizarea, mereu de acord';
+  @override
+  String get epubLookTitle => 'Aspectul cărților';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, fontul și dimensiunea textului cărților EPUB, separat de note';
+  @override
+  String get epubSameAsApp => 'Ca aplicația';
+  @override
+  String get epubFontTitle => 'Font';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospațiat';
+  @override
+  String get epubTextSizeTitle => 'Dimensiunea textului';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1454,6 +1471,8 @@ final class RomanianStrings extends Strings {
   String get commandNeedNone => 'Mereu disponibilă';
   @override
   String get commandNeedOpenNote => 'Necesită o notă deschisă';
+  @override
+  String get commandNeedTextNote => 'Necesită o notă text deschisă';
   @override
   String get commandNeedWideWindow => 'Doar în fereastră lată';
   @override

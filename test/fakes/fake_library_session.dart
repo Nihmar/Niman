@@ -13,6 +13,8 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/epub/epub_look.dart';
+import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -157,6 +159,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _root = null;
     _phase = LibraryPhase.none;
     AppTextScales.reset();
+    EpubLooks.reset();
     _bump();
   }
 
@@ -535,6 +538,23 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final clamped = normalizeTextScale(scale);
     _config = _config.copyWith(noteTextScale: clamped);
     AppTextScales.note = clamped;
+  }
+
+  @override
+  Future<EpubLook> get epubLook async => _config.epubLook;
+
+  @override
+  Future<void> setEpubLook(EpubLook look) async {
+    _config = _config.copyWith(epubLook: look);
+    final id = look.theme;
+    final customId = id == null ? null : AppTheme.customIdIn(id);
+    final custom = customId == null ? null : await customTheme(customId);
+    EpubLooks.apply(
+      look,
+      theme: id == null || (customId != null && custom == null)
+          ? null
+          : themeFromId(id, custom: custom),
+    );
   }
 
   @override
