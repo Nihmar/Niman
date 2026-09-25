@@ -76,6 +76,8 @@ Set<ToolbarItem> activeFormatsOf({
       case TokenKind.frontmatter:
       // The toolbar has no subscript.
       case TokenKind.subscript:
+      // A template command, which no toolbar button makes.
+      case TokenKind.templateCommand:
       // A task list's runs, which no toolbar button makes.
       case TokenKind.todoPriority ||
           TokenKind.todoDate ||

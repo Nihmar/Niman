@@ -1019,6 +1019,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       linkType: _editorSettings.linkType,
       missingNoteLocation: _editorSettings.missingNoteLocation,
       attachmentsFolder: _editorSettings.attachmentsFolder,
+      templateFolder: _editorSettings.templateFolder,
       indentWidth: _editorSettings.indentWidth,
       toolbarLayout: _editorSettings.toolbarLayout,
       showPreview: _notePreview,
@@ -3296,6 +3297,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         linkType: _editorSettings.linkType,
         missingNoteLocation: _editorSettings.missingNoteLocation,
         attachmentsFolder: _editorSettings.attachmentsFolder,
+        templateFolder: _editorSettings.templateFolder,
         indentWidth: _editorSettings.indentWidth,
         toolbarLayout: _editorSettings.toolbarLayout,
         // A single enabled editor has nowhere to switch to:

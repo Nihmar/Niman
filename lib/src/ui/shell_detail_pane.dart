@@ -43,6 +43,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.statusActions,
     required this.spellCheck,
     this.reloadToken = 0,
+    this.templateFolder,
     this.linksFollowed = 0,
     this.onAnnotate,
     this.marks,
@@ -115,6 +116,10 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// The folder (library-relative) picked images are copied into.
   final String attachmentsFolder;
+
+  /// The library's template folder: its notes have their template
+  /// commands coloured in the source.
+  final String? templateFolder;
 
   /// The indent/outdent width in spaces.
   final int indentWidth;
@@ -258,6 +263,7 @@ final class ShellDetailPane extends StatelessWidget {
     linkType: linkType,
     missingNoteLocation: missingNoteLocation,
     attachmentsFolder: attachmentsFolder,
+    templateFolder: templateFolder,
     indentWidth: indentWidth,
     toolbarLayout: toolbarLayout,
     // Wide only: the formatting toolbar sits above the editor (desktop

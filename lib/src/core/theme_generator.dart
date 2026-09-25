@@ -69,6 +69,8 @@ ThemeColors _variant({required double hue, required bool dark}) {
     quote: _blend(ink, ground, 0.42),
     math: _hsl(hue + 270, 0.45, distant),
     tag: _hsl(hue + 160, 0.45, distant),
+    // A template command on a hue no note role takes.
+    template: _hsl(hue + 120, 0.50, distant),
     // A task list: the priority louder than the rest of the wheel, the
     // date between the ink and the markers, the tokens on hues of their
     // own, and a finished task further back than any marker.
