@@ -322,6 +322,23 @@ final class BasqueStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Erreditorra eta aurrebista, beti bat etorritakoak';
+  @override
+  String get epubLookTitle => 'Liburuen itxura';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB liburuen gaia, letra-tipoa eta testu-tamaina, oharretatik aparte';
+  @override
+  String get epubSameAsApp => 'Aplikazioaren berdina';
+  @override
+  String get epubFontTitle => 'Letra-tipoa';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Testuaren tamaina';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1451,6 +1468,8 @@ final class BasqueStrings extends Strings {
   String get commandNeedNone => 'Beti erabilgarri';
   @override
   String get commandNeedOpenNote => 'Ohar ireki bat behar du';
+  @override
+  String get commandNeedTextNote => 'Testu-ohar ireki bat behar du';
   @override
   String get commandNeedWideWindow => 'Leiho zabalean soilik';
   @override

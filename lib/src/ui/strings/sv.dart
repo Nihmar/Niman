@@ -325,6 +325,24 @@ final class SwedishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Editorn och förhandsvisningen, som alltid håller ihop';
+  @override
+  String get epubLookTitle => 'Böckernas utseende';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, typsnitt och textstorlek för EPUB-böcker, skilt från '
+      'anteckningarna';
+  @override
+  String get epubSameAsApp => 'Som appen';
+  @override
+  String get epubFontTitle => 'Typsnitt';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Textstorlek';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1446,6 +1464,8 @@ final class SwedishStrings extends Strings {
   String get commandNeedNone => 'Alltid tillgängligt';
   @override
   String get commandNeedOpenNote => 'Kräver en öppen anteckning';
+  @override
+  String get commandNeedTextNote => 'Kräver en öppen textanteckning';
   @override
   String get commandNeedWideWindow => 'Bara i brett fönster';
   @override

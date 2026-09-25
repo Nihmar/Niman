@@ -316,6 +316,23 @@ final class TurkishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Düzenleyici ve önizleme, her zaman senkronize';
+  @override
+  String get epubLookTitle => 'Kitap görünümü';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB kitaplarının teması, yazı tipi ve metin boyutu, notlardan ayrı';
+  @override
+  String get epubSameAsApp => 'Uygulamayla aynı';
+  @override
+  String get epubFontTitle => 'Yazı tipi';
+  @override
+  String get epubFontSerif => 'Serifli';
+  @override
+  String get epubFontSans => 'Serifsiz';
+  @override
+  String get epubFontMono => 'Eş aralıklı';
+  @override
+  String get epubTextSizeTitle => 'Metin boyutu';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1431,6 +1448,8 @@ final class TurkishStrings extends Strings {
   String get commandNeedNone => 'Her zaman kullanılabilir';
   @override
   String get commandNeedOpenNote => 'Açık bir not gerekir';
+  @override
+  String get commandNeedTextNote => 'Açık bir metin notu gerekir';
   @override
   String get commandNeedWideWindow => 'Yalnızca geniş pencerede';
   @override

@@ -322,6 +322,23 @@ final class BelarusianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Рэдактар і прагляд заўсёды сінхранізаваны';
+  @override
+  String get epubLookTitle => 'Выгляд кніг';
+  @override
+  String get epubLookSubtitle =>
+      'Тэма, шрыфт і памер тэксту кніг EPUB, асобна ад нататак';
+  @override
+  String get epubSameAsApp => 'Як у праграме';
+  @override
+  String get epubFontTitle => 'Шрыфт';
+  @override
+  String get epubFontSerif => 'З засечкамі';
+  @override
+  String get epubFontSans => 'Без засечак';
+  @override
+  String get epubFontMono => 'Монашырынны';
+  @override
+  String get epubTextSizeTitle => 'Памер тэксту';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1443,6 +1460,8 @@ final class BelarusianStrings extends Strings {
   String get commandNeedNone => 'Заўсёды даступна';
   @override
   String get commandNeedOpenNote => 'Патрэбна адкрытая нататка';
+  @override
+  String get commandNeedTextNote => 'Патрэбна адкрытая тэкставая нататка';
   @override
   String get commandNeedWideWindow => 'Толькі ў шырокім акне';
   @override

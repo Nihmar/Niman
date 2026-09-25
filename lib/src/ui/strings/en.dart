@@ -324,6 +324,23 @@ final class EnglishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'The editor and the preview, which always agree';
+  @override
+  String get epubLookTitle => 'Book appearance';
+  @override
+  String get epubLookSubtitle =>
+      'Theme, font and text size of the EPUB books, apart from the notes';
+  @override
+  String get epubSameAsApp => 'Same as the app';
+  @override
+  String get epubFontTitle => 'Font';
+  @override
+  String get epubFontSerif => 'Serif';
+  @override
+  String get epubFontSans => 'Sans serif';
+  @override
+  String get epubFontMono => 'Monospace';
+  @override
+  String get epubTextSizeTitle => 'Text size';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1433,6 +1450,8 @@ final class EnglishStrings extends Strings {
   String get commandNeedNone => 'Always available';
   @override
   String get commandNeedOpenNote => 'Needs an open note';
+  @override
+  String get commandNeedTextNote => 'Needs an open text note';
   @override
   String get commandNeedWideWindow => 'Wide window only';
   @override

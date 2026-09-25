@@ -152,12 +152,38 @@ void main() {
       offered(tester),
       expected({
         CommandNeed.openNote,
+        CommandNeed.textNote,
         CommandNeed.wideWindow,
         CommandNeed.dockRoom,
         CommandNeed.notInZen,
         CommandNeed.desktop,
         CommandNeed.zenRoom,
         CommandNeed.previewToggle,
+        CommandNeed.twoEditors,
+      }),
+    );
+  });
+
+  testWidgets("a book open offers none of the editor's commands", (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(1400, 900));
+    await controller.seedFile('book.epub');
+    await settle(tester);
+    await tester.tap(noteRow('book.epub'));
+    await settle(tester);
+    await keys(tester, LogicalKeyboardKey.keyP, shift: true);
+    // Its file can still be renamed, moved or deleted; it cannot be
+    // previewed, tidied or have versions.
+    expect(
+      offered(tester),
+      expected({
+        CommandNeed.openNote,
+        CommandNeed.wideWindow,
+        CommandNeed.dockRoom,
+        CommandNeed.notInZen,
+        CommandNeed.desktop,
+        CommandNeed.zenRoom,
         CommandNeed.twoEditors,
       }),
     );

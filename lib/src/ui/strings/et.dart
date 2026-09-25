@@ -320,6 +320,23 @@ final class EstonianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Redaktor ja eelvaade on alati sünkroonis';
+  @override
+  String get epubLookTitle => 'Raamatute välimus';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB-raamatute teema, font ja teksti suurus, märkmetest eraldi';
+  @override
+  String get epubSameAsApp => 'Nagu rakendus';
+  @override
+  String get epubFontTitle => 'Font';
+  @override
+  String get epubFontSerif => 'Seriifidega';
+  @override
+  String get epubFontSans => 'Seriifideta';
+  @override
+  String get epubFontMono => 'Püsisammuga';
+  @override
+  String get epubTextSizeTitle => 'Teksti suurus';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1425,6 +1442,8 @@ final class EstonianStrings extends Strings {
   String get commandNeedNone => 'Alati saadaval';
   @override
   String get commandNeedOpenNote => 'Vajab avatud märget';
+  @override
+  String get commandNeedTextNote => 'Vajab avatud tekstimärget';
   @override
   String get commandNeedWideWindow => 'Ainult laias aknas';
   @override

@@ -23,6 +23,7 @@ abstract final class SettingsKeys {
   static const language = Key('language-choice');
   static const uiTextScale = Key('ui-text-scale-setting');
   static const closeToTray = Key('close-to-tray-setting');
+  static const epubLook = Key('epub-look-setting');
 
   // Themes (issue #269).
   static const brightness = Key('theme-brightness-setting');

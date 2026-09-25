@@ -46,6 +46,7 @@ final class NoteMenuButton extends StatelessWidget {
     required this.onSelected,
     this.typewriter = false,
     this.palette = false,
+    this.textNote = true,
     super.key,
   });
 
@@ -59,6 +60,11 @@ final class NoteMenuButton extends StatelessWidget {
   /// key opens it.
   final bool palette;
 
+  /// Whether the note is text. A picture, a PDF or a book has no
+  /// headings, tags, Markdown or versions to offer: its menu keeps the
+  /// file's own actions, and the palette where it is offered.
+  final bool textNote;
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<NoteMenuAction>(
@@ -67,34 +73,38 @@ final class NoteMenuButton extends StatelessWidget {
       icon: const Icon(Icons.more_vert),
       onSelected: onSelected,
       itemBuilder: (context) => [
-        _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
-        _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
-        _item(
-          NoteMenuAction.typewriter,
-          Icons.vertical_align_center,
-          typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
-        ),
+        if (textNote) ...[
+          _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
+          _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
+          _item(
+            NoteMenuAction.typewriter,
+            Icons.vertical_align_center,
+            typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
+          ),
+        ],
         if (palette)
           _item(
             NoteMenuAction.palette,
             Icons.bolt_outlined,
             AppStrings.commandPaletteTitle,
           ),
-        _item(
-          NoteMenuAction.format,
-          Icons.cleaning_services_outlined,
-          AppStrings.formatNoteTitle,
-        ),
-        _item(
-          NoteMenuAction.cheatsheet,
-          Icons.menu_book_outlined,
-          AppStrings.cheatsheetTitle,
-        ),
-        _item(
-          NoteMenuAction.history,
-          Icons.history,
-          AppStrings.noteHistoryTitle,
-        ),
+        if (textNote) ...[
+          _item(
+            NoteMenuAction.format,
+            Icons.cleaning_services_outlined,
+            AppStrings.formatNoteTitle,
+          ),
+          _item(
+            NoteMenuAction.cheatsheet,
+            Icons.menu_book_outlined,
+            AppStrings.cheatsheetTitle,
+          ),
+          _item(
+            NoteMenuAction.history,
+            Icons.history,
+            AppStrings.noteHistoryTitle,
+          ),
+        ],
         _item(
           NoteMenuAction.rename,
           Icons.edit_outlined,

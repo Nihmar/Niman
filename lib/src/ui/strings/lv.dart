@@ -320,6 +320,23 @@ final class LatvianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'Redaktors un priekšskatījums vienmēr ir saskaņā';
+  @override
+  String get epubLookTitle => 'Grāmatu izskats';
+  @override
+  String get epubLookSubtitle =>
+      'EPUB grāmatu motīvs, fonts un teksta lielums, atsevišķi no piezīmēm';
+  @override
+  String get epubSameAsApp => 'Kā lietotnē';
+  @override
+  String get epubFontTitle => 'Fonts';
+  @override
+  String get epubFontSerif => 'Ar serifiem';
+  @override
+  String get epubFontSans => 'Bez serifiem';
+  @override
+  String get epubFontMono => 'Vienplatuma';
+  @override
+  String get epubTextSizeTitle => 'Teksta lielums';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1440,6 +1457,8 @@ final class LatvianStrings extends Strings {
   String get commandNeedNone => 'Vienmēr pieejama';
   @override
   String get commandNeedOpenNote => 'Nepieciešama atvērta piezīme';
+  @override
+  String get commandNeedTextNote => 'Nepieciešama atvērta teksta piezīme';
   @override
   String get commandNeedWideWindow => 'Tikai platā logā';
   @override

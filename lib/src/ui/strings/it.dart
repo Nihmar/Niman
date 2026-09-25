@@ -330,6 +330,23 @@ final class ItalianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'L’editor e l’anteprima, che restano d’accordo';
+  @override
+  String get epubLookTitle => 'Aspetto dei libri';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, font e dimensione del testo dei libri EPUB, a parte le note';
+  @override
+  String get epubSameAsApp => "Come l'app";
+  @override
+  String get epubFontTitle => 'Font';
+  @override
+  String get epubFontSerif => 'Con grazie';
+  @override
+  String get epubFontSans => 'Senza grazie';
+  @override
+  String get epubFontMono => 'Monospazio';
+  @override
+  String get epubTextSizeTitle => 'Dimensione del testo';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1458,6 +1475,8 @@ final class ItalianStrings extends Strings {
   String get commandNeedNone => 'Sempre disponibile';
   @override
   String get commandNeedOpenNote => 'Serve una nota aperta';
+  @override
+  String get commandNeedTextNote => 'Serve una nota di testo aperta';
   @override
   String get commandNeedWideWindow => 'Solo con finestra larga';
   @override

@@ -327,6 +327,24 @@ final class CatalanStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'L’editor i la previsualització, sempre d’acord';
+  @override
+  String get epubLookTitle => 'Aspecte dels llibres';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, tipus de lletra i mida del text dels llibres EPUB, a part de les '
+      'notes';
+  @override
+  String get epubSameAsApp => "Com l'aplicació";
+  @override
+  String get epubFontTitle => 'Tipus de lletra';
+  @override
+  String get epubFontSerif => 'Amb gràcia';
+  @override
+  String get epubFontSans => 'Sense gràcia';
+  @override
+  String get epubFontMono => 'Monoespaiat';
+  @override
+  String get epubTextSizeTitle => 'Mida del text';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1471,6 +1489,8 @@ final class CatalanStrings extends Strings {
   String get commandNeedNone => 'Sempre disponible';
   @override
   String get commandNeedOpenNote => 'Cal una nota oberta';
+  @override
+  String get commandNeedTextNote => 'Cal una nota de text oberta';
   @override
   String get commandNeedWideWindow => 'Només amb finestra ampla';
   @override

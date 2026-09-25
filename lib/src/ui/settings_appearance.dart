@@ -4,16 +4,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
+import 'package:niman/src/ui/epub_look_sheet.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The Appearance area of the settings home (issue #104): the app's own
-/// look — language, the interface text size and, on the desktops, what
-/// the window's × does. The colors have their own area (issue #269).
+/// look — language, the interface text size, the books' own look (#280)
+/// and, on the desktops, what the window's × does. The colors have their
+/// own area (issue #269).
 final class SettingsAppearanceScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
   const new({required this.controller, this.highlight, super.key});
@@ -33,6 +36,7 @@ final class _SettingsAppearanceScreenState
     extends State<SettingsAppearanceScreen> {
   AppLanguage _language = AppLanguage.system;
   double _uiTextScale = defaultTextScale;
+  EpubLook _epubLook = const EpubLook();
   bool _closeToTray = true;
 
   /// The tray is the desktops': elsewhere there is nothing to close into.
@@ -53,11 +57,13 @@ final class _SettingsAppearanceScreenState
     final controller = widget.controller;
     final language = await controller.language;
     final uiTextScale = await controller.uiTextScale;
+    final epubLook = await controller.epubLook;
     final closeToTray = await controller.closeToTray;
     if (!mounted) return;
     setState(() {
       _language = language;
       _uiTextScale = uiTextScale;
+      _epubLook = epubLook;
       _closeToTray = closeToTray;
     });
   }
@@ -111,6 +117,14 @@ final class _SettingsAppearanceScreenState
     if (mounted) setState(() => _uiTextScale = scale);
   }
 
+  /// The sheet the book's Aa button opens, on the same values.
+  Future<void> _editEpubLook() async {
+    final controller = widget.controller;
+    await showEpubLookSheet(context, session: controller);
+    final look = await controller.epubLook;
+    if (mounted) setState(() => _epubLook = look);
+  }
+
   Future<void> _setCloseToTray({required bool enabled}) async {
     await widget.controller.setCloseToTray(enabled: enabled);
     CloseToTray.enabled.value = enabled;
@@ -142,6 +156,15 @@ final class _SettingsAppearanceScreenState
               subtitle: AppStrings.uiTextScaleSubtitle,
               value: AppStrings.textScaleValue(_uiTextScale),
               onTap: () => unawaited(_chooseUiTextScale()),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.epubLook,
+            child: SettingsValueRow(
+              title: AppStrings.epubLookTitle,
+              subtitle: AppStrings.epubLookSubtitle,
+              value: epubLookSummary(_epubLook),
+              onTap: () => unawaited(_editEpubLook()),
             ),
           ),
           // The window's × (#209): the desktops only, where there is a

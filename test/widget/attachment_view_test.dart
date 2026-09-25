@@ -1,5 +1,6 @@
 // An attachment picked in the tree is shown in the note pane: a picture
-// zoomed and panned, a PDF page by page. (The PDF is drawn by PDFium, a
+// zoomed and panned, a PDF page by page, a book read like a note (its own
+// test: epub_pane_test.dart). (The PDF is drawn by PDFium, a
 // native library a widget test cannot load: its viewer is left to the
 // device, and only which files it takes is held here.)
 import 'dart:io';
@@ -16,7 +17,8 @@ void main() {
       expect(isShownAttachment(name), isTrue, reason: name);
     }
     expect(isShownAttachment('Docs/Paper.PDF'), isTrue);
-    for (final name in ['a.md', 'todo.txt', 'b.epub', 'c.zip', 'noext']) {
+    expect(isShownAttachment('Books/Novel.EPUB'), isTrue);
+    for (final name in ['a.md', 'todo.txt', 'c.zip', 'noext']) {
       expect(isShownAttachment(name), isFalse, reason: name);
     }
   });

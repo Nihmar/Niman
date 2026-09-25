@@ -328,6 +328,24 @@ final class GalicianStrings extends Strings {
   @override
   String get noteTextScaleSubtitle =>
       'O editor e a previsualización, sempre de acordo';
+  @override
+  String get epubLookTitle => 'Aspecto dos libros';
+  @override
+  String get epubLookSubtitle =>
+      'Tema, tipo de letra e tamaño do texto dos libros EPUB, á parte das '
+      'notas';
+  @override
+  String get epubSameAsApp => 'Como a aplicación';
+  @override
+  String get epubFontTitle => 'Tipo de letra';
+  @override
+  String get epubFontSerif => 'Con serifa';
+  @override
+  String get epubFontSans => 'Sen serifa';
+  @override
+  String get epubFontMono => 'Monoespazada';
+  @override
+  String get epubTextSizeTitle => 'Tamaño do texto';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1455,6 +1473,8 @@ final class GalicianStrings extends Strings {
   String get commandNeedNone => 'Sempre dispoñible';
   @override
   String get commandNeedOpenNote => 'Precisa unha nota aberta';
+  @override
+  String get commandNeedTextNote => 'Precisa unha nota de texto aberta';
   @override
   String get commandNeedWideWindow => 'Só con xanela ancha';
   @override

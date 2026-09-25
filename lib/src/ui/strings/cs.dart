@@ -323,6 +323,23 @@ final class CzechStrings extends Strings {
   String get noteTextScaleTitle => 'Velikost textu poznámek';
   @override
   String get noteTextScaleSubtitle => 'Editor a náhled, vždy v souladu';
+  @override
+  String get epubLookTitle => 'Vzhled knih';
+  @override
+  String get epubLookSubtitle =>
+      'Motiv, písmo a velikost textu knih EPUB, zvlášť od poznámek';
+  @override
+  String get epubSameAsApp => 'Jako aplikace';
+  @override
+  String get epubFontTitle => 'Písmo';
+  @override
+  String get epubFontSerif => 'Patkové';
+  @override
+  String get epubFontSans => 'Bezpatkové';
+  @override
+  String get epubFontMono => 'Neproporcionální';
+  @override
+  String get epubTextSizeTitle => 'Velikost textu';
 
   // Settings: preview mode.
   // Settings: editor formatting.
@@ -1437,6 +1454,8 @@ final class CzechStrings extends Strings {
   String get commandNeedNone => 'Vždy k dispozici';
   @override
   String get commandNeedOpenNote => 'Vyžaduje otevřenou poznámku';
+  @override
+  String get commandNeedTextNote => 'Vyžaduje otevřenou textovou poznámku';
   @override
   String get commandNeedWideWindow => 'Jen v širokém okně';
   @override
