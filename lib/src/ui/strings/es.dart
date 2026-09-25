@@ -1668,6 +1668,28 @@ final class SpanishStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'No se pudo abrir este archivo fuera de Niman.';
+  @override
+  String get copyPlaceLink => 'Copiar enlace a este punto';
+  @override
+  String get placeLinkCopied => 'Enlace copiado';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Carpeta de anotaciones';
+  @override
+  String get annotationsFolderSubtitle => 'Notas que anotan un PDF o un libro';
+  @override
+  String get annotationNoteSuffix => 'Anotación';
+  @override
+  String get annotateAction => 'Anotar';
+  @override
+  String get annotationCommentHint => 'Tu comentario';
+  @override
+  String get annotationSaved => 'Anotación guardada';
+  @override
+  String get annotationOpenNote => 'Abrir nota';
+  @override
+  String get annotationFailed => 'No se pudo guardar la anotación';
 
   @override
   String get movedToTrash => 'Movido a la papelera';

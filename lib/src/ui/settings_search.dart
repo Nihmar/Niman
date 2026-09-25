@@ -300,6 +300,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushFolders(SettingsKeys.attachmentsFolder),
     ),
     SettingsSearchEntry(
+      title: AppStrings.annotationsFolderTitle,
+      area: folders,
+      rowKey: SettingsKeys.annotationsFolder,
+      value: () async => ops == null ? null : await ops.annotationsFolder,
+      areaId: SettingsAreaId.folders,
+      open: () => pushFolders(SettingsKeys.annotationsFolder),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.quickNoteTitle,
       area: folders,
       rowKey: SettingsKeys.quickNote,

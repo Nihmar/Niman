@@ -3,11 +3,14 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/annotations/annotation.dart';
+import 'package:niman/src/annotations/annotation_mark_source.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -40,6 +43,9 @@ final class ShellDetailPane extends StatelessWidget {
     required this.statusActions,
     required this.spellCheck,
     this.reloadToken = 0,
+    this.linksFollowed = 0,
+    this.onAnnotate,
+    this.marks,
     this.zen = false,
     this.typewriter = false,
     this.onToggleTypewriter,
@@ -155,6 +161,16 @@ final class ShellDetailPane extends StatelessWidget {
   /// widget toggles); forwarded to the NoteView.
   final int reloadToken;
 
+  /// Counts the links followed, for a PDF or a book to go back to a link's
+  /// place when the same link is followed again (#282).
+  final int linksFollowed;
+
+  /// Annotates a place of a book or a PDF in its companion note (#284).
+  final void Function(Annotation annotation)? onAnnotate;
+
+  /// Where the library's books and PDFs were annotated (#285).
+  final AnnotationMarkSource? marks;
+
   /// The library's note write path, forwarded to the NoteView; null (no
   /// open library) lets the editor write directly.
   final NoteSaver? saveNote;
@@ -212,6 +228,12 @@ final class ShellDetailPane extends StatelessWidget {
           path: p.join(root, tab.path),
           column: noteColumn,
           onEditEpubLook: onEditEpubLook,
+          positions: ReadingPositions(root),
+          anchor: tab.anchor,
+          reloadToken: linksFollowed,
+          linkType: linkType,
+          onAnnotate: onAnnotate,
+          marks: marks,
         )
       : _noteView(root, tab);
 

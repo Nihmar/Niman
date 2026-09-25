@@ -20,12 +20,17 @@ import 'package:crypto/crypto.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html;
 import 'package:niman/src/epub/xhtml_markdown.dart';
+import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
 
 /// One entry of a book's table of contents: its title, the line of the
 /// book's text it opens on, and how deep it is nested (0 at the top).
 typedef EpubContentsEntry = ({String title, int line, int depth});
+
+/// Where a chapter of a book begins: its path in the archive, and the line
+/// of the book's text it opens on.
+typedef EpubChapter = ({String file, int line});
 
 /// A book, ready to read.
 final class EpubDocument {
@@ -36,6 +41,7 @@ final class EpubDocument {
     required this.contents,
     required this.pictures,
     required this.links,
+    required this.chapters,
   });
 
   /// The book's title, or its file name when it gives none.
@@ -54,6 +60,9 @@ final class EpubDocument {
   /// number; null for a link into a file the book does not read.
   final List<int?> links;
 
+  /// Its chapters with any text, in the order they are read.
+  final List<EpubChapter> chapters;
+
   /// How the text names a picture: `epub-picture:3`.
   static const String pictureScheme = 'epub-picture';
 
@@ -67,6 +76,54 @@ final class EpubDocument {
     final index = int.tryParse(target.substring(linkScheme.length + 1));
     if (index == null || index < 0 || index >= links.length) return null;
     return links[index];
+  }
+
+  /// The index of the contents entry being read at [line]: the last one
+  /// opening at or above it; -1 before the first.
+  int entryAt(int line) =>
+      contents.lastIndexWhere((entry) => entry.line <= line);
+
+  /// The index of the chapter [name] names: its path in the archive, as
+  /// the book spells it, else whatever its case (a Markdown link's
+  /// fragment may come lowercased), else its file name alone (a link
+  /// written by hand); -1 when none does.
+  int _chapterNamed(String name) {
+    final exact = chapters.indexWhere((c) => c.file == name);
+    if (exact != -1) return exact;
+    final lower = name.toLowerCase();
+    final anyCase = chapters.indexWhere((c) => c.file.toLowerCase() == lower);
+    if (anyCase != -1) return anyCase;
+    return chapters.indexWhere((c) => c.file.toLowerCase().endsWith('/$lower'));
+  }
+
+  /// [line] of the book's text, [fraction] into it, as a place in its
+  /// chapter; null for a book with no chapters.
+  EpubLocation? locationAt(int line, double fraction) {
+    final index = chapters.lastIndexWhere((c) => c.line <= line);
+    if (index == -1) {
+      return chapters.isEmpty
+          ? null
+          : EpubLocation(chapter: chapters.first.file, line: 0);
+    }
+    final chapter = chapters[index];
+    return EpubLocation(
+      chapter: chapter.file,
+      line: line - chapter.line,
+      fraction: fraction,
+    );
+  }
+
+  /// The line of the book's text [location] names, kept within its
+  /// chapter when the chapter has grown shorter; null when the book has
+  /// no such chapter.
+  int? lineOfLocation(EpubLocation location) {
+    final index = _chapterNamed(location.chapter);
+    if (index == -1) return null;
+    final start = chapters[index].line;
+    final end = index + 1 < chapters.length
+        ? chapters[index + 1].line - 1
+        : '\n'.allMatches(markdown).length - 1;
+    return (start + location.line).clamp(start, end < start ? start : end);
   }
 }
 
@@ -180,6 +237,10 @@ EpubDocument readEpub(String path, String pictureDir) {
     ],
     pictures: _extract(book, pictures, pictureDir),
     links: [for (final target in targets) lineOf(target.file, target.fragment)],
+    chapters: [
+      for (final MapEntry(key: file, value: line) in chapterStart.entries)
+        (file: file, line: line),
+    ],
   );
 }
 

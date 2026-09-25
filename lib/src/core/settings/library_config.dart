@@ -10,6 +10,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         EditorKind,
         LinkType,
         TreeSort,
+        defaultAnnotationsFolder,
         defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
@@ -270,6 +271,11 @@ String cleanTemplateFolder(String folder) =>
 String cleanAttachmentsFolder(String folder) =>
     cleanFolderPath(folder, defaultAttachmentsFolder);
 
+/// Sanitizes an annotations-folder path; an empty result is
+/// [defaultAnnotationsFolder].
+String cleanAnnotationsFolder(String folder) =>
+    cleanFolderPath(folder, defaultAnnotationsFolder);
+
 /// The per-library settings, stored in the library folder itself as
 /// `<library>/.niman/settings.json` (T-ML-01, T-ML-10).
 ///
@@ -305,6 +311,7 @@ final class LibraryConfig {
     this.historyIntervalMinutes = defaultHistoryIntervalMinutes,
     this.templateFolder = defaultTemplateFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
+    this.annotationsFolder = defaultAnnotationsFolder,
     this.pinnedCollapsed = false,
     this.lineNumbers = true,
     this.readableLineLength = true,
@@ -348,6 +355,7 @@ final class LibraryConfig {
     final folder = json['listNoteFolder'];
     final templates = json['templateFolder'];
     final attachments = json['attachmentsFolder'];
+    final annotations = json['annotationsFolder'];
     return LibraryConfig(
       trashEnabled: switch (trash) {
         final bool enabled => enabled,
@@ -370,6 +378,9 @@ final class LibraryConfig {
       attachmentsFolder: attachments is String
           ? cleanAttachmentsFolder(attachments)
           : defaultAttachmentsFolder,
+      annotationsFolder: annotations is String
+          ? cleanAnnotationsFolder(annotations)
+          : defaultAnnotationsFolder,
       pinnedCollapsed: _boolOr(json['pinnedCollapsed'], false),
       lineNumbers: _boolOr(json['lineNumbers'], true),
       readableLineLength: _boolOr(json['readableLineLength'], true),
@@ -458,6 +469,10 @@ final class LibraryConfig {
   /// The folder (library-relative) holding the attachments: editor images
   /// and voice-note clips, copied in and linked (issue #56).
   final String attachmentsFolder;
+
+  /// The folder (library-relative) where a note annotating a PDF or a book
+  /// is made, when the file has none yet (#284).
+  final String annotationsFolder;
 
   /// Whether the tree's pinned section is rolled up (default false).
   final bool pinnedCollapsed;
@@ -555,6 +570,7 @@ final class LibraryConfig {
     String? listNoteFolder,
     String? templateFolder,
     String? attachmentsFolder,
+    String? annotationsFolder,
     bool? pinnedCollapsed,
     bool? lineNumbers,
     bool? readableLineLength,
@@ -589,6 +605,7 @@ final class LibraryConfig {
       listNoteFolder: listNoteFolder ?? this.listNoteFolder,
       templateFolder: templateFolder ?? this.templateFolder,
       attachmentsFolder: attachmentsFolder ?? this.attachmentsFolder,
+      annotationsFolder: annotationsFolder ?? this.annotationsFolder,
       pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       readableLineLength: readableLineLength ?? this.readableLineLength,
@@ -653,6 +670,7 @@ final class LibraryConfig {
     'listNoteFolder',
     'templateFolder',
     'attachmentsFolder',
+    'annotationsFolder',
     'pinnedCollapsed',
     'lineNumbers',
     'readableLineLength',
@@ -704,6 +722,7 @@ final class LibraryConfig {
       'listNoteFolder': listNoteFolder,
       'templateFolder': templateFolder,
       'attachmentsFolder': attachmentsFolder,
+      'annotationsFolder': annotationsFolder,
       'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
       'readableLineLength': readableLineLength,
@@ -794,6 +813,7 @@ final class LibraryConfig {
         listNoteFolder == other.listNoteFolder &&
         templateFolder == other.templateFolder &&
         attachmentsFolder == other.attachmentsFolder &&
+        annotationsFolder == other.annotationsFolder &&
         pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&
         readableLineLength == other.readableLineLength &&

@@ -74,6 +74,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String _listNoteFolder = 'Lists';
   String _templateFolder = defaultTemplateFolder;
   String _attachmentsFolder = defaultAttachmentsFolder;
+  String _annotationsFolder = defaultAnnotationsFolder;
 
   /// Search hits returned for every word query (empty = no results).
   ///
@@ -952,6 +953,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _attachmentsFolder = folder;
   }
 
+  @override
+  Future<String> get annotationsFolder async => _annotationsFolder;
+
+  @override
+  Future<void> setAnnotationsFolder({required String folder}) async {
+    _annotationsFolder = folder;
+  }
+
   /// Templates come from the fake's own rows, so a test that creates a
   /// note under the folder has a template.
   @override
@@ -1381,6 +1390,17 @@ final class _FakeFieldSource implements FieldSource {
       }
     }
     return out..sort((a, b) => a.path.compareTo(b.path));
+  }
+
+  @override
+  Future<List<({Note note, String value})>> fieldValues(String key) async {
+    final name = key.trim().toLowerCase();
+    final out = [
+      for (final (note, fm) in _session._liveFrontmatter())
+        for (final value in fm?.fields[name] ?? const <String>[])
+          (note: note, value: value),
+    ];
+    return out..sort((a, b) => a.note.path.compareTo(b.note.path));
   }
 
   @override

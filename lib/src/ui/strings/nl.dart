@@ -1661,6 +1661,28 @@ final class DutchStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Kon dit bestand niet buiten Niman openen.';
+  @override
+  String get copyPlaceLink => 'Link naar deze plek kopiëren';
+  @override
+  String get placeLinkCopied => 'Link gekopieerd';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Map voor aantekeningen';
+  @override
+  String get annotationsFolderSubtitle => 'Notities bij een pdf of boek';
+  @override
+  String get annotationNoteSuffix => 'Aantekening';
+  @override
+  String get annotateAction => 'Aantekening maken';
+  @override
+  String get annotationCommentHint => 'Je opmerking';
+  @override
+  String get annotationSaved => 'Aantekening opgeslagen';
+  @override
+  String get annotationOpenNote => 'Notitie openen';
+  @override
+  String get annotationFailed => 'De aantekening kon niet worden opgeslagen';
 
   @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';

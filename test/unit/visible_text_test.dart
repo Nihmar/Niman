@@ -188,4 +188,26 @@ inline math $x$ and a #tag.
       }
     });
   });
+
+  group('a block as one line of plain text (#284)', () {
+    String plain(String document) {
+      final buffer = SourceBuffer.fromText(document);
+      final scanner = BlockScanner(buffer);
+      return plainTextOf(
+        BlockParser().parse(scanner.index.blocks.first, buffer),
+      );
+    }
+
+    test('its markers and escapes gone, its lines joined', () {
+      expect(
+        plain('Some **bold** and\na \\#tag, \\*not\\* emphasis.'),
+        'Some bold and a #tag, *not* emphasis.',
+      );
+    });
+
+    test("a quote's and a list item's marks gone", () {
+      expect(plain('> Quoted\n> on two lines.'), 'Quoted on two lines.');
+      expect(plain('- An item [with](x.md) a link'), 'An item with a link');
+    });
+  });
 }

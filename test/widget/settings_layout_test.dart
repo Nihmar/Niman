@@ -270,11 +270,12 @@ void main() {
   });
 
   testWidgets('a folder the library does not hold says so', (tester) async {
-    // A fresh library holds no folders: every configured folder wears
-    // the "to create" badge rather than a confident value (issue #104).
+    // A fresh library holds no folders: every configured folder (lists,
+    // templates, attachments, annotations) wears the "to create" badge
+    // rather than a confident value (issue #104).
     await pump(tester);
     await openArea(tester, const Key('settings-area-folders'));
-    expect(find.text(AppStrings.settingsFolderToCreate), findsNWidgets(3));
+    expect(find.text(AppStrings.settingsFolderToCreate), findsNWidgets(4));
   });
 
   testWidgets('the keyboard row shows on phones only, hidden on desktop', (

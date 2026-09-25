@@ -50,6 +50,10 @@ const String defaultTemplateFolder = 'Templates';
 /// copied in by the editor and voice-note clips alike (issue #56).
 const String defaultAttachmentsFolder = 'assets';
 
+/// The default folder (library-relative) where the notes annotating a PDF
+/// or a book are made (#284).
+const String defaultAnnotationsFolder = 'Annotations';
+
 /// Global app settings, a single row (id 1).
 final class AppSettingsRepo {
   /// Creates the repo over the given [AppDatabase].

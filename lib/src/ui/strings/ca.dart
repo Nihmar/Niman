@@ -1672,6 +1672,28 @@ final class CatalanStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'No s’ha pogut obrir aquest fitxer fora del Niman.';
+  @override
+  String get copyPlaceLink => "Copia l'enllaç a aquest punt";
+  @override
+  String get placeLinkCopied => 'Enllaç copiat';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => "Carpeta d'anotacions";
+  @override
+  String get annotationsFolderSubtitle => 'Notes que anoten un PDF o un llibre';
+  @override
+  String get annotationNoteSuffix => 'Anotació';
+  @override
+  String get annotateAction => 'Anota';
+  @override
+  String get annotationCommentHint => 'El teu comentari';
+  @override
+  String get annotationSaved => 'Anotació desada';
+  @override
+  String get annotationOpenNote => 'Obre la nota';
+  @override
+  String get annotationFailed => "No s'ha pogut desar l'anotació";
 
   @override
   String get movedToTrash => 'Moguda a la paperera';

@@ -1631,6 +1631,28 @@ final class CzechStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Tento soubor se nepodařilo otevřít mimo Niman.';
+  @override
+  String get copyPlaceLink => 'Kopírovat odkaz na toto místo';
+  @override
+  String get placeLinkCopied => 'Odkaz zkopírován';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Složka anotací';
+  @override
+  String get annotationsFolderSubtitle => 'Poznámky k PDF nebo knize';
+  @override
+  String get annotationNoteSuffix => 'Anotace';
+  @override
+  String get annotateAction => 'Anotovat';
+  @override
+  String get annotationCommentHint => 'Váš komentář';
+  @override
+  String get annotationSaved => 'Anotace uložena';
+  @override
+  String get annotationOpenNote => 'Otevřít poznámku';
+  @override
+  String get annotationFailed => 'Anotaci se nepodařilo uložit';
 
   @override
   String get movedToTrash => 'Přesunuto do koše';

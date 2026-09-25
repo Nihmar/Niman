@@ -80,7 +80,8 @@ address), or a sync that would remove many files (tap **Sync now** to
 see what and decide). Syncing by hand lifts the pause.
 
 What travels: every note and attachment, plus the library's
-`.niman/settings.json`, `.niman/counters.json` and personal dictionary
+`.niman/settings.json`, `.niman/counters.json`, where each book and PDF
+was left (`.niman/reading.json`) and personal dictionary
 (`.niman/dictionary.txt`, the words added with *Add to dictionary*). What stays on each
 device: `.trash/`, `.history/`, any other dot folder (a `.git/`, for
 example), and the files the operating system drops into folders
@@ -94,7 +95,7 @@ example), and the files the operating system drops into folders
   is **moved to this device's trash**, never deleted outright. After such
   a sync a message offers **Show**, which opens the trash.
 - The library's own files (`.niman/settings.json`, `.niman/counters.json`,
-  `.niman/dictionary.txt`) are never deleted by a sync: if one goes
+  `.niman/reading.json`, `.niman/dictionary.txt`) are never deleted by a sync: if one goes
   missing on one side, it is put back from the other.
 - If a sync would remove more than 10 files and more than half of the
   library, Niman stops and asks first. That is what a wrong address, an

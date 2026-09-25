@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
@@ -26,6 +27,7 @@ import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
@@ -76,6 +78,7 @@ import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/settings_window.dart';
+import 'package:niman/src/ui/shell_annotation_flow.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
@@ -711,6 +714,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
 
+  /// Counts the links followed: a PDF or a book goes back to a link's
+  /// place when it moves (#282). Not [_noteReloadToken], which also moves
+  /// on a resume or a sync, when a file must stay where it is read.
+  int _linksFollowed = 0;
+
   /// A template `{{cursor}}` offset to land the caret on after the created
   /// note opens (#53). Fresh notes only: appended text joins an existing
   /// file whose length the creation flow does not know.
@@ -799,6 +807,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
       _pendingCaretOffset = null;
+      _linksFollowed++;
       _resetNoteKind();
       if (sameNote) _noteReloadToken++;
       _noteOpened();
@@ -976,6 +985,15 @@ final class _LibraryShellState extends State<_LibraryShell>
         path: p.join(controller.root ?? '', selectedPath),
         column: _editorSettings.noteColumn,
         onEditEpubLook: () => _editEpubLook(controller),
+        positions: switch (controller.root) {
+          final root? => ReadingPositions(root),
+          null => null,
+        },
+        anchor: _pendingAnchor,
+        reloadToken: _linksFollowed,
+        linkType: _editorSettings.linkType,
+        onAnnotate: _annotate,
+        marks: _annotations,
       );
     }
     return NoteView(
@@ -1841,6 +1859,24 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// build's follow — one microtask after the flow asks. The request
   /// waits here instead of being written into a tab that is not there.
   String? _opensInPreview;
+
+  /// Annotates a place of a book or a PDF in its companion note, over the
+  /// file (#284).
+  late final ShellAnnotationFlow _annotations = ShellAnnotationFlow(
+    controller: widget.controller,
+    unsaved: widget.unsavedTracker,
+    linkType: () => _editorSettings.linkType,
+    // The companion may be the note on screen, or in the tree.
+    onWritten: () {
+      widget.controller.notify();
+      if (mounted) setState(() => _noteReloadToken++);
+    },
+    onOpen: (path, offset) =>
+        _onTemplateNoteFiled(path: path, preview: false, caret: offset),
+  );
+
+  void _annotate(Annotation annotation) =>
+      unawaited(_annotations.annotate(context, annotation));
 
   /// Opens a note the template flow just filed (#51): preview per its
   /// `open` directive, caret per its `{{cursor}}`. The state the flow
@@ -3275,6 +3311,9 @@ final class _LibraryShellState extends State<_LibraryShell>
         unsavedTracker: widget.unsavedTracker,
         spellCheck: widget.spellCheck,
         reloadToken: _noteReloadToken,
+        linksFollowed: _linksFollowed,
+        onAnnotate: _annotate,
+        marks: _annotations,
         saveNote: _noteSaver(controller),
         saveNoteStream: _noteStreamSaver(controller),
         createMissingNote: _missingNoteCreator(controller),

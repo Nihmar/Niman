@@ -10,6 +10,7 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/webdav/webdav_multistatus.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 
@@ -25,6 +26,7 @@ const Set<String> libraryStateFiles = {
   '.niman/settings.json',
   '.niman/counters.json',
   '.niman/dictionary.txt',
+  ReadingPositions.filePath,
 };
 
 /// The paths the sync never touches.

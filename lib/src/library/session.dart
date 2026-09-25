@@ -172,6 +172,13 @@ abstract interface class NoteOperations {
   /// Sets the attachments folder.
   Future<void> setAttachmentsFolder({required String folder});
 
+  /// The folder (library-relative) where a note annotating a PDF or a
+  /// book is made (default `Annotations`, #284).
+  Future<String> get annotationsFolder;
+
+  /// Sets the annotations folder.
+  Future<void> setAnnotationsFolder({required String folder});
+
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});
 

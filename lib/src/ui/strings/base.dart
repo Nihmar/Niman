@@ -775,6 +775,27 @@ abstract base class Strings {
   String get attachmentUnreadable;
   String get attachmentMissing;
   String get attachmentOpenFailed;
+
+  /// The button that copies a link to the place of a PDF or a book
+  /// being read (#282).
+  String get copyPlaceLink;
+  String get placeLinkCopied;
+
+  /// A link's label for [page] of the PDF [name]: `Dune, p. 34`.
+  String pdfPageLabel(String name, int page);
+
+  // Annotating a PDF or a book in a note of its own (#284).
+  String get annotationsFolderTitle;
+  String get annotationsFolderSubtitle;
+
+  /// Ends the name of a note made to annotate a file:
+  /// `Dune - Annotation.md`.
+  String get annotationNoteSuffix;
+  String get annotateAction;
+  String get annotationCommentHint;
+  String get annotationSaved;
+  String get annotationOpenNote;
+  String get annotationFailed;
   String get movedToTrash;
   String get deletedMessage;
   String deleteToTrashConfirm(String name);

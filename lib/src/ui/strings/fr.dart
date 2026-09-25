@@ -1683,6 +1683,29 @@ final class FrenchStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Impossible d’ouvrir ce fichier en dehors de Niman.';
+  @override
+  String get copyPlaceLink => 'Copier le lien vers cet endroit';
+  @override
+  String get placeLinkCopied => 'Lien copié';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, p. $page';
+  @override
+  String get annotationsFolderTitle => 'Dossier des annotations';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Notes qui annotent un PDF ou un livre';
+  @override
+  String get annotationNoteSuffix => 'Annotation';
+  @override
+  String get annotateAction => 'Annoter';
+  @override
+  String get annotationCommentHint => 'Votre commentaire';
+  @override
+  String get annotationSaved => 'Annotation enregistrée';
+  @override
+  String get annotationOpenNote => 'Ouvrir la note';
+  @override
+  String get annotationFailed => "L'annotation n'a pas pu être enregistrée";
 
   @override
   String get movedToTrash => 'Mis à la corbeille';

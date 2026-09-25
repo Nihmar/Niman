@@ -1644,6 +1644,29 @@ final class BosnianStrings extends Strings {
   @override
   String get attachmentOpenFailed =>
       'Ovu datoteku nije bilo moguće otvoriti izvan Nimana.';
+  @override
+  String get copyPlaceLink => 'Kopiraj vezu na ovo mjesto';
+  @override
+  String get placeLinkCopied => 'Veza je kopirana';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, str. $page';
+  @override
+  String get annotationsFolderTitle => 'Folder za anotacije';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Bilješke koje anotiraju PDF ili knjigu';
+  @override
+  String get annotationNoteSuffix => 'Anotacija';
+  @override
+  String get annotateAction => 'Anotiraj';
+  @override
+  String get annotationCommentHint => 'Vaš komentar';
+  @override
+  String get annotationSaved => 'Anotacija sačuvana';
+  @override
+  String get annotationOpenNote => 'Otvori bilješku';
+  @override
+  String get annotationFailed => 'Anotaciju nije moguće sačuvati';
 
   @override
   String get movedToTrash => 'Pomaknuto u korpu';

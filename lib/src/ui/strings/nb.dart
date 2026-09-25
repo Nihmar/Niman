@@ -1627,6 +1627,29 @@ final class NorwegianStrings extends Strings {
   String get attachmentMissing => 'Denne filen finnes ikke på disken.';
   @override
   String get attachmentOpenFailed => 'Filen kunne ikke åpnes utenfor Niman.';
+  @override
+  String get copyPlaceLink => 'Kopier lenke til dette stedet';
+  @override
+  String get placeLinkCopied => 'Lenke kopiert';
+  @override
+  String pdfPageLabel(String name, int page) => '$name, s. $page';
+  @override
+  String get annotationsFolderTitle => 'Mappe for merknader';
+  @override
+  String get annotationsFolderSubtitle =>
+      'Notater som kommenterer en PDF eller en bok';
+  @override
+  String get annotationNoteSuffix => 'Merknad';
+  @override
+  String get annotateAction => 'Legg til merknad';
+  @override
+  String get annotationCommentHint => 'Din kommentar';
+  @override
+  String get annotationSaved => 'Merknad lagret';
+  @override
+  String get annotationOpenNote => 'Åpne notat';
+  @override
+  String get annotationFailed => 'Merknaden kunne ikke lagres';
 
   @override
   String get movedToTrash => 'Flyttet til papirkorg';
