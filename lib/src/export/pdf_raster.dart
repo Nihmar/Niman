@@ -7,6 +7,11 @@
 /// paints, so it runs on the UI isolate: there is no second engine to hand
 /// the picture to, and a note-sized job is the price of a machine without a
 /// browser.
+///
+/// A page is a slice of the one layout, not a break the layout chose: a
+/// line or a picture that crosses a slice's edge is cut in two. A machine
+/// with an engine prints the page's HTML instead, where the print CSS
+/// keeps blocks whole.
 library;
 
 import 'dart:io';
@@ -192,6 +197,9 @@ final class RasterPdfPrinter implements PdfPrinter {
 
   /// Device pixels per logical pixel.
   final double pixelRatio;
+
+  @override
+  Future<bool> get canPrint async => true;
 
   @override
   Future<PdfOutcome> print(String htmlPath, String pdfPath) async {

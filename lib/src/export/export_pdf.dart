@@ -11,6 +11,7 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/pdf_printer.dart';
@@ -19,6 +20,8 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:path/path.dart' as p;
+
+const AppLogger _log = AppLogger(name: 'export');
 
 /// No engine is on this machine, and the note could not be drawn either.
 final class NoPdfEngine implements Exception {
@@ -50,6 +53,17 @@ Future<PdfExport> exportNotePdf({
   MathCache? mathCache,
   Directory? scratch,
 }) async {
+  final chosen = printer ?? const ProcessPdfPrinter();
+  // Nothing to print with: the note is drawn, and its page — the reads,
+  // the parse, the highlighting — is never built.
+  if (!await chosen.canPrint) {
+    return await _draw(
+      path: path,
+      text: text,
+      theme: theme,
+      mathCache: mathCache,
+    );
+  }
   final source = await ExportSources.forNote(
     text: text,
     title: title,
@@ -63,10 +77,7 @@ Future<PdfExport> exportNotePdf({
     final htmlPath = p.join(dir.path, 'page.html');
     final pdfPath = p.join(dir.path, 'page.pdf');
     await File(htmlPath).writeAsString(page);
-    final outcome = await (printer ?? const ProcessPdfPrinter()).print(
-      htmlPath,
-      pdfPath,
-    );
+    final outcome = await chosen.print(htmlPath, pdfPath);
     switch (outcome) {
       case PdfPrinted():
         return (
@@ -74,16 +85,21 @@ Future<PdfExport> exportNotePdf({
           selectable: true,
         );
       case PdfNoEngine():
-      case PdfFailed():
-        if (theme == null || mathCache == null) {
-          throw const NoPdfEngine();
-        }
-        final drawn = await rasterPdf(
+        _log.warning('no PDF engine: drawing the note instead');
+        return await _draw(
+          path: path,
           text: text,
           theme: theme,
           mathCache: mathCache,
         );
-        return (payload: _payload(path, drawn), selectable: false);
+      case PdfFailed(:final message):
+        _log.warning('the PDF engine failed ($message): drawing the note');
+        return await _draw(
+          path: path,
+          text: text,
+          theme: theme,
+          mathCache: mathCache,
+        );
     }
   } finally {
     if (scratch == null) {
@@ -95,6 +111,19 @@ Future<PdfExport> exportNotePdf({
       }
     }
   }
+}
+
+/// The raster fallback: the note drawn as page pictures, or the failure of
+/// a machine that has neither an engine nor a theme to draw with.
+Future<PdfExport> _draw({
+  required String path,
+  required String text,
+  required MarkdownTheme? theme,
+  required MathCache? mathCache,
+}) async {
+  if (theme == null || mathCache == null) throw const NoPdfEngine();
+  final drawn = await rasterPdf(text: text, theme: theme, mathCache: mathCache);
+  return (payload: _payload(path, drawn), selectable: false);
 }
 
 ExportPayload _payload(String path, Uint8List bytes) => (

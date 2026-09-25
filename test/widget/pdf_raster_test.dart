@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -91,4 +92,39 @@ void main() {
     expect(outcome, isA<PdfPrinted>());
     expect(File(pdfPath).lengthSync(), greaterThan(100));
   });
+
+  testWidgets('a print that fails draws the note instead', (tester) async {
+    await pumpTheme(tester);
+    final dir = Directory.current.createTempSync('niman_pdf_');
+    addTearDown(() {
+      if (dir.existsSync()) dir.deleteSync(recursive: true);
+    });
+    final result = await tester.runAsync(
+      () => exportNotePdf(
+        text: '# Title\n',
+        title: 'Title',
+        path: 'Title.md',
+        root: dir.path,
+        language: 'en',
+        printer: const _Fails(),
+        theme: theme,
+        mathCache: cache,
+      ),
+    );
+    // The PDF is a picture of the pages, and the caller is told so.
+    expect(result!.selectable, isFalse);
+    expect(latin1.decode(result.payload.bytes.sublist(0, 8)), '%PDF-1.4');
+  });
+}
+
+/// A printer that is there and fails: the note must be drawn anyway.
+final class _Fails implements PdfPrinter {
+  const new();
+
+  @override
+  Future<bool> get canPrint async => true;
+
+  @override
+  Future<PdfOutcome> print(String htmlPath, String pdfPath) async =>
+      const PdfFailed('the engine exited with 2');
 }
