@@ -3884,7 +3884,11 @@ final class _Line extends StatelessWidget {
   }
 
   /// The inline formulas `live` typesets on this line: all of them but the
-  /// one in the caret's word, [run], whose source is shown as written.
+  /// one the caret is in ([run]), whose source is shown as written.
+  ///
+  /// The test is overlap, not containment: a formula's own source may hold
+  /// spaces — `$a \sim b$` — so the caret's run is one word *inside* it,
+  /// and a run that has to contain the formula never matches (#290).
   List<InlineFormula> _inlineFormulas({(int, int)? run}) {
     final cache = mathCache;
     if (!hideMarkers || cache == null) return const <InlineFormula>[];
@@ -3893,7 +3897,7 @@ final class _Line extends StatelessWidget {
     return typesetInline(
       <InlineFormulaSource>[
         for (final source in sources)
-          if (run == null || source.start < run.$1 || source.end > run.$2)
+          if (run == null || run.$2 <= source.start || run.$1 >= source.end)
             source,
       ],
       cache,
