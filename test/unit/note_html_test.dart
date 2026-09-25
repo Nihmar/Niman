@@ -158,14 +158,14 @@ void main() {
     expect(html, contains(r'alt="a $x$ #t"'));
   });
 
-  test('a fence\'s indent counts a tab as columns', () {
+  test("a fence's indent counts a tab as columns", () {
     // CommonMark 4.5: a tab advances to the next multiple of four, so the
     // two columns of fence indent come out of it and two stay.
     final html = body('  ```\n\tvar x = 1;\n  ```\n');
     expect(html, contains('  var x = 1;'));
   });
 
-  test('the note\'s own sentinel characters stay the text they are', () {
+  test("the note's own sentinel characters stay the text they are", () {
     // The masking tokens are private-use pairs around a number; a note that
     // holds the pair itself must not index into the pieces (#63 review, L2).
     final html = body('A \uE00199\uE002 glyph, and a \uE0010\uE002 one.\n');
