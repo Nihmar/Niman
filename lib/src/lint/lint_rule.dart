@@ -22,7 +22,8 @@ enum LintRule {
   /// A fenced code block ends with a closing fence.
   closingFence('closing-fence'),
 
-  /// A fence's language is the first alphanumeric word of its info string.
+  /// A fence's language is the first word of its info string, not Pandoc's
+  /// `{.lang}` class.
   fenceLanguage('fence-language');
 
   new(this.id);

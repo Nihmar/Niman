@@ -160,6 +160,22 @@ void main() {
     expect(tidy('~~~dart\ncode\n~~~\n'), '~~~dart\ncode\n~~~\n');
   });
 
+  test("a language's own punctuation is its name, and stays", () {
+    for (final tag in ['c++', 'c#', 'objective-c', 'ts:title="x"']) {
+      final note = '```$tag\ncode\n```\n';
+      expect(tidy(note), note, reason: tag);
+    }
+  });
+
+  test("Pandoc's attribute block and class dot are unwrapped", () {
+    expect(
+      tidy('```{.dart .numberLines}\ncode\n```\n'),
+      '```dart .numberLines\ncode\n```\n',
+    );
+    expect(tidy('``` .dart\ncode\n```\n'), '``` dart\ncode\n```\n');
+    expect(tidy('```{}\ncode\n```\n'), '```\ncode\n```\n');
+  });
+
   test("an unclosed fence is closed, with the opener's own run", () {
     expect(tidy('```{.python}\ncode\n'), '```python\ncode\n```\n');
     expect(tidy('~~~~\ncode\n'), '~~~~\ncode\n~~~~\n');
