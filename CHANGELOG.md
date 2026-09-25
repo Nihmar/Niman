@@ -8,7 +8,9 @@ Update it in the release commit, before the tag.
 
 ## [0.0.9] - 2026-09-25
 
-**A homegrown editor, and a lot more to play with.** The source editor, the live (WYSIWYG) editor and the read view are one widget of Niman's own now — and around it, the round that reads books and PDFs, annotates them, keeps a journal, and lets you wear colors of your own.
+A homegrown editor, and a lot more to play with.
+
+The source editor, the live (WYSIWYG) editor and the read view are one widget of Niman's own now — and around it, the round that reads books and PDFs, annotates them, keeps a journal, and lets you wear colors of your own.
 
 ### Added
 - **Books, read in the app.** An EPUB opens in the note pane on every platform and reads like a note — its headings, emphasis, lists, quotes, tables and pictures in Niman's typography — with an **Outline** of its table of contents. A PDF and a picture open there too, paged and zoomed, and the row under a PDF or a book copies a link to the place being read
