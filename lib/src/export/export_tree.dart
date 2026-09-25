@@ -5,6 +5,11 @@
 /// list nor the pages are held in a list. Progress comes back over a port,
 /// and cancelling kills the isolate and removes the half-written zip.
 ///
+/// A PDF export writes one PDF per note, at the note's own relative path —
+/// not one combined file — printed by the machine's browser engine, or by
+/// Android's WebView ([WebViewPdfPrinter], through the `niman/pdf`
+/// channel, which is why the isolate asks for the root token).
+///
 /// Links and pictures are resolved **inside the exported subtree**: a
 /// target that is there becomes a relative link, one that is not stays as
 /// the note wrote it (a wikilink becomes highlighted text). Resolving
@@ -17,15 +22,18 @@ library;
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui' show RootIsolateToken;
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show BackgroundIsolateBinaryMessenger;
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:path/path.dart' as p;
@@ -103,9 +111,11 @@ final class TreeExport {
   /// Starts exporting [dir] (absolute) into [zipPath].
   ///
   /// [engine] is the PDF format's browser (Edge, Chromium): the printer a
-  /// folder of pages goes through. Without one there is nothing to print
-  /// with — [TreeExportNoEngine] — since the raster fallback paints on the
-  /// UI isolate and cannot run here.
+  /// folder of pages goes through on the desktop. Android needs none — its
+  /// WebView prints through the `niman/pdf` channel from the isolate — and
+  /// where there is neither an engine nor a WebView there is nothing to
+  /// print with: [TreeExportNoEngine], since the raster fallback paints on
+  /// the UI isolate and cannot run here.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
@@ -113,7 +123,9 @@ final class TreeExport {
     required String language,
     String? engine,
   }) async {
-    if (format == ExportTreeFormat.pdf && engine == null) {
+    if (format == ExportTreeFormat.pdf &&
+        engine == null &&
+        !Platform.isAndroid) {
       throw const TreeExportNoEngine();
     }
     final events = ReceivePort();
@@ -127,6 +139,9 @@ final class TreeExport {
         format: format,
         language: language,
         engine: engine,
+        // The root isolate's token, so the spawned isolate may open the
+        // WebView channel when Android prints.
+        token: RootIsolateToken.instance,
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -217,10 +232,19 @@ typedef TreeExportRequest = ({
   ExportTreeFormat format,
   String language,
   String? engine,
+  RootIsolateToken? token,
   SendPort events,
 });
 
 Future<void> _exportTree(TreeExportRequest request) async {
+  // Android prints through the WebView channel, which a background isolate
+  // may only open with the root isolate's token.
+  if (request.format == ExportTreeFormat.pdf && Platform.isAndroid) {
+    final token = request.token;
+    if (token != null) {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+    }
+  }
   final tree = _walk(request.dir);
   final encoder = ZipFileEncoder()..create(request.zipPath);
   // The PDF format's scratch: one page and one PDF at a time, reused.
@@ -247,7 +271,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
           await _printInto(
             encoder,
             scratch!,
-            request.engine!,
+            request.engine,
             page,
             _stem(entry.rel),
           );
@@ -290,20 +314,22 @@ Future<void> _exportTree(TreeExportRequest request) async {
   }
 }
 
-/// Prints [page] with [engine] and adds the PDF to [encoder] as
-/// `<stem>.pdf`.
+/// Prints [page] with the machine's printer and adds the PDF to [encoder]
+/// as `<stem>.pdf`.
 Future<void> _printInto(
   ZipFileEncoder encoder,
   Directory scratch,
-  String engine,
+  String? engine,
   String page,
   String stem,
 ) async {
   final htmlPath = p.join(scratch.path, 'page.html');
   final pdfPath = p.join(scratch.path, 'page.pdf');
   File(htmlPath).writeAsStringSync(page);
-  final outcome = await ProcessPdfPrinter(engine: engine)
-      .print(htmlPath, pdfPath);
+  final printer = Platform.isAndroid
+      ? const WebViewPdfPrinter()
+      : ProcessPdfPrinter(engine: engine);
+  final outcome = await printer.print(htmlPath, pdfPath);
   switch (outcome) {
     case PdfPrinted():
       await encoder.addFile(File(pdfPath), '$stem.pdf');

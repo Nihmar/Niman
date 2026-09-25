@@ -2,11 +2,13 @@
 /// desktop, SAF on Android, as the theme and the debug log already save.
 library;
 
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/export/pdf_printer.dart';
+import 'package:niman/src/export/pdf_webview.dart';
 
 /// Where an exported file is written; the place it landed, or null when
 /// the dialog was dismissed. The tests hand in their own.
@@ -57,11 +59,21 @@ final pickExportFolderProvider = Provider<PickExportFolder>(
 );
 
 /// The printer a note's PDF goes through; tests hand in their own, since
-/// no engine can be started under `flutter test`.
-final pdfPrinterProvider = Provider<PdfPrinter>(
-  (ref) => const ProcessPdfPrinter(),
-);
+/// no engine can be started under `flutter test`. Android's WebView prints
+/// in-process through its channel, so nothing is searched for there.
+final pdfPrinterProvider = Provider<PdfPrinter>((ref) {
+  if (Platform.isAndroid) return const WebViewPdfPrinter();
+  return const ProcessPdfPrinter();
+});
 
-/// The engine a folder's PDF zip prints with, or null when this machine
-/// has none — found once, so the export chooser can leave the format out.
+/// The desktop engine a folder's PDF zip prints with, or null when this
+/// machine has none — found once, so the export chooser can leave the
+/// format out. Android prints through its WebView and has no engine path:
+/// [pdfAvailableProvider] is what says whether PDF is offered at all.
 final pdfEngineProvider = FutureProvider<String?>((ref) => findPdfEngine());
+
+/// Whether PDFs can be printed here at all: the system WebView on Android,
+/// a browser engine on the desktop.
+final pdfAvailableProvider = Provider<bool>(
+  (ref) => Platform.isAndroid || ref.watch(pdfEngineProvider).value != null,
+);
