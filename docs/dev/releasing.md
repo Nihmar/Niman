@@ -6,9 +6,10 @@ Workflow: `.github/workflows/release.yml`.
 ## Cutting a release
 
 1. Add the release's entries to `CHANGELOG.md` under a new
-   `## [X.Y.Z] - YYYY-MM-DD` heading, bump `version:` in
-   `pubspec.yaml`, and raise the `+N` build number on the same line
-   (`0.0.9+6`). The `+N` is Android's `versionCode`: the installer
+   `## [X.Y.Z] - YYYY-MM-DD` heading, starting the section with its
+   headline on a line of its own (see [The release title](#the-release-title)),
+   bump `version:` in `pubspec.yaml`, and raise the `+N` build number on the
+   same line (`0.0.9+6`). The `+N` is Android's `versionCode`: the installer
    refuses a package that does not raise it, so it goes up on every tag,
    including a re-cut of a version already released. Commit the two
    together. The changelog ships inside the build and feeds the in-app
@@ -21,6 +22,26 @@ Workflow: `.github/workflows/release.yml`.
 The workflow builds all platforms and publishes artifacts on the tag's
 GitHub Release page. To re-run: delete the tag locally and remotely,
 fix, tag again.
+
+### The release title
+
+The GitHub Release takes its title from the changelog. The first line of
+the version's section that is neither a `###` heading nor a bullet is the
+title: write it as a short headline, one line, before the sections.
+Surrounding `**`/`_` are stripped, so it may be bold.
+
+```markdown
+## [0.0.9] - 2026-09-25
+
+Books, a theme of your own, and one Markdown surface.
+
+### Added
+- …
+```
+
+A section without such a line falls back to `Niman <version>`. The tag
+stays `vX.Y.Z`; only the release's displayed name changes, and it can be
+corrected after the fact with `gh release edit` without re-tagging.
 
 ## Artifacts
 
