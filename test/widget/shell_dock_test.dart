@@ -8,9 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/dock/history_dock_pane.dart';
+import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
 
@@ -106,6 +108,44 @@ void main() {
     await tester.tapAt(Offset(divider.left - 80, 400));
     await settle(tester);
     expect(shown(), 'alpha.md');
+  });
+
+  // #297: the dock's edge is a splitter, like the tree's.
+  testWidgets('dragging the dock divider resizes the dock and persists', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(1400, 900));
+    expect(tester.getRect(dock).width, defaultDockWidth);
+
+    await tester.drag(
+      find.byKey(const Key('dock-divider')),
+      const Offset(-80, 0),
+    );
+    await settle(tester);
+
+    expect(tester.getRect(dock).width, defaultDockWidth + 80);
+    expect(await controller.dockWidth, defaultDockWidth + 80);
+  });
+
+  testWidgets('the dock stops growing where the panes would get too narrow', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(1100, 900));
+    await tester.drag(
+      find.byKey(const Key('dock-divider')),
+      const Offset(-400, 0),
+    );
+    await settle(tester);
+
+    final panes = tester.getRect(find.byKey(const ValueKey('wide-panes')));
+    expect(panes.width, RightDock.minPanesWidth);
+    expect(tester.getRect(dock).width, lessThan(maxDockWidth));
+  });
+
+  testWidgets('a saved dock width comes back', (tester) async {
+    await controller.setDockWidth(420);
+    await pumpAt(tester, const Size(1400, 900));
+    expect(tester.getRect(dock).width, 420);
   });
 
   testWidgets('on a phone the note’s ⋮ offers the same panes as sheets', (

@@ -146,7 +146,10 @@ any window at least 1000 px wide: desktops, tablets, a phone in
 landscape if it is that wide. A phone upright has no room for a note
 and a panel side by side, so this is a decision rather than an
 omission: the note's ⋮ menu opens the same three there, the outline and
-the tags as sheets and the history as its screen.
+the tags as sheets and the history as its screen. Where the panel shows,
+its left edge drags to make it wider or narrower, like the tree's edge.
+It stops growing before the note gets narrower than 360 px, and it
+keeps its width for the next launch.
 
 ## Not yet
 

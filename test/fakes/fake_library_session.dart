@@ -458,6 +458,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<double> get dockWidth async => _config.dockWidth;
+
+  @override
+  Future<void> setDockWidth(double width) async {
+    _config = _config.copyWith(dockWidth: width);
+  }
+
+  @override
   Future<bool> get pinnedCollapsed async => _config.pinnedCollapsed;
 
   @override

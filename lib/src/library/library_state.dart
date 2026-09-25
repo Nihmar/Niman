@@ -997,6 +997,16 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(treeWidth: width));
   }
 
+  /// The right dock's width in logical pixels.
+  @override
+  Future<double> get dockWidth async => (await _library).dockWidth;
+
+  /// Sets (and persists) the right dock's width.
+  @override
+  Future<void> setDockWidth(double width) async {
+    await _editLibrary((c) => c.copyWith(dockWidth: width));
+  }
+
   /// Whether the tree's pinned section is rolled up.
   @override
   Future<bool> get pinnedCollapsed async => (await _library).pinnedCollapsed;
