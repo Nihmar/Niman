@@ -19,6 +19,7 @@ import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/range_highlight.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/attachment_view.dart';
@@ -423,7 +424,7 @@ void main() {
     late String path;
     setUp(() => path = twoChapters());
 
-    testWidgets('a long press offers it, with a link to the paragraph', (
+    testWidgets('a word selected offers its annotation and link (#283)', (
       tester,
     ) async {
       final annotated = <Annotation>[];
@@ -433,19 +434,27 @@ void main() {
         positions: ReadingPositions(dir.path),
         onAnnotate: annotated.add,
       );
-      await tester.longPress(find.text('It begins.'));
+      // A long press selects the word under it: "It", at the text's start.
+      await tester.longPressAt(
+        tester.getTopLeft(find.text('It begins.')) + const Offset(4, 8),
+      );
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('epub-paragraph-link')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('epub-paragraph-annotate')));
+      // The link to it, folded away on a phone.
+      await tester.tap(find.byIcon(Icons.more_vert));
       await tester.pumpAndSettle();
-      expect(annotated, hasLength(1));
+      expect(find.text(AppStrings.copyPlaceLink), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.annotateAction));
+      await tester.pumpAndSettle();
       final annotation = annotated.single;
       expect(annotation.path, 'novel.epub');
-      expect(annotation.quote, 'It begins.');
+      expect(annotation.quote, 'It');
       expect(annotation.label, 'novel, One');
       final place = annotation.place as EpubLocation;
       expect(place.chapter, endsWith('one.xhtml'));
       expect(place.line, 2);
+      expect(place.chars, (start: 0, end: 2));
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -468,12 +477,35 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
+    testWidgets("the row's button annotates the passage selected", (
+      tester,
+    ) async {
+      final annotated = <Annotation>[];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        onAnnotate: annotated.add,
+      );
+      await tester.longPressAt(
+        tester.getTopLeft(find.text('It begins.')) + const Offset(4, 8),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('annotate-button')));
+      await tester.pumpAndSettle();
+      expect(annotated.single.quote, 'It');
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('a book outside a library offers neither', (tester) async {
       final annotated = <Annotation>[];
       await pump(tester, path, onAnnotate: annotated.add);
-      await tester.longPress(find.text('It begins.'));
+      await tester.longPressAt(
+        tester.getTopLeft(find.text('It begins.')) + const Offset(4, 8),
+      );
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('epub-paragraph-annotate')), findsNothing);
+      // Its text is still selectable, to copy.
+      expect(find.text(AppStrings.annotateAction), findsNothing);
       final button = tester.widget<IconButton>(
         find.byKey(const Key('annotate-button')),
       );
@@ -520,6 +552,39 @@ void main() {
       await tester.tap(find.text('It begins.'));
       await tester.pumpAndSettle();
       expect(marks.opened, [on(2)]);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('an annotated passage is marked, not its paragraph (#283)', (
+      tester,
+    ) async {
+      marks.marks = [
+        AnnotationMark(
+          note: 'Novel - Annotation.md',
+          offset: 40,
+          place: EpubLocation(
+            chapter: one.file,
+            line: 2,
+            chars: (start: 3, end: 9),
+          ),
+        ),
+      ];
+      await pump(
+        tester,
+        path,
+        positions: ReadingPositions(dir.path),
+        marks: marks,
+      );
+      final block = marked(2);
+      expect(block, findsOneWidget);
+      final highlight = tester.widget<RangeHighlight>(
+        find.descendant(of: block, matching: find.byType(RangeHighlight)),
+      );
+      expect(highlight.ranges, [(start: 3, end: 9)]);
+      expect(
+        find.descendant(of: block, matching: find.byType(DecoratedBox)),
+        findsNothing,
+      );
       await tester.pumpWidget(const SizedBox());
     });
 

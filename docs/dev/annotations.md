@@ -25,20 +25,28 @@ the index only answers which notes declare the key.
   with the frontmatter, and returns where the annotation starts in the
   note, for the note to open there.
 
-A PDF passage's place carries its characters in the page's text
-(`PdfLocation.chars`, fragment `page=34&chars=120-180`), for the file to
-mark it (#285). A book's paragraph is its chapter line; a part of a
-paragraph (#283) will add the same key to `EpubLocation`.
+A passage's place carries its characters: a PDF's in the page's text
+(`PdfLocation.chars`, fragment `page=34&chars=120-180`), a book's in the
+text of the paragraph it starts in, as a reader sees it
+(`EpubLocation.chars`, `chapter=…&line=12&chars=3-40`, #283), for the file
+to mark it (#285). A book's passage that runs on past its paragraph keeps
+the paragraph's place, quoting all of it.
 
 ## The surface
 
-- The read view offers `onBlockMenu` (long press, secondary click) with
-  the block's first line and its text (`plainTextOf`,
-  `markdown/render/visible_text.dart`), and `blockTextAt(line)`. The book's
-  pane (`EpubPane`, its places in `EpubPlaces`) turns a paragraph into an
-  `Annotation` from its menu (`epub_paragraph_menu.dart`, which also copies
-  a link to it) or from the row's annotate button (the paragraph at the top
-  of the view).
+- The read view's text is selectable when it is given `selectionActions`
+  (#283, `markdown/render/read_selection.dart`): Flutter's `SelectionArea`
+  over the blocks — handles and a toolbar on a phone, a mouse drag and a
+  context menu on desktop — and a `SelectionListener` per block reporting
+  the part of it selected to a `ReadSelectionScope`. The view's `selection`
+  is the first block's line, the start in its text, the end when the
+  selection ends in that block, and the text. The actions join the menu —
+  the first before Copy, where a phone keeps it in sight, the rest after.
+  `blockTextAt(line)` gives a block's text as a reader sees it
+  (`plainTextOf`). The book's pane (`EpubPane`, its places in
+  `EpubPlaces`) offers **Annotate** and **Copy link to this place** on a
+  selection, and its row's annotate button annotates the selection, or
+  the paragraph at the top of the view.
 - `PdfDocumentView` adds **Annotate** to pdfrx's selection menu
   (`customizeContextMenuItems`) and tracks the selection
   (`onTextSelectionChange`) for the row's button, which annotates the
@@ -69,9 +77,12 @@ a companion edited, an annotation written). A tap goes through
 `openAnnotationMarks`: one mark opens its note at the annotation, several
 ask which.
 
-- A book: `epubMarkedLines` maps the marks to lines of the book's text;
-  the read view tints the blocks holding them (`markedLines`, the
-  highlighter colour of `==mark==`) and reports a tap on one
+- A book: `epubBlockMarks` maps the marks to lines of the book's text
+  and a passage's characters; the read view (`marks`, `MarkedBlock`) tints
+  a block marked whole, and only the characters of a passage
+  (`RangeHighlight`, which paints the boxes of the block's paragraphs,
+  their text read in order as the selection counts it), in the
+  highlighter colour of `==mark==`, and reports a tap on one
   (`onTapMark`) with its lines, which `epubMarksBetween` turns back into
   marks.
 - A PDF: `PdfMarkLayer` reads, per marked page, the page's structured text

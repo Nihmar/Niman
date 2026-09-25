@@ -13,6 +13,7 @@ import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/epub/epub_marks.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/read_selection.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/book_location.dart';
@@ -23,11 +24,11 @@ import 'package:niman/src/ui/epub_bar.dart';
 import 'package:niman/src/ui/epub_contents_sheet.dart';
 import 'package:niman/src/ui/epub_links.dart';
 import 'package:niman/src/ui/epub_pane.dart';
-import 'package:niman/src/ui/epub_paragraph_menu.dart';
 import 'package:niman/src/ui/epub_places.dart';
 import 'package:niman/src/ui/epub_theme.dart';
 import 'package:niman/src/ui/file_marks.dart';
 import 'package:niman/src/ui/place_link_button.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The pane's state, so a test can ask what it shows.
 final class EpubPaneState extends State<EpubPane> {
@@ -197,23 +198,26 @@ final class EpubPaneState extends State<EpubPane> {
     if (annotation != null) widget.onAnnotate?.call(annotation);
   }
 
-  /// A paragraph's menu: annotate it, or copy a link to it.
-  Future<void> _paragraphMenu(BlockMenuRequest request) async {
-    final action = await showEpubParagraphMenu(
-      context,
-      request.position,
-      annotate: widget.onAnnotate != null,
-    );
-    if (!mounted) return;
-    switch (action) {
-      case EpubParagraphAction.annotate:
-        _annotate(_places.annotation(request.line, request.text));
-      case EpubParagraphAction.copyLink:
-        final at = _places.at(request.line);
-        if (at != null) await copyPlaceLink(context, at, widget.linkType);
-      case null:
-    }
-  }
+  /// What a selection of the book offers (#283): annotating it and a link
+  /// to it, in a library; copying it, anywhere.
+  List<ReadSelectionAction> _selectionActions() => [
+    if (widget.positions != null && widget.onAnnotate != null)
+      (
+        label: AppStrings.annotateAction,
+        onPressed: (selection) =>
+            _annotate(_places.selectionAnnotation(selection)),
+      ),
+    if (widget.positions != null)
+      (
+        label: AppStrings.copyPlaceLink,
+        onPressed: (selection) {
+          final at = _places.selected(selection);
+          if (at != null) {
+            unawaited(copyPlaceLink(context, at, widget.linkType));
+          }
+        },
+      ),
+  ];
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -286,10 +290,8 @@ final class EpubPaneState extends State<EpubPane> {
       ),
       embedResolver: (target) async => document.pictures[target],
       // A paragraph links, and annotates, only in a library.
-      onBlockMenu: widget.positions == null
-          ? null
-          : (request) => unawaited(_paragraphMenu(request)),
-      markedLines: epubMarkedLines(document, _marks?.marks ?? const []),
+      selectionActions: _selectionActions(),
+      marks: epubBlockMarks(document, _marks?.marks ?? const []),
       onTapMark: (start, end) => _openMarks(document, start, end),
     ),
   );

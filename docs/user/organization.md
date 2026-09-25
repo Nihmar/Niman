@@ -165,10 +165,13 @@ library.
 A PDF or a book is annotated in a note of its own, its **companion
 note**, without leaving the file:
 
-- In a book, **long-press a paragraph** (right-click on desktop) and pick
-  **Annotate**; the same menu copies a link to the paragraph. The
-  **annotate** button on the book's row annotates the paragraph at the
-  top of the view.
+- In a book, **select a passage** — long-press a word and drag the
+  handles on a phone; drag with the mouse on desktop, where a double
+  click selects a word and a triple click a paragraph — and pick
+  **Annotate** in its menu; the same menu copies the text, or a link to
+  the passage (on a phone, behind ⋮). The **annotate** button on the
+  book's row annotates the passage selected, or the paragraph at the top
+  of the view when nothing is.
 - In a PDF, **select a passage** and pick **Annotate** in its menu. The
   **annotate** button on the PDF's row annotates the passage selected,
   or the page being read when nothing is — a scanned PDF has no text to

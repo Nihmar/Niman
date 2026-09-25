@@ -6,6 +6,8 @@ library;
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
+import 'package:niman/src/markdown/render/read_selection.dart';
+import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/ui/place_link_button.dart';
 import 'package:path/path.dart' as p;
@@ -74,8 +76,44 @@ final class EpubPlaces {
     null => null,
   };
 
-  /// The paragraph being read, as an annotation.
+  /// The passage [selection] holds, as a place to link to: the paragraph
+  /// it starts in, and its characters there when it ends there too (#283).
+  PlaceToLink? selected(ReadSelection selection) {
+    final paragraph = at(selection.line);
+    if (paragraph == null) return null;
+    final place = paragraph.place as EpubLocation;
+    final end = selection.end;
+    return (
+      path: paragraph.path,
+      place: end == null
+          ? place
+          : EpubLocation(
+              chapter: place.chapter,
+              line: place.line,
+              chars: (start: selection.start, end: end),
+            ),
+      label: paragraph.label,
+    );
+  }
+
+  /// The passage [selection] holds, as an annotation quoting it.
+  Annotation? selectionAnnotation(ReadSelection selection) =>
+      switch (selected(selection)) {
+        final at? => Annotation(
+          path: at.path,
+          place: at.place,
+          label: at.label,
+          quote: selection.text,
+        ),
+        null => null,
+      };
+
+  /// The passage selected, else the paragraph being read, as an
+  /// annotation.
   Annotation? annotationHere() {
+    if (view?.selection case final selection?) {
+      return selectionAnnotation(selection);
+    }
     final top = topLine();
     final block = top == null ? null : view?.blockTextAt(top);
     return block == null ? null : annotation(block.line, block.text);

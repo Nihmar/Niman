@@ -61,7 +61,11 @@ sealed class BookLocation {
     final chapter = values['chapter'];
     if (chapter == null || chapter.isEmpty) return null;
     final line = int.tryParse(values['line'] ?? '') ?? 0;
-    return EpubLocation(chapter: chapter, line: line < 0 ? 0 : line);
+    return EpubLocation(
+      chapter: chapter,
+      line: line < 0 ? 0 : line,
+      chars: _range(values['chars']),
+    );
   }
 
   /// The character range `chars=120-180` spells, or null.
@@ -145,10 +149,17 @@ final class PdfLocation extends BookLocation {
 }
 
 /// A place in an EPUB: a chapter, a line of the chapter's text, and how far
-/// into that line.
+/// into that line; or, for a passage (#283), its characters in the text of
+/// the paragraph opening on that line.
 final class EpubLocation extends BookLocation {
-  /// The place [fraction] into [line] of [chapter].
-  const new({required this.chapter, required this.line, this.fraction = 0});
+  /// The place [fraction] into [line] of [chapter], or the passage [chars]
+  /// of the paragraph there.
+  const new({
+    required this.chapter,
+    required this.line,
+    this.fraction = 0,
+    this.chars,
+  });
 
   /// The chapter: its path in the book's archive, as the spine names it.
   final String chapter;
@@ -160,6 +171,10 @@ final class EpubLocation extends BookLocation {
   /// top, towards 1 at its bottom.
   final double fraction;
 
+  /// A passage: the range of its characters in the paragraph's text as a
+  /// reader sees it, the end excluded; null for the paragraph, or a place.
+  final ({int start, int end})? chars;
+
   @override
   Map<String, Object?> toJson() => {
     'chapter': chapter,
@@ -168,7 +183,13 @@ final class EpubLocation extends BookLocation {
   };
 
   @override
-  String toFragment() => 'chapter=${BookLocation._escape(chapter)}&line=$line';
+  String toFragment() {
+    final place = 'chapter=${BookLocation._escape(chapter)}&line=$line';
+    return switch (chars) {
+      (:final start, :final end) => '$place&chars=$start-$end',
+      null => place,
+    };
+  }
 
   @override
   bool isNear(BookLocation? other) =>
@@ -182,11 +203,12 @@ final class EpubLocation extends BookLocation {
       other is EpubLocation &&
       other.chapter == chapter &&
       other.line == line &&
-      other.fraction == fraction;
+      other.fraction == fraction &&
+      other.chars == chars;
 
   @override
-  int get hashCode => Object.hash(chapter, line, fraction);
+  int get hashCode => Object.hash(chapter, line, fraction, chars);
 
   @override
-  String toString() => 'EpubLocation($chapter, $line, $fraction)';
+  String toString() => 'EpubLocation($chapter, $line, $fraction, $chars)';
 }

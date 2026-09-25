@@ -39,6 +39,10 @@ Wikilinks and Markdown links alike:
   chapter of a book, the chapter named by its file inside the EPUB (its
   name alone is enough, `chapter=ch5.xhtml`). Niman's own form: there is
   no common one for books, and Obsidian opens the book, ignoring it.
+- `&chars=3-40` after either names a passage: its characters in the PDF
+  page's text, or in the text of the book's paragraph on that line. An
+  annotation's link carries it, for the file to mark just the passage;
+  following it goes to the page or the paragraph.
 
 You rarely write one by hand: the **link** button on the row under a PDF
 or a book copies a link to the place you are reading — the page, or the
