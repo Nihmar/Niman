@@ -292,7 +292,7 @@ final class AppSettingsRepo {
     );
   }
 
-  /// Where the tour stopped, for *Continue the tour*.
+  /// Where the tour stopped, for *Take the tour*.
   Future<void> setTourStep(int step) async {
     await _ensureRow();
     await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(

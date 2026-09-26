@@ -186,6 +186,11 @@ void main() {
     expect(find.byKey(const Key('tour-card')), findsOne);
     // The first step is the tree, which the wide layout is showing.
     expect(find.text('Your library'), findsOne);
+    expect(
+      store.tourOffer,
+      isFalse,
+      reason: 'the offer is spent the moment it is shown',
+    );
     await close();
   });
 
@@ -203,6 +208,19 @@ void main() {
 
     expect(store.tourOffer, isFalse);
     expect(find.byKey(const Key('tour-card')), findsNothing);
+    await close();
+  });
+
+  testWidgets('a tour already taken is never offered again', (tester) async {
+    store
+      ..deckSeen = true
+      ..tourOffer = true
+      ..tourSeen = true;
+    await pumpDeck(tester);
+
+    await openLibrary(tester, picker);
+
+    expect(find.byKey(const Key('tour-offer')), findsNothing);
     await close();
   });
 

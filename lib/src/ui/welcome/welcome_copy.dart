@@ -159,19 +159,15 @@ final class WelcomeCopy {
   /// The Settings → About row, and the palette command, for the deck.
   String get deckCommand => 'What Niman can do';
 
-  /// The palette command for the tour (the About row uses this too).
+  /// The palette command for the tour, and the Settings → About row: an
+  /// unfinished tour resumes where it stopped, a finished one starts
+  /// over.
   String get tourCommand => 'Take the tour';
-
-  /// The palette command that resumes a tour left halfway.
-  String get tourContinueCommand => 'Continue the tour';
 
   // The tour.
 
   /// Leaves the tour, remembering where it stopped.
   String get tourDone => 'Done';
-
-  /// Leaves the tour and never offers it again.
-  String get tourNever => "Don't show again";
 
   /// The offer, once the first library is open.
   String get tourOfferTitle => 'Show you around?';

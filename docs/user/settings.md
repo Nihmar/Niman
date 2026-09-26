@@ -68,8 +68,9 @@ sync) in `.niman/settings.json`.
 
 The **Diagnostics and info** area also carries the first run again
 (#266): *What Niman can do* reopens the welcome deck read-only, and
-*Continue the tour* resumes the guided tour wherever it stopped. Both are
-device settings, like the deck's Markdown answer themselves.
+*Take the tour* runs the guided tour — resuming one left halfway,
+starting a finished one over. Both are device settings, like the deck's
+Markdown answer themselves.
 
 ## Library settings kept on this device
 

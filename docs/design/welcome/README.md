@@ -266,7 +266,7 @@ up afterwards.
 | `welcome_seen` | bool | `0` | The deck has been finished or skipped; the migration sets `1` for every upgrading install |
 | `markdown_experience` | text nullable | null | `none` / `some` / `fluent`; null = never asked |
 | `tour_seen` | bool | `0` | The tour was finished or dismissed with "don't show again" |
-| `tour_step` | int | `0` | Where the tour stopped, for *Continue the tour* |
+| `tour_step` | int | `0` | Where the tour stopped, for *Take the tour* |
 | `tour_offer` | bool | `0` | The welcome's "show me around" checkbox, read when the first library opens |
 
 `AppSettingsRepo` gains the getters/setters (one row, `_ensureRow`, the
@@ -436,13 +436,21 @@ and the pieces stand where the plan put them. What differs, and why:
   target each do not fit a phone; `Back`/`Next` (and the arrow keys) are
   the way through.
 - **No "Don't show again" on the card.** `Skip` leaves the tour where it
-  is (the palette's *Continue the tour* resumes), the last step's `Done`
-  marks it seen, and the offer's *Not now* clears the offer — the tour
-  stays in Help and the palette, and is never raised on its own again.
+  is (the palette's *Take the tour* resumes), the last step's `Done`
+  marks it seen, and the offer is spent the moment it is shown — the
+  tour stays in Help and the palette, and is never raised on its own
+  again.
+- **A finished tour starts over.** `tour_step` goes back to 0 with
+  `tour_seen`, so *Take the tour* resumes a tour left halfway and runs a
+  finished one from its first step.
 - **The last step opens the cheatsheet and ends the tour.** The card's
   button closes the overlay, opens the cheatsheet and marks the tour
   done, which is the hand-over the plan asked for without a second
   overlay over a screen it no longer belongs to.
+- **The overlay is watched, not tried in.** Every tap goes to the scrim,
+  the hole included: the steps that hand the user a control (§6.1) are
+  not in this round, and nothing behind the tour can be edited by
+  accident.
 - **The copy lives in `ui/welcome/welcome_copy.dart`, in English.** The
   deck and the tour are ~70 labels, and `ui/strings/` is compile-time
   complete across thirty-seven locales: machine-translating onboarding
@@ -455,5 +463,5 @@ and the pieces stand where the plan put them. What differs, and why:
   library offers both editors.
 - **Entries:** the deck reopens read-only from Settings → About (*What
   Niman can do*) and the palette; the tour from Settings → About
-  (*Continue the tour*), the palette, and the welcome's own offer once a
+  (*Take the tour*), the palette, and the welcome's own offer once a
   library is open.
