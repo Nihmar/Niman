@@ -21,13 +21,13 @@ import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
-import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_progress_dialog.dart';
 import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/export/export_tree_book.dart';
+import 'package:niman/src/export/export_working_dialog.dart';
 import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
@@ -326,6 +326,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 // A book's metadata source, checked before the export starts
                 // (E3); widget tests answer for their library root.
                 epubMetadataProblem: ref.read(epubMetadataProblemProvider),
+                epubExport: ref.read(epubNoteExportProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -361,6 +362,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.pdfPrinter,
     required this.pdfEngineLookup,
     required this.epubMetadataProblem,
+    required this.epubExport,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -418,6 +420,10 @@ final class _LibraryShell extends StatefulWidget {
   /// Why a folder's book has no metadata source (#303, E3), asked before
   /// its EPUB export starts so the user can stop and add an `index.md`.
   final EpubMetadataLookup epubMetadataProblem;
+
+  /// Builds a note's EPUB book (#303); a seam, so a widget test can watch
+  /// the working dialog without the real builder's isolate.
+  final EpubNoteExport epubExport;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -2995,15 +3001,33 @@ final class _LibraryShellState extends State<_LibraryShell>
         }
       } else if (format == ExportFormat.epub) {
         // The book carries its pictures itself; the body is the same
-        // exported page the other formats draw (#303).
-        payload = await exportNoteEpub(
-          text: await ops.readNote(path),
-          title: title,
-          path: path,
-          root: root,
-          language: AppLanguages.resolved.id,
-          linkSource: _linkSource,
-        );
+        // exported page the other formats draw (#303). Building it —
+        // typesetting, copying the pictures, writing the zip — is the slow
+        // part, and on a phone it is seconds: the dialog says the app is
+        // working, where a PDF has its own.
+        final done = Completer<void>();
+        if (mounted) {
+          unawaited(
+            showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) =>
+                  ExportWorkingDialog(title: title, done: done.future),
+            ),
+          );
+        }
+        try {
+          payload = await widget.epubExport(
+            text: await ops.readNote(path),
+            title: title,
+            path: path,
+            root: root,
+            language: AppLanguages.resolved.id,
+            linkSource: _linkSource,
+          );
+        } finally {
+          if (!done.isCompleted) done.complete();
+        }
       } else {
         payload = await exportNote(
           text: await ops.readNote(path),

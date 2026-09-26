@@ -8,9 +8,12 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/saved_file.dart';
+import 'package:niman/src/export/epub_note.dart';
+import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
+import 'package:niman/src/links/resolver.dart';
 
 /// Where an exported file is written; the place it landed, or null when
 /// the dialog was dismissed. The tests hand in their own.
@@ -75,6 +78,23 @@ typedef EpubMetadataLookup = Future<EpubMetadataProblem?> Function(
 final epubMetadataProblemProvider = Provider<EpubMetadataLookup>(
   (ref) => ExportTreeBook.problemOf,
 );
+
+/// One note as an EPUB book (#303).
+final epubNoteExportProvider = Provider<EpubNoteExport>(
+  (ref) => exportNoteEpub,
+);
+
+/// Builds one note's EPUB book (#303): the seam the shell exporting a note
+/// goes through, so a widget test can answer without the isolate the real
+/// builder typesets in.
+typedef EpubNoteExport = Future<ExportPayload> Function({
+  required String text,
+  required String title,
+  required String path,
+  required String root,
+  required String language,
+  LinkSource? linkSource,
+});
 
 /// The printer a note's PDF goes through; tests hand in their own, since
 /// no engine can be started under `flutter test`. Android's WebView prints
