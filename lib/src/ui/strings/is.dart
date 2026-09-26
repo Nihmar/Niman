@@ -1575,11 +1575,20 @@ final class IcelandicStrings extends Strings {
       'index.md hefur ekkert frontmatter. Bókin ber nafn möppunnar og '
       'engan höfund, kápu eða seríu.';
   @override
-  String get exportEpubAnyway => 'Flytja út samt';
+  String get exportAnyway => 'Flytja út samt';
   @override
   String get exportPdfPicture =>
       'PDF-skjalið er mynd af síðunum; settu upp vafra fyrir valanlegan '
       'texta.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF sem mynd';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Enginn vafri fannst á þessari tölvu. Nótan er teiknuð sem '
+      'mynd af síðunum: ekki er hægt að velja eða leita í textanum, '
+      'og löng nóta tekur lengri tíma.';
   @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override

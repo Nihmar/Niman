@@ -1617,11 +1617,21 @@ final class FrenchStrings extends Strings {
       'index.md n’a pas de frontmatter. Le livre portera le nom du '
       'dossier et n’aura ni auteur, ni couverture, ni série.';
   @override
-  String get exportEpubAnyway => 'Exporter quand même';
+  String get exportAnyway => 'Exporter quand même';
   @override
   String get exportPdfPicture =>
       'Le PDF est une image des pages ; installez un navigateur pour un texte '
       'sélectionnable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF en image';
+
+  @override
+  String get exportPdfNoEngine =>
+      "Aucun navigateur n'a été trouvé sur cette machine. La note "
+      'est dessinée comme une image des pages : le texte ne peut '
+      'être ni sélectionné ni recherché, et une note longue prend '
+      'plus de temps.';
   @override
   String get formatNoteAlreadyTidy => 'La note était déjà rangée.';
   @override

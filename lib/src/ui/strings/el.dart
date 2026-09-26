@@ -1627,11 +1627,21 @@ final class GreekStrings extends Strings {
       'Το index.md δεν έχει frontmatter. Το βιβλίο θα φέρει το όνομα '
       'του φακέλου και κανέναν συγγραφέα, εξώφυλλο ή σειρά.';
   @override
-  String get exportEpubAnyway => 'Εξαγωγή παρόλα αυτά';
+  String get exportAnyway => 'Εξαγωγή παρόλα αυτά';
   @override
   String get exportPdfPicture =>
       'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε ένα πρόγραμμα '
       'περιήγησης για επιλέξιμο κείμενο.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF ως εικόνα';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Δεν βρέθηκε πρόγραμμα περιήγησης σε αυτόν τον υπολογιστή. Η '
+      'σημείωση σχεδιάζεται ως εικόνα των σελίδων: το κείμενο δεν '
+      'μπορεί να επιλεγεί ή να αναζητηθεί, και μια μεγάλη σημείωση '
+      'παίρνει περισσότερο χρόνο.';
   @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override

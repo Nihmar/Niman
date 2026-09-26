@@ -1443,9 +1443,16 @@ final class ChineseStrings extends Strings {
   String get exportEpubNoFrontmatter =>
       'index.md 没有 frontmatter。书籍将以文件夹名称命名，且没有作者、封面或系列。';
   @override
-  String get exportEpubAnyway => '仍然导出';
+  String get exportAnyway => '仍然导出';
   @override
   String get exportPdfPicture => 'PDF 是页面的图片；安装浏览器后文字可选择。';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF 为页面图片';
+
+  @override
+  String get exportPdfNoEngine =>
+      '此计算机上未找到浏览器引擎。笔记将绘制为页面图片：文本既不能选择也不能搜索，长笔记需要更长时间。';
   @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override

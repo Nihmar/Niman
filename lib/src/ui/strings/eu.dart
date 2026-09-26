@@ -1585,10 +1585,19 @@ final class BasqueStrings extends Strings {
       'index.md-k ez du frontmatter-ik. Liburuak karpetaren izena '
       'izango du, eta ez autore, azal edo sailik.';
   @override
-  String get exportEpubAnyway => 'Esportatu hala ere';
+  String get exportAnyway => 'Esportatu hala ere';
   @override
   String get exportPdfPicture =>
       'PDFa orrialdeen irudia da; instalatu nabigatzailea testua hautatzeko.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF irudi gisa';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Ez da nabigatzailerik aurkitu ordenagailu honetan. Oharra '
+      'orrien irudi gisa marrazten da: testua ezin da hautatu edo '
+      'bilatu, eta ohar luzeak denbora gehiago behar du.';
   @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override

@@ -1582,11 +1582,20 @@ final class UkrainianStrings extends Strings {
       'У index.md немає frontmatter. Книга матиме назву теки і не '
       'матиме автора, обкладинки чи серії.';
   @override
-  String get exportEpubAnyway => 'Усе одно експортувати';
+  String get exportAnyway => 'Усе одно експортувати';
   @override
   String get exportPdfPicture =>
       'PDF — це зображення сторінок; встановіть браузер, щоб текст можна '
       'було виділяти.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF як зображення';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На цій машині не знайдено браузера. Нотатка малюється як '
+      'зображення сторінок: текст не можна виділити чи шукати, а '
+      'довга нотатка триває довше.';
   @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override

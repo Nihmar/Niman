@@ -1589,10 +1589,19 @@ final class FinnishStrings extends Strings {
       'index.md-tiedostossa ei ole frontmatteria. Kirja saa kansion '
       'nimen, eikä siinä ole tekijää, kantta tai sarjaa.';
   @override
-  String get exportEpubAnyway => 'Vie silti';
+  String get exportAnyway => 'Vie silti';
   @override
   String get exportPdfPicture =>
       'PDF on kuva sivuista; asenna selain, niin teksti on valittavissa.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kuvana';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Tältä koneelta ei löytynyt selainta. Muistiinpano piirretään '
+      'kuvana sivuista: tekstiä ei voi valita tai etsiä, ja pitkä '
+      'muistiinpano kestää kauemmin.';
   @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override

@@ -11,6 +11,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_tree_book.dart';
+import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -61,6 +62,7 @@ void main() {
     Size size = const Size(1400, 900),
     String? pdfEngine,
     EpubMetadataProblem? epubProblem,
+    PdfPrinter? pdfPrinter,
   }) async {
     setSurfaceSize(tester, size);
     await tester.pumpWidget(
@@ -93,6 +95,11 @@ void main() {
           }),
           // The engine search is the machine's; the tests answer for it.
           pdfEngineProvider.overrideWith((ref) => pdfEngine),
+          // As is the printer a note's PDF goes through: the tests hand in
+          // one that cannot print, which is the machine the fallback is
+          // for.
+          if (pdfPrinter != null)
+            pdfPrinterProvider.overrideWithValue(pdfPrinter),
           // The metadata pre-flight reads the library root, which is not a
           // real folder here: the test answers for it.
           epubMetadataProblemProvider.overrideWithValue(
@@ -306,6 +313,26 @@ void main() {
     await settle(tester);
   });
 
+  testWidgets('a note PDF with nothing to print with asks first', (
+    tester,
+  ) async {
+    await pumpShell(tester, pdfPrinter: const _NoEnginePrinter());
+    await chooseExport(tester, 'pdf');
+
+    // What is written would be a picture of the pages — no text to select
+    // or search, and minutes of drawing on a long note — and that is said
+    // before the note is even read, so a stop costs nothing (#63).
+    expect(find.byKey(const Key('export-pdf-picture-dialog')), findsOneWidget);
+    expect(find.text(AppStrings.exportPdfNoEngine), findsOneWidget);
+    expect(saved, isNull);
+
+    await tester.tap(find.byKey(const Key('export-pdf-picture-cancel')));
+    await settle(tester);
+    expect(saved, isNull);
+    expect(find.byKey(const Key('pdf-export-progress')), findsNothing);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
   testWidgets('a folder row exports it as one zip', (tester) async {
     // The destination dialog is dismissed: the picker was asked, and
     // nothing was written.
@@ -440,4 +467,17 @@ void main() {
     await settle(tester);
     expect(pickedTitle, AppStrings.exportTitle);
   });
+}
+
+/// A machine with nothing to print a page with — no Edge, no Chromium — so
+/// a note's PDF would be drawn here instead (#63).
+final class _NoEnginePrinter implements PdfPrinter {
+  const new();
+
+  @override
+  Future<bool> get canPrint async => false;
+
+  @override
+  Future<PdfOutcome> print(String htmlPath, String pdfPath) async =>
+      const PdfNoEngine();
 }

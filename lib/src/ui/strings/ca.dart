@@ -1608,11 +1608,20 @@ final class CatalanStrings extends Strings {
       'index.md no té frontmatter. El llibre portarà el nom de la '
       'carpeta i cap autor, portada ni sèrie.';
   @override
-  String get exportEpubAnyway => 'Exporta igualment';
+  String get exportAnyway => 'Exporta igualment';
   @override
   String get exportPdfPicture =>
       'El PDF és una imatge de les pàgines; instal·la un navegador per tenir '
       'text seleccionable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF com a imatge';
+
+  @override
+  String get exportPdfNoEngine =>
+      "No s'ha trobat cap navegador en aquest ordinador. La nota es "
+      'dibuixa com una imatge de les pàgines: el text no es pot '
+      'seleccionar ni cercar, i una nota llarga triga més.';
   @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override

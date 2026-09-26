@@ -1576,10 +1576,19 @@ final class SlovakStrings extends Strings {
       'index.md nemá frontmatter. Kniha ponesie názov priečinka a '
       'nebude mať autora, obálku ani sériu.';
   @override
-  String get exportEpubAnyway => 'Priek tomu exportovať';
+  String get exportAnyway => 'Priek tomu exportovať';
   @override
   String get exportPdfPicture =>
       'PDF je obrázok stránok; nainštalujte prehliadač pre vyberateľný text.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF ako obrázok';
+
+  @override
+  String get exportPdfNoEngine =>
+      'V tomto počítači sa nenašiel žiadny prehliadač. Poznámka sa '
+      'vykreslí ako obrázok strán: text nie je možné označiť ani '
+      'vyhľadávať a dlhá poznámka trvá dlhšie.';
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override

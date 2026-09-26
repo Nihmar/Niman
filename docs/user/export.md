@@ -20,15 +20,19 @@ one file:
   breaking the page.
 - **PDF** — the same page printed: A4, its paper style, its formulas and
   pictures in place. The machine prints it with its own browser — Edge on
-  Windows, a Chromium-family browser on Linux, the system WebView on
-  Android — so the text stays real: it can be selected, searched and
-  copied. On a desktop that has none of those browsers the note is drawn
-  instead: a picture of its pages, which cannot be selected, and Niman
-  says so when the file is written. The drawn pages show the note's
-  pictures too — the fallback reads and draws them, it does not leave
-  them out. A PDF export says it is running while it runs — the engine
-  printing, or the pages being drawn one by one — and can be stopped
-  from the same dialog: a long note is minutes of work, not a hang.
+  Windows, a Chromium-family browser on Linux (Chromium, Chrome, Brave,
+  Vivaldi, Helium), the system WebView on Android — so the text stays
+  real: it can be selected, searched and copied. On a desktop that has
+  none of those browsers the note is drawn instead: a picture of its
+  pages, which cannot be selected. That is not what everyone asked for,
+  so Niman says it *before* it starts drawing and lets you stop there,
+  and says it again when the file is written. The drawn pages show the
+  note's pictures too — the fallback reads and draws them, it does not
+  leave them out — and their pages break between two lines, so a page
+  never cuts one in half. A PDF export says it is running while it runs —
+  the engine printing, or the pages being drawn one by one — and can be
+  stopped from the same dialog: a long note is minutes of work, not a
+  hang.
 - **EPUB** — the note as a book of one chapter, for an e-reader: the same
   page (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the
   file. A `cover:` key in the note's frontmatter names a picture the book

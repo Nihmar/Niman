@@ -1596,11 +1596,21 @@ final class DutchStrings extends Strings {
       'index.md heeft geen frontmatter. Het boek krijgt de naam van de '
       'map en geen auteur, omslag of reeks.';
   @override
-  String get exportEpubAnyway => 'Toch exporteren';
+  String get exportAnyway => 'Toch exporteren';
   @override
   String get exportPdfPicture =>
       "De PDF is een afbeelding van de pagina's; installeer een browser "
       'voor selecteerbare tekst.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF als afbeelding';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Er is geen browser gevonden op deze computer. De notitie '
+      "wordt getekend als een afbeelding van de pagina's: de tekst "
+      'kan niet worden geselecteerd of doorzocht, en een lange '
+      'notitie duurt langer.';
   @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override

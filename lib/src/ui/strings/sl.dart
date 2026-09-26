@@ -1571,10 +1571,19 @@ final class SlovenianStrings extends Strings {
       'index.md nima frontmatterja. Knjiga bo nosila ime mape in ne bo '
       'imela avtorja, naslovnice ali zbirke.';
   @override
-  String get exportEpubAnyway => 'Vseeno izvozi';
+  String get exportAnyway => 'Vseeno izvozi';
   @override
   String get exportPdfPicture =>
       'PDF je slika strani; za izbirno besedilo namestite brskalnik.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kot slika';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na tem računalniku ni bilo najdenega brskalnika. Zapis se '
+      'nariše kot slika strani: besedila ni mogoče izbrati ali '
+      'iskati, dolg zapis pa traja dlje.';
   @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override

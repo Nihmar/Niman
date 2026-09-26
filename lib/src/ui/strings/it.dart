@@ -1596,11 +1596,21 @@ final class ItalianStrings extends Strings {
       'index.md non ha frontmatter. Il libro porterà il nome della '
       'cartella e nessun autore, copertina o serie.';
   @override
-  String get exportEpubAnyway => 'Esporta comunque';
+  String get exportAnyway => 'Esporta comunque';
   @override
   String get exportPdfPicture =>
       "Il PDF è un'immagine delle pagine; installa un browser per "
       'avere testo selezionabile.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF come immagine';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Su questa macchina non è stato trovato alcun motore di '
+      "browser. La nota viene disegnata come un'immagine delle "
+      'pagine: il testo non può essere selezionato né cercato, e '
+      'una nota lunga richiede più tempo.';
   @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override

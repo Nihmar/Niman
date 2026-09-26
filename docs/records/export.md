@@ -93,8 +93,8 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
 - [x] Every picture the note shows is decoded and drawn in place — the fallback hands the page its pictures, or the note would silently lose them.
 - [x] The printed page points at its pictures with `file:` URLs, where the exported HTML must carry `data:` URIs: the engine fetches them itself, and embedding a library's photos built pages of hundreds of megabytes — the Android bridge read one into its own heap until it OOM'd.
 - [x] The export says it is running — the engine printing, then the pages drawn — and can be cancelled from the dialog; the fallback checks between pages, and Android's bridge stops a print in flight.
-- [x] Afterwards the app says what happened: the PDF is a picture of the pages, and a browser engine on the machine gives selectable text.
-- [x] Tests: the page count over a known note; the paper is A4 in points; a picture handed in is drawn; the writer round-trips its image streams.
+- [x] The machine is asked **before** the note is read: no engine to print with means a picture of the pages, so the export shows a pre-flight dialog (*Cancel* / *Export anyway*) and stops there if the user wants; the note is read and the dialog closed behind the progress one, so nothing is done before the answer. Afterwards the app says what happened as well: the PDF is a picture of the pages, and a browser engine on the machine gives selectable text.
+- [x] Tests: the page count over a known note; a break never falls inside a line of a real layout; the paper is A4 in points; a picture handed in is drawn; the writer round-trips its image streams.
 
 ### 2.3 What gets exported as PDF
 - [x] A note gives one `.pdf`.

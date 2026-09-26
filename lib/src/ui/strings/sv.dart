@@ -1582,10 +1582,19 @@ final class SwedishStrings extends Strings {
       'index.md har ingen frontmatter. Boken får mappens namn och '
       'ingen författare, omslag eller serie.';
   @override
-  String get exportEpubAnyway => 'Exportera ändå';
+  String get exportAnyway => 'Exportera ändå';
   @override
   String get exportPdfPicture =>
       'PDF:en är en bild av sidorna; installera en webbläsare för valbar text.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF som bild';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Ingen webbläsare hittades på den här datorn. Anteckningen '
+      'ritas som en bild av sidorna: texten kan varken markeras '
+      'eller sökas, och en lång anteckning tar längre tid.';
   @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override

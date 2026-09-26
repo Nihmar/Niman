@@ -1559,10 +1559,19 @@ final class EstonianStrings extends Strings {
       'index.md failil pole frontmatterit. Raamat kannab kausta nime '
       'ning sellel pole autorit, kaant ega sarja.';
   @override
-  String get exportEpubAnyway => 'Ekspordi siiski';
+  String get exportAnyway => 'Ekspordi siiski';
   @override
   String get exportPdfPicture =>
       'PDF on lehekülgede pilt; valitava teksti saamiseks paigalda brauseri.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF pildina';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Selles arvutis ei leitud brauserit. Märge joonistatakse '
+      'lehekülgede pildina: teksti ei saa valida ega otsida ning '
+      'pikk märge võtab kauem aega.';
   @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override

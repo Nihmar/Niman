@@ -1591,11 +1591,20 @@ final class GalicianStrings extends Strings {
       'index.md non ten frontmatter. O libro levará o nome do cartafol '
       'e ningún autor, portada ou serie.';
   @override
-  String get exportEpubAnyway => 'Exportar de todos os xeitos';
+  String get exportAnyway => 'Exportar de todos os xeitos';
   @override
   String get exportPdfPicture =>
       'O PDF é unha imaxe das páxinas; instala un navegador para ter texto '
       'seleccionable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF como imaxe';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Non se atopou ningún navegador nesta máquina. A nota '
+      'debúxase como unha imaxe das páxinas: o texto non se pode '
+      'seleccionar nin buscar, e unha nota longa tarda máis.';
   @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override

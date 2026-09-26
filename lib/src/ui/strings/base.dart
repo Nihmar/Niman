@@ -753,8 +753,19 @@ abstract base class Strings {
   /// The dialog's message when `index.md` has no frontmatter.
   String get exportEpubNoFrontmatter;
 
-  /// The dialog's proceed action: export the book without metadata.
-  String get exportEpubAnyway;
+  /// The dialog's proceed action: export anyway, without what the message
+  /// said is missing. Both pre-flight dialogs end with it — a book without
+  /// metadata (#303, E3), a note drawn as a picture (#63).
+  String get exportAnyway;
+
+  /// The title of the pre-flight dialog a note's PDF export shows when the
+  /// machine has no browser engine to print the page with (#63): what is
+  /// written is a picture of the pages, drawn here.
+  String get exportPdfNoEngineTitle;
+
+  /// The dialog's message: drawn page by page, with no text to select or
+  /// search, and slower on a long note.
+  String get exportPdfNoEngine;
 
   String get exportPdfPicture;
   String exportDone(String place);

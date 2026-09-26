@@ -1569,11 +1569,20 @@ final class CzechStrings extends Strings {
       'index.md nemá frontmatter. Kniha ponese název složky a nebude '
       'mít autora, obálku ani sérii.';
   @override
-  String get exportEpubAnyway => 'Přesto exportovat';
+  String get exportAnyway => 'Přesto exportovat';
   @override
   String get exportPdfPicture =>
       'PDF je obrázek stránek; nainstalujte prohlížeč pro text, který lze '
       'vybrat.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF jako obrázek';
+
+  @override
+  String get exportPdfNoEngine =>
+      'V tomto počítači nebyl nalezen žádný prohlížeč. Poznámka se '
+      'vykreslí jako obrázek stránek: text nelze označit ani '
+      'vyhledávat a dlouhá poznámka trvá déle.';
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override

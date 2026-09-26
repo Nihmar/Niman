@@ -1590,11 +1590,20 @@ final class AlbanianStrings extends Strings {
       'index.md nuk ka frontmatter. Libri do të mbajë emrin e dosjes '
       'dhe pa autor, kopertinë ose seri.';
   @override
-  String get exportEpubAnyway => 'Eksporto gjithsesi';
+  String get exportAnyway => 'Eksporto gjithsesi';
   @override
   String get exportPdfPicture =>
       'PDF-ja është një pamje e faqeve; instaloni një shfletues për tekst të '
       'zgjedhshëm.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF si imazh';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Në këtë makinë nuk u gjet asnjë shfletues. Shënimi vizatohet '
+      'si imazh i faqeve: teksti nuk mund të zgjidhet ose kërkohet, '
+      'dhe një shënim i gjatë kërkon më shumë kohë.';
   @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override
