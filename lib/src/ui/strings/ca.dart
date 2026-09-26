@@ -1549,6 +1549,8 @@ final class CatalanStrings extends Strings {
   @override
   String get importFolderAction => 'Importa';
   @override
+  String get notionImportTitle => 'Importa exportació de Notion';
+  @override
   String dropRejected(String names) =>
       'Aquí només s’obren fitxers Markdown i carpetes: $names';
   @override

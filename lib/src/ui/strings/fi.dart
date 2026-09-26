@@ -1529,6 +1529,8 @@ final class FinnishStrings extends Strings {
   @override
   String get importFolderAction => 'Tuo';
   @override
+  String get notionImportTitle => 'Tuo Notion-vienti';
+  @override
   String dropRejected(String names) =>
       'Täällä avautuvat vain Markdown-tiedostot ja kansiot: $names';
   @override

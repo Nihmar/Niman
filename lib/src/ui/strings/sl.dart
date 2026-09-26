@@ -1512,6 +1512,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get importFolderAction => 'Uvozi';
   @override
+  String get notionImportTitle => 'Uvozi izvoz Notion';
+  @override
   String dropRejected(String names) =>
       'Tu se odpirajo samo datoteke Markdown in mape: $names';
   @override

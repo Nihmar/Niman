@@ -1500,6 +1500,8 @@ final class EstonianStrings extends Strings {
   @override
   String get importFolderAction => 'Impordi';
   @override
+  String get notionImportTitle => 'Impordi Notioni eksport';
+  @override
   String dropRejected(String names) =>
       'Siin avanevad ainult Markdowni failid ja kaustad: $names';
   @override

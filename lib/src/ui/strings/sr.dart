@@ -1524,6 +1524,8 @@ final class SerbianStrings extends Strings {
   @override
   String get importFolderAction => 'Увези';
   @override
+  String get notionImportTitle => 'Увези Notion извоз';
+  @override
   String dropRejected(String names) =>
       'Овде се отварају само Markdown датотеке и фасцикле: $names';
   @override

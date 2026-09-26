@@ -35,6 +35,7 @@ import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/markdown_import.dart';
@@ -1670,7 +1671,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the bytes and wrote its own copy at [path], which is imported here
   /// and deleted. The note lands at the library root under the name it
   /// came with, uniquified like any new note; a `.markdown` and a `.txt`
-  /// alike become one, because what is imported is its text.
+  /// alike become one, because what is imported is its text. A `.zip` is
+  /// a Notion export instead (#25): its pages land in a folder of their
+  /// own, see [_importNotionArchive].
   Future<void> _importSharedFile({
     required String path,
     required String name,
@@ -1679,6 +1682,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (ops == null || !mounted) return;
     final source = File(path);
     if (!source.existsSync()) return;
+    if (p.extension(name).toLowerCase() == '.zip') {
+      await _importNotionArchive(source, name, consume: true);
+      return;
+    }
     var text = utf8.decode(await source.readAsBytes(), allowMalformed: true);
     // A BOM is the platform's encoding marker, not part of the note.
     if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
@@ -1699,6 +1706,50 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (!mounted) return;
       _revealFolder('');
       _openNoteFromLink(imported.path, null);
+    });
+  }
+
+  /// Imports the Notion export [source] (a `.zip`) into a new folder of
+  /// the library (#25), revealing it, and says where it landed.
+  ///
+  /// [consume] deletes the archive first — a share's copy in the app
+  /// cache has no other owner; a file the user dropped is theirs and
+  /// stays where it is.
+  Future<void> _importNotionArchive(
+    File source,
+    String name, {
+    bool consume = false,
+  }) async {
+    final root = widget.controller.root;
+    if (root == null || !mounted) return;
+    await _guard(() async {
+      final imported = await importNotionZip(
+        source: source.path,
+        libraryRoot: root,
+      );
+      if (consume) {
+        try {
+          await source.delete();
+        } on FileSystemException {
+          // A cache file that outlives us costs disk, not the import.
+        }
+      }
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      if (imported == null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
+        );
+        return;
+      }
+      // Asked for now rather than waiting for the watcher: the tree is
+      // where the user looks next, and the notes have just been written.
+      await widget.controller.rescanNow();
+      if (!mounted) return;
+      _revealFolder(imported.folder);
+      messenger.showSnackBar(
+        SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),
+      );
     });
   }
 
@@ -2919,8 +2970,13 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// A folder dropped on the window (#75). One of this library's own is
   /// shown in the tree; any other is offered for import — its Markdown
-  /// copied into a new folder here — and shown once it is in.
+  /// copied into a new folder here — and shown once it is in. A Notion
+  /// export (a `.zip`, #25) goes through the import instead.
   Future<void> _openFolder(String path) async {
+    if (p.extension(path).toLowerCase() == '.zip') {
+      await _importNotionArchive(File(path), p.basename(path));
+      return;
+    }
     final root = widget.controller.root;
     if (root == null || !mounted) return;
     if (p.equals(root, path) || p.isWithin(root, path)) {

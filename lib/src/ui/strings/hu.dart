@@ -1528,6 +1528,8 @@ final class HungarianStrings extends Strings {
   @override
   String get importFolderAction => 'Importálás';
   @override
+  String get notionImportTitle => 'Notion-exportálás importálása';
+  @override
   String dropRejected(String names) =>
       'Itt csak Markdown-fájlok és mappák nyílnak meg: $names';
   @override

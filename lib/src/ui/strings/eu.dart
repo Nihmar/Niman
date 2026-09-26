@@ -1525,6 +1525,8 @@ final class BasqueStrings extends Strings {
   @override
   String get importFolderAction => 'Inportatu';
   @override
+  String get notionImportTitle => 'Inportatu Notion esportazioa';
+  @override
   String dropRejected(String names) =>
       'Hemen Markdown fitxategiak eta karpetak soilik irekitzen dira: $names';
   @override

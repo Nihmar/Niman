@@ -1527,6 +1527,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get importFolderAction => 'Importar';
   @override
+  String get notionImportTitle => 'Importar exportação do Notion';
+  @override
   String dropRejected(String names) =>
       'Aqui só abrem ficheiros Markdown e pastas: $names';
   @override

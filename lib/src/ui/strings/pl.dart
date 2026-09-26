@@ -1537,6 +1537,8 @@ final class PolishStrings extends Strings {
   @override
   String get importFolderAction => 'Importuj';
   @override
+  String get notionImportTitle => 'Importuj eksport Notion';
+  @override
   String dropRejected(String names) =>
       'Tu otwierają się tylko pliki Markdown i foldery: $names';
   @override

@@ -1523,6 +1523,8 @@ final class SwedishStrings extends Strings {
   @override
   String get importFolderAction => 'Importera';
   @override
+  String get notionImportTitle => 'Importera Notion-export';
+  @override
   String dropRejected(String names) =>
       'Här öppnas bara Markdown-filer och mappar: $names';
   @override

@@ -276,9 +276,34 @@ frame around the window says so while you drag.
   Nothing else comes along: not images, not hidden folders such as
   `.git` or `.obsidian`. The folder you dropped is left exactly as it
   was.
+- **A Notion export** (the `.zip` of *Export → Markdown & CSV*) is
+  imported: see [Importing a Notion export](#importing-a-notion-export).
 - **With no library open**, a dropped folder opens as the library, the
   way *Open existing* would open it.
 - **Anything else** is left alone, and a message names it.
+
+## Importing a Notion export
+
+Notion's **Export → Markdown & CSV** downloads a zip of pages. *Settings
+→ Maintenance → Import Notion export* picks that zip, and so does sharing
+it to Niman on Android or dropping it on the window on the desktop. The
+pages land in a new folder of the library named after the export: the
+page id goes from every name (`Roadmap 4a1b…​.md` is `Roadmap.md`), each
+page keeps its children in a folder of its own, and the links between
+pages are rewritten to the names they now have — so the result is a
+browsable, linked part of the library, not a pile of renamed files.
+Images and other attachments come along. What Notion exports for itself
+does not: the `.csv` of a database view, and hidden folders. The zip
+itself stays where it was (a share's copy is deleted with the share).
+
+## An Obsidian vault
+
+A vault is **opened, not imported**: pick the vault folder when opening a
+library, and Obsidian's syntax reads the same way there — `[[wikilinks]]`
+with `|aliases`, `[[folder/note]]` paths, `![[image.png]]` embeds finding
+their attachment by bare name, frontmatter, `#tags`. The vault's hidden
+folders (`.obsidian/`, `.trash/`) stay out of the tree, and everything
+else in it that is not Markdown is kept as a file.
 
 ## Folders, quick note, list notes, voice notes
 
