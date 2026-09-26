@@ -115,6 +115,41 @@ void main() {
     }
   });
 
+  test('every cross-reference entry names the object at its offset', () {
+    final first = PdfPageImage(width: 2, height: 2, rgb: _rgb(10));
+    final second = PdfPageImage(width: 2, height: 2, rgb: _rgb(100));
+    final pdf = writePdf(<PdfPageImage>[first, second]);
+    final text = latin1.decode(pdf);
+    // The table starts where the trailer says, and its entries name the
+    // objects at their offsets: the page tree (object 2) is written last,
+    // so a table in write order pointed every entry at the next object
+    // (P1). A reader repairs such a file by scanning; `qpdf --check` does
+    // not.
+    final startxref = int.parse(
+      RegExp(r'startxref\n(\d+)').firstMatch(text)!.group(1)!,
+    );
+    final header = RegExp(r'^xref\n0 (\d+)\n')
+        .firstMatch(text.substring(startxref));
+    expect(header, isNotNull);
+    final count = int.parse(header!.group(1)!);
+    var at = startxref + header.group(0)!.length;
+    for (var number = 0; number < count; number++) {
+      final entry = text.substring(at, at + 20);
+      at += 20;
+      if (number == 0) {
+        expect(entry, '0000000000 65535 f \n');
+        continue;
+      }
+      final offset = int.parse(entry.substring(0, 10));
+      final object = '$number 0 obj';
+      expect(
+        text.substring(offset, offset + object.length),
+        object,
+        reason: 'xref entry $number',
+      );
+    }
+  });
+
   test('an image is fitted into the content box, not stretched', () {
     // A wide picture in a square content box is limited by the width.
     final wide = PdfPageImage(width: 4, height: 2, rgb: Uint8List(24));
