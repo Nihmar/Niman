@@ -153,7 +153,20 @@ void main() {
 
     shares.emit(SharedFile(path: zip.path, name: 'Export.zip'));
     final target = File(p.join(tmp.path, 'library', 'Workspace', 'Roadmap.md'));
-    for (var i = 0; i < 100 && !target.existsSync(); i++) {
+    // The import reads the zip, writes the note and consumes the copy for
+    // real, which a widget test's fake clock cannot drive on its own: each
+    // turn here gives the isolate real time and pumps the continuation it
+    // wakes. The wait is on the result — the note's bytes and the consumed
+    // copy — and generous, because a shared runner is slower than a desk
+    // and a timeout here reads as a failure of the feature.
+    for (
+      var i = 0;
+      i < 500 &&
+          !(target.existsSync() &&
+              target.lengthSync() > 0 &&
+              !zip.existsSync());
+      i++
+    ) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
@@ -185,7 +198,7 @@ void main() {
     // body is fake-async: real time is let through for the read, a pump
     // for the continuation it wakes. The loop is the seam between the two.
     shares.emit(SharedFile(path: copy.path, name: 'Report.md'));
-    for (var i = 0; i < 50 && controller.contentOf('Report.md') == null; i++) {
+    for (var i = 0; i < 300 && controller.contentOf('Report.md') == null; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 10)),
       );
