@@ -47,11 +47,22 @@ corrected after the fact with `gh release edit` without re-tagging.
 
 | Platform | Files |
 |----------|-------|
-| Android | `.apk`, testing `.apk` (issue #106) |
+| Android | `.apk` (the official build; **the release pipeline never builds the testing flavor** — see below) |
 | Linux | `.tar.gz`, `.AppImage`, `.pkg.tar.zst` (Arch) |
 | Windows | Inno Setup installer (`.exe`), portable `.zip` |
 
 See `packaging/` for AppImage, Arch pkg, and Inno Setup details.
+
+**No testing APK in a release, ever.** The in-app update downloads the
+release's `.apk` (issue #81), and GitHub lists assets in name order:
+`niman-<V>-android-testing.apk` sorts before `niman-<V>-android.apk`, so
+a page carrying both handed the updater the testing app — a different
+application ID, installed *beside* the one that asked (0.0.10, fixed in
+0.1.0). The release pipeline therefore builds the official flavor and
+nothing else; the testing flavor is a **local** build
+(`./scripts/niman.sh apk beta`, `scripts\niman.bat apk beta`), which is
+what it is for. `selectAndroidAsset` also refuses a `-testing` name, for
+pages cut before this rule.
 
 ## Signing
 

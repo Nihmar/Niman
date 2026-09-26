@@ -40,6 +40,32 @@ void main() {
       );
     });
 
+    test('android picks the official apk, not the testing build', () {
+      // The order the 0.0.10 release page had: GitHub lists assets by
+      // name, and `-android-testing.apk` sorts before `-android.apk`.
+      const page = [
+        ReleaseAsset(
+          name: 'niman-1.0.0-android-testing.apk',
+          downloadUrl: 'https://example.com/niman-1.0.0-android-testing.apk',
+        ),
+        ReleaseAsset(
+          name: 'niman-1.0.0-android.apk',
+          downloadUrl: 'https://example.com/niman-1.0.0-android.apk',
+        ),
+      ];
+      expect(selectAndroidAsset(page)!.name, 'niman-1.0.0-android.apk');
+    });
+
+    test('android with only a testing apk still answers with it', () {
+      const page = [
+        ReleaseAsset(
+          name: 'niman-1.0.0-android-testing.apk',
+          downloadUrl: 'https://example.com/niman-1.0.0-android-testing.apk',
+        ),
+      ];
+      expect(selectAndroidAsset(page)!.name, 'niman-1.0.0-android-testing.apk');
+    });
+
     test('windows picks the installer, never the portable zip', () {
       expect(
         selectWindowsAsset(sampleAssets())!.name,

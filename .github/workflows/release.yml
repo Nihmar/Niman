@@ -93,22 +93,18 @@ jobs:
           mkdir -p dist
           cp build/app/outputs/flutter-apk/app-official-release.apk "dist/niman-$VERSION-android.apk"
 
-      # The testing build (issue #106): the release pipeline with the
-      # beta flavor's separate application ID (dev.niman.niman.beta),
-      # installable side by side with the official APK.
-      - run: flutter build apk --release --flavor beta --dart-define=APP_CHANNEL=testing --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
-
-      - name: Stage testing artifact
-        run: cp build/app/outputs/flutter-apk/app-beta-release.apk "dist/niman-$VERSION-android-testing.apk"
-
       - uses: actions/upload-artifact@v4
         with:
           name: apk
-          # Both APKs: the official `-android.apk` and the testing
-          # `-android-testing.apk`. A glob ending in `-android.apk`
-          # matched only the first, so the testing build was built and
-          # staged and then never uploaded -- no release had it.
-          path: dist/niman-*-android*.apk
+          path: dist/niman-$VERSION-android.apk
+
+      # No testing build here (issue #106, revised): a release carries the
+      # official APK and nothing else. An in-app update takes the release's
+      # `.apk` (issue #81), and `-android-testing.apk` sorts before
+      # `-android.apk`, so 0.0.10's page handed the updater the testing
+      # app — a different application ID, installed beside the one that
+      # asked. The testing flavor is built **locally** when it is wanted
+      # (`./scripts/niman.sh apk beta`), never by the release pipeline.
 
   linux:
     name: Linux tarball, AppImage, Arch pkg
