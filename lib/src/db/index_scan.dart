@@ -5,10 +5,13 @@
 /// otherwise be a UI-isolate FUSE round trip.
 library;
 
+import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
 
 /// A note file or folder observed on disk during a scan.
@@ -112,6 +115,237 @@ void _walkDir(
       logs.add('walk: skip non-file/dir entry "${ent.path}" ($ent)');
     }
   }
+}
+
+/// One directory's own listing in a streamed walk (#302).
+///
+/// The whole-tree [scanTree] returns every entry at once, which at a
+/// million notes is a million [DiskEntry] in memory before the scan has
+/// written anything. A streamed walk yields these one at a time instead:
+/// the caller mirrors a directory, then asks for the next.
+final class DirListing {
+  /// Creates a directory listing.
+  const new({
+    required this.rel,
+    required this.name,
+    required this.modified,
+    required this.entries,
+    required this.logs,
+    this.failed = false,
+  });
+
+  /// Library-relative slash-separated path; `''` for the library root.
+  final String rel;
+
+  /// Base name; `''` for the library root.
+  final String name;
+
+  /// The directory's own last-modification time.
+  final DateTime modified;
+
+  /// The direct children — files and folders — by name. Hidden entries are
+  /// not here; the walk skips them and says so in [logs].
+  final List<DiskEntry> entries;
+
+  /// The lines the walk wanted to log for this listing.
+  final List<String> logs;
+
+  /// Whether the directory could not be read: it vanished between its
+  /// parent's listing and its own. [entries] is empty then.
+  final bool failed;
+
+  /// The subfolders of this listing, by name.
+  Iterable<DiskEntry> get dirs => entries.where((e) => e.isDir);
+}
+
+/// The streamed walk's isolate entry point (#302).
+///
+/// Sends its request port to the caller first, then answers every request
+/// with the next [DirListing] in depth-first order — a directory before its
+/// children — or with `null` once the tree is walked.
+///
+/// One request per directory is the backpressure: the isolate waits for the
+/// caller to finish a directory before it lists the next, so neither side
+/// holds more than one listing, and a whole-library scan costs one isolate
+/// rather than one per folder. A short-lived `Isolate.run` per directory
+/// would be a spawn per folder, and the FUSE `listSync`/`statSync` behind
+/// every listing cannot run on the UI isolate.
+Future<void> walkDirectories((String, SendPort) args) async {
+  final (root, out) = args;
+  final requests = ReceivePort();
+  out.send(requests.sendPort);
+  final pending = <String>[root];
+  await for (final _ in requests) {
+    if (pending.isEmpty) {
+      out.send(null);
+      break;
+    }
+    out.send(_listOne(root, pending.removeLast(), pending));
+  }
+  requests.close();
+}
+
+/// Lists one directory: its own state plus its direct children, and queues
+/// its subfolders for the walk to visit next.
+DirListing _listOne(String root, String abs, List<String> pending) {
+  final rel = relPath(abs, root);
+  final name = p.basename(abs);
+  final logs = <String>[];
+  final entries = <DiskEntry>[];
+  final subdirs = <DiskEntry>[];
+  try {
+    final modified = Directory(abs).statSync().modified;
+    final children = Directory(abs).listSync(followLinks: false)
+      ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+    for (final ent in children) {
+      final childName = p.basename(ent.path);
+      if (childName.startsWith('.')) {
+        logs.add('walk: skip hidden entry "$childName"');
+        continue;
+      }
+      if (ent is Directory) {
+        final st = ent.statSync();
+        final entry = DiskEntry(
+          rel: relPath(ent.path, root),
+          name: childName,
+          isDir: true,
+          size: 0,
+          modified: st.modified,
+        );
+        entries.add(entry);
+        subdirs.add(entry);
+      } else if (ent is File) {
+        final st = ent.statSync();
+        entries.add(
+          DiskEntry(
+            rel: relPath(ent.path, root),
+            name: childName,
+            isDir: false,
+            size: st.size,
+            modified: st.modified,
+          ),
+        );
+      } else {
+        logs.add('walk: skip non-file/dir entry "${ent.path}" ($ent)');
+      }
+    }
+    // Pushed in reverse so the first child is popped first: the walk is
+    // depth-first and in name order.
+    for (final dir in subdirs.reversed) {
+      pending.add(p.join(root, dir.rel));
+    }
+    return DirListing(
+      rel: rel,
+      name: name,
+      modified: modified,
+      entries: entries,
+      logs: logs,
+    );
+  } on FileSystemException catch (error) {
+    logs.add('walk: "$rel" could not be read ($error)');
+    return DirListing(
+      rel: rel,
+      name: name,
+      modified: DateTime.fromMillisecondsSinceEpoch(0),
+      entries: const [],
+      logs: logs,
+      failed: true,
+    );
+  }
+}
+
+/// Drives a [walkDirectories] isolate one directory at a time (#302).
+///
+/// [start] spawns the isolate and waits for its request port; [next] pulls
+/// one listing; [close] stops the isolate. A scan owns one of these for its
+/// whole run and closes it in a `finally`, so an exception in the middle of
+/// a reconciliation cannot leave the isolate walking behind it.
+final class DirWalker {
+  new _(this._messages, this._events, this._isolate, this._root, this._ticket);
+
+  final ReceivePort _messages;
+  final StreamIterator<Object?> _events;
+  final Isolate _isolate;
+  final String _root;
+  final int _ticket;
+
+  SendPort? _requests;
+  bool _finished = false;
+  bool _portsClosed = false;
+
+  /// Spawns the walk isolate for [root] and waits for it to be ready.
+  static Future<DirWalker> start(String root) async {
+    final messages = ReceivePort();
+    final isolate = await Isolate.spawn<(String, SendPort)>(
+      walkDirectories,
+      (root, messages.sendPort),
+      onError: messages.sendPort,
+      debugName: 'niman-walk',
+    );
+    final walker = DirWalker._(
+      messages,
+      StreamIterator<Object?>(messages),
+      isolate,
+      root,
+      IsolateGauge.begin('walk "$root"'),
+    );
+    try {
+      walker._requests = await walker._ready();
+    } on Object {
+      await walker.close();
+      rethrow;
+    }
+    return walker;
+  }
+
+  Future<SendPort> _ready() async {
+    if (!await _events.moveNext()) {
+      throw StateError('the walk isolate for "$_root" ended before it started');
+    }
+    final event = _events.current;
+    if (event is SendPort) return event;
+    throw StateError(
+      'the walk isolate for "$_root" failed: ${_failure(event)}',
+    );
+  }
+
+  /// The next directory of the walk, or null when the tree is walked.
+  Future<DirListing?> next() async {
+    final requests = _requests;
+    if (_finished || requests == null) return null;
+    requests.send(null);
+    while (await _events.moveNext()) {
+      final event = _events.current;
+      if (event == null) {
+        _finished = true;
+        return null;
+      }
+      if (event is DirListing) return event;
+      throw StateError(
+        'the walk isolate for "$_root" failed: ${_failure(event)}',
+      );
+    }
+    _finished = true;
+    return null;
+  }
+
+  /// Stops the walk and its isolate. Safe to call more than once, and after
+  /// a walk that reached its end on its own.
+  Future<void> close({Object? error}) async {
+    if (!_finished) {
+      _finished = true;
+      _isolate.kill(priority: Isolate.immediate);
+    }
+    if (!_portsClosed) {
+      _portsClosed = true;
+      await _events.cancel();
+      _messages.close();
+    }
+    IsolateGauge.finishJob(_ticket, error: error);
+  }
+
+  static String _failure(Object? event) =>
+      event is List && event.isNotEmpty ? '${event.first}' : '$event';
 }
 
 /// The on-disk state of one path, as probed by [probePaths].
