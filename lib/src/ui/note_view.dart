@@ -1313,11 +1313,11 @@ final class _NoteViewState extends State<NoteView>
             pressed(
               const SingleActivator(LogicalKeyboardKey.keyH, control: true),
             ))) {
-      _sourceFind.open(replace: true);
+      openFind(replace: true);
       return KeyEventResult.handled;
     }
     if (pressed(find)) {
-      _sourceFind.open();
+      openFind();
       return KeyEventResult.handled;
     }
     if (!_sourceFind.visible) return KeyEventResult.ignored;
@@ -1334,6 +1334,12 @@ final class _NoteViewState extends State<NoteView>
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
+  }
+
+  @override
+  void openFind({bool replace = false}) {
+    if (_previewOnly || !_ready) return;
+    _sourceFind.open(replace: replace);
   }
 
   /// The line the unified surface's caret is on (1-based), or null before it
