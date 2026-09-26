@@ -4025,63 +4025,72 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// [pane]'s deck, focusing the pane on any press inside it.
-  Widget _detailPane(LibrarySession controller, int pane) => Listener(
-    behavior: HitTestBehavior.translucent,
-    onPointerDown: (_) => _workspace.focus(pane),
-    child: TabDropZone(
-      pane: pane,
-      isSplit: _workspace.value.isSplit,
-      onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
-      child: ShellDetailPane(
-        root: controller.root,
-        tabs: _deck(pane),
-        onMemento: _workspace.remember,
-        zen: _inZen,
-        typewriter: _editorSettings.typewriter,
-        onToggleTypewriter: _toggleTypewriter,
-        onLoaded: _workspace.noteLoaded,
-        onEditedNoteClosed: _tidyClosedNote,
-        showLineNumbers: _editorSettings.lineNumbers,
-        noteColumn: _editorSettings.noteColumn,
-        // The kind toggles and ⋮ sit at the end of the note's
-        // one row of chrome (#173); there is no header above.
-        barActions: [
-          ..._kindActions,
-          if (_dockRoom) _dockToggle(),
-          _noteMenu(),
-        ],
-        autofocusEditor: _editorSettings.autofocusEditor,
-        linkType: _editorSettings.linkType,
-        missingNoteLocation: _editorSettings.missingNoteLocation,
-        attachmentsFolder: _editorSettings.attachmentsFolder,
-        templateFolder: _editorSettings.templateFolder,
-        indentWidth: _editorSettings.indentWidth,
-        toolbarLayout: _editorSettings.toolbarLayout,
-        // A single enabled editor has nowhere to switch to:
-        // the note hides its switch instead of offering a
-        // dead toggle.
-        onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-            ? _setEditorKind
-            : null,
-        linkSource: _linkSource,
-        onOpenNote: _openNoteFromLink,
-        kindMode: !_kindRawMode,
-        onNoteKindChanged: _onNoteKindChanged,
-        unsavedTracker: widget.unsavedTracker,
-        spellCheck: widget.spellCheck,
-        reloadToken: _noteReloadToken,
-        linksFollowed: _linksFollowed,
-        onAnnotate: _annotate,
-        marks: _annotations,
-        saveNote: _noteSaver(controller),
-        saveNoteStream: _noteStreamSaver(controller),
-        createMissingNote: _missingNoteCreator(controller),
-        statusActions: _statusActionsFor(pane),
-        header: _journalHeader,
-        onEditEpubLook: () => _editEpubLook(controller),
+  ///
+  /// A pane showing a note claims the tour's note target; an empty pane
+  /// claims nothing, so the step is skipped rather than pointing at a
+  /// blank.
+  Widget _detailPane(LibrarySession controller, int pane) {
+    final listener = Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _workspace.focus(pane),
+      child: TabDropZone(
+        pane: pane,
+        isSplit: _workspace.value.isSplit,
+        onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
+        child: ShellDetailPane(
+          root: controller.root,
+          tabs: _deck(pane),
+          onMemento: _workspace.remember,
+          zen: _inZen,
+          typewriter: _editorSettings.typewriter,
+          onToggleTypewriter: _toggleTypewriter,
+          onLoaded: _workspace.noteLoaded,
+          onEditedNoteClosed: _tidyClosedNote,
+          showLineNumbers: _editorSettings.lineNumbers,
+          noteColumn: _editorSettings.noteColumn,
+          // The kind toggles and ⋮ sit at the end of the note's
+          // one row of chrome (#173); there is no header above.
+          barActions: [
+            ..._kindActions,
+            if (_dockRoom) _dockToggle(),
+            _noteMenu(),
+          ],
+          autofocusEditor: _editorSettings.autofocusEditor,
+          linkType: _editorSettings.linkType,
+          missingNoteLocation: _editorSettings.missingNoteLocation,
+          attachmentsFolder: _editorSettings.attachmentsFolder,
+          templateFolder: _editorSettings.templateFolder,
+          indentWidth: _editorSettings.indentWidth,
+          toolbarLayout: _editorSettings.toolbarLayout,
+          // A single enabled editor has nowhere to switch to:
+          // the note hides its switch instead of offering a
+          // dead toggle.
+          onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+              ? _setEditorKind
+              : null,
+          linkSource: _linkSource,
+          onOpenNote: _openNoteFromLink,
+          kindMode: !_kindRawMode,
+          onNoteKindChanged: _onNoteKindChanged,
+          unsavedTracker: widget.unsavedTracker,
+          spellCheck: widget.spellCheck,
+          reloadToken: _noteReloadToken,
+          linksFollowed: _linksFollowed,
+          onAnnotate: _annotate,
+          marks: _annotations,
+          saveNote: _noteSaver(controller),
+          saveNoteStream: _noteStreamSaver(controller),
+          createMissingNote: _missingNoteCreator(controller),
+          statusActions: _statusActionsFor(pane),
+          header: _journalHeader,
+          onEditEpubLook: () => _editEpubLook(controller),
+        ),
       ),
-    ),
-  );
+    );
+    return _workspace.value.panes[pane].activeTab == null
+        ? listener
+        : TourTarget(id: TourTargets.note, child: listener);
+  }
 
   /// Opens the sheet that sets how the books look (#280).
   void _editEpubLook(LibrarySession controller) =>
