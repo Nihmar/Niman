@@ -536,6 +536,28 @@ void main() {
     });
   });
 
+  test("the app's own reader reads a book's math back", () async {
+    final notes = p.join(root.path, 'Notes');
+    await Directory(notes).create(recursive: true);
+    await File(p.join(notes, 'a.md'))
+        .writeAsString('Inline \$x^2\$ and a block:\n\n\$\$\\frac{a}{b}\$\$\n');
+
+    final out = p.join(root.path, 'math.epub');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: out,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+
+    final document = readEpub(out, p.join(root.path, 'pictures'));
+    // The pane typesets the TeX the chapter's SVG carries; before, the
+    // formula SVG was a picture with no `<image>`, and the pane showed
+    // nothing where the formula was.
+    expect(document.markdown, contains(r'$x^2$'));
+    expect(document.markdown, contains(r'$$\frac{a}{b}$$'));
+  });
+
   test('a picture shared by two notes goes in once', () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);
