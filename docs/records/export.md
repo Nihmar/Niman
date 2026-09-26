@@ -75,7 +75,7 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
   - `--print-to-pdf=<out> file:///<page>`
 
   Use a timeout that kills the engine, and check that the file exists and is not empty.
-- [x] **Linux: Chromium.** Search `PATH` for `chromium`, `chromium-browser`, `google-chrome`, `google-chrome-stable`, `microsoft-edge`, `brave-browser`, with the same flags.
+- [x] **Linux: a Chromium.** Search `PATH` for the family's names — `chromium`, `google-chrome`, `microsoft-edge`, `brave`, `vivaldi`, `helium-browser` and their variants — with the same flags. Every one of them is the same engine under a different name, so the search is a name list, not a per-browser branch: Helium's wrapper was on `PATH` with nothing matching it, and a machine that had an engine printed nothing and drew the note instead.
 - [x] **Android: WebView.** A `MethodChannel` (`niman/pdf`) in `MainActivity`:
   1. An offscreen `WebView` loads the page with `loadUrl` (a `file:` URL).
   2. On `onPageFinished`, call `createPrintDocumentAdapter`.
