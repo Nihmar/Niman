@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -46,11 +47,11 @@ Future<void> startTour(
       copy: const WelcomeCopy(),
       initialStep: index,
       onStep: (step) => _persist(store, (s) => s.setTourStep(step)),
-      onDone: () => _persist(store, (s) => s.setTourSeen(seen: true)),
+      onDone: () => _markDone(store),
       onAction: (action) async {
         // The step hands the tour over to what it opens; the tour is
         // done, and the cheatsheet is on screen.
-        await _persist(store, (s) => s.setTourSeen(seen: true));
+        await _markDone(store);
         if (!context.mounted) return;
         switch (action) {
           case TourAction.cheatsheet:
@@ -61,25 +62,28 @@ Future<void> startTour(
   );
 }
 
-/// Resumes the tour where it stopped, for the palette's *Continue the
-/// tour*.
+/// Resumes the tour where it stopped, for the palette's *Take the tour*:
+/// a finished tour starts over, an unfinished one picks up.
 Future<void> resumeTour(BuildContext context, WidgetRef ref) async {
   final store = await welcomeStore(ref);
   final state = await store?.state();
   if (!context.mounted) return;
-  await startTour(context, ref, from: state?.tourStep ?? 0);
+  final from = state != null && !state.tourSeen ? state.tourStep : 0;
+  await startTour(context, ref, from: from);
 }
 
 /// Offers the tour once, when the welcome asked for it and a library is
 /// open.
 ///
-/// Declining (or closing) clears the offer: the tour stays in Help and
-/// the palette, and is never raised again by itself.
+/// The offer is spent the moment it is shown: accepting and quitting
+/// mid-tour must not raise it again on the next launch, and declining
+/// leaves the tour to Help and the palette.
 Future<void> offerTour(BuildContext context, WidgetRef ref) async {
   final store = await welcomeStore(ref);
   if (store == null) return;
   final state = await store.state();
   if (!state.tourOffer || state.tourSeen) return;
+  await store.setTourOffer(offer: false);
   if (!context.mounted) return;
   const copy = WelcomeCopy();
   final show = await showDialog<bool>(
@@ -102,13 +106,17 @@ Future<void> offerTour(BuildContext context, WidgetRef ref) async {
       ],
     ),
   );
-  if (show != true) {
-    await store.setTourOffer(offer: false);
-    return;
-  }
+  if (show != true) return;
   if (!context.mounted) return;
   await startTour(context, ref);
 }
+
+/// The tour is over (Done, or the cheatsheet hand-over): seen, and back
+/// at its start for the next run.
+Future<void> _markDone(WelcomeStore? store) => _persist(store, (s) async {
+  await s.setTourStep(0);
+  await s.setTourSeen(seen: true);
+});
 
 /// The first-run state, or null when there is none to keep it in (a test
 /// bed, a database that will not open): the tour still runs, it just
@@ -131,5 +139,12 @@ Future<void> _persist(
   Future<void> Function(WelcomeStore store) write,
 ) async {
   if (store == null) return;
-  await write(store);
+  try {
+    await write(store);
+  } on Object catch (error) {
+    // A store that will not write is not a reason to take the tour down.
+    _log.warning('the tour could not be saved ($error)');
+  }
 }
+
+const AppLogger _log = AppLogger(name: 'tour');

@@ -320,7 +320,7 @@ final class _SettingsDiagnosticsScreenState
                 HighlightRow(
                   key: SettingsKeys.welcomeTour,
                   child: SettingsValueRow(
-                    title: const WelcomeCopy().tourContinueCommand,
+                    title: const WelcomeCopy().tourCommand,
                     onTap: () => unawaited(resumeTour(context, ref)),
                   ),
                 ),

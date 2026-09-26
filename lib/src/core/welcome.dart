@@ -79,7 +79,7 @@ typedef WelcomeState = ({
   /// Whether the guided tour was finished or dismissed.
   bool tourSeen,
 
-  /// Where the tour stopped, for *Continue the tour*; 0 is its start.
+  /// Where the tour stopped, for *Take the tour*; 0 is its start.
   int tourStep,
 
   /// Whether the welcome asked for the tour once a library is open.

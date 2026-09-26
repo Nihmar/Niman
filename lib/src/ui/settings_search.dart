@@ -472,7 +472,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushDiagnostics(SettingsKeys.welcomeDeck),
     ),
     SettingsSearchEntry(
-      title: const WelcomeCopy().tourContinueCommand,
+      title: const WelcomeCopy().tourCommand,
       area: AppStrings.settingsAreaDiagnostics,
       rowKey: SettingsKeys.welcomeTour,
       value: noValue,

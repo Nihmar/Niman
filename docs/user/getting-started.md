@@ -39,12 +39,12 @@ deck is shown once: it lives under Settings → About as *What Niman can
 do*.
 
 The last page can ask for a **tour** instead (*Show me around*), and so
-can the command palette later (*Take the tour*, which resumes where it
-stopped). It points at the real controls — the tree, the create menu, the
-note and its three modes, the toolbar, the tabs, the dock — and ends by
-opening the **Markdown cheatsheet** (#265), every construct written
-beside how a note shows it. Stop it at any step; nothing of it is left in
-your library.
+can the command palette later (*Take the tour*, which resumes a tour left
+halfway and starts a finished one over). It points at the real controls —
+the tree, the create menu, the note and its three modes, the toolbar,
+the tabs, the dock — and ends by opening the **Markdown cheatsheet**
+(#265), every construct written beside how a note shows it. Stop it at
+any step; nothing of it is left in your library.
 
 ## First steps
 
