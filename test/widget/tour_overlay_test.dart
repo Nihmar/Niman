@@ -118,6 +118,20 @@ void main() {
     expect(find.text('Gone'), findsNothing);
   });
 
+  testWidgets('the card keeps its margins on a 430 px window', (tester) async {
+    // 430 is a phone's width, and the range a fixed 420-wide card left
+    // the left clamp no room for.
+    tester.view.physicalSize = const Size(430, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await pumpTour(tester, const [one]);
+
+    expect(tester.takeException(), isNull);
+    final card = tester.getRect(find.byKey(const Key('tour-card')));
+    expect(card.left, greaterThanOrEqualTo(0));
+    expect(card.right, lessThanOrEqualTo(430));
+  });
+
   testWidgets('Skip leaves, and the tour says where it was', (tester) async {
     final run = await pumpTour(tester, const [one, two], from: 1);
     expect(find.text('Two'), findsOne);

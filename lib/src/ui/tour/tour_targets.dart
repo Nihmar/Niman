@@ -45,7 +45,10 @@ final class _TourTargetState extends State<TourTarget> {
 
   @override
   void dispose() {
-    _targets[widget.id]?.remove(_key);
+    final keys = _targets[widget.id];
+    keys?.remove(_key);
+    // An id nobody mounts any more leaves no empty list behind.
+    if (keys != null && keys.isEmpty) _targets.remove(widget.id);
     super.dispose();
   }
 

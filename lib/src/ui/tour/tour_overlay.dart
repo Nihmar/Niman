@@ -2,6 +2,8 @@
 /// control being talked about, and a card beside it.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
@@ -65,11 +67,18 @@ final class _TourOverlay extends ConsumerStatefulWidget {
 }
 
 final class _TourOverlayState extends ConsumerState<_TourOverlay> {
+  /// The card's ceiling: its scrollable body is capped at 180, plus the
+  /// title and the buttons. Only used to keep it on a short screen.
+  static const double _cardMaxHeight = 340;
+
   late int _index = widget.run.initialStep.clamp(
     0,
     widget.run.steps.length - 1,
   );
   Rect? _hole;
+
+  /// A measure is already waiting for the next frame.
+  bool _measureScheduled = false;
 
   TourStep get _step => widget.run.steps[_index];
   bool get _last => _index == widget.run.steps.length - 1;
@@ -79,7 +88,18 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
     super.didChangeDependencies();
     // After the frame: the target has to be laid out before it can be
     // measured, and the first build of the route is not.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+    _scheduleMeasure();
+  }
+
+  /// Measures after the next frame, at most once per frame: a dependency
+  /// change while one is already queued does not add a second.
+  void _scheduleMeasure() {
+    if (_measureScheduled) return;
+    _measureScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureScheduled = false;
+      _measure();
+    });
   }
 
   /// Takes the target's rectangle, or moves on: a step whose control is
@@ -89,15 +109,21 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
     if (!mounted) return;
     final target = _step.target;
     if (target == null) {
-      setState(() => _hole = null);
+      if (_hole != null) setState(() => _hole = null);
       return;
     }
     final rect = tourTargetRect(target);
     if (rect == null) {
       if (!_last) {
-        setState(() => _index++);
+        // Nothing to point at: the step is skipped, and the hole goes
+        // with it so the card is never read beside the previous one's
+        // control.
+        setState(() {
+          _hole = null;
+          _index++;
+        });
         widget.run.onStep(_index);
-        WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+        _scheduleMeasure();
       } else {
         _done();
       }
@@ -112,7 +138,7 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
       _hole = null;
     });
     widget.run.onStep(_index);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+    _scheduleMeasure();
   }
 
   /// The tour is over (Done on the last step, or nothing left to show).
@@ -121,7 +147,7 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
     Navigator.of(context).pop();
   }
 
-  /// Left part-way: the palette's *Continue the tour* picks it up.
+  /// Left part-way: the palette's *Take the tour* picks it up.
   void _skip() => Navigator.of(context).pop();
 
   /// Leaves the tour for what the step opens (the cheatsheet).
@@ -136,7 +162,9 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
     final hole = _hole;
-    final width = size.width < 420 ? size.width - 32 : 420.0;
+    // A card that keeps its margins even at 420-451 px, where the fixed
+    // 420-wide version left no room for the clamp to work with.
+    final width = math.min(420, size.width - 32).toDouble();
     final below = hole != null && hole.bottom + 220 < size.height;
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -168,12 +196,20 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
             )
           else
             Positioned(
-              left: (hole.center.dx - width / 2).clamp(
-                16.0,
-                size.width - width - 16,
-              ),
+              left: (hole.center.dx - width / 2)
+                  .clamp(16, math.max(16, size.width - width - 16))
+                  .toDouble(),
               top: below ? hole.bottom + 12 : null,
-              bottom: below ? null : size.height - hole.top + 12,
+              // Above the hole, and never off the top: a short window
+              // pulls the card down to the hole instead of out of view.
+              bottom: below
+                  ? null
+                  : (size.height - hole.top + 12)
+                        .clamp(
+                          16,
+                          math.max(16, size.height - _cardMaxHeight - 16),
+                        )
+                        .toDouble(),
               width: width,
               child: _card(theme),
             ),
