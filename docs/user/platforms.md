@@ -171,6 +171,17 @@ and Windows only: a phone has nothing to drag from.
 Linux and Windows only for now: Android's picker hands over a copy of
 the file, which could be read but not saved back.
 
+**Sharing into Niman (Android)** goes the other way: another app's
+**Share** menu offers Niman for text and for a Markdown file, and a file
+manager's **Open with** does for a `.md`. Shared text is appended to the
+[quick note](organization.md#folders-quick-note-list-notes-voice-notes)
+and the note opens; with no quick note chosen yet, the choose/create
+screen opens and the text lands in whatever note it picks. A shared file
+is copied into the library root as a new note — its name kept, uniquified
+like any other — and opened. A copy, because Android hands the sender's
+file as a read-only `content://` reference, not a path Niman could edit
+in place.
+
 The **side panel** (outline, tags, history beside the note, and the
 [journal](journal.md)'s calendar) shows on
 any window at least 1000 px wide: desktops, tablets, a phone in
@@ -181,8 +192,3 @@ the tags as sheets and the history as its screen. Where the panel shows,
 its left edge drags to make it wider or narrower, like the tree's edge.
 It stops growing before the note gets narrower than 360 px, and it
 keeps its width for the next launch.
-
-## Not yet
-
-Share-in on Android — tracked as
-[#40](https://github.com/Nihmar/Niman/issues/40).
