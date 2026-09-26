@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -47,6 +48,7 @@ void main() {
           required root,
           required language,
           linkSource,
+          isCancelled,
         }) async => (
           name: 'note.epub',
           bytes: Uint8List(0),
@@ -229,6 +231,7 @@ void main() {
           required root,
           required language,
           linkSource,
+          isCancelled,
         }) async {
           await release.future;
           return (
@@ -249,6 +252,41 @@ void main() {
     await settle(tester);
     expect(find.byKey(const Key('export-working')), findsNothing);
     expect(saved?.name, 'note.epub');
+  });
+
+  testWidgets('an EPUB export can be stopped from its dialog', (tester) async {
+    final release = Completer<void>();
+    epubExport =
+        ({
+          required text,
+          required title,
+          required path,
+          required root,
+          required language,
+          linkSource,
+          isCancelled,
+        }) async {
+          await release.future;
+          if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
+          return (
+            name: 'note.epub',
+            bytes: Uint8List(0),
+            mimeType: 'application/epub+zip',
+          );
+        };
+    await pumpShell(tester);
+    await chooseExport(tester, 'epub');
+
+    await tester.tap(find.byKey(const Key('export-working-cancel')));
+    await settle(tester);
+    release.complete();
+    await settle(tester);
+
+    // The dialog closes itself and a stop says nothing: no file, no
+    // message.
+    expect(find.byKey(const Key('export-working')), findsNothing);
+    expect(saved, isNull);
+    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets('a row that is not Markdown offers no export', (tester) async {

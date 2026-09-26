@@ -114,6 +114,9 @@ final class EpubPaneState extends State<EpubPane> {
         _ => null,
       };
       if (!mounted || open != _opens) return;
+      // An ad-hoc diagnostic (#303): what the chapters carried and what
+      // the read text got of it.
+      _log.info('epub "${widget.path}": ${_mathReport(document)}');
       setState(() {
         _document = document;
         _buffer = SourceBuffer.fromText(document.markdown);
@@ -264,6 +267,18 @@ final class EpubPaneState extends State<EpubPane> {
         ],
       ),
     );
+  }
+
+  /// An ad-hoc diagnostic (#303): the book's math, and what the read text
+  /// got of it.
+  static String _mathReport(EpubDocument document) {
+    final signs = RegExp(r'(?<!\\)\$').allMatches(document.markdown).length;
+    final first = RegExp(r'(?<!\\)\$\$?[^\$\n]{1,60}')
+        .firstMatch(document.markdown)
+        ?.group(0);
+    return '${document.mathReport ?? 'no math in the chapters'}; '
+        'text: $signs dollar signs'
+        '${first == null ? '' : ', first "$first"'}';
   }
 
   /// The book, at the books' text size rather than the interface one, as

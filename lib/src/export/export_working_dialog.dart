@@ -17,7 +17,12 @@ import 'package:niman/src/ui/strings.dart';
 /// A running export with no countable steps, watched by [done].
 final class ExportWorkingDialog extends StatefulWidget {
   /// Shows [title] and closes when [done] completes.
-  const new({required this.title, required this.done, super.key});
+  const new({
+    required this.title,
+    required this.done,
+    this.onCancel,
+    super.key,
+  });
 
   /// The note's own name, so the dialog says what is being exported.
   final String title;
@@ -25,11 +30,16 @@ final class ExportWorkingDialog extends StatefulWidget {
   /// Completes when the export is over — written or failed.
   final Future<void> done;
 
+  /// Asks the export to stop; null shows no way to stop.
+  final VoidCallback? onCancel;
+
   @override
   State<ExportWorkingDialog> createState() => _ExportWorkingDialogState();
 }
 
 final class _ExportWorkingDialogState extends State<ExportWorkingDialog> {
+  bool _cancelling = false;
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +77,20 @@ final class _ExportWorkingDialogState extends State<ExportWorkingDialog> {
           const LinearProgressIndicator(),
         ],
       ),
+      actions: widget.onCancel == null
+          ? null
+          : [
+              TextButton(
+                key: const Key('export-working-cancel'),
+                onPressed: _cancelling
+                    ? null
+                    : () {
+                        setState(() => _cancelling = true);
+                        widget.onCancel!();
+                      },
+                child: Text(AppStrings.actionCancel),
+              ),
+            ],
     );
   }
 }

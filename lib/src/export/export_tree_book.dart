@@ -92,8 +92,10 @@ abstract final class ExportTreeBook {
     return (metadata: epubMetadataOf(text), warnings: warnings);
   }
 
-  /// Adds one note of [tree] to [book] as a chapter (#303).
-  static Future<void> addChapter(
+  /// Adds one note of [tree] to [book] as a chapter (#303), answering how
+  /// many formulas its page drew and how many it left as source — an
+  /// ad-hoc diagnostic for math that never shows.
+  static Future<({int formulas, int sources})> addChapter(
     EpubBook book,
     ExportTreeWalk tree,
     ExportTreeEntry entry,
@@ -129,5 +131,22 @@ abstract final class ExportTreeBook {
       fontFaces: html.fontFaces,
       hasSvg: html.usesSvg,
     );
+    return (
+      formulas: _count(body, '<svg'),
+      sources: _count(body, 'class="math-source"'),
+    );
+  }
+}
+
+/// How many times [needle] appears in [text]; a diagnostic count, not a
+/// parser.
+int _count(String text, String needle) {
+  var count = 0;
+  var at = 0;
+  while (true) {
+    final found = text.indexOf(needle, at);
+    if (found < 0) return count;
+    count++;
+    at = found + needle.length;
   }
 }

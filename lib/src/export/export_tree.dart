@@ -224,9 +224,13 @@ final class TreeExport {
         // The isolate's cancellation mailbox: what lets a cancel close the
         // zip instead of killing the isolate with a file handle open.
         _cancelPort = message;
-      } else if (message is _TreeExportWarning) {
+      } else if (message is _TreeExportLog) {
         // Logged here, on the parent: the isolate's buffer goes with it.
-        _log.warning(message.message);
+        if (message.warning) {
+          _log.warning(message.message);
+        } else {
+          _log.info(message.message);
+        }
       } else if (message is TreeExportNoChapters) {
         // A typed failure the isolate asked to report without throwing:
         // only a message keeps the type across the boundary.
@@ -311,15 +315,18 @@ Object _errorOf(Object? message) {
   return message!;
 }
 
-/// A warning the isolate saw and the parent is to log (#303, E3): the
+/// A log line the isolate saw and the parent is to write (#303, E3): the
 /// isolate's own [AppLog] buffer dies with it, so the line would leave no
 /// trace.
-final class _TreeExportWarning {
-  /// Creates the warning.
-  const new(this.message);
+final class _TreeExportLog {
+  /// Creates the line; [warning] is the severity it is logged at.
+  const new(this.message, {this.warning = false});
 
   /// The line the parent logs.
   final String message;
+
+  /// Whether it is a warning, rather than information.
+  final bool warning;
 }
 
 /// The request the export isolate is spawned with.
@@ -366,7 +373,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
       ? ExportTreeBook.frontmatter(tree)
       : null;
   for (final warning in front?.warnings ?? const <String>[]) {
-    request.events.send(_TreeExportWarning(warning));
+    request.events.send(_TreeExportLog(warning, warning: true));
   }
   final metadata = front?.metadata ?? const EpubMetadata();
   final coverTarget = metadata.cover;
@@ -375,9 +382,10 @@ Future<void> _exportTree(TreeExportRequest request) async {
       : ExportTreePages.fileIn(coverTarget, '.', tree.files);
   if (coverTarget != null && cover == null) {
     request.events.send(
-      _TreeExportWarning(
+      _TreeExportLog(
         'the book\'s cover "$coverTarget" is not in the folder: '
         'the book opens on its first chapter',
+        warning: true,
       ),
     );
   }
@@ -403,6 +411,8 @@ Future<void> _exportTree(TreeExportRequest request) async {
     final total = book == null
         ? tree.entries.length
         : tree.files.where(ExportTreePages.isNote).length;
+    var formulaCount = 0;
+    var sourceCount = 0;
     var done = 0;
     for (final entry in tree.entries) {
       // Between entries, where the zip is never half-written.
@@ -419,7 +429,9 @@ Future<void> _exportTree(TreeExportRequest request) async {
         await encoder!.addFile(File(entry.abs), entry.rel);
       } else if (ExportTreePages.isNote(entry.rel)) {
         if (book != null) {
-          await ExportTreeBook.addChapter(book, tree, entry);
+          final drawn = await ExportTreeBook.addChapter(book, tree, entry);
+          formulaCount += drawn.formulas;
+          sourceCount += drawn.sources;
         } else {
           final page = ExportTreePages.page(
             ExportTreePages.readNote(entry.abs),
@@ -461,6 +473,16 @@ Future<void> _exportTree(TreeExportRequest request) async {
     }
     if (book != null) {
       await book.close();
+      if (formulaCount > 0 || sourceCount > 0) {
+        // An ad-hoc diagnostic (#303): what the container's pages did with
+        // the formulas.
+        request.events.send(
+          _TreeExportLog(
+            'epub "${p.basename(request.zipPath)}": $formulaCount formulas '
+            'drawn, $sourceCount left as source',
+          ),
+        );
+      }
     } else {
       await encoder!.close();
     }
