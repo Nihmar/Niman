@@ -1531,6 +1531,8 @@ final class GalicianStrings extends Strings {
   @override
   String get importFolderAction => 'Importar';
   @override
+  String get notionImportTitle => 'Importar exportación de Notion';
+  @override
   String dropRejected(String names) =>
       'Aquí só se abren ficheiros Markdown e cartafoles: $names';
   @override

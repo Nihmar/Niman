@@ -1512,6 +1512,8 @@ final class DanishStrings extends Strings {
   @override
   String get importFolderAction => 'Importér';
   @override
+  String get notionImportTitle => 'Importer Notion-eksport';
+  @override
   String dropRejected(String names) =>
       'Kun Markdown-filer og mapper åbnes her: $names';
   @override

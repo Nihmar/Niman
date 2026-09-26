@@ -257,6 +257,7 @@ void main() {
     await pump(tester);
     expect(find.text(AppStrings.settingsGroupMaintenance), findsOne);
     expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
+    expect(find.byKey(const Key('notion-import-setting')), findsOneWidget);
     expect(find.byKey(const Key('switch-library-setting')), findsOneWidget);
     expect(find.byKey(const Key('close-library-setting')), findsOneWidget);
     // And they are out of the areas they used to hide in.

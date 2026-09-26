@@ -1504,6 +1504,8 @@ final class EnglishStrings extends Strings {
   @override
   String get importFolderAction => 'Import';
   @override
+  String get notionImportTitle => 'Import Notion export';
+  @override
   String dropRejected(String names) =>
       'Only Markdown files and folders open here: $names';
   @override

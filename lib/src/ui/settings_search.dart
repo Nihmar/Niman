@@ -521,6 +521,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => flashHome(SettingsKeys.reindex),
       onHome: true,
     ),
+    SettingsSearchEntry(
+      title: AppStrings.notionImportTitle,
+      area: maintenance,
+      rowKey: SettingsKeys.notionImport,
+      value: noValue,
+      open: () => flashHome(SettingsKeys.notionImport),
+      onHome: true,
+    ),
     if (libraryRows) ...[
       SettingsSearchEntry(
         title: AppStrings.switchLibraryTitle,

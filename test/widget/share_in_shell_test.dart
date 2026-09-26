@@ -2,6 +2,7 @@
 // file imported into the library and opened.
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -124,6 +125,48 @@ void main() {
     await settle(tester);
 
     expect(controller.contentOf('Quick note.md'), 'from a cold start');
+    await close();
+  });
+
+  testWidgets('a shared Notion export is imported into the library', (
+    tester,
+  ) async {
+    // A real folder to import into: the fake session would answer for the
+    // notes, but the import writes the files itself.
+    final tmp = Directory.systemTemp.createTempSync('niman_share_zip_');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker, parent: tmp.path);
+
+    // A Notion export, small: one page under its workspace folder.
+    const id = '1f2e4c8a9b0d1e2f3a4b5c6d7e8f9012';
+    final archive = Archive()
+      ..add(
+        ArchiveFile.string(
+          'Workspace $id/Roadmap 4a1b2c3d4e5f60718293a4b5c6d7e8f9.md',
+          '# Roadmap\n',
+        ),
+      );
+    final zip = File(p.join(tmp.path, 'Export $id.zip'))
+      ..writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+    shares.emit(SharedFile(path: zip.path, name: 'Export.zip'));
+    final target = File(p.join(tmp.path, 'library', 'Workspace', 'Roadmap.md'));
+    for (var i = 0; i < 100 && !target.existsSync(); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    await settle(tester);
+
+    expect(target.readAsStringSync(), contains('# Roadmap'));
+    expect(
+      zip.existsSync(),
+      isFalse,
+      reason: 'the shared copy is consumed by the import',
+    );
     await close();
   });
 

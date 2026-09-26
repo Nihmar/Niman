@@ -1516,6 +1516,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get importFolderAction => 'Flytja inn';
   @override
+  String get notionImportTitle => 'Flytja inn Notion-útflutning';
+  @override
   String dropRejected(String names) =>
       'Hér opnast aðeins Markdown-skrár og möppur: $names';
   @override

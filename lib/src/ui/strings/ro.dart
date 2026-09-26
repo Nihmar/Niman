@@ -1530,6 +1530,8 @@ final class RomanianStrings extends Strings {
   @override
   String get importFolderAction => 'Importă';
   @override
+  String get notionImportTitle => 'Importă exportul Notion';
+  @override
   String dropRejected(String names) =>
       'Aici se deschid doar fișiere Markdown și dosare: $names';
   @override

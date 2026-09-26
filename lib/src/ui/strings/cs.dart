@@ -1509,6 +1509,8 @@ final class CzechStrings extends Strings {
   @override
   String get importFolderAction => 'Importovat';
   @override
+  String get notionImportTitle => 'Importovat export z Notion';
+  @override
   String dropRejected(String names) =>
       'Zde se otevírají jen soubory Markdown a složky: $names';
   @override

@@ -722,6 +722,7 @@ abstract base class Strings {
   String get dropHint;
   String get dropNothing;
   String get importFolderAction;
+  String get notionImportTitle;
   String dropRejected(String names);
   String importFolderTitle(String name);
   String importFolderBody(int count);

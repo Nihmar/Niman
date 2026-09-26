@@ -1516,6 +1516,8 @@ final class SlovakStrings extends Strings {
   @override
   String get importFolderAction => 'Importovať';
   @override
+  String get notionImportTitle => 'Importovať export z Notion';
+  @override
   String dropRejected(String names) =>
       'Tu sa otvárajú len súbory Markdown a priečinky: $names';
   @override

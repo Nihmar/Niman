@@ -1,9 +1,12 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
+import 'package:path/path.dart' as p;
 
 /// The Maintenance group of the settings home (issue #104): the actions
 /// that are not settings — reindexing, switching and closing the
@@ -50,6 +53,44 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
     }
   }
 
+  /// Imports a Notion export (#25): picks the `.zip` Notion's "Markdown &
+  /// CSV" export downloads, brings its pages into a new folder of the
+  /// library, and says where they landed.
+  ///
+  /// The export goes in as it is elsewhere too — a `.zip` shared into the
+  /// app, or dropped on the window — and all three routes run the same
+  /// import (`importNotionZip`).
+  Future<void> _importNotion(BuildContext context) async {
+    final root = controller.root;
+    if (root == null) return;
+    final picked = await FilePicker.pickFile(
+      dialogTitle: AppStrings.notionImportTitle,
+      type: FileType.custom,
+      allowedExtensions: const ['zip'],
+    );
+    final path = picked?.path;
+    if (path == null || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final name = p.basename(path);
+    try {
+      final imported = await importNotionZip(source: path, libraryRoot: root);
+      if (imported == null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
+        );
+        return;
+      }
+      // Asked for now rather than waiting for the watcher: the tree is
+      // where the user looks next, and the notes have just been written.
+      await controller.rescanNow();
+      messenger.showSnackBar(
+        SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),
+      );
+    } on Object catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text('$error')));
+    }
+  }
+
   /// Opens the known-library list and switches to whatever is picked
   /// (T-ML-06).
   ///
@@ -92,6 +133,16 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             leading: const Icon(Icons.refresh_outlined),
             title: Text(AppStrings.reindexTitle),
             onTap: () => _rescan(context),
+          ),
+        ),
+        HighlightRow(
+          key: SettingsKeys.notionImport,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.archive_outlined),
+            title: Text(AppStrings.notionImportTitle),
+            onTap: () => _importNotion(context),
           ),
         ),
         // Above "Close library" on purpose: switching is the common

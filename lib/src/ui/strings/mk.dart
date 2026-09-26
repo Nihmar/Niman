@@ -1533,6 +1533,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get importFolderAction => 'Увези';
   @override
+  String get notionImportTitle => 'Увези извоз од Notion';
+  @override
   String dropRejected(String names) =>
       'Тука се отвораат само Markdown датотеки и папки: $names';
   @override
