@@ -10,6 +10,8 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/library_state.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -26,7 +28,7 @@ void main() {
       expect(defaults.enabled, {EditorKind.source, EditorKind.wysiwyg});
     });
 
-    test('all the time, and no answer: today\'s default, source first', () {
+    test("all the time, and no answer: today's default, source first", () {
       for (final answer in [MarkdownExperience.fluent, null]) {
         final defaults = editorDefaultsFor(answer);
         expect(defaults.kind, EditorKind.source);
@@ -101,7 +103,7 @@ void main() {
     });
   });
 
-  group('a library\'s first open on this device', () {
+  group("a library's first open on this device", () {
     late Directory library;
     late MemoryDeviceSettingsStore device;
 
@@ -138,7 +140,7 @@ void main() {
       expect(await device.read(library.path), isNotNull);
     });
 
-    test('keeps the library\'s own editor when the file has one', () async {
+    test("keeps the library's own editor when the file has one", () async {
       await writeSettings('{"editorKind": "source"}');
       final defaults = editorDefaultsFor(MarkdownExperience.none);
       final store = LibraryConfigStore(
@@ -161,11 +163,64 @@ void main() {
       expect(config.enabledEditors, {EditorKind.wysiwyg});
     });
 
-    test('with no answer, the defaults are today\'s', () async {
+    test("with no answer, the defaults are today's", () async {
       final store = LibraryConfigStore(library.path, device: device);
       final config = await store.read();
       expect(config.editorKind, EditorKind.source);
       expect(config.enabledEditors, {EditorKind.source, EditorKind.wysiwyg});
+    });
+  });
+
+  group('opening the first library', () {
+    test('it takes the answer the deck stored', () async {
+      final appDb = AppDatabase(NativeDatabase.memory());
+      final library = await Directory.current.createTemp('niman_first_');
+      addTearDown(() async {
+        await appDb.close();
+        await library.delete(recursive: true);
+      });
+      await DbWelcomeStore(AppSettingsRepo(appDb))
+          .setExperience(MarkdownExperience.none);
+
+      final controller = LibraryController(
+        () async => appDb,
+        indexDbFactory: (_) async => IndexDatabase(NativeDatabase.memory()),
+        rescanInterval: const Duration(hours: 1),
+        resumeReconcileDelay: const Duration(hours: 1),
+      );
+      addTearDown(controller.dispose);
+
+      await controller.open(library.path, create: true, blockingScan: false);
+
+      expect(await controller.editorKind, EditorKind.wysiwyg);
+      expect(await controller.enabledEditors, {EditorKind.wysiwyg});
+      await controller.close();
+    });
+
+    test('no answer leaves the editors as they were', () async {
+      final appDb = AppDatabase(NativeDatabase.memory());
+      final library = await Directory.current.createTemp('niman_first_');
+      addTearDown(() async {
+        await appDb.close();
+        await library.delete(recursive: true);
+      });
+
+      final controller = LibraryController(
+        () async => appDb,
+        indexDbFactory: (_) async => IndexDatabase(NativeDatabase.memory()),
+        rescanInterval: const Duration(hours: 1),
+        resumeReconcileDelay: const Duration(hours: 1),
+      );
+      addTearDown(controller.dispose);
+
+      await controller.open(library.path, create: true, blockingScan: false);
+
+      expect(await controller.editorKind, EditorKind.source);
+      expect(await controller.enabledEditors, {
+        EditorKind.source,
+        EditorKind.wysiwyg,
+      });
+      await controller.close();
     });
   });
 }

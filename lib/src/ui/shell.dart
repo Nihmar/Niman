@@ -124,6 +124,7 @@ import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/update_banner.dart';
+import 'package:niman/src/ui/welcome/welcome_gate.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/ui/zen_mode.dart';
 import 'package:niman/src/widget/widget_host.dart';
@@ -303,51 +304,55 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     final controller = ref.watch(librarySessionProvider);
     // Started once: writes transcripts into notes no view has open.
     ref.read(audioTranscriptWriterProvider);
-    return StreamBuilder<int>(
-      stream: controller.events,
-      initialData: controller.revision,
-      builder: (context, _) => switch (controller.phase) {
-        LibraryPhase.ready => Column(
-          children: [
-            UpdateAvailableBanner(session: controller),
-            Expanded(
-              child: _LibraryShell(
-                controller: controller,
-                reminders: ref.read(reminderServiceProvider),
-                spellCheck: ref.read(spellCheckProvider),
-                transcription: ref.read(transcriptionModelsProvider),
-                openNotes: ref.read(openAudioNotesProvider),
-                shortcuts: ref.read(shortcutServiceProvider),
-                shareIn: ref.read(shareInServiceProvider),
-                todoSourceFactory: ref.read(todoSourceFactoryProvider),
-                unsavedTracker: ref.watch(unsavedTrackerProvider),
-                saveExportFile: ref.read(saveExportFileProvider),
-                pickExportFolder: ref.read(pickExportFolderProvider),
-                pdfPrinter: ref.read(pdfPrinterProvider),
-                // The engine search is a process on Windows: looked up when
-                // a folder export actually asks for it, never at startup
-                // (L4), and awaited before the chooser can offer PDF (L5).
-                pdfEngineLookup: () => ref.read(pdfEngineProvider.future),
-                // A book's metadata source, checked before the export starts
-                // (E3); widget tests answer for their library root.
-                epubMetadataProblem: ref.read(epubMetadataProblemProvider),
-                epubExport: ref.read(epubNoteExportProvider),
-                outsideFiles: ref.read(outsideFilesProvider),
-                launchRequests: ref.read(launchRequestsProvider),
-                targets: ref.read(widgetTargetServiceProvider),
-                widgetUpdater: ref.read(widgetUpdaterProvider),
-                widgetHost: ref.read(widgetHostServiceProvider),
-                tray: ref.read(trayServiceProvider),
-                window: ref.read(windowControllerProvider),
+    // The first-run deck (#266) sits over whatever the phase asks for:
+    // it is about the app, not about a library.
+    return WelcomeGate(
+      child: StreamBuilder<int>(
+        stream: controller.events,
+        initialData: controller.revision,
+        builder: (context, _) => switch (controller.phase) {
+          LibraryPhase.ready => Column(
+            children: [
+              UpdateAvailableBanner(session: controller),
+              Expanded(
+                child: _LibraryShell(
+                  controller: controller,
+                  reminders: ref.read(reminderServiceProvider),
+                  spellCheck: ref.read(spellCheckProvider),
+                  transcription: ref.read(transcriptionModelsProvider),
+                  openNotes: ref.read(openAudioNotesProvider),
+                  shortcuts: ref.read(shortcutServiceProvider),
+                  shareIn: ref.read(shareInServiceProvider),
+                  todoSourceFactory: ref.read(todoSourceFactoryProvider),
+                  unsavedTracker: ref.watch(unsavedTrackerProvider),
+                  saveExportFile: ref.read(saveExportFileProvider),
+                  pickExportFolder: ref.read(pickExportFolderProvider),
+                  pdfPrinter: ref.read(pdfPrinterProvider),
+                  // The engine search is a process on Windows: looked up when
+                  // a folder export actually asks for it, never at startup
+                  // (L4), and awaited before the chooser can offer PDF (L5).
+                  pdfEngineLookup: () => ref.read(pdfEngineProvider.future),
+                  // A book's metadata source, checked before the export starts
+                  // (E3); widget tests answer for their library root.
+                  epubMetadataProblem: ref.read(epubMetadataProblemProvider),
+                  epubExport: ref.read(epubNoteExportProvider),
+                  outsideFiles: ref.read(outsideFilesProvider),
+                  launchRequests: ref.read(launchRequestsProvider),
+                  targets: ref.read(widgetTargetServiceProvider),
+                  widgetUpdater: ref.read(widgetUpdaterProvider),
+                  widgetHost: ref.read(widgetHostServiceProvider),
+                  tray: ref.read(trayServiceProvider),
+                  window: ref.read(windowControllerProvider),
+                ),
               ),
-            ),
-          ],
-        ),
-        _ => OpenLibraryScreen(
-          controller: controller,
-          outsideFiles: ref.read(outsideFilesProvider),
-        ),
-      },
+            ],
+          ),
+          _ => OpenLibraryScreen(
+            controller: controller,
+            outsideFiles: ref.read(outsideFilesProvider),
+          ),
+        },
+      ),
     );
   }
 }
