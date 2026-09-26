@@ -1577,11 +1577,20 @@ final class BelarusianStrings extends Strings {
       'У index.md няма фронтматэру. Кніга атрымае назву тэчкі і не '
       'будзе мець аўтара, вокладкі ці серыі.';
   @override
-  String get exportEpubAnyway => 'Усё роўна экспартаваць';
+  String get exportAnyway => 'Усё роўна экспартаваць';
   @override
   String get exportPdfPicture =>
       'PDF — гэта малюнак старонак; усталюйце браўзер, каб атрымаць '
       'выдзяляльны тэкст.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF як выява';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На гэтай машыне не знойдзены браўзэр. Нататка малюецца як '
+      'выява старонак: тэкст нельга выдзеліць ці шукаць, а доўгая '
+      'нататка патрабуе больш часу.';
   @override
   String get formatNoteAlreadyTidy => 'Нататка ўжо была ўпарадкавана.';
   @override

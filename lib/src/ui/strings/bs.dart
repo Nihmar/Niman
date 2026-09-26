@@ -1582,11 +1582,20 @@ final class BosnianStrings extends Strings {
       'index.md nema frontmatter. Knjiga će nositi ime fascikle i bez '
       'autora, korica ili serije.';
   @override
-  String get exportEpubAnyway => 'Ipak izvezi';
+  String get exportAnyway => 'Ipak izvezi';
   @override
   String get exportPdfPicture =>
       'PDF je slika stranica; instalirajte preglednik za tekst koji se može '
       'birati.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kao slika';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na ovom računaru nije pronađen pretraživač. Bilješka se crta '
+      'kao slika stranica: tekst se ne može označiti ni '
+      'pretraživati, a duga bilješka traje duže.';
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override

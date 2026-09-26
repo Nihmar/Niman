@@ -1583,11 +1583,20 @@ final class SerbianStrings extends Strings {
       'index.md нема frontmatter. Књига ће носити име фасцикле и без '
       'аутора, корица или серије.';
   @override
-  String get exportEpubAnyway => 'Ипак извези';
+  String get exportAnyway => 'Ипак извези';
   @override
   String get exportPdfPicture =>
       'PDF је слика страница; инсталирајте прегледач за текст који се може '
       'изабрати.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF као слика';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На овом рачунару није пронађен прегледач. Белешка се црта '
+      'као слика страница: текст се не може изабрати ни '
+      'претраживати, а дуга белешка траје дуже.';
   @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override

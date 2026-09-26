@@ -1563,11 +1563,20 @@ final class EnglishStrings extends Strings {
       'index.md has no frontmatter. The book will carry the folder '
       'name and no author, cover or series.';
   @override
-  String get exportEpubAnyway => 'Export anyway';
+  String get exportAnyway => 'Export anyway';
   @override
   String get exportPdfPicture =>
       'The PDF is a picture of the pages; a browser engine on this machine '
       'gives selectable text.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF as a picture';
+
+  @override
+  String get exportPdfNoEngine =>
+      'No browser engine was found on this machine. The note is '
+      'drawn as a picture of its pages: the text can be neither '
+      'selected nor searched, and a long note takes longer.';
   @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override

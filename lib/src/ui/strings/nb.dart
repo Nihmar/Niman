@@ -1565,10 +1565,19 @@ final class NorwegianStrings extends Strings {
       'index.md har ingen frontmatter. Boken får mappens navn og ingen '
       'forfatter, forside eller serie.';
   @override
-  String get exportEpubAnyway => 'Eksporter likevel';
+  String get exportAnyway => 'Eksporter likevel';
   @override
   String get exportPdfPicture =>
       'PDF-en er et bilde av sidene; installer en nettleser for valgbar tekst.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF som bilde';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Fant ingen nettleser på denne maskinen. Notatet tegnes som '
+      'et bilde av sidene: teksten kan ikke velges eller søkes i, '
+      'og et langt notat tar lengre tid.';
   @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override

@@ -1573,10 +1573,19 @@ final class LatvianStrings extends Strings {
       'index.md nav frontmatter. Grāmatai būs mapes nosaukums, un tai '
       'nebūs autora, vāka vai sērijas.';
   @override
-  String get exportEpubAnyway => 'Tomēr eksportēt';
+  String get exportAnyway => 'Tomēr eksportēt';
   @override
   String get exportPdfPicture =>
       'PDF ir lapu attēls; instalē pārlūku, lai tekstu varētu atlasīt.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kā attēls';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Šajā datorā netika atrasta pārlūkprogramma. Piezīme tiek '
+      'zīmēta kā lappušu attēls: tekstu nevar atlasīt vai meklēt, '
+      'un gara piezīme aizņem ilgāku laiku.';
   @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override

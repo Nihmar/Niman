@@ -1564,10 +1564,19 @@ final class TurkishStrings extends Strings {
       'index.md dosyasında frontmatter yok. Kitap klasörün adını '
       'taşıyacak; yazarı, kapağı veya serisi olmayacak.';
   @override
-  String get exportEpubAnyway => 'Yine de dışa aktar';
+  String get exportAnyway => 'Yine de dışa aktar';
   @override
   String get exportPdfPicture =>
       'PDF, sayfaların bir resmidir; seçilebilir metin için tarayıcı kurun.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'Görsel olarak PDF';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Bu makinede tarayıcı bulunamadı. Not, sayfaların görüntüsü '
+      'olarak çizilir: metin ne seçilebilir ne aranabilir ve uzun '
+      'bir not daha uzun sürer.';
   @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override

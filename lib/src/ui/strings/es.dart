@@ -1607,11 +1607,20 @@ final class SpanishStrings extends Strings {
       'index.md no tiene frontmatter. El libro llevará el nombre de la '
       'carpeta y ningún autor, portada ni serie.';
   @override
-  String get exportEpubAnyway => 'Exportar de todos modos';
+  String get exportAnyway => 'Exportar de todos modos';
   @override
   String get exportPdfPicture =>
       'El PDF es una imagen de las páginas; instala un navegador para tener '
       'texto seleccionable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF como imagen';
+
+  @override
+  String get exportPdfNoEngine =>
+      'No se encontró ningún navegador en este equipo. La nota se '
+      'dibuja como una imagen de las páginas: el texto no se puede '
+      'seleccionar ni buscar, y una nota larga tarda más.';
   @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override

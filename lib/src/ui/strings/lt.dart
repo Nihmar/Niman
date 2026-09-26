@@ -1576,11 +1576,20 @@ final class LithuanianStrings extends Strings {
       'index.md neturi frontmatter. Knyga vadinsis aplanko vardu ir '
       'neturės autoriaus, viršelio ar serijos.';
   @override
-  String get exportEpubAnyway => 'Vis tiek eksportuoti';
+  String get exportAnyway => 'Vis tiek eksportuoti';
   @override
   String get exportPdfPicture =>
       'PDF yra puslapių paveikslėlis; įdiekite naršyklę, kad tekstą būtų '
       'galima žymėti.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kaip vaizdas';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Šiame kompiuteryje naršyklės nerasta. Pastaba piešiama kaip '
+      'puslapių vaizdas: teksto negalima pažymėti ar ieškoti, o '
+      'ilga pastaba užima daugiau laiko.';
   @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
   @override

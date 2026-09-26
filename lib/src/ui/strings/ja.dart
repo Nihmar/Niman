@@ -1476,9 +1476,17 @@ final class JapaneseStrings extends Strings {
   String get exportEpubNoFrontmatter =>
       'index.md に frontmatter がありません。本の名前はフォルダー名になり、著者・表紙・シリーズは付きません。';
   @override
-  String get exportEpubAnyway => 'それでも書き出す';
+  String get exportAnyway => 'それでも書き出す';
   @override
   String get exportPdfPicture => 'PDF はページの画像です。ブラウザーをインストールするとテキストを選択できます。';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF を画像として';
+
+  @override
+  String get exportPdfNoEngine =>
+      'このマシンにはブラウザーが見つかりませんでした。ノートはページの画像として描画されるため、テキストの選択も検索もできず、'
+      '長いノートほど時間がかかります。';
   @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override

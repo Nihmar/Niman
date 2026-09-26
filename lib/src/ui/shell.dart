@@ -2943,9 +2943,18 @@ final class _LibraryShellState extends State<_LibraryShell>
           bytes: await ops.readNoteBytes(path),
         );
       } else if (format == ExportFormat.pdf) {
+        // The machine prints the page with a browser engine, or draws it
+        // here when it has none. Which of the two it will be is settled
+        // before the note is read: a picture of the pages is not what
+        // everyone asked for — no text to select or search, and minutes of
+        // drawing on a long note — and finding out when the file is
+        // written is too late (#63).
+        if (!await widget.pdfPrinter.canPrint) {
+          if (!mounted) return;
+          if (!await _confirmPdfPicture()) return;
+        }
         // The raster fallback draws with the note's own typography, so a
         // cache of its own goes with it.
-        final text = await ops.readNote(path);
         final cache = MathCache();
         // A browser print reports no progress and the drawing fallback can
         // take minutes on a novel: the dialog says the export is running
@@ -2977,6 +2986,10 @@ final class _LibraryShellState extends State<_LibraryShell>
           );
         }
         try {
+          // Read behind the dialog, as the EPUB branch does: a big note is
+          // not instant, and a gap between the chooser closing and the
+          // dialog opening reads as a stall (#63).
+          final text = await ops.readNote(path);
           final printed = await exportNotePdf(
             text: text,
             title: title,
@@ -3223,7 +3236,36 @@ final class _LibraryShellState extends State<_LibraryShell>
           FilledButton(
             key: const Key('export-epub-anyway'),
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppStrings.exportEpubAnyway),
+            child: Text(AppStrings.exportAnyway),
+          ),
+        ],
+      ),
+    );
+    return go ?? false;
+  }
+
+  /// Asks whether a PDF should be drawn when this machine has no browser
+  /// engine to print the page with (#63): what is written is a picture of
+  /// the pages, with no text to select or search, and a long note is
+  /// minutes of drawing it. True when the user lets it go on — false stops
+  /// the export before the note is even read.
+  Future<bool> _confirmPdfPicture() async {
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const Key('export-pdf-picture-dialog'),
+        title: Text(AppStrings.exportPdfNoEngineTitle),
+        content: Text(AppStrings.exportPdfNoEngine),
+        actions: [
+          TextButton(
+            key: const Key('export-pdf-picture-cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          FilledButton(
+            key: const Key('export-pdf-picture-anyway'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(AppStrings.exportAnyway),
           ),
         ],
       ),

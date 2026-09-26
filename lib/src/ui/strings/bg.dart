@@ -1591,10 +1591,19 @@ final class BulgarianStrings extends Strings {
       'index.md няма frontmatter. Книгата ще носи името на папката и '
       'без автор, корица или поредица.';
   @override
-  String get exportEpubAnyway => 'Експортирай въпреки това';
+  String get exportAnyway => 'Експортирай въпреки това';
   @override
   String get exportPdfPicture =>
       'PDF е картина на страниците; инсталирайте браузър за избираем текст.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF като изображение';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На тази машина не бе намерен браузър. Бележката се рисува '
+      'като изображение на страниците: текстът не може да се '
+      'маркира или търси, а дългата бележка отнема повече време.';
   @override
   String get formatNoteAlreadyTidy => 'Бележката вече беше подредена.';
   @override

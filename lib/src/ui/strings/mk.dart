@@ -1592,11 +1592,20 @@ final class MacedonianStrings extends Strings {
       'index.md нема frontmatter. Книгата ќе го носи името на папката '
       'и без автор, корица или серија.';
   @override
-  String get exportEpubAnyway => 'Сепак извези';
+  String get exportAnyway => 'Сепак извези';
   @override
   String get exportPdfPicture =>
       'PDF е слика од страниците; инсталирајте прелистувач за текст што може '
       'да се избере.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF како слика';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На овој компјутер не е најден прелистувач. Белешката се црта '
+      'како слика од страниците: текстот не може да се избере или '
+      'пребарува, а долгата белешка трае подолго.';
   @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override

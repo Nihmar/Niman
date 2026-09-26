@@ -1603,11 +1603,21 @@ final class GermanStrings extends Strings {
       'index.md hat kein Frontmatter. Das Buch trägt den Ordnernamen '
       'und keinen Autor, kein Cover und keine Reihe.';
   @override
-  String get exportEpubAnyway => 'Trotzdem exportieren';
+  String get exportAnyway => 'Trotzdem exportieren';
   @override
   String get exportPdfPicture =>
       'Das PDF ist ein Bild der Seiten; mit einem Browser wird der Text '
       'auswählbar.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF als Bild';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Auf diesem Rechner wurde kein Browser gefunden. Die Notiz '
+      'wird als Bild der Seiten gezeichnet: Der Text lässt sich '
+      'weder markieren noch durchsuchen, und eine lange Notiz '
+      'dauert länger.';
   @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override

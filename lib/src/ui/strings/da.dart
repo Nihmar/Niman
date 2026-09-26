@@ -1571,11 +1571,20 @@ final class DanishStrings extends Strings {
       'index.md har ingen frontmatter. Bogen får mappens navn og ingen '
       'forfatter, forside eller serie.';
   @override
-  String get exportEpubAnyway => 'Eksportér alligevel';
+  String get exportAnyway => 'Eksportér alligevel';
   @override
   String get exportPdfPicture =>
       "PDF'en er et billede af siderne; installér en browser for "
       'markérbar tekst.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF som billede';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Der blev ikke fundet nogen browser på denne maskine. Noten '
+      'tegnes som et billede af siderne: teksten kan ikke markeres '
+      'eller søges, og en lang note tager længere tid.';
   @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
   @override

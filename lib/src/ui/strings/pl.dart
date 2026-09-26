@@ -1597,11 +1597,20 @@ final class PolishStrings extends Strings {
       'index.md nie ma frontmatter. Książka będzie nosić nazwę folderu '
       'i nie będzie mieć autora, okładki ani serii.';
   @override
-  String get exportEpubAnyway => 'Eksportuj mimo to';
+  String get exportAnyway => 'Eksportuj mimo to';
   @override
   String get exportPdfPicture =>
       'PDF to obraz stron; zainstaluj przeglądarkę, aby tekst można było '
       'zaznaczać.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF jako obraz';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na tym komputerze nie znaleziono przeglądarki. Notatka jest '
+      'rysowana jako obraz stron: tekstu nie można zaznaczyć ani '
+      'przeszukać, a długa notatka zajmuje więcej czasu.';
   @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override

@@ -1550,11 +1550,20 @@ final class HindiStrings extends Strings {
       'index.md में frontmatter नहीं है। किताब फ़ोल्डर के नाम से बनेगी '
       'और उसमें लेखक, कवर या श्रृंखला नहीं होगी।';
   @override
-  String get exportEpubAnyway => 'फिर भी निर्यात करें';
+  String get exportAnyway => 'फिर भी निर्यात करें';
   @override
   String get exportPdfPicture =>
       'PDF पृष्ठों की तस्वीर है; चुने जा सकने वाले टेक्स्ट के लिए ब्राउज़र '
       'इंस्टॉल करें।';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF चित्र के रूप में';
+
+  @override
+  String get exportPdfNoEngine =>
+      'इस मशीन पर कोई ब्राउज़र नहीं मिला। नोट पेजों के चित्र के रूप '
+      'में बनाया जाता है: पाठ को न चुना जा सकता है न खोजा जा सकता '
+      'है, और लंबे नोट में अधिक समय लगता है।';
   @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
   @override

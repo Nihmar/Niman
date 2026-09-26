@@ -1576,11 +1576,20 @@ final class CroatianStrings extends Strings {
       'index.md nema frontmatter. Knjiga će nositi naziv mape i bez '
       'autora, naslovnice ili serije.';
   @override
-  String get exportEpubAnyway => 'Ipak izvezi';
+  String get exportAnyway => 'Ipak izvezi';
   @override
   String get exportPdfPicture =>
       'PDF je slika stranica; instalirajte preglednik za tekst koji se može '
       'označiti.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kao slika';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na ovom računalu nije pronađen preglednik. Bilješka se crta '
+      'kao slika stranica: tekst se ne može označiti ni '
+      'pretraživati, a duga bilješka traje dulje.';
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override

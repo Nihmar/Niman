@@ -1587,10 +1587,19 @@ final class HungarianStrings extends Strings {
       'Az index.md nem tartalmaz frontmattert. A könyv a mappa nevét '
       'viseli, és nem lesz szerzője, borítója vagy sorozata.';
   @override
-  String get exportEpubAnyway => 'Exportálás mégis';
+  String get exportAnyway => 'Exportálás mégis';
   @override
   String get exportPdfPicture =>
       'A PDF az oldalak képe; választható szöveghez telepítsd a böngészőt.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF képként';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Ezen a gépen nem található böngésző. A jegyzet az oldalak '
+      'képként rajzolódik ki: a szöveg nem jelölhető ki és nem '
+      'kereshető, a hosszú jegyzet pedig tovább tart.';
   @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override
