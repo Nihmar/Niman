@@ -1,5 +1,6 @@
 // Exporting the open note as a file (#24): the ⋮ menu's entry, the format
 // chooser, the save seam and the message that says where it landed.
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ void main() {
   String? place;
   String? pickedFolder;
   String? pickedTitle;
+  late EpubNoteExport epubExport;
 
   setUp(() {
     controller = FakeLibrarySession();
@@ -35,6 +37,21 @@ void main() {
     place = null;
     pickedFolder = null;
     pickedTitle = null;
+    // The real book builder typesets in an isolate the fake-async zone
+    // cannot wait on; a test that does not care gets an empty book.
+    epubExport =
+        ({
+          required text,
+          required title,
+          required path,
+          required root,
+          required language,
+          linkSource,
+        }) async => (
+          name: 'note.epub',
+          bytes: Uint8List(0),
+          mimeType: 'application/epub+zip',
+        );
   });
 
   Future<void> pumpShell(
@@ -79,6 +96,9 @@ void main() {
           epubMetadataProblemProvider.overrideWithValue(
             (folder) async => epubProblem,
           ),
+          // The book builder is the machine's isolate: the tests hand in
+          // their own, which they can hold open and watch.
+          epubNoteExportProvider.overrideWithValue(epubExport),
         ],
         child: const NimanApp(),
       ),
@@ -194,6 +214,41 @@ void main() {
     await tester.tap(find.byKey(const Key('export-format-markdown')));
     await settle(tester);
     expect(saved?.name, 'note.md');
+  });
+
+  testWidgets('a note EPUB export says it is working while it builds', (
+    tester,
+  ) async {
+    place = '/tmp/note.epub';
+    final release = Completer<void>();
+    epubExport =
+        ({
+          required text,
+          required title,
+          required path,
+          required root,
+          required language,
+          linkSource,
+        }) async {
+          await release.future;
+          return (
+            name: 'note.epub',
+            bytes: Uint8List(0),
+            mimeType: 'application/epub+zip',
+          );
+        };
+    await pumpShell(tester);
+    await chooseExport(tester, 'epub');
+
+    // The build is under way and the dialog says so; the save picker has
+    // not been asked yet.
+    expect(find.byKey(const Key('export-working')), findsOneWidget);
+    expect(saved, isNull);
+
+    release.complete();
+    await settle(tester);
+    expect(find.byKey(const Key('export-working')), findsNothing);
+    expect(saved?.name, 'note.epub');
   });
 
   testWidgets('a row that is not Markdown offers no export', (tester) async {
