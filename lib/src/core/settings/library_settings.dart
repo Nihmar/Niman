@@ -231,6 +231,83 @@ final class AppSettingsRepo {
     );
   }
 
+  /// The first-run state in one read (#266): whether the welcome deck was
+  /// seen, the Markdown answer text (`none`/`some`/`fluent`, null while
+  /// never asked), whether the tour was seen, where it stopped, and
+  /// whether the welcome asked for it once a library is open.
+  ///
+  /// An install that upgrades into v31 reads `seen: true` — the migration
+  /// writes it — so a library the user already has never gets a welcome.
+  Future<
+    ({
+      bool deckSeen,
+      String? experience,
+      bool tourSeen,
+      int tourStep,
+      bool tourOffer,
+    })
+  >
+  firstRun() async {
+    final rows = await _db.select(_db.appSettings).get();
+    if (rows.isEmpty) {
+      return (
+        deckSeen: false,
+        experience: null,
+        tourSeen: false,
+        tourStep: 0,
+        tourOffer: false,
+      );
+    }
+    final row = rows.first;
+    return (
+      deckSeen: row.welcomeSeen,
+      experience: row.markdownExperience,
+      tourSeen: row.tourSeen,
+      tourStep: row.tourStep,
+      tourOffer: row.tourOffer,
+    );
+  }
+
+  /// Marks the welcome deck as seen (finished or skipped).
+  Future<void> setWelcomeSeen({required bool seen}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(welcomeSeen: Value(seen)),
+    );
+  }
+
+  /// Keeps the Markdown answer, or clears it with null.
+  Future<void> setMarkdownExperience(String? experience) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(markdownExperience: Value(experience)),
+    );
+  }
+
+  /// Marks the guided tour as seen (finished or dismissed).
+  Future<void> setTourSeen({required bool seen}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(tourSeen: Value(seen)),
+    );
+  }
+
+  /// Where the tour stopped, for *Continue the tour*.
+  Future<void> setTourStep(int step) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(tourStep: Value(step)),
+    );
+  }
+
+  /// Whether the welcome asked for the tour once a library is open.
+  Future<void> setTourOffer({required bool offer}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(tourOffer: Value(offer)),
+    );
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

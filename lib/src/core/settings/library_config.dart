@@ -703,6 +703,24 @@ final class LibraryConfig {
     ...EpubLook.keys,
   };
 
+  /// The device keys for the two editor settings, as the file spells
+  /// them, for the first-open seed the welcome's answer gives (#266).
+  ///
+  /// Built here rather than in `core/welcome.dart` so the JSON names and
+  /// the enum spelling live with the serialization they belong to.
+  static Map<String, Object?> editorDeviceKeys({
+    required EditorKind kind,
+    required Set<EditorKind> enabled,
+  }) {
+    return {
+      'editorKind': kind.name,
+      'enabledEditors': [
+        for (final option in EditorKind.values)
+          if (enabled.contains(option)) option.name,
+      ],
+    };
+  }
+
   /// What `settings.json` holds: [toJsonMap] without the [deviceKeys].
   Map<String, Object?> libraryJsonMap() => {
     for (final entry in toJsonMap().entries)
@@ -927,11 +945,19 @@ final class LibraryConfig {
 /// Without a device store (tests, tools, the legacy seed) the file keeps
 /// every key, as it did before the split.
 final class LibraryConfigStore {
-  /// Creates a store for the library at its absolute path.
-  new(this._libraryPath, {this._device});
+  /// Creates a store for the library at its absolute path; [firstRunDefaults]
+  /// are the device keys a library takes from the welcome's answer (#266)
+  /// when this device has never stored any for it.
+  new(this._libraryPath, {this._device, this.firstRunDefaults});
 
   final String _libraryPath;
   final DeviceSettingsStore? _device;
+
+  /// The welcome's answer as device keys ([LibraryConfig.editorDeviceKeys]),
+  /// or null when the question was never asked. Merged *under* the file's
+  /// own values, so a library that has an editor choice of its own keeps
+  /// it.
+  final Map<String, Object?>? firstRunDefaults;
 
   /// The settings file: `<library>/.niman/settings.json`.
   File get file => File(p.join(_libraryPath, '.niman', 'settings.json'));
@@ -957,6 +983,14 @@ final class LibraryConfigStore {
         for (final key in LibraryConfig.deviceKeys)
           if (json.containsKey(key)) key: json[key],
       };
+      // The first run's answer fills what the file does not say — a new
+      // library, or one that never carried these keys (#266).
+      final defaults = firstRunDefaults;
+      if (defaults != null) {
+        for (final entry in defaults.entries) {
+          device.putIfAbsent(entry.key, () => entry.value);
+        }
+      }
       await deviceStore.write(_libraryPath, device);
     }
     return LibraryConfig.fromJsonMap({

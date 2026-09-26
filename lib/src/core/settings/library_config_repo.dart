@@ -16,9 +16,18 @@ import 'package:niman/src/core/settings/library_config.dart';
 /// time, and the cache is replaced only once the write has landed.
 final class LibraryConfigRepo {
   /// Creates the repo for the library at its absolute path; [device]
-  /// keeps the device's share of the settings (see [LibraryConfigStore]).
-  new(String libraryPath, {DeviceSettingsStore? device})
-    : _store = LibraryConfigStore(libraryPath, device: device);
+  /// keeps the device's share of the settings (see [LibraryConfigStore]),
+  /// and [firstRunDefaults] are the editor keys the welcome's answer
+  /// hands a library this device opens for the first time (#266).
+  new(
+    String libraryPath, {
+    DeviceSettingsStore? device,
+    Map<String, Object?>? firstRunDefaults,
+  }) : _store = LibraryConfigStore(
+         libraryPath,
+         device: device,
+         firstRunDefaults: firstRunDefaults,
+       );
 
   final LibraryConfigStore _store;
 

@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/sample_themes.dart';
 
@@ -90,6 +91,17 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 31) {
+    for (final column in [
+      'welcome_seen',
+      'markdown_experience',
+      'tour_seen',
+      'tour_step',
+      'tour_offer',
+    ]) {
+      await drop('app_settings', column);
+    }
+  }
   if (version < 30) await db.customStatement('DROP TABLE custom_themes');
   if (version < 29) await drop('sync_items', 'base_text');
   if (version < 28) {
@@ -1291,6 +1303,63 @@ void main() {
         repo.save(sampleCustomTheme(id: 'other', name: 'mine')),
         throwsA(isA<Exception>()),
       );
+      await db.close();
+    });
+  });
+
+  group('v30 → v31: the first-run welcome appears (#266)', () {
+    late File dbFile;
+
+    setUp(() async {
+      final dir = await Directory.systemTemp.createTemp('niman_v31_');
+      addTearDown(() => dir.delete(recursive: true));
+      dbFile = File(p.join(dir.path, 'app.db'));
+    });
+
+    test('an existing install is marked as already welcomed', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 30);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path) '
+          "VALUES (1, '/lib/Work')",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      final state = await repo.firstRun();
+      expect(
+        state.deckSeen,
+        isTrue,
+        reason: 'an install with a library is not welcomed as a new one',
+      );
+      expect(state.experience, null);
+      expect(state.tourSeen, isFalse);
+      expect(state.tourStep, 0);
+      expect(state.tourOffer, isFalse);
+
+      // And the answer round-trips, so the deck is once and not twice.
+      await repo.setWelcomeSeen(seen: false);
+      await repo.setMarkdownExperience('some');
+      await repo.setTourSeen(seen: true);
+      await repo.setTourStep(3);
+      await repo.setTourOffer(offer: true);
+      final written = await repo.firstRun();
+      expect(written.deckSeen, isFalse);
+      expect(written.experience, 'some');
+      expect(written.tourSeen, isTrue);
+      expect(written.tourStep, 3);
+      expect(written.tourOffer, isTrue);
+      await db.close();
+    });
+
+    test('a fresh database starts unseen', () async {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final state = await AppSettingsRepo(db).firstRun();
+      expect(state.deckSeen, isFalse);
+      expect(state.experience, null);
       await db.close();
     });
   });

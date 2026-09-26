@@ -20,6 +20,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -440,9 +441,20 @@ final class LibraryController implements LibrarySession {
         ..onRemoved = _onRemoved;
       // One reader of `.niman/settings.json` per session: the four
       // per-library settings and the overrides (T-ML-10) share its cache.
+      // The welcome's answer (#266) seeds the editors of a library this
+      // device opens for the first time; a failure to read it is not a
+      // reason to fail the open.
+      Map<String, Object?>? firstRunDefaults;
+      try {
+        firstRunDefaults = await DbWelcomeStore(AppSettingsRepo(appDb))
+            .firstLibraryEditorKeys();
+      } on Object catch (error) {
+        _log.warning('first-run editor defaults unavailable ($error)');
+      }
       final config = LibraryConfigRepo(
         abs,
         device: DbDeviceSettingsStore(appDb),
+        firstRunDefaults: firstRunDefaults,
       );
       _configRepo = config;
       final ops = NoteOps(
@@ -1536,4 +1548,15 @@ final librarySessionProvider = Provider<LibrarySession>((ref) {
   );
   ref.onDispose(controller.dispose);
   return controller;
+});
+
+/// The first run's state (#266), over the app database: the welcome deck
+/// reads it, the tour writes its progress back.
+///
+/// The seam a widget test overrides with a [MemoryWelcomeStore]; a test
+/// bed with no application-support folder would otherwise fail opening
+/// the database, which is why the deck's own reader tolerates a null
+/// store instead.
+final welcomeStoreProvider = FutureProvider<WelcomeStore>((ref) async {
+  return DbWelcomeStore(AppSettingsRepo(await defaultAppDatabase()));
 });

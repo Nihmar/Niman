@@ -164,6 +164,74 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _welcomeSeenMeta = const VerificationMeta(
+    'welcomeSeen',
+  );
+  @override
+  late final GeneratedColumn<bool> welcomeSeen = GeneratedColumn<bool>(
+    'welcome_seen',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("welcome_seen" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _markdownExperienceMeta =
+      const VerificationMeta('markdownExperience');
+  @override
+  late final GeneratedColumn<String> markdownExperience =
+      GeneratedColumn<String>(
+        'markdown_experience',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _tourSeenMeta = const VerificationMeta(
+    'tourSeen',
+  );
+  @override
+  late final GeneratedColumn<bool> tourSeen = GeneratedColumn<bool>(
+    'tour_seen',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tour_seen" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _tourStepMeta = const VerificationMeta(
+    'tourStep',
+  );
+  @override
+  late final GeneratedColumn<int> tourStep = GeneratedColumn<int>(
+    'tour_step',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tourOfferMeta = const VerificationMeta(
+    'tourOffer',
+  );
+  @override
+  late final GeneratedColumn<bool> tourOffer = GeneratedColumn<bool>(
+    'tour_offer',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tour_offer" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -179,6 +247,11 @@ class $AppSettingsTable extends AppSettings
     changelogSeenVersion,
     keyMap,
     pinnedCommands,
+    welcomeSeen,
+    markdownExperience,
+    tourSeen,
+    tourStep,
+    tourOffer,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -297,6 +370,42 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('welcome_seen')) {
+      context.handle(
+        _welcomeSeenMeta,
+        welcomeSeen.isAcceptableOrUnknown(
+          data['welcome_seen']!,
+          _welcomeSeenMeta,
+        ),
+      );
+    }
+    if (data.containsKey('markdown_experience')) {
+      context.handle(
+        _markdownExperienceMeta,
+        markdownExperience.isAcceptableOrUnknown(
+          data['markdown_experience']!,
+          _markdownExperienceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tour_seen')) {
+      context.handle(
+        _tourSeenMeta,
+        tourSeen.isAcceptableOrUnknown(data['tour_seen']!, _tourSeenMeta),
+      );
+    }
+    if (data.containsKey('tour_step')) {
+      context.handle(
+        _tourStepMeta,
+        tourStep.isAcceptableOrUnknown(data['tour_step']!, _tourStepMeta),
+      );
+    }
+    if (data.containsKey('tour_offer')) {
+      context.handle(
+        _tourOfferMeta,
+        tourOffer.isAcceptableOrUnknown(data['tour_offer']!, _tourOfferMeta),
+      );
+    }
     return context;
   }
 
@@ -358,6 +467,26 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.string,
         data['${effectivePrefix}pinned_commands'],
       ),
+      welcomeSeen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}welcome_seen'],
+      )!,
+      markdownExperience: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}markdown_experience'],
+      ),
+      tourSeen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tour_seen'],
+      )!,
+      tourStep: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tour_step'],
+      )!,
+      tourOffer: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tour_offer'],
+      )!,
     );
   }
 
@@ -439,6 +568,28 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// names, in pinning order; null while none was. The device's, like the
   /// key map: a pin is about how this machine is used.
   final String? pinnedCommands;
+
+  /// Whether the first-run welcome deck was finished or skipped (#266).
+  ///
+  /// Fresh installs only: the v31 migration writes `1` for every database
+  /// that upgrades into it, because an install that has opened Niman
+  /// already has a library and a way of writing and is not welcomed twice.
+  final bool welcomeSeen;
+
+  /// The welcome's Markdown answer (`none`, `some`, `fluent`), or null
+  /// while it was never asked. It seeds the editors of a library the
+  /// first time this device opens it (#266).
+  final String? markdownExperience;
+
+  /// Whether the guided tour was finished or dismissed (#266).
+  final bool tourSeen;
+
+  /// Where the tour stopped, for *Continue the tour*; 0 is its start.
+  final int tourStep;
+
+  /// The welcome's "show me around" choice (#266), read once a library is
+  /// open: the tour needs a shell to point at.
+  final bool tourOffer;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -453,6 +604,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     this.changelogSeenVersion,
     this.keyMap,
     this.pinnedCommands,
+    required this.welcomeSeen,
+    this.markdownExperience,
+    required this.tourSeen,
+    required this.tourStep,
+    required this.tourOffer,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -480,6 +636,13 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     if (!nullToAbsent || pinnedCommands != null) {
       map['pinned_commands'] = Variable<String>(pinnedCommands);
     }
+    map['welcome_seen'] = Variable<bool>(welcomeSeen);
+    if (!nullToAbsent || markdownExperience != null) {
+      map['markdown_experience'] = Variable<String>(markdownExperience);
+    }
+    map['tour_seen'] = Variable<bool>(tourSeen);
+    map['tour_step'] = Variable<int>(tourStep);
+    map['tour_offer'] = Variable<bool>(tourOffer);
     return map;
   }
 
@@ -508,6 +671,13 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       pinnedCommands: pinnedCommands == null && nullToAbsent
           ? const Value.absent()
           : Value(pinnedCommands),
+      welcomeSeen: Value(welcomeSeen),
+      markdownExperience: markdownExperience == null && nullToAbsent
+          ? const Value.absent()
+          : Value(markdownExperience),
+      tourSeen: Value(tourSeen),
+      tourStep: Value(tourStep),
+      tourOffer: Value(tourOffer),
     );
   }
 
@@ -534,6 +704,13 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       ),
       keyMap: serializer.fromJson<String?>(json['keyMap']),
       pinnedCommands: serializer.fromJson<String?>(json['pinnedCommands']),
+      welcomeSeen: serializer.fromJson<bool>(json['welcomeSeen']),
+      markdownExperience: serializer.fromJson<String?>(
+        json['markdownExperience'],
+      ),
+      tourSeen: serializer.fromJson<bool>(json['tourSeen']),
+      tourStep: serializer.fromJson<int>(json['tourStep']),
+      tourOffer: serializer.fromJson<bool>(json['tourOffer']),
     );
   }
   @override
@@ -553,6 +730,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'changelogSeenVersion': serializer.toJson<String?>(changelogSeenVersion),
       'keyMap': serializer.toJson<String?>(keyMap),
       'pinnedCommands': serializer.toJson<String?>(pinnedCommands),
+      'welcomeSeen': serializer.toJson<bool>(welcomeSeen),
+      'markdownExperience': serializer.toJson<String?>(markdownExperience),
+      'tourSeen': serializer.toJson<bool>(tourSeen),
+      'tourStep': serializer.toJson<int>(tourStep),
+      'tourOffer': serializer.toJson<bool>(tourOffer),
     };
   }
 
@@ -570,6 +752,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     Value<String?> changelogSeenVersion = const Value.absent(),
     Value<String?> keyMap = const Value.absent(),
     Value<String?> pinnedCommands = const Value.absent(),
+    bool? welcomeSeen,
+    Value<String?> markdownExperience = const Value.absent(),
+    bool? tourSeen,
+    int? tourStep,
+    bool? tourOffer,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -590,6 +777,13 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     pinnedCommands: pinnedCommands.present
         ? pinnedCommands.value
         : this.pinnedCommands,
+    welcomeSeen: welcomeSeen ?? this.welcomeSeen,
+    markdownExperience: markdownExperience.present
+        ? markdownExperience.value
+        : this.markdownExperience,
+    tourSeen: tourSeen ?? this.tourSeen,
+    tourStep: tourStep ?? this.tourStep,
+    tourOffer: tourOffer ?? this.tourOffer,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -626,6 +820,15 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       pinnedCommands: data.pinnedCommands.present
           ? data.pinnedCommands.value
           : this.pinnedCommands,
+      welcomeSeen: data.welcomeSeen.present
+          ? data.welcomeSeen.value
+          : this.welcomeSeen,
+      markdownExperience: data.markdownExperience.present
+          ? data.markdownExperience.value
+          : this.markdownExperience,
+      tourSeen: data.tourSeen.present ? data.tourSeen.value : this.tourSeen,
+      tourStep: data.tourStep.present ? data.tourStep.value : this.tourStep,
+      tourOffer: data.tourOffer.present ? data.tourOffer.value : this.tourOffer,
     );
   }
 
@@ -644,7 +847,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
           ..write('changelogSeenVersion: $changelogSeenVersion, ')
           ..write('keyMap: $keyMap, ')
-          ..write('pinnedCommands: $pinnedCommands')
+          ..write('pinnedCommands: $pinnedCommands, ')
+          ..write('welcomeSeen: $welcomeSeen, ')
+          ..write('markdownExperience: $markdownExperience, ')
+          ..write('tourSeen: $tourSeen, ')
+          ..write('tourStep: $tourStep, ')
+          ..write('tourOffer: $tourOffer')
           ..write(')'))
         .toString();
   }
@@ -664,6 +872,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     changelogSeenVersion,
     keyMap,
     pinnedCommands,
+    welcomeSeen,
+    markdownExperience,
+    tourSeen,
+    tourStep,
+    tourOffer,
   );
   @override
   bool operator ==(Object other) =>
@@ -681,7 +894,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.legacyLibrarySettings == this.legacyLibrarySettings &&
           other.changelogSeenVersion == this.changelogSeenVersion &&
           other.keyMap == this.keyMap &&
-          other.pinnedCommands == this.pinnedCommands);
+          other.pinnedCommands == this.pinnedCommands &&
+          other.welcomeSeen == this.welcomeSeen &&
+          other.markdownExperience == this.markdownExperience &&
+          other.tourSeen == this.tourSeen &&
+          other.tourStep == this.tourStep &&
+          other.tourOffer == this.tourOffer);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -698,6 +916,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String?> changelogSeenVersion;
   final Value<String?> keyMap;
   final Value<String?> pinnedCommands;
+  final Value<bool> welcomeSeen;
+  final Value<String?> markdownExperience;
+  final Value<bool> tourSeen;
+  final Value<int> tourStep;
+  final Value<bool> tourOffer;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -712,6 +935,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.changelogSeenVersion = const Value.absent(),
     this.keyMap = const Value.absent(),
     this.pinnedCommands = const Value.absent(),
+    this.welcomeSeen = const Value.absent(),
+    this.markdownExperience = const Value.absent(),
+    this.tourSeen = const Value.absent(),
+    this.tourStep = const Value.absent(),
+    this.tourOffer = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -727,6 +955,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.changelogSeenVersion = const Value.absent(),
     this.keyMap = const Value.absent(),
     this.pinnedCommands = const Value.absent(),
+    this.welcomeSeen = const Value.absent(),
+    this.markdownExperience = const Value.absent(),
+    this.tourSeen = const Value.absent(),
+    this.tourStep = const Value.absent(),
+    this.tourOffer = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -742,6 +975,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? changelogSeenVersion,
     Expression<String>? keyMap,
     Expression<String>? pinnedCommands,
+    Expression<bool>? welcomeSeen,
+    Expression<String>? markdownExperience,
+    Expression<bool>? tourSeen,
+    Expression<int>? tourStep,
+    Expression<bool>? tourOffer,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -759,6 +997,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
         'changelog_seen_version': changelogSeenVersion,
       if (keyMap != null) 'key_map': keyMap,
       if (pinnedCommands != null) 'pinned_commands': pinnedCommands,
+      if (welcomeSeen != null) 'welcome_seen': welcomeSeen,
+      if (markdownExperience != null) 'markdown_experience': markdownExperience,
+      if (tourSeen != null) 'tour_seen': tourSeen,
+      if (tourStep != null) 'tour_step': tourStep,
+      if (tourOffer != null) 'tour_offer': tourOffer,
     });
   }
 
@@ -776,6 +1019,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String?>? changelogSeenVersion,
     Value<String?>? keyMap,
     Value<String?>? pinnedCommands,
+    Value<bool>? welcomeSeen,
+    Value<String?>? markdownExperience,
+    Value<bool>? tourSeen,
+    Value<int>? tourStep,
+    Value<bool>? tourOffer,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -792,6 +1040,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       changelogSeenVersion: changelogSeenVersion ?? this.changelogSeenVersion,
       keyMap: keyMap ?? this.keyMap,
       pinnedCommands: pinnedCommands ?? this.pinnedCommands,
+      welcomeSeen: welcomeSeen ?? this.welcomeSeen,
+      markdownExperience: markdownExperience ?? this.markdownExperience,
+      tourSeen: tourSeen ?? this.tourSeen,
+      tourStep: tourStep ?? this.tourStep,
+      tourOffer: tourOffer ?? this.tourOffer,
     );
   }
 
@@ -841,6 +1094,21 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (pinnedCommands.present) {
       map['pinned_commands'] = Variable<String>(pinnedCommands.value);
     }
+    if (welcomeSeen.present) {
+      map['welcome_seen'] = Variable<bool>(welcomeSeen.value);
+    }
+    if (markdownExperience.present) {
+      map['markdown_experience'] = Variable<String>(markdownExperience.value);
+    }
+    if (tourSeen.present) {
+      map['tour_seen'] = Variable<bool>(tourSeen.value);
+    }
+    if (tourStep.present) {
+      map['tour_step'] = Variable<int>(tourStep.value);
+    }
+    if (tourOffer.present) {
+      map['tour_offer'] = Variable<bool>(tourOffer.value);
+    }
     return map;
   }
 
@@ -859,7 +1127,12 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
           ..write('changelogSeenVersion: $changelogSeenVersion, ')
           ..write('keyMap: $keyMap, ')
-          ..write('pinnedCommands: $pinnedCommands')
+          ..write('pinnedCommands: $pinnedCommands, ')
+          ..write('welcomeSeen: $welcomeSeen, ')
+          ..write('markdownExperience: $markdownExperience, ')
+          ..write('tourSeen: $tourSeen, ')
+          ..write('tourStep: $tourStep, ')
+          ..write('tourOffer: $tourOffer')
           ..write(')'))
         .toString();
   }
@@ -4506,6 +4779,11 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String?> changelogSeenVersion,
       Value<String?> keyMap,
       Value<String?> pinnedCommands,
+      Value<bool> welcomeSeen,
+      Value<String?> markdownExperience,
+      Value<bool> tourSeen,
+      Value<int> tourStep,
+      Value<bool> tourOffer,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -4522,6 +4800,11 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String?> changelogSeenVersion,
       Value<String?> keyMap,
       Value<String?> pinnedCommands,
+      Value<bool> welcomeSeen,
+      Value<String?> markdownExperience,
+      Value<bool> tourSeen,
+      Value<int> tourStep,
+      Value<bool> tourOffer,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -4595,6 +4878,31 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get pinnedCommands => $composableBuilder(
     column: $table.pinnedCommands,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get welcomeSeen => $composableBuilder(
+    column: $table.welcomeSeen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get markdownExperience => $composableBuilder(
+    column: $table.markdownExperience,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get tourSeen => $composableBuilder(
+    column: $table.tourSeen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tourStep => $composableBuilder(
+    column: $table.tourStep,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get tourOffer => $composableBuilder(
+    column: $table.tourOffer,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4672,6 +4980,31 @@ class $$AppSettingsTableOrderingComposer
     column: $table.pinnedCommands,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get welcomeSeen => $composableBuilder(
+    column: $table.welcomeSeen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get markdownExperience => $composableBuilder(
+    column: $table.markdownExperience,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get tourSeen => $composableBuilder(
+    column: $table.tourSeen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tourStep => $composableBuilder(
+    column: $table.tourStep,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get tourOffer => $composableBuilder(
+    column: $table.tourOffer,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -4741,6 +5074,25 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.pinnedCommands,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get welcomeSeen => $composableBuilder(
+    column: $table.welcomeSeen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get markdownExperience => $composableBuilder(
+    column: $table.markdownExperience,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get tourSeen =>
+      $composableBuilder(column: $table.tourSeen, builder: (column) => column);
+
+  GeneratedColumn<int> get tourStep =>
+      $composableBuilder(column: $table.tourStep, builder: (column) => column);
+
+  GeneratedColumn<bool> get tourOffer =>
+      $composableBuilder(column: $table.tourOffer, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -4787,6 +5139,11 @@ class $$AppSettingsTableTableManager
                 Value<String?> changelogSeenVersion = const Value.absent(),
                 Value<String?> keyMap = const Value.absent(),
                 Value<String?> pinnedCommands = const Value.absent(),
+                Value<bool> welcomeSeen = const Value.absent(),
+                Value<String?> markdownExperience = const Value.absent(),
+                Value<bool> tourSeen = const Value.absent(),
+                Value<int> tourStep = const Value.absent(),
+                Value<bool> tourOffer = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -4801,6 +5158,11 @@ class $$AppSettingsTableTableManager
                 changelogSeenVersion: changelogSeenVersion,
                 keyMap: keyMap,
                 pinnedCommands: pinnedCommands,
+                welcomeSeen: welcomeSeen,
+                markdownExperience: markdownExperience,
+                tourSeen: tourSeen,
+                tourStep: tourStep,
+                tourOffer: tourOffer,
               ),
           createCompanionCallback:
               ({
@@ -4817,6 +5179,11 @@ class $$AppSettingsTableTableManager
                 Value<String?> changelogSeenVersion = const Value.absent(),
                 Value<String?> keyMap = const Value.absent(),
                 Value<String?> pinnedCommands = const Value.absent(),
+                Value<bool> welcomeSeen = const Value.absent(),
+                Value<String?> markdownExperience = const Value.absent(),
+                Value<bool> tourSeen = const Value.absent(),
+                Value<int> tourStep = const Value.absent(),
+                Value<bool> tourOffer = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -4831,6 +5198,11 @@ class $$AppSettingsTableTableManager
                 changelogSeenVersion: changelogSeenVersion,
                 keyMap: keyMap,
                 pinnedCommands: pinnedCommands,
+                welcomeSeen: welcomeSeen,
+                markdownExperience: markdownExperience,
+                tourSeen: tourSeen,
+                tourStep: tourStep,
+                tourOffer: tourOffer,
               ),
           withReferenceMapper: (p0) => p0
               .map(
