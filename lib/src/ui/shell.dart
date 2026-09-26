@@ -21,6 +21,7 @@ import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
@@ -3006,13 +3007,17 @@ final class _LibraryShellState extends State<_LibraryShell>
         // part, and on a phone it is seconds: the dialog says the app is
         // working, where a PDF has its own.
         final done = Completer<void>();
+        var cancelled = false;
         if (mounted) {
           unawaited(
             showDialog<void>(
               context: context,
               barrierDismissible: false,
-              builder: (context) =>
-                  ExportWorkingDialog(title: title, done: done.future),
+              builder: (context) => ExportWorkingDialog(
+                title: title,
+                done: done.future,
+                onCancel: () => cancelled = true,
+              ),
             ),
           );
         }
@@ -3024,7 +3029,11 @@ final class _LibraryShellState extends State<_LibraryShell>
             root: root,
             language: AppLanguages.resolved.id,
             linkSource: _linkSource,
+            isCancelled: () => cancelled,
           );
+        } on EpubExportCancelled {
+          // The dialog closed itself; a cancel says nothing.
+          return;
         } finally {
           if (!done.isCompleted) done.complete();
         }

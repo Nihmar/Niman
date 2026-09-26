@@ -42,6 +42,7 @@ final class EpubDocument {
     required this.pictures,
     required this.links,
     required this.chapters,
+    this.mathReport,
   });
 
   /// The book's title, or its file name when it gives none.
@@ -62,6 +63,11 @@ final class EpubDocument {
 
   /// Its chapters with any text, in the order they are read.
   final List<EpubChapter> chapters;
+
+  /// An ad-hoc diagnostic (#303): what the chapters' math looked like to a
+  /// plain scan — the SVG formulas, their first TeX, the MathML — for the
+  /// pane to log. Null when the book shows none.
+  final String? mathReport;
 
   /// How the text names a picture: `epub-picture:3`.
   static const String pictureScheme = 'epub-picture';
@@ -177,10 +183,19 @@ EpubDocument readEpub(String path, String pictureDir) {
   final anchors = <String, Map<String, int>>{};
   final text = StringBuffer();
   var line = 0;
+  var formulaSvgs = 0;
+  var mathMl = 0;
+  String? firstTex;
   for (final chapter in spine) {
     final file = book.file(chapter);
     if (file == null) continue;
     final dir = p.posix.dirname(chapter);
+    final chapterText = book.text(file);
+    for (final match in _svgFormula.allMatches(chapterText)) {
+      formulaSvgs++;
+      firstTex ??= match.group(1);
+    }
+    mathMl += _mathMl.allMatches(chapterText).length;
     final converted = XhtmlMarkdown(
       picture: (src) {
         final resolved = _resolve(dir, src);
@@ -203,7 +218,7 @@ EpubDocument readEpub(String path, String pictureDir) {
         ));
         return '${EpubDocument.linkScheme}:${targets.length - 1}';
       },
-    ).convert(book.text(file));
+    ).convert(chapterText);
     if (converted.markdown.trim().isEmpty) continue;
     if (text.isNotEmpty) {
       // A rule between two chapters, a blank line on each side of it.
@@ -241,8 +256,27 @@ EpubDocument readEpub(String path, String pictureDir) {
       for (final MapEntry(key: file, value: line) in chapterStart.entries)
         (file: file, line: line),
     ],
+    mathReport: _mathReport(formulaSvgs, firstTex, mathMl),
   );
 }
+
+/// The math a book's chapters showed, as one log line's worth (#303):
+/// null when there was none.
+String? _mathReport(int formulas, String? firstTex, int mathMl) {
+  if (formulas == 0 && mathMl == 0) return null;
+  final sample = firstTex == null ? '' : ' (first: "$firstTex")';
+  final ml = mathMl == 0 ? '' : ', $mathMl mathml';
+  return '$formulas svg formulas$sample$ml';
+}
+
+/// A formula SVG's TeX, in its `aria-label`; an ad-hoc diagnostic (#303).
+final RegExp _svgFormula = RegExp(
+  '<svg[^>]*aria-label="([^"]*)"',
+  caseSensitive: false,
+);
+
+/// A MathML element; an ad-hoc diagnostic (#303).
+final RegExp _mathMl = RegExp(r'<math[\s>]', caseSensitive: false);
 
 /// A file of the book's manifest.
 typedef _Item = ({String path, String type, String properties});

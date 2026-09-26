@@ -558,6 +558,20 @@ void main() {
     expect(document.markdown, contains(r'$$\frac{a}{b}$$'));
   });
 
+  test('a cancel before the book is built writes nothing', () async {
+    await expectLater(
+      exportNoteEpub(
+        text: '# T\n',
+        title: 'T',
+        path: 'T.md',
+        root: root.path,
+        language: 'en',
+        isCancelled: () => true,
+      ),
+      throwsA(isA<EpubExportCancelled>()),
+    );
+  });
+
   test('a picture shared by two notes goes in once', () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);
