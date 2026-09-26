@@ -10,7 +10,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 
 | Module | Contents |
 |--------|----------|
-| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), single instance, the tray, the changelog parser |
+| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), the first-run state (`welcome.dart`), single instance, the tray, the changelog parser |
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
 | `import/` | Bringing a Notion export into the library (#25): the zip walk, page ids off the names, links rewritten, assets kept |
@@ -36,7 +36,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
 | `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
 | `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](../records/transcription.md) |
-| `ui/` | Shell, tree, settings screens, shared widgets |
+| `ui/` | Shell, tree, settings screens, shared widgets; `ui/welcome/` is the first-run deck (#266) and `ui/tour/` the guided tour with its target registry |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 
 State: Riverpod. No god classes — one class per file, split at ~300
