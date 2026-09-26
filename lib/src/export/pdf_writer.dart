@@ -74,7 +74,10 @@ final class PdfWriter {
   final double margin;
 
   final BytesBuilder _out = BytesBuilder();
-  final List<int> _offsets = <int>[];
+  // Keyed by object number, not appended in write order: the page tree is
+  // written last (`finish`) but is object 2, so a list in write order
+  // would point every xref entry past its object (P1).
+  final Map<int, int> _offsets = <int, int>{};
   int _pages = 0;
   bool _started = false;
   bool _finished = false;
@@ -82,7 +85,7 @@ final class PdfWriter {
   void _write(String text) => _out.add(utf8.encode(text));
 
   void _begin(int number) {
-    _offsets.add(_out.length);
+    _offsets[number] = _out.length;
     _write('$number 0 obj\n');
   }
 
@@ -147,7 +150,9 @@ final class PdfWriter {
     final startxref = _out.length;
     _write('xref\n0 ${_offsets.length + 1}\n');
     _write('0000000000 65535 f \n');
-    for (final offset in _offsets) {
+    // Object numbers are contiguous from 1, so the count is their number.
+    for (var number = 1; number <= _offsets.length; number++) {
+      final offset = _offsets[number]!;
       _write('${offset.toString().padLeft(10, '0')} 00000 n \n');
     }
     _write(
