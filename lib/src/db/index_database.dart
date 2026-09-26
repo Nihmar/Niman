@@ -172,9 +172,8 @@ class NoteLinks extends Table {
 /// links.
 ///
 /// The primary key deletes a note's stale edges before its content pass
-/// queues the fresh ones; the index reads them in the order they were
-/// queued.
-@TableIndex(name: 'pending_links_note', columns: {#noteId})
+/// queues the fresh ones, and its leading column is what the scan pages
+/// the queue by (insertion order).
 class PendingLinks extends Table {
   /// The id of the note the link is written in.
   IntColumn get noteId => integer()();
