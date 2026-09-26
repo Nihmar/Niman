@@ -2,7 +2,9 @@
 ///
 /// Asset file names are fixed by `.github/workflows/release.yml`:
 ///
-/// - Android: `niman-<V>-android.apk`
+/// - Android: `niman-<V>-android.apk` (the official build; a testing
+///   `-android-testing.apk` is attached to the workflow run, never to the
+///   release page — see `selectAndroidAsset`)
 /// - Linux: `niman-<V>-linux-x64.tar.gz`, `niman-<V>-linux-x64.AppImage`,
 ///   `niman-<V>-....pkg.tar.zst` (Arch)
 /// - Windows: `niman-<V>-windows-x64-setup.exe` (installer),
@@ -38,13 +40,25 @@ enum LinuxVariant {
   unknown,
 }
 
-/// Selects the Android update asset: the published `.apk`.
+/// Selects the Android update asset: the release's **official** `.apk`.
+///
+/// A release page used to carry a testing build beside it
+/// (`niman-<V>-android-testing.apk`, issue #106), whose application ID is
+/// `dev.niman.niman.beta` and which installs *beside* this app instead of
+/// updating it. GitHub lists assets in name order, `-android-testing.apk`
+/// before `-android.apk`, so "the first `.apk`" handed the updater the
+/// testing build (0.0.10). The official one is the one that is not a
+/// testing build; a page carrying nothing else still answers with what it
+/// has, so an old release stays updatable.
 /// Returns null when the release carries no APK.
 ReleaseAsset? selectAndroidAsset(List<ReleaseAsset> assets) {
+  ReleaseAsset? first;
   for (final asset in assets) {
-    if (asset.name.endsWith('.apk')) return asset;
+    if (!asset.name.endsWith('.apk')) continue;
+    first ??= asset;
+    if (!asset.name.contains('-testing')) return asset;
   }
-  return null;
+  return first;
 }
 
 /// Selects the Windows update asset: the Inno Setup installer

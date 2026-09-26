@@ -105,8 +105,11 @@ its own folder:
 - The settings database refuses to be opened by a build older than the
   one that last migrated it, rather than let drift stamp it back down.
 
-CI (`.github/workflows/release.yml`) publishes the testing APK from
-every release tag as `niman-<version>-android-testing.apk`.
+CI (`.github/workflows/release.yml`) builds the official APK from every
+release tag and **never the testing flavor**: a release page holding both
+APKs handed the in-app update the testing one (0.0.10; see
+[releasing](releasing.md#artifacts)). Build it where it is wanted, with
+`./scripts/niman.sh apk beta`.
 
 ## Checks before every commit
 
