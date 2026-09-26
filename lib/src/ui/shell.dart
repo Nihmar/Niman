@@ -3250,9 +3250,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     final wanted = _zipName(name, extension);
     final stem = p.basenameWithoutExtension(wanted);
     var path = p.join(folder, wanted);
-    // A stat, and the one place this app writes a file the user named:
-    // sync keeps the loop readable and runs once per export.
-    for (var n = 2; File(path).existsSync(); n++) {
+    // A stat per candidate, awaited: a `statSync` here would be a FUSE
+    // round trip on the UI isolate on Android, and the rule is no disk I/O
+    // there. The lint prefers the sync form; the platform rule wins.
+    // ignore: avoid_slow_async_io
+    for (var n = 2; await File(path).exists(); n++) {
       path = p.join(folder, '$stem ($n).$extension');
     }
     return path;
