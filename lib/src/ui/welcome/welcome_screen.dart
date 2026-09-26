@@ -59,10 +59,13 @@ final class WelcomeScreen extends StatefulWidget {
 }
 
 final class _WelcomeScreenState extends State<WelcomeScreen> {
-  late final List<WelcomePage> _pages = [
+  /// The pages, rebuilt from the copy: a widget pumped again with other
+  /// words gets them.
+  List<WelcomePage> get _pages => [
     ...themedPages(widget.copy),
     devicePage(widget.copy),
   ];
+
   int _page = 0;
   MarkdownExperience? _answer;
   late bool _tourOffer = widget.initialTourOffer;
@@ -106,7 +109,15 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
         _back();
         return KeyEventResult.handled;
       case LogicalKeyboardKey.escape:
-        if (!widget.readOnly) _finish();
+        // Esc leaves: the deck finishes as a skip; the read-only deck
+        // closes where it has somewhere to go back to.
+        if (!widget.readOnly) {
+          _finish();
+          return KeyEventResult.handled;
+        }
+        final onClose = widget.onClose;
+        if (onClose == null) return KeyEventResult.ignored;
+        onClose();
         return KeyEventResult.handled;
       default:
         return KeyEventResult.ignored;
@@ -270,9 +281,10 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  /// The dots, Back, and Next (or Start).
+  /// The dots, Back, and Next (or Start; Close on the read-only deck's
+  /// last page — a Next there would be a control that does nothing).
   Widget _footer(ThemeData theme) {
-    final last = _onQuestion;
+    final last = _onQuestion || (widget.readOnly && _page == _lastPage);
     return Row(
       children: [
         Semantics(
@@ -303,9 +315,19 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
         const SizedBox(width: 8),
         FilledButton(
-          key: Key(last ? 'welcome-start' : 'welcome-next'),
-          onPressed: last ? _finish : _next,
-          child: Text(last ? widget.copy.start : widget.copy.next),
+          key: Key(
+            last
+                ? (widget.readOnly ? 'welcome-close-primary' : 'welcome-start')
+                : 'welcome-next',
+          ),
+          onPressed: last
+              ? (widget.readOnly ? widget.onClose : _finish)
+              : _next,
+          child: Text(
+            last
+                ? (widget.readOnly ? widget.copy.close : widget.copy.start)
+                : widget.copy.next,
+          ),
         ),
       ],
     );

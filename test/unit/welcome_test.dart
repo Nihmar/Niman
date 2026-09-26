@@ -12,10 +12,18 @@ import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/welcome/welcome_copy.dart';
+import 'package:niman/src/ui/welcome/welcome_pages.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
   group('the answer and the editors', () {
+    test('the device page draws what this platform has, and only that', () {
+      const copy = WelcomeCopy();
+      expect(devicePage(copy, isAndroid: true).body, copy.androidBody);
+      expect(devicePage(copy, isAndroid: false).body, copy.desktopBody);
+    });
+
     test('never: the live editor alone, the source not offered', () {
       final defaults = editorDefaultsFor(MarkdownExperience.none);
       expect(defaults.kind, EditorKind.wysiwyg);
@@ -125,7 +133,7 @@ void main() {
       final store = LibraryConfigStore(
         library.path,
         device: device,
-        firstRunDefaults: LibraryConfig.editorDeviceKeys(
+        welcomeDefaults: LibraryConfig.editorDeviceKeys(
           kind: defaults.kind,
           enabled: defaults.enabled,
         ),
@@ -146,7 +154,7 @@ void main() {
       final store = LibraryConfigStore(
         library.path,
         device: device,
-        firstRunDefaults: LibraryConfig.editorDeviceKeys(
+        welcomeDefaults: LibraryConfig.editorDeviceKeys(
           kind: defaults.kind,
           enabled: defaults.enabled,
         ),
