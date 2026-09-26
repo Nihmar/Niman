@@ -482,6 +482,30 @@ void main() {
     expect(files['OEBPS/content.opf'], contains('media-type="image/svg+xml"'));
   });
 
+  test('a book progresses in chapters, not tree entries', () async {
+    final notes = p.join(root.path, 'Notes');
+    await Directory(notes).create(recursive: true);
+    await File(p.join(notes, 'photo.png')).writeAsBytes(<int>[1, 2, 3]);
+    await File(p.join(notes, 'a.md')).writeAsString('# A\n');
+    await File(p.join(notes, 'b.md')).writeAsString('# B\n');
+
+    final out = p.join(root.path, 'book.epub');
+    final export = await TreeExport.start(
+      dir: notes,
+      zipPath: out,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+    ExportProgress? last;
+    export.progress.addListener(() => last = export.progress.value);
+    await export.done;
+    // The picture and the folder never enter the container, so the bar
+    // must not count them (E10).
+    expect(last, isNotNull);
+    expect(last!.total, 2);
+    expect(last!.done, 2);
+  });
+
   test('a picture shared by two notes goes in once', () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);
