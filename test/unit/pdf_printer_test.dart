@@ -70,6 +70,25 @@ void main() {
       );
     });
 
+    test('the registry lookup is given a timeout', () async {
+      Duration? seen;
+      final engine = await findPdfEngine(
+        isWindows: true,
+        isLinux: false,
+        run: (exe, args, {timeout}) async {
+          seen = timeout;
+          return (exit: 1, stdout: '');
+        },
+        isFile: (path) async => false,
+        roots: const <String?>[null],
+      );
+      // A `reg.exe` that never answers must not hold the export before the
+      // format chooser is even shown; the install folders are the fallback
+      // (P4).
+      expect(engine, isNull);
+      expect(seen, isNotNull);
+    });
+
     test('a platform with neither engine finds nothing', () async {
       expect(await findPdfEngine(isWindows: false, isLinux: false), isNull);
     });
@@ -183,6 +202,22 @@ void main() {
       );
       // Killed, not waited out: the script would run forever.
       expect(started.elapsed, lessThan(const Duration(seconds: 20)));
+    });
+
+    test('a talkative process is drained, but only the head is kept', () async {
+      var seen = 0;
+      final chunks =
+          Stream<List<int>>.fromIterable(<List<int>>[
+            for (var at = 0; at < 2000; at++) List<int>.filled(100, 0x78),
+          ]).map((chunk) {
+            seen += chunk.length;
+            return chunk;
+          });
+      final out = await collectProcessOutput(chunks);
+      // Every byte went through — a pipe left full would block the writer
+      // — and the buffer kept the cap, not the two hundred kilobytes (P3).
+      expect(seen, 2000 * 100);
+      expect(out.length, processOutputLimit);
     });
   });
 }

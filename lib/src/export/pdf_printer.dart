@@ -114,6 +114,11 @@ typedef ProcessRunner = Future<ProcessAnswer> Function(
 /// The size of the file at [path], or null when it is not there.
 typedef FileSize = Future<int?> Function(String path);
 
+/// How much of a program's output is kept. None of it is read — only the
+/// exit code matters — but the pipe must be drained, or a talkative engine
+/// blocks on it; the rest is read and dropped (P3).
+const int processOutputLimit = 64 * 1024;
+
 /// Runs [exe] with [args], through `dart:io`.
 Future<ProcessAnswer> runProcess(
   String exe,
@@ -121,7 +126,7 @@ Future<ProcessAnswer> runProcess(
   Duration? timeout,
 }) async {
   final process = await Process.start(exe, args);
-  final stdoutDone = process.stdout.transform(utf8.decoder).join();
+  final stdoutDone = collectProcessOutput(process.stdout);
   final stderrDone = process.stderr.drain<void>();
   try {
     final exit = timeout == null
@@ -138,6 +143,20 @@ Future<ProcessAnswer> runProcess(
     unawaited(stderrDone.then<void>((_) {}, onError: (Object _) {}));
     throw const ProcessTimedOut();
   }
+}
+
+/// [stream]'s text, at most [processOutputLimit] characters: everything is
+/// read, so the writer never waits on a full pipe, but only the head is
+/// kept. The runner asks for the exit code and the file size; the output
+/// exists for a log line and nothing else.
+Future<String> collectProcessOutput(Stream<List<int>> stream) async {
+  final out = StringBuffer();
+  await for (final text in stream.transform(utf8.decoder)) {
+    if (out.length >= processOutputLimit) continue;
+    final room = processOutputLimit - out.length;
+    out.write(text.length <= room ? text : text.substring(0, room));
+  }
+  return out.toString();
 }
 
 /// Stops [process]: its own signal first, then SIGKILL when it will not go.
@@ -239,7 +258,13 @@ Future<String?> _edgeFromRegistry({
   const key =
       r'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe';
   try {
-    final answer = await run('reg', <String>['query', key, '/ve']);
+    final answer = await run(
+      'reg',
+      <String>['query', key, '/ve'],
+      // A hung `reg.exe` must not hold the folder export open before its
+      // chooser even appears; the install folders are the fallback (P4).
+      timeout: const Duration(seconds: 5),
+    );
     if (answer.exit != 0) return null;
     for (final line in answer.stdout.split('\n')) {
       final mark = line.indexOf('REG_SZ');
