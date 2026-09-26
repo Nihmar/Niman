@@ -123,6 +123,10 @@ Future<PdfExport> exportNotePdf({
           linkSource: linkSource,
           theme: theme,
           mathCache: mathCache,
+          // As on the no-engine branch: the note is drawn page by page,
+          // and the dialog's cancel must be heard (P2).
+          onProgress: onProgress,
+          isCancelled: isCancelled,
         );
     }
   } finally {

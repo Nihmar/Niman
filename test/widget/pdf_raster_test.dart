@@ -155,6 +155,7 @@ void main() {
     addTearDown(() {
       if (dir.existsSync()) dir.deleteSync(recursive: true);
     });
+    final stages = <PdfExportStage>[];
     final result = await tester.runAsync(
       () => exportNotePdf(
         text: '# Title\n',
@@ -165,11 +166,49 @@ void main() {
         printer: const _Fails(),
         theme: theme,
         mathCache: cache,
+        onProgress: (report) => stages.add(report.stage),
       ),
     );
     // The PDF is a picture of the pages, and the caller is told so.
     expect(result!.selectable, isFalse);
     expect(latin1.decode(result.payload.bytes.sublist(0, 8)), '%PDF-1.4');
+    // The failing engine's drawing reports like the no-engine one's: without
+    // them the dialog sat on the indeterminate printing bar (P2).
+    expect(stages.first, PdfExportStage.printing);
+    expect(stages, contains(PdfExportStage.drawing));
+  });
+
+  testWidgets("a cancel during a failing engine's drawing stops it", (
+    tester,
+  ) async {
+    await pumpTheme(tester);
+    final dir = Directory.current.createTempSync('niman_pdf_');
+    addTearDown(() {
+      if (dir.existsSync()) dir.deleteSync(recursive: true);
+    });
+    // The first check is the one after the failed print; the second is the
+    // fallback's own, before its first page: the note is never drawn to the
+    // end (P2).
+    var checks = 0;
+    final outcome = await tester.runAsync(() async {
+      try {
+        await exportNotePdf(
+          text: '# Title\n',
+          title: 'Title',
+          path: 'Title.md',
+          root: dir.path,
+          language: 'en',
+          printer: const _Fails(),
+          theme: theme,
+          mathCache: cache,
+          isCancelled: () => ++checks >= 2,
+        );
+        return 'drawn';
+      } on PdfExportCancelled {
+        return 'cancelled';
+      }
+    });
+    expect(outcome, 'cancelled');
   });
 
   testWidgets('drawing reports its pages as it goes', (tester) async {
