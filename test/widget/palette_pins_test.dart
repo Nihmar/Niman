@@ -76,20 +76,15 @@ void main() {
     await openPalette(tester);
     expect(find.text(AppStrings.palettePinned.toUpperCase()), findsNothing);
 
-    // Nothing was used yet, so the list opens in name order: the
-    // journal's calendar is far from its head.
+    // Nothing was used yet, so the list opens on the ranked eight; the
+    // journal's calendar is not one of them.
+    // A query lists it: the empty palette shows the eight ranked commands
+    // (#208), and the calendar is not among them — the pin works the same
+    // on a filtered row.
+    await tester.enterText(find.byKey(const Key('palette-field')), 'calendar');
+    await settle(tester);
     final pin = find.byKey(const Key('palette-pin-journalCalendar'));
-    // Built lazily: the list is longer than the palette shows.
-    await tester.scrollUntilVisible(
-      pin,
-      200,
-      scrollable: find
-          .descendant(
-            of: find.byType(ListView),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
+    expect(pin, findsOneWidget);
     await tester.tap(pin);
     await settle(tester);
     expect(PinnedCommands.current.value, [AppCommand.journalCalendar]);
@@ -98,7 +93,9 @@ void main() {
     // head: back at the top of the list, under its own heading, without
     // the palette being reopened.
     expect(tester.widget<IconButton>(pin).tooltip, AppStrings.paletteUnpin);
-    await tester.drag(find.byType(ListView), const Offset(0, 600));
+    // The filtered list has no pinned head; the whole list does (the
+    // heading is the empty query's own, #208).
+    await tester.enterText(find.byKey(const Key('palette-field')), '');
     await settle(tester);
     expect(find.text(AppStrings.palettePinned.toUpperCase()), findsOne);
     expect(heads(AppCommand.journalCalendar), isTrue);

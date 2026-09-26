@@ -6,6 +6,8 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_entries.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_example.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tour/tour_steps.dart';
+import 'package:niman/src/ui/tour/tour_targets.dart';
 
 /// Opens the cheatsheet over the app. [onInsert] puts an example in the
 /// open note — the page closes first, so the note is what the writer sees
@@ -47,19 +49,25 @@ final class _CheatsheetScreenState extends State<CheatsheetScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(AppStrings.cheatsheetTitle)),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            // A page to read, not a row of the window's full width.
-            constraints: const BoxConstraints(maxWidth: 1000),
-            child: ListView.separated(
-              key: const Key('cheatsheet'),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: cheatsheetEntries.length,
-              separatorBuilder: (context, _) => const Divider(),
-              itemBuilder: (context, index) => CheatsheetExample(
-                entry: cheatsheetEntries[index],
-                mathCache: _math,
-                onInsert: widget.onInsert,
+        child: TourTarget(
+          id: TourTargets.cheatsheet,
+          child: Center(
+            child: ConstrainedBox(
+              // A page to read, not a row of the window's full width.
+              constraints: const BoxConstraints(maxWidth: 1000),
+              child: ListView.separated(
+                key: const Key('cheatsheet'),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                itemCount: cheatsheetEntries.length,
+                separatorBuilder: (context, _) => const Divider(),
+                itemBuilder: (context, index) => CheatsheetExample(
+                  entry: cheatsheetEntries[index],
+                  mathCache: _math,
+                  onInsert: widget.onInsert,
+                ),
               ),
             ),
           ),

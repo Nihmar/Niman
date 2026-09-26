@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/text_input_probe.dart';
@@ -16,6 +17,9 @@ import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tour/tour_host.dart';
+import 'package:niman/src/ui/welcome/welcome_copy.dart';
+import 'package:niman/src/ui/welcome/welcome_gate.dart';
 
 /// The Diagnostics and info area of the settings home (issue #104): the
 /// debug switch and the log export, plus what the installation is.
@@ -299,6 +303,28 @@ final class _SettingsDiagnosticsScreenState
             child: SettingsValueRow(
               title: AppStrings.cheatsheetTitle,
               onTap: () => showMarkdownCheatsheet(context),
+            ),
+          ),
+          // The welcome again (#266), read-only, and the tour from where
+          // it was left: the deck is once, but nothing of it is lost.
+          Consumer(
+            builder: (context, ref, _) => Column(
+              children: [
+                HighlightRow(
+                  key: SettingsKeys.welcomeDeck,
+                  child: SettingsValueRow(
+                    title: const WelcomeCopy().deckCommand,
+                    onTap: () => showWelcomeDeck(context),
+                  ),
+                ),
+                HighlightRow(
+                  key: SettingsKeys.welcomeTour,
+                  child: SettingsValueRow(
+                    title: const WelcomeCopy().tourContinueCommand,
+                    onTap: () => unawaited(resumeTour(context, ref)),
+                  ),
+                ),
+              ],
             ),
           ),
           // The phase-3 spike (§8.7.1): a bare `TextInputConnection` that

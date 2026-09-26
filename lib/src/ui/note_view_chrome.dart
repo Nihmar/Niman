@@ -13,6 +13,8 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tour/tour_steps.dart';
+import 'package:niman/src/ui/tour/tour_targets.dart';
 
 /// The frontmatter parse-error banner.
 final class FrontmatterWarningBanner extends StatelessWidget {
@@ -256,29 +258,32 @@ final class NoteStatusRow extends StatelessWidget {
         // before the Spacer, so nothing to its left moves and what is
         // to its right is anchored to the other edge.
         if (!loading && canSwitchEditorKind && !showPreview)
-          Padding(
-            padding: iconPadding,
-            child: Tooltip(
-              message: showWysiwyg
-                  ? AppStrings.switchToSourceTooltip
-                  : AppStrings.switchToWysiwygTooltip,
-              child: TextButton.icon(
-                key: const Key('editor-kind-toggle'),
-                onPressed: editorKindLocked ? null : onToggleEditorKind,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  textStyle: labelStyle,
-                  foregroundColor: theme.colorScheme.onSurfaceVariant,
-                ),
-                icon: Icon(
-                  showWysiwyg ? Icons.code : Icons.edit_note,
-                  size: 18,
-                ),
-                label: Text(
-                  showWysiwyg
-                      ? AppStrings.switchToSourceLabel
-                      : AppStrings.switchToWysiwygLabel,
+          TourTarget(
+            id: TourTargets.modeSwitch,
+            child: Padding(
+              padding: iconPadding,
+              child: Tooltip(
+                message: showWysiwyg
+                    ? AppStrings.switchToSourceTooltip
+                    : AppStrings.switchToWysiwygTooltip,
+                child: TextButton.icon(
+                  key: const Key('editor-kind-toggle'),
+                  onPressed: editorKindLocked ? null : onToggleEditorKind,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    textStyle: labelStyle,
+                    foregroundColor: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  icon: Icon(
+                    showWysiwyg ? Icons.code : Icons.edit_note,
+                    size: 18,
+                  ),
+                  label: Text(
+                    showWysiwyg
+                        ? AppStrings.switchToSourceLabel
+                        : AppStrings.switchToWysiwygLabel,
+                  ),
                 ),
               ),
             ),
@@ -332,18 +337,21 @@ final class NoteToolbarBar extends StatelessWidget {
   final ToolbarLayout layout;
 
   @override
-  Widget build(BuildContext context) => EditorToolbar(
-    dense: dense,
-    buttons: [
-      for (final item in layout.visible)
-        EditorToolbarButton(
-          key: item.widgetKey,
-          icon: item.icon,
-          tooltip: item.label,
-          active: active.contains(item),
-          group: item.group,
-          onPressed: actions[item]!,
-        ),
-    ],
+  Widget build(BuildContext context) => TourTarget(
+    id: TourTargets.toolbar,
+    child: EditorToolbar(
+      dense: dense,
+      buttons: [
+        for (final item in layout.visible)
+          EditorToolbarButton(
+            key: item.widgetKey,
+            icon: item.icon,
+            tooltip: item.label,
+            active: active.contains(item),
+            group: item.group,
+            onPressed: actions[item]!,
+          ),
+      ],
+    ),
   );
 }

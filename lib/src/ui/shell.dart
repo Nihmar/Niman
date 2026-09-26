@@ -120,6 +120,9 @@ import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
+import 'package:niman/src/ui/tour/tour_host.dart';
+import 'package:niman/src/ui/tour/tour_steps.dart';
+import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -359,7 +362,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
 
 /// The library shell: sidebar tree + action bar on the left, detail pane
 /// on the right.
-final class _LibraryShell extends StatefulWidget {
+final class _LibraryShell extends ConsumerStatefulWidget {
   const new({
     required this.controller,
     required this.reminders,
@@ -465,7 +468,7 @@ final class _LibraryShell extends StatefulWidget {
   final WindowController window;
 
   @override
-  State<_LibraryShell> createState() => _LibraryShellState();
+  ConsumerState<_LibraryShell> createState() => _LibraryShellState();
 }
 
 /// The app tabs: the bottom navigation bar on the narrow layout, the
@@ -487,7 +490,7 @@ enum ShellTab {
   settings,
 }
 
-final class _LibraryShellState extends State<_LibraryShell>
+final class _LibraryShellState extends ConsumerState<_LibraryShell>
     with WidgetsBindingObserver {
   String? _selected;
   bool _selectedIsDir = false;
@@ -1064,68 +1067,74 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _phoneNoteView(LibrarySession controller, String selectedPath) {
     // A picture, a PDF or a book, shown rather than read as a note.
     if (isShownAttachment(selectedPath)) {
-      return AttachmentView(
-        key: _phoneNoteKey,
-        path: p.join(controller.root ?? '', selectedPath),
-        column: _editorSettings.noteColumn,
-        onEditEpubLook: () => _editEpubLook(controller),
-        positions: switch (controller.root) {
-          final root? => ReadingPositions(root),
-          null => null,
-        },
-        anchor: _pendingAnchor,
-        reloadToken: _linksFollowed,
-        linkType: _editorSettings.linkType,
-        onAnnotate: _annotate,
-        marks: _annotations,
+      return TourTarget(
+        id: TourTargets.note,
+        child: AttachmentView(
+          key: _phoneNoteKey,
+          path: p.join(controller.root ?? '', selectedPath),
+          column: _editorSettings.noteColumn,
+          onEditEpubLook: () => _editEpubLook(controller),
+          positions: switch (controller.root) {
+            final root? => ReadingPositions(root),
+            null => null,
+          },
+          anchor: _pendingAnchor,
+          reloadToken: _linksFollowed,
+          linkType: _editorSettings.linkType,
+          onAnnotate: _annotate,
+          marks: _annotations,
+        ),
       );
     }
-    return NoteView(
-      key: _phoneNoteKey,
-      path: p.join(controller.root ?? '', selectedPath),
-      // One editor on the phone: switching notes hands the one going in
-      // its memento, and the one going out hands in its own (#23).
-      initialMemento: _workspace.value.tabs
-          .where((tab) => tab.path == selectedPath)
-          .firstOrNull
-          ?.memento,
-      onMemento: (path, memento) {
-        final root = controller.root;
-        if (root != null) _workspace.remember(relPath(path, root), memento);
-      },
-      onEditedNoteClosed: _tidyClosedNote,
-      showLineNumbers: _editorSettings.lineNumbers,
-      typewriter: _editorSettings.typewriter,
-      // No switch in the phone's status row: it has no room left for one.
-      // Settings and the Search tab's commands reach it there.
-      noteColumn: _editorSettings.noteColumn,
-      autofocusEditor: _editorSettings.autofocusEditor,
-      linkType: _editorSettings.linkType,
-      missingNoteLocation: _editorSettings.missingNoteLocation,
-      attachmentsFolder: _editorSettings.attachmentsFolder,
-      templateFolder: _editorSettings.templateFolder,
-      indentWidth: _editorSettings.indentWidth,
-      toolbarLayout: _editorSettings.toolbarLayout,
-      showPreview: _notePreview,
-      showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
-      // A single enabled editor has nowhere to switch to: the note hides
-      // its switch instead of offering a dead toggle.
-      onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-          ? _setEditorKind
-          : null,
-      libraryRoot: controller.root,
-      linkSource: _linkSource,
-      onOpenNote: _openNoteFromLink,
-      initialAnchor: _pendingAnchor,
-      initialCaretOffset: _pendingCaretOffset,
-      kindMode: !_kindRawMode,
-      onNoteKindChanged: _onNoteKindChanged,
-      unsavedTracker: widget.unsavedTracker,
-      spellCheck: widget.spellCheck,
-      reloadToken: _noteReloadToken,
-      saveNote: _noteSaver(controller),
-      saveNoteStream: _noteStreamSaver(controller),
-      createMissingNote: _missingNoteCreator(controller),
+    return TourTarget(
+      id: TourTargets.note,
+      child: NoteView(
+        key: _phoneNoteKey,
+        path: p.join(controller.root ?? '', selectedPath),
+        // One editor on the phone: switching notes hands the one going in
+        // its memento, and the one going out hands in its own (#23).
+        initialMemento: _workspace.value.tabs
+            .where((tab) => tab.path == selectedPath)
+            .firstOrNull
+            ?.memento,
+        onMemento: (path, memento) {
+          final root = controller.root;
+          if (root != null) _workspace.remember(relPath(path, root), memento);
+        },
+        onEditedNoteClosed: _tidyClosedNote,
+        showLineNumbers: _editorSettings.lineNumbers,
+        typewriter: _editorSettings.typewriter,
+        // No switch in the phone's status row: it has no room left for one.
+        // Settings and the Search tab's commands reach it there.
+        noteColumn: _editorSettings.noteColumn,
+        autofocusEditor: _editorSettings.autofocusEditor,
+        linkType: _editorSettings.linkType,
+        missingNoteLocation: _editorSettings.missingNoteLocation,
+        attachmentsFolder: _editorSettings.attachmentsFolder,
+        templateFolder: _editorSettings.templateFolder,
+        indentWidth: _editorSettings.indentWidth,
+        toolbarLayout: _editorSettings.toolbarLayout,
+        showPreview: _notePreview,
+        showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
+        // A single enabled editor has nowhere to switch to: the note hides
+        // its switch instead of offering a dead toggle.
+        onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+            ? _setEditorKind
+            : null,
+        libraryRoot: controller.root,
+        linkSource: _linkSource,
+        onOpenNote: _openNoteFromLink,
+        initialAnchor: _pendingAnchor,
+        initialCaretOffset: _pendingCaretOffset,
+        kindMode: !_kindRawMode,
+        onNoteKindChanged: _onNoteKindChanged,
+        unsavedTracker: widget.unsavedTracker,
+        spellCheck: widget.spellCheck,
+        reloadToken: _noteReloadToken,
+        saveNote: _noteSaver(controller),
+        saveNoteStream: _noteStreamSaver(controller),
+        createMissingNote: _missingNoteCreator(controller),
+      ),
     );
   }
 
@@ -1522,6 +1531,9 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_applyReminderLaunch());
     unawaited(_applyShortcutLaunch());
     unawaited(_applyShareLaunch());
+    // The welcome's "show me around" (#266): asked once a library is
+    // open, because the tour points at the shell.
+    unawaited(offerTour(context, ref));
     unawaited(_homeWidgets.applyLaunchTarget());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
@@ -2463,40 +2475,43 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// reveals New note / New folder mini FABs; each creates in the
   /// selected folder, root if none (T-UI-05).
   Widget _newItemFab() {
-    return NewItemFab(
-      onAnchor: (center) => _fabAnchor = center,
-      expanded: _fabExpanded,
-      listFolder: _fabListFolder,
-      onToggle: () {
-        // Opening the menu loads the list folder for the label; the
-        // setting is read once per opening, not once per build.
-        if (!_fabExpanded) unawaited(_loadFabListFolder());
-        setState(() => _fabExpanded = !_fabExpanded);
-      },
-      onNewNote: () {
-        _closeFab();
-        unawaited(_createFlow.createNote(context));
-      },
-      onJournalToday: () {
-        _closeFab();
-        unawaited(_journalFlow.openToday(context));
-      },
-      onNewListNote: () {
-        _closeFab();
-        unawaited(_createFlow.createListNote(context));
-      },
-      onNewAudioNote: () {
-        _closeFab();
-        unawaited(_createFlow.createAudioNote(context));
-      },
-      onNewFromTemplate: () {
-        _closeFab();
-        unawaited(_templateFlow.createFromTemplate(context));
-      },
-      onNewFolder: () {
-        _closeFab();
-        unawaited(_createFlow.createFolder(context));
-      },
+    return TourTarget(
+      id: TourTargets.create,
+      child: NewItemFab(
+        onAnchor: (center) => _fabAnchor = center,
+        expanded: _fabExpanded,
+        listFolder: _fabListFolder,
+        onToggle: () {
+          // Opening the menu loads the list folder for the label; the
+          // setting is read once per opening, not once per build.
+          if (!_fabExpanded) unawaited(_loadFabListFolder());
+          setState(() => _fabExpanded = !_fabExpanded);
+        },
+        onNewNote: () {
+          _closeFab();
+          unawaited(_createFlow.createNote(context));
+        },
+        onJournalToday: () {
+          _closeFab();
+          unawaited(_journalFlow.openToday(context));
+        },
+        onNewListNote: () {
+          _closeFab();
+          unawaited(_createFlow.createListNote(context));
+        },
+        onNewAudioNote: () {
+          _closeFab();
+          unawaited(_createFlow.createAudioNote(context));
+        },
+        onNewFromTemplate: () {
+          _closeFab();
+          unawaited(_templateFlow.createFromTemplate(context));
+        },
+        onNewFolder: () {
+          _closeFab();
+          unawaited(_createFlow.createFolder(context));
+        },
+      ),
     );
   }
 
@@ -2680,9 +2695,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// app is navigated, so having them vanish behind a note meant going
   /// back before going anywhere.
   Widget _shellTabs() {
-    return ShellTabBar(
-      selectedIndex: _tab.index,
-      onDestinationSelected: _onDestinationSelected,
+    return TourTarget(
+      id: TourTargets.nav,
+      child: ShellTabBar(
+        selectedIndex: _tab.index,
+        onDestinationSelected: _onDestinationSelected,
+      ),
     );
   }
 
@@ -2900,6 +2918,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       AppCommand.exportLibrary: () =>
           unawaited(_exportFolder('', library: true)),
       AppCommand.markdownCheatsheet: () => unawaited(_openCheatsheet()),
+      AppCommand.welcomeTour: () => unawaited(resumeTour(context, ref)),
+      AppCommand.welcomeDeck: () => unawaited(showWelcomeDeck(context)),
       AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
       AppCommand.closeTab: _workspace.closeActive,
@@ -3793,7 +3813,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         ),
         if (_dockShown && !zen) ...[
           _dockDivider(),
-          SizedBox(width: _dockWidth, child: _rightDock(controller)),
+          TourTarget(
+            id: TourTargets.dock,
+            child: SizedBox(width: _dockWidth, child: _rightDock(controller)),
+          ),
         ],
       ],
     );
@@ -4254,11 +4277,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// wide layout used to carry, where the tree is the thing they act on
   /// (issue #100 moved the bar itself into [TreeFooterBar]).
   Widget _treeFooter(LibrarySession controller) {
-    return TreeFooterBar(
-      controller: controller,
-      onNewItem: _onNewItem,
-      syncButton: _syncActions.button(context, controller),
-      sortToggle: _sortToggle(),
+    return TourTarget(
+      id: TourTargets.create,
+      child: TreeFooterBar(
+        controller: controller,
+        onNewItem: _onNewItem,
+        syncButton: _syncActions.button(context, controller),
+        sortToggle: _sortToggle(),
+      ),
     );
   }
 
@@ -4281,19 +4307,22 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The tree pane: the action bar and the note tree — the whole body on
   /// phones, the left column on wide screens.
   Widget _treePane(LibrarySession controller) {
-    return NoteTree(
-      controller: controller,
-      nameDesc: _editorSettings.treeSort == TreeSort.nameDesc,
-      selectedPath: _selected,
-      expanded: _expanded,
-      onToggle: _toggle,
-      onSelect: _select,
-      onOpenInNewTab: (note) => _select(note, newTab: true),
-      onLongPress: _showRowMenu,
-      onSecondaryTapDown: (note, details) =>
-          _showRowMenuAt(note, details.globalPosition),
-      onBackgroundSecondaryTapUp: (details) =>
-          unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
+    return TourTarget(
+      id: TourTargets.tree,
+      child: NoteTree(
+        controller: controller,
+        nameDesc: _editorSettings.treeSort == TreeSort.nameDesc,
+        selectedPath: _selected,
+        expanded: _expanded,
+        onToggle: _toggle,
+        onSelect: _select,
+        onOpenInNewTab: (note) => _select(note, newTab: true),
+        onLongPress: _showRowMenu,
+        onSecondaryTapDown: (note, details) =>
+            _showRowMenuAt(note, details.globalPosition),
+        onBackgroundSecondaryTapUp: (details) =>
+            unawaited(_showTreeBackgroundMenuAt(details.globalPosition)),
+      ),
     );
   }
 

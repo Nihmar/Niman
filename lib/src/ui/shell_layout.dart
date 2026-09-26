@@ -18,6 +18,8 @@ import 'package:niman/src/ui/palette/palette_swipe.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/title_bar.dart';
+import 'package:niman/src/ui/tour/tour_steps.dart';
+import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
@@ -333,10 +335,13 @@ final class WideShellLayout extends StatelessWidget {
                   child: Row(
                     children: [
                       if (!props.zen) ...[
-                        ShellRail(
-                          selectedIndex: props.tabIndex,
-                          onDestinationSelected: props.onDestinationSelected,
-                          onSwitchLibrary: props.onSwitchLibrary,
+                        TourTarget(
+                          id: TourTargets.nav,
+                          child: ShellRail(
+                            selectedIndex: props.tabIndex,
+                            onDestinationSelected: props.onDestinationSelected,
+                            onSwitchLibrary: props.onSwitchLibrary,
+                          ),
                         ),
                         const VerticalDivider(width: 1),
                       ],

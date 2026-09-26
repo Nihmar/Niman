@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 /// A command the shell can run from the keyboard.
 enum AppCommand {
@@ -81,6 +82,12 @@ enum AppCommand {
 
   /// The Markdown cheatsheet (#265): every construct, written and shown.
   markdownCheatsheet,
+
+  /// The guided tour (#266), from the step where it was left.
+  welcomeTour,
+
+  /// The welcome deck again, read-only: what the app can do.
+  welcomeDeck,
 
   /// Open a Markdown file outside the library (#77).
   openFile,
@@ -275,6 +282,8 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
+  AppCommand.welcomeTour => const WelcomeCopy().tourContinueCommand,
+  AppCommand.welcomeDeck => const WelcomeCopy().deckCommand,
   AppCommand.openFile => AppStrings.openFileTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,
