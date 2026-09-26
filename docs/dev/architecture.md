@@ -14,6 +14,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
 | `import/` | Bringing a Notion export into the library (#25): the zip walk, page ids off the names, links rewritten, assets kept |
+| `export/` | What leaves the app: a note's one-page HTML (`note_html.dart`, `html_*`), the PDF through the system browser and its drawn fallback (`export_pdf.dart`, `pdf_webview.dart`), the EPUB books (`epub_book.dart`, `epub_note.dart`) and the folder/library zips (`export_tree*.dart`) |
 | `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](../records/workspace.md) |
 | `journal/` | The journal's day pattern, settings and calendar summaries (see [journal](../user/journal.md)) |
 | `reading/` | Where each PDF and each book was left, kept in `.niman/reading.json` |

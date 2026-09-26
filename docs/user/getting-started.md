@@ -42,6 +42,8 @@ disk; the app's SQLite database is only a rebuildable index.
 - [Editing](editing.md) — Markdown, math, images, spellcheck, the read view.
 - [Organization](organization.md) — trash, history, templates, tags — and
   reading pictures, PDFs and books.
+- [Export](export.md) — a note, a folder or the library out as Markdown,
+  HTML, PDF or EPUB.
 - [Journal](journal.md) — one note per day, with a calendar and a template.
 - [Tasks and reminders](tasks.md) — todo.txt plus `rem:` alarms.
 - [Themes](themes.md) — the shipped palettes, and a theme of your own.

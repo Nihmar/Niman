@@ -2,9 +2,10 @@
 
 Four folders, by what each holds:
 
-- **`user/`** — how to use Niman: getting started, editing, organization,
-  the journal, search, links, templates, tasks and reminders, themes,
-  home-screen widgets, settings, shortcuts, sync, and platform notes.
+- **`user/`** — how to use Niman: getting started, editing, export,
+  organization, the journal, search, links, templates, tasks and
+  reminders, themes, home-screen widgets, settings, shortcuts, sync, and
+  platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
   instructions, code conventions and the release process. Living
   documentation, kept current with the code.
@@ -12,7 +13,7 @@ Four folders, by what each holds:
   the features, kept as they were written (not kept current): the unified
   Markdown surface and its parity and huge-note measurements, the rejected
   editor alternatives, the workspace, the EPUB reader, annotations, the
-  note history and WebDAV sync, and transcription. See
+  note history and WebDAV sync, the index scan, and transcription. See
   [records/README.md](records/README.md).
 - **`design/`** — the mockups a round was agreed against, one folder per
   round, with the decision each screen records.
