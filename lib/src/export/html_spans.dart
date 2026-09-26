@@ -84,7 +84,7 @@ final class HtmlSpans {
       );
     }
     return (
-      html: '<img class="embed" src="$data" alt="${escapeAttribute(shown)}">',
+      html: '<img class="embed" src="$data" alt="${escapeAttribute(shown)}" />',
       plain: shown,
     );
   }
