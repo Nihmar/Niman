@@ -77,13 +77,13 @@ The PDF is the exported HTML page, printed. `htmlPage` already has
   Use a timeout that kills the engine, and check that the file exists and is not empty.
 - [x] **Linux: Chromium.** Search `PATH` for `chromium`, `chromium-browser`, `google-chrome`, `google-chrome-stable`, `microsoft-edge`, `brave-browser`, with the same flags.
 - [x] **Android: WebView.** A `MethodChannel` (`niman/pdf`) in `MainActivity`:
-  1. An offscreen `WebView` loads the page with `loadDataWithBaseURL`.
+  1. An offscreen `WebView` loads the page with `loadUrl` (a `file:` URL).
   2. On `onPageFinished`, call `createPrintDocumentAdapter`.
   3. `layout` and `write` go to a file through a small helper in the `android.print` package, because its callback constructors are package-private.
-  4. A4, no margins beyond the CSS, and a 300 dpi resolution: the WebView's adapter refuses a layout whose attributes do not name one — without it every Android PDF silently fell back to a picture.
+  4. A4 with the page's own 18 mm margin (`PrintAttributes.Margins`), and a 300 dpi resolution: the WebView's adapter refuses a layout whose attributes do not name one — without it every Android PDF silently fell back to a picture.
 
   A `cancel` call destroys the view and answers a waiting print, so a
-  cancelled export leaves no busy bridge. No on-device test yet (§4).
+  cancelled export leaves no busy bridge. No on-device test yet.
 - [x] Tests: engine discovery with a fake `PATH` and a fake file system; the command line that is built; the outcomes.
 
 ### 2.2 Raster fallback (Linux without Chromium)
@@ -147,7 +147,7 @@ Every entry exists on Android, Linux and Windows.
 
 Commit each step as it lands. Run analyze and the targeted tests on each commit, and the integration tests before the PR.
 
-## 4. EPUB (#303), after the pages
+## 5. EPUB (#303), after the pages
 
 A note is a one-chapter book; a folder (or the library) is **one** book
 with a chapter per note. The body is the same exported page (`NoteHtml`,
@@ -179,6 +179,9 @@ demands; the container is `mimetype` (stored, first),
   spine, the EPUB 3 `cover-image` property, and the EPUB 2
   `meta name="cover"` for older readers. The Markdown cheatsheet
   documents the keys, in every language.
+- [x] A book with no `index.md` at the exported root, one whose
+  `index.md` has no frontmatter, and a `cover:` that does not resolve
+  still export; each logs why the package carries no metadata (E3).
 - [ ] Nav folded by folder (a flat, tree-ordered list for now).
 
 ## Open questions
