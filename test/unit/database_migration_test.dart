@@ -1352,6 +1352,12 @@ void main() {
       expect(written.tourSeen, isTrue);
       expect(written.tourStep, 3);
       expect(written.tourOffer, isTrue);
+
+      // The upgrade lives in the row, not in the column's default: a row
+      // written later in the same database starts unseen.
+      await db.customStatement('DELETE FROM app_settings');
+      await repo.setTourStep(0);
+      expect((await repo.firstRun()).deckSeen, isFalse);
       await db.close();
     });
 

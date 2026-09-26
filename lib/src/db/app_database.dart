@@ -90,9 +90,10 @@ class AppSettings extends Table {
 
   /// Whether the first-run welcome deck was finished or skipped (#266).
   ///
-  /// Fresh installs only: the v31 migration writes `1` for every database
-  /// that upgrades into it, because an install that has opened Niman
-  /// already has a library and a way of writing and is not welcomed twice.
+  /// Fresh installs only: the v31 migration marks every row that exists
+  /// when a database upgrades into it, because an install that has
+  /// opened Niman already has a library and a way of writing and is not
+  /// welcomed twice. A row written later still starts unseen.
   BoolColumn get welcomeSeen =>
       boolean().named('welcome_seen').withDefault(const Constant(false))();
 
@@ -106,7 +107,7 @@ class AppSettings extends Table {
   BoolColumn get tourSeen =>
       boolean().named('tour_seen').withDefault(const Constant(false))();
 
-  /// Where the tour stopped, for *Continue the tour*; 0 is its start.
+  /// Where the tour stopped, for *Take the tour*; 0 is its start.
   IntColumn get tourStep =>
       integer().named('tour_step').withDefault(const Constant(0))();
 
@@ -480,9 +481,9 @@ class AppDatabase extends _$AppDatabase {
   /// and pre-v30 databases gain `custom_themes` (issue #269), empty: a
   /// fresh install has no themes of its own, and an upgrade keeps the
   /// shipped ones, and pre-v31 databases gain the first-run welcome
-  /// (issue #266): `welcome_seen` starts at 1 for an upgrade — it has
-  /// opened Niman before — with `markdown_experience`, `tour_seen`,
-  /// `tour_step` and `tour_offer` at their defaults.
+  /// (issue #266): the columns take their schema defaults, and every row
+  /// that exists through the upgrade is marked as already welcomed — it
+  /// has opened Niman before — so only a fresh database sees the deck.
   ///
   /// v27 to v29 were numbered on two branches at once — one took v27 for
   /// the columns, the other v27 and v28 for the table and `base_text` — so
@@ -699,15 +700,21 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 31) {
         // The first-run welcome (#266). An upgrading install has opened
-        // Niman before — it has a library and a way of writing — so the
-        // deck is marked seen as the columns are made; only a fresh
-        // database starts at 0 and is welcomed.
+        // Niman before — it has a library and a way of writing — so its
+        // existing row is marked as welcomed just after the columns are
+        // made; only a fresh database starts unseen and is welcomed.
+        //
+        // The columns keep the defaults the drift table declares: the
+        // upgrade is a value written into the row, not a different DDL
+        // default that would outlive the upgrade in the schema.
         final existing = await _columnsOf('app_settings');
+        var addedWelcomeSeen = false;
         if (!existing.contains('welcome_seen')) {
           await m.database.customStatement(
             'ALTER TABLE app_settings ADD COLUMN welcome_seen '
-            'BOOLEAN NOT NULL DEFAULT 1',
+            'BOOLEAN NOT NULL DEFAULT 0',
           );
+          addedWelcomeSeen = true;
         }
         if (!existing.contains('markdown_experience')) {
           await m.database.customStatement(
@@ -730,6 +737,11 @@ class AppDatabase extends _$AppDatabase {
           await m.database.customStatement(
             'ALTER TABLE app_settings ADD COLUMN tour_offer '
             'BOOLEAN NOT NULL DEFAULT 0',
+          );
+        }
+        if (addedWelcomeSeen) {
+          await m.database.customStatement(
+            'UPDATE app_settings SET welcome_seen = 1',
           );
         }
       }
