@@ -72,7 +72,10 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.tabSearch ||
   AppCommand.tabQuickNote ||
   AppCommand.tabSettings => PaletteGroup.goTo,
-  AppCommand.openPalette || AppCommand.goToNote => null,
+  AppCommand.openPalette ||
+  AppCommand.goToNote ||
+  AppCommand.welcomeTour ||
+  AppCommand.welcomeDeck => null,
 };
 
 /// Whether [command] asks something before it acts: its name ends in

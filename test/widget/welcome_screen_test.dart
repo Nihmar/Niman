@@ -19,14 +19,13 @@ void main() {
   late FakeLibrarySession controller;
   late FakeShortcutService shortcuts;
   late MemoryWelcomeStore store;
+  late FakeFilePicker picker;
 
   setUp(() {
     controller = FakeLibrarySession();
     shortcuts = FakeShortcutService();
     store = MemoryWelcomeStore();
-    // The deck's own tests never open a library; the picker is installed
-    // so the open-library screen behind it has one.
-    useFakeFilePicker();
+    picker = useFakeFilePicker();
   });
 
   Widget buildApp({bool noStore = false}) {
@@ -167,6 +166,43 @@ void main() {
 
     expect(find.text('Your notes are files'), findsNothing);
     expect(find.text('Create new'), findsOne);
+    await close();
+  });
+
+  testWidgets("the welcome's offer starts the tour once a library is open", (
+    tester,
+  ) async {
+    store
+      ..deckSeen = true
+      ..tourOffer = true;
+    await pumpDeck(tester);
+
+    await openLibrary(tester, picker);
+    expect(find.byKey(const Key('tour-offer')), findsOne);
+
+    await tester.tap(find.byKey(const Key('tour-offer-yes')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('tour-card')), findsOne);
+    // The first step is the tree, which the wide layout is showing.
+    expect(find.text('Your library'), findsOne);
+    await close();
+  });
+
+  testWidgets('declining the offer leaves the tour to Help and the palette', (
+    tester,
+  ) async {
+    store
+      ..deckSeen = true
+      ..tourOffer = true;
+    await pumpDeck(tester);
+
+    await openLibrary(tester, picker);
+    await tester.tap(find.byKey(const Key('tour-offer-no')));
+    await tester.pumpAndSettle();
+
+    expect(store.tourOffer, isFalse);
+    expect(find.byKey(const Key('tour-card')), findsNothing);
     await close();
   });
 

@@ -22,6 +22,7 @@ import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/theme/theme_row.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 import 'package:niman/src/ui/trash.dart';
+import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 /// One searchable settings row (issue #104): its title, where it lives,
 /// its current value, and how to open it.
@@ -461,6 +462,22 @@ List<SettingsSearchEntry> settingsSearchEntries({
       value: noValue,
       areaId: SettingsAreaId.diagnostics,
       open: () => pushDiagnostics(SettingsKeys.cheatsheet),
+    ),
+    SettingsSearchEntry(
+      title: const WelcomeCopy().deckCommand,
+      area: AppStrings.settingsAreaDiagnostics,
+      rowKey: SettingsKeys.welcomeDeck,
+      value: noValue,
+      areaId: SettingsAreaId.diagnostics,
+      open: () => pushDiagnostics(SettingsKeys.welcomeDeck),
+    ),
+    SettingsSearchEntry(
+      title: const WelcomeCopy().tourContinueCommand,
+      area: AppStrings.settingsAreaDiagnostics,
+      rowKey: SettingsKeys.welcomeTour,
+      value: noValue,
+      areaId: SettingsAreaId.diagnostics,
+      open: () => pushDiagnostics(SettingsKeys.welcomeTour),
     ),
     SettingsSearchEntry(
       title: AppStrings.reminderShowTokensTitle,

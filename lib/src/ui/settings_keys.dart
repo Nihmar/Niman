@@ -80,6 +80,8 @@ abstract final class SettingsKeys {
   static const debugLogs = Key('debug-logs-setting');
   static const exportLog = Key('export-log-setting');
   static const changelog = Key('changelog-setting');
+  static const welcomeDeck = Key('welcome-deck-setting');
+  static const welcomeTour = Key('welcome-tour-setting');
   static const cheatsheet = Key('cheatsheet-setting');
 
   // Reminders.

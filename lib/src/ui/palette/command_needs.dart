@@ -84,6 +84,8 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.journalCalendar ||
   AppCommand.typewriterMode ||
   AppCommand.markdownCheatsheet ||
+  AppCommand.welcomeTour ||
+  AppCommand.welcomeDeck ||
   AppCommand.reindexLibrary ||
   AppCommand.exportLibrary ||
   AppCommand.switchLibrary ||

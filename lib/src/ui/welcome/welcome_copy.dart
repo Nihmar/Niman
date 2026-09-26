@@ -161,4 +161,105 @@ final class WelcomeCopy {
 
   /// The palette command for the tour (the About row uses this too).
   String get tourCommand => 'Take the tour';
+
+  /// The palette command that resumes a tour left halfway.
+  String get tourContinueCommand => 'Continue the tour';
+
+  // The tour.
+
+  /// Leaves the tour, remembering where it stopped.
+  String get tourDone => 'Done';
+
+  /// Leaves the tour and never offers it again.
+  String get tourNever => "Don't show again";
+
+  /// The offer, once the first library is open.
+  String get tourOfferTitle => 'Show you around?';
+
+  /// What the offer says.
+  String get tourOfferBody =>
+      'A few steps through the app, pointing at the real controls. You can '
+      'stop at any step and pick it up later from the command palette.';
+
+  /// Accepting the offer.
+  String get tourOfferYes => 'Show me';
+
+  /// Declining it (the tour stays in Help and the palette).
+  String get tourOfferNo => 'Not now';
+
+  /// The step about the tree.
+  String get tourTreeTitle => 'Your library';
+
+  /// The tree step's body.
+  String get tourTreeBody =>
+      'This is the folder you chose, folder by folder. Anything you do to '
+      'a file outside Niman shows up here the moment it lands.';
+
+  /// The step about creating notes.
+  String get tourCreateTitle => 'Make a note';
+
+  /// The create step's body.
+  String get tourCreateBody =>
+      'Notes, list notes, voice notes, templates and folders all start '
+      'here. The same menu appears on a phone as the round button.';
+
+  /// The step about the note pane.
+  String get tourNoteTitle => 'One note at a time';
+
+  /// The note step's body.
+  String get tourNoteBody =>
+      'The note on screen; the ones you opened stay in tabs above it, and a '
+      'second pane can open beside it on a wide window.';
+
+  /// The step about the three modes.
+  String get tourModesTitle => 'Three ways to write';
+
+  /// The modes step's body.
+  String get tourModesBody =>
+      'Write the Markdown source, write it as it reads, or read it — this '
+      'switch is per note, and the library setting decides what opens.';
+
+  /// The step about the toolbar.
+  String get tourToolbarTitle => 'The toolbar';
+
+  /// The toolbar step's body.
+  String get tourToolbarBody =>
+      'Formatting on the line you are in, and the same actions on '
+      'right-click. Every construct Niman reads is in the cheatsheet.';
+
+  /// The step that opens the cheatsheet.
+  String get tourCheatsheetTitle => 'Every construct, written beside it';
+
+  /// The cheatsheet step's body.
+  String get tourCheatsheetBody =>
+      'This is the cheatsheet. Each example can be copied, and Insert puts '
+      'it in the note you have open.';
+
+  /// The button that opens the cheatsheet for its step.
+  String get tourCheatsheetOpen => 'Open it';
+
+  /// The step about the navigation.
+  String get tourTabsTitle => 'Everything is a tab';
+
+  /// The navigation step's body.
+  String get tourTabsBody =>
+      'Files, tasks, search, the quick note, settings. The command palette '
+      'reaches every one of them, and every command, from the keyboard.';
+
+  /// The step about the dock.
+  String get tourDockTitle => 'Outline, tags, history';
+
+  /// The dock step's body.
+  String get tourDockBody =>
+      'The outline of the note, its tags and its past versions, beside '
+      'it. On a phone the note menu opens the same three.';
+
+  /// The last step's title.
+  String get tourEndTitle => 'That is the tour';
+
+  /// The last step's body.
+  String get tourEndBody =>
+      'Take it again whenever you like from the palette (Help: Take the '
+      'tour). The cheatsheet is in the note menu, and the rest of the '
+      'app explains itself as you go.';
 }

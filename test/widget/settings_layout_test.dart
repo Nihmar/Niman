@@ -270,6 +270,17 @@ void main() {
     expect(find.byKey(const Key('close-library-setting')), findsNothing);
   });
 
+  testWidgets('the welcome and the tour sit beside the changelog', (
+    tester,
+  ) async {
+    // #266: the deck is once, but nothing of it is lost — the pages come
+    // back read-only, and the tour picks up where it stopped.
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-diagnostics'));
+    expect(find.byKey(const Key('welcome-deck-setting')), findsOneWidget);
+    expect(find.byKey(const Key('welcome-tour-setting')), findsOneWidget);
+  });
+
   testWidgets('a folder the library does not hold says so', (tester) async {
     // A fresh library holds no folders: every configured folder (lists,
     // templates, attachments, annotations) wears the "to create" badge
