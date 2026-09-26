@@ -36,6 +36,39 @@ void main() {
       );
     });
 
+    test('a Chromium derivative is found by its own name', () async {
+      // Helium is Chromium 154 under another name, and its wrapper sits on
+      // PATH like any other browser's: a machine that had an engine to
+      // print with was told it had none, and got a picture of the pages
+      // instead (#63).
+      Future<bool> isFile(String path) async =>
+          path == '/usr/bin/helium-browser';
+      expect(
+        await findPdfEngine(
+          isWindows: false,
+          isLinux: true,
+          path: const ['/usr/local/bin', '/usr/bin'],
+          isFile: isFile,
+        ),
+        '/usr/bin/helium-browser',
+      );
+    });
+
+    test('Vivaldi and Brave are engines too', () async {
+      for (final name in const <String>['vivaldi-stable', 'brave-browser']) {
+        expect(
+          await findPdfEngine(
+            isWindows: false,
+            isLinux: true,
+            path: const ['/usr/bin'],
+            isFile: (path) async => path == '/usr/bin/$name',
+          ),
+          '/usr/bin/$name',
+          reason: name,
+        );
+      }
+    });
+
     test('Windows asks the App Paths key first', () async {
       const edge =
           r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe';

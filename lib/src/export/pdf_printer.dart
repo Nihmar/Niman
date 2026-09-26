@@ -181,13 +181,30 @@ Future<int?> fileSize(String path) async {
 
 /// The Chromium-family executables a Linux desktop may have, in the order
 /// they are looked for.
+///
+/// Every one of them prints headless with the same flags ([printFlags]),
+/// which is what makes the list a list and not a per-browser branch:
+/// Chromium, a distro's build of it, Google Chrome, Edge, Brave, Vivaldi
+/// and Helium are the same engine wearing different names. Helium is the
+/// one that made the name matter: its wrapper is on `PATH` but nothing in
+/// the list matched it, so a machine that had a Chromium printer was told
+/// it had none and got the raster fallback instead (#63).
 const List<String> chromiumExecutables = <String>[
   'chromium',
   'chromium-browser',
+  'chromium-freeworld',
   'google-chrome',
   'google-chrome-stable',
+  'google-chrome-beta',
   'microsoft-edge',
+  'microsoft-edge-beta',
+  'microsoft-edge-dev',
   'brave-browser',
+  'brave',
+  'vivaldi-stable',
+  'vivaldi',
+  'helium-browser',
+  'helium',
 ];
 
 /// The flags every engine prints headless with.

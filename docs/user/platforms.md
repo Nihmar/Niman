@@ -30,7 +30,8 @@ everywhere; PDF goes through each platform's own printer (below).
   A folder's PDF zip prints each note the same way, one PDF per note.
   A WebView that refuses the print (a broken system component) falls
   back to drawing the note page by page, pictures included; that PDF is
-  a picture and cannot be selected.
+  a picture and cannot be selected, and the app says so when the file is
+  written.
 
 ## Linux
 
@@ -67,10 +68,11 @@ everywhere; PDF goes through each platform's own printer (below).
   the folder) or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
 - **PDF export:** printed headless by the first Chromium-family browser
-  on `PATH` (`chromium`, `google-chrome`, Microsoft Edge, Brave). On a
-  machine without one, a note is drawn as pictures of its pages —
-  pictures included, but not selectable — and a folder's PDF zip is not
-  offered.
+  on `PATH` — Chromium, Google Chrome, Microsoft Edge, Brave, Vivaldi,
+  Helium: one engine under many names. On a machine without one, a note
+  is drawn as pictures of its pages — pictures included, but not
+  selectable — and the export asks before it starts, because a long note
+  is minutes of drawing; a folder's PDF zip is not offered.
 
 ## Windows
 
@@ -98,8 +100,8 @@ everywhere; PDF goes through each platform's own printer (below).
   [organization](organization.md#opening-a-note-outside-niman).
 - **PDF export:** printed headless by Edge, found through the shell's
   App Paths key or its install folder. A note falls back to being drawn
-  as page pictures where Edge is missing; a folder's PDF zip is not
-  offered then.
+  as page pictures where Edge is missing — asking before it starts, as
+  on Linux — and a folder's PDF zip is not offered then.
 
 ## Density
 
