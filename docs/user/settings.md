@@ -66,6 +66,11 @@ sync) in `.niman/settings.json`.
 | `journalTemplate` | none (= a heading with the date) | The template an entry is made from, library-relative |
 | `journalDayStart` | 0 | The hour a new day begins (0–6): at 4, until four in the morning is still yesterday |
 
+The **Diagnostics and info** area also carries the first run again
+(#266): *What Niman can do* reopens the welcome deck read-only, and
+*Continue the tour* resumes the guided tour wherever it stopped. Both are
+device settings, like the deck's Markdown answer themselves.
+
 ## Library settings kept on this device
 
 Per library, but in the app's own storage rather than the folder: what

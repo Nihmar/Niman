@@ -85,6 +85,16 @@ Full guides live in [`docs/`](docs/):
 - Books have a **look of their own** — theme, brightness, font and text
   size — apart from the notes.
 
+### Starting out
+
+- **A welcome on the first run**, before anything is asked of you: what
+  the app does, and one question — how much Markdown you know — that
+  decides how your first library opens (live editor, or the Markdown
+  source; change it whenever in Settings → Editor).
+- **A guided tour** that points at the real controls, offered by the
+  welcome and re-runnable from the command palette, ending in the
+  [Markdown cheatsheet](docs/user/editing.md#markdown-support).
+
 ### Getting notes in and out
 
 - **Export a note** as Markdown, as a self-contained HTML page, as a

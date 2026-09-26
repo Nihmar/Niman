@@ -83,9 +83,10 @@ database) sees the deck.
   window is short; the controls pinned to the bottom.
 - Desktop: the same page in a centred card, max width 720, so a 1440-px
   window does not turn six lines of prose into one line of 1440 px.
-- Controls: `Skip` (top right) · dots (bottom left, tappable, with
-  semantics) · `Back` / `Next` (bottom right). On the last page `Next`
-  becomes `Start writing`.
+- Controls: `Skip` (top right) · dots (bottom left, with a semantics
+  label: they are progress, not buttons — with nine pages a 48 dp target
+  each does not fit a phone) · `Back` / `Next` (bottom right). On the
+  last page `Next` becomes `Start writing`.
 - Keys: ←/→ or PageUp/PageDown page, Esc skips. On Android, system back
   goes to the previous page; on page 1 it leaves the app (with the deck
   unfinished, so it comes back next launch).
@@ -425,3 +426,34 @@ Mockups land in this folder as they are drawn.
    platform page keeps share-in, widgets and voice notes on Android and
    the tray, tabs and drag and drop on the desktop.
 6. **Everything ships with the tour** — one round, one release.
+
+## As built (2026-09-26)
+
+The round shipped as one delivery — deck, question, seeding and tour —
+and the pieces stand where the plan put them. What differs, and why:
+
+- **The dots are progress, not taps** (§4.1): nine of them at a 48 dp
+  target each do not fit a phone; `Back`/`Next` (and the arrow keys) are
+  the way through.
+- **No "Don't show again" on the card.** `Skip` leaves the tour where it
+  is (the palette's *Continue the tour* resumes), the last step's `Done`
+  marks it seen, and the offer's *Not now* clears the offer — the tour
+  stays in Help and the palette, and is never raised on its own again.
+- **The last step opens the cheatsheet and ends the tour.** The card's
+  button closes the overlay, opens the cheatsheet and marks the tour
+  done, which is the hand-over the plan asked for without a second
+  overlay over a screen it no longer belongs to.
+- **The copy lives in `ui/welcome/welcome_copy.dart`, in English.** The
+  deck and the tour are ~70 labels, and `ui/strings/` is compile-time
+  complete across thirty-seven locales: machine-translating onboarding
+  prose would be worse than English until a translation round of its
+  own. Filed as an issue; the copy is behind one class, so folding it
+  into `AppStrings` later is a mechanical swap.
+- **Steps:** eight on a wide window (tree, create, note, modes, toolbar,
+  tabs, dock, cheatsheet), seven on a phone (no dock step — the note's
+  menu has the same three panes), and the modes step only when the
+  library offers both editors.
+- **Entries:** the deck reopens read-only from Settings → About (*What
+  Niman can do*) and the palette; the tour from Settings → About
+  (*Continue the tour*), the palette, and the welcome's own offer once a
+  library is open.

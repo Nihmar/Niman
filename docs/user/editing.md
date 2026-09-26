@@ -7,6 +7,12 @@ each device): `source` (default) or `wysiwyg`. The settings
 screen can offer source, WYSIWYG, or both (`enabledEditors`); the note's
 status row switches only when both are enabled.
 
+A library the device opens for the first time takes its two from the
+welcome's Markdown question (#266): *Never* starts in `wysiwyg` with the
+source not offered, *A little* starts in `wysiwyg` with both, *All the
+time* (or a skipped question) is the `source` default above. Settings →
+Editor changes either whenever, and the answer is never applied twice.
+
 Both are one surface, Niman's own, in two modes: the note's text is the
 same Markdown either way, and only how it is drawn differs. The read view
 (the preview) is the same engine again, with nothing to edit.

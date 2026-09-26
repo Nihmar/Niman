@@ -25,6 +25,27 @@ disk; the app's SQLite database is only a rebuildable index.
   back. It is in the row's own menu (⋯, right-click on a desktop, or a
   long press on a phone), and the library open right now closes first.
 
+## The first run
+
+A fresh install opens on a short **welcome**: what Niman is — notes as
+files, three ways to write one, links and templates, search, export and
+import, tasks, sync, and what your device adds — and then one question:
+**have you written Markdown before?** The answer only decides how your
+first library starts. *Never* opens notes in the live editor and does not
+offer the Markdown source; *A little* opens live with both editors
+offered; *All the time* opens the source, as the app has always come.
+Settings → Editor has the switches whenever you change your mind, and the
+deck is shown once: it lives under Settings → About as *What Niman can
+do*.
+
+The last page can ask for a **tour** instead (*Show me around*), and so
+can the command palette later (*Take the tour*, which resumes where it
+stopped). It points at the real controls — the tree, the create menu, the
+note and its three modes, the toolbar, the tabs, the dock — and ends by
+opening the **Markdown cheatsheet** (#265), every construct written
+beside how a note shows it. Stop it at any step; nothing of it is left in
+your library.
+
 ## First steps
 
 1. Open (or create) a folder as a library.
