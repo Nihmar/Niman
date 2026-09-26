@@ -2186,10 +2186,6 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     'fields_key_value',
     'CREATE INDEX fields_key_value ON frontmatter_fields ("key", value)',
   );
-  late final Index pendingLinksNote = Index(
-    'pending_links_note',
-    'CREATE INDEX pending_links_note ON pending_links (note_id)',
-  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2208,7 +2204,6 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     noteTagsNote,
     linksTo,
     fieldsKeyValue,
-    pendingLinksNote,
   ];
 }
 
