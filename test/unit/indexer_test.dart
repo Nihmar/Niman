@@ -517,8 +517,11 @@ void main() {
       // are never read either.
       expect(seen.map((p) => p.file), hasLength(3));
       expect(seen.map((p) => p.file), containsAll(<String>['note1.md']));
+      // The count runs across the whole scan, directory after directory.
       expect(seen.map((p) => p.done), [1, 2, 3]);
-      expect(seen.every((p) => p.of == 3), isTrue);
+      // The denominator is the library's note count when the scan starts;
+      // this one starts empty, so each directory reports its own batch.
+      expect(seen.map((p) => p.of), [2, 2, 1]);
     });
 
     test('any content read reports while a callback is set', () async {

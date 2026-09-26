@@ -122,11 +122,17 @@ final class IndexTree {
     String root,
     List<String> rels, {
     Map<String, KnownContent> known = const {},
+    int total = 0,
+    int doneBase = 0,
   }) async {
     if (rels.isEmpty) return const {};
     final contents = <String, NoteContent>{};
     _log.debug('contents: reading ${rels.length} note(s)');
     final report = onProgress;
+    // The denominator of a progress report: a directory-at-a-time scan
+    // knows the library's note count once and passes it down, so the bar
+    // does not reset at every folder; a one-off read reports its own size.
+    final of = total > 0 ? total : rels.length;
     ReceivePort? port;
     if (report != null) {
       var done = 0;
@@ -136,8 +142,8 @@ final class IndexTree {
           report(
             IndexProgress(
               file: message! as String,
-              done: done,
-              of: rels.length,
+              done: doneBase + done,
+              of: of,
             ),
           );
         });
@@ -208,12 +214,18 @@ final class IndexTree {
   readContents(
     String root,
     List<DiskEntry> entries,
-    Map<String, Note> old,
-  ) async {
+    Map<String, Note> old, {
+    bool? contentOwed,
+    int progressTotal = 0,
+    int doneBase = 0,
+  }) async {
     final shas = <String, String>{};
     final todo = <String>[];
+    final pending = <String>{};
+    final noteRels = <String>[];
     for (final e in entries) {
       if (e.isDir || !isNoteFile(e.name)) continue;
+      noteRels.add(e.rel);
       final prev = old[e.rel];
       if (prev != null && awaited(e.rel)) {
         // Its writer reads it in a moment: its row stays as it is.
@@ -228,18 +240,25 @@ final class IndexTree {
         shas[e.rel] = prev.sha256!;
       } else {
         todo.add(e.rel);
+        pending.add(e.rel);
       }
     }
     // Notes without a content row (the v7-era index or a half-rebuilt db)
     // are read once here, so the content pass can build their rows — even
-    // when their (size, mtime) did not change.
-    if (!await _store.contentIndexComplete()) {
-      _log.info('contents: content index incomplete, rebuilding missing rows');
-      for (final rel in await _store.missingFtsPaths()) {
-        if (!todo.contains(rel) && !awaited(rel)) todo.add(rel);
+    // when their (size, mtime) did not change. Scoped to the notes of this
+    // listing: a directory-at-a-time scan checks folder by folder, so a
+    // million missing rows never become a list in memory (#302).
+    if (contentOwed ?? !await _store.contentIndexComplete()) {
+      for (final rel in await _store.missingFtsAmong(noteRels)) {
+        if (pending.add(rel) && !awaited(rel)) todo.add(rel);
       }
     }
-    final contents = await readRelContents(root, todo);
+    final contents = await readRelContents(
+      root,
+      todo,
+      total: progressTotal,
+      doneBase: doneBase,
+    );
     for (final c in contents.values) {
       shas[c.rel] = c.sha256;
     }
@@ -305,7 +324,22 @@ final class IndexTree {
   ///
   /// `removed` is the top-level paths actually pruned: a gone note, or a
   /// gone folder (its rows pruned whole). Renames are paired, not removed.
-  Future<({bool wrote, Set<String> pairedRels, Set<String> removed})>
+  ///
+  /// [deferDeletes] leaves the gone rows alone and reports them through
+  /// `goneLeft` instead — what a directory-at-a-time scan wants, so a note
+  /// that vanished from this folder is still around to pair when a later
+  /// folder turns out to be its new home (#302). [orphanLookup] is the
+  /// other half: a candidate from a directory the scan has already passed,
+  /// asked only when this listing has none, and expected to consume the
+  /// candidate it answers with.
+  Future<
+    ({
+      bool wrote,
+      Set<String> pairedRels,
+      Set<String> removed,
+      Set<String> goneLeft,
+    })
+  >
   applyDiff({
     required List<DiskEntry> entries,
     required Map<String, Note> old,
@@ -313,6 +347,8 @@ final class IndexTree {
     required Map<String, NoteContent> contents,
     String scope = '',
     int scopeParentId = 0,
+    bool deferDeletes = false,
+    Future<Note?> Function(DiskEntry entry, String sha)? orphanLookup,
   }) async {
     final scopeParentRel = parentOf(scope);
     final entryRels = <String>{for (final e in entries) e.rel};
@@ -369,12 +405,23 @@ final class IndexTree {
         e.rel,
       );
       final pairOld = _pairCandidate(e, shas[e.rel], old, gone, pairedOld);
-      if (pairOld != null) {
-        // Rename with unchanged content: the old row keeps its id.
-        final oldRow = old[pairOld]!;
+      final sha = shas[e.rel];
+      var pairRow = pairOld == null ? null : old[pairOld];
+      // A rename whose old home a previous directory of the same scan
+      // found gone (#302): the candidate lives in the scan's orphan table,
+      // not in this listing's rows. It is consumed by the lookup, so two
+      // entries can never pair with one row.
+      if (pairRow == null && !e.isDir && sha != null && orphanLookup != null) {
+        pairRow = await orphanLookup(e, sha);
+      }
+      if (pairRow != null) {
+        // Rename with unchanged content: the old row keeps its id. A
+        // non-null local, because the query builder's closure below cannot
+        // see the promotion of a variable the lookup may have written.
+        final pairing = pairRow;
         await (_db.update(
           _db.notes,
-        )..where((t) => t.id.equals(oldRow.id))).write(
+        )..where((t) => t.id.equals(pairing.id))).write(
           NotesCompanion(
             path: Value(e.rel),
             parent: Value(parentId),
@@ -382,13 +429,13 @@ final class IndexTree {
             isDir: const Value(false),
             size: Value(e.size),
             modified: Value(e.modified),
-            sha256: Value(shas[e.rel]),
+            sha256: Value(sha),
           ),
         );
-        newIds[e.rel] = oldRow.id;
+        newIds[e.rel] = pairing.id;
         pairedRels.add(e.rel);
-        pairedOld.add(pairOld);
-        await _store.replaceFileStems(oldRow.id, e.name);
+        pairedOld.add(pairing.path);
+        await _store.replaceFileStems(pairing.id, e.name);
         wrote = true;
         continue;
       }
@@ -411,14 +458,26 @@ final class IndexTree {
       wrote = true;
     }
     final removed = <String>{};
+    final goneLeft = <String>{};
     for (final rel in gone) {
       if (gone.contains(parentOf(rel))) continue;
       if (pairedOld.contains(rel)) continue;
+      // The caller prunes later: a directory-at-a-time scan keeps every
+      // vanished note of this listing in its orphan table until the walk
+      // has seen the whole tree, so a move into a directory it has already
+      // passed can still pair (#302).
+      goneLeft.add(rel);
+      if (deferDeletes) continue;
       await _dao.deleteSubtree(rel);
       removed.add(rel);
       wrote = true;
     }
-    return (wrote: wrote, pairedRels: pairedRels, removed: removed);
+    return (
+      wrote: wrote,
+      pairedRels: pairedRels,
+      removed: removed,
+      goneLeft: goneLeft,
+    );
   }
 
   /// The gone-path candidate for a content-preserving rename of [e]: a
