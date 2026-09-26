@@ -38,6 +38,9 @@ final class _Note implements NoteViewHandle {
 
   @override
   void insertAtCaret(String markdown) => currentText += markdown;
+
+  @override
+  void openFind({bool replace = false}) {}
 }
 
 final class _Tags implements TagSource {

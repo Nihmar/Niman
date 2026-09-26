@@ -112,6 +112,24 @@ void main() {
     expect(find.byKey(const Key('insert-image')), findsNothing);
   });
 
+  testWidgets('find and replace open from the keyboard with the focus '
+      'anywhere', (tester) async {
+    await pump(tester, _FakeDocument('/tmp/draft.md', 'alpha beta'));
+    // No click into the editor: a file open on its own leaves the focus on
+    // the screen, and the editor's own key handler never hears the chord.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('source-find-input')), findsOneWidget);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyH);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('source-replace-input')), findsOneWidget);
+  });
+
   testWidgets('a file opened outside a library reads in the read view', (
     tester,
   ) async {

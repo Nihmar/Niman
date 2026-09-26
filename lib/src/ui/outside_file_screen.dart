@@ -13,7 +13,9 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/editor_only.dart';
@@ -22,6 +24,7 @@ import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -126,6 +129,17 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
     widget.files.open(widget.documentFor(path));
   }
 
+  /// Opens the active file's find bar, [replace] and all.
+  ///
+  /// The editor hears Ctrl+F only with the caret in it; a file open on its
+  /// own takes no focus into the editor by itself, so the screen binds the
+  /// key over the file showing.
+  void _openFind({bool replace = false}) {
+    final path = widget.files.active?.filePath;
+    final Object? state = path == null ? null : _views[path]?.key.currentState;
+    if (state is NoteViewHandle) state.openFind(replace: replace);
+  }
+
   void _closeActive() {
     final active = widget.files.active;
     if (active != null) widget.files.close(active.filePath);
@@ -137,17 +151,35 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
     final active = widget.files.active;
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     final title = active?.name ?? '';
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    final bindings = <ShortcutActivator, VoidCallback>{
+      ...appShortcutBindings({
+        AppCommand.closeTab: _closeActive,
+        AppCommand.nextTab: () => widget.files.cycle(1),
+        AppCommand.previousTab: () => widget.files.cycle(-1),
+        AppCommand.openFile: () => unawaited(_openAnother()),
+      }),
+      // The editor's own keys, bound here too: with the focus outside the
+      // editor the note's own handler never hears them.
+      SingleActivator(LogicalKeyboardKey.keyF, control: !mac, meta: mac):
+          _openFind,
+      SingleActivator(
+        LogicalKeyboardKey.keyF,
+        control: !mac,
+        meta: mac,
+        alt: true,
+      ): () =>
+          _openFind(replace: true),
+      if (!mac)
+        const SingleActivator(LogicalKeyboardKey.keyH, control: true): () =>
+            _openFind(replace: true),
+    };
     return Scaffold(
       appBar: window.customTitleBar
           ? null
           : AppBar(title: Text(title, key: const Key('outside-file-title'))),
       body: CallbackShortcuts(
-        bindings: appShortcutBindings({
-          AppCommand.closeTab: _closeActive,
-          AppCommand.nextTab: () => widget.files.cycle(1),
-          AppCommand.previousTab: () => widget.files.cycle(-1),
-          AppCommand.openFile: () => unawaited(_openAnother()),
-        }),
+        bindings: bindings,
         child: Focus(
           autofocus: true,
           child: Column(
