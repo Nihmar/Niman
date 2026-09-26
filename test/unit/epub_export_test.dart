@@ -306,6 +306,29 @@ void main() {
     expect(document.pictures, hasLength(1));
   });
 
+  test(
+    'a folder with no notes is refused, not written as an empty book',
+    () async {
+      final notes = p.join(root.path, 'Notes');
+      await Directory(p.join(notes, 'pics')).create(recursive: true);
+      await File(p.join(notes, 'pics', 'photo.png'))
+          .writeAsBytes(<int>[1, 2, 3]);
+
+      final out = p.join(root.path, 'book.epub');
+      await expectLater(
+        TreeExport.run(
+          dir: notes,
+          zipPath: out,
+          format: ExportTreeFormat.epub,
+          language: 'en',
+        ),
+        throwsA(isA<TreeExportNoChapters>()),
+      );
+      // Refused before the container was created: nothing to sweep up (E2).
+      expect(File(out).existsSync(), isFalse);
+    },
+  );
+
   test('a picture shared by two notes goes in once', () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);

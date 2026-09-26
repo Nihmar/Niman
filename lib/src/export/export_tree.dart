@@ -101,6 +101,20 @@ final class TreeExportNoEngine implements Exception {
   String toString() => 'No PDF engine was found';
 }
 
+/// An EPUB was asked for from a folder with no notes in it.
+///
+/// EPUB 3 wants at least one `itemref` in the spine: a book with no
+/// chapters is not a book, and writing the container anyway left a file
+/// that no reader opens (E2).
+final class TreeExportNoChapters implements Exception {
+  /// Creates the failure.
+  const new();
+
+  /// What a log line reads.
+  @override
+  String toString() => 'A folder with no notes has no book to write';
+}
+
 /// One tree export, running on its own isolate.
 final class TreeExport {
   new _(
@@ -213,6 +227,10 @@ final class TreeExport {
         // The isolate's cancellation mailbox: what lets a cancel close the
         // zip instead of killing the isolate with a file handle open.
         _cancelPort = message;
+      } else if (message is TreeExportNoChapters) {
+        // A typed failure the isolate asked to report without throwing:
+        // only a message keeps the type across the boundary.
+        unawaited(_settle(gauge, error: message));
       }
     });
     _errors.listen(
@@ -329,6 +347,15 @@ Future<void> _exportTree(TreeExportRequest request) async {
     }
   }
   final tree = _walk(request.dir);
+  // A book needs a chapter: EPUB 3's spine must hold at least one itemref,
+  // and a folder of attachments is not a book (E2). Asked before the
+  // container is created, so there is no file to sweep afterwards; the
+  // failure travels as a message because an exception thrown here would
+  // reach the parent as its own text, not as the type a caller can catch.
+  if (request.format == ExportTreeFormat.epub && tree.notes.isEmpty) {
+    request.events.send(const TreeExportNoChapters());
+    return;
+  }
   // The cancellation mailbox: the parent asks the export to stop, and the
   // encoder is closed on the way out instead of being torn off by a kill.
   final cancel = ReceivePort();
