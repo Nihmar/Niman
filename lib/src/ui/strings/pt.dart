@@ -1574,6 +1574,19 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Livro sem metadados';
+  @override
+  String get exportEpubNoIndex =>
+      'Esta pasta não tem nenhum index.md na raiz. O livro terá o nome '
+      'da pasta e nenhum autor, capa ou série.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md não tem frontmatter. O livro terá o nome da pasta e '
+      'nenhum autor, capa ou série.';
+  @override
+  String get exportEpubAnyway => 'Exportar mesmo assim';
   @override
   String get exportPdfPicture =>
       'O PDF é uma imagem das páginas; instale o navegador para ter texto '

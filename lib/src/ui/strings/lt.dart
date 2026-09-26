@@ -1564,6 +1564,19 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knyga be metaduomenų';
+  @override
+  String get exportEpubNoIndex =>
+      'Šiame aplanke šaknyje nėra index.md. Knyga vadinsis aplanko '
+      'vardu ir neturės autoriaus, viršelio ar serijos.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md neturi frontmatter. Knyga vadinsis aplanko vardu ir '
+      'neturės autoriaus, viršelio ar serijos.';
+  @override
+  String get exportEpubAnyway => 'Vis tiek eksportuoti';
   @override
   String get exportPdfPicture =>
       'PDF yra puslapių paveikslėlis; įdiekite naršyklę, kad tekstą būtų '

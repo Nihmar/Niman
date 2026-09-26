@@ -1553,6 +1553,19 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bok uten metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Denne mappen har ingen index.md i roten. Boken får mappens navn '
+      'og ingen forfatter, forside eller serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md har ingen frontmatter. Boken får mappens navn og ingen '
+      'forfatter, forside eller serie.';
+  @override
+  String get exportEpubAnyway => 'Eksporter likevel';
   @override
   String get exportPdfPicture =>
       'PDF-en er et bilde av sidene; installer en nettleser for valgbar tekst.';

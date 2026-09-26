@@ -9,6 +9,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_tree.dart';
+import 'package:niman/src/export/export_tree_book.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
 
@@ -504,6 +505,35 @@ void main() {
     expect(last, isNotNull);
     expect(last!.total, 2);
     expect(last!.done, 2);
+  });
+
+  group('the metadata pre-flight', () {
+    test('a folder with no index.md asks for one', () async {
+      final notes = p.join(root.path, 'Notes');
+      await Directory(notes).create(recursive: true);
+      expect(
+        await ExportTreeBook.problemOf(notes),
+        EpubMetadataProblem.missingIndex,
+      );
+    });
+
+    test('an index.md with no frontmatter asks for one', () async {
+      final notes = p.join(root.path, 'Notes');
+      await Directory(notes).create(recursive: true);
+      await File(p.join(notes, 'index.md')).writeAsString('# Index\n');
+      expect(
+        await ExportTreeBook.problemOf(notes),
+        EpubMetadataProblem.missingFrontmatter,
+      );
+    });
+
+    test('an index.md with frontmatter is no problem', () async {
+      final notes = p.join(root.path, 'Notes');
+      await Directory(notes).create(recursive: true);
+      await File(p.join(notes, 'index.md'))
+          .writeAsString('---\ntitle: T\n---\n# Index\n');
+      expect(await ExportTreeBook.problemOf(notes), isNull);
+    });
   });
 
   test('a picture shared by two notes goes in once', () async {

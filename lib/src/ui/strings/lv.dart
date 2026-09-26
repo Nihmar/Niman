@@ -1561,6 +1561,19 @@ final class LatvianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Grāmata bez metadatiem';
+  @override
+  String get exportEpubNoIndex =>
+      'Šai mapei saknē nav index.md. Grāmatai būs mapes nosaukums, un '
+      'tai nebūs autora, vāka vai sērijas.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nav frontmatter. Grāmatai būs mapes nosaukums, un tai '
+      'nebūs autora, vāka vai sērijas.';
+  @override
+  String get exportEpubAnyway => 'Tomēr eksportēt';
   @override
   String get exportPdfPicture =>
       'PDF ir lapu attēls; instalē pārlūku, lai tekstu varētu atlasīt.';

@@ -1614,6 +1614,20 @@ final class GreekStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Βιβλίο χωρίς μεταδεδομένα';
+  @override
+  String get exportEpubNoIndex =>
+      'Αυτός ο φάκελος δεν έχει index.md στη ρίζα του. Το βιβλίο θα '
+      'φέρει το όνομα του φακέλου και κανέναν συγγραφέα, εξώφυλλο ή '
+      'σειρά.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'Το index.md δεν έχει frontmatter. Το βιβλίο θα φέρει το όνομα '
+      'του φακέλου και κανέναν συγγραφέα, εξώφυλλο ή σειρά.';
+  @override
+  String get exportEpubAnyway => 'Εξαγωγή παρόλα αυτά';
   @override
   String get exportPdfPicture =>
       'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε ένα πρόγραμμα '

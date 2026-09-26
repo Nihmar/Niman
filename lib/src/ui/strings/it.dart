@@ -1583,6 +1583,20 @@ final class ItalianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libro senza metadati';
+  @override
+  String get exportEpubNoIndex =>
+      'Questa cartella non ha un index.md nella sua radice. Il libro '
+      'porterà il nome della cartella e nessun autore, copertina o '
+      'serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md non ha frontmatter. Il libro porterà il nome della '
+      'cartella e nessun autore, copertina o serie.';
+  @override
+  String get exportEpubAnyway => 'Esporta comunque';
   @override
   String get exportPdfPicture =>
       "Il PDF è un'immagine delle pagine; installa un browser per "

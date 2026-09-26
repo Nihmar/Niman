@@ -1552,6 +1552,19 @@ final class TurkishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Üst verisi olmayan kitap';
+  @override
+  String get exportEpubNoIndex =>
+      'Bu klasörün kökünde index.md yok. Kitap klasörün adını '
+      'taşıyacak; yazarı, kapağı veya serisi olmayacak.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md dosyasında frontmatter yok. Kitap klasörün adını '
+      'taşıyacak; yazarı, kapağı veya serisi olmayacak.';
+  @override
+  String get exportEpubAnyway => 'Yine de dışa aktar';
   @override
   String get exportPdfPicture =>
       'PDF, sayfaların bir resmidir; seçilebilir metin için tarayıcı kurun.';

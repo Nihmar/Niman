@@ -1466,6 +1466,17 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'メタデータのない本';
+  @override
+  String get exportEpubNoIndex =>
+      'このフォルダーのルートに index.md がありません。本の名前はフォルダー名になり、著者・表紙・シリーズは付きません。';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md に frontmatter がありません。本の名前はフォルダー名になり、著者・表紙・シリーズは付きません。';
+  @override
+  String get exportEpubAnyway => 'それでも書き出す';
   @override
   String get exportPdfPicture => 'PDF はページの画像です。ブラウザーをインストールするとテキストを選択できます。';
   @override

@@ -1565,6 +1565,19 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Кніга без метаданых';
+  @override
+  String get exportEpubNoIndex =>
+      'У гэтай тэчцы няма index.md у яе корані. Кніга атрымае назву '
+      'тэчкі і не будзе мець аўтара, вокладкі ці серыі.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'У index.md няма фронтматэру. Кніга атрымае назву тэчкі і не '
+      'будзе мець аўтара, вокладкі ці серыі.';
+  @override
+  String get exportEpubAnyway => 'Усё роўна экспартаваць';
   @override
   String get exportPdfPicture =>
       'PDF — гэта малюнак старонак; усталюйце браўзер, каб атрымаць '

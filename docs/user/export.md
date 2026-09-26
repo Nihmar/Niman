@@ -45,8 +45,10 @@ Export a folder, below, and its note-to-note links become links.
 An EPUB takes its metadata from the frontmatter: the note's own for a
 single note, `index.md`'s for a folder or the library — the note the
 book's author writes the metadata in, when the exported folder has one at
-its root. Without one the book keeps the folder's name, and the export
-logs why. The keys are the usual ones, so a note written for another tool
+its root. When there is no `index.md`, or it carries no frontmatter, the
+export asks first: the book would carry the folder's name and no author,
+cover or series, and the dialog lets you stop and write the note before
+going on. The keys are the usual ones, so a note written for another tool
 reads the same here:
 
 ```

@@ -27,6 +27,7 @@ import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_pdf.dart';
 import 'package:niman/src/export/export_progress_dialog.dart';
 import 'package:niman/src/export/export_tree.dart';
+import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_export_progress_dialog.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
@@ -322,6 +323,9 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 // a folder export actually asks for it, never at startup
                 // (L4), and awaited before the chooser can offer PDF (L5).
                 pdfEngineLookup: () => ref.read(pdfEngineProvider.future),
+                // A book's metadata source, checked before the export starts
+                // (E3); widget tests answer for their library root.
+                epubMetadataProblem: ref.read(epubMetadataProblemProvider),
                 outsideFiles: ref.read(outsideFilesProvider),
                 launchRequests: ref.read(launchRequestsProvider),
                 targets: ref.read(widgetTargetServiceProvider),
@@ -356,6 +360,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.pickExportFolder,
     required this.pdfPrinter,
     required this.pdfEngineLookup,
+    required this.epubMetadataProblem,
     required this.outsideFiles,
     required this.launchRequests,
     required this.targets,
@@ -409,6 +414,10 @@ final class _LibraryShell extends StatefulWidget {
   /// `Future` so the chooser can wait for the answer instead of reading a
   /// null that is only the search still running.
   final Future<String?> Function() pdfEngineLookup;
+
+  /// Why a folder's book has no metadata source (#303, E3), asked before
+  /// its EPUB export starts so the user can stop and add an `index.md`.
+  final EpubMetadataLookup epubMetadataProblem;
 
   /// The files open outside any library (#77).
   final OutsideFiles outsideFiles;
@@ -3092,6 +3101,17 @@ final class _LibraryShellState extends State<_LibraryShell>
       pdfAvailable: Platform.isAndroid || engine != null,
     );
     if (format == null || !mounted) return;
+    // A book's metadata is its folder's `index.md`: without one the book
+    // would carry the folder's name and nothing else. Asked before the
+    // destination is even chosen, so the export can be stopped and the
+    // note written first (E3).
+    if (format == ExportTreeFormat.epub) {
+      final problem = await widget.epubMetadataProblem(
+        dir.isEmpty ? root : p.join(root, dir),
+      );
+      if (!mounted) return;
+      if (problem != null && !await _confirmEpubMetadata(problem)) return;
+    }
     final folder = await widget.pickExportFolder(
       dialogTitle: AppStrings.exportTitle,
     );
@@ -3143,6 +3163,39 @@ final class _LibraryShellState extends State<_LibraryShell>
         context,
       ).showSnackBar(SnackBar(content: Text(AppStrings.exportFailed(error))));
     }
+  }
+
+  /// Asks whether an EPUB export should go on when the folder has no
+  /// metadata source (#303, E3): the book would carry the folder's name and
+  /// no author, cover or series. True when the user lets it go on — false
+  /// stops the export before anything is written.
+  Future<bool> _confirmEpubMetadata(EpubMetadataProblem problem) async {
+    final message = switch (problem) {
+      EpubMetadataProblem.missingIndex => AppStrings.exportEpubNoIndex,
+      EpubMetadataProblem.missingFrontmatter =>
+        AppStrings.exportEpubNoFrontmatter,
+    };
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const Key('export-epub-metadata-dialog'),
+        title: Text(AppStrings.exportEpubNoMetadataTitle),
+        content: Text(message),
+        actions: [
+          TextButton(
+            key: const Key('export-epub-cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          FilledButton(
+            key: const Key('export-epub-anyway'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(AppStrings.exportEpubAnyway),
+          ),
+        ],
+      ),
+    );
+    return go ?? false;
   }
 
   /// Says where an export landed, with a way to its folder where the OS

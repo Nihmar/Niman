@@ -1578,6 +1578,19 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libër pa metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Kjo dosje nuk ka index.md në rrënjë. Libri do të mbajë emrin e '
+      'dosjes dhe pa autor, kopertinë ose seri.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nuk ka frontmatter. Libri do të mbajë emrin e dosjes '
+      'dhe pa autor, kopertinë ose seri.';
+  @override
+  String get exportEpubAnyway => 'Eksporto gjithsesi';
   @override
   String get exportPdfPicture =>
       'PDF-ja është një pamje e faqeve; instaloni një shfletues për tekst të '

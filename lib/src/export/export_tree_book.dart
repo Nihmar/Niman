@@ -3,6 +3,9 @@
 /// chapter.
 library;
 
+import 'dart:io';
+import 'dart:isolate';
+
 import 'package:niman/src/export/epub_book.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
@@ -18,8 +21,47 @@ typedef ExportTreeFrontmatter = ({
   List<String> warnings,
 });
 
+/// Why an exported folder has no metadata for its book (#303, E3).
+enum EpubMetadataProblem {
+  /// No `index.md` at the folder's root.
+  missingIndex,
+
+  /// `index.md` is there but carries no frontmatter.
+  missingFrontmatter,
+}
+
 /// A folder's book: its metadata source and its chapters.
 abstract final class ExportTreeBook {
+  /// The problem an exported folder's metadata source has, found before the
+  /// export starts: no `index.md` at [folder]'s root, or one with nothing
+  /// in it (E3). Null when the folder has a source.
+  ///
+  /// It reads the folder's own listing and, when there is one, `index.md` —
+  /// never the tree — so a caller can ask before the export does its work;
+  /// the read runs off the UI isolate.
+  static Future<EpubMetadataProblem?> problemOf(String folder) async {
+    try {
+      return await Isolate.run(() {
+        File? index;
+        for (final entry in Directory(folder).listSync(followLinks: false)) {
+          if (entry is! File) continue;
+          if (p.basename(entry.path).toLowerCase() != 'index.md') continue;
+          index = entry;
+          break;
+        }
+        final file = index;
+        if (file == null) return EpubMetadataProblem.missingIndex;
+        return parseFrontmatter(ExportTreePages.readNote(file.path)) == null
+            ? EpubMetadataProblem.missingFrontmatter
+            : null;
+      });
+    } on FileSystemException {
+      // A folder that is not there is the export's failure to report, not
+      // the pre-flight's.
+      return null;
+    }
+  }
+
   /// The frontmatter a folder's book takes: `index.md`'s, when the exported
   /// folder has one at its root (#303).
   ///

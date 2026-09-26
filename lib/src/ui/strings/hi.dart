@@ -1538,6 +1538,19 @@ final class HindiStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'मेटाडेटा के बिना किताब';
+  @override
+  String get exportEpubNoIndex =>
+      'इस फ़ोल्डर की जड़ में index.md नहीं है। किताब फ़ोल्डर के नाम से '
+      'बनेगी और उसमें लेखक, कवर या श्रृंखला नहीं होगी।';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md में frontmatter नहीं है। किताब फ़ोल्डर के नाम से बनेगी '
+      'और उसमें लेखक, कवर या श्रृंखला नहीं होगी।';
+  @override
+  String get exportEpubAnyway => 'फिर भी निर्यात करें';
   @override
   String get exportPdfPicture =>
       'PDF पृष्ठों की तस्वीर है; चुने जा सकने वाले टेक्स्ट के लिए ब्राउज़र '

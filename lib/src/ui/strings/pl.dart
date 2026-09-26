@@ -1584,6 +1584,20 @@ final class PolishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Książka bez metadanych';
+  @override
+  String get exportEpubNoIndex =>
+      'Ten folder nie ma pliku index.md w katalogu głównym. Książka '
+      'będzie nosić nazwę folderu i nie będzie mieć autora, okładki '
+      'ani serii.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nie ma frontmatter. Książka będzie nosić nazwę folderu '
+      'i nie będzie mieć autora, okładki ani serii.';
+  @override
+  String get exportEpubAnyway => 'Eksportuj mimo to';
   @override
   String get exportPdfPicture =>
       'PDF to obraz stron; zainstaluj przeglądarkę, aby tekst można było '

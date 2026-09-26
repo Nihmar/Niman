@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/export/export_files.dart';
+import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -40,6 +41,7 @@ void main() {
     WidgetTester tester, {
     Size size = const Size(1400, 900),
     String? pdfEngine,
+    EpubMetadataProblem? epubProblem,
   }) async {
     setSurfaceSize(tester, size);
     await tester.pumpWidget(
@@ -72,6 +74,11 @@ void main() {
           }),
           // The engine search is the machine's; the tests answer for it.
           pdfEngineProvider.overrideWith((ref) => pdfEngine),
+          // The metadata pre-flight reads the library root, which is not a
+          // real folder here: the test answers for it.
+          epubMetadataProblemProvider.overrideWithValue(
+            (folder) async => epubProblem,
+          ),
         ],
         child: const NimanApp(),
       ),
@@ -238,6 +245,68 @@ void main() {
     expect(find.byKey(const Key('export-tree-epub')), findsOne);
     await tester.tapAt(const Offset(4, 4));
     await settle(tester);
+  });
+
+  testWidgets('a folder with no index.md asks before the book is written', (
+    tester,
+  ) async {
+    await pumpShell(tester, epubProblem: EpubMetadataProblem.missingIndex);
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+    await tester.longPress(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-export-folder')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('export-tree-epub')));
+    await settle(tester);
+
+    expect(find.byKey(const Key('export-epub-metadata-dialog')), findsOne);
+    expect(find.text(AppStrings.exportEpubNoIndex), findsOneWidget);
+
+    // Stopping is before the destination is even asked for (E3).
+    await tester.tap(find.byKey(const Key('export-epub-cancel')));
+    await settle(tester);
+    expect(pickedTitle, isNull);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets(
+    'an index.md without frontmatter says so, and the export can go on',
+    (tester) async {
+      // The destination is dismissed: the picker was asked, nothing written.
+      await pumpShell(
+        tester,
+        epubProblem: EpubMetadataProblem.missingFrontmatter,
+      );
+      await controller.createFolder(parentPath: '', name: 'Docs');
+      await settle(tester);
+      await tester.longPress(noteRow('Docs'));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('menu-export-folder')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('export-tree-epub')));
+      await settle(tester);
+
+      expect(find.text(AppStrings.exportEpubNoFrontmatter), findsOneWidget);
+      await tester.tap(find.byKey(const Key('export-epub-anyway')));
+      await settle(tester);
+      expect(pickedTitle, AppStrings.exportTitle);
+    },
+  );
+
+  testWidgets('a source in place needs no asking', (tester) async {
+    await pumpShell(tester);
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+    await tester.longPress(noteRow('Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-export-folder')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('export-tree-epub')));
+    await settle(tester);
+
+    expect(find.byKey(const Key('export-epub-metadata-dialog')), findsNothing);
+    expect(pickedTitle, AppStrings.exportTitle);
   });
 
   testWidgets('a folder is not offered PDF where no engine is', (tester) async {

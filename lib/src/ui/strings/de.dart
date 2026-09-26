@@ -1590,6 +1590,20 @@ final class GermanStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Buch ohne Metadaten';
+  @override
+  String get exportEpubNoIndex =>
+      'Dieser Ordner hat keine index.md in seinem Stammverzeichnis. '
+      'Das Buch trägt den Ordnernamen und keinen Autor, kein Cover und '
+      'keine Reihe.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md hat kein Frontmatter. Das Buch trägt den Ordnernamen '
+      'und keinen Autor, kein Cover und keine Reihe.';
+  @override
+  String get exportEpubAnyway => 'Trotzdem exportieren';
   @override
   String get exportPdfPicture =>
       'Das PDF ist ein Bild der Seiten; mit einem Browser wird der Text '

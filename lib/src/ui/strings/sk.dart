@@ -1564,6 +1564,19 @@ final class SlovakStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Kniha bez metadát';
+  @override
+  String get exportEpubNoIndex =>
+      'Tento priečinok nemá v koreni žiadny index.md. Kniha ponesie '
+      'názov priečinka a nebude mať autora, obálku ani sériu.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nemá frontmatter. Kniha ponesie názov priečinka a '
+      'nebude mať autora, obálku ani sériu.';
+  @override
+  String get exportEpubAnyway => 'Priek tomu exportovať';
   @override
   String get exportPdfPicture =>
       'PDF je obrázok stránok; nainštalujte prehliadač pre vyberateľný text.';

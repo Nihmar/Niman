@@ -1605,6 +1605,19 @@ final class FrenchStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Livre sans métadonnées';
+  @override
+  String get exportEpubNoIndex =>
+      'Ce dossier n’a pas d’index.md à sa racine. Le livre portera le '
+      'nom du dossier et n’aura ni auteur, ni couverture, ni série.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md n’a pas de frontmatter. Le livre portera le nom du '
+      'dossier et n’aura ni auteur, ni couverture, ni série.';
+  @override
+  String get exportEpubAnyway => 'Exporter quand même';
   @override
   String get exportPdfPicture =>
       'Le PDF est une image des pages ; installez un navigateur pour un texte '
