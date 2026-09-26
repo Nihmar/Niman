@@ -1505,6 +1505,8 @@ final class TurkishStrings extends Strings {
   @override
   String get importFolderAction => 'İçe aktar';
   @override
+  String get notionImportTitle => 'Notion dışa aktarımını içe aktar';
+  @override
   String dropRejected(String names) =>
       'Burada yalnızca Markdown dosyaları ve klasörler açılır: $names';
   @override

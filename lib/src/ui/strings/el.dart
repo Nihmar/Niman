@@ -1567,6 +1567,8 @@ final class GreekStrings extends Strings {
   @override
   String get importFolderAction => 'Εισαγωγή';
   @override
+  String get notionImportTitle => 'Εισαγωγή εξαγωγής Notion';
+  @override
   String dropRejected(String names) =>
       'Εδώ ανοίγουν μόνο αρχεία Markdown και φάκελοι: $names';
   @override

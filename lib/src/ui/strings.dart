@@ -903,6 +903,7 @@ final class AppStrings {
   static String get dropHint => _s.dropHint;
   static String get dropNothing => _s.dropNothing;
   static String get importFolderAction => _s.importFolderAction;
+  static String get notionImportTitle => _s.notionImportTitle;
   static String dropRejected(String names) => _s.dropRejected(names);
   static String importFolderTitle(String name) => _s.importFolderTitle(name);
   static String importFolderBody(int count) => _s.importFolderBody(count);

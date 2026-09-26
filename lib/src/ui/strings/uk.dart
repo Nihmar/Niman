@@ -1523,6 +1523,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get importFolderAction => 'Імпортувати';
   @override
+  String get notionImportTitle => 'Імпорт експорту Notion';
+  @override
   String dropRejected(String names) =>
       'Тут відкриваються лише файли Markdown і теки: $names';
   @override

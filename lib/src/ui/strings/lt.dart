@@ -1517,6 +1517,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get importFolderAction => 'Importuoti';
   @override
+  String get notionImportTitle => 'Importuoti „Notion“ eksportą';
+  @override
   String dropRejected(String names) =>
       'Čia atidaromi tik Markdown failai ir aplankai: $names';
   @override

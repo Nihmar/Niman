@@ -1390,6 +1390,8 @@ final class ChineseStrings extends Strings {
   @override
   String get importFolderAction => '导入';
   @override
+  String get notionImportTitle => '导入 Notion 导出';
+  @override
   String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';
   @override
   String importFolderTitle(String name) => '导入“$name”？';

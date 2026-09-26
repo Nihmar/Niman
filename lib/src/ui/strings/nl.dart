@@ -1537,6 +1537,8 @@ final class DutchStrings extends Strings {
   @override
   String get importFolderAction => 'Importeren';
   @override
+  String get notionImportTitle => 'Notion-export importeren';
+  @override
   String dropRejected(String names) =>
       'Hier openen alleen Markdown-bestanden en mappen: $names';
   @override

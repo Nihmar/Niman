@@ -1543,6 +1543,8 @@ final class GermanStrings extends Strings {
   @override
   String get importFolderAction => 'Importieren';
   @override
+  String get notionImportTitle => 'Notion-Export importieren';
+  @override
   String dropRejected(String names) =>
       'Hier öffnen sich nur Markdown-Dateien und Ordner: $names';
   @override

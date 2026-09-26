@@ -1531,6 +1531,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get importFolderAction => 'Importo';
   @override
+  String get notionImportTitle => 'Importo eksportin e Notion';
+  @override
   String dropRejected(String names) =>
       'Këtu hapen vetëm skedarë Markdown dhe dosje: $names';
   @override

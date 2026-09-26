@@ -1506,6 +1506,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get importFolderAction => 'Importer';
   @override
+  String get notionImportTitle => 'Importer Notion-eksport';
+  @override
   String dropRejected(String names) =>
       'Bare Markdown-filer og mapper åpnes her: $names';
   @override
