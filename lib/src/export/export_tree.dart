@@ -17,10 +17,13 @@
 /// the isolate — the index lives on the UI isolate — and gives the
 /// behavior the export wants anyway: what is not in the zip cannot be
 /// linked to from it.
+///
+/// This file is the orchestration: the walk and the pages are
+/// `export_tree_pages.dart`, a book's chapters `export_tree_book.dart`, the
+/// printer `export_tree_printer.dart`.
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui' show RootIsolateToken;
@@ -31,15 +34,15 @@ import 'package:flutter/services.dart' show BackgroundIsolateBinaryMessenger;
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/epub_book.dart';
-import 'package:niman/src/export/export_sources.dart';
-import 'package:niman/src/export/html_page.dart';
-import 'package:niman/src/export/note_html.dart';
-import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/export_tree_book.dart';
+import 'package:niman/src/export/export_tree_pages.dart';
+import 'package:niman/src/export/export_tree_printer.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
-import 'package:niman/src/frontmatter/parser.dart';
-import 'package:niman/src/links/parser.dart';
 import 'package:path/path.dart' as p;
+
+export 'package:niman/src/export/export_tree_printer.dart'
+    show TreeExportNoEngine;
 
 const AppLogger _log = AppLogger(name: 'export');
 
@@ -93,16 +96,6 @@ final class ExportCancelled implements Exception {
   String toString() => zipLeftBehind
       ? 'Export cancelled; the half-written zip could not be removed'
       : 'Export cancelled';
-}
-
-/// A PDF folder was asked for with no engine to print with.
-final class TreeExportNoEngine implements Exception {
-  /// Creates the failure.
-  const new();
-
-  /// What a log line reads.
-  @override
-  String toString() => 'No PDF engine was found';
 }
 
 /// An EPUB was asked for from a folder with no notes in it.
@@ -329,21 +322,6 @@ final class _TreeExportWarning {
   final String message;
 }
 
-/// One entry of the subtree: its absolute path, its zip name, and whether
-/// it is a folder.
-typedef _Entry = ({String abs, String rel, bool isDir});
-
-/// The walked tree, its root, and the lookups links and pictures resolve
-/// with, and the page name each note gets inside the export.
-typedef _Tree = ({
-  String root,
-  List<_Entry> entries,
-  Set<String> files,
-  Map<String, String> notes,
-  Map<String, List<String>> stems,
-  Map<String, String> names,
-});
-
 /// The request the export isolate is spawned with.
 typedef TreeExportRequest = ({
   String dir,
@@ -365,7 +343,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
       BackgroundIsolateBinaryMessenger.ensureInitialized(token);
     }
   }
-  final tree = _walk(request.dir);
+  final tree = ExportTreePages.walk(request.dir);
   // A book needs a chapter: EPUB 3's spine must hold at least one itemref,
   // and a folder of attachments is not a book (E2). Asked before the
   // container is created, so there is no file to sweep afterwards; the
@@ -385,13 +363,16 @@ Future<void> _exportTree(TreeExportRequest request) async {
   // encoder would, and the plain formats have no book. Its metadata and
   // cover are the `index.md` note's frontmatter (#303).
   final front = request.format == ExportTreeFormat.epub
-      ? _bookFrontmatter(tree, request.events)
+      ? ExportTreeBook.frontmatter(tree)
       : null;
+  for (final warning in front?.warnings ?? const <String>[]) {
+    request.events.send(_TreeExportWarning(warning));
+  }
   final metadata = front?.metadata ?? const EpubMetadata();
   final coverTarget = metadata.cover;
-  final cover = coverTarget == null || front == null
+  final cover = coverTarget == null
       ? null
-      : _fileIn(coverTarget, front.dir, tree.files);
+      : ExportTreePages.fileIn(coverTarget, '.', tree.files);
   if (coverTarget != null && cover == null) {
     request.events.send(
       _TreeExportWarning(
@@ -421,12 +402,14 @@ Future<void> _exportTree(TreeExportRequest request) async {
     // attachments and its empty folders never enter the container (E10).
     final total = book == null
         ? tree.entries.length
-        : tree.files.where(_isNote).length;
+        : tree.files.where(ExportTreePages.isNote).length;
     var done = 0;
     for (final entry in tree.entries) {
       // Between entries, where the zip is never half-written.
       if (cancelled) break;
-      if (book != null && !_isNote(entry.rel)) continue;
+      // A book carries its chapters and the pictures they cite, not the
+      // tree: an attachment nobody cites would only weigh the book down.
+      if (book != null && !ExportTreePages.isNote(entry.rel)) continue;
       // Every format keeps the tree's folders, empty ones included: a
       // folder in the Markdown zip and not in the HTML one is a support
       // question waiting to happen (L8).
@@ -434,12 +417,12 @@ Future<void> _exportTree(TreeExportRequest request) async {
         encoder?.addArchiveFile(ArchiveFile.directory(entry.rel));
       } else if (request.format == ExportTreeFormat.markdown) {
         await encoder!.addFile(File(entry.abs), entry.rel);
-      } else if (_isNote(entry.rel)) {
+      } else if (ExportTreePages.isNote(entry.rel)) {
         if (book != null) {
-          await _addEpubChapter(book, tree, entry);
+          await ExportTreeBook.addChapter(book, tree, entry);
         } else {
-          final page = _page(
-            _readNote(entry.abs),
+          final page = ExportTreePages.page(
+            ExportTreePages.readNote(entry.abs),
             entry.rel,
             tree,
             request.language,
@@ -452,7 +435,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
             embedPictures: request.format == ExportTreeFormat.pdf,
           );
           if (request.format == ExportTreeFormat.pdf) {
-            await _printInto(
+            await ExportTreePrinter.printInto(
               encoder!,
               scratch!,
               request.engine,
@@ -467,9 +450,6 @@ Future<void> _exportTree(TreeExportRequest request) async {
           }
         }
       } else {
-        // The EPUB carries the pictures its chapters reference, not the
-        // whole tree: an attachment nobody cites would only weigh the
-        // book down.
         if (encoder != null) await encoder.addFile(File(entry.abs), entry.rel);
       }
       done++;
@@ -505,357 +485,4 @@ Future<void> _exportTree(TreeExportRequest request) async {
       // A temp directory left behind is not the export's failure.
     }
   }
-}
-
-/// The frontmatter a folder's book takes: `index.md`'s, when the exported
-/// folder has one at its root (#303).
-///
-/// A folder has no frontmatter of its own, and a book's metadata belongs to
-/// the book, not to whichever note sorts first: `index.md` is the note the
-/// author writes it in.
-///
-/// A book without one — or with one that says nothing — is not a failure,
-/// but it is silent: the package carries the folder's name and nothing
-/// else, so why is said over [events] for the parent to log (E3).
-({EpubMetadata metadata, String dir})? _bookFrontmatter(
-  _Tree tree,
-  SendPort events,
-) {
-  final rel = tree.notes['index.md'];
-  if (rel == null || p.dirname(rel) != '.') {
-    events.send(
-      const _TreeExportWarning(
-        'the exported folder has no index.md at its root: the book carries '
-        "the folder's name and no metadata",
-      ),
-    );
-    return null;
-  }
-  final text = _readNote(p.join(tree.root, rel));
-  if (parseFrontmatter(text) == null) {
-    events.send(
-      const _TreeExportWarning(
-        "the book's index.md has no frontmatter: the package carries the "
-        "folder's name and no metadata",
-      ),
-    );
-  }
-  return (metadata: epubMetadataOf(text), dir: '.');
-}
-
-/// Adds one note of the tree to [book] as a chapter (#303).
-Future<void> _addEpubChapter(EpubBook book, _Tree tree, _Entry entry) async {
-  final rel = entry.rel;
-  final noteDir = p.dirname(rel);
-  final href = 'OEBPS/text/${tree.names[rel]}.xhtml';
-  final text = _readNote(entry.abs);
-  final images = <String, String>{};
-  for (final target in ExportSources.pictureTargets(text)) {
-    final picture = _fileIn(target, noteDir, tree.files);
-    if (picture == null) continue;
-    final url = await book.imageHref(
-      p.posix.dirname(href),
-      p.join(tree.root, picture),
-    );
-    if (url != null) images[target] = url;
-  }
-  final title = _pageTitle(text, rel);
-  final source = NoteHtmlSource(
-    text: text,
-    title: title,
-    images: images,
-    // A book's chapters link to each other, as the HTML zip's pages do.
-    links: _linkUrls(text, noteDir, tree, '.xhtml'),
-  );
-  final html = NoteHtml(source);
-  final body = html.body();
-  book.addChapter(
-    href: href,
-    title: title,
-    body: body,
-    fontFaces: html.fontFaces,
-    hasSvg: html.usesSvg,
-  );
-}
-
-/// Prints [page] with the machine's printer and adds the PDF to [encoder]
-/// as `<stem>.pdf`.
-Future<void> _printInto(
-  ZipFileEncoder encoder,
-  Directory scratch,
-  String? engine,
-  ProcessRunner? runner,
-  String page,
-  String stem,
-) async {
-  final htmlPath = p.join(scratch.path, 'page.html');
-  final pdfPath = p.join(scratch.path, 'page.pdf');
-  File(htmlPath).writeAsStringSync(page);
-  // The scratch is reused for every note: a PDF left by the last one must
-  // not pass for this one's, should the printer answer without writing.
-  try {
-    File(pdfPath).deleteSync();
-  } on FileSystemException {
-    // Never written, or already gone.
-  }
-  final printer = Platform.isAndroid
-      ? const WebViewPdfPrinter()
-      : ProcessPdfPrinter(engine: engine, run: runner ?? runProcess);
-  final outcome = await printer.print(htmlPath, pdfPath);
-  switch (outcome) {
-    case PdfPrinted():
-      await encoder.addFile(File(pdfPath), '$stem.pdf');
-    case PdfNoEngine():
-      throw const TreeExportNoEngine();
-    case PdfFailed(:final message):
-      throw StateError('printing "$stem": $message');
-  }
-}
-
-/// Whether [rel] becomes a page: a Markdown note.
-bool _isNote(String rel) => p.extension(rel).toLowerCase() == '.md';
-
-/// The note at [abs] as the app reads it: decoded leniently — a note with a
-/// broken byte is still a note (`NoteOps.readNote`) — and without its BOM.
-/// A strict decode would turn one bad byte anywhere in the tree into a
-/// failed export of the whole folder (E9).
-String _readNote(String abs) {
-  final bytes = File(abs).readAsBytesSync();
-  final text = utf8.decode(bytes, allowMalformed: true);
-  return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
-      ? text.substring(1)
-      : text;
-}
-
-/// The subtree of [dir] in path order: every file and folder whose name
-/// does not start with a dot (settings, trash and history are not part of
-/// an export).
-_Tree _walk(String dir) {
-  final entries = <_Entry>[];
-  void visit(Directory current, String rel) {
-    final children = current.listSync()
-      ..sort((a, b) => a.path.compareTo(b.path));
-    for (final child in children) {
-      final name = p.basename(child.path);
-      if (name.startsWith('.')) continue;
-      final childRel = rel.isEmpty ? name : '$rel/$name';
-      if (child is Directory) {
-        entries.add((abs: child.path, rel: childRel, isDir: true));
-        visit(child, childRel);
-      } else if (child is File) {
-        entries.add((abs: child.path, rel: childRel, isDir: false));
-      }
-    }
-  }
-
-  visit(Directory(dir), '');
-  final files = <String>{
-    for (final entry in entries)
-      if (!entry.isDir) entry.rel,
-  };
-  final notes = <String, String>{
-    for (final file in files)
-      if (_isNote(file)) file.toLowerCase(): file,
-  };
-  final noteFiles = [
-    for (final file in files)
-      if (_isNote(file)) file,
-  ];
-  final stems = <String, List<String>>{};
-  for (final file in noteFiles) {
-    (stems[_stem(file).toLowerCase()] ??= <String>[]).add(file);
-  }
-  // The page name a note gets inside the export: its stem when that is
-  // free, a numbered one when two notes would land on one entry. Names
-  // are kept unique case-insensitively: `a.md` and `a.MD` are two notes
-  // on Linux and one file name on Windows (E7).
-  final names = <String, String>{};
-  final used = <String>{};
-  for (final file in noteFiles) {
-    final wanted = _stem(file);
-    var name = wanted;
-    for (var n = 2; !used.add(name.toLowerCase()); n++) {
-      name = '$wanted-$n';
-    }
-    names[file] = name;
-  }
-  return (
-    root: dir,
-    entries: entries,
-    files: files,
-    notes: notes,
-    stems: stems,
-    names: names,
-  );
-}
-
-/// [rel] without its Markdown extension: the page beside the note.
-String _stem(String rel) => p.withoutExtension(rel);
-
-/// The title a page or a chapter carries: the note's frontmatter title, or
-/// its file's own name.
-String _pageTitle(String text, String rel) =>
-    parseFrontmatter(text)?.title ?? p.basenameWithoutExtension(rel);
-
-String _page(
-  String text,
-  String rel,
-  _Tree tree,
-  String language,
-  String linkExtension, {
-  bool embedPictures = false,
-}) {
-  final noteDir = p.dirname(rel);
-  final title = _pageTitle(text, rel);
-  final source = NoteHtmlSource(
-    text: text,
-    title: title,
-    images: embedPictures
-        ? _imageFileUrls(text, noteDir, tree)
-        : _imageUrls(text, noteDir, tree),
-    links: _linkUrls(text, noteDir, tree, linkExtension),
-  );
-  final html = NoteHtml(source);
-  return htmlPage(
-    title: title,
-    body: html.body(),
-    fontFaces: html.fontFaces,
-    language: language,
-  );
-}
-
-/// The pictures [text] shows, by the target as written, as URLs relative to
-/// the page.
-Map<String, String> _imageUrls(String text, String noteDir, _Tree tree) {
-  final out = <String, String>{};
-  for (final target in ExportSources.pictureTargets(text)) {
-    final picture = _fileIn(target, noteDir, tree.files);
-    if (picture != null) out[target] = _url(noteDir, picture);
-  }
-  return out;
-}
-
-/// The pictures [text] shows, by the target as written, as `file:` URLs.
-///
-/// A PDF page is printed from the export's scratch directory, where the
-/// pictures the zip holds are not: left relative, every one of them is a
-/// broken image. A `file:` URL points at the tree itself, and the engine
-/// fetches it — the page stays the note's size, where embedding a
-/// library's photos as base64 built one no phone could hold.
-Map<String, String> _imageFileUrls(String text, String noteDir, _Tree tree) {
-  final out = <String, String>{};
-  for (final target in ExportSources.pictureTargets(text)) {
-    final picture = _fileIn(target, noteDir, tree.files);
-    if (picture == null) continue;
-    out[target] = Uri.file(p.join(tree.root, picture)).toString();
-  }
-  return out;
-}
-
-/// The note links [text] writes, by the target as written, as URLs
-/// relative to the page. A target outside the subtree is left out: it
-/// becomes highlighted text on the page. [extension] is what a note link
-/// points at — the page the zip holds, `.html` or `.pdf`.
-Map<String, String> _linkUrls(
-  String text,
-  String noteDir,
-  _Tree tree,
-  String extension,
-) {
-  final out = <String, String>{};
-  for (final link in parseLinks(text)) {
-    switch (link) {
-      case WikiLink(:final ref):
-        final note = _noteIn(ref.target, noteDir, tree);
-        if (note != null) {
-          out[ref.target] = _url(noteDir, '${tree.names[note]}$extension');
-        }
-      case MarkdownLink(:final href):
-        if (!href.toLowerCase().endsWith('.md')) continue;
-        final note = _noteIn(href, noteDir, tree);
-        if (note != null) {
-          out[href] = _url(noteDir, '${tree.names[note]}$extension');
-        }
-    }
-  }
-  return out;
-}
-
-/// The file [target] names inside the tree, from [noteDir]: the subtree
-/// root first, then the note's own folder, then a unique file name — the
-/// read view's own order, over the tree instead of the index. The name
-/// matches case-insensitively when exactly one file answers, as a note
-/// target does (E7).
-String? _fileIn(String target, String noteDir, Set<String> files) {
-  var clean = target.trim().replaceAll(r'\', '/');
-  while (clean.startsWith('./')) {
-    clean = clean.substring(2);
-  }
-  if (clean.isEmpty) return null;
-  if (files.contains(clean)) return clean;
-  final beside = p.posix.normalize(p.posix.join(noteDir, clean));
-  if (files.contains(beside)) return beside;
-  if (clean.contains('%')) {
-    try {
-      final decoded = Uri.decodeFull(clean);
-      if (decoded != clean) return _fileIn(decoded, noteDir, files);
-    } on FormatException {
-      // A stray `%` is taken as written.
-    }
-  }
-  final base = p.posix.basename(clean);
-  final matches = [
-    for (final file in files)
-      if (p.posix.basename(file) == base) file,
-  ];
-  if (matches.length == 1) return matches.single;
-  if (matches.isEmpty) {
-    final lower = base.toLowerCase();
-    final caseless = [
-      for (final file in files)
-        if (p.posix.basename(file).toLowerCase() == lower) file,
-    ];
-    if (caseless.length == 1) return caseless.single;
-  }
-  return null;
-}
-
-/// The note [target] names inside the tree: an exact path first (with
-/// `.md`), then the note's own folder, then a unique stem, then the stem
-/// under the target's own folder — the index's own order.
-String? _noteIn(String target, String noteDir, _Tree tree) {
-  var clean = target.trim().replaceAll(r'\', '/');
-  while (clean.startsWith('./')) {
-    clean = clean.substring(2);
-  }
-  if (clean.isEmpty) return null;
-  var lower = clean.toLowerCase();
-  if (!lower.endsWith('.md')) lower = '$lower.md';
-  final atRoot = tree.notes[lower];
-  if (atRoot != null) return atRoot;
-  final beside = tree.notes[p.posix.join(noteDir, lower)];
-  if (beside != null) return beside;
-  final stem = p.withoutExtension(p.posix.basename(lower));
-  final candidates = tree.stems[stem] ?? const <String>[];
-  if (candidates.length == 1) return candidates.single;
-  final prefix = p.posix.dirname(lower);
-  if (candidates.isEmpty || prefix == '.') return null;
-  final filtered = [
-    for (final candidate in candidates)
-      if (p.posix.dirname(candidate.toLowerCase()) == prefix) candidate,
-  ];
-  return filtered.length == 1 ? filtered.single : null;
-}
-
-/// Where [target] sits, from the page in [fromDir] (both tree-relative):
-/// a URL a browser reads, one path segment at a time.
-///
-/// `Uri.encodeFull` would leave `#` and `?` alone — they are URI delimiters,
-/// not path characters — so a picture named `a#b.png` would export as a
-/// fragment of a path that does not exist.
-String _url(String fromDir, String target) {
-  final relative = fromDir.isEmpty || fromDir == '.'
-      ? target
-      : p.posix.relative(target, from: fromDir);
-  return relative.split('/').map(Uri.encodeComponent).join('/');
 }
