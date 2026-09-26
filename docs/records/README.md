@@ -23,4 +23,5 @@ comments (`docs/records/<name>.md`).
 | [epub-reader.md](epub-reader.md) | Reading an EPUB into Markdown (#280) |
 | [annotations.md](annotations.md) | Annotating a PDF or a book in a companion note (#284) |
 | [sync.md](sync.md) | Note history and WebDAV sync: the decisions, settled before the code |
+| [index-reconcile.md](index-reconcile.md) | The index scan, a directory at a time with bounded memory (#302) |
 | [transcription.md](transcription.md) | On-device speech-to-text with `whisper_ggml` |

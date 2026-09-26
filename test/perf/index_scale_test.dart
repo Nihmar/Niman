@@ -17,6 +17,12 @@
 // this every time without holding the machine up — `flutter test` runs
 // files in parallel, and the ten-thousand-note scan next door is timing
 // itself on the same disk. `NIMAN_SCALE=1000000` is the gate itself.
+//
+// The disk-reconcile test at the end follows the same shape, one env var
+// up: `NIMAN_FIXTURE_DIR=<library>` points it at the library
+// `tool/make_fixture.dart` writes (a million notes, half an hour of
+// filesystem work) and makes the number the gate; without it the test
+// writes a small library of its own.
 @Timeout(Duration(minutes: 10))
 library;
 
@@ -28,6 +34,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -41,6 +48,10 @@ final int scale =
 /// Notes per folder; the folder count follows from the scale.
 const int perFolder = 1000;
 
+/// Notes the disk-reconcile fixture holds when the run did not point at
+/// the one `tool/make_fixture.dart` writes.
+const int _diskNotes = 2000;
+
 String _folderName(int f) => 'f${f.toString().padLeft(4, '0')}';
 
 String _noteName(int f, int n) =>
@@ -53,6 +64,7 @@ void main() {
 
   late Directory tmp;
   late Directory root;
+  late Directory scanRoot;
   late File indexFile;
   late IndexDatabase db;
   late NoteDao dao;
@@ -176,6 +188,17 @@ void main() {
     tags = TagRepo(db);
     await build();
     _say('index file: ${(indexFile.lengthSync() / (1024 * 1024)).round()} MB');
+    // The library the disk-reconcile test walks: the fixture a perf round
+    // made, or a small one written here.
+    final fixture = Platform.environment['NIMAN_FIXTURE_DIR'];
+    if (fixture != null && Directory(fixture).existsSync()) {
+      scanRoot = Directory(fixture);
+      _say('disk fixture: ${scanRoot.path}');
+    } else {
+      scanRoot = Directory(p.join(tmp.path, 'scan'));
+      await _writeScanFixture(scanRoot, _diskNotes);
+      _say('disk fixture: wrote $_diskNotes notes under ${scanRoot.path}');
+    }
   });
 
   tearDownAll(() async {
@@ -275,20 +298,51 @@ void main() {
     expect(notes, hasLength(tagNotesLimit));
   });
 
-  // Deliberately not a gate: this measures the one read that does not
-  // stay bounded, so the number is on the record and moves when the
-  // reconciliation is rewritten to work a directory at a time (T-M6-11).
-  // At a million notes it was 9 s and about a gigabyte on 2026-09-10.
-  test('reconciliation still holds the whole index at once', () async {
+  // Deliberately not a gate: this measures the one read that did not stay
+  // bounded, so the number is on the record. Before #302 the
+  // reconciliation loaded every row into a map and the whole walk into a
+  // list: 9 s and about a gigabyte at a million notes on 2026-09-10. The
+  // scan now mirrors a directory at a time, and the RSS delta here is what
+  // says so — constant in the library, unlike the old one.
+  test('a full scan holds a directory, not the library', () async {
+    final scanFile = File(p.join(tmp.path, 'scan-index.db'));
+    final scanDb = IndexDatabase(NativeDatabase(scanFile));
+    addTearDown(scanDb.close);
+    final scanTree = Indexer(scanDb);
+
     final before = ProcessInfo.currentRss;
-    await timed('every row, as a rescan reads them', () async {
-      final all = await dao.allRows();
-      final byPath = {for (final row in all) row.path: row};
-      _say('rows held: ${byPath.length}');
-    });
+    final first = await timed(
+      'a first full scan of the disk fixture',
+      () => scanTree.fullScan(scanRoot.path),
+    );
+    final firstRss = ProcessInfo.currentRss - before;
+
+    var fires = 0;
+    scanTree.onChanged = () => fires++;
+    final beforeRescan = ProcessInfo.currentRss;
+    final rescan = await timed(
+      'a rescan of the unchanged library',
+      () => scanTree.fullScan(scanRoot.path),
+    );
+    final rescanRss = ProcessInfo.currentRss - beforeRescan;
+
+    final rows = await scanDb
+        .customSelect('SELECT count(*) AS c FROM notes')
+        .getSingle();
+    _say('rows indexed: ${rows.read<int>('c')}');
     _say(
-      'rss delta: '
-      '${((ProcessInfo.currentRss - before) / (1024 * 1024)).round()} MB',
+      'rss delta: first scan '
+      '${_mb(firstRss)} MB in $first ms, unchanged rescan '
+      '${_mb(rescanRss)} MB in $rescan ms',
+    );
+    expect(fires, 0, reason: 'an unchanged rescan writes nothing');
+    // A backstop, not the design's bar: the old reconciliation held every
+    // row in Dart memory, a gigabyte at the gate; this must fail long
+    // before that, on any runner, without failing on a big directory.
+    expect(
+      firstRss,
+      lessThan(512 * 1024 * 1024),
+      reason: 'the scan held ${_mb(firstRss)} MB',
     );
   });
 
@@ -320,3 +374,24 @@ void main() {
 /// go to the console rather than into an assertion message nobody sees.
 // ignore: avoid_print
 void _say(String line) => print(line);
+
+/// [bytes] in whole mebibytes.
+int _mb(int bytes) => (bytes / (1024 * 1024)).round();
+
+/// Writes a small note library for the disk-reconcile test: folders of
+/// fifty notes, each with a title, a tag and a unique word. Small on
+/// purpose — the gate is `NIMAN_FIXTURE_DIR` aimed at
+/// `tool/make_fixture.dart`'s million-note library.
+Future<void> _writeScanFixture(Directory root, int notes) async {
+  const perFolder = 50;
+  for (var i = 0; i < notes; i++) {
+    final folder = Directory(
+      p.join(root.path, 'f${(i ~/ perFolder).toString().padLeft(3, '0')}'),
+    )..createSync(recursive: true);
+    File(p.join(folder.path, 'n${i.toString().padLeft(4, '0')}.md'))
+        .writeAsStringSync(
+          '---\ntitle: note $i\ntags: [fixture]\n---\n'
+          'Body of note $i with seed $i.\n',
+        );
+  }
+}

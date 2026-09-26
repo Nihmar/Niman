@@ -1886,6 +1886,271 @@ class FrontmatterFieldsCompanion extends UpdateCompanion<FrontmatterField> {
   }
 }
 
+class $PendingLinksTable extends PendingLinks
+    with TableInfo<$PendingLinksTable, PendingLink> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingLinksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _noteIdMeta = const VerificationMeta('noteId');
+  @override
+  late final GeneratedColumn<int> noteId = GeneratedColumn<int>(
+    'note_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetMeta = const VerificationMeta('target');
+  @override
+  late final GeneratedColumn<String> target = GeneratedColumn<String>(
+    'target',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [noteId, target, kind];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_links';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PendingLink> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('note_id')) {
+      context.handle(
+        _noteIdMeta,
+        noteId.isAcceptableOrUnknown(data['note_id']!, _noteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteIdMeta);
+    }
+    if (data.containsKey('target')) {
+      context.handle(
+        _targetMeta,
+        target.isAcceptableOrUnknown(data['target']!, _targetMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {noteId, target, kind};
+  @override
+  PendingLink map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingLink(
+      noteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}note_id'],
+      )!,
+      target: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+    );
+  }
+
+  @override
+  $PendingLinksTable createAlias(String alias) {
+    return $PendingLinksTable(attachedDatabase, alias);
+  }
+}
+
+class PendingLink extends DataClass implements Insertable<PendingLink> {
+  /// The id of the note the link is written in.
+  final int noteId;
+
+  /// The target text as written.
+  final String target;
+
+  /// The link form: `wiki` (`[[…]]`) or `md` (`[t](p)`).
+  final String kind;
+  const PendingLink({
+    required this.noteId,
+    required this.target,
+    required this.kind,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['note_id'] = Variable<int>(noteId);
+    map['target'] = Variable<String>(target);
+    map['kind'] = Variable<String>(kind);
+    return map;
+  }
+
+  PendingLinksCompanion toCompanion(bool nullToAbsent) {
+    return PendingLinksCompanion(
+      noteId: Value(noteId),
+      target: Value(target),
+      kind: Value(kind),
+    );
+  }
+
+  factory PendingLink.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingLink(
+      noteId: serializer.fromJson<int>(json['noteId']),
+      target: serializer.fromJson<String>(json['target']),
+      kind: serializer.fromJson<String>(json['kind']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'noteId': serializer.toJson<int>(noteId),
+      'target': serializer.toJson<String>(target),
+      'kind': serializer.toJson<String>(kind),
+    };
+  }
+
+  PendingLink copyWith({int? noteId, String? target, String? kind}) =>
+      PendingLink(
+        noteId: noteId ?? this.noteId,
+        target: target ?? this.target,
+        kind: kind ?? this.kind,
+      );
+  PendingLink copyWithCompanion(PendingLinksCompanion data) {
+    return PendingLink(
+      noteId: data.noteId.present ? data.noteId.value : this.noteId,
+      target: data.target.present ? data.target.value : this.target,
+      kind: data.kind.present ? data.kind.value : this.kind,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingLink(')
+          ..write('noteId: $noteId, ')
+          ..write('target: $target, ')
+          ..write('kind: $kind')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(noteId, target, kind);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingLink &&
+          other.noteId == this.noteId &&
+          other.target == this.target &&
+          other.kind == this.kind);
+}
+
+class PendingLinksCompanion extends UpdateCompanion<PendingLink> {
+  final Value<int> noteId;
+  final Value<String> target;
+  final Value<String> kind;
+  final Value<int> rowid;
+  const PendingLinksCompanion({
+    this.noteId = const Value.absent(),
+    this.target = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PendingLinksCompanion.insert({
+    required int noteId,
+    required String target,
+    required String kind,
+    this.rowid = const Value.absent(),
+  }) : noteId = Value(noteId),
+       target = Value(target),
+       kind = Value(kind);
+  static Insertable<PendingLink> custom({
+    Expression<int>? noteId,
+    Expression<String>? target,
+    Expression<String>? kind,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (noteId != null) 'note_id': noteId,
+      if (target != null) 'target': target,
+      if (kind != null) 'kind': kind,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PendingLinksCompanion copyWith({
+    Value<int>? noteId,
+    Value<String>? target,
+    Value<String>? kind,
+    Value<int>? rowid,
+  }) {
+    return PendingLinksCompanion(
+      noteId: noteId ?? this.noteId,
+      target: target ?? this.target,
+      kind: kind ?? this.kind,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (noteId.present) {
+      map['note_id'] = Variable<int>(noteId.value);
+    }
+    if (target.present) {
+      map['target'] = Variable<String>(target.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingLinksCompanion(')
+          ..write('noteId: $noteId, ')
+          ..write('target: $target, ')
+          ..write('kind: $kind, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$IndexDatabase extends GeneratedDatabase {
   _$IndexDatabase(QueryExecutor e) : super(e);
   $IndexDatabaseManager get managers => $IndexDatabaseManager(this);
@@ -1896,6 +2161,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   late final $NoteLinksTable noteLinks = $NoteLinksTable(this);
   late final $FrontmatterFieldsTable frontmatterFields =
       $FrontmatterFieldsTable(this);
+  late final $PendingLinksTable pendingLinks = $PendingLinksTable(this);
   late final Index notesParent = Index(
     'notes_parent',
     'CREATE INDEX notes_parent ON notes (parent)',
@@ -1931,6 +2197,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     noteTags,
     noteLinks,
     frontmatterFields,
+    pendingLinks,
     notesParent,
     notesDirPath,
     stemsNote,
@@ -3046,6 +3313,177 @@ typedef $$FrontmatterFieldsTableProcessedTableManager =
       FrontmatterField,
       PrefetchHooks Function()
     >;
+typedef $$PendingLinksTableCreateCompanionBuilder =
+    PendingLinksCompanion Function({
+      required int noteId,
+      required String target,
+      required String kind,
+      Value<int> rowid,
+    });
+typedef $$PendingLinksTableUpdateCompanionBuilder =
+    PendingLinksCompanion Function({
+      Value<int> noteId,
+      Value<String> target,
+      Value<String> kind,
+      Value<int> rowid,
+    });
+
+class $$PendingLinksTableFilterComposer
+    extends Composer<_$IndexDatabase, $PendingLinksTable> {
+  $$PendingLinksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get target => $composableBuilder(
+    column: $table.target,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PendingLinksTableOrderingComposer
+    extends Composer<_$IndexDatabase, $PendingLinksTable> {
+  $$PendingLinksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get target => $composableBuilder(
+    column: $table.target,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PendingLinksTableAnnotationComposer
+    extends Composer<_$IndexDatabase, $PendingLinksTable> {
+  $$PendingLinksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get noteId =>
+      $composableBuilder(column: $table.noteId, builder: (column) => column);
+
+  GeneratedColumn<String> get target =>
+      $composableBuilder(column: $table.target, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+}
+
+class $$PendingLinksTableTableManager
+    extends
+        RootTableManager<
+          _$IndexDatabase,
+          $PendingLinksTable,
+          PendingLink,
+          $$PendingLinksTableFilterComposer,
+          $$PendingLinksTableOrderingComposer,
+          $$PendingLinksTableAnnotationComposer,
+          $$PendingLinksTableCreateCompanionBuilder,
+          $$PendingLinksTableUpdateCompanionBuilder,
+          (
+            PendingLink,
+            BaseReferences<_$IndexDatabase, $PendingLinksTable, PendingLink>,
+          ),
+          PendingLink,
+          PrefetchHooks Function()
+        > {
+  $$PendingLinksTableTableManager(_$IndexDatabase db, $PendingLinksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PendingLinksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PendingLinksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PendingLinksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> noteId = const Value.absent(),
+                Value<String> target = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PendingLinksCompanion(
+                noteId: noteId,
+                target: target,
+                kind: kind,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int noteId,
+                required String target,
+                required String kind,
+                Value<int> rowid = const Value.absent(),
+              }) => PendingLinksCompanion.insert(
+                noteId: noteId,
+                target: target,
+                kind: kind,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PendingLinksTable, PendingLink>(table),
+                  BaseReferences<
+                    _$IndexDatabase,
+                    $PendingLinksTable,
+                    PendingLink
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PendingLinksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$IndexDatabase,
+      $PendingLinksTable,
+      PendingLink,
+      $$PendingLinksTableFilterComposer,
+      $$PendingLinksTableOrderingComposer,
+      $$PendingLinksTableAnnotationComposer,
+      $$PendingLinksTableCreateCompanionBuilder,
+      $$PendingLinksTableUpdateCompanionBuilder,
+      (
+        PendingLink,
+        BaseReferences<_$IndexDatabase, $PendingLinksTable, PendingLink>,
+      ),
+      PendingLink,
+      PrefetchHooks Function()
+    >;
 
 class $IndexDatabaseManager {
   final _$IndexDatabase _db;
@@ -3061,4 +3499,6 @@ class $IndexDatabaseManager {
       $$NoteLinksTableTableManager(_db, _db.noteLinks);
   $$FrontmatterFieldsTableTableManager get frontmatterFields =>
       $$FrontmatterFieldsTableTableManager(_db, _db.frontmatterFields);
+  $$PendingLinksTableTableManager get pendingLinks =>
+      $$PendingLinksTableTableManager(_db, _db.pendingLinks);
 }

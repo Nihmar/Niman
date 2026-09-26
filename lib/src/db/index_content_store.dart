@@ -15,6 +15,15 @@ import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
+/// A link edge whose target is resolved later than it was parsed: the note
+/// that wrote it, the target text as written, and the link form.
+///
+/// A directory-at-a-time scan defers every edge it writes to the end of
+/// the walk (#302), so a link resolves against the whole final tree —
+/// including a note a later directory introduces, and a rename whose
+/// pairing is only known once the old home has been walked.
+typedef QueuedLink = ({int fromNote, String target, String kind});
+
 /// Writes and repairs the content-derived rows of the notes index (#51).
 ///
 /// Owned by the indexer facade, which calls [applyContent] after the
@@ -90,45 +99,76 @@ final class IndexContentStore {
         rows.read<int>('stray') == 0;
   }
 
-  /// The paths of md notes that have no `notes_fts` row.
-  Future<List<String>> missingFtsPaths() async {
-    final rows = await _db
-        .customSelect(
-          'SELECT notes.path FROM notes LEFT JOIN notes_fts '
-          'ON notes.id = notes_fts.rowid WHERE notes_fts.rowid IS NULL '
-          "AND notes.is_dir = 0 AND lower(substr(notes.name, -3)) = '.md'",
-        )
-        .get();
-    return [for (final r in rows) r.read<String>('path')];
+  /// How many paths fit in one `IN (...)` — under SQLite's variable limit
+  /// with room to spare.
+  static const _pathChunk = 400;
+
+  /// The subset of [rels] whose notes have no `notes_fts` row — the content
+  /// rows a v7-era index is missing. Checked in chunks, so a scan repairs
+  /// them a directory (or a batch) at a time and never holds a whole
+  /// library's missing paths in memory (#302).
+  Future<List<String>> missingFtsAmong(Iterable<String> rels) async {
+    final all = rels.toList(growable: false);
+    if (all.isEmpty) return const [];
+    final out = <String>[];
+    for (var i = 0; i < all.length; i += _pathChunk) {
+      final end = i + _pathChunk < all.length ? i + _pathChunk : all.length;
+      final chunk = all.sublist(i, end);
+      final placeholders = List.filled(chunk.length, '?').join(', ');
+      final rows = await _db
+          .customSelect(
+            'SELECT notes.path FROM notes LEFT JOIN notes_fts '
+            'ON notes.id = notes_fts.rowid WHERE notes_fts.rowid IS NULL '
+            'AND notes.path IN ($placeholders)',
+            variables: [for (final rel in chunk) Variable<String>(rel)],
+          )
+          .get();
+      out.addAll([for (final row in rows) row.read<String>('path')]);
+    }
+    return out;
+  }
+
+  /// The one-time repairs an index written before a rule existed owes: file
+  /// stems missing since embeds made them worth having (T-M3-09), and
+  /// frontmatter recorded against a file that is not a note.
+  ///
+  /// Answers whether either wrote. Paged, so repairing a library never
+  /// holds it in memory (#302); a full scan calls this once, at its end.
+  Future<bool> repairDerivedRows() async {
+    final stems = await _repairMissingFileStems();
+    final stray = await _clearNonNoteFrontmatter();
+    return stems || stray;
   }
 
   /// Writes the missing file stems (every file without one) — the one-time
-  /// repair when non-`.md` files gained stems (embeds) after an older
-  /// index was built.
-  Future<void> _repairMissingFileStems() async {
-    final rows = await _db
-        .customSelect(
-          'SELECT notes.id, notes.name FROM notes LEFT JOIN note_stems '
-          "ON note_stems.note_id = notes.id AND note_stems.source = 'file' "
-          'WHERE note_stems.note_id IS NULL AND notes.is_dir = 0',
-        )
-        .get();
-    if (rows.isEmpty) return;
-    _log.info('contents: writing ${rows.length} missing file stem(s)');
-    for (var i = 0; i < rows.length; i += _contentChunk) {
-      final end = i + _contentChunk < rows.length
-          ? i + _contentChunk
-          : rows.length;
+  /// repair when non-`.md` files gained stems (embeds) after an older index
+  /// was built. One page at a time: at a million attachments the repair
+  /// used to hold them all before writing the first stem (#302).
+  Future<bool> _repairMissingFileStems() async {
+    var wrote = false;
+    while (true) {
+      final rows = await _db
+          .customSelect(
+            'SELECT notes.id, notes.name FROM notes LEFT JOIN note_stems '
+            "ON note_stems.note_id = notes.id AND note_stems.source = 'file' "
+            'WHERE note_stems.note_id IS NULL AND notes.is_dir = 0 LIMIT '
+            '$_contentChunk',
+          )
+          .get();
+      if (rows.isEmpty) break;
+      _log.info('contents: writing ${rows.length} missing file stem(s)');
+      // A written row leaves the result set, so the next query pages on its
+      // own however many there are.
       await _db.transaction(() async {
-        for (var j = i; j < end; j++) {
-          await replaceFileStems(
-            rows[j].read<int>('id'),
-            rows[j].read<String>('name'),
-          );
+        for (final row in rows) {
+          await replaceFileStems(row.read<int>('id'), row.read<String>('name'));
         }
       });
-      if (end < rows.length) await Future<void>.delayed(Duration.zero);
+      wrote = true;
+      if (rows.length < _contentChunk) break;
+      await Future<void>.delayed(Duration.zero);
     }
+    return wrote;
   }
 
   /// Clears frontmatter the index should never have recorded: the known
@@ -139,7 +179,8 @@ final class IndexContentStore {
   /// wrote a YAML block into it — came back as `pinned` on that row and
   /// put the file in the tree's pinned block. The write path is fixed;
   /// this takes back what it already recorded.
-  Future<void> _clearNonNoteFrontmatter() async {
+  /// Answers whether anything was cleared.
+  Future<bool> _clearNonNoteFrontmatter() async {
     const nonNote = "is_dir = 0 AND lower(substr(name, -3)) <> '.md'";
     final fixed = await _db.customUpdate(
       'UPDATE notes SET title = NULL, date = NULL, pinned = 0 '
@@ -147,12 +188,13 @@ final class IndexContentStore {
       'OR pinned <> 0)',
       updates: {_db.notes},
     );
-    if (fixed == 0) return;
+    if (fixed == 0) return false;
     _log.info('contents: cleared frontmatter on $fixed non-note row(s)');
     await _db.customStatement(
       'DELETE FROM frontmatter_fields WHERE note_id IN '
       '(SELECT id FROM notes WHERE $nonNote)',
     );
+    return true;
   }
 
   /// Writes the content-derived rows — `notes_fts` (title + body copy),
@@ -161,9 +203,15 @@ final class IndexContentStore {
   /// written, so links pointing at notes indexed later in the same walk
   /// resolve; [paired] rels keep their existing rows (their content did
   /// not change — the rename only moved the path).
+  ///
+  /// With [pendingLink] set, the link edges are handed to it instead of
+  /// resolved here: the caller collects them and writes them once its tree
+  /// is final. The note's stale edges are still dropped now.
   Future<void> applyContent(
     Map<String, NoteContent> contents, {
     required Set<String> paired,
+    bool repair = true,
+    void Function(QueuedLink link)? pendingLink,
   }) async {
     // Notes only. FTS, tags, links and frontmatter fields are all derived
     // from Markdown, and the completeness check counts `.md` rows, so a
@@ -175,36 +223,33 @@ final class IndexContentStore {
           if (await _dao.find(c.rel) case final Note row) (row, c),
     ];
 
-    // One-time repair, before the early return: an index built before
+    // One-time repairs, before the early return: an index built before
     // files gained stems (embeds — `![[foo.png]]` by bare name) has every
     // FTS row but no attachment stems, so an unchanged rescan must still
     // write the missing ones. Sitting after the `items.isEmpty` return it
     // never ran — content rows were complete, nothing else was rewritten
     // (T-M3-09 device report: `![[…]]` images stayed placeholders).
-    await _repairMissingFileStems();
-    await _clearNonNoteFrontmatter();
+    // A directory-at-a-time scan asks for them once, not per directory.
+    if (repair) await repairDerivedRows();
     if (items.isEmpty) return;
 
     // Link targets resolve once per pass — one stems lookup per distinct
     // stem and one notes lookup, via [LinkResolver.resolveBatch] — instead
     // of two queries per link (the per-link queries dominated the content
-    // pass: hundreds of notes × a dozen links each).
+    // pass: hundreds of notes × a dozen links each). When the caller defers
+    // the edges there is nothing to resolve yet.
     final batchTargets = <String>{};
-    for (final (_, c) in items) {
-      for (final link in c.links) {
-        final target = switch (link) {
-          final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
-          final MarkdownLink m
-              when !LinkResolver.hasScheme(m.href) &&
-                  !m.href.trim().startsWith('#') &&
-                  m.href.contains('.md') =>
-            m.href,
-          _ => null,
-        };
-        if (target != null) batchTargets.add(target);
+    if (pendingLink == null) {
+      for (final (_, c) in items) {
+        for (final link in c.links) {
+          final target = _linkTarget(link);
+          if (target != null) batchTargets.add(target);
+        }
       }
     }
-    final resolved = await LinkResolver(_db).resolveBatch(batchTargets);
+    final resolved = pendingLink == null
+        ? await LinkResolver(_db).resolveBatch(batchTargets)
+        : const <String, ResolveResult>{};
 
     // Chunked writes: each chunk its own transaction with a yield between
     // chunks, so a large backfill leaves frames free (typing stays
@@ -216,20 +261,34 @@ final class IndexContentStore {
           : items.length;
       await _db.transaction(() async {
         for (final (row, c) in items.sublist(i, end)) {
-          await _writeContentRow(row, c, resolved);
+          await _writeContentRow(row, c, resolved, pendingLink);
         }
       });
       if (end < items.length) await Future<void>.delayed(Duration.zero);
     }
   }
 
+  /// The target text of [link] to resolve by, or null for a link that
+  /// never resolves to an indexed note (external URL, anchor, non-`.md`).
+  static String? _linkTarget(ParsedLink link) => switch (link) {
+    final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
+    final MarkdownLink m
+        when !LinkResolver.hasScheme(m.href) &&
+            !m.href.trim().startsWith('#') &&
+            m.href.contains('.md') =>
+      m.href,
+    _ => null,
+  };
+
   /// The content-derived rows of one note within a chunk transaction:
   /// FTS (title + body copy), file + alias stems, tags, and the resolved
-  /// link edges from the batched resolution map.
+  /// link edges from the batched resolution map (or the caller's pending
+  /// sink, when it defers them).
   Future<void> _writeContentRow(
     Note row,
     NoteContent c,
     Map<String, ResolveResult> resolved,
+    void Function(QueuedLink link)? pendingLink,
   ) async {
     await _db.customStatement(
       'DELETE FROM notes_fts WHERE rowid = ?',
@@ -246,7 +305,7 @@ final class IndexContentStore {
     await _writeAliasStems(row.id, c);
     await _writeTags(row.id, c);
     await writeFields(row.id, fields: c.fields, date: c.date, pinned: c.pinned);
-    await _writeLinks(row.id, c, resolved);
+    await _writeLinks(row.id, c, resolved, pendingLink);
   }
 
   /// Writes the known frontmatter fields onto the note row itself and the
@@ -361,26 +420,34 @@ final class IndexContentStore {
   /// note become edges; dead links, external URLs, anchors and self-links
   /// are skipped. [resolved] carries the batched resolution results
   /// (target text → outcome, same rules as the single-target path).
+  ///
+  /// With [pendingLink] the edges are handed over unresolved, after the
+  /// note's stale ones are dropped: the caller resolves them against a
+  /// tree it has finished building. Either way the note's queued edges are
+  /// dropped too — a leftover from a scan that never finished would
+  /// resolve against content the note no longer has.
   Future<void> _writeLinks(
     int noteId,
     NoteContent c,
     Map<String, ResolveResult> resolved,
+    void Function(QueuedLink link)? pendingLink,
   ) async {
     await (_db.delete(
       _db.noteLinks,
     )..where((l) => l.fromNote.equals(noteId))).go();
+    await (_db.delete(
+      _db.pendingLinks,
+    )..where((l) => l.noteId.equals(noteId))).go();
+    final pending = <QueuedLink>[];
     await _db.batch((batch) {
       for (final link in c.links) {
-        final target = switch (link) {
-          final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
-          final MarkdownLink m
-              when !LinkResolver.hasScheme(m.href) &&
-                  !m.href.trim().startsWith('#') &&
-                  m.href.contains('.md') =>
-            m.href,
-          _ => null,
-        };
+        final target = _linkTarget(link);
         if (target == null) continue;
+        final kind = link is WikiLink ? 'wiki' : 'md';
+        if (pendingLink != null) {
+          pending.add((fromNote: noteId, target: target, kind: kind));
+          continue;
+        }
         final outcome = resolved[target];
         if (outcome is! ResolvedNote || outcome.note.id == noteId) continue;
         batch.insert(
@@ -388,11 +455,13 @@ final class IndexContentStore {
           NoteLinksCompanion.insert(
             fromNote: noteId,
             toNote: outcome.note.id,
-            kind: link is WikiLink ? 'wiki' : 'md',
+            kind: kind,
           ),
           mode: InsertMode.insertOrIgnore,
         );
       }
     });
+    if (pendingLink == null) return;
+    pending.forEach(pendingLink);
   }
 }
