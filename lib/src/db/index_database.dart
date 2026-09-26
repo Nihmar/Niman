@@ -158,6 +158,37 @@ class NoteLinks extends Table {
   Set<Column> get primaryKey => {fromNote, toNote, kind};
 }
 
+/// A link edge a scan has parsed but not resolved yet (#302).
+///
+/// A directory-at-a-time scan writes a directory's content rows as it
+/// walks, but its link edges have to wait for the whole tree: a target may
+/// be a note a later directory is about to introduce, or one whose move
+/// between folders pairs only at the end. This table is the queue, and it
+/// is durable on purpose — a scan that never reached its end (a crash, a
+/// killed process) leaves its edges here for the next scan to resolve.
+/// Losing them would not be repaired by the content-row check the way a
+/// half-written content pass is: the note's FTS row lands with the rest of
+/// its content, and a missing edge looks exactly like a note with no
+/// links.
+///
+/// The primary key deletes a note's stale edges before its content pass
+/// queues the fresh ones; the index reads them in the order they were
+/// queued.
+@TableIndex(name: 'pending_links_note', columns: {#noteId})
+class PendingLinks extends Table {
+  /// The id of the note the link is written in.
+  IntColumn get noteId => integer()();
+
+  /// The target text as written.
+  TextColumn get target => text()();
+
+  /// The link form: `wiki` (`[[…]]`) or `md` (`[t](p)`).
+  TextColumn get kind => text()();
+
+  @override
+  Set<Column> get primaryKey => {noteId, target, kind};
+}
+
 /// The pragmas an index connection opens with: those of every connection
 /// of the app, and incremental auto-vacuum.
 ///
@@ -187,7 +218,15 @@ void indexDatabaseSetup(sqlite3.Database db) {
 /// never migrated: a shape change means deleting it and rescanning,
 /// which costs a walk and loses nothing.
 @DriftDatabase(
-  tables: [Notes, NoteStems, Tags, NoteTags, NoteLinks, FrontmatterFields],
+  tables: [
+    Notes,
+    NoteStems,
+    Tags,
+    NoteTags,
+    NoteLinks,
+    FrontmatterFields,
+    PendingLinks,
+  ],
 )
 class IndexDatabase extends _$IndexDatabase {
   /// Creates the index on top of [e].
@@ -197,8 +236,10 @@ class IndexDatabase extends _$IndexDatabase {
   /// table and the three known-field columns on `notes` (T-M4-02). v3:
   /// the six indexes the million-note pass showed missing (T-M6-01). v4:
   /// the full-text table keeps its word index and no copy of the text.
+  /// v5: the pending link edges a directory-at-a-time scan resolves at the
+  /// end of its walk (#302).
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -219,6 +260,7 @@ class IndexDatabase extends _$IndexDatabase {
   /// The tables an upgrade drops, dependents before the rows they key on.
   static const List<String> _allTables = [
     'notes_fts',
+    'pending_links',
     'frontmatter_fields',
     'note_links',
     'note_tags',

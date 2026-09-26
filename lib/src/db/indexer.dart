@@ -11,6 +11,7 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_content_store.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_note_content.dart';
+import 'package:niman/src/db/index_reconcile.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/index_tree.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -40,6 +41,9 @@ final class Indexer {
   /// handle and DAO. Late so one DAO instance serves all three.
   late final IndexContentStore _store = IndexContentStore(_db, _dao);
   late final IndexTree _tree = IndexTree(_db, _dao, _store);
+
+  /// The directory-at-a-time full scan (#302).
+  late final IndexReconciler _scan = IndexReconciler(_db, _dao, _tree, _store);
 
   /// The DAO over the same database, exposed for read-side callers.
   NoteDao get dao => _dao;
@@ -84,76 +88,18 @@ final class Indexer {
 
   /// Rebuilds the index from a full disk scan of `root`.
   ///
-  /// The index is diffed against the walk, so every row whose path survives
-  /// keeps its id (the stable id space is what the M3 `frontmatter_fields`,
-  /// `note_tags` and FTS indexes key off): gone paths are deleted, new
-  /// paths inserted, surviving rows updated where they actually changed.
-  /// Used on first open, on the periodic rescan fallback, and for explicit
-  /// re-index. Skips the write (and does not fire [onChanged]) when the
-  /// index already mirrors the disk tree.
+  /// The index is diffed against the walk a directory at a time (#302), so
+  /// every row whose path survives keeps its id (the stable id space is
+  /// what the M3 `frontmatter_fields`, `note_tags` and FTS indexes key
+  /// off): gone paths are deleted, new paths inserted, surviving rows
+  /// updated where they actually changed. Used on first open, on the
+  /// periodic rescan fallback, and for explicit re-index. Skips the write
+  /// (and does not fire [onChanged]) when the index already mirrors the
+  /// disk tree.
   Future<void> fullScan(String root) {
-    return _synchronized(() async {
-      final old = <String, Note>{
-        for (final row in await _dao.allRows()) row.path: row,
-      };
-      final entries = await _tree.walk(root, root);
-      final files = entries.where((e) => !e.isDir).length;
-      _log
-        ..info(
-          'fullScan $root: found ${entries.length} entr(ies) '
-          '($files file, ${entries.length - files} dir)',
-        )
-        // The paths themselves are not logged: on a large library the line
-        // was ~8 KB of the 512 KB ring on every fallback scan, and it
-        // evicted the useful history (T-PP-22).
-        ..debug('fullScan entries: ${entries.length} path(s)');
-      // Checked before the digests: a rescan that changes nothing — the
-      // common case — then costs the walk and no reads.
-      // The content index can still be incomplete (a v7-era database
-      // predates the M3 tables): in that case the no-write exit is skipped
-      // and the content pass rebuilds FTS/tags/links for every note.
-      // The pages the writes since the last scan freed — a note's old
-      // full-text rows — go back to the disk: without it the file only
-      // grows (`indexDatabaseSetup`). Free when there are none.
-      await _db.customStatement('PRAGMA incremental_vacuum');
-      if (!_treeChanged(old, entries)) {
-        if (await _store.contentIndexComplete()) {
-          _log.info('fullScan: index already mirrors disk, no write');
-          return;
-        }
-        _log.info('fullScan: content index incomplete — building content rows');
-      }
-      _log.info('fullScan: tree changed, applying diff');
-      final read = await _tree.readContents(root, entries, old);
-      var wrote = false;
-      var pairedRels = const <String>{};
-      var removed = const <String>{};
-      await _db.transaction(() async {
-        final result = await _tree.applyDiff(
-          entries: entries,
-          old: old,
-          shas: read.shas,
-          contents: read.contents,
-        );
-        wrote = result.wrote;
-        pairedRels = result.pairedRels;
-        removed = result.removed;
-      });
-      // Content rows (FTS, tags, links) for the notes whose content
-      // actually changed; a paired rename keeps its rows untouched. Runs
-      // in its own chunked transactions (after the notes rows) so the
-      // frames stay free during a big backfill — and the completeness
-      // check repairs a partial pass on the next scan.
-      await _store.applyContent(read.contents, paired: pairedRels);
-      if (wrote) {
-        final cb = onChanged;
-        if (cb != null) cb();
-      }
-      if (removed.isNotEmpty) {
-        final cb = onRemoved;
-        if (cb != null) cb(removed);
-      }
-    });
+    return _synchronized(
+      () => _scan.fullScan(root, onChanged: onChanged, onRemoved: onRemoved),
+    );
   }
 
   /// The first index of a library, the tree alone: when the index is empty,
@@ -171,26 +117,7 @@ final class Indexer {
   /// the digest the rename pairing keys on — so this is the empty index's
   /// alone.
   Future<bool> indexTreeFirst(String root) {
-    return _synchronized(() async {
-      if (await _dao.allRows().then((rows) => rows.isNotEmpty)) return false;
-      final entries = await _tree.walk(root, root);
-      if (entries.isEmpty) return false;
-      _log.info(
-        'first index $root: the tree first, ${entries.length} entr(ies); '
-        'the notes after it',
-      );
-      await _db.transaction(() async {
-        await _tree.applyDiff(
-          entries: entries,
-          old: const <String, Note>{},
-          shas: const <String, String>{},
-          contents: const <String, NoteContent>{},
-        );
-      });
-      final cb = onChanged;
-      if (cb != null) cb();
-      return true;
-    });
+    return _synchronized(() => _scan.treeFirst(root, onChanged: onChanged));
   }
 
   /// Applies a batch of changed absolute paths incrementally.
@@ -495,31 +422,5 @@ final class Indexer {
       return (wrote: true, removed: <String>{rel});
     }
     return (wrote: false, removed: const <String>{});
-  }
-
-  /// Whether the desired tree differs from [old].
-  ///
-  /// Includes the parent links: an index written by an older build can hold
-  /// the right paths with wrong parents, and the diff repairs those, so the
-  /// no-write check has to see them. Digests take no part in this: the
-  /// reads only ever reuse a stored one when `(size, mtime)` already proves
-  /// the content unchanged, so a digest can never be the deciding
-  /// difference — and comparing it would force a rewrite of every index
-  /// written by an older build.
-  bool _treeChanged(Map<String, Note> old, List<DiskEntry> entries) {
-    if (old.length != entries.length) return true;
-    for (final e in entries) {
-      final o = old[e.rel];
-      if (o == null) return true;
-      if (o.isDir != e.isDir || o.size != e.size || o.name != e.name) {
-        return true;
-      }
-      if (o.modified != toStoredSecond(e.modified)) return true;
-      final parentRel = parentOf(e.rel);
-      if (o.parent != (parentRel.isEmpty ? 0 : old[parentRel]?.id)) {
-        return true;
-      }
-    }
-    return false;
   }
 }

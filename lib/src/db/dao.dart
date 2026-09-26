@@ -148,6 +148,33 @@ final class NoteDao {
     return _db.select(_db.notes).get();
   }
 
+  /// Whether the index holds any row at all: the first index's own
+  /// precondition, answered without loading a row (`Indexer.indexTreeFirst`).
+  Future<bool> hasRows() async {
+    final row = await _db
+        .customSelect('SELECT 1 AS one FROM notes LIMIT 1')
+        .getSingleOrNull();
+    return row != null;
+  }
+
+  /// The highest row id, or 0 when the index is empty: rows above it were
+  /// inserted since, which is how a scan finds the notes it just added.
+  Future<int> maxId() async {
+    final row = await _db
+        .customSelect('SELECT max(id) AS m FROM notes')
+        .getSingle();
+    return row.read<int?>('m') ?? 0;
+  }
+
+  /// How many notes (files, not folders) the index holds — the
+  /// denominator a scan's progress reports against.
+  Future<int> noteCount() async {
+    final row = await _db
+        .customSelect('SELECT count(*) AS c FROM notes WHERE is_dir = 0')
+        .getSingle();
+    return row.read<int>('c');
+  }
+
   /// Deletes the row at `path` and every descendant row, returning the
   /// number of rows deleted.
   ///
@@ -180,6 +207,11 @@ final class NoteDao {
       );
       await _db.customStatement(
         'DELETE FROM frontmatter_fields WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM pending_links WHERE note_id IN '
         '(SELECT id FROM notes WHERE $where)',
         args,
       );
