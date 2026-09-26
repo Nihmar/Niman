@@ -6,6 +6,19 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.1.1] - 2026-09-26
+
+Show me around.
+
+A fresh install opens on the app itself: what Niman is, one question
+about Markdown that decides how the first library writes, and a guided
+tour that points at the real controls, one step at a time.
+
+### Added
+- **A welcome on the first run.** Nine pages on what Niman is — notes as files, the three ways to write one, links and templates, search, export and import, tasks and sync, and what this device adds — and then one question: *Have you written Markdown before?* The answer only decides how your first library starts, and Settings → Editor has the switches whenever you change your mind. The deck is shown once, and opens read-only again from Settings → About (*What Niman can do*) or the palette
+- **A guided tour, pointing at the real controls.** The tree, the create menu, the note and its tabs, the three editor modes, the toolbar, the navigation and the dock: each step dims the app, spotlights the control it talks about and says what it is for. A step whose control is not on this screen — no dock on a phone, no source switch in a live-only library — is skipped rather than pointing at nothing, and the last step hands over to the Markdown cheatsheet. Offered once by the welcome, resumable where it stopped, and always there from Settings → About (*Take the tour*) or the palette
+- **A library this device opens for the first time takes its two editors from the answer.** *Never* starts in the live editor with the Markdown source not offered, *A little* starts live with both, *All the time* (or a skipped question) is today's source default — never overwriting a library's own choice, and only until you change it in Settings → Editor
+
 ## [0.1.0] - 2026-09-26
 
 Notes in, notes out.
