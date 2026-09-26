@@ -28,6 +28,7 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show BackgroundIsolateBinaryMessenger;
 import 'package:niman/src/core/isolate_gauge.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/epub_book.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/html_page.dart';
@@ -38,6 +39,8 @@ import 'package:niman/src/export/pdf_webview.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:path/path.dart' as p;
+
+const AppLogger _log = AppLogger(name: 'export');
 
 /// What a folder or the library is exported as.
 enum ExportTreeFormat {
@@ -227,6 +230,9 @@ final class TreeExport {
         // The isolate's cancellation mailbox: what lets a cancel close the
         // zip instead of killing the isolate with a file handle open.
         _cancelPort = message;
+      } else if (message is _TreeExportWarning) {
+        // Logged here, on the parent: the isolate's buffer goes with it.
+        _log.warning(message.message);
       } else if (message is TreeExportNoChapters) {
         // A typed failure the isolate asked to report without throwing:
         // only a message keeps the type across the boundary.
@@ -311,6 +317,17 @@ Object _errorOf(Object? message) {
   return message!;
 }
 
+/// A warning the isolate saw and the parent is to log (#303, E3): the
+/// isolate's own [AppLog] buffer dies with it, so the line would leave no
+/// trace.
+final class _TreeExportWarning {
+  /// Creates the warning.
+  const new(this.message);
+
+  /// The line the parent logs.
+  final String message;
+}
+
 /// One entry of the subtree: its absolute path, its zip name, and whether
 /// it is a folder.
 typedef _Entry = ({String abs, String rel, bool isDir});
@@ -366,13 +383,21 @@ Future<void> _exportTree(TreeExportRequest request) async {
   // encoder would, and the plain formats have no book. Its metadata and
   // cover are the `index.md` note's frontmatter (#303).
   final front = request.format == ExportTreeFormat.epub
-      ? _bookFrontmatter(tree)
+      ? _bookFrontmatter(tree, request.events)
       : null;
   final metadata = front?.metadata ?? const EpubMetadata();
   final coverTarget = metadata.cover;
   final cover = coverTarget == null || front == null
       ? null
       : _fileIn(coverTarget, front.dir, tree.files);
+  if (coverTarget != null && cover == null) {
+    request.events.send(
+      _TreeExportWarning(
+        'the book\'s cover "$coverTarget" is not in the folder: '
+        'the book opens on its first chapter',
+      ),
+    );
+  }
   final book = request.format == ExportTreeFormat.epub
       ? await EpubBook.start(
           path: request.zipPath,
@@ -484,13 +509,34 @@ Future<void> _exportTree(TreeExportRequest request) async {
 /// A folder has no frontmatter of its own, and a book's metadata belongs to
 /// the book, not to whichever note sorts first: `index.md` is the note the
 /// author writes it in.
-({EpubMetadata metadata, String dir})? _bookFrontmatter(_Tree tree) {
+///
+/// A book without one — or with one that says nothing — is not a failure,
+/// but it is silent: the package carries the folder's name and nothing
+/// else, so why is said over [events] for the parent to log (E3).
+({EpubMetadata metadata, String dir})? _bookFrontmatter(
+  _Tree tree,
+  SendPort events,
+) {
   final rel = tree.notes['index.md'];
-  if (rel == null || p.dirname(rel) != '.') return null;
-  return (
-    metadata: epubMetadataOf(File(p.join(tree.root, rel)).readAsStringSync()),
-    dir: '.',
-  );
+  if (rel == null || p.dirname(rel) != '.') {
+    events.send(
+      const _TreeExportWarning(
+        'the exported folder has no index.md at its root: the book carries '
+        "the folder's name and no metadata",
+      ),
+    );
+    return null;
+  }
+  final text = File(p.join(tree.root, rel)).readAsStringSync();
+  if (parseFrontmatter(text) == null) {
+    events.send(
+      const _TreeExportWarning(
+        "the book's index.md has no frontmatter: the package carries the "
+        "folder's name and no metadata",
+      ),
+    );
+  }
+  return (metadata: epubMetadataOf(text), dir: '.');
 }
 
 /// Adds one note of the tree to [book] as a chapter (#303).

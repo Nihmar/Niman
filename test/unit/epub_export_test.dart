@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/export/epub_note.dart';
 import 'package:niman/src/export/export_tree.dart';
@@ -38,6 +39,17 @@ void main() {
         XmlDocument.parse(entry.value);
       }
     }
+  }
+
+  /// Waits until a logged line says [needle]: the warning crosses from the
+  /// export isolate and is logged on the parent, which can land just after
+  /// `run` answers.
+  Future<void> waitForLog(String needle) async {
+    for (var at = 0; at < 200; at++) {
+      if (AppLog.lines().any((line) => line.contains(needle))) return;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    fail('no log line mentions "$needle"');
   }
 
   test('a note is a one-chapter book, its picture inside', () async {
@@ -326,6 +338,65 @@ void main() {
       );
       // Refused before the container was created: nothing to sweep up (E2).
       expect(File(out).existsSync(), isFalse);
+    },
+  );
+
+  test('a folder without index.md says why the book has no metadata', () async {
+    AppLog.clear();
+    addTearDown(AppLog.clear);
+    final notes = p.join(root.path, 'Notes');
+    await Directory(notes).create(recursive: true);
+    await File(p.join(notes, 'a.md')).writeAsString('# A\n');
+
+    final out = p.join(root.path, 'book.epub');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: out,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+    // The book is still written — the metadata source is optional — but
+    // the export is not silent about it (E3).
+    await waitForLog('no index.md');
+  });
+
+  test('an index.md with no frontmatter says so', () async {
+    AppLog.clear();
+    addTearDown(AppLog.clear);
+    final notes = p.join(root.path, 'Notes');
+    await Directory(notes).create(recursive: true);
+    await File(p.join(notes, 'index.md')).writeAsString('# Index\n');
+    await File(p.join(notes, 'a.md')).writeAsString('# A\n');
+
+    final out = p.join(root.path, 'book.epub');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: out,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+    await waitForLog('index.md has no frontmatter');
+  });
+
+  test(
+    'a cover the frontmatter names but the folder lacks is logged',
+    () async {
+      AppLog.clear();
+      addTearDown(AppLog.clear);
+      final notes = p.join(root.path, 'Notes');
+      await Directory(notes).create(recursive: true);
+      await File(p.join(notes, 'index.md'))
+          .writeAsString('---\ncover: missing.png\n---\n# Index\n');
+      await File(p.join(notes, 'a.md')).writeAsString('# A\n');
+
+      final out = p.join(root.path, 'book.epub');
+      await TreeExport.run(
+        dir: notes,
+        zipPath: out,
+        format: ExportTreeFormat.epub,
+        language: 'en',
+      );
+      await waitForLog('cover "missing.png"');
     },
   );
 
