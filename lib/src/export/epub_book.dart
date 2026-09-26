@@ -75,7 +75,10 @@ final class EpubMetadata {
   /// `publisher:`.
   final String? publisher;
 
-  /// `date:`.
+  /// `published:` — the book's publication date.
+  ///
+  /// Not `date:`, which is the note's own: a journal entry that begins a
+  /// book must not date the book the day it was written.
   final String? date;
 
   /// `tags:`, one `dc:subject` each.
@@ -114,7 +117,7 @@ EpubMetadata epubMetadataOf(String text) {
     language: first('language') ?? first('lang'),
     description: first('description'),
     publisher: first('publisher'),
-    date: first('date'),
+    date: first('published'),
     subjects: front.tags,
     series: first('series'),
     seriesIndex: first('series_index'),

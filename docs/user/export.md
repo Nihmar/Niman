@@ -42,9 +42,10 @@ become links.
 ### A book's metadata
 
 An EPUB takes its metadata from the frontmatter: the note's own for a
-single note, the first chapter's for a folder or the library. The keys
-are the usual ones, so a note written for another tool reads the same
-here:
+single note, `index.md`'s for a folder or the library — the note the
+book's author writes the metadata in, when the exported folder has one at
+its root. The keys are the usual ones, so a note written for another tool
+reads the same here:
 
 ```
 ---
@@ -57,14 +58,16 @@ cover: cover.png
 tags: [geometry, notes]
 description: What the book is.
 publisher: Niman Press
+published: 2026-09-25
 rights: Public domain
 ---
 ```
 
 `title` and `language` override the export's own (the note's display name
-and the app's language), `tags` become the book's subjects, and `cover:`
-names the picture the book opens on. The Markdown cheatsheet carries the
-same example, under **EPUB metadata**.
+and the app's language), `tags` become the book's subjects, `cover:`
+names the picture the book opens on, and `published:` — not `date:`,
+which is the note's own — the book's date. The Markdown cheatsheet
+carries the same example, under **EPUB metadata**.
 
 ## A folder, or the whole library
 
@@ -90,9 +93,9 @@ one zip:
   note is a chapter, in the tree's own order, with a table of contents
   and links between the chapters. The pictures the chapters show travel
   inside the book, each one once; an attachment no chapter shows is left
-  out. The book's cover is the `cover:` picture in its first chapter's
-  frontmatter, when that chapter names one. One EPUB, not one per note —
-  a folder is a book, and the format is what its reader expects.
+  out. The book's metadata and cover are the `index.md` frontmatter at the
+  exported folder's root. One EPUB, not one per note — a folder is a book,
+  and the format is what its reader expects.
 
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those

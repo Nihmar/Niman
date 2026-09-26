@@ -138,6 +138,7 @@ final List<CheatsheetEntry> cheatsheetEntries = <CheatsheetEntry>[
         'tags: [geometry, notes]\n'
         'description: What the book is.\n'
         'publisher: Niman Press\n'
+        'published: 2026-09-25\n'
         'rights: Public domain\n'
         '---\n'
         "A book's first chapter.",

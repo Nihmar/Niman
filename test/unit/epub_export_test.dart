@@ -181,7 +181,7 @@ void main() {
           'language: it\n'
           'description: What it is.\n'
           'publisher: Niman Press\n'
-          'date: 2026-09-25\n'
+          'published: 2026-09-25\n'
           'tags: [geometry, notes]\n'
           'series: Notes\n'
           'series_index: 2\n'
@@ -215,12 +215,14 @@ void main() {
     expect(files['OEBPS/text/note.xhtml'], contains('xml:lang="it"'));
   });
 
-  test("a folder book takes its first chapter's cover", () async {
+  test("a folder book takes its index.md's cover and metadata", () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);
     await File(p.join(notes, 'photo.png')).writeAsBytes(<int>[1, 2, 3]);
-    await File(p.join(notes, 'a.md'))
-        .writeAsString('---\ncover: photo.png\n---\n# A\n');
+    await File(p.join(notes, 'index.md')).writeAsString(
+      '---\ncover: photo.png\nauthor: Ada Lovelace\n---\n# Index\n',
+    );
+    await File(p.join(notes, 'a.md')).writeAsString('# A\n');
     await File(p.join(notes, 'b.md')).writeAsString('# B\n');
     final out = p.join(root.path, 'book.epub');
     await TreeExport.run(
@@ -231,7 +233,28 @@ void main() {
     );
     final files = textEntries(out);
     expect(files.keys, contains('OEBPS/cover.xhtml'));
-    expect(files['OEBPS/content.opf'], contains('properties="cover-image"'));
+    final opf = files['OEBPS/content.opf']!;
+    expect(opf, contains('properties="cover-image"'));
+    expect(opf, contains('<dc:creator>Ada Lovelace</dc:creator>'));
+    // `index.md` is a chapter like any other.
+    expect(files.keys, contains('OEBPS/text/index.xhtml'));
+  });
+
+  test("a cover in a chapter is not the book's", () async {
+    final notes = p.join(root.path, 'Notes');
+    await Directory(notes).create(recursive: true);
+    await File(p.join(notes, 'photo.png')).writeAsBytes(<int>[1, 2, 3]);
+    await File(p.join(notes, 'a.md'))
+        .writeAsString('---\ncover: photo.png\n---\n# A\n');
+    final out = p.join(root.path, 'book.epub');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: out,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+    final files = textEntries(out);
+    expect(files.keys, isNot(contains('OEBPS/cover.xhtml')));
   });
 
   test("the app's own reader opens the book it wrote", () async {
