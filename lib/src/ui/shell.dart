@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
@@ -14,6 +15,7 @@ import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/core/text_scale.dart';
@@ -315,6 +317,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 transcription: ref.read(transcriptionModelsProvider),
                 openNotes: ref.read(openAudioNotesProvider),
                 shortcuts: ref.read(shortcutServiceProvider),
+                shareIn: ref.read(shareInServiceProvider),
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
                 saveExportFile: ref.read(saveExportFileProvider),
@@ -356,6 +359,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.reminders,
     required this.spellCheck,
     required this.shortcuts,
+    required this.shareIn,
     required this.todoSourceFactory,
     required this.unsavedTracker,
     required this.saveExportFile,
@@ -394,6 +398,10 @@ final class _LibraryShell extends StatefulWidget {
   /// The launcher quick actions (T-SC-03: each one lands on the flow its
   /// in-app control uses).
   final ShortcutService shortcuts;
+
+  /// What other apps share into Niman (#40): text to the quick note, a
+  /// file imported into the library.
+  final ShareInService shareIn;
 
   /// Builds the todo file source per library root (overridden with a
   /// fake in widget tests).
@@ -755,6 +763,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Notification taps while running: a todo tap opens the Todo tab.
   StreamSubscription<String?>? _reminderTaps;
   StreamSubscription<ShortcutAction>? _shortcutTaps;
+
+  /// What other apps share in while the shell is up (#40).
+  StreamSubscription<ShareRequest>? _shareTaps;
   StreamSubscription<ShortcutAction>? _trayTaps;
   StreamSubscription<void>? _trayActivations;
   StreamSubscription<TrayCommand>? _trayCommands;
@@ -1020,6 +1031,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// under the opening note for the length of the fade — long enough for
   /// the chooser to flash behind a note the user had already chosen.
   bool _showQuickNoteChooser = false;
+
+  /// Text shared into Niman (#40) with no quick note to put it in yet: it
+  /// is appended to whatever note the chooser opens next.
+  String? _pendingSharedText;
 
   /// The pending tab-hide after a note open (canceled on close).
   Timer? _noteHideTimer;
@@ -1466,6 +1481,9 @@ final class _LibraryShellState extends State<_LibraryShell>
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
+    _shareTaps = widget.shareIn.requests.listen(
+      (request) => unawaited(_handleShare(request)),
+    );
     _trayTaps = widget.tray.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
@@ -1497,6 +1515,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     });
     unawaited(_applyReminderLaunch());
     unawaited(_applyShortcutLaunch());
+    unawaited(_applyShareLaunch());
     unawaited(_homeWidgets.applyLaunchTarget());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
@@ -1530,6 +1549,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_homeWidgets.dispose());
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
+    unawaited(_shareTaps?.cancel());
     unawaited(_libraryEvents?.cancel());
     unawaited(_libraryRemovals?.cancel());
     unawaited(_syncChanges?.cancel());
@@ -1600,6 +1620,86 @@ final class _LibraryShellState extends State<_LibraryShell>
     final action = await widget.shortcuts.consumeLaunchAction();
     if (action == null) return;
     await _runShortcut(action);
+  }
+
+  /// A share that started the app (#40, cold start).
+  ///
+  /// Asked for here for the same reason as the launcher actions: every
+  /// share needs a library — text goes into one, a file is imported into
+  /// one. Shares that arrive while there is no shell wait in the service
+  /// and are delivered once one mounts.
+  Future<void> _applyShareLaunch() async {
+    final request = await widget.shareIn.consumeLaunchRequest();
+    if (request == null) return;
+    await _handleShare(request);
+  }
+
+  /// Runs a share: text into the quick note, a file into the library
+  /// (#40).
+  Future<void> _handleShare(ShareRequest request) async {
+    switch (request) {
+      case SharedText(:final text):
+        await _shareText(text);
+      case SharedFile(:final path, :final name):
+        await _importSharedFile(path: path, name: name);
+    }
+  }
+
+  /// Inserts [text] at the end of the quick note and opens it.
+  ///
+  /// With no quick note set the choose/create screen opens instead, and
+  /// the text waits: [_openQuickNote] inserts it into whatever note the
+  /// choice lands on — the text is the point of the share, so it cannot
+  /// be dropped just because the target is not configured yet.
+  Future<void> _shareText(String text) async {
+    final ops = widget.controller.ops;
+    if (ops == null || !mounted) return;
+    _pendingSharedText = text;
+    final path = await ops.quickNotePath;
+    if (!mounted) return;
+    if (path == null || path.isEmpty) {
+      _openQuickNoteChooser();
+      return;
+    }
+    await _openQuickNote(path);
+  }
+
+  /// Imports the file a share copied into the library and opens it (#40).
+  ///
+  /// Android hands a `content://` URI, not a file: the platform side read
+  /// the bytes and wrote its own copy at [path], which is imported here
+  /// and deleted. The note lands at the library root under the name it
+  /// came with, uniquified like any new note; a `.markdown` and a `.txt`
+  /// alike become one, because what is imported is its text.
+  Future<void> _importSharedFile({
+    required String path,
+    required String name,
+  }) async {
+    final ops = widget.controller.ops;
+    if (ops == null || !mounted) return;
+    final source = File(path);
+    if (!source.existsSync()) return;
+    var text = utf8.decode(await source.readAsBytes(), allowMalformed: true);
+    // A BOM is the platform's encoding marker, not part of the note.
+    if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+      text = text.substring(1);
+    }
+    try {
+      // The copy has done its job whatever the import decides next.
+      await source.delete();
+    } on FileSystemException {
+      // A cache file that outlives us costs disk, not the import.
+    }
+    await _guard(() async {
+      final imported = await ops.createNote(
+        parentPath: '',
+        name: p.basenameWithoutExtension(name),
+        content: text,
+      );
+      if (!mounted) return;
+      _revealFolder('');
+      _openNoteFromLink(imported.path, null);
+    });
   }
 
   /// Runs [action]'s in-app flow: the same one the equivalent control
@@ -1826,6 +1926,19 @@ final class _LibraryShellState extends State<_LibraryShell>
         if (mounted) _openQuickNoteChooser();
         return;
       }
+      // Text shared into Niman (#40) waits here for the note it goes in:
+      // appended before the note is opened, so the first read of the file
+      // already carries it. What is on screen is saved first — the append
+      // reads the file, and a buffer written after it would take the
+      // shared text back out.
+      final pending = _pendingSharedText;
+      _pendingSharedText = null;
+      var reload = false;
+      if (pending != null) {
+        await widget.unsavedTracker.saveAll();
+        await ops.appendToNote(note.path, pending);
+        reload = _selected == note.path && !_selectedIsDir;
+      }
       if (!mounted) return;
       // Read the origin before the switch below: the chooser flow arrives
       // here from the quick note tab itself, and Files is its home.
@@ -1838,6 +1951,9 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
+        // Already open: its buffer predates the appended text, so it
+        // re-reads the file instead of keeping what it had.
+        if (reload) _noteReloadToken++;
         _resetNoteKind();
         _noteOpened();
       });

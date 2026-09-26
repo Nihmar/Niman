@@ -20,16 +20,19 @@ class MainActivity : FlutterActivity() {
     private val shortcuts = ShortcutsBridge(this)
     private val widgets = WidgetBridge(this)
     private val pdf = PdfBridge(this)
+    private val shares = ShareBridge(this)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         shortcuts.attach(flutterEngine.dartExecutor.binaryMessenger)
         widgets.attach(flutterEngine.dartExecutor.binaryMessenger)
         pdf.attach(flutterEngine.dartExecutor.binaryMessenger)
+        shares.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
         shortcuts.handleIntent(intent, running = false)
         widgets.handleIntent(intent, running = false)
+        shares.handleIntent(intent, running = false)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/storage")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -69,12 +72,14 @@ class MainActivity : FlutterActivity() {
         setIntent(intent)
         shortcuts.handleIntent(intent, running = true)
         widgets.handleIntent(intent, running = true)
+        shares.handleIntent(intent, running = true)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         shortcuts.detach()
         widgets.detach()
         pdf.detach()
+        shares.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
