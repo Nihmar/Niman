@@ -6,6 +6,36 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.0.10] - 2026-09-26
+
+Notes in, notes out.
+
+Your notes leave as files anyone can open — Markdown, a page of their
+own, a print-ready PDF, a whole book as EPUB — and arrive from wherever
+they were: a Notion export, an Obsidian vault, another app's share menu.
+And underneath, the library learned to walk a million notes without
+holding them all at once.
+
+### Added
+- **A note as a PDF.** *Export → PDF* prints the note through the machine's own browser — Edge on Windows, a Chromium-family browser on Linux, the system WebView on Android — so its text stays selectable and searchable: A4, pictures and formulas in place. Where no browser is, Niman says so before it starts and draws the pages itself instead, a picture of them that still holds the note's pictures, and the drawing can be stopped
+- **A note, a folder, the library as EPUB.** A book out of Markdown: a cover and metadata from the frontmatter, a chapter per note anchored to `index.md`, the math typeset, a working dialog with a stop button
+- **A Notion export, imported.** Notion's *Markdown & CSV* zip lands as a new folder of the library — the page ids off every file name, the links between pages rewritten to the names they now have, pictures and attachments kept, the database `.csv`s and the hidden files dropped. From *Settings → Maintenance → Import Notion export*, from sharing the zip to Niman on Android, or from dropping it on the desktop window
+- **An Obsidian vault, opened.** Pick the vault folder when opening a library and Obsidian's own syntax reads as it stands: `[[wikilinks]]` and their `|aliases`, `[[folder/note]]` paths, `![[image.png]]` embeds resolving their attachment by name, frontmatter and `#tags`
+- **Sharing into Niman on Android.** Another app's share menu offers it now: text lands at the end of the quick note — or waits for the choose/create screen when none is set — a `.md` is imported into the library and opened, and a Notion export is imported
+- **The Markdown tidy's rules are yours to choose.** *Settings → Editor* lists what the tidy fixes, each on or off
+- **The right dock resizes** by dragging its edge, and **desktop tree rows** are drawn compactly with a menu made for the pointer
+
+### Changed
+- **A full scan reconciles one directory at a time.** First open, re-index and the periodic rescan no longer hold every index row, the whole disk walk and every changed note in memory at once: the peak is the largest folder, not the library. At a million notes the old scan took about a gigabyte to itself; the rescan of an untouched library now takes none of it
+
+### Fixed
+- A heading typed at the end of a note no longer hangs the editor on a phone
+- An inline formula with spaces in its source reveals its `$…$` instead of staying stuck
+- The touch handles and their menu no longer flash at a stale place; a revealed mark starts on the note's margin
+- A re-index closes the tabs of the notes it really pruned, and leaves a renamed note's tab open
+- Ctrl+F and Ctrl+H work in the single-file editor
+- A live table's row no longer wraps off its columns
+
 ## [0.0.9] - 2026-09-25
 
 A homegrown editor, and a lot more to play with.
