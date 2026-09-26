@@ -400,6 +400,24 @@ void main() {
     },
   );
 
+  test('a note link to a page the book does not carry is text', () async {
+    final payload = await exportNoteEpub(
+      text: 'See [altrove](altrove.md).\n',
+      title: 'T',
+      path: 'T.md',
+      root: root.path,
+      language: 'en',
+    );
+    final file = p.join(root.path, 'link.epub');
+    await File(file).writeAsBytes(payload.bytes);
+    final chapter = textEntries(file)['OEBPS/text/note.xhtml']!;
+    // The one-chapter book carries `note.xhtml` and nothing else: a
+    // relative href to another note's source is a resource the reader
+    // cannot open (E4).
+    expect(chapter, isNot(contains('href="altrove.md"')));
+    expect(chapter, contains('<span>altrove</span>'));
+  });
+
   test('a picture shared by two notes goes in once', () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);

@@ -35,6 +35,9 @@ const String _open = '';
 const String _close = '';
 final RegExp _token = RegExp('$_open(\\d+)$_close');
 
+/// A local Markdown note link's path, a `#` fragment or `?` query aside.
+final RegExp _noteHref = RegExp(r'\.md(?:[#?].*)?$');
+
 /// A quote line's `>` markers, every level of them.
 final RegExp _quoteMarks = RegExp('^((?: {0,3}> ?)+)');
 
@@ -253,7 +256,18 @@ final class NoteHtml {
       // A task's box shows its state; a page has nothing to tick it for.
       if (node.tag == 'input') node.attributes['disabled'] = '';
       if (node.tag == 'img') _repoint(node, 'src', source.images);
-      if (node.tag == 'a') _repoint(node, 'href', source.links);
+      if (node.tag == 'a' &&
+          !_repoint(node, 'href', source.links) &&
+          _isNoteLink(node.attributes['href'])) {
+        // A Markdown link to a note the page has no target for shows the
+        // text it wrote, as a wikilink does: `[x](other.md)` on a one-note
+        // export pointed at a file the page does not carry (E4).
+        final replacement = md.Element('span', node.children);
+        nodes[at] = replacement;
+        final replacementChildren = replacement.children;
+        if (replacementChildren != null) _rewrite(replacementChildren);
+        continue;
+      }
       final children = node.children;
       if (children != null) _rewrite(children);
     }
@@ -294,22 +308,38 @@ final class NoteHtml {
   });
 
   /// Points [element]'s [attribute] at what [targets] has for it, as written
-  /// or as the parser percent-encoded it.
-  static void _repoint(
+  /// or as the parser percent-encoded it; false when there is no target.
+  static bool _repoint(
     md.Element element,
     String attribute,
     Map<String, String> targets,
   ) {
     final written = element.attributes[attribute];
-    if (written == null) return;
+    if (written == null) return false;
     var target = targets[written];
     if (target == null) {
       try {
         target = targets[Uri.decodeFull(written)];
       } on FormatException {
-        return;
+        return false;
       }
     }
-    if (target != null) element.attributes[attribute] = target;
+    if (target == null) return false;
+    element.attributes[attribute] = target;
+    return true;
+  }
+
+  /// Whether [href] names a local Markdown note, by its path; a fragment or
+  /// a query does not change that, and an absolute URL is not one.
+  static bool _isNoteLink(String? href) {
+    if (href == null || href.isEmpty) return false;
+    final lower = href.toLowerCase();
+    if (lower.startsWith('#') ||
+        lower.startsWith('mailto:') ||
+        lower.startsWith('data:') ||
+        lower.contains('://')) {
+      return false;
+    }
+    return _noteHref.hasMatch(lower);
   }
 }

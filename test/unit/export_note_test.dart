@@ -35,4 +35,23 @@ void main() {
     expect(page, contains('<title>Il titolo</title>'));
     expect(page, contains('<h1 id="body">Body</h1>'));
   });
+
+  test('a link to a note this export does not carry is its own text', () async {
+    final payload = await exportNote(
+      text: 'See [altrove](altrove.md) and [il web](https://example.com).\n',
+      title: 'T',
+      path: 'Notes/T.md',
+      root: '/lib',
+      language: 'en',
+      format: ExportFileFormat.html,
+    );
+    final page = utf8.decode(payload.bytes);
+    // One note carries one page: `altrove.md` is not in it, and a relative
+    // href to a file that is not there is dead (E4). A wikilink becomes
+    // highlighted text; a Markdown note link becomes the text it shows.
+    expect(page, isNot(contains('href="altrove.md"')));
+    expect(page, contains('<span>altrove</span>'));
+    // An absolute URL is not a note link: it stays the link it was.
+    expect(page, contains('href="https://example.com"'));
+  });
 }
