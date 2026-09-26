@@ -15,6 +15,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/picture_mime.dart';
 import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -22,7 +23,6 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/extension_masker.dart';
 import 'package:niman/src/markdown/extension_span.dart';
-import 'package:niman/src/markdown/render/embed_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:path/path.dart' as p;
 
@@ -118,7 +118,7 @@ abstract final class ExportSources {
     );
     for (final entry in paths.entries) {
       final path = entry.value;
-      if (imageMime(p.extension(path).toLowerCase()) == null) continue;
+      if (pictureMime(p.extension(path).toLowerCase()) == null) continue;
       try {
         images[entry.key] = await Isolate.run(
           () => File(path).readAsBytesSync(),
@@ -178,13 +178,15 @@ abstract final class ExportSources {
 
   /// One chapter's XHTML body for a container (#303), built off the UI
   /// isolate like [page]: the parse, the highlighting and the formulas
-  /// are the same work whichever file they end in. The fonts go back too:
-  /// a book declares them once, not once per chapter.
-  static Future<({String body, String? fontFaces})> xhtml(
+  /// are the same work whichever file they end in. The fonts go back too —
+  /// a book declares them once, not once per chapter — and whether the
+  /// chapter drew SVG, which the package must declare (E6).
+  static Future<({String body, String? fontFaces, bool hasSvg})> xhtml(
     NoteHtmlSource source,
   ) => Isolate.run(() {
     final html = NoteHtml(source);
-    return (body: html.body(), fontFaces: html.fontFaces);
+    final body = html.body();
+    return (body: body, fontFaces: html.fontFaces, hasSvg: html.usesSvg);
   });
 
   /// The whole page for [source], built off the UI isolate (#24): the
@@ -208,11 +210,11 @@ abstract final class ExportSources {
   ///
   /// Only an embed with an image extension counts: `![[notes.md]]` is a
   /// link to a file that happens to be an embed, the same rule the read
-  /// view draws by.
+  /// view draws by — over the export's own list, which carries SVG (E8).
   static List<String> pictureTargets(String text) {
     final out = <String>{};
     for (final target in _embeds(text)) {
-      if (EmbedView.imageExtensions.hasMatch(target)) out.add(target);
+      if (pictureExtension.hasMatch(target)) out.add(target);
     }
     out.addAll(NoteHtml(NoteHtmlSource(text: text, title: '')).imageTargets());
     return out.toList();
@@ -276,7 +278,7 @@ abstract final class ExportSources {
   /// thrown away with it.
   static Future<String?> pictureDataUri(String path) async {
     final result = await Isolate.run(() {
-      final mime = imageMime(p.extension(path).toLowerCase());
+      final mime = pictureMime(p.extension(path).toLowerCase());
       if (mime == null) return (uri: null, skip: 'not an image type');
       try {
         final bytes = File(path).readAsBytesSync();
@@ -290,17 +292,4 @@ abstract final class ExportSources {
     }
     return result.uri;
   }
-
-  /// The MIME type of the picture at [extension] (lower case, with the
-  /// dot), or null when it is not an image type. Public so a caller that
-  /// reads the bytes itself — the tree export, whose pictures are embedded
-  /// by the background isolate — names them the same way.
-  static String? imageMime(String extension) => switch (extension) {
-    '.png' => 'image/png',
-    '.jpg' || '.jpeg' => 'image/jpeg',
-    '.gif' => 'image/gif',
-    '.webp' => 'image/webp',
-    '.bmp' => 'image/bmp',
-    _ => null,
-  };
 }

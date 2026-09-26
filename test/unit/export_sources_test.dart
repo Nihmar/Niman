@@ -18,6 +18,14 @@ void main() {
       ]);
     });
 
+    test('an embed of an SVG is one, where the read view draws none', () {
+      // Flutter cannot decode an SVG inline; an export can carry it, and
+      // the two picture paths must agree on that (E8).
+      expect(ExportSources.pictureTargets('![[drawing.svg]]\n'), [
+        'drawing.svg',
+      ]);
+    });
+
     test('an embed in code or math is not a picture', () {
       expect(
         ExportSources.pictureTargets('```\n![[photo.png]]\n```\n'),
@@ -83,8 +91,17 @@ void main() {
     });
 
     test('a target whose type is not an image is skipped', () async {
+      File(p.join(root.path, 'notes.txt')).writeAsStringSync('text');
+      expect(await imagesOf('![alt](notes.txt)\n'), isEmpty);
+    });
+
+    test('an SVG becomes a data URI like any other picture', () async {
+      // One picture table for every export (S3): an SVG a browser draws
+      // from a data URI is embedded as one, not silently dropped.
       File(p.join(root.path, 'drawing.svg')).writeAsStringSync('<svg/>');
-      expect(await imagesOf('![alt](drawing.svg)\n'), isEmpty);
+      final images = await imagesOf('![alt](drawing.svg)\n');
+      expect(images.keys, ['drawing.svg']);
+      expect(images.values.single, startsWith('data:image/svg+xml;base64,'));
     });
 
     test('a note with none reads nothing and keeps its text', () async {
@@ -112,14 +129,26 @@ void main() {
       expect(source.images['photo.png'], contains('photo.png'));
     });
 
-    test('a type the data-URI export skips still prints', () async {
-      File(p.join(root.path, 'drawing.svg')).writeAsStringSync('<svg/>');
+    test('a type that is not an image stays out of the bytes', () async {
+      File(p.join(root.path, 'notes.txt')).writeAsStringSync('text');
+      // The raster fallback reads and decodes what it is handed: a target
+      // that is not a picture is skipped there…
+      expect(
+        await ExportSources.imageBytes(
+          text: '![alt](notes.txt)\n',
+          notePath: note,
+          root: root.path,
+        ),
+        isEmpty,
+      );
+      // …while the printed page still points at it: the engine is the one
+      // that decides what it can draw.
       final urls = await ExportSources.imageUrls(
-        text: '![alt](drawing.svg)\n',
+        text: '![alt](notes.txt)\n',
         notePath: note,
         root: root.path,
       );
-      expect(urls.keys, ['drawing.svg']);
+      expect(urls.keys, ['notes.txt']);
     });
   });
 
