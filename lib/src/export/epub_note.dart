@@ -74,6 +74,7 @@ Future<ExportPayload> exportNoteEpub({
         title: title,
         body: chapter.body,
         fontFaces: chapter.fontFaces,
+        hasSvg: chapter.hasSvg,
       );
     } finally {
       await book.close();

@@ -83,6 +83,15 @@ void main() {
     expect(chapter, contains('src="../images/'));
     final opf = files['OEBPS/content.opf']!;
     expect(opf, contains('properties="nav"'));
+    // The chapter drew its formula as inline SVG: the package must say so
+    // for a conformance checker to pass it (E6).
+    expect(
+      opf,
+      contains(
+        '<item id="ch1" href="text/note.xhtml" '
+        'media-type="application/xhtml+xml" properties="svg" />',
+      ),
+    );
     expect(opf, contains('media-type="image/png"'));
     expect(opf, contains('media-type="application/xhtml+xml"'));
     final nav = files['OEBPS/nav.xhtml']!;
@@ -175,6 +184,8 @@ void main() {
         RegExp(r'<itemref idref="ch\d+" />').allMatches(opf),
         hasLength(3),
       );
+      // No formula in these notes: no chapter declares SVG (E6).
+      expect(opf, isNot(contains('properties="svg"')));
     },
   );
 
@@ -447,6 +458,28 @@ void main() {
     // cannot open (E4).
     expect(chapter, isNot(contains('href="altrove.md"')));
     expect(chapter, contains('<span>altrove</span>'));
+  });
+
+  test('an SVG embed is inside the book, not left as words', () async {
+    await File(p.join(root.path, 'drawing.svg')).writeAsString('<svg/>');
+    final payload = await exportNoteEpub(
+      text: '# T\n\n![[drawing.svg]]\n',
+      title: 'T',
+      path: 'T.md',
+      root: root.path,
+      language: 'en',
+    );
+    final file = p.join(root.path, 'svg.epub');
+    await File(file).writeAsBytes(payload.bytes);
+    final files = textEntries(file);
+    // The same note packages the picture whether the note wrote it as an
+    // embed or as a Markdown image (E8).
+    expect(files.keys, contains('OEBPS/images/img-1.svg'));
+    expect(
+      files['OEBPS/text/note.xhtml'],
+      contains('src="../images/img-1.svg"'),
+    );
+    expect(files['OEBPS/content.opf'], contains('media-type="image/svg+xml"'));
   });
 
   test('a picture shared by two notes goes in once', () async {

@@ -35,10 +35,16 @@ final class MathSvg {
 
   String? _fonts;
   bool _needsFonts = false;
+  bool _rendered = false;
 
   /// The `@font-face` rules the page must declare, or null when no drawing
   /// on it writes text.
   String? get fontFaces => _needsFonts ? _fonts : null;
+
+  /// Whether a formula was drawn: an EPUB chapter that carries inline SVG
+  /// declares the `svg` manifest property, and one that does not must not
+  /// (E6).
+  bool get usesSvg => _rendered;
 
   /// [tex] as an inline `<svg>` element, sized in the text's own em and sat
   /// on its baseline; or null when the TeX does not parse, for the caller to
@@ -69,6 +75,7 @@ final class MathSvg {
     final width = double.parse(size.group(1)!);
     final height = double.parse(size.group(2)!);
     final baseline = double.parse(base.group(1)!);
+    _rendered = true;
     // In em of the surrounding text, at the read view's maths scale.
     String em(double units) =>
         '${(units / _unitsPerEm * mathScale).toStringAsFixed(3)}em';

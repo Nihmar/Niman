@@ -19,22 +19,9 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/html_text.dart';
+import 'package:niman/src/export/picture_mime.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:path/path.dart' as p;
-
-/// The media type of the picture at [extension] (lower case, with the dot),
-/// or null when it is not one an EPUB may carry. SVG is here where the
-/// page's own embed list is not: a container stores the file itself, and
-/// every reader draws SVG.
-String? epubPictureType(String extension) => switch (extension) {
-  '.png' => 'image/png',
-  '.jpg' || '.jpeg' => 'image/jpeg',
-  '.gif' => 'image/gif',
-  '.webp' => 'image/webp',
-  '.bmp' => 'image/bmp',
-  '.svg' => 'image/svg+xml',
-  _ => null,
-};
 
 /// The metadata a book's frontmatter may carry (#303).
 ///
@@ -138,7 +125,7 @@ const String _imageDir = '$_opfDir/images';
 String _iri(String href) => href.split('/').map(Uri.encodeComponent).join('/');
 
 /// One chapter, as it was added.
-typedef EpubChapterEntry = ({String id, String href, String title});
+typedef EpubChapterEntry = ({String id, String href, String title, bool svg});
 
 /// One picture, as it was copied in.
 typedef _EpubPicture = ({String id, String href, String path});
@@ -204,7 +191,7 @@ final class EpubBook {
   ///
   /// A type an EPUB cannot carry is no cover, not a failed book.
   Future<void> _addCover(String absolutePath) async {
-    final type = epubPictureType(p.extension(absolutePath).toLowerCase());
+    final type = pictureMime(p.extension(absolutePath).toLowerCase());
     if (type == null) return;
     final extension = p.extension(absolutePath).toLowerCase();
     final href = '$_imageDir/cover$extension';
@@ -222,7 +209,7 @@ final class EpubBook {
     if (existing != null) {
       return p.posix.relative(existing.href, from: fromDir);
     }
-    final type = epubPictureType(p.extension(absolutePath).toLowerCase());
+    final type = pictureMime(p.extension(absolutePath).toLowerCase());
     if (type == null) return null;
     final at = _picturesInOrder.length + 1;
     final extension = p.extension(absolutePath).toLowerCase();
@@ -239,18 +226,20 @@ final class EpubBook {
   /// chapters resolve as they do in the HTML zip).
   ///
   /// [fontFaces] are the maths fonts the chapter's formulas need, declared
-  /// once for the whole book.
+  /// once for the whole book; [hasSvg] says the chapter embeds inline SVG
+  /// (a formula), which the package must declare.
   void addChapter({
     required String href,
     required String title,
     required String body,
     String? fontFaces,
+    bool hasSvg = false,
   }) {
     _fonts ??= fontFaces;
     final id = 'ch${_chapters.length + 1}';
     final xhtml = _chapterXhtml(href: href, title: title, body: body);
     _encoder.addArchiveFile(ArchiveFile.string(href, xhtml));
-    _chapters.add((id: id, href: href, title: title));
+    _chapters.add((id: id, href: href, title: title, svg: hasSvg));
   }
 
   /// Writes the styles, the nav, the package, and closes the container.
@@ -374,7 +363,7 @@ final class EpubBook {
         'media-type="application/xhtml+xml" />\n',
       );
       final href = _iri(p.posix.relative(_cover!.href, from: _opfDir));
-      final type = epubPictureType(p.extension(_cover!.path).toLowerCase());
+      final type = pictureMime(p.extension(_cover!.path).toLowerCase());
       manifest.write(
         '    <item id="cover-image" href="${escapeAttribute(href)}" '
         'media-type="$type" properties="cover-image" />\n',
@@ -384,12 +373,13 @@ final class EpubBook {
       final href = _iri(p.posix.relative(chapter.href, from: _opfDir));
       manifest.write(
         '    <item id="${chapter.id}" href="${escapeAttribute(href)}" '
-        'media-type="application/xhtml+xml" />\n',
+        'media-type="application/xhtml+xml"'
+        '${chapter.svg ? ' properties="svg"' : ''} />\n',
       );
     }
     for (final picture in _picturesInOrder) {
       final href = _iri(p.posix.relative(picture.href, from: _opfDir));
-      final type = epubPictureType(p.extension(picture.path).toLowerCase());
+      final type = pictureMime(p.extension(picture.path).toLowerCase());
       manifest.write(
         '    <item id="${picture.id}" href="${escapeAttribute(href)}" '
         'media-type="$type" />\n',

@@ -565,11 +565,13 @@ Future<void> _addEpubChapter(EpubBook book, _Tree tree, _Entry entry) async {
     links: _linkUrls(text, noteDir, tree, '.xhtml'),
   );
   final html = NoteHtml(source);
+  final body = html.body();
   book.addChapter(
     href: href,
     title: title,
-    body: html.body(),
+    body: body,
     fontFaces: html.fontFaces,
+    hasSvg: html.usesSvg,
   );
 }
 

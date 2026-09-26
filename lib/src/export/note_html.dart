@@ -78,6 +78,10 @@ final class NoteHtml {
   /// The `@font-face` rules the body's formulas need, or null.
   String? get fontFaces => _math.fontFaces;
 
+  /// Whether the body drew a formula as inline SVG; the EPUB package
+  /// declares the `svg` property for a chapter that did (E6).
+  bool get usesSvg => _math.usesSvg;
+
   String _render(String text) {
     final nodes = _parsed(text);
     _rewrite(nodes);
