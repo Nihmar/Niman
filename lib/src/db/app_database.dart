@@ -88,6 +88,33 @@ class AppSettings extends Table {
   /// key map: a pin is about how this machine is used.
   TextColumn get pinnedCommands => text().named('pinned_commands').nullable()();
 
+  /// Whether the first-run welcome deck was finished or skipped (#266).
+  ///
+  /// Fresh installs only: the v31 migration writes `1` for every database
+  /// that upgrades into it, because an install that has opened Niman
+  /// already has a library and a way of writing and is not welcomed twice.
+  BoolColumn get welcomeSeen =>
+      boolean().named('welcome_seen').withDefault(const Constant(false))();
+
+  /// The welcome's Markdown answer (`none`, `some`, `fluent`), or null
+  /// while it was never asked. It seeds the editors of a library the
+  /// first time this device opens it (#266).
+  TextColumn get markdownExperience =>
+      text().named('markdown_experience').nullable()();
+
+  /// Whether the guided tour was finished or dismissed (#266).
+  BoolColumn get tourSeen =>
+      boolean().named('tour_seen').withDefault(const Constant(false))();
+
+  /// Where the tour stopped, for *Continue the tour*; 0 is its start.
+  IntColumn get tourStep =>
+      integer().named('tour_step').withDefault(const Constant(0))();
+
+  /// The welcome's "show me around" choice (#266), read once a library is
+  /// open: the tour needs a shell to point at.
+  BoolColumn get tourOffer =>
+      boolean().named('tour_offer').withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -385,7 +412,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 30;
+  int get schemaVersion => 31;
 
   /// The index that makes a custom theme's name unique without regard to
   /// case, and the name it answers to (issue #269).
@@ -452,7 +479,10 @@ class AppDatabase extends _$AppDatabase {
   /// files merge without a base until their next agreement records one,
   /// and pre-v30 databases gain `custom_themes` (issue #269), empty: a
   /// fresh install has no themes of its own, and an upgrade keeps the
-  /// shipped ones.
+  /// shipped ones, and pre-v31 databases gain the first-run welcome
+  /// (issue #266): `welcome_seen` starts at 1 for an upgrade — it has
+  /// opened Niman before — with `markdown_experience`, `tour_seen`,
+  /// `tour_step` and `tour_offer` at their defaults.
   ///
   /// v27 to v29 were numbered on two branches at once — one took v27 for
   /// the columns, the other v27 and v28 for the table and `base_text` — so
@@ -666,6 +696,42 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(customThemes);
         }
         await _createCustomThemeNameIndex(m);
+      }
+      if (from < 31) {
+        // The first-run welcome (#266). An upgrading install has opened
+        // Niman before — it has a library and a way of writing — so the
+        // deck is marked seen as the columns are made; only a fresh
+        // database starts at 0 and is welcomed.
+        final existing = await _columnsOf('app_settings');
+        if (!existing.contains('welcome_seen')) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN welcome_seen '
+            'BOOLEAN NOT NULL DEFAULT 1',
+          );
+        }
+        if (!existing.contains('markdown_experience')) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN markdown_experience TEXT',
+          );
+        }
+        if (!existing.contains('tour_seen')) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN tour_seen '
+            'BOOLEAN NOT NULL DEFAULT 0',
+          );
+        }
+        if (!existing.contains('tour_step')) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN tour_step '
+            'INTEGER NOT NULL DEFAULT 0',
+          );
+        }
+        if (!existing.contains('tour_offer')) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN tour_offer '
+            'BOOLEAN NOT NULL DEFAULT 0',
+          );
+        }
       }
     },
   );
