@@ -111,6 +111,38 @@ void main() {
     expect(a, isNot(contains('Top.html')));
   });
 
+  test('two notes whose names differ only by case get one page each', () async {
+    // `a.md` is in the fixture. On a case-sensitive disk `a.MD` is a
+    // second note whose stem is the same file name; on Windows it is the
+    // same file written twice. Either way the zip cannot hold one
+    // overwriting the other (E7).
+    await File(p.join(notes, 'a.MD')).writeAsString('# Upper\n');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.html,
+      language: 'en',
+    );
+    final files = await contents();
+    // Path order puts `a.MD` first: it keeps the name, `a.md` is numbered.
+    expect(files['a.html'], contains('Upper'));
+    expect(files['a-2.html'], contains('>A</h1>'));
+  });
+
+  test('a picture in the wrong case still resolves when unique', () async {
+    await File(p.join(notes, 'Vector.SVG')).writeAsBytes(<int>[1, 2, 3]);
+    await File(p.join(notes, 'case.md')).writeAsString('![p](vector.svg)\n');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.html,
+      language: 'en',
+    );
+    // The note lookup is case-insensitive; the picture's is too, when one
+    // file answers (E7).
+    expect((await contents())['case.html'], contains('src="Vector.SVG"'));
+  });
+
   test('a PDF folder needs an engine', () async {
     await expectLater(
       TreeExport.run(

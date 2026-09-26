@@ -333,14 +333,15 @@ final class _TreeExportWarning {
 /// it is a folder.
 typedef _Entry = ({String abs, String rel, bool isDir});
 
-/// The walked tree, its root, and the two lookups links and pictures
-/// resolve with.
+/// The walked tree, its root, and the lookups links and pictures resolve
+/// with, and the page name each note gets inside the export.
 typedef _Tree = ({
   String root,
   List<_Entry> entries,
   Set<String> files,
   Map<String, String> notes,
   Map<String, List<String>> stems,
+  Map<String, String> names,
 });
 
 /// The request the export isolate is spawned with.
@@ -416,10 +417,16 @@ Future<void> _exportTree(TreeExportRequest request) async {
       ? Directory.systemTemp.createTempSync('niman-tree-pdf-')
       : null;
   try {
+    // A book's progress counts chapters, not the tree: a folder's
+    // attachments and its empty folders never enter the container (E10).
+    final total = book == null
+        ? tree.entries.length
+        : tree.files.where(_isNote).length;
     var done = 0;
     for (final entry in tree.entries) {
       // Between entries, where the zip is never half-written.
       if (cancelled) break;
+      if (book != null && !_isNote(entry.rel)) continue;
       // Every format keeps the tree's folders, empty ones included: a
       // folder in the Markdown zip and not in the HTML one is a support
       // question waiting to happen (L8).
@@ -451,11 +458,11 @@ Future<void> _exportTree(TreeExportRequest request) async {
               request.engine,
               request.runner,
               page,
-              _stem(entry.rel),
+              tree.names[entry.rel]!,
             );
           } else {
             encoder!.addArchiveFile(
-              ArchiveFile.string('${_stem(entry.rel)}.html', page),
+              ArchiveFile.string('${tree.names[entry.rel]}.html', page),
             );
           }
         }
@@ -466,13 +473,9 @@ Future<void> _exportTree(TreeExportRequest request) async {
         if (encoder != null) await encoder.addFile(File(entry.abs), entry.rel);
       }
       done++;
-      if (done % 8 == 0 || done == tree.entries.length) {
+      if (done % 8 == 0 || done == total) {
         request.events.send(
-          ExportProgress(
-            done: done,
-            total: tree.entries.length,
-            current: entry.rel,
-          ),
+          ExportProgress(done: done, total: total, current: entry.rel),
         );
       }
     }
@@ -544,7 +547,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
 Future<void> _addEpubChapter(EpubBook book, _Tree tree, _Entry entry) async {
   final rel = entry.rel;
   final noteDir = p.dirname(rel);
-  final href = 'OEBPS/text/${_stem(rel)}.xhtml';
+  final href = 'OEBPS/text/${tree.names[rel]}.xhtml';
   final text = _readNote(entry.abs);
   final images = <String, String>{};
   for (final target in ExportSources.pictureTargets(text)) {
@@ -652,12 +655,29 @@ _Tree _walk(String dir) {
   };
   final notes = <String, String>{
     for (final file in files)
-      if (p.extension(file).toLowerCase() == '.md') file.toLowerCase(): file,
+      if (_isNote(file)) file.toLowerCase(): file,
   };
+  final noteFiles = [
+    for (final file in files)
+      if (_isNote(file)) file,
+  ];
   final stems = <String, List<String>>{};
-  for (final file in notes.values) {
-    final stem = _stem(file).toLowerCase();
-    (stems[stem] ??= <String>[]).add(file);
+  for (final file in noteFiles) {
+    (stems[_stem(file).toLowerCase()] ??= <String>[]).add(file);
+  }
+  // The page name a note gets inside the export: its stem when that is
+  // free, a numbered one when two notes would land on one entry. Names
+  // are kept unique case-insensitively: `a.md` and `a.MD` are two notes
+  // on Linux and one file name on Windows (E7).
+  final names = <String, String>{};
+  final used = <String>{};
+  for (final file in noteFiles) {
+    final wanted = _stem(file);
+    var name = wanted;
+    for (var n = 2; !used.add(name.toLowerCase()); n++) {
+      name = '$wanted-$n';
+    }
+    names[file] = name;
   }
   return (
     root: dir,
@@ -665,6 +685,7 @@ _Tree _walk(String dir) {
     files: files,
     notes: notes,
     stems: stems,
+    names: names,
   );
 }
 
@@ -747,12 +768,14 @@ Map<String, String> _linkUrls(
       case WikiLink(:final ref):
         final note = _noteIn(ref.target, noteDir, tree);
         if (note != null) {
-          out[ref.target] = _url(noteDir, '${_stem(note)}$extension');
+          out[ref.target] = _url(noteDir, '${tree.names[note]}$extension');
         }
       case MarkdownLink(:final href):
         if (!href.toLowerCase().endsWith('.md')) continue;
         final note = _noteIn(href, noteDir, tree);
-        if (note != null) out[href] = _url(noteDir, '${_stem(note)}$extension');
+        if (note != null) {
+          out[href] = _url(noteDir, '${tree.names[note]}$extension');
+        }
     }
   }
   return out;
@@ -760,7 +783,9 @@ Map<String, String> _linkUrls(
 
 /// The file [target] names inside the tree, from [noteDir]: the subtree
 /// root first, then the note's own folder, then a unique file name — the
-/// read view's own order, over the tree instead of the index.
+/// read view's own order, over the tree instead of the index. The name
+/// matches case-insensitively when exactly one file answers, as a note
+/// target does (E7).
 String? _fileIn(String target, String noteDir, Set<String> files) {
   var clean = target.trim().replaceAll(r'\', '/');
   while (clean.startsWith('./')) {
@@ -783,7 +808,16 @@ String? _fileIn(String target, String noteDir, Set<String> files) {
     for (final file in files)
       if (p.posix.basename(file) == base) file,
   ];
-  return matches.length == 1 ? matches.single : null;
+  if (matches.length == 1) return matches.single;
+  if (matches.isEmpty) {
+    final lower = base.toLowerCase();
+    final caseless = [
+      for (final file in files)
+        if (p.posix.basename(file).toLowerCase() == lower) file,
+    ];
+    if (caseless.length == 1) return caseless.single;
+  }
+  return null;
 }
 
 /// The note [target] names inside the tree: an exact path first (with
