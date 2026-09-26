@@ -4,6 +4,11 @@ Supported today: **Android** (minSdk 35), **Linux** (Wayland),
 **Windows**. macOS/iOS are not built yet, but the code is kept portable.
 New tests must be portable too (see [conventions](../dev/conventions.md)).
 
+Export is one feature on every platform: Markdown, HTML, PDF and EPUB
+are in both choosers, note and folder alike. EPUB is platform-neutral
+Dart — no engine, no WebView — so a book is built the same way
+everywhere; PDF goes through each platform's own printer (below).
+
 ## Android
 
 - **Storage:** plain `dart:io` file access, gated by

@@ -35,16 +35,18 @@ one file:
   opens on. A wikilink out has nothing to point at, exactly as on a
   single HTML page.
 
-A wikilink becomes highlighted text on a page exported on its own: one
-page has nothing to point at. Export a folder, below, and its links
-become links.
+A link to another note becomes the text it shows on a page exported on
+its own — a wikilink highlighted, a Markdown link its own words — since
+one page has nothing to point at; a link to a website stays a link.
+Export a folder, below, and its note-to-note links become links.
 
 ### A book's metadata
 
 An EPUB takes its metadata from the frontmatter: the note's own for a
 single note, `index.md`'s for a folder or the library — the note the
 book's author writes the metadata in, when the exported folder has one at
-its root. The keys are the usual ones, so a note written for another tool
+its root. Without one the book keeps the folder's name, and the export
+logs why. The keys are the usual ones, so a note written for another tool
 reads the same here:
 
 ```
@@ -100,12 +102,15 @@ one zip:
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those
 are the app's own corners, and the tree that lists a library does not
-show them either. An empty folder is kept in every format.
+show them either. An empty folder is kept in the Markdown, HTML and PDF
+zips; a book has no folders to keep, and a folder with no Markdown note
+at all is refused there — there would be no chapter to read.
 
 The zip is streamed while it is written, one entry at a time, so a
 library of any size exports without the whole of it ever being in memory.
 A progress dialog shows the entry being written and can stop the run; a
-cancelled export removes the half-written zip. An export never
+cancelled export removes the half-written zip — unless Windows has not
+let go of the file yet, and then the app says so. An export never
 overwrites the last one: a second zip of the same folder is written as
 `name (2).zip` beside it.
 
