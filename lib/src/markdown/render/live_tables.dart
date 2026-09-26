@@ -20,14 +20,11 @@
 library;
 
 import 'package:flutter/painting.dart';
-import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/table/markdown_table.dart';
-
-const AppLogger _log = AppLogger(name: 'markdown');
 
 /// A stretch of a row's source drawn as nothing `width` wide: the pipes and
 /// the spaces between two cells' text.
@@ -166,13 +163,6 @@ final class LiveTables {
     for (final width in column) {
       edges.add(edges.last + width + 2 * pad);
     }
-    // An ad-hoc diagnostic (#303): what a table's columns were measured to
-    // be, for the glyph that drifts the cells after it off them.
-    _log.info(
-      'live table line ${block.startLine}: columns '
-      '${column.map((w) => w.toStringAsFixed(1)).toList()} '
-      'edges ${edges.map((w) => w.toStringAsFixed(1)).toList()}',
-    );
     final tiny = _tinyAdvance(scaler);
     // The columns' alignments, from the delimiter row: a right-aligned
     // column's text stands at its right edge, as the read view sets it.
