@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/export/export_pdf.dart';
+import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_raster.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
@@ -113,6 +114,69 @@ void main() {
     final pages = _imageStreams(bytes);
     expect(pages.length, int.parse(count));
     expect(pages.first, isNot(equals(pages[1])));
+  });
+
+  testWidgets('a page never breaks through a line of text', (tester) async {
+    await pumpTheme(tester);
+    // A surface tall enough for the whole column: the note is wider than a
+    // page's height and a viewport would only cut it off.
+    tester.view.physicalSize = const Size(400, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: Column(
+              key: key,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                for (var at = 0; at < 40; at++) ...[
+                  Text(
+                    'Paragraph $at, long enough to wrap over more than one '
+                    'line of a narrow column.',
+                    style: theme.body,
+                  ),
+                  // A picture, a rule, a formula: a leaf box, drawn as one
+                  // piece and not to be broken through.
+                  if (at == 20) const SizedBox(height: 12),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final box = tester.renderObject<RenderBox>(find.byKey(key));
+    final spans = rasterInkSpans(box);
+    // One span per line, not one per paragraph: the break has to be able to
+    // fall inside a paragraph (#63). And the leaf box is one of them.
+    expect(spans.length, greaterThan(40));
+    expect(
+      spans.where((span) => span.$2 - span.$1 == 12),
+      hasLength(1),
+      reason: 'the picture is a span of its own',
+    );
+    final breaks = rasterBreaks(
+      total: box.size.height,
+      spans: spans,
+      contentHeight: 120,
+    );
+    expect(breaks.length, greaterThan(2));
+    expect(breaks.last, box.size.height);
+    for (final at in breaks.skip(1)) {
+      for (final (top, bottom) in spans) {
+        expect(
+          at > top && at < bottom,
+          isFalse,
+          reason: 'the break at $at cuts the line that runs $top..$bottom',
+        );
+      }
+    }
   });
 
   testWidgets('a picture handed in is drawn on the page', (tester) async {

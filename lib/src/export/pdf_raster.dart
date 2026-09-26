@@ -8,10 +8,12 @@
 /// the picture to, and a note-sized job is the price of a machine without a
 /// browser.
 ///
-/// A page is a slice of the one layout, not a break the layout chose: a
-/// line or a picture that crosses a slice's edge is cut in two. A machine
-/// with an engine prints the page's HTML instead, where the print CSS
-/// keeps blocks whole.
+/// A page is a slice of the one layout, and where the slices end is not
+/// the page's nominal edge: the break is moved up to the last offset that
+/// falls between two lines of text ([rasterBreaks]), so a page never cuts
+/// one in half. A picture taller than a page has nowhere to break and is
+/// cut. A machine with an engine prints the page's HTML instead, where the
+/// print CSS keeps blocks whole.
 library;
 
 import 'dart:io';
@@ -21,6 +23,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/export/pdf_breaks.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_writer.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -98,8 +101,14 @@ Future<Uint8List> rasterPdf({
   );
   try {
     final box = layout.layOut();
-    final total = box.size.height;
-    final count = math.max(1, (total / contentHeight).ceil());
+    // Where each page ends: the page's own edge pulled up to a gap between
+    // two lines of text, so a slice never cuts one in half (#63).
+    final breaks = rasterBreaks(
+      total: box.size.height,
+      spans: rasterInkSpans(box),
+      contentHeight: contentHeight,
+    );
+    final count = breaks.length - 1;
     onProgress?.call(0, count);
     // The note is recorded once and sliced per page: a capture per page
     // would re-record the whole note for every page, which is quadratic in
@@ -113,14 +122,8 @@ Future<Uint8List> rasterPdf({
     try {
       for (var page = 0; page < count; page++) {
         if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
-        final top = page * contentHeight;
-        // A note that lays out to nothing — empty, or only blocks the read
-        // view hides — still takes one page: a zero-height capture is an
-        // empty image on some backends and an error on others, and a PDF
-        // wants a page (P5).
-        final height = total <= 0
-            ? contentHeight
-            : math.min(contentHeight, total - top);
+        final top = breaks[page];
+        final height = breaks[page + 1] - top;
         final image = await recording.capture(
           Rect.fromLTWH(0, top, contentWidth, height),
           pixelRatio: pixelRatio,

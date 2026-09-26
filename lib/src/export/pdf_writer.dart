@@ -39,7 +39,8 @@ final class PdfPageImage {
 }
 
 /// Writes [pages] as a PDF, each image fitted into the page's content box
-/// — an A4 sheet with [margin] points on every side.
+/// — an A4 sheet with [margin] points on every side — from that box's
+/// top-left corner.
 Uint8List writePdf(
   List<PdfPageImage> pages, {
   double pageWidth = a4Width,
@@ -104,7 +105,11 @@ final class PdfWriter {
     final imageObject = pageObject + 2;
     final scale = _fit(page, content.width, content.height);
     final x = content.left + (content.width - page.width * scale) / 2;
-    final y = content.bottom + (content.height - page.height * scale) / 2;
+    // From the content box's own top: a page the raster fallback broke
+    // early — a line straddled its edge, so the break moved up — holds
+    // less than a full sheet, and its words must still begin where every
+    // other page's do, not float to the middle of the paper.
+    final y = content.bottom + (content.height - page.height * scale);
     final drawn = utf8.encode(
       'q ${_number(page.width * scale)} 0 0 ${_number(page.height * scale)} '
       '${_number(x)} ${_number(y)} cm /Im0 Do Q\n',
