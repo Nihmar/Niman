@@ -161,7 +161,8 @@ demands; the container is `mimetype` (stored, first),
   chapter that shows it, the maths fonts declared once for the book.
 - [x] One note → one `.epub`, its pictures inside.
 - [x] Folder/library → one `.epub`, a chapter per note, links between
-  chapters internal, one nav entry per chapter.
+  chapters internal, one nav entry per chapter. Its frontmatter is
+  `index.md`'s at the folder's root, when there is one.
 - [x] The EPUB format in both choosers, on every platform, `.epub` file
   names, strings in every locale.
 - [x] Tests: the container's shape and first-stored `mimetype`, every
@@ -169,13 +170,15 @@ demands; the container is `mimetype` (stored, first),
   a shared picture copied once, links between chapters.
 - [ ] Read back by hand in Calibre / Apple Books / KOReader **and** in the
   app's own pane (#280).
-- [x] Cover and metadata from the frontmatter: `cover:`, `title`,
-  `author`, `language`/`lang`, `description`, `publisher`, `date`,
-  `tags` (→ `dc:subject`), `series` + `series_index` (EPUB 3
-  `belongs-to-collection`), `rights`, `identifier`/`isbn`. The cover is a
-  `cover.xhtml` page first in the spine, the EPUB 3 `cover-image`
-  property, and the EPUB 2 `meta name="cover"` for older readers. The
-  Markdown cheatsheet documents the keys, in every language.
+- [x] Cover and metadata from the frontmatter: the note's own, or
+  `index.md`'s at the exported folder's root. `cover:`, `title`,
+  `author`, `language`/`lang`, `description`, `publisher`, `published`
+  (not `date:`, which is the note's own), `tags` (→ `dc:subject`),
+  `series` + `series_index` (EPUB 3 `belongs-to-collection`), `rights`,
+  `identifier`/`isbn`. The cover is a `cover.xhtml` page first in the
+  spine, the EPUB 3 `cover-image` property, and the EPUB 2
+  `meta name="cover"` for older readers. The Markdown cheatsheet
+  documents the keys, in every language.
 - [ ] Nav folded by folder (a flat, tree-ordered list for now).
 
 ## Open questions
