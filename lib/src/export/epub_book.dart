@@ -131,6 +131,12 @@ EpubMetadata epubMetadataOf(String text) {
 const String _opfDir = 'OEBPS';
 const String _imageDir = '$_opfDir/images';
 
+/// [href], a container-relative path, as the IRI a package or a nav may
+/// name: one path segment at a time, because a space or a `#` in a note's
+/// name is not a URL character. The zip entries keep the note's own name;
+/// only the references to them are escaped (E5).
+String _iri(String href) => href.split('/').map(Uri.encodeComponent).join('/');
+
 /// One chapter, as it was added.
 typedef EpubChapterEntry = ({String id, String href, String title});
 
@@ -275,7 +281,7 @@ final class EpubBook {
   /// so a reader opens on the picture, not on the first chapter.
   String _coverXhtml() {
     final cover = _cover!;
-    final src = p.posix.relative(cover.href, from: _opfDir);
+    final src = _iri(p.posix.relative(cover.href, from: _opfDir));
     return '<?xml version="1.0" encoding="utf-8"?>\n'
         '<!DOCTYPE html>\n'
         '<html xmlns="http://www.w3.org/1999/xhtml" '
@@ -327,7 +333,7 @@ final class EpubBook {
   String _navXhtml() {
     final entries = StringBuffer();
     for (final chapter in _chapters) {
-      final href = p.posix.relative(chapter.href, from: _opfDir);
+      final href = _iri(p.posix.relative(chapter.href, from: _opfDir));
       entries.write(
         '      <li><a href="${escapeAttribute(href)}">'
         '${escapeHtml(chapter.title)}</a></li>\n',
@@ -367,7 +373,7 @@ final class EpubBook {
         '    <item id="cover-page" href="cover.xhtml" '
         'media-type="application/xhtml+xml" />\n',
       );
-      final href = p.posix.relative(_cover!.href, from: _opfDir);
+      final href = _iri(p.posix.relative(_cover!.href, from: _opfDir));
       final type = epubPictureType(p.extension(_cover!.path).toLowerCase());
       manifest.write(
         '    <item id="cover-image" href="${escapeAttribute(href)}" '
@@ -375,14 +381,14 @@ final class EpubBook {
       );
     }
     for (final chapter in _chapters) {
-      final href = p.posix.relative(chapter.href, from: _opfDir);
+      final href = _iri(p.posix.relative(chapter.href, from: _opfDir));
       manifest.write(
         '    <item id="${chapter.id}" href="${escapeAttribute(href)}" '
         'media-type="application/xhtml+xml" />\n',
       );
     }
     for (final picture in _picturesInOrder) {
-      final href = p.posix.relative(picture.href, from: _opfDir);
+      final href = _iri(p.posix.relative(picture.href, from: _opfDir));
       final type = epubPictureType(p.extension(picture.path).toLowerCase());
       manifest.write(
         '    <item id="${picture.id}" href="${escapeAttribute(href)}" '

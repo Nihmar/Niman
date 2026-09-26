@@ -178,6 +178,37 @@ void main() {
     },
   );
 
+  test('a book escapes the hrefs of names a URL cannot hold', () async {
+    final notes = p.join(root.path, 'Notes');
+    await Directory(notes).create(recursive: true);
+    await File(p.join(notes, 'my note.md'))
+        .writeAsString('# Space\n\nSee [hash](a#b.md).\n');
+    await File(p.join(notes, 'a#b.md')).writeAsString('# Hash\n');
+
+    final out = p.join(root.path, 'book.epub');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: out,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+    final files = textEntries(out);
+    // The entries keep the notes' own names…
+    expect(
+      files.keys,
+      containsAll(<String>['OEBPS/text/my note.xhtml', 'OEBPS/text/a#b.xhtml']),
+    );
+    // …while the package and the nav name them as IRIs: a space in an
+    // href is not valid, and `#` would make the file name a fragment
+    // (E5).
+    expect(files['OEBPS/nav.xhtml'], contains('href="text/my%20note.xhtml"'));
+    expect(files['OEBPS/nav.xhtml'], contains('href="text/a%23b.xhtml"'));
+    expect(files['OEBPS/content.opf'], contains('href="text/my%20note.xhtml"'));
+    expect(files['OEBPS/content.opf'], contains('href="text/a%23b.xhtml"'));
+    // The chapter's link to the other note names the same IRI.
+    expect(files['OEBPS/text/my note.xhtml'], contains('href="a%23b.xhtml"'));
+  });
+
   test("a cover named in the frontmatter is the book's first page", () async {
     await File(p.join(root.path, 'photo.png')).writeAsBytes(<int>[1, 2, 3]);
     final payload = await exportNoteEpub(
