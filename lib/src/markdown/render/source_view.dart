@@ -3837,6 +3837,12 @@ final class _Line extends StatelessWidget {
       strutStyle: table != null && !folded
           ? StrutStyle.fromTextStyle(_lineStyle(revealed: revealed))
           : null,
+      // A table's row is laid out as the row it is: the cells are put where
+      // they belong by the room between them, and a row that soft-wrapped
+      // carried the cells after the break onto the next line — they landed
+      // wherever the wrap left the pen, in the wrong columns. A table wider
+      // than the pane is clipped instead, as it was already.
+      softWrap: table == null,
     );
     if (folded) return paragraph;
     if (inline.isNotEmpty) {
