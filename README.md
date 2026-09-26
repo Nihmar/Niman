@@ -52,6 +52,10 @@ Full guides live in [`docs/`](docs/):
   can be transcribed on the device, with nothing uploaded.
 - **Spellcheck** on every platform (system/IME on Android, hunspell on
   desktop) with a per-library personal dictionary.
+- **Tidy the Markdown** in one action — list indentation, heading spacing,
+  tight lists, a closed fence where the note forgot one — with each rule
+  on or off per library, and the tidy run by itself when a note is closed
+  if you want it.
 - Find and replace, word count, heading outline and folding, **typewriter
   mode** on every platform, and **Zen mode** on the desktop.
 - The **command palette** and **remappable keyboard shortcuts**.
@@ -80,6 +84,33 @@ Full guides live in [`docs/`](docs/):
   note, linked back to its place; the file marks where it was annotated.
 - Books have a **look of their own** — theme, brightness, font and text
   size — apart from the notes.
+
+### Getting notes in and out
+
+- **Export a note** as Markdown, as a self-contained HTML page, as a
+  print-ready **PDF**, or as an **EPUB** book. The PDF is printed through
+  the machine's own browser — Edge on Windows, a Chromium-family browser
+  on Linux, the system WebView on Android — so its text stays selectable;
+  where there is none, the app says so before it starts and draws the
+  pages itself instead.
+- **Export a folder or the whole library** as one zip: Markdown, a page
+  per note as HTML, a PDF per note, or **one EPUB book** with a chapter
+  per note, its cover and metadata from `index.md`. Attachments travel
+  inside, and the links between the notes are rewritten to follow.
+- **Import a Notion export.** Notion's *Markdown & CSV* zip lands as a new
+  folder of the library: the page ids off every file name, the links
+  between pages rewritten to the names they now have, pictures and
+  attachments kept. From *Settings → Maintenance → Import Notion export*,
+  from sharing the zip to Niman on Android, or by dropping it on the
+  desktop window.
+- **Open an Obsidian vault.** Pick the vault folder as the library and
+  Obsidian's own syntax reads as it stands — `[[wikilinks]]` and their
+  aliases, `![[image.png]]` embeds, frontmatter and tags — with
+  `.obsidian/` kept out of the tree.
+- **Share into Niman on Android** from any app's share menu: text lands
+  at the end of the quick note (or waits for the choose/create screen
+  when none is set), and a Markdown file — or a Notion export — is
+  imported into the library and opened.
 
 ### Organization
 
