@@ -1579,6 +1579,19 @@ final class GalicianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libro sen metadatos';
+  @override
+  String get exportEpubNoIndex =>
+      'Este cartafol non ten ningún index.md na súa raíz. O libro '
+      'levará o nome do cartafol e ningún autor, portada ou serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md non ten frontmatter. O libro levará o nome do cartafol '
+      'e ningún autor, portada ou serie.';
+  @override
+  String get exportEpubAnyway => 'Exportar de todos os xeitos';
   @override
   String get exportPdfPicture =>
       'O PDF é unha imaxe das páxinas; instala un navegador para ter texto '

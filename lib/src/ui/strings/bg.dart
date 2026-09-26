@@ -1579,6 +1579,19 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Книга без метаданни';
+  @override
+  String get exportEpubNoIndex =>
+      'Тази папка няма index.md в основата си. Книгата ще носи името '
+      'на папката и без автор, корица или поредица.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md няма frontmatter. Книгата ще носи името на папката и '
+      'без автор, корица или поредица.';
+  @override
+  String get exportEpubAnyway => 'Експортирай въпреки това';
   @override
   String get exportPdfPicture =>
       'PDF е картина на страниците; инсталирайте браузър за избираем текст.';

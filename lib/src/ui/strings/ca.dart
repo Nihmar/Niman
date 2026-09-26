@@ -1596,6 +1596,19 @@ final class CatalanStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Llibre sense metadades';
+  @override
+  String get exportEpubNoIndex =>
+      'Aquesta carpeta no té cap index.md a l’arrel. El llibre portarà '
+      'el nom de la carpeta i cap autor, portada ni sèrie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md no té frontmatter. El llibre portarà el nom de la '
+      'carpeta i cap autor, portada ni sèrie.';
+  @override
+  String get exportEpubAnyway => 'Exporta igualment';
   @override
   String get exportPdfPicture =>
       'El PDF és una imatge de les pàgines; instal·la un navegador per tenir '

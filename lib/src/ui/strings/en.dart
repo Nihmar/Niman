@@ -1551,6 +1551,19 @@ final class EnglishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Book without metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'This folder has no index.md at its root. The book will carry '
+      'the folder name and no author, cover or series.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md has no frontmatter. The book will carry the folder '
+      'name and no author, cover or series.';
+  @override
+  String get exportEpubAnyway => 'Export anyway';
   @override
   String get exportPdfPicture =>
       'The PDF is a picture of the pages; a browser engine on this machine '

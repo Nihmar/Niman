@@ -742,6 +742,20 @@ abstract base class Strings {
   String get exportLibraryTitle;
   String get exportFormatPdf;
   String get exportFormatEpub;
+
+  /// The title of the pre-flight dialog a folder's EPUB export shows when
+  /// the folder has no metadata source (#303, E3).
+  String get exportEpubNoMetadataTitle;
+
+  /// The dialog's message when the exported folder has no `index.md`.
+  String get exportEpubNoIndex;
+
+  /// The dialog's message when `index.md` has no frontmatter.
+  String get exportEpubNoFrontmatter;
+
+  /// The dialog's proceed action: export the book without metadata.
+  String get exportEpubAnyway;
+
   String get exportPdfPicture;
   String exportDone(String place);
   String exportFailed(Object error);

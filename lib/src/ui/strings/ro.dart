@@ -1577,6 +1577,19 @@ final class RomanianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Carte fără metadate';
+  @override
+  String get exportEpubNoIndex =>
+      'Acest dosar nu are index.md în rădăcină. Cartea va purta numele '
+      'dosarului și nu va avea autor, copertă sau serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nu are frontmatter. Cartea va purta numele dosarului '
+      'și nu va avea autor, copertă sau serie.';
+  @override
+  String get exportEpubAnyway => 'Exportă oricum';
   @override
   String get exportPdfPicture =>
       'PDF-ul este o imagine a paginilor; instalați un browser pentru text '

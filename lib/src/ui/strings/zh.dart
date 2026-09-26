@@ -1433,6 +1433,17 @@ final class ChineseStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => '没有元数据的书籍';
+  @override
+  String get exportEpubNoIndex =>
+      '此文件夹的根目录中没有 index.md。书籍将以文件夹名称命名，且没有作者、封面或系列。';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md 没有 frontmatter。书籍将以文件夹名称命名，且没有作者、封面或系列。';
+  @override
+  String get exportEpubAnyway => '仍然导出';
   @override
   String get exportPdfPicture => 'PDF 是页面的图片；安装浏览器后文字可选择。';
   @override

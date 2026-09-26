@@ -1563,6 +1563,19 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bók án lýsigagna';
+  @override
+  String get exportEpubNoIndex =>
+      'Þessi mappa hefur engan index.md í rót sinni. Bókin ber nafn '
+      'möppunnar og engan höfund, kápu eða seríu.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md hefur ekkert frontmatter. Bókin ber nafn möppunnar og '
+      'engan höfund, kápu eða seríu.';
+  @override
+  String get exportEpubAnyway => 'Flytja út samt';
   @override
   String get exportPdfPicture =>
       'PDF-skjalið er mynd af síðunum; settu upp vafra fyrir valanlegan '

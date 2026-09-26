@@ -1575,6 +1575,19 @@ final class HungarianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Könyv metaadatok nélkül';
+  @override
+  String get exportEpubNoIndex =>
+      'Ebben a mappában nincs index.md a gyökérben. A könyv a mappa '
+      'nevét viseli, és nem lesz szerzője, borítója vagy sorozata.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'Az index.md nem tartalmaz frontmattert. A könyv a mappa nevét '
+      'viseli, és nem lesz szerzője, borítója vagy sorozata.';
+  @override
+  String get exportEpubAnyway => 'Exportálás mégis';
   @override
   String get exportPdfPicture =>
       'A PDF az oldalak képe; választható szöveghez telepítsd a böngészőt.';

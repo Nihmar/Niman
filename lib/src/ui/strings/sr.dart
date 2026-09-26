@@ -1571,6 +1571,19 @@ final class SerbianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Књига без метаподатака';
+  @override
+  String get exportEpubNoIndex =>
+      'Ова фасцикла нема index.md у корену. Књига ће носити име '
+      'фасцикле и без аутора, корица или серије.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md нема frontmatter. Књига ће носити име фасцикле и без '
+      'аутора, корица или серије.';
+  @override
+  String get exportEpubAnyway => 'Ипак извези';
   @override
   String get exportPdfPicture =>
       'PDF је слика страница; инсталирајте прегледач за текст који се може '

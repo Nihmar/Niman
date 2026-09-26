@@ -1580,6 +1580,19 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Книга без метаподатоци';
+  @override
+  String get exportEpubNoIndex =>
+      'Оваа папка нема index.md во коренот. Книгата ќе го носи името '
+      'на папката и без автор, корица или серија.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md нема frontmatter. Книгата ќе го носи името на папката '
+      'и без автор, корица или серија.';
+  @override
+  String get exportEpubAnyway => 'Сепак извези';
   @override
   String get exportPdfPicture =>
       'PDF е слика од страниците; инсталирајте прелистувач за текст што може '

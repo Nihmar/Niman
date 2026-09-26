@@ -1559,6 +1559,19 @@ final class DanishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bog uden metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Denne mappe har ingen index.md i roden. Bogen får mappens navn '
+      'og ingen forfatter, forside eller serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md har ingen frontmatter. Bogen får mappens navn og ingen '
+      'forfatter, forside eller serie.';
+  @override
+  String get exportEpubAnyway => 'Eksportér alligevel';
   @override
   String get exportPdfPicture =>
       "PDF'en er et billede af siderne; installér en browser for "

@@ -1570,6 +1570,19 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Книга без метаданих';
+  @override
+  String get exportEpubNoIndex =>
+      'У цій теці немає index.md у її корені. Книга матиме назву теки '
+      'і не матиме автора, обкладинки чи серії.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'У index.md немає frontmatter. Книга матиме назву теки і не '
+      'матиме автора, обкладинки чи серії.';
+  @override
+  String get exportEpubAnyway => 'Усе одно експортувати';
   @override
   String get exportPdfPicture =>
       'PDF — це зображення сторінок; встановіть браузер, щоб текст можна '

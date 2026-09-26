@@ -1570,6 +1570,19 @@ final class BosnianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knjiga bez metapodataka';
+  @override
+  String get exportEpubNoIndex =>
+      'Ova fascikla nema index.md u korijenu. Knjiga će nositi ime '
+      'fascikle i bez autora, korica ili serije.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nema frontmatter. Knjiga će nositi ime fascikle i bez '
+      'autora, korica ili serije.';
+  @override
+  String get exportEpubAnyway => 'Ipak izvezi';
   @override
   String get exportPdfPicture =>
       'PDF je slika stranica; instalirajte preglednik za tekst koji se može '

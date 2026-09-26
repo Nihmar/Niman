@@ -1547,6 +1547,19 @@ final class EstonianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Raamat ilma metaandmeteta';
+  @override
+  String get exportEpubNoIndex =>
+      'Selles kaustas pole juuretasandil index.md faili. Raamat kannab '
+      'kausta nime ning sellel pole autorit, kaant ega sarja.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md failil pole frontmatterit. Raamat kannab kausta nime '
+      'ning sellel pole autorit, kaant ega sarja.';
+  @override
+  String get exportEpubAnyway => 'Ekspordi siiski';
   @override
   String get exportPdfPicture =>
       'PDF on lehekülgede pilt; valitava teksti saamiseks paigalda brauseri.';

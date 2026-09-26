@@ -1573,6 +1573,19 @@ final class BasqueStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Metadaturik gabeko liburua';
+  @override
+  String get exportEpubNoIndex =>
+      'Karpeta honek ez du index.md-rik erroan. Liburuak karpetaren '
+      'izena izango du, eta ez autore, azal edo sailik.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md-k ez du frontmatter-ik. Liburuak karpetaren izena '
+      'izango du, eta ez autore, azal edo sailik.';
+  @override
+  String get exportEpubAnyway => 'Esportatu hala ere';
   @override
   String get exportPdfPicture =>
       'PDFa orrialdeen irudia da; instalatu nabigatzailea testua hautatzeko.';

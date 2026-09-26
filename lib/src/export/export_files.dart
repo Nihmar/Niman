@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/saved_file.dart';
+import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/pdf_printer.dart';
 import 'package:niman/src/export/pdf_webview.dart';
 
@@ -60,6 +61,19 @@ Future<String?> pickExportFolderFromDisk({required String dialogTitle}) =>
 /// The folder seam the shell exports a tree through.
 final pickExportFolderProvider = Provider<PickExportFolder>(
   (ref) => pickExportFolderFromDisk,
+);
+
+/// Why a folder's book has no metadata source before its export starts
+/// (#303, E3), or null when it has one. A directory listing and one note
+/// read, off the UI isolate. Widget tests answer for their library root,
+/// which is not a real folder.
+typedef EpubMetadataLookup = Future<EpubMetadataProblem?> Function(
+  String folder,
+);
+
+/// The metadata pre-flight seam a folder's EPUB export goes through.
+final epubMetadataProblemProvider = Provider<EpubMetadataLookup>(
+  (ref) => ExportTreeBook.problemOf,
 );
 
 /// The printer a note's PDF goes through; tests hand in their own, since

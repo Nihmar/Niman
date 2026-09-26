@@ -1559,6 +1559,19 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knjiga brez metapodatkov';
+  @override
+  String get exportEpubNoIndex =>
+      'Ta mapa nima v korenu datoteke index.md. Knjiga bo nosila ime '
+      'mape in ne bo imela avtorja, naslovnice ali zbirke.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nima frontmatterja. Knjiga bo nosila ime mape in ne bo '
+      'imela avtorja, naslovnice ali zbirke.';
+  @override
+  String get exportEpubAnyway => 'Vseeno izvozi';
   @override
   String get exportPdfPicture =>
       'PDF je slika strani; za izbirno besedilo namestite brskalnik.';

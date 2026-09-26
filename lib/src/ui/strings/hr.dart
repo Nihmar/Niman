@@ -1564,6 +1564,19 @@ final class CroatianStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knjiga bez metapodataka';
+  @override
+  String get exportEpubNoIndex =>
+      'Ova mapa nema index.md u korijenu. Knjiga će nositi naziv mape '
+      'i bez autora, naslovnice ili serije.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nema frontmatter. Knjiga će nositi naziv mape i bez '
+      'autora, naslovnice ili serije.';
+  @override
+  String get exportEpubAnyway => 'Ipak izvezi';
   @override
   String get exportPdfPicture =>
       'PDF je slika stranica; instalirajte preglednik za tekst koji se može '

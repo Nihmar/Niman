@@ -1570,6 +1570,19 @@ final class SwedishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bok utan metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Den här mappen har ingen index.md i roten. Boken får mappens '
+      'namn och ingen författare, omslag eller serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md har ingen frontmatter. Boken får mappens namn och '
+      'ingen författare, omslag eller serie.';
+  @override
+  String get exportEpubAnyway => 'Exportera ändå';
   @override
   String get exportPdfPicture =>
       'PDF:en är en bild av sidorna; installera en webbläsare för valbar text.';

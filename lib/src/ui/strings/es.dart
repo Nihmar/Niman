@@ -1594,6 +1594,20 @@ final class SpanishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libro sin metadatos';
+  @override
+  String get exportEpubNoIndex =>
+      'Esta carpeta no tiene ningún index.md en su raíz. El libro '
+      'llevará el nombre de la carpeta y ningún autor, portada ni '
+      'serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md no tiene frontmatter. El libro llevará el nombre de la '
+      'carpeta y ningún autor, portada ni serie.';
+  @override
+  String get exportEpubAnyway => 'Exportar de todos modos';
   @override
   String get exportPdfPicture =>
       'El PDF es una imagen de las páginas; instala un navegador para tener '

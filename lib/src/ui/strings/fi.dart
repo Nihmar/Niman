@@ -1577,6 +1577,19 @@ final class FinnishStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Kirja ilman metatietoja';
+  @override
+  String get exportEpubNoIndex =>
+      'Tässä kansiossa ei ole index.md-tiedostoa juuressa. Kirja saa '
+      'kansion nimen, eikä siinä ole tekijää, kantta tai sarjaa.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md-tiedostossa ei ole frontmatteria. Kirja saa kansion '
+      'nimen, eikä siinä ole tekijää, kantta tai sarjaa.';
+  @override
+  String get exportEpubAnyway => 'Vie silti';
   @override
   String get exportPdfPicture =>
       'PDF on kuva sivuista; asenna selain, niin teksti on valittavissa.';

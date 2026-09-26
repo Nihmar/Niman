@@ -1557,6 +1557,19 @@ final class CzechStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Kniha bez metadat';
+  @override
+  String get exportEpubNoIndex =>
+      'Tato složka nemá v kořeni žádný index.md. Kniha ponese název '
+      'složky a nebude mít autora, obálku ani sérii.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nemá frontmatter. Kniha ponese název složky a nebude '
+      'mít autora, obálku ani sérii.';
+  @override
+  String get exportEpubAnyway => 'Přesto exportovat';
   @override
   String get exportPdfPicture =>
       'PDF je obrázek stránek; nainstalujte prohlížeč pro text, který lze '

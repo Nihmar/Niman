@@ -923,6 +923,10 @@ final class AppStrings {
   static String get exportLibraryTitle => _s.exportLibraryTitle;
   static String get exportFormatPdf => _s.exportFormatPdf;
   static String get exportFormatEpub => _s.exportFormatEpub;
+  static String get exportEpubNoMetadataTitle => _s.exportEpubNoMetadataTitle;
+  static String get exportEpubNoIndex => _s.exportEpubNoIndex;
+  static String get exportEpubNoFrontmatter => _s.exportEpubNoFrontmatter;
+  static String get exportEpubAnyway => _s.exportEpubAnyway;
   static String get exportPdfPicture => _s.exportPdfPicture;
   static String exportDone(String place) => _s.exportDone(place);
   static String exportFailed(Object error) => _s.exportFailed(error);

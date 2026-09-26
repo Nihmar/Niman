@@ -1584,6 +1584,19 @@ final class DutchStrings extends Strings {
 
   @override
   String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Boek zonder metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Deze map heeft geen index.md in de hoofdmap. Het boek krijgt de '
+      'naam van de map en geen auteur, omslag of reeks.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md heeft geen frontmatter. Het boek krijgt de naam van de '
+      'map en geen auteur, omslag of reeks.';
+  @override
+  String get exportEpubAnyway => 'Toch exporteren';
   @override
   String get exportPdfPicture =>
       "De PDF is een afbeelding van de pagina's; installeer een browser "

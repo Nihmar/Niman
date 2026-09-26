@@ -179,9 +179,11 @@ demands; the container is `mimetype` (stored, first),
   spine, the EPUB 3 `cover-image` property, and the EPUB 2
   `meta name="cover"` for older readers. The Markdown cheatsheet
   documents the keys, in every language.
-- [x] A book with no `index.md` at the exported root, one whose
-  `index.md` has no frontmatter, and a `cover:` that does not resolve
-  still export; each logs why the package carries no metadata (E3).
+- [x] A folder with no `index.md` at its root, or one whose `index.md`
+  has no frontmatter, asks before the export starts — the book would
+  carry the folder's name and nothing else — with *Cancel* (stop and
+  write the note) and *Export anyway*; the export logs the missing
+  source, and a `cover:` that does not resolve too (E3).
 - [ ] Nav folded by folder (a flat, tree-ordered list for now).
 
 ## Open questions
