@@ -19,7 +19,10 @@ asked of the user, that
 
 And then, as the second act (the issue itself), a **guided tour**: the
 same ground again, but pointing at the real controls in a real library,
-one step at a time.
+one step at a time, with the [cheatsheet](../user/editing.md#markdown-support) (#265) as
+its playground — no sample notes are made in anyone's library.
+
+The two acts ship together: one round, one release.
 
 Not in this: an account, telemetry, a forced tour, video, or a second
 onboarding for someone who already has a library.
@@ -29,7 +32,7 @@ onboarding for someone who already has a library.
 | Question | Decision | Why |
 |---|---|---|
 | Where the deck shows | **Before the library picker**, full screen, over the open-library screen | Nothing about the app needs a library to be explained, and the answer must be known *before* the first library's settings are written |
-| How long | 7 pages, one per theme; ~30 seconds read | A page per feature is a manual; a page per theme is an invitation |
+| How long | 9 pages, one per theme; ~40 seconds read | A page per feature is a manual; a page per theme is an invitation |
 | Skippable | **Always**, top right, and the last page's primary action is "Start writing" | Never forced (the issue's own requirement) |
 | Markdown question | Last page, **three answers** | Two forces a guess; three matches how people actually answer ("never" / "a little" / "all the time") |
 | What "never" does | Source editor **off** (`enabledEditors = {wysiwyg}`), live editor default | "Show the source editor or not" (the request): off, not merely not-default. Settings → Editor re-enables it in two taps, and the question's own subtext says so |
@@ -37,7 +40,8 @@ onboarding for someone who already has a library.
 | What "all the time" does | Both editors on, **source** default | Today's behavior; nothing changes for an experienced user |
 | Where the answer lives | `app_settings` (device), applied to a library **the first time this device opens it** | The editors are device settings; the answer must not follow the library to another machine |
 | Where the tour lives | After the first library is open, opt-in from the welcome's last page, and later from Help and the palette | The tour points at real controls: there must be a shell to point at |
-| Tour playground | Two sample notes made on request, deleted at the end on request | Wikilinks, backlinks, tags and search need content that is not the user's own |
+| Tour playground | The **cheatsheet** (#265): it is opened, talked through, and can insert the example a step is about into a note the user picks | Nothing of the app's own is left in the library; the user keeps only what they chose to insert |
+| Delivery | One round: the deck **and** the tour, in the same release | The tour's promise ("show me around") is the deck's last line; shipping the pause between them costs a release for no user |
 
 ## 3. The first run, step by step
 
@@ -111,16 +115,26 @@ database) sees the deck.
 
 **5 — It goes with you.**
 > Export a note or a whole folder as Markdown, HTML, a PDF or an EPUB
-> book. Bring in a Notion export, open an Obsidian vault where it is, or
-> sync a library over WebDAV.
+> book. Bring in a Notion export, or open an Obsidian vault where it
+> already is.
 
-**6 — Niman on this device.** (platform page, one of:)
+**6 — Tasks and reminders.**
+> A `todo.txt` you keep as a file — priorities, projects, due dates — and
+> `rem:` alarms that warn you when something is due, on the phone and on
+> the desktop.
+
+**7 — Across your machines.**
+> Point a library at a WebDAV folder — Nextcloud, ownCloud, a NAS — and
+> edits sync both ways, merged line by line when two devices touched the
+> same note.
+
+**8 — Niman on this device.** (platform page, one of:)
 > *Android:* Share text or a file into Niman from any app, keep a note on
-> the home screen, and never miss a reminder.
+> the home screen, and record a voice note instead of typing.
 > *Desktop:* Tabs and split panes, the system tray, drag and drop onto
 > the window, and `.md` files that open Niman.
 
-**7 — One question.**
+**9 — One question.**
 > **Have you written Markdown before?**
 > `Never` · `A little` · `All the time`
 > *This only sets how the app starts. You can turn any editor on or off
@@ -132,12 +146,12 @@ database) sees the deck.
 
 New labels, in the order they ship (name → English):
 `welcomeSkip`, `welcomeNext`, `welcomeBack`, `welcomeStart`,
-`welcomePageOf(n, of)`, `welcomePage1Title/Body` … `welcomePage5Title/Body`,
+`welcomePageOf(n, of)`, `welcomePage1Title/Body` … `welcomePage7Title/Body`,
 `welcomeAndroidTitle/Body`, `welcomeDesktopTitle/Body`,
 `welcomeQuestionTitle`, `welcomeAnswerNone`, `welcomeAnswerNoneHint`,
 `welcomeAnswerSome`, `welcomeAnswerSomeHint`, `welcomeAnswerFluent`,
 `welcomeAnswerFluentHint`, `welcomeQuestionNote`, `welcomeTourOffer`,
-`welcomeTourOfferNote`. About **30** labels × 37 locales — the same
+`welcomeTourOfferNote`. About **34** labels × 37 locales — the same
 mechanical pass `notionImportTitle` took, done in the phase that
 introduces them, never as an English fallback (the strings contract is
 compile-time).
@@ -195,16 +209,17 @@ Desktop (wide):
 | 2 | the + menu / FAB | new note, list, voice, template, folder |
 | 3 | the mode switch | source / live / read, and that it is one note (skipped or shortened when the source editor is off) |
 | 4 | the toolbar | formatting, the context menu, the cheatsheet |
-| 5 | the sample note's link | wikilinks and backlinks; tags and frontmatter |
+| 5 | the cheatsheet's own rows (opened in a pane) | wikilinks and backlinks, tags and frontmatter — each with its example, insertable into a note the user picks |
 | 6 | search | full-text, tags, `key = value` |
 | 7 | the palette | commands and notes in one place; pinned commands |
 | 8 | the dock | outline, tags, history |
 | 9 | the journal / templates | one note a day; what a template fills in |
 | 10 | the trash | soft delete, restore, history |
-| 11 | Settings → Editor/Commands | where editors are chosen; commands vs keyboard shortcuts |
-| 12 | sync | WebDAV, per library |
-| 13 | the tray / quick note | the quick note; the tray on the desktop |
-| 14 | done | offers to delete the sample notes |
+| 11 | the Todo tab | `todo.txt`, priorities and `rem:` reminders |
+| 12 | Settings → Editor/Commands | where editors are chosen; commands vs keyboard shortcuts |
+| 13 | Settings → Sync | WebDAV, per library |
+| 14 | the tray / quick note | the quick note; the tray on the desktop |
+| 15 | done | where the cheatsheet lives (the palette, the note's ⋮ menu), and the end |
 
 Android (narrow): the same ground with the phone's controls — the bottom
 bar, the notebook FAB and its sheet, the keyboard toolbar, the note's ⋮
@@ -215,18 +230,19 @@ The exact per-platform list is written down in `tour_steps.dart` as
 data (target id, title, body, advance-on-use), so the set is reviewable
 and testable without a device.
 
-### 6.3 The playground
+### 6.3 The playground: the cheatsheet
 
-Made only when the tour is accepted, at the library root:
+The tour writes nothing of its own. Its content steps open the
+**cheatsheet** (#265) — every construct, written beside how a note shows
+it — in a pane, point at the row being talked about, and offer its
+**Insert** action: the example lands in the note the user has open (or
+in one they pick), which is what makes the next steps (the wikilink's
+backlink, the tag in the tag list, the table as a table) real.
 
-- `Welcome to Niman.md` — a heading, a paragraph, a `[[Niman tips]]`
-  wikilink, a `#welcome` tag, a task list, `$math$` and a small table:
-  every construct a step points at, visible in one screenful.
-- `Niman tips.md` — a short note that links back, so the backlinks step
-  has an answer.
-
-At the end the tour offers to delete both (they are ordinary notes; the
-user may keep them). Nothing is created if the tour is skipped.
+A step whose content is not there — an empty library, a cheatsheet row
+out of view — still explains itself; what it must never do is create a
+note nobody asked for. Nothing is written, and nothing has to be cleaned
+up afterwards.
 
 ## 7. Coming back to it
 
@@ -302,7 +318,7 @@ wrappers in the tree/footer/FAB/dock/toolbar/palette.
 
 ## 10. Tests
 
-Phase 1:
+The deck:
 
 - `test/unit/welcome_test.dart` — the answer → editors mapping; the store
   round-trip; the migration's `welcome_seen` for an upgrade; the seeding
@@ -320,15 +336,16 @@ Phase 1:
   new headless case asserts the deck appears on a fresh database and
   leaves.
 
-Phase 2:
+The tour:
 
 - `test/unit/tour_steps_test.dart` — the step list per platform and per
   `enabledEditors`; no step names a target the shell does not register.
 - `test/widget/tour_overlay_test.dart` — the spotlight's rect follows the
   target, a missing target skips the step, Next/Back/Skip, "don't show
   again", resume from `tour_step`.
-- `test/widget/tour_notes_test.dart` — the sample notes are made only on
-  acceptance and deleted only on request.
+- `test/widget/tour_cheatsheet_test.dart` — a content step opens the
+  cheatsheet, points at its row, and inserts only when the user asks;
+  no note is created by the tour alone.
 
 ## 11. Docs
 
@@ -343,7 +360,7 @@ Phase 2:
 - `docs/dev/architecture.md` — `ui/welcome/`, `ui/tour/`, `core/welcome.dart`.
 - `README.md` — a line in the feature list (the tour, and that the first
   run offers it).
-- `CHANGELOG.md` at the release that ships each phase.
+- `CHANGELOG.md` at the release that ships the round.
 
 ## 12. Edge cases
 
@@ -365,44 +382,46 @@ Phase 2:
 - **The tour meets a user's layout:** hidden rail, closed dock, source
   editor off — steps with no target are skipped, and the step list is
   built after the layout is known.
+- **The tour meets an empty library:** the cheatsheet still opens, and
+  its Insert action makes the note the following steps point at. Nothing
+  is created until the user taps Insert.
 
-## 13. Phases and what each closes
+## 13. Delivery and what each part closes
 
-**Phase 1 — the welcome deck** (this document's §3–§5, §8–§9).
-AC: a fresh install shows the deck once; every page is skippable; the
-last page's answer sets the first library's editors as the table says;
-an upgrading install never sees it; the deck and the question are
-reachable again from Settings → About and the palette; `flutter analyze`
-clean, the widget tests above green, and one headless integration case
-for the fresh-install path.
+**One round: the welcome deck and the guided tour together** (the
+agreed shape). Internally the work is ordered deck → cheatsheet wiring
+→ tour, and no
+release is cut between them.
 
-**Phase 2 — the guided tour** (the issue's own body, §6–§7).
-AC: offered from the welcome and re-runnable from Help and the palette;
-each step points at a real control (a missing one skips the step); the
-phone and the desktop each get their own list; a sample note (and only a
-sample note) is the playground and is offered for deletion; `tour_seen`
-and `tour_step` survive a restart.
+**The deck** (this document's §3–§5, §8–§9).
+AC: a fresh install shows the deck once, before the library picker;
+every page is skippable; the last page's answer sets the first library's
+editors as the table says; an upgrading install never sees it; the deck
+is reachable again from Settings → About and the palette.
 
-**Phase 3 — polish.** Mockups into this folder, the deck's "What Niman
-can do" read-only screen, the tour's translations, and a device pass on
-Android and Linux for the spotlight geometry.
+**The guided tour** (the issue's own body, §6–§7).
+AC: offered from the welcome's last page and re-runnable from Help and
+the palette; each step points at a real control (a missing one skips the
+step); the phone and the desktop each get their own list; the cheatsheet
+is the playground and nothing is written without the user's Insert;
+`tour_seen` and `tour_step` survive a restart.
 
-## 14. Open questions (for review)
+**Together:** `flutter analyze` clean, the tests of §10 green, one
+headless integration case for the fresh-install path, and a device pass
+on Android and Linux for the deck's pages and the spotlight geometry.
+Mockups land in this folder as they are drawn.
 
-1. **Deck before or after the first library?** The plan puts it before
-   (nothing in it needs a library, and the answer must exist before the
-   library's settings are seeded). The other reading is easier to test on
-   a device: library first, deck over it.
-2. **Three answers or two?** Three reads better and costs one string set;
-   two ("Never" / "Yes") is sharper if the middle is really the same as
-   "a little".
-3. **"Never" hides the source editor, or only leaves it off?** The plan
-   hides it (`enabledEditors = {wysiwyg}`), with the settings path named
-   on the question itself.
-4. **The tour's playground:** sample notes created on acceptance (the
-   plan), or the cheatsheet (#265) only?
-5. **Which pages for which platform:** the plan gives Android share-in,
-   widgets and reminders; desktop the tray, tabs and drag and drop. Any
-   theme to add or drop (sync? tags? tasks?).
-6. **Ship phase 1 alone first**, or hold the welcome until the tour is
-   ready next to it?
+## 14. Decisions (agreed 2026-09-26)
+
+1. **The deck runs before the library picker.** Nothing in it needs a
+   library, and the answer must exist before the first library's settings
+   are seeded.
+2. **Three answers** for the Markdown question: `Never` / `A little` /
+   `All the time`.
+3. **`Never` hides the source editor** (`enabledEditors = {wysiwyg}`),
+   with the settings path named on the question itself.
+4. **The cheatsheet is the tour's playground**; no sample notes.
+5. **Sync and tasks get pages of their own** (5 pages became 7); the
+   platform page keeps share-in, widgets and voice notes on Android and
+   the tray, tabs and drag and drop on the desktop.
+6. **Everything ships with the tour** — one round, one release.
