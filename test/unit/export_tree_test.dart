@@ -180,6 +180,44 @@ void main() {
     expect(files['a.pdf'], contains('href="b.pdf"'));
   });
 
+  test('a note with a broken byte still exports, decoded leniently', () async {
+    // `# Broken`, one byte of it not UTF-8: the app reads such a note, so
+    // the export does too, instead of failing the whole folder (E9).
+    await File(p.join(notes, 'broken.md')).writeAsBytes(<int>[
+      0x23,
+      0x20,
+      0x42,
+      0x72,
+      0xFF,
+      0x6F,
+      0x6B,
+      0x65,
+      0x6E,
+      0x0A,
+    ]);
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.html,
+      language: 'en',
+    );
+    final files = await contents();
+    expect(files.keys, contains('broken.html'));
+    expect(files['broken.html'], contains('Br\uFFFDoken'));
+    // The book's chapters take the same read.
+    zip = p.join(lib.path, 'book.epub');
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.epub,
+      language: 'en',
+    );
+    expect(
+      (await contents())['OEBPS/text/broken.xhtml'],
+      contains('Br\uFFFDoken'),
+    );
+  });
+
   test('a cancelled export leaves no zip behind', () async {
     // Enough entries that the isolate is still writing when the cancel
     // lands.

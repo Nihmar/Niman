@@ -20,6 +20,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui' show RootIsolateToken;
@@ -431,7 +432,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
           await _addEpubChapter(book, tree, entry);
         } else {
           final page = _page(
-            File(entry.abs).readAsStringSync(),
+            _readNote(entry.abs),
             entry.rel,
             tree,
             request.language,
@@ -527,7 +528,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
     );
     return null;
   }
-  final text = File(p.join(tree.root, rel)).readAsStringSync();
+  final text = _readNote(p.join(tree.root, rel));
   if (parseFrontmatter(text) == null) {
     events.send(
       const _TreeExportWarning(
@@ -544,7 +545,7 @@ Future<void> _addEpubChapter(EpubBook book, _Tree tree, _Entry entry) async {
   final rel = entry.rel;
   final noteDir = p.dirname(rel);
   final href = 'OEBPS/text/${_stem(rel)}.xhtml';
-  final text = File(entry.abs).readAsStringSync();
+  final text = _readNote(entry.abs);
   final images = <String, String>{};
   for (final target in ExportSources.pictureTargets(text)) {
     final picture = _fileIn(target, noteDir, tree.files);
@@ -608,6 +609,18 @@ Future<void> _printInto(
 
 /// Whether [rel] becomes a page: a Markdown note.
 bool _isNote(String rel) => p.extension(rel).toLowerCase() == '.md';
+
+/// The note at [abs] as the app reads it: decoded leniently — a note with a
+/// broken byte is still a note (`NoteOps.readNote`) — and without its BOM.
+/// A strict decode would turn one bad byte anywhere in the tree into a
+/// failed export of the whole folder (E9).
+String _readNote(String abs) {
+  final bytes = File(abs).readAsBytesSync();
+  final text = utf8.decode(bytes, allowMalformed: true);
+  return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
+      ? text.substring(1)
+      : text;
+}
 
 /// The subtree of [dir] in path order: every file and folder whose name
 /// does not start with a dot (settings, trash and history are not part of
