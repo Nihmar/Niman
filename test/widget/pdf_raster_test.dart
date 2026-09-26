@@ -81,6 +81,19 @@ void main() {
     expect(text, contains('/MediaBox [0 0 595.28 841.89]'));
   });
 
+  testWidgets('a note that lays out to nothing is still one page', (
+    tester,
+  ) async {
+    await pumpTheme(tester);
+    final bytes = await tester.runAsync(
+      () => rasterPdf(text: '', theme: theme, mathCache: cache),
+    );
+    expect(latin1.decode(bytes!.sublist(0, 8)), '%PDF-1.4');
+    expect(latin1.decode(bytes), contains('/Count 1'));
+    // A page of paper, not a zero-height capture (P5).
+    expect(_imageStreams(bytes), hasLength(1));
+  });
+
   testWidgets('a long note is several pages', (tester) async {
     await pumpTheme(tester);
     final note = StringBuffer();
