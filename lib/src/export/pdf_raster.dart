@@ -114,7 +114,13 @@ Future<Uint8List> rasterPdf({
       for (var page = 0; page < count; page++) {
         if (isCancelled?.call() ?? false) throw const PdfExportCancelled();
         final top = page * contentHeight;
-        final height = math.min(contentHeight, total - top);
+        // A note that lays out to nothing — empty, or only blocks the read
+        // view hides — still takes one page: a zero-height capture is an
+        // empty image on some backends and an error on others, and a PDF
+        // wants a page (P5).
+        final height = total <= 0
+            ? contentHeight
+            : math.min(contentHeight, total - top);
         final image = await recording.capture(
           Rect.fromLTWH(0, top, contentWidth, height),
           pixelRatio: pixelRatio,
@@ -193,7 +199,7 @@ final class _OffscreenLayout {
   final FocusManager _focus = FocusManager();
   late final BuildOwner _build = BuildOwner(focusManager: _focus);
   late final RenderView _view = RenderView(
-    view: ui.PlatformDispatcher.instance.implicitView!,
+    view: _platformView(ui.PlatformDispatcher.instance),
     configuration: ViewConfiguration(
       logicalConstraints: BoxConstraints(minWidth: width, maxWidth: width),
     ),
@@ -237,6 +243,17 @@ final class _OffscreenLayout {
     _build.finalizeTree();
     _focus.dispose();
   }
+}
+
+/// The platform view the offscreen tree runs on, or a failure that says
+/// what is missing: `implicitView!` died with a null-check error that
+/// names neither the view nor the export (P5).
+ui.FlutterView _platformView(ui.PlatformDispatcher dispatcher) {
+  final view = dispatcher.implicitView;
+  if (view == null) {
+    throw StateError('the note cannot be laid out without a platform view');
+  }
+  return view;
 }
 
 /// The raster printer: a [PdfPrinter] that draws the note itself, for a
