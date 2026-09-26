@@ -77,6 +77,29 @@ void main() {
     expect(nav, contains('href="text/note.xhtml"'));
   });
 
+  test('an embed and an open callout are well-formed XHTML', () async {
+    await File(p.join(root.path, 'photo.png')).writeAsBytes(<int>[1, 2, 3]);
+    final payload = await exportNoteEpub(
+      text: '# T\n\n![[photo.png]]\n\n> [!note]+ Open\n> Body.\n',
+      title: 'T',
+      path: 'T.md',
+      root: root.path,
+      language: 'en',
+    );
+    final file = p.join(root.path, 'wellformed.epub');
+    await File(file).writeAsBytes(payload.bytes);
+    final files = textEntries(file);
+    // `xml` is lenient about both — an unclosed `<img>` and a valueless
+    // `open` — so the element forms themselves are asserted: a strict
+    // reader (KOReader, epubcheck) is the one the container must satisfy
+    // (E1).
+    expectParses(files);
+    final chapter = files['OEBPS/text/note.xhtml']!;
+    expect(chapter, contains('alt="photo.png" />'));
+    expect(chapter, isNot(contains('alt="photo.png">')));
+    expect(chapter, contains('open="open">'));
+  });
+
   test('the mimetype entry is first and stored', () async {
     final payload = await exportNoteEpub(
       text: '# T\n',

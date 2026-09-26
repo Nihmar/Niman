@@ -71,7 +71,7 @@ String calloutHtml(Callout callout, String bodyHtml) {
       '<div class="callout" $attrs><div class="callout-title">$title</div>'
           '$body</div>',
     CalloutFold.open =>
-      '<details class="callout" $attrs open>$summary$body'
+      '<details class="callout" $attrs open="open">$summary$body'
           '</details>',
     CalloutFold.closed =>
       '<details class="callout" $attrs>$summary$body'
