@@ -32,9 +32,12 @@
 /// rather than silently rendered wrong.
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
+import 'package:niman/src/links/parser.dart' show wikiDisplayText;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
@@ -66,6 +69,7 @@ final class BlockView extends StatelessWidget {
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
+    this.embedImages,
     this.onToggleTask,
     this.scope,
     this.quoteNesting = 0,
@@ -111,6 +115,11 @@ final class BlockView extends StatelessWidget {
 
   /// Resolves an embed's target, for the round that draws images.
   final Future<String?> Function(String target)? embedResolver;
+
+  /// The pictures an export already decoded, by the target as written:
+  /// drawn on the first build, with no resolver and no frame to wait for
+  /// (#63, H3).
+  final Map<String, ui.Image>? embedImages;
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +173,7 @@ final class BlockView extends StatelessWidget {
       onTapLink: onTapLink,
       onTapWikiLink: onTapWikiLink,
       embedResolver: embedResolver,
+      embedImages: embedImages,
     ).build();
     return Text.rich(
       TextSpan(children: spans, style: base),
@@ -338,6 +348,7 @@ final class BlockView extends StatelessWidget {
             onTapLink: onTapLink,
             onTapWikiLink: onTapWikiLink,
             embedResolver: embedResolver,
+            embedImages: embedImages,
           ).build(),
         ),
         style: style,
@@ -364,6 +375,7 @@ final class BlockView extends StatelessWidget {
           onTapLink: onTapLink,
           onTapWikiLink: onTapWikiLink,
           embedResolver: embedResolver,
+          embedImages: embedImages,
           // The content's lines are the quote's, one for one: its marks
           // were taken off each line, not the lines.
           onToggleTask: toggle == null ? null : (line) => toggle(start + line),
@@ -568,6 +580,7 @@ final class BlockView extends StatelessWidget {
       onTapLink: onTapLink,
       onTapWikiLink: onTapWikiLink,
       embedResolver: embedResolver,
+      embedImages: embedImages,
     ).build();
     return Text.rich(
       TextSpan(children: spans, style: style),
@@ -703,6 +716,7 @@ final class _InlineBuilder {
     this.onTapLink,
     this.onTapWikiLink,
     this.embedResolver,
+    this.embedImages,
   });
 
   final VisibleText visible;
@@ -741,6 +755,13 @@ final class _InlineBuilder {
   final void Function(String text, String? href)? onTapLink;
   final void Function(ExtensionSpan span)? onTapWikiLink;
   final Future<String?> Function(String target)? embedResolver;
+
+  /// The pictures already decoded, by the target as written: an export
+  /// draws them directly, without a resolver (#63, H3).
+  final Map<String, ui.Image>? embedImages;
+
+  /// The decoded picture for [target], when an export handed one in.
+  ui.Image? _embedImage(String target) => embedImages?[target];
 
   /// The spans of the block, in offset order.
   List<InlineSpan> build() {
@@ -795,6 +816,17 @@ final class _InlineBuilder {
       // it when there is no picture — the same two rules the embed follows,
       // because they are the same problem. Without a resolver there is nothing
       // to resolve and the alt text is the honest thing to draw.
+      final decoded = _embedImage(segment.href!);
+      if (decoded != null) {
+        return WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: EmbedView(
+            target: segment.href!,
+            display: text,
+            image: decoded,
+          ),
+        );
+      }
       if (embedResolver == null) {
         return TextSpan(text: text, style: _tinted(theme.marker));
       }
@@ -836,7 +868,7 @@ final class _InlineBuilder {
         );
       case ExtensionKind.wikilink:
         return TextSpan(
-          text: _wikiDisplay(span),
+          text: wikiDisplayText(span.inner),
           style: _tinted(theme.wikilink),
           recognizer: TapGestureRecognizer()
             ..onTap = () => onTapWikiLink?.call(span),
@@ -846,6 +878,25 @@ final class _InlineBuilder {
       case ExtensionKind.codeSpan:
         return TextSpan(text: span.inner, style: _code);
       case ExtensionKind.embed:
+        // `![[target|alias]]`: the alias is what the reader asked to see, and
+        // it is what the preview drew when a binary or a missing target had to
+        // stand in for itself (`preview/wikilink.dart`). The read view passed
+        // the raw inner instead, so the same note read `![[book.epub|The
+        // book]]` in one surface and `![[The book]]` in the other.
+        final pipe = span.inner.indexOf('|');
+        final target = pipe >= 0 ? span.inner.substring(0, pipe) : span.inner;
+        final alias = pipe >= 0 ? span.inner.substring(pipe + 1).trim() : '';
+        final decoded = _embedImage(target);
+        if (decoded != null) {
+          return WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: EmbedView(
+              target: target,
+              display: alias.isEmpty ? target : alias,
+              image: decoded,
+            ),
+          );
+        }
         // An embed is a picture in the middle of a line, so it is a widget
         // span rather than text. Without a resolver there is nothing to
         // resolve, and the note's own words stand in for the picture.
@@ -855,14 +906,6 @@ final class _InlineBuilder {
             style: _tinted(theme.marker),
           );
         }
-        // `![[target|alias]]`: the alias is what the reader asked to see, and
-        // it is what the preview drew when a binary or a missing target had to
-        // stand in for itself (`preview/wikilink.dart`). The read view passed
-        // the raw inner instead, so the same note read `![[book.epub|The
-        // book]]` in one surface and `![[The book]]` in the other.
-        final pipe = span.inner.indexOf('|');
-        final target = pipe >= 0 ? span.inner.substring(0, pipe) : span.inner;
-        final alias = pipe >= 0 ? span.inner.substring(pipe + 1).trim() : '';
         return WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: EmbedView(
@@ -884,21 +927,6 @@ final class _InlineBuilder {
           ),
         );
     }
-  }
-
-  /// What a wikilink shows: its alias, or its target.
-  static String _wikiDisplay(ExtensionSpan span) {
-    final inner = span.inner;
-    final pipe = inner.indexOf('|');
-    if (pipe >= 0) {
-      final alias = inner.substring(pipe + 1).trim();
-      if (alias.isNotEmpty) return alias;
-    }
-    final target = pipe >= 0 ? inner.substring(0, pipe) : inner;
-    final hash = target.indexOf('#');
-    return (hash >= 0 ? target.substring(0, hash) : target).trim().isEmpty
-        ? inner
-        : (hash >= 0 ? target.substring(0, hash) : target).trim();
   }
 }
 

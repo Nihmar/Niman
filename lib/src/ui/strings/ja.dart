@@ -590,6 +590,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get cheatFrontmatter => 'フロントマター';
   @override
+  String get cheatEpubMetadata => 'EPUB メタデータ';
+  @override
   String get cheatTemplates => 'テンプレートのプレースホルダー';
   @override
   String get menuAddLink => 'リンクを追加';
@@ -1445,6 +1447,46 @@ final class JapaneseStrings extends Strings {
   String get formatNoteTitle => 'Markdown を整える';
   @override
   String get formatNoteDone => 'ノートを整えました。';
+  @override
+  String get exportTitle => 'エクスポート';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '$place に書き出しました';
+  @override
+  String exportFailed(Object error) => 'エクスポートに失敗しました: $error';
+  @override
+  String get exportFolderTitle => 'フォルダーをエクスポート…';
+  @override
+  String get exportLibraryTitle => 'ライブラリをエクスポート…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'メタデータのない本';
+  @override
+  String get exportEpubNoIndex =>
+      'このフォルダーのルートに index.md がありません。本の名前はフォルダー名になり、著者・表紙・シリーズは付きません。';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md に frontmatter がありません。本の名前はフォルダー名になり、著者・表紙・シリーズは付きません。';
+  @override
+  String get exportAnyway => 'それでも書き出す';
+  @override
+  String get exportPdfPicture => 'PDF はページの画像です。ブラウザーをインストールするとテキストを選択できます。';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF を画像として';
+
+  @override
+  String get exportPdfNoEngine =>
+      'このマシンにはブラウザーが見つかりませんでした。ノートはページの画像として描画されるため、テキストの選択も検索もできず、'
+      '長いノートほど時間がかかります。';
   @override
   String get formatNoteAlreadyTidy => 'ノートはすでに整っていました。';
   @override

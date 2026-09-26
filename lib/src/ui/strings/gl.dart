@@ -628,6 +628,8 @@ final class GalicianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadatos EPUB';
+  @override
   String get cheatTemplates => 'Marcadores dos modelos';
   @override
   String get menuAddLink => 'Engadir ligazón';
@@ -1558,6 +1560,51 @@ final class GalicianStrings extends Strings {
   String get formatNoteTitle => 'Arranxar o Markdown';
   @override
   String get formatNoteDone => 'A nota arranxouse.';
+  @override
+  String get exportTitle => 'Exportar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportado a $place';
+  @override
+  String exportFailed(Object error) => 'A exportación fallou: $error';
+  @override
+  String get exportFolderTitle => 'Exportar o cartafol…';
+  @override
+  String get exportLibraryTitle => 'Exportar a biblioteca…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libro sen metadatos';
+  @override
+  String get exportEpubNoIndex =>
+      'Este cartafol non ten ningún index.md na súa raíz. O libro '
+      'levará o nome do cartafol e ningún autor, portada ou serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md non ten frontmatter. O libro levará o nome do cartafol '
+      'e ningún autor, portada ou serie.';
+  @override
+  String get exportAnyway => 'Exportar de todos os xeitos';
+  @override
+  String get exportPdfPicture =>
+      'O PDF é unha imaxe das páxinas; instala un navegador para ter texto '
+      'seleccionable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF como imaxe';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Non se atopou ningún navegador nesta máquina. A nota '
+      'debúxase como unha imaxe das páxinas: o texto non se pode '
+      'seleccionar nin buscar, e unha nota longa tarda máis.';
   @override
   String get formatNoteAlreadyTidy => 'A nota xa estaba arranxada.';
   @override

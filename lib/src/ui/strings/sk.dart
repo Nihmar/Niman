@@ -626,6 +626,8 @@ final class SlovakStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadáta EPUB';
+  @override
   String get cheatTemplates => 'Zástupné symboly šablón';
   @override
   String get menuAddLink => 'Pridať odkaz';
@@ -1543,6 +1545,50 @@ final class SlovakStrings extends Strings {
   String get formatNoteTitle => 'Upratať Markdown';
   @override
   String get formatNoteDone => 'Poznámka bola upratená.';
+  @override
+  String get exportTitle => 'Exportovať';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportované do $place';
+  @override
+  String exportFailed(Object error) => 'Export zlyhal: $error';
+  @override
+  String get exportFolderTitle => 'Exportovať priečinok…';
+  @override
+  String get exportLibraryTitle => 'Exportovať knižnicu…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Kniha bez metadát';
+  @override
+  String get exportEpubNoIndex =>
+      'Tento priečinok nemá v koreni žiadny index.md. Kniha ponesie '
+      'názov priečinka a nebude mať autora, obálku ani sériu.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nemá frontmatter. Kniha ponesie názov priečinka a '
+      'nebude mať autora, obálku ani sériu.';
+  @override
+  String get exportAnyway => 'Priek tomu exportovať';
+  @override
+  String get exportPdfPicture =>
+      'PDF je obrázok stránok; nainštalujte prehliadač pre vyberateľný text.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF ako obrázok';
+
+  @override
+  String get exportPdfNoEngine =>
+      'V tomto počítači sa nenašiel žiadny prehliadač. Poznámka sa '
+      'vykreslí ako obrázok strán: text nie je možné označiť ani '
+      'vyhľadávať a dlhá poznámka trvá dlhšie.';
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už bola upratená.';
   @override

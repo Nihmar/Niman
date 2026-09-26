@@ -627,6 +627,8 @@ final class GermanStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-Metadaten';
+  @override
   String get cheatTemplates => 'Vorlagen-Platzhalter';
   @override
   String get menuAddLink => 'Link hinzufügen';
@@ -1569,6 +1571,53 @@ final class GermanStrings extends Strings {
   String get formatNoteTitle => 'Markdown aufräumen';
   @override
   String get formatNoteDone => 'Die Notiz wurde aufgeräumt.';
+  @override
+  String get exportTitle => 'Exportieren';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportiert nach $place';
+  @override
+  String exportFailed(Object error) => 'Export fehlgeschlagen: $error';
+  @override
+  String get exportFolderTitle => 'Ordner exportieren…';
+  @override
+  String get exportLibraryTitle => 'Bibliothek exportieren…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Buch ohne Metadaten';
+  @override
+  String get exportEpubNoIndex =>
+      'Dieser Ordner hat keine index.md in seinem Stammverzeichnis. '
+      'Das Buch trägt den Ordnernamen und keinen Autor, kein Cover und '
+      'keine Reihe.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md hat kein Frontmatter. Das Buch trägt den Ordnernamen '
+      'und keinen Autor, kein Cover und keine Reihe.';
+  @override
+  String get exportAnyway => 'Trotzdem exportieren';
+  @override
+  String get exportPdfPicture =>
+      'Das PDF ist ein Bild der Seiten; mit einem Browser wird der Text '
+      'auswählbar.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF als Bild';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Auf diesem Rechner wurde kein Browser gefunden. Die Notiz '
+      'wird als Bild der Seiten gezeichnet: Der Text lässt sich '
+      'weder markieren noch durchsuchen, und eine lange Notiz '
+      'dauert länger.';
   @override
   String get formatNoteAlreadyTidy => 'Die Notiz war schon aufgeräumt.';
   @override

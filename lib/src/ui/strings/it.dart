@@ -629,6 +629,8 @@ final class ItalianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadati EPUB';
+  @override
   String get cheatTemplates => 'Segnaposto dei modelli';
   @override
   String get menuAddLink => 'Aggiungi link';
@@ -1562,6 +1564,53 @@ final class ItalianStrings extends Strings {
   String get formatNoteTitle => 'Sistema il Markdown';
   @override
   String get formatNoteDone => 'Nota sistemata.';
+  @override
+  String get exportTitle => 'Esporta';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Esportato in $place';
+  @override
+  String exportFailed(Object error) => 'Esportazione non riuscita: $error';
+  @override
+  String get exportFolderTitle => 'Esporta cartella…';
+  @override
+  String get exportLibraryTitle => 'Esporta libreria…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libro senza metadati';
+  @override
+  String get exportEpubNoIndex =>
+      'Questa cartella non ha un index.md nella sua radice. Il libro '
+      'porterà il nome della cartella e nessun autore, copertina o '
+      'serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md non ha frontmatter. Il libro porterà il nome della '
+      'cartella e nessun autore, copertina o serie.';
+  @override
+  String get exportAnyway => 'Esporta comunque';
+  @override
+  String get exportPdfPicture =>
+      "Il PDF è un'immagine delle pagine; installa un browser per "
+      'avere testo selezionabile.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF come immagine';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Su questa macchina non è stato trovato alcun motore di '
+      "browser. La nota viene disegnata come un'immagine delle "
+      'pagine: il testo non può essere selezionato né cercato, e '
+      'una nota lunga richiede più tempo.';
   @override
   String get formatNoteAlreadyTidy => 'La nota era già a posto.';
   @override

@@ -625,6 +625,8 @@ final class CzechStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadata EPUB';
+  @override
   String get cheatTemplates => 'Zástupné symboly šablon';
   @override
   String get menuAddLink => 'Přidat odkaz';
@@ -1536,6 +1538,51 @@ final class CzechStrings extends Strings {
   String get formatNoteTitle => 'Uklidit Markdown';
   @override
   String get formatNoteDone => 'Poznámka byla uklizena.';
+  @override
+  String get exportTitle => 'Export';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportováno do $place';
+  @override
+  String exportFailed(Object error) => 'Export se nezdařil: $error';
+  @override
+  String get exportFolderTitle => 'Exportovat složku…';
+  @override
+  String get exportLibraryTitle => 'Exportovat knihovnu…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Kniha bez metadat';
+  @override
+  String get exportEpubNoIndex =>
+      'Tato složka nemá v kořeni žádný index.md. Kniha ponese název '
+      'složky a nebude mít autora, obálku ani sérii.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nemá frontmatter. Kniha ponese název složky a nebude '
+      'mít autora, obálku ani sérii.';
+  @override
+  String get exportAnyway => 'Přesto exportovat';
+  @override
+  String get exportPdfPicture =>
+      'PDF je obrázek stránek; nainstalujte prohlížeč pro text, který lze '
+      'vybrat.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF jako obrázek';
+
+  @override
+  String get exportPdfNoEngine =>
+      'V tomto počítači nebyl nalezen žádný prohlížeč. Poznámka se '
+      'vykreslí jako obrázek stránek: text nelze označit ani '
+      'vyhledávat a dlouhá poznámka trvá déle.';
   @override
   String get formatNoteAlreadyTidy => 'Poznámka už byla uklizená.';
   @override

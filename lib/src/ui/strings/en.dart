@@ -621,6 +621,8 @@ final class EnglishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metadata';
+  @override
   String get cheatTemplates => 'Template placeholders';
   @override
   String get menuAddLink => 'Add link';
@@ -1530,6 +1532,51 @@ final class EnglishStrings extends Strings {
   String get formatNoteTitle => 'Tidy the Markdown';
   @override
   String get formatNoteDone => 'The note was tidied.';
+  @override
+  String get exportTitle => 'Export';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exported to $place';
+  @override
+  String exportFailed(Object error) => 'Export failed: $error';
+  @override
+  String get exportFolderTitle => 'Export folder…';
+  @override
+  String get exportLibraryTitle => 'Export library…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Book without metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'This folder has no index.md at its root. The book will carry '
+      'the folder name and no author, cover or series.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md has no frontmatter. The book will carry the folder '
+      'name and no author, cover or series.';
+  @override
+  String get exportAnyway => 'Export anyway';
+  @override
+  String get exportPdfPicture =>
+      'The PDF is a picture of the pages; a browser engine on this machine '
+      'gives selectable text.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF as a picture';
+
+  @override
+  String get exportPdfNoEngine =>
+      'No browser engine was found on this machine. The note is '
+      'drawn as a picture of its pages: the text can be neither '
+      'selected nor searched, and a long note takes longer.';
   @override
   String get formatNoteAlreadyTidy => 'The note was already tidy.';
   @override

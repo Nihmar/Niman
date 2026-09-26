@@ -625,6 +625,8 @@ final class CroatianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metapodaci';
+  @override
   String get cheatTemplates => 'Rezervirana mjesta predložaka';
   @override
   String get menuAddLink => 'Dodaj poveznicu';
@@ -1543,6 +1545,51 @@ final class CroatianStrings extends Strings {
   String get formatNoteTitle => 'Posloži Markdown';
   @override
   String get formatNoteDone => 'Bilješka je posložena.';
+  @override
+  String get exportTitle => 'Izvezi';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Izvezeno u $place';
+  @override
+  String exportFailed(Object error) => 'Izvoz nije uspio: $error';
+  @override
+  String get exportFolderTitle => 'Izvezi mapu…';
+  @override
+  String get exportLibraryTitle => 'Izvezi knjižnicu…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knjiga bez metapodataka';
+  @override
+  String get exportEpubNoIndex =>
+      'Ova mapa nema index.md u korijenu. Knjiga će nositi naziv mape '
+      'i bez autora, naslovnice ili serije.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nema frontmatter. Knjiga će nositi naziv mape i bez '
+      'autora, naslovnice ili serije.';
+  @override
+  String get exportAnyway => 'Ipak izvezi';
+  @override
+  String get exportPdfPicture =>
+      'PDF je slika stranica; instalirajte preglednik za tekst koji se može '
+      'označiti.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kao slika';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na ovom računalu nije pronađen preglednik. Bilješka se crta '
+      'kao slika stranica: tekst se ne može označiti ni '
+      'pretraživati, a duga bilješka traje dulje.';
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override

@@ -60,6 +60,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.moveNote ||
   AppCommand.deleteNote => const {CommandNeed.openNote},
   AppCommand.formatNote ||
+  AppCommand.exportNote ||
   AppCommand.noteHistory => const {CommandNeed.textNote},
   AppCommand.closeTab ||
   AppCommand.nextTab ||
@@ -84,6 +85,7 @@ Set<CommandNeed> commandNeeds(AppCommand command) => switch (command) {
   AppCommand.typewriterMode ||
   AppCommand.markdownCheatsheet ||
   AppCommand.reindexLibrary ||
+  AppCommand.exportLibrary ||
   AppCommand.switchLibrary ||
   AppCommand.tabFiles ||
   AppCommand.tabTodo ||

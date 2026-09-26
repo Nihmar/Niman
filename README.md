@@ -17,6 +17,7 @@ Full guides live in [`docs/`](docs/):
 
 - **User:** [getting started](docs/user/getting-started.md),
   [editing](docs/user/editing.md), [organization](docs/user/organization.md),
+  [export](docs/user/export.md),
   [journal](docs/user/journal.md), [search](docs/user/search.md),
   [links](docs/user/links.md), [templates](docs/user/templates.md),
   [tasks & reminders](docs/user/tasks.md), [themes](docs/user/themes.md),

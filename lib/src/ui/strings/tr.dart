@@ -617,6 +617,8 @@ final class TurkishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB meta verileri';
+  @override
   String get cheatTemplates => 'Şablon yer tutucuları';
   @override
   String get menuAddLink => 'Bağlantı ekle';
@@ -1531,6 +1533,50 @@ final class TurkishStrings extends Strings {
   String get formatNoteTitle => 'Markdown’ı düzenle';
   @override
   String get formatNoteDone => 'Not düzenlendi.';
+  @override
+  String get exportTitle => 'Dışa aktar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '$place konumuna aktarıldı';
+  @override
+  String exportFailed(Object error) => 'Dışa aktarma başarısız: $error';
+  @override
+  String get exportFolderTitle => 'Klasörü dışa aktar…';
+  @override
+  String get exportLibraryTitle => 'Kitaplığı dışa aktar…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Üst verisi olmayan kitap';
+  @override
+  String get exportEpubNoIndex =>
+      'Bu klasörün kökünde index.md yok. Kitap klasörün adını '
+      'taşıyacak; yazarı, kapağı veya serisi olmayacak.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md dosyasında frontmatter yok. Kitap klasörün adını '
+      'taşıyacak; yazarı, kapağı veya serisi olmayacak.';
+  @override
+  String get exportAnyway => 'Yine de dışa aktar';
+  @override
+  String get exportPdfPicture =>
+      'PDF, sayfaların bir resmidir; seçilebilir metin için tarayıcı kurun.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'Görsel olarak PDF';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Bu makinede tarayıcı bulunamadı. Not, sayfaların görüntüsü '
+      'olarak çizilir: metin ne seçilebilir ne aranabilir ve uzun '
+      'bir not daha uzun sürer.';
   @override
   String get formatNoteAlreadyTidy => 'Not zaten düzenliydi.';
   @override

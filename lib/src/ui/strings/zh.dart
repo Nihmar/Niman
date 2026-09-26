@@ -589,6 +589,8 @@ final class ChineseStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB 元数据';
+  @override
   String get cheatTemplates => '模板占位符';
   @override
   String get menuAddLink => '添加链接';
@@ -1412,6 +1414,45 @@ final class ChineseStrings extends Strings {
   String get formatNoteTitle => '整理 Markdown';
   @override
   String get formatNoteDone => '已整理该笔记。';
+  @override
+  String get exportTitle => '导出';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '已导出到 $place';
+  @override
+  String exportFailed(Object error) => '导出失败：$error';
+  @override
+  String get exportFolderTitle => '导出文件夹…';
+  @override
+  String get exportLibraryTitle => '导出库…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => '没有元数据的书籍';
+  @override
+  String get exportEpubNoIndex =>
+      '此文件夹的根目录中没有 index.md。书籍将以文件夹名称命名，且没有作者、封面或系列。';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md 没有 frontmatter。书籍将以文件夹名称命名，且没有作者、封面或系列。';
+  @override
+  String get exportAnyway => '仍然导出';
+  @override
+  String get exportPdfPicture => 'PDF 是页面的图片；安装浏览器后文字可选择。';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF 为页面图片';
+
+  @override
+  String get exportPdfNoEngine =>
+      '此计算机上未找到浏览器引擎。笔记将绘制为页面图片：文本既不能选择也不能搜索，长笔记需要更长时间。';
   @override
   String get formatNoteAlreadyTidy => '这条笔记已经很整齐了。';
   @override

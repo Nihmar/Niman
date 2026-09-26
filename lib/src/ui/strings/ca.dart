@@ -629,6 +629,8 @@ final class CatalanStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadades EPUB';
+  @override
   String get cheatTemplates => 'Marcadors de les plantilles';
   @override
   String get menuAddLink => 'Afegeix un enllaç';
@@ -1575,6 +1577,51 @@ final class CatalanStrings extends Strings {
   String get formatNoteTitle => 'Endreça el Markdown';
   @override
   String get formatNoteDone => 'La nota s’ha endreçat.';
+  @override
+  String get exportTitle => 'Exporta';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportat a $place';
+  @override
+  String exportFailed(Object error) => 'L’exportació ha fallat: $error';
+  @override
+  String get exportFolderTitle => 'Exporta la carpeta…';
+  @override
+  String get exportLibraryTitle => 'Exporta la biblioteca…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Llibre sense metadades';
+  @override
+  String get exportEpubNoIndex =>
+      'Aquesta carpeta no té cap index.md a l’arrel. El llibre portarà '
+      'el nom de la carpeta i cap autor, portada ni sèrie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md no té frontmatter. El llibre portarà el nom de la '
+      'carpeta i cap autor, portada ni sèrie.';
+  @override
+  String get exportAnyway => 'Exporta igualment';
+  @override
+  String get exportPdfPicture =>
+      'El PDF és una imatge de les pàgines; instal·la un navegador per tenir '
+      'text seleccionable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF com a imatge';
+
+  @override
+  String get exportPdfNoEngine =>
+      "No s'ha trobat cap navegador en aquest ordinador. La nota es "
+      'dibuixa com una imatge de les pàgines: el text no es pot '
+      'seleccionar ni cercar, i una nota llarga triga més.';
   @override
   String get formatNoteAlreadyTidy => 'La nota ja estava endreçada.';
   @override

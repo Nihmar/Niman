@@ -626,6 +626,8 @@ final class DutchStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Sjabloonplaatshouders';
   @override
   String get menuAddLink => 'Link toevoegen';
@@ -1563,6 +1565,52 @@ final class DutchStrings extends Strings {
   String get formatNoteTitle => 'Markdown opruimen';
   @override
   String get formatNoteDone => 'De notitie is opgeruimd.';
+  @override
+  String get exportTitle => 'Exporteren';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Geëxporteerd naar $place';
+  @override
+  String exportFailed(Object error) => 'Export mislukt: $error';
+  @override
+  String get exportFolderTitle => 'Map exporteren…';
+  @override
+  String get exportLibraryTitle => 'Bibliotheek exporteren…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Boek zonder metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Deze map heeft geen index.md in de hoofdmap. Het boek krijgt de '
+      'naam van de map en geen auteur, omslag of reeks.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md heeft geen frontmatter. Het boek krijgt de naam van de '
+      'map en geen auteur, omslag of reeks.';
+  @override
+  String get exportAnyway => 'Toch exporteren';
+  @override
+  String get exportPdfPicture =>
+      "De PDF is een afbeelding van de pagina's; installeer een browser "
+      'voor selecteerbare tekst.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF als afbeelding';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Er is geen browser gevonden op deze computer. De notitie '
+      "wordt getekend als een afbeelding van de pagina's: de tekst "
+      'kan niet worden geselecteerd of doorzocht, en een lange '
+      'notitie duurt langer.';
   @override
   String get formatNoteAlreadyTidy => 'De notitie was al opgeruimd.';
   @override

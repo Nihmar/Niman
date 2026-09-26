@@ -632,6 +632,8 @@ final class RomanianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadate EPUB';
+  @override
   String get cheatTemplates => 'Substituenți de șabloane';
   @override
   String get menuAddLink => 'Adaugă link';
@@ -1556,6 +1558,51 @@ final class RomanianStrings extends Strings {
   String get formatNoteTitle => 'Aranjează Markdown-ul';
   @override
   String get formatNoteDone => 'Nota a fost aranjată.';
+  @override
+  String get exportTitle => 'Exportă';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportat în $place';
+  @override
+  String exportFailed(Object error) => 'Exportul a eșuat: $error';
+  @override
+  String get exportFolderTitle => 'Exportă folderul…';
+  @override
+  String get exportLibraryTitle => 'Exportă biblioteca…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Carte fără metadate';
+  @override
+  String get exportEpubNoIndex =>
+      'Acest dosar nu are index.md în rădăcină. Cartea va purta numele '
+      'dosarului și nu va avea autor, copertă sau serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nu are frontmatter. Cartea va purta numele dosarului '
+      'și nu va avea autor, copertă sau serie.';
+  @override
+  String get exportAnyway => 'Exportă oricum';
+  @override
+  String get exportPdfPicture =>
+      'PDF-ul este o imagine a paginilor; instalați un browser pentru text '
+      'selectabil.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF ca imagine';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Pe acest calculator nu a fost găsit niciun browser. Nota '
+      'este desenată ca o imagine a paginilor: textul nu poate fi '
+      'selectat sau căutat, iar o notă lungă durează mai mult.';
   @override
   String get formatNoteAlreadyTidy => 'Nota era deja aranjată.';
   @override

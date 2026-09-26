@@ -24,4 +24,12 @@ abstract interface class NoteViewHandle {
   /// Puts [markdown] at the caret, one undo step: on the caret's line when
   /// it is one line, on lines of its own when it is more (#265).
   void insertAtCaret(String markdown);
+
+  /// Opens the find bar over the note, as Ctrl+F does with the editor
+  /// focused; [replace] opens the replace row too. The screen that shows
+  /// the note asks when the key was pressed with the focus anywhere else —
+  /// a file open on its own takes no focus into the editor by itself.
+  /// Nothing happens in preview-only mode, where the editor and its bar are
+  /// not on screen.
+  void openFind({bool replace = false});
 }

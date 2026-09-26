@@ -621,6 +621,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadata EPUB';
+  @override
   String get cheatTemplates => 'Vendmbajtësit e shablloneve';
   @override
   String get menuAddLink => 'Shto lidhje';
@@ -1557,6 +1559,51 @@ final class AlbanianStrings extends Strings {
   String get formatNoteTitle => 'Rregullo Markdown-in';
   @override
   String get formatNoteDone => 'Shënimi u rregullua.';
+  @override
+  String get exportTitle => 'Eksporto';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'U eksportua në $place';
+  @override
+  String exportFailed(Object error) => 'Eksportimi dështoi: $error';
+  @override
+  String get exportFolderTitle => 'Eksporto dosjen…';
+  @override
+  String get exportLibraryTitle => 'Eksporto bibliotekën…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libër pa metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Kjo dosje nuk ka index.md në rrënjë. Libri do të mbajë emrin e '
+      'dosjes dhe pa autor, kopertinë ose seri.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nuk ka frontmatter. Libri do të mbajë emrin e dosjes '
+      'dhe pa autor, kopertinë ose seri.';
+  @override
+  String get exportAnyway => 'Eksporto gjithsesi';
+  @override
+  String get exportPdfPicture =>
+      'PDF-ja është një pamje e faqeve; instaloni një shfletues për tekst të '
+      'zgjedhshëm.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF si imazh';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Në këtë makinë nuk u gjet asnjë shfletues. Shënimi vizatohet '
+      'si imazh i faqeve: teksti nuk mund të zgjidhet ose kërkohet, '
+      'dhe një shënim i gjatë kërkon më shumë kohë.';
   @override
   String get formatNoteAlreadyTidy => 'Shënimi ishte tashmë i rregullt.';
   @override

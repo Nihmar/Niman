@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
@@ -862,6 +863,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<String> readNote(String path) async => _requireRow(path).content;
+
+  @override
+  Future<Uint8List> readNoteBytes(String path) async =>
+      Uint8List.fromList(utf8.encode(_requireRow(path).content));
 
   /// Every [saveNote] call, in order: `(path, content, editSession)`.
   final List<(String, String, int?)> saves = [];

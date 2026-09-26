@@ -621,6 +621,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB lýsigögn';
+  @override
   String get cheatTemplates => 'Staðgenglar sniðmáta';
   @override
   String get menuAddLink => 'Bæta við tengli';
@@ -1542,6 +1544,51 @@ final class IcelandicStrings extends Strings {
   String get formatNoteTitle => 'Taka til í Markdown';
   @override
   String get formatNoteDone => 'Tekið var til í glósunni.';
+  @override
+  String get exportTitle => 'Flytja út';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Flutt út í $place';
+  @override
+  String exportFailed(Object error) => 'Útflutningur mistókst: $error';
+  @override
+  String get exportFolderTitle => 'Flytja möppu út…';
+  @override
+  String get exportLibraryTitle => 'Flytja safnið út…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bók án lýsigagna';
+  @override
+  String get exportEpubNoIndex =>
+      'Þessi mappa hefur engan index.md í rót sinni. Bókin ber nafn '
+      'möppunnar og engan höfund, kápu eða seríu.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md hefur ekkert frontmatter. Bókin ber nafn möppunnar og '
+      'engan höfund, kápu eða seríu.';
+  @override
+  String get exportAnyway => 'Flytja út samt';
+  @override
+  String get exportPdfPicture =>
+      'PDF-skjalið er mynd af síðunum; settu upp vafra fyrir valanlegan '
+      'texta.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF sem mynd';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Enginn vafri fannst á þessari tölvu. Nótan er teiknuð sem '
+      'mynd af síðunum: ekki er hægt að velja eða leita í textanum, '
+      'og löng nóta tekur lengri tíma.';
   @override
   String get formatNoteAlreadyTidy => 'Glósan var þegar snyrtileg.';
   @override

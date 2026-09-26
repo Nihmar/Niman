@@ -45,7 +45,9 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - `integration_test/` = E2E, not part of the default `flutter test` run,
   and it rots when nothing runs it (#241): `app_boot` + `template_backlink`
   run headless (in CI too); `sync_e2e` needs `-d linux` on a Linux host
-  with a display. Run all three via `integration` before every commit.
+  with a display. Run all three via `integration` **only once a feature's
+  implementation is finished** — never after intermediate commits of work
+  in progress.
 - **New tests must be portable**: use `p.join` for paths (never literal `/`), no `chmod`.
 
 ## Codegen
