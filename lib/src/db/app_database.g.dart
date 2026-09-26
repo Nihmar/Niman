@@ -571,9 +571,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// Whether the first-run welcome deck was finished or skipped (#266).
   ///
-  /// Fresh installs only: the v31 migration writes `1` for every database
-  /// that upgrades into it, because an install that has opened Niman
-  /// already has a library and a way of writing and is not welcomed twice.
+  /// Fresh installs only: the v31 migration marks every row that exists
+  /// when a database upgrades into it, because an install that has
+  /// opened Niman already has a library and a way of writing and is not
+  /// welcomed twice. A row written later still starts unseen.
   final bool welcomeSeen;
 
   /// The welcome's Markdown answer (`none`, `some`, `fluent`), or null
@@ -584,7 +585,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// Whether the guided tour was finished or dismissed (#266).
   final bool tourSeen;
 
-  /// Where the tour stopped, for *Continue the tour*; 0 is its start.
+  /// Where the tour stopped, for *Take the tour*; 0 is its start.
   final int tourStep;
 
   /// The welcome's "show me around" choice (#266), read once a library is
