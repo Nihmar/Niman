@@ -626,6 +626,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Метадані EPUB';
+  @override
   String get cheatTemplates => 'Заповнювачі шаблонів';
   @override
   String get menuAddLink => 'Додати посилання';
@@ -1549,6 +1551,51 @@ final class UkrainianStrings extends Strings {
   String get formatNoteTitle => 'Упорядкувати Markdown';
   @override
   String get formatNoteDone => 'Нотатку впорядковано.';
+  @override
+  String get exportTitle => 'Експортувати';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Експортовано до $place';
+  @override
+  String exportFailed(Object error) => 'Експорт не вдався: $error';
+  @override
+  String get exportFolderTitle => 'Експортувати теку…';
+  @override
+  String get exportLibraryTitle => 'Експортувати бібліотеку…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Книга без метаданих';
+  @override
+  String get exportEpubNoIndex =>
+      'У цій теці немає index.md у її корені. Книга матиме назву теки '
+      'і не матиме автора, обкладинки чи серії.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'У index.md немає frontmatter. Книга матиме назву теки і не '
+      'матиме автора, обкладинки чи серії.';
+  @override
+  String get exportAnyway => 'Усе одно експортувати';
+  @override
+  String get exportPdfPicture =>
+      'PDF — це зображення сторінок; встановіть браузер, щоб текст можна '
+      'було виділяти.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF як зображення';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На цій машині не знайдено браузера. Нотатка малюється як '
+      'зображення сторінок: текст не можна виділити чи шукати, а '
+      'довга нотатка триває довше.';
   @override
   String get formatNoteAlreadyTidy => 'Нотатка вже була впорядкована.';
   @override

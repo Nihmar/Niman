@@ -191,6 +191,36 @@ void main() {
     });
   });
 
+  group('math', () {
+    test('a formula SVG is its TeX again, inline and display', () {
+      expect(
+        markdown(
+          '<p>a <svg class="math" role="img" aria-label="x^2+1">'
+          '<path/></svg> b</p>'
+          '<div class="math-block"><svg class="math math-display" '
+          r'aria-label="\frac{a}{b}"><path/></svg></div>',
+        ),
+        r'a $x^2+1$ b'
+        '\n\n'
+        r'$$\frac{a}{b}$$',
+      );
+    });
+
+    test('a dollar inside the TeX is escaped for the app syntax', () {
+      expect(
+        markdown(r'<p><svg class="math" aria-label="a\$b"/></p>'),
+        r'$a\$b$',
+      );
+    });
+
+    test('an SVG with no TeX source is still a picture', () {
+      expect(
+        markdown('<p><svg><image xlink:href="a.png"/></svg></p>'),
+        '![](pic:a.png)',
+      );
+    });
+  });
+
   group('pictures and links', () {
     test('a picture is named by the book', () {
       expect(

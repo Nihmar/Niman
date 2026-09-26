@@ -626,6 +626,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metaduomenys';
+  @override
   String get cheatTemplates => 'Šablonų vietos rezervavimo ženklai';
   @override
   String get menuAddLink => 'Pridėti nuorodą';
@@ -1543,6 +1545,51 @@ final class LithuanianStrings extends Strings {
   String get formatNoteTitle => 'Sutvarkyti Markdown';
   @override
   String get formatNoteDone => 'Pastaba sutvarkyta.';
+  @override
+  String get exportTitle => 'Eksportuoti';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksportuota į $place';
+  @override
+  String exportFailed(Object error) => 'Eksportuoti nepavyko: $error';
+  @override
+  String get exportFolderTitle => 'Eksportuoti aplanką…';
+  @override
+  String get exportLibraryTitle => 'Eksportuoti biblioteką…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knyga be metaduomenų';
+  @override
+  String get exportEpubNoIndex =>
+      'Šiame aplanke šaknyje nėra index.md. Knyga vadinsis aplanko '
+      'vardu ir neturės autoriaus, viršelio ar serijos.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md neturi frontmatter. Knyga vadinsis aplanko vardu ir '
+      'neturės autoriaus, viršelio ar serijos.';
+  @override
+  String get exportAnyway => 'Vis tiek eksportuoti';
+  @override
+  String get exportPdfPicture =>
+      'PDF yra puslapių paveikslėlis; įdiekite naršyklę, kad tekstą būtų '
+      'galima žymėti.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kaip vaizdas';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Šiame kompiuteryje naršyklės nerasta. Pastaba piešiama kaip '
+      'puslapių vaizdas: teksto negalima pažymėti ar ieškoti, o '
+      'ilga pastaba užima daugiau laiko.';
   @override
   String get formatNoteAlreadyTidy => 'Pastaba jau buvo tvarkinga.';
   @override

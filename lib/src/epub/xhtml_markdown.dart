@@ -194,6 +194,27 @@ final class XhtmlMarkdown {
     return '![$alt]($name)';
   }
 
+  /// The TeX a formula's SVG carries in its `aria-label`, as the app's own
+  /// math syntax: `$…$` in the line, `$$…$$` for a display formula (the
+  /// SVG's `math-display` class). Null when the SVG is not a formula — a
+  /// picture's, or one with no source to set again.
+  ///
+  /// Niman's own exports set every formula that way (#303), and the read
+  /// view typesets the TeX itself rather than drawing another page's SVG.
+  static String? _mathOf(Element element) {
+    if (element.localName != 'svg') return null;
+    final tex = element.attributes['aria-label']?.trim();
+    if (tex == null || tex.isEmpty) return null;
+    // A `$` inside the TeX would end the span it is written in.
+    final escaped = tex.replaceAllMapped(
+      RegExp(r'(?<!\\)\$'),
+      (match) => r'\$',
+    );
+    // One `$` in the line, two on a line of its own for a display formula.
+    final sign = element.classes.contains('math-display') ? r'$$' : r'$';
+    return '$sign$escaped$sign';
+  }
+
   /// [element]'s attribute [name], looked up by how it prints: inside an
   /// SVG the parser keys `xlink:href` by an `AttributeName`, not a string.
   static String? _attribute(Element element, String name) => element
@@ -242,6 +263,11 @@ final class XhtmlMarkdown {
         }
         out.write('[$text](<${link(href)}>)');
       case 'img' || 'image' || 'svg':
+        final math = _mathOf(node);
+        if (math != null) {
+          out.write(math);
+          return;
+        }
         final picture = _pictureOf(node);
         if (picture != null) out.write(picture);
       case 'script' || 'style' || 'head':

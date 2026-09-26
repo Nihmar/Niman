@@ -4,6 +4,11 @@ Supported today: **Android** (minSdk 35), **Linux** (Wayland),
 **Windows**. macOS/iOS are not built yet, but the code is kept portable.
 New tests must be portable too (see [conventions](../dev/conventions.md)).
 
+Export is one feature on every platform: Markdown, HTML, PDF and EPUB
+are in both choosers, note and folder alike. EPUB is platform-neutral
+Dart — no engine, no WebView — so a book is built the same way
+everywhere; PDF goes through each platform's own printer (below).
+
 ## Android
 
 - **Storage:** plain `dart:io` file access, gated by
@@ -20,6 +25,13 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   [shortcuts](shortcuts.md)).
 - **Home-screen widgets:** the Niman Todos and Niman Note widgets
   (see [widgets](widgets.md)).
+- **PDF export:** through the system WebView's print adapter, in-process:
+  no browser is installed or run, and the PDF's text stays selectable.
+  A folder's PDF zip prints each note the same way, one PDF per note.
+  A WebView that refuses the print (a broken system component) falls
+  back to drawing the note page by page, pictures included; that PDF is
+  a picture and cannot be selected, and the app says so when the file is
+  written.
 
 ## Linux
 
@@ -55,6 +67,12 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   (over `org.freedesktop.FileManager1`, falling back to `xdg-open` on
   the folder) or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
+- **PDF export:** printed headless by the first Chromium-family browser
+  on `PATH` — Chromium, Google Chrome, Microsoft Edge, Brave, Vivaldi,
+  Helium: one engine under many names. On a machine without one, a note
+  is drawn as pictures of its pages — pictures included, but not
+  selectable — and the export asks before it starts, because a long note
+  is minutes of drawing; a folder's PDF zip is not offered.
 
 ## Windows
 
@@ -80,6 +98,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 - A tree row's right-click menu can show the note in Explorer (selected)
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
+- **PDF export:** printed headless by Edge, found through the shell's
+  App Paths key or its install folder. A note falls back to being drawn
+  as page pictures where Edge is missing — asking before it starts, as
+  on Linux — and a folder's PDF zip is not offered then.
 
 ## Density
 

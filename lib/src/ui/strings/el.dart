@@ -633,6 +633,8 @@ final class GreekStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Μεταδεδομένα EPUB';
+  @override
   String get cheatTemplates => 'Σύμβολα κράτησης προτύπων';
   @override
   String get menuAddLink => 'Προσθήκη συνδέσμου';
@@ -1593,6 +1595,53 @@ final class GreekStrings extends Strings {
   String get formatNoteTitle => 'Τακτοποίηση του Markdown';
   @override
   String get formatNoteDone => 'Η σημείωση τακτοποιήθηκε.';
+  @override
+  String get exportTitle => 'Εξαγωγή';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Εξήχθη στο $place';
+  @override
+  String exportFailed(Object error) => 'Η εξαγωγή απέτυχε: $error';
+  @override
+  String get exportFolderTitle => 'Εξαγωγή φακέλου…';
+  @override
+  String get exportLibraryTitle => 'Εξαγωγή βιβλιοθήκης…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Βιβλίο χωρίς μεταδεδομένα';
+  @override
+  String get exportEpubNoIndex =>
+      'Αυτός ο φάκελος δεν έχει index.md στη ρίζα του. Το βιβλίο θα '
+      'φέρει το όνομα του φακέλου και κανέναν συγγραφέα, εξώφυλλο ή '
+      'σειρά.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'Το index.md δεν έχει frontmatter. Το βιβλίο θα φέρει το όνομα '
+      'του φακέλου και κανέναν συγγραφέα, εξώφυλλο ή σειρά.';
+  @override
+  String get exportAnyway => 'Εξαγωγή παρόλα αυτά';
+  @override
+  String get exportPdfPicture =>
+      'Το PDF είναι εικόνα των σελίδων· εγκαταστήστε ένα πρόγραμμα '
+      'περιήγησης για επιλέξιμο κείμενο.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF ως εικόνα';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Δεν βρέθηκε πρόγραμμα περιήγησης σε αυτόν τον υπολογιστή. Η '
+      'σημείωση σχεδιάζεται ως εικόνα των σελίδων: το κείμενο δεν '
+      'μπορεί να επιλεγεί ή να αναζητηθεί, και μια μεγάλη σημείωση '
+      'παίρνει περισσότερο χρόνο.';
   @override
   String get formatNoteAlreadyTidy => 'Η σημείωση ήταν ήδη τακτοποιημένη.';
   @override

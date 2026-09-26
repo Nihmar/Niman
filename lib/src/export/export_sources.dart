@@ -1,0 +1,295 @@
+/// Everything an exported page needs from the disk (#24), gathered before
+/// the page is built: the pictures the note shows, as `data:` URIs.
+///
+/// Building a page reads nothing ([NoteHtmlSource]), so this is where the
+/// reading happens. A picture that cannot be resolved, read or typed stays
+/// as the note wrote it, and the skip is logged.
+library;
+
+import 'dart:convert';
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:typed_data';
+
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/export/html_page.dart';
+import 'package:niman/src/export/note_html.dart';
+import 'package:niman/src/export/note_html_source.dart';
+import 'package:niman/src/export/picture_mime.dart';
+import 'package:niman/src/links/embed_path.dart';
+import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/block.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/extension_masker.dart';
+import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:path/path.dart' as p;
+
+const AppLogger _log = AppLogger(name: 'export');
+
+/// The note's own sources, read for its page.
+abstract final class ExportSources {
+  /// A whole note's page source: its [text], its [title], and every picture
+  /// it shows as a `data:` URI, by the target as the note writes it.
+  static Future<NoteHtmlSource> forNote({
+    required String text,
+    required String title,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async => NoteHtmlSource(
+    text: text,
+    title: title,
+    images: await images(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    ),
+  );
+
+  /// The pictures [text] shows, resolved and read: `data:` URIs by the
+  /// target as written — an embed's wiki target, a Markdown image's `src`.
+  static Future<Map<String, String>> images({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final images = <String, String>{};
+    final paths = await imagePaths(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    );
+    for (final entry in paths.entries) {
+      final uri = await pictureDataUri(entry.value);
+      if (uri == null) continue;
+      images[entry.key] = uri;
+    }
+    return images;
+  }
+
+  /// The pictures [text] shows, resolved to the file each one is, by the
+  /// target as written: what a container that carries the pictures
+  /// themselves (the EPUB, #303) copies in, and the one resolution every
+  /// page paths its pictures from.
+  static Future<Map<String, String>> imagePaths({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final paths = <String, String>{};
+    for (final target in pictureTargets(text)) {
+      final path = await picturePath(
+        target: target,
+        notePath: notePath,
+        root: root,
+        linkSource: linkSource,
+      );
+      if (path == null) {
+        _log.warning('picture not found: "$target" in $notePath');
+        continue;
+      }
+      paths[target] = path;
+    }
+    return paths;
+  }
+
+  /// The pictures [text] shows, resolved and read, by the target as
+  /// written: the bytes themselves, for a caller that decodes and draws
+  /// them itself — the raster PDF fallback, which has no browser to hand
+  /// the page to (#63, H3).
+  static Future<Map<String, Uint8List>> imageBytes({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final images = <String, Uint8List>{};
+    final paths = await imagePaths(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    );
+    for (final entry in paths.entries) {
+      final path = entry.value;
+      if (pictureMime(p.extension(path).toLowerCase()) == null) continue;
+      try {
+        images[entry.key] = await Isolate.run(
+          () => File(path).readAsBytesSync(),
+        );
+      } on FileSystemException catch (error) {
+        _log.warning('picture skipped ($path): $error');
+      }
+    }
+    return images;
+  }
+
+  /// A whole note's page source for the printer: its [text], its [title],
+  /// and its pictures by `file:` URL.
+  ///
+  /// The printed page is not the exported file: the engine (Edge, a
+  /// Chromium, Android's WebView) reads the page from disk and fetches a
+  /// `file:` picture itself, where the HTML export must carry a `data:`
+  /// URI. Embedding a library's photos built pages of hundreds of
+  /// megabytes — the Android PDF read one into its own heap and OOM'd.
+  static Future<NoteHtmlSource> forPrint({
+    required String text,
+    required String title,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async => NoteHtmlSource(
+    text: text,
+    title: title,
+    images: await imageUrls(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    ),
+  );
+
+  /// The pictures [text] shows, resolved, by the target as written: `file:`
+  /// URLs, for a page a browser or a WebView prints from disk.
+  static Future<Map<String, String>> imageUrls({
+    required String text,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final images = <String, String>{};
+    final paths = await imagePaths(
+      text: text,
+      notePath: notePath,
+      root: root,
+      linkSource: linkSource,
+    );
+    for (final entry in paths.entries) {
+      images[entry.key] = Uri.file(entry.value).toString();
+    }
+    return images;
+  }
+
+  /// One chapter's XHTML body for a container (#303), built off the UI
+  /// isolate like [page]: the parse, the highlighting and the formulas
+  /// are the same work whichever file they end in. The fonts go back too —
+  /// a book declares them once, not once per chapter — and whether the
+  /// chapter drew SVG, which the package must declare (E6).
+  static Future<({String body, String? fontFaces, bool hasSvg})> xhtml(
+    NoteHtmlSource source,
+  ) => Isolate.run(() {
+    final html = NoteHtml(source);
+    final body = html.body();
+    return (body: body, fontFaces: html.fontFaces, hasSvg: html.usesSvg);
+  });
+
+  /// The whole page for [source], built off the UI isolate (#24): the
+  /// parse, the code highlighting and the formulas' SVG are a tenth of a
+  /// second on a large note, and a tenth of a second is a visible hang.
+  static Future<String> page(
+    NoteHtmlSource source, {
+    required String language,
+  }) => Isolate.run(() {
+    final html = NoteHtml(source);
+    return htmlPage(
+      title: source.title,
+      body: html.body(),
+      fontFaces: html.fontFaces,
+      language: language,
+    );
+  });
+
+  /// The picture targets [text] names, as written: an embed's
+  /// (`![[photo.png]]`) and a Markdown image's (the parser's `img src`).
+  ///
+  /// Only an embed with an image extension counts: `![[notes.md]]` is a
+  /// link to a file that happens to be an embed, the same rule the read
+  /// view draws by — over the export's own list, which carries SVG (E8).
+  static List<String> pictureTargets(String text) {
+    final out = <String>{};
+    for (final target in _embeds(text)) {
+      if (pictureExtension.hasMatch(target)) out.add(target);
+    }
+    out.addAll(NoteHtml(NoteHtmlSource(text: text, title: '')).imageTargets());
+    return out.toList();
+  }
+
+  /// The embed targets of [text], through the read view's own masker: a
+  /// `![[…]]` in code, math, raw HTML or the frontmatter is not one.
+  static List<String> _embeds(String text) {
+    const masker = ExtensionMasker();
+    final buffer = SourceBuffer.fromText(text);
+    final out = <String>[];
+    for (final block in BlockScanner(buffer).index.blocks) {
+      if (!_carriesEmbeds(block.kind)) continue;
+      final blockText = [
+        for (var line = block.startLine; line < block.endLine; line++)
+          buffer.lineAt(line),
+      ].join('\n');
+      for (final span in masker.mask(blockText).spans) {
+        if (span.kind != ExtensionKind.embed) continue;
+        final target = parseWikiRef(span.inner).target;
+        if (target.isNotEmpty) out.add(target);
+      }
+    }
+    return out;
+  }
+
+  /// Whether a block's text is read as constructs at all.
+  static bool _carriesEmbeds(BlockKind kind) => switch (kind) {
+    BlockKind.frontmatter ||
+    BlockKind.fencedCode ||
+    BlockKind.indentedCode ||
+    BlockKind.math ||
+    BlockKind.html => false,
+    _ => true,
+  };
+
+  /// One picture target resolved to the file it is, or null.
+  ///
+  /// The rule every page resolves its pictures with, for a caller that
+  /// needs a single one: the cover a note's frontmatter named (#303).
+  static Future<String?> picturePath({
+    required String target,
+    required String notePath,
+    required String root,
+    LinkSource? linkSource,
+  }) async {
+    final path = await resolveEmbedPath(target, notePath, root, linkSource);
+    if (path != null) return path;
+    try {
+      final decoded = Uri.decodeFull(target);
+      if (decoded == target) return null;
+      return await resolveEmbedPath(decoded, notePath, root, linkSource);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// The picture at [path] as a `data:` URI, read off the UI isolate; null
+  /// when its extension has no image type or the file cannot be read, and
+  /// the skip is logged here — not in the isolate, whose own log would be
+  /// thrown away with it.
+  static Future<String?> pictureDataUri(String path) async {
+    final result = await Isolate.run(() {
+      final mime = pictureMime(p.extension(path).toLowerCase());
+      if (mime == null) return (uri: null, skip: 'not an image type');
+      try {
+        final bytes = File(path).readAsBytesSync();
+        return (uri: 'data:$mime;base64,${base64Encode(bytes)}', skip: null);
+      } on FileSystemException catch (error) {
+        return (uri: null, skip: '$error');
+      }
+    });
+    if (result.uri == null) {
+      _log.warning('picture skipped ($path): ${result.skip}');
+    }
+    return result.uri;
+  }
+}

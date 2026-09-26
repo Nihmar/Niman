@@ -73,6 +73,12 @@ enum AppCommand {
   /// Tidy the note's Markdown (#227).
   formatNote,
 
+  /// Write the note on screen out as a file (#24).
+  exportNote,
+
+  /// Write the whole library out as one zip (#24).
+  exportLibrary,
+
   /// The Markdown cheatsheet (#265): every construct, written and shown.
   markdownCheatsheet,
 
@@ -266,6 +272,8 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.typewriterMode => AppStrings.typewriterTitle,
   AppCommand.formatNote => AppStrings.formatNoteTitle,
+  AppCommand.exportNote => AppStrings.exportTitle,
+  AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
   AppCommand.openFile => AppStrings.openFileTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,

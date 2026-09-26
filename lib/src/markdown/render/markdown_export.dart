@@ -49,6 +49,7 @@ final class MarkdownExportView extends StatelessWidget {
     required this.theme,
     required this.mathCache,
     required this.width,
+    this.embedImages,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     super.key,
   });
@@ -72,6 +73,14 @@ final class MarkdownExportView extends StatelessWidget {
   /// The inset around the page.
   final EdgeInsets padding;
 
+  /// The note's pictures, already decoded, by the target as written.
+  ///
+  /// An export that read the bytes on its own hands them here: the raster
+  /// fallback runs without a frame loop, so an `EmbedView` that resolves
+  /// and decodes could not be waited for — the picture is drawn on the
+  /// first build instead (H3).
+  final Map<String, ui.Image>? embedImages;
+
   @override
   Widget build(BuildContext context) {
     final blocks = BlockScanner(buffer).index.blocks;
@@ -88,6 +97,7 @@ final class MarkdownExportView extends StatelessWidget {
                 parsed: parser.of(block, buffer),
                 theme: theme,
                 mathCache: mathCache,
+                embedImages: embedImages,
               ),
           ],
         ),
@@ -122,12 +132,17 @@ abstract final class MarkdownExport {
   /// into an [OffsetLayer] — a `PaintingContext` takes a layer and its bounds,
   /// not a canvas — and the layer is recorded into a picture through
   /// `toImage`, at as many device pixels per logical pixel as [pixelRatio].
+  ///
+  /// [size] crops the recording: a paginating caller asks for one page's
+  /// slice of a tall box by painting it at `-pageTop` and taking a
+  /// page-sized rectangle. It is the box's own size by default.
   static Future<ui.Image> capture(
     RenderBox box, {
     Offset offset = Offset.zero,
+    Size? size,
     double pixelRatio = 1,
   }) async {
-    final bounds = offset & box.size;
+    final bounds = offset & (size ?? box.size);
     final layer = OffsetLayer(offset: offset);
     final context = _RecordingContext(layer, bounds);
     box.paint(context, offset);
@@ -148,4 +163,36 @@ abstract final class MarkdownExport {
   /// needs before it can decide anything, and it is not derivable from the
   /// source: a line breaks where it breaks.
   static double heightOf(RenderBox box) => box.size.height;
+
+  /// Records [box] once, for as many page slices as the caller takes.
+  ///
+  /// [capture] records the note per call: a paginating caller asking once
+  /// per page re-paints the whole note per page, which is quadratic in the
+  /// note's length. A recording is made once here, and
+  /// [MarkdownExportRecording.capture] slices it at raster time, where the
+  /// engine clips what the slice does not cover (M6).
+  static MarkdownExportRecording record(RenderBox box) {
+    final bounds = Offset.zero & box.size;
+    final layer = OffsetLayer();
+    final context = _RecordingContext(layer, bounds);
+    box.paint(context, Offset.zero);
+    context.finish();
+    return MarkdownExportRecording._(layer);
+  }
+}
+
+/// A laid-out note, recorded once (#63).
+final class MarkdownExportRecording {
+  new _(this._layer);
+
+  final OffsetLayer _layer;
+
+  /// [slice], in the note's own coordinates, as an image: the same
+  /// [OffsetLayer.toImage] a capture would take, over the one recorded
+  /// picture.
+  Future<ui.Image> capture(Rect slice, {double pixelRatio = 1}) =>
+      _layer.toImage(slice, pixelRatio: pixelRatio);
+
+  /// Lets the recorded picture go.
+  void dispose() => _layer.dispose();
 }

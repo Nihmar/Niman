@@ -619,6 +619,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Malplassholdere';
   @override
   String get menuAddLink => 'Legg til lenke';
@@ -1532,6 +1534,50 @@ final class NorwegianStrings extends Strings {
   String get formatNoteTitle => 'Rydd opp i Markdown';
   @override
   String get formatNoteDone => 'Notatet ble ryddet.';
+  @override
+  String get exportTitle => 'Eksporter';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksportert til $place';
+  @override
+  String exportFailed(Object error) => 'Eksporten mislyktes: $error';
+  @override
+  String get exportFolderTitle => 'Eksporter mappe…';
+  @override
+  String get exportLibraryTitle => 'Eksporter bibliotek…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bok uten metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Denne mappen har ingen index.md i roten. Boken får mappens navn '
+      'og ingen forfatter, forside eller serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md har ingen frontmatter. Boken får mappens navn og ingen '
+      'forfatter, forside eller serie.';
+  @override
+  String get exportAnyway => 'Eksporter likevel';
+  @override
+  String get exportPdfPicture =>
+      'PDF-en er et bilde av sidene; installer en nettleser for valgbar tekst.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF som bilde';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Fant ingen nettleser på denne maskinen. Notatet tegnes som '
+      'et bilde av sidene: teksten kan ikke velges eller søkes i, '
+      'og et langt notat tar lengre tid.';
   @override
   String get formatNoteAlreadyTidy => 'Notatet var allerede ryddig.';
   @override

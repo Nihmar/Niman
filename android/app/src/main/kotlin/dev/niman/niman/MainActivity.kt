@@ -19,11 +19,13 @@ class MainActivity : FlutterActivity() {
     private val manageStorageRequestCode = 1
     private val shortcuts = ShortcutsBridge(this)
     private val widgets = WidgetBridge(this)
+    private val pdf = PdfBridge(this)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         shortcuts.attach(flutterEngine.dartExecutor.binaryMessenger)
         widgets.attach(flutterEngine.dartExecutor.binaryMessenger)
+        pdf.attach(flutterEngine.dartExecutor.binaryMessenger)
         // Cold start: this runs while Dart is still booting, so the
         // launching intent's action waits until Dart asks for it.
         shortcuts.handleIntent(intent, running = false)
@@ -72,6 +74,7 @@ class MainActivity : FlutterActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         shortcuts.detach()
         widgets.detach()
+        pdf.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }
 

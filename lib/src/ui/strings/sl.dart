@@ -628,6 +628,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metapodatki EPUB';
+  @override
   String get cheatTemplates => 'Ograde predlog';
   @override
   String get menuAddLink => 'Dodaj povezavo';
@@ -1538,6 +1540,50 @@ final class SlovenianStrings extends Strings {
   String get formatNoteTitle => 'Pospravi Markdown';
   @override
   String get formatNoteDone => 'Zapisek je bil pospravljen.';
+  @override
+  String get exportTitle => 'Izvozi';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Izvoženo v $place';
+  @override
+  String exportFailed(Object error) => 'Izvoz ni uspel: $error';
+  @override
+  String get exportFolderTitle => 'Izvozi mapo…';
+  @override
+  String get exportLibraryTitle => 'Izvozi knjižnico…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knjiga brez metapodatkov';
+  @override
+  String get exportEpubNoIndex =>
+      'Ta mapa nima v korenu datoteke index.md. Knjiga bo nosila ime '
+      'mape in ne bo imela avtorja, naslovnice ali zbirke.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nima frontmatterja. Knjiga bo nosila ime mape in ne bo '
+      'imela avtorja, naslovnice ali zbirke.';
+  @override
+  String get exportAnyway => 'Vseeno izvozi';
+  @override
+  String get exportPdfPicture =>
+      'PDF je slika strani; za izbirno besedilo namestite brskalnik.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kot slika';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na tem računalniku ni bilo najdenega brskalnika. Zapis se '
+      'nariše kot slika strani: besedila ni mogoče izbrati ali '
+      'iskati, dolg zapis pa traja dlje.';
   @override
   String get formatNoteAlreadyTidy => 'Zapisek je bil že pospravljen.';
   @override

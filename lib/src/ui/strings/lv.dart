@@ -622,6 +622,8 @@ final class LatvianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metadati';
+  @override
   String get cheatTemplates => 'Veidņu vietturi';
   @override
   String get menuAddLink => 'Pievienot saiti';
@@ -1540,6 +1542,50 @@ final class LatvianStrings extends Strings {
   String get formatNoteTitle => 'Sakārtot Markdown';
   @override
   String get formatNoteDone => 'Piezīme tika sakārtota.';
+  @override
+  String get exportTitle => 'Eksportēt';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksportēts uz $place';
+  @override
+  String exportFailed(Object error) => 'Eksportēšana neizdevās: $error';
+  @override
+  String get exportFolderTitle => 'Eksportēt mapi…';
+  @override
+  String get exportLibraryTitle => 'Eksportēt bibliotēku…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Grāmata bez metadatiem';
+  @override
+  String get exportEpubNoIndex =>
+      'Šai mapei saknē nav index.md. Grāmatai būs mapes nosaukums, un '
+      'tai nebūs autora, vāka vai sērijas.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nav frontmatter. Grāmatai būs mapes nosaukums, un tai '
+      'nebūs autora, vāka vai sērijas.';
+  @override
+  String get exportAnyway => 'Tomēr eksportēt';
+  @override
+  String get exportPdfPicture =>
+      'PDF ir lapu attēls; instalē pārlūku, lai tekstu varētu atlasīt.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kā attēls';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Šajā datorā netika atrasta pārlūkprogramma. Piezīme tiek '
+      'zīmēta kā lappušu attēls: tekstu nevar atlasīt vai meklēt, '
+      'un gara piezīme aizņem ilgāku laiku.';
   @override
   String get formatNoteAlreadyTidy => 'Piezīme jau bija kārtībā.';
   @override

@@ -627,6 +627,8 @@ final class SerbianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'ЕПУБ метаподаци';
+  @override
   String get cheatTemplates => 'Чувари места у шаблонима';
   @override
   String get menuAddLink => 'Додај везу';
@@ -1550,6 +1552,51 @@ final class SerbianStrings extends Strings {
   String get formatNoteTitle => 'Сложи Markdown';
   @override
   String get formatNoteDone => 'Белешка је сложена.';
+  @override
+  String get exportTitle => 'Извези';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Извезено у $place';
+  @override
+  String exportFailed(Object error) => 'Извоз није успео: $error';
+  @override
+  String get exportFolderTitle => 'Извези фасциклу…';
+  @override
+  String get exportLibraryTitle => 'Извези библиотеку…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Књига без метаподатака';
+  @override
+  String get exportEpubNoIndex =>
+      'Ова фасцикла нема index.md у корену. Књига ће носити име '
+      'фасцикле и без аутора, корица или серије.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md нема frontmatter. Књига ће носити име фасцикле и без '
+      'аутора, корица или серије.';
+  @override
+  String get exportAnyway => 'Ипак извези';
+  @override
+  String get exportPdfPicture =>
+      'PDF је слика страница; инсталирајте прегледач за текст који се може '
+      'изабрати.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF као слика';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На овом рачунару није пронађен прегледач. Белешка се црта '
+      'као слика страница: текст се не може изабрати ни '
+      'претраживати, а дуга белешка траје дуже.';
   @override
   String get formatNoteAlreadyTidy => 'Белешка је већ била сложена.';
   @override

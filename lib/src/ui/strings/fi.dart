@@ -622,6 +622,8 @@ final class FinnishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metatiedot';
+  @override
   String get cheatTemplates => 'Mallipohjien paikkamerkit';
   @override
   String get menuAddLink => 'Lisää linkki';
@@ -1556,6 +1558,50 @@ final class FinnishStrings extends Strings {
   String get formatNoteTitle => 'Siivoa Markdown';
   @override
   String get formatNoteDone => 'Muistiinpano siivottiin.';
+  @override
+  String get exportTitle => 'Vie';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Viety kohteeseen $place';
+  @override
+  String exportFailed(Object error) => 'Vienti epäonnistui: $error';
+  @override
+  String get exportFolderTitle => 'Vie kansio…';
+  @override
+  String get exportLibraryTitle => 'Vie kirjasto…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Kirja ilman metatietoja';
+  @override
+  String get exportEpubNoIndex =>
+      'Tässä kansiossa ei ole index.md-tiedostoa juuressa. Kirja saa '
+      'kansion nimen, eikä siinä ole tekijää, kantta tai sarjaa.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md-tiedostossa ei ole frontmatteria. Kirja saa kansion '
+      'nimen, eikä siinä ole tekijää, kantta tai sarjaa.';
+  @override
+  String get exportAnyway => 'Vie silti';
+  @override
+  String get exportPdfPicture =>
+      'PDF on kuva sivuista; asenna selain, niin teksti on valittavissa.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kuvana';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Tältä koneelta ei löytynyt selainta. Muistiinpano piirretään '
+      'kuvana sivuista: tekstiä ei voi valita tai etsiä, ja pitkä '
+      'muistiinpano kestää kauemmin.';
   @override
   String get formatNoteAlreadyTidy => 'Muistiinpano oli jo siisti.';
   @override

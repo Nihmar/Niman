@@ -612,6 +612,8 @@ final class HindiStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB मेटाडेटा';
+  @override
   String get cheatTemplates => 'टेम्पलेट प्लेसहोल्डर';
   @override
   String get menuAddLink => 'लिंक जोड़ें';
@@ -1517,6 +1519,51 @@ final class HindiStrings extends Strings {
   String get formatNoteTitle => 'मार्कडाउन व्यवस्थित करें';
   @override
   String get formatNoteDone => 'नोट व्यवस्थित कर दिया गया।';
+  @override
+  String get exportTitle => 'निर्यात';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => '$place पर निर्यात किया';
+  @override
+  String exportFailed(Object error) => 'निर्यात विफल: $error';
+  @override
+  String get exportFolderTitle => 'फ़ोल्डर निर्यात करें…';
+  @override
+  String get exportLibraryTitle => 'लाइब्रेरी निर्यात करें…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'मेटाडेटा के बिना किताब';
+  @override
+  String get exportEpubNoIndex =>
+      'इस फ़ोल्डर की जड़ में index.md नहीं है। किताब फ़ोल्डर के नाम से '
+      'बनेगी और उसमें लेखक, कवर या श्रृंखला नहीं होगी।';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md में frontmatter नहीं है। किताब फ़ोल्डर के नाम से बनेगी '
+      'और उसमें लेखक, कवर या श्रृंखला नहीं होगी।';
+  @override
+  String get exportAnyway => 'फिर भी निर्यात करें';
+  @override
+  String get exportPdfPicture =>
+      'PDF पृष्ठों की तस्वीर है; चुने जा सकने वाले टेक्स्ट के लिए ब्राउज़र '
+      'इंस्टॉल करें।';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF चित्र के रूप में';
+
+  @override
+  String get exportPdfNoEngine =>
+      'इस मशीन पर कोई ब्राउज़र नहीं मिला। नोट पेजों के चित्र के रूप '
+      'में बनाया जाता है: पाठ को न चुना जा सकता है न खोजा जा सकता '
+      'है, और लंबे नोट में अधिक समय लगता है।';
   @override
   String get formatNoteAlreadyTidy => 'नोट पहले से व्यवस्थित था।';
   @override

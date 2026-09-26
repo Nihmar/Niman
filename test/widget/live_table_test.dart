@@ -54,6 +54,47 @@ RenderParagraph _row(WidgetTester tester, String text) => tester
     .firstWhere((p) => p.text.toPlainText().contains(text));
 
 void main() {
+  testWidgets('a table row is one line, however long its cells', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => MarkdownSurface(
+              buffer: SourceBuffer.fromText(
+                '| head | second |\n|---|---|\n'
+                '| a first cell far too long for the pane, and still going, '
+                'and going, and going, and going | second |',
+              ),
+              mode: MarkdownSurfaceMode.live,
+              theme: markdownThemeOf(context),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    final paragraphs = tester.renderObjectList<RenderParagraph>(
+      find.byType(RichText),
+    );
+    final header = paragraphs.firstWhere(
+      (p) => p.text.toPlainText().contains('head'),
+    );
+    final row = paragraphs.firstWhere(
+      (p) => p.text.toPlainText().contains('far too long'),
+    );
+    // The cells after the long one stay on its line: a soft-wrapped row
+    // dropped them wherever the wrap left the pen, in the wrong columns.
+    expect(row.size.height, closeTo(header.size.height, 0.5));
+  });
+
   testWidgets("a row's pipes are drawn as room, on the caret's row too", (
     tester,
   ) async {

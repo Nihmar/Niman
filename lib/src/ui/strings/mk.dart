@@ -629,6 +629,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB метаподатоци';
+  @override
   String get cheatTemplates => 'Резервирани места во шаблоните';
   @override
   String get menuAddLink => 'Додај врска';
@@ -1559,6 +1561,51 @@ final class MacedonianStrings extends Strings {
   String get formatNoteTitle => 'Средиго Markdown';
   @override
   String get formatNoteDone => 'Белешката е средена.';
+  @override
+  String get exportTitle => 'Извези';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Извезено во $place';
+  @override
+  String exportFailed(Object error) => 'Извозот не успеа: $error';
+  @override
+  String get exportFolderTitle => 'Извези папка…';
+  @override
+  String get exportLibraryTitle => 'Извези библиотека…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Книга без метаподатоци';
+  @override
+  String get exportEpubNoIndex =>
+      'Оваа папка нема index.md во коренот. Книгата ќе го носи името '
+      'на папката и без автор, корица или серија.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md нема frontmatter. Книгата ќе го носи името на папката '
+      'и без автор, корица или серија.';
+  @override
+  String get exportAnyway => 'Сепак извези';
+  @override
+  String get exportPdfPicture =>
+      'PDF е слика од страниците; инсталирајте прелистувач за текст што може '
+      'да се избере.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF како слика';
+
+  @override
+  String get exportPdfNoEngine =>
+      'На овој компјутер не е најден прелистувач. Белешката се црта '
+      'како слика од страниците: текстот не може да се избере или '
+      'пребарува, а долгата белешка трае подолго.';
   @override
   String get formatNoteAlreadyTidy => 'Белешката веќе беше средена.';
   @override

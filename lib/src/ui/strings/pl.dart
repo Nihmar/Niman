@@ -632,6 +632,8 @@ final class PolishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadane EPUB';
+  @override
   String get cheatTemplates => 'Symbole zastępcze szablonów';
   @override
   String get menuAddLink => 'Dodaj link';
@@ -1563,6 +1565,52 @@ final class PolishStrings extends Strings {
   String get formatNoteTitle => 'Uporządkuj Markdown';
   @override
   String get formatNoteDone => 'Notatka została uporządkowana.';
+  @override
+  String get exportTitle => 'Eksportuj';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Wyeksportowano do $place';
+  @override
+  String exportFailed(Object error) => 'Eksport nie powiódł się: $error';
+  @override
+  String get exportFolderTitle => 'Eksportuj folder…';
+  @override
+  String get exportLibraryTitle => 'Eksportuj bibliotekę…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Książka bez metadanych';
+  @override
+  String get exportEpubNoIndex =>
+      'Ten folder nie ma pliku index.md w katalogu głównym. Książka '
+      'będzie nosić nazwę folderu i nie będzie mieć autora, okładki '
+      'ani serii.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nie ma frontmatter. Książka będzie nosić nazwę folderu '
+      'i nie będzie mieć autora, okładki ani serii.';
+  @override
+  String get exportAnyway => 'Eksportuj mimo to';
+  @override
+  String get exportPdfPicture =>
+      'PDF to obraz stron; zainstaluj przeglądarkę, aby tekst można było '
+      'zaznaczać.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF jako obraz';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na tym komputerze nie znaleziono przeglądarki. Notatka jest '
+      'rysowana jako obraz stron: tekstu nie można zaznaczyć ani '
+      'przeszukać, a długa notatka zajmuje więcej czasu.';
   @override
   String get formatNoteAlreadyTidy => 'Notatka była już uporządkowana.';
   @override

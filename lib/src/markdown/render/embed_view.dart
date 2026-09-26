@@ -19,6 +19,7 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/preview/aspect_image.dart';
@@ -31,6 +32,7 @@ final class EmbedView extends StatefulWidget {
     required this.display,
     this.onResolve,
     this.placeholder,
+    this.image,
     super.key,
   });
 
@@ -48,6 +50,14 @@ final class EmbedView extends StatefulWidget {
   /// Resolves [target] to an absolute path, or null. Null resolver = nothing
   /// can be resolved, so the placeholder is drawn without asking.
   final Future<String?> Function(String target)? onResolve;
+
+  /// The picture itself, already decoded.
+  ///
+  /// An export that read the bytes on its own hands it here: the raster
+  /// fallback runs without a frame loop, so a resolution round — and the
+  /// decode behind it — could not be waited for, and the picture is drawn
+  /// on the first build instead (#63, H3).
+  final ui.Image? image;
 
   /// Image extensions an embed renders inline.
   static final RegExp imageExtensions = RegExp(
@@ -109,6 +119,8 @@ final class EmbedViewState extends State<EmbedView> {
 
   @override
   Widget build(BuildContext context) {
+    final image = widget.image;
+    if (image != null) return _picture(context, image);
     final path = _path;
     if (path == null || !EmbedView.imageExtensions.hasMatch(widget.target)) {
       return _placeholder(context);
@@ -117,6 +129,23 @@ final class EmbedViewState extends State<EmbedView> {
       provider: FileImage(File(path)),
       fit: BoxFit.fitWidth,
       errorBuilder: (context, error, stack) => _placeholder(context),
+    );
+  }
+
+  /// The already-decoded picture, with the box [AspectImage] would reserve
+  /// for it: its own ratio, capped for the surface it is drawn on.
+  Widget _picture(BuildContext context, ui.Image image) {
+    final ratio = image.height <= 0 ? 1.0 : image.width / image.height;
+    return Align(
+      alignment: Alignment.centerLeft,
+      heightFactor: 1,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: heightCapFor(context)),
+        child: AspectRatio(
+          aspectRatio: ratio,
+          child: RawImage(image: image, fit: BoxFit.fitWidth),
+        ),
+      ),
     );
   }
 

@@ -620,6 +620,8 @@ final class BasqueStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metadatuak';
+  @override
   String get cheatTemplates => 'Txantiloien lekukoak';
   @override
   String get menuAddLink => 'Gehitu esteka';
@@ -1552,6 +1554,50 @@ final class BasqueStrings extends Strings {
   String get formatNoteTitle => 'Markdown txukundu';
   @override
   String get formatNoteDone => 'Oharra txukundu da.';
+  @override
+  String get exportTitle => 'Esportatu';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Hona esportatu: $place';
+  @override
+  String exportFailed(Object error) => 'Esportazioak huts egin du: $error';
+  @override
+  String get exportFolderTitle => 'Esportatu karpeta…';
+  @override
+  String get exportLibraryTitle => 'Esportatu liburutegia…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Metadaturik gabeko liburua';
+  @override
+  String get exportEpubNoIndex =>
+      'Karpeta honek ez du index.md-rik erroan. Liburuak karpetaren '
+      'izena izango du, eta ez autore, azal edo sailik.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md-k ez du frontmatter-ik. Liburuak karpetaren izena '
+      'izango du, eta ez autore, azal edo sailik.';
+  @override
+  String get exportAnyway => 'Esportatu hala ere';
+  @override
+  String get exportPdfPicture =>
+      'PDFa orrialdeen irudia da; instalatu nabigatzailea testua hautatzeko.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF irudi gisa';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Ez da nabigatzailerik aurkitu ordenagailu honetan. Oharra '
+      'orrien irudi gisa marrazten da: testua ezin da hautatu edo '
+      'bilatu, eta ohar luzeak denbora gehiago behar du.';
   @override
   String get formatNoteAlreadyTidy => 'Oharra txukun zegoen jada.';
   @override

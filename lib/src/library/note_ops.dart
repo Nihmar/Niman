@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -420,12 +421,18 @@ final class NoteOps implements NoteOperations {
   /// broken byte is still a note) and without its BOM.
   @override
   Future<String> readNote(String path) async {
-    await _mustFind(path);
-    final bytes = await File(_abs(path)).readAsBytes();
+    final bytes = await readNoteBytes(path);
     final text = utf8.decode(bytes, allowMalformed: true);
     return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
         ? text.substring(1)
         : text;
+  }
+
+  /// The note's bytes as the file holds them.
+  @override
+  Future<Uint8List> readNoteBytes(String path) async {
+    await _mustFind(path);
+    return await File(_abs(path)).readAsBytes();
   }
 
   /// Pins or unpins the note at [path] by editing its frontmatter.

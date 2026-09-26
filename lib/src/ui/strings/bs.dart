@@ -628,6 +628,8 @@ final class BosnianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metapodaci';
+  @override
   String get cheatTemplates => 'Rezervisana mjesta šablona';
   @override
   String get menuAddLink => 'Dodaj link';
@@ -1549,6 +1551,51 @@ final class BosnianStrings extends Strings {
   String get formatNoteTitle => 'Posloži Markdown';
   @override
   String get formatNoteDone => 'Bilješka je posložena.';
+  @override
+  String get exportTitle => 'Izvoz';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Izvezeno u $place';
+  @override
+  String exportFailed(Object error) => 'Izvoz nije uspio: $error';
+  @override
+  String get exportFolderTitle => 'Izvezi fasciklu…';
+  @override
+  String get exportLibraryTitle => 'Izvezi biblioteku…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Knjiga bez metapodataka';
+  @override
+  String get exportEpubNoIndex =>
+      'Ova fascikla nema index.md u korijenu. Knjiga će nositi ime '
+      'fascikle i bez autora, korica ili serije.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md nema frontmatter. Knjiga će nositi ime fascikle i bez '
+      'autora, korica ili serije.';
+  @override
+  String get exportAnyway => 'Ipak izvezi';
+  @override
+  String get exportPdfPicture =>
+      'PDF je slika stranica; instalirajte preglednik za tekst koji se može '
+      'birati.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF kao slika';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Na ovom računaru nije pronađen pretraživač. Bilješka se crta '
+      'kao slika stranica: tekst se ne može označiti ni '
+      'pretraživati, a duga bilješka traje duže.';
   @override
   String get formatNoteAlreadyTidy => 'Bilješka je već bila posložena.';
   @override

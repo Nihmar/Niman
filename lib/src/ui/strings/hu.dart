@@ -623,6 +623,8 @@ final class HungarianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metaadatok';
+  @override
   String get cheatTemplates => 'Sablon-helyőrzők';
   @override
   String get menuAddLink => 'Hivatkozás hozzáadása';
@@ -1554,6 +1556,50 @@ final class HungarianStrings extends Strings {
   String get formatNoteTitle => 'Markdown rendbetétele';
   @override
   String get formatNoteDone => 'A jegyzet rendbe lett téve.';
+  @override
+  String get exportTitle => 'Exportálás';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportálva ide: $place';
+  @override
+  String exportFailed(Object error) => 'Az exportálás nem sikerült: $error';
+  @override
+  String get exportFolderTitle => 'Mappa exportálása…';
+  @override
+  String get exportLibraryTitle => 'Könyvtár exportálása…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Könyv metaadatok nélkül';
+  @override
+  String get exportEpubNoIndex =>
+      'Ebben a mappában nincs index.md a gyökérben. A könyv a mappa '
+      'nevét viseli, és nem lesz szerzője, borítója vagy sorozata.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'Az index.md nem tartalmaz frontmattert. A könyv a mappa nevét '
+      'viseli, és nem lesz szerzője, borítója vagy sorozata.';
+  @override
+  String get exportAnyway => 'Exportálás mégis';
+  @override
+  String get exportPdfPicture =>
+      'A PDF az oldalak képe; választható szöveghez telepítsd a böngészőt.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF képként';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Ezen a gépen nem található böngésző. A jegyzet az oldalak '
+      'képként rajzolódik ki: a szöveg nem jelölhető ki és nem '
+      'kereshető, a hosszú jegyzet pedig tovább tart.';
   @override
   String get formatNoteAlreadyTidy => 'A jegyzet már rendben volt.';
   @override

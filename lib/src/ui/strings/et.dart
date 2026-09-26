@@ -616,6 +616,8 @@ final class EstonianStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB metaandmed';
+  @override
   String get cheatTemplates => 'Mallide kohatäited';
   @override
   String get menuAddLink => 'Lisa link';
@@ -1526,6 +1528,50 @@ final class EstonianStrings extends Strings {
   String get formatNoteTitle => 'Korrasta Markdown';
   @override
   String get formatNoteDone => 'Märge korrastati.';
+  @override
+  String get exportTitle => 'Ekspordi';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksporditud asukohta $place';
+  @override
+  String exportFailed(Object error) => 'Eksport ebaõnnestus: $error';
+  @override
+  String get exportFolderTitle => 'Ekspordi kaust…';
+  @override
+  String get exportLibraryTitle => 'Ekspordi teek…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Raamat ilma metaandmeteta';
+  @override
+  String get exportEpubNoIndex =>
+      'Selles kaustas pole juuretasandil index.md faili. Raamat kannab '
+      'kausta nime ning sellel pole autorit, kaant ega sarja.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md failil pole frontmatterit. Raamat kannab kausta nime '
+      'ning sellel pole autorit, kaant ega sarja.';
+  @override
+  String get exportAnyway => 'Ekspordi siiski';
+  @override
+  String get exportPdfPicture =>
+      'PDF on lehekülgede pilt; valitava teksti saamiseks paigalda brauseri.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF pildina';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Selles arvutis ei leitud brauserit. Märge joonistatakse '
+      'lehekülgede pildina: teksti ei saa valida ega otsida ning '
+      'pikk märge võtab kauem aega.';
   @override
   String get formatNoteAlreadyTidy => 'Märge oli juba korras.';
   @override

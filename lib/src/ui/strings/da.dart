@@ -620,6 +620,8 @@ final class DanishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Skabelonpladsholdere';
   @override
   String get menuAddLink => 'Tilføj link';
@@ -1538,6 +1540,51 @@ final class DanishStrings extends Strings {
   String get formatNoteTitle => 'Ryd op i Markdown';
   @override
   String get formatNoteDone => 'Noten blev ryddet op.';
+  @override
+  String get exportTitle => 'Eksportér';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Eksporteret til $place';
+  @override
+  String exportFailed(Object error) => 'Eksport mislykkedes: $error';
+  @override
+  String get exportFolderTitle => 'Eksportér mappe…';
+  @override
+  String get exportLibraryTitle => 'Eksportér bibliotek…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bog uden metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Denne mappe har ingen index.md i roden. Bogen får mappens navn '
+      'og ingen forfatter, forside eller serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md har ingen frontmatter. Bogen får mappens navn og ingen '
+      'forfatter, forside eller serie.';
+  @override
+  String get exportAnyway => 'Eksportér alligevel';
+  @override
+  String get exportPdfPicture =>
+      "PDF'en er et billede af siderne; installér en browser for "
+      'markérbar tekst.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF som billede';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Der blev ikke fundet nogen browser på denne maskine. Noten '
+      'tegnes som et billede af siderne: teksten kan ikke markeres '
+      'eller søges, og en lang note tager længere tid.';
   @override
   String get formatNoteAlreadyTidy => 'Noten var allerede ryddelig.';
   @override

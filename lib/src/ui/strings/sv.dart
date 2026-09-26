@@ -625,6 +625,8 @@ final class SwedishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'EPUB-metadata';
+  @override
   String get cheatTemplates => 'Mallplatshållare';
   @override
   String get menuAddLink => 'Lägg till länk';
@@ -1549,6 +1551,50 @@ final class SwedishStrings extends Strings {
   String get formatNoteTitle => 'Städa upp i Markdown';
   @override
   String get formatNoteDone => 'Anteckningen städades.';
+  @override
+  String get exportTitle => 'Exportera';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exporterat till $place';
+  @override
+  String exportFailed(Object error) => 'Exporten misslyckades: $error';
+  @override
+  String get exportFolderTitle => 'Exportera mapp…';
+  @override
+  String get exportLibraryTitle => 'Exportera bibliotek…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Bok utan metadata';
+  @override
+  String get exportEpubNoIndex =>
+      'Den här mappen har ingen index.md i roten. Boken får mappens '
+      'namn och ingen författare, omslag eller serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md har ingen frontmatter. Boken får mappens namn och '
+      'ingen författare, omslag eller serie.';
+  @override
+  String get exportAnyway => 'Exportera ändå';
+  @override
+  String get exportPdfPicture =>
+      'PDF:en är en bild av sidorna; installera en webbläsare för valbar text.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF som bild';
+
+  @override
+  String get exportPdfNoEngine =>
+      'Ingen webbläsare hittades på den här datorn. Anteckningen '
+      'ritas som en bild av sidorna: texten kan varken markeras '
+      'eller sökas, och en lång anteckning tar längre tid.';
   @override
   String get formatNoteAlreadyTidy => 'Anteckningen var redan städad.';
   @override

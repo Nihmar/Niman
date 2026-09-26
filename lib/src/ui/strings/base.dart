@@ -306,6 +306,7 @@ abstract base class Strings {
   String get cheatFootnotes;
   String get cheatRule;
   String get cheatFrontmatter;
+  String get cheatEpubMetadata;
   String get cheatTemplates;
   String get menuAddLink;
   String get menuAddExternalLink;
@@ -734,6 +735,41 @@ abstract base class Strings {
   String get formatNoteTitle;
   String get formatNoteDone;
   String get formatNoteAlreadyTidy;
+  String get exportTitle;
+  String get exportFormatMarkdown;
+  String get exportFormatHtml;
+  String get exportFolderTitle;
+  String get exportLibraryTitle;
+  String get exportFormatPdf;
+  String get exportFormatEpub;
+
+  /// The title of the pre-flight dialog a folder's EPUB export shows when
+  /// the folder has no metadata source (#303, E3).
+  String get exportEpubNoMetadataTitle;
+
+  /// The dialog's message when the exported folder has no `index.md`.
+  String get exportEpubNoIndex;
+
+  /// The dialog's message when `index.md` has no frontmatter.
+  String get exportEpubNoFrontmatter;
+
+  /// The dialog's proceed action: export anyway, without what the message
+  /// said is missing. Both pre-flight dialogs end with it — a book without
+  /// metadata (#303, E3), a note drawn as a picture (#63).
+  String get exportAnyway;
+
+  /// The title of the pre-flight dialog a note's PDF export shows when the
+  /// machine has no browser engine to print the page with (#63): what is
+  /// written is a picture of the pages, drawn here.
+  String get exportPdfNoEngineTitle;
+
+  /// The dialog's message: drawn page by page, with no text to select or
+  /// search, and slower on a long note.
+  String get exportPdfNoEngine;
+
+  String get exportPdfPicture;
+  String exportDone(String place);
+  String exportFailed(Object error);
   String get tidyOnCloseTitle;
   String get tidyOnCloseSubtitle;
   String get lintRulesTitle;

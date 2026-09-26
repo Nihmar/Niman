@@ -629,6 +629,8 @@ final class SpanishStrings extends Strings {
   @override
   String get cheatFrontmatter => 'Frontmatter';
   @override
+  String get cheatEpubMetadata => 'Metadatos EPUB';
+  @override
   String get cheatTemplates => 'Marcadores de plantillas';
   @override
   String get menuAddLink => 'Añadir enlace';
@@ -1573,6 +1575,52 @@ final class SpanishStrings extends Strings {
   String get formatNoteTitle => 'Ordenar el Markdown';
   @override
   String get formatNoteDone => 'La nota se ha ordenado.';
+  @override
+  String get exportTitle => 'Exportar';
+  @override
+  String get exportFormatMarkdown => 'Markdown';
+  @override
+  String get exportFormatHtml => 'HTML';
+  @override
+  String exportDone(String place) => 'Exportado a $place';
+  @override
+  String exportFailed(Object error) => 'La exportación falló: $error';
+  @override
+  String get exportFolderTitle => 'Exportar carpeta…';
+  @override
+  String get exportLibraryTitle => 'Exportar biblioteca…';
+  @override
+  String get exportFormatPdf => 'PDF';
+
+  @override
+  String get exportFormatEpub => 'EPUB';
+
+  @override
+  String get exportEpubNoMetadataTitle => 'Libro sin metadatos';
+  @override
+  String get exportEpubNoIndex =>
+      'Esta carpeta no tiene ningún index.md en su raíz. El libro '
+      'llevará el nombre de la carpeta y ningún autor, portada ni '
+      'serie.';
+  @override
+  String get exportEpubNoFrontmatter =>
+      'index.md no tiene frontmatter. El libro llevará el nombre de la '
+      'carpeta y ningún autor, portada ni serie.';
+  @override
+  String get exportAnyway => 'Exportar de todos modos';
+  @override
+  String get exportPdfPicture =>
+      'El PDF es una imagen de las páginas; instala un navegador para tener '
+      'texto seleccionable.';
+
+  @override
+  String get exportPdfNoEngineTitle => 'PDF como imagen';
+
+  @override
+  String get exportPdfNoEngine =>
+      'No se encontró ningún navegador en este equipo. La nota se '
+      'dibuja como una imagen de las páginas: el texto no se puede '
+      'seleccionar ni buscar, y una nota larga tarda más.';
   @override
   String get formatNoteAlreadyTidy => 'La nota ya estaba ordenada.';
   @override
