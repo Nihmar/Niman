@@ -945,10 +945,11 @@ final class LibraryConfig {
 /// Without a device store (tests, tools, the legacy seed) the file keeps
 /// every key, as it did before the split.
 final class LibraryConfigStore {
-  /// Creates a store for the library at its absolute path; [firstRunDefaults]
+  /// Creates a store for the library at its absolute path; [welcomeDefaults]
   /// are the device keys a library takes from the welcome's answer (#266)
-  /// when this device has never stored any for it.
-  new(this._libraryPath, {this._device, this.firstRunDefaults});
+  /// when this device has never stored any for it — every such library,
+  /// not only the first.
+  new(this._libraryPath, {this._device, this.welcomeDefaults});
 
   final String _libraryPath;
   final DeviceSettingsStore? _device;
@@ -957,7 +958,7 @@ final class LibraryConfigStore {
   /// or null when the question was never asked. Merged *under* the file's
   /// own values, so a library that has an editor choice of its own keeps
   /// it.
-  final Map<String, Object?>? firstRunDefaults;
+  final Map<String, Object?>? welcomeDefaults;
 
   /// The settings file: `<library>/.niman/settings.json`.
   File get file => File(p.join(_libraryPath, '.niman', 'settings.json'));
@@ -985,7 +986,7 @@ final class LibraryConfigStore {
       };
       // The first run's answer fills what the file does not say — a new
       // library, or one that never carried these keys (#266).
-      final defaults = firstRunDefaults;
+      final defaults = welcomeDefaults;
       if (defaults != null) {
         for (final entry in defaults.entries) {
           device.putIfAbsent(entry.key, () => entry.value);

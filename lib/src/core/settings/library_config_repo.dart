@@ -17,16 +17,16 @@ import 'package:niman/src/core/settings/library_config.dart';
 final class LibraryConfigRepo {
   /// Creates the repo for the library at its absolute path; [device]
   /// keeps the device's share of the settings (see [LibraryConfigStore]),
-  /// and [firstRunDefaults] are the editor keys the welcome's answer
+  /// and [welcomeDefaults] are the editor keys the welcome's answer
   /// hands a library this device opens for the first time (#266).
   new(
     String libraryPath, {
     DeviceSettingsStore? device,
-    Map<String, Object?>? firstRunDefaults,
+    Map<String, Object?>? welcomeDefaults,
   }) : _store = LibraryConfigStore(
          libraryPath,
          device: device,
-         firstRunDefaults: firstRunDefaults,
+         welcomeDefaults: welcomeDefaults,
        );
 
   final LibraryConfigStore _store;

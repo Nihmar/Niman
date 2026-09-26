@@ -239,15 +239,40 @@ void main() {
     expect(find.byKey(const Key('welcome-skip')), findsNothing);
     expect(find.byKey(const Key('welcome-close')), findsOne);
 
-    // Through every page: no question, and the last page closes.
+    // Through every page: no question, and the last page's primary
+    // button closes — a Next there would be a control that does nothing.
     for (var i = 0; i < 8; i++) {
       expect(find.byKey(const Key('welcome-question')), findsNothing);
-      final button = find.byKey(const Key('welcome-next'));
-      if (button.evaluate().isEmpty) break;
-      await tester.tap(button);
+      final next = find.byKey(const Key('welcome-next'));
+      if (next.evaluate().isEmpty) break;
+      await tester.tap(next);
       await tester.pumpAndSettle();
     }
-    await tester.tap(find.byKey(const Key('welcome-close')));
+    expect(find.byKey(const Key('welcome-next')), findsNothing);
+    await tester.tap(find.byKey(const Key('welcome-close-primary')));
+    expect(closed, isTrue);
+  });
+
+  testWidgets('Escape leaves the deck, and closes the read-only one', (
+    tester,
+  ) async {
+    // The interactive deck: Escape is a skip.
+    await pumpDeck(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('Your notes are files'), findsNothing);
+    expect(store.deckSeen, isTrue);
+    await close();
+
+    var closed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: WelcomeScreen(readOnly: true, onClose: () => closed = true),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
     expect(closed, isTrue);
   });
 }

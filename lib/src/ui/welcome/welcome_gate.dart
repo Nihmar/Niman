@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/welcome/welcome_screen.dart';
@@ -18,7 +19,10 @@ final welcomeStateProvider = FutureProvider<WelcomeState?>((ref) async {
   try {
     final store = await ref.watch(welcomeStoreProvider.future);
     return await store.state();
-  } on Object {
+  } on Object catch (error) {
+    // A test bed without an application-support folder, a database that
+    // will not open: the app opens as before #266, and the log says why.
+    _log.warning('the first run could not be read ($error)');
     return null;
   }
 });
@@ -33,13 +37,19 @@ final class WelcomeGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(welcomeStateProvider).value;
+    final state = ref.watch(welcomeStateProvider);
+    final welcome = state.value;
     // Loading, no store, or already welcomed: the app, unchanged. The
     // deck never flashes in front of a library that was resumed.
-    if (state == null || state.deckSeen) return child;
+    //
+    // A first run makes the state resolve in the first frames and the
+    // deck covers the app then; while it is still unknown the app stays
+    // usable rather than frozen, which is also the only shape that
+    // survives a test bed whose store never answers.
+    if (welcome == null || welcome.deckSeen) return child;
     return WelcomeScreen(
-      initialAnswer: state.experience,
-      initialTourOffer: state.tourOffer,
+      initialAnswer: welcome.experience,
+      initialTourOffer: welcome.tourOffer,
       onAnswer: (answer) => unawaited(_answer(ref, answer)),
       onFinish: ({required experience, required tourOffer}) =>
           unawaited(_finish(ref, experience: experience, tourOffer: tourOffer)),
@@ -50,8 +60,12 @@ final class WelcomeGate extends ConsumerWidget {
 /// Keeps the answer as soon as it is tapped: a deck left halfway, or an
 /// app killed behind it, does not lose what the user said.
 Future<void> _answer(WidgetRef ref, MarkdownExperience answer) async {
-  final store = await ref.read(welcomeStoreProvider.future);
-  await store.setExperience(answer);
+  try {
+    final store = await ref.read(welcomeStoreProvider.future);
+    await store.setExperience(answer);
+  } on Object catch (error) {
+    _log.warning('the welcome answer was not kept ($error)');
+  }
 }
 
 /// Leaves the deck: the answer (when one was given), the tour offer, and
@@ -61,10 +75,14 @@ Future<void> _finish(
   required MarkdownExperience? experience,
   required bool tourOffer,
 }) async {
-  final store = await ref.read(welcomeStoreProvider.future);
-  if (experience != null) await store.setExperience(experience);
-  await store.setTourOffer(offer: tourOffer);
-  await store.setDeckSeen(seen: true);
+  try {
+    final store = await ref.read(welcomeStoreProvider.future);
+    if (experience != null) await store.setExperience(experience);
+    await store.setTourOffer(offer: tourOffer);
+    await store.setDeckSeen(seen: true);
+  } on Object catch (error) {
+    _log.warning('the welcome could not be closed ($error)');
+  }
   ref.invalidate(welcomeStateProvider);
 }
 
@@ -81,3 +99,5 @@ Future<void> showWelcomeDeck(BuildContext context) {
     ),
   );
 }
+
+const AppLogger _log = AppLogger(name: 'welcome');
