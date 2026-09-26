@@ -10,7 +10,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 
 | Module | Contents |
 |--------|----------|
-| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, single instance, the tray, the changelog parser |
+| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, themes and their `.json` transfer, language, shortcuts/launch args, share-in (`share_in.dart`), single instance, the tray, the changelog parser |
 | `update/` | The GitHub-Releases update check, its scheduler and the download of the next build |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image/audio import, Markdown import |
 | `workspace/` | The open notes of one library on one device: panes, tabs and their mementos — see [workspace.md](../records/workspace.md) |

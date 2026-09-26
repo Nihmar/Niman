@@ -284,7 +284,9 @@ frame around the window says so while you drag.
 
 - Notes live in plain folders inside the library.
 - **Quick note:** one tap target for scratch text. Defaults to
-  `Quick note.md` at the library root; `quickNotePath` overrides it.
+  `Quick note.md` at the library root; `quickNotePath` overrides it. Text
+  shared into Niman from another app lands at its end
+  ([platforms](platforms.md)), and the note opens.
 - **List notes:** created under `listNoteFolder` (default `Lists`).
 - **Voice notes:** a note with `type: audio` frontmatter shows a chat
   instead of the editor — vocals on the left, written notes on the
