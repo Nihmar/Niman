@@ -1558,6 +1558,8 @@ final class FrenchStrings extends Strings {
   @override
   String get importFolderAction => 'Importer';
   @override
+  String get notionImportTitle => 'Importer une exportation Notion';
+  @override
   String dropRejected(String names) =>
       'Seuls les fichiers Markdown et les dossiers s’ouvrent ici : $names';
   @override

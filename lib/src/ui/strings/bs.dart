@@ -1523,6 +1523,8 @@ final class BosnianStrings extends Strings {
   @override
   String get importFolderAction => 'Uvezi';
   @override
+  String get notionImportTitle => 'Uvezi Notion izvoz';
+  @override
   String dropRejected(String names) =>
       'Ovdje se otvaraju samo Markdown datoteke i mape: $names';
   @override

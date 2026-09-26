@@ -1514,6 +1514,8 @@ final class LatvianStrings extends Strings {
   @override
   String get importFolderAction => 'Importēt';
   @override
+  String get notionImportTitle => 'Importēt Notion eksportu';
+  @override
   String dropRejected(String names) =>
       'Šeit atveras tikai Markdown faili un mapes: $names';
   @override

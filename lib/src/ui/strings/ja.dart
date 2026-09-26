@@ -1422,6 +1422,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get importFolderAction => '読み込む';
   @override
+  String get notionImportTitle => 'Notion エクスポートを読み込む';
+  @override
   String dropRejected(String names) =>
       'ここで開けるのは Markdown ファイルとフォルダーだけです：$names';
   @override

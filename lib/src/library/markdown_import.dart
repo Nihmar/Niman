@@ -51,7 +51,7 @@ Future<({String folder, int notes})?> importMarkdownFolder({
 }) async {
   final files = markdownFilesIn(Directory(source));
   if (files.isEmpty) return null;
-  final name = _freeName(libraryRoot, p.basename(p.normalize(source)));
+  final name = freeFolderName(libraryRoot, p.basename(p.normalize(source)));
   final target = p.join(libraryRoot, name);
   for (final relative in files) {
     final to = File(p.join(target, relative));
@@ -61,7 +61,10 @@ Future<({String folder, int notes})?> importMarkdownFolder({
   return (folder: name, notes: files.length);
 }
 
-String _freeName(String root, String wanted) {
+/// A folder name free in [root]: [wanted], or `wanted 2`, `wanted 3`…
+/// while each is taken, so an import never lands on top of the library's
+/// own folders.
+String freeFolderName(String root, String wanted) {
   var name = wanted;
   for (
     var n = 2;

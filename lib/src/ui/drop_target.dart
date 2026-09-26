@@ -30,9 +30,9 @@ typedef SortedDrop = ({
   List<String> rejected,
 });
 
-/// Sorts the dropped [paths]: Markdown files to open, folders to import,
-/// and the rest, which is left alone. [isFolder] stands in for the disk
-/// in tests.
+/// Sorts the dropped [paths]: Markdown files to open, folders and Notion
+/// exports to import, and the rest, which is left alone. [isFolder]
+/// stands in for the disk in tests.
 SortedDrop sortDrop(
   List<String> paths, {
   bool Function(String path)? isFolder,
@@ -47,6 +47,10 @@ SortedDrop sortDrop(
       folders.add(path);
     } else if (editorOnlyExtensions.contains(extension)) {
       files.add(path);
+    } else if (extension == 'zip') {
+      // A Notion export, offered for import (#25): the shell decides by
+      // the extension what the archive is.
+      folders.add(path);
     } else {
       rejected.add(path);
     }

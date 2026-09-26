@@ -1532,6 +1532,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get importFolderAction => 'Импортиране';
   @override
+  String get notionImportTitle => 'Импортиране на експорт от Notion';
+  @override
   String dropRejected(String names) =>
       'Тук се отварят само файлове Markdown и папки: $names';
   @override

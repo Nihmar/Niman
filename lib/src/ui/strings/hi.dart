@@ -1491,6 +1491,8 @@ final class HindiStrings extends Strings {
   @override
   String get importFolderAction => 'आयात करें';
   @override
+  String get notionImportTitle => 'Notion निर्यात आयात करें';
+  @override
   String dropRejected(String names) =>
       'यहाँ केवल Markdown फ़ाइलें और फ़ोल्डर खुलते हैं: $names';
   @override

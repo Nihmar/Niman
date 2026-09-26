@@ -1518,6 +1518,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get importFolderAction => 'Імпартаваць';
   @override
+  String get notionImportTitle => 'Імпарт экспарту Notion';
+  @override
   String dropRejected(String names) =>
       'Тут адкрываюцца толькі файлы Markdown і папкі: $names';
   @override
