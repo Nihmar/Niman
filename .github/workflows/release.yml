@@ -96,7 +96,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: dist/niman-$VERSION-android.apk
+          # A glob, not the staged path: `with:` values are YAML, not
+          # shell, so `$VERSION` there is the literal text and matched
+          # nothing (the 0.1.0 release went out without its APK). The
+          # pattern ends at `-android.apk` and cannot match a testing
+          # build's `-android-testing.apk`.
+          path: dist/niman-*-android.apk
 
       # No testing build here (issue #106, revised): a release carries the
       # official APK and nothing else. An in-app update takes the release's
