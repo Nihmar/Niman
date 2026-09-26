@@ -180,7 +180,9 @@ screen opens and the text lands in whatever note it picks. A shared file
 is copied into the library root as a new note — its name kept, uniquified
 like any other — and opened. A copy, because Android hands the sender's
 file as a read-only `content://` reference, not a path Niman could edit
-in place.
+in place. A Notion export (a `.zip`) shared the same way is
+[imported](organization.md#importing-a-notion-export) instead of copied
+as one note.
 
 The **side panel** (outline, tags, history beside the note, and the
 [journal](journal.md)'s calendar) shows on
