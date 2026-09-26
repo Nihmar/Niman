@@ -6,7 +6,7 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
-## [0.0.10] - 2026-09-26
+## [0.1.0] - 2026-09-26
 
 Notes in, notes out.
 
@@ -29,6 +29,7 @@ holding them all at once.
 - **A full scan reconciles one directory at a time.** First open, re-index and the periodic rescan no longer hold every index row, the whole disk walk and every changed note in memory at once: the peak is the largest folder, not the library. At a million notes the old scan took about a gigabyte to itself; the rescan of an untouched library now takes none of it
 
 ### Fixed
+- **The in-app update installs the official app again.** 0.0.10's release page carried the testing build beside the official APK, and the updater took the testing one — a different application ID, which installs *beside* the app that asked — so Android auto-update is fixed by not publishing it (and by refusing a `-testing` name in the updater itself)
 - A heading typed at the end of a note no longer hangs the editor on a phone
 - An inline formula with spaces in its source reveals its `$…$` instead of staying stuck
 - The touch handles and their menu no longer flash at a stale place; a revealed mark starts on the note's margin
