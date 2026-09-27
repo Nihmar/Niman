@@ -385,6 +385,12 @@ final class BulgarianStrings extends Strings {
   String get listEmpty => 'Все още няма елементи';
   @override
   String get listDragHandleLabel => 'Сменете реда на елементите';
+  @override
+  String get shoppingListName => 'Списък за пазаруване';
+  @override
+  String get checklistName => 'Контролен списък';
+  @override
+  String get shoppingQuantityLabel => 'Количество';
 
   // Audio note kind (issue #56).
   @override

@@ -383,6 +383,12 @@ final class PortugueseStrings extends Strings {
   String get listEmpty => 'Ainda não há itens';
   @override
   String get listDragHandleLabel => 'Reordenar o item';
+  @override
+  String get shoppingListName => 'Lista de compras';
+  @override
+  String get checklistName => 'Lista de verificação';
+  @override
+  String get shoppingQuantityLabel => 'Quantidade';
 
   // Audio note kind (issue #56).
   @override

@@ -384,6 +384,12 @@ final class DutchStrings extends Strings {
   String get listEmpty => 'Nog geen items';
   @override
   String get listDragHandleLabel => 'Item van plaats verwisselen';
+  @override
+  String get shoppingListName => 'Boodschappenlijst';
+  @override
+  String get checklistName => 'Checklist';
+  @override
+  String get shoppingQuantityLabel => 'Aantal';
 
   // Audio note kind (issue #56).
   @override

@@ -354,6 +354,12 @@ final class ChineseStrings extends Strings {
   String get listEmpty => '还没有条目';
   @override
   String get listDragHandleLabel => '重新排列条目';
+  @override
+  String get shoppingListName => '购物清单';
+  @override
+  String get checklistName => '核对清单';
+  @override
+  String get shoppingQuantityLabel => '数量';
 
   // Audio note kind (issue #56).
   @override

@@ -380,6 +380,12 @@ final class FinnishStrings extends Strings {
   String get listEmpty => 'Ei vielä kohteita';
   @override
   String get listDragHandleLabel => 'Muuta kohteen järjestys';
+  @override
+  String get shoppingListName => 'Ostoslista';
+  @override
+  String get checklistName => 'Tarkistuslista';
+  @override
+  String get shoppingQuantityLabel => 'Määrä';
 
   // Audio note kind (issue #56).
   @override

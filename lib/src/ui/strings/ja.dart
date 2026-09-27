@@ -354,6 +354,12 @@ final class JapaneseStrings extends Strings {
   String get listEmpty => 'まだ項目がありません';
   @override
   String get listDragHandleLabel => '項目を並べ替え';
+  @override
+  String get shoppingListName => '買い物リスト';
+  @override
+  String get checklistName => 'チェックリスト';
+  @override
+  String get shoppingQuantityLabel => '数量';
 
   // Audio note kind (issue #56).
   @override

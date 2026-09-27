@@ -383,6 +383,12 @@ final class SlovenianStrings extends Strings {
   String get listEmpty => 'Ni še elementov';
   @override
   String get listDragHandleLabel => 'Spremeni vrstni red elementa';
+  @override
+  String get shoppingListName => 'Nakupovalni seznam';
+  @override
+  String get checklistName => 'Kontrolni seznam';
+  @override
+  String get shoppingQuantityLabel => 'Količina';
 
   // Audio note kind (issue #56).
   @override

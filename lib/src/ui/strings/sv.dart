@@ -383,6 +383,12 @@ final class SwedishStrings extends Strings {
   String get listEmpty => 'Inga objekt ännu';
   @override
   String get listDragHandleLabel => 'Byt ordning på objektet';
+  @override
+  String get shoppingListName => 'Inköpslista';
+  @override
+  String get checklistName => 'Checklista';
+  @override
+  String get shoppingQuantityLabel => 'Antal';
 
   // Audio note kind (issue #56).
   @override

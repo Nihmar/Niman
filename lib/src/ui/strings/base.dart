@@ -184,6 +184,11 @@ abstract base class Strings {
   String get listAddTooltip;
   String get listEmpty;
   String get listDragHandleLabel;
+  // The shopping-list subtype: the ⋮ entries that turn a list into one
+  // and back, and the quantity a shopping item carries.
+  String get shoppingListName;
+  String get checklistName;
+  String get shoppingQuantityLabel;
 
   // Audio note kind (issue #56).
   String get audioEmpty;

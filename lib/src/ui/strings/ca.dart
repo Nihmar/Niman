@@ -387,6 +387,12 @@ final class CatalanStrings extends Strings {
   String get listEmpty => 'Encara no hi ha elements';
   @override
   String get listDragHandleLabel => 'Canvia l’ordre de l’element';
+  @override
+  String get shoppingListName => 'Llista de la compra';
+  @override
+  String get checklistName => 'Llista de control';
+  @override
+  String get shoppingQuantityLabel => 'Quantitat';
 
   // Audio note kind (issue #56).
   @override

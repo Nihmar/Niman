@@ -839,15 +839,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Empty when the open note has no kind GUI (including unknown `type`s).
   List<Widget> get _kindActions {
     if (_kindGui == null) return const [];
-    final isAudio = _noteKind == 'audio';
+    final icon = switch (_noteKind) {
+      'audio' => Icons.mic_outlined,
+      'shopping-list' => Icons.shopping_cart_outlined,
+      _ => Icons.checklist,
+    };
     return [
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
-          tooltip: isAudio
+          tooltip: _noteKind == 'audio'
               ? AppStrings.showAudioTooltip
               : AppStrings.showListTooltip,
-          icon: Icon(isAudio ? Icons.mic_outlined : Icons.checklist),
+          icon: Icon(icon),
           onPressed: () => setState(() => _kindRawMode = false),
         )
       else
@@ -2230,6 +2234,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     textNote: !_shownIsAttachment,
     // The phone has no key for the palette (#206); the wide layout has.
     palette: !_wide,
+    kindSwitch: switch (_noteKind) {
+      'list' => NoteKindSwitch.toShoppingList,
+      'shopping-list' => NoteKindSwitch.toChecklist,
+      _ => null,
+    },
     onSelected: (action) {
       final path = _selected;
       if (path == null) return;
@@ -2242,12 +2251,25 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         NoteMenuAction.export => _exportNote(path),
         NoteMenuAction.cheatsheet => _openCheatsheet(),
         NoteMenuAction.history => _openHistory(path),
+        NoteMenuAction.kindSwitch => Future<void>.sync(_switchNoteKind),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
         NoteMenuAction.delete => _rowActions.delete(context, path),
       });
     },
   );
+
+  /// Turns the open note between `list` and `shopping-list` (#309).
+  ///
+  /// The note's own buffer rewrites the frontmatter (unsaved changes
+  /// included) through its handle, one undoable edit, saved at once; the
+  /// body swaps as the shell hears the new kind. Nothing else moves: the
+  /// name, the folder and the lines stay.
+  void _switchNoteKind() {
+    final note = _panelNote;
+    if (note == null) return;
+    note.setNoteKind(_noteKind == 'list' ? 'shopping-list' : 'list');
+  }
 
   @override
   Widget build(BuildContext context) {

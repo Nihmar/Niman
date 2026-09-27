@@ -380,6 +380,12 @@ final class UkrainianStrings extends Strings {
   String get listEmpty => 'Елементів ще немає';
   @override
   String get listDragHandleLabel => 'Змінити порядок елементів';
+  @override
+  String get shoppingListName => 'Список покупок';
+  @override
+  String get checklistName => 'Контрольний список';
+  @override
+  String get shoppingQuantityLabel => 'Кількість';
 
   // Audio note kind (issue #56).
   @override

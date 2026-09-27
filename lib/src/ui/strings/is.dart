@@ -378,6 +378,12 @@ final class IcelandicStrings extends Strings {
   String get listEmpty => 'Engir liðir enn';
   @override
   String get listDragHandleLabel => 'Raða lið aftur';
+  @override
+  String get shoppingListName => 'Innkaupalisti';
+  @override
+  String get checklistName => 'Gátlisti';
+  @override
+  String get shoppingQuantityLabel => 'Magn';
 
   // Audio note kind (issue #56).
   @override

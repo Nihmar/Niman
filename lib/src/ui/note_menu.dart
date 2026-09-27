@@ -21,6 +21,11 @@ enum NoteMenuAction {
   /// Tidy the note's Markdown (#227).
   format,
 
+  /// Turn the note's kind around (#309): a list into a shopping list, a
+  /// shopping list back into a list. The entry's label says which, and it
+  /// only exists on those two kinds.
+  kindSwitch,
+
   /// Write the note out as a file (#24).
   export,
 
@@ -40,6 +45,16 @@ enum NoteMenuAction {
   delete,
 }
 
+/// What the note's ⋮ says about its kind (#309), when the note is one
+/// half of the shopping-list pair.
+enum NoteKindSwitch {
+  /// A `list` note: the entry turns it into a shopping list.
+  toShoppingList,
+
+  /// A `shopping-list` note: the entry turns it back into a checklist.
+  toChecklist,
+}
+
 /// The open note's ⋮ menu (mockup H2): History, Rename, Move, Delete —
 /// the file actions, next to the view controls on the note's bar.
 final class NoteMenuButton extends StatelessWidget {
@@ -50,11 +65,16 @@ final class NoteMenuButton extends StatelessWidget {
     this.typewriter = false,
     this.palette = false,
     this.textNote = true,
+    this.kindSwitch,
     super.key,
   });
 
   /// Called with the action picked.
   final ValueChanged<NoteMenuAction> onSelected;
+
+  /// Which way the kind entry reads, or null when the note is neither a
+  /// list nor a shopping list (there is nothing to turn).
+  final NoteKindSwitch? kindSwitch;
 
   /// Whether typewriter mode is on.
   final bool typewriter;
@@ -79,6 +99,16 @@ final class NoteMenuButton extends StatelessWidget {
         if (textNote) ...[
           _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
           _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
+          if (kindSwitch case final kind?)
+            _item(
+              NoteMenuAction.kindSwitch,
+              kind == NoteKindSwitch.toShoppingList
+                  ? Icons.shopping_cart_outlined
+                  : Icons.checklist,
+              kind == NoteKindSwitch.toShoppingList
+                  ? AppStrings.shoppingListName
+                  : AppStrings.checklistName,
+            ),
           _item(
             NoteMenuAction.typewriter,
             Icons.vertical_align_center,

@@ -26,6 +26,7 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/editor/word_count_index.dart';
+import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/image_import.dart';
@@ -419,6 +420,18 @@ final class _NoteViewState extends State<NoteView>
     if (!_ready) return false;
     final kind = _noteKind == null ? null : NoteKinds.forType(_noteKind);
     return !(widget.kindMode && kind != null);
+  }
+
+  @override
+  void setNoteKind(String? type) {
+    final text = type == null
+        ? removeFrontmatterKey(_currentText, 'type')
+        : setFrontmatterKey(_currentText, 'type', type);
+    if (text == _currentText) return;
+    _applyKindEdit(text);
+    if (!mounted) return;
+    setState(() => _noteKind = type);
+    widget.onNoteKindChanged?.call(type);
   }
 
   @override

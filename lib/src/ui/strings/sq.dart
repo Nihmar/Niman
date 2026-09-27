@@ -380,6 +380,12 @@ final class AlbanianStrings extends Strings {
   String get listEmpty => "Ende s'ka elemente";
   @override
   String get listDragHandleLabel => 'Rirrendni elementin';
+  @override
+  String get shoppingListName => 'Listë pazari';
+  @override
+  String get checklistName => 'Listë kontrolli';
+  @override
+  String get shoppingQuantityLabel => 'Sasia';
 
   // Audio note kind (issue #56).
   @override

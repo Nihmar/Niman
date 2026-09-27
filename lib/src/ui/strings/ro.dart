@@ -386,6 +386,12 @@ final class RomanianStrings extends Strings {
   String get listEmpty => 'Niciun element încă';
   @override
   String get listDragHandleLabel => 'Schimbă ordinea elementului';
+  @override
+  String get shoppingListName => 'Listă de cumpărături';
+  @override
+  String get checklistName => 'Listă de verificare';
+  @override
+  String get shoppingQuantityLabel => 'Cantitate';
 
   // Audio note kind (issue #56).
   @override

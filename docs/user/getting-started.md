@@ -49,7 +49,8 @@ any step; nothing of it is left in your library.
 ## First steps
 
 1. Open (or create) a folder as a library.
-2. Create a note with the Files FAB: **New note** or **New list note**.
+2. Create a note with the Files FAB: **New note** or **New list note**
+   (see [list notes](lists.md)).
 3. Write in the source editor or the live (WYSIWYG) editor — switch per
    note or per library, and read the note in the read view (see
    [editing](editing.md)).
@@ -61,6 +62,8 @@ any step; nothing of it is left in your library.
 ## Next
 
 - [Editing](editing.md) — Markdown, math, images, spellcheck, the read view.
+- [List notes and shopping lists](lists.md) — checklists, quantities, and
+  the ⋮ switch between the two.
 - [Organization](organization.md) — trash, history, templates, tags — and
   reading pictures, PDFs and books.
 - [Export](export.md) — a note, a folder or the library out as Markdown,

@@ -382,6 +382,12 @@ final class SlovakStrings extends Strings {
   String get listEmpty => 'Zatiaľ žiadne položky';
   @override
   String get listDragHandleLabel => 'Zmeniť poradie položky';
+  @override
+  String get shoppingListName => 'Nákupný zoznam';
+  @override
+  String get checklistName => 'Kontrolný zoznam';
+  @override
+  String get shoppingQuantityLabel => 'Množstvo';
 
   // Audio note kind (issue #56).
   @override
