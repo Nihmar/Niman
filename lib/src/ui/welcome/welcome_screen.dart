@@ -9,7 +9,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/welcome.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/welcome/welcome_pages.dart';
 
 /// The welcome deck.
@@ -18,16 +18,12 @@ final class WelcomeScreen extends StatefulWidget {
   const new({
     this.onAnswer,
     this.onFinish,
-    this.copy = const WelcomeCopy(),
     this.readOnly = false,
     this.onClose,
     this.initialAnswer,
     this.initialTourOffer = false,
     super.key,
   });
-
-  /// The words; a constant, and a seam for a test that wants its own.
-  final WelcomeCopy copy;
 
   /// Whether this is the read-only deck (no question, no tour offer, a
   /// Close button).
@@ -61,10 +57,7 @@ final class WelcomeScreen extends StatefulWidget {
 final class _WelcomeScreenState extends State<WelcomeScreen> {
   /// The pages, rebuilt from the copy: a widget pumped again with other
   /// words gets them.
-  List<WelcomePage> get _pages => [
-    ...themedPages(widget.copy),
-    devicePage(widget.copy),
-  ];
+  List<WelcomePage> get _pages => [...themedPages(), devicePage()];
 
   int _page = 0;
   MarkdownExperience? _answer;
@@ -179,13 +172,13 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
           TextButton(
             key: const Key('welcome-close'),
             onPressed: widget.onClose,
-            child: Text(widget.copy.close),
+            child: Text(AppStrings.welcomeClose),
           )
         else
           TextButton(
             key: const Key('welcome-skip'),
             onPressed: _finish,
-            child: Text(widget.copy.skip),
+            child: Text(AppStrings.welcomeSkip),
           ),
       ],
     );
@@ -222,7 +215,7 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
       children: [
         const SizedBox(height: 24),
         Text(
-          widget.copy.questionTitle,
+          AppStrings.welcomeQuestionTitle,
           key: const Key('welcome-question'),
           style: theme.textTheme.headlineSmall,
         ),
@@ -234,25 +227,25 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
             children: [
               _answerTile(
                 MarkdownExperience.none,
-                widget.copy.answerNone,
-                widget.copy.answerNoneHint,
+                AppStrings.welcomeAnswerNone,
+                AppStrings.welcomeAnswerNoneHint,
               ),
               _answerTile(
                 MarkdownExperience.some,
-                widget.copy.answerSome,
-                widget.copy.answerSomeHint,
+                AppStrings.welcomeAnswerSome,
+                AppStrings.welcomeAnswerSomeHint,
               ),
               _answerTile(
                 MarkdownExperience.fluent,
-                widget.copy.answerFluent,
-                widget.copy.answerFluentHint,
+                AppStrings.welcomeAnswerFluent,
+                AppStrings.welcomeAnswerFluentHint,
               ),
             ],
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          widget.copy.questionNote,
+          AppStrings.welcomeQuestionNote,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -264,8 +257,8 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
           onChanged: (value) => setState(() => _tourOffer = value ?? false),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
-          title: Text(widget.copy.tourOffer),
-          subtitle: Text(widget.copy.tourOfferNote),
+          title: Text(AppStrings.welcomeTourOffer),
+          subtitle: Text(AppStrings.welcomeTourOfferNote),
         ),
       ],
     );
@@ -288,7 +281,7 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
     return Row(
       children: [
         Semantics(
-          label: widget.copy.pageOf(_page + 1, _lastPage + 1),
+          label: AppStrings.welcomePageOf(_page + 1, _lastPage + 1),
           child: Row(
             children: [
               for (var i = 0; i <= _lastPage; i++)
@@ -311,7 +304,7 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
           TextButton(
             key: const Key('welcome-back'),
             onPressed: _back,
-            child: Text(widget.copy.back),
+            child: Text(AppStrings.welcomeBack),
           ),
         const SizedBox(width: 8),
         FilledButton(
@@ -325,8 +318,10 @@ final class _WelcomeScreenState extends State<WelcomeScreen> {
               : _next,
           child: Text(
             last
-                ? (widget.readOnly ? widget.copy.close : widget.copy.start)
-                : widget.copy.next,
+                ? (widget.readOnly
+                      ? AppStrings.welcomeClose
+                      : AppStrings.welcomeStart)
+                : AppStrings.welcomeNext,
           ),
         ),
       ],

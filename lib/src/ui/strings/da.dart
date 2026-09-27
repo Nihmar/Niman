@@ -2486,4 +2486,180 @@ final class DanishStrings extends Strings {
   String get syncMergeSave => 'Gem fletningen';
   @override
   String get syncMergeKeepWhole => 'Eller behold én hel kopi';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Spring over';
+  @override
+  String get welcomeNext => 'Næste';
+  @override
+  String get welcomeBack => 'Tilbage';
+  @override
+  String get welcomeStart => 'Begynd at skrive';
+  @override
+  String get welcomeClose => 'Luk';
+  @override
+  String get welcomeNotesTitle => 'Dine noter er filer';
+  @override
+  String get welcomeNotesBody =>
+      'Niman holder dine noter som almindelige Markdown-filer i '
+      'mapper, du vælger. En note er en .md-fil, og alt appen viser '
+      'dig, er bygget af dem. Ingen konto, og ikke noget eget '
+      'format at komme tilbage til.';
+  @override
+  String get welcomeModesTitle => 'Tre måder at skrive samme note';
+  @override
+  String get welcomeModesBody =>
+      'Skriv Markdown-kilden, skriv noten som den læses '
+      '(live-editoren), eller læs den. Det er én note, uanset '
+      'hvilken du bruger, og du kan skifte per note eller for hele '
+      'biblioteket.';
+  @override
+  String get welcomeLinksTitle => 'Alt hænger sammen';
+  @override
+  String get welcomeLinksBody =>
+      'Wikilinks som [[denne]] finder deres note, mens du skriver. '
+      'Tags, frontmatter og skabeloner holder delene, du skriver '
+      'igen og igen, af vejen.';
+  @override
+  String get welcomeFindTitle => 'Find den igen';
+  @override
+  String get welcomeFindBody =>
+      'Fuldtekstsøgning i biblioteket, en kommandopalet til alt, '
+      'appen kan, og hurtignoten et tastetryk væk.';
+  @override
+  String get welcomeExportTitle => 'Den følger med dig';
+  @override
+  String get welcomeExportBody =>
+      'Eksporter en note eller en hel mappe som Markdown, HTML, PDF '
+      'eller EPUB-bog. Importer en Notion-eksport, eller åbn et '
+      'Obsidian-hvælv, hvor det allerede ligger.';
+  @override
+  String get welcomeTasksTitle => 'Opgaver og påmindelser';
+  @override
+  String get welcomeTasksBody =>
+      'En todo.txt-liste, du holder som fil — prioriteter, '
+      'projekter, forfaldsdatoer — og rem:-alarmer, der advarer '
+      'dig, når noget forfalder, på telefonen og på skrivebordet.';
+  @override
+  String get welcomeSyncTitle => 'På tværs af dine maskiner';
+  @override
+  String get welcomeSyncBody =>
+      'Peg et bibliotek mod en WebDAV-mappe — Nextcloud, ownCloud, '
+      'en NAS — og ændringer synkroniseres begge veje, flettet '
+      'linje for linje, når to enheder har rørt samme note.';
+  @override
+  String get welcomeDeviceTitle => 'Niman på denne enhed';
+  @override
+  String get welcomeAndroidBody =>
+      'Del tekst eller en fil til Niman fra enhver app, behold en '
+      'note på hjemmeskærmen, og optag en stemmenote i stedet for '
+      'at skrive.';
+  @override
+  String get welcomeDesktopBody =>
+      'Faner og delte paneler, systembakken, træk og slip til '
+      'vinduet, og .md-filer, der åbner Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Har du skrevet Markdown før?';
+  @override
+  String get welcomeQuestionNote =>
+      'Det bestemmer kun, hvordan appen starter. Du kan tænde eller '
+      'slukke enhver editor i Indstillinger → Editor når som helst.';
+  @override
+  String get welcomeAnswerNone => 'Aldrig';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Live-editoren, og Markdown-kilden tilbydes ikke, før du '
+      'tænder den.';
+  @override
+  String get welcomeAnswerSome => 'Lidt';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Live-editoren åbner noter; Markdown-kilden er en kontakt '
+      'væk.';
+  @override
+  String get welcomeAnswerFluent => 'Hele tiden';
+  @override
+  String get welcomeAnswerFluentHint => 'Markdown-kilden, som appen kommer.';
+  @override
+  String get welcomeTourOffer => 'Vis mig rundt i appen';
+  @override
+  String get welcomeTourOfferNote =>
+      'Rundturen starter, når dit første bibliotek er åbent, og '
+      'peger på de rigtige kontroller.';
+  @override
+  String get welcomeDeckCommand => 'Hvad Niman kan';
+  @override
+  String get welcomeTourCommand => 'Tag rundturen';
+  @override
+  String get tourDone => 'Færdig';
+  @override
+  String get tourOfferTitle => 'Skal jeg vise dig rundt?';
+  @override
+  String get tourOfferBody =>
+      'Et par trin gennem appen, der peger på de rigtige '
+      'kontroller. Du kan stoppe ved et hvilket som helst trin og '
+      'fortsætte senere fra kommandopaletten.';
+  @override
+  String get tourOfferYes => 'Vis mig';
+  @override
+  String get tourOfferNo => 'Ikke nu';
+  @override
+  String get tourTreeTitle => 'Dit bibliotek';
+  @override
+  String get tourTreeBody =>
+      'Det er den mappe, du valgte, mappe for mappe. Alt, du gør '
+      'ved en fil uden for Niman, dukker op her, i det øjeblik den '
+      'lander.';
+  @override
+  String get tourCreateTitle => 'Lav en note';
+  @override
+  String get tourCreateBody =>
+      'Noter, lister, stemmenoter, skabeloner og mapper starter '
+      'alle her. Den samme menu vises på en telefon som den runde '
+      'knap.';
+  @override
+  String get tourNoteTitle => 'En note ad gangen';
+  @override
+  String get tourNoteBody =>
+      'Noten på skærmen; dem, du åbnede, bliver i faner ovenover, '
+      'og et andet panel kan åbne ved siden af i et bredt vindue.';
+  @override
+  String get tourModesTitle => 'Tre måder at skrive';
+  @override
+  String get tourModesBody =>
+      'Skriv Markdown-kilden, skriv den, som den læses, eller læs '
+      'den — denne kontakt er per note, og biblioteksindstillingen '
+      'bestemmer, hvad der åbnes.';
+  @override
+  String get tourToolbarTitle => 'Værktøjslinjen';
+  @override
+  String get tourToolbarBody =>
+      'Formatering på den linje, du er i, og de samme handlinger '
+      'ved højreklik. Hver konstruktion, Niman læser, står i '
+      'snydearket.';
+  @override
+  String get tourCheatsheetTitle => 'Hver konstruktion, skrevet ved siden af';
+  @override
+  String get tourCheatsheetBody =>
+      'Dette er snydearket. Hvert eksempel kan kopieres, og Indsæt '
+      'lægger det i noten, du har åben.';
+  @override
+  String get tourCheatsheetOpen => 'Åbn det';
+  @override
+  String get tourTabsTitle => 'Alt er en fane';
+  @override
+  String get tourTabsBody =>
+      'Filer, opgaver, søgning, hurtignoten, indstillinger. '
+      'Kommandopaletten når dem alle, og hver kommando, fra '
+      'tastaturet.';
+  @override
+  String get tourDockTitle => 'Disposition, tags, historik';
+  @override
+  String get tourDockBody =>
+      'Notens disposition, dens tags og dens tidligere versioner, '
+      'ved siden af. På en telefon åbner notemenuen de samme tre.';
+  @override
+  String welcomePageOf(int page, int of) => '$page af $of';
 }

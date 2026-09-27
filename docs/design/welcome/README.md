@@ -451,12 +451,14 @@ and the pieces stand where the plan put them. What differs, and why:
   the hole included: the steps that hand the user a control (§6.1) are
   not in this round, and nothing behind the tour can be edited by
   accident.
-- **The copy lives in `ui/welcome/welcome_copy.dart`, in English.** The
-  deck and the tour are ~70 labels, and `ui/strings/` is compile-time
-  complete across thirty-seven locales: machine-translating onboarding
-  prose would be worse than English until a translation round of its
-  own. Filed as an issue; the copy is behind one class, so folding it
-  into `AppStrings` later is a mechanical swap.
+- **The copy started in `ui/welcome/welcome_copy.dart`, in English.**
+  The deck and the tour are ~56 labels, and `ui/strings/` is
+  compile-time complete across thirty-seven locales: the first round
+  left onboarding prose in English rather than ship machine
+  translations. [#308](https://github.com/Nihmar/Niman/issues/308)
+  folded them into `AppStrings` (`welcome*`/`tour*`), so the deck and
+  the tour now resolve in every locale the app speaks; the call sites
+  read `AppStrings` directly and `ui/welcome/welcome_copy.dart` is gone.
 - **Steps:** eight on a wide window (tree, create, note, modes, toolbar,
   tabs, dock, cheatsheet), seven on a phone (no dock step — the note's
   menu has the same three panes), and the modes step only when the

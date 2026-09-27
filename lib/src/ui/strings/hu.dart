@@ -2506,4 +2506,186 @@ final class HungarianStrings extends Strings {
   String get syncMergeSave => 'Összefésülés mentése';
   @override
   String get syncMergeKeepWhole => 'Vagy tarts meg egy teljes példányt';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Kihagyás';
+  @override
+  String get welcomeNext => 'Tovább';
+  @override
+  String get welcomeBack => 'Vissza';
+  @override
+  String get welcomeStart => 'Kezdj el írni';
+  @override
+  String get welcomeClose => 'Bezárás';
+  @override
+  String get welcomeNotesTitle => 'A jegyzeteid fájlok';
+  @override
+  String get welcomeNotesBody =>
+      'A Niman egyszerű Markdown-fájlokként tartja a jegyzeteidet, '
+      'általad választott mappákban. Egy jegyzet egy .md-fájl, és '
+      'minden, amit az alkalmazás mutat, ezekből épül. Nincs fiók, '
+      'és nincs a mi formátumunk, amihez vissza kellene térni.';
+  @override
+  String get welcomeModesTitle => 'Három mód ugyanarra a jegyzetre';
+  @override
+  String get welcomeModesBody =>
+      'Írd a Markdown-forrást, írd a jegyzetet úgy, ahogy olvasódik '
+      '(az élő szerkesztő), vagy olvasd. Egy jegyzet, bármelyiket '
+      'használod, és jegyzetenként vagy az egész könyvtárra '
+      'válthatsz.';
+  @override
+  String get welcomeLinksTitle => 'Minden összekapcsolódik';
+  @override
+  String get welcomeLinksBody =>
+      'A [[ilyen]] wikihivatkozások gépelés közben megtalálják a '
+      'jegyzetüket. A címkék, a frontmatter és a sablonok elteszik '
+      'az utadból, amit újra és újra leírsz.';
+  @override
+  String get welcomeFindTitle => 'Találd meg újra';
+  @override
+  String get welcomeFindBody =>
+      'Teljes szöveges keresés a könyvtárban, parancspaletta '
+      'mindenhez, amit az alkalmazás tud, és a gyorsjegyzet egy '
+      'billentyűre.';
+  @override
+  String get welcomeExportTitle => 'Veled megy';
+  @override
+  String get welcomeExportBody =>
+      'Exportálj egy jegyzetet vagy egy egész mappát Markdown, '
+      'HTML, PDF vagy EPUB könyv formában. Hozz be egy '
+      'Notion-exportot, vagy nyiss meg egy Obsidian-tárat ott, ahol '
+      'már van.';
+  @override
+  String get welcomeTasksTitle => 'Feladatok és emlékeztetők';
+  @override
+  String get welcomeTasksBody =>
+      'Egy todo.txt lista, amit fájlként tartasz — prioritások, '
+      'projektek, határidők — és rem: riasztások, amelyek szólnak, '
+      'ha valami esedékes, telefonon és asztali gépen.';
+  @override
+  String get welcomeSyncTitle => 'A gépeid között';
+  @override
+  String get welcomeSyncBody =>
+      'Irányíts egy könyvtárat egy WebDAV-mappára — Nextcloud, '
+      'ownCloud, NAS — és a módosítások mindkét irányban '
+      'szinkronizálódnak, soronként összefésülve, ha két eszköz '
+      'ugyanahhoz a jegyzethez nyúlt.';
+  @override
+  String get welcomeDeviceTitle => 'Niman ezen az eszközön';
+  @override
+  String get welcomeAndroidBody =>
+      'Ossz meg szöveget vagy fájlt a Nimannak bármelyik '
+      'alkalmazásból, tarts jegyzetet a kezdőképernyőn, és vegyél '
+      'fel hangjegyzetet gépelés helyett.';
+  @override
+  String get welcomeDesktopBody =>
+      'Lapok és osztott panelek, a rendszertálca, húzd és ejtsd az '
+      'ablakra, és a Nimant megnyitó .md-fájlok.';
+  @override
+  String get welcomeQuestionTitle => 'Írtál már Markdownt?';
+  @override
+  String get welcomeQuestionNote =>
+      'Ez csak azt dönti el, hogyan indul az alkalmazás. Bármelyik '
+      'szerkesztőt bármikor be- vagy kikapcsolhatod a Beállítások → '
+      'Szerkesztő alatt.';
+  @override
+  String get welcomeAnswerNone => 'Soha';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Az élő szerkesztő, és a Markdown-forrás nem jelenik meg, '
+      'amíg be nem kapcsolod.';
+  @override
+  String get welcomeAnswerSome => 'Egy kicsit';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Az élő szerkesztő nyitja a jegyzeteket; a Markdown-forrás '
+      'egy kapcsolóra van.';
+  @override
+  String get welcomeAnswerFluent => 'Folyamatosan';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'A Markdown-forrás, ahogy az alkalmazás jön.';
+  @override
+  String get welcomeTourOffer => 'Mutasd meg az alkalmazást';
+  @override
+  String get welcomeTourOfferNote =>
+      'A körút akkor indul, ha az első könyvtárad nyitva van, és a '
+      'valódi vezérlőkre mutat.';
+  @override
+  String get welcomeDeckCommand => 'Mit tud a Niman';
+  @override
+  String get welcomeTourCommand => 'Körút indítása';
+  @override
+  String get tourDone => 'Kész';
+  @override
+  String get tourOfferTitle => 'Megmutassam?';
+  @override
+  String get tourOfferBody =>
+      'Néhány lépés az alkalmazáson át, a valódi vezérlőkre '
+      'mutatva. Bármelyik lépésnél megállhatsz, és később '
+      'folytathatod a parancspalettáról.';
+  @override
+  String get tourOfferYes => 'Mutasd';
+  @override
+  String get tourOfferNo => 'Most nem';
+  @override
+  String get tourTreeTitle => 'A könyvtárad';
+  @override
+  String get tourTreeBody =>
+      'Ez az a mappa, amit választottál, mappa mappára. Minden, '
+      'amit egy fájllal a Nimanon kívül teszel, itt jelenik meg, '
+      'amint megérkezik.';
+  @override
+  String get tourCreateTitle => 'Készíts jegyzetet';
+  @override
+  String get tourCreateBody =>
+      'Jegyzetek, listák, hangjegyzetek, sablonok és mappák mind '
+      'innen indulnak. Ugyanez a menü jelenik meg a telefonon kerek '
+      'gombként.';
+  @override
+  String get tourNoteTitle => 'Egyszerre egy jegyzet';
+  @override
+  String get tourNoteBody =>
+      'A jegyzet a képernyőn; a megnyitottak lapokban maradnak '
+      'felette, és egy széles ablakban egy második panel nyílhat '
+      'mellé.';
+  @override
+  String get tourModesTitle => 'Három mód az írásra';
+  @override
+  String get tourModesBody =>
+      'Írd a Markdown-forrást, írd úgy, ahogy olvasódik, vagy '
+      'olvasd — ez a kapcsoló jegyzetenként szól, és a könyvtár '
+      'beállítása dönti el, mi nyílik meg.';
+  @override
+  String get tourToolbarTitle => 'Az eszköztár';
+  @override
+  String get tourToolbarBody =>
+      'Formázás abban a sorban, ahol vagy, és ugyanazok a műveletek '
+      'jobb kattintásra. Minden szerkezet, amit a Niman olvas, a '
+      'csalólapon van.';
+  @override
+  String get tourCheatsheetTitle => 'Minden szerkezet, mellé írva';
+  @override
+  String get tourCheatsheetBody =>
+      'Ez a csalólap. Minden példa másolható, a Beszúrás pedig '
+      'beilleszti a nyitott jegyzetbe.';
+  @override
+  String get tourCheatsheetOpen => 'Nyisd meg';
+  @override
+  String get tourTabsTitle => 'Minden egy lap';
+  @override
+  String get tourTabsBody =>
+      'Fájlok, feladatok, keresés, a gyorsjegyzet, beállítások. A '
+      'parancspaletta mindegyiket eléri, és minden parancsot, a '
+      'billentyűzetről.';
+  @override
+  String get tourDockTitle => 'Vázlat, címkék, előzmények';
+  @override
+  String get tourDockBody =>
+      'A jegyzet vázlata, címkéi és korábbi verziói, mellette. '
+      'Telefonon a jegyzet menüje nyitja ugyanezt a hármat.';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

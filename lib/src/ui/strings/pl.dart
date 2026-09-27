@@ -2539,4 +2539,185 @@ final class PolishStrings extends Strings {
   String get syncMergeSave => 'Zapisz scalenie';
   @override
   String get syncMergeKeepWhole => 'Albo zachowaj jedną całą kopię';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Pomiń';
+  @override
+  String get welcomeNext => 'Dalej';
+  @override
+  String get welcomeBack => 'Wstecz';
+  @override
+  String get welcomeStart => 'Zacznij pisać';
+  @override
+  String get welcomeClose => 'Zamknij';
+  @override
+  String get welcomeNotesTitle => 'Twoje notatki to pliki';
+  @override
+  String get welcomeNotesBody =>
+      'Niman trzyma twoje notatki jako zwykłe pliki Markdown w '
+      'wybranych przez ciebie katalogach. Jedna notatka to jeden '
+      'plik .md, a wszystko, co pokazuje aplikacja, jest z nich '
+      'zbudowane. Bez konta i bez naszego formatu, do którego '
+      'trzeba wracać.';
+  @override
+  String get welcomeModesTitle => 'Trzy sposoby na tę samą notatkę';
+  @override
+  String get welcomeModesBody =>
+      'Pisz źródło Markdown, pisz notatkę tak, jak się czyta '
+      '(edytor na żywo), albo ją czytaj. To jedna notatka, '
+      'któregokolwiek użyjesz, i możesz zmieniać tryb dla notatki '
+      'lub dla całej biblioteki.';
+  @override
+  String get welcomeLinksTitle => 'Wszystko się łączy';
+  @override
+  String get welcomeLinksBody =>
+      'Linki wiki jak [[ten]] znajdują swoją notatkę, gdy piszesz. '
+      'Tagi, frontmatter i szablony trzymają z drogi to, co piszesz '
+      'w kółko.';
+  @override
+  String get welcomeFindTitle => 'Znajdź ją znowu';
+  @override
+  String get welcomeFindBody =>
+      'Wyszukiwanie pełnotekstowe w bibliotece, paleta poleceń do '
+      'wszystkiego, co potrafi aplikacja, i szybka notatka pod '
+      'jednym klawiszem.';
+  @override
+  String get welcomeExportTitle => 'Idzie z tobą';
+  @override
+  String get welcomeExportBody =>
+      'Eksportuj notatkę lub cały katalog jako Markdown, HTML, PDF '
+      'albo książkę EPUB. Wczytaj eksport z Notion albo otwórz '
+      'skarbiec Obsidian tam, gdzie już jest.';
+  @override
+  String get welcomeTasksTitle => 'Zadania i przypomnienia';
+  @override
+  String get welcomeTasksBody =>
+      'Lista todo.txt, którą trzymasz jako plik — priorytety, '
+      'projekty, terminy — i alarmy rem:, które ostrzegają, gdy coś '
+      'jest na terminie, w telefonie i na pulpicie.';
+  @override
+  String get welcomeSyncTitle => 'Między twoimi maszynami';
+  @override
+  String get welcomeSyncBody =>
+      'Skieruj bibliotekę na katalog WebDAV — Nextcloud, ownCloud, '
+      'NAS — a zmiany synchronizują się w obie strony, scalane '
+      'linia po linii, gdy dwa urządzenia dotknęły tej samej '
+      'notatki.';
+  @override
+  String get welcomeDeviceTitle => 'Niman na tym urządzeniu';
+  @override
+  String get welcomeAndroidBody =>
+      'Udostępniaj tekst lub plik do Nimana z dowolnej aplikacji, '
+      'trzymaj notatkę na ekranie głównym i nagrywaj notatkę '
+      'głosową zamiast pisać.';
+  @override
+  String get welcomeDesktopBody =>
+      'Karty i dzielone panele, zasobnik systemowy, przeciąganie i '
+      'upuszczanie na okno oraz pliki .md, które otwierają Nimana.';
+  @override
+  String get welcomeQuestionTitle => 'Pisałeś już w Markdownie?';
+  @override
+  String get welcomeQuestionNote =>
+      'To ustawia tylko, jak startuje aplikacja. Każdy edytor '
+      'możesz włączyć lub wyłączyć w Ustawienia → Edytor w dowolnej '
+      'chwili.';
+  @override
+  String get welcomeAnswerNone => 'Nigdy';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Edytor na żywo, a źródło Markdown nie jest oferowane, dopóki '
+      'go nie włączysz.';
+  @override
+  String get welcomeAnswerSome => 'Trochę';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Edytor na żywo otwiera notatki; źródło Markdown jest o jeden '
+      'przełącznik dalej.';
+  @override
+  String get welcomeAnswerFluent => 'Cały czas';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Źródło Markdown, tak jak aplikacja przychodzi.';
+  @override
+  String get welcomeTourOffer => 'Pokaż mi aplikację';
+  @override
+  String get welcomeTourOfferNote =>
+      'Zwiedzanie zaczyna się, gdy twoja pierwsza biblioteka jest '
+      'otwarta, i wskazuje prawdziwe elementy sterujące.';
+  @override
+  String get welcomeDeckCommand => 'Co potrafi Niman';
+  @override
+  String get welcomeTourCommand => 'Obejdź aplikację';
+  @override
+  String get tourDone => 'Gotowe';
+  @override
+  String get tourOfferTitle => 'Oprowadzić cię?';
+  @override
+  String get tourOfferBody =>
+      'Kilka kroków przez aplikację, wskazujących prawdziwe '
+      'elementy sterujące. Możesz zatrzymać się na dowolnym kroku i '
+      'wrócić później z palety poleceń.';
+  @override
+  String get tourOfferYes => 'Pokaż';
+  @override
+  String get tourOfferNo => 'Nie teraz';
+  @override
+  String get tourTreeTitle => 'Twoja biblioteka';
+  @override
+  String get tourTreeBody =>
+      'To katalog, który wybrałeś, katalog po katalogu. Wszystko, '
+      'co zrobisz z plikiem poza Nimanem, pojawia się tutaj, gdy '
+      'tylko dotrze.';
+  @override
+  String get tourCreateTitle => 'Utwórz notatkę';
+  @override
+  String get tourCreateBody =>
+      'Notatki, listy, notatki głosowe, szablony i katalogi '
+      'zaczynają się tutaj. To samo menu pojawia się w telefonie '
+      'jako okrągły przycisk.';
+  @override
+  String get tourNoteTitle => 'Jedna notatka naraz';
+  @override
+  String get tourNoteBody =>
+      'Notatka na ekranie; otwarte zostają w kartach powyżej, a '
+      'drugi panel może otworzyć się obok w szerokim oknie.';
+  @override
+  String get tourModesTitle => 'Trzy sposoby pisania';
+  @override
+  String get tourModesBody =>
+      'Pisz źródło Markdown, pisz je tak, jak się czyta, albo je '
+      'czytaj — ten przełącznik jest dla notatki, a ustawienie '
+      'biblioteki decyduje, co się otwiera.';
+  @override
+  String get tourToolbarTitle => 'Pasek narzędzi';
+  @override
+  String get tourToolbarBody =>
+      'Formatowanie w linii, w której jesteś, i te same akcje pod '
+      'prawym przyciskiem. Każda konstrukcja, którą czyta Niman, '
+      'jest w ściądze.';
+  @override
+  String get tourCheatsheetTitle => 'Każda konstrukcja, obok zapisana';
+  @override
+  String get tourCheatsheetBody =>
+      'To ściąga. Każdy przykład można skopiować, a Wstaw wstawia '
+      'go do otwartej notatki.';
+  @override
+  String get tourCheatsheetOpen => 'Otwórz ją';
+  @override
+  String get tourTabsTitle => 'Wszystko to karta';
+  @override
+  String get tourTabsBody =>
+      'Pliki, zadania, wyszukiwanie, szybka notatka, ustawienia. '
+      'Paleta poleceń dociera do każdej z nich, i do każdego '
+      'polecenia, z klawiatury.';
+  @override
+  String get tourDockTitle => 'Konspekt, tagi, historia';
+  @override
+  String get tourDockBody =>
+      'Konspekt notatki, jej tagi i poprzednie wersje, obok. W '
+      'telefonie menu notatki otwiera te same trzy.';
+  @override
+  String welcomePageOf(int page, int of) => '$page z $of';
 }

@@ -4,7 +4,7 @@ library;
 
 import 'dart:io';
 
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// One page of the deck.
 final class WelcomePage {
@@ -22,14 +22,35 @@ final class WelcomePage {
 ///
 /// The device page is not here — it is [devicePage] and draws what this
 /// platform has — and neither is the question, which is not prose.
-List<WelcomePage> themedPages(WelcomeCopy copy) => [
-  WelcomePage(title: copy.notesTitle, body: copy.notesBody),
-  WelcomePage(title: copy.modesTitle, body: copy.modesBody),
-  WelcomePage(title: copy.linksTitle, body: copy.linksBody),
-  WelcomePage(title: copy.findTitle, body: copy.findBody),
-  WelcomePage(title: copy.exportTitle, body: copy.exportBody),
-  WelcomePage(title: copy.tasksTitle, body: copy.tasksBody),
-  WelcomePage(title: copy.syncTitle, body: copy.syncBody),
+List<WelcomePage> themedPages() => [
+  WelcomePage(
+    title: AppStrings.welcomeNotesTitle,
+    body: AppStrings.welcomeNotesBody,
+  ),
+  WelcomePage(
+    title: AppStrings.welcomeModesTitle,
+    body: AppStrings.welcomeModesBody,
+  ),
+  WelcomePage(
+    title: AppStrings.welcomeLinksTitle,
+    body: AppStrings.welcomeLinksBody,
+  ),
+  WelcomePage(
+    title: AppStrings.welcomeFindTitle,
+    body: AppStrings.welcomeFindBody,
+  ),
+  WelcomePage(
+    title: AppStrings.welcomeExportTitle,
+    body: AppStrings.welcomeExportBody,
+  ),
+  WelcomePage(
+    title: AppStrings.welcomeTasksTitle,
+    body: AppStrings.welcomeTasksBody,
+  ),
+  WelcomePage(
+    title: AppStrings.welcomeSyncTitle,
+    body: AppStrings.welcomeSyncBody,
+  ),
 ];
 
 /// The device page: one body, whichever platform this is.
@@ -37,7 +58,9 @@ List<WelcomePage> themedPages(WelcomeCopy copy) => [
 /// Android gets the share sheet, the home-screen widgets and voice notes;
 /// a desktop gets the tray, the panes and the file association. The page
 /// exists on every platform — it says what *this* one can do.
-WelcomePage devicePage(WelcomeCopy copy, {bool? isAndroid}) => WelcomePage(
-  title: copy.deviceTitle,
-  body: (isAndroid ?? Platform.isAndroid) ? copy.androidBody : copy.desktopBody,
+WelcomePage devicePage({bool? isAndroid}) => WelcomePage(
+  title: AppStrings.welcomeDeviceTitle,
+  body: (isAndroid ?? Platform.isAndroid)
+      ? AppStrings.welcomeAndroidBody
+      : AppStrings.welcomeDesktopBody,
 );

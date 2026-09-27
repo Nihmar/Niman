@@ -2520,4 +2520,180 @@ final class SlovenianStrings extends Strings {
   String get syncMergeSave => 'Shrani združitev';
   @override
   String get syncMergeKeepWhole => 'Ali obdržite eno celo kopijo';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Preskoči';
+  @override
+  String get welcomeNext => 'Naprej';
+  @override
+  String get welcomeBack => 'Nazaj';
+  @override
+  String get welcomeStart => 'Začni pisati';
+  @override
+  String get welcomeClose => 'Zapri';
+  @override
+  String get welcomeNotesTitle => 'Tvoje opombe so datoteke';
+  @override
+  String get welcomeNotesBody =>
+      'Niman hrani tvoje opombe kot preproste datoteke Markdown v '
+      'mapah, ki jih izbereš. Ena opomba je ena datoteka .md, in '
+      'vse, kar ti aplikacija pokaže, je zgrajeno iz njih. Brez '
+      'računa in brez našega formata, h kateremu bi se vračal.';
+  @override
+  String get welcomeModesTitle => 'Trije načini za isto opombo';
+  @override
+  String get welcomeModesBody =>
+      'Piši vir Markdown, piši opombo tako, kot se bere (živi '
+      'urejevalnik), ali jo beri. To je ena opomba, katerikoli '
+      'način uporabiš, in lahko preklapljaš po opombi ali za '
+      'celotno knjižnico.';
+  @override
+  String get welcomeLinksTitle => 'Vse se poveže';
+  @override
+  String get welcomeLinksBody =>
+      'Wiki povezave, kot je [[ta]], najdejo svojo opombo med '
+      'tipkanjem. Oznake, frontmatter in predloge držijo stran '
+      'dele, ki jih pišeš znova in znova.';
+  @override
+  String get welcomeFindTitle => 'Najdi jo spet';
+  @override
+  String get welcomeFindBody =>
+      'Iskanje po celotnem besedilu v knjižnici, paleta ukazov za '
+      'vse, kar aplikacija zna, in hitra opomba na en pritisk.';
+  @override
+  String get welcomeExportTitle => 'Gre s tabo';
+  @override
+  String get welcomeExportBody =>
+      'Izvozi opombo ali celotno mapo kot Markdown, HTML, PDF ali '
+      'knjigo EPUB. Uvozi izvoz Notion ali odpri shrambo Obsidian '
+      'tam, kjer že je.';
+  @override
+  String get welcomeTasksTitle => 'Naloge in opomniki';
+  @override
+  String get welcomeTasksBody =>
+      'Seznam todo.txt, ki ga držiš kot datoteko — prioritete, '
+      'projekti, roki — in alarmi rem:, ki te opozorijo, ko je kaj '
+      'zapadlo, v telefonu in na namizju.';
+  @override
+  String get welcomeSyncTitle => 'Med tvojimi napravami';
+  @override
+  String get welcomeSyncBody =>
+      'Usmeri knjižnico na mapo WebDAV — Nextcloud, ownCloud, NAS — '
+      'in spremembe se sinhronizirajo v obe smeri, združene vrstico '
+      'za vrstico, ko sta se dve napravi dotaknili iste opombe.';
+  @override
+  String get welcomeDeviceTitle => 'Niman na tej napravi';
+  @override
+  String get welcomeAndroidBody =>
+      'Deli besedilo ali datoteko v Niman iz katerekoli aplikacije, '
+      'obdrži opombo na domačem zaslonu in posnemi glasovno opombo '
+      'namesto tipkanja.';
+  @override
+  String get welcomeDesktopBody =>
+      'Zavihki in razdeljeni podokni, sistemska pladenjska, '
+      'vlečenje in spuščanje na okno ter datoteke .md, ki odprejo '
+      'Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Si že kdaj pisal Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'To določi le, kako se aplikacija zažene. Vsak urejevalnik '
+      'lahko kadar koli vklopiš ali izklopiš v Nastavitve → '
+      'Urejevalnik.';
+  @override
+  String get welcomeAnswerNone => 'Nikoli';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Živi urejevalnik, vir Markdown pa se ne ponudi, dokler ga ne '
+      'vklopiš.';
+  @override
+  String get welcomeAnswerSome => 'Malo';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Živi urejevalnik odpira opombe; vir Markdown je eno stikalo '
+      'stran.';
+  @override
+  String get welcomeAnswerFluent => 'Ves čas';
+  @override
+  String get welcomeAnswerFluentHint => 'Vir Markdown, kot pride aplikacija.';
+  @override
+  String get welcomeTourOffer => 'Pokaži mi aplikacijo';
+  @override
+  String get welcomeTourOfferNote =>
+      'Ogled se začne, ko je tvoja prva knjižnica odprta, in pokaže '
+      'na prave kontrolnike.';
+  @override
+  String get welcomeDeckCommand => 'Kaj zna Niman';
+  @override
+  String get welcomeTourCommand => 'Na ogled';
+  @override
+  String get tourDone => 'Končano';
+  @override
+  String get tourOfferTitle => 'Naj te popeljem?';
+  @override
+  String get tourOfferBody =>
+      'Nekaj korakov skozi aplikacijo, s kazanjem na prave '
+      'kontrolnike. Ustaviš se lahko pri katerem koli koraku in ga '
+      'pozneje nadaljuješ iz palete ukazov.';
+  @override
+  String get tourOfferYes => 'Pokaži mi';
+  @override
+  String get tourOfferNo => 'Ne zdaj';
+  @override
+  String get tourTreeTitle => 'Tvoja knjižnica';
+  @override
+  String get tourTreeBody =>
+      'To je mapa, ki si jo izbral, mapa za mapo. Vse, kar narediš '
+      'z datoteko zunaj Nimana, se pojavi tu v trenutku, ko prispe.';
+  @override
+  String get tourCreateTitle => 'Ustvari opombo';
+  @override
+  String get tourCreateBody =>
+      'Opombe, seznami, glasovne opombe, predloge in mape se vse '
+      'začnejo tu. Isti meni se v telefonu pojavi kot okrogel gumb.';
+  @override
+  String get tourNoteTitle => 'Ena opomba naenkrat';
+  @override
+  String get tourNoteBody =>
+      'Opomba na zaslonu; tiste, ki si jih odprl, ostanejo v '
+      'zavihkih zgoraj, in v širokem oknu se lahko odpre drugi '
+      'podokno ob njej.';
+  @override
+  String get tourModesTitle => 'Trije načini pisanja';
+  @override
+  String get tourModesBody =>
+      'Piši vir Markdown, piši ga tako, kot se bere, ali ga beri — '
+      'to stikalo je po opombi, in nastavitev knjižnice odloči, kaj '
+      'se odpre.';
+  @override
+  String get tourToolbarTitle => 'Orodna vrstica';
+  @override
+  String get tourToolbarBody =>
+      'Oblikovanje v vrstici, v kateri si, in ista dejanja ob '
+      'desnem kliku. Vsaka zgradba, ki jo Niman bere, je v plonk '
+      'listku.';
+  @override
+  String get tourCheatsheetTitle => 'Vsaka zgradba, zapisana zraven';
+  @override
+  String get tourCheatsheetBody =>
+      'To je plonk listek. Vsak primer je mogoče kopirati, in '
+      'Vstavi ga vstavi v opombo, ki jo imaš odprto.';
+  @override
+  String get tourCheatsheetOpen => 'Odpri ga';
+  @override
+  String get tourTabsTitle => 'Vse je zavihek';
+  @override
+  String get tourTabsBody =>
+      'Datoteke, naloge, iskanje, hitra opomba, nastavitve. Paleta '
+      'ukazov doseže vse, in vsak ukaz, s tipkovnice.';
+  @override
+  String get tourDockTitle => 'Oris, oznake, zgodovina';
+  @override
+  String get tourDockBody =>
+      'Oris opombe, njene oznake in prejšnje različice, ob strani. '
+      'V telefonu meni opombe odpre iste tri.';
+  @override
+  String welcomePageOf(int page, int of) => '$page od $of';
 }

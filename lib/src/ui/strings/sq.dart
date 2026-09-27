@@ -2516,4 +2516,184 @@ final class AlbanianStrings extends Strings {
   String get syncMergeSave => 'Ruaj bashkimin';
   @override
   String get syncMergeKeepWhole => 'Ose mbaj një kopje të plotë';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Kapërce';
+  @override
+  String get welcomeNext => 'Tjetra';
+  @override
+  String get welcomeBack => 'Prapa';
+  @override
+  String get welcomeStart => 'Fillo të shkruash';
+  @override
+  String get welcomeClose => 'Mbyll';
+  @override
+  String get welcomeNotesTitle => 'Shënimet e tua janë skedarë';
+  @override
+  String get welcomeNotesBody =>
+      'Niman i mban shënimet e tua si skedarë të thjeshtë Markdown '
+      'në dosjet që zgjedh. Një shënim është një skedar .md, dhe '
+      'gjithçka që aplikacioni të tregon është ndërtuar prej tyre. '
+      'Pa llogari dhe pa një format tonin për t’u kthyer.';
+  @override
+  String get welcomeModesTitle => 'Tri mënyra për të shkruar të njëjtin shënim';
+  @override
+  String get welcomeModesBody =>
+      'Shkruaj burimin Markdown, shkruaj shënimin ashtu si lexohet '
+      '(redaktori i drejtpërdrejtë), ose lexoje. Është një shënim '
+      'sido që ta përdorësh, dhe mund të ndërrosh për shënim ose '
+      'për gjithë bibliotekën.';
+  @override
+  String get welcomeLinksTitle => 'Gjithçka lidhet';
+  @override
+  String get welcomeLinksBody =>
+      'Lidhjet wiki si [[kjo]] e gjejnë shënimin e tyre ndërsa '
+      'shkruan. Etiketat, frontmatter dhe shabllonët i mbajnë '
+      'mënjanë pjesët që i shkruan herë pas here.';
+  @override
+  String get welcomeFindTitle => 'Gjeje përsëri';
+  @override
+  String get welcomeFindBody =>
+      'Kërkim me tekst të plotë në bibliotekë, një paletë komandash '
+      'për gjithçka që bën aplikacioni, dhe shënimi i shpejtë një '
+      'tast larg.';
+  @override
+  String get welcomeExportTitle => 'Vjen me ty';
+  @override
+  String get welcomeExportBody =>
+      'Eksporto një shënim ose një dosje të tërë si Markdown, HTML, '
+      'PDF ose libër EPUB. Sill një eksport Notion, ose hap një '
+      'depo Obsidian aty ku është tashmë.';
+  @override
+  String get welcomeTasksTitle => 'Detyra dhe kujtesa';
+  @override
+  String get welcomeTasksBody =>
+      'Një listë todo.txt që e mban si skedar — prioritete, '
+      'projekte, afate — dhe alarme rem: që të paralajmërojnë kur '
+      'diçka është për afat, në telefon dhe në desktop.';
+  @override
+  String get welcomeSyncTitle => 'Mes makinave të tua';
+  @override
+  String get welcomeSyncBody =>
+      'Drejto një bibliotekë nga një dosje WebDAV — Nextcloud, '
+      'ownCloud, një NAS — dhe ndryshimet sinkronizohen nga të dyja '
+      'anët, të bashkuara rresht për rresht kur dy pajisje prekën '
+      'të njëjtin shënim.';
+  @override
+  String get welcomeDeviceTitle => 'Niman në këtë pajisje';
+  @override
+  String get welcomeAndroidBody =>
+      'Ndaj tekst ose një skedar në Niman nga çdo aplikacion, mbaj '
+      'një shënim në ekranin bazë dhe regjistro një shënim zanor në '
+      'vend që të shkruash.';
+  @override
+  String get welcomeDesktopBody =>
+      'Skeda dhe panele të ndara, sirtari i sistemit, tërheqja dhe '
+      'lëshimi mbi dritare, dhe skedarë .md që hapin Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Ke shkruar ndonjëherë Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Kjo vendos vetëm si niset aplikacioni. Mund të ndezësh ose '
+      'fikësh çdo redaktor në Cilësimet → Redaktor në çdo moment.';
+  @override
+  String get welcomeAnswerNone => 'Kurrë';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Redaktori i drejtpërdrejtë, dhe burimi Markdown nuk ofrohet '
+      'derisa ta ndezësh.';
+  @override
+  String get welcomeAnswerSome => 'Pak';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Redaktori i drejtpërdrejtë hap shënimet; burimi Markdown '
+      'është një çelës larg.';
+  @override
+  String get welcomeAnswerFluent => 'Gjithë kohën';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Burimi Markdown, siç vjen aplikacioni.';
+  @override
+  String get welcomeTourOffer => 'Më trego aplikacionin';
+  @override
+  String get welcomeTourOfferNote =>
+      'Turneu nis kur biblioteka jote e parë është e hapur, dhe '
+      'tregon kontrollet e vërteta.';
+  @override
+  String get welcomeDeckCommand => 'Çfarë di Niman';
+  @override
+  String get welcomeTourCommand => 'Bëj turneun';
+  @override
+  String get tourDone => 'Përfundoi';
+  @override
+  String get tourOfferTitle => 'Të të tregoj përreth?';
+  @override
+  String get tourOfferBody =>
+      'Disa hapa nëpër aplikacion, duke treguar kontrollet e '
+      'vërteta. Mund të ndalosh në çdo hap dhe ta vazhdosh më vonë '
+      'nga paleta e komandave.';
+  @override
+  String get tourOfferYes => 'Më trego';
+  @override
+  String get tourOfferNo => 'Jo tani';
+  @override
+  String get tourTreeTitle => 'Biblioteka jote';
+  @override
+  String get tourTreeBody =>
+      'Kjo është dosja që zgjodhe, dosje pas dosje. Çdo gjë që bën '
+      'me një skedar jashtë Niman shfaqet këtu në çastin që arrin.';
+  @override
+  String get tourCreateTitle => 'Krijo një shënim';
+  @override
+  String get tourCreateBody =>
+      'Shënimet, listat, shënimet zanore, shabllonët dhe dosjet '
+      'nisin të gjitha këtu. I njëjti menu shfaqet në telefon si '
+      'butoni i rrumbullakët.';
+  @override
+  String get tourNoteTitle => 'Një shënim në një herë';
+  @override
+  String get tourNoteBody =>
+      'Shënimi në ekran; ata që hape mbeten në skeda sipër tij, dhe '
+      'një panel i dytë mund të hapet pranë në një dritare të '
+      'gjerë.';
+  @override
+  String get tourModesTitle => 'Tri mënyra për të shkruar';
+  @override
+  String get tourModesBody =>
+      'Shkruaj burimin Markdown, shkruaje ashtu si lexohet, ose '
+      'lexoje — ky çelës është për shënim, dhe cilësimi i '
+      'bibliotekës vendos çfarë hapet.';
+  @override
+  String get tourToolbarTitle => 'Shiriti i veglave';
+  @override
+  String get tourToolbarBody =>
+      'Formatimi në rreshtin ku je, dhe të njëjtat veprime me klik '
+      'të djathtë. Çdo konstrukt që lexon Niman është në fletën e '
+      'mashtrimit.';
+  @override
+  String get tourCheatsheetTitle => 'Çdo konstrukt, i shkruar pranë';
+  @override
+  String get tourCheatsheetBody =>
+      'Kjo është fleta e mashtrimit. Çdo shembull mund të kopjohet, '
+      'dhe Fut e vendos në shënimin që ke hapur.';
+  @override
+  String get tourCheatsheetOpen => 'Hape';
+  @override
+  String get tourTabsTitle => 'Gjithçka është një skedë';
+  @override
+  String get tourTabsBody =>
+      'Skedarë, detyra, kërkim, shënimi i shpejtë, cilësimet. '
+      'Paleta e komandave i arrin të gjitha, dhe çdo komandë, nga '
+      'tastiera.';
+  @override
+  String get tourDockTitle => 'Struktura, etiketat, historia';
+  @override
+  String get tourDockBody =>
+      'Struktura e shënimit, etiketat dhe versionet e tij të '
+      'kaluara, pranë. Në telefon menuja e shënimit hap të njëjtat '
+      'tre.';
+  @override
+  String welcomePageOf(int page, int of) => '$page nga $of';
 }

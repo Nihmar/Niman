@@ -2486,4 +2486,181 @@ final class LatvianStrings extends Strings {
   String get syncMergeSave => 'Saglabāt sapludinājumu';
   @override
   String get syncMergeKeepWhole => 'Vai paturiet vienu veselu kopiju';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Izlaist';
+  @override
+  String get welcomeNext => 'Tālāk';
+  @override
+  String get welcomeBack => 'Atpakaļ';
+  @override
+  String get welcomeStart => 'Sāc rakstīt';
+  @override
+  String get welcomeClose => 'Aizvērt';
+  @override
+  String get welcomeNotesTitle => 'Tavi pieraksti ir faili';
+  @override
+  String get welcomeNotesBody =>
+      'Niman tur tavus pierakstus kā vienkāršus Markdown failus '
+      'mapēs, kuras izvēlies. Viens pieraksts ir viens .md fails, '
+      'un viss, ko lietotne tev rāda, ir no tiem būvēts. Nav konta '
+      'un nav mūsu formāta, pie kā atgriezties.';
+  @override
+  String get welcomeModesTitle =>
+      'Trīs veidi, kā rakstīt vienu un to pašu piezīmi';
+  @override
+  String get welcomeModesBody =>
+      'Raksti Markdown avotu, raksti piezīmi tā, kā tā lasās '
+      '(tiešraides redaktors), vai lasi to. Tas ir viens pieraksts, '
+      'kuru vien izmantotu, un vari mainīt pa piezīmēm vai visai '
+      'bibliotēkai.';
+  @override
+  String get welcomeLinksTitle => 'Viss savienojas';
+  @override
+  String get welcomeLinksBody =>
+      'Vikisaites kā [[šī]] atrod savu piezīmi, kamēr raksti. '
+      'Cilpes, frontmatter un veidnes tur pa gabalu to, ko raksti '
+      'atkal un atkal.';
+  @override
+  String get welcomeFindTitle => 'Atrodi to no jauna';
+  @override
+  String get welcomeFindBody =>
+      'Pilnteksta meklēšana bibliotēkā, komandu palete visam, ko '
+      'lietotne prot, un ātrā piezīme viena taustiņa attālumā.';
+  @override
+  String get welcomeExportTitle => 'Tas nāk tev līdzi';
+  @override
+  String get welcomeExportBody =>
+      'Eksportē piezīmi vai visu mapi kā Markdown, HTML, PDF vai '
+      'EPUB grāmatu. Ieved Notion eksportu vai atver Obsidian '
+      'glabātuvi tur, kur tā jau ir.';
+  @override
+  String get welcomeTasksTitle => 'Uzdevumi un atgādinājumi';
+  @override
+  String get welcomeTasksBody =>
+      'todo.txt saraksts, ko turi kā failu — prioritātes, projekti, '
+      'termiņi — un rem: signāli, kas brīdina, kad kaut kam pienāk '
+      'termiņš, tālrunī un darbvirsmā.';
+  @override
+  String get welcomeSyncTitle => 'Starp tavām mašīnām';
+  @override
+  String get welcomeSyncBody =>
+      'Pavērs bibliotēku uz WebDAV mapi — Nextcloud, ownCloud, NAS '
+      '— un izmaiņas sinhronizējas abos virzienos, sapludinātas '
+      'rindu pa rindai, kad divas ierīces pieskārās tai pašai '
+      'piezīmei.';
+  @override
+  String get welcomeDeviceTitle => 'Niman šajā ierīcē';
+  @override
+  String get welcomeAndroidBody =>
+      'Kopīgo tekstu vai failu uz Niman no jebkuras lietotnes, turi '
+      'piezīmi sākuma ekrānā un ieraksti balss piezīmi, nevis '
+      'raksti.';
+  @override
+  String get welcomeDesktopBody =>
+      'Cilnes un sadalīti paneļi, sistēmas paplāte, vilkšana un '
+      'nomešana uz loga, un .md faili, kas atver Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Vai esi jau rakstījis Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Tas tikai nosaka, kā lietotne startē. Jebkuru redaktoru vari '
+      'ieslēgt vai izslēgt sadaļā Iestatījumi → Redaktors jebkurā '
+      'laikā.';
+  @override
+  String get welcomeAnswerNone => 'Nekad';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Tiešraides redaktors, un Markdown avots netiek piedāvāts, '
+      'kamēr to neieslēdz.';
+  @override
+  String get welcomeAnswerSome => 'Mazliet';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Tiešraides redaktors atver piezīmes; Markdown avots ir vienu '
+      'slēdzi tālāk.';
+  @override
+  String get welcomeAnswerFluent => 'Visu laiku';
+  @override
+  String get welcomeAnswerFluentHint => 'Markdown avots, kā lietotne nāk.';
+  @override
+  String get welcomeTourOffer => 'Parādi man lietotni';
+  @override
+  String get welcomeTourOfferNote =>
+      'Apskats sākas, kad tava pirmā bibliotēka ir atvērta, un '
+      'norāda uz īstajiem vadības elementiem.';
+  @override
+  String get welcomeDeckCommand => 'Ko Niman prot';
+  @override
+  String get welcomeTourCommand => 'Veic apskatu';
+  @override
+  String get tourDone => 'Gatavs';
+  @override
+  String get tourOfferTitle => 'Vai pavadīt tevi?';
+  @override
+  String get tourOfferBody =>
+      'Daži soļi cauri lietotnei, norādot uz īstajiem vadības '
+      'elementiem. Vari apstāties jebkurā solī un vēlāk turpināt no '
+      'komandu paletes.';
+  @override
+  String get tourOfferYes => 'Parādi';
+  @override
+  String get tourOfferNo => 'Ne tagad';
+  @override
+  String get tourTreeTitle => 'Tava bibliotēka';
+  @override
+  String get tourTreeBody =>
+      'Šī ir mape, ko izvēlējies, mape pa mapei. Viss, ko dari '
+      'failam ārpus Nimana, parādās šeit tajā mirklī, kad tas '
+      'nonāk.';
+  @override
+  String get tourCreateTitle => 'Izveido piezīmi';
+  @override
+  String get tourCreateBody =>
+      'Piezīmes, saraksti, balss piezīmes, veidnes un mapes visas '
+      'sākas šeit. Tā pati izvēlne tālrunī parādās kā apaļā poga.';
+  @override
+  String get tourNoteTitle => 'Viena piezīme vienlaikus';
+  @override
+  String get tourNoteBody =>
+      'Piezīme uz ekrāna; atvērtās paliek cilnēs virs tās, un platā '
+      'logā blakus var atvērties otrs panelis.';
+  @override
+  String get tourModesTitle => 'Trīs veidi, kā rakstīt';
+  @override
+  String get tourModesBody =>
+      'Raksti Markdown avotu, raksti to tā, kā tas lasās, vai lasi '
+      'to — šis slēdzis ir pa piezīmei, un bibliotēkas iestatījums '
+      'izlemj, kas atveras.';
+  @override
+  String get tourToolbarTitle => 'Rīkjosla';
+  @override
+  String get tourToolbarBody =>
+      'Formatēšana rindā, kurā esi, un tās pašas darbības ar labo '
+      'klikšķi. Katra konstrukcija, ko Niman lasa, ir špikerī.';
+  @override
+  String get tourCheatsheetTitle => 'Katra konstrukcija, rakstīta blakus';
+  @override
+  String get tourCheatsheetBody =>
+      'Šis ir špikeris. Katru piemēru var kopēt, un Ievietot '
+      'ievieto to atvērtajā piezīmē.';
+  @override
+  String get tourCheatsheetOpen => 'Atver to';
+  @override
+  String get tourTabsTitle => 'Viss ir cilne';
+  @override
+  String get tourTabsBody =>
+      'Faili, uzdevumi, meklēšana, ātrā piezīme, iestatījumi. '
+      'Komandu palete sasniedz visus, un katru komandu, no '
+      'tastatūras.';
+  @override
+  String get tourDockTitle => 'Struktūra, cilpes, vēsture';
+  @override
+  String get tourDockBody =>
+      'Piezīmes struktūra, tās cilpes un iepriekšējās versijas, '
+      'blakus. Tālrunī piezīmes izvēlne atver tos pašus trīs.';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

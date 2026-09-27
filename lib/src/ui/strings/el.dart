@@ -2579,4 +2579,187 @@ final class GreekStrings extends Strings {
   String get syncMergeSave => 'Αποθήκευση της ένωσης';
   @override
   String get syncMergeKeepWhole => 'Ή κρατήστε ένα ολόκληρο αντίγραφο';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Παράλειψη';
+  @override
+  String get welcomeNext => 'Επόμενο';
+  @override
+  String get welcomeBack => 'Πίσω';
+  @override
+  String get welcomeStart => 'Ξεκίνα να γράφεις';
+  @override
+  String get welcomeClose => 'Κλείσιμο';
+  @override
+  String get welcomeNotesTitle => 'Οι σημειώσεις σου είναι αρχεία';
+  @override
+  String get welcomeNotesBody =>
+      'Το Niman κρατά τις σημειώσεις σου ως απλά αρχεία Markdown σε '
+      'φακέλους που διαλέγεις. Μία σημείωση είναι ένα αρχείο .md, '
+      'και ό,τι σου δείχνει η εφαρμογή είναι χτισμένο από αυτά. '
+      'Χωρίς λογαριασμό και χωρίς δικό μας φορμά για να '
+      'επιστρέψεις.';
+  @override
+  String get welcomeModesTitle => 'Τρεις τρόποι να γράψεις την ίδια σημείωση';
+  @override
+  String get welcomeModesBody =>
+      'Γράψε το Markdown, γράψε τη σημείωση όπως διαβάζεται (ο '
+      'ζωντανός επεξεργαστής), ή διάβασέ την. Είναι μία σημείωση '
+      'όποιον κι αν χρησιμοποιήσεις, και μπορείς να αλλάζεις ανά '
+      'σημείωση ή για όλη τη βιβλιοθήκη.';
+  @override
+  String get welcomeLinksTitle => 'Όλα συνδέονται';
+  @override
+  String get welcomeLinksBody =>
+      'Οι σύνδεσμοι wiki όπως [[αυτός]] βρίσκουν τη σημείωσή τους '
+      'καθώς γράφεις. Οι ετικέτες, το frontmatter και τα πρότυπα '
+      'κρατούν μακριά τα κομμάτια που ξαναγράφεις.';
+  @override
+  String get welcomeFindTitle => 'Βρες την ξανά';
+  @override
+  String get welcomeFindBody =>
+      'Αναζήτηση πλήρους κειμένου στη βιβλιοθήκη, μια παλέτα '
+      'εντολών για ό,τι ξέρει η εφαρμογή, και η γρήγορη σημείωση '
+      'ένα πλήκτρο μακριά.';
+  @override
+  String get welcomeExportTitle => 'Έρχεται μαζί σου';
+  @override
+  String get welcomeExportBody =>
+      'Εξήγαγε μια σημείωση ή έναν ολόκληρο φάκελο ως Markdown, '
+      'HTML, PDF ή βιβλίο EPUB. Φέρε μια εξαγωγή από το Notion, ή '
+      'άνοιξε ένα θησαυροφυλάκιο Obsidian εκεί που είναι ήδη.';
+  @override
+  String get welcomeTasksTitle => 'Εργασίες και υπενθυμίσεις';
+  @override
+  String get welcomeTasksBody =>
+      'Μια λίστα todo.txt που την κρατάς ως αρχείο — '
+      'προτεραιότητες, έργα, προθεσμίες — και συναγερμοί rem: που '
+      'σε ειδοποιούν όταν κάτι λήγει, στο τηλέφωνο και στον '
+      'υπολογιστή.';
+  @override
+  String get welcomeSyncTitle => 'Ανάμεσα στις μηχανές σου';
+  @override
+  String get welcomeSyncBody =>
+      'Στρέψε μια βιβλιοθήκη σε έναν φάκελο WebDAV — Nextcloud, '
+      'ownCloud, ένα NAS — και οι αλλαγές συγχρονίζονται και προς '
+      'τις δύο κατευθύνσεις, ενωμένες γραμμή προς γραμμή όταν δύο '
+      'συσκευές άγγιξαν την ίδια σημείωση.';
+  @override
+  String get welcomeDeviceTitle => 'Niman σε αυτή τη συσκευή';
+  @override
+  String get welcomeAndroidBody =>
+      'Μοιράσου κείμενο ή αρχείο στο Niman από οποιαδήποτε '
+      'εφαρμογή, κράτα μια σημείωση στην αρχική οθόνη, και '
+      'ηχογράφησε μια φωνητική σημείωση αντί να πληκτρολογείς.';
+  @override
+  String get welcomeDesktopBody =>
+      'Καρτέλες και χωρισμένα πλαίσια, η θήκη συστήματος, σύρε και '
+      'άφησε στο παράθυρο, και αρχεία .md που ανοίγουν το Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Έχεις ξαναγράψει Markdown;';
+  @override
+  String get welcomeQuestionNote =>
+      'Αυτό ορίζει μόνο πώς ξεκινά η εφαρμογή. Μπορείς να '
+      'ενεργοποιήσεις ή να απενεργοποιήσεις οποιονδήποτε '
+      'επεξεργαστή στις Ρυθμίσεις → Επεξεργαστής οποτεδήποτε.';
+  @override
+  String get welcomeAnswerNone => 'Ποτέ';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Ο ζωντανός επεξεργαστής, και το Markdown δεν προσφέρεται '
+      'μέχρι να το ενεργοποιήσεις.';
+  @override
+  String get welcomeAnswerSome => 'Λίγο';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Ο ζωντανός επεξεργαστής ανοίγει σημειώσεις; το Markdown '
+      'είναι ένας διακόπτης μακριά.';
+  @override
+  String get welcomeAnswerFluent => 'Συνέχεια';
+  @override
+  String get welcomeAnswerFluentHint => 'Το Markdown, όπως έρχεται η εφαρμογή.';
+  @override
+  String get welcomeTourOffer => 'Δείξε μου την εφαρμογή';
+  @override
+  String get welcomeTourOfferNote =>
+      'Η περιήγηση ξεκινά όταν ανοίξει η πρώτη σου βιβλιοθήκη, και '
+      'δείχνει στα αληθινά χειριστήρια.';
+  @override
+  String get welcomeDeckCommand => 'Τι ξέρει το Niman';
+  @override
+  String get welcomeTourCommand => 'Κάνε την περιήγηση';
+  @override
+  String get tourDone => 'Έτοιμο';
+  @override
+  String get tourOfferTitle => 'Να σε ξεναγήσω;';
+  @override
+  String get tourOfferBody =>
+      'Λίγα βήματα στην εφαρμογή, δείχνοντας στα αληθινά '
+      'χειριστήρια. Μπορείς να σταματήσεις σε όποιο βήμα θέλεις και '
+      'να συνεχίσεις αργότερα από την παλέτα εντολών.';
+  @override
+  String get tourOfferYes => 'Δείξε μου';
+  @override
+  String get tourOfferNo => 'Όχι τώρα';
+  @override
+  String get tourTreeTitle => 'Η βιβλιοθήκη σου';
+  @override
+  String get tourTreeBody =>
+      'Αυτός είναι ο φάκελος που διάλεξες, φάκελος προς φάκελο. '
+      'Ό,τι κάνεις σε ένα αρχείο έξω από το Niman εμφανίζεται εδώ '
+      'τη στιγμή που φτάνει.';
+  @override
+  String get tourCreateTitle => 'Φτιάξε μια σημείωση';
+  @override
+  String get tourCreateBody =>
+      'Σημειώσεις, λίστες, φωνητικές σημειώσεις, πρότυπα και '
+      'φάκελοι ξεκινούν όλα εδώ. Το ίδιο μενού εμφανίζεται στο '
+      'τηλέφωνο ως το στρογγυλό κουμπί.';
+  @override
+  String get tourNoteTitle => 'Μία σημείωση τη φορά';
+  @override
+  String get tourNoteBody =>
+      'Η σημείωση στην οθόνη; όσες άνοιξες μένουν σε καρτέλες από '
+      'πάνω, και ένα δεύτερο πλαίσιο μπορεί να ανοίξει δίπλα σε ένα '
+      'φαρδύ παράθυρο.';
+  @override
+  String get tourModesTitle => 'Τρεις τρόποι να γράψεις';
+  @override
+  String get tourModesBody =>
+      'Γράψε το Markdown, γράψε το όπως διαβάζεται, ή διάβασέ το — '
+      'αυτός ο διακόπτης είναι ανά σημείωση, και η ρύθμιση της '
+      'βιβλιοθήκης αποφασίζει τι ανοίγει.';
+  @override
+  String get tourToolbarTitle => 'Η γραμμή εργαλείων';
+  @override
+  String get tourToolbarBody =>
+      'Μορφοποίηση στη γραμμή που βρίσκεσαι, και οι ίδιες ενέργειες '
+      'με δεξί κλικ. Κάθε κατασκευή που διαβάζει το Niman είναι στο '
+      'σκονάκι.';
+  @override
+  String get tourCheatsheetTitle => 'Κάθε κατασκευή, γραμμένη δίπλα';
+  @override
+  String get tourCheatsheetBody =>
+      'Αυτό είναι το σκονάκι. Κάθε παράδειγμα μπορεί να αντιγραφεί, '
+      'και το Εισαγωγή το βάζει στη σημείωση που έχεις ανοιχτή.';
+  @override
+  String get tourCheatsheetOpen => 'Άνοιξέ το';
+  @override
+  String get tourTabsTitle => 'Όλα είναι καρτέλα';
+  @override
+  String get tourTabsBody =>
+      'Αρχεία, εργασίες, αναζήτηση, η γρήγορη σημείωση, ρυθμίσεις. '
+      'Η παλέτα εντολών τα φτάνει όλα, και κάθε εντολή, από το '
+      'πληκτρολόγιο.';
+  @override
+  String get tourDockTitle => 'Διάρθρωση, ετικέτες, ιστορικό';
+  @override
+  String get tourDockBody =>
+      'Η διάρθρωση της σημείωσης, οι ετικέτες και οι περασμένες '
+      'εκδόσεις της, δίπλα. Στο τηλέφωνο το μενού της σημείωσης '
+      'ανοίγει τα ίδια τρία.';
+  @override
+  String welcomePageOf(int page, int of) => '$page από $of';
 }

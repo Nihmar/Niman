@@ -2523,4 +2523,180 @@ final class CroatianStrings extends Strings {
   String get syncMergeSave => 'Spremi spajanje';
   @override
   String get syncMergeKeepWhole => 'Ili zadrži jednu cijelu kopiju';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Preskoči';
+  @override
+  String get welcomeNext => 'Dalje';
+  @override
+  String get welcomeBack => 'Natrag';
+  @override
+  String get welcomeStart => 'Počni pisati';
+  @override
+  String get welcomeClose => 'Zatvori';
+  @override
+  String get welcomeNotesTitle => 'Tvoje su bilješke datoteke';
+  @override
+  String get welcomeNotesBody =>
+      'Niman drži tvoje bilješke kao obične Markdown datoteke u '
+      'mapama koje odabereš. Jedna bilješka je jedna .md datoteka, '
+      'a sve što ti aplikacija prikazuje izgrađeno je od njih. Bez '
+      'računa i bez našeg formata kojemu se vraćati.';
+  @override
+  String get welcomeModesTitle => 'Tri načina da napišeš istu bilješku';
+  @override
+  String get welcomeModesBody =>
+      'Piši Markdown izvor, piši bilješku onako kako se čita (živi '
+      'uređivač) ili je čitaj. To je jedna bilješka koju god '
+      'upotrijebiš, a mijenjati možeš po bilješci ili za cijelu '
+      'biblioteku.';
+  @override
+  String get welcomeLinksTitle => 'Sve se povezuje';
+  @override
+  String get welcomeLinksBody =>
+      'Wiki poveznice poput [[ove]] pronalaze svoju bilješku dok '
+      'tipkaš. Oznake, frontmatter i predlošci drže po strani '
+      'dijelove koje pišeš iznova i iznova.';
+  @override
+  String get welcomeFindTitle => 'Nađi je opet';
+  @override
+  String get welcomeFindBody =>
+      'Pretraga cijelog teksta po biblioteci, paleta naredbi za sve '
+      'što aplikacija može, i brza bilješka na jedan pritisak.';
+  @override
+  String get welcomeExportTitle => 'Ide s tobom';
+  @override
+  String get welcomeExportBody =>
+      'Izvezi bilješku ili cijelu mapu kao Markdown, HTML, PDF ili '
+      'EPUB knjigu. Uvezi Notion izvoz ili otvori Obsidian trezor '
+      'tamo gdje već jest.';
+  @override
+  String get welcomeTasksTitle => 'Zadaci i podsjetnici';
+  @override
+  String get welcomeTasksBody =>
+      'Popis todo.txt koji držiš kao datoteku — prioriteti, '
+      'projekti, rokovi — i rem: alarmi koji te upozore kad nešto '
+      'dospije, na telefonu i na stolnom računalu.';
+  @override
+  String get welcomeSyncTitle => 'Među tvojim strojevima';
+  @override
+  String get welcomeSyncBody =>
+      'Usmjeri biblioteku na WebDAV mapu — Nextcloud, ownCloud, NAS '
+      '— i izmjene se sinkroniziraju u oba smjera, spojene redak po '
+      'redak kad su dva uređaja dotaknula istu bilješku.';
+  @override
+  String get welcomeDeviceTitle => 'Niman na ovom uređaju';
+  @override
+  String get welcomeAndroidBody =>
+      'Podijeli tekst ili datoteku u Niman iz bilo koje aplikacije, '
+      'zadrži bilješku na početnom zaslonu i snimi glasovnu '
+      'bilješku umjesto tipkanja.';
+  @override
+  String get welcomeDesktopBody =>
+      'Kartice i podijeljeni okviri, sistemska traka, povlačenje i '
+      'ispuštanje na prozor, i .md datoteke koje otvaraju Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Jesi li već pisao Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Ovo samo određuje kako aplikacija kreće. Svaki uređivač '
+      'možeš uključiti ili isključiti u Postavke → Uređivač bilo '
+      'kada.';
+  @override
+  String get welcomeAnswerNone => 'Nikad';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Živi uređivač, a Markdown izvor se ne nudi dok ga ne '
+      'uključiš.';
+  @override
+  String get welcomeAnswerSome => 'Malo';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Živi uređivač otvara bilješke; Markdown izvor je jedan '
+      'prekidač dalje.';
+  @override
+  String get welcomeAnswerFluent => 'Stalno';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown izvor, kako aplikacija dolazi.';
+  @override
+  String get welcomeTourOffer => 'Pokaži mi aplikaciju';
+  @override
+  String get welcomeTourOfferNote =>
+      'Obilazak počinje kad je tvoja prva biblioteka otvorena, i '
+      'pokazuje na prave kontrole.';
+  @override
+  String get welcomeDeckCommand => 'Što Niman zna';
+  @override
+  String get welcomeTourCommand => 'Kreni u obilazak';
+  @override
+  String get tourDone => 'Gotovo';
+  @override
+  String get tourOfferTitle => 'Da te provedem?';
+  @override
+  String get tourOfferBody =>
+      'Nekoliko koraka kroz aplikaciju, pokazujući na prave '
+      'kontrole. Možeš stati na bilo kojem koraku i kasnije '
+      'nastaviti iz palete naredbi.';
+  @override
+  String get tourOfferYes => 'Pokaži mi';
+  @override
+  String get tourOfferNo => 'Ne sada';
+  @override
+  String get tourTreeTitle => 'Tvoja biblioteka';
+  @override
+  String get tourTreeBody =>
+      'Ovo je mapa koju si odabrao, mapa po mapa. Sve što učiniš '
+      'datoteci izvan Nimana pojavljuje se ovdje čim stigne.';
+  @override
+  String get tourCreateTitle => 'Stvori bilješku';
+  @override
+  String get tourCreateBody =>
+      'Bilješke, popisi, glasovne bilješke, predlošci i mape svi '
+      'počinju ovdje. Isti se izbornik na telefonu pojavljuje kao '
+      'okrugli gumb.';
+  @override
+  String get tourNoteTitle => 'Jedna bilješka odjednom';
+  @override
+  String get tourNoteBody =>
+      'Bilješka na zaslonu; one koje si otvorio ostaju u karticama '
+      'iznad, a drugi se okvir može otvoriti pokraj u širokom '
+      'prozoru.';
+  @override
+  String get tourModesTitle => 'Tri načina pisanja';
+  @override
+  String get tourModesBody =>
+      'Piši Markdown izvor, piši ga onako kako se čita, ili ga '
+      'čitaj — ovaj je prekidač po bilješci, a postavka biblioteke '
+      'odlučuje što se otvara.';
+  @override
+  String get tourToolbarTitle => 'Alatna traka';
+  @override
+  String get tourToolbarBody =>
+      'Oblikovanje u retku u kojem jesi, i iste radnje desnim '
+      'klikom. Svaka konstrukcija koju Niman čita je u šalabahteru.';
+  @override
+  String get tourCheatsheetTitle => 'Svaka konstrukcija, zapisana pokraj';
+  @override
+  String get tourCheatsheetBody =>
+      'Ovo je šalabahter. Svaki se primjer može kopirati, a Umetni '
+      'ga stavlja u bilješku koju imaš otvorenu.';
+  @override
+  String get tourCheatsheetOpen => 'Otvori ga';
+  @override
+  String get tourTabsTitle => 'Sve je kartica';
+  @override
+  String get tourTabsBody =>
+      'Datoteke, zadaci, pretraga, brza bilješka, postavke. Paleta '
+      'naredbi doseže svaku, i svaku naredbu, s tipkovnice.';
+  @override
+  String get tourDockTitle => 'Obris, oznake, povijest';
+  @override
+  String get tourDockBody =>
+      'Obris bilješke, njezine oznake i prošle verzije, pokraj. Na '
+      'telefonu izbornik bilješke otvara iste tri.';
+  @override
+  String welcomePageOf(int page, int of) => '$page od $of';
 }

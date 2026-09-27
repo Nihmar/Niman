@@ -2518,4 +2518,188 @@ final class BasqueStrings extends Strings {
   String get syncMergeSave => 'Gorde bateratzea';
   @override
   String get syncMergeKeepWhole => 'Edo gorde kopia oso bat';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Saltatu';
+  @override
+  String get welcomeNext => 'Hurrengoa';
+  @override
+  String get welcomeBack => 'Atzera';
+  @override
+  String get welcomeStart => 'Hasi idazten';
+  @override
+  String get welcomeClose => 'Itxi';
+  @override
+  String get welcomeNotesTitle => 'Zure oharrak fitxategiak dira';
+  @override
+  String get welcomeNotesBody =>
+      'Nimanek zure oharrak Markdown fitxategi arrunt gisa '
+      'gordetzen ditu, zuk aukeratutako karpetetan. Ohar bat .md '
+      'fitxategi bat da, eta aplikazioak erakusten dizun guztia '
+      'haietatik eraikita dago. Konturik ez eta gure formaturik ez, '
+      'hara itzultzeko.';
+  @override
+  String get welcomeModesTitle => 'Ohar bera idazteko hiru modu';
+  @override
+  String get welcomeModesBody =>
+      'Idatzi Markdown iturburua, idatzi oharra irakurtzen den '
+      'bezala (zuzenean editorea), edo irakurri. Ohar bat da, '
+      'edozein erabilita ere, eta oharrez ohar edo biblioteka osoan '
+      'alda dezakezu.';
+  @override
+  String get welcomeLinksTitle => 'Dena lotzen da';
+  @override
+  String get welcomeLinksBody =>
+      '[[hau]] bezalako wikilinkek beren oharra aurkitzen dute '
+      'idazten duzun bitartean. Etiketek, frontmatterrak eta '
+      'txantiloiek baztertzen dute behin eta berriz idazten duzuna.';
+  @override
+  String get welcomeFindTitle => 'Aurkitu berriro';
+  @override
+  String get welcomeFindBody =>
+      'Bilaketa osoa bibliotekan, aplikazioak dakioken guztirako '
+      'komando paleta bat, eta ohar azkarra tekla bakarrera.';
+  @override
+  String get welcomeExportTitle => 'Zurekin doa';
+  @override
+  String get welcomeExportBody =>
+      'Esportatu ohar bat edo karpeta oso bat Markdown, HTML, PDF '
+      'edo EPUB liburu gisa. Ekarri Notion esportazio bat, edo '
+      'ireki Obsidian gordailu bat jada dagoen tokian.';
+  @override
+  String get welcomeTasksTitle => 'Zereginak eta oroigarriak';
+  @override
+  String get welcomeTasksBody =>
+      'Fitxategi gisa gordetzen duzun todo.txt zerrenda bat — '
+      'lehentasunak, proiektuak, epeak — eta rem: alarmak, zerbait '
+      'epemugan dagoenean ohartarazten dutenak, telefonoan eta '
+      'mahaigainean.';
+  @override
+  String get welcomeSyncTitle => 'Zure makinen artean';
+  @override
+  String get welcomeSyncBody =>
+      'Zuzendu biblioteka bat WebDAV karpeta batera — Nextcloud, '
+      'ownCloud, NAS bat — eta aldaketak bi norabideetan '
+      'sinkronizatzen dira, lerroz lerro batuta bi gailuk ohar bera '
+      'ukitu dutenean.';
+  @override
+  String get welcomeDeviceTitle => 'Niman gailu honetan';
+  @override
+  String get welcomeAndroidBody =>
+      'Partekatu testua edo fitxategi bat Nimani edozein '
+      'aplikaziotatik, eduki ohar bat hasierako pantailan, eta '
+      'grabatu ahots ohar bat idatzi beharrean.';
+  @override
+  String get welcomeDesktopBody =>
+      'Fitxak eta panel zatituak, sistemaren erretilua, leihoan '
+      'arrastatu eta jaregin, eta Niman irekitzen duten .md '
+      'fitxategiak.';
+  @override
+  String get welcomeQuestionTitle => 'Idatzi duzu inoiz Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Honek aplikazioa nola abiarazten den baino ez du '
+      'erabakitzen. Edozein editore piztu edo itzal dezakezu '
+      'Ezarpenak → Erredaktorea atalean, nahi duzunean.';
+  @override
+  String get welcomeAnswerNone => 'Inoiz ez';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Zuzenean editorea, eta Markdown iturburua ez da eskaintzen '
+      'piztu arte.';
+  @override
+  String get welcomeAnswerSome => 'Pixka bat';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Zuzenean editoreak oharrak irekitzen ditu; Markdown '
+      'iturburua etengailu batera dago.';
+  @override
+  String get welcomeAnswerFluent => 'Etengabe';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown iturburua, aplikazioa datorren bezala.';
+  @override
+  String get welcomeTourOffer => 'Erakutsi aplikazioa';
+  @override
+  String get welcomeTourOfferNote =>
+      'Bira zure lehen biblioteka irekita dagoenean hasten da, eta '
+      'benetako kontroletara seinalatzen du.';
+  @override
+  String get welcomeDeckCommand => 'Zer daki Nimanek';
+  @override
+  String get welcomeTourCommand => 'Egin bira';
+  @override
+  String get tourDone => 'Eginda';
+  @override
+  String get tourOfferTitle => 'Erakutsiko dizut?';
+  @override
+  String get tourOfferBody =>
+      'Aplikazioan zehar hainbat urrats, benetako kontroletara '
+      'seinalatuz. Edozein urratsean geldi zaitezke eta geroago '
+      'komando paletatik jarrai dezakezu.';
+  @override
+  String get tourOfferYes => 'Erakutsi';
+  @override
+  String get tourOfferNo => 'Orain ez';
+  @override
+  String get tourTreeTitle => 'Zure biblioteka';
+  @override
+  String get tourTreeBody =>
+      'Hau zuk aukeratutako karpeta da, karpetaz karpeta. Nimanetik '
+      'kanpo fitxategi bati egiten diozun guztia hemen agertzen da '
+      'iristen den unean.';
+  @override
+  String get tourCreateTitle => 'Sortu ohar bat';
+  @override
+  String get tourCreateBody =>
+      'Oharrak, zerrendak, ahots oharrak, txantiloiak eta karpetak '
+      'denak hemen hasten dira. Menu bera telefonoan botoi biribil '
+      'gisa agertzen da.';
+  @override
+  String get tourNoteTitle => 'Ohar bat aldiko';
+  @override
+  String get tourNoteBody =>
+      'Oharra pantailan; irekitakoak gainean fitxetan geratzen '
+      'dira, eta bigarren panel bat alboan ireki daiteke leiho '
+      'zabal batean.';
+  @override
+  String get tourModesTitle => 'Idazteko hiru modu';
+  @override
+  String get tourModesBody =>
+      'Idatzi Markdown iturburua, idatzi irakurtzen den bezala, edo '
+      'irakurri — etengailu hau oharrez ohar da, eta bibliotekaren '
+      'ezarpenak erabakitzen du zer irekitzen den.';
+  @override
+  String get tourToolbarTitle => 'Tresna barra';
+  @override
+  String get tourToolbarBody =>
+      'Formatuak zauden lerroan, eta ekintza berak eskuineko '
+      'klikarekin. Nimanek irakurtzen duen eraikuntza bakoitza '
+      'tranpa-orrian dago.';
+  @override
+  String get tourCheatsheetTitle => 'Eraikuntza bakoitza, alboan idatzita';
+  @override
+  String get tourCheatsheetBody =>
+      'Hau tranpa-orria da. Adibide bakoitza kopia daiteke, eta '
+      'Txertatu irekita duzun oharrean jartzen du.';
+  @override
+  String get tourCheatsheetOpen => 'Ireki';
+  @override
+  String get tourTabsTitle => 'Dena fitxa bat da';
+  @override
+  String get tourTabsBody =>
+      'Fitxategiak, zereginak, bilaketa, ohar azkarra, ezarpenak. '
+      'Komando paletak denak eta komando bakoitza lortzen ditu '
+      'teklatutik.';
+  @override
+  String get tourDockTitle => 'Egitura, etiketak, historia';
+  @override
+  String get tourDockBody =>
+      'Oharraren egitura, bere etiketak eta iraganeko bertsioak, '
+      'alboan. Telefonoan oharraren menuak hiru berak irekitzen '
+      'ditu.';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

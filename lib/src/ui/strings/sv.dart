@@ -2502,4 +2502,182 @@ final class SwedishStrings extends Strings {
   String get syncMergeSave => 'Spara sammanfogningen';
   @override
   String get syncMergeKeepWhole => 'Eller behåll en hel kopia';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Hoppa över';
+  @override
+  String get welcomeNext => 'Nästa';
+  @override
+  String get welcomeBack => 'Tillbaka';
+  @override
+  String get welcomeStart => 'Börja skriva';
+  @override
+  String get welcomeClose => 'Stäng';
+  @override
+  String get welcomeNotesTitle => 'Dina anteckningar är filer';
+  @override
+  String get welcomeNotesBody =>
+      'Niman håller dina anteckningar som vanliga Markdown-filer i '
+      'mappar du väljer. En anteckning är en .md-fil, och allt '
+      'appen visar dig byggs av dem. Inget konto, inget eget format '
+      'att ta sig tillbaka till.';
+  @override
+  String get welcomeModesTitle => 'Tre sätt att skriva samma anteckning';
+  @override
+  String get welcomeModesBody =>
+      'Skriv Markdown-källan, skriv anteckningen som den läses '
+      '(live-redigeraren), eller läs den. Det är en anteckning '
+      'vilken du än använder, och du kan byta per anteckning eller '
+      'för hela biblioteket.';
+  @override
+  String get welcomeLinksTitle => 'Allt hänger samman';
+  @override
+  String get welcomeLinksBody =>
+      'Wikilänkar som [[den här]] hittar sin anteckning medan du '
+      'skriver. Taggar, frontmatter och mallar håller undan delarna '
+      'du skriver om och om igen.';
+  @override
+  String get welcomeFindTitle => 'Hitta den igen';
+  @override
+  String get welcomeFindBody =>
+      'Fulltextsökning i biblioteket, en kommandopalett för allt '
+      'appen kan, och snabbanteckningen ett tangenttryck bort.';
+  @override
+  String get welcomeExportTitle => 'Den följer med dig';
+  @override
+  String get welcomeExportBody =>
+      'Exportera en anteckning eller en hel mapp som Markdown, '
+      'HTML, PDF eller EPUB-bok. Importera en Notion-export, eller '
+      'öppna ett Obsidian-valv där det redan ligger.';
+  @override
+  String get welcomeTasksTitle => 'Uppgifter och påminnelser';
+  @override
+  String get welcomeTasksBody =>
+      'En todo.txt-lista du håller som fil — prioriteringar, '
+      'projekt, förfallodatum — och rem:-larm som varnar dig när '
+      'något förfaller, i telefonen och på skrivbordet.';
+  @override
+  String get welcomeSyncTitle => 'Mellan dina maskiner';
+  @override
+  String get welcomeSyncBody =>
+      'Peka ett bibliotek mot en WebDAV-mapp — Nextcloud, ownCloud, '
+      'en NAS — och ändringar synkas åt båda hållen, sammanfogade '
+      'rad för rad när två enheter rört samma anteckning.';
+  @override
+  String get welcomeDeviceTitle => 'Niman på den här enheten';
+  @override
+  String get welcomeAndroidBody =>
+      'Dela text eller en fil till Niman från vilken app som helst, '
+      'behåll en anteckning på hemskärmen, och spela in en '
+      'röstanteckning i stället för att skriva.';
+  @override
+  String get welcomeDesktopBody =>
+      'Flikar och delade paneler, systemfältet, dra och släpp till '
+      'fönstret, och .md-filer som öppnar Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Har du skrivit Markdown förut?';
+  @override
+  String get welcomeQuestionNote =>
+      'Detta avgör bara hur appen startar. Du kan slå på eller av '
+      'vilken redigerare som helst i Inställningar → Redigerare när '
+      'som helst.';
+  @override
+  String get welcomeAnswerNone => 'Aldrig';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Live-redigeraren, och Markdown-källan erbjuds inte förrän du '
+      'slår på den.';
+  @override
+  String get welcomeAnswerSome => 'Lite';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Live-redigeraren öppnar anteckningar; Markdown-källan är en '
+      'växel bort.';
+  @override
+  String get welcomeAnswerFluent => 'Hela tiden';
+  @override
+  String get welcomeAnswerFluentHint => 'Markdown-källan, som appen kommer.';
+  @override
+  String get welcomeTourOffer => 'Visa mig runt i appen';
+  @override
+  String get welcomeTourOfferNote =>
+      'Rundturen börjar när ditt första bibliotek är öppet, och '
+      'pekar på de riktiga kontrollerna.';
+  @override
+  String get welcomeDeckCommand => 'Vad Niman kan';
+  @override
+  String get welcomeTourCommand => 'Ta rundturen';
+  @override
+  String get tourDone => 'Klar';
+  @override
+  String get tourOfferTitle => 'Ska jag visa dig runt?';
+  @override
+  String get tourOfferBody =>
+      'Några steg genom appen, som pekar på de riktiga '
+      'kontrollerna. Du kan stanna vid vilket steg som helst och '
+      'fortsätta senare från kommandopaletten.';
+  @override
+  String get tourOfferYes => 'Visa mig';
+  @override
+  String get tourOfferNo => 'Inte nu';
+  @override
+  String get tourTreeTitle => 'Ditt bibliotek';
+  @override
+  String get tourTreeBody =>
+      'Det här är mappen du valde, mapp för mapp. Allt du gör med '
+      'en fil utanför Niman dyker upp här så fort den landar.';
+  @override
+  String get tourCreateTitle => 'Skapa en anteckning';
+  @override
+  String get tourCreateBody =>
+      'Anteckningar, listor, röstanteckningar, mallar och mappar '
+      'börjar alla här. Samma meny visas i telefonen som den runda '
+      'knappen.';
+  @override
+  String get tourNoteTitle => 'En anteckning i taget';
+  @override
+  String get tourNoteBody =>
+      'Anteckningen på skärmen; de du öppnat stannar i flikar '
+      'ovanför, och en andra panel kan öppnas bredvid i ett brett '
+      'fönster.';
+  @override
+  String get tourModesTitle => 'Tre sätt att skriva';
+  @override
+  String get tourModesBody =>
+      'Skriv Markdown-källan, skriv den som den läses, eller läs '
+      'den — den här växeln gäller per anteckning, och '
+      'biblioteksinställningen avgör vad som öppnas.';
+  @override
+  String get tourToolbarTitle => 'Verktygsfältet';
+  @override
+  String get tourToolbarBody =>
+      'Formatering på raden du står i, och samma åtgärder vid '
+      'högerklick. Varje konstruktion Niman läser finns i '
+      'fusklappen.';
+  @override
+  String get tourCheatsheetTitle => 'Varje konstruktion, skriven bredvid';
+  @override
+  String get tourCheatsheetBody =>
+      'Det här är fusklappen. Varje exempel kan kopieras, och '
+      'Infoga lägger in det i anteckningen du har öppen.';
+  @override
+  String get tourCheatsheetOpen => 'Öppna den';
+  @override
+  String get tourTabsTitle => 'Allt är en flik';
+  @override
+  String get tourTabsBody =>
+      'Filer, uppgifter, sökning, snabbanteckningen, inställningar. '
+      'Kommandopaletten når alla, och varje kommando, från '
+      'tangentbordet.';
+  @override
+  String get tourDockTitle => 'Disposition, taggar, historik';
+  @override
+  String get tourDockBody =>
+      'Anteckningens disposition, dess taggar och tidigare '
+      'versioner, bredvid. I telefonen öppnar anteckningsmenyn '
+      'samma tre.';
+  @override
+  String welcomePageOf(int page, int of) => '$page av $of';
 }
