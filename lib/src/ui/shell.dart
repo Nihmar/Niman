@@ -839,15 +839,19 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// Empty when the open note has no kind GUI (including unknown `type`s).
   List<Widget> get _kindActions {
     if (_kindGui == null) return const [];
-    final isAudio = _noteKind == 'audio';
+    final icon = switch (_noteKind) {
+      'audio' => Icons.mic_outlined,
+      'shopping-list' => Icons.shopping_cart_outlined,
+      _ => Icons.checklist,
+    };
     return [
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
-          tooltip: isAudio
+          tooltip: _noteKind == 'audio'
               ? AppStrings.showAudioTooltip
               : AppStrings.showListTooltip,
-          icon: Icon(isAudio ? Icons.mic_outlined : Icons.checklist),
+          icon: Icon(icon),
           onPressed: () => setState(() => _kindRawMode = false),
         )
       else

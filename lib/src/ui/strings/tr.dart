@@ -374,6 +374,12 @@ final class TurkishStrings extends Strings {
   String get listEmpty => 'Henüz öğe yok';
   @override
   String get listDragHandleLabel => 'Öğeyi yeniden sırala';
+  @override
+  String get shoppingListName => 'Alışveriş listesi';
+  @override
+  String get checklistName => 'Kontrol listesi';
+  @override
+  String get shoppingQuantityLabel => 'Miktar';
 
   // Audio note kind (issue #56).
   @override

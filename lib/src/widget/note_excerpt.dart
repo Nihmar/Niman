@@ -2,13 +2,15 @@
 ///
 /// RemoteViews cannot render Markdown, so a pinned note is flattened:
 /// prose text for normal notes, structured rows for `type: list` notes
-/// (the widget renders one row view per item).
+/// (the `shopping-list` subtype included, its quantities folded into the
+/// row text) — the widget renders one row view per item.
 /// Pure Dart, no I/O: callers read the note off the UI isolate and pass
 /// the content in.
 library;
 
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
+import 'package:niman/src/ui/kinds/shopping_parser.dart';
 import 'package:path/path.dart' as p;
 
 /// Max excerpt chars for a normal note.
@@ -56,9 +58,12 @@ String noteWidgetTitle(String notePath) {
   return base.isEmpty ? notePath : base;
 }
 
-/// Whether [content] is a list note (`type: list` frontmatter).
+/// Whether [content] is a list note (`type: list` frontmatter, or the
+/// `shopping-list` subtype, which is the same checklist with a quantity
+/// per row).
 bool isListNoteContent(String content) {
-  return frontmatterTypeOf(content) == 'list';
+  final type = frontmatterTypeOf(content);
+  return type == 'list' || type == 'shopping-list';
 }
 
 /// The body lines of [content] without its frontmatter block.
@@ -85,13 +90,15 @@ List<String> noteBodyLines(String content) {
   String content, {
   int maxItems = widgetChecklistMaxItems,
 }) {
-  final items = parseListItems(content);
+  final items = frontmatterTypeOf(content) == 'shopping-list'
+      ? parseShoppingItems(content)
+      : parseListItems(content);
   final kept = items.length <= maxItems ? items : items.sublist(0, maxItems);
   return (
     rows: [
       for (final item in kept)
         ChecklistRow(
-          text: item.text,
+          text: '${item.text}${shoppingQuantitySuffix(item.quantity)}',
           checked: item.checked,
           line: item.line,
           depth: item.depth,

@@ -388,6 +388,12 @@ final class FrenchStrings extends Strings {
   String get listEmpty => 'Aucun élément pour l’instant';
   @override
   String get listDragHandleLabel => 'Réorganiser l’élément';
+  @override
+  String get shoppingListName => 'Liste de courses';
+  @override
+  String get checklistName => 'Liste de contrôle';
+  @override
+  String get shoppingQuantityLabel => 'Quantité';
 
   // Audio note kind (issue #56).
   @override

@@ -386,6 +386,12 @@ final class GalicianStrings extends Strings {
   String get listEmpty => 'Aínda non hai elementos';
   @override
   String get listDragHandleLabel => 'Cambiar a orde do elemento';
+  @override
+  String get shoppingListName => 'Lista da compra';
+  @override
+  String get checklistName => 'Lista de control';
+  @override
+  String get shoppingQuantityLabel => 'Cantidade';
 
   // Audio note kind (issue #56).
   @override

@@ -372,6 +372,12 @@ final class HindiStrings extends Strings {
   String get listEmpty => 'अभी कोई आइटम नहीं';
   @override
   String get listDragHandleLabel => 'आइटम का क्रम बदलें';
+  @override
+  String get shoppingListName => 'खरीदारी सूची';
+  @override
+  String get checklistName => 'चेकलिस्ट';
+  @override
+  String get shoppingQuantityLabel => 'मात्रा';
 
   // Audio note kind (issue #56).
   @override

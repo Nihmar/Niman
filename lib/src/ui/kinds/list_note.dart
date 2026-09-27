@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/kinds/list_item_row.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
+import 'package:niman/src/ui/kinds/shopping_parser.dart';
+import 'package:niman/src/ui/kinds/shopping_quantity_sheet.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The frontmatter a new list note is created with.
@@ -29,9 +31,18 @@ final class ListKindGui implements NoteKindGUI {
 /// are byte-stable ([flipListItem], [appendListItem], [editItemText],
 /// [moveSubtree]): unmodified lines keep their bytes, and a moved item
 /// keeps its bytes apart from the leading spaces.
+///
+/// [shopping] builds the same body for the `shopping-list` subtype
+/// (#309): every item carries a quantity, edited beside its text and
+/// kept in the item's own text as a `×2`.
 class ListNoteView extends StatefulWidget {
   /// Creates the view; [onChanged] receives the new full note text.
-  const new({required this.text, required this.onChanged, super.key});
+  const new({
+    required this.text,
+    required this.onChanged,
+    this.shopping = false,
+    super.key,
+  });
 
   /// The full note text.
   final String text;
@@ -39,6 +50,9 @@ class ListNoteView extends StatefulWidget {
   /// Called with the new full note text after an edit; the host persists
   /// it.
   final ValueChanged<String> onChanged;
+
+  /// Whether the body is a shopping list, with a quantity per item.
+  final bool shopping;
 
   @override
   State<ListNoteView> createState() => _ListNoteViewState();
@@ -65,6 +79,10 @@ class _ListNoteViewState extends State<ListNoteView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
+
+  /// The quantity the add row will write; one is the absence of a marker,
+  /// and the chip resets to it after every add.
+  int _newQuantity = 1;
 
   final ScrollController _scroll = ScrollController();
   final GlobalKey _listKey = GlobalKey();
@@ -104,9 +122,13 @@ class _ListNoteViewState extends State<ListNoteView>
   @override
   void initState() {
     super.initState();
-    _items = parseListItems(widget.text);
+    _items = _parse(widget.text);
     WidgetsBinding.instance.addObserver(this);
   }
+
+  /// The items of [text], with quantities when this is a shopping list.
+  List<ListItem> _parse(String text) =>
+      widget.shopping ? parseShoppingItems(text) : parseListItems(text);
 
   /// Ends an in-place edit when the software keyboard is dismissed
   /// (issue #5).
@@ -150,14 +172,16 @@ class _ListNoteViewState extends State<ListNoteView>
     super.didUpdateWidget(old);
     if (old.text != widget.text) {
       final oldItems = _items;
-      _items = parseListItems(widget.text);
+      _items = _parse(widget.text);
       _drag = null;
       _drop = null;
       // An open in-place edit survives the rebuild unless its own line
       // changed (a committed edit or a pencil edit under the field).
       final e = _editingIndex;
       if (e != null &&
-          (e >= _items.length || oldItems[e].text != _items[e].text)) {
+          (e >= _items.length ||
+              oldItems[e].text != _items[e].text ||
+              oldItems[e].quantity != _items[e].quantity)) {
         _setEditing(null);
       }
       if (_scrollToEnd) {
@@ -219,7 +243,16 @@ class _ListNoteViewState extends State<ListNoteView>
     if (text.isEmpty) return;
     _newItem.clear();
     _scrollToEnd = true;
-    widget.onChanged(appendListItem(widget.text, text));
+    if (!widget.shopping) {
+      widget.onChanged(appendListItem(widget.text, text));
+      return;
+    }
+    // A typed `latte x2` carries its own quantity; the chip wins when it
+    // was moved off one, since that was a deliberate choice too.
+    final typed = parseShoppingItems('- [ ] $text\n').first;
+    final quantity = _newQuantity > 1 ? _newQuantity : typed.quantity;
+    if (_newQuantity != 1) setState(() => _newQuantity = 1);
+    widget.onChanged(appendShoppingItem(widget.text, typed.text, quantity));
   }
 
   void _beginEdit(int index) {
@@ -228,7 +261,7 @@ class _ListNoteViewState extends State<ListNoteView>
     setState(() => _setEditing(index));
   }
 
-  void _commitEdit(int index, String raw) {
+  void _commitEdit(int index, String raw, int quantity) {
     if (!mounted) return;
     if (_cancelPendingCommit) {
       _cancelPendingCommit = false;
@@ -237,6 +270,14 @@ class _ListNoteViewState extends State<ListNoteView>
     if (index >= _items.length) return;
     final text = raw.trim();
     final item = _items[index];
+    if (widget.shopping) {
+      if (text == item.text && quantity == item.quantity) {
+        if (_editingIndex == index) setState(() => _setEditing(null));
+        return;
+      }
+      widget.onChanged(editShoppingItem(widget.text, item, text, quantity));
+      return;
+    }
     if (text == item.text) {
       if (_editingIndex == index) setState(() => _setEditing(null));
       return;
@@ -479,12 +520,14 @@ class _ListNoteViewState extends State<ListNoteView>
                       return ListItemRow(
                         key: _rowKey(index),
                         item: item,
+                        shopping: widget.shopping,
                         isDragSource: _drag?.index == index,
                         isEditing: _editingIndex == index,
                         indicator: indicator,
                         onToggle: () => _toggle(index),
                         onBeginEdit: () => _beginEdit(index),
-                        onCommitEdit: (text) => _commitEdit(index, text),
+                        onCommitEdit: (text, quantity) =>
+                            _commitEdit(index, text, quantity),
                         onDelete: () => _delete(index),
                         onDragStart: (global) => _onDragStart(index, global),
                         onDragMove: _onDragMove,
@@ -520,17 +563,61 @@ class _ListNoteViewState extends State<ListNoteView>
             ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         decoration: InputDecoration(
           hintText: AppStrings.listAddHint,
-          prefixIcon: const Icon(Icons.add),
-          suffixIcon: IconButton(
-            key: const Key('list-add-button'),
-            icon: const Icon(Icons.check),
-            tooltip: AppStrings.listAddTooltip,
-            onPressed: _add,
+          prefixIcon: widget.shopping ? null : const Icon(Icons.add),
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.shopping) _addQuantityButton(context),
+              IconButton(
+                key: const Key('list-add-button'),
+                icon: const Icon(Icons.check),
+                tooltip: AppStrings.listAddTooltip,
+                onPressed: _add,
+              ),
+            ],
           ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onSubmitted: (_) => _add(),
       ),
     );
+  }
+
+  /// The add row's quantity chip: what the next item is written with,
+  /// reset to one after every add.
+  Widget _addQuantityButton(BuildContext context) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: AppStrings.shoppingQuantityLabel,
+      child: InkWell(
+        key: const Key('list-add-quantity'),
+        borderRadius: BorderRadius.circular(14),
+        onTap: _pickAddQuantity,
+        child: Container(
+          height: 28,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.colorScheme.outline),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('×$_newQuantity', style: theme.textTheme.labelMedium),
+              const Icon(Icons.arrow_drop_down, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAddQuantity() async {
+    final picked = await showShoppingQuantitySheet(
+      context,
+      quantity: _newQuantity,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _newQuantity = picked);
   }
 }

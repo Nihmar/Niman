@@ -389,6 +389,12 @@ final class GreekStrings extends Strings {
   String get listEmpty => 'Δεν υπάρχουν ακόμα στοιχεία';
   @override
   String get listDragHandleLabel => 'Επαναταξινόμηση στοιχείου';
+  @override
+  String get shoppingListName => 'Λίστα αγορών';
+  @override
+  String get checklistName => 'Λίστα ελέγχου';
+  @override
+  String get shoppingQuantityLabel => 'Ποσότητα';
 
   // Audio note kind (issue #56).
   @override

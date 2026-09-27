@@ -387,6 +387,12 @@ final class ItalianStrings extends Strings {
   String get listEmpty => 'Nessun elemento per ora';
   @override
   String get listDragHandleLabel => 'Riordina l’elemento';
+  @override
+  String get shoppingListName => 'Lista della spesa';
+  @override
+  String get checklistName => 'Checklist';
+  @override
+  String get shoppingQuantityLabel => 'Quantità';
 
   // Audio note kind (issue #56).
   @override

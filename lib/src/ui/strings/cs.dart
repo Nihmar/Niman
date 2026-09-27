@@ -380,6 +380,12 @@ final class CzechStrings extends Strings {
   String get listEmpty => 'Zatím žádné položky';
   @override
   String get listDragHandleLabel => 'Změnit pořadí položky';
+  @override
+  String get shoppingListName => 'Nákupní seznam';
+  @override
+  String get checklistName => 'Kontrolní seznam';
+  @override
+  String get shoppingQuantityLabel => 'Množství';
 
   // Audio note kind (issue #56).
   @override

@@ -378,6 +378,12 @@ final class BelarusianStrings extends Strings {
   String get listEmpty => 'Элементаў яшчэ няма';
   @override
   String get listDragHandleLabel => 'Змяніць парадак элементаў';
+  @override
+  String get shoppingListName => 'Спіс пакупак';
+  @override
+  String get checklistName => 'Кантрольны спіс';
+  @override
+  String get shoppingQuantityLabel => 'Колькасць';
 
   // Audio note kind (issue #56).
   @override

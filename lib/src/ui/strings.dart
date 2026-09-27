@@ -334,6 +334,9 @@ final class AppStrings {
   static String get listAddTooltip => _s.listAddTooltip;
   static String get listEmpty => _s.listEmpty;
   static String get listDragHandleLabel => _s.listDragHandleLabel;
+  static String get shoppingListName => _s.shoppingListName;
+  static String get checklistName => _s.checklistName;
+  static String get shoppingQuantityLabel => _s.shoppingQuantityLabel;
 
   // Audio note kind (issue #56).
   static String get audioEmpty => _s.audioEmpty;

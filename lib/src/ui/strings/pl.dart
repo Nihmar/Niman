@@ -385,6 +385,12 @@ final class PolishStrings extends Strings {
   String get listEmpty => 'Nie ma jeszcze elementów';
   @override
   String get listDragHandleLabel => 'Zmień kolejność elementu';
+  @override
+  String get shoppingListName => 'Lista zakupów';
+  @override
+  String get checklistName => 'Lista kontrolna';
+  @override
+  String get shoppingQuantityLabel => 'Ilość';
 
   // Audio note kind (issue #56).
   @override
