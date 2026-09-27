@@ -71,6 +71,10 @@ class _ListNoteViewState extends State<ListNoteView>
   final Map<int, GlobalKey> _rowKeys = {};
   int? _editingIndex;
 
+  /// Whether the next rebuild is the one a just-added item landed in: the
+  /// list then takes the scroll to its new foot.
+  bool _scrollToEnd = false;
+
   /// A commit the row is about to deliver whose item the delete already
   /// took: the row is reused for the item that shifted into its place,
   /// and that item must not be overwritten with the deleted one's text.
@@ -156,7 +160,42 @@ class _ListNoteViewState extends State<ListNoteView>
           (e >= _items.length || oldItems[e].text != _items[e].text)) {
         _setEditing(null);
       }
+      if (_scrollToEnd) {
+        _scrollToEnd = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToNewItem());
+      }
     }
+  }
+
+  /// Takes the list to the item just added, so it is on screen when the
+  /// field is empty again.
+  ///
+  /// The add row sits outside the scroll view, at the viewport's foot: a
+  /// new line lands under it, and without this the list stayed where it
+  /// was until the writer scrolled by hand.
+  void _scrollToNewItem() {
+    if (!mounted || !_scroll.hasClients) return;
+    final position = _scroll.position;
+    if (position.pixels >= position.maxScrollExtent) return;
+    unawaited(
+      _scroll
+          .animateTo(
+            position.maxScrollExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+          )
+          // The extent a sliver reports is an estimate until its last child
+          // is built: the glide lands, building the new item can move the
+          // foot a little further, and the rest is a jump rather than a
+          // second animation.
+          .whenComplete(() {
+            if (!mounted || !_scroll.hasClients) return;
+            final landed = _scroll.position;
+            if (landed.pixels < landed.maxScrollExtent) {
+              landed.jumpTo(landed.maxScrollExtent);
+            }
+          }),
+    );
   }
 
   @override
@@ -179,6 +218,7 @@ class _ListNoteViewState extends State<ListNoteView>
     final text = _newItem.text.trim();
     if (text.isEmpty) return;
     _newItem.clear();
+    _scrollToEnd = true;
     widget.onChanged(appendListItem(widget.text, text));
   }
 
