@@ -10,6 +10,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart';
 
 import '../fakes/sample_themes.dart';
 
@@ -1367,6 +1368,133 @@ void main() {
       expect(state.deckSeen, isFalse);
       expect(state.experience, null);
       await db.close();
+    });
+  });
+
+  // #312: the app database had one connection per caller, and on the first
+  // launch after an update two of them upgraded the same file at once: both
+  // read the old schema, one added `welcome_seen`, and the other's `ALTER`
+  // came out as `duplicate column name` (the phone's crash report). The
+  // upgrade now runs under the write lock, in one transaction.
+  group('two connections on one file (#312)', () {
+    late Directory dir;
+    late File dbFile;
+
+    setUp(() async {
+      dir = await Directory.systemTemp.createTemp('niman_race_');
+      addTearDown(() => dir.delete(recursive: true));
+      dbFile = File(p.join(dir.path, 'app.db'));
+    });
+
+    /// A connection like the app's own, setup included: the wait for
+    /// another migrator's lock is what the test is about.
+    AppDatabase open() =>
+        AppDatabase(NativeDatabase(dbFile, setup: appDatabaseSetup));
+
+    /// The schema version the file carries, as drift reads it.
+    Future<int> versionOf(AppDatabase db) async {
+      final rows = await db.customSelect('PRAGMA user_version').get();
+      return rows.single.read<int>('user_version');
+    }
+
+    test('a v30 file opened twice runs one migration', () async {
+      {
+        final db = open();
+        await _rewindTo(db, 30);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib')",
+        );
+        await db.close();
+      }
+
+      final first = open();
+      final second = open();
+      // Both read the version and step into the upgrade before either has
+      // finished it: this is the launch that crashed.
+      final rows = await Future.wait([
+        first.select(first.appSettings).get(),
+        second.select(second.appSettings).get(),
+      ]);
+      expect(rows[0], hasLength(1));
+      expect(rows[1], hasLength(1));
+      expect(await versionOf(first), 31);
+      expect(await versionOf(second), 31);
+      // The upgrade ran once, and the row that was there is the row it
+      // welcomed.
+      expect((await AppSettingsRepo(first).firstRun()).deckSeen, isTrue);
+      await first.close();
+      await second.close();
+    });
+
+    test('a v30 file the v31 columns reached early still opens', () async {
+      // The file an interrupted upgrade used to leave behind: the columns
+      // are there and the version is not. The guards skip what is already
+      // applied, and the row keeps the value it has.
+      {
+        final db = open();
+        await _rewindTo(db, 30);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib')",
+        );
+        for (final column in [
+          'welcome_seen BOOLEAN NOT NULL DEFAULT 0',
+          'markdown_experience TEXT',
+          'tour_seen BOOLEAN NOT NULL DEFAULT 0',
+          'tour_step INTEGER NOT NULL DEFAULT 0',
+          'tour_offer BOOLEAN NOT NULL DEFAULT 0',
+        ]) {
+          await db.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN $column',
+          );
+        }
+        await db.close();
+      }
+
+      final db = open();
+      expect((await AppSettingsRepo(db).firstRun()).deckSeen, isFalse);
+      expect(await versionOf(db), 31);
+      await db.close();
+    });
+
+    test('a step that fails rolls the whole upgrade back', () async {
+      {
+        final db = open();
+        await _rewindTo(db, 21);
+        // A column a half-applied migration would have left behind: the
+        // `from < 24` step's own ALTER now fails.
+        await db.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN key_map TEXT',
+        );
+        await db.close();
+      }
+
+      final db = open();
+      await expectLater(
+        db.select(db.appSettings).get(),
+        throwsA(isA<SqliteException>()),
+      );
+      await db.close();
+
+      // The file itself, not through drift: the column this test put there
+      // fails every migration attempt, and what the check is about is what
+      // the *file* kept. Nothing of the chain it walked before the failure
+      // is in it, and the version is still 21 for the next launch to
+      // migrate.
+      final raw = sqlite3.open(dbFile.path);
+      addTearDown(raw.close);
+      expect(raw.userVersion, 21);
+      final tables = {
+        for (final row in raw.select(
+          "SELECT name FROM sqlite_master WHERE type = 'table'",
+        ))
+          row['name'] as String,
+      };
+      expect(
+        tables,
+        isNot(contains('sync_destinations')),
+        reason: 'an upgrade that cannot finish changes nothing',
+      );
+      expect(tables, isNot(contains('workspaces')));
     });
   });
 }
