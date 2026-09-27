@@ -2518,4 +2518,185 @@ final class MacedonianStrings extends Strings {
   String get syncMergeSave => 'Зачувај го спојувањето';
   @override
   String get syncMergeKeepWhole => 'Или задржете една цела копија';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Прескокни';
+  @override
+  String get welcomeNext => 'Следно';
+  @override
+  String get welcomeBack => 'Назад';
+  @override
+  String get welcomeStart => 'Почни да пишуваш';
+  @override
+  String get welcomeClose => 'Затвори';
+  @override
+  String get welcomeNotesTitle => 'Твоите белешки се датотеки';
+  @override
+  String get welcomeNotesBody =>
+      'Niman ги држи твоите белешки како обични Markdown датотеки '
+      'во папки што ги избираш. Една белешка е една .md датотека, и '
+      'сè што ти покажува апликацијата е изградено од нив. Без '
+      'сметка и без наш формат кон кој би се враќал.';
+  @override
+  String get welcomeModesTitle => 'Три начини да ја напишеш истата белешка';
+  @override
+  String get welcomeModesBody =>
+      'Пишувај го Markdown изворот, пишувај ја белешката како што '
+      'се чита (живиот уредувач), или читај ја. Тоа е една белешка '
+      'која и да ја употребиш, и можеш да менуваш по белешка или за '
+      'целата библиотека.';
+  @override
+  String get welcomeLinksTitle => 'Сè се поврзува';
+  @override
+  String get welcomeLinksBody =>
+      'Вики врски како [[оваа]] ја наоѓаат својата белешка додека '
+      'пишуваш. Ознаките, frontmatter и шаблоните ги држат настрана '
+      'деловите што ги пишуваш одново и одново.';
+  @override
+  String get welcomeFindTitle => 'Најди ја повторно';
+  @override
+  String get welcomeFindBody =>
+      'Пребарување на целиот текст во библиотеката, палета со '
+      'команди за сè што може апликацијата, и брзата белешка на '
+      'едно копче.';
+  @override
+  String get welcomeExportTitle => 'Оди со тебе';
+  @override
+  String get welcomeExportBody =>
+      'Извези белешка или цела папка како Markdown, HTML, PDF или '
+      'EPUB книга. Внеси извоз од Notion или отвори склад на '
+      'Obsidian таму каде што веќе е.';
+  @override
+  String get welcomeTasksTitle => 'Задачи и потсетници';
+  @override
+  String get welcomeTasksBody =>
+      'Список todo.txt што го држиш како датотека — приоритети, '
+      'проекти, рокови — и rem: аларми што те предупредуваат кога '
+      'нешто е за рок, на телефон и на компјутер.';
+  @override
+  String get welcomeSyncTitle => 'Меѓу твоите машини';
+  @override
+  String get welcomeSyncBody =>
+      'Насочи библиотека кон папка WebDAV — Nextcloud, ownCloud, '
+      'NAS — и промените се синхронизираат во двете насоки, споени '
+      'ред по ред кога два уреда ја допреле истата белешка.';
+  @override
+  String get welcomeDeviceTitle => 'Niman на овој уред';
+  @override
+  String get welcomeAndroidBody =>
+      'Сподели текст или датотека во Niman од која било апликација, '
+      'држи белешка на почетниот екран и сними гласовна белешка '
+      'наместо да пишуваш.';
+  @override
+  String get welcomeDesktopBody =>
+      'Картички и поделени панели, системската лента, влечење и '
+      'пуштање на прозорецот, и .md датотеки што го отвораат Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Си пишувал претходно Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Ова само одредува како стартува апликацијата. Секој уредувач '
+      'можеш да го вклучиш или исклучиш во Поставки → Уредувач во '
+      'секое време.';
+  @override
+  String get welcomeAnswerNone => 'Никогаш';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Живиот уредувач, а Markdown изворот не се нуди додека не го '
+      'вклучиш.';
+  @override
+  String get welcomeAnswerSome => 'Малку';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Живиот уредувач отвора белешки; Markdown изворот е едно '
+      'копче подалеку.';
+  @override
+  String get welcomeAnswerFluent => 'Постојано';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown изворот, како што доаѓа апликацијата.';
+  @override
+  String get welcomeTourOffer => 'Покажи ми ја апликацијата';
+  @override
+  String get welcomeTourOfferNote =>
+      'Обиколката започнува кога твојата прва библиотека е '
+      'отворена, и покажува кон вистинските контроли.';
+  @override
+  String get welcomeDeckCommand => 'Што знае Niman';
+  @override
+  String get welcomeTourCommand => 'Направи обиколка';
+  @override
+  String get tourDone => 'Готово';
+  @override
+  String get tourOfferTitle => 'Да те прошетам?';
+  @override
+  String get tourOfferBody =>
+      'Неколку чекори низ апликацијата, покажувајќи кон вистинските '
+      'контроли. Можеш да застанеш на кој било чекор и подоцна да '
+      'продолжиш од палетата со команди.';
+  @override
+  String get tourOfferYes => 'Покажи ми';
+  @override
+  String get tourOfferNo => 'Не сега';
+  @override
+  String get tourTreeTitle => 'Твојата библиотека';
+  @override
+  String get tourTreeBody =>
+      'Ова е папката што ја избра, папка по папка. Сè што ќе '
+      'направиш со датотека надвор од Niman се појавува тука во '
+      'моментот кога ќе пристигне.';
+  @override
+  String get tourCreateTitle => 'Создај белешка';
+  @override
+  String get tourCreateBody =>
+      'Белешки, списоци, гласовни белешки, шаблони и папки сите '
+      'почнуваат тука. Истото мени на телефон се појавува како '
+      'тркалезно копче.';
+  @override
+  String get tourNoteTitle => 'Една белешка истовремено';
+  @override
+  String get tourNoteBody =>
+      'Белешката на екранот; отворените остануваат во картички над '
+      'неа, а во широк прозорец покрај неа може да се отвори втор '
+      'панел.';
+  @override
+  String get tourModesTitle => 'Три начини да пишуваш';
+  @override
+  String get tourModesBody =>
+      'Пишувај го Markdown изворот, пишувај го како што се чита, '
+      'или читај го — ова копче е по белешка, а поставката на '
+      'библиотеката одлучува што се отвора.';
+  @override
+  String get tourToolbarTitle => 'Лентата со алатки';
+  @override
+  String get tourToolbarBody =>
+      'Форматирање на редот во кој си, и истите дејства со десен '
+      'клик. Секоја конструкција што ја чита Niman е во листот за '
+      'помош.';
+  @override
+  String get tourCheatsheetTitle => 'Секоја конструкција, напишана покрај';
+  @override
+  String get tourCheatsheetBody =>
+      'Ова е листот за помош. Секој пример може да се копира, а '
+      'Вметни го става во белешката што ја имаш отворено.';
+  @override
+  String get tourCheatsheetOpen => 'Отвори го';
+  @override
+  String get tourTabsTitle => 'Сè е картичка';
+  @override
+  String get tourTabsBody =>
+      'Датотеки, задачи, пребарување, брзата белешка, поставки. '
+      'Палетата со команди стигнува до сите, и до секоја команда, '
+      'од тастатурата.';
+  @override
+  String get tourDockTitle => 'Структура, ознаки, историја';
+  @override
+  String get tourDockBody =>
+      'Структурата на белешката, нејзините ознаки и нејзините '
+      'минати верзии, покрај. На телефон менито на белешката ги '
+      'отвора истите три.';
+  @override
+  String welcomePageOf(int page, int of) => '$page од $of';
 }

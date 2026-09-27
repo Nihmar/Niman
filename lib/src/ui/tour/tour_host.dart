@@ -10,9 +10,9 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/cheatsheet/cheatsheet_screen.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tour/tour_overlay.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 /// Starts the tour for the window in front of us.
 ///
@@ -34,17 +34,12 @@ Future<void> startTour(
   final session = ref.read(librarySessionProvider);
   final editors = await session.enabledEditors;
   if (!context.mounted) return;
-  final steps = tourSteps(
-    const WelcomeCopy(),
-    canSwitchEditor: editors.length > 1,
-    hasDock: wide,
-  );
+  final steps = tourSteps(canSwitchEditor: editors.length > 1, hasDock: wide);
   final index = from.clamp(0, steps.length - 1);
   await showTour(
     context,
     TourRun(
       steps: steps,
-      copy: const WelcomeCopy(),
       initialStep: index,
       onStep: (step) => _persist(store, (s) => s.setTourStep(step)),
       onDone: () => _markDone(store),
@@ -85,23 +80,22 @@ Future<void> offerTour(BuildContext context, WidgetRef ref) async {
   if (!state.tourOffer || state.tourSeen) return;
   await store.setTourOffer(offer: false);
   if (!context.mounted) return;
-  const copy = WelcomeCopy();
   final show = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       key: const Key('tour-offer'),
-      title: Text(copy.tourOfferTitle),
-      content: Text(copy.tourOfferBody),
+      title: Text(AppStrings.tourOfferTitle),
+      content: Text(AppStrings.tourOfferBody),
       actions: [
         TextButton(
           key: const Key('tour-offer-no'),
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(copy.tourOfferNo),
+          child: Text(AppStrings.tourOfferNo),
         ),
         FilledButton(
           key: const Key('tour-offer-yes'),
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(copy.tourOfferYes),
+          child: Text(AppStrings.tourOfferYes),
         ),
       ],
     ),

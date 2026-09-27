@@ -2519,4 +2519,184 @@ final class LithuanianStrings extends Strings {
   String get syncMergeSave => 'Išsaugoti suliejimą';
   @override
   String get syncMergeKeepWhole => 'Arba palikti vieną visą kopiją';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Praleisti';
+  @override
+  String get welcomeNext => 'Toliau';
+  @override
+  String get welcomeBack => 'Atgal';
+  @override
+  String get welcomeStart => 'Pradėk rašyti';
+  @override
+  String get welcomeClose => 'Uždaryti';
+  @override
+  String get welcomeNotesTitle => 'Tavo pastabos yra failai';
+  @override
+  String get welcomeNotesBody =>
+      'Niman laiko tavo pastabas kaip paprastus Markdown failus '
+      'tavo pasirinktuose kataloguose. Viena pastaba yra vienas .md '
+      'failas, ir viskas, ką programa tau rodo, yra iš jų sukurta. '
+      'Jokios paskyros ir jokio mūsų formato, prie kurio reikėtų '
+      'grįžti.';
+  @override
+  String get welcomeModesTitle => 'Trys būdai rašyti tą pačią pastabą';
+  @override
+  String get welcomeModesBody =>
+      'Rašyk Markdown šaltinį, rašyk pastabą taip, kaip ji skaitoma '
+      '(gyvasis redaktorius), arba skaityk ją. Tai viena pastaba, '
+      'kad ir kurią naudotum, ir gali keisti pagal pastabą arba '
+      'visai bibliotekai.';
+  @override
+  String get welcomeLinksTitle => 'Viskas susiję';
+  @override
+  String get welcomeLinksBody =>
+      'Wiki nuorodos kaip [[ši]] randa savo pastabą tau rašant. '
+      'Žymos, frontmatter ir šablonai laiko nuošalyje dalis, kurias '
+      'rašai vėl ir vėl.';
+  @override
+  String get welcomeFindTitle => 'Rask ją vėl';
+  @override
+  String get welcomeFindBody =>
+      'Viso teksto paieška bibliotekoje, komandų paletė viskam, ką '
+      'programa moka, ir greitoji pastaba per vieną klavišą.';
+  @override
+  String get welcomeExportTitle => 'Ji keliauja su tavimi';
+  @override
+  String get welcomeExportBody =>
+      'Eksportuok pastabą ar visą katalogą kaip Markdown, HTML, PDF '
+      'ar EPUB knygą. Importuok Notion eksportą arba atidaryk '
+      'Obsidian saugyklą ten, kur ji jau yra.';
+  @override
+  String get welcomeTasksTitle => 'Užduotys ir priminimai';
+  @override
+  String get welcomeTasksBody =>
+      'todo.txt sąrašas, kurį laikai kaip failą — prioritetai, '
+      'projektai, terminai — ir rem: signalai, perspėjantys, kai '
+      'kas nors sueina, telefone ir darbalaukyje.';
+  @override
+  String get welcomeSyncTitle => 'Tarp tavo mašinų';
+  @override
+  String get welcomeSyncBody =>
+      'Nukreipk biblioteką į WebDAV katalogą — Nextcloud, ownCloud, '
+      'NAS — ir pakeitimai sinchronizuojami abiem kryptimis, '
+      'sulieti eilutė po eilutės, kai du įrenginiai palietė tą '
+      'pačią pastabą.';
+  @override
+  String get welcomeDeviceTitle => 'Niman šiame įrenginyje';
+  @override
+  String get welcomeAndroidBody =>
+      'Bendrink tekstą ar failą su Niman iš bet kurios programos, '
+      'laikyk pastabą pradiniame ekrane ir įrašyk balso pastabą '
+      'vietoj rašymo.';
+  @override
+  String get welcomeDesktopBody =>
+      'Kortelės ir padalyti skydeliai, sistemos dėklas, vilkimas ir '
+      'numetimas ant lango, ir .md failai, atidarantys Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Ar jau rašei Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Tai nustato tik, kaip programa paleidžiama. Bet kurį '
+      'redaktorių gali įjungti ar išjungti skiltyje Nustatymai → '
+      'Redaktorius bet kada.';
+  @override
+  String get welcomeAnswerNone => 'Niekada';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Gyvasis redaktorius, o Markdown šaltinis nesiūlomas, kol jo '
+      'neįjungi.';
+  @override
+  String get welcomeAnswerSome => 'Šiek tiek';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Gyvasis redaktorius atidaro pastabas; Markdown šaltinis yra '
+      'per vieną jungiklį.';
+  @override
+  String get welcomeAnswerFluent => 'Visą laiką';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown šaltinis, kaip programa ateina.';
+  @override
+  String get welcomeTourOffer => 'Parodyk man programą';
+  @override
+  String get welcomeTourOfferNote =>
+      'Apžvalga prasideda, kai tavo pirmoji biblioteka atidaryta, '
+      'ir rodo į tikruosius valdiklius.';
+  @override
+  String get welcomeDeckCommand => 'Ką Niman moka';
+  @override
+  String get welcomeTourCommand => 'Atlik apžvalgą';
+  @override
+  String get tourDone => 'Baigta';
+  @override
+  String get tourOfferTitle => 'Parodyti tau?';
+  @override
+  String get tourOfferBody =>
+      'Keli žingsniai per programą, rodant į tikruosius valdiklius. '
+      'Gali sustoti bet kuriame žingsnyje ir vėliau tęsti iš '
+      'komandų paletės.';
+  @override
+  String get tourOfferYes => 'Parodyk';
+  @override
+  String get tourOfferNo => 'Ne dabar';
+  @override
+  String get tourTreeTitle => 'Tavo biblioteka';
+  @override
+  String get tourTreeBody =>
+      'Tai katalogas, kurį pasirinkai, katalogas po katalogo. '
+      'Viskas, ką padarai failui už Nimano ribų, atsiranda čia tą '
+      'akimirką, kai jis atkeliauja.';
+  @override
+  String get tourCreateTitle => 'Sukurk pastabą';
+  @override
+  String get tourCreateBody =>
+      'Pastabos, sąrašai, balso pastabos, šablonai ir katalogai '
+      'visi prasideda čia. Tas pats meniu telefone pasirodo kaip '
+      'apvalus mygtukas.';
+  @override
+  String get tourNoteTitle => 'Viena pastaba vienu metu';
+  @override
+  String get tourNoteBody =>
+      'Pastaba ekrane; atidarytos lieka kortelėse virš jos, o '
+      'plačiame lange šalia gali atsiverti antras skydelis.';
+  @override
+  String get tourModesTitle => 'Trys būdai rašyti';
+  @override
+  String get tourModesBody =>
+      'Rašyk Markdown šaltinį, rašyk jį taip, kaip skaitoma, arba '
+      'skaityk jį — šis jungiklis yra pagal pastabą, o bibliotekos '
+      'nustatymas lemia, kas atsidaro.';
+  @override
+  String get tourToolbarTitle => 'Įrankių juosta';
+  @override
+  String get tourToolbarBody =>
+      'Formatavimas eilutėje, kurioje esi, ir tie patys veiksmai '
+      'dešiniuoju pelės klavišu. Kiekviena konstrukcija, kurią '
+      'Niman skaito, yra sukčiavimo lapelyje.';
+  @override
+  String get tourCheatsheetTitle => 'Kiekviena konstrukcija, parašyta šalia';
+  @override
+  String get tourCheatsheetBody =>
+      'Tai sukčiavimo lapelis. Kiekvieną pavyzdį galima '
+      'nukopijuoti, o Įterpti įdeda jį į atidarytą pastabą.';
+  @override
+  String get tourCheatsheetOpen => 'Atidaryk jį';
+  @override
+  String get tourTabsTitle => 'Viskas yra kortelė';
+  @override
+  String get tourTabsBody =>
+      'Failai, užduotys, paieška, greitoji pastaba, nustatymai. '
+      'Komandų paletė pasiekia juos visus, ir kiekvieną komandą, iš '
+      'klaviatūros.';
+  @override
+  String get tourDockTitle => 'Struktūra, žymos, istorija';
+  @override
+  String get tourDockBody =>
+      'Pastabos struktūra, jos žymos ir ankstesnės versijos, šalia. '
+      'Telefone pastabos meniu atidaro tuos pačius tris.';
+  @override
+  String welcomePageOf(int page, int of) => '$page iš $of';
 }

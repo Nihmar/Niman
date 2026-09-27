@@ -2468,4 +2468,178 @@ final class TurkishStrings extends Strings {
   String get syncMergeSave => 'Birleştirmeyi kaydet';
   @override
   String get syncMergeKeepWhole => 'Ya da tek bir tam kopya tut';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Atla';
+  @override
+  String get welcomeNext => 'İleri';
+  @override
+  String get welcomeBack => 'Geri';
+  @override
+  String get welcomeStart => 'Yazmaya başla';
+  @override
+  String get welcomeClose => 'Kapat';
+  @override
+  String get welcomeNotesTitle => 'Notların dosyadır';
+  @override
+  String get welcomeNotesBody =>
+      'Niman notlarını seçtiğin klasörlerde düz Markdown dosyaları '
+      'olarak tutar. Bir not bir .md dosyasıdır ve uygulamanın sana '
+      'gösterdiği her şey onlardan kuruludur. Hesap yok, geri '
+      'dönülecek bizim bir biçimimiz yok.';
+  @override
+  String get welcomeModesTitle => 'Aynı notu yazmanın üç yolu';
+  @override
+  String get welcomeModesBody =>
+      'Markdown kaynağını yaz, notu okunduğu gibi yaz (canlı '
+      'düzenleyici) ya da oku. Hangisini kullanırsan kullan tek '
+      'not, ve not başına ya da tüm kütüphane için '
+      'değiştirebilirsin.';
+  @override
+  String get welcomeLinksTitle => 'Her şey bağlanır';
+  @override
+  String get welcomeLinksBody =>
+      '[[bunun]] gibi wiki bağlantıları sen yazarken notunu bulur. '
+      'Etiketler, frontmatter ve şablonlar tekrar tekrar yazdığın '
+      'kısımları ortadan kaldırır.';
+  @override
+  String get welcomeFindTitle => 'Yeniden bul';
+  @override
+  String get welcomeFindBody =>
+      'Kütüphane genelinde tam metin arama, uygulamanın yapabildiği '
+      'her şey için bir komut paleti ve bir tuş ötede hızlı not.';
+  @override
+  String get welcomeExportTitle => 'Seninle gelir';
+  @override
+  String get welcomeExportBody =>
+      'Bir notu ya da bütün bir klasörü Markdown, HTML, PDF veya '
+      'EPUB kitap olarak dışa aktar. Bir Notion dışa aktarımını içe '
+      'al ya da zaten durduğu yerde bir Obsidian kasasını aç.';
+  @override
+  String get welcomeTasksTitle => 'Görevler ve anımsatıcılar';
+  @override
+  String get welcomeTasksBody =>
+      'Dosya olarak tuttuğun bir todo.txt listesi — öncelikler, '
+      'projeler, teslim tarihleri — ve telefonda ve masaüstünde bir '
+      'şeyin vakti geldiğinde seni uyaran rem: alarmları.';
+  @override
+  String get welcomeSyncTitle => 'Makinelerin arasında';
+  @override
+  String get welcomeSyncBody =>
+      'Bir kütüphaneyi bir WebDAV klasörüne yönelt — Nextcloud, '
+      'ownCloud, bir NAS — ve değişiklikler iki yönde eşitlenir, '
+      'iki cihaz aynı nota dokunduğunda satır satır birleştirilir.';
+  @override
+  String get welcomeDeviceTitle => 'Bu cihazda Niman';
+  @override
+  String get welcomeAndroidBody =>
+      'Herhangi bir uygulamadan Niman’a metin ya da dosya paylaş, '
+      'ana ekranda bir not tut ve yazmak yerine sesli not kaydet.';
+  @override
+  String get welcomeDesktopBody =>
+      'Sekmeler ve bölünmüş paneller, sistem tepsisi, pencereye '
+      'sürükle bırak ve Niman’ı açan .md dosyaları.';
+  @override
+  String get welcomeQuestionTitle => 'Daha önce Markdown yazdın mı?';
+  @override
+  String get welcomeQuestionNote =>
+      'Bu yalnızca uygulamanın nasıl başladığını belirler. Herhangi '
+      'bir düzenleyiciyi Ayarlar → Düzenleyici’den istediğin zaman '
+      'açıp kapatabilirsin.';
+  @override
+  String get welcomeAnswerNone => 'Hiç';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Canlı düzenleyici, ve sen açana kadar Markdown kaynağı '
+      'sunulmaz.';
+  @override
+  String get welcomeAnswerSome => 'Biraz';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Canlı düzenleyici notları açar; Markdown kaynağı bir anahtar '
+      'ötede.';
+  @override
+  String get welcomeAnswerFluent => 'Her zaman';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown kaynağı, uygulama nasıl geliyorsa öyle.';
+  @override
+  String get welcomeTourOffer => 'Bana uygulamayı göster';
+  @override
+  String get welcomeTourOfferNote =>
+      'Tur, ilk kütüphanen açıldığında başlar ve gerçek denetimleri '
+      'gösterir.';
+  @override
+  String get welcomeDeckCommand => 'Niman neler yapabilir';
+  @override
+  String get welcomeTourCommand => 'Tura çık';
+  @override
+  String get tourDone => 'Bitti';
+  @override
+  String get tourOfferTitle => 'Gezdireyim mi?';
+  @override
+  String get tourOfferBody =>
+      'Uygulamada gerçek denetimleri gösteren birkaç adım. '
+      'İstediğin adımda durup sonra komut paletinden '
+      'sürdürebilirsin.';
+  @override
+  String get tourOfferYes => 'Göster';
+  @override
+  String get tourOfferNo => 'Şimdi değil';
+  @override
+  String get tourTreeTitle => 'Kütüphanen';
+  @override
+  String get tourTreeBody =>
+      'Bu seçtiğin klasör, klasör klasör. Niman dışında bir dosyaya '
+      'yaptığın her şey geldiği anda burada görünür.';
+  @override
+  String get tourCreateTitle => 'Not oluştur';
+  @override
+  String get tourCreateBody =>
+      'Notlar, listeler, sesli notlar, şablonlar ve klasörler hepsi '
+      'buradan başlar. Aynı menü telefonda yuvarlak düğme olarak '
+      'görünür.';
+  @override
+  String get tourNoteTitle => 'Bir seferde bir not';
+  @override
+  String get tourNoteBody =>
+      'Ekrandaki not; açtıkların üstünde sekmelerde kalır ve geniş '
+      'bir pencerede yanında ikinci bir panel açılabilir.';
+  @override
+  String get tourModesTitle => 'Yazmanın üç yolu';
+  @override
+  String get tourModesBody =>
+      'Markdown kaynağını yaz, okunduğu gibi yaz ya da oku — bu '
+      'anahtar not başına, ve neyin açılacağını kütüphane ayarı '
+      'belirler.';
+  @override
+  String get tourToolbarTitle => 'Araç çubuğu';
+  @override
+  String get tourToolbarBody =>
+      'Bulunduğun satırda biçimlendirme ve sağ tıklamada aynı '
+      'eylemler. Niman’ın okuduğu her yapı kopya kağıdında.';
+  @override
+  String get tourCheatsheetTitle => 'Her yapı, yanına yazılmış';
+  @override
+  String get tourCheatsheetBody =>
+      'Bu kopya kağıdı. Her örnek kopyalanabilir ve Ekle onu açık '
+      'olan nota koyar.';
+  @override
+  String get tourCheatsheetOpen => 'Aç';
+  @override
+  String get tourTabsTitle => 'Her şey bir sekme';
+  @override
+  String get tourTabsBody =>
+      'Dosyalar, görevler, arama, hızlı not, ayarlar. Komut paleti '
+      'hepsine ve her komuta klavyeden ulaşır.';
+  @override
+  String get tourDockTitle => 'Ana hat, etiketler, geçmiş';
+  @override
+  String get tourDockBody =>
+      'Notun ana hattı, etiketleri ve geçmiş sürümleri, yanında. '
+      'Telefonda not menüsü aynı üçünü açar.';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

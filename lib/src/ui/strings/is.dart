@@ -2494,4 +2494,182 @@ final class IcelandicStrings extends Strings {
   String get syncMergeSave => 'Vista sameininguna';
   @override
   String get syncMergeKeepWhole => 'Eða halda einu heilu eintaki';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Sleppa';
+  @override
+  String get welcomeNext => 'Næsta';
+  @override
+  String get welcomeBack => 'Til baka';
+  @override
+  String get welcomeStart => 'Byrja að skrifa';
+  @override
+  String get welcomeClose => 'Loka';
+  @override
+  String get welcomeNotesTitle => 'Minnisblöðin þín eru skrár';
+  @override
+  String get welcomeNotesBody =>
+      'Niman heldur minnisblöðunum þínum sem venjulegum '
+      'Markdown-skrám í möppum sem þú velur. Eitt minnisblað er ein '
+      '.md-skrá, og allt sem forritið sýnir þér er byggt úr þeim. '
+      'Enginn aðgangur og ekkert okkar snið til að fara aftur í.';
+  @override
+  String get welcomeModesTitle => 'Þrjár leiðir til að skrifa sama minnisblað';
+  @override
+  String get welcomeModesBody =>
+      'Skrifaðu Markdown-upprunann, skrifaðu minnisblaðið eins og '
+      'það lesst (ritillinn í beinni), eða lestu það. Það er eitt '
+      'minnisblað hvað sem þú notar, og þú getur skipt eftir '
+      'minnisblaði eða fyrir allt bókasafnið.';
+  @override
+  String get welcomeLinksTitle => 'Allt tengist';
+  @override
+  String get welcomeLinksBody =>
+      'Wiki-tenglar eins og [[þessi]] finna minnisblaðið sitt á '
+      'meðan þú skrifar. Merki, frontmatter og sniðmát halda til '
+      'hliðar hlutunum sem þú skrifar aftur og aftur.';
+  @override
+  String get welcomeFindTitle => 'Finndu það aftur';
+  @override
+  String get welcomeFindBody =>
+      'Leit í öllum texta bókasafnsins, skipanapallett fyrir allt '
+      'sem forritið getur, og flýtiminnisblaðið einn takka í burtu.';
+  @override
+  String get welcomeExportTitle => 'Það fer með þér';
+  @override
+  String get welcomeExportBody =>
+      'Flyttu út minnisblað eða alla möppu sem Markdown, HTML, PDF '
+      'eða EPUB-bók. Flyttu inn Notion-útflutning, eða opnaðu '
+      'Obsidian-hvelfingu þar sem hún er þegar.';
+  @override
+  String get welcomeTasksTitle => 'Verk og áminningar';
+  @override
+  String get welcomeTasksBody =>
+      'todo.txt-listi sem þú heldur sem skrá — forgangur, verkefni, '
+      'skiladagar — og rem:-viðvaranir sem vara þig við þegar '
+      'eitthvað er á skiladegi, í símanum og á skjáborðinu.';
+  @override
+  String get welcomeSyncTitle => 'Milli vélanna þinna';
+  @override
+  String get welcomeSyncBody =>
+      'Beindu bókasafni að WebDAV-möppu — Nextcloud, ownCloud, NAS '
+      '— og breytingar samstillast í báðar áttir, sameinaðar línu '
+      'fyrir línu þegar tvö tæki snertu sama minnisblað.';
+  @override
+  String get welcomeDeviceTitle => 'Niman á þessu tæki';
+  @override
+  String get welcomeAndroidBody =>
+      'Deildu texta eða skrá í Niman frá hvaða forriti sem er, '
+      'haltu minnisblaði á heimaskjánum, og taktu upp '
+      'raddminnisblað í stað þess að skrifa.';
+  @override
+  String get welcomeDesktopBody =>
+      'Flipar og skiptir gluggar, kerfisbakki, draga og sleppa á '
+      'gluggann, og .md-skrár sem opna Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Hefurðu skrifað Markdown áður?';
+  @override
+  String get welcomeQuestionNote =>
+      'Þetta ræður aðeins hvernig forritið ræsist. Þú getur kveikt '
+      'eða slökkt á hvaða ritli sem er í Stillingar → Ritill hvenær '
+      'sem er.';
+  @override
+  String get welcomeAnswerNone => 'Aldrei';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Ritillinn í beinni, og Markdown-uppruninn er ekki boðinn '
+      'fyrr en þú kveikir á honum.';
+  @override
+  String get welcomeAnswerSome => 'Smá';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Ritillinn í beinni opnar minnisblöð; Markdown-uppruninn er '
+      'einn rofi í burtu.';
+  @override
+  String get welcomeAnswerFluent => 'Alltaf';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown-uppruninn, eins og forritið kemur.';
+  @override
+  String get welcomeTourOffer => 'Sýndu mér forritið';
+  @override
+  String get welcomeTourOfferNote =>
+      'Skoðunarferðin byrjar þegar fyrsta bókasafnið þitt er opið, '
+      'og bendir á alvöru stýringarnar.';
+  @override
+  String get welcomeDeckCommand => 'Hvað Niman kann';
+  @override
+  String get welcomeTourCommand => 'Farðu í skoðunarferð';
+  @override
+  String get tourDone => 'Búið';
+  @override
+  String get tourOfferTitle => 'Á ég að sýna þér?';
+  @override
+  String get tourOfferBody =>
+      'Nokkur skref gegnum forritið, sem benda á alvöru '
+      'stýringarnar. Þú getur stoppað á hvaða skrefi sem er og '
+      'haldið áfram síðar frá skipanapallettinni.';
+  @override
+  String get tourOfferYes => 'Sýndu mér';
+  @override
+  String get tourOfferNo => 'Ekki núna';
+  @override
+  String get tourTreeTitle => 'Bókasafnið þitt';
+  @override
+  String get tourTreeBody =>
+      'Þetta er mappan sem þú valdir, mappa fyrir möppu. Allt sem '
+      'þú gerir við skrá utan Nimans birtist hér um leið og hún '
+      'kemur.';
+  @override
+  String get tourCreateTitle => 'Búðu til minnisblað';
+  @override
+  String get tourCreateBody =>
+      'Minnisblöð, listar, raddminnisblöð, sniðmát og möppur byrja '
+      'öll hér. Sami valmynd birtist í símanum sem hringlaga '
+      'hnappurinn.';
+  @override
+  String get tourNoteTitle => 'Eitt minnisblað í einu';
+  @override
+  String get tourNoteBody =>
+      'Minnisblaðið á skjánum; þau sem þú opnaðir eru áfram í '
+      'flipum fyrir ofan, og annar gluggi getur opnast við hliðina '
+      'á breiðum glugga.';
+  @override
+  String get tourModesTitle => 'Þrjár leiðir til að skrifa';
+  @override
+  String get tourModesBody =>
+      'Skrifaðu Markdown-upprunann, skrifaðu hann eins og hann '
+      'lesst, eða lestu hann — þessi rofi er eftir minnisblaði, og '
+      'stilling bókasafnsins ræður hvað opnast.';
+  @override
+  String get tourToolbarTitle => 'Verkfærastikan';
+  @override
+  String get tourToolbarBody =>
+      'Snið á línunni sem þú ert í, og sömu aðgerðir við hægri '
+      'smelli. Hver smíð sem Niman les er á svindlblaðinu.';
+  @override
+  String get tourCheatsheetTitle => 'Hver smíð, skrifuð við hliðina';
+  @override
+  String get tourCheatsheetBody =>
+      'Þetta er svindlblaðið. Hvert dæmi er hægt að afrita, og '
+      'Setja inn setur það í minnisblaðið sem þú hefur opið.';
+  @override
+  String get tourCheatsheetOpen => 'Opnaðu það';
+  @override
+  String get tourTabsTitle => 'Allt er flipi';
+  @override
+  String get tourTabsBody =>
+      'Skrár, verk, leit, flýtiminnisblaðið, stillingar. '
+      'Skipanapallettin nær til þeirra allra, og hverrar skipunar, '
+      'frá lyklaborðinu.';
+  @override
+  String get tourDockTitle => 'Uppbygging, merki, saga';
+  @override
+  String get tourDockBody =>
+      'Uppbygging minnisblaðsins, merkin þess og fyrri útgáfur, við '
+      'hliðina. Í símanum opnar valmynd minnisblaðsins sömu þrjú.';
+  @override
+  String welcomePageOf(int page, int of) => '$page af $of';
 }

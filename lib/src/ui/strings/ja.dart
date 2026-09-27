@@ -2292,4 +2292,150 @@ final class JapaneseStrings extends Strings {
   String get syncMergeSave => '統合を保存';
   @override
   String get syncMergeKeepWhole => 'または、どちらか一方をまるごと残す';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'スキップ';
+  @override
+  String get welcomeNext => '次へ';
+  @override
+  String get welcomeBack => '戻る';
+  @override
+  String get welcomeStart => '書き始める';
+  @override
+  String get welcomeClose => '閉じる';
+  @override
+  String get welcomeNotesTitle => 'ノートはファイルです';
+  @override
+  String get welcomeNotesBody =>
+      'Niman はあなたのノートを、選んだフォルダのなかの普通の Markdown ファイルとして保ちます。1 つのノートは '
+      '1 つの .md '
+      'ファイルで、アプリが見せるものはすべてそこから作られます。アカウントも、取り戻すための独自形式もありません。';
+  @override
+  String get welcomeModesTitle => '同じノートを書く 3 つの方法';
+  @override
+  String get welcomeModesBody =>
+      'Markdown のソースを書く、読めるままに書く（ライブエディタ）、あるいは読む。どれを使っても 1 '
+      'つのノートで、ノートごとにもライブラリ全体でも切り替えられます。';
+  @override
+  String get welcomeLinksTitle => 'すべてがつながる';
+  @override
+  String get welcomeLinksBody =>
+      '[[これ]] のような wikilink '
+      'は、入力しながらそのノートを見つけます。タグ、frontmatter、テンプレートは、何度も書く部分をわきにどけます。';
+  @override
+  String get welcomeFindTitle => 'また見つける';
+  @override
+  String get welcomeFindBody =>
+      'ライブラリ全体の全文検索、アプリのすべてに届くコマンドパレット、そしてキーひとつ先のクイックノート。';
+  @override
+  String get welcomeExportTitle => '持ち出せます';
+  @override
+  String get welcomeExportBody =>
+      'ノート 1 つ、あるいはフォルダごと Markdown、HTML、PDF、EPUB '
+      'ブックとして書き出せます。Notion の書き出しを取り込むか、すでにある Obsidian '
+      'の保管庫をそのまま開けます。';
+  @override
+  String get welcomeTasksTitle => 'タスクとリマインダー';
+  @override
+  String get welcomeTasksBody =>
+      'ファイルとして持つ todo.txt のリスト — 優先度、プロジェクト、期限 — と、期限が近づくと知らせる rem: '
+      'アラーム。スマホでもデスクトップでも。';
+  @override
+  String get welcomeSyncTitle => 'マシンをまたいで';
+  @override
+  String get welcomeSyncBody =>
+      'ライブラリを WebDAV フォルダ — Nextcloud、ownCloud、NAS — '
+      'に向ければ、編集は双方向に同期し、2 台が同じノートに触れたときは行ごとに統合されます。';
+  @override
+  String get welcomeDeviceTitle => 'この端末の Niman';
+  @override
+  String get welcomeAndroidBody =>
+      'どのアプリからでもテキストやファイルを Niman '
+      'に共有でき、ホーム画面にノートを置き、入力の代わりに音声ノートを録音できます。';
+  @override
+  String get welcomeDesktopBody =>
+      'タブと分割ペイン、システムトレイ、ウィンドウへのドラッグ＆ドロップ、そして Niman を開く .md ファイル。';
+  @override
+  String get welcomeQuestionTitle => 'Markdown を書いたことはありますか？';
+  @override
+  String get welcomeQuestionNote =>
+      'これはアプリの初期状態を決めるだけです。設定 → エディタ でいつでもエディタをオン／オフできます。';
+  @override
+  String get welcomeAnswerNone => 'まったくない';
+  @override
+  String get welcomeAnswerNoneHint => 'ライブエディタを使い、オンにするまで Markdown ソースは出しません。';
+  @override
+  String get welcomeAnswerSome => '少し';
+  @override
+  String get welcomeAnswerSomeHint => 'ライブエディタでノートを開き、Markdown ソースはスイッチひとつ先。';
+  @override
+  String get welcomeAnswerFluent => 'いつも使う';
+  @override
+  String get welcomeAnswerFluentHint => 'Markdown ソースを、アプリの既定どおりに。';
+  @override
+  String get welcomeTourOffer => 'アプリを案内して';
+  @override
+  String get welcomeTourOfferNote => '最初のライブラリを開いたらツアーが始まり、本物の操作部分を指します。';
+  @override
+  String get welcomeDeckCommand => 'Niman にできること';
+  @override
+  String get welcomeTourCommand => 'ツアーを見る';
+  @override
+  String get tourDone => '完了';
+  @override
+  String get tourOfferTitle => '案内しましょうか？';
+  @override
+  String get tourOfferBody =>
+      'アプリをいくつかの手順で案内し、本物の操作部分を指します。どの手順でも止められ、あとでコマンドパレットから再開できます。';
+  @override
+  String get tourOfferYes => '案内して';
+  @override
+  String get tourOfferNo => '今はいい';
+  @override
+  String get tourTreeTitle => 'あなたのライブラリ';
+  @override
+  String get tourTreeBody =>
+      'これが選んだフォルダで、フォルダごとに並びます。Niman の外でファイルにしたことは、届いた瞬間ここに出ます。';
+  @override
+  String get tourCreateTitle => 'ノートを作る';
+  @override
+  String get tourCreateBody =>
+      'ノート、リスト、音声ノート、テンプレート、フォルダはすべてここから始まります。スマホでも同じメニューが丸いボタンとして出ます。';
+  @override
+  String get tourNoteTitle => '一度に 1 つのノート';
+  @override
+  String get tourNoteBody =>
+      '画面のノート。開いたノートは上にタブで残り、広いウィンドウなら隣にもう 1 つのペインを開けます。';
+  @override
+  String get tourModesTitle => '3 つの書き方';
+  @override
+  String get tourModesBody =>
+      'Markdown ソースを書く、読めるままに書く、読む — '
+      'このスイッチはノートごとで、開く方法はライブラリの設定が決めます。';
+  @override
+  String get tourToolbarTitle => 'ツールバー';
+  @override
+  String get tourToolbarBody =>
+      'いる行の書式設定と、右クリックでも同じ操作。Niman が読む記法はすべてカンニングペーパーにあります。';
+  @override
+  String get tourCheatsheetTitle => 'どの記法も、となりに';
+  @override
+  String get tourCheatsheetBody =>
+      'これがカンニングペーパーです。どの例もコピーでき、「挿入」で開いているノートに入ります。';
+  @override
+  String get tourCheatsheetOpen => '開く';
+  @override
+  String get tourTabsTitle => 'すべてがタブ';
+  @override
+  String get tourTabsBody =>
+      'ファイル、タスク、検索、クイックノート、設定。コマンドパレットはどれにも、すべてのコマンドにも、キーボードから届きます。';
+  @override
+  String get tourDockTitle => 'アウトライン、タグ、履歴';
+  @override
+  String get tourDockBody =>
+      'ノートのアウトライン、タグ、過去のバージョンがとなりに。スマホではノートのメニューが同じ 3 つを開きます。';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

@@ -2,7 +2,7 @@
 /// what it says, and when it is left out.
 library;
 
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// What a step can do beyond being read.
 enum TourAction {
@@ -41,55 +41,54 @@ final class TourStep {
 /// (a library that only writes live has no switch to point at);
 /// [hasDock] drops the dock step on a phone, where the note's menu opens
 /// the same three panes.
-List<TourStep> tourSteps(
-  WelcomeCopy copy, {
+List<TourStep> tourSteps({
   required bool canSwitchEditor,
   required bool hasDock,
 }) {
   return [
     TourStep(
       target: TourTargets.tree,
-      title: copy.tourTreeTitle,
-      body: copy.tourTreeBody,
+      title: AppStrings.tourTreeTitle,
+      body: AppStrings.tourTreeBody,
     ),
     TourStep(
       target: TourTargets.create,
-      title: copy.tourCreateTitle,
-      body: copy.tourCreateBody,
+      title: AppStrings.tourCreateTitle,
+      body: AppStrings.tourCreateBody,
     ),
     TourStep(
       target: TourTargets.note,
-      title: copy.tourNoteTitle,
-      body: copy.tourNoteBody,
+      title: AppStrings.tourNoteTitle,
+      body: AppStrings.tourNoteBody,
     ),
     if (canSwitchEditor)
       TourStep(
         target: TourTargets.modeSwitch,
-        title: copy.tourModesTitle,
-        body: copy.tourModesBody,
+        title: AppStrings.tourModesTitle,
+        body: AppStrings.tourModesBody,
       ),
     TourStep(
       target: TourTargets.toolbar,
-      title: copy.tourToolbarTitle,
-      body: copy.tourToolbarBody,
+      title: AppStrings.tourToolbarTitle,
+      body: AppStrings.tourToolbarBody,
     ),
     TourStep(
       target: TourTargets.nav,
-      title: copy.tourTabsTitle,
-      body: copy.tourTabsBody,
+      title: AppStrings.tourTabsTitle,
+      body: AppStrings.tourTabsBody,
     ),
     if (hasDock)
       TourStep(
         target: TourTargets.dock,
-        title: copy.tourDockTitle,
-        body: copy.tourDockBody,
+        title: AppStrings.tourDockTitle,
+        body: AppStrings.tourDockBody,
       ),
     // Last: the tour hands over to the cheatsheet (#265) — the playground
     // the issue asked for, with nothing of ours left in the library.
     TourStep(
       target: TourTargets.cheatsheet,
-      title: copy.tourCheatsheetTitle,
-      body: copy.tourCheatsheetBody,
+      title: AppStrings.tourCheatsheetTitle,
+      body: AppStrings.tourCheatsheetBody,
       action: TourAction.cheatsheet,
     ),
   ];

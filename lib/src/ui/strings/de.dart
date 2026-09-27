@@ -2555,4 +2555,186 @@ final class GermanStrings extends Strings {
   String get syncMergeSave => 'Zusammenführung speichern';
   @override
   String get syncMergeKeepWhole => 'Oder eine ganze Kopie behalten';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Überspringen';
+  @override
+  String get welcomeNext => 'Weiter';
+  @override
+  String get welcomeBack => 'Zurück';
+  @override
+  String get welcomeStart => 'Schreiben beginnen';
+  @override
+  String get welcomeClose => 'Schließen';
+  @override
+  String get welcomeNotesTitle => 'Deine Notizen sind Dateien';
+  @override
+  String get welcomeNotesBody =>
+      'Niman hält deine Notizen als einfache Markdown-Dateien in '
+      'Ordnern deiner Wahl. Eine Notiz ist eine .md-Datei, und '
+      'alles, was die App dir zeigt, wird daraus gebaut. Kein '
+      'Konto, kein eigenes Format.';
+  @override
+  String get welcomeModesTitle => 'Drei Wege, dieselbe Notiz zu schreiben';
+  @override
+  String get welcomeModesBody =>
+      'Schreibe den Markdown-Quelltext, schreibe die Notiz so, wie '
+      'sie sich liest (der Live-Editor), oder lies sie. Es ist eine '
+      'Notiz, egal welchen du nimmst, und du kannst pro Notiz oder '
+      'für die ganze Bibliothek wechseln.';
+  @override
+  String get welcomeLinksTitle => 'Alles hängt zusammen';
+  @override
+  String get welcomeLinksBody =>
+      'Wikilinks wie [[dieser]] finden ihre Notiz während du '
+      'tippst. Tags, Frontmatter und Vorlagen halten aus dem Weg, '
+      'was du immer wieder schreibst.';
+  @override
+  String get welcomeFindTitle => 'Wiederfinden';
+  @override
+  String get welcomeFindBody =>
+      'Volltextsuche über die Bibliothek, eine Befehlspalette für '
+      'alles, was die App kann, und die Schnellnotiz mit einem '
+      'Tastendruck.';
+  @override
+  String get welcomeExportTitle => 'Es geht mit dir';
+  @override
+  String get welcomeExportBody =>
+      'Exportiere eine Notiz oder einen ganzen Ordner als Markdown, '
+      'HTML, PDF oder EPUB-Buch. Bring einen Notion-Export mit, '
+      'oder öffne einen Obsidian-Vault, wo er schon liegt.';
+  @override
+  String get welcomeTasksTitle => 'Aufgaben und Erinnerungen';
+  @override
+  String get welcomeTasksBody =>
+      'Eine todo.txt-Liste, die du als Datei hältst — Prioritäten, '
+      'Projekte, Fälligkeiten — und rem:-Alarme, die dich warnen, '
+      'wenn etwas fällig ist, auf dem Handy und am Desktop.';
+  @override
+  String get welcomeSyncTitle => 'Über deine Geräte hinweg';
+  @override
+  String get welcomeSyncBody =>
+      'Richte eine Bibliothek auf einen WebDAV-Ordner — Nextcloud, '
+      'ownCloud, ein NAS — und Änderungen synchronisieren in beide '
+      'Richtungen, Zeile für Zeile zusammengeführt, wenn zwei '
+      'Geräte dieselbe Notiz berührt haben.';
+  @override
+  String get welcomeDeviceTitle => 'Niman auf diesem Gerät';
+  @override
+  String get welcomeAndroidBody =>
+      'Teile Text oder eine Datei aus jeder App an Niman, behalte '
+      'eine Notiz auf dem Startbildschirm, und nimm eine '
+      'Sprachnotiz auf statt zu tippen.';
+  @override
+  String get welcomeDesktopBody =>
+      'Tabs und geteilte Bereiche, das Infobereichssymbol, Ziehen '
+      'und Ablegen aufs Fenster, und .md-Dateien, die Niman öffnen.';
+  @override
+  String get welcomeQuestionTitle => 'Hast du schon Markdown geschrieben?';
+  @override
+  String get welcomeQuestionNote =>
+      'Das legt nur fest, wie die App startet. Du kannst jeden '
+      'Editor jederzeit in Einstellungen → Editor ein- oder '
+      'ausschalten.';
+  @override
+  String get welcomeAnswerNone => 'Nie';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Der Live-Editor, und der Markdown-Quelltext wird nicht '
+      'angeboten, bis du ihn einschaltest.';
+  @override
+  String get welcomeAnswerSome => 'Ein wenig';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Der Live-Editor öffnet Notizen; der Markdown-Quelltext ist '
+      'einen Schalter entfernt.';
+  @override
+  String get welcomeAnswerFluent => 'Ständig';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Der Markdown-Quelltext, so wie die App kommt.';
+  @override
+  String get welcomeTourOffer => 'Zeig mir die App';
+  @override
+  String get welcomeTourOfferNote =>
+      'Die Tour beginnt, sobald deine erste Bibliothek offen ist, '
+      'und zeigt auf die echten Bedienelemente.';
+  @override
+  String get welcomeDeckCommand => 'Was Niman kann';
+  @override
+  String get welcomeTourCommand => 'Tour starten';
+  @override
+  String get tourDone => 'Fertig';
+  @override
+  String get tourOfferTitle => 'Soll ich dir was zeigen?';
+  @override
+  String get tourOfferBody =>
+      'Ein paar Schritte durch die App, auf die echten '
+      'Bedienelemente zeigend. Du kannst bei jedem Schritt aufhören '
+      'und ihn später aus der Befehlspalette fortsetzen.';
+  @override
+  String get tourOfferYes => 'Zeig mir';
+  @override
+  String get tourOfferNo => 'Jetzt nicht';
+  @override
+  String get tourTreeTitle => 'Deine Bibliothek';
+  @override
+  String get tourTreeBody =>
+      'Das ist der Ordner, den du gewählt hast, Ordner für Ordner. '
+      'Alles, was du außerhalb von Niman mit einer Datei machst, '
+      'erscheint hier, sobald es ankommt.';
+  @override
+  String get tourCreateTitle => 'Eine Notiz anlegen';
+  @override
+  String get tourCreateBody =>
+      'Notizen, Listen, Sprachnotizen, Vorlagen und Ordner beginnen '
+      'alle hier. Dasselbe Menü erscheint auf dem Handy als runder '
+      'Knopf.';
+  @override
+  String get tourNoteTitle => 'Eine Notiz nach der anderen';
+  @override
+  String get tourNoteBody =>
+      'Die Notiz auf dem Bildschirm; die geöffneten bleiben in Tabs '
+      'darüber, und ein zweiter Bereich kann sich daneben öffnen, '
+      'wenn das Fenster breit ist.';
+  @override
+  String get tourModesTitle => 'Drei Wege zu schreiben';
+  @override
+  String get tourModesBody =>
+      'Schreibe den Markdown-Quelltext, schreibe ihn so, wie er '
+      'sich liest, oder lies ihn — dieser Schalter gilt pro Notiz, '
+      'und die Bibliothekseinstellung entscheidet, was sich öffnet.';
+  @override
+  String get tourToolbarTitle => 'Die Werkzeugleiste';
+  @override
+  String get tourToolbarBody =>
+      'Formatierung in der Zeile, in der du bist, und dieselben '
+      'Aktionen per Rechtsklick. Jedes Konstrukt, das Niman liest, '
+      'steht im Spickzettel.';
+  @override
+  String get tourCheatsheetTitle => 'Jedes Konstrukt, daneben geschrieben';
+  @override
+  String get tourCheatsheetBody =>
+      'Das ist der Spickzettel. Jedes Beispiel lässt sich kopieren, '
+      'und Einfügen setzt es in die Notiz, die du offen hast.';
+  @override
+  String get tourCheatsheetOpen => 'Öffnen';
+  @override
+  String get tourTabsTitle => 'Alles ist ein Tab';
+  @override
+  String get tourTabsBody =>
+      'Dateien, Aufgaben, Suche, die Schnellnotiz, Einstellungen. '
+      'Die Befehlspalette erreicht sie alle, und jeden Befehl, über '
+      'die Tastatur.';
+  @override
+  String get tourDockTitle => 'Gliederung, Tags, Verlauf';
+  @override
+  String get tourDockBody =>
+      'Die Gliederung der Notiz, ihre Tags und ihre früheren '
+      'Versionen, daneben. Auf dem Handy öffnet das Notizmenü '
+      'dieselben drei.';
+  @override
+  String welcomePageOf(int page, int of) => '$page von $of';
 }

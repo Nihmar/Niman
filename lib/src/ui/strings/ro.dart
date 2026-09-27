@@ -2534,4 +2534,182 @@ final class RomanianStrings extends Strings {
   String get syncMergeSave => 'Salvează îmbinarea';
   @override
   String get syncMergeKeepWhole => 'Sau păstrează o copie întreagă';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Sari peste';
+  @override
+  String get welcomeNext => 'Înainte';
+  @override
+  String get welcomeBack => 'Înapoi';
+  @override
+  String get welcomeStart => 'Începe să scrii';
+  @override
+  String get welcomeClose => 'Închide';
+  @override
+  String get welcomeNotesTitle => 'Notițele tale sunt fișiere';
+  @override
+  String get welcomeNotesBody =>
+      'Niman ține notițele tale ca simple fișiere Markdown, în '
+      'dosarele pe care le alegi. O notă este un fișier .md, și tot '
+      'ce îți arată aplicația este construit din ele. Fără cont și '
+      'fără un format al nostru la care să revii.';
+  @override
+  String get welcomeModesTitle => 'Trei feluri de a scrie aceeași notă';
+  @override
+  String get welcomeModesBody =>
+      'Scrie sursa Markdown, scrie nota așa cum se citește '
+      '(editorul live), sau citește-o. Este o singură notă, oricare '
+      'ai folosi, și poți schimba pe notă sau pentru întreaga '
+      'bibliotecă.';
+  @override
+  String get welcomeLinksTitle => 'Totul se leagă';
+  @override
+  String get welcomeLinksBody =>
+      'Legăturile wiki precum [[aceasta]] își găsesc nota în timp '
+      'ce scrii. Etichetele, frontmatter și șabloanele țin la o '
+      'parte părțile pe care le scrii iar și iar.';
+  @override
+  String get welcomeFindTitle => 'Găsește-o din nou';
+  @override
+  String get welcomeFindBody =>
+      'Căutare full-text în bibliotecă, o paletă de comenzi pentru '
+      'tot ce știe aplicația, și nota rapidă la o tastă.';
+  @override
+  String get welcomeExportTitle => 'Merge cu tine';
+  @override
+  String get welcomeExportBody =>
+      'Exportă o notă sau un întreg dosar ca Markdown, HTML, PDF '
+      'sau carte EPUB. Adu o exportare Notion, sau deschide un seif '
+      'Obsidian acolo unde este deja.';
+  @override
+  String get welcomeTasksTitle => 'Sarcini și memento-uri';
+  @override
+  String get welcomeTasksBody =>
+      'O listă todo.txt pe care o ții ca fișier — priorități, '
+      'proiecte, termene — și alarme rem: care te avertizează când '
+      'ceva e scadent, pe telefon și pe desktop.';
+  @override
+  String get welcomeSyncTitle => 'Între mașinile tale';
+  @override
+  String get welcomeSyncBody =>
+      'Îndreaptă o bibliotecă spre un dosar WebDAV — Nextcloud, '
+      'ownCloud, un NAS — și modificările se sincronizează în '
+      'ambele sensuri, îmbinate linie cu linie când două '
+      'dispozitive au atins aceeași notă.';
+  @override
+  String get welcomeDeviceTitle => 'Niman pe acest dispozitiv';
+  @override
+  String get welcomeAndroidBody =>
+      'Partajează text sau un fișier către Niman din orice '
+      'aplicație, ține o notă pe ecranul principal, și '
+      'înregistrează o notă vocală în loc să scrii.';
+  @override
+  String get welcomeDesktopBody =>
+      'File și panouri divizate, zona de notificare, trage și '
+      'plasează pe fereastră, și fișiere .md care deschid Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Ai mai scris Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Asta stabilește doar cum pornește aplicația. Poți porni sau '
+      'opri orice editor în Setări → Editor oricând.';
+  @override
+  String get welcomeAnswerNone => 'Niciodată';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Editorul live, iar sursa Markdown nu este oferită până nu o '
+      'pornești.';
+  @override
+  String get welcomeAnswerSome => 'Puțin';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Editorul live deschide notițele; sursa Markdown este la un '
+      'comutator.';
+  @override
+  String get welcomeAnswerFluent => 'Tot timpul';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Sursa Markdown, așa cum vine aplicația.';
+  @override
+  String get welcomeTourOffer => 'Arată-mi aplicația';
+  @override
+  String get welcomeTourOfferNote =>
+      'Turul începe odată ce prima ta bibliotecă este deschisă, și '
+      'arată spre controalele reale.';
+  @override
+  String get welcomeDeckCommand => 'Ce știe Niman să facă';
+  @override
+  String get welcomeTourCommand => 'Fă turul';
+  @override
+  String get tourDone => 'Gata';
+  @override
+  String get tourOfferTitle => 'Te plimb prin aplicație?';
+  @override
+  String get tourOfferBody =>
+      'Câțiva pași prin aplicație, arătând spre controalele reale. '
+      'Te poți opri la orice pas și relua mai târziu din paleta de '
+      'comenzi.';
+  @override
+  String get tourOfferYes => 'Arată-mi';
+  @override
+  String get tourOfferNo => 'Nu acum';
+  @override
+  String get tourTreeTitle => 'Biblioteca ta';
+  @override
+  String get tourTreeBody =>
+      'Acesta este dosarul pe care l-ai ales, dosar cu dosar. Tot '
+      'ce faci unui fișier în afara Niman apare aici în momentul în '
+      'care ajunge.';
+  @override
+  String get tourCreateTitle => 'Creează o notă';
+  @override
+  String get tourCreateBody =>
+      'Notițe, liste, note vocale, șabloane și dosare încep toate '
+      'de aici. Același meniu apare pe telefon ca butonul rotund.';
+  @override
+  String get tourNoteTitle => 'O notă odată';
+  @override
+  String get tourNoteBody =>
+      'Nota de pe ecran; cele deschise rămân în file deasupra, și '
+      'un al doilea panou se poate deschide alături într-o '
+      'fereastră lată.';
+  @override
+  String get tourModesTitle => 'Trei feluri de a scrie';
+  @override
+  String get tourModesBody =>
+      'Scrie sursa Markdown, scrie-o așa cum se citește, sau '
+      'citește-o — acest comutator este pe notă, și setarea '
+      'bibliotecii decide ce se deschide.';
+  @override
+  String get tourToolbarTitle => 'Bara de instrumente';
+  @override
+  String get tourToolbarBody =>
+      'Formatare pe linia în care ești, și aceleași acțiuni la clic '
+      'dreapta. Fiecare construcție pe care o citește Niman este în '
+      'fituica.';
+  @override
+  String get tourCheatsheetTitle => 'Fiecare construcție, scrisă alături';
+  @override
+  String get tourCheatsheetBody =>
+      'Aceasta este fituica. Fiecare exemplu poate fi copiat, iar '
+      'Inserează îl pune în nota pe care o ai deschisă.';
+  @override
+  String get tourCheatsheetOpen => 'Deschide-o';
+  @override
+  String get tourTabsTitle => 'Totul este o filă';
+  @override
+  String get tourTabsBody =>
+      'Fișiere, sarcini, căutare, nota rapidă, setări. Paleta de '
+      'comenzi ajunge la toate, și la fiecare comandă, de la '
+      'tastatură.';
+  @override
+  String get tourDockTitle => 'Structură, etichete, istoric';
+  @override
+  String get tourDockBody =>
+      'Structura notei, etichetele și versiunile ei trecute, '
+      'alături. Pe telefon meniul notei deschide aceleași trei.';
+  @override
+  String welcomePageOf(int page, int of) => '$page din $of';
 }

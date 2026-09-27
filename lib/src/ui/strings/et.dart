@@ -2464,4 +2464,178 @@ final class EstonianStrings extends Strings {
   String get syncMergeSave => 'Salvesta ühendamine';
   @override
   String get syncMergeKeepWhole => 'Või jäta alles üks terve koopia';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Jäta vahele';
+  @override
+  String get welcomeNext => 'Edasi';
+  @override
+  String get welcomeBack => 'Tagasi';
+  @override
+  String get welcomeStart => 'Alusta kirjutamist';
+  @override
+  String get welcomeClose => 'Sulge';
+  @override
+  String get welcomeNotesTitle => 'Sinu märkmed on failid';
+  @override
+  String get welcomeNotesBody =>
+      'Niman hoiab sinu märkmeid tavaliste Markdown-failidena '
+      'kaustades, mille valid. Üks märge on üks .md-fail ja kõik, '
+      'mida rakendus sulle näitab, on nendest ehitatud. Kontot pole '
+      'ja meie oma vormingut, kuhu tagasi pöörduda, pole.';
+  @override
+  String get welcomeModesTitle => 'Kolm viisi sama märkme kirjutamiseks';
+  @override
+  String get welcomeModesBody =>
+      'Kirjuta Markdown-allikas, kirjuta märge nii, nagu seda '
+      'loetakse (otse-redaktor), või loe seda. See on üks märge, '
+      'mida iganes kasutad, ja saad vahetada märkme kaupa või kogu '
+      'kogu jaoks.';
+  @override
+  String get welcomeLinksTitle => 'Kõik on seotud';
+  @override
+  String get welcomeLinksBody =>
+      'Wikilingid nagu [[see]] leiavad oma märkme kirjutamise ajal. '
+      'Sildid, frontmatter ja mallid hoiavad eemale need osad, mida '
+      'ikka ja jälle kirjutad.';
+  @override
+  String get welcomeFindTitle => 'Leia see uuesti';
+  @override
+  String get welcomeFindBody =>
+      'Täistekstiotsing kogus, käsukataloog kõige jaoks, mida '
+      'rakendus oskab, ja kiirmärge ühe klahvi kaugusel.';
+  @override
+  String get welcomeExportTitle => 'See tuleb sinuga kaasa';
+  @override
+  String get welcomeExportBody =>
+      'Ekspordi märge või terve kaust Markdowni, HTML-i, PDF-i või '
+      'EPUB-raamatuna. Too sisse Notioni eksport või ava Obsidiani '
+      'hoidla seal, kus see juba on.';
+  @override
+  String get welcomeTasksTitle => 'Ülesanded ja meeldetuletused';
+  @override
+  String get welcomeTasksBody =>
+      'todo.txt-nimekiri, mida hoiad failina — prioriteedid, '
+      'projektid, tähtajad — ja rem:-alarmid, mis hoiatavad, kui '
+      'miski on tähtajaline, telefonis ja töölaual.';
+  @override
+  String get welcomeSyncTitle => 'Sinu masinate vahel';
+  @override
+  String get welcomeSyncBody =>
+      'Suuna kogu WebDAV-kausta — Nextcloud, ownCloud, NAS — ja '
+      'muudatused sünkroonitakse mõlemas suunas, rida rea haaval '
+      'ühendatud, kui kaks seadet puudutasid sama märget.';
+  @override
+  String get welcomeDeviceTitle => 'Niman selles seadmes';
+  @override
+  String get welcomeAndroidBody =>
+      'Jaga teksti või faili Nimani mis tahes rakendusest, hoia '
+      'märge avaekraanil ja salvesta häälemärge kirjutamise asemel.';
+  @override
+  String get welcomeDesktopBody =>
+      'Vahelehed ja poolitatud paneelid, süsteemisalv, lohistamine '
+      'aknale ja .md-failid, mis avavad Nimani.';
+  @override
+  String get welcomeQuestionTitle => 'Kas oled varem Markdowni kirjutanud?';
+  @override
+  String get welcomeQuestionNote =>
+      'See määrab ainult, kuidas rakendus käivitub. Iga redaktori '
+      'saad igal ajal sisse või välja lülitada jaotises Seaded → '
+      'Redaktor.';
+  @override
+  String get welcomeAnswerNone => 'Mitte kunagi';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Otse-redaktor, ja Markdown-allikat ei pakuta enne, kui selle '
+      'sisse lülitad.';
+  @override
+  String get welcomeAnswerSome => 'Natuke';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Otse-redaktor avab märkmed; Markdown-allikas on ühe lüliti '
+      'kaugusel.';
+  @override
+  String get welcomeAnswerFluent => 'Kogu aeg';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown-allikas, nii nagu rakendus tuleb.';
+  @override
+  String get welcomeTourOffer => 'Näita mulle rakendust';
+  @override
+  String get welcomeTourOfferNote =>
+      'Ringkäik algab, kui sinu esimene kogu on avatud, ja osutab '
+      'päris juhtelementidele.';
+  @override
+  String get welcomeDeckCommand => 'Mida Niman oskab';
+  @override
+  String get welcomeTourCommand => 'Tee ringkäik';
+  @override
+  String get tourDone => 'Valmis';
+  @override
+  String get tourOfferTitle => 'Kas näitan sulle?';
+  @override
+  String get tourOfferBody =>
+      'Mõned sammud läbi rakenduse, osutades päris '
+      'juhtelementidele. Võid peatuda mis tahes sammul ja jätkata '
+      'hiljem käsukataloogist.';
+  @override
+  String get tourOfferYes => 'Näita';
+  @override
+  String get tourOfferNo => 'Mitte praegu';
+  @override
+  String get tourTreeTitle => 'Sinu kogu';
+  @override
+  String get tourTreeBody =>
+      'See on kaust, mille valisid, kaust kausta haaval. Kõik, mida '
+      'teed failiga väljaspool Nimani, ilmub siia kohe, kui see '
+      'saabub.';
+  @override
+  String get tourCreateTitle => 'Loo märge';
+  @override
+  String get tourCreateBody =>
+      'Märkmed, nimekirjad, häälemärkmed, mallid ja kaustad algavad '
+      'kõik siit. Sama menüü ilmub telefonis ümmarguse nupuna.';
+  @override
+  String get tourNoteTitle => 'Üks märge korraga';
+  @override
+  String get tourNoteBody =>
+      'Märge ekraanil; avatud jäävad vahelehtedele selle kohal, ja '
+      'laias aknas saab kõrvale avada teise paneeli.';
+  @override
+  String get tourModesTitle => 'Kolm viisi kirjutada';
+  @override
+  String get tourModesBody =>
+      'Kirjuta Markdown-allikas, kirjuta see nii, nagu loetakse, '
+      'või loe seda — see lüliti on märkme kaupa ja kogu seade '
+      'otsustab, mis avaneb.';
+  @override
+  String get tourToolbarTitle => 'Tööriistariba';
+  @override
+  String get tourToolbarBody =>
+      'Vormindus real, kus oled, ja samad toimingud paremklõpsul. '
+      'Iga konstruktsioon, mida Niman loeb, on spikris.';
+  @override
+  String get tourCheatsheetTitle => 'Iga konstruktsioon, kõrvale kirjutatud';
+  @override
+  String get tourCheatsheetBody =>
+      'See on spikker. Iga näidet saab kopeerida ja Sisesta paneb '
+      'selle avatud märkmesse.';
+  @override
+  String get tourCheatsheetOpen => 'Ava see';
+  @override
+  String get tourTabsTitle => 'Kõik on vaheleht';
+  @override
+  String get tourTabsBody =>
+      'Failid, ülesanded, otsing, kiirmärge, seaded. Käsukataloog '
+      'jõuab kõigini ja iga käsuni klaviatuurilt.';
+  @override
+  String get tourDockTitle => 'Liigendus, sildid, ajalugu';
+  @override
+  String get tourDockBody =>
+      'Märkme liigendus, selle sildid ja varasemad versioonid, '
+      'kõrval. Telefonis avab märkme menüü samad kolm.';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

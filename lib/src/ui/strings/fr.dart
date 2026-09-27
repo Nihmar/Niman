@@ -2573,4 +2573,188 @@ final class FrenchStrings extends Strings {
   String get syncMergeSave => 'Enregistrer la fusion';
   @override
   String get syncMergeKeepWhole => 'Ou garder une copie entière';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Passer';
+  @override
+  String get welcomeNext => 'Suivant';
+  @override
+  String get welcomeBack => 'Retour';
+  @override
+  String get welcomeStart => 'Commencer à écrire';
+  @override
+  String get welcomeClose => 'Fermer';
+  @override
+  String get welcomeNotesTitle => 'Vos notes sont des fichiers';
+  @override
+  String get welcomeNotesBody =>
+      'Niman garde vos notes en simples fichiers Markdown, dans les '
+      'dossiers que vous choisissez. Une note est un fichier .md, '
+      "et tout ce que l'app affiche en est construit. Aucun compte, "
+      'aucun format à nous.';
+  @override
+  String get welcomeModesTitle => "Trois façons d'écrire la même note";
+  @override
+  String get welcomeModesBody =>
+      "Écrivez la source Markdown, écrivez la note telle qu'elle se "
+      "lit (l'éditeur direct), ou lisez-la. C'est une seule note "
+      'quelle que soit la façon, et vous pouvez changer par note ou '
+      'pour toute la bibliothèque.';
+  @override
+  String get welcomeLinksTitle => 'Tout est relié';
+  @override
+  String get welcomeLinksBody =>
+      'Les liens wiki comme [[celui-ci]] trouvent leur note pendant '
+      'que vous tapez. Les étiquettes, le frontmatter et les '
+      'modèles gardent de côté ce que vous réécrivez sans cesse.';
+  @override
+  String get welcomeFindTitle => 'La retrouver';
+  @override
+  String get welcomeFindBody =>
+      'Recherche plein texte dans la bibliothèque, une palette de '
+      "commandes pour tout ce que l'app sait faire, et la note "
+      'rapide à une touche.';
+  @override
+  String get welcomeExportTitle => 'Elle vous accompagne';
+  @override
+  String get welcomeExportBody =>
+      'Exportez une note ou un dossier entier en Markdown, HTML, '
+      'PDF ou livre EPUB. Importez une exportation Notion, ou '
+      'ouvrez un coffre Obsidian là où il est déjà.';
+  @override
+  String get welcomeTasksTitle => 'Tâches et rappels';
+  @override
+  String get welcomeTasksBody =>
+      'Une liste todo.txt que vous gardez comme fichier — '
+      'priorités, projets, échéances — et des alarmes rem: qui vous '
+      'préviennent quand quelque chose est dû, sur téléphone et sur '
+      'ordinateur.';
+  @override
+  String get welcomeSyncTitle => 'Sur toutes vos machines';
+  @override
+  String get welcomeSyncBody =>
+      'Pointez une bibliothèque vers un dossier WebDAV — Nextcloud, '
+      'ownCloud, un NAS — et les modifications se synchronisent '
+      'dans les deux sens, fusionnées ligne par ligne quand deux '
+      'appareils ont touché la même note.';
+  @override
+  String get welcomeDeviceTitle => 'Niman sur cet appareil';
+  @override
+  String get welcomeAndroidBody =>
+      "Partagez du texte ou un fichier vers Niman depuis n'importe "
+      "quelle app, gardez une note sur l'écran d'accueil, et "
+      'enregistrez une note vocale au lieu de taper.';
+  @override
+  String get welcomeDesktopBody =>
+      'Onglets et volets partagés, la zone de notification, le '
+      'glisser-déposer sur la fenêtre, et les fichiers .md qui '
+      'ouvrent Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Avez-vous déjà écrit du Markdown ?';
+  @override
+  String get welcomeQuestionNote =>
+      "Cela règle seulement le démarrage de l'app. Vous pouvez "
+      'activer ou désactiver tout éditeur dans Paramètres → '
+      'Éditeur, à tout moment.';
+  @override
+  String get welcomeAnswerNone => 'Jamais';
+  @override
+  String get welcomeAnswerNoneHint =>
+      "L'éditeur direct, et la source Markdown n'est pas proposée "
+      "avant que vous l'activiez.";
+  @override
+  String get welcomeAnswerSome => 'Un peu';
+  @override
+  String get welcomeAnswerSomeHint =>
+      "L'éditeur direct ouvre les notes ; la source Markdown est à "
+      'un interrupteur.';
+  @override
+  String get welcomeAnswerFluent => 'Tout le temps';
+  @override
+  String get welcomeAnswerFluentHint =>
+      "La source Markdown, comme l'app arrive.";
+  @override
+  String get welcomeTourOffer => "Faites-moi visiter l'app";
+  @override
+  String get welcomeTourOfferNote =>
+      'La visite commence une fois votre première bibliothèque '
+      'ouverte, et pointe les vrais contrôles.';
+  @override
+  String get welcomeDeckCommand => 'Ce que Niman sait faire';
+  @override
+  String get welcomeTourCommand => 'Faire la visite';
+  @override
+  String get tourDone => 'Terminé';
+  @override
+  String get tourOfferTitle => 'Je vous fais visiter ?';
+  @override
+  String get tourOfferBody =>
+      "Quelques étapes dans l'app, en pointant les vrais contrôles. "
+      "Vous pouvez arrêter à n'importe quelle étape et reprendre "
+      'plus tard depuis la palette de commandes.';
+  @override
+  String get tourOfferYes => 'Montrez-moi';
+  @override
+  String get tourOfferNo => 'Pas maintenant';
+  @override
+  String get tourTreeTitle => 'Votre bibliothèque';
+  @override
+  String get tourTreeBody =>
+      "C'est le dossier que vous avez choisi, dossier par dossier. "
+      'Tout ce que vous faites à un fichier hors de Niman apparaît '
+      "ici dès qu'il arrive.";
+  @override
+  String get tourCreateTitle => 'Créer une note';
+  @override
+  String get tourCreateBody =>
+      'Notes, listes, notes vocales, modèles et dossiers commencent '
+      'tous ici. Le même menu apparaît sur téléphone comme le '
+      'bouton rond.';
+  @override
+  String get tourNoteTitle => 'Une note à la fois';
+  @override
+  String get tourNoteBody =>
+      "La note à l'écran ; celles que vous avez ouvertes restent "
+      "dans des onglets au-dessus, et un second volet peut s'ouvrir "
+      'à côté sur une fenêtre large.';
+  @override
+  String get tourModesTitle => "Trois façons d'écrire";
+  @override
+  String get tourModesBody =>
+      "Écrivez la source Markdown, écrivez-la telle qu'elle se lit, "
+      'ou lisez-la — cet interrupteur est par note, et le réglage '
+      "de la bibliothèque décide ce qui s'ouvre.";
+  @override
+  String get tourToolbarTitle => "La barre d'outils";
+  @override
+  String get tourToolbarBody =>
+      'Le formatage sur la ligne où vous êtes, et les mêmes actions '
+      'au clic droit. Chaque construction que Niman lit est dans '
+      "l'aide-mémoire.";
+  @override
+  String get tourCheatsheetTitle => 'Chaque construction, écrite à côté';
+  @override
+  String get tourCheatsheetBody =>
+      "Ceci est l'aide-mémoire. Chaque exemple peut être copié, et "
+      'Insérer le met dans la note que vous avez ouverte.';
+  @override
+  String get tourCheatsheetOpen => "L'ouvrir";
+  @override
+  String get tourTabsTitle => 'Tout est un onglet';
+  @override
+  String get tourTabsBody =>
+      'Fichiers, tâches, recherche, la note rapide, paramètres. La '
+      'palette de commandes les atteint tous, et chaque commande, '
+      'au clavier.';
+  @override
+  String get tourDockTitle => 'Plan, étiquettes, historique';
+  @override
+  String get tourDockBody =>
+      'Le plan de la note, ses étiquettes et ses versions passées, '
+      'à côté. Sur téléphone, le menu de la note ouvre les mêmes '
+      'trois.';
+  @override
+  String welcomePageOf(int page, int of) => '$page sur $of';
 }

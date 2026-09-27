@@ -2,13 +2,10 @@
 // out.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 void main() {
-  const copy = WelcomeCopy();
-
   test('every step points at a target the app registers', () {
-    final steps = tourSteps(copy, canSwitchEditor: true, hasDock: true);
+    final steps = tourSteps(canSwitchEditor: true, hasDock: true);
     expect(steps, isNotEmpty);
     for (final step in steps) {
       final target = step.target;
@@ -22,8 +19,8 @@ void main() {
   });
 
   test('the modes step goes when the source editor is off', () {
-    final withSwitch = tourSteps(copy, canSwitchEditor: true, hasDock: true);
-    final without = tourSteps(copy, canSwitchEditor: false, hasDock: true);
+    final withSwitch = tourSteps(canSwitchEditor: true, hasDock: true);
+    final without = tourSteps(canSwitchEditor: false, hasDock: true);
 
     expect(withSwitch.map((s) => s.target), contains(TourTargets.modeSwitch));
     expect(
@@ -34,21 +31,21 @@ void main() {
   });
 
   test("the dock step is a wide window's", () {
-    final narrow = tourSteps(copy, canSwitchEditor: true, hasDock: false);
-    final wide = tourSteps(copy, canSwitchEditor: true, hasDock: true);
+    final narrow = tourSteps(canSwitchEditor: true, hasDock: false);
+    final wide = tourSteps(canSwitchEditor: true, hasDock: true);
 
     expect(narrow.map((s) => s.target), isNot(contains(TourTargets.dock)));
     expect(wide.map((s) => s.target), contains(TourTargets.dock));
   });
 
   test('the last step hands the tour over to the cheatsheet', () {
-    final steps = tourSteps(copy, canSwitchEditor: true, hasDock: true);
+    final steps = tourSteps(canSwitchEditor: true, hasDock: true);
     expect(steps.last.target, TourTargets.cheatsheet);
     expect(steps.last.action, TourAction.cheatsheet);
   });
 
   test('every step says something, and every id is used', () {
-    final steps = tourSteps(copy, canSwitchEditor: true, hasDock: true);
+    final steps = tourSteps(canSwitchEditor: true, hasDock: true);
     for (final step in steps) {
       expect(step.title, isNotEmpty);
       expect(step.body, isNotEmpty);

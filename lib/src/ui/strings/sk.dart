@@ -2504,4 +2504,181 @@ final class SlovakStrings extends Strings {
   String get syncMergeSave => 'Uložiť zlúčenie';
   @override
   String get syncMergeKeepWhole => 'Alebo ponechať jednu celú kópiu';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Preskočiť';
+  @override
+  String get welcomeNext => 'Ďalej';
+  @override
+  String get welcomeBack => 'Späť';
+  @override
+  String get welcomeStart => 'Začať písať';
+  @override
+  String get welcomeClose => 'Zavrieť';
+  @override
+  String get welcomeNotesTitle => 'Tvoje poznámky sú súbory';
+  @override
+  String get welcomeNotesBody =>
+      'Niman drží tvoje poznámky ako obyčajné súbory Markdown v '
+      'priečinkoch, ktoré si vyberieš. Jedna poznámka je jeden '
+      'súbor .md a všetko, čo ti aplikácia ukazuje, je z nich '
+      'postavené. Žiadny účet a žiadny náš formát, ku ktorému by si '
+      'sa musel vracať.';
+  @override
+  String get welcomeModesTitle => 'Tri spôsoby, ako písať tú istú poznámku';
+  @override
+  String get welcomeModesBody =>
+      'Píš zdroj Markdown, píš poznámku tak, ako sa číta (živý '
+      'editor), alebo si ju prečítaj. Je to jedna poznámka, '
+      'ktorúkoľvek použiješ, a prepínať môžeš po poznámkach alebo '
+      'pre celú knižnicu.';
+  @override
+  String get welcomeLinksTitle => 'Všetko sa prepája';
+  @override
+  String get welcomeLinksBody =>
+      'Wiki odkazy ako [[tento]] nájdu svoju poznámku, keď píšeš. '
+      'Značky, frontmatter a šablóny držia bokom to, čo píšeš stále '
+      'dookola.';
+  @override
+  String get welcomeFindTitle => 'Nájdi ju znova';
+  @override
+  String get welcomeFindBody =>
+      'Fulltextové hľadanie v knižnici, paleta príkazov pre všetko, '
+      'čo aplikácia vie, a rýchla poznámka na jeden stisk.';
+  @override
+  String get welcomeExportTitle => 'Ide s tebou';
+  @override
+  String get welcomeExportBody =>
+      'Vyvoz poznámku alebo celý priečinok ako Markdown, HTML, PDF '
+      'alebo knihu EPUB. Naimportuj export z Notionu, alebo otvor '
+      'trezor Obsidian tam, kde už je.';
+  @override
+  String get welcomeTasksTitle => 'Úlohy a pripomienky';
+  @override
+  String get welcomeTasksBody =>
+      'Zoznam todo.txt, ktorý držíš ako súbor — priority, projekty, '
+      'termíny — a alarmy rem:, ktoré ťa upozornia, keď je niečo po '
+      'termíne, v telefóne aj na počítači.';
+  @override
+  String get welcomeSyncTitle => 'Medzi tvojimi strojmi';
+  @override
+  String get welcomeSyncBody =>
+      'Namier knižnicu na priečinok WebDAV — Nextcloud, ownCloud, '
+      'NAS — a zmeny sa synchronizujú oboma smermi, zlúčené riadok '
+      'po riadku, keď sa dve zariadenia dotkli tej istej poznámky.';
+  @override
+  String get welcomeDeviceTitle => 'Niman na tomto zariadení';
+  @override
+  String get welcomeAndroidBody =>
+      'Zdieľaj text alebo súbor do Nimana z akejkoľvek aplikácie, '
+      'drž poznámku na domovskej obrazovke a nahraj hlasovú '
+      'poznámku namiesto písania.';
+  @override
+  String get welcomeDesktopBody =>
+      'Karty a delené panely, systémová lišta, ťahanie na okno a '
+      'súbory .md, ktoré otvárajú Nimana.';
+  @override
+  String get welcomeQuestionTitle => 'Písal si už niekedy Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Toto určuje len to, ako aplikácia štartuje. Akýkoľvek editor '
+      'môžeš kedykoľvek zapnúť alebo vypnúť v Nastavenia → Editor.';
+  @override
+  String get welcomeAnswerNone => 'Nikdy';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Živý editor, a zdroj Markdown sa neponúka, kým ho nezapneš.';
+  @override
+  String get welcomeAnswerSome => 'Trochu';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Živý editor otvára poznámky; zdroj Markdown je o jeden '
+      'prepínač ďalej.';
+  @override
+  String get welcomeAnswerFluent => 'Stále';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Zdroj Markdown, tak ako aplikácia prichádza.';
+  @override
+  String get welcomeTourOffer => 'Ukáž mi aplikáciu';
+  @override
+  String get welcomeTourOfferNote =>
+      'Prehliadka začne, keď je tvoja prvá knižnica otvorená, a '
+      'ukazuje na skutočné ovládacie prvky.';
+  @override
+  String get welcomeDeckCommand => 'Čo Niman vie';
+  @override
+  String get welcomeTourCommand => 'Prejsť si aplikáciu';
+  @override
+  String get tourDone => 'Hotovo';
+  @override
+  String get tourOfferTitle => 'Mám ťa previesť?';
+  @override
+  String get tourOfferBody =>
+      'Niekoľko krokov aplikáciou, ktoré ukazujú na skutočné '
+      'ovládacie prvky. Môžeš sa zastaviť pri ktoromkoľvek kroku a '
+      'neskôr pokračovať z palety príkazov.';
+  @override
+  String get tourOfferYes => 'Ukáž mi';
+  @override
+  String get tourOfferNo => 'Teraz nie';
+  @override
+  String get tourTreeTitle => 'Tvoja knižnica';
+  @override
+  String get tourTreeBody =>
+      'Toto je priečinok, ktorý si vybral, priečinok po priečinku. '
+      'Všetko, čo urobíš so súborom mimo Nimana, sa tu objaví, hneď '
+      'ako dorazí.';
+  @override
+  String get tourCreateTitle => 'Vytvor poznámku';
+  @override
+  String get tourCreateBody =>
+      'Poznámky, zoznamy, hlasové poznámky, šablóny a priečinky '
+      'začínajú všetky tu. Rovnaká ponuka sa v telefóne objaví ako '
+      'okrúhle tlačidlo.';
+  @override
+  String get tourNoteTitle => 'Jedna poznámka naraz';
+  @override
+  String get tourNoteBody =>
+      'Poznámka na obrazovke; tie, ktoré si otvoril, zostávajú v '
+      'kartách nad ňou, a v širokom okne sa vedľa môže otvoriť '
+      'druhý panel.';
+  @override
+  String get tourModesTitle => 'Tri spôsoby písania';
+  @override
+  String get tourModesBody =>
+      'Píš zdroj Markdown, píš ho tak, ako sa číta, alebo si ho '
+      'prečítaj — tento prepínač je pre každú poznámku a nastavenie '
+      'knižnice rozhoduje, čo sa otvorí.';
+  @override
+  String get tourToolbarTitle => 'Panel nástrojov';
+  @override
+  String get tourToolbarBody =>
+      'Formátovanie na riadku, na ktorom si, a rovnaké akcie po '
+      'kliknutí pravým tlačidlom. Každý prvok, ktorý Niman číta, je '
+      'v ťaháku.';
+  @override
+  String get tourCheatsheetTitle => 'Každý prvok, písaný vedľa';
+  @override
+  String get tourCheatsheetBody =>
+      'Toto je ťahák. Každý príklad sa dá skopírovať a Vložiť ho '
+      'vloží do poznámky, ktorú máš otvorenú.';
+  @override
+  String get tourCheatsheetOpen => 'Otvoriť ho';
+  @override
+  String get tourTabsTitle => 'Všetko je karta';
+  @override
+  String get tourTabsBody =>
+      'Súbory, úlohy, hľadanie, rýchla poznámka, nastavenia. Paleta '
+      'príkazov dosiahne na všetky a na každý príkaz z klávesnice.';
+  @override
+  String get tourDockTitle => 'Osnova, značky, história';
+  @override
+  String get tourDockBody =>
+      'Osnova poznámky, jej značky a jej minulé verzie, vedľa. V '
+      'telefóne ponuka poznámky otvorí tie isté tri.';
+  @override
+  String welcomePageOf(int page, int of) => '$page z $of';
 }

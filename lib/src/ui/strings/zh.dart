@@ -2235,4 +2235,134 @@ final class ChineseStrings extends Strings {
   String get syncMergeSave => '保存合并结果';
   @override
   String get syncMergeKeepWhole => '或保留其中一个完整副本';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => '跳过';
+  @override
+  String get welcomeNext => '下一步';
+  @override
+  String get welcomeBack => '上一步';
+  @override
+  String get welcomeStart => '开始写作';
+  @override
+  String get welcomeClose => '关闭';
+  @override
+  String get welcomeNotesTitle => '你的笔记就是文件';
+  @override
+  String get welcomeNotesBody =>
+      'Niman 把你的笔记以纯 Markdown 文件保存在你选择的文件夹里。一条笔记就是一个 .md '
+      '文件，应用显示的一切都由它们构建。没有账号，也没有我们的专有格式要你去取回。';
+  @override
+  String get welcomeModesTitle => '同一条笔记，三种写法';
+  @override
+  String get welcomeModesBody =>
+      '写 Markdown 源码，边写边看（实时编辑器），或直接阅读。用哪一种都是同一条笔记，可以按笔记或整个文库切换。';
+  @override
+  String get welcomeLinksTitle => '一切都连在一起';
+  @override
+  String get welcomeLinksBody =>
+      '像 [[这个]] 这样的 wikilink 会在你输入时找到对应的笔记。标签、frontmatter '
+      '和模板把反复书写的部分放到一边。';
+  @override
+  String get welcomeFindTitle => '再次找到它';
+  @override
+  String get welcomeFindBody => '全库全文搜索，一个覆盖应用全部功能的命令面板，以及一键唤出的快速笔记。';
+  @override
+  String get welcomeExportTitle => '它跟着你走';
+  @override
+  String get welcomeExportBody =>
+      '把一条笔记或整个文件夹导出为 Markdown、HTML、PDF 或 EPUB 电子书。导入 Notion '
+      '导出，或直接在原处打开 Obsidian 仓库。';
+  @override
+  String get welcomeTasksTitle => '任务与提醒';
+  @override
+  String get welcomeTasksBody =>
+      '一份你以文件保存的 todo.txt 清单——优先级、项目、截止日期——以及 rem: '
+      '闹钟，在到期时提醒你，手机和桌面都可以。';
+  @override
+  String get welcomeSyncTitle => '在你的设备之间';
+  @override
+  String get welcomeSyncBody =>
+      '把一个文库指向 WebDAV '
+      '文件夹——Nextcloud、ownCloud、NAS——编辑就会双向同步，两台设备改到同一条笔记时逐行合并。';
+  @override
+  String get welcomeDeviceTitle => '这台设备上的 Niman';
+  @override
+  String get welcomeAndroidBody =>
+      '从任何应用把文字或文件分享到 Niman，在主屏幕上放一条笔记，用语音记笔记而不必打字。';
+  @override
+  String get welcomeDesktopBody => '标签页与分栏、系统托盘、拖放到窗口，以及能打开 Niman 的 .md 文件。';
+  @override
+  String get welcomeQuestionTitle => '你写过 Markdown 吗？';
+  @override
+  String get welcomeQuestionNote => '这只决定应用如何启动。你随时可以在 设置 → 编辑器 里打开或关闭任何编辑器。';
+  @override
+  String get welcomeAnswerNone => '从没写过';
+  @override
+  String get welcomeAnswerNoneHint => '使用实时编辑器，打开前不会提供 Markdown 源码。';
+  @override
+  String get welcomeAnswerSome => '会一点';
+  @override
+  String get welcomeAnswerSomeHint => '实时编辑器打开笔记；Markdown 源码只差一个开关。';
+  @override
+  String get welcomeAnswerFluent => '一直在用';
+  @override
+  String get welcomeAnswerFluentHint => 'Markdown 源码，与应用默认一致。';
+  @override
+  String get welcomeTourOffer => '带我看看这个应用';
+  @override
+  String get welcomeTourOfferNote => '第一个文库打开后，导览就会开始，并指向真实的控件。';
+  @override
+  String get welcomeDeckCommand => 'Niman 能做什么';
+  @override
+  String get welcomeTourCommand => '开始导览';
+  @override
+  String get tourDone => '完成';
+  @override
+  String get tourOfferTitle => '带你逛一圈？';
+  @override
+  String get tourOfferBody => '几步走过这个应用，指向真实的控件。你可以在任何一步停下，之后从命令面板继续。';
+  @override
+  String get tourOfferYes => '带我看看';
+  @override
+  String get tourOfferNo => '暂时不用';
+  @override
+  String get tourTreeTitle => '你的文库';
+  @override
+  String get tourTreeBody => '这就是你选的文件夹，一层一层。在 Niman 之外对文件做的任何改动，一落地就会出现在这里。';
+  @override
+  String get tourCreateTitle => '新建一条笔记';
+  @override
+  String get tourCreateBody => '笔记、清单、语音笔记、模板和文件夹都从这里开始。手机上同一个菜单就是那个圆形按钮。';
+  @override
+  String get tourNoteTitle => '一次一条笔记';
+  @override
+  String get tourNoteBody => '屏幕上的笔记；你打开过的会留在上面的标签页里，宽窗口时旁边还能再开一个面板。';
+  @override
+  String get tourModesTitle => '三种写法';
+  @override
+  String get tourModesBody =>
+      '写 Markdown 源码、边写边看，或直接阅读——这个开关按笔记生效，打开哪种由文库设置决定。';
+  @override
+  String get tourToolbarTitle => '工具栏';
+  @override
+  String get tourToolbarBody => '对当前行设置格式，右键也有同样的操作。Niman 能读的每种语法都在速查表里。';
+  @override
+  String get tourCheatsheetTitle => '每种语法，就在旁边';
+  @override
+  String get tourCheatsheetBody => '这就是速查表。每个示例都可以复制，「插入」会把它放进你打开的笔记里。';
+  @override
+  String get tourCheatsheetOpen => '打开它';
+  @override
+  String get tourTabsTitle => '一切都是标签页';
+  @override
+  String get tourTabsBody => '文件、任务、搜索、快速笔记、设置。命令面板用键盘就能到达每一个，以及每一条命令。';
+  @override
+  String get tourDockTitle => '大纲、标签、历史';
+  @override
+  String get tourDockBody => '笔记的大纲、标签和过去的版本，就在旁边。手机上笔记菜单会打开同样这三样。';
+  @override
+  String welcomePageOf(int page, int of) => '第 $page / $of 页';
 }

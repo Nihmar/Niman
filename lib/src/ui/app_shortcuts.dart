@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 /// A command the shell can run from the keyboard.
 enum AppCommand {
@@ -282,8 +281,8 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.exportNote => AppStrings.exportTitle,
   AppCommand.exportLibrary => AppStrings.exportLibraryTitle,
   AppCommand.markdownCheatsheet => AppStrings.cheatsheetTitle,
-  AppCommand.welcomeTour => const WelcomeCopy().tourCommand,
-  AppCommand.welcomeDeck => const WelcomeCopy().deckCommand,
+  AppCommand.welcomeTour => AppStrings.welcomeTourCommand,
+  AppCommand.welcomeDeck => AppStrings.welcomeDeckCommand,
   AppCommand.openFile => AppStrings.openFileTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,

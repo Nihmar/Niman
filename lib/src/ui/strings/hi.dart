@@ -2457,4 +2457,177 @@ final class HindiStrings extends Strings {
   String get syncMergeSave => 'मिलान सहेजें';
   @override
   String get syncMergeKeepWhole => 'या पूरी एक कॉपी रखें';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'छोड़ें';
+  @override
+  String get welcomeNext => 'आगे';
+  @override
+  String get welcomeBack => 'पीछे';
+  @override
+  String get welcomeStart => 'लिखना शुरू करें';
+  @override
+  String get welcomeClose => 'बंद करें';
+  @override
+  String get welcomeNotesTitle => 'आपके नोट फ़ाइलें हैं';
+  @override
+  String get welcomeNotesBody =>
+      'Niman आपके नोट को आपके चुने हुए फ़ोल्डरों में सादी Markdown '
+      'फ़ाइलों के रूप में रखता है। एक नोट एक .md फ़ाइल है, और ऐप जो '
+      'कुछ दिखाता है वह उन्हीं से बना है। कोई खाता नहीं, और लौटने '
+      'के लिए हमारा कोई फ़ॉर्मैट नहीं।';
+  @override
+  String get welcomeModesTitle => 'एक ही नोट लिखने के तीन तरीके';
+  @override
+  String get welcomeModesBody =>
+      'Markdown स्रोत लिखें, नोट को पढ़े जाने के तरह लिखें (लाइव '
+      'एडिटर), या उसे पढ़ें। किसी भी तरीके से यह एक ही नोट है, और '
+      'आप नोट के हिसाब से या पूरी लाइब्रेरी के लिए बदल सकते हैं।';
+  @override
+  String get welcomeLinksTitle => 'सब कुछ जुड़ता है';
+  @override
+  String get welcomeLinksBody =>
+      '[[यह]] जैसे विकिलिंक टाइप करते समय अपना नोट ढूँढ लेते हैं। '
+      'टैग, frontmatter और टेम्पलेट उन हिस्सों को रास्ते से हटा '
+      'देते हैं जिन्हें आप बार-बार लिखते हैं।';
+  @override
+  String get welcomeFindTitle => 'फिर से ढूँढें';
+  @override
+  String get welcomeFindBody =>
+      'लाइब्रेरी में पूरा-पाठ खोज, ऐप जो कुछ कर सकता है उसके लिए '
+      'कमांड पैलेट, और एक कुंजी दूर क्विक नोट।';
+  @override
+  String get welcomeExportTitle => 'यह साथ चलता है';
+  @override
+  String get welcomeExportBody =>
+      'एक नोट या पूरा फ़ोल्डर Markdown, HTML, PDF या EPUB किताब के '
+      'रूप में निर्यात करें। Notion का निर्यात लाएँ, या जहाँ पहले '
+      'से है वहीं Obsidian वॉल्ट खोलें।';
+  @override
+  String get welcomeTasksTitle => 'काम और रिमाइंडर';
+  @override
+  String get welcomeTasksBody =>
+      'एक todo.txt सूची जिसे आप फ़ाइल के रूप में रखते हैं — '
+      'प्राथमिकताएँ, प्रोजेक्ट, समय-सीमाएँ — और rem: अलार्म जो कुछ '
+      'देय होने पर चेतावनी देते हैं, फ़ोन और डेस्कटॉप दोनों पर।';
+  @override
+  String get welcomeSyncTitle => 'आपकी मशीनों के बीच';
+  @override
+  String get welcomeSyncBody =>
+      'एक लाइब्रेरी को WebDAV फ़ोल्डर की ओर इंगित करें — Nextcloud, '
+      'ownCloud, NAS — और बदलाव दोनों तरफ़ सिंक होते हैं, जब दो '
+      'डिवाइस एक ही नोट को छूते हैं तो पंक्ति दर पंक्ति मिलाए जाते '
+      'हैं।';
+  @override
+  String get welcomeDeviceTitle => 'इस डिवाइस पर Niman';
+  @override
+  String get welcomeAndroidBody =>
+      'किसी भी ऐप से टेक्स्ट या फ़ाइल Niman में साझा करें, होम '
+      'स्क्रीन पर नोट रखें, और टाइप करने के बजाय वॉइस नोट रिकॉर्ड '
+      'करें।';
+  @override
+  String get welcomeDesktopBody =>
+      'टैब और बँटे पैन, सिस्टम ट्रे, विंडो पर ड्रैग और ड्रॉप, और वे '
+      '.md फ़ाइलें जो Niman खोलती हैं।';
+  @override
+  String get welcomeQuestionTitle => 'क्या आपने पहले Markdown लिखा है?';
+  @override
+  String get welcomeQuestionNote =>
+      'यह केवल तय करता है कि ऐप कैसे शुरू होगा। आप कभी भी सेटिंग्स '
+      '→ एडिटर में कोई भी एडिटर चालू या बंद कर सकते हैं।';
+  @override
+  String get welcomeAnswerNone => 'कभी नहीं';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'लाइव एडिटर, और Markdown स्रोत तब तक नहीं दिया जाता जब तक आप '
+      'उसे चालू न करें।';
+  @override
+  String get welcomeAnswerSome => 'थोड़ा';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'लाइव एडिटर नोट खोलता है; Markdown स्रोत एक स्विच दूर है।';
+  @override
+  String get welcomeAnswerFluent => 'हमेशा';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown स्रोत, जैसा ऐप के साथ आता है।';
+  @override
+  String get welcomeTourOffer => 'मुझे ऐप दिखाएँ';
+  @override
+  String get welcomeTourOfferNote =>
+      'टूर आपकी पहली लाइब्रेरी खुलने पर शुरू होता है, और असली '
+      'नियंत्रणों की ओर इशारा करता है।';
+  @override
+  String get welcomeDeckCommand => 'Niman क्या कर सकता है';
+  @override
+  String get welcomeTourCommand => 'टूर पर चलें';
+  @override
+  String get tourDone => 'हो गया';
+  @override
+  String get tourOfferTitle => 'घुमाऊँ आपको?';
+  @override
+  String get tourOfferBody =>
+      'ऐप में कुछ कदम, असली नियंत्रणों की ओर इशारा करते हुए। आप '
+      'किसी भी कदम पर रुक सकते हैं और बाद में कमांड पैलेट से जारी '
+      'रख सकते हैं।';
+  @override
+  String get tourOfferYes => 'दिखाएँ';
+  @override
+  String get tourOfferNo => 'अभी नहीं';
+  @override
+  String get tourTreeTitle => 'आपकी लाइब्रेरी';
+  @override
+  String get tourTreeBody =>
+      'यह वही फ़ोल्डर है जिसे आपने चुना, फ़ोल्डर दर फ़ोल्डर। Niman '
+      'के बाहर किसी फ़ाइल से जो कुछ करते हैं, वह यहाँ पहुँचते ही '
+      'दिखने लगता है।';
+  @override
+  String get tourCreateTitle => 'नोट बनाएँ';
+  @override
+  String get tourCreateBody =>
+      'नोट, सूचियाँ, वॉइस नोट, टेम्पलेट और फ़ोल्डर सब यहीं से शुरू '
+      'होते हैं। फ़ोन पर वही मेन्यू गोल बटन के रूप में दिखता है।';
+  @override
+  String get tourNoteTitle => 'एक बार में एक नोट';
+  @override
+  String get tourNoteBody =>
+      'स्क्रीन पर नोट; जो आपने खोले वे ऊपर टैब में रहते हैं, और '
+      'चौड़ी विंडो में बगल में दूसरा पैन खुल सकता है।';
+  @override
+  String get tourModesTitle => 'लिखने के तीन तरीके';
+  @override
+  String get tourModesBody =>
+      'Markdown स्रोत लिखें, उसे पढ़े जाने के तरह लिखें, या पढ़ें — '
+      'यह स्विच हर नोट पर लागू है, और लाइब्रेरी सेटिंग तय करती है '
+      'कि क्या खुलेगा।';
+  @override
+  String get tourToolbarTitle => 'टूलबार';
+  @override
+  String get tourToolbarBody =>
+      'जिस पंक्ति में हैं उस पर फ़ॉर्मैटिंग, और राइट-क्लिक पर वही '
+      'क्रियाएँ। Niman जो भी रचना पढ़ता है वह चीट शीट में है।';
+  @override
+  String get tourCheatsheetTitle => 'हर रचना, बगल में लिखी';
+  @override
+  String get tourCheatsheetBody =>
+      'यह चीट शीट है। हर उदाहरण कॉपी किया जा सकता है, और इन्सर्ट '
+      'उसे आपके खुले नोट में डाल देता है।';
+  @override
+  String get tourCheatsheetOpen => 'इसे खोलें';
+  @override
+  String get tourTabsTitle => 'सब कुछ एक टैब है';
+  @override
+  String get tourTabsBody =>
+      'फ़ाइलें, काम, खोज, क्विक नोट, सेटिंग्स। कमांड पैलेट कीबोर्ड '
+      'से हर एक तक, और हर कमांड तक पहुँचता है।';
+  @override
+  String get tourDockTitle => 'रूपरेखा, टैग, इतिहास';
+  @override
+  String get tourDockBody =>
+      'नोट की रूपरेखा, उसके टैग और उसके पुराने संस्करण, बगल में। '
+      'फ़ोन पर नोट का मेन्यू वही तीन खोलता है।';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

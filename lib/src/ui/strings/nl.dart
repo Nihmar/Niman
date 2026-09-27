@@ -2527,4 +2527,187 @@ final class DutchStrings extends Strings {
   String get syncMergeSave => 'Samenvoeging opslaan';
   @override
   String get syncMergeKeepWhole => 'Of houd één hele kopie';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Overslaan';
+  @override
+  String get welcomeNext => 'Volgende';
+  @override
+  String get welcomeBack => 'Terug';
+  @override
+  String get welcomeStart => 'Begin met schrijven';
+  @override
+  String get welcomeClose => 'Sluiten';
+  @override
+  String get welcomeNotesTitle => 'Je notities zijn bestanden';
+  @override
+  String get welcomeNotesBody =>
+      'Niman bewaart je notities als gewone Markdown-bestanden in '
+      'mappen die jij kiest. Eén notitie is één .md-bestand, en '
+      'alles wat de app je toont is daaruit opgebouwd. Geen account '
+      'en geen eigen formaat om naar terug te gaan.';
+  @override
+  String get welcomeModesTitle =>
+      'Drie manieren om dezelfde notitie te schrijven';
+  @override
+  String get welcomeModesBody =>
+      'Schrijf de Markdown-brontekst, schrijf de notitie zoals ze '
+      'leest (de live-editor), of lees haar. Het is één notitie '
+      'welke je ook gebruikt, en je kunt per notitie of voor de '
+      'hele bibliotheek wisselen.';
+  @override
+  String get welcomeLinksTitle => 'Alles hangt samen';
+  @override
+  String get welcomeLinksBody =>
+      'Wikilinks zoals [[deze]] vinden hun notitie terwijl je typt. '
+      'Tags, frontmatter en sjablonen houden de stukken die je '
+      'steeds opnieuw schrijft uit de weg.';
+  @override
+  String get welcomeFindTitle => 'Weer terugvinden';
+  @override
+  String get welcomeFindBody =>
+      'Volledige-tekstzoekopdracht door de bibliotheek, een '
+      'opdrachtpalet voor alles wat de app kan, en de snelnotitie '
+      'op één toets.';
+  @override
+  String get welcomeExportTitle => 'Het gaat met je mee';
+  @override
+  String get welcomeExportBody =>
+      'Exporteer een notitie of een hele map als Markdown, HTML, '
+      'een PDF of een EPUB-boek. Haal een Notion-export binnen, of '
+      'open een Obsidian-vault waar die al staat.';
+  @override
+  String get welcomeTasksTitle => 'Taken en herinneringen';
+  @override
+  String get welcomeTasksBody =>
+      'Een todo.txt-lijst die je als bestand houdt — prioriteiten, '
+      'projecten, vervaldata — en rem:-alarmen die je waarschuwen '
+      'wanneer iets vervalt, op de telefoon en op de desktop.';
+  @override
+  String get welcomeSyncTitle => 'Over je machines heen';
+  @override
+  String get welcomeSyncBody =>
+      'Wijs een bibliotheek naar een WebDAV-map — Nextcloud, '
+      'ownCloud, een NAS — en bewerkingen synchroniseren beide '
+      'kanten op, regel voor regel samengevoegd wanneer twee '
+      'apparaten dezelfde notitie hebben aangeraakt.';
+  @override
+  String get welcomeDeviceTitle => 'Niman op dit apparaat';
+  @override
+  String get welcomeAndroidBody =>
+      'Deel tekst of een bestand naar Niman vanuit elke app, houd '
+      'een notitie op het beginscherm, en neem een spraaknotitie op '
+      'in plaats van te typen.';
+  @override
+  String get welcomeDesktopBody =>
+      'Tabbladen en gesplitste panelen, het systeemvak, slepen en '
+      'neerzetten op het venster, en .md-bestanden die Niman '
+      'openen.';
+  @override
+  String get welcomeQuestionTitle => 'Heb je eerder Markdown geschreven?';
+  @override
+  String get welcomeQuestionNote =>
+      'Dit bepaalt alleen hoe de app start. Je kunt elke editor '
+      'altijd aan- of uitzetten in Instellingen → Editor.';
+  @override
+  String get welcomeAnswerNone => 'Nooit';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'De live-editor, en de Markdown-bron wordt niet aangeboden '
+      'tot je die aanzet.';
+  @override
+  String get welcomeAnswerSome => 'Een beetje';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'De live-editor opent notities; de Markdown-bron is één '
+      'schakelaar verderop.';
+  @override
+  String get welcomeAnswerFluent => 'Altijd';
+  @override
+  String get welcomeAnswerFluentHint => 'De Markdown-bron, zoals de app komt.';
+  @override
+  String get welcomeTourOffer => 'Laat me de app zien';
+  @override
+  String get welcomeTourOfferNote =>
+      'De rondleiding begint zodra je eerste bibliotheek open is, '
+      'en wijst naar de echte bediening.';
+  @override
+  String get welcomeDeckCommand => 'Wat Niman kan';
+  @override
+  String get welcomeTourCommand => 'Rondleiding volgen';
+  @override
+  String get tourDone => 'Klaar';
+  @override
+  String get tourOfferTitle => 'Zal ik je rondleiden?';
+  @override
+  String get tourOfferBody =>
+      'Een paar stappen door de app, wijzend naar de echte '
+      'bediening. Je kunt bij elke stap stoppen en later verdergaan '
+      'vanuit het opdrachtpalet.';
+  @override
+  String get tourOfferYes => 'Laat zien';
+  @override
+  String get tourOfferNo => 'Nu niet';
+  @override
+  String get tourTreeTitle => 'Je bibliotheek';
+  @override
+  String get tourTreeBody =>
+      'Dit is de map die je koos, map voor map. Alles wat je buiten '
+      'Niman met een bestand doet, verschijnt hier zodra het '
+      'aankomt.';
+  @override
+  String get tourCreateTitle => 'Een notitie maken';
+  @override
+  String get tourCreateBody =>
+      'Notities, lijsten, spraaknotities, sjablonen en mappen '
+      'beginnen allemaal hier. Hetzelfde menu verschijnt op een '
+      'telefoon als de ronde knop.';
+  @override
+  String get tourNoteTitle => 'Eén notitie tegelijk';
+  @override
+  String get tourNoteBody =>
+      'De notitie op het scherm; de geopende blijven in tabbladen '
+      'erboven, en een tweede paneel kan ernaast openen in een '
+      'breed venster.';
+  @override
+  String get tourModesTitle => 'Drie manieren om te schrijven';
+  @override
+  String get tourModesBody =>
+      'Schrijf de Markdown-bron, schrijf haar zoals ze leest, of '
+      'lees haar — deze schakelaar geldt per notitie, en de '
+      'bibliotheekinstelling bepaalt wat opent.';
+  @override
+  String get tourToolbarTitle => 'De werkbalk';
+  @override
+  String get tourToolbarBody =>
+      'Opmaak op de regel waar je bent, en dezelfde acties bij '
+      'rechtsklikken. Elk construct dat Niman leest staat in het '
+      'spiekbriefje.';
+  @override
+  String get tourCheatsheetTitle => 'Elk construct, ernaast geschreven';
+  @override
+  String get tourCheatsheetBody =>
+      'Dit is het spiekbriefje. Elk voorbeeld kan worden '
+      'gekopieerd, en Invoegen zet het in de notitie die je open '
+      'hebt.';
+  @override
+  String get tourCheatsheetOpen => 'Openen';
+  @override
+  String get tourTabsTitle => 'Alles is een tabblad';
+  @override
+  String get tourTabsBody =>
+      'Bestanden, taken, zoeken, de snelnotitie, instellingen. Het '
+      'opdrachtpalet bereikt ze allemaal, en elke opdracht, vanaf '
+      'het toetsenbord.';
+  @override
+  String get tourDockTitle => 'Structuur, tags, geschiedenis';
+  @override
+  String get tourDockBody =>
+      'De structuur van de notitie, haar tags en haar eerdere '
+      'versies, ernaast. Op een telefoon opent het notitiemenu '
+      'dezelfde drie.';
+  @override
+  String welcomePageOf(int page, int of) => '$page van $of';
 }

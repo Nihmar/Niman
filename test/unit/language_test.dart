@@ -98,6 +98,11 @@ void main() {
         () => AppStrings.toolbarBold,
         () => AppStrings.listEmpty,
         () => AppStrings.languageTitle,
+        // The welcome deck and the guided tour (#308) were the last
+        // English-only surface; the samples keep them localized.
+        () => AppStrings.welcomeNotesTitle,
+        () => AppStrings.welcomeNext,
+        () => AppStrings.tourTreeTitle,
       ];
       AppLanguages.choice = AppLanguage.english;
       final en = samples.map((sample) => sample()).toList();

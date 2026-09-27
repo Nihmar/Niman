@@ -6,9 +6,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 /// What the tour needs from whoever starts it: the steps, where to keep
 /// the progress, and what to do when a step acts.
@@ -16,7 +16,6 @@ final class TourRun {
   /// Creates a run.
   const new({
     required this.steps,
-    required this.copy,
     required this.onStep,
     required this.onDone,
     required this.onAction,
@@ -25,9 +24,6 @@ final class TourRun {
 
   /// The steps, in order.
   final List<TourStep> steps;
-
-  /// The words.
-  final WelcomeCopy copy;
 
   /// Where the step it is on, whenever it moves: the tour survives a
   /// close and a restart.
@@ -231,7 +227,7 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
             Row(
               children: [
                 Text(
-                  widget.run.copy.pageOf(_index + 1, widget.run.steps.length),
+                  AppStrings.welcomePageOf(_index + 1, widget.run.steps.length),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -240,7 +236,7 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
                 TextButton(
                   key: const Key('tour-skip'),
                   onPressed: _skip,
-                  child: Text(widget.run.copy.skip),
+                  child: Text(AppStrings.welcomeSkip),
                 ),
               ],
             ),
@@ -260,26 +256,26 @@ final class _TourOverlayState extends ConsumerState<_TourOverlay> {
                   TextButton(
                     key: const Key('tour-back'),
                     onPressed: () => _go(_index - 1),
-                    child: Text(widget.run.copy.back),
+                    child: Text(AppStrings.welcomeBack),
                   ),
                 const SizedBox(width: 8),
                 if (_step.action case final action?)
                   FilledButton(
                     key: const Key('tour-action'),
                     onPressed: () => _act(action),
-                    child: Text(widget.run.copy.tourCheatsheetOpen),
+                    child: Text(AppStrings.tourCheatsheetOpen),
                   )
                 else if (!_last)
                   FilledButton(
                     key: const Key('tour-next'),
                     onPressed: () => _go(_index + 1),
-                    child: Text(widget.run.copy.next),
+                    child: Text(AppStrings.welcomeNext),
                   )
                 else
                   FilledButton(
                     key: const Key('tour-done'),
                     onPressed: _done,
-                    child: Text(widget.run.copy.tourDone),
+                    child: Text(AppStrings.tourDone),
                   ),
               ],
             ),

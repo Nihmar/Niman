@@ -8,11 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/tour/tour_overlay.dart';
 import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
 
 void main() {
-  const copy = WelcomeCopy();
-
   /// Pumps a page with one target on it ('here') and a button that starts
   /// [steps]; answers what the run reported.
   Future<({List<int> steps, List<TourAction> actions, bool Function() done})>
@@ -47,7 +44,6 @@ void main() {
                         context,
                         TourRun(
                           steps: steps,
-                          copy: copy,
                           initialStep: from,
                           onStep: visited.add,
                           onDone: () => finished = true,

@@ -18,7 +18,6 @@ import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tour/tour_host.dart';
-import 'package:niman/src/ui/welcome/welcome_copy.dart';
 import 'package:niman/src/ui/welcome/welcome_gate.dart';
 
 /// The Diagnostics and info area of the settings home (issue #104): the
@@ -313,14 +312,14 @@ final class _SettingsDiagnosticsScreenState
                 HighlightRow(
                   key: SettingsKeys.welcomeDeck,
                   child: SettingsValueRow(
-                    title: const WelcomeCopy().deckCommand,
+                    title: AppStrings.welcomeDeckCommand,
                     onTap: () => showWelcomeDeck(context),
                   ),
                 ),
                 HighlightRow(
                   key: SettingsKeys.welcomeTour,
                   child: SettingsValueRow(
-                    title: const WelcomeCopy().tourCommand,
+                    title: AppStrings.welcomeTourCommand,
                     onTap: () => unawaited(resumeTour(context, ref)),
                   ),
                 ),

@@ -2537,4 +2537,187 @@ final class CatalanStrings extends Strings {
   String get syncMergeSave => 'Desa la unió';
   @override
   String get syncMergeKeepWhole => 'O conserva una còpia sencera';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Omet';
+  @override
+  String get welcomeNext => 'Següent';
+  @override
+  String get welcomeBack => 'Enrere';
+  @override
+  String get welcomeStart => 'Comença a escriure';
+  @override
+  String get welcomeClose => 'Tanca';
+  @override
+  String get welcomeNotesTitle => 'Les teves notes són fitxers';
+  @override
+  String get welcomeNotesBody =>
+      'El Niman guarda les teves notes com a fitxers Markdown '
+      'senzills, a les carpetes que triïs. Una nota és un fitxer '
+      '.md, i tot el que l’aplicació et mostra es construeix a '
+      'partir d’ells. Sense compte i sense un format nostre al qual '
+      'tornar.';
+  @override
+  String get welcomeModesTitle => 'Tres maneres d’escriure la mateixa nota';
+  @override
+  String get welcomeModesBody =>
+      'Escriu la font Markdown, escriu la nota tal com es llegeix '
+      '(l’editor en directe), o llegeix-la. És una sola nota facis '
+      'servir la que facis servir, i pots canviar per nota o per '
+      'tota la biblioteca.';
+  @override
+  String get welcomeLinksTitle => 'Tot es connecta';
+  @override
+  String get welcomeLinksBody =>
+      'Els wikilinks com [[aquest]] troben la seva nota mentre '
+      'escrius. Les etiquetes, el frontmatter i les plantilles '
+      'treuen del mig les parts que escrius una i altra vegada.';
+  @override
+  String get welcomeFindTitle => 'Torna-la a trobar';
+  @override
+  String get welcomeFindBody =>
+      'Cerca de text complet a la biblioteca, una paleta d’ordres '
+      'per a tot el que sap fer l’aplicació, i la nota ràpida a una '
+      'tecla.';
+  @override
+  String get welcomeExportTitle => 'Va amb tu';
+  @override
+  String get welcomeExportBody =>
+      'Exporta una nota o una carpeta sencera com a Markdown, HTML, '
+      'PDF o llibre EPUB. Porta una exportació del Notion, o obre '
+      'una volta d’Obsidian on ja és.';
+  @override
+  String get welcomeTasksTitle => 'Tasques i recordatoris';
+  @override
+  String get welcomeTasksBody =>
+      'Una llista todo.txt que guardes com a fitxer — prioritats, '
+      'projectes, terminis — i alarmes rem: que t’avisen quan '
+      'alguna cosa venç, al mòbil i a l’escriptori.';
+  @override
+  String get welcomeSyncTitle => 'Entre les teves màquines';
+  @override
+  String get welcomeSyncBody =>
+      'Apunta una biblioteca a una carpeta WebDAV — Nextcloud, '
+      'ownCloud, un NAS — i les edicions se sincronitzen en tots '
+      'dos sentits, fusionades línia a línia quan dos dispositius '
+      'han tocat la mateixa nota.';
+  @override
+  String get welcomeDeviceTitle => 'Niman en aquest dispositiu';
+  @override
+  String get welcomeAndroidBody =>
+      'Comparteix text o un fitxer amb el Niman des de qualsevol '
+      'aplicació, mantén una nota a la pantalla d’inici i '
+      'enregistra una nota de veu en lloc d’escriure.';
+  @override
+  String get welcomeDesktopBody =>
+      'Pestanyes i panells dividits, la safata del sistema, '
+      'arrossega i deixa anar a la finestra, i fitxers .md que '
+      'obren el Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Has escrit Markdown abans?';
+  @override
+  String get welcomeQuestionNote =>
+      'Això només decideix com arrenca l’aplicació. Pots activar o '
+      'desactivar qualsevol editor a Configuració → Editor quan '
+      'vulguis.';
+  @override
+  String get welcomeAnswerNone => 'Mai';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'L’editor en directe, i la font Markdown no s’ofereix fins '
+      'que l’activis.';
+  @override
+  String get welcomeAnswerSome => 'Una mica';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'L’editor en directe obre les notes; la font Markdown és a un '
+      'commutador.';
+  @override
+  String get welcomeAnswerFluent => 'Sempre';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'La font Markdown, tal com arriba l’aplicació.';
+  @override
+  String get welcomeTourOffer => 'Ensenya’m l’aplicació';
+  @override
+  String get welcomeTourOfferNote =>
+      'El recorregut comença quan la teva primera biblioteca és '
+      'oberta, i assenyala els controls reals.';
+  @override
+  String get welcomeDeckCommand => 'Què sap fer el Niman';
+  @override
+  String get welcomeTourCommand => 'Fes el recorregut';
+  @override
+  String get tourDone => 'Fet';
+  @override
+  String get tourOfferTitle => 'Et faig un recorregut?';
+  @override
+  String get tourOfferBody =>
+      'Uns quants passos per l’aplicació, assenyalant els controls '
+      'reals. Pots aturar-te a qualsevol pas i reprendre’l més tard '
+      'des de la paleta d’ordres.';
+  @override
+  String get tourOfferYes => 'Mostra’m';
+  @override
+  String get tourOfferNo => 'Ara no';
+  @override
+  String get tourTreeTitle => 'La teva biblioteca';
+  @override
+  String get tourTreeBody =>
+      'Aquesta és la carpeta que vas triar, carpeta per carpeta. '
+      'Tot el que facis a un fitxer fora del Niman apareix aquí tan '
+      'bon punt arriba.';
+  @override
+  String get tourCreateTitle => 'Crea una nota';
+  @override
+  String get tourCreateBody =>
+      'Notes, llistes, notes de veu, plantilles i carpetes comencen '
+      'totes aquí. El mateix menú apareix al mòbil com el botó '
+      'rodó.';
+  @override
+  String get tourNoteTitle => 'Una nota alhora';
+  @override
+  String get tourNoteBody =>
+      'La nota a la pantalla; les que has obert es queden en '
+      'pestanyes a sobre, i un segon panell es pot obrir al costat '
+      'en una finestra ampla.';
+  @override
+  String get tourModesTitle => 'Tres maneres d’escriure';
+  @override
+  String get tourModesBody =>
+      'Escriu la font Markdown, escriu-la tal com es llegeix, o '
+      'llegeix-la — aquest commutador és per nota, i la '
+      'configuració de la biblioteca decideix què s’obre.';
+  @override
+  String get tourToolbarTitle => 'La barra d’eines';
+  @override
+  String get tourToolbarBody =>
+      'Format a la línia on ets, i les mateixes accions amb el clic '
+      'dret. Cada construcció que el Niman llegeix és a la xitxa.';
+  @override
+  String get tourCheatsheetTitle => 'Cada construcció, escrita al costat';
+  @override
+  String get tourCheatsheetBody =>
+      'Aquesta és la xitxa. Cada exemple es pot copiar, i Insereix '
+      'el posa a la nota que tens oberta.';
+  @override
+  String get tourCheatsheetOpen => 'Obre-la';
+  @override
+  String get tourTabsTitle => 'Tot és una pestanya';
+  @override
+  String get tourTabsBody =>
+      'Fitxers, tasques, cerca, la nota ràpida, configuració. La '
+      'paleta d’ordres arriba a totes, i a cada ordre, des del '
+      'teclat.';
+  @override
+  String get tourDockTitle => 'Esquema, etiquetes, historial';
+  @override
+  String get tourDockBody =>
+      'L’esquema de la nota, les seves etiquetes i les seves '
+      'versions passades, al costat. Al mòbil el menú de la nota '
+      'obre els mateixos tres.';
+  @override
+  String welcomePageOf(int page, int of) => '$page de $of';
 }

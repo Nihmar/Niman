@@ -2506,4 +2506,187 @@ final class FinnishStrings extends Strings {
   String get syncMergeSave => 'Tallenna yhdistelmä';
   @override
   String get syncMergeKeepWhole => 'Tai säilytä yksi kokonainen kopio';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Ohita';
+  @override
+  String get welcomeNext => 'Seuraava';
+  @override
+  String get welcomeBack => 'Takaisin';
+  @override
+  String get welcomeStart => 'Aloita kirjoittaminen';
+  @override
+  String get welcomeClose => 'Sulje';
+  @override
+  String get welcomeNotesTitle => 'Muistiinpanosi ovat tiedostoja';
+  @override
+  String get welcomeNotesBody =>
+      'Niman pitää muistiinpanosi tavallisina Markdown-tiedostoina '
+      'valitsemissasi kansioissa. Yksi muistiinpano on yksi '
+      '.md-tiedosto, ja kaikki, mitä sovellus näyttää, on '
+      'rakennettu niistä. Ei tiliä eikä omaa muotoa, johon palata.';
+  @override
+  String get welcomeModesTitle => 'Kolme tapaa kirjoittaa sama muistiinpano';
+  @override
+  String get welcomeModesBody =>
+      'Kirjoita Markdown-lähde, kirjoita muistiinpano niin kuin se '
+      'luetaan (live-editori) tai lue se. Se on yksi muistiinpano '
+      'valitsitpa minkä tahansa, ja voit vaihtaa muistiinpanoittain '
+      'tai koko kirjastolle.';
+  @override
+  String get welcomeLinksTitle => 'Kaikki liittyy toisiinsa';
+  @override
+  String get welcomeLinksBody =>
+      'Wikilinkit kuten [[tämä]] löytävät muistiinpanonsa '
+      'kirjoittaessasi. Tunnisteet, frontmatter ja mallineet '
+      'pitävät poissa ne osat, jotka kirjoitat aina uudelleen.';
+  @override
+  String get welcomeFindTitle => 'Löydä se taas';
+  @override
+  String get welcomeFindBody =>
+      'Koko tekstin haku kirjastosta, komentopaletti kaikkeen, mitä '
+      'sovellus osaa, ja pikamuistiinpano yhden näppäimen päässä.';
+  @override
+  String get welcomeExportTitle => 'Se kulkee mukanasi';
+  @override
+  String get welcomeExportBody =>
+      'Vie muistiinpano tai koko kansio Markdownina, HTML:nä, '
+      'PDF:nä tai EPUB-kirjana. Tuo Notion-vienti tai avaa '
+      'Obsidian-holvi siellä, missä se jo on.';
+  @override
+  String get welcomeTasksTitle => 'Tehtävät ja muistutukset';
+  @override
+  String get welcomeTasksBody =>
+      'todo.txt-lista, jota pidät tiedostona — tärkeysjärjestys, '
+      'projektit, eräpäivät — ja rem:-hälytykset, jotka '
+      'varoittavat, kun jotain on erääntymässä, puhelimessa ja '
+      'työpöydällä.';
+  @override
+  String get welcomeSyncTitle => 'Koneidesi välillä';
+  @override
+  String get welcomeSyncBody =>
+      'Osoita kirjasto WebDAV-kansioon — Nextcloud, ownCloud, NAS — '
+      'ja muutokset synkronoituvat molempiin suuntiin, rivi riviltä '
+      'yhdistettyinä, kun kaksi laitetta on koskenut samaa '
+      'muistiinpanoa.';
+  @override
+  String get welcomeDeviceTitle => 'Niman tällä laitteella';
+  @override
+  String get welcomeAndroidBody =>
+      'Jaa tekstiä tai tiedosto Nimanille mistä tahansa '
+      'sovelluksesta, pidä muistiinpano aloitusnäytöllä ja äänitä '
+      'muistiinpano kirjoittamisen sijaan.';
+  @override
+  String get welcomeDesktopBody =>
+      'Välilehdet ja jaetut paneelit, järjestelmän ilmaisinalue, '
+      'vetäminen ja pudottaminen ikkunaan sekä .md-tiedostot, jotka '
+      'avaavat Nimanin.';
+  @override
+  String get welcomeQuestionTitle => 'Oletko kirjoittanut Markdownia ennen?';
+  @override
+  String get welcomeQuestionNote =>
+      'Tämä määrää vain, miten sovellus käynnistyy. Voit kytkeä '
+      'minkä tahansa editorin päälle tai pois kohdassa Asetukset → '
+      'Editori milloin tahansa.';
+  @override
+  String get welcomeAnswerNone => 'En koskaan';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Live-editori, ja Markdown-lähdettä ei tarjota ennen kuin '
+      'kytket sen päälle.';
+  @override
+  String get welcomeAnswerSome => 'Vähän';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Live-editori avaa muistiinpanot; Markdown-lähde on yhden '
+      'kytkimen päässä.';
+  @override
+  String get welcomeAnswerFluent => 'Koko ajan';
+  @override
+  String get welcomeAnswerFluentHint =>
+      'Markdown-lähde, sellaisena kuin sovellus tulee.';
+  @override
+  String get welcomeTourOffer => 'Näytä minulle sovellus';
+  @override
+  String get welcomeTourOfferNote =>
+      'Kierros alkaa, kun ensimmäinen kirjastosi on auki, ja '
+      'osoittaa oikeisiin säätimiin.';
+  @override
+  String get welcomeDeckCommand => 'Mitä Niman osaa';
+  @override
+  String get welcomeTourCommand => 'Tee kierros';
+  @override
+  String get tourDone => 'Valmis';
+  @override
+  String get tourOfferTitle => 'Näytänkö sinulle?';
+  @override
+  String get tourOfferBody =>
+      'Muutama askel sovelluksen läpi oikeisiin säätimiin '
+      'osoittaen. Voit pysähtyä mihin tahansa askeleeseen ja jatkaa '
+      'myöhemmin komentopaletista.';
+  @override
+  String get tourOfferYes => 'Näytä';
+  @override
+  String get tourOfferNo => 'Ei nyt';
+  @override
+  String get tourTreeTitle => 'Kirjastosi';
+  @override
+  String get tourTreeBody =>
+      'Tämä on valitsemasi kansio, kansio kansiolta. Kaikki, mitä '
+      'teet tiedostolle Nimanin ulkopuolella, näkyy täällä heti kun '
+      'se saapuu.';
+  @override
+  String get tourCreateTitle => 'Tee muistiinpano';
+  @override
+  String get tourCreateBody =>
+      'Muistiinpanot, listat, äänimuistiinpanot, mallineet ja '
+      'kansiot alkavat kaikki täältä. Sama valikko näkyy '
+      'puhelimessa pyöreänä painikkeena.';
+  @override
+  String get tourNoteTitle => 'Yksi muistiinpano kerrallaan';
+  @override
+  String get tourNoteBody =>
+      'Muistiinpano ruudulla; avaamasi jäävät välilehtiin sen '
+      'yläpuolelle, ja toinen paneeli voi avautua viereen leveässä '
+      'ikkunassa.';
+  @override
+  String get tourModesTitle => 'Kolme tapaa kirjoittaa';
+  @override
+  String get tourModesBody =>
+      'Kirjoita Markdown-lähde, kirjoita se niin kuin se luetaan '
+      'tai lue se — tämä kytkin on muistiinpanokohtainen, ja '
+      'kirjaston asetus päättää, mikä avautuu.';
+  @override
+  String get tourToolbarTitle => 'Työkalupalkki';
+  @override
+  String get tourToolbarBody =>
+      'Muotoilu rivillä, jolla olet, ja samat toiminnot oikealla '
+      'napsautuksella. Jokainen rakenne, jonka Niman lukee, on '
+      'lunttilapussa.';
+  @override
+  String get tourCheatsheetTitle => 'Jokainen rakenne, viereen kirjoitettuna';
+  @override
+  String get tourCheatsheetBody =>
+      'Tämä on lunttilappu. Jokainen esimerkki voidaan kopioida, ja '
+      'Lisää sijoittaa sen avoinna olevaan muistiinpanoon.';
+  @override
+  String get tourCheatsheetOpen => 'Avaa se';
+  @override
+  String get tourTabsTitle => 'Kaikki on välilehti';
+  @override
+  String get tourTabsBody =>
+      'Tiedostot, tehtävät, haku, pikamuistiinpano, asetukset. '
+      'Komentopaletti tavoittaa ne kaikki, ja jokaisen komennon, '
+      'näppäimistöltä.';
+  @override
+  String get tourDockTitle => 'Jäsennys, tunnisteet, historia';
+  @override
+  String get tourDockBody =>
+      'Muistiinpanon jäsennys, sen tunnisteet ja aiemmat versiot, '
+      'vieressä. Puhelimessa muistiinpanon valikko avaa samat '
+      'kolme.';
+  @override
+  String welcomePageOf(int page, int of) => '$page / $of';
 }

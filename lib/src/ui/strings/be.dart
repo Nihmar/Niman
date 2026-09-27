@@ -2525,4 +2525,180 @@ final class BelarusianStrings extends Strings {
   String get syncMergeSave => 'Захаваць аб’яднанне';
   @override
   String get syncMergeKeepWhole => 'Або пакінуць адну цэлую копію';
+
+  // The welcome deck and the guided tour (#308).
+
+  @override
+  String get welcomeSkip => 'Прапусціць';
+  @override
+  String get welcomeNext => 'Далей';
+  @override
+  String get welcomeBack => 'Назад';
+  @override
+  String get welcomeStart => 'Пачаць пісаць';
+  @override
+  String get welcomeClose => 'Закрыць';
+  @override
+  String get welcomeNotesTitle => 'Твае заўвагі — гэта файлы';
+  @override
+  String get welcomeNotesBody =>
+      'Niman трымае твае заўвагі як звычайныя файлы Markdown у '
+      'папках, якія ты выбіраеш. Адна заўвага — адзін .md файл, і '
+      'ўсё, што паказвае праграма, пабудавана з іх. Без акаўнта і '
+      'без нашага фармату, да якога давялося б вяртацца.';
+  @override
+  String get welcomeModesTitle => 'Тры спосабы напісаць тую ж заўвагу';
+  @override
+  String get welcomeModesBody =>
+      'Пішы крыніцу Markdown, пішы заўвагу так, як яна чытаецца '
+      '(жывы рэдактар), або чытай яе. Гэта адна заўвага, якую б ты '
+      'ні ўзяў, і можна перамыкаць для заўвагі ці для ўсёй '
+      'бібліятэкі.';
+  @override
+  String get welcomeLinksTitle => 'Усё звязваецца';
+  @override
+  String get welcomeLinksBody =>
+      'Вікіспасылкі як [[гэтая]] знаходзяць сваю заўвагу, пакуль ты '
+      'пішаш. Мэткі, frontmatter і шаблоны трымаюць убаку тое, што '
+      'ты пішаш зноў і зноў.';
+  @override
+  String get welcomeFindTitle => 'Знайдзі яе зноў';
+  @override
+  String get welcomeFindBody =>
+      'Поўнатэкставы пошук у бібліятэцы, палітра каманд для ўсяго, '
+      'што ўмее праграма, і хуткая заўвага на адну клавішу.';
+  @override
+  String get welcomeExportTitle => 'Яна ідзе з табой';
+  @override
+  String get welcomeExportBody =>
+      'Экспартуй заўвагу або цэлую папку як Markdown, HTML, PDF ці '
+      'кнігу EPUB. Імпартуй экспарт з Notion або адкрый сховішча '
+      'Obsidian там, дзе яно ўжо ёсць.';
+  @override
+  String get welcomeTasksTitle => 'Задачы і напаміны';
+  @override
+  String get welcomeTasksBody =>
+      'Спіс todo.txt, які ты трымаеш як файл — прыярытэты, праекты, '
+      'тэрміны — і сігналы rem:, што папярэджваюць, калі нешта на '
+      'часе, на тэлефоне і на камп’ютары.';
+  @override
+  String get welcomeSyncTitle => 'Паміж тваімі машынамі';
+  @override
+  String get welcomeSyncBody =>
+      'Накіруй бібліятэку на папку WebDAV — Nextcloud, ownCloud, '
+      'NAS — і змены сінхранізуюцца ў абодва бакі, злітыя радок за '
+      'радком, калі дзве прылады дакрануліся да той самай заўвагі.';
+  @override
+  String get welcomeDeviceTitle => 'Niman на гэтай прыладзе';
+  @override
+  String get welcomeAndroidBody =>
+      'Дзяліся тэкстам ці файлам у Niman з любой праграмы, трымай '
+      'заўвагу на галоўным экране і запісвай галасавую заўвагу '
+      'замест таго, каб друкаваць.';
+  @override
+  String get welcomeDesktopBody =>
+      'Укладкі і падзеленыя панэлі, сістэмны латок, перацягванне на '
+      'акно і .md файлы, што адкрываюць Niman.';
+  @override
+  String get welcomeQuestionTitle => 'Ты ўжо пісаў Markdown?';
+  @override
+  String get welcomeQuestionNote =>
+      'Гэта вызначае толькі тое, як запускаецца праграма. Любы '
+      'рэдактар можна ўключыць ці выключыць у Налады → Рэдактар у '
+      'любы час.';
+  @override
+  String get welcomeAnswerNone => 'Ніколі';
+  @override
+  String get welcomeAnswerNoneHint =>
+      'Жывы рэдактар, а крыніца Markdown не прапануецца, пакуль ты '
+      'яе не ўключыш.';
+  @override
+  String get welcomeAnswerSome => 'Трохі';
+  @override
+  String get welcomeAnswerSomeHint =>
+      'Жывы рэдактар адкрывае заўвагі; крыніца Markdown — за адзін '
+      'перамыкач.';
+  @override
+  String get welcomeAnswerFluent => 'Пастаянна';
+  @override
+  String get welcomeAnswerFluentHint => 'Крыніца Markdown, як ідзе праграма.';
+  @override
+  String get welcomeTourOffer => 'Пакажы мне праграму';
+  @override
+  String get welcomeTourOfferNote =>
+      'Агляд пачынаецца, калі твая першая бібліятэка адкрыта, і '
+      'паказвае на сапраўдныя элементы кіравання.';
+  @override
+  String get welcomeDeckCommand => 'Што ўмее Niman';
+  @override
+  String get welcomeTourCommand => 'Прайсці агляд';
+  @override
+  String get tourDone => 'Гатова';
+  @override
+  String get tourOfferTitle => 'Правесці цябе?';
+  @override
+  String get tourOfferBody =>
+      'Некалькі крокаў праграмай, што паказваюць на сапраўдныя '
+      'элементы кіравання. Можаш спыніцца на любым кроку і '
+      'працягнуць пазней з палітры каманд.';
+  @override
+  String get tourOfferYes => 'Пакажы';
+  @override
+  String get tourOfferNo => 'Не зараз';
+  @override
+  String get tourTreeTitle => 'Твая бібліятэка';
+  @override
+  String get tourTreeBody =>
+      'Гэта папка, якую ты выбраў, папка за папкай. Усё, што ты '
+      'робіш з файлам па-за Niman, з’яўляецца тут у тую ж хвіліну, '
+      'калі прыходзіць.';
+  @override
+  String get tourCreateTitle => 'Ствары заўвагу';
+  @override
+  String get tourCreateBody =>
+      'Заўвагі, спісы, галасавыя заўвагі, шаблоны і папкі '
+      'пачынаюцца ўсе тут. Тое ж меню з’яўляецца на тэлефоне як '
+      'круглая кнопка.';
+  @override
+  String get tourNoteTitle => 'Адна заўвага за раз';
+  @override
+  String get tourNoteBody =>
+      'Заўвага на экране; адкрытыя застаюцца ва ўкладках над ёй, а '
+      'ў шырокім акне побач можа адкрыцца другая панэль.';
+  @override
+  String get tourModesTitle => 'Тры спосабы пісаць';
+  @override
+  String get tourModesBody =>
+      'Пішы крыніцу Markdown, пішы яе так, як чытаецца, або чытай '
+      'яе — гэты перамыкач для заўвагі, а налада бібліятэкі '
+      'вырашае, што адкрываецца.';
+  @override
+  String get tourToolbarTitle => 'Панэль інструментаў';
+  @override
+  String get tourToolbarBody =>
+      'Фарматаванне ў радку, у якім ты, і тыя ж дзеянні правай '
+      'кнопкай. Кожная канструкцыя, якую чытае Niman, ёсць у '
+      'шпаргалцы.';
+  @override
+  String get tourCheatsheetTitle => 'Кожная канструкцыя, напісаная побач';
+  @override
+  String get tourCheatsheetBody =>
+      'Гэта шпаргалка. Кожны прыклад можна скапіраваць, а Уставіць '
+      'дадае яго ў адкрытую заўвагу.';
+  @override
+  String get tourCheatsheetOpen => 'Адкрый яе';
+  @override
+  String get tourTabsTitle => 'Усё — гэта ўкладка';
+  @override
+  String get tourTabsBody =>
+      'Файлы, задачы, пошук, хуткая заўвага, налады. Палітра каманд '
+      'дастае да ўсіх, і да кожнай каманды, з клавіятуры.';
+  @override
+  String get tourDockTitle => 'Структура, мэткі, гісторыя';
+  @override
+  String get tourDockBody =>
+      'Структура заўвагі, яе мэткі і яе мінулыя версіі, побач. На '
+      'тэлефоне меню заўвагі адкрывае тыя ж тры.';
+  @override
+  String welcomePageOf(int page, int of) => '$page з $of';
 }
