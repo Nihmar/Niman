@@ -153,29 +153,26 @@ final changelogUpdateProvider = FutureProvider<List<ChangelogVersion>?>((
   try {
     final version = await ref.watch(appVersionProvider.future);
     final entries = await ref.watch(changelogProvider.future);
-    final db = await defaultAppDatabase();
-    try {
-      final repo = AppSettingsRepo(db);
-      final seen = await repo.changelogSeenVersion();
-      if (seen == null) {
-        await repo.setChangelogSeenVersion(version);
-        return null;
-      }
-      final fresh = entries
-          .where(
-            (entry) =>
-                isNewerVersion(entry.version, seen) &&
-                // An entry ahead of this build (the file was updated for
-                // the next tag) is not news yet.
-                !isNewerVersion(version, entry.version),
-          )
-          .toList();
-      if (fresh.isEmpty) return null;
+    // The app's one settings connection (#312): the session and the welcome
+    // gate hold the same one, so this must not close it.
+    final repo = AppSettingsRepo(await defaultAppDatabase());
+    final seen = await repo.changelogSeenVersion();
+    if (seen == null) {
       await repo.setChangelogSeenVersion(version);
-      return fresh;
-    } finally {
-      await db.close();
+      return null;
     }
+    final fresh = entries
+        .where(
+          (entry) =>
+              isNewerVersion(entry.version, seen) &&
+              // An entry ahead of this build (the file was updated for
+              // the next tag) is not news yet.
+              !isNewerVersion(version, entry.version),
+        )
+        .toList();
+    if (fresh.isEmpty) return null;
+    await repo.setChangelogSeenVersion(version);
+    return fresh;
   } on Object catch (error) {
     const AppLogger(name: 'changelog')
         .warning('update notice skipped ($error)');

@@ -2,8 +2,21 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart';
 
 part 'app_database.g.dart';
+
+/// The connection setup the app settings database opens with: a busy
+/// timeout, and WAL (a reader does not block the writer).
+///
+/// Both are what the migration's waiting leans on ([AppDatabase._migrating]):
+/// the busy timeout for sqlite's own retries inside a lock attempt, WAL so
+/// a connection that only reads is never held up by the migration.
+void appDatabaseSetup(Database db) {
+  db
+    ..execute('PRAGMA busy_timeout = 5000')
+    ..execute('PRAGMA journal_mode = WAL');
+}
 
 /// Global app settings; a single row (id 1).
 class AppSettings extends Table {
@@ -495,10 +508,15 @@ class AppDatabase extends _$AppDatabase {
   /// table rather than at the number.
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async {
+    onCreate: (m) => _migrating(() async {
+      // A second connection can arrive here on a fresh file while this one
+      // waited for the lock, and the database that opener made is complete:
+      // there is nothing left to create.
+      if (await _stamped()) return;
       await m.createAll();
       await _createCustomThemeNameIndex(m);
-    },
+      await _stamp();
+    }),
     onUpgrade: (m, from, to) async {
       // Drift calls this for a downgrade too, and then writes the older
       // version over the newer one: a release opening a testing build's
@@ -511,242 +529,342 @@ class AppDatabase extends _$AppDatabase {
           'it was opened by a newer build',
         );
       }
-      if (from == 1) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN debug_logs_enabled '
-          'BOOLEAN NOT NULL DEFAULT 1',
-        );
-      }
-      if (from < 3) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN line_numbers '
-          'BOOLEAN NOT NULL DEFAULT 1',
-        );
-      }
-      if (from < 4) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN editor_autofocus '
-          'BOOLEAN NOT NULL DEFAULT 0',
-        );
-      }
-      if (from < 5) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN preview_mode '
-          "TEXT NOT NULL DEFAULT 'auto'",
-        );
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN split_ratio '
-          'REAL NOT NULL DEFAULT 0.55',
-        );
-      }
-      if (from < 6) {
-        await m.database.customStatement(
-          'ALTER TABLE library_settings ADD COLUMN quick_note_path TEXT',
-        );
-      }
-      if (from < 7) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN tree_sort '
-          "TEXT NOT NULL DEFAULT 'nameAsc'",
-        );
-      }
-      // v8 created the M3 index tables here. v15 drops them from this
-      // database, so an old enough upgrade skips straight to that: the
-      // library's own index file is built by the scan on its first open.
-      if (from < 9) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN reminder_show_tokens '
-          'BOOLEAN NOT NULL DEFAULT 0',
-        );
-      }
-      if (from < 10) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN link_type '
-          "TEXT NOT NULL DEFAULT 'wikilink'",
-        );
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN indent_width '
-          'INTEGER NOT NULL DEFAULT 2',
-        );
-      }
-      if (from < 11) {
-        await m.database.customStatement(
-          'ALTER TABLE library_settings ADD COLUMN list_note_folder '
-          "TEXT NOT NULL DEFAULT 'Lists'",
-        );
-      }
-      if (from < 12) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN editor_toolbar '
-          "TEXT NOT NULL DEFAULT ''",
-        );
-      }
-      if (from < 13) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN language '
-          "TEXT NOT NULL DEFAULT 'system'",
-        );
-      }
-      if (from < 14) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN legacy_library_settings '
-          "TEXT NOT NULL DEFAULT ''",
-        );
-        await _parkLibrarySettings(m.database);
-        await m.database.customStatement(
-          'DROP TABLE IF EXISTS library_settings',
-        );
-      }
-      if (from < 15) {
-        for (final table in _indexTables) {
-          await m.database.customStatement('DROP TABLE IF EXISTS $table');
-        }
-        await m.database.customStatement('VACUUM');
-      }
-      if (from < 16) {
-        await m.createTable(knownLibraries);
-        await _seedRegistry();
-      }
-      if (from < 17) {
-        await _parkEditorSettings();
-        for (final column in _librarySettingColumns) {
+      await _migrating(() async {
+        // An opener that waited for the lock finds the upgrade already
+        // done — the columns and the number together — and runs nothing
+        // (see [_migrating]).
+        if (await _stamped()) return;
+        if (from == 1) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings DROP COLUMN $column',
+            'ALTER TABLE app_settings ADD COLUMN debug_logs_enabled '
+            'BOOLEAN NOT NULL DEFAULT 1',
           );
         }
-      }
-      if (from < 18) {
-        for (final column in ['theme_brightness', 'theme_palette']) {
+        if (from < 3) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings ADD COLUMN $column '
+            'ALTER TABLE app_settings ADD COLUMN line_numbers '
+            'BOOLEAN NOT NULL DEFAULT 1',
+          );
+        }
+        if (from < 4) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN editor_autofocus '
+            'BOOLEAN NOT NULL DEFAULT 0',
+          );
+        }
+        if (from < 5) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN preview_mode '
+            "TEXT NOT NULL DEFAULT 'auto'",
+          );
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN split_ratio '
+            'REAL NOT NULL DEFAULT 0.55',
+          );
+        }
+        if (from < 6) {
+          await m.database.customStatement(
+            'ALTER TABLE library_settings ADD COLUMN quick_note_path TEXT',
+          );
+        }
+        if (from < 7) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN tree_sort '
+            "TEXT NOT NULL DEFAULT 'nameAsc'",
+          );
+        }
+        // v8 created the M3 index tables here. v15 drops them from this
+        // database, so an old enough upgrade skips straight to that: the
+        // library's own index file is built by the scan on its first open.
+        if (from < 9) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN reminder_show_tokens '
+            'BOOLEAN NOT NULL DEFAULT 0',
+          );
+        }
+        if (from < 10) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN link_type '
+            "TEXT NOT NULL DEFAULT 'wikilink'",
+          );
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN indent_width '
+            'INTEGER NOT NULL DEFAULT 2',
+          );
+        }
+        if (from < 11) {
+          await m.database.customStatement(
+            'ALTER TABLE library_settings ADD COLUMN list_note_folder '
+            "TEXT NOT NULL DEFAULT 'Lists'",
+          );
+        }
+        if (from < 12) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN editor_toolbar '
+            "TEXT NOT NULL DEFAULT ''",
+          );
+        }
+        if (from < 13) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN language '
             "TEXT NOT NULL DEFAULT 'system'",
           );
         }
-      }
-      if (from < 19) {
-        await m.createTable(widgetConfigs);
-      }
-      if (from < 20) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN changelog_seen_version TEXT',
-        );
-        await m.database.customStatement(
-          "UPDATE app_settings SET changelog_seen_version = '0.0.3' "
-          'WHERE id = 1',
-        );
-      }
-      if (from < 21) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN auto_update_enabled '
-          'BOOLEAN NOT NULL DEFAULT 0',
-        );
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN last_update_check_ms '
-          'INTEGER',
-        );
-      }
-      if (from < 22) {
-        await m.createTable(syncDestinations);
-        await m.createTable(syncItems);
-        await m.createTable(syncOps);
-      }
-      if (from < 23) {
-        await m.createTable(workspaces);
-      }
-      if (from < 24) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN key_map TEXT',
-        );
-      }
-      if (from < 25) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN pinned_commands TEXT',
-        );
-      }
-      if (from < 26) {
-        await m.database.customStatement(
-          'ALTER TABLE app_settings ADD COLUMN close_to_tray '
-          'BOOLEAN NOT NULL DEFAULT 1',
-        );
-      }
-      // v27–v29 look before they act: see the note above the strategy.
-      if (from < 29) {
-        final existing = await _columnsOf('app_settings');
-        for (final column in ['preview_mode', 'split_ratio']) {
-          if (!existing.contains(column)) continue;
+        if (from < 14) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings DROP COLUMN $column',
+            'ALTER TABLE app_settings ADD COLUMN legacy_library_settings '
+            "TEXT NOT NULL DEFAULT ''",
+          );
+          await _parkLibrarySettings(m.database);
+          await m.database.customStatement(
+            'DROP TABLE IF EXISTS library_settings',
           );
         }
-      }
-      if (from < 29 && !await _hasTable('library_device_settings')) {
-        await m.createTable(libraryDeviceSettings);
-      }
-      // Only on a table that was already there: below v22 it was just
-      // created, with the column.
-      if (from >= 22 &&
-          from < 29 &&
-          !(await _columnsOf('sync_items')).contains('base_text')) {
-        await m.database.customStatement(
-          'ALTER TABLE sync_items ADD COLUMN base_text TEXT',
-        );
-      }
-      // A themes testing build stamped v27 with the table already made.
-      if (from < 30) {
-        if (!await _hasTable('custom_themes')) {
-          await m.createTable(customThemes);
+        if (from < 15) {
+          for (final table in _indexTables) {
+            await m.database.customStatement('DROP TABLE IF EXISTS $table');
+          }
         }
-        await _createCustomThemeNameIndex(m);
-      }
-      if (from < 31) {
-        // The first-run welcome (#266). An upgrading install has opened
-        // Niman before — it has a library and a way of writing — so its
-        // existing row is marked as welcomed just after the columns are
-        // made; only a fresh database starts unseen and is welcomed.
-        //
-        // The columns keep the defaults the drift table declares: the
-        // upgrade is a value written into the row, not a different DDL
-        // default that would outlive the upgrade in the schema.
-        final existing = await _columnsOf('app_settings');
-        var addedWelcomeSeen = false;
-        if (!existing.contains('welcome_seen')) {
+        if (from < 16) {
+          await m.createTable(knownLibraries);
+          await _seedRegistry();
+        }
+        if (from < 17) {
+          await _parkEditorSettings();
+          for (final column in _librarySettingColumns) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings DROP COLUMN $column',
+            );
+          }
+        }
+        if (from < 18) {
+          for (final column in ['theme_brightness', 'theme_palette']) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings ADD COLUMN $column '
+              "TEXT NOT NULL DEFAULT 'system'",
+            );
+          }
+        }
+        if (from < 19) {
+          await m.createTable(widgetConfigs);
+        }
+        if (from < 20) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings ADD COLUMN welcome_seen '
+            'ALTER TABLE app_settings ADD COLUMN changelog_seen_version TEXT',
+          );
+          await m.database.customStatement(
+            "UPDATE app_settings SET changelog_seen_version = '0.0.3' "
+            'WHERE id = 1',
+          );
+        }
+        if (from < 21) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN auto_update_enabled '
             'BOOLEAN NOT NULL DEFAULT 0',
           );
-          addedWelcomeSeen = true;
-        }
-        if (!existing.contains('markdown_experience')) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings ADD COLUMN markdown_experience TEXT',
+            'ALTER TABLE app_settings ADD COLUMN last_update_check_ms '
+            'INTEGER',
           );
         }
-        if (!existing.contains('tour_seen')) {
+        if (from < 22) {
+          await m.createTable(syncDestinations);
+          await m.createTable(syncItems);
+          await m.createTable(syncOps);
+        }
+        if (from < 23) {
+          await m.createTable(workspaces);
+        }
+        if (from < 24) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings ADD COLUMN tour_seen '
-            'BOOLEAN NOT NULL DEFAULT 0',
+            'ALTER TABLE app_settings ADD COLUMN key_map TEXT',
           );
         }
-        if (!existing.contains('tour_step')) {
+        if (from < 25) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings ADD COLUMN tour_step '
-            'INTEGER NOT NULL DEFAULT 0',
+            'ALTER TABLE app_settings ADD COLUMN pinned_commands TEXT',
           );
         }
-        if (!existing.contains('tour_offer')) {
+        if (from < 26) {
           await m.database.customStatement(
-            'ALTER TABLE app_settings ADD COLUMN tour_offer '
-            'BOOLEAN NOT NULL DEFAULT 0',
+            'ALTER TABLE app_settings ADD COLUMN close_to_tray '
+            'BOOLEAN NOT NULL DEFAULT 1',
           );
         }
-        if (addedWelcomeSeen) {
+        // v27–v29 look before they act: see the note above the strategy.
+        if (from < 29) {
+          final existing = await _columnsOf('app_settings');
+          for (final column in ['preview_mode', 'split_ratio']) {
+            if (!existing.contains(column)) continue;
+            await m.database.customStatement(
+              'ALTER TABLE app_settings DROP COLUMN $column',
+            );
+          }
+        }
+        if (from < 29 && !await _hasTable('library_device_settings')) {
+          await m.createTable(libraryDeviceSettings);
+        }
+        // Only on a table that was already there: below v22 it was just
+        // created, with the column.
+        if (from >= 22 &&
+            from < 29 &&
+            !(await _columnsOf('sync_items')).contains('base_text')) {
           await m.database.customStatement(
-            'UPDATE app_settings SET welcome_seen = 1',
+            'ALTER TABLE sync_items ADD COLUMN base_text TEXT',
           );
         }
+        // A themes testing build stamped v27 with the table already made.
+        if (from < 30) {
+          if (!await _hasTable('custom_themes')) {
+            await m.createTable(customThemes);
+          }
+          await _createCustomThemeNameIndex(m);
+        }
+        if (from < 31) {
+          // The first-run welcome (#266). An upgrading install has opened
+          // Niman before — it has a library and a way of writing — so its
+          // existing row is marked as welcomed just after the columns are
+          // made; only a fresh database starts unseen and is welcomed.
+          //
+          // The columns keep the defaults the drift table declares: the
+          // upgrade is a value written into the row, not a different DDL
+          // default that would outlive the upgrade in the schema.
+          final existing = await _columnsOf('app_settings');
+          var addedWelcomeSeen = false;
+          if (!existing.contains('welcome_seen')) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings ADD COLUMN welcome_seen '
+              'BOOLEAN NOT NULL DEFAULT 0',
+            );
+            addedWelcomeSeen = true;
+          }
+          if (!existing.contains('markdown_experience')) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings ADD COLUMN markdown_experience TEXT',
+            );
+          }
+          if (!existing.contains('tour_seen')) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings ADD COLUMN tour_seen '
+              'BOOLEAN NOT NULL DEFAULT 0',
+            );
+          }
+          if (!existing.contains('tour_step')) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings ADD COLUMN tour_step '
+              'INTEGER NOT NULL DEFAULT 0',
+            );
+          }
+          if (!existing.contains('tour_offer')) {
+            await m.database.customStatement(
+              'ALTER TABLE app_settings ADD COLUMN tour_offer '
+              'BOOLEAN NOT NULL DEFAULT 0',
+            );
+          }
+          if (addedWelcomeSeen) {
+            await m.database.customStatement(
+              'UPDATE app_settings SET welcome_seen = 1',
+            );
+          }
+        }
+        // The whole chain is in the file now, with the number that says so
+        // (see [_migrating]).
+        await _stamp();
+      });
+    },
+    beforeOpen: (details) async {
+      final before = details.versionBefore;
+      // v15 drops the six index tables this database used to carry, and the
+      // space they held comes back here — the one place that runs after the
+      // migration's transaction, because a VACUUM cannot run inside one
+      // (#312). A fresh database has nothing to reclaim.
+      if (before != null && before < 15) {
+        await customStatement('VACUUM');
       }
     },
   );
+
+  /// Runs a migration [body] with the file's write lock held, in one
+  /// transaction, and leaves the file stamped with this schema version.
+  ///
+  /// One migrator per file is the invariant this keeps. The lock is taken
+  /// with `BEGIN IMMEDIATE`, before the steps look at the schema, because a
+  /// second connection has to read the version *after* the first one
+  /// committed: without it both read the same old schema and the one that
+  /// lost its turn came out of its `ALTER` with `duplicate column name` —
+  /// the crash on the first launch after the 0.1.0 → 0.1.1 update, when the
+  /// welcome gate, the update notice and the session each opened their own
+  /// connection (#312).
+  ///
+  /// The version is written here rather than left to drift's own stamp
+  /// after the callback returned, because drift writes that one *outside*
+  /// the transaction: a connection waiting on the lock would otherwise see
+  /// the new columns under the old number and run steps that are already
+  /// applied. Drift writes the same number again afterwards.
+  ///
+  /// The waiting itself is in Dart, not in sqlite's busy handler: the two
+  /// connections of one Niman run on one isolate, so a blocking wait inside
+  /// sqlite would starve the very migration it is waiting for (its lock
+  /// attempt gives up after about sixty milliseconds). Sleeping here lets
+  /// the other migration commit; the next attempt then reads the version it
+  /// stamped and runs nothing.
+  ///
+  /// A step that throws rolls the whole migration back: a file that cannot
+  /// be upgraded is left exactly as it was, instead of half stepped
+  /// through — which is the state the column guards tolerate, but not one
+  /// the app should be producing.
+  Future<void> _migrating(Future<void> Function() body) async {
+    for (var attempt = 1; ; attempt++) {
+      try {
+        await _migrateOnce(body);
+        return;
+      } on SqliteException catch (error) {
+        if (attempt >= _migrationTries || !_isFileLocked(error)) rethrow;
+        await Future<void>.delayed(_migrationWait);
+      }
+    }
+  }
+
+  /// One migration attempt: the lock, [body], the version stamp.
+  Future<void> _migrateOnce(Future<void> Function() body) async {
+    await customStatement('BEGIN IMMEDIATE');
+    try {
+      await body();
+      await customStatement('COMMIT');
+    } on Object {
+      try {
+        await customStatement('ROLLBACK');
+      } on Object {
+        // The failing statement took the transaction down with it; there
+        // is nothing left to roll back.
+      }
+      rethrow;
+    }
+  }
+
+  /// How many times a migration waits for another opener's, [_migrationWait]
+  /// apart: about five seconds, the budget the connections' busy timeout
+  /// allows sqlite's own retries.
+  static const int _migrationTries = 200;
+  static const Duration _migrationWait = Duration(milliseconds: 25);
+
+  /// Whether [error] says another connection holds the file's write lock:
+  /// sqlite's `SQLITE_BUSY` and `SQLITE_LOCKED` (sqlite.org/rescode.html).
+  static bool _isFileLocked(SqliteException error) =>
+      error.resultCode == 5 || error.resultCode == 6;
+
+  /// Whether the file already carries this schema version.
+  ///
+  /// Read inside the migration's own transaction, so the answer arrives
+  /// together with the columns the number describes.
+  Future<bool> _stamped() async {
+    final rows = await customSelect('PRAGMA user_version').get();
+    return rows.single.read<int>('user_version') >= schemaVersion;
+  }
+
+  /// Stamps this schema version inside the migration's transaction.
+  Future<void> _stamp() =>
+      customStatement('PRAGMA user_version = $schemaVersion');
 
   /// Whether the database has a table called [name].
   Future<bool> _hasTable(String name) async {
