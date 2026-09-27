@@ -2701,4 +2701,13 @@ final class BelarusianStrings extends Strings {
       'тэлефоне меню заўвагі адкрывае тыя ж тры.';
   @override
   String welcomePageOf(int page, int of) => '$page з $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Адзначыць укладзеныя сцяжкі';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Адзначэнне сцяжка адзначае і ўкладзеныя пад ім. Зняцце '
+      'адзнакі пакідае іх як ёсць.';
 }

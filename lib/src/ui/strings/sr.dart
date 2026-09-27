@@ -2697,4 +2697,13 @@ final class SerbianStrings extends Strings {
       'поред. На телефону изборник белешке отвара иста три.';
   @override
   String welcomePageOf(int page, int of) => '$page од $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Означи уграђене квадратиће';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Означавање квадратића означава и оне уграђене испод. '
+      'Уклањање ознаке их оставља какви јесу.';
 }

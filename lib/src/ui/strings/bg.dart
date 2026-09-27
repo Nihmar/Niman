@@ -2688,4 +2688,13 @@ final class BulgarianStrings extends Strings {
       'отстрани. На телефона менюто на бележката отваря същите три.';
   @override
   String welcomePageOf(int page, int of) => '$page от $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Отмятане на вложените квадратчета';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Отмятането на квадратче отмята и вложените под него. '
+      'Махането на отметката ги оставя както са.';
 }

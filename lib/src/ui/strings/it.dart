@@ -2690,4 +2690,13 @@ final class ItalianStrings extends Strings {
       'stessi tre.';
   @override
   String welcomePageOf(int page, int of) => '$page di $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Spunta le caselle annidate';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Spuntare una casella spunta quelle annidate sotto. Toglierla '
+      'le lascia come sono.';
 }

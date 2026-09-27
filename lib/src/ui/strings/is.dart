@@ -2672,4 +2672,13 @@ final class IcelandicStrings extends Strings {
       'hliðina. Í símanum opnar valmynd minnisblaðsins sömu þrjú.';
   @override
   String welcomePageOf(int page, int of) => '$page af $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Haka við innfellda reiti';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Að haka við reit hakir líka við þá sem eru innfelldir undir. '
+      'Að taka hakið af lætur þá standa.';
 }

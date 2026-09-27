@@ -49,6 +49,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   bool _readableLineLength = true;
   double _noteColumnWidth = defaultNoteColumnWidth;
   bool _typewriter = false;
+  bool _cascadeChecklist = false;
   bool _tidyOnClose = true;
   Set<String> _lintRulesOff = const <String>{};
   bool? _autofocusEditor;
@@ -79,6 +80,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final readableLineLength = await controller.readableLineLength;
     final noteColumnWidth = await controller.noteColumnWidth;
     final typewriter = await controller.typewriter;
+    final cascadeChecklist = await controller.cascadeChecklist;
     final tidyOnClose = await controller.tidyOnClose;
     final lintRulesOff = await controller.lintRulesOff;
     final autofocus = await controller.editorAutofocusEnabled;
@@ -94,6 +96,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _readableLineLength = readableLineLength;
       _noteColumnWidth = noteColumnWidth;
       _typewriter = typewriter;
+      _cascadeChecklist = cascadeChecklist;
       _tidyOnClose = tidyOnClose;
       _lintRulesOff = lintRulesOff;
       _autofocusEditor = autofocus;
@@ -137,6 +140,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     await controller.setTypewriter(enabled: value);
     controller.notify();
     if (mounted) setState(() => _typewriter = value);
+  }
+
+  /// Persists the cascade-checklist setting (#326); an open note takes it
+  /// on the spot, through the shell's refresh.
+  Future<void> _toggleCascadeChecklist(bool value) async {
+    final controller = widget.controller;
+    await controller.setCascadeChecklist(enabled: value);
+    controller.notify();
+    if (mounted) setState(() => _cascadeChecklist = value);
   }
 
   /// Persists tidy-on-close; the shell picks it up through its refresh,
@@ -547,6 +559,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               description: AppStrings.typewriterSubtitle,
               value: _typewriter,
               onChanged: (value) => unawaited(_toggleTypewriter(value)),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.cascadeChecklist,
+            child: SettingsSwitchRow(
+              title: AppStrings.cascadeChecklistTitle,
+              description: AppStrings.cascadeChecklistSubtitle,
+              value: _cascadeChecklist,
+              onChanged: (value) => unawaited(_toggleCascadeChecklist(value)),
             ),
           ),
           // Phones and tablets only: there is no on-screen keyboard to

@@ -439,6 +439,7 @@ void main() {
         noteColumnWidth: 900,
         typewriter: true,
         tidyOnClose: false,
+        cascadeChecklist: true,
       );
       await store.write(config);
       expect(await store.read(), config);
@@ -468,6 +469,7 @@ void main() {
         'noteColumnWidth',
         'typewriter',
         'tidyOnClose',
+        'cascadeChecklist',
       ]) {
         expect(content, contains('"$key"'), reason: key);
       }
@@ -606,6 +608,23 @@ void main() {
       expect(config.typewriter, isFalse);
       // A note closed after an edit is tidied unless someone says otherwise.
       expect(config.tidyOnClose, isTrue);
+      // #326: a tick stays on its own line unless someone asks for the sweep.
+      expect(config.cascadeChecklist, isFalse);
+    });
+
+    test('cascadeChecklist is off unless the file says true', () {
+      bool cascadeOf(Object? raw) =>
+          LibraryConfig.fromJsonMap({'cascadeChecklist': raw}).cascadeChecklist;
+      expect(LibraryConfig.fromJsonMap(const {}).cascadeChecklist, isFalse);
+      expect(cascadeOf(true), isTrue);
+      expect(cascadeOf(false), isFalse);
+      // A value nobody can read is the default, not "on".
+      expect(cascadeOf('yes'), isFalse);
+      expect(cascadeOf(1), isFalse);
+      final on = LibraryConfig.defaults.copyWith(cascadeChecklist: true);
+      expect(on.toJsonMap()['cascadeChecklist'], isTrue);
+      expect(LibraryConfig.fromJsonMap(on.toJsonMap()), on);
+      expect(on, isNot(LibraryConfig.defaults));
     });
 
     test('tidyOnClose is on unless the file says false', () {

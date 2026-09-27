@@ -2688,4 +2688,13 @@ final class HungarianStrings extends Strings {
       'Telefonon a jegyzet menüje nyitja ugyanezt a hármat.';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'A beágyazott négyzetek bejelölése';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Egy négyzet bejelölése az alatta beágyazottakat is bejelöli. '
+      'A jelölés levétele úgy hagyja őket.';
 }

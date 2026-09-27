@@ -382,6 +382,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get cascadeChecklist async => _config.cascadeChecklist;
+
+  @override
+  Future<void> setCascadeChecklist({required bool enabled}) async {
+    _config = _config.copyWith(cascadeChecklist: enabled);
+  }
+
+  @override
   Future<double> get noteColumnWidth async => _config.noteColumnWidth;
 
   @override

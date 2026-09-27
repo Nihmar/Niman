@@ -2699,4 +2699,13 @@ final class LithuanianStrings extends Strings {
       'Telefone pastabos meniu atidaro tuos pačius tris.';
   @override
   String welcomePageOf(int page, int of) => '$page iš $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Žymėti įdėtus langelius';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Pažymėjus langelį pažymimi ir po juo įdėti. Nuėmus žymę jie '
+      'paliekami.';
 }

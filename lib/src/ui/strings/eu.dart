@@ -2702,4 +2702,13 @@ final class BasqueStrings extends Strings {
       'ditu.';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Markatu habiaratutako laukiak';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Lauki bat markatzean hark azpian habiaratutakoak ere '
+      'markatzen ditu. Marka kentzean dauden bezala uzten ditu.';
 }

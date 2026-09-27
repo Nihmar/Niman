@@ -236,4 +236,50 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('a tick in the read pane carries down the branch (#326)', (
+    tester,
+  ) async {
+    const note = 'Tasks\n\n- [ ] parent\n  - [ ] child\n- [ ] sib\n';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteView(
+            path: '/tmp/niman-read-cascade-test.md',
+            showLineNumbers: true,
+            autofocusEditor: false,
+            showPreview: true,
+            cascadeChecklist: true,
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final editor = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView, skipOffstage: false),
+    );
+    Finder inRead({required bool ticked}) => find.descendant(
+      of: find.byType(MarkdownReadView),
+      matching: findCheckbox(ticked: ticked),
+    );
+    expect(inRead(ticked: false), findsNWidgets(3));
+
+    // The first unticked box is the parent.
+    await tester.tap(inRead(ticked: false).first);
+    await tester.pump();
+    expect(
+      editor.widget.buffer.text,
+      'Tasks\n\n- [x] parent\n  - [x] child\n- [ ] sib\n',
+    );
+    expect(editor.undo(), isTrue);
+    expect(
+      editor.widget.buffer.text,
+      note,
+      reason: 'the whole branch is one undo step',
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }

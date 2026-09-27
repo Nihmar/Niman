@@ -2690,4 +2690,13 @@ final class PortugueseStrings extends Strings {
       'mesmos três.';
   @override
   String welcomePageOf(int page, int of) => '$page de $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marcar as caixas aninhadas';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar uma caixa marca as que estão aninhadas por baixo. '
+      'Desmarcá-la deixa-as como estão.';
 }

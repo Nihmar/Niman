@@ -2703,4 +2703,13 @@ final class UkrainianStrings extends Strings {
       'телефоні меню нотатки відкриває ті самі три.';
   @override
   String welcomePageOf(int page, int of) => '$page з $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Позначати вкладені прапорці';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Позначення прапорця позначає й вкладені під ним. Зняття '
+      'позначки залишає їх як є.';
 }

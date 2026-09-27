@@ -2712,4 +2712,13 @@ final class RomanianStrings extends Strings {
       'alături. Pe telefon meniul notei deschide aceleași trei.';
   @override
   String welcomePageOf(int page, int of) => '$page din $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Bifează casetele imbricate';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Bifarea unei casete le bifează și pe cele imbricate '
+      'dedesubt. Debifarea le lasă așa.';
 }

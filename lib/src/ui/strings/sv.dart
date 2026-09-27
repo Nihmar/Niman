@@ -2680,4 +2680,13 @@ final class SwedishStrings extends Strings {
       'samma tre.';
   @override
   String welcomePageOf(int page, int of) => '$page av $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Markera nästlade rutor';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Att markera en ruta markerar dem som är nästlade under. Att '
+      'avmarkera lämnar dem som de är.';
 }

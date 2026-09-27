@@ -40,6 +40,7 @@ final class ShellEditorSettings {
     this.dockWidth = defaultDockWidth,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.tidyOnClose = true,
+    this.cascadeChecklist = false,
     this.lintRulesOff = const <String>{},
   });
 
@@ -99,6 +100,10 @@ final class ShellEditorSettings {
   /// the "Tidy the Markdown" command does.
   final bool tidyOnClose;
 
+  /// Whether ticking a checklist item also ticks the tasks nested under it
+  /// (#326).
+  final bool cascadeChecklist;
+
   /// The #72 rules turned off, by id; see [lintRules] for the ones that
   /// run.
   final Set<String> lintRulesOff;
@@ -134,6 +139,7 @@ final class ShellEditorSettings {
     final dockWidth = await session.dockWidth;
     final toolbar = await session.editorToolbar;
     final tidyOnClose = await session.tidyOnClose;
+    final cascadeChecklist = await session.cascadeChecklist;
     final lintRulesOff = await session.lintRulesOff;
     final editorKind = await session.editorKind;
     final editorsEnabled = await session.enabledEditors;
@@ -164,6 +170,7 @@ final class ShellEditorSettings {
       dockWidth: dockWidth,
       toolbarLayout: ToolbarLayout.parse(toolbar),
       tidyOnClose: tidyOnClose,
+      cascadeChecklist: cascadeChecklist,
       lintRulesOff: lintRulesOff,
     );
   }
@@ -201,6 +208,7 @@ final class ShellEditorSettings {
       dockWidth: dockWidth ?? this.dockWidth,
       toolbarLayout: toolbarLayout,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
+      cascadeChecklist: cascadeChecklist,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
     );
   }
@@ -224,6 +232,7 @@ final class ShellEditorSettings {
         treeWidth == other.treeWidth &&
         dockWidth == other.dockWidth &&
         tidyOnClose == other.tidyOnClose &&
+        cascadeChecklist == other.cascadeChecklist &&
         setEquals(lintRulesOff, other.lintRulesOff) &&
         // The layout compares by what it is written as: two parses of the
         // same string are two objects.
@@ -248,6 +257,7 @@ final class ShellEditorSettings {
     dockWidth,
     toolbarLayout.encode(),
     tidyOnClose,
+    cascadeChecklist,
     Object.hashAllUnordered(lintRulesOff),
   );
 }

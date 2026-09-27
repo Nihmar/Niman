@@ -2699,4 +2699,13 @@ final class MacedonianStrings extends Strings {
       'отвора истите три.';
   @override
   String welcomePageOf(int page, int of) => '$page од $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Означи вгнездени квадратчиња';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Означувањето квадратче ги означува и вгнездените под него. '
+      'Отстранувањето на ознаката ги остава како се.';
 }

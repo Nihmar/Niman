@@ -2762,4 +2762,13 @@ final class GreekStrings extends Strings {
       'ανοίγει τα ίδια τρία.';
   @override
   String welcomePageOf(int page, int of) => '$page από $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Σήμανση των ένθετων πλαισίων';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Η σήμανση ενός πλαισίου σημαίνει και όσα είναι ένθετα από '
+      'κάτω. Η αφαίρεση τα αφήνει ως έχουν.';
 }
