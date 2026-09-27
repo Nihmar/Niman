@@ -70,6 +70,11 @@ class _ListNoteViewState extends State<ListNoteView>
   final GlobalKey _listKey = GlobalKey();
   final Map<int, GlobalKey> _rowKeys = {};
   int? _editingIndex;
+
+  /// A commit the row is about to deliver whose item the delete already
+  /// took: the row is reused for the item that shifted into its place,
+  /// and that item must not be overwritten with the deleted one's text.
+  bool _cancelPendingCommit = false;
   _Drag? _drag;
   _DropTarget? _drop;
 
@@ -179,11 +184,17 @@ class _ListNoteViewState extends State<ListNoteView>
 
   void _beginEdit(int index) {
     if (_drag != null) return;
+    _cancelPendingCommit = false;
     setState(() => _setEditing(index));
   }
 
   void _commitEdit(int index, String raw) {
     if (!mounted) return;
+    if (_cancelPendingCommit) {
+      _cancelPendingCommit = false;
+      return;
+    }
+    if (index >= _items.length) return;
     final text = raw.trim();
     final item = _items[index];
     if (text == item.text) {
@@ -191,6 +202,46 @@ class _ListNoteViewState extends State<ListNoteView>
       return;
     }
     widget.onChanged(editItemText(widget.text, item, text));
+  }
+
+  /// Deletes the item at [index] and its whole subtree, at once, and
+  /// offers the whole block back through the snackbar's Undo.
+  ///
+  /// A confirmation would stand between the trash and every single item
+  /// nobody meant to remove; the Undo covers the one that was, and the
+  /// editor's own history covers it too.
+  void _delete(int index) {
+    final items = _items;
+    final item = items[index];
+    final end = subtreeEnd(items, index, listLineCount(widget.text));
+    final block = widget.text.split('\n').sublist(item.line, end);
+    if (_editingIndex == index) {
+      _cancelPendingCommit = true;
+      setState(() => _setEditing(null));
+    }
+    widget.onChanged(deleteListItem(widget.text, items, index));
+    _offerUndo(block, item.line);
+  }
+
+  /// The snackbar a delete leaves behind: Undo puts [block] back at
+  /// [atLine], byte for byte.
+  void _offerUndo(List<String> block, int atLine) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.deletedMessage),
+          action: SnackBarAction(
+            label: AppStrings.actionUndo,
+            onPressed: () {
+              if (!mounted) return;
+              widget.onChanged(insertListLines(widget.text, atLine, block));
+            },
+          ),
+        ),
+      );
   }
 
   void _onDragStart(int index, Offset global) {
@@ -394,6 +445,7 @@ class _ListNoteViewState extends State<ListNoteView>
                         onToggle: () => _toggle(index),
                         onBeginEdit: () => _beginEdit(index),
                         onCommitEdit: (text) => _commitEdit(index, text),
+                        onDelete: () => _delete(index),
                         onDragStart: (global) => _onDragStart(index, global),
                         onDragMove: _onDragMove,
                         onDragEnd: _onDragEnd,

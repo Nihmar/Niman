@@ -255,6 +255,42 @@ void main() {
     });
   });
 
+  group('deleteListItem', () {
+    test('removes the item and its whole subtree, byte-stable otherwise', () {
+      const text = 'prose\n- [ ] a\n  - [ ] b\nbetween\n- [ ] c\n';
+      final items = parseListItems(text);
+      expect(deleteListItem(text, items, 0), 'prose\n- [ ] c\n');
+      expect(
+        deleteListItem(text, items, 2),
+        'prose\n- [ ] a\n  - [ ] b\nbetween\n',
+      );
+    });
+
+    test('a trailing newline and the frontmatter survive', () {
+      const text = '---\ntype: list\n---\n- [ ] a\n- [ ] b\n';
+      final items = parseListItems(text);
+      expect(deleteListItem(text, items, 1), '---\ntype: list\n---\n- [ ] a\n');
+      expect(deleteListItem(text, items, 0), '---\ntype: list\n---\n- [ ] b\n');
+    });
+  });
+
+  group('insertListLines', () {
+    test('puts a deleted block back byte for byte', () {
+      const text = '---\ntype: list\n---\nprose\n- [ ] a\n  - [ ] b\n- [ ] c\n';
+      final items = parseListItems(text);
+      final block = text
+          .split('\n')
+          .sublist(items[0].line, subtreeEnd(items, 0, listLineCount(text)));
+      final after = deleteListItem(text, items, 0);
+      expect(insertListLines(after, items[0].line, block), text);
+    });
+
+    test('a past-the-end anchor is clamped', () {
+      expect(insertListLines('a\n', 99, ['x']), 'a\nx\n');
+      expect(insertListLines('a', 99, ['x']), 'a\nx');
+    });
+  });
+
   group('editItemText', () {
     test('replaces only the item text, byte-stable otherwise', () {
       const text = 'prose\n- [ ] one\n- [x] two\n';

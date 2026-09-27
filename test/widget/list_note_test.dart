@@ -22,6 +22,11 @@ Finder _rowEditField() => find.descendant(
   matching: find.byType(TextField),
 );
 
+Finder _rowDelete(int index) => find.descendant(
+  of: _row(index),
+  matching: find.byKey(const Key('list-delete-item')),
+);
+
 /// Drags [from] to [to] (the handle drag of T-TK-09).
 Future<void> _drag(WidgetTester tester, Finder from, Offset to) async {
   final gesture = await tester.startGesture(tester.getCenter(from));
@@ -346,6 +351,78 @@ void main() {
       expect(find.text('two'), findsOneWidget);
     },
   );
+
+  testWidgets('the trash deletes an item and its subtree at once', (
+    tester,
+  ) async {
+    var text = '---\ntype: list\n---\n- [ ] one\n  - [ ] child\n- [ ] two\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(_rowDelete(0));
+    await tester.pump();
+    expect(text, '---\ntype: list\n---\n- [ ] two\n');
+    expect(find.text(AppStrings.deletedMessage), findsOneWidget);
+  });
+
+  testWidgets('Undo puts the deleted block back byte for byte', (tester) async {
+    const original =
+        '---\ntype: list\n---\n- [ ] one\n  - [ ] child\n- [ ] two\n';
+    var text = original;
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(_rowDelete(0));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(app());
+    await tester.pump();
+    expect(text, '---\ntype: list\n---\n- [ ] two\n');
+
+    await tester.tap(find.text(AppStrings.actionUndo));
+    await tester.pump();
+    expect(text, original);
+  });
+
+  testWidgets('deleting the row being edited leaves the next item alone', (
+    tester,
+  ) async {
+    var text = '---\ntype: list\n---\n- [ ] one\n- [ ] two\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(find.text('one'));
+    await tester.pump();
+    await tester.enterText(_rowEditField(), 'one edited');
+    await tester.tap(_rowDelete(0));
+    await tester.pump();
+    await tester.pumpWidget(app());
+    // The pending commit must not land on the item that took the row's
+    // place.
+    await tester.pump();
+    expect(text, '---\ntype: list\n---\n- [ ] two\n');
+    expect(find.text('two'), findsOneWidget);
+  });
 
   testWidgets('a note without task items shows the empty state', (
     tester,

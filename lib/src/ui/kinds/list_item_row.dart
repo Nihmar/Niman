@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/ui/kinds/list_drag_handle.dart';
 import 'package:niman/src/ui/kinds/list_drop_indicator.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// One row of the list-kind GUI: the drag handle (dragging it moves the
-/// row, T-TK-09), the checkbox (tapping it flips the item) and the item
-/// text (tapping it edits the text in place).
+/// row, T-TK-09), the checkbox (tapping it flips the item), the item
+/// text (tapping it edits the text in place) and the trash (tapping it
+/// deletes the item and its subtree).
 class ListItemRow extends StatefulWidget {
   /// Creates the row.
   const new({
@@ -18,6 +20,7 @@ class ListItemRow extends StatefulWidget {
     required this.onToggle,
     required this.onBeginEdit,
     required this.onCommitEdit,
+    required this.onDelete,
     required this.onDragStart,
     required this.onDragMove,
     required this.onDragEnd,
@@ -45,6 +48,9 @@ class ListItemRow extends StatefulWidget {
 
   /// Commits the edited text (submit, focus loss, or the edit ending).
   final ValueChanged<String> onCommitEdit;
+
+  /// Deletes the item and its subtree (the trash tap).
+  final VoidCallback onDelete;
 
   /// The drag started at the given global position (the handle's drag).
   final ValueChanged<Offset> onDragStart;
@@ -146,6 +152,18 @@ class _ListItemRowState extends State<ListItemRow> {
                         : null,
                   ),
                 ),
+        ),
+        // Always there, and always in the same place: a control that
+        // came and went would move what is under the thumb already on
+        // the row.
+        IconButton(
+          key: const Key('list-delete-item'),
+          icon: const Icon(Icons.delete_outline, size: 20),
+          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          tooltip: AppStrings.actionDelete,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+          onPressed: widget.onDelete,
         ),
       ],
     );

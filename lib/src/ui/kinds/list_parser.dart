@@ -212,6 +212,33 @@ String moveSubtree(
   return rest.join('\n');
 }
 
+/// The note text with the item at [index]'s whole subtree (item plus
+/// children and the prose between them) removed.
+///
+/// Byte-stable: every line outside the subtree keeps its bytes. The
+/// block it took out goes back with [insertListLines], which is what the
+/// delete's Undo holds on to.
+String deleteListItem(String text, List<ListItem> items, int index) {
+  final lines = text.split('\n');
+  final item = items[index];
+  final end = subtreeEnd(items, index, listLineCount(text));
+  lines.removeRange(item.line, end);
+  return lines.join('\n');
+}
+
+/// The note text with [block] inserted so that its first line becomes
+/// line [atLine], clamped to the text's content lines (the phantom line
+/// a trailing newline produces is not one).
+///
+/// The way back for [deleteListItem]: the block goes where it was taken
+/// from. Edits that moved the neighbourhood meanwhile shift where it
+/// lands, which is as much as a line number can promise.
+String insertListLines(String text, int atLine, List<String> block) {
+  final lines = text.split('\n')
+    ..insertAll(atLine.clamp(0, listLineCount(text)), block);
+  return lines.join('\n');
+}
+
 /// The note text with [item]'s text replaced by [newText] (everything
 /// else, frontmatter included, keeps its bytes).
 String editItemText(String text, ListItem item, String newText) {
