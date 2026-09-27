@@ -435,6 +435,13 @@ final class LibraryController implements LibrarySession {
       // costs a reconciliation rather than a full walk.
       final indexDb = await indexDbFactory(abs);
       _indexDb = indexDb;
+      // The connection's *first* query is what opens the file: sqlite, the
+      // schema and its FTS table, on the connection's own isolate. The
+      // tree's first flatten used to be that query, so a cold index paid for
+      // all of it inside one frame's wait — `flatten: 51ms … [tree 51,
+      // pinned 0, settings 0]` (#315). Asking here spends the wait beside
+      // the rest of the open, not behind the first frame.
+      unawaited(_warmIndex(indexDb));
       final indexer = Indexer(indexDb)
         ..onChanged = _bump
         ..onRemoved = _onRemoved;
@@ -1438,6 +1445,23 @@ final class LibraryController implements LibrarySession {
     } on Object catch (error) {
       // The periodic rescan finds what is still missing and reads it.
       _log.error('first index failed: $error');
+    }
+  }
+
+  /// Opens the index connection's file while the library is still being set
+  /// up (#315): one cheap query, for the isolate's boot, the sqlite open,
+  /// the schema and the FTS table.
+  ///
+  /// A failure is logged and left alone: the connection remembers a failed
+  /// migration and rethrows it to every reader after, so the first one to
+  /// ask hears about it exactly as it would have without this.
+  Future<void> _warmIndex(IndexDatabase db) async {
+    final clock = Stopwatch()..start();
+    try {
+      await db.customSelect('SELECT 1').get();
+      _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
+    } on Object catch (error) {
+      _log.debug('index warm-up failed: $error');
     }
   }
 
