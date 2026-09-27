@@ -568,20 +568,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _scheduleCaret();
       _ensureCaretVisible();
       _notifyChanged(edit);
-      _bookEditFrame();
+      _bookFrame();
     },
   );
 
-  /// What the frame a keystroke draws costs *this view*, in parts (#316).
+  /// What the frame this view is drawing costs it, in parts (#316).
   ///
-  /// The exported logs show typing as a run of 16-37 ms frames whose build
-  /// is 11-33 ms, and `[frames] slow frame` (main.dart) says a frame missed
-  /// the budget without saying which of the view's parts made it miss.
-  /// These are the parts: the synchronous edit path, then the build, the
-  /// layout and the paint of the view's own subtree. What is left between
-  /// their sum and that frame's own `build` is work *outside* this view —
-  /// the shell rebuilding around it — which is how the two lines split it.
-  final _EditFrameCost _cost = _EditFrameCost();
+  /// The exported logs show typing as a run of frames whose build is 11-33 ms,
+  /// and `[frames] slow frame` (main.dart) reports that frame's own `build` —
+  /// which Flutter counts as build + layout + paint together — so it cannot
+  /// say whether the edit path, the lines, or the paint made it. These are the
+  /// parts: the synchronous edit path, then the view's own build, its
+  /// subtree's layout and its paint. What is left between their sum and that
+  /// frame's own `build` is work *outside* this view — the shell rebuilding
+  /// around it — which is how the two lines split a frame.
+  ///
+  /// Measured on every frame the view draws, not only the ones a keystroke
+  /// arrives in: a scroll or a window resize lays the same lines out again (a
+  /// frame of `build 66.6 ms` with no keystroke and nothing else in the log,
+  /// 12:25 session), and those are frames this has to be able to name.
+  final _FrameCost _cost = _FrameCost();
 
   /// The clock over the synchronous part of an edit: the tokenizer callback
   /// opens it and `onEdited` closes it.
@@ -593,38 +599,55 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Whether this frame's one report is already booked.
   bool _costBooked = false;
 
-  /// The bar this view's own share of a keystroke's frame is held to: half
-  /// of 60 Hz, so the line appears while the rest of the app still has room
-  /// in the frame. Half of it again, for the edit path alone.
-  static const int _editFrameBarMicros = 8000;
+  /// The bar this view's own share of a frame is held to: half of 60 Hz, so
+  /// the line appears while the rest of the app still has room in the frame.
+  static const int _frameBarMicros = 8000;
 
-  /// Closes the edit path's clock and books this frame's one report.
-  void _bookEditFrame() {
-    _cost.edit += _editClock?.elapsedMicroseconds ?? 0;
-    _editClock = null;
-    _cost.keystroke = true;
+  /// The bar the edit path alone is held to: half of the view's own, because a
+  /// delta that costs four milliseconds before anything is drawn is worth
+  /// naming on its own.
+  static const int _editBarMicros = 4000;
+
+  /// Closes the edit path's clock, if one is open, and books this frame's
+  /// report.
+  void _bookFrame() {
+    final clock = _editClock;
+    if (clock != null) {
+      _cost.edit += clock.elapsedMicroseconds;
+      _editClock = null;
+    }
+    _bookReport();
+  }
+
+  /// Books this frame's one report, to run after the frame.
+  ///
+  /// Called from the edit path and from the render object that times the
+  /// layout and the paint: a frame no keystroke caused still has to be
+  /// bookable, and this widget does not build on a scroll.
+  void _bookReport() {
     if (_costBooked) return;
     _costBooked = true;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _costBooked = false;
-      _reportEditFrame();
+      _reportFrame();
     });
   }
 
-  /// Writes the measured parts of the frame a keystroke drew, when they
-  /// together miss [_editFrameBarMicros], or when the edit path alone does.
+  /// Writes the measured parts of a frame this view drew, when they together
+  /// miss [_frameBarMicros], or when the edit path alone misses
+  /// [_editBarMicros].
   ///
   /// One line per frame, and only for the ones that missed it: a line per
-  /// keystroke would charge the frames it measures — the same reason
+  /// frame would charge the frames it measures — the same reason
   /// `_reportSlowFrames` (main.dart) logs the slow ones alone.
-  void _reportEditFrame() {
+  void _reportFrame() {
     final cost = _cost;
     final total = cost.total;
-    if (total >= _editFrameBarMicros || cost.edit >= _editFrameBarMicros ~/ 2) {
+    if (total >= _frameBarMicros || cost.edit >= _editBarMicros) {
       _log.debug(
-        'keystroke frame: edit ${_editMs(cost.edit)}, '
-        'build ${_editMs(cost.build)}, layout ${_editMs(cost.layout)}, '
-        'paint ${_editMs(cost.paint)} (${_editMs(total)} here)',
+        'frame: edit ${_editMs(cost.edit)}, build ${_editMs(cost.build)}, '
+        'layout ${_editMs(cost.layout)}, paint ${_editMs(cost.paint)} '
+        '(${_editMs(total)} here)',
       );
     }
     cost.reset();
@@ -2461,10 +2484,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   @override
   Widget build(BuildContext context) {
-    // Timed only while a keystroke's frame is the one being drawn, and only
-    // for the report (_cost, #316).
+    // Every frame the view builds is measured, for the report (#316).
     final cost = _cost;
-    final clock = cost.keystroke ? (Stopwatch()..start()) : null;
+    final clock = Stopwatch()..start();
     final syntax = widget.syntax ?? SyntaxColors.of(context);
     // The shortcuts wrap the focus, not the other way round: a
     // `CallbackShortcuts`
@@ -2741,8 +2763,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ),
       ),
     );
-    if (clock != null) cost.build += clock.elapsedMicroseconds;
-    return _TimedSubtree(cost: cost, child: content);
+    cost.build += clock.elapsedMicroseconds;
+    return _TimedSubtree(cost: cost, onSlow: _bookReport, child: content);
   }
 
   // ---------------------------------------------------------- table handles
@@ -4781,16 +4803,16 @@ final class _CaretPainter extends CustomPainter {
       oldDelegate.shift != shift;
 }
 
-/// What the frame that drew a keystroke cost the source view (#316).
+/// What a frame this view draws costs it (#316).
 ///
 /// Microseconds, accumulated while that frame is built, laid out and painted,
-/// and reported once by `MarkdownSourceViewState._reportEditFrame`. Together
-/// with the app's own `[frames] slow frame` line (main.dart) it splits a
-/// keystroke's frame: what this view spent, and what the shell around it
-/// spent.
-final class _EditFrameCost {
+/// and reported once by `MarkdownSourceViewState._reportFrame`. Together with
+/// the app's own `[frames] slow frame` line (main.dart) it splits a frame: what
+/// this view spent, and what the shell around it spent.
+final class _FrameCost {
   /// The synchronous edit path: the delta applied to the buffer, the styler
-  /// told, the rows spliced, the caret scheduled.
+  /// told, the rows spliced, the caret scheduled. Zero on a frame no keystroke
+  /// arrived in.
   int edit = 0;
 
   /// The view's own `build`.
@@ -4802,10 +4824,6 @@ final class _EditFrameCost {
   /// Recording their paint.
   int paint = 0;
 
-  /// Whether a keystroke arrived for this frame: the frames that are not
-  /// drawing one are neither measured nor reported.
-  bool keystroke = false;
-
   /// The four parts together.
   int get total => edit + build + layout + paint;
 
@@ -4815,49 +4833,59 @@ final class _EditFrameCost {
     build = 0;
     layout = 0;
     paint = 0;
-    keystroke = false;
   }
 }
 
-/// Times the layout and paint of the subtree under it into the cost it
-/// carries, while a keystroke's frame is the one being drawn.
+/// Times the layout and paint of the subtree under it into the cost it carries,
+/// and says so when a frame's own share of the work grows past the bar.
 final class _TimedSubtree extends SingleChildRenderObjectWidget {
-  const new({required this.cost, required super.child});
+  const new({required this.cost, required this.onSlow, required super.child});
 
-  final _EditFrameCost cost;
+  final _FrameCost cost;
+
+  /// Called during the frame when [cost] passes the view's own bar, so a frame
+  /// the widget did not build in — a scroll, a resize — still gets its report.
+  final VoidCallback onSlow;
 
   @override
   _RenderTimedSubtree createRenderObject(BuildContext context) =>
-      _RenderTimedSubtree(cost);
+      _RenderTimedSubtree(cost, onSlow);
 
   @override
   void updateRenderObject(
     BuildContext context,
     _RenderTimedSubtree renderObject,
   ) {
-    renderObject.cost = cost;
+    renderObject
+      ..cost = cost
+      ..onSlow = onSlow;
   }
 }
 
 final class _RenderTimedSubtree extends RenderProxyBox {
-  new(this.cost);
+  new(this.cost, this.onSlow);
 
-  _EditFrameCost cost;
+  _FrameCost cost;
+  VoidCallback onSlow;
 
   @override
   void performLayout() {
-    if (!cost.keystroke) return super.performLayout();
     final clock = Stopwatch()..start();
     super.performLayout();
     cost.layout += clock.elapsedMicroseconds;
+    _noteIfSlow();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (!cost.keystroke) return super.paint(context, offset);
     final clock = Stopwatch()..start();
     super.paint(context, offset);
     cost.paint += clock.elapsedMicroseconds;
+    _noteIfSlow();
+  }
+
+  void _noteIfSlow() {
+    if (cost.total >= MarkdownSourceViewState._frameBarMicros) onSlow();
   }
 }
 
