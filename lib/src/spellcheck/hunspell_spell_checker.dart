@@ -127,6 +127,10 @@ final class HunspellSpellChecker implements SpellChecker {
     List<String>? dirs,
     String? dictionary,
   }) {
+    // Timed for #315: a launch opens these engines more than once, and the
+    // frame that first asks for a verdict is where the dictionary's own
+    // read of its `.aff`/`.dic` used to land.
+    final clock = Stopwatch()..start();
     final lib = library ?? _openLibrary();
     if (lib == null) return null;
     final dict = dictionary == null
@@ -144,7 +148,9 @@ final class HunspellSpellChecker implements SpellChecker {
           >('Hunspell_create');
       final handle = create(aff, dic);
       if (handle == nullptr) return null;
-      const AppLogger(name: 'spellcheck').info('hunspell ready: ${dict.dic}');
+      const AppLogger(
+        name: 'spellcheck',
+      ).info('hunspell ready: ${dict.dic} in ${clock.elapsedMilliseconds} ms');
       return HunspellSpellChecker._(
         handle: handle,
         spell: lib
