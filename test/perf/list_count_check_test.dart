@@ -11,7 +11,10 @@
 // Same shape as the other benchmarks here (see `read_view_timing_test.dart`):
 // the numbers are printed, a **backstop** is asserted on any host, and the
 // design's ceiling is asserted only by a run that asks for it —
-// `NIMAN_PERF=1 flutter test test/perf/list_count_check_test.dart`.
+// `NIMAN_PERF=1 flutter test test/perf/list_count_check_test.dart`. The
+// million-line note runs only on such a run: 40 MB of string is more than the
+// default suite should hold, and the test shell died under it twice on a
+// loaded machine (#329).
 // ignore_for_file: avoid_print
 import 'dart:io';
 
@@ -46,6 +49,10 @@ String _note(int lines) {
 void main() {
   for (final lines in const [100000, 1000000]) {
     test('the list check on $lines lines does not read the note', () {
+      if (lines >= 1000000 && !_referenceHost) {
+        markTestSkipped('the million-line note runs under NIMAN_PERF=1');
+        return;
+      }
       final buffer = SourceBuffer.fromText(_note(lines));
       final scan = Stopwatch()..start();
       final scanned = BlockScanner(buffer).index;
