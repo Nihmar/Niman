@@ -53,10 +53,37 @@ const defaultFolderName = 'New folder';
 /// the same filesystem). The leading dot puts it under the indexer's
 /// hidden-entry rule, so a scan landing mid-write never indexes the temp
 /// file.
+///
+/// The name is cut from the path by hand rather than with `package:path`:
+/// this runs inside the write isolates, whose platform style resolves on
+/// its first use there, and resolving it asks the process for its working
+/// directory — which throws when that directory is gone, as it is when a
+/// rebuild replaces the folder the app was launched from. A save must not
+/// depend on where the app was started (#319).
 File atomicTempPath(File file, int micros) {
-  return File(
-    p.join(file.parent.path, '.${p.basename(file.path)}$_tempMarker-$micros'),
-  );
+  final path = file.path;
+  final slash = path.lastIndexOf('/');
+  final backslash = path.lastIndexOf(r'\');
+  final cut = slash > backslash ? slash : backslash;
+  final directory = cut < 0 ? '' : path.substring(0, cut + 1);
+  return File('$directory.${path.substring(cut + 1)}$_tempMarker-$micros');
+}
+
+/// Points the process's working directory at [directory] — one the app
+/// owns.
+///
+/// Not the directory the binary was started from: that one belongs to
+/// whoever launched it, and it can be gone while the app is still running
+/// (a rebuild replacing the release bundle it was run from). `package:path`
+/// resolves the platform's style by asking for the working directory, once
+/// per isolate, so a directory that vanished takes the temp name of the
+/// next save — and every other relative-path call — down with it: 20 failed
+/// writes and five crash reports in one sitting (#319).
+///
+/// Throws when [directory] cannot be made the working directory; the caller
+/// decides whether that is worth reporting.
+void pinWorkingDirectory(Directory directory) {
+  Directory.current = directory.path;
 }
 
 /// Writes [data] to [file] atomically.
