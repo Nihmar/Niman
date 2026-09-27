@@ -44,6 +44,28 @@ void main() {
         reason: 'no note',
       );
     });
+
+    test('rejects a note path that escapes the library (issue #332)', () {
+      expect(
+        parseNoteRowToggleUri(
+          Uri.parse(
+            'niman://note-row-toggle?id=7&library=%2Flib&note=..%2Fout.md&line=3',
+          ),
+        ),
+        isNull,
+        reason: 'a .. segment',
+      );
+      expect(
+        parseNoteRowToggleUri(
+          Uri.parse(
+            'niman://note-row-toggle?id=7&library=%2Flib&note=%2Fetc%2Fpasswd'
+            '&line=3',
+          ),
+        ),
+        isNull,
+        reason: 'an absolute path',
+      );
+    });
   });
 
   group('add URI parsing', () {
@@ -85,6 +107,17 @@ void main() {
         ),
         isNull,
         reason: 'blank text',
+      );
+    });
+
+    test('add rejects a note path that escapes the library (issue #332)', () {
+      expect(
+        parseNoteRowAddUri(
+          Uri.parse(
+            'niman://note-row-add?id=7&library=%2Flib&note=..%2Fout.md&text=x',
+          ),
+        ),
+        isNull,
       );
     });
   });
@@ -184,6 +217,25 @@ void main() {
         contains('- [x] milk'),
       );
     });
+
+    test(
+      'a toggle whose note escapes the library fails quiet (#332)',
+      () async {
+        final uri = Uri(
+          scheme: 'niman',
+          host: 'note-row-toggle',
+          queryParameters: {
+            'id': '7',
+            'library': root.path,
+            'note': '../outside.md',
+            'line': '3',
+          },
+        );
+
+        expect(await toggleWidgetNoteRow(uri, updater: recorder()), isFalse);
+        expect(saves, isEmpty);
+      },
+    );
   });
 
   group('add op', () {
@@ -279,6 +331,49 @@ void main() {
         File(p.join(root.path, 'List.md')).readAsStringSync(),
         contains('- [ ] eggs'),
       );
+    });
+
+    test(
+      'an add whose note escapes the library writes nothing (#332)',
+      () async {
+        final outside = await Directory.systemTemp.createTemp('niman_outside_');
+        addTearDown(() async {
+          if (outside.existsSync()) await outside.delete(recursive: true);
+        });
+        final prey = File(p.join(outside.path, 'outside.md'))
+          ..writeAsStringSync('- [ ] untouched\n');
+        final writes = <String>[];
+        final uri = Uri(
+          scheme: 'niman',
+          host: 'note-row-add',
+          queryParameters: {
+            'id': '7',
+            'library': root.path,
+            'note': '../${p.basename(outside.path)}/outside.md',
+            'text': 'sneaky',
+          },
+        );
+
+        expect(
+          await addWidgetNoteRow(
+            uri,
+            readNote: (_, _) async => '- [ ] untouched\n',
+            writeNote: (_, note, _) async => writes.add(note),
+            updater: recorder(),
+          ),
+          isFalse,
+        );
+        expect(writes, isEmpty);
+        expect(prey.readAsStringSync(), '- [ ] untouched\n');
+      },
+    );
+
+    test('the note IO refuses a path outside the library (#332)', () async {
+      await expectLater(
+        writeNoteText(root.path, '../outside.md', 'x'),
+        throwsArgumentError,
+      );
+      expect(await readNoteText(root.path, '../outside.md'), isNull);
     });
   });
 }
