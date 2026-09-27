@@ -423,6 +423,21 @@ final class LibraryController implements LibrarySession {
       } else if (!rootDir.existsSync()) {
         throw ArgumentError('Directory does not exist: $abs');
       }
+      // This library's own index file (T-ML-03). Opening a second library
+      // no longer scans over the first one's rows, so coming back to it
+      // costs a reconciliation rather than a full walk.
+      //
+      // Asked for before anything else the open does, and warmed here: the
+      // connection's *first* query is what opens the file — sqlite, the
+      // schema and its FTS table, on the connection's own isolate — and the
+      // tree's first flatten used to be that query, so a cold index paid for
+      // it inside one frame's wait (`flatten: 105ms … [tree 103]`, #315).
+      // From here the wait runs beside the app's own settings work and the
+      // watcher instead of behind the first frame; a library that fails to
+      // open closes it again in `_teardown`.
+      final indexDb = await indexDbFactory(abs);
+      _indexDb = indexDb;
+      unawaited(_warmIndex(indexDb));
       final appDb = await appDatabase;
       AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
       _startUpdateChecks(appDb);
@@ -430,18 +445,6 @@ final class LibraryController implements LibrarySession {
       // `library_settings` table gets its `.niman/settings.json` here,
       // now that the folder is known to be reachable (T-ML-02).
       await LegacyLibrarySettings(appDb).seed(abs);
-      // This library's own index file (T-ML-03). Opening a second library
-      // no longer scans over the first one's rows, so coming back to it
-      // costs a reconciliation rather than a full walk.
-      final indexDb = await indexDbFactory(abs);
-      _indexDb = indexDb;
-      // The connection's *first* query is what opens the file: sqlite, the
-      // schema and its FTS table, on the connection's own isolate. The
-      // tree's first flatten used to be that query, so a cold index paid for
-      // all of it inside one frame's wait — `flatten: 51ms … [tree 51,
-      // pinned 0, settings 0]` (#315). Asking here spends the wait beside
-      // the rest of the open, not behind the first frame.
-      unawaited(_warmIndex(indexDb));
       final indexer = Indexer(indexDb)
         ..onChanged = _bump
         ..onRemoved = _onRemoved;
