@@ -37,6 +37,11 @@ final class MarkdownTable {
 
   /// Reads [lines], a table's lines: its header, its delimiter row, its
   /// body. Null when they are not a table.
+  ///
+  /// A row wider than the delimiter row widens the table — the extra
+  /// columns are kept and the delimiter row is padded to reach them —
+  /// rather than losing the cells: a menu edit writes every line back, and
+  /// truncating here deleted text the writer had typed (#333).
   static MarkdownTable? parse(List<String> lines) {
     if (lines.length < 2) return null;
     final delimiter = splitRow(lines[1]);
@@ -44,10 +49,11 @@ final class MarkdownTable {
         !delimiter.every((cell) => _delimiterCell.hasMatch(cell.trim()))) {
       return null;
     }
-    final width = delimiter.length;
+    final width = lines
+        .map((line) => splitRow(line).length)
+        .reduce((most, length) => length > most ? length : most);
     List<String> cells(String line) {
       final raw = splitRow(line).map((cell) => cell.trim()).toList();
-      if (raw.length > width) return raw.sublist(0, width);
       return [...raw, for (var i = raw.length; i < width; i++) ''];
     }
 
@@ -56,11 +62,17 @@ final class MarkdownTable {
     return MarkdownTable(
       header: cells(first),
       rows: [for (final line in lines.skip(2)) cells(line)],
-      aligns: [for (final cell in delimiter) _alignOf(cell.trim())],
+      aligns: [
+        for (final cell in delimiter) _alignOf(cell.trim()),
+        for (var at = delimiter.length; at < width; at++) TableAlign.none,
+      ],
       padded: _isPadded(lines),
       outerPipes: first.trim().startsWith('|'),
       indent: indent,
-      delimiters: [for (final cell in delimiter) cell.trim()],
+      delimiters: [
+        for (final cell in delimiter) cell.trim(),
+        for (var at = delimiter.length; at < width; at++) '---',
+      ],
       spaced: _isSpaced(first),
       delimiterSpaced: _isSpaced(lines[1]),
     );
@@ -87,7 +99,8 @@ final class MarkdownTable {
   final String indent;
 
   /// The delimiter cells as written, for a table that was not padded: an
-  /// unpadded column keeps its own dashes until its alignment changes.
+  /// unpadded column keeps its own dashes until its alignment changes. A
+  /// column a wider row added (see [parse]) reads `---`.
   final List<String>? delimiters;
 
   /// Whether its rows are written with a space either side of each cell
