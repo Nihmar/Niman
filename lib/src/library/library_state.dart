@@ -54,7 +54,6 @@ import 'package:niman/src/widget/widget_libraries.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
-import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 /// Coarse lifecycle of a library session.
 enum LibraryPhase {
@@ -1326,7 +1325,9 @@ final class LibraryController implements LibrarySession {
     final appDb = _appDatabase;
     _appDatabase = null;
     if (appDb != null) {
-      await (await appDb).close();
+      final db = await appDb;
+      await db.close();
+      await forgetDefaultAppDatabase(db);
     }
   }
 
@@ -1487,20 +1488,36 @@ Future<File> libraryIndexFile(String libraryPath) async {
   return File(p.join(dir.path, '${digest.toString().substring(0, 16)}.db'));
 }
 
-/// The one connection-level setup every connection applies: a busy
-/// timeout (the search reader contends with indexer writes) and WAL
-/// (readers do not block the writer).
-void _databaseSetup(sqlite3.Database db) {
-  db
-    ..execute('PRAGMA busy_timeout = 5000')
-    ..execute('PRAGMA journal_mode = WAL');
-}
+/// The one connection to the app settings database, shared by everything
+/// that reads it (#312).
+///
+/// Not one per caller: the welcome gate, the update notice and the session
+/// each opened their own, and on the first launch after an update all of
+/// them upgraded the same file at once — two migrations interleaved, and
+/// the one that lost came out of its `ALTER` with `duplicate column name`
+/// (the crash in #312). One connection, one migrator; the migration itself
+/// takes the file's write lock as well (see [AppDatabase.migration]).
+Future<AppDatabase>? _appDatabase;
 
-/// Creates the app settings database in the application-support directory.
-Future<AppDatabase> defaultAppDatabase() async {
-  return AppDatabase(
-    NativeDatabase(await defaultAppDbFile(), setup: _databaseSetup),
-  );
+/// The app settings database in the application-support directory.
+///
+/// Every caller shares the connection this hands out, so nobody opens a
+/// second one; [forgetDefaultAppDatabase] drops it once it is closed.
+Future<AppDatabase> defaultAppDatabase() =>
+    _appDatabase ??= _openDefaultAppDatabase();
+
+Future<AppDatabase> _openDefaultAppDatabase() async => AppDatabase(
+  NativeDatabase(await defaultAppDbFile(), setup: appDatabaseSetup),
+);
+
+/// Forgets the connection [defaultAppDatabase] handed out, when [db] is
+/// that connection, so the next call opens a fresh one: a closed drift
+/// database cannot be reopened.
+Future<void> forgetDefaultAppDatabase(AppDatabase db) async {
+  final open = _appDatabase;
+  if (open != null && identical(await open, db)) {
+    _appDatabase = null;
+  }
 }
 
 /// Opens the index of the library at [libraryPath], on drift's background
