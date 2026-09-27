@@ -40,6 +40,9 @@ final class _Note implements NoteViewHandle {
   void insertAtCaret(String markdown) => currentText += markdown;
 
   @override
+  void setNoteKind(String? type) {}
+
+  @override
   void openFind({bool replace = false}) {}
 }
 
