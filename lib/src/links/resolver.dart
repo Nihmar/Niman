@@ -257,7 +257,11 @@ final class LinkResolver implements LinkSource {
       final byLen = a.path.length.compareTo(b.path.length);
       return byLen != 0 ? byLen : a.path.compareTo(b.path);
     });
-    if (notes.length == 1) {
+    // A bare stem with one candidate resolves to it; a target that names a
+    // path still has to name it — with a single candidate the shortcut used
+    // to hand back the only note there was, so a stale `[[a/note]]` opened
+    // an unrelated `xa/note.md` (#330).
+    if (notes.length == 1 && !t.contains('/')) {
       return ResolvedNote(note: notes.single, heading: heading);
     }
     // Same-stem candidates: qualify by the target's path prefix. For a

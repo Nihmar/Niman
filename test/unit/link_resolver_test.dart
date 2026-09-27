@@ -104,6 +104,17 @@ void main() {
     expect(r, isA<UnresolvedNote>());
   });
 
+  test(
+    'a qualified target with one candidate is dead, not wrong (#330)',
+    () async {
+      await addNote('xa/note.md', stem: 'note');
+      // The only `note` in the library is not at `a/`, so the link is dead —
+      // it used to resolve to `xa/note.md` because the single-candidate
+      // shortcut ran before the path was looked at.
+      expect(await resolver.resolveWiki('a/note'), isA<UnresolvedNote>());
+    },
+  );
+
   test('alias source rows resolve like file stems', () async {
     final note = await addNote('Real Name.md', stem: 'real name');
     await db
