@@ -267,23 +267,41 @@ int trashTimestampSuffix(DateTime now) {
 }
 
 /// Picks a collision-safe trash file name: [base] with [ext], or
-/// `<base>.<unixSeconds><ext>` when [dir] already contains it.
+/// `<base>.<unixSeconds><ext>` when [dir] already contains it — and a
+/// `-<n>` counter while even that is taken, so two deletes of one name
+/// inside one second cannot land on the same file (a rename replaces its
+/// target, which silently destroyed the earlier copy, #335).
 Future<String> trashFileName(Directory dir, String base, String ext) async {
   final plain = '$base$ext';
   if (!File(p.join(dir.path, plain)).existsSync()) {
     return plain;
   }
-  return '$base.${trashTimestampSuffix(DateTime.now())}$ext';
+  final stamp = trashTimestampSuffix(DateTime.now());
+  var counter = 1;
+  var candidate = '$base.$stamp$ext';
+  while (File(p.join(dir.path, candidate)).existsSync()) {
+    counter += 1;
+    candidate = '$base.$stamp-$counter$ext';
+  }
+  return candidate;
 }
 
 /// Picks a collision-safe trash folder name: [base], or
-/// `<base>.<unixSeconds>` when [dir] already contains it.
+/// `<base>.<unixSeconds>` when [dir] already contains it — and a `-<n>`
+/// counter while even that is taken (#335).
 Future<String> trashDirName(Directory dir, String base) async {
   final plain = base;
   if (!Directory(p.join(dir.path, plain)).existsSync()) {
     return plain;
   }
-  return '$base.${trashTimestampSuffix(DateTime.now())}';
+  final stamp = trashTimestampSuffix(DateTime.now());
+  var counter = 1;
+  var candidate = '$base.$stamp';
+  while (Directory(p.join(dir.path, candidate)).existsSync()) {
+    counter += 1;
+    candidate = '$base.$stamp-$counter';
+  }
+  return candidate;
 }
 
 /// Splits [fileName] into (base, extension) parts; extension includes the

@@ -101,6 +101,29 @@ void main() {
       expect(name, startsWith('Docs.'));
       expect(name, matches(RegExp(r'^Docs\.\d{10}$')));
     });
+
+    test(
+      'a second collision inside one second gets its own name (#335)',
+      () async {
+        File(p.join(tempDir.path, 'Note.md')).writeAsStringSync('x');
+        final first = await trashFileName(tempDir, 'Note', '.md');
+        File(p.join(tempDir.path, first)).writeAsStringSync('y');
+        final second = await trashFileName(tempDir, 'Note', '.md');
+        expect(second, isNot(first));
+        expect(second, endsWith('.md'));
+        expect(File(p.join(tempDir.path, second)).existsSync(), isFalse);
+      },
+    );
+
+    test('a second directory collision gets its own name too (#335)', () async {
+      Directory(p.join(tempDir.path, 'Docs')).createSync();
+      final first = await trashDirName(tempDir, 'Docs');
+      Directory(p.join(tempDir.path, first)).createSync();
+      final second = await trashDirName(tempDir, 'Docs');
+      expect(second, isNot(first));
+      expect(second, startsWith('Docs.'));
+      expect(Directory(p.join(tempDir.path, second)).existsSync(), isFalse);
+    });
   });
 
   group('path helpers', () {
