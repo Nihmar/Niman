@@ -204,6 +204,21 @@ void main() {
       expect(p.basename(temp.path), contains(p.basename(file.path)));
       expect(atomicTempPath(file, 456).path, isNot(temp.path));
     });
+
+    test('the temp name is cut from the path it was given', () {
+      // Not joined with `package:path`: that resolves the platform's style,
+      // which asks for the working directory — and a write has to work
+      // whatever happened to the directory the app was launched from
+      // (#319). The path comes back with the separators it had.
+      expect(
+        atomicTempPath(File('/lib/note.md'), 7).path,
+        '/lib/.note.md.niman-tmp-7',
+      );
+      expect(
+        atomicTempPath(File(r'C:\lib\note.md'), 7).path,
+        r'C:\lib\.note.md.niman-tmp-7',
+      );
+    });
   });
 
   group('DiskStamp', () {

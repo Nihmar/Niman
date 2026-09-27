@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/crash_reporter.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
@@ -26,7 +27,11 @@ Future<void> main(List<String> args) async {
   _reportSlowFrames();
   // Desktop only by construction: Android launches with no arguments, so
   // the platform service stays in charge there.
-  final launch = parseLaunchArgs(args, cwd: Directory.current.path);
+  final launch = parseLaunchArgs(args, cwd: _readableCurrentDirectory());
+  // From here on the app owns its working directory (see
+  // [_pinWorkingDirectory]): the one it was started in belongs to whoever
+  // launched it, and it can be rebuilt under a running app (#319).
+  unawaited(_pinWorkingDirectory());
   final desktop = Platform.isLinux || Platform.isWindows;
   // One Niman per session (#41): a later launch hands itself to the first
   // and ends here, before it opens anything.
@@ -59,6 +64,37 @@ Future<void> main(List<String> args) async {
       child: const NimanApp(),
     ),
   );
+}
+
+/// The process's working directory, when it can still be read, and the
+/// system's temp directory otherwise.
+///
+/// A shell sitting in a folder that is gone since leaves its children with
+/// a working directory `Directory.current` throws on, and that used to take
+/// the launch down here, before the app had started and before anything
+/// could log it (#319). The temp directory is only a stand-in: nothing of
+/// the app's resolves against it.
+String _readableCurrentDirectory() {
+  try {
+    return Directory.current.path;
+  } on Object {
+    return Directory.systemTemp.path;
+  }
+}
+
+/// Hands the process a working directory it owns: Niman's own support
+/// folder (see [pinWorkingDirectory]).
+///
+/// Best effort and unawaited: a folder that cannot be made the working
+/// directory is a degraded mode, not a launch failure, and the app's own
+/// paths are absolute either way.
+Future<void> _pinWorkingDirectory() async {
+  try {
+    pinWorkingDirectory(await appSupportDirectory());
+  } on Object catch (error) {
+    const AppLogger(name: 'files')
+        .warning('working directory not pinned ($error)');
+  }
 }
 
 /// Claims the session for this process, or hands [launch] to the Niman
