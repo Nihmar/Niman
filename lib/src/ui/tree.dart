@@ -152,18 +152,28 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// Flattens the visible tree from the index, and reads the pinned notes
   /// alongside it — one revision, one build, so the two never disagree.
+  ///
+  /// The three waits are timed apart (#315): the first read after a library
+  /// opens is where a cold index connection's open used to land, and the
+  /// line has to say whether it is the query, the pinned read or the
+  /// settings file that a frame waited for.
   Future<_Rows> _flatten() async {
     final started = DateTime.now();
     final allNodes = await widget.controller.tree(
       widget.expanded,
       nameDesc: widget.nameDesc,
     );
+    final treeMs = DateTime.now().difference(started).inMilliseconds;
+    final pinnedAt = DateTime.now();
     final fields = await widget.controller.fieldSource;
     final pinned = await fields?.pinnedNotes() ?? const <Note>[];
+    final pinnedMs = DateTime.now().difference(pinnedAt).inMilliseconds;
     // Asked once per session, not per flatten: after the first answer the
     // state lives here, so a toggle repaints instead of round-tripping
     // through the settings file.
+    final settingsAt = DateTime.now();
     _pinnedCollapsed ??= await widget.controller.pinnedCollapsed;
+    final settingsMs = DateTime.now().difference(settingsAt).inMilliseconds;
 
     final nodesByParent = <int, List<Note>>{};
     for (final node in allNodes) {
@@ -175,7 +185,8 @@ final class _NoteTreeState extends State<NoteTree> {
 
     const AppLogger(name: 'tree.ui').debug(
       'flatten: ${DateTime.now().difference(started).inMilliseconds}ms '
-      '(${out.length} rows, ${pinned.length} pinned)',
+      '(${out.length} rows, ${pinned.length} pinned) '
+      '[tree $treeMs, pinned $pinnedMs, settings $settingsMs]',
     );
     return _Rows(pinned: pinned, tree: out);
   }
