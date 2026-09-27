@@ -51,6 +51,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
@@ -154,6 +155,7 @@ final class NoteView extends StatefulWidget {
     this.toolbarTop = false,
     this.zen = false,
     this.typewriter = false,
+    this.cascadeChecklist = true,
     this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
@@ -332,6 +334,10 @@ final class NoteView extends StatefulWidget {
   /// editor, in both editors. Independent of [zen]: either may be on
   /// without the other.
   final bool typewriter;
+
+  /// Whether ticking a checklist item ticks the tasks nested under it
+  /// (#326), in the live editor and in the read view alike.
+  final bool cascadeChecklist;
 
   /// The status row's typewriter switch; null leaves it out.
   final VoidCallback? onToggleTypewriter;
@@ -1255,6 +1261,7 @@ final class _NoteViewState extends State<NoteView>
         showLineNumbers: widget.showLineNumbers && !widget.zen,
         caretWidth: widget.zen ? zenCaretWidth : null,
         typewriter: widget.typewriter,
+        cascadeChecklist: widget.cascadeChecklist,
         // The keyboard-on-open setting, and a template `{{cursor}}` landing,
         // which always takes the focus (#53).
         autofocus: widget.autofocusEditor || widget.initialCaretOffset != null,
@@ -1410,19 +1417,43 @@ final class _NoteViewState extends State<NoteView>
         line >= from.lineCount) {
       return;
     }
-    for (final token in surface.tokensOf(line)) {
-      if (token.kind != TokenKind.taskBox) continue;
-      final at = from.offsetOfLine(line) + token.start + 1;
-      final ticked = from.lineAt(line).codeUnitAt(token.start + 1) != 0x20;
-      surface.replaceRange(
-        at,
-        at + 1,
-        ticked ? ' ' : 'x',
-        caret: surface.selection,
-      );
-      _refreshPreview();
-      return;
+    final text = from.lineAt(line);
+    final box = taskBoxOffset(text);
+    if (box == null) return;
+    final ticked = text.codeUnitAt(box) != 0x20;
+    if (!ticked && widget.cascadeChecklist) {
+      // The pane on screen has the note scanned; with neither scan in
+      // hand the sweep waits and the one box still toggles.
+      final blocks =
+          _sourceViewKey.currentState?.blocks ??
+          _readViewKey.currentState?.blocks;
+      final edit = blocks == null
+          ? null
+          : checklistTickEdit(
+              buffer: from,
+              blocks: blocks,
+              line: line,
+              ticked: true,
+            );
+      if (edit != null) {
+        surface.replaceRange(
+          edit.start,
+          edit.end,
+          edit.text,
+          caret: surface.selection,
+        );
+        _refreshPreview();
+        return;
+      }
     }
+    final at = from.offsetOfLine(line) + box;
+    surface.replaceRange(
+      at,
+      at + 1,
+      ticked ? ' ' : 'x',
+      caret: surface.selection,
+    );
+    _refreshPreview();
   }
 
   /// The blocks and definitions of [buffer] as the source pane already holds

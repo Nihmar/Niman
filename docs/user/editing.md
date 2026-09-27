@@ -39,7 +39,10 @@ same Markdown either way, and only how it is drawn differs. The read view
   such, and so is a format inside another (`<u>**x**</u>` is bold and
   underlined); list items get their bullet, number or checkbox — a click or a
   tap on the checkbox ticks it, one undo step, without moving the caret (in
-  the read view too, where the tick is saved like any edit). A
+  the read view too, where the tick is saved like any edit). With **Tick
+  nested checkboxes** on (Settings → Editor, per library, on by default),
+  ticking an item also ticks the tasks nested under it, at any depth, as the
+  same undo step; clearing the parent leaves the children as they are. A
   sublist is one column in per level, as the read view draws it, and a
   line that goes on an item — its wrapped rows, and the lines written
   under it — starts under the item's text. On the caret's line the marks

@@ -397,6 +397,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) typewriter mode.
   Future<void> setTypewriter({required bool enabled});
 
+  /// Whether ticking a checklist item also ticks the tasks nested under it
+  /// (default false, #326).
+  Future<bool> get cascadeChecklist;
+
+  /// Sets (and persists) the cascade-checklist toggle.
+  Future<void> setCascadeChecklist({required bool enabled});
+
   /// The note column's text width, in logical pixels.
   Future<double> get noteColumnWidth;
 

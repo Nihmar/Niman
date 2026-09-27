@@ -2641,4 +2641,13 @@ final class EnglishStrings extends Strings {
       'beside it. On a phone the note menu opens the same three.';
   @override
   String welcomePageOf(int page, int of) => '$page of $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Tick nested checkboxes';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ticking a checkbox ticks every one nested under it. Clearing '
+      'it leaves them as they are.';
 }

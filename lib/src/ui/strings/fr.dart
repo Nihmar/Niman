@@ -2757,4 +2757,13 @@ final class FrenchStrings extends Strings {
       'trois.';
   @override
   String welcomePageOf(int page, int of) => '$page sur $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Cocher les cases imbriquées';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Cocher une case coche celles qui sont imbriquées dessous. La '
+      'décocher les laisse telles quelles.';
 }

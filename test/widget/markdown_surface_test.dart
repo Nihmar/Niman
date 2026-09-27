@@ -98,6 +98,7 @@ void main() {
     String text = '# Titolo\n\ntesto\n',
     MarkdownTheme theme = _theme,
     bool lineNumbers = false,
+    bool cascadeChecklist = false,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -111,6 +112,7 @@ void main() {
             // hold for both.
             selection: caret == null ? null : SelectionModel.at(caret),
             showLineNumbers: lineNumbers,
+            cascadeChecklist: cascadeChecklist,
           ),
         ),
       ),
@@ -806,6 +808,74 @@ void main() {
       );
       await tester.pump();
       expect(state.widget.buffer.text, note);
+    });
+
+    testWidgets('a tick carries down the branch when the setting is on', (
+      tester,
+    ) async {
+      const nested = 'caret\n\n- [ ] parent\n  - [ ] child\n- [ ] sib\n';
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: 0,
+        text: nested,
+        cascadeChecklist: true,
+      );
+      final buffer = state.widget.buffer;
+      await tester.tapAt(
+        boxOf(tester, '- [ ] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(buffer.text, 'caret\n\n- [x] parent\n  - [x] child\n- [ ] sib\n');
+      expect(state.undo(), isTrue);
+      expect(buffer.text, nested, reason: 'the whole branch is one undo step');
+    });
+
+    testWidgets('off, a tick stays on its own line', (tester) async {
+      const nested = 'caret\n\n- [ ] parent\n  - [ ] child\n- [ ] sib\n';
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: 0,
+        text: nested,
+      );
+      final buffer = state.widget.buffer;
+      await tester.tapAt(
+        boxOf(tester, '- [ ] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(buffer.text, 'caret\n\n- [x] parent\n  - [ ] child\n- [ ] sib\n');
+    });
+
+    testWidgets('clearing a parent leaves its children ticked', (tester) async {
+      const nested = 'caret\n\n- [ ] parent\n  - [ ] child\n';
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: 0,
+        text: nested,
+        cascadeChecklist: true,
+      );
+      final buffer = state.widget.buffer;
+      await tester.tapAt(
+        boxOf(tester, '- [ ] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(buffer.text, 'caret\n\n- [x] parent\n  - [x] child\n');
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tapAt(
+        boxOf(tester, '- [x] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(
+        buffer.text,
+        'caret\n\n- [ ] parent\n  - [x] child\n',
+        reason: 'clearing a parent does not clear its children',
+      );
     });
   });
 

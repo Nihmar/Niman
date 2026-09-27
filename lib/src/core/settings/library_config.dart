@@ -354,6 +354,7 @@ final class LibraryConfig {
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
     this.tidyOnClose = true,
+    this.cascadeChecklist = true,
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
@@ -425,6 +426,7 @@ final class LibraryConfig {
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
       tidyOnClose: _boolOr(json['tidyOnClose'], true),
+      cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
       lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
       treeSort: switch (json['treeSort']) {
         'nameDesc' => TreeSort.nameDesc,
@@ -543,6 +545,11 @@ final class LibraryConfig {
   /// them.
   final bool tidyOnClose;
 
+  /// Whether ticking a checklist item also ticks the tasks nested under it
+  /// (default true, #326). Library-wide, and one-way: clearing a parent
+  /// leaves its children as they are.
+  final bool cascadeChecklist;
+
   /// The #72 rules this library has turned off, by [LintRule.id].
   ///
   /// The rules *left out* are stored: a rule added in a later build runs
@@ -628,6 +635,7 @@ final class LibraryConfig {
     bool? editorAutofocus,
     bool? reminderShowTokens,
     bool? tidyOnClose,
+    bool? cascadeChecklist,
     Set<String>? lintRulesOff,
     TreeSort? treeSort,
     LinkType? linkType,
@@ -665,6 +673,7 @@ final class LibraryConfig {
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
+      cascadeChecklist: cascadeChecklist ?? this.cascadeChecklist,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
@@ -751,6 +760,7 @@ final class LibraryConfig {
     'editorAutofocus',
     'reminderShowTokens',
     'tidyOnClose',
+    'cascadeChecklist',
     'lintRulesOff',
     'treeSort',
     'linkType',
@@ -805,6 +815,7 @@ final class LibraryConfig {
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
       'tidyOnClose': tidyOnClose,
+      'cascadeChecklist': cascadeChecklist,
       'treeSort': treeSort.name,
       'linkType': linkType.name,
       'missingNoteLocation': missingNoteLocation.name,
@@ -905,6 +916,7 @@ final class LibraryConfig {
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&
         tidyOnClose == other.tidyOnClose &&
+        cascadeChecklist == other.cascadeChecklist &&
         lintRulesOff.length == other.lintRulesOff.length &&
         lintRulesOff.containsAll(other.lintRulesOff) &&
         treeSort == other.treeSort &&

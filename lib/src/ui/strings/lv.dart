@@ -2663,4 +2663,13 @@ final class LatvianStrings extends Strings {
       'blakus. Tālrunī piezīmes izvēlne atver tos pašus trīs.';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Atzīmēt iegultos ķekstiņus';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ķekstiņa atzīmēšana atzīmē arī zem tā iegultos. Atzīmes '
+      'noņemšana tos atstāj kā ir.';
 }

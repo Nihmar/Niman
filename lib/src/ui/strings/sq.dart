@@ -2696,4 +2696,13 @@ final class AlbanianStrings extends Strings {
       'tre.';
   @override
   String welcomePageOf(int page, int of) => '$page nga $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Shëno kutitë e futura';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Shënimi i një kutie shënon edhe ato të futura poshtë saj. '
+      'Heqja e shënimit i lë ashtu.';
 }

@@ -2438,4 +2438,12 @@ final class JapaneseStrings extends Strings {
       'ノートのアウトライン、タグ、過去のバージョンがとなりに。スマホではノートのメニューが同じ 3 つを開きます。';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => '入れ子のチェックボックスをまとめて';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'チェックすると、その下に入れ子になったものも一緒にチェックされます。外すとそのままです。';
 }

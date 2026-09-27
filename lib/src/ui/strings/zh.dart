@@ -2365,4 +2365,11 @@ final class ChineseStrings extends Strings {
   String get tourDockBody => '笔记的大纲、标签和过去的版本，就在旁边。手机上笔记菜单会打开同样这三样。';
   @override
   String welcomePageOf(int page, int of) => '第 $page / $of 页';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => '勾选嵌套的复选框';
+  @override
+  String get cascadeChecklistSubtitle => '勾选一个复选框会同时勾选嵌套在它下面的。取消勾选则保持原样。';
 }

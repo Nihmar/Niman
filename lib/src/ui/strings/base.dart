@@ -1233,4 +1233,9 @@ abstract base class Strings {
   String get tourDockTitle;
   String get tourDockBody;
   String welcomePageOf(int page, int of);
+
+  // Cascading a checklist tick (#326).
+
+  String get cascadeChecklistTitle;
+  String get cascadeChecklistSubtitle;
 }

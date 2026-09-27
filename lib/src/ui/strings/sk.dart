@@ -2681,4 +2681,13 @@ final class SlovakStrings extends Strings {
       'telefóne ponuka poznámky otvorí tie isté tri.';
   @override
   String welcomePageOf(int page, int of) => '$page z $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Zaškrtnúť vnorené políčka';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Zaškrtnutie políčka zaškrtne aj tie vnorené pod ním. '
+      'Odškrtnutie ich nechá tak.';
 }

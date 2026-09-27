@@ -2689,4 +2689,13 @@ final class FinnishStrings extends Strings {
       'kolme.';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Valitse sisäkkäiset ruudut';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ruudun valitseminen valitsee myös sen alle sisäkkäiset. '
+      'Valinnan poisto jättää ne ennalleen.';
 }

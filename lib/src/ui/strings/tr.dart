@@ -2642,4 +2642,13 @@ final class TurkishStrings extends Strings {
       'Telefonda not menüsü aynı üçünü açar.';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'İç içe kutuları işaretle';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Bir kutuyu işaretlemek altındaki iç içe kutuları da '
+      'işaretler. İşareti kaldırmak onları olduğu gibi bırakır.';
 }

@@ -2720,4 +2720,13 @@ final class CatalanStrings extends Strings {
       'obre els mateixos tres.';
   @override
   String welcomePageOf(int page, int of) => '$page de $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marca les caselles imbricades';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar una casella marca les que hi ha imbricades a sota. '
+      'Desmarcar-la les deixa tal com estan.';
 }

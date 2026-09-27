@@ -2701,4 +2701,13 @@ final class BosnianStrings extends Strings {
       'pored. Na telefonu meni bilješke otvara ista tri.';
   @override
   String welcomePageOf(int page, int of) => '$page od $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Označi ugniježđene kućice';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Označavanje kućice označava i one ugniježđene ispod. '
+      'Uklanjanje oznake ih ostavlja kakve jesu.';
 }

@@ -911,6 +911,15 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
+  Future<bool> get cascadeChecklist async => (await _library).cascadeChecklist;
+
+  @override
+  Future<void> setCascadeChecklist({required bool enabled}) async {
+    _log.info('cascade checklist set to $enabled');
+    await _editLibrary((c) => c.copyWith(cascadeChecklist: enabled));
+  }
+
+  @override
   Future<double> get noteColumnWidth async => (await _library).noteColumnWidth;
 
   @override

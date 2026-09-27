@@ -2638,4 +2638,13 @@ final class EstonianStrings extends Strings {
       'kõrval. Telefonis avab märkme menüü samad kolm.';
   @override
   String welcomePageOf(int page, int of) => '$page / $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Märgi pesastatud märkeruudud';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Märkeruudu märkimine märgib ka selle alla pesastatud. Märgi '
+      'eemaldamine jätab need puutumata.';
 }

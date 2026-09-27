@@ -2673,4 +2673,13 @@ final class CzechStrings extends Strings {
       'telefonu nabídka poznámky otevře stejné tři.';
   @override
   String welcomePageOf(int page, int of) => '$page z $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Zaškrtnout vnořená políčka';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Zaškrtnutí políčka zaškrtne i ta vnořená pod ním. Odškrtnutí '
+      'je nechá být.';
 }

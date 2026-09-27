@@ -2699,4 +2699,13 @@ final class CroatianStrings extends Strings {
       'telefonu izbornik bilješke otvara iste tri.';
   @override
   String welcomePageOf(int page, int of) => '$page od $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Označi ugniježđene kućice';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Označavanje kućice označava i one ugniježđene ispod. '
+      'Odznačavanje ih ostavlja kakve jesu.';
 }

@@ -1451,4 +1451,9 @@ final class AppStrings {
   static String get tourDockTitle => _s.tourDockTitle;
   static String get tourDockBody => _s.tourDockBody;
   static String welcomePageOf(int page, int of) => _s.welcomePageOf(page, of);
+
+  // Cascading a checklist tick (#326).
+
+  static String get cascadeChecklistTitle => _s.cascadeChecklistTitle;
+  static String get cascadeChecklistSubtitle => _s.cascadeChecklistSubtitle;
 }

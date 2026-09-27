@@ -2662,4 +2662,13 @@ final class DanishStrings extends Strings {
       'ved siden af. På en telefon åbner notemenuen de samme tre.';
   @override
   String welcomePageOf(int page, int of) => '$page af $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Sæt flueben i indlejrede felter';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Et flueben i et felt sætter også dem, der er indlejret '
+      'under. At fjerne det lader dem være.';
 }

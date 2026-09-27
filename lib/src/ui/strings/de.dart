@@ -2737,4 +2737,13 @@ final class GermanStrings extends Strings {
       'dieselben drei.';
   @override
   String welcomePageOf(int page, int of) => '$page von $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Verschachtelte Kästchen mitnehmen';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ein Häkchen setzt auch die darunter verschachtelten. Es '
+      'wieder zu entfernen lässt sie, wie sie sind.';
 }

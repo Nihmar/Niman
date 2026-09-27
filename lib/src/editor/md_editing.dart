@@ -517,6 +517,27 @@ final RegExp _listItem = RegExp(
 /// the pattern above cannot match because it wants the space.
 final RegExp _bareListItem = RegExp(r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]*$');
 
+/// A task box's state character, anywhere a list marker is followed by one:
+/// the space of `- [ ] `, the `x` of `- [x] `, without needing the trailing
+/// space `_listItem` wants.
+final RegExp _taskBoxState = RegExp(
+  r'^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+\[([ xX])\]',
+);
+
+/// The offset of the state character of the task box on [line] — the space
+/// of `- [ ] `, the `x` of `- [x] ` — or null when the line is not a task
+/// item.
+///
+/// Line-local, like [listItemHead]: the caller knows whether the line is
+/// inside a code fence.
+int? taskBoxOffset(String line) {
+  final match = _taskBoxState.firstMatch(line);
+  if (match == null) return null;
+  // The box's `[` is the only bracket the pattern can match, so its
+  // offset inside the match is where the state character sits, minus one.
+  return match.start + match[0]!.indexOf('[') + 1;
+}
+
 /// The head of the list item on [line], or null when it is not one.
 ///
 /// Line-local on purpose: the caller knows whether the line is inside a

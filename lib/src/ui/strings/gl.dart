@@ -2691,4 +2691,13 @@ final class GalicianStrings extends Strings {
       'tres.';
   @override
   String welcomePageOf(int page, int of) => '$page de $of';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marca as casiñas aniñadas';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar unha casiña marca as que están aniñadas debaixo. '
+      'Desmarcala déixaas como están.';
 }
