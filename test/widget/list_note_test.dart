@@ -7,7 +7,7 @@ import 'package:niman/src/ui/kinds/list_item_row.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/strings.dart';
 
-Widget _app(ListNoteView view) => MaterialApp(home: Scaffold(body: view));
+Widget _app(Widget view) => MaterialApp(home: Scaffold(body: view));
 
 Finder _row(int index) => find.byType(ListItemRow).at(index);
 
@@ -274,6 +274,39 @@ void main() {
     await tester.tap(find.byKey(const Key('list-add-button')));
     await tester.pump();
     expect(out, '---\ntype: list\n---\n- [ ] one\n- [ ] three\n');
+  });
+
+  testWidgets('the add row scrolls the list to the new item', (tester) async {
+    final buffer = StringBuffer('---\ntype: list\n---\n');
+    for (var i = 0; i < 12; i++) {
+      buffer.writeln('- [ ] item $i');
+    }
+    var text = buffer.toString();
+    Widget app() => _app(
+      SizedBox(
+        height: 240,
+        child: ListNoteView(
+          text: text,
+          onChanged: (t) {
+            text = t;
+          },
+        ),
+      ),
+    );
+    await tester.pumpWidget(app());
+    ScrollPosition position() =>
+        tester.widget<ListView>(find.byType(ListView)).controller!.position;
+    expect(position().maxScrollExtent, greaterThan(0));
+    expect(position().pixels, 0);
+
+    await tester.enterText(find.byKey(const Key('list-add-field')), 'last');
+    await tester.tap(find.byKey(const Key('list-add-button')));
+    await tester.pump();
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    expect(text, endsWith('- [ ] last\n'));
+    expect(position().pixels, position().maxScrollExtent);
   });
 
   testWidgets('the add row slides away while a row is edited', (tester) async {
