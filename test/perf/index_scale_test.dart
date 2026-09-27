@@ -11,7 +11,9 @@
 // The assertions are machine-speed signal, not benchmarks: they are wide
 // enough to pass on a busy laptop and narrow enough to fail on a query
 // that reads the whole table. The numbers themselves are printed, and
-// those are what a perf round reads.
+// those are what a perf round reads. The bar is three times as wide unless
+// the run asks for the design's ceilings (`NIMAN_PERF=1`, #329), so a
+// shared runner fails only on a regression.
 //
 // Default scale is a twentieth of the gate so the suite keeps running
 // this every time without holding the machine up — `flutter test` runs
@@ -51,6 +53,14 @@ const int perFolder = 1000;
 /// Notes the disk-reconcile fixture holds when the run did not point at
 /// the one `tool/make_fixture.dart` writes.
 const int _diskNotes = 2000;
+
+/// Whether this run holds the design's ceilings. Every number is printed on
+/// every run; what a run asserts is the design's bar on a run that asked for
+/// it, and a backstop three times as wide otherwise (AGENTS.md, #329).
+final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
+
+/// The bar [ceiling] is held to, per [_referenceHost].
+double _bar(double ceiling) => _referenceHost ? ceiling : ceiling * 3;
 
 String _folderName(int f) => 'f${f.toString().padLeft(4, '0')}';
 
@@ -234,8 +244,12 @@ void main() {
       () => controller.children(0),
     );
 
-    expect(open, lessThan(5000), reason: 'open took $open ms');
-    expect(firstFrame, lessThan(2000), reason: 'tree read took $firstFrame ms');
+    expect(open, lessThan(_bar(5000)), reason: 'open took $open ms');
+    expect(
+      firstFrame,
+      lessThan(_bar(2000)),
+      reason: 'tree read took $firstFrame ms',
+    );
     await controller.close();
     await controller.dispose();
   });
@@ -258,11 +272,15 @@ void main() {
     );
     final dirs = await timed('every folder', () => dao.folders());
 
-    expect(top, lessThan(1000), reason: 'top level took $top ms');
-    expect(children, lessThan(1000), reason: 'children took $children ms');
-    expect(find, lessThan(500), reason: 'find took $find ms');
-    expect(tree, lessThan(1500), reason: 'tree took $tree ms');
-    expect(dirs, lessThan(1500), reason: 'folders took $dirs ms');
+    expect(top, lessThan(_bar(1000)), reason: 'top level took $top ms');
+    expect(
+      children,
+      lessThan(_bar(1000)),
+      reason: 'children took $children ms',
+    );
+    expect(find, lessThan(_bar(500)), reason: 'find took $find ms');
+    expect(tree, lessThan(_bar(1500)), reason: 'tree took $tree ms');
+    expect(dirs, lessThan(_bar(1500)), reason: 'folders took $dirs ms');
   });
 
   test('search answers from FTS, and a rare word is instant', () async {
@@ -280,8 +298,8 @@ void main() {
       await search.search(buildFtsQuery('seed'), id: search.begin(), limit: 50);
     });
 
-    expect(rare, lessThan(1000), reason: 'rare word took $rare ms');
-    expect(common, lessThan(5000), reason: 'common word took $common ms');
+    expect(rare, lessThan(_bar(1000)), reason: 'rare word took $rare ms');
+    expect(common, lessThan(_bar(5000)), reason: 'common word took $common ms');
   });
 
   test('the tag list is bounded, however many notes carry the tag', () async {
@@ -291,8 +309,8 @@ void main() {
       notes = await tags.notesWithTag('fixture');
     });
 
-    expect(counts, lessThan(3000), reason: 'tag counts took $counts ms');
-    expect(open, lessThan(1500), reason: 'notes of a tag took $open ms');
+    expect(counts, lessThan(_bar(3000)), reason: 'tag counts took $counts ms');
+    expect(open, lessThan(_bar(1500)), reason: 'notes of a tag took $open ms');
     // Half the library carries it; what opening it costs does not grow
     // with the library.
     expect(notes, hasLength(tagNotesLimit));
@@ -364,9 +382,17 @@ void main() {
       () => dao.deleteSubtree(_folderName(folders - 1)),
     );
 
-    expect(backlinks, lessThan(500), reason: 'backlinks took $backlinks ms');
-    expect(subtree, lessThan(1500), reason: 'subtree read took $subtree ms');
-    expect(deleted, lessThan(3000), reason: 'delete took $deleted ms');
+    expect(
+      backlinks,
+      lessThan(_bar(500)),
+      reason: 'backlinks took $backlinks ms',
+    );
+    expect(
+      subtree,
+      lessThan(_bar(1500)),
+      reason: 'subtree read took $subtree ms',
+    );
+    expect(deleted, lessThan(_bar(3000)), reason: 'delete took $deleted ms');
   });
 }
 
