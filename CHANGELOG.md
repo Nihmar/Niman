@@ -6,6 +6,23 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.1.2] - 2026-09-27
+
+Let's go to the mall!
+
+The list note learned to be a shopping list — a quantity per item, the
+same file, and a switch in the note's ⋮ that goes both ways — and its
+rows delete themselves now, with an Undo, while the list follows what
+you add.
+
+### Added
+- **A shopping list is a list note turned.** *⋮ → Shopping list* on an open list note, *⋮ → Checklist* to come back: only the frontmatter's `type` changes, so the file, its name and its lines stay what they were and a round trip loses nothing. Every row carries a `×N` pill — a tap edits just the quantity, and the in-place edit shows the name and the number side by side — the add row has its own quantity chip with a stepper and quick counts, and a typed `latte x2` is read as quantity 2. The quantity is part of the item's text (`- [ ] Latte ×2`, whole numbers, and one is never written: `- [ ] Pane`), so the note stays plain Markdown. The home-screen widget shows a shopping list with its quantities
+- **A row can be deleted.** The trash at the end of every row removes the item and its sub-items at once, and the snackbar's Undo puts the whole block back. The trash keeps its place while the row is being edited, so nothing moves under the thumb already on the row
+- **An item's text scrolls when it is longer than its row**, as a note's name already does in the tree and the title bar
+
+### Changed
+- **Adding an item scrolls the list to it.** The add field sits under the viewport's foot, so a new row used to land out of sight until you scrolled by hand
+
 ## [0.1.1] - 2026-09-26
 
 Show me around.
