@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
+import 'package:niman/src/ui/kinds/shopping_list_note.dart';
 
 /// The note text as seen and edited by a kind GUI.
 abstract interface class NoteKindHost {
@@ -45,7 +46,11 @@ abstract interface class NoteKindGUI {
 final class NoteKinds {
   new _();
 
-  static final List<NoteKindGUI> _all = [ListKindGui(), AudioKindGui()];
+  static final List<NoteKindGUI> _all = [
+    ListKindGui(),
+    ShoppingListKindGui(),
+    AudioKindGui(),
+  ];
 
   /// The GUI for [type], or null for an unknown or absent kind.
   static NoteKindGUI? forType(String? type) {

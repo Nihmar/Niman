@@ -385,6 +385,12 @@ final class GermanStrings extends Strings {
   String get listEmpty => 'Noch keine Einträge';
   @override
   String get listDragHandleLabel => 'Eintrag umsortieren';
+  @override
+  String get shoppingListName => 'Einkaufsliste';
+  @override
+  String get checklistName => 'Checkliste';
+  @override
+  String get shoppingQuantityLabel => 'Menge';
 
   // Audio note kind (issue #56).
   @override

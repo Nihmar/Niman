@@ -28,9 +28,11 @@ void main() {
   });
 
   group('NoteKinds', () {
-    test('list and audio are registered; unknown kinds are plain notes', () {
+    test('list, its shopping subtype and audio are registered', () {
       expect(NoteKinds.forType('list'), isNotNull);
       expect(NoteKinds.forType('list')!.type, 'list');
+      expect(NoteKinds.forType('shopping-list'), isNotNull);
+      expect(NoteKinds.forType('shopping-list')!.type, 'shopping-list');
       expect(NoteKinds.forType('audio'), isNotNull);
       expect(NoteKinds.forType('audio')!.type, 'audio');
       expect(NoteKinds.forType('note'), isNull);

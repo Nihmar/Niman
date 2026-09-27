@@ -11,6 +11,7 @@ final class ListItem {
     required this.textStart,
     required this.checked,
     required this.text,
+    this.quantity = 1,
   });
 
   /// The 0-based index of the item's line in the note text (split on
@@ -35,6 +36,11 @@ final class ListItem {
 
   /// The item text after the box (trimmed).
   final String text;
+
+  /// The item's quantity: 1 for a plain list, and what
+  /// `parseShoppingItems` reads from the `×2` a shopping item's text may
+  /// end in.
+  final int quantity;
 }
 
 /// A drop zone of a list drag (T-TK-09): where the dragged item lands
@@ -210,6 +216,33 @@ String moveSubtree(
       : insertLine;
   rest.insertAll(at, moved);
   return rest.join('\n');
+}
+
+/// The note text with the item at [index]'s whole subtree (item plus
+/// children and the prose between them) removed.
+///
+/// Byte-stable: every line outside the subtree keeps its bytes. The
+/// block it took out goes back with [insertListLines], which is what the
+/// delete's Undo holds on to.
+String deleteListItem(String text, List<ListItem> items, int index) {
+  final lines = text.split('\n');
+  final item = items[index];
+  final end = subtreeEnd(items, index, listLineCount(text));
+  lines.removeRange(item.line, end);
+  return lines.join('\n');
+}
+
+/// The note text with [block] inserted so that its first line becomes
+/// line [atLine], clamped to the text's content lines (the phantom line
+/// a trailing newline produces is not one).
+///
+/// The way back for [deleteListItem]: the block goes where it was taken
+/// from. Edits that moved the neighbourhood meanwhile shift where it
+/// lands, which is as much as a line number can promise.
+String insertListLines(String text, int atLine, List<String> block) {
+  final lines = text.split('\n')
+    ..insertAll(atLine.clamp(0, listLineCount(text)), block);
+  return lines.join('\n');
 }
 
 /// The note text with [item]'s text replaced by [newText] (everything

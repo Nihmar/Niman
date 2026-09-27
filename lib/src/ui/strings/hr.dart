@@ -383,6 +383,12 @@ final class CroatianStrings extends Strings {
   String get listEmpty => 'Još nema stavaka';
   @override
   String get listDragHandleLabel => 'Promijeni redoslijed stavke';
+  @override
+  String get shoppingListName => 'Popis za kupnju';
+  @override
+  String get checklistName => 'Kontrolni popis';
+  @override
+  String get shoppingQuantityLabel => 'Količina';
 
   // Audio note kind (issue #56).
   @override

@@ -384,6 +384,12 @@ final class SerbianStrings extends Strings {
   String get listEmpty => 'Још нема ставки';
   @override
   String get listDragHandleLabel => 'Преређуј ставку';
+  @override
+  String get shoppingListName => 'Листа за куповину';
+  @override
+  String get checklistName => 'Контролна листа';
+  @override
+  String get shoppingQuantityLabel => 'Количина';
 
   // Audio note kind (issue #56).
   @override

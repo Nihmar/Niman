@@ -384,6 +384,12 @@ final class MacedonianStrings extends Strings {
   String get listEmpty => 'Сè уште нема ставки';
   @override
   String get listDragHandleLabel => 'Прередиј ја ставка';
+  @override
+  String get shoppingListName => 'Листа за купување';
+  @override
+  String get checklistName => 'Листа за проверка';
+  @override
+  String get shoppingQuantityLabel => 'Количина';
 
   // Audio note kind (issue #56).
   @override

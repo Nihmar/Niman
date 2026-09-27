@@ -7,7 +7,7 @@ import 'package:niman/src/ui/kinds/list_item_row.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/strings.dart';
 
-Widget _app(ListNoteView view) => MaterialApp(home: Scaffold(body: view));
+Widget _app(Widget view) => MaterialApp(home: Scaffold(body: view));
 
 Finder _row(int index) => find.byType(ListItemRow).at(index);
 
@@ -17,9 +17,11 @@ Finder _rowCheckbox(int index) =>
 Finder _rowHandle(int index) =>
     find.descendant(of: _row(index), matching: find.byType(ListDragHandle));
 
-Finder _rowEditField() => find.descendant(
-  of: find.byType(ListItemRow),
-  matching: find.byType(TextField),
+Finder _rowEditField() => find.byKey(const Key('list-edit-field'));
+
+Finder _rowDelete(int index) => find.descendant(
+  of: _row(index),
+  matching: find.byKey(const Key('list-delete-item')),
 );
 
 /// Drags [from] to [to] (the handle drag of T-TK-09).
@@ -271,6 +273,39 @@ void main() {
     expect(out, '---\ntype: list\n---\n- [ ] one\n- [ ] three\n');
   });
 
+  testWidgets('the add row scrolls the list to the new item', (tester) async {
+    final buffer = StringBuffer('---\ntype: list\n---\n');
+    for (var i = 0; i < 12; i++) {
+      buffer.writeln('- [ ] item $i');
+    }
+    var text = buffer.toString();
+    Widget app() => _app(
+      SizedBox(
+        height: 240,
+        child: ListNoteView(
+          text: text,
+          onChanged: (t) {
+            text = t;
+          },
+        ),
+      ),
+    );
+    await tester.pumpWidget(app());
+    ScrollPosition position() =>
+        tester.widget<ListView>(find.byType(ListView)).controller!.position;
+    expect(position().maxScrollExtent, greaterThan(0));
+    expect(position().pixels, 0);
+
+    await tester.enterText(find.byKey(const Key('list-add-field')), 'last');
+    await tester.tap(find.byKey(const Key('list-add-button')));
+    await tester.pump();
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    expect(text, endsWith('- [ ] last\n'));
+    expect(position().pixels, position().maxScrollExtent);
+  });
+
   testWidgets('the add row slides away while a row is edited', (tester) async {
     var text = '---\ntype: list\n---\n- [ ] one\n';
     Widget app() => _app(
@@ -346,6 +381,238 @@ void main() {
       expect(find.text('two'), findsOneWidget);
     },
   );
+
+  testWidgets('the trash deletes an item and its subtree at once', (
+    tester,
+  ) async {
+    var text = '---\ntype: list\n---\n- [ ] one\n  - [ ] child\n- [ ] two\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(_rowDelete(0));
+    await tester.pump();
+    expect(text, '---\ntype: list\n---\n- [ ] two\n');
+    expect(find.text(AppStrings.deletedMessage), findsOneWidget);
+  });
+
+  testWidgets('Undo puts the deleted block back byte for byte', (tester) async {
+    const original =
+        '---\ntype: list\n---\n- [ ] one\n  - [ ] child\n- [ ] two\n';
+    var text = original;
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(_rowDelete(0));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(app());
+    await tester.pump();
+    expect(text, '---\ntype: list\n---\n- [ ] two\n');
+
+    await tester.tap(find.text(AppStrings.actionUndo));
+    await tester.pump();
+    expect(text, original);
+  });
+
+  testWidgets('deleting the row being edited leaves the next item alone', (
+    tester,
+  ) async {
+    var text = '---\ntype: list\n---\n- [ ] one\n- [ ] two\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(find.text('one'));
+    await tester.pump();
+    await tester.enterText(_rowEditField(), 'one edited');
+    await tester.tap(_rowDelete(0));
+    await tester.pump();
+    await tester.pumpWidget(app());
+    // The pending commit must not land on the item that took the row's
+    // place.
+    await tester.pump();
+    expect(text, '---\ntype: list\n---\n- [ ] two\n');
+    expect(find.text('two'), findsOneWidget);
+  });
+
+  testWidgets('a shopping item shows its quantity, and ×1 reads one', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        ListNoteView(
+          text:
+              '---\ntype: shopping-list\n---\n- [ ] Latte ×2\n- [ ] Pane ×1\n',
+          shopping: true,
+          onChanged: (_) {},
+        ),
+      ),
+    );
+    expect(find.text('Latte'), findsOneWidget);
+    expect(find.text('×2'), findsOneWidget);
+    expect(find.text('Pane'), findsOneWidget);
+    // The row's pill (the add chip carries a ×1 of its own).
+    expect(
+      find.descendant(of: _row(1), matching: find.text('×1')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the add row reads a typed quantity and writes the marker', (
+    tester,
+  ) async {
+    String? out;
+    await tester.pumpWidget(
+      _app(
+        ListNoteView(
+          text: '---\ntype: shopping-list\n---\n- [ ] Pane\n',
+          shopping: true,
+          onChanged: (t) {
+            out = t;
+          },
+        ),
+      ),
+    );
+    await tester.enterText(find.byKey(const Key('list-add-field')), 'Latte x2');
+    await tester.tap(find.byKey(const Key('list-add-button')));
+    await tester.pump();
+    expect(out, '---\ntype: shopping-list\n---\n- [ ] Pane\n- [ ] Latte ×2\n');
+  });
+
+  testWidgets('the add chip writes its quantity, then resets to one', (
+    tester,
+  ) async {
+    var text = '---\ntype: shopping-list\n---\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        shopping: true,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(find.byKey(const Key('list-add-quantity')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quantity-preset-3')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('quantity-ok')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('list-add-field')), 'Uova');
+    await tester.tap(find.byKey(const Key('list-add-button')));
+    await tester.pump();
+    expect(text, '---\ntype: shopping-list\n---\n- [ ] Uova ×3\n');
+
+    // The chip is back to one for the next item.
+    await tester.pumpWidget(app());
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('list-add-quantity')),
+        matching: find.text('×1'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('tapping the pill opens the edit on the quantity', (
+    tester,
+  ) async {
+    var text = '---\ntype: shopping-list\n---\n- [ ] Latte ×2\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        shopping: true,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(find.byKey(const Key('list-quantity-pill')));
+    await tester.pump();
+    expect(find.byKey(const Key('list-quantity-field')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('list-quantity-field')), '5');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(text, '---\ntype: shopping-list\n---\n- [ ] Latte ×5\n');
+  });
+
+  testWidgets('an edit changes the name and the quantity together', (
+    tester,
+  ) async {
+    var text = '---\ntype: shopping-list\n---\n- [ ] Latte ×2\n';
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        shopping: true,
+        onChanged: (t) {
+          text = t;
+        },
+      ),
+    );
+    await tester.pumpWidget(app());
+
+    await tester.tap(find.text('Latte'));
+    await tester.pump();
+    await tester.enterText(_rowEditField(), 'Latte intero');
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('list-quantity-field')), '6');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(text, '---\ntype: shopping-list\n---\n- [ ] Latte intero ×6\n');
+  });
+
+  testWidgets('a plain list stays plain: no quantity anywhere', (tester) async {
+    await tester.pumpWidget(
+      _app(ListNoteView(text: '- [ ] Latte ×2\n', onChanged: (_) {})),
+    );
+    // `×2` is part of the name in a plain list, and there is no pill,
+    // no quantity field and no chip.
+    expect(find.text('Latte ×2'), findsOneWidget);
+    expect(find.byKey(const Key('list-quantity-pill')), findsNothing);
+    expect(find.byKey(const Key('list-add-quantity')), findsNothing);
+    expect(find.byIcon(Icons.add), findsOneWidget); // the add row's plus
+  });
+
+  testWidgets('a long item text marquees instead of clipping', (tester) async {
+    final long = 'Latte ' * 60;
+    await tester.pumpWidget(
+      _app(
+        ListNoteView(
+          text: '---\ntype: shopping-list\n---\n- [ ] $long\n',
+          shopping: true,
+          onChanged: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key('marquee-offset')), findsOneWidget);
+  });
 
   testWidgets('a note without task items shows the empty state', (
     tester,

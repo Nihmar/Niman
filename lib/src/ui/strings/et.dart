@@ -375,6 +375,12 @@ final class EstonianStrings extends Strings {
   String get listEmpty => 'Elemente veel pole';
   @override
   String get listDragHandleLabel => 'Muuda elemendi järjekorda';
+  @override
+  String get shoppingListName => 'Ostunimekiri';
+  @override
+  String get checklistName => 'Kontrollnimekiri';
+  @override
+  String get shoppingQuantityLabel => 'Kogus';
 
   // Audio note kind (issue #56).
   @override

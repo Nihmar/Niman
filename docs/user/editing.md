@@ -357,7 +357,10 @@ On the desktop the toolbar and the note's own controls share **one row**
 above the note, in both editors. The formatting is on the left, grouped
 (text, lines, insertions) with a thin divider between groups, and the
 note's **⋮** menu (history, rename, move, delete) is at the right end,
-next to the list or voice-note switch when the note has one. The row
+next to the list or voice-note switch when the note has one. On a list
+note the same menu carries the **Shopping list** entry, and on a
+shopping list the **Checklist** one, which is how the two are turned
+into each other (see [list notes](lists.md)). The row
 keeps to the note's column, so its first button sits over the start of
 the text. It stays when there is nothing to format, in the preview or on
 a list note, so the ⋮ is always in the same place. The note's name is
