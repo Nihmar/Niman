@@ -40,7 +40,7 @@ final class ShellEditorSettings {
     this.dockWidth = defaultDockWidth,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.tidyOnClose = true,
-    this.cascadeChecklist = false,
+    this.cascadeChecklist = true,
     this.lintRulesOff = const <String>{},
   });
 

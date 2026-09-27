@@ -249,7 +249,6 @@ void main() {
             showLineNumbers: true,
             autofocusEditor: false,
             showPreview: true,
-            cascadeChecklist: true,
             readNote: (_) async => note,
             writeNote: (_, _) async {},
           ),

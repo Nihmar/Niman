@@ -439,7 +439,7 @@ void main() {
         noteColumnWidth: 900,
         typewriter: true,
         tidyOnClose: false,
-        cascadeChecklist: true,
+        cascadeChecklist: false,
       );
       await store.write(config);
       expect(await store.read(), config);
@@ -608,23 +608,23 @@ void main() {
       expect(config.typewriter, isFalse);
       // A note closed after an edit is tidied unless someone says otherwise.
       expect(config.tidyOnClose, isTrue);
-      // #326: a tick stays on its own line unless someone asks for the sweep.
-      expect(config.cascadeChecklist, isFalse);
+      // #326: the sweep is on unless someone turns it off.
+      expect(config.cascadeChecklist, isTrue);
     });
 
-    test('cascadeChecklist is off unless the file says true', () {
+    test('cascadeChecklist is on unless the file says false', () {
       bool cascadeOf(Object? raw) =>
           LibraryConfig.fromJsonMap({'cascadeChecklist': raw}).cascadeChecklist;
-      expect(LibraryConfig.fromJsonMap(const {}).cascadeChecklist, isFalse);
-      expect(cascadeOf(true), isTrue);
+      expect(LibraryConfig.fromJsonMap(const {}).cascadeChecklist, isTrue);
       expect(cascadeOf(false), isFalse);
-      // A value nobody can read is the default, not "on".
-      expect(cascadeOf('yes'), isFalse);
-      expect(cascadeOf(1), isFalse);
-      final on = LibraryConfig.defaults.copyWith(cascadeChecklist: true);
-      expect(on.toJsonMap()['cascadeChecklist'], isTrue);
-      expect(LibraryConfig.fromJsonMap(on.toJsonMap()), on);
-      expect(on, isNot(LibraryConfig.defaults));
+      expect(cascadeOf(true), isTrue);
+      // A value nobody can read is the default, not "off".
+      expect(cascadeOf('no'), isTrue);
+      expect(cascadeOf(0), isTrue);
+      final off = LibraryConfig.defaults.copyWith(cascadeChecklist: false);
+      expect(off.toJsonMap()['cascadeChecklist'], isFalse);
+      expect(LibraryConfig.fromJsonMap(off.toJsonMap()), off);
+      expect(off, isNot(LibraryConfig.defaults));
     });
 
     test('tidyOnClose is on unless the file says false', () {
