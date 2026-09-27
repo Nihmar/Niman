@@ -182,6 +182,10 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       text: text.replaceRange(start[0], end, selection),
       selection: TextSelection.collapsed(offset: start[0] + selection.length),
     );
+    // The list is built from what the field holds, and a programmatic value
+    // does not rebuild this widget: without this the pool kept offering the
+    // token the caret had just left (#311).
+    setState(() {});
   }
 
   /// The distinct `+`/`@`/`#` tokens of the current field text (parsed
@@ -429,7 +433,12 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
           // the option, so this inline list replaces it as the overlay.)
           _fieldBox(context),
           if (_focus.hasFocus && _completions.isNotEmpty)
-            _completionList(_completions),
+            // The pick is a tap outside the field, and on the desktops the
+            // platform's own `onTapOutside` unfocuses on the pointer *down*:
+            // the rebuild that followed removed the entry before the tap
+            // could fire, so a suggestion did nothing at all (#311). Inside
+            // the field's own tap region, the tap is the field's.
+            TextFieldTapRegion(child: _completionList(_completions)),
           if (tokens.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8),
