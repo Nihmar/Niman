@@ -75,8 +75,9 @@ aliases: [My alias]
 
 Any key is stored and filterable (`key = value` in search). Keys the app
 acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
-shows the checklist, `audio` shows the recordings). Everything else is
-your own vocabulary — stored, searchable, but driving nothing.
+shows the checklist, `shopping-list` the same with a quantity per item,
+`audio` shows the recordings). Everything else is your own vocabulary —
+stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
 
@@ -312,7 +313,10 @@ else in it that is not Markdown is kept as a file.
   `Quick note.md` at the library root; `quickNotePath` overrides it. Text
   shared into Niman from another app lands at its end
   ([platforms](platforms.md)), and the note opens.
-- **List notes:** created under `listNoteFolder` (default `Lists`).
+- **List notes:** created under `listNoteFolder` (default `Lists`) and
+  shown as a checklist: tick, nest, drag, edit, delete, add. A list note
+  can be turned into a **shopping list** (a quantity per item) from its
+  ⋮ menu, and back. See [list notes](lists.md).
 - **Voice notes:** a note with `type: audio` frontmatter shows a chat
   instead of the editor — vocals on the left, written notes on the
   right. Record (or attach) appends a vocal; clips are plain audio

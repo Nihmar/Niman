@@ -27,9 +27,10 @@ short setup dialog: pick the library from the ones you have open
   row menu and place the widget; the next placed instance adopts the
   pin.
 - **Rows:** a prose note shows its text excerpt; a `type: list` note
-  shows its checklist (up to 100 rows, scrollable). Tap a row to
-  toggle the item — with the app closed. **"+"** adds an item from a
-  home-screen dialog.
+  shows its checklist (up to 100 rows, scrollable) and a
+  `type: shopping-list` note the same, each row's quantity folded into
+  its text. Tap a row to toggle the item — with the app closed. **"+"**
+  adds an item from a home-screen dialog.
 - **Tap the note:** opens it in the app.
 
 Both wear the app theme (brightness and palette) and refresh when
