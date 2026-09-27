@@ -354,7 +354,7 @@ final class LibraryConfig {
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
     this.tidyOnClose = true,
-    this.cascadeChecklist = false,
+    this.cascadeChecklist = true,
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
@@ -426,7 +426,7 @@ final class LibraryConfig {
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
       tidyOnClose: _boolOr(json['tidyOnClose'], true),
-      cascadeChecklist: _boolOr(json['cascadeChecklist'], false),
+      cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
       lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
       treeSort: switch (json['treeSort']) {
         'nameDesc' => TreeSort.nameDesc,
@@ -546,7 +546,7 @@ final class LibraryConfig {
   final bool tidyOnClose;
 
   /// Whether ticking a checklist item also ticks the tasks nested under it
-  /// (default false, #326). Library-wide, and one-way: clearing a parent
+  /// (default true, #326). Library-wide, and one-way: clearing a parent
   /// leaves its children as they are.
   final bool cascadeChecklist;
 

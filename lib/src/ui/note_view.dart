@@ -155,7 +155,7 @@ final class NoteView extends StatefulWidget {
     this.toolbarTop = false,
     this.zen = false,
     this.typewriter = false,
-    this.cascadeChecklist = false,
+    this.cascadeChecklist = true,
     this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],

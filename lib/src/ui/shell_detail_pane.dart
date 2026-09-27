@@ -49,7 +49,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.marks,
     this.zen = false,
     this.typewriter = false,
-    this.cascadeChecklist = false,
+    this.cascadeChecklist = true,
     this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,

@@ -87,7 +87,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
-    this.cascadeChecklist = false,
+    this.cascadeChecklist = true,
     this.autofocus = false,
     this.viewKey,
     this.lineTokens,

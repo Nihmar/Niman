@@ -134,7 +134,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
-    this.cascadeChecklist = false,
+    this.cascadeChecklist = true,
     this.lineTokens,
     this.templateCommands = false,
     this.autofocus = false,
