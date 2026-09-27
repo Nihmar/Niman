@@ -26,10 +26,27 @@ import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
 
+/// Whether [notePath] may name a note inside a library: a relative path
+/// with no `..` segment. The configure activity's picker applies the same
+/// rule to the file the user chooses (`WidgetConfigActivity.notePathIn`);
+/// the row ops apply it again here because their URIs arrive from outside
+/// the app (issue #332), where a crafted one could otherwise name a file
+/// outside the library.
+bool widgetNotePathInLibrary(String notePath) {
+  if (notePath.isEmpty || p.isAbsolute(notePath)) return false;
+  return !p.split(notePath).contains('..');
+}
+
 /// The text of the note file at [notePath] in [root], read off the UI
 /// isolate (the Android FUSE rule), BOM stripped and decoded leniently;
-/// null when the file is missing or unreadable.
+/// null when the file is missing or unreadable, or when [notePath] names
+/// a file outside the library.
 Future<String?> readNoteText(String root, String notePath) async {
+  if (!widgetNotePathInLibrary(notePath)) {
+    const AppLogger(name: 'widgets')
+        .warning('note path refused, outside the library: $notePath');
+    return null;
+  }
   try {
     final bytes = await Isolate.run(() {
       final file = File(p.join(root, notePath));
@@ -47,7 +64,13 @@ Future<String?> readNoteText(String root, String notePath) async {
 }
 
 /// Writes [content] to the note file at [notePath] in [root] atomically.
+///
+/// Throws [ArgumentError] when [notePath] escapes the library — the same
+/// rule [readNoteText] applies (issue #332).
 Future<void> writeNoteText(String root, String notePath, String content) async {
+  if (!widgetNotePathInLibrary(notePath)) {
+    throw ArgumentError.value(notePath, 'notePath', 'outside the library');
+  }
   await writeFileAtomically(File(p.join(root, notePath)), utf8.encode(content));
 }
 
@@ -97,7 +120,8 @@ Future<String> notePayloadFor(
 }
 
 /// Parses a `niman://note-row-toggle?id=&library=&note=&line=` URI, or
-/// null when it carries nothing toggleable.
+/// null when it carries nothing toggleable — or when its note path
+/// escapes the library (issue #332).
 ///
 /// Like the todo toggle, the native rows append the payload's theme,
 /// so the re-push wears it; taps without it resolve live.
@@ -117,7 +141,8 @@ parseNoteRowToggleUri(Uri? uri) {
       library == null ||
       library.isEmpty ||
       note == null ||
-      note.isEmpty) {
+      note.isEmpty ||
+      !widgetNotePathInLibrary(note)) {
     return null;
   }
   return (
@@ -189,7 +214,8 @@ Future<bool> toggleWidgetNoteRow(
 }
 
 /// Parses a `niman://note-row-add?id=&library=&note=&text=` URI, or null
-/// when it carries nothing appendable.
+/// when it carries nothing appendable — or when its note path escapes the
+/// library (issue #332).
 ///
 /// The `text` param is what the home-screen add dialog captured:
 /// RemoteViews cannot take typed text, so the dialog types it and the
@@ -210,6 +236,7 @@ parseNoteRowAddUri(Uri? uri) {
       library.isEmpty ||
       note == null ||
       note.isEmpty ||
+      !widgetNotePathInLibrary(note) ||
       text == null ||
       text.trim().isEmpty) {
     return null;

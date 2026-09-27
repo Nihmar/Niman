@@ -39,6 +39,17 @@
          screen (including the per-app "unknown apps" allowlist). -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!-- Widget row taps (issue #332): the background broadcast carries a
+         `niman://` URI that ends in a file read and write, and the two
+         receivers below accept it from any app. The sends are this app's
+         own PendingIntents (WidgetBackgroundTemplate, NoteItemAddActivity
+         and the plugin's getBroadcast), which run with this app's identity,
+         so a signature-level permission closes the path to other apps
+         without touching the widget flow. -->
+    <permission
+        android:name="dev.niman.niman.permission.WIDGET_TAP"
+        android:protectionLevel="signature" />
+
     <application
         android:label="Niman"
         android:name="${applicationName}"
@@ -140,17 +151,22 @@
               reaches the Dart toggle through the plugin's worker.
               WidgetTapReceiver logs the row URI first (the background
               isolate's own log never reaches the export), then delegates
-              to the same worker. -->
+              to the same worker.
+              Guarded by the app's signature permission (issue #332): the
+              tap URIs name a note to write, and an unguarded exported
+              receiver let any installed app send one. -->
         <receiver
             android:name=".WidgetTapReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:permission="dev.niman.niman.permission.WIDGET_TAP">
             <intent-filter>
                 <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
             </intent-filter>
         </receiver>
         <receiver
             android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:permission="dev.niman.niman.permission.WIDGET_TAP">
             <intent-filter>
                 <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
             </intent-filter>
