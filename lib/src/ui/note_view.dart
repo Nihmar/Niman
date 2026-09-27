@@ -775,11 +775,18 @@ final class _NoteViewState extends State<NoteView>
       _savePending = false;
       // Persist the outgoing note under its own path before the buffer is
       // replaced by the incoming one (its text is read synchronously at the
-      // start of _save, before the _load below resets the buffer). An
-      // in-flight save already holds the outgoing text + path: skip.
-      final saved = !_saving && _revision != _lastSavedRevision
-          ? _save(path: oldWidget.path)
-          : _activeSave ?? Future<void>.value();
+      // start of a save, before the _load below resets the buffer). A save
+      // in flight holds an *older* revision of it, so the newest one is
+      // taken here and its write chained behind that save — switching
+      // during a save dropped every edit made since it started (#334).
+      final Future<void> saved;
+      if (_revision == _lastSavedRevision) {
+        saved = _activeSave ?? Future<void>.value();
+      } else if (!_saving) {
+        saved = _save(path: oldWidget.path);
+      } else {
+        saved = _saveOutgoingAfter(_activeSave, oldWidget.path);
+      }
       _closed(oldWidget.path, saved);
       // The tracker now sees the incoming path (the adapter reads it
       // live) — re-read the dirty set so the guard does not act on the
@@ -1815,6 +1822,47 @@ final class _NoteViewState extends State<NoteView>
     return future;
   }
 
+  /// Saves the outgoing note at [target] as it stands *now*, after
+  /// [waiting] — the save already running for it — so one note never has
+  /// two writes racing for the same path.
+  ///
+  /// The text, or the streaming save's buffer snapshot, is taken before the
+  /// first await: the note switch that calls this replaces the buffer with
+  /// the incoming note's, and an edit made during a save would otherwise be
+  /// the one nobody writes (#334).
+  Future<void> _saveOutgoingAfter(Future<void>? waiting, String target) async {
+    final session = _editSession;
+    final stream = _takeStreamSave();
+    final text = stream == null ? _currentText : null;
+    if (waiting != null) {
+      try {
+        await waiting;
+      } on Object {
+        // The save that was already running reports its own failure; this
+        // one still has to try.
+      }
+    }
+    final clock = Stopwatch()..start();
+    try {
+      if (stream != null) {
+        await widget.saveNoteStream!(
+          target,
+          (index) => _nextSlice(stream, index),
+          editSession: session,
+          references: stream.references,
+        );
+      } else {
+        await _write(target, text!, session);
+      }
+      _log.info(
+        'note saved: $target (outgoing, ${clock.elapsedMilliseconds} ms)',
+      );
+    } on Object catch (error) {
+      _log.error('note save failed: $target ($error)');
+      rethrow;
+    }
+  }
+
   /// The actual write for [_save]; a write error reaches every caller
   /// awaiting the returned future.
   ///
@@ -1828,8 +1876,10 @@ final class _NoteViewState extends State<NoteView>
     final clock = Stopwatch()..start();
     final stream = _takeStreamSave();
     if (stream != null) {
-      unawaited(_saveStreamed(stream, revision, target, clock));
-      return;
+      // Awaited, not handed over: `_activeSave` must be the write itself, or
+      // a caller that awaits a save — the close guard, a note switch (#334) —
+      // believes the disk moved while the slices are still going out.
+      return await _saveStreamed(stream, revision, target, clock);
     }
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
