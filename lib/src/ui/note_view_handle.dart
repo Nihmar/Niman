@@ -21,6 +21,12 @@ abstract interface class NoteViewHandle {
   /// whose text is on screen, not a kind's own view of it.
   bool get canInsert;
 
+  /// Rewrites the note's frontmatter `type` — the kind its body is built
+  /// from — as one undoable edit, saved at once. Null removes the key and
+  /// leaves a plain note. The note's ⋮ menu is the caller: a list turns
+  /// into a shopping list and back (#309).
+  void setNoteKind(String? type);
+
   /// Puts [markdown] at the caret, one undo step: on the caret's line when
   /// it is one line, on lines of its own when it is more (#265).
   void insertAtCaret(String markdown);
