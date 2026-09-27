@@ -11,6 +11,7 @@ final class ListItem {
     required this.textStart,
     required this.checked,
     required this.text,
+    this.quantity = 1,
   });
 
   /// The 0-based index of the item's line in the note text (split on
@@ -35,6 +36,11 @@ final class ListItem {
 
   /// The item text after the box (trimmed).
   final String text;
+
+  /// The item's quantity: 1 for a plain list, and what
+  /// `parseShoppingItems` reads from the `×2` a shopping item's text may
+  /// end in.
+  final int quantity;
 }
 
 /// A drop zone of a list drag (T-TK-09): where the dragged item lands

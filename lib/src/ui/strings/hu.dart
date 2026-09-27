@@ -382,6 +382,12 @@ final class HungarianStrings extends Strings {
   String get listEmpty => 'Nincs elem';
   @override
   String get listDragHandleLabel => 'Elem sorrendjének módosítása';
+  @override
+  String get shoppingListName => 'Bevásárlólista';
+  @override
+  String get checklistName => 'Ellenőrzőlista';
+  @override
+  String get shoppingQuantityLabel => 'Mennyiség';
 
   // Audio note kind (issue #56).
   @override

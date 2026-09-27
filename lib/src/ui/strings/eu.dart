@@ -378,6 +378,12 @@ final class BasqueStrings extends Strings {
   String get listEmpty => 'Oraindik ez dago elementurik';
   @override
   String get listDragHandleLabel => 'Aldatu elementuaren ordena';
+  @override
+  String get shoppingListName => 'Erosketa-zerrenda';
+  @override
+  String get checklistName => 'Egiaztapen-zerrenda';
+  @override
+  String get shoppingQuantityLabel => 'Kopurua';
 
   // Audio note kind (issue #56).
   @override

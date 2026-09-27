@@ -387,6 +387,12 @@ final class SpanishStrings extends Strings {
   String get listEmpty => 'Aún no hay elementos';
   @override
   String get listDragHandleLabel => 'Reordenar el elemento';
+  @override
+  String get shoppingListName => 'Lista de la compra';
+  @override
+  String get checklistName => 'Lista de verificación';
+  @override
+  String get shoppingQuantityLabel => 'Cantidad';
 
   // Audio note kind (issue #56).
   @override

@@ -11,8 +11,12 @@ void main() {
   });
 
   group('kinds', () {
-    test('detects list notes', () {
+    test('detects list notes, shopping lists included', () {
       expect(isListNoteContent('---\ntype: list\n---\n- [ ] milk\n'), isTrue);
+      expect(
+        isListNoteContent('---\ntype: shopping-list\n---\n- [ ] milk ×2\n'),
+        isTrue,
+      );
       expect(isListNoteContent('# plain note\n'), isFalse);
       expect(isListNoteContent('---\ntype: audio\n---\n'), isFalse);
     });
@@ -77,6 +81,14 @@ void main() {
         'line': 4,
         'depth': 0,
       });
+    });
+
+    test('a shopping list folds each quantity into its row text', () {
+      const shopping =
+          '---\ntype: shopping-list\n---\n'
+          '- [ ] milk ×2\n- [ ] bread\n';
+      final list = checklistRows(shopping);
+      expect(list.rows.map((row) => row.text).toList(), ['milk ×2', 'bread']);
     });
   });
 }

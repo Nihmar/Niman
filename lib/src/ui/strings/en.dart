@@ -381,6 +381,12 @@ final class EnglishStrings extends Strings {
   String get listEmpty => 'No items yet';
   @override
   String get listDragHandleLabel => 'Reorder item';
+  @override
+  String get shoppingListName => 'Shopping list';
+  @override
+  String get checklistName => 'Checklist';
+  @override
+  String get shoppingQuantityLabel => 'Quantity';
 
   // Audio note kind (issue #56).
   @override

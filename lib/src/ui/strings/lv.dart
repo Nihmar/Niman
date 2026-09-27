@@ -376,6 +376,12 @@ final class LatvianStrings extends Strings {
   String get listEmpty => 'Vēl nav elementu';
   @override
   String get listDragHandleLabel => 'Mainīt elementa secību';
+  @override
+  String get shoppingListName => 'Iepirkumu saraksts';
+  @override
+  String get checklistName => 'Kontrolsaraksts';
+  @override
+  String get shoppingQuantityLabel => 'Daudzums';
 
   // Audio note kind (issue #56).
   @override

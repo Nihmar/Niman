@@ -385,6 +385,12 @@ final class BosnianStrings extends Strings {
   String get listEmpty => 'Još nema stavki';
   @override
   String get listDragHandleLabel => 'Preuredi stavku';
+  @override
+  String get shoppingListName => 'Lista za kupovinu';
+  @override
+  String get checklistName => 'Kontrolna lista';
+  @override
+  String get shoppingQuantityLabel => 'Količina';
 
   // Audio note kind (issue #56).
   @override

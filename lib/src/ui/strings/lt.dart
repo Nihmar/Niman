@@ -379,6 +379,12 @@ final class LithuanianStrings extends Strings {
   String get listEmpty => 'Elementų dar nėra';
   @override
   String get listDragHandleLabel => 'Keisti elemento tvarką';
+  @override
+  String get shoppingListName => 'Pirkinių sąrašas';
+  @override
+  String get checklistName => 'Kontrolinis sąrašas';
+  @override
+  String get shoppingQuantityLabel => 'Kiekis';
 
   // Audio note kind (issue #56).
   @override

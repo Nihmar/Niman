@@ -378,6 +378,12 @@ final class NorwegianStrings extends Strings {
   String get listEmpty => 'Ingen elementer ennå';
   @override
   String get listDragHandleLabel => 'Endre rekkefølge på elementet';
+  @override
+  String get shoppingListName => 'Handleliste';
+  @override
+  String get checklistName => 'Sjekkliste';
+  @override
+  String get shoppingQuantityLabel => 'Antall';
 
   // Audio note kind (issue #56).
   @override

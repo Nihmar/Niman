@@ -380,6 +380,12 @@ final class DanishStrings extends Strings {
   String get listEmpty => 'Ingen elementer endnu';
   @override
   String get listDragHandleLabel => 'Omordn element';
+  @override
+  String get shoppingListName => 'Indkøbsliste';
+  @override
+  String get checklistName => 'Tjekliste';
+  @override
+  String get shoppingQuantityLabel => 'Antal';
 
   // Audio note kind (issue #56).
   @override
