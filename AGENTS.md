@@ -13,6 +13,9 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 
 ## Commits
 - One logical change per commit; never bundle unrelated changes.
+- **No co-authoring signatures**: a commit message carries no `Co-authored-by:`
+  trailer — not a tool's, not another agent's. The history has none, and none
+  is to be added.
 - **Build the beta (testing) flavor by default** — `./scripts/niman.sh apk beta` /
   `./scripts/niman.sh linux beta`, `scripts\niman.bat apk beta` /
   `scripts\niman.bat windows beta`. It carries its own application ID /
