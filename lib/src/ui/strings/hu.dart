@@ -2506,4 +2506,13 @@ final class HungarianStrings extends Strings {
   String get syncMergeSave => 'Összefésülés mentése';
   @override
   String get syncMergeKeepWhole => 'Vagy tarts meg egy teljes példányt';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'A beágyazott négyzetek bejelölése';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Egy négyzet bejelölése az alatta beágyazottakat is bejelöli. '
+      'A jelölés levétele úgy hagyja őket.';
 }

@@ -2482,4 +2482,13 @@ final class NorwegianStrings extends Strings {
   String get syncMergeSave => 'Lagre flettingen';
   @override
   String get syncMergeKeepWhole => 'Eller behold én hel kopi';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Huk av nøstede bokser';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Å huke av en boks huker også av dem som er nøstet under. Å '
+      'fjerne haken lar dem stå.';
 }

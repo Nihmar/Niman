@@ -2457,4 +2457,13 @@ final class HindiStrings extends Strings {
   String get syncMergeSave => 'मिलान सहेजें';
   @override
   String get syncMergeKeepWhole => 'या पूरी एक कॉपी रखें';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'नेस्ट किए चेकबॉक्स पर टिक करें';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'किसी चेकबॉक्स पर टिक करने से उसके नीचे नेस्ट किए गए भी टिक '
+      'हो जाते हैं। हटाने पर वे वैसे ही रहते हैं।';
 }

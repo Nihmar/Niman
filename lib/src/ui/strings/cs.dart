@@ -2495,4 +2495,13 @@ final class CzechStrings extends Strings {
   String get syncMergeSave => 'Uložit sloučení';
   @override
   String get syncMergeKeepWhole => 'Nebo ponechat jednu celou kopii';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Zaškrtnout vnořená políčka';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Zaškrtnutí políčka zaškrtne i ta vnořená pod ním. Odškrtnutí '
+      'je nechá být.';
 }

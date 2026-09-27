@@ -49,6 +49,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.marks,
     this.zen = false,
     this.typewriter = false,
+    this.cascadeChecklist = false,
     this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,
@@ -158,6 +159,10 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Typewriter mode (#70), and the status row's switch for it.
   final bool typewriter;
+
+  /// Whether ticking a checklist item ticks the tasks nested under it
+  /// (#326).
+  final bool cascadeChecklist;
 
   /// See [typewriter].
   final VoidCallback? onToggleTypewriter;
@@ -272,6 +277,7 @@ final class ShellDetailPane extends StatelessWidget {
     toolbarTop: true,
     zen: zen,
     typewriter: typewriter,
+    cascadeChecklist: cascadeChecklist,
     onToggleTypewriter: onToggleTypewriter,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,

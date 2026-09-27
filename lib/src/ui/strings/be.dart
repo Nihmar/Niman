@@ -2525,4 +2525,13 @@ final class BelarusianStrings extends Strings {
   String get syncMergeSave => 'Захаваць аб’яднанне';
   @override
   String get syncMergeKeepWhole => 'Або пакінуць адну цэлую копію';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Адзначыць укладзеныя сцяжкі';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Адзначэнне сцяжка адзначае і ўкладзеныя пад ім. Зняцце '
+      'адзнакі пакідае іх як ёсць.';
 }

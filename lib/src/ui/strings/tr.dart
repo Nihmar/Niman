@@ -2468,4 +2468,13 @@ final class TurkishStrings extends Strings {
   String get syncMergeSave => 'Birleştirmeyi kaydet';
   @override
   String get syncMergeKeepWhole => 'Ya da tek bir tam kopya tut';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'İç içe kutuları işaretle';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Bir kutuyu işaretlemek altındaki iç içe kutuları da '
+      'işaretler. İşareti kaldırmak onları olduğu gibi bırakır.';
 }

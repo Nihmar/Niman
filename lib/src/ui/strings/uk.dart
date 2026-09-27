@@ -2526,4 +2526,13 @@ final class UkrainianStrings extends Strings {
   String get syncMergeSave => 'Зберегти об’єднання';
   @override
   String get syncMergeKeepWhole => 'Або залишити одну цілу копію';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Позначати вкладені прапорці';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Позначення прапорця позначає й вкладені під ним. Зняття '
+      'позначки залишає їх як є.';
 }

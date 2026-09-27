@@ -2292,4 +2292,12 @@ final class JapaneseStrings extends Strings {
   String get syncMergeSave => '統合を保存';
   @override
   String get syncMergeKeepWhole => 'または、どちらか一方をまるごと残す';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => '入れ子のチェックボックスをまとめて';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'チェックすると、その下に入れ子になったものも一緒にチェックされます。外すとそのままです。';
 }

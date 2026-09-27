@@ -87,6 +87,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
+    this.cascadeChecklist = false,
     this.autofocus = false,
     this.viewKey,
     this.lineTokens,
@@ -183,6 +184,10 @@ final class MarkdownSurface extends StatelessWidget {
   /// Typewriter mode: the row being written keeps to the middle.
   final bool typewriter;
 
+  /// Whether ticking a checklist item ticks the tasks nested under it
+  /// (#326).
+  final bool cascadeChecklist;
+
   /// Whether the note takes the focus as it opens.
   final bool autofocus;
 
@@ -232,6 +237,7 @@ final class MarkdownSurface extends StatelessWidget {
     embedResolver: embedResolver,
     caretWidth: caretWidth,
     typewriter: typewriter,
+    cascadeChecklist: cascadeChecklist,
     autofocus: autofocus,
     lineTokens: lineTokens,
     templateCommands: templateCommands,

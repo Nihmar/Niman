@@ -1173,4 +1173,9 @@ abstract base class Strings {
   String get syncMergeKeepBoth;
   String get syncMergeSave;
   String get syncMergeKeepWhole;
+
+  // Cascading a checklist tick (#326).
+
+  String get cascadeChecklistTitle;
+  String get cascadeChecklistSubtitle;
 }

@@ -2502,4 +2502,13 @@ final class SwedishStrings extends Strings {
   String get syncMergeSave => 'Spara sammanfogningen';
   @override
   String get syncMergeKeepWhole => 'Eller behåll en hel kopia';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Markera nästlade rutor';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Att markera en ruta markerar dem som är nästlade under. Att '
+      'avmarkera lämnar dem som de är.';
 }

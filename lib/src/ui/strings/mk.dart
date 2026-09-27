@@ -2518,4 +2518,13 @@ final class MacedonianStrings extends Strings {
   String get syncMergeSave => 'Зачувај го спојувањето';
   @override
   String get syncMergeKeepWhole => 'Или задржете една цела копија';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Означи вгнездени квадратчиња';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Означувањето квадратче ги означува и вгнездените под него. '
+      'Отстранувањето на ознаката ги остава како се.';
 }

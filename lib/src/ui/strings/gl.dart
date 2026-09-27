@@ -2512,4 +2512,13 @@ final class GalicianStrings extends Strings {
   String get syncMergeSave => 'Gardar a unión';
   @override
   String get syncMergeKeepWhole => 'Ou conserva unha copia enteira';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marca as casiñas aniñadas';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar unha casiña marca as que están aniñadas debaixo. '
+      'Desmarcala déixaas como están.';
 }

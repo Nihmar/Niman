@@ -2518,4 +2518,13 @@ final class BasqueStrings extends Strings {
   String get syncMergeSave => 'Gorde bateratzea';
   @override
   String get syncMergeKeepWhole => 'Edo gorde kopia oso bat';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Markatu habiaratutako laukiak';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Lauki bat markatzean hark azpian habiaratutakoak ere '
+      'markatzen ditu. Marka kentzean dauden bezala uzten ditu.';
 }

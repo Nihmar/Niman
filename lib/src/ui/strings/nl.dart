@@ -2527,4 +2527,13 @@ final class DutchStrings extends Strings {
   String get syncMergeSave => 'Samenvoeging opslaan';
   @override
   String get syncMergeKeepWhole => 'Of houd één hele kopie';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Geneste vakjes mee aanvinken';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Een vakje aanvinken vinkt ook de eronder geneste aan. '
+      'Uitzetten laat ze zoals ze zijn.';
 }

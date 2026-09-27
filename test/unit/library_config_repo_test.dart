@@ -115,6 +115,17 @@ void main() {
       expect((await fresh.config).tidyOnClose, isFalse);
     });
 
+    test('cascadeChecklist is written to the file, not the device', () async {
+      await split.update((c) => c.copyWith(cascadeChecklist: true));
+      expect(fileJson()['cascadeChecklist'], isTrue);
+      expect(
+        (await device.read(lib.path))?.containsKey('cascadeChecklist') ?? false,
+        isFalse,
+      );
+      final fresh = LibraryConfigRepo(lib.path);
+      expect((await fresh.config).cascadeChecklist, isTrue);
+    });
+
     test('a device key alone never touches the file', () async {
       await split.update((c) => c.copyWith(trashEnabled: false));
       final before = store.file.statSync().modified;

@@ -2504,4 +2504,13 @@ final class SlovakStrings extends Strings {
   String get syncMergeSave => 'Uložiť zlúčenie';
   @override
   String get syncMergeKeepWhole => 'Alebo ponechať jednu celú kópiu';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Zaškrtnúť vnorené políčka';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Zaškrtnutie políčka zaškrtne aj tie vnorené pod ním. '
+      'Odškrtnutie ich nechá tak.';
 }

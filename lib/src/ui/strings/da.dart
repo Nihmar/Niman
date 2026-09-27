@@ -2486,4 +2486,13 @@ final class DanishStrings extends Strings {
   String get syncMergeSave => 'Gem fletningen';
   @override
   String get syncMergeKeepWhole => 'Eller behold én hel kopi';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Sæt flueben i indlejrede felter';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Et flueben i et felt sætter også dem, der er indlejret '
+      'under. At fjerne det lader dem være.';
 }

@@ -1391,4 +1391,9 @@ final class AppStrings {
   static String get syncMergeKeepBoth => _s.syncMergeKeepBoth;
   static String get syncMergeSave => _s.syncMergeSave;
   static String get syncMergeKeepWhole => _s.syncMergeKeepWhole;
+
+  // Cascading a checklist tick (#326).
+
+  static String get cascadeChecklistTitle => _s.cascadeChecklistTitle;
+  static String get cascadeChecklistSubtitle => _s.cascadeChecklistSubtitle;
 }

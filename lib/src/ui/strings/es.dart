@@ -2533,4 +2533,13 @@ final class SpanishStrings extends Strings {
   String get syncMergeSave => 'Guardar la unión';
   @override
   String get syncMergeKeepWhole => 'O conserva una copia entera';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marcar las casillas anidadas';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar una casilla marca las que están anidadas debajo. '
+      'Desmarcarla las deja como están.';
 }

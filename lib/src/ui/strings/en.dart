@@ -2465,4 +2465,13 @@ final class EnglishStrings extends Strings {
   String get syncMergeSave => 'Save the merge';
   @override
   String get syncMergeKeepWhole => 'Or keep one whole copy';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Tick nested checkboxes';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ticking a checkbox ticks every one nested under it. Clearing '
+      'it leaves them as they are.';
 }

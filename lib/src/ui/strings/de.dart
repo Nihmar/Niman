@@ -2555,4 +2555,13 @@ final class GermanStrings extends Strings {
   String get syncMergeSave => 'Zusammenführung speichern';
   @override
   String get syncMergeKeepWhole => 'Oder eine ganze Kopie behalten';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Verschachtelte Kästchen mitnehmen';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ein Häkchen setzt auch die darunter verschachtelten. Es '
+      'wieder zu entfernen lässt sie, wie sie sind.';
 }

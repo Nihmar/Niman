@@ -2508,4 +2508,13 @@ final class ItalianStrings extends Strings {
   String get syncMergeSave => "Salva l'unione";
   @override
   String get syncMergeKeepWhole => 'Oppure tieni una copia intera';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Spunta le caselle annidate';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Spuntare una casella spunta quelle annidate sotto. Toglierla '
+      'le lascia come sono.';
 }

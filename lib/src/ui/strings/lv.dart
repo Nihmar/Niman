@@ -2486,4 +2486,13 @@ final class LatvianStrings extends Strings {
   String get syncMergeSave => 'Saglabāt sapludinājumu';
   @override
   String get syncMergeKeepWhole => 'Vai paturiet vienu veselu kopiju';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Atzīmēt iegultos ķekstiņus';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ķekstiņa atzīmēšana atzīmē arī zem tā iegultos. Atzīmes '
+      'noņemšana tos atstāj kā ir.';
 }

@@ -2537,4 +2537,13 @@ final class CatalanStrings extends Strings {
   String get syncMergeSave => 'Desa la unió';
   @override
   String get syncMergeKeepWhole => 'O conserva una còpia sencera';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marca les caselles imbricades';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar una casella marca les que hi ha imbricades a sota. '
+      'Desmarcar-la les deixa tal com estan.';
 }

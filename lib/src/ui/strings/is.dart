@@ -2494,4 +2494,13 @@ final class IcelandicStrings extends Strings {
   String get syncMergeSave => 'Vista sameininguna';
   @override
   String get syncMergeKeepWhole => 'Eða halda einu heilu eintaki';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Haka við innfellda reiti';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Að haka við reit hakir líka við þá sem eru innfelldir undir. '
+      'Að taka hakið af lætur þá standa.';
 }

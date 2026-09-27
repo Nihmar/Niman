@@ -82,6 +82,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -133,6 +134,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.embedResolver,
     this.caretWidth,
     this.typewriter = false,
+    this.cascadeChecklist = false,
     this.lineTokens,
     this.templateCommands = false,
     this.autofocus = false,
@@ -254,6 +256,10 @@ final class MarkdownSourceView extends StatefulWidget {
   /// pane, lit faintly, and the note leaves room below its last line so that
   /// row can reach the middle there too.
   final bool typewriter;
+
+  /// Whether ticking a checklist item ticks the tasks nested under it
+  /// (#326).
+  final bool cascadeChecklist;
 
   /// The colours of a line of a file that is not Markdown, by its text —
   /// a todo.txt's (`todoTxtTokens`) — or null for the Markdown engine's.
@@ -1683,7 +1689,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// source, written out, and a click there is a click in the text. The box
   /// is where the painter puts it ([liveItemSlot]), asked of the same
   /// paragraph, so the two agree by construction.
-  ({int start, int end, bool ticked})? _taskBoxAt(Offset global) {
+  ({int line, int start, int end, bool ticked})? _taskBoxAt(Offset global) {
     if (!widget.hideMarkers) return null;
     final caretLine = _caretSpot.value.line;
     for (final entry in _lineKeys.entries) {
@@ -1711,6 +1717,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         if (token.kind != TokenKind.taskBox) continue;
         final start = widget.buffer.offsetOfLine(index) + token.start;
         return (
+          line: index,
           start: start,
           end: start + token.end - token.start,
           ticked: ticked,
@@ -1726,6 +1733,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   bool _toggleTaskAt(Offset global) {
     final box = _taskBoxAt(global);
     if (box == null) return false;
+    // Ticking a parent takes its branch with it (#326); clearing one does
+    // not, and neither does a library that turned the sweep off.
+    if (!box.ticked && widget.cascadeChecklist) {
+      final blocks = _styler?.blocks;
+      final edit = blocks == null
+          ? null
+          : checklistTickEdit(
+              buffer: widget.buffer,
+              blocks: blocks,
+              line: box.line,
+              ticked: true,
+            );
+      if (edit != null) {
+        _history.seal();
+        _replaceRange(
+          edit.start,
+          edit.end,
+          edit.text,
+          caret: _selection,
+          follow: false,
+        );
+        _history.seal();
+        return true;
+      }
+    }
     _history.seal();
     _replaceRange(
       box.start + 1,

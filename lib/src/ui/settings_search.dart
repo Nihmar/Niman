@@ -221,6 +221,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.typewriter),
     ),
     SettingsSearchEntry(
+      title: AppStrings.cascadeChecklistTitle,
+      area: editor,
+      rowKey: SettingsKeys.cascadeChecklist,
+      value: () async => onOff(on: await controller.cascadeChecklist),
+      areaId: SettingsAreaId.editor,
+      open: () => pushEditor(SettingsKeys.cascadeChecklist),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.linkTypeTitle,
       area: editor,
       rowKey: SettingsKeys.linkType,

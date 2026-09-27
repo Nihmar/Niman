@@ -2534,4 +2534,13 @@ final class RomanianStrings extends Strings {
   String get syncMergeSave => 'Salvează îmbinarea';
   @override
   String get syncMergeKeepWhole => 'Sau păstrează o copie întreagă';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Bifează casetele imbricate';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Bifarea unei casete le bifează și pe cele imbricate '
+      'dedesubt. Debifarea le lasă așa.';
 }

@@ -2519,4 +2519,13 @@ final class LithuanianStrings extends Strings {
   String get syncMergeSave => 'Išsaugoti suliejimą';
   @override
   String get syncMergeKeepWhole => 'Arba palikti vieną visą kopiją';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Žymėti įdėtus langelius';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Pažymėjus langelį pažymimi ir po juo įdėti. Nuėmus žymę jie '
+      'paliekami.';
 }

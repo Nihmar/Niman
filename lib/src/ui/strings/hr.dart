@@ -2523,4 +2523,13 @@ final class CroatianStrings extends Strings {
   String get syncMergeSave => 'Spremi spajanje';
   @override
   String get syncMergeKeepWhole => 'Ili zadrži jednu cijelu kopiju';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Označi ugniježđene kućice';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Označavanje kućice označava i one ugniježđene ispod. '
+      'Odznačavanje ih ostavlja kakve jesu.';
 }

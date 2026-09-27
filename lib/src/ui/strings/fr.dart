@@ -2573,4 +2573,13 @@ final class FrenchStrings extends Strings {
   String get syncMergeSave => 'Enregistrer la fusion';
   @override
   String get syncMergeKeepWhole => 'Ou garder une copie entière';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Cocher les cases imbriquées';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Cocher une case coche celles qui sont imbriquées dessous. La '
+      'décocher les laisse telles quelles.';
 }

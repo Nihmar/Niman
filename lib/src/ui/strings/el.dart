@@ -2579,4 +2579,13 @@ final class GreekStrings extends Strings {
   String get syncMergeSave => 'Αποθήκευση της ένωσης';
   @override
   String get syncMergeKeepWhole => 'Ή κρατήστε ένα ολόκληρο αντίγραφο';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Σήμανση των ένθετων πλαισίων';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Η σήμανση ενός πλαισίου σημαίνει και όσα είναι ένθετα από '
+      'κάτω. Η αφαίρεση τα αφήνει ως έχουν.';
 }

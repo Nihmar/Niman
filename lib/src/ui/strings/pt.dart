@@ -2510,4 +2510,13 @@ final class PortugueseStrings extends Strings {
   String get syncMergeSave => 'Salvar a união';
   @override
   String get syncMergeKeepWhole => 'Ou mantenha uma cópia inteira';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Marcar as caixas aninhadas';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Marcar uma caixa marca as que estão aninhadas por baixo. '
+      'Desmarcá-la deixa-as como estão.';
 }

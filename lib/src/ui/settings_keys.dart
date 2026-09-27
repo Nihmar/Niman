@@ -44,6 +44,7 @@ abstract final class SettingsKeys {
   static const readableLineLength = Key('readable-line-length-setting');
   static const noteColumnWidth = Key('note-column-width-setting');
   static const typewriter = Key('typewriter-setting');
+  static const cascadeChecklist = Key('cascade-checklist-setting');
   static const linkType = Key('link-type');
   static const missingNoteLocation = Key('missing-note-location');
   static const noteTextScale = Key('note-text-scale-setting');

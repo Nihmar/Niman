@@ -2521,4 +2521,13 @@ final class SerbianStrings extends Strings {
   String get syncMergeSave => 'Сачувај спајање';
   @override
   String get syncMergeKeepWhole => 'Или задржите једну целу копију';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Означи уграђене квадратиће';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Означавање квадратића означава и оне уграђене испод. '
+      'Уклањање ознаке их оставља какви јесу.';
 }

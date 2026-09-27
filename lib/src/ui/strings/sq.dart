@@ -2516,4 +2516,13 @@ final class AlbanianStrings extends Strings {
   String get syncMergeSave => 'Ruaj bashkimin';
   @override
   String get syncMergeKeepWhole => 'Ose mbaj një kopje të plotë';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Shëno kutitë e futura';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Shënimi i një kutie shënon edhe ato të futura poshtë saj. '
+      'Heqja e shënimit i lë ashtu.';
 }

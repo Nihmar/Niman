@@ -2506,4 +2506,13 @@ final class FinnishStrings extends Strings {
   String get syncMergeSave => 'Tallenna yhdistelmä';
   @override
   String get syncMergeKeepWhole => 'Tai säilytä yksi kokonainen kopio';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Valitse sisäkkäiset ruudut';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Ruudun valitseminen valitsee myös sen alle sisäkkäiset. '
+      'Valinnan poisto jättää ne ennalleen.';
 }

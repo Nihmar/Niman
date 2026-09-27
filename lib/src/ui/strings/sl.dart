@@ -2520,4 +2520,13 @@ final class SlovenianStrings extends Strings {
   String get syncMergeSave => 'Shrani združitev';
   @override
   String get syncMergeKeepWhole => 'Ali obdržite eno celo kopijo';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Označi gnezdene kvadratke';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Označitev kvadratka označi tudi tiste, gnezdene pod njim. '
+      'Odznačitev jih pusti take.';
 }

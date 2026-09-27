@@ -2539,4 +2539,13 @@ final class PolishStrings extends Strings {
   String get syncMergeSave => 'Zapisz scalenie';
   @override
   String get syncMergeKeepWhole => 'Albo zachowaj jedną całą kopię';
+
+  // Cascading a checklist tick (#326).
+
+  @override
+  String get cascadeChecklistTitle => 'Zaznacz zagnieżdżone pola';
+  @override
+  String get cascadeChecklistSubtitle =>
+      'Zaznaczenie pola zaznacza też te zagnieżdżone pod nim. '
+      'Odznaczenie zostawia je bez zmian.';
 }
