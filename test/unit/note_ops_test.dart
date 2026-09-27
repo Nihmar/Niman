@@ -416,6 +416,36 @@ void main() {
       final names = items.map((i) => i.name).toSet();
       expect(names, isNot({'Dup.md'}));
     });
+
+    test(
+      'deletes of one name inside a second keep every copy (#335)',
+      () async {
+        for (final body in ['one', 'two', 'three']) {
+          await ops.createNote(parentPath: '', name: 'Dup');
+          File(p.join(root.path, 'Dup.md')).writeAsStringSync(body);
+          await ops.delete('Dup.md');
+        }
+
+        final copies = Directory(p.join(root.path, '.trash'))
+            .listSync()
+            .whereType<File>()
+            .where((file) => !p.basename(file.path).startsWith('.'))
+            .map((file) => file.readAsStringSync())
+            .toSet();
+        expect(copies, {
+          'one',
+          'two',
+          'three',
+        }, reason: 'no delete replaced a copy already in the trash');
+        final items = await ops.trashItems();
+        expect(items, hasLength(3));
+        expect(
+          items.map((item) => item.name).toSet(),
+          hasLength(3),
+          reason: 'and each of them has a name of its own',
+        );
+      },
+    );
   });
 
   group('restore', () {
