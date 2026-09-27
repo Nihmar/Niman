@@ -49,12 +49,34 @@ void main() {
       expect(table.header, [r'a \| b', 'c']);
     });
 
-    test('rows short of cells are filled, long ones cut', () {
+    test('rows short of cells are filled, and a wide row widens the table', () {
       final table = _table('| a | b |\n| --- | --- |\n| 1 |\n| 1 | 2 | 3 |');
       expect(table.rows, [
-        ['1', ''],
-        ['1', '2'],
+        ['1', '', ''],
+        ['1', '2', '3'],
       ]);
+      expect(table.columns, 3, reason: 'the extra cell is not dropped (#333)');
+      final again = MarkdownTable.parse(table.toLines())!;
+      expect(again.header, ['a', 'b', '']);
+      expect(again.rows, [
+        ['1', '', ''],
+        ['1', '2', '3'],
+      ]);
+      expect(again.aligns, table.aligns);
+    });
+
+    test('a menu edit keeps the cells past the delimiter row (#333)', () {
+      final table = _table('| a | b |\n| --- | --- |\n| 1 | 2 | 3 |');
+      final after = MarkdownTable.parse(
+        _lines(TableEdits.addRowAtEnd(table)).split('\n'),
+      )!;
+      expect(after.columns, 3);
+      expect(after.rows.first, ['1', '2', '3']);
+      expect(
+        _lines(TableEdits.addRowAtEnd(table)),
+        contains('| 1 | 2 | 3 |'),
+        reason: 'the row the menu did not touch is written as it was',
+      );
     });
 
     test('without outer pipes, and indented', () {
