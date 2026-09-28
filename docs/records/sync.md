@@ -475,7 +475,9 @@ one runs joins it.
      `copyFileOver` copies the bytes to the target instead, checking the
      size before dropping the temp: a copy is not atomic the way the
      rename it replaces is. A temp that will not delete is left alone —
-     hidden, skipped by the indexer, and the bytes are already in place.
+     hidden, skipped by the indexer, and the bytes are already in place;
+     one a process killed mid-download left is swept at the next library
+     open (#379).
 
      Ruled out, each by a run that still stalled: the worker isolate (the
      call was moved to the calling isolate and still hung), the event loop

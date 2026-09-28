@@ -10,6 +10,8 @@ import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/custom_theme.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/custom_theme_repo.dart';
@@ -554,6 +556,10 @@ final class LibraryController implements LibrarySession {
       // it to (issue #79) — behind the ready bump, because a folder full
       // of old deletions must not hold the library shut.
       unawaited(_autoEmptyTrash(ops, settings.trashAutoEmptyDays));
+      // And, like the trash empty, behind the ready bump: the temp files a
+      // killed write left (issue #379) are swept on a background isolate so
+      // a folder full of them never holds the library shut.
+      unawaited(_sweepStaleTempFiles(abs));
       _bump();
       if (!blockingScan) {
         _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
@@ -1445,6 +1451,30 @@ final class LibraryController implements LibrarySession {
       await autoEmptyTrash(ops, maxAgeDays: days);
     } on Object catch (error) {
       _log.error('auto-empty failed: $error');
+    }
+  }
+
+  /// Sweeps the stray `.niman-tmp-*` files a killed write left in the open
+  /// library (issue #379).
+  ///
+  /// Runs once per open, on a background isolate like the index walk: the
+  /// rename onto a target is the only thing that removes a write's temp, so
+  /// a process killed between the two leaves the temp behind, and nothing
+  /// else notices it — the walk and the sync both skip dot names. The age
+  /// guard in [sweepStaleTempFiles] keeps a write still in flight safe.
+  /// Whatever it runs into is logged and swallowed: the library is open and
+  /// usable either way.
+  Future<void> _sweepStaleTempFiles(String abs) async {
+    try {
+      final removed = await IsolateGauge.run(
+        () => sweepStaleTempFiles(abs),
+        'sweep temps "$abs"',
+      );
+      if (removed > 0) {
+        _log.info('swept $removed stale temp file(s) in $abs');
+      }
+    } on Object catch (error) {
+      _log.warning('temp sweep failed for $abs: $error');
     }
   }
 
