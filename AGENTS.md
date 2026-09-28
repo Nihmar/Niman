@@ -26,9 +26,14 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - An APK build that fails with `package dev.flutter.plugins.integration_test does not exist` is a stale plugin registrant, not a code fault: `flutter pub get` writes `android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java` with every plugin, and only `flutter build --release` rewrites it without the dev dependencies. Delete that file (gitignored, regenerated), `flutter pub get`, build again.
 
 ## Verify
-- **Before analyze and tests**, run `dart fix --apply` then `dart format lib test tool` (both idempotent).
-- CI (`.github/workflows/check.yml`) runs analyze + `flutter test` + the
-  headless integration tests on every PR. Run checks locally too:
+- **Before analyze and tests**, run `dart fix --apply` then
+  `dart format lib test tool` (both idempotent); CI gates the result with
+  `dart format --output=none --set-exit-if-changed lib test tool`, so drift
+  fails the job.
+- CI (`.github/workflows/check.yml`) runs that gate + analyze + `flutter test` +
+  the integration files on every PR, and installs `hunspell`, `hunspell-en-us`
+  and `hunspell-it` so the live cases of `test/unit/spell_check_test.dart` check
+  real words there instead of skipping. Run checks locally too:
   - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`),
     plus `./scripts/niman.sh integration` for `integration_test/`
   - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`),
@@ -51,11 +56,12 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
   shape: print the number, say which bar it was held to, and put the absolute
   one behind `NIMAN_PERF`.
 - `integration_test/` = E2E, not part of the default `flutter test` run,
-  and it rots when nothing runs it (#241): `app_boot` + `template_backlink`
-  run headless (in CI too); `sync_e2e` needs `-d linux` on a Linux host
-  with a display. Run all three via `integration` **only once a feature's
-  implementation is finished** — never after intermediate commits of work
-  in progress.
+  and it rots when nothing runs it (#241): CI runs `app_boot` headless and
+  `sync_e2e` on `-d linux` under `xvfb-run`, the device the headless runner
+  cannot give it; `template_backlink` is a repro harness that skips unless
+  a library is seeded at `/tmp/niman/repro_lib`. Run all three via
+  `integration` **only once a feature's implementation is finished** —
+  never after intermediate commits of work in progress.
 - **New tests must be portable**: use `p.join` for paths (never literal `/`), no `chmod`.
 
 ## Codegen

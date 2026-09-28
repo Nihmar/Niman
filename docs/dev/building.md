@@ -36,11 +36,12 @@ scripts\niman.bat windows    # Windows build (on a Windows host)
 scripts\niman.bat windows beta  # Windows testing build (its own data folder)
 ```
 
-`check` (`.github/workflows/check.yml`) runs analyze, `flutter test`
-and the headless integration tests on every pull request, so the suite
-cannot rot unnoticed again (issue #241). The WebDAV sync flow needs a
-Linux display (`flutter test -d linux`) and stays a local run inside
-`integration`.
+`check` (`.github/workflows/check.yml`) runs the formatting gate, analyze,
+`flutter test` and the integration files on every pull request, so the
+suite cannot rot unnoticed again (issue #241). The WebDAV sync flow needs
+a device (`flutter test -d linux`), which CI provides on a virtual
+display, and CI installs hunspell so the live spell-check cases run there
+instead of skipping (issue #363).
 
 ## The two Android builds (issue #106)
 
@@ -113,14 +114,17 @@ APKs handed the in-app update the testing one (0.0.10; see
 
 ## Checks before every commit
 
-1. `dart fix --apply`, then `dart format lib test tool` (both idempotent).
+1. `dart fix --apply`, then `dart format lib test tool` (both idempotent);
+   CI fails the job on drift (`dart format --output=none
+   --set-exit-if-changed lib test tool`).
 2. `./scripts/niman.sh check` (infos are fatal:
    `flutter analyze --fatal-infos`).
 3. `flutter test` runs `test/unit/` + `test/widget/`; single test:
    `flutter test test/unit/<f>.dart --plain-name "<name>"`.
-   `integration_test/` is E2E, not part of the default run: `app_boot` +
-   `template_backlink` run headless (in CI too), `sync_e2e` needs
-   `-d linux` on a Linux host with a display. `./scripts/niman.sh
+   `integration_test/` is E2E, not part of the default run: `app_boot` and
+   `sync_e2e` run in CI too (`sync_e2e` on `-d linux`, under xvfb);
+   `template_backlink` is a repro harness and skips unless a library is
+   seeded at `/tmp/niman/repro_lib`. `./scripts/niman.sh
    integration` runs all three (issue #241).
 4. Windows note: ~20 tests fail on path separators and temp-dir cleanup
    (pre-existing, green on Linux). Use `pwsh scripts/newfail.ps1` — it
