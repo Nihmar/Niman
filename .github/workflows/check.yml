@@ -17,8 +17,13 @@ jobs:
   check:
     name: Analyze and test
     runs-on: ubuntu-latest
+    # Read-only: analyze and test never touch the repository or a release.
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      # Actions are pinned to a commit SHA, with the tag in a comment: a
+      # moving tag is a supply-chain hole (issue #393).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # The headless integration tests build the Linux desktop bundle,
       # which needs the same system libraries as the release build, plus
@@ -32,7 +37,7 @@ jobs:
             libayatana-appindicator3-dev libsecret-1-dev libjsoncpp-dev \
             libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev xvfb
 
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
