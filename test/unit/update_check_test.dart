@@ -133,6 +133,28 @@ void main() {
         throwsFormatException,
       );
     });
+
+    // Issue #384: the asset's published digest must survive decoding.
+    test('carries the asset digest, absent when the API omits it', () {
+      final release = LatestRelease.fromJson({
+        'tag_name': 'v1.0.0',
+        'assets': [
+          {
+            'name': 'niman-1.0.0-android.apk',
+            'browser_download_url': 'https://example.com/a.apk',
+            'digest': 'sha256:abc123',
+          },
+          {
+            'name': 'niman-1.0.0-windows-x64-setup.exe',
+            'browser_download_url': 'https://example.com/setup.exe',
+          },
+        ],
+      });
+      expect(release.assets.first.digest, 'sha256:abc123');
+      expect(release.assets.first.expectedSha256, 'abc123');
+      expect(release.assets.last.digest, isNull);
+      expect(release.assets.last.expectedSha256, isNull);
+    });
   });
 
   group('checkForUpdate', () {

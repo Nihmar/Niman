@@ -13,6 +13,7 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/update/app_version.dart';
 import 'package:niman/src/update/release_asset.dart';
 import 'package:niman/src/update/update_check.dart';
@@ -145,10 +146,30 @@ Future<Directory> updateDownloadDirectory() {
   return downloadDirectory();
 }
 
-/// Streams [asset] into [into] (default [updateDownloadDirectory]).
+/// The downloaded bytes did not match the release's published digest, or
+/// the release published no digest to check them against.
+///
+/// Raised by [downloadAsset] after it deletes the artifact, so nothing
+/// unverified is left on disk or handed to the platform (issue #384).
+final class UpdateIntegrityException implements Exception {
+  /// Creates the refusal for [message].
+  const new(this.message);
+
+  /// What went wrong, for the log.
+  final String message;
+
+  @override
+  String toString() => 'UpdateIntegrityException: $message';
+}
+
+/// Streams [asset] into [into] (default [updateDownloadDirectory]) and
+/// verifies the bytes against the digest the release published.
 ///
 /// The file name is the asset's base name, so a hostile release cannot
-/// escape the folder.
+/// escape the folder. A download whose sha256 does not match the digest
+/// the release published, or an asset that published none, is deleted and
+/// rethrown as [UpdateIntegrityException]; the caller then neither offers
+/// nor applies it (issue #384).
 Future<File> downloadAsset(ReleaseAsset asset, {Directory? into}) async {
   final dir = into ?? await updateDownloadDirectory();
   final file = File(p.join(dir.path, p.basename(asset.name)));
@@ -165,9 +186,33 @@ Future<File> downloadAsset(ReleaseAsset asset, {Directory? into}) async {
       );
     }
     await response.pipe(file.openWrite());
-    return file;
   } finally {
     client.close();
+  }
+  await _verifyDownload(asset, file);
+  return file;
+}
+
+/// Checks [file]'s bytes against [asset]'s published digest.
+///
+/// Deletes the file and throws [UpdateIntegrityException] on a mismatch,
+/// or when the release carried no sha256 digest at all: an unverifiable
+/// download is not silently trusted.
+Future<void> _verifyDownload(ReleaseAsset asset, File file) async {
+  final expected = asset.expectedSha256;
+  if (expected == null) {
+    await file.delete();
+    throw UpdateIntegrityException(
+      'asset ${asset.name} published no sha256 digest to verify against',
+    );
+  }
+  final actual = await hashFileSha256(file);
+  if (actual != expected) {
+    await file.delete();
+    throw UpdateIntegrityException(
+      'asset ${asset.name} failed its digest check '
+      '(downloaded $actual, published $expected)',
+    );
   }
 }
 
