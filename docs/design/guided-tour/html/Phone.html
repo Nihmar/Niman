@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman — the guided tour, on a phone</title>
+<style>
+/* The app's own palette: lib/src/ui/theme/niman.dart (dark). */
+:root{
+  --background:#23262B; --backdrop:#1B1D21; --surface:#2C3037; --surface-high:#363B44;
+  --text:#F2EDE5; --muted:#A6A29A; --outline:#4A4F59;
+  --accent:#587CD3; --on-accent:#F2EDE5; --error:#E0687A;
+  --wikilink:#587CD3; --link:#7CA0E6; --code:#7FD1C4; --tag:#6FB8CC; --task:#8FBF7F;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:28px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:#14161A;color:var(--text);font-size:13px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+p.lead{margin:0 0 8px;color:var(--muted);font-size:13px;max-width:900px;line-height:1.55}
+p.lead b{color:var(--text);font-weight:600}
+.screens{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;margin-top:18px}
+.screen{display:flex;flex-direction:column;gap:8px}
+.screen .label{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.caption{color:var(--muted);font-size:12px;margin:6px 0 0;width:390px;line-height:1.5}
+.caption b{color:var(--text);font-weight:600}
+
+/* — a phone — */
+.phone{position:relative;width:390px;height:844px;background:var(--backdrop);border:1px solid var(--surface);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
+.status{height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:11px;color:var(--muted)}
+.appbar{height:56px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 8px;font-size:17px;font-weight:500;color:var(--text)}
+.appbar .bt{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0}
+.appbar .title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.treelist{flex:1;min-height:0;padding:4px 6px;color:#C8C3BA;font-size:14px}
+.treelist .r{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:10px}
+.treelist .r.ind{padding-left:32px}
+.treelist .r.sel{background:var(--surface-high);color:var(--text)}
+.treelist .r.dir{color:var(--muted)}
+.notebody{flex:1;min-height:0;padding:6px 18px 0;overflow:hidden}
+.notebody h3{margin:6px 0 12px;font-size:22px;font-weight:650;color:var(--text)}
+.notebody p{font-size:15px;line-height:1.6;color:#E3DED6;margin:0 0 14px}
+.navbar{height:80px;flex-shrink:0;background:var(--surface);border-top:1px solid var(--outline);display:flex;align-items:center}
+.navbar .d{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--muted)}
+.navbar .d .ic{width:26px;height:26px;font-size:18px;display:flex;align-items:center;justify-content:center}
+.navbar .d.on{color:var(--accent)}
+.toolbar{flex-shrink:0;height:48px;display:flex;align-items:center;gap:2px;padding:0 8px;color:var(--muted);background:var(--backdrop);border-top:1px solid var(--surface)}
+.toolbar .bt{width:36px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.toolbar .sep{width:1px;height:16px;background:var(--surface-high);margin:0 4px}
+.toolbar .spread{flex-grow:1}
+.homestrip{flex-shrink:0;height:22px;display:flex;align-items:center;justify-content:center}
+.homestrip i{width:120px;height:4px;border-radius:2px;background:var(--outline);display:block}
+
+/* — the tour over the phone: the dim, the hole, the card — */
+.spot{position:absolute;border:2px solid var(--accent);border-radius:12px;
+  box-shadow:0 0 0 2000px rgba(10,11,13,.55);z-index:20;pointer-events:none}
+.card{position:absolute;background:var(--surface);border-radius:12px;
+  box-shadow:0 16px 40px rgba(0,0,0,.5);padding:6px 14px 8px;z-index:30;color:var(--text)}
+.card .top{display:flex;align-items:center;height:34px}
+.card .count{font-size:12px;color:var(--muted)}
+.card .skip{margin-left:auto;font-size:13px;color:var(--accent)}
+.card h4{margin:0 0 8px;font-size:15.5px;font-weight:600}
+.card p{margin:0 0 8px;font-size:13px;line-height:1.5;color:#E3DED6}
+.card .actions{display:flex;justify-content:flex-end;align-items:center;gap:6px;height:44px}
+.card .back{font-size:13px;color:var(--accent)}
+.card .next{background:var(--accent);color:var(--on-accent);font-size:13px;font-weight:600;padding:9px 16px;border-radius:20px}
+</style>
+</head>
+<body>
+
+<h1>The guided tour — the phone shapes</h1>
+<p class="lead">Two 390&times;844 states. Act two of issue <b>#266</b>, on a phone: the same walk the desktop gets, over the phone's own controls. A phone walk is <b>7 steps</b> — the desktop's <b>8</b> minus the dock, which a phone has not got; the bar below stands where the desktop's rail does.</p>
+<p class="lead">Every step is the same drawing: the window goes to the app's scrim (<code>55%</code>), a rounded hole the control's own rectangle bears is cut in it, edged in <code>2 px</code> of the accent, and a card with the counter, the prose and <code>Back</code> / <code>Next</code> / <code>Skip</code> sits beside it. The control keeps its colour: the hole is the only bright thing.</p>
+
+<div class="screens">
+
+  <div class="screen">
+    <div class="label">The bottom bar — step 6 of 7</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>&#9636;&#9636;&#9636; &#9211;</span></div>
+      <div class="appbar"><span class="bt">&#9776;</span><span class="title">Library</span><span class="bt">&#9906;</span><span class="bt">&#8942;</span></div>
+      <div class="treelist">
+        <div class="r dir">&#9656; Attachments</div>
+        <div class="r dir">&#9662; Guides</div>
+        <div class="r ind sel">&#9636; Markdown basics.md</div>
+        <div class="r ind">&#9636; Notes.md</div>
+        <div class="r dir">&#9656; Personal</div>
+        <div class="r dir">&#9656; Work</div>
+        <div class="r">&#9636; todo.txt</div>
+      </div>
+      <div class="navbar">
+        <div class="d on"><span class="ic">&#9636;</span>Files</div>
+        <div class="d"><span class="ic">&#9745;</span>Todo</div>
+        <div class="d"><span class="ic">&#9906;</span>Search</div>
+        <div class="d"><span class="ic">&#9998;</span>Quick note</div>
+        <div class="d"><span class="ic">&#9881;</span>Settings</div>
+      </div>
+      <!-- the tour: the bar is the control -->
+      <div class="spot" style="left:-6px;top:758px;width:402px;height:92px"></div>
+      <div class="card" style="left:16px;width:358px;bottom:104px">
+        <div class="top"><span class="count">6 of 7</span><span class="skip">Skip</span></div>
+        <h4>Everything is a tab</h4>
+        <p>Files, tasks, search, the quick note, settings. The command palette reaches every one of them, and every command, from the keyboard.</p>
+        <div class="actions"><span class="back">Back</span><span class="next">Next</span></div>
+      </div>
+    </div>
+    <p class="caption">The desktop points this step at the <b>rail</b>; the phone at the <b>bottom bar</b>. Same words, the platform's own control — which is the one thing the steps are allowed to differ in.</p>
+  </div>
+
+  <div class="screen">
+    <div class="label">The toolbar — step 5 of 7</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>&#9636;&#9636;&#9636; &#9211;</span></div>
+      <div class="appbar"><span class="bt">&#8592;</span><span class="title">Markdown basics</span><span class="bt">&#8942;</span></div>
+      <div class="notebody">
+        <h3>Markdown basics</h3>
+        <p>Markdown is a way of writing that reads as plainly as it is written. A heading is a <span style="color:var(--code)">#</span>; a link is brackets around the words it shows.</p>
+        <p>The same toolbar actions sit on a long press on a word.</p>
+      </div>
+      <div class="toolbar">
+        <span class="bt" style="font-weight:700">B</span>
+        <span class="bt" style="font-style:italic">I</span>
+        <span class="bt" style="text-decoration:line-through">S</span>
+        <span class="sep"></span>
+        <span class="bt" style="font-weight:600">H</span>
+        <span class="bt">&#8226;&#8212;</span>
+        <span class="sep"></span>
+        <span class="bt">&#128279;</span>
+        <span class="bt"><span style="color:var(--accent)">&#9636;</span></span>
+        <span class="spread"></span>
+        <span class="bt">&#8942;</span>
+      </div>
+      <div class="homestrip"><i></i></div>
+      <!-- the tour: the toolbar is the control -->
+      <div class="spot" style="left:2px;top:768px;width:386px;height:60px"></div>
+      <div class="card" style="left:16px;width:358px;bottom:150px">
+        <div class="top"><span class="count">5 of 7</span><span class="skip">Skip</span></div>
+        <h4>The toolbar</h4>
+        <p>Formatting on the line you are in, and the same actions on right-click. Every construct Niman reads is in the cheatsheet.</p>
+        <div class="actions"><span class="back">Back</span><span class="next">Next</span></div>
+      </div>
+    </div>
+    <p class="caption">The phone's toolbar is pinned at the foot of the note — the issue's "keyboard toolbar" is this bar. The card sits above it, over the note text, which is the spot with the most room.</p>
+  </div>
+
+</div>
+
+<p class="caption" style="width:900px;margin-top:22px">Mockups, not screenshots of the app: everything here is HTML drawn to look like Niman, using the real palette from <code>lib/src/ui/theme/niman.dart</code> (night). Where a mockup and the app disagree, the app ships. The steps themselves are data in <code>lib/src/ui/tour/tour_steps.dart</code>; the bar's five destinations are <code>shellDestinations()</code> in <code>lib/src/ui/shell_navigation.dart</code>.</p>
+
+</body>
+</html>
