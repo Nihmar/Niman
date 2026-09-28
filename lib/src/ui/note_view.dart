@@ -38,6 +38,7 @@ import 'package:niman/src/links/embed_path.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_parser.dart';
@@ -146,6 +147,7 @@ final class NoteView extends StatefulWidget {
     this.saveNote,
     this.saveNoteStream,
     this.linkSource,
+    this.wikilinkSuggester,
     this.onOpenNote,
     this.createMissingNote,
     this.folderExists,
@@ -271,6 +273,11 @@ final class NoteView extends StatefulWidget {
   /// The link-resolution source (wiki targets + markdown hrefs against the
   /// open index); null (tests without a session) disables link navigation.
   final LinkSource? linkSource;
+
+  /// The library the wikilink suggester panel reads (#475): the notes,
+  /// their aliases and their headings. Null (no open library) draws no
+  /// panel, and the link is typed as it was before.
+  final WikilinkSuggester? wikilinkSuggester;
 
   /// Opens a note by library-relative path, then (optionally) jumps to a
   /// heading; the shell implements it (T-M3-07).
@@ -1267,6 +1274,7 @@ final class _NoteViewState extends State<NoteView>
         surface: surface,
         lineTokens: _plainTextIn(widget) ? todoTxtTokens : null,
         templateCommands: _templateIn(widget),
+        wikilinkSuggester: widget.wikilinkSuggester,
         // The shell's own focus node: the phone toolbar, the format keys,
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.

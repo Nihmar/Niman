@@ -14,6 +14,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/editor/markdown_format.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/epub/epub_look.dart';
 import 'package:niman/src/epub/epub_looks.dart';
 import 'package:niman/src/frontmatter/edit.dart';
@@ -27,6 +28,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/search/replace.dart';
@@ -807,6 +809,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<LinkSource?> get linkSource async => FakeLinkSource();
+
+  @override
+  Future<WikilinkSuggester?> get wikilinkSuggester async =>
+      _FakeWikilinkSuggester(this);
 
   @override
   Future<List<Note>> folders() async {
@@ -1592,4 +1598,75 @@ final class _TrashEntry {
 
   /// Row ids of the whole trashed subtree.
   final Set<int> rowIds;
+}
+
+/// The fake's [WikilinkSuggester]: the notes it holds as `[[` rows (stem,
+/// folder dimmed), their headings read off the note's own content after a
+/// `#`, and a book's place form from the target's extension (#475).
+final class _FakeWikilinkSuggester implements WikilinkSuggester {
+  /// Creates a suggester over [_session]'s rows.
+  new(this._session);
+
+  final FakeLibrarySession _session;
+
+  @override
+  Future<List<NoteSuggestion>> notes(String query) async {
+    final q = query.trim().toLowerCase();
+    final notes = <NoteSuggestion>[];
+    for (final row in _session._rows) {
+      if (row.isDir || row.trashed) continue;
+      final name = p.basenameWithoutExtension(row.path);
+      if (q.isNotEmpty && !name.toLowerCase().contains(q)) continue;
+      final folder = p.dirname(row.path);
+      notes.add(
+        NoteSuggestion(
+          name: name,
+          folder: folder == '.' ? '' : folder,
+          target: name,
+        ),
+      );
+    }
+    notes.sort((a, b) {
+      final ap = q.isNotEmpty && a.name.toLowerCase().startsWith(q);
+      final bp = q.isNotEmpty && b.name.toLowerCase().startsWith(q);
+      if (ap != bp) return ap ? -1 : 1;
+      final byFolder = a.folder.compareTo(b.folder);
+      return byFolder != 0 ? byFolder : a.name.compareTo(b.name);
+    });
+    return notes;
+  }
+
+  @override
+  Future<List<HeadingSuggestion>> headings(String target) async {
+    final stem = p.basenameWithoutExtension(target).toLowerCase();
+    final row = _session._rows
+        .where(
+          (row) =>
+              !row.isDir &&
+              !row.trashed &&
+              p.basenameWithoutExtension(row.path).toLowerCase() == stem,
+        )
+        .firstOrNull;
+    if (row == null) return const <HeadingSuggestion>[];
+    return <HeadingSuggestion>[
+      for (final heading in outlineOfText(row.content))
+        HeadingSuggestion(heading.text),
+    ];
+  }
+
+  @override
+  Future<List<BookSuggestion>> bookPlaces(String target) async {
+    switch (p.extension(target).toLowerCase()) {
+      case '.pdf':
+        return const <BookSuggestion>[
+          BookSuggestion(form: 'page=', hint: 'type a number'),
+        ];
+      case '.epub':
+        return const <BookSuggestion>[
+          BookSuggestion(form: 'chapter=', hint: 'name a file in the book'),
+        ];
+      default:
+        return const <BookSuggestion>[];
+    }
+  }
 }

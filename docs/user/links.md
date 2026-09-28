@@ -15,6 +15,25 @@ highlights, the preview links, and the indexer records are the same set:
 links inside code fences, math blocks, inline code, and frontmatter are
 never links, everywhere.
 
+While a link is typed, a small panel lists what can go there, in both
+editors, under the caret:
+
+- after `[[` — the library's notes, the name shown and the folder dimmed
+  (what tells two same-named notes apart). A note is matched by its name
+  **and** by its frontmatter aliases, prefix matches first; a row found
+  through an alias says which one;
+- after a `#` — the headings of the note just named, filtered the same
+  way. `[[#` — no target — lists the headings of the note being edited;
+- after a `#` on a PDF or an EPUB — the place form to type, `page=` or
+  `chapter=`.
+
+`↑`/`↓` move, `⏎` or `Tab` complete the link, `Esc` closes the panel and
+leaves the text as it was. The panel writes nothing but the link that was
+chosen: no note is created from it, and a name that matches nothing is
+left as typed (see *Dead links* below for where a new note comes from).
+The rows come from the index the app already keeps; nothing is scanned to
+fill the panel.
+
 ## Markdown links
 
 Standard `[text](href)` links, and reference links — `[text][label]` with a

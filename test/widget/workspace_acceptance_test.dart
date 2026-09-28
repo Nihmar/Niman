@@ -70,6 +70,7 @@ Widget _deck(
   toolbarLayout: ToolbarLayout.defaults,
   onEditorKindChanged: null,
   linkSource: null,
+  wikilinkSuggester: null,
   onOpenNote: (_, _) {},
   kindMode: true,
   onNoteKindChanged: (_) {},

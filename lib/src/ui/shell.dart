@@ -43,6 +43,7 @@ import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -691,6 +692,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// The link-resolution source (T-M3-07), resolved from the session.
   LinkSource? _linkSource;
 
+  /// The library the wikilink suggester panel reads (#475), resolved from
+  /// the session.
+  WikilinkSuggester? _wikilinkSuggester;
+
   /// The todo state (T-TD-04): owned here so the tab body and the tab's
   /// app-bar add action share one controller.
   late final TodoController _todoController;
@@ -883,6 +888,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   Future<void> _loadLinkSource() async {
     final source = await widget.controller.linkSource;
     if (mounted && source != null) setState(() => _linkSource = source);
+    final suggester = await widget.controller.wikilinkSuggester;
+    if (mounted && suggester != null) {
+      setState(() => _wikilinkSuggester = suggester);
+    }
   }
 
   /// Opens a note reached through a link (T-M3-07): selects it, remembers
@@ -1136,6 +1145,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
             : null,
         libraryRoot: controller.root,
         linkSource: _linkSource,
+        wikilinkSuggester: _wikilinkSuggester,
         onOpenNote: _openNoteFromLink,
         initialAnchor: _pendingAnchor,
         initialCaretOffset: _pendingCaretOffset,
@@ -4130,6 +4140,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
               ? _setEditorKind
               : null,
           linkSource: _linkSource,
+          wikilinkSuggester: _wikilinkSuggester,
           onOpenNote: _openNoteFromLink,
           kindMode: !_kindRawMode,
           onNoteKindChanged: _onNoteKindChanged,
