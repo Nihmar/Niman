@@ -125,6 +125,7 @@ import 'package:niman/src/ui/tour/tour_steps.dart';
 import 'package:niman/src/ui/tour/tour_targets.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
+import 'package:niman/src/ui/tree_click_clock.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/update_banner.dart';
 import 'package:niman/src/ui/welcome/welcome_gate.dart';
@@ -1928,9 +1929,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   ///   second half puts back what the first replaced, then opens the note
   ///   beside it. Waiting to tell the two apart instead would make every
   ///   single click late.
+  ///
+  /// The 300 ms window is real time, so it comes from
+  /// [treeClickClockProvider]: a test that scripts the two clicks decides
+  /// the gap between them rather than racing the machine (#437).
   void _showFromTree(String path, {required bool newTab}) {
     final keys = HardwareKeyboard.instance;
-    final now = DateTime.now();
+    final now = ref.read(treeClickClockProvider)();
     final last = _lastTreeClick;
     _lastTreeClick = null;
     if (newTab || keys.isControlPressed || keys.isMetaPressed) {
