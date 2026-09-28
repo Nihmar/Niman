@@ -120,4 +120,7 @@ flutter {
 dependencies {
     // Core library desugaring runtime (see compileOptions above).
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    // Host-side unit tests (android/app/src/test): the share copy's size
+    // cap is plain JVM code, so it is tested without a device (#386).
+    testImplementation("junit:junit:4.13.2")
 }
