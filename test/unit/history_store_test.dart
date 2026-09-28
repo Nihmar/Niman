@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
@@ -79,6 +80,40 @@ void main() {
     expect(manifest.pins, {syncBasePin: 1});
     expect(manifest.versions.map((v) => v.number), [1, 4, 5]);
     expect(version('a.md', 1), 'base');
+  });
+
+  test('a version whose bytes changed on disk is not returned as its hash '
+      'claims', () {
+    write('a.md', 'first');
+    save('a.md', 'second', forced());
+    // The version file drifts: a partial write, a killed process, a sync
+    // race, an edit by hand.
+    File(historyVersionPath(root.path, 'a.md', 1)).writeAsStringSync('damaged');
+    expect(readHistoryVersion(root.path, 'a.md', 1), isNull);
+  });
+
+  test('the sync base skips a drifted version and pins none', () {
+    write('a.md', 'base');
+    save('a.md', 'second', forced());
+    final sha = sha256.convert(utf8.encode('base')).toString();
+    File(historyVersionPath(root.path, 'a.md', 1)).writeAsStringSync('damaged');
+    final result = pinSyncBaseVersion(
+      root.path,
+      'a.md',
+      sha,
+      limit: 3,
+      now: t0,
+    );
+    expect(result.pinned, isNull);
+    expect(readHistoryManifest(root.path, 'a.md').pins[syncBasePin], isNull);
+  });
+
+  test('a rebuilt version without a stored hash still reads back', () {
+    write('a.md', 'one');
+    save('a.md', 'two', forced());
+    File(historyManifestPath(root.path, 'a.md')).deleteSync();
+    expect(readHistoryVersion(root.path, 'a.md', 1), isNotNull);
+    expect(version('a.md', 1), 'one');
   });
 
   test('a lost manifest is rebuilt from the version files', () {
