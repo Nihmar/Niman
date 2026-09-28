@@ -63,6 +63,16 @@ everywhere; PDF goes through each platform's own printer (below).
   `text/markdown`, so Niman is offered for `.md` files and can be made
   their default app. Double-clicking one opens it in the Niman already
   running, or starts one.
+- **Dropping files and folders on the window** is the window's own GDK
+  drop destination, which takes the `text/uri-list` a file manager
+  offers. The frame around the window says a drag is over it, and the
+  drop opens or imports what it names
+  ([organization](organization.md#dropping-files-on-the-window)). The
+  portal's file-transfer target is not taken: it carries a one-time key
+  to resolve over D-Bus rather than paths, and preferring it is what left
+  a drop on KDE/Wayland doing nothing at all (#224). A drag from a
+  sandboxed app that offers that target alone is therefore not taken
+  either, and says so in the log.
 - A tree row's right-click menu can show the note in the file manager
   (over `org.freedesktop.FileManager1`, falling back to `xdg-open` on
   the folder) or open it in the default app — see
@@ -102,6 +112,12 @@ everywhere; PDF goes through each platform's own printer (below).
   default only when nothing else claims `.md`, or when you pick it.
   Double-clicking one opens it in the Niman already running, or starts
   one.
+- **Dropping files and folders on the window** takes the paths Win32
+  hands the window (`WM_DROPFILES`), and the drop opens or imports what
+  it names. The frame that Linux draws while a drag is over the window is
+  **not** drawn here: reporting a drag that is over the window and has
+  not landed needs an OLE `IDropTarget` registered on the Flutter view,
+  which this pass does not do (#224). The drop itself is unaffected.
 - A tree row's right-click menu can show the note in Explorer (selected)
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
@@ -171,7 +187,9 @@ everything but the note.
 
 **Dropping files and folders on the window** (see
 [organization](organization.md#dropping-files-on-the-window)) is Linux
-and Windows only: a phone has nothing to drag from.
+and Windows only: a phone has nothing to drag from. On Linux the window
+draws a frame while a drag is over it; on Windows the drop lands without
+that frame, which needs an OLE drop target this pass did not add (#224).
 
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is

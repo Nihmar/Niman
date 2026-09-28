@@ -22,7 +22,6 @@ dependencies:
   # network comes back (docs/records/sync.md, "Queue and triggers").
   connectivity_plus: ^7.3.1
   crypto: ^3.0.7
-  desktop_drop: ^0.8.4
 
   # Rebuildable index (SQLite + FTS5); schema lands in M1.
   drift: ^2.34.3
