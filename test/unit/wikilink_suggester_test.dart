@@ -146,7 +146,7 @@ void main() {
     expect(await suggester.notes(''), hasLength(1));
   });
 
-  test('a note\'s headings come from its own text, through one read', () async {
+  test("a note's headings come from its own text, through one read", () async {
     await addNote('Notes.md', stems: ['notes']);
     final reads = <String>[];
     final suggester = IndexWikilinkSuggester(
