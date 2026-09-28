@@ -94,6 +94,7 @@ abstract final class SettingsKeys {
 
   // Maintenance: actions rather than settings, searchable all the same.
   static const reindex = Key('reindex-setting');
+  static const rebuildIndex = Key('rebuild-index-setting');
   static const notionImport = Key('notion-import-setting');
   static const switchLibrary = Key('switch-library-setting');
   static const closeLibrary = Key('close-library-setting');

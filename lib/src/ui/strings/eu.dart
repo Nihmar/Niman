@@ -2711,4 +2711,9 @@ final class BasqueStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Lauki bat markatzean hark azpian habiaratutakoak ere '
       'markatzen ditu. Marka kentzean dauden bezala uzten ditu.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Berregin indizea';
 }

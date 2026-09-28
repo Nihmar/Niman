@@ -2446,4 +2446,9 @@ final class JapaneseStrings extends Strings {
   @override
   String get cascadeChecklistSubtitle =>
       'チェックすると、その下に入れ子になったものも一緒にチェックされます。外すとそのままです。';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'インデックスを再構築';
 }

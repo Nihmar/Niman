@@ -297,6 +297,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   int rescans = 0;
 
   @override
+  Future<void> rebuildIndex() async {
+    if (_root == null || _phase != LibraryPhase.ready) {
+      throw StateError('No library is open');
+    }
+    indexRebuilds++;
+  }
+
+  /// How many times the index was rebuilt on request (#368).
+  int indexRebuilds = 0;
+
+  @override
   Future<bool> get debugLogsEnabled async => true;
 
   @override

@@ -2700,4 +2700,9 @@ final class GalicianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar unha casiña marca as que están aniñadas debaixo. '
       'Desmarcala déixaas como están.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Reconstruír o índice';
 }

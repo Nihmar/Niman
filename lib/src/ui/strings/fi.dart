@@ -2698,4 +2698,9 @@ final class FinnishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ruudun valitseminen valitsee myös sen alle sisäkkäiset. '
       'Valinnan poisto jättää ne ennalleen.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Rakenna hakemisto uudelleen';
 }

@@ -2706,4 +2706,9 @@ final class SerbianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Означавање квадратића означава и оне уграђене испод. '
       'Уклањање ознаке их оставља какви јесу.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Поново изгради индекс';
 }

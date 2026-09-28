@@ -341,6 +341,14 @@ abstract interface class LibrarySession {
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
 
+  /// Rebuilds the open library's index from disk (#368): the index file is
+  /// deleted and re-created, and the notes are read again into it.
+  ///
+  /// The repair for a damaged index, without forgetting the library — its
+  /// known-list entry, its workspace, its per-device settings and its sync
+  /// destination are all outside the index and stay.
+  Future<void> rebuildIndex();
+
   /// Whether the in-app debug log buffer records events.
   ///
   /// Also applies the persisted value to the live logger.

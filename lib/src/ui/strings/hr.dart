@@ -2708,4 +2708,9 @@ final class CroatianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označavanje kućice označava i one ugniježđene ispod. '
       'Odznačavanje ih ostavlja kakve jesu.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Ponovno izgradi indeks';
 }

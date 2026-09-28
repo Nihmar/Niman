@@ -2697,4 +2697,9 @@ final class BulgarianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Отмятането на квадратче отмята и вложените под него. '
       'Махането на отметката ги оставя както са.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Преизгради индекса';
 }

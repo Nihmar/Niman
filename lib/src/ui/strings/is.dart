@@ -2681,4 +2681,9 @@ final class IcelandicStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Að haka við reit hakir líka við þá sem eru innfelldir undir. '
       'Að taka hakið af lætur þá standa.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Endurbyggja vísi';
 }

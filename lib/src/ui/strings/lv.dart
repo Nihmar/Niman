@@ -2672,4 +2672,9 @@ final class LatvianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ķekstiņa atzīmēšana atzīmē arī zem tā iegultos. Atzīmes '
       'noņemšana tos atstāj kā ir.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Pārbūvēt indeksu';
 }

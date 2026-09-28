@@ -2719,4 +2719,9 @@ final class DutchStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Een vakje aanvinken vinkt ook de eronder geneste aan. '
       'Uitzetten laat ze zoals ze zijn.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Index opnieuw opbouwen';
 }

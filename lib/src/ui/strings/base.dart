@@ -916,6 +916,9 @@ abstract base class Strings {
   String get libraryPathTitle;
   String get reindexTitle;
   String get reindexDone;
+  // Rebuilding deletes the index file and re-reads the notes into a fresh
+  // one (#368), where re-indexing works on the index already there.
+  String get rebuildIndexTitle;
   String get closeLibraryTitle;
   String get exportLogTitle;
   String get exportLogSubtitle;

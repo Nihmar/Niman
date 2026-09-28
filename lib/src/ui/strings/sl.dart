@@ -2705,4 +2705,9 @@ final class SlovenianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označitev kvadratka označi tudi tiste, gnezdene pod njim. '
       'Odznačitev jih pusti take.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Ponovno zgradi indeks';
 }

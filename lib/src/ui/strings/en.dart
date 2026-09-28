@@ -2650,4 +2650,9 @@ final class EnglishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ticking a checkbox ticks every one nested under it. Clearing '
       'it leaves them as they are.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Rebuild index';
 }

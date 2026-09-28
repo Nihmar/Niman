@@ -2710,4 +2710,9 @@ final class BelarusianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Адзначэнне сцяжка адзначае і ўкладзеныя пад ім. Зняцце '
       'адзнакі пакідае іх як ёсць.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Перабудаваць індэкс';
 }

@@ -2372,4 +2372,9 @@ final class ChineseStrings extends Strings {
   String get cascadeChecklistTitle => '勾选嵌套的复选框';
   @override
   String get cascadeChecklistSubtitle => '勾选一个复选框会同时勾选嵌套在它下面的。取消勾选则保持原样。';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => '重建索引';
 }

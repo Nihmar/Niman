@@ -2705,4 +2705,9 @@ final class AlbanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Shënimi i një kutie shënon edhe ato të futura poshtë saj. '
       'Heqja e shënimit i lë ashtu.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Rindërto indeksin';
 }

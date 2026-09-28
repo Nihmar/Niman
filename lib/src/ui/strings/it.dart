@@ -2699,4 +2699,9 @@ final class ItalianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Spuntare una casella spunta quelle annidate sotto. Toglierla '
       'le lascia come sono.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => "Ricostruisci l'indice";
 }

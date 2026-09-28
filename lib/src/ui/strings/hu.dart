@@ -2697,4 +2697,9 @@ final class HungarianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Egy négyzet bejelölése az alatta beágyazottakat is bejelöli. '
       'A jelölés levétele úgy hagyja őket.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Index újraépítése';
 }

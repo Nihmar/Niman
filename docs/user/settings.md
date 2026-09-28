@@ -14,9 +14,14 @@ Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, updates,
 diagnostics),
 the open **Library** (folders, journal, trash and history, sync, transcription,
-reminders), and **Maintenance** (re-index, switch or close the library;
-in the settings window only re-index, since the rail's library window
-switches and closes).
+reminders), and **Maintenance** (re-index, rebuild the index, switch or
+close the library; in the settings window only the first two, since the
+rail's library window switches and closes).
+Rebuilding deletes the library's index file and reads every note into a
+fresh one — the repair for an index a full disk or an interrupted update
+left unreadable, which a re-index over the same file could not fix. The
+library itself is untouched: it stays on the list, with what was open in
+it, its settings and its sync.
 The search at the top looks through the settings themselves, not only
 the area names, and takes you to the row it found.
 

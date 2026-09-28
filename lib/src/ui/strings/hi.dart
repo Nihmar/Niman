@@ -2639,4 +2639,9 @@ final class HindiStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'किसी चेकबॉक्स पर टिक करने से उसके नीचे नेस्ट किए गए भी टिक '
       'हो जाते हैं। हटाने पर वे वैसे ही रहते हैं।';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'इंडेक्स फिर से बनाएँ';
 }

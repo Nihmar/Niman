@@ -2771,4 +2771,9 @@ final class GreekStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Η σήμανση ενός πλαισίου σημαίνει και όσα είναι ένθετα από '
       'κάτω. Η αφαίρεση τα αφήνει ως έχουν.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Αναδόμηση ευρετηρίου';
 }

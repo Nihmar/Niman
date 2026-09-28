@@ -546,6 +546,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
       onHome: true,
     ),
     SettingsSearchEntry(
+      title: AppStrings.rebuildIndexTitle,
+      area: maintenance,
+      rowKey: SettingsKeys.rebuildIndex,
+      value: noValue,
+      open: () => flashHome(SettingsKeys.rebuildIndex),
+      onHome: true,
+    ),
+    SettingsSearchEntry(
       title: AppStrings.notionImportTitle,
       area: maintenance,
       rowKey: SettingsKeys.notionImport,

@@ -2671,4 +2671,9 @@ final class DanishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Et flueben i et felt sætter også dem, der er indlejret '
       'under. At fjerne det lader dem være.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Genopbyg indeks';
 }
