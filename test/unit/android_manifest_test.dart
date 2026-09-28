@@ -4,15 +4,27 @@
 // fix: the app's signature permission on both receivers of the background
 // action.
 //
+// Issue #383 is the other manifest half: the default `allowBackup` is true,
+// and the app's databases hold the private sync destination (URL, username)
+// and the library paths, while the support folder holds the crash reports
+// and the debug log. Auto-backup off is what keeps them off Google's servers
+// and off a device-to-device transfer.
+//
 // Run from the package root, like `flutter test` does.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
+
+/// The manifest of the Android source set [sourceSet] (`main`, `debug`,
+/// `beta`, …).
+File manifestFile(String sourceSet) =>
+    File(p.join('android', 'app', 'src', sourceSet, 'AndroidManifest.xml'));
 
 void main() {
   test('the widget background receivers ask for the signature permission', () {
-    final file = File('android/app/src/main/AndroidManifest.xml');
+    final file = manifestFile('main');
     expect(file.existsSync(), isTrue, reason: 'run from the package root');
     final manifest = XmlDocument.parse(file.readAsStringSync());
 
@@ -51,6 +63,35 @@ void main() {
             '${receiver.getAttribute('android:name')} accepts a write URI '
             'from any app without it',
       );
+    }
+  });
+
+  test('auto-backup is off, so the private databases stay on the device', () {
+    final application = XmlDocument.parse(
+      manifestFile('main').readAsStringSync(),
+    ).rootElement.findElements('application').single;
+    expect(
+      application.getAttribute('android:allowBackup'),
+      'false',
+      reason:
+          'the backup would carry the sync destination (URL and username), '
+          'the library paths, the crash reports and the debug log',
+    );
+
+    // The source sets merge over this one, and one of them declaring the
+    // attribute would put it back on. None does, and none may.
+    for (final sourceSet in ['debug', 'profile', 'beta']) {
+      final file = manifestFile(sourceSet);
+      if (!file.existsSync()) continue;
+      for (final flavor in XmlDocument.parse(
+        file.readAsStringSync(),
+      ).rootElement.findElements('application')) {
+        expect(
+          flavor.getAttribute('android:allowBackup'),
+          isNot('true'),
+          reason: '${file.path} turns auto-backup back on',
+        );
+      }
     }
   });
 }

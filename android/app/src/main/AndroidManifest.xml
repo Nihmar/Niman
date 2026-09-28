@@ -50,10 +50,19 @@
         android:name="dev.niman.niman.permission.WIDGET_TAP"
         android:protectionLevel="signature" />
 
+    <!-- Auto-backup (issue #383): the default `allowBackup` is true, which
+         ships the app's databases to Google's backup — and they hold the
+         private sync destination, its URL and username, and the library
+         paths — and to a device-to-device transfer, where a restored
+         library path does not exist. The support folder's crash reports and
+         debug log go with them. The user's notes are files on shared
+         storage, outside the app's own data, and nothing else here is worth
+         restoring: the databases rebuild from the disk. -->
     <application
         android:label="Niman"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -42,7 +42,7 @@ final Set<String> jsonStateFiles = libraryStateFiles
 /// Dot folders and dot files are left out — `.trash/`, `.history/`, the
 /// atomic-write temp files, a `.git/` the user keeps — except the
 /// [libraryStateFiles]. So are the files operating systems drop into
-/// folders on their own.
+/// folders on their own, and the crash reports the reporter writes.
 bool isSyncablePath(String path) {
   if (path.isEmpty) return false;
   final segments = path.split('/');
@@ -50,10 +50,22 @@ bool isSyncablePath(String path) {
   if (libraryStateFiles.contains(path)) return true;
   if (segments.any((s) => s.startsWith('.'))) return false;
   final name = segments.last.toLowerCase();
-  return !_systemJunk.contains(name);
+  return !_systemJunk.contains(name) && !_isCrashReport(name);
 }
 
 const _systemJunk = {'thumbs.db', 'desktop.ini'};
+
+/// Whether [name] (a file name, lower case) is a crash report: the shape
+/// `CrashReporter` writes (`niman-crash-<stamp>.txt`, `core/crash_reporter.dart`).
+///
+/// A report is diagnostics, not content: it carries the whole `AppLog`
+/// buffer, the note and library paths and the sync host in it. The reporter
+/// keeps them in the app's private support folder (#383), so a file that
+/// reaches a library anyway — an older build's report, a copy the user made,
+/// a library that synced before the fix — is left in place instead of being
+/// uploaded by the next run.
+bool _isCrashReport(String name) =>
+    name.startsWith('niman-crash-') && name.endsWith('.txt');
 
 /// A file on disk, as the engine stat-ed it.
 @immutable
