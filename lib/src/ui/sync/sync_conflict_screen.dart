@@ -50,6 +50,10 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
 
   bool get _isText => NoteOps.keepsHistory(widget.path);
 
+  /// Whether both sides were read and a merge is ready to save.
+  bool get _canSaveMerge =>
+      !_failed && _texts != null && _merge != null && !_resolving;
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +79,11 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
       _log.warning('conflict screen ${widget.path}: $e');
       if (mounted) {
         setState(() {
+          // No sides to show and no merge to save: the screen says why.
           _failed = true;
+          _texts = null;
+          _merge = null;
+          _choices = const [];
           _resolving = false;
         });
       }
@@ -107,7 +115,14 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
             content: Text(AppStrings.syncConflictMoved),
           ),
         );
-        setState(() => _texts = null);
+        setState(() {
+          // Drop the merge too: it was computed over the versions the user
+          // is about to see again, and there is nothing to save until they
+          // are read.
+          _texts = null;
+          _merge = null;
+          _choices = const [];
+        });
         await _load();
         return;
       }
@@ -133,10 +148,11 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
     'keep ${local ? 'local' : 'remote'}',
   );
 
-  Future<void> _saveMerge() {
+  Future<void> _saveMerge() async {
+    if (!_canSaveMerge) return;
     final merge = _merge!;
     final shown = _texts!;
-    return _resolve(
+    await _resolve(
       () => widget.sync.resolveMerged(
         widget.path,
         merge.text(_choices),
@@ -220,7 +236,7 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
               if (merge != null) ...[
                 FilledButton.icon(
                   key: const Key('sync-save-merge'),
-                  onPressed: _resolving ? null : _saveMerge,
+                  onPressed: _canSaveMerge ? _saveMerge : null,
                   icon: const Icon(Icons.merge_type),
                   label: Text(AppStrings.syncMergeSave),
                 ),
