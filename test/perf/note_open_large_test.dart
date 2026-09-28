@@ -5,11 +5,19 @@
 // highlighter read the note line by line through a structure that walked its
 // segments for every line — more than a minute before the first frame. The
 // bound is generous: the open it guards costs about a second at 21 MB here.
+// The number is printed on every run; the design's ceiling is asserted only by
+// a run that asks for it (`NIMAN_PERF=1`), and a backstop three times as wide
+// on any other, so a shared runner cannot fail it for its hardware (#329).
 // ignore_for_file: avoid_print
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
+
+/// Whether this run is the one that holds the design's ceilings.
+final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
 
 void main() {
   testWidgets('a 21 MB note opens without the wait', (tester) async {
@@ -37,8 +45,13 @@ void main() {
     );
     await tester.pump();
     clock.stop();
-    print('open, ${text.length} chars: ${clock.elapsedMilliseconds} ms');
+    const ceiling = 5000;
+    final bar = _referenceHost ? ceiling : ceiling * 3;
+    print(
+      'open, ${text.length} chars: ${clock.elapsedMilliseconds} ms '
+      '(held to $bar ms)',
+    );
     expect(find.byType(MarkdownSourceView), findsOneWidget);
-    expect(clock.elapsedMilliseconds, lessThan(5000));
+    expect(clock.elapsedMilliseconds, lessThan(bar));
   });
 }

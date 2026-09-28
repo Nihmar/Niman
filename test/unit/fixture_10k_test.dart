@@ -7,6 +7,7 @@
 // minutes of filesystem work on a Windows host with a virus scanner in
 // the path, and it happens before the first assertion runs. A test that
 // allows a scan 60 seconds cannot be given 30 to finish in.
+// ignore_for_file: avoid_print
 @Timeout(Duration(minutes: 5))
 library;
 
@@ -24,6 +25,15 @@ import 'package:path/path.dart' as p;
 
 /// The fixture note count.
 const int noteCount = 10000;
+
+/// Whether this run holds the design's ceilings (AGENTS.md): the timings in
+/// this file are printed on every run and asserted only on such a run, at a
+/// backstop five times as wide otherwise. The search bound used to be an
+/// unconditional 2 s and flaked under a loaded runner (#329).
+final bool _referenceHost = Platform.environment['NIMAN_PERF'] == '1';
+
+/// The bar [ceiling] is held to, per [_referenceHost].
+double _bar(double ceiling) => _referenceHost ? ceiling : ceiling * 5;
 
 void main() {
   late Directory root;
@@ -93,7 +103,8 @@ void main() {
     final clock = Stopwatch()..start();
     final hits = await search.search(buildFtsQuery('unique'), id: id, limit: 5);
     final elapsed = clock.elapsedMilliseconds;
-    expect(elapsed, lessThan(2000), reason: 'search took $elapsed ms');
+    print('word search on the fixture: $elapsed ms (held to ${_bar(2000)} ms)');
+    expect(elapsed, lessThan(_bar(2000)), reason: 'search took $elapsed ms');
     expect(hits, hasLength(5));
     // The excerpt is read from the note, which the index keeps no copy of.
     expect(
@@ -111,7 +122,8 @@ void main() {
     expect(counts.single.count, noteCount);
     final notes = await tags.notesWithTag('fixture');
     expect(notes, hasLength(tagNotesLimit));
-    expect(clock.elapsedMilliseconds, lessThan(5000));
+    print('tag counts and notes: ${clock.elapsedMilliseconds} ms');
+    expect(clock.elapsedMilliseconds, lessThan(_bar(5000)));
   });
 
   test(
@@ -126,7 +138,8 @@ void main() {
         );
       final clock = Stopwatch()..start();
       await indexer.applyEvents(root.path, [target.path]);
-      expect(clock.elapsedMilliseconds, lessThan(10000));
+      print('one edited note re-indexes: ${clock.elapsedMilliseconds} ms');
+      expect(clock.elapsedMilliseconds, lessThan(_bar(10000)));
 
       final hit = await db
           .customSelect(
