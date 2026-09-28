@@ -19,6 +19,12 @@
 /// A placeholder the engine does not know is left standing, and so is one
 /// whose filter it does not know. That way a typo is visible in the note
 /// that was created, instead of quietly deleting a line the user wrote.
+///
+/// This file is also where the syntax is written down: the placeholder
+/// names, the filter names and the date-format tokens below are the
+/// canonical vocabulary, and `checker.dart` (T-TPL-09) validates a
+/// template against these very lists rather than against a copy of them,
+/// so a name added here is a name the checker already knows.
 library;
 
 import 'dart:math';
@@ -251,6 +257,31 @@ final RegExp templatePlaceholder = RegExp(r'\{\{([^{}]*)\}\}');
   );
 }
 
+/// Every placeholder name this build answers, and the vocabulary the
+/// checker (`checker.dart`) validates against.
+///
+/// Kept in step with the `switch (name)` in [_substitute] below, which is
+/// where each one is written out; `include` is the one name that is read
+/// earlier still, by `includes.dart`, before the substitution pass runs.
+/// A name that is not here is left standing in the created note, and it is
+/// what the checker calls an unknown placeholder.
+const Set<String> templatePlaceholderNames = {
+  'title',
+  'uuid',
+  'counter',
+  'date',
+  'time',
+  'now',
+  'ask',
+  'choice',
+  'parent',
+  'folder',
+  'clipboard',
+  'selection',
+  'cursor',
+  'include',
+};
+
 /// Whether [source] holds a `{{name}}` placeholder, whatever argument or
 /// filters it carries.
 ///
@@ -351,6 +382,32 @@ String? _dateValue(
   );
 }
 
+/// Every filter that reads its value as text — the names in the
+/// `switch (name)` of [_applyTextFilters] below, and the vocabulary the
+/// checker suggests corrections from.
+///
+/// A name not here is not a filter: the whole placeholder is left
+/// standing, which is what makes a typo (`upperr`) visible in the note.
+///
+/// The engine lower-cases a filter's name before it looks it up, so
+/// `{{title|UPPER}}` is the same filter as `{{title|upper}}`.
+const Set<String> templateTextFilters = {
+  'upper',
+  'lower',
+  'trim',
+  'slug',
+  'title',
+  'pad',
+  'default',
+};
+
+/// The two filters that snap a date to the start or the end of one of
+/// [templateDateUnits]; see [_moveDate].
+const Set<String> templateDateFilters = {'startof', 'endof'};
+
+/// The units `startof:` and `endof:` take — a week, a month, a year.
+const Set<String> templateDateUnits = {'week', 'month', 'year'};
+
 /// [value] with every filter in [filters] applied in order, or null when
 /// one of them is not a filter this build knows.
 String? _applyTextFilters(String value, List<String> filters) {
@@ -405,7 +462,7 @@ String? _pad(String value, String? argument) {
 /// Adding months keeps the day where it fits — 31 January plus a month
 /// is 28 February, not 3 March, because "next month" means the month.
 DateTime? _moveDate(DateTime when, String filter) {
-  final shift = _shiftPattern.firstMatch(filter);
+  final shift = templateDateShift.firstMatch(filter);
   if (shift != null) {
     final sign = shift.group(1) == '-' ? -1 : 1;
     final count = sign * int.parse(shift.group(2)!);
@@ -431,8 +488,12 @@ DateTime? _moveDate(DateTime when, String filter) {
   };
 }
 
-/// `+3d`, `-1w`, `+2m`, `+1y`.
-final RegExp _shiftPattern = RegExp(r'^([+-])(\d+)\s*([dwmy])$');
+/// `+3d`, `-1w`, `+2m`, `+1y` — the whole of a date move, unit and count
+/// both.
+///
+/// A filter the checker sees starting with `+` or `-` is read against
+/// this, so `+xd` is reported as a move whose count is not a number.
+final RegExp templateDateShift = RegExp(r'^([+-])(\d+)\s*([dwmy])$');
 
 DateTime _atMidnight(DateTime when) =>
     DateTime(when.year, when.month, when.day);
@@ -515,7 +576,7 @@ String formatDateTime(DateTime when, String format) {
       i = end + 1;
       continue;
     }
-    final token = _tokenAt(format, i);
+    final token = templateDateTokenAt(format, i);
     if (token == null) {
       out.write(format[i]);
       i++;
@@ -528,16 +589,22 @@ String formatDateTime(DateTime when, String format) {
 }
 
 /// The format token starting at [i], or null when none does.
-String? _tokenAt(String format, int i) {
-  for (final token in _tokens) {
+///
+/// [format] is a date format (`YYYY-MM-DD`), not the whole placeholder:
+/// the checker walks a format with this same function, so a token it
+/// knows is exactly a token the engine renders.
+String? templateDateTokenAt(String format, int i) {
+  for (final token in templateDateTokens) {
     if (format.startsWith(token, i)) return token;
   }
   return null;
 }
 
 /// Longest first within each letter, so `YYYY` wins over `YY` and
-/// `MMMM` over `MM`.
-const List<String> _tokens = [
+/// `MMMM` over `MM` — and so a walk of a format reads `YYYYY` as `YYYY`
+/// and one letter the format does not know, which is what the checker
+/// reports as an unknown token.
+const List<String> templateDateTokens = [
   'YYYY',
   'YY',
   'MMMM',
