@@ -691,7 +691,7 @@ final class DocumentScope {
       if (footnote != null) {
         final label = footnote.group(1)!;
         counts[label] = (counts[label] ?? 0) + 1;
-        final body = (footnote.group(2) ?? '').trim();
+        final body = _footnoteBody(source, at, footnote.group(2) ?? '');
         if (body.isNotEmpty) bodies.putIfAbsent(label, () => body);
         continue;
       }
@@ -726,10 +726,20 @@ final class DocumentScope {
     );
   }
 
-  /// Whether [line] can hold anything a scope is made of: a definition, or a
-  /// footnote reference, whose order is the footnotes' numbering.
+  /// Whether [line] can be part of what a scope is made of: a definition, a
+  /// footnote reference — whose order is the footnotes' numbering — or a line
+  /// a footnote's body runs on to.
+  ///
+  /// The continuation lines are here because a footnote's body is read across
+  /// lines ([_footnoteBody]): a reader that rescans only the lines a
+  /// definition *opens* on would keep a body the note no longer has. Being
+  /// line-local, this is a superset of what each line is — an indented line
+  /// that continues nothing is read again for nothing — and an edit that
+  /// touches one is what pays for it.
   static bool mayHold(String line) =>
-      _opensWithBracket(line) || line.contains('[^');
+      _opensWithBracket(line) ||
+      line.contains('[^') ||
+      _continuesFootnote(line);
 
   /// Whether [line] opens with `[` after at most three spaces: the only
   /// lines a definition can be.
@@ -741,13 +751,36 @@ final class DocumentScope {
     return at < line.length && line.codeUnitAt(at) == 0x5B;
   }
 
+  /// The body of the footnote whose definition opens on [line]: the text its
+  /// own line carries, and the lines under it indented four spaces on — the
+  /// continuation the package's footnote reads (`FootnoteDefSyntax`), whose
+  /// text runs as long as its indent. Read whole, so a multi-line footnote
+  /// exists in the read view and in `live`, not only in the file (#361).
+  static String _footnoteBody(SourceBuffer source, int line, String own) {
+    final parts = <String>[own.trim()];
+    for (var at = line + 1; at < source.lineCount; at++) {
+      final text = source.lineAt(at);
+      if (!_continuesFootnote(text)) break;
+      parts.add(text.trim());
+    }
+    return parts.join('\n').trim();
+  }
+
+  /// Whether [text] runs on the footnote definition above it: a line with
+  /// text, indented four spaces in.
+  static bool _continuesFootnote(String text) {
+    final trimmed = text.trimLeft();
+    return trimmed.isNotEmpty && text.length - trimmed.length >= 4;
+  }
+
   /// A link reference definition, in its single-line form.
   static final RegExp _linkDefinition = RegExp(
     r'^ {0,3}\[([^\]^][^\]]*)\]:[ \t]*(\S+)[ \t]*'
     r'(?:["\x27(]([^"\x27)]*)["\x27)])?[ \t]*$',
   );
 
-  /// A footnote definition, in its single-line form: its label and its body.
+  /// A footnote definition's opening line: its label, and the text that line
+  /// carries; the lines under it are read with it ([_footnoteBody]).
   static final RegExp _footnoteDefinition = RegExp(
     r'^ {0,3}\[\^([^\]]+)\]:[ \t]*(.*)$',
   );
@@ -796,7 +829,8 @@ final class Footnote {
   /// The label, without its brackets.
   final String label;
 
-  /// What the definition said, in its single-line form.
+  /// What the definition said: its own line's text and the lines indented
+  /// under it, joined with `\n`.
   final String body;
 
   @override

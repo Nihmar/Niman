@@ -194,6 +194,67 @@ void main() {
       expect(_kinds('a\n\n---').last, BlockKind.thematicBreak);
     });
 
+    test('a setext underline heads the line above it (#361)', () {
+      // The export re-parses the note with the package's `SetextHeaderWithId`
+      // syntax, which writes `<h2>` for `Title\n---`: the scanner read the
+      // two as a paragraph and a rule, so the read view drew one thing and
+      // the page another.
+      final scanner = BlockScanner(SourceBuffer.fromText('Title\n---\nafter'));
+      final heading = scanner.index.blocks.first;
+      expect(heading.kind, BlockKind.heading);
+      expect(heading.lineCount, 2, reason: 'the text line and its underline');
+      expect(heading.headingLevel, 2);
+      expect(scanner.index.blocks.last.kind, BlockKind.paragraph);
+      // `=` is a first-level heading, a longer run is the same heading, and
+      // an underline on its own — nothing above it to head — is a rule.
+      expect(
+        BlockScanner(SourceBuffer.fromText('Title\n==='))
+            .index
+            .blocks
+            .single
+            .headingLevel,
+        1,
+      );
+      expect(
+        BlockScanner(SourceBuffer.fromText('Title\n-------'))
+            .index
+            .blocks
+            .first
+            .lineCount,
+        2,
+      );
+      // An underline with nothing above it to head is a rule — and a `---` on
+      // the note's first line is the frontmatter, not one.
+      expect(_kinds('\n---').last, BlockKind.thematicBreak);
+      // And a paragraph is not interrupted by one: only the line above the
+      // underline is its heading's text, as the package reads it.
+      expect(_kinds('one\ntwo\n---'), <BlockKind>[
+        BlockKind.paragraph,
+        BlockKind.heading,
+      ]);
+    });
+
+    test('a quoted task line is one quote, its children in it', () {
+      // A list inside a quote is a quote block and not a list item, whatever
+      // its items are — which is why the tick cascade reads the quote's own
+      // lines with their marks off (#361).
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('> - [ ] parent\n>   - [ ] child\n\nout'),
+      );
+      final blocks = scanner.index.blocks;
+      expect(blocks.first.kind, BlockKind.quote);
+      expect(blocks.first.quoteDepth, 1);
+      expect(blocks.first.lineCount, 2, reason: 'the parent and its child');
+      expect(blocks.last.kind, BlockKind.paragraph);
+      expect(
+        _depths(
+          BlockScanner(SourceBuffer.fromText('- [ ] parent\n  - [ ] child')),
+        ),
+        <int>[0, 1],
+        reason: 'the marks off, the quote is the list the cascade walks',
+      );
+    });
+
     test('a lazy paragraph stays in its quote', () {
       final scanner = BlockScanner(
         SourceBuffer.fromText('> quoted\nlazy line\n\nout'),

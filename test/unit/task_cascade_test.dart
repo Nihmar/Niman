@@ -70,6 +70,17 @@ void main() {
       );
     });
 
+    test('a quoted parent takes a quoted child with it (#361)', () {
+      // A list inside a quote is one `quote` block to the scanner, so the
+      // cascade reads the quote's own lines with their marks off: the child
+      // is the item nested under the parent, and the sibling is not.
+      const text = '> - [ ] parent\n>   - [ ] child\n> - [ ] sibling';
+      expect(
+        _ticked(text, 0),
+        '> - [x] parent\n>   - [x] child\n> - [ ] sibling',
+      );
+    });
+
     test('a checklist line in a fenced code block is not a child', () {
       const text =
           '- [ ] parent\n'

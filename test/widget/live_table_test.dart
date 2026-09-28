@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface.dart';
+import 'package:niman/src/preview/math_cache.dart';
 
 const String _note =
     'caret\n\n| a | b |\n|---|---|\n| **one** | two |\n\nafter';
@@ -71,6 +75,34 @@ Future<MarkdownSourceViewState> _pumpNote(
   await tester.pump();
   await tester.pump();
   return tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
+}
+
+/// A table whose first cell holds an escaped pipe: one cell, so the cell
+/// after it is `c` — the read view's own count.
+const String _escaped = '| a \\| b | c |\n|---|---|\n| one | two |\n';
+
+/// The same, with a second cell too long for a phone's pane: laid out in
+/// columns fitted to it, its cells wrapped inside them.
+const String _escapedLong =
+    '| a \\| b | a second cell far too long for the pane, and still going |\n'
+    '|---|---|\n'
+    '| one | two |\n';
+
+/// Pumps [note] in the read view, for the cell count `live` has to agree with.
+Future<void> _pumpReadView(WidgetTester tester, String note) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: MarkdownReadView(
+          buffer: SourceBuffer.fromText(note),
+          parser: BlockParser(),
+          mathCache: MathCache(),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+  await tester.pump();
 }
 
 /// Where [text] starts on line [line] of [_note], plus [plus].
@@ -247,6 +279,85 @@ void main() {
     expect(_row(tester, '---').size.height, lessThan(1));
     await _pump(tester, _buffer.offsetOfLine(3) + 1);
     expect(_row(tester, '---').size.height, lessThan(1));
+  });
+
+  testWidgets('an escaped pipe is one cell, in live and in the read view', (
+    tester,
+  ) async {
+    // The caret stepped cell by cell through every pipe, the read view's row
+    // by the pipes that are not escaped: `| a \| b | c |` was three cells to
+    // `live` and two to the reader (#361).
+    final state = await _pumpNote(tester, _escaped);
+    final buffer = state.widget.buffer;
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    state.placeCaret(buffer.offsetOfLine(0) + buffer.lineAt(0).indexOf('a'));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(
+      state.selectedText,
+      'c',
+      reason: r'the cell after `a \| b`, not the `b` a split would make',
+    );
+
+    // And the read view reads the row as two cells, the escaped pipe standing
+    // in the first one's text: the count `live` now steps by.
+    await _pumpReadView(tester, _escaped);
+    final grid = tester.widget<Table>(
+      find.descendant(of: find.byType(BlockView), matching: find.byType(Table)),
+    );
+    expect(grid.children.first.children, hasLength(2));
+    expect(
+      tester
+          .widgetList<RichText>(
+            find.descendant(
+              of: find.byType(Table),
+              matching: find.byType(RichText),
+            ),
+          )
+          .first
+          .text
+          .toPlainText(),
+      'a | b',
+      reason: 'the escaped pipe is the cell text, not an edge',
+    );
+  });
+
+  testWidgets('an escaped pipe is one cell in a row fitted to the pane', (
+    tester,
+  ) async {
+    // The same row in a pane it does not fit: its cells are wrapped inside
+    // their fitted columns, and cut from the same ranges — so the pipe is
+    // still one cell's text there, and the step still skips it.
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final state = await _pumpNote(tester, _escapedLong);
+    final buffer = state.widget.buffer;
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    state.placeCaret(buffer.offsetOfLine(0) + buffer.lineAt(0).indexOf('a'));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(
+      state.selectedText,
+      'a second cell far too long for the pane, and still going',
+    );
+    // The row is laid out in fitted columns, its cells wrapped inside them:
+    // the last cell's last word is drawn, and inside the pane. (A phrase
+    // straddles the wrap, so its words are asked for one by one.)
+    expect(
+      find.textContaining('going', findRichText: true),
+      findsOneWidget,
+      reason: 'the fitted row is drawn, its last cell inside the pane',
+    );
+    expect(
+      tester.getRect(find.textContaining('going', findRichText: true)).right,
+      lessThanOrEqualTo(320.5),
+    );
   });
 
   group('the caret stays in the cells', () {

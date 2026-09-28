@@ -167,13 +167,15 @@ final class SourceStyler {
   /// frame does per line, without joining the block's text to find it.
   final Map<int, _Parsed> _byStart = <int, _Parsed>{};
 
-  /// The lines that may hold a link or footnote definition, or cite a
-  /// footnote, in order ([DocumentScope.mayHold]): what an edit is checked
-  /// against, and all that is read again when it touches one.
+  /// The lines that may hold a link or footnote definition, cite a footnote or
+  /// run its body on, in order ([DocumentScope.mayHold]): what an edit is
+  /// checked against, and all that is read again when it touches one.
   ///
   /// The citations are here as much as the definitions: their order is the
   /// footnotes' numbering and the order of the section a note ends with, and
-  /// a `[^1]` typed mid-sentence left a scope that said otherwise.
+  /// a `[^1]` typed mid-sentence left a scope that said otherwise. The
+  /// continuation lines are here as much as the definition's own: a footnote
+  /// is read across lines (#361).
   final List<int> _definers = <int>[];
 
   static const int _parseCacheSize = 4096;
