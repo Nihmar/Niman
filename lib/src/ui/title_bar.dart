@@ -242,40 +242,112 @@ const double _leading = 4 + 40;
 const double _tabsGap = 16;
 
 /// Minimize, maximize/restore and close, at the bar's right edge.
-final class _WindowButtons extends StatelessWidget {
+///
+/// The bar also tells the window seam where these three ended up (#169):
+/// Windows offers the Snap Layouts flyout only to a window that answers
+/// `WM_NCHITTEST` with the caption-button hit codes over them, and the
+/// rectangles are the drawn ones, so the hit test follows the bar instead
+/// of a constant.
+final class _WindowButtons extends StatefulWidget {
   const new({required this.window});
 
   final WindowController window;
 
   @override
+  State<_WindowButtons> createState() => _WindowButtonsState();
+}
+
+final class _WindowButtonsState extends State<_WindowButtons> {
+  /// The buttons as the render tree holds them: where they are is what the
+  /// platform has to be told (#169).
+  final GlobalKey _minimize = GlobalKey();
+  final GlobalKey _maximize = GlobalKey();
+  final GlobalKey _close = GlobalKey();
+
+  /// What the window was last told, so a layout that moves nothing does not
+  /// repeat itself.
+  ({Rect minimize, Rect maximize, Rect close})? _reported;
+
+  @override
   Widget build(BuildContext context) {
+    // The window's size and scale both move the buttons, and both reach the
+    // bar as a MediaQuery change: depending on it is what makes the bar
+    // report again after a resize or a move to another display (#169).
+    final media = MediaQuery.of(context);
+    WidgetsBinding.instance.addPostFrameCallback(
+      // After the frame: only then are the buttons where the user sees them.
+      (_) => _reportButtons(media.devicePixelRatio),
+    );
     return ValueListenableBuilder<bool>(
-      valueListenable: window.maximized,
+      valueListenable: widget.window.maximized,
       builder: (context, maximized, _) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _WindowButton(
-            key: const Key('window-minimize'),
-            icon: Icons.minimize,
-            tooltip: AppStrings.windowMinimizeTooltip,
-            onPressed: () => unawaited(window.minimize()),
+          KeyedSubtree(
+            key: _minimize,
+            child: _WindowButton(
+              key: const Key('window-minimize'),
+              icon: Icons.minimize,
+              tooltip: AppStrings.windowMinimizeTooltip,
+              onPressed: () => unawaited(widget.window.minimize()),
+            ),
           ),
-          _WindowButton(
-            key: const Key('window-maximize'),
-            icon: maximized ? Icons.filter_none : Icons.crop_square,
-            tooltip: maximized
-                ? AppStrings.windowRestoreTooltip
-                : AppStrings.windowMaximizeTooltip,
-            onPressed: () => unawaited(window.toggleMaximize()),
+          KeyedSubtree(
+            key: _maximize,
+            child: _WindowButton(
+              key: const Key('window-maximize'),
+              icon: maximized ? Icons.filter_none : Icons.crop_square,
+              tooltip: maximized
+                  ? AppStrings.windowRestoreTooltip
+                  : AppStrings.windowMaximizeTooltip,
+              onPressed: () => unawaited(widget.window.toggleMaximize()),
+            ),
           ),
-          _WindowButton(
-            key: const Key('window-close'),
-            icon: Icons.close,
-            tooltip: AppStrings.windowCloseTooltip,
-            onPressed: () => unawaited(window.close()),
+          KeyedSubtree(
+            key: _close,
+            child: _WindowButton(
+              key: const Key('window-close'),
+              icon: Icons.close,
+              tooltip: AppStrings.windowCloseTooltip,
+              onPressed: () => unawaited(widget.window.close()),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Hands the window seam the buttons' rectangles, in physical pixels: the
+  /// Flutter view's top-left corner is the window's client origin, so the
+  /// drawn point scaled by the device pixel ratio is the client point.
+  void _reportButtons(double ratio) {
+    if (!mounted) return;
+    final buttons = (
+      minimize: _bounds(_minimize, ratio),
+      maximize: _bounds(_maximize, ratio),
+      close: _bounds(_close, ratio),
+    );
+    if (buttons == _reported) return;
+    _reported = buttons;
+    widget.window.reportCaptionButtons(
+      minimize: buttons.minimize,
+      maximize: buttons.maximize,
+      close: buttons.close,
+    );
+  }
+
+  /// The button [key] holds, as laid out. Zero when it is gone: a rectangle
+  /// nobody is in is a hit test that answers nothing, which is the safe
+  /// direction to fail in.
+  Rect _bounds(GlobalKey key, double ratio) {
+    final box = key.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return Rect.zero;
+    final origin = box.localToGlobal(Offset.zero);
+    return Rect.fromLTWH(
+      origin.dx * ratio,
+      origin.dy * ratio,
+      box.size.width * ratio,
+      box.size.height * ratio,
     );
   }
 }

@@ -89,6 +89,13 @@ everywhere; PDF goes through each platform's own printer (below).
   system behaviours — resizing from the edges, Aero Snap, `Win`+Arrow —
   because the frame is still there underneath; the app only paints over
   the caption.
+- Hovering the maximise button opens the Windows 11 **Snap Layouts**
+  flyout: the runner answers the hit test over the button's rectangle,
+  which the title bar reports on every layout it takes, so the flyout
+  follows the bar's real layout rather than a fixed spot (#169). The
+  three buttons are non-client for that, so the app no longer draws
+  their hover highlight on Windows; the × still meets the unsaved-edits
+  check.
 - The installer can associate `.md` and `.markdown` files with Niman
   (a checkbox, on by default). Niman joins the files' *Open with* list;
   Windows leaves the choice of default app to you, so it becomes the

@@ -1,3 +1,5 @@
+import 'dart:ui' show Rect;
+
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
@@ -13,6 +15,9 @@ final class FakeWindowController implements WindowController {
 
   /// Every prevent flag pushed to the platform, in order.
   final List<bool> preventHistory = [];
+
+  /// Every caption-button report the title bar made (#169), in order.
+  final List<({Rect minimize, Rect maximize, Rect close})> captionButtons = [];
 
   /// How many times the window was closed for real.
   int closeCalls = 0;
@@ -55,6 +60,15 @@ final class FakeWindowController implements WindowController {
 
   @override
   Future<void> applyCustomTitleBar() async {}
+
+  @override
+  void reportCaptionButtons({
+    required Rect minimize,
+    required Rect maximize,
+    required Rect close,
+  }) {
+    captionButtons.add((minimize: minimize, maximize: maximize, close: close));
+  }
 
   @override
   Future<void> minimize() async => minimizeCalls++;
