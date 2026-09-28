@@ -2833,4 +2833,26 @@ final class PolishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Odbuduj indeks';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Czy chodziło o $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nie proponujemy poprawki — tekst zostaje tak, jak został zapisany.';
+  @override
+  String get templateHintFixAction => 'Popraw';
+  @override
+  String get templateHintDismissAction => 'Odrzuć';
+  @override
+  String templateProblems(int count) {
+    final mod10 = count % 10;
+    final mod100 = count % 100;
+    if (count == 1) return '1 problem w tym szablonie';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return '$count problemy w tym szablonie';
+    }
+    return '$count problemów w tym szablonie';
+  }
 }

@@ -2801,4 +2801,20 @@ final class HungarianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Index újraépítése';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Erre gondoltál: $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nincs javasolt javítás — a szöveg úgy marad, ahogy írtad.';
+  @override
+  String get templateHintFixAction => 'Javítás';
+  @override
+  String get templateHintDismissAction => 'Elvetés';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 probléma ebben a sablonban'
+      : '$count probléma ebben a sablonban';
 }

@@ -2793,4 +2793,20 @@ final class SwedishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Bygg om indexet';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Menade du $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Ingen rättning föreslås — texten står kvar som den skrevs.';
+  @override
+  String get templateHintFixAction => 'Rätta';
+  @override
+  String get templateHintDismissAction => 'Ignorera';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problem i den här mallen'
+      : '$count problem i den här mallen';
 }

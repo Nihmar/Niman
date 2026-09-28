@@ -2809,4 +2809,25 @@ final class SlovenianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Ponovno zgradi indeks';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Ste mislili $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Popravek ni predlagan — besedilo ostane, kot je napisano.';
+  @override
+  String get templateHintFixAction => 'Popravi';
+  @override
+  String get templateHintDismissAction => 'Zavrni';
+  @override
+  String templateProblems(int count) {
+    if (count == 1) return '1 težava v tej predlogi';
+    if (count == 2) return '$count težavi v tej predlogi';
+    if (count == 3 || count == 4) {
+      return '$count težave v tej predlogi';
+    }
+    return '$count težav v tej predlogi';
+  }
 }

@@ -81,9 +81,22 @@ author wrote, so the checker points at it and stays quiet.
 
 It reads the placeholders only: nothing is said about the Markdown around
 them, about the frontmatter, or about the `niman:` directives block,
-each of which has its own parser. **The editor does not run the checker
-yet** — when it runs, and how a mistake is shown, is the other half of
-#71 and is still open.
+each of which has its own parser.
+
+The checker runs in the editor, on the templates folder alone: a `{{…}}`
+in a note anywhere else is ordinary text. A template is read again a
+quarter of a second after typing stops — never on the keystroke itself —
+and each mistake is drawn as a wavy underline under the span it is on, in
+the colour the spelling's own underline uses. Putting the caret in a
+marked span opens the hint: what is wrong, and, where a fix was computed,
+**Did you mean …?** with that fix as a single button. The tap applies it
+as one undoable edit and nothing is ever rewritten without it; where no
+fix is safe the hint says so and offers only **Dismiss**. A template with
+problems also carries a quiet count in the status row, and a clean one
+carries nothing at all.
+
+A note being made from a template is not the template: the **Fill in the
+template** dialog edits no source, so the checker is not there.
 
 ## File directives
 

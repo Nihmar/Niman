@@ -2810,4 +2810,20 @@ final class SerbianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Поново изгради индекс';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Да ли сте мислили $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Нема предложене исправке — текст остаје како је написан.';
+  @override
+  String get templateHintFixAction => 'Исправи';
+  @override
+  String get templateHintDismissAction => 'Одбаци';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 проблем у овом шаблону'
+      : '$count проблема у овом шаблону';
 }

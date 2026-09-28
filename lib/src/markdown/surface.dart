@@ -40,6 +40,7 @@ import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/templates/check_state.dart';
 
 /// What the surface is showing.
 enum MarkdownSurfaceMode {
@@ -84,6 +85,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.formatMenu,
     this.editorMenu,
     this.spellCheck,
+    this.templateCheck,
     this.findMatches,
     this.onOpenLink,
     this.activeItems,
@@ -170,6 +172,10 @@ final class MarkdownSurface extends StatelessWidget {
   /// The note's spelling: its underline and its menu entries.
   final EditorSpellCheck? spellCheck;
 
+  /// The note's template syntax check (T-TPL-09); see
+  /// [MarkdownSourceView.templateCheck].
+  final TemplateCheck? templateCheck;
+
   /// What the find bar found, painted over the lines.
   final SourceMatches? findMatches;
 
@@ -239,6 +245,7 @@ final class MarkdownSurface extends StatelessWidget {
     formatMenu: formatMenu,
     editorMenu: editorMenu,
     spellCheck: spellCheck,
+    templateCheck: templateCheck,
     findMatches: findMatches,
     onOpenLink: onOpenLink,
     activeItems: activeItems,

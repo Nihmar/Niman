@@ -2801,4 +2801,19 @@ final class BulgarianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Преизгради индекса';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Имахте предвид $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Не се предлага поправка — текстът остава както е написан.';
+  @override
+  String get templateHintFixAction => 'Поправи';
+  @override
+  String get templateHintDismissAction => 'Отхвърли';
+  @override
+  String templateProblems(int count) =>
+      count == 1 ? '1 проблем в този шаблон' : '$count проблема в този шаблон';
 }

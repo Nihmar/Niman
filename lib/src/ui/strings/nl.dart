@@ -2823,4 +2823,20 @@ final class DutchStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Index opnieuw opbouwen';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Bedoelde je $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Geen correctie voorgesteld — de tekst blijft zoals geschreven.';
+  @override
+  String get templateHintFixAction => 'Corrigeren';
+  @override
+  String get templateHintDismissAction => 'Negeren';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 probleem in dit sjabloon'
+      : '$count problemen in dit sjabloon';
 }

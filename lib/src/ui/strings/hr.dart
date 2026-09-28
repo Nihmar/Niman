@@ -2812,4 +2812,20 @@ final class CroatianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Ponovno izgradi indeks';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Jeste li mislili $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nema predloženog ispravka — tekst ostaje kako je napisan.';
+  @override
+  String get templateHintFixAction => 'Ispravi';
+  @override
+  String get templateHintDismissAction => 'Odbaci';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problem u ovom predlošku'
+      : '$count problema u ovom predlošku';
 }

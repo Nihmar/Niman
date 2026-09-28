@@ -2771,4 +2771,19 @@ final class NorwegianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Bygg indeksen på nytt';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Mente du $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Ingen retting foreslått — teksten står som skrevet.';
+  @override
+  String get templateHintFixAction => 'Rett';
+  @override
+  String get templateHintDismissAction => 'Avvis';
+  @override
+  String templateProblems(int count) =>
+      count == 1 ? '1 problem i denne malen' : '$count problemer i denne malen';
 }

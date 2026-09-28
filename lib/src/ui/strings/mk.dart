@@ -2812,4 +2812,20 @@ final class MacedonianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Повторно изгради го индексот';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Дали мислевте $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Не се предлага исправка — текстот останува како што е напишан.';
+  @override
+  String get templateHintFixAction => 'Исправи';
+  @override
+  String get templateHintDismissAction => 'Одбаци';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 проблем во овој шаблон'
+      : '$count проблеми во овој шаблон';
 }

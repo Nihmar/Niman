@@ -2814,4 +2814,20 @@ final class BosnianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Ponovo izgradi indeks';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Da li ste mislili $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nema predložene ispravke — tekst ostaje kako je napisan.';
+  @override
+  String get templateHintFixAction => 'Ispravi';
+  @override
+  String get templateHintDismissAction => 'Odbaci';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problem u ovom predlošku'
+      : '$count problema u ovom predlošku';
 }

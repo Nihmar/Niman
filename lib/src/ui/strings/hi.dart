@@ -2743,4 +2743,20 @@ final class HindiStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'इंडेक्स फिर से बनाएँ';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'क्या आपका मतलब $fix था?';
+  @override
+  String get templateHintNoFix =>
+      'कोई सुधार नहीं सुझाया गया — पाठ जैसा लिखा है वैसा ही रहता है।';
+  @override
+  String get templateHintFixAction => 'सुधारें';
+  @override
+  String get templateHintDismissAction => 'हटाएँ';
+  @override
+  String templateProblems(int count) => count == 1
+      ? 'इस टेम्पलेट में 1 समस्या'
+      : 'इस टेम्पलेट में $count समस्याएँ';
 }

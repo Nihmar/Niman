@@ -2785,4 +2785,20 @@ final class IcelandicStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Endurbyggja vísi';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Áttir þú við $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Engin leiðrétting boðin — textinn stendur óbreyttur.';
+  @override
+  String get templateHintFixAction => 'Leiðrétta';
+  @override
+  String get templateHintDismissAction => 'Hafna';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 vandamál í þessari smíð'
+      : '$count vandamál í þessari smíð';
 }

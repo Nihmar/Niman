@@ -82,6 +82,7 @@ final class NoteStatusRow extends StatelessWidget {
     required this.onToggleEditorKind,
     this.editorKindLocked = false,
     this.typewriter = false,
+    this.templateProblems = 0,
     this.onToggleTypewriter,
     super.key,
   });
@@ -107,6 +108,12 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// The note's word count, left of the status.
   final int wordCount;
+
+  /// How many template-placeholder problems the note has (T-TPL-09), or zero
+  /// when it is not a template or is clean. A quiet count, drawn only when
+  /// there is something to count; it points at nothing the note's own marks
+  /// do not already point at.
+  final int templateProblems;
 
   /// The saved/unsaved text right of the count.
   final String statusText;
@@ -294,6 +301,32 @@ final class NoteStatusRow extends StatelessWidget {
         // changes with its label, and nothing follows it now, so
         // flipping the editor no longer slides the count sideways.
         if (!loading) ...[
+          // The template checker's count (T-TPL-09): quiet, and only while a
+          // template has problems, so a note with a broken placeholder says
+          // so without the writer hunting for the squiggle. A count, not a
+          // button: the mark on the span is where the fix is.
+          if (templateProblems > 0) ...[
+            Tooltip(
+              message: AppStrings.templateProblems(templateProblems),
+              child: Row(
+                key: const Key('template-problems'),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 14,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$templateProblems',
+                    style: labelStyle?.copyWith(color: theme.colorScheme.error),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
           Text(
             AppStrings.wordCount(wordCount),
             style: labelStyle?.copyWith(

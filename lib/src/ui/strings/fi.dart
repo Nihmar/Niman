@@ -2802,4 +2802,20 @@ final class FinnishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Rakenna hakemisto uudelleen';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Tarkoititko $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Korjausta ei tarjota — teksti jää kirjoitetuksi.';
+  @override
+  String get templateHintFixAction => 'Korjaa';
+  @override
+  String get templateHintDismissAction => 'Hylkää';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 ongelma tässä mallipohjassa'
+      : '$count ongelmaa tässä mallipohjassa';
 }

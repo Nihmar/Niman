@@ -2870,4 +2870,20 @@ final class FrenchStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => "Reconstruire l'index";
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Vouliez-vous dire $fix ?';
+  @override
+  String get templateHintNoFix =>
+      'Aucune correction proposée — le texte reste tel qu’il est écrit.';
+  @override
+  String get templateHintFixAction => 'Corriger';
+  @override
+  String get templateHintDismissAction => 'Ignorer';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problème dans ce modèle'
+      : '$count problèmes dans ce modèle';
 }

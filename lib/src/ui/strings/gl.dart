@@ -2804,4 +2804,20 @@ final class GalicianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Reconstruír o índice';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Querías dicir $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Non se ofrece ningunha corrección: o texto queda como está escrito.';
+  @override
+  String get templateHintFixAction => 'Corrixir';
+  @override
+  String get templateHintDismissAction => 'Descartar';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problema nesta plantilla'
+      : '$count problemas nesta plantilla';
 }

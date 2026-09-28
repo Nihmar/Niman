@@ -2754,4 +2754,20 @@ final class EnglishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Rebuild index';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Did you mean $fix?';
+  @override
+  String get templateHintNoFix =>
+      'No fix offered — the text is left as written.';
+  @override
+  String get templateHintFixAction => 'Fix';
+  @override
+  String get templateHintDismissAction => 'Dismiss';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problem in this template'
+      : '$count problems in this template';
 }

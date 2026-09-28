@@ -2875,4 +2875,20 @@ final class GreekStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Αναδόμηση ευρετηρίου';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Μήπως εννοούσατε $fix;';
+  @override
+  String get templateHintNoFix =>
+      'Δεν προτείνεται διόρθωση — το κείμενο μένει όπως γράφτηκε.';
+  @override
+  String get templateHintFixAction => 'Διόρθωση';
+  @override
+  String get templateHintDismissAction => 'Απόρριψη';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 πρόβλημα σε αυτό το πρότυπο'
+      : '$count προβλήματα σε αυτό το πρότυπο';
 }

@@ -2812,4 +2812,28 @@ final class LithuanianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Perkurti indeksą';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Ar turėjote omenyje $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Pataisymas nesiūlomas — tekstas lieka toks, koks parašytas.';
+  @override
+  String get templateHintFixAction => 'Taisyti';
+  @override
+  String get templateHintDismissAction => 'Atmesti';
+  @override
+  String templateProblems(int count) {
+    final mod10 = count % 10;
+    final mod100 = count % 100;
+    if (mod10 == 1 && mod100 != 11) {
+      return '1 problema šiame šablone';
+    }
+    if (mod10 >= 2 && mod10 <= 9 && (mod100 < 11 || mod100 > 19)) {
+      return '$count problemos šiame šablone';
+    }
+    return '$count problemų šiame šablone';
+  }
 }

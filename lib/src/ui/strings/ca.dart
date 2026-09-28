@@ -2833,4 +2833,20 @@ final class CatalanStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => "Reconstrueix l'índex";
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Volíeu dir $fix?';
+  @override
+  String get templateHintNoFix =>
+      'No s’ofereix cap correcció — el text queda tal com està escrit.';
+  @override
+  String get templateHintFixAction => 'Corregeix';
+  @override
+  String get templateHintDismissAction => 'Descarta';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problema en aquesta plantilla'
+      : '$count problemes en aquesta plantilla';
 }

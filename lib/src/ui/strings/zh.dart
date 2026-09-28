@@ -2476,4 +2476,17 @@ final class ChineseStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => '重建索引';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => '你指的是 $fix 吗？';
+  @override
+  String get templateHintNoFix => '没有可用的修正 — 文本保持原样。';
+  @override
+  String get templateHintFixAction => '修正';
+  @override
+  String get templateHintDismissAction => '忽略';
+  @override
+  String templateProblems(int count) => '此模板中有 $count 个问题';
 }

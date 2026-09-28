@@ -2550,4 +2550,17 @@ final class JapaneseStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'インデックスを再構築';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => '$fix のことですか？';
+  @override
+  String get templateHintNoFix => '修正候補はありません — テキストは書かれたままにします。';
+  @override
+  String get templateHintFixAction => '修正';
+  @override
+  String get templateHintDismissAction => '破棄';
+  @override
+  String templateProblems(int count) => 'このテンプレートに $count 件の問題';
 }
