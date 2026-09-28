@@ -152,30 +152,30 @@ code, not a measurement, unless the row says otherwise.
 | 1 | `ui/tab_body_stack.dart:46` | `AnimatedOpacity` over a kept-alive tab body, `TickerMode` gating the hidden ones | 180 ms | easeOutCubic | a tab switch (phone layout) | smooth — paint-only, on kept-alive bodies; the outgoing body goes `Offstage` in the same frame, so the fade is entry-only (a guess) |
 | 2 | `ui/shell_layout.dart:256`, fade constant `ui/shell.dart:1038` | `AnimatedSwitcher` + `FadeTransition`: the full-screen note page over the tab shell | 220 ms | easeOutCubic | opening/closing a note (phone) | smooth (a guess); the shell's own hide waits the fade out (`shell.dart:1017`) |
 | 3 | `ui/note_view.dart:2333` | `AnimatedSize` — the toolbar growing/shrinking as preview mode flips | 200 ms | easeOutCubic | preview toggle (phone; on desktop the toolbar is a fixed row) | smooth (a guess): one row's height, `topCenter` |
-| 4 | `ui/new_item_fab.dart:137` | `AnimatedSwitcher` — the `+`/`×` glyph | 150 ms | default (fade + scale) | FAB menu opened/closed | smooth (a guess) |
-| 5 | `ui/new_item_fab.dart:181` | `AnimatedScale` + `AnimatedOpacity` — the six mini FABs revealing | 150 ms | easeOut | FAB menu opened/closed | smooth (a guess); they stay in the tree at scale 0, so no layout jump |
+| 4 | `ui/new_item_fab.dart:137` | `AnimatedSwitcher` — the `+`/`×` glyph | 150 ms | the default fade, linear (`AnimatedSwitcher.defaultTransitionBuilder` is a `FadeTransition`) | FAB menu opened/closed | smooth (a guess) |
+| 5 | `ui/new_item_fab.dart:181` | `AnimatedScale` + `AnimatedOpacity` — the six mini FABs revealing | 150 ms | easeOut (scale) and linear (opacity: no curve is passed) | FAB menu opened/closed | smooth (a guess); they stay in the tree at scale 0, so no layout jump |
 | 6 | `ui/new_item_fab.dart:252` | `TweenAnimationBuilder` + `CustomPaint` — the scrim circle growing from the FAB over the body | 200 ms | easeOut | FAB menu opened/closed | unmeasured; the only animation here that repaints a full-screen area each frame (a guess — a circle over the body, `Colors.black26`) |
 | 7 | `ui/kinds/list_note.dart:105` | `AnimationController` → `SizeTransition` + `FadeTransition` — the add-item row stepping aside | 180 ms | easeOutCubic / easeInCubic (reverse) | a list row entering in-place editing | smooth (a guess): a one-row subtree |
 | 8 | `ui/kinds/list_note.dart:204` | `ScrollController.animateTo`, then a `jumpTo` correction if the estimated extent moved | 200 ms | easeOutCubic | a list item added | smooth then a snap at the end by design (a guess) |
-| 9 | `ui/kinds/list_item_row.dart:233` | `AnimatedContainer` — drop-target tint and the row's indent | 120 ms | default (easeInOut) | a row dragged under another, or re-indented | smooth (a guess) |
+| 9 | `ui/kinds/list_item_row.dart:233` | `AnimatedContainer` — drop-target tint and the row's indent | 120 ms | linear (the implicit animation's default; no curve is passed) | a row dragged under another, or re-indented | smooth (a guess) |
 | 10 | `ui/shell_tree_footer.dart:77` | `PopupMenuButton.popUpAnimationStyle` — the New menu | 120 ms | easeOut | the New menu opened | *deliberately shortened* from Material's 300 ms: "a desktop menu should appear, not perform" |
-| 11 | `ui/shell_tree_footer.dart:191` | `AnimatedRotation` — the sort chevron turning | 180 ms | default | sort order toggled | smooth (a guess) |
+| 11 | `ui/shell_tree_footer.dart:191` | `AnimatedRotation` — the sort chevron turning | 180 ms | linear (implicit default) | sort order toggled | smooth (a guess) |
 | 12 | `ui/marquee_text.dart:64` | `AnimationController` + `Transform.translate` inside a `ClipRect` — an overflowing name sliding and resting | one pass = 2×1200 ms pauses + 2×travel, travel from the text's width (clamped 200–20000 ms); 3 passes then rest | linear with rests (`_offsetAt`) | a title/label wider than its room (tree, title bar, tab, list row) | unmeasured; transform-only, but a clip per frame and it runs for as long as the 3 passes take (a guess) |
-| 13 | `ui/sync/spinning_sync_icon.dart:25` | `AnimationController.repeat` → `RotationTransition` | 1400 ms a turn | — | a sync in flight | smooth; holds still under reduced motion |
-| 14 | `ui/note_tab_bar.dart:122` | `Scrollable.ensureVisible` — the active tab revealed in a scrolling row | 150 ms | default | a tab activated, or a note opened | smooth (a guess) |
-| 15 | `ui/settings_area.dart:80` | `Scrollable.ensureVisible` to a searched row, plus a highlight that **snaps** on and off | 300 ms (scroll); the flash 2 s, no fade | default | a Settings search result opened | the scroll is smooth; the flash is a snap (a guess) |
+| 13 | `ui/sync/spinning_sync_icon.dart:25` | `AnimationController.repeat` → `RotationTransition` | 1400 ms a turn | — | a sync in flight | smooth (a guess); it holds still under reduced motion |
+| 14 | `ui/note_tab_bar.dart:122` | `Scrollable.ensureVisible` — the active tab revealed in a scrolling row | 150 ms | ease (the parameter's default) | a tab activated, or a note opened | smooth (a guess) |
+| 15 | `ui/settings_area.dart:80` | `Scrollable.ensureVisible` to a searched row, plus a highlight that **snaps** on and off | 300 ms (scroll, ease); the flash 2 s, no fade | ease | a Settings search result opened | the scroll is smooth; the flash is a snap (a guess) |
 | 16 | `editor/typewriter_scroll.dart:28` | `animateTo` — the note gliding so the caret's row is centred | 100 ms | easeOut | typewriter mode, caret moving to a new row | smooth by design ("short enough never to fall behind typing") |
-| 17 | `ui/welcome/welcome_screen.dart:146` | `AnimatedSwitcher` — deck pages | 200 ms | default (fade) | Next/Back on the first-run deck | smooth (a guess) |
+| 17 | `ui/welcome/welcome_screen.dart:146` | `AnimatedSwitcher` — deck pages | 200 ms | the default fade, linear | Next/Back on the first-run deck | smooth (a guess) |
 | 18 | `ui/floating_window.dart:52` | `RawDialogRoute` + `FadeTransition` — a settings panel from the rail | 120 ms | linear (the route's own) | a library window opened | smooth, deliberately short (a guess) |
 | 19 | `ui/palette/command_palette.dart:92` | `showGeneralDialog`, no transition builder → the framework's fade | 120 ms | linear | the palette (Ctrl+P, two-finger swipe) | smooth, deliberately short (a guess) |
 | 20 | `ui/tour/tour_overlay.dart:49` | `PageRouteBuilder` with **no** `transitionBuilder` | 150 ms declared | — | the tour started | nothing animates: the overlay appears instantly, and the 150 ms only bounds the route's own animation — the one place whose duration reads as a promise the code does not keep |
 | 21 | `ui/kinds/audio_composer.dart:123`, `ui/kinds/audio_note.dart:184` | `ScaleTransition` over a `TweenSequence` 1 → 1.12 → 1 — the record button's swell when the microphone goes live | 700 ms, once | weights 0.4/0.6 | recording started | smooth (a guess) |
-| 22 | `ui/kinds/audio_recording_bar.dart:46` | `AnimationController.repeat(reverse)` → `FadeTransition` — the "breath" of the recording bar | 900 ms | default | recording | smooth (a guess) |
-| 23 | `ui/kinds/audio_note.dart:481` | `AnimatedOpacity` — the empty hint leaving as the first bubble arrives | 200 ms | default | the first audio row | smooth (a guess) |
+| 22 | `ui/kinds/audio_recording_bar.dart:46` | `AnimationController.repeat(reverse)` → `FadeTransition` — the "breath" of the recording bar | 900 ms | linear (the `Tween`'s own) | recording | smooth (a guess) |
+| 23 | `ui/kinds/audio_note.dart:481` | `AnimatedOpacity` — the empty hint leaving as the first bubble arrives | 200 ms | linear (implicit default) | the first audio row | smooth (a guess) |
 | 24 | `ui/kinds/audio_chat_list.dart:96` | `animateTo` to the bottom | 300 ms | easeOut | a row added | smooth (a guess) |
 | 25 | `ui/kinds/audio_chat_list.dart:107` | `AnimatedList` with `FadeTransition` + `SizeTransition` — a bubble arriving or leaving | the framework's 300 ms insert/remove default | easeOut | a row inserted/removed | the list's own insert animation (a guess) |
-| 26 | `ui/kinds/audio_clip_bubble.dart:182` | `AnimatedSwitcher` — the play/pause glyph | 150 ms | default | a clip started/paused | smooth (a guess) |
-| 27 | `ui/kinds/audio_composer.dart:148`, `:179` | `AnimatedSwitcher` — the mic/send/stop glyph, and the composer ↔ recording bar swap | 150 ms and 200 ms | default; `ScaleTransition` for the glyph | typing, recording, saving | smooth (a guess) |
+| 26 | `ui/kinds/audio_clip_bubble.dart:182` | `AnimatedSwitcher` — the play/pause glyph | 150 ms | the default fade, linear | a clip started/paused | smooth (a guess) |
+| 27 | `ui/kinds/audio_composer.dart:148`, `:179` | `AnimatedSwitcher` — the mic/send/stop glyph, and the composer ↔ recording bar swap | 150 ms and 200 ms | the default fade, linear; `ScaleTransition` for the glyph | typing, recording, saving | smooth (a guess) |
 | 28 | the framework's defaults, **not overridden** (`lib/src/app.dart:76` sets only `theme`, `darkTheme`, `themeMode`) | any `Navigator.push`: `ZoomPageTransitionsBuilder` on Linux and Windows; a dialog 150 ms; a modal sheet 250 ms in / 200 ms out; a snack bar 250 ms; a popup menu 300 ms (shortened at #10); the indeterminate progress indicators' own loops | 450 ms for a page push | framework's own | every settings screen, the trash, history, an epub, a diff | unmeasured, and the one I would measure first: it is by far the longest animation in the app, and the zoom transition rasterises the outgoing page into a snapshot to run (a guess) |
 | 29 | `markdown/render/content_clamp_physics.dart:23` | deliberately **no** animation: a position left past the end by an estimate is put back on the end at once, where the platform's physics would spring it back | — | — | a jump landing on a changed extent (Ctrl+End, an outline jump) | this is the "snap" the design asks for; the platform's half-second spring is what it replaces |
 | 30 | scroll and fling | the platform's own ballistic simulation, `ClampingScrollPhysics` on Linux/Windows (the app overrides no `ScrollBehavior`) | — | — | wheel, trackpad, drag, fling | the one place a "missing" animation would be wrong: a fling without its simulation is not a scroll |
@@ -217,8 +217,9 @@ frame, with no animation at all, and it is verified in the code:
 - **A window resize**, and the phone/desktop breakpoint crossing.
 - **The caret** (`markdown/render/source_view.dart:2698`): a 550 ms timer
   toggles it, so it blinks by snapping, not by fading.
-- **Table hover** (`source_view.dart:3140`): a 200 ms timer, then the
-  highlight is there.
+- **Table hover** (`source_view.dart:3132`, `:3140`): the table's handles are put
+  on the pointer's table and cleared 200 ms after it leaves — both in one
+  frame, no fade.
 - **Drag and drop of a note or a tab**: the feedback follows the pointer and
   the drop marker appears; the only animated part is the list row's tint
   (#9).
