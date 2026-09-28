@@ -582,6 +582,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   _hint = ValueNotifier<({int start, int end, TemplateSyntaxError error})?>(
     null,
   );
+
   /// The overlay the wikilink suggester panel is drawn in (#475).
   final OverlayPortalController _suggestOverlay = OverlayPortalController();
 
