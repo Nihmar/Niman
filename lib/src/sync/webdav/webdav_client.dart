@@ -674,9 +674,71 @@ final class WebDavClient {
     };
     _log.warning('$method ${_show(path)}: $detail');
     final text = '$method ${_show(path)}: $detail';
-    return e is TlsException
-        ? WebDavProtocolFailure(text)
-        : WebDavRetryable(text);
+    if (e is TlsException) {
+      // A certificate the device refuses is its own outcome, with a
+      // message that names the destination so the user can act on it
+      // (#366). Any other TLS trouble stays a protocol failure, as it
+      // was.
+      return _certificateFailure(method, path, e) ??
+          WebDavProtocolFailure(text);
+    }
+    return WebDavRetryable(text);
+  }
+
+  /// The failure for a refused certificate, or null when [e] is TLS
+  /// trouble of another kind (a version mismatch, a dropped handshake).
+  WebDavCertificateFailure? _certificateFailure(
+    String method,
+    String path,
+    TlsException e,
+  ) {
+    if (!_certificateRefused(e)) return null;
+    final fingerprint = _fingerprintIn(e);
+    final host = baseUrl.host;
+    final authority = baseUrl.hasPort ? '$host:${baseUrl.port}' : host;
+    final digest = fingerprint == null ? '' : ', fingerprint $fingerprint';
+    return WebDavCertificateFailure(
+      '$method ${_show(path)}: the certificate for $authority is not '
+      'trusted$digest',
+      host: host,
+      fingerprint: fingerprint,
+    );
+  }
+
+  /// Whether [e] is the device refusing the server's certificate, rather
+  /// than any other TLS failure.
+  ///
+  /// The Dart VM raises [HandshakeException] from BoringSSL, whose text
+  /// carries `CERTIFICATE_VERIFY_FAILED`; the named cases below cover a
+  /// platform that words it differently.
+  static bool _certificateRefused(TlsException e) {
+    final text = '${e.message} ${e.osError?.message ?? ''}'.toLowerCase();
+    return text.contains('certificate_verify_failed') ||
+        (text.contains('certificate') &&
+            (text.contains('self signed') ||
+                text.contains('self-signed') ||
+                text.contains('selfsigned') ||
+                text.contains('untrusted') ||
+                text.contains('not trusted') ||
+                text.contains('verify failed')));
+  }
+
+  /// The certificate's fingerprint, when [e]'s text carries a digest.
+  ///
+  /// [TlsException] has no certificate field: the Dart VM's does not
+  /// expose one, so this is null unless the platform put a digest in the
+  /// message. A fingerprint is a long chain of hex bytes, which is what
+  /// the pattern looks for.
+  static String? _fingerprintIn(TlsException e) {
+    final text = '${e.message} ${e.osError?.message ?? ''}';
+    final match = RegExp(
+      // A digest starts at a boundary: the `56` of a `SHA256:` label is
+      // hex too, and must not be taken for the first byte.
+      '(?<![0-9a-f])[0-9a-f]{2}(?::[0-9a-f]{2}){15,}'
+      '|(?<![0-9a-f])[0-9a-f]{40,}',
+      caseSensitive: false,
+    ).firstMatch(text);
+    return match?.group(0)?.toUpperCase();
   }
 
   Future<WebDavFailure> _fail(

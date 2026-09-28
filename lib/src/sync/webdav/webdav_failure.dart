@@ -1,3 +1,5 @@
+import 'dart:io' show TlsException;
+
 /// Why a WebDAV request failed (docs/records/sync.md, "The client").
 ///
 /// Messages carry a verb, a library-relative path and a status — never
@@ -56,8 +58,33 @@ final class WebDavUnsupported extends WebDavFailure {
   const new(super.message, {super.status});
 }
 
+/// The server's TLS certificate is not trusted — a self-signed one, an
+/// expired one, or a chain the device does not know — so the handshake
+/// never completed. This is the failure a self-signed NAS ships; it is
+/// its own outcome because the user can act on it (trust this one
+/// destination, or use `http://` on a trusted network), unlike a plain
+/// protocol failure.
+///
+/// The issue behind it is open about the fix (#366): accepting the
+/// certificate is a per-destination trust decision, so this failure only
+/// reports what happened and carries what the user needs to see it.
+final class WebDavCertificateFailure extends WebDavFailure {
+  /// See [WebDavFailure.new]; [host] is the destination the certificate
+  /// belongs to and [fingerprint] the certificate's digest when the
+  /// exception exposed one.
+  const new(super.message, {required this.host, this.fingerprint});
+
+  /// The host the certificate was presented for.
+  final String host;
+
+  /// The certificate's fingerprint, or null when the TLS exception did
+  /// not carry one (as the Dart VM's [TlsException] does not).
+  final String? fingerprint;
+}
+
 /// Any other answer the client does not expect: a bad redirect, an
-/// unparsable multistatus, a status with no meaning here, a TLS failure.
+/// unparsable multistatus, a status with no meaning here, any other TLS
+/// failure (one that is not a certificate the user could act on).
 final class WebDavProtocolFailure extends WebDavFailure {
   /// See [WebDavFailure.new].
   const new(super.message, {super.status});

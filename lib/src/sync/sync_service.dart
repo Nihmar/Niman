@@ -514,7 +514,8 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
         WebDavUnsupported() => SyncTestOutcome.unsupported,
         WebDavRetryable() => SyncTestOutcome.offline,
         WebDavPrecondition() ||
-        WebDavProtocolFailure() => SyncTestOutcome.failed,
+        WebDavProtocolFailure() ||
+        WebDavCertificateFailure() => SyncTestOutcome.failed,
       };
       _log.warning('test: ${outcome.name}: ${e.message}');
       return SyncTestResult(

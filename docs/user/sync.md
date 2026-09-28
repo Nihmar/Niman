@@ -163,6 +163,7 @@ touched when it stops:
 | Waiting for your confirmation | An automatic sync would have removed many files: **Sync now** shows what, and asks. |
 | Waiting for Wi-Fi | **Wi-Fi only** is on and the phone is on mobile data. |
 | Not synced · N | Those files are tried again at the next sync (a full disk on the server, for example). |
+| The certificate for *address* is not trusted | The server presented a TLS certificate the device cannot verify — an OpenMediaVault NAS, for one, ships a self-signed one — so the handshake stopped before anything was sent. The failure names the address, and the certificate's fingerprint when the system reports one. There are two ways out: use `http://` on a network you trust (see step 2 above), or trust that one certificate. Trusting a certificate is a per-server decision, keyed to its fingerprint; **Niman does not have that option yet**, and whether to add it is still open — it is not built quietly behind your back. |
 
 ### Change or disconnect
 
