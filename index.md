@@ -16,6 +16,27 @@ truth. No lock-in, no proprietary format.
 > is in progress is tracked in the
 > [issue tracker](https://github.com/Nihmar/Niman/issues).
 
+## Screenshots
+
+From the app itself, in English, on a library of sample notes — a phone
+(Android) on the left, the Linux desktop on the right.
+
+<p>
+  <img src="docs/images/android-files.jpg" alt="Android: the files view" width="120">
+  <img src="docs/images/android-editor-live.jpg" alt="Android: editing a note in live" width="120">
+  <img src="docs/images/android-preview.jpg" alt="Android: the read view" width="120">
+  <img src="docs/images/android-search.jpg" alt="Android: search" width="120">
+  <img src="docs/images/android-widget.jpg" alt="Android: the home-screen widget" width="120">
+  <img src="docs/images/desktop-panes.jpg" alt="Desktop: three panes, a journal entry in source and in live" width="290">
+</p>
+
+<p>
+  <img src="docs/images/desktop-editor-live.jpg" alt="Desktop: editing a note in live" width="235">
+  <img src="docs/images/desktop-read-view.jpg" alt="Desktop: the read view" width="235">
+  <img src="docs/images/desktop-journal.jpg" alt="Desktop: a journal entry with the calendar" width="235">
+  <img src="docs/images/desktop-settings.jpg" alt="Desktop: settings" width="235">
+</p>
+
 ## The user guide
 
 Start with [getting started](docs/user/getting-started.md), or pick the guide
