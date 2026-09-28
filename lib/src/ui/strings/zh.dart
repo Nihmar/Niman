@@ -418,6 +418,8 @@ final class ChineseStrings extends Strings {
   String get audioRecordingPaused => '已暂停';
   @override
   String get audioSavingRecording => '正在保存…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1049,6 +1051,8 @@ final class ChineseStrings extends Strings {
   @override
   String get closeMenuTooltip => '关闭';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => '新建文件夹';
   @override
   String get newNoteSameFolder => '在同一文件夹中新建笔记';
@@ -1083,6 +1087,8 @@ final class ChineseStrings extends Strings {
   String get newFromTemplateTitle => '从模板新建';
   @override
   String get newFromTemplateHere => '在此从模板新建';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => '填写模板';
   @override
@@ -1398,6 +1404,8 @@ final class ChineseStrings extends Strings {
   @override
   String get notionImportTitle => '导入 Notion 导出';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';
   @override
   String importFolderTitle(String name) => '导入“$name”？';
@@ -1640,6 +1648,10 @@ final class ChineseStrings extends Strings {
   String trashDeleteConfirm(String name) => '$name 将被永久删除（无法恢复）';
   @override
   String get trashDeletePermanently => '永久删除';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1718,6 +1730,8 @@ final class ChineseStrings extends Strings {
   @override
   String get reindexDone => '索引重建完成';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => '关闭文库';
   @override
   String get exportLogTitle => '导出调试日志';
@@ -1744,6 +1758,17 @@ final class ChineseStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '没有找到整词「$term」的完全匹配'
       '${only == null ? '' : '，$only 中也没有'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

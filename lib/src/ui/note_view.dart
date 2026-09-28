@@ -57,6 +57,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
@@ -1318,33 +1319,23 @@ final class _NoteViewState extends State<NoteView>
   /// Ctrl+Alt+F replace, F3 and Shift+F3 walk the matches, Escape closes the
   /// bar.
   ///
+  /// The chords come from [findInNoteKey] and its neighbours, which the
+  /// shortcut reference reads too, so the row and the handler agree off
+  /// the Control platforms (issue #381).
+  ///
   /// A key handler rather than shortcuts, so that a key it has nothing to do
   /// with — Escape with the bar closed — goes on to the shell.
   KeyEventResult _sourceFindKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final keyboard = HardwareKeyboard.instance;
     bool pressed(SingleActivator key) => key.accepts(event, keyboard);
-    final mac = defaultTargetPlatform == TargetPlatform.macOS;
-    final find = SingleActivator(
-      LogicalKeyboardKey.keyF,
-      control: !mac,
-      meta: mac,
-    );
-    final replace = SingleActivator(
-      LogicalKeyboardKey.keyF,
-      control: !mac,
-      meta: mac,
-      alt: true,
-    );
-    if (pressed(replace) ||
-        (!mac &&
-            pressed(
-              const SingleActivator(LogicalKeyboardKey.keyH, control: true),
-            ))) {
+    final replace = replaceInNoteKey();
+    final ctrlH = ctrlHReplaceKey();
+    if (pressed(replace) || (ctrlH != null && pressed(ctrlH))) {
       openFind(replace: true);
       return KeyEventResult.handled;
     }
-    if (pressed(find)) {
+    if (pressed(findInNoteKey())) {
       openFind();
       return KeyEventResult.handled;
     }

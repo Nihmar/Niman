@@ -264,15 +264,24 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
                         ),
                       ),
                   SettingsListHeading(AppStrings.shortcutEditorSection),
+                  // The editors' own find keys, built from the chords the
+                  // editors bind (issue #381): `Ctrl+H` is not the key on
+                  // macOS, so the row cannot be a literal.
                   ListTile(
                     dense: true,
+                    key: const Key('shortcut-editor-find'),
                     title: Text(AppStrings.shortcutFind),
-                    trailing: const ShortcutKeys('Ctrl+F'),
+                    trailing: ShortcutKeys(describeActivator(findInNoteKey())),
                   ),
                   ListTile(
                     dense: true,
+                    key: const Key('shortcut-editor-replace'),
                     title: Text(AppStrings.shortcutReplace),
-                    trailing: const ShortcutKeys('Ctrl+H'),
+                    trailing: ShortcutKeys(
+                      describeActivator(
+                        ctrlHReplaceKey() ?? replaceInNoteKey(),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

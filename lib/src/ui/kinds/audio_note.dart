@@ -271,9 +271,10 @@ class _AudioNoteViewState extends State<AudioNoteView>
   }
 
   void _fail(Object error) {
+    const AppLogger(name: 'audio').error('playback failed: $error');
     if (!mounted) return;
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('$error')));
+        .showSnackBar(SnackBar(content: Text(AppStrings.audioPlayFailed)));
   }
 
   Future<void> _togglePlay(AudioChatRow row, AudioClip clip) async {

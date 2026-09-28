@@ -452,6 +452,8 @@ final class RomanianStrings extends Strings {
   String get audioRecordingPaused => 'În pauză';
   @override
   String get audioSavingRecording => 'Se salvează…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1131,6 +1133,8 @@ final class RomanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Închide';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Dosar nou';
   @override
   String get newNoteSameFolder => 'Notă nouă în același dosar';
@@ -1165,6 +1169,8 @@ final class RomanianStrings extends Strings {
   String get newFromTemplateTitle => 'Nouă din șablon';
   @override
   String get newFromTemplateHere => 'Nouă din șablon aici';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Completează șablonul';
   @override
@@ -1538,6 +1544,8 @@ final class RomanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importă exportul Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Aici se deschid doar fișiere Markdown și dosare: $names';
   @override
@@ -1807,6 +1815,10 @@ final class RomanianStrings extends Strings {
       '$name se șterge permanent (fără restaurare)';
   @override
   String get trashDeletePermanently => 'Șterge permanent';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1897,6 +1909,8 @@ final class RomanianStrings extends Strings {
   @override
   String get reindexDone => 'Reindexare finalizată';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Închide biblioteca';
   @override
   String get exportLogTitle => 'Exportă jurnalul de depanare';
@@ -1926,6 +1940,17 @@ final class RomanianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nicio potrivire exactă de cuvânt întreg pentru „$term”'
       '${only == null ? ' a fost găsită' : ' a fost găsită în $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

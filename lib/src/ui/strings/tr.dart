@@ -439,6 +439,8 @@ final class TurkishStrings extends Strings {
   String get audioRecordingPaused => 'Duraklatıldı';
   @override
   String get audioSavingRecording => 'Kaydediliyor…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1113,6 +1115,8 @@ final class TurkishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Kapat';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Yeni klasör';
   @override
   String get newNoteSameFolder => 'Aynı klasörde yeni not';
@@ -1148,6 +1152,8 @@ final class TurkishStrings extends Strings {
   String get newFromTemplateTitle => 'Şablondan yeni';
   @override
   String get newFromTemplateHere => 'Buradan şablondan yeni';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Şablonu doldur';
   @override
@@ -1513,6 +1519,8 @@ final class TurkishStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion dışa aktarımını içe aktar';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Burada yalnızca Markdown dosyaları ve klasörler açılır: $names';
   @override
@@ -1781,6 +1789,10 @@ final class TurkishStrings extends Strings {
       '$name kalıcı olarak silinecek (dönüş yok)';
   @override
   String get trashDeletePermanently => 'Kalıcı olarak sil';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1870,6 +1882,8 @@ final class TurkishStrings extends Strings {
   @override
   String get reindexDone => 'Dekor yeniden oluşturuldu';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Kütüphaneyi kapat';
   @override
   String get exportLogTitle => 'Hata ayıklama kayıtlarını dışa aktar';
@@ -1899,6 +1913,17 @@ final class TurkishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '“$term” için tam kelime eşleşmesi yok'
       '${only == null ? ' bulunamadı' : ' $only içinde bulundu'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

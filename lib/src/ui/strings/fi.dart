@@ -445,6 +445,8 @@ final class FinnishStrings extends Strings {
   String get audioRecordingPaused => 'Tauolla';
   @override
   String get audioSavingRecording => 'Tallennetaan…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1123,6 +1125,8 @@ final class FinnishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sulje';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Uusi kansio';
   @override
   String get newNoteSameFolder => 'Uusi muistiinpano samaan kansioon';
@@ -1157,6 +1161,8 @@ final class FinnishStrings extends Strings {
   String get newFromTemplateTitle => 'Uusi mallipohjasta';
   @override
   String get newFromTemplateHere => 'Uusi mallipohjasta tähän';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Täytä mallipohja';
   @override
@@ -1537,6 +1543,8 @@ final class FinnishStrings extends Strings {
   @override
   String get notionImportTitle => 'Tuo Notion-vienti';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Täällä avautuvat vain Markdown-tiedostot ja kansiot: $names';
   @override
@@ -1807,6 +1815,10 @@ final class FinnishStrings extends Strings {
       '$name poistetaan pysyvästi (ei palautusta)';
   @override
   String get trashDeletePermanently => 'Poista pysyvästi';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1898,6 +1910,8 @@ final class FinnishStrings extends Strings {
   @override
   String get reindexDone => 'Hakuelokuvaaminen valmis';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Sulje kirjasto';
   @override
   String get exportLogTitle => 'Vie vianetsintäloki';
@@ -1927,6 +1941,17 @@ final class FinnishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ei täsmällistä kokonaissanan “$term” osumaa'
       '${only == null ? '' : ' löytyi ${only}ssa'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

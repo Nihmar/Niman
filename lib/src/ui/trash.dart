@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
@@ -62,9 +63,12 @@ final class _TrashScreenState extends State<TrashScreen> {
       await action(item);
       await _load();
     } on Object catch (error) {
+      const AppLogger(name: 'trash')
+          .error('restore or delete of "${item.name}" failed: $error');
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.trashActionFailed)));
       }
     } finally {
       if (mounted) {
@@ -123,9 +127,10 @@ final class _TrashScreenState extends State<TrashScreen> {
       await ops.emptyTrash();
       await _load();
     } on Object catch (error) {
+      const AppLogger(name: 'trash').error('emptying the trash failed: $error');
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+            .showSnackBar(SnackBar(content: Text(AppStrings.trashEmptyFailed)));
       }
     } finally {
       if (mounted) {

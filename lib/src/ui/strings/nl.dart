@@ -449,6 +449,8 @@ final class DutchStrings extends Strings {
   String get audioRecordingPaused => 'Gepauzeerd';
   @override
   String get audioSavingRecording => 'Opslaan…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1125,6 +1127,8 @@ final class DutchStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sluiten';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Nieuwe map';
   @override
   String get newNoteSameFolder => 'Nieuwe notitie in dezelfde map';
@@ -1158,6 +1162,8 @@ final class DutchStrings extends Strings {
   String get newFromTemplateTitle => 'Nieuw uit sjabloon';
   @override
   String get newFromTemplateHere => 'Nieuw uit sjabloon hier';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Sjabloon invullen';
   @override
@@ -1545,6 +1551,8 @@ final class DutchStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion-export importeren';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Hier openen alleen Markdown-bestanden en mappen: $names';
   @override
@@ -1818,6 +1826,10 @@ final class DutchStrings extends Strings {
       '$name wordt definitief verwijderd (niet te herstellen)';
   @override
   String get trashDeletePermanently => 'Definitief verwijderen';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1909,6 +1921,8 @@ final class DutchStrings extends Strings {
   @override
   String get reindexDone => 'Herindexeren afgerond';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Bibliotheek sluiten';
   @override
   String get exportLogTitle => 'Debuglog exporteren';
@@ -1938,6 +1952,17 @@ final class DutchStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Geen exacte heel-woordmatch van “$term” '
       '${only == null ? 'gevonden' : 'gevonden in $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

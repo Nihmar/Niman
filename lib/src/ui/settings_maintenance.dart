@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
@@ -52,9 +53,10 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
       }
     } on Object catch (error) {
+      const AppLogger(name: 'maintenance').error('re-scan failed: $error');
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+            .showSnackBar(SnackBar(content: Text(AppStrings.reindexFailed)));
       }
     }
   }
@@ -112,7 +114,11 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),
       );
     } on Object catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text('$error')));
+      const AppLogger(name: 'maintenance')
+          .error('Notion import failed: $error');
+      messenger.showSnackBar(
+        SnackBar(content: Text(AppStrings.notionImportFailed)),
+      );
     }
   }
 

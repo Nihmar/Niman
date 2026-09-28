@@ -443,6 +443,8 @@ final class IcelandicStrings extends Strings {
   String get audioRecordingPaused => 'Í hléi';
   @override
   String get audioSavingRecording => 'Vistar…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1120,6 +1122,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Loka';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Ný mappa';
   @override
   String get newNoteSameFolder => 'Nýtt minnisblað í sömu möppu';
@@ -1154,6 +1158,8 @@ final class IcelandicStrings extends Strings {
   String get newFromTemplateTitle => 'Nýtt frá smíð';
   @override
   String get newFromTemplateHere => 'Nýtt frá smíð hér';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Fylla út smíð';
   @override
@@ -1524,6 +1530,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get notionImportTitle => 'Flytja inn Notion-útflutning';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Hér opnast aðeins Markdown-skrár og möppur: $names';
   @override
@@ -1792,6 +1800,10 @@ final class IcelandicStrings extends Strings {
       '$name verður varanlega eytt (án endurheimta)';
   @override
   String get trashDeletePermanently => 'Eyða varanlega';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1882,6 +1894,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get reindexDone => 'Vísu endurbyggt';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Loka bókasafni';
   @override
   String get exportLogTitle => 'Flytja út aflausningarskrá';
@@ -1909,6 +1923,17 @@ final class IcelandicStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ekki nákvæmur heilar orð samanburður „$term"'
       '${only == null ? "ekki fannst" : "fannst í $only"}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

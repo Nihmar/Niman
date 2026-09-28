@@ -13,9 +13,7 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/editor_only.dart';
@@ -151,7 +149,6 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
     final active = widget.files.active;
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     final title = active?.name ?? '';
-    final mac = defaultTargetPlatform == TargetPlatform.macOS;
     final bindings = <ShortcutActivator, VoidCallback>{
       ...appShortcutBindings({
         AppCommand.closeTab: _closeActive,
@@ -160,19 +157,11 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
         AppCommand.openFile: () => unawaited(_openAnother()),
       }),
       // The editor's own keys, bound here too: with the focus outside the
-      // editor the note's own handler never hears them.
-      SingleActivator(LogicalKeyboardKey.keyF, control: !mac, meta: mac):
-          _openFind,
-      SingleActivator(
-        LogicalKeyboardKey.keyF,
-        control: !mac,
-        meta: mac,
-        alt: true,
-      ): () =>
-          _openFind(replace: true),
-      if (!mac)
-        const SingleActivator(LogicalKeyboardKey.keyH, control: true): () =>
-            _openFind(replace: true),
+      // editor the note's own handler never hears them. The chords are the
+      // editor's own (issue #381), from `findInNoteKey`'s family.
+      findInNoteKey(): _openFind,
+      replaceInNoteKey(): () => _openFind(replace: true),
+      ?ctrlHReplaceKey(): () => _openFind(replace: true),
     };
     return Scaffold(
       appBar: window.customTitleBar

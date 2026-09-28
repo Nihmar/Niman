@@ -445,6 +445,8 @@ final class UkrainianStrings extends Strings {
   String get audioRecordingPaused => 'Призупинено';
   @override
   String get audioSavingRecording => 'Збереження…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1122,6 +1124,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Закрити';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Нова папка';
   @override
   String get newNoteSameFolder => 'Нова нотатка в тій самій теці';
@@ -1157,6 +1161,8 @@ final class UkrainianStrings extends Strings {
   String get newFromTemplateTitle => 'Новий зі шаблону';
   @override
   String get newFromTemplateHere => 'Новий зі шаблону тут';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Заповнити шаблон';
   @override
@@ -1531,6 +1537,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get notionImportTitle => 'Імпорт експорту Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Тут відкриваються лише файли Markdown і теки: $names';
   @override
@@ -1800,6 +1808,10 @@ final class UkrainianStrings extends Strings {
       '$name буде остаточно видалено (без відновлення)';
   @override
   String get trashDeletePermanently => 'Видалити остаточно';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1890,6 +1902,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get reindexDone => 'Переіндексацію завершено';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Закрити бібліотеку';
   @override
   String get exportLogTitle => 'Експортувати журнал налагодження';
@@ -1919,6 +1933,17 @@ final class UkrainianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '«$term» не має точного збігу цілого слова'
       '${only == null ? '' : ' — знайдено лише $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

@@ -105,9 +105,12 @@ final class ShellTemplateFlow {
         resolve: (written) => resolveInclude(ops, folder, written),
       );
     } on Object catch (error) {
+      const AppLogger(name: 'template')
+          .error('reading template "${chosen.path}" failed: $error');
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.templateOpenFailed)));
       }
       return;
     }

@@ -2112,9 +2112,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     try {
       await action();
     } on Object catch (error) {
+      const AppLogger(name: 'shell').error('guarded action failed: $error');
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.shellActionFailed)));
       }
       return;
     } finally {

@@ -445,6 +445,8 @@ final class AlbanianStrings extends Strings {
   String get audioRecordingPaused => 'Në pauzë';
   @override
   String get audioSavingRecording => 'Po ruhet…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1124,6 +1126,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Mbyll';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Tresë e re';
   @override
   String get newNoteSameFolder => 'Shënim i ri në të njëjtën dosje';
@@ -1160,6 +1164,8 @@ final class AlbanianStrings extends Strings {
   String get newFromTemplateTitle => 'E re nga shabllon';
   @override
   String get newFromTemplateHere => 'E re nga shabllon këtu';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Plotëso shabllonin';
   @override
@@ -1539,6 +1545,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importo eksportin e Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Këtu hapen vetëm skedarë Markdown dhe dosje: $names';
   @override
@@ -1809,6 +1817,10 @@ final class AlbanianStrings extends Strings {
       '$name do të fshihet përfundimisht (pa kthim)';
   @override
   String get trashDeletePermanently => 'Fshi përfundimisht';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1901,6 +1913,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get reindexDone => 'U rindeksua';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Mbyll bibliotekën';
   @override
   String get exportLogTitle => 'Eksporto ditëzatin e diagnostikimit';
@@ -1931,6 +1945,17 @@ final class AlbanianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'S\'ka përputhje të plotë të fjalës „$term"'
       '${only == null ? "s'u gjet" : 'u gjet në $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

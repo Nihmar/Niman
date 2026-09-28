@@ -220,6 +220,11 @@ abstract base class Strings {
   String get audioRecordingPaused;
   String get audioSavingRecording;
 
+  /// A recording that would not play (#381): the error itself names a
+  /// class and a stack, so it goes to the log and this sentence goes on
+  /// screen.
+  String get audioPlayFailed;
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   String get shortcutQuickNote;
   String get trayOpen;
@@ -557,6 +562,10 @@ abstract base class Strings {
   String get newNoteTitle;
   String get newItemTooltip;
   String get closeMenuTooltip;
+
+  /// A shell action that threw (issue #381): the sentence the snackbar
+  /// shows, while the error itself goes to the log.
+  String get shellActionFailed;
   String get newFolderTitle;
   String get newNoteSameFolder;
   String get newFromTemplateSameFolder;
@@ -577,6 +586,10 @@ abstract base class Strings {
   String get templateFolderTitle;
   String get newFromTemplateTitle;
   String get newFromTemplateHere;
+
+  /// A template that could not be read, or whose includes could not be
+  /// pasted, before its form opened (#381).
+  String get templateOpenFailed;
   String get templateFormTitle;
   String get templateFormBacklink;
   String get templateFormNoNote;
@@ -728,6 +741,9 @@ abstract base class Strings {
   String get dropNothing;
   String get importFolderAction;
   String get notionImportTitle;
+
+  /// A Notion export that could not be imported (#381).
+  String get notionImportFailed;
   String dropRejected(String names);
   String importFolderTitle(String name);
   String importFolderBody(int count);
@@ -876,6 +892,13 @@ abstract base class Strings {
   String trashDeleteConfirm(String name);
   String get trashDeletePermanently;
 
+  /// A restore or a permanent delete of a trashed note failed (#381):
+  /// the sentence replaces the caught error's `toString()`.
+  String get trashActionFailed;
+
+  /// Emptying the trash failed (#381).
+  String get trashEmptyFailed;
+
   // The open/create library screen.
   String get openLibraryIntro;
   String get openLibraryExisting;
@@ -919,6 +942,9 @@ abstract base class Strings {
   // Rebuilding deletes the index file and re-reads the notes into a fresh
   // one (#368), where re-indexing works on the index already there.
   String get rebuildIndexTitle;
+
+  /// Re-reading the library from disk failed (issue #381).
+  String get reindexFailed;
   String get closeLibraryTitle;
   String get exportLogTitle;
   String get exportLogSubtitle;
@@ -932,6 +958,19 @@ abstract base class Strings {
   String replaceDone(int occurrences, String term, int notes);
   String replaceSkipped(int skipped);
   String replacePreviewEmpty(String term, String? only);
+
+  // The replace panel's scope line (#381): what the run covers, built
+  // from the table instead of the pairs "note"/"notes" composed here.
+  String get replaceScopeWholeLibrary;
+
+  /// The scope when the run is narrowed to one note: [note] is its path.
+  String replaceScopeNote(String note);
+
+  /// The scope when the run covers [count] matching notes.
+  String replaceScopeNotes(int count);
+
+  /// The notes that could not be written, appended to a run's outcome.
+  String replaceWriteFailed(int count);
 
   // The about section (issue #80): the app's version and its changelog.
   String get settingsSectionAbout;

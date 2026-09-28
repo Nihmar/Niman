@@ -41,6 +41,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
-        android:text="Open Niman"
+        android:text="@string/widget_config_open_app"
         android:visibility="gone" />
 </LinearLayout>

@@ -610,7 +610,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         : AppStrings.replaceSkipped(report.skipped.length);
     final failures = failed.isEmpty
         ? ''
-        : ' (${failed.length} note(s) could not be written)';
+        : AppStrings.replaceWriteFailed(failed.length);
     _snack('$message$skipped$failures');
     _leaveReplaceMode();
     // The watcher re-indexes the rewritten files: once it has, re-run the
@@ -656,11 +656,11 @@ final class _SearchScreenState extends State<SearchScreen> {
     final noteCount = notes.length;
     final String scope;
     if (only != null) {
-      scope = 'in $only';
+      scope = AppStrings.replaceScopeNote(only);
     } else if (noteCount == 0) {
-      scope = 'whole library';
+      scope = AppStrings.replaceScopeWholeLibrary;
     } else {
-      scope = 'in $noteCount note${noteCount == 1 ? '' : 's'}';
+      scope = AppStrings.replaceScopeNotes(noteCount);
     }
     final confirmLabel = only != null
         ? AppStrings.replaceInThisNote

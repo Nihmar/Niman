@@ -440,6 +440,8 @@ final class EstonianStrings extends Strings {
   String get audioRecordingPaused => 'Peatatud';
   @override
   String get audioSavingRecording => 'Salvestamine…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1110,6 +1112,8 @@ final class EstonianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sulge';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Uus kaust';
   @override
   String get newNoteSameFolder => 'Uus märkmik samas kaustas';
@@ -1144,6 +1148,8 @@ final class EstonianStrings extends Strings {
   String get newFromTemplateTitle => 'Uus šabloonist';
   @override
   String get newFromTemplateHere => 'Uus šabloonist siia';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Täita šabloon';
   @override
@@ -1508,6 +1514,8 @@ final class EstonianStrings extends Strings {
   @override
   String get notionImportTitle => 'Impordi Notioni eksport';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Siin avanevad ainult Markdowni failid ja kaustad: $names';
   @override
@@ -1777,6 +1785,10 @@ final class EstonianStrings extends Strings {
       '$name kustutatakse püsivalt (taastamata)';
   @override
   String get trashDeletePermanently => 'Kustuta püsivalt';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1864,6 +1876,8 @@ final class EstonianStrings extends Strings {
   @override
   String get reindexDone => 'Uuesti indekseerimine lõpetatud';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Sulge kogu';
   @override
   String get exportLogTitle => 'Ekspordi silumise logid';
@@ -1891,6 +1905,17 @@ final class EstonianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” täpset täissõna vastet ei ole'
       '${only == null ? '' : ' ei leitud $only-s'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

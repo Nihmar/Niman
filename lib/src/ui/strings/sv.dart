@@ -448,6 +448,8 @@ final class SwedishStrings extends Strings {
   String get audioRecordingPaused => 'Pausad';
   @override
   String get audioSavingRecording => 'Sparar…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1122,6 +1124,8 @@ final class SwedishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Stäng';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Ny mapp';
   @override
   String get newNoteSameFolder => 'Ny anteckning i samma mapp';
@@ -1155,6 +1159,8 @@ final class SwedishStrings extends Strings {
   String get newFromTemplateTitle => 'Ny från mall';
   @override
   String get newFromTemplateHere => 'Ny från mall här';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Fyll i mallen';
   @override
@@ -1531,6 +1537,8 @@ final class SwedishStrings extends Strings {
   @override
   String get notionImportTitle => 'Importera Notion-export';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Här öppnas bara Markdown-filer och mappar: $names';
   @override
@@ -1800,6 +1808,10 @@ final class SwedishStrings extends Strings {
       '$name raderas permanent (ingen återställning)';
   @override
   String get trashDeletePermanently => 'Radera permanent';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1890,6 +1902,8 @@ final class SwedishStrings extends Strings {
   @override
   String get reindexDone => 'Omindexering klar';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Stäng biblioteket';
   @override
   String get exportLogTitle => 'Exportera felsökningsloggen';
@@ -1920,6 +1934,17 @@ final class SwedishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ingen exakt helt-ord-träff på “$term” '
       '${only == null ? 'hittades' : 'hittad i $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

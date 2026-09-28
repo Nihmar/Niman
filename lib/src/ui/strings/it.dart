@@ -452,6 +452,8 @@ final class ItalianStrings extends Strings {
   String get audioRecordingPaused => 'In pausa';
   @override
   String get audioSavingRecording => 'Salvataggio…';
+  @override
+  String get audioPlayFailed => 'Impossibile riprodurre l’audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1128,6 +1130,8 @@ final class ItalianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Chiudi';
   @override
+  String get shellActionFailed => 'Impossibile completare l’azione';
+  @override
   String get newFolderTitle => 'Nuova cartella';
   @override
   String get newNoteSameFolder => 'Nuova nota nella stessa cartella';
@@ -1163,6 +1167,8 @@ final class ItalianStrings extends Strings {
   String get newFromTemplateTitle => 'Nuova da modello';
   @override
   String get newFromTemplateHere => 'Nuova da modello qui';
+  @override
+  String get templateOpenFailed => 'Impossibile aprire il modello';
   @override
   String get templateFormTitle => 'Compila il modello';
   @override
@@ -1544,6 +1550,9 @@ final class ItalianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importa esportazione Notion';
   @override
+  String get notionImportFailed =>
+      'Impossibile importare l’esportazione di Notion';
+  @override
   String dropRejected(String names) =>
       'Qui si aprono solo file Markdown e cartelle: $names';
   @override
@@ -1814,6 +1823,11 @@ final class ItalianStrings extends Strings {
       '$name verrà eliminato definitivamente, senza ripristino';
   @override
   String get trashDeletePermanently => 'Elimina definitivamente';
+  @override
+  String get trashActionFailed =>
+      'Impossibile ripristinare o eliminare la nota';
+  @override
+  String get trashEmptyFailed => 'Impossibile svuotare il cestino';
 
   // The open/create library screen.
   @override
@@ -1906,6 +1920,8 @@ final class ItalianStrings extends Strings {
   @override
   String get reindexDone => 'Reindicizzazione completata';
   @override
+  String get reindexFailed => 'Impossibile rileggere la libreria';
+  @override
   String get closeLibraryTitle => 'Chiudi la libreria';
   @override
   String get exportLogTitle => 'Esporta il log di debug';
@@ -1933,6 +1949,17 @@ final class ItalianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nessuna parola intera esatta "$term" '
       '${only == null ? 'trovata' : 'trovata in $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'tutta la libreria';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 nota' : 'in $count note';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 nota non è stata scritta)'
+      : ' ($count note non sono state scritte)';
 
   // About (issue #80).
   @override

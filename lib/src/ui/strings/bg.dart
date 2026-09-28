@@ -450,6 +450,8 @@ final class BulgarianStrings extends Strings {
   String get audioRecordingPaused => 'На пауза';
   @override
   String get audioSavingRecording => 'Запазване…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1128,6 +1130,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Затваряне';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Нова папка';
   @override
   String get newNoteSameFolder => 'Нова бележка в същата папка';
@@ -1162,6 +1166,8 @@ final class BulgarianStrings extends Strings {
   String get newFromTemplateTitle => 'Нов от шаблон';
   @override
   String get newFromTemplateHere => 'Нов от шаблон тук';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Попълни шаблон';
   @override
@@ -1540,6 +1546,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get notionImportTitle => 'Импортиране на експорт от Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Тук се отварят само файлове Markdown и папки: $names';
   @override
@@ -1810,6 +1818,10 @@ final class BulgarianStrings extends Strings {
       '$name ще бъде окончателно изтрит (без възстановяване)';
   @override
   String get trashDeletePermanently => 'Изтрий окончателно';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1901,6 +1913,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get reindexDone => 'Презиндексирането е завършено';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Затвори библиотеката';
   @override
   String get exportLogTitle => 'Експортирай джурнала за отключване';
@@ -1930,6 +1944,17 @@ final class BulgarianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” няма точното съвпадение на цялата дума'
       '${only == null ? '' : ' — намерено е само $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

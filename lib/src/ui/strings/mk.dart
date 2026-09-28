@@ -449,6 +449,8 @@ final class MacedonianStrings extends Strings {
   String get audioRecordingPaused => 'Паузирано';
   @override
   String get audioSavingRecording => 'Се зачувува…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1129,6 +1131,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Затвори';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Нова папка';
   @override
   String get newNoteSameFolder => 'Нова белешка во истата папка';
@@ -1164,6 +1168,8 @@ final class MacedonianStrings extends Strings {
   String get newFromTemplateTitle => 'Ново од шаблон';
   @override
   String get newFromTemplateHere => 'Ново од шаблон овде';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Пополни го шаблон';
   @override
@@ -1541,6 +1547,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get notionImportTitle => 'Увези извоз од Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Тука се отвораат само Markdown датотеки и папки: $names';
   @override
@@ -1811,6 +1819,10 @@ final class MacedonianStrings extends Strings {
       '$name ќе биде трајно избришано (без враќање)';
   @override
   String get trashDeletePermanently => 'Избриши трајно';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1902,6 +1914,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get reindexDone => 'Повторно индексирано';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Затвори библиотека';
   @override
   String get exportLogTitle => 'Извези дневник за откланување грешки';
@@ -1932,6 +1946,17 @@ final class MacedonianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Нема точно совпаѓање на цел збор „$term"'
       '${only == null ? 'не е пронајдено' : 'пронајдено во $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override
