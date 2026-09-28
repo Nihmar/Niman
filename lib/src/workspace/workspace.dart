@@ -309,12 +309,14 @@ final class Workspace {
     });
   }
 
-  /// Closes [path]'s tab and, for a folder, every tab under it.
+  /// Closes [path]'s tab and, for a folder, every tab under it: the note
+  /// was deleted here, and its tab goes with it. A file that went away
+  /// from outside the app is [withMissing] instead: its tab stays.
   Workspace deleted(String path) => deletedAll(<String>{path});
 
   /// Closes the tab of every path in [paths], and — for a folder — every
-  /// tab under it. What a re-index pruned from the tree (issue #289): the
-  /// open notes it held close with it.
+  /// tab under it. The in-app delete ([deleted]): the reader asked for
+  /// the note to go, and the tab goes with it.
   Workspace deletedAll(Set<String> paths) {
     if (paths.isEmpty) return this;
     return _filtered(
@@ -328,12 +330,19 @@ final class Workspace {
   Workspace withMemento(String path, NoteMemento memento) =>
       _mapTab(path, (tab) => tab.copyWith(memento: memento));
 
-  /// Marks exactly the tabs in [paths] as gone from disk.
-  Workspace withMissing(Set<String> paths) => _mapTabs(
-    (tab) => tab.missing == paths.contains(tab.path)
-        ? tab
-        : tab.copyWith(missing: !tab.missing),
-  );
+  /// Marks the tabs at [paths] — and, for a folder, every tab under it —
+  /// as gone from disk, and every other tab as there: the file went away
+  /// from outside the app, so the tab stays and says so.
+  ///
+  /// What the shell asks for when it notices a path is gone: a re-index
+  /// that pruned it (#289), or a library loading with a note the index no
+  /// longer holds (issue #372). The tabs themselves keep their place.
+  Workspace withMissing(Set<String> paths) => _mapTabs((tab) {
+    final gone = paths.any(
+      (path) => tab.path == path || tab.path.startsWith('$path/'),
+    );
+    return tab.missing == gone ? tab : tab.copyWith(missing: gone);
+  });
 
   /// The dock opened or closed.
   Workspace withDock({bool? open, DockPane? pane}) =>

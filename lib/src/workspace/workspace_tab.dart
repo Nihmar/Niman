@@ -19,7 +19,8 @@ final class WorkspaceTab {
   final NoteMemento memento;
 
   /// The file went away from outside the app (a sync, another program):
-  /// the tab stays, saying so, rather than vanishing under the reader.
+  /// the tab stays, saying so, rather than vanishing under the reader
+  /// (issue #372). A delete asked for here closes the tab instead.
   /// Never persisted — it is found again, or not, on the next look.
   final bool missing;
 
