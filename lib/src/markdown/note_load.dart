@@ -15,10 +15,10 @@
 /// later.
 library;
 
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -56,21 +56,17 @@ Future<Object> readNoteText(String path) => Isolate.run(() => _readText(path));
 
 Object _readText(String path) {
   final bytes = File(path).readAsBytesSync();
-  try {
-    return utf8.decode(bytes);
-  } on FormatException catch (error) {
-    return NoteReadFailure('$path: $error', notText: true);
+  if (looksBinary(bytes)) {
+    return NoteReadFailure('$path: not text', notText: true);
   }
+  return decodeNoteText(bytes);
 }
 
 Object _loadNote(String path) {
   final bytes = File(path).readAsBytesSync();
-  final String decoded;
-  try {
-    decoded = utf8.decode(bytes);
-  } on FormatException catch (error) {
-    return NoteReadFailure('$path: $error', notText: true);
+  if (looksBinary(bytes)) {
+    return NoteReadFailure('$path: not text', notText: true);
   }
-  final text = normalizedLineEndings(decoded);
+  final text = normalizedLineEndings(decodeNoteText(bytes));
   return LoadedNote(text: text, buffer: SourceBuffer.fromText(text));
 }

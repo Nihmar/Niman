@@ -8,7 +8,6 @@
 /// the progress are the caller's.
 library;
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:niman/src/export/export_sources.dart';
@@ -17,6 +16,7 @@ import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:path/path.dart' as p;
 
 /// One entry of the subtree: its absolute path, its zip name, and whether
@@ -106,7 +106,7 @@ abstract final class ExportTreePages {
   /// a failed export of the whole folder (E9).
   static String readNote(String abs) {
     final bytes = File(abs).readAsBytesSync();
-    final text = utf8.decode(bytes, allowMalformed: true);
+    final text = decodeNoteText(bytes);
     return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
         ? text.substring(1)
         : text;

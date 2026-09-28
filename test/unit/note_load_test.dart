@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/editor/word_count_index.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
@@ -49,9 +50,42 @@ void main() {
     },
   );
 
-  test('a file that is not text says so', () async {
+  test(
+    'a Latin-1 note the rest of the app reads opens as text (#353)',
+    () async {
+      // `caf\xE9\n`: 0xE9 is not UTF-8, but an imported vault is full of such
+      // notes, and note ops, the index, the widget and export all read them —
+      // so the editor does too, with the one broken byte as U+FFFD.
+      final file = File(p.join(dir.path, 'latin1.md'))
+        ..writeAsBytesSync(<int>[0x63, 0x61, 0x66, 0xE9, 0x0A]);
+      final loaded = await loadNote(file.path);
+      expect(loaded, isA<LoadedNote>());
+      final note = loaded as LoadedNote;
+      expect(note.text, 'caf\uFFFD\n');
+      expect(note.buffer.text, note.text);
+      // One rule for every path: the text the loader hands the editor is what
+      // note ops, the index, the widget and export decode.
+      expect(note.text, decodeNoteText(<int>[0x63, 0x61, 0x66, 0xE9, 0x0A]));
+      // The reload path reads the same file the same way.
+      expect(await readNoteText(file.path), 'caf\uFFFD\n');
+    },
+  );
+
+  test('a genuinely binary file (NUL bytes) is not text', () async {
+    // A UTF-16 BOM and a NUL: nothing a person writes as a note, and the
+    // refusal of a file that is not text (issue #156) still holds.
     final file = File(p.join(dir.path, 'image.md'))
       ..writeAsBytesSync(<int>[0xFF, 0xFE, 0x00, 0xC3]);
+    final loaded = await loadNote(file.path);
+    expect(loaded, isA<NoteReadFailure>());
+    expect((loaded as NoteReadFailure).notText, isTrue);
+  });
+
+  test('a NUL-free file of undecodable bytes is not text either', () async {
+    // No NUL to catch it, but every byte decodes to U+FFFD: binary, not a
+    // Latin-1 note.
+    final file = File(p.join(dir.path, 'blob.md'))
+      ..writeAsBytesSync(List<int>.filled(64, 0xFF));
     final loaded = await loadNote(file.path);
     expect(loaded, isA<NoteReadFailure>());
     expect((loaded as NoteReadFailure).notText, isTrue);

@@ -18,6 +18,7 @@ import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/ui/kinds/list_parser.dart';
 import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
@@ -54,7 +55,7 @@ Future<String?> readNoteText(String root, String notePath) async {
       return file.readAsBytesSync();
     });
     if (bytes == null) return null;
-    final text = utf8.decode(bytes, allowMalformed: true);
+    final text = decodeNoteText(bytes);
     return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
         ? text.substring(1)
         : text;
