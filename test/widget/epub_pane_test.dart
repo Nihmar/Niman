@@ -241,13 +241,14 @@ void main() {
     testWidgets('a place in a chapter the book lost opens it at its start', (
       tester,
     ) async {
+      final path = twoChapters();
       await tester.runAsync(
         () => positions.write(
           'novel.epub',
           const EpubLocation(chapter: 'OEBPS/gone.xhtml', line: 40),
         ),
       );
-      await pump(tester, twoChapters(), positions: positions);
+      await pump(tester, path, positions: positions);
       expect(find.text('Chapter one'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
@@ -275,6 +276,7 @@ void main() {
     });
 
     testWidgets('a book opened and not moved writes nothing', (tester) async {
+      final path = twoChapters();
       await tester.runAsync(
         () => positions.write(
           'novel.epub',
@@ -282,7 +284,7 @@ void main() {
           at: DateTime.utc(2026),
         ),
       );
-      await pump(tester, twoChapters(), positions: positions);
+      await pump(tester, path, positions: positions);
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpWidget(const SizedBox());
       await settled(tester);

@@ -128,12 +128,20 @@ void main() {
 
     File kept() => File(p.join(root.path, ReadingPositions.filePath));
 
+    /// Puts a file at [path], library-relative: an entry for a file that
+    /// is there survives the write's pruning (#367).
+    File holding(String path) => File(p.join(root.path, path))
+      ..parent.createSync(recursive: true)
+      ..writeAsStringSync('x');
+
     test('none are kept in a library that read nothing', () async {
       expect(await positions.read('book.epub'), isNull);
       expect(kept().existsSync(), isFalse);
     });
 
     test('keep each file where it was left, and when', () async {
+      holding('books/Dune.epub');
+      holding('papers/x.pdf');
       await positions.write(
         'books/Dune.epub',
         const EpubLocation(chapter: 'ch1.xhtml', line: 7),
@@ -155,6 +163,9 @@ void main() {
     });
 
     test('lose none of the writes made at once', () async {
+      for (var page = 1; page <= 20; page++) {
+        holding('p$page.pdf');
+      }
       await Future.wait([
         for (var page = 1; page <= 20; page++)
           positions.write('p$page.pdf', PdfLocation(page: page)),
@@ -165,10 +176,18 @@ void main() {
     });
 
     test('follow a file renamed, and a folder with the files in it', () async {
+      holding('a/one.pdf');
+      holding('a/b/two.pdf');
+      holding('ab/three.pdf');
       await positions.write('a/one.pdf', const PdfLocation(page: 1));
       await positions.write('a/b/two.pdf', const PdfLocation(page: 2));
       await positions.write('ab/three.pdf', const PdfLocation(page: 3));
+      // The file, then the folder holding it, are renamed on disk before
+      // their positions are carried (#281), as a move does.
+      File(p.join(root.path, 'a', 'one.pdf'))
+          .renameSync(p.join(root.path, 'a', 'uno.pdf'));
       await positions.moved('a/one.pdf', 'a/uno.pdf');
+      Directory(p.join(root.path, 'a')).renameSync(p.join(root.path, 'z'));
       await positions.moved('a', 'z');
       expect(await positions.read('z/uno.pdf'), const PdfLocation(page: 1));
       expect(await positions.read('z/b/two.pdf'), const PdfLocation(page: 2));
@@ -177,11 +196,35 @@ void main() {
       expect(await positions.read('ab/three.pdf'), const PdfLocation(page: 3));
     });
 
+    test(
+      'drop the entries of files that are gone, and keep the rest',
+      () async {
+        holding('books/Dune.epub');
+        holding('papers/x.pdf');
+        await positions.write(
+          'books/Dune.epub',
+          const EpubLocation(chapter: 'ch1.xhtml', line: 7),
+        );
+        await positions.write('papers/x.pdf', const PdfLocation(page: 2));
+        // The book leaves the library; the next write drops its entry.
+        File(p.join(root.path, 'books', 'Dune.epub')).deleteSync();
+        await positions.write('papers/x.pdf', const PdfLocation(page: 3));
+        final json = jsonDecode(kept().readAsStringSync()) as Map;
+        expect(json.keys, ['papers/x.pdf']);
+        expect(await positions.read('books/Dune.epub'), isNull);
+        expect(
+          await positions.read('papers/x.pdf'),
+          const PdfLocation(page: 3),
+        );
+      },
+    );
+
     test('a file that does not read is started over', () async {
       kept()
         ..parent.createSync(recursive: true)
         ..writeAsStringSync('{not json');
       expect(await positions.read('x.pdf'), isNull);
+      holding('x.pdf');
       await positions.write('x.pdf', const PdfLocation(page: 4));
       expect(await positions.read('x.pdf'), const PdfLocation(page: 4));
     });
