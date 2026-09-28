@@ -13,15 +13,33 @@ library;
 
 /// One downloadable file attached to a GitHub release.
 final class ReleaseAsset {
-  /// Creates an asset with its release file [name] and [downloadUrl]
-  /// (`browser_download_url` in the GitHub API).
-  const new({required this.name, required this.downloadUrl});
+  /// Creates an asset with its release file [name], [downloadUrl]
+  /// (`browser_download_url` in the GitHub API) and published [digest].
+  const new({required this.name, required this.downloadUrl, this.digest});
 
   /// The file name as published on the release page.
   final String name;
 
   /// The direct download URL.
   final String downloadUrl;
+
+  /// The checksum GitHub published for the file, `sha256:<hex>` (the
+  /// releases API's `digest` field); null when the surface returned none
+  /// (issue #384). Carried so the downloaded bytes can be checked before
+  /// the artifact is offered or applied.
+  final String? digest;
+
+  /// The expected lowercase hex sha256 parsed out of [digest]; null when
+  /// none was published or its algorithm is not sha256, i.e. there is
+  /// nothing trustworthy to verify the download against.
+  String? get expectedSha256 {
+    final raw = digest;
+    if (raw == null) return null;
+    const prefix = 'sha256:';
+    if (!raw.startsWith(prefix)) return null;
+    final hex = raw.substring(prefix.length).toLowerCase();
+    return hex.isEmpty ? null : hex;
+  }
 }
 
 /// Which Linux package variant is installed, so the checker downloads the

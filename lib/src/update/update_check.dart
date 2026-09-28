@@ -30,7 +30,10 @@ final class LatestRelease {
         final name = entry['name'] as String?;
         final url = entry['browser_download_url'] as String?;
         if (name == null || url == null) continue;
-        assets.add(ReleaseAsset(name: name, downloadUrl: url));
+        // The API's `digest` is `sha256:<hex>`; carried through so the
+        // download can be verified before it is applied (issue #384).
+        final digest = entry['digest'] as String?;
+        assets.add(ReleaseAsset(name: name, downloadUrl: url, digest: digest));
       }
     }
     return LatestRelease(version: version, assets: assets);
