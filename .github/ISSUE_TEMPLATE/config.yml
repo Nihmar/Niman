@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing
+    url: https://github.com/Nihmar/Niman/blob/main/CONTRIBUTING.md
+    about: What to install, the checks a change must pass, and how a change is proposed
+  - name: Documentation
+    url: https://nihmar.github.io/Niman/
+    about: The user and contributor guides

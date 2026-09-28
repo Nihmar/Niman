@@ -293,6 +293,19 @@ asked. See [building](docs/dev/building.md).
 | [`whisper_ggml`](https://pub.dev/packages/whisper_ggml) | On-device speech-to-text for audio notes |
 | [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | Credentials + secrets |
 
+## Contributing
+
+Niman is open source and contributions are welcome — the work is tracked in the
+[issue tracker](https://github.com/Nihmar/Niman/issues).
+[CONTRIBUTING.md](CONTRIBUTING.md) carries what a change needs: the setup on each
+platform, the checks it has to pass (`./scripts/niman.sh check`, the formatting
+gate, `flutter analyze --fatal-infos`, the integration suite), how a change is
+proposed (one logical change per commit, a pull request per issue), and the
+platform-parity expectation that Android, Linux and Windows ship a capability in
+the same round. It points at the full rules in [`AGENTS.md`](AGENTS.md) and
+[`docs/dev/conventions.md`](docs/dev/conventions.md), and
+[building](docs/dev/building.md) has the flavours, the scripts and the artifacts.
+
 ## Acknowledgments
 
 - [Markor](https://github.com/gsantner/markor) — the offline Markdown editor
@@ -304,4 +317,5 @@ asked. See [building](docs/dev/building.md).
 
 ## License
 
-Niman is open source under the MIT license.
+Niman is open source under the [MIT license](LICENSE): use it, read it, change
+it and ship it, with the copyright notice and the permission notice kept.
