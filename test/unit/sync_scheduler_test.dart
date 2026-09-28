@@ -33,8 +33,11 @@ final class _Harness {
         final wait = runTakes;
         if (wait != null) await Future<void>.delayed(wait);
         due = false; // the run settled what was queued
-        return (reports.isEmpty ? SyncReport.new : reports.removeAt(0))()
-          ..quick = quick;
+        return (
+          report: (reports.isEmpty ? SyncReport.new : reports.removeAt(0))()
+            ..quick = quick,
+          joined: joined,
+        );
       },
       triggers: () async => triggers,
       hasDueHints: () async => due,
@@ -54,6 +57,9 @@ final class _Harness {
   Duration? runTakes;
   final List<String> runs = [];
   final List<SyncReport Function()> reports = [];
+
+  /// Whether the scripted run joins a run already going.
+  bool joined = false;
 
   void start() {
     unawaited(scheduler.start());
@@ -165,6 +171,25 @@ void main() {
       h.elapse(1);
       expect(h.runs.last, 'full @135');
       expect(h.scheduler.backoffUntil, isNull, reason: 'that one went fine');
+      h.scheduler.dispose();
+    });
+  });
+
+  test('a run that joined another is not settled here (#391)', () {
+    fakeAsync((async) {
+      final h = _Harness(async)
+        ..triggers = const SyncTriggers(intervalSeconds: 0)
+        ..joined = true
+        ..reports.add(() => _aborted(SyncAbort.offline))
+        ..start();
+      expect(h.runs, ['full @0']);
+      expect(
+        h.scheduler.backoffUntil,
+        isNull,
+        reason: 'the caller that started the run settles its failure',
+      );
+      h.elapse(300);
+      expect(h.runs, ['full @0'], reason: 'and no retry was armed');
       h.scheduler.dispose();
     });
   });

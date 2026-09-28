@@ -411,7 +411,7 @@ auth, redirects and injected failures on and off.
 ### The engine (`lib/src/sync/sync_engine.dart`)
 
 `SyncEngine.run` does one full sync of a library; a second call while
-one runs joins it.
+one runs joins it and gets the same report, saying that it joined.
 
 1. **Destination:** row, password (a user without a stored password
    stops the run), client. Capabilities come from the store; missing or
@@ -682,8 +682,11 @@ After a run: `offline` / `failed` back automatic runs off for
 timer; `authentication` / `missingPassword` pause them
 (`SyncPause.authentication`), `remoteMissing` / `unsupported` too
 (`server`), and a refused mass deletion (`confirmation`). A pause ends
-with a manual run or a saved destination. Paths that failed back off
-their hints and arm a quick retry.
+with a manual run or a saved destination. One run is settled once, by
+the caller that started it: a manual sync that joined an automatic run
+reads its report but leaves the failure count and the backoff to the
+scheduler (#391). Paths that failed back off their hints and arm a
+quick retry.
 
 The network comes from `NetworkMonitor` (`ConnectivityNetworkMonitor`
 over `connectivity_plus`: Wi-Fi or Ethernet = unmetered, mobile, none =

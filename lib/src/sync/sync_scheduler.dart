@@ -81,8 +81,9 @@ final class SyncScheduler {
     this.quickMaxDelay = const Duration(seconds: 60),
   }) : _now = now ?? DateTime.now;
 
-  /// Runs an automatic sync.
-  final Future<SyncReport> Function({required bool quick}) run;
+  /// Runs an automatic sync; the result says whether it joined a run
+  /// already going, which that run's own caller settles (#391).
+  final Future<SyncRun> Function({required bool quick}) run;
 
   /// The destination's trigger options, or null without a destination.
   final Future<SyncTriggers?> Function() triggers;
@@ -383,8 +384,10 @@ final class SyncScheduler {
         _firstHintAt = null;
       }
       ran = true;
-      final report = await run(quick: quick);
-      runFinished(report);
+      final outcome = await run(quick: quick);
+      // A run already going is settled by whoever started it: settling it
+      // here too would count its failure twice (#391).
+      if (!outcome.joined) runFinished(outcome.report);
     } on Object catch (e) {
       _log.error('scheduler: ${quick ? 'quick' : 'full'} ($why) failed: $e');
     } finally {

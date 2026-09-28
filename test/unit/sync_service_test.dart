@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -301,6 +302,103 @@ void main() {
       expect(row.autoSync, isTrue);
       expect(service.status.destination!.intervalSeconds, 300);
       expect(service.offersWifiOnly, isFalse, reason: 'not a phone');
+    });
+  });
+
+  group('a manual sync joining a run going (#391)', () {
+    setUp(() async {
+      ops.syncHints = service.hint;
+      await service.save(url: '${server.url}', username: '');
+      File(p.join(path, 'a.md')).writeAsStringSync('one');
+      final first = await service.syncNow();
+      expect(first.clean, isTrue, reason: first.summary());
+      await ops.writer.indexed;
+      AppLog.clear();
+      addTearDown(AppLog.clear);
+    });
+
+    /// What the scheduler logged when it settled a failed run: one line
+    /// per settle, naming the failure count it counted.
+    List<String> settledFailures() => AppLog.lines()
+        .where((line) => line.contains('automatic runs wait'))
+        .toList();
+
+    /// Waits until the run has finished and the scheduler has settled it.
+    Future<void> settled() async {
+      await eventually(
+        () => !service.status.running && service.status.nextRetryAt != null,
+        reason: 'the run settled',
+      );
+      await pumpEventQueue();
+    }
+
+    test('a failure it joined is counted once', () async {
+      // Notes for the automatic run to carry over: it is plainly still
+      // going when the manual sync joins it.
+      for (var i = 0; i < 20; i++) {
+        File(p.join(path, 'note$i.md')).writeAsStringSync('note $i');
+      }
+
+      Future<SyncReport>? manual;
+      var failed = false;
+      void watch() {
+        final status = service.status;
+        if (!status.running) return;
+        if (status.background) {
+          // The automatic full run is going: "Sync now" joins it.
+          manual ??= service.syncNow();
+          return;
+        }
+        if (failed) return;
+        // The manual side has just entered the run, so the engine call
+        // that joins it comes next: it is this run that fails, once.
+        failed = true;
+        server.failNext(503, count: 6);
+      }
+
+      service.addListener(watch);
+      addTearDown(() => service.removeListener(watch));
+
+      await service.start();
+      await eventually(() => manual != null, reason: 'the manual sync joined');
+      final report = await manual!;
+      expect(report.aborted, SyncAbort.offline, reason: report.summary());
+      expect(failed, isTrue, reason: 'the joined run failed');
+      expect(
+        AppLog.lines().where((line) => line.contains('joining it')),
+        hasLength(1),
+        reason: AppLog.dump(),
+      );
+
+      await settled();
+      expect(settledFailures(), hasLength(1), reason: AppLog.dump());
+      expect(settledFailures().single, contains('(failure 1)'));
+      expect(
+        service.status.nextRetryAt!.difference(DateTime.now()),
+        lessThan(syncBackoff(2)),
+        reason:
+            'one failure waits ${syncBackoff(1).inSeconds}s, not '
+            '${syncBackoff(2).inSeconds}',
+      );
+    });
+
+    test('a manual sync on its own still settles its run', () async {
+      server.failNext(503, count: 6);
+      final report = await service.syncNow();
+      expect(report.aborted, SyncAbort.offline, reason: report.summary());
+      expect(service.status.aborted, SyncAbort.offline);
+      expect(service.status.lastReport, same(report));
+
+      await settled();
+      expect(settledFailures(), hasLength(1), reason: AppLog.dump());
+      expect(settledFailures().single, contains('(failure 1)'));
+      expect(
+        service.status.nextRetryAt!.difference(DateTime.now()),
+        lessThan(syncBackoff(2)),
+        reason:
+            'one failure waits ${syncBackoff(1).inSeconds}s, not '
+            '${syncBackoff(2).inSeconds}',
+      );
     });
   });
 }
