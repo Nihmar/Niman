@@ -46,6 +46,24 @@ void main() {
     expect(links.single.offset, 'Intro.\n'.length);
   });
 
+  test('a `#` line inside a fence is not a heading (#374)', () {
+    const note =
+        '## Dune, p. 3\n'
+        '\n'
+        '> A passage.\n'
+        '> — [[Books/Dune.pdf#page=3|Dune, p. 3]]\n'
+        '\n'
+        '```\n'
+        '# not a heading\n'
+        '```\n'
+        '\n'
+        '[Dune, p. 8](<Books/Dune.pdf#page=8>)\n';
+    final last = annotationLinksIn(note).last;
+    expect(last.place, const PdfLocation(page: 8));
+    expect(last.title, 'Dune, p. 3');
+    expect(note.substring(last.offset), startsWith('## Dune, p. 3'));
+  });
+
   test('a link to a heading, or to no place, is no mark', () {
     expect(annotationLinksIn('[[Note#Heading]] [x](a.md) [[a.pdf]]'), isEmpty);
   });

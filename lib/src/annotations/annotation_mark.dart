@@ -11,7 +11,10 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/percent.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/reading/book_location.dart';
 
 /// A place of a file, annotated in a note.
@@ -66,11 +69,11 @@ typedef AnnotationLink = ({
 /// The links of [text], a note, that point at a place of a file, each with
 /// the annotation it belongs to. Pure, for an isolate: a companion may be
 /// long.
+///
+/// [text] is the note as the editor holds it — its line endings `\n` — since
+/// the offsets here are the ones a caret stands at.
 List<AnnotationLink> annotationLinksIn(String text) {
-  final headings = [
-    for (final match in _heading.allMatches(text))
-      (offset: match.start, title: match[1]!.trim()),
-  ];
+  final headings = _headingsIn(text);
   final out = <AnnotationLink>[];
   var heading = 0;
   for (final link in parseLinks(text)) {
@@ -113,5 +116,21 @@ List<AnnotationLink> annotationLinksIn(String text) {
   return out;
 }
 
-/// A heading line, its text captured.
-final RegExp _heading = RegExp(r'^#{1,6}[ \t]+(.*)$', multiLine: true);
+/// The headings of [text], each with the offset it starts at, as the note's
+/// own outline reads them (`outlineOfBlocks` over the block scan): a `#` line
+/// inside a code fence, a formula or the frontmatter is not a heading, and
+/// the scan is the answer the outline and the colouring share.
+///
+/// A regex over the raw text answered a different question — every `#` line
+/// where no fence or formula opened one — so a fenced `#` became a mark's
+/// heading and its offset, which the outline disagreed with (#374).
+List<({int offset, String title})> _headingsIn(String text) {
+  final buffer = SourceBuffer.fromText(text);
+  return [
+    for (final heading in outlineOfBlocks(
+      BlockScanner(buffer).index,
+      buffer.lineAt,
+    ))
+      (offset: buffer.offsetOfLine(heading.line), title: heading.text),
+  ];
+}

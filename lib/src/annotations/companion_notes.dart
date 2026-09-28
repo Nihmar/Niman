@@ -28,6 +28,7 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/note_load.dart';
 import 'package:path/path.dart' as p;
 
 /// Where an annotation was written: the note, and the offset its text
@@ -73,7 +74,10 @@ final class CompanionNotes {
     final out = <AnnotationMark>[];
     final pointsHere = <String, bool>{};
     for (final note in await of(path)) {
-      final text = await ops.readNote(note);
+      // The note as the editor opens it, which is the text its offsets are
+      // for: a CRLF companion read as it is on disk put every mark one
+      // character late per `\r` before it (#374).
+      final text = normalizedLineEndings(await ops.readNote(note));
       final links = await Isolate.run(() => annotationLinksIn(text));
       for (final link in links) {
         final key = '${link.markdown}:${link.target}';
@@ -141,7 +145,10 @@ final class CompanionNotes {
       );
       path = note.path;
     }
-    final written = await ops.readNote(path);
+    // The same text the editor opens the note with, so the offset is where
+    // its caret goes: the raw file's would be one character late per `\r`
+    // before the annotation when the companion is CRLF (#374).
+    final written = normalizedLineEndings(await ops.readNote(path));
     final at = written.lastIndexOf(text);
     return (path: path, offset: at == -1 ? written.length : at);
   }
