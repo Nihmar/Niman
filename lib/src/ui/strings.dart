@@ -261,6 +261,11 @@ final class AppStrings {
   static String get uiTextScaleSubtitle => _s.uiTextScaleSubtitle;
   static String get noteTextScaleTitle => _s.noteTextScaleTitle;
   static String get noteTextScaleSubtitle => _s.noteTextScaleSubtitle;
+  static String get sourceFontTitle => _s.sourceFontTitle;
+  static String get sourceFontSubtitle => _s.sourceFontSubtitle;
+  static String get sourceFontMonospace => _s.sourceFontMonospace;
+  static String get sourceFontSansSerif => _s.sourceFontSansSerif;
+  static String get sourceFontSerif => _s.sourceFontSerif;
   static String get epubLookTitle => _s.epubLookTitle;
   static String get epubLookSubtitle => _s.epubLookSubtitle;
   static String get epubSameAsApp => _s.epubSameAsApp;

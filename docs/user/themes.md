@@ -20,6 +20,9 @@ at once, everywhere, and the choice is remembered on this device.
 
 The Markdown colors — code, links, quotes, tags — travel with the theme:
 the editor and the preview always agree with the interface around them.
+The face is not one of them: the source pane's is its own setting
+(**Settings → Editor → Source editor font**, see `editing.md`), and the
+preview and `live` keep the note's own whatever it says.
 So does the color of a template command: the `{{…}}` the engine answers
 in a note of the library's template folder wears one of its own, and stays
 plain where it is not a command. So do the colors of a task list

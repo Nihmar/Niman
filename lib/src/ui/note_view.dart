@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_config.dart'
+    show defaultSourceFont;
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
@@ -128,6 +130,7 @@ final class NoteView extends StatefulWidget {
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.templateFolder,
     this.indentWidth = 2,
+    this.sourceFont = defaultSourceFont,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.showPreview = false,
     this.showWysiwyg = false,
@@ -205,6 +208,9 @@ final class NoteView extends StatefulWidget {
 
   /// The indent/outdent width in spaces (settings).
   final int indentWidth;
+
+  /// The face the source pane is set in (settings, issue #259).
+  final SourceFont sourceFont;
 
   /// The toolbar the user arranged (settings, T-TB-04): which buttons
   /// show and in what order.
@@ -1264,6 +1270,7 @@ final class _NoteViewState extends State<NoteView>
         // which always takes the focus (#53).
         autofocus: widget.autofocusEditor || widget.initialCaretOffset != null,
         indentWidth: widget.indentWidth,
+        sourceFont: widget.sourceFont,
         column: widget.noteColumn,
         formatMenu: _formatMenu,
         editorMenu: _editorMenu,

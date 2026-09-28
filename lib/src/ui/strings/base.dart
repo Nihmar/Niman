@@ -156,6 +156,11 @@ abstract base class Strings {
   String get uiTextScaleSubtitle;
   String get noteTextScaleTitle;
   String get noteTextScaleSubtitle;
+  String get sourceFontTitle;
+  String get sourceFontSubtitle;
+  String get sourceFontMonospace;
+  String get sourceFontSansSerif;
+  String get sourceFontSerif;
   String get epubLookTitle;
   String get epubLookSubtitle;
   String get epubSameAsApp;

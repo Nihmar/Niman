@@ -300,6 +300,17 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'エディタとプレビューは常に同じです';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => '本の表示';
   @override
   String get epubLookSubtitle => 'EPUB の本のテーマ、フォント、文字サイズ（ノートとは別）';

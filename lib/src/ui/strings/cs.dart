@@ -324,6 +324,17 @@ final class CzechStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'Editor a náhled, vždy v souladu';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Vzhled knih';
   @override
   String get epubLookSubtitle =>

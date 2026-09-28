@@ -331,6 +331,17 @@ final class ItalianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'L’editor e l’anteprima, che restano d’accordo';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Aspetto dei libri';
   @override
   String get epubLookSubtitle =>

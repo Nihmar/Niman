@@ -300,6 +300,17 @@ final class ChineseStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => '编辑器与预览，两者始终一致';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => '书籍外观';
   @override
   String get epubLookSubtitle => 'EPUB 书籍的主题、字体和文字大小，与笔记分开';

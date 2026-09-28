@@ -21,6 +21,9 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/settings/library_config.dart'
+    show defaultSourceFont;
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
@@ -75,6 +78,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showLineNumbers = true,
     this.indentWidth = 2,
+    this.sourceFont = defaultSourceFont,
     this.syntax,
     this.dark = false,
     this.formatMenu,
@@ -145,6 +149,11 @@ final class MarkdownSurface extends StatelessWidget {
   /// How many spaces Tab indents by.
   final int indentWidth;
 
+  /// The face `source` mode is set in (issue #259); the monospace face the
+  /// editor shipped with unless the library chose another. `live` and the
+  /// read view keep the note's own.
+  final SourceFont sourceFont;
+
   /// The token palette; null takes it from the ambient theme.
   final SyntaxColors? syntax;
 
@@ -201,12 +210,12 @@ final class MarkdownSurface extends StatelessWidget {
   /// Whether this mode draws the note as it reads.
   bool get hidesMarkers => mode == MarkdownSurfaceMode.live;
 
-  /// The typography this mode is set in: `source` is monospace, `live` is the
-  /// note's own theme, because that is the difference between reading the file
-  /// and
-  /// reading the note.
-  MarkdownTheme get effectiveTheme =>
-      mode == MarkdownSurfaceMode.source ? monospaceTheme(theme) : theme;
+  /// The typography this mode is set in: `source` takes the library's chosen
+  /// face, `live` the note's own theme — because that is the difference
+  /// between reading the file and reading the note.
+  MarkdownTheme get effectiveTheme => mode == MarkdownSurfaceMode.source
+      ? surfaceThemeFor(theme, sourceFont)
+      : theme;
 
   @override
   Widget build(BuildContext context) => MarkdownSourceView(

@@ -20,6 +20,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/markdown/render/code_themes.dart';
 import 'package:niman/src/markdown/render/mark_highlight.dart';
 
@@ -209,43 +210,44 @@ final class MarkdownTheme {
   );
 }
 
-/// The source mode's typography: a copy of [theme] in a monospace face.
+/// The source mode's typography: a copy of [theme] set in [font]'s face.
 ///
-/// The source editor is read as *text* — its markers, its indents, its columns
-/// —
-/// and a proportional face makes the columns drift. The legacy editor set the
-/// note
-/// in `monospace` with these fallbacks, for the platforms where the generic
-/// alias
-/// does not resolve (`note_editor.dart`), and the numbers in the same face at
-/// the
-/// same size, dimmed.
+/// The source editor is read as *text* — its markers, its indents, its
+/// columns — and a proportional face makes the columns drift, so [font]
+/// defaults to the monospace alias with the fallbacks the legacy editor
+/// carried (`note_editor.dart`). A writer may choose otherwise (#259): the
+/// face and the numbers' own width follow the setting, the read view and
+/// `live` keep the note's own.
 ///
-/// The face is a *documentation* matter as much as a code one: set, for now,
-/// and
-/// meant to become a setting — see the issue "the source editor's font should
-/// be a
-/// setting" and `docs/user/editing.md`.
-MarkdownTheme monospaceTheme(MarkdownTheme theme) {
-  const fallback = <String>['Consolas', 'DejaVu Sans Mono', 'Roboto Mono'];
-  TextStyle mono(TextStyle style) =>
-      style.copyWith(fontFamily: 'monospace', fontFamilyFallback: fallback);
+/// The numbers in the gutter are set in the same face at the same size,
+/// dimmed, and the gutter measures a digit in it (`lineNumbersWidth`), so
+/// they line up with the characters they count whatever the face.
+///
+/// A face is a *documentation* matter as much as a code one: see
+/// `docs/user/editing.md`.
+MarkdownTheme surfaceThemeFor(MarkdownTheme theme, SourceFont font) {
+  final family = font.family;
+  // The note's own, proportional face: the theme, unchanged.
+  if (family == null) return theme;
+  final fallback = font.fallback;
+  TextStyle face(TextStyle style) =>
+      style.copyWith(fontFamily: family, fontFamilyFallback: fallback);
   return MarkdownTheme(
-    body: mono(theme.body),
-    heading1: mono(theme.heading1),
-    heading2: mono(theme.heading2),
-    heading3: mono(theme.heading3),
-    heading4: mono(theme.heading4),
-    heading5: mono(theme.heading5),
-    heading6: mono(theme.heading6),
-    code: mono(theme.code),
-    quote: mono(theme.quote),
-    tableCell: mono(theme.tableCell),
-    tableHeader: mono(theme.tableHeader),
-    link: mono(theme.link),
-    wikilink: mono(theme.wikilink),
-    tag: mono(theme.tag),
-    marker: mono(theme.marker),
+    body: face(theme.body),
+    heading1: face(theme.heading1),
+    heading2: face(theme.heading2),
+    heading3: face(theme.heading3),
+    heading4: face(theme.heading4),
+    heading5: face(theme.heading5),
+    heading6: face(theme.heading6),
+    code: face(theme.code),
+    quote: face(theme.quote),
+    tableCell: face(theme.tableCell),
+    tableHeader: face(theme.tableHeader),
+    link: face(theme.link),
+    wikilink: face(theme.wikilink),
+    tag: face(theme.tag),
+    marker: face(theme.marker),
     codeHighlight: theme.codeHighlight,
     rule: theme.rule,
     codeBackground: theme.codeBackground,

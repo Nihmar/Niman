@@ -7,6 +7,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        SourceFont,
         TreeSort,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
@@ -684,6 +685,37 @@ void main() {
       expect(config.treeSort, TreeSort.nameAsc);
       expect(config.linkType, LinkType.wikilink);
       expect(config.lineNumbers, isTrue);
+    });
+
+    test('the source font round-trips, and an older file reads as mono '
+        '(#259)', () {
+      // The face the editor shipped in, so a file written before the
+      // setting existed opens exactly as it did.
+      expect(LibraryConfig.defaults.sourceFont, defaultSourceFont);
+      expect(defaultSourceFont, SourceFont.monospace);
+      expect(
+        LibraryConfig.fromJsonMap(const {}).sourceFont,
+        SourceFont.monospace,
+      );
+
+      final serif = LibraryConfig.defaults.copyWith(
+        sourceFont: SourceFont.serif,
+      );
+      expect(serif.toJsonMap()['sourceFont'], 'serif');
+      final back = LibraryConfig.fromJsonMap(serif.toJsonMap());
+      expect(back.sourceFont, SourceFont.serif);
+      expect(back, serif);
+      expect(serif, isNot(LibraryConfig.defaults));
+
+      // A name this build does not know — a newer build's, or a
+      // hand-typed one — is no more informative than a missing key.
+      for (final raw in <Object?>['comic sans', 42, true, null]) {
+        expect(
+          LibraryConfig.fromJsonMap({'sourceFont': raw}).sourceFont,
+          defaultSourceFont,
+          reason: '$raw',
+        );
+      }
     });
 
     test('value equality', () {

@@ -324,6 +324,17 @@ final class DanishStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editoren og forhåndsvisningen, som altid er enige';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Bøgernes udseende';
   @override
   String get epubLookSubtitle =>

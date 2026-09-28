@@ -30,6 +30,55 @@ enum LinkType {
   markdown,
 }
 
+/// The face the source editor is set in (issue #259).
+///
+/// The source is read as *text* — its markers, its indents, its columns —
+/// and a proportional face makes the columns drift, so the editor ships in
+/// the monospace face it always had. A writer who prefers a proportional
+/// face for prose, or a different mono one, may choose one all the same; the
+/// read view and `live` keep the note's own face either way.
+enum SourceFont {
+  /// The platform's monospace, with the legacy fallbacks (the default).
+  monospace,
+
+  /// The note's own, proportional face.
+  sansSerif,
+
+  /// The platform's serif.
+  serif;
+
+  /// The font with this [name]; anything unknown is [monospace], the shipped
+  /// face — an unreadable value leaves the editor as it was.
+  static SourceFont fromName(Object? name) {
+    for (final font in values) {
+      if (font.name == name) return font;
+    }
+    return monospace;
+  }
+
+  /// The `fontFamily` the source editor is set in, or null for the note's
+  /// own, proportional face — the theme's, which the read view uses too.
+  String? get family => switch (this) {
+    SourceFont.monospace => 'monospace',
+    SourceFont.sansSerif => null,
+    SourceFont.serif => 'serif',
+  };
+
+  /// The faces to fall back to where the alias above does not resolve.
+  ///
+  /// The same list the legacy editor carried for monospace; the serif face
+  /// gets the ones the platforms actually ship.
+  List<String>? get fallback => switch (this) {
+    SourceFont.monospace => const [
+      'Consolas',
+      'DejaVu Sans Mono',
+      'Roboto Mono',
+    ],
+    SourceFont.sansSerif => null,
+    SourceFont.serif => const ['DejaVu Serif', 'Georgia', 'Times New Roman'],
+  };
+}
+
 /// At and above this width the shell is wide: the rail, the tree and the
 /// note share the screen (spec: at 600 dp and up). Below it the phone
 /// layout, where the tree and the note are two full-screen panes.

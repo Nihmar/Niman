@@ -1223,6 +1223,17 @@ final class LibraryController implements LibrarySession {
     AppTextScales.note = clamped;
   }
 
+  /// The source editor's face (issue #259).
+  @override
+  Future<SourceFont> get sourceFont async => (await _library).sourceFont;
+
+  /// Sets (and persists) the source editor's face.
+  @override
+  Future<void> setSourceFont(SourceFont font) async {
+    _log.info('source editor font set to ${font.name}');
+    await _editLibrary((c) => c.copyWith(sourceFont: font));
+  }
+
   /// How the library's books look (#280).
   @override
   Future<EpubLook> get epubLook async => (await _library).epubLook;
