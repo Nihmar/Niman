@@ -448,6 +448,8 @@ final class PortugueseStrings extends Strings {
   String get audioRecordingPaused => 'Em pausa';
   @override
   String get audioSavingRecording => 'Salvando…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1124,6 +1126,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Fechar';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Nova pasta';
   @override
   String get newNoteSameFolder => 'Nova nota na mesma pasta';
@@ -1158,6 +1162,8 @@ final class PortugueseStrings extends Strings {
   String get newFromTemplateTitle => 'Nova a partir de modelo';
   @override
   String get newFromTemplateHere => 'Nova a partir de modelo aqui';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Preencher o modelo';
   @override
@@ -1535,6 +1541,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get notionImportTitle => 'Importar exportação do Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Aqui só abrem ficheiros Markdown e pastas: $names';
   @override
@@ -1803,6 +1811,10 @@ final class PortugueseStrings extends Strings {
       '$name será excluído permanentemente (sem restauração)';
   @override
   String get trashDeletePermanently => 'Excluir permanentemente';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1894,6 +1906,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get reindexDone => 'Reindexação concluída';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Fechar a biblioteca';
   @override
   String get exportLogTitle => 'Exportar o log de depuração';
@@ -1925,6 +1939,17 @@ final class PortugueseStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nenhuma palavra inteira exata “$term” '
       '${only == null ? 'encontrada' : 'encontrada em $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

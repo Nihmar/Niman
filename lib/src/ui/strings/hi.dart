@@ -437,6 +437,8 @@ final class HindiStrings extends Strings {
   String get audioRecordingPaused => 'रुकी हुई';
   @override
   String get audioSavingRecording => 'सहेजा जा रहा है…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1103,6 +1105,8 @@ final class HindiStrings extends Strings {
   @override
   String get closeMenuTooltip => 'बंद करें';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'नया फ़ोल्डर';
   @override
   String get newNoteSameFolder => 'उसी फ़ोल्डर में नया नोट';
@@ -1138,6 +1142,8 @@ final class HindiStrings extends Strings {
   String get newFromTemplateTitle => 'टेम्पलेट से नया';
   @override
   String get newFromTemplateHere => 'यहाँ टेम्पलेट से नया';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'टेम्पलेट भरें';
   @override
@@ -1499,6 +1505,8 @@ final class HindiStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion निर्यात आयात करें';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'यहाँ केवल Markdown फ़ाइलें और फ़ोल्डर खुलते हैं: $names';
   @override
@@ -1768,6 +1776,10 @@ final class HindiStrings extends Strings {
       '$name को हमेशा के लिए हटाया जाएगा (पुनर्स्थापना नहीं)';
   @override
   String get trashDeletePermanently => 'हमेशा के लिए हटाएँ';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1857,6 +1869,8 @@ final class HindiStrings extends Strings {
   @override
   String get reindexDone => 'दोबारा इंडेक्स पूरा';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'लाइब्रेरी बंद करें';
   @override
   String get exportLogTitle => 'डिबग-लॉग निर्यात करें';
@@ -1884,6 +1898,17 @@ final class HindiStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '«$term» का कोई सटीक पूरा-शब्द मेल नहीं '
       '${only == null ? 'मिला' : '$only में मिला'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

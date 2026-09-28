@@ -450,6 +450,8 @@ final class BosnianStrings extends Strings {
   String get audioRecordingPaused => 'Pauzirano';
   @override
   String get audioSavingRecording => 'Spremanje…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1125,6 +1127,8 @@ final class BosnianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Zatvori';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Nova mapa';
   @override
   String get newNoteSameFolder => 'Nova bilješka u istoj mapi';
@@ -1158,6 +1162,8 @@ final class BosnianStrings extends Strings {
   String get newFromTemplateTitle => 'Novo iz predloška';
   @override
   String get newFromTemplateHere => 'Novo iz predloška ovdje';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Ispuni predložak';
   @override
@@ -1531,6 +1537,8 @@ final class BosnianStrings extends Strings {
   @override
   String get notionImportTitle => 'Uvezi Notion izvoz';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Ovdje se otvaraju samo Markdown datoteke i mape: $names';
   @override
@@ -1800,6 +1808,10 @@ final class BosnianStrings extends Strings {
       '$name će biti trajno obrisano (bez povratka)';
   @override
   String get trashDeletePermanently => 'Obriši trajno';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1889,6 +1901,8 @@ final class BosnianStrings extends Strings {
   @override
   String get reindexDone => 'Ponovno indeksirano';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Zatvori biblioteku';
   @override
   String get exportLogTitle => 'Izvezi dnevnik za otklanjanje grešaka';
@@ -1919,6 +1933,17 @@ final class BosnianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nema točnog podudaranja cijele riječi "$term"'
       '${only == null ? 'nije pronađeno' : 'pronađeno u $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

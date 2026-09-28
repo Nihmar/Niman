@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Where a desktop reminder is posted.
 ///
@@ -47,9 +48,15 @@ final class PluginDesktopNotifier implements DesktopNotifier {
   @override
   Future<void> init({required void Function(String? payload) onTap}) async {
     await _plugin.initialize(
-      settings: const InitializationSettings(
-        linux: LinuxInitializationSettings(defaultActionName: 'Open Niman'),
-        windows: WindowsInitializationSettings(
+      // The notification's action button says the same words as the
+      // tray's Open row, so it takes that label (issue #381) instead of
+      // an English literal — the panel is the OS's, and rebuilds it in
+      // the language on screen at the time it was built.
+      settings: InitializationSettings(
+        linux: LinuxInitializationSettings(
+          defaultActionName: AppStrings.trayOpen,
+        ),
+        windows: const WindowsInitializationSettings(
           appName: desktopNotificationAppName,
           appUserModelId: desktopNotificationAppUserModelId,
           guid: desktopNotificationGuid,

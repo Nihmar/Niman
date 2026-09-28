@@ -418,6 +418,8 @@ final class JapaneseStrings extends Strings {
   String get audioRecordingPaused => '一時停止中';
   @override
   String get audioSavingRecording => '保存中…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1060,6 +1062,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get closeMenuTooltip => '閉じる';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => '新しいフォルダ';
   @override
   String get newNoteSameFolder => '同じフォルダーに新規ノート';
@@ -1093,6 +1097,8 @@ final class JapaneseStrings extends Strings {
   String get newFromTemplateTitle => 'テンプレートから新規作成';
   @override
   String get newFromTemplateHere => 'ここにテンプレートから新規作成';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'テンプレートを埋める';
   @override
@@ -1430,6 +1436,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion エクスポートを読み込む';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'ここで開けるのは Markdown ファイルとフォルダーだけです：$names';
   @override
@@ -1682,6 +1690,10 @@ final class JapaneseStrings extends Strings {
   String trashDeleteConfirm(String name) => '$name を完全に削除します（復元できません）';
   @override
   String get trashDeletePermanently => '完全に削除';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1763,6 +1775,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get reindexDone => '再インデックス完了';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'ライブラリを閉じる';
   @override
   String get exportLogTitle => 'デバッグログをエクスポート';
@@ -1789,6 +1803,17 @@ final class JapaneseStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '語全体「$term」の完全一致はありません'
       '${only == null ? '' : ' — $only 内には'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

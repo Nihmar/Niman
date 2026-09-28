@@ -446,6 +446,8 @@ final class EnglishStrings extends Strings {
   String get audioRecordingPaused => 'Paused';
   @override
   String get audioSavingRecording => 'Saving…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1114,6 +1116,8 @@ final class EnglishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Close';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'New folder';
   @override
   String get newNoteSameFolder => 'New note in the same folder';
@@ -1148,6 +1152,8 @@ final class EnglishStrings extends Strings {
   String get newFromTemplateTitle => 'New from template';
   @override
   String get newFromTemplateHere => 'New from template here';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Fill in the template';
   @override
@@ -1512,6 +1518,8 @@ final class EnglishStrings extends Strings {
   @override
   String get notionImportTitle => 'Import Notion export';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Only Markdown files and folders open here: $names';
   @override
@@ -1779,6 +1787,10 @@ final class EnglishStrings extends Strings {
       '$name will be deleted permanently (no restore)';
   @override
   String get trashDeletePermanently => 'Delete permanently';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1869,6 +1881,8 @@ final class EnglishStrings extends Strings {
   @override
   String get reindexDone => 'Re-index complete';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Close library';
   @override
   String get exportLogTitle => 'Export debug log';
@@ -1897,6 +1911,17 @@ final class EnglishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'No exact whole-word match of "$term" '
       '${only == null ? 'was found' : 'found in $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

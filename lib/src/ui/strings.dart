@@ -367,6 +367,7 @@ final class AppStrings {
   static String get audioResumeRecording => _s.audioResumeRecording;
   static String get audioRecordingPaused => _s.audioRecordingPaused;
   static String get audioSavingRecording => _s.audioSavingRecording;
+  static String get audioPlayFailed => _s.audioPlayFailed;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   static String get shortcutQuickNote => _s.shortcutQuickNote;
@@ -728,6 +729,7 @@ final class AppStrings {
   static String get newNoteTitle => _s.newNoteTitle;
   static String get newItemTooltip => _s.newItemTooltip;
   static String get closeMenuTooltip => _s.closeMenuTooltip;
+  static String get shellActionFailed => _s.shellActionFailed;
   static String get newFolderTitle => _s.newFolderTitle;
   static String get newNoteHere => _s.newNoteHere;
   static String get newNoteSameFolder => _s.newNoteSameFolder;
@@ -745,6 +747,7 @@ final class AppStrings {
   static String get templateFolderTitle => _s.templateFolderTitle;
   static String get newFromTemplateTitle => _s.newFromTemplateTitle;
   static String get newFromTemplateHere => _s.newFromTemplateHere;
+  static String get templateOpenFailed => _s.templateOpenFailed;
   static String get templateFormTitle => _s.templateFormTitle;
   static String get templateFormBacklink => _s.templateFormBacklink;
   static String get templateFormNoNote => _s.templateFormNoNote;
@@ -907,6 +910,7 @@ final class AppStrings {
   static String get dropNothing => _s.dropNothing;
   static String get importFolderAction => _s.importFolderAction;
   static String get notionImportTitle => _s.notionImportTitle;
+  static String get notionImportFailed => _s.notionImportFailed;
   static String dropRejected(String names) => _s.dropRejected(names);
   static String importFolderTitle(String name) => _s.importFolderTitle(name);
   static String importFolderBody(int count) => _s.importFolderBody(count);
@@ -1033,6 +1037,8 @@ final class AppStrings {
   static String get trashEmptyConfirm => _s.trashEmptyConfirm;
   static String trashDeleteConfirm(String name) => _s.trashDeleteConfirm(name);
   static String get trashDeletePermanently => _s.trashDeletePermanently;
+  static String get trashActionFailed => _s.trashActionFailed;
+  static String get trashEmptyFailed => _s.trashEmptyFailed;
 
   // The open/create library screen.
   static String get openLibraryIntro => _s.openLibraryIntro;
@@ -1077,6 +1083,7 @@ final class AppStrings {
   static String get reindexTitle => _s.reindexTitle;
   static String get reindexDone => _s.reindexDone;
   static String get rebuildIndexTitle => _s.rebuildIndexTitle;
+  static String get reindexFailed => _s.reindexFailed;
   static String get closeLibraryTitle => _s.closeLibraryTitle;
   static String get exportLogTitle => _s.exportLogTitle;
   static String get exportLogSubtitle => _s.exportLogSubtitle;
@@ -1092,6 +1099,10 @@ final class AppStrings {
   static String replaceSkipped(int skipped) => _s.replaceSkipped(skipped);
   static String replacePreviewEmpty(String term, String? only) =>
       _s.replacePreviewEmpty(term, only);
+  static String get replaceScopeWholeLibrary => _s.replaceScopeWholeLibrary;
+  static String replaceScopeNote(String note) => _s.replaceScopeNote(note);
+  static String replaceScopeNotes(int count) => _s.replaceScopeNotes(count);
+  static String replaceWriteFailed(int count) => _s.replaceWriteFailed(count);
 
   // About (issue #80): the app's version and its changelog.
   static String get settingsSectionAbout => _s.settingsSectionAbout;

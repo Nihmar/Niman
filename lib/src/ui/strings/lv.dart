@@ -441,6 +441,8 @@ final class LatvianStrings extends Strings {
   String get audioRecordingPaused => 'Pauzēts';
   @override
   String get audioSavingRecording => 'Saglabā…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1118,6 +1120,8 @@ final class LatvianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Aizvērt';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Jauns katalogs';
   @override
   String get newNoteSameFolder => 'Jauna piezīme tajā pašā mapē';
@@ -1152,6 +1156,8 @@ final class LatvianStrings extends Strings {
   String get newFromTemplateTitle => 'Jauns no šablona';
   @override
   String get newFromTemplateHere => 'Jauns no šablona šeit';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Aizpildīt šablonu';
   @override
@@ -1522,6 +1528,8 @@ final class LatvianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importēt Notion eksportu';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Šeit atveras tikai Markdown faili un mapes: $names';
   @override
@@ -1790,6 +1798,10 @@ final class LatvianStrings extends Strings {
       '$name tiks neatgriezeniski dzēsts (bez atjaunošanas)';
   @override
   String get trashDeletePermanently => 'Dzēst neatgriezeniski';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1881,6 +1893,8 @@ final class LatvianStrings extends Strings {
   @override
   String get reindexDone => 'Pārraudzīšana pabeigta';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Aizvērt bibliotēku';
   @override
   String get exportLogTitle => 'Eksportēt atkļūdošanas žurnālu';
@@ -1910,6 +1924,17 @@ final class LatvianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” nav precīza visa vārda sakritējuma'
       '${only == null ? '' : ' netika atrasts $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

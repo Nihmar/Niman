@@ -447,6 +447,8 @@ final class SlovakStrings extends Strings {
   String get audioRecordingPaused => 'Pozastavené';
   @override
   String get audioSavingRecording => 'Ukladanie…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1122,6 +1124,8 @@ final class SlovakStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Zavrieť';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Nový priečinok';
   @override
   String get newNoteSameFolder => 'Nová poznámka v rovnakom priečinku';
@@ -1157,6 +1161,8 @@ final class SlovakStrings extends Strings {
   String get newFromTemplateTitle => 'Nové zo šablóny';
   @override
   String get newFromTemplateHere => 'Nové zo šablóny sem';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Vyplniť šablónu';
   @override
@@ -1524,6 +1530,8 @@ final class SlovakStrings extends Strings {
   @override
   String get notionImportTitle => 'Importovať export z Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Tu sa otvárajú len súbory Markdown a priečinky: $names';
   @override
@@ -1792,6 +1800,10 @@ final class SlovakStrings extends Strings {
       '$name sa trvalo vymaže (bez obnovenia)';
   @override
   String get trashDeletePermanently => 'Trvalo vymazať';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1882,6 +1894,8 @@ final class SlovakStrings extends Strings {
   @override
   String get reindexDone => 'Preindexovanie dokončené';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Zavrieť knižnicu';
   @override
   String get exportLogTitle => 'Exportovať diagnostické záznamy';
@@ -1912,6 +1926,17 @@ final class SlovakStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Žiadny presný výsledok celého slova pre „$term”'
       '${only == null ? '' : ' sa nenašiel v $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

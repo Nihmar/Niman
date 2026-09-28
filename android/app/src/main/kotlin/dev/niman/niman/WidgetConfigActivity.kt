@@ -132,10 +132,11 @@ class WidgetConfigActivity : Activity() {
                 // The restored pick (if any) is moot: there is nothing to
                 // pick from.
                 pendingLibrary = null
-                titleView.text = if (isTodo) "Niman Todos" else "Niman Note"
+                titleView.text = getString(
+                    if (isTodo) R.string.todo_widget_label else R.string.note_widget_label,
+                )
                 messageView.visibility = View.VISIBLE
-                messageView.text = "No libraries yet. Open Niman, open a " +
-                    "library, then place the widget again."
+                messageView.text = getString(R.string.widget_config_no_libraries)
                 listView.visibility = View.GONE
                 openAppButton.visibility = View.VISIBLE
             }
@@ -152,7 +153,7 @@ class WidgetConfigActivity : Activity() {
                 // (activity recreation) would be lost before the picker's
                 // result arrives.
                 pendingLibrary = null
-                titleView.text = "Choose library"
+                titleView.text = getString(R.string.widget_config_choose_library)
                 messageView.visibility = View.GONE
                 openAppButton.visibility = View.GONE
                 listView.visibility = View.VISIBLE

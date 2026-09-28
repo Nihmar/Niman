@@ -451,6 +451,8 @@ final class GalicianStrings extends Strings {
   String get audioRecordingPaused => 'En pausa';
   @override
   String get audioSavingRecording => 'Gardando…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1130,6 +1132,8 @@ final class GalicianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Pechar';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Cartafol novo';
   @override
   String get newNoteSameFolder => 'Nova nota no mesmo cartafol';
@@ -1164,6 +1168,8 @@ final class GalicianStrings extends Strings {
   String get newFromTemplateTitle => 'Nova desde unha plantilla';
   @override
   String get newFromTemplateHere => 'Nova desde unha plantilla aquí';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Encher a plantilla';
   @override
@@ -1539,6 +1545,8 @@ final class GalicianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importar exportación de Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Aquí só se abren ficheiros Markdown e cartafoles: $names';
   @override
@@ -1807,6 +1815,10 @@ final class GalicianStrings extends Strings {
       '$name borraráse permanentemente (sen restauración)';
   @override
   String get trashDeletePermanently => 'Borrar permanentemente';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1899,6 +1911,8 @@ final class GalicianStrings extends Strings {
   @override
   String get reindexDone => 'Reindexación completada';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Pechar a biblioteca';
   @override
   String get exportLogTitle => 'Exportar o rexistro de depuración';
@@ -1930,6 +1944,17 @@ final class GalicianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Non se encontrou coincidencia exacta de palabra completa para '
       '“$term” ${only == null ? 'atopouse' : 'atopouse en $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

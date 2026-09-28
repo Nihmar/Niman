@@ -444,6 +444,8 @@ final class LithuanianStrings extends Strings {
   String get audioRecordingPaused => 'Pristabdyta';
   @override
   String get audioSavingRecording => 'Išsaugoma…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1118,6 +1120,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Uždaryti';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Naujas katalogas';
   @override
   String get newNoteSameFolder => 'Nauja pastaba tame pačiame aplanke';
@@ -1153,6 +1157,8 @@ final class LithuanianStrings extends Strings {
   String get newFromTemplateTitle => 'Nauja iš šablonų';
   @override
   String get newFromTemplateHere => 'Nauja iš šablonų čia';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Užpildyti šabloną';
   @override
@@ -1525,6 +1531,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importuoti „Notion“ eksportą';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Čia atidaromi tik Markdown failai ir aplankai: $names';
   @override
@@ -1795,6 +1803,10 @@ final class LithuanianStrings extends Strings {
       '$name bus nevildinamai ištrintas (be atkūrimo)';
   @override
   String get trashDeletePermanently => 'Ištrinti nevildinamai';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1887,6 +1899,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get reindexDone => 'Perskirta baigta';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Uždaryti biblioteką';
   @override
   String get exportLogTitle => 'Eksportuoti derinimo žurnalą';
@@ -1916,6 +1930,17 @@ final class LithuanianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” neturi tikslaus visą žodį atitinkančio atitikmens'
       '${only == null ? '' : ' – tik $only rasta'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

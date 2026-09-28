@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Home-screen widget picker labels (issue 6). -->
+<!-- Home-screen widget picker labels (issue 6) and the sentences the two
+     renderers draw (issue #381): the launcher renders the widgets with no
+     Dart engine, so their text cannot come from `ui/strings/` and lives
+     here, per locale, beside the picker labels. -->
 <resources>
     <string name="todo_widget_label">Niman Todos</string>
     <string name="note_widget_label">Niman Note</string>
     <string name="widget_note_add_hint">New item</string>
     <string name="widget_note_add_add">Add</string>
     <string name="widget_note_add_cancel">Cancel</string>
+
+    <!-- The todo widget. -->
+    <string name="widget_todo_title_fallback">Todos</string>
+    <string name="widget_todo_count_open">%1$d open</string>
+    <string name="widget_todo_empty_loading">Open Niman to load todos</string>
+    <string name="widget_todo_empty_none">No open tasks</string>
+
+    <!-- The note widget. -->
+    <string name="widget_note_title_fallback">Note</string>
+    <string name="widget_note_empty_loading">Open Niman to load — or pin a note first</string>
+    <string name="widget_note_empty_none">No items</string>
+    <string name="widget_note_body_missing">Note not found</string>
+    <string name="widget_note_body_empty">Empty note</string>
+
+    <!-- The placement screen. -->
+    <string name="widget_config_open_app">Open Niman</string>
+    <string name="widget_config_choose_library">Choose library</string>
+    <string name="widget_config_no_libraries">No libraries yet. Open Niman, open a library, then place the widget again.</string>
 </resources>

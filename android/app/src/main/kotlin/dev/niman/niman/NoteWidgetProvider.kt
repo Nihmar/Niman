@@ -97,14 +97,15 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }
         val library = parsed?.optString("library").orEmpty()
         val note = parsed?.optString("note").orEmpty()
-        val title = parsed?.optString("title").orEmpty().ifEmpty { "Note" }
+        val title = parsed?.optString("title").orEmpty()
+            .ifEmpty { context.getString(R.string.widget_note_title_fallback) }
         val kind = parsed?.optString("kind", "") ?: ""
         if (kind == "list") {
             return listViews(context, id, library, note, title, payload)
         }
         val views = RemoteViews(context.packageName, R.layout.widget_note)
         views.setTextViewText(R.id.widget_note_title, title)
-        views.setTextViewText(R.id.widget_note_body, bodyFor(parsed, payload))
+        views.setTextViewText(R.id.widget_note_body, bodyFor(context, parsed, payload))
         // The app theme rides in the payload: without it (an old push)
         // the layout defaults stand.
         WidgetTheme.fromPayload(payload)?.let { theme ->
@@ -129,7 +130,10 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         views.setTextViewText(R.id.widget_note_title, title)
         views.setTextViewText(
             R.id.widget_note_empty,
-            if (payload == null) "Open Niman to load — or pin a note first" else "No items",
+            context.getString(
+                if (payload == null) R.string.widget_note_empty_loading
+                else R.string.widget_note_empty_none,
+            ),
         )
         // The app theme rides in the payload: without it (an old push)
         // the layout defaults stand.
@@ -200,17 +204,17 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         )
     }
 
-    private fun bodyFor(parsed: JSONObject?, payload: String?): String {
+    private fun bodyFor(context: Context, parsed: JSONObject?, payload: String?): String {
         // No payload yet: the choice was just placed and Dart has not
         // pushed. The pin path (tree action) still exists, hence the hint.
-        if (parsed == null) return "Open Niman to load — or pin a note first"
+        if (parsed == null) return context.getString(R.string.widget_note_empty_loading)
         val body = parsed.optString("body", "")
         if (body.isNotEmpty()) {
             return if (parsed.optBoolean("truncated", false)) "$body …" else body
         }
         return when (parsed.optString("kind", "")) {
-            "missing" -> "Note not found"
-            else -> "Empty note"
+            "missing" -> context.getString(R.string.widget_note_body_missing)
+            else -> context.getString(R.string.widget_note_body_empty)
         }
     }
 

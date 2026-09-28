@@ -443,6 +443,8 @@ final class BasqueStrings extends Strings {
   String get audioRecordingPaused => 'Pausatuta';
   @override
   String get audioSavingRecording => 'Gordetzen…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1124,6 +1126,8 @@ final class BasqueStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Itxi';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Karpeta berria';
   @override
   String get newNoteSameFolder => 'Ohar berria karpeta berean';
@@ -1158,6 +1162,8 @@ final class BasqueStrings extends Strings {
   String get newFromTemplateTitle => 'Berria txantiloitik';
   @override
   String get newFromTemplateHere => 'Berria txantiloitik hemen';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Bete txantiloia';
   @override
@@ -1533,6 +1539,8 @@ final class BasqueStrings extends Strings {
   @override
   String get notionImportTitle => 'Inportatu Notion esportazioa';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Hemen Markdown fitxategiak eta karpetak soilik irekitzen dira: $names';
   @override
@@ -1802,6 +1810,10 @@ final class BasqueStrings extends Strings {
       '$name betirako ezabatuko da (ez dago berrezarriketa)';
   @override
   String get trashDeletePermanently => 'Ezabatu betirako';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1894,6 +1906,8 @@ final class BasqueStrings extends Strings {
   @override
   String get reindexDone => 'Berrindekatzea amaituta';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Itxi biblioteka';
   @override
   String get exportLogTitle => 'Esportatu arazte-erregistroa';
@@ -1924,6 +1938,17 @@ final class BasqueStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '“$term”-en hitz osoko emaitzazko emaitzarik ez da '
       '${only == null ? 'aurkitu' : '$only-n aurkitu'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

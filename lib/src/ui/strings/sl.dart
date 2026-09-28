@@ -448,6 +448,8 @@ final class SlovenianStrings extends Strings {
   String get audioRecordingPaused => 'Začasno ustavljeno';
   @override
   String get audioSavingRecording => 'Shranjevanje …';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1121,6 +1123,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Zapri';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Nova mapa';
   @override
   String get newNoteSameFolder => 'Nov zapisek v isti mapi';
@@ -1155,6 +1159,8 @@ final class SlovenianStrings extends Strings {
   String get newFromTemplateTitle => 'Novo iz predloge';
   @override
   String get newFromTemplateHere => 'Novo iz predloge sem';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Izpolni predlogo';
   @override
@@ -1520,6 +1526,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get notionImportTitle => 'Uvozi izvoz Notion';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Tu se odpirajo samo datoteke Markdown in mape: $names';
   @override
@@ -1788,6 +1796,10 @@ final class SlovenianStrings extends Strings {
       '$name se trajno izbriše (brez obnove)';
   @override
   String get trashDeletePermanently => 'Trajno izbriši';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1876,6 +1888,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get reindexDone => 'Ponovno indeksiranje dokončano';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Zapri knjižnico';
   @override
   String get exportLogTitle => 'Izvozi razhroščevalni dnevnik';
@@ -1904,6 +1918,17 @@ final class SlovenianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ni natančnega zadetka celih besed za „$term”'
       '${only == null ? '' : ' ni bilo najdeno v $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

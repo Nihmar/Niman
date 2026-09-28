@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Etichette dei widget nella lista (issue 6). -->
+<!-- Etichette dei widget nella lista (issue 6) e le frasi che i due
+     renderer disegnano (issue #381). -->
 <resources>
     <string name="todo_widget_label">Niman Attività</string>
     <string name="note_widget_label">Niman Nota</string>
     <string name="widget_note_add_hint">Nuovo elemento</string>
     <string name="widget_note_add_add">Aggiungi</string>
     <string name="widget_note_add_cancel">Annulla</string>
+
+    <!-- Il widget delle attività. -->
+    <string name="widget_todo_title_fallback">Attività</string>
+    <string name="widget_todo_count_open">%1$d aperte</string>
+    <string name="widget_todo_empty_loading">Apri Niman per caricare le attività</string>
+    <string name="widget_todo_empty_none">Nessuna attività aperta</string>
+
+    <!-- Il widget della nota. -->
+    <string name="widget_note_title_fallback">Nota</string>
+    <string name="widget_note_empty_loading">Apri Niman per caricare — o fissa prima una nota</string>
+    <string name="widget_note_empty_none">Nessun elemento</string>
+    <string name="widget_note_body_missing">Nota non trovata</string>
+    <string name="widget_note_body_empty">Nota vuota</string>
+
+    <!-- La schermata di posizionamento. -->
+    <string name="widget_config_open_app">Apri Niman</string>
+    <string name="widget_config_choose_library">Scegli la libreria</string>
+    <string name="widget_config_no_libraries">Nessuna libreria. Apri Niman, apri una libreria, poi ricolloca il widget.</string>
 </resources>

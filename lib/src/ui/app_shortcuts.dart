@@ -9,6 +9,7 @@
 /// shortcut to fight the editor for.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/ui/key_map.dart';
@@ -312,6 +313,38 @@ String describeActivator(ShortcutActivator activation) {
     keyName(activation.trigger),
   ].join('+');
 }
+
+/// Whether the platform's own shortcut modifier is Meta rather than
+/// Control: macOS, and nowhere else.
+bool get platformModifierIsMeta =>
+    defaultTargetPlatform == TargetPlatform.macOS;
+
+/// The key the editors' find bar opens on (issue #381): `Ctrl+F`, or
+/// `Meta+F` on macOS, which binds no `Ctrl+F` at all.
+///
+/// One source for the binding and for the reference row, so the key that
+/// runs and the key the shortcut screen names cannot drift.
+SingleActivator findInNoteKey({bool? mac}) {
+  final meta = mac ?? platformModifierIsMeta;
+  return SingleActivator(LogicalKeyboardKey.keyF, control: !meta, meta: meta);
+}
+
+/// The key the editors' replace opens on: the find key with Alt.
+SingleActivator replaceInNoteKey({bool? mac}) {
+  final meta = mac ?? platformModifierIsMeta;
+  return SingleActivator(
+    LogicalKeyboardKey.keyF,
+    control: !meta,
+    meta: meta,
+    alt: true,
+  );
+}
+
+/// The second key the editors' replace answers to, where the platform
+/// has one: `Ctrl+H`. Null on macOS, whose chord is [replaceInNoteKey].
+SingleActivator? ctrlHReplaceKey({bool? mac}) => (mac ?? platformModifierIsMeta)
+    ? null
+    : const SingleActivator(LogicalKeyboardKey.keyH, control: true);
 
 /// [key] as a person reads it, in their language (#159): the modifiers
 /// keep their names, and so do letters and digits; the named keys do not.

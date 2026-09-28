@@ -445,6 +445,8 @@ final class DanishStrings extends Strings {
   String get audioRecordingPaused => 'På pause';
   @override
   String get audioSavingRecording => 'Gemmer…';
+  @override
+  String get audioPlayFailed => 'Could not play this audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1116,6 +1118,8 @@ final class DanishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Luk';
   @override
+  String get shellActionFailed => 'Could not finish that action';
+  @override
   String get newFolderTitle => 'Ny mappe';
   @override
   String get newNoteSameFolder => 'Ny note i samme mappe';
@@ -1150,6 +1154,8 @@ final class DanishStrings extends Strings {
   String get newFromTemplateTitle => 'Ny fra skabelon';
   @override
   String get newFromTemplateHere => 'Ny fra skabelon her';
+  @override
+  String get templateOpenFailed => 'Could not open the template';
   @override
   String get templateFormTitle => 'Udfyld skabelonen';
   @override
@@ -1520,6 +1526,8 @@ final class DanishStrings extends Strings {
   @override
   String get notionImportTitle => 'Importer Notion-eksport';
   @override
+  String get notionImportFailed => 'Could not import the Notion export';
+  @override
   String dropRejected(String names) =>
       'Kun Markdown-filer og mapper åbnes her: $names';
   @override
@@ -1787,6 +1795,10 @@ final class DanishStrings extends Strings {
       '$name slettes permanent (ingen gendannelse)';
   @override
   String get trashDeletePermanently => 'Slet permanent';
+  @override
+  String get trashActionFailed => 'Could not restore or delete the note';
+  @override
+  String get trashEmptyFailed => 'Could not empty the trash';
 
   // The open/create library screen.
   @override
@@ -1876,6 +1888,8 @@ final class DanishStrings extends Strings {
   @override
   String get reindexDone => 'Omindexering fuldført';
   @override
+  String get reindexFailed => 'Could not re-scan the library';
+  @override
   String get closeLibraryTitle => 'Luk biblioteket';
   @override
   String get exportLogTitle => 'Eksportér fejlfinding-log';
@@ -1905,6 +1919,17 @@ final class DanishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ingen præcis helt-ord-match på “$term” '
       '${only == null ? 'blev fundet' : 'fundet i $only'}';
+  @override
+  String get replaceScopeWholeLibrary => 'whole library';
+  @override
+  String replaceScopeNote(String note) => 'in $note';
+  @override
+  String replaceScopeNotes(int count) =>
+      count == 1 ? 'in 1 note' : 'in $count notes';
+  @override
+  String replaceWriteFailed(int count) => count == 1
+      ? ' (1 note could not be written)'
+      : ' ($count notes could not be written)';
 
   // About (issue #80).
   @override

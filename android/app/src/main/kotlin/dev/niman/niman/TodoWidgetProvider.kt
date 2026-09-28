@@ -101,11 +101,14 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         val rowCount = rows?.length() ?: 0
         val total = parsed?.optInt("total", rowCount) ?: rowCount
         val views = RemoteViews(context.packageName, R.layout.widget_todo)
-        views.setTextViewText(R.id.widget_todo_title, titleFor(library))
-        views.setTextViewText(R.id.widget_todo_count, countFor(total))
+        views.setTextViewText(R.id.widget_todo_title, titleFor(context, library))
+        views.setTextViewText(R.id.widget_todo_count, countFor(context, total))
         views.setTextViewText(
             R.id.widget_todo_empty,
-            if (payload == null) "Open Niman to load todos" else "No open tasks",
+            context.getString(
+                if (payload == null) R.string.widget_todo_empty_loading
+                else R.string.widget_todo_empty_none,
+            ),
         )
         // The app theme rides in the payload: without it (an old push)
         // the layout defaults stand.
@@ -155,17 +158,18 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         return views
     }
 
-    private fun titleFor(library: String): String {
-        if (library.isEmpty()) return "Todos"
+    private fun titleFor(context: Context, library: String): String {
+        val fallback = context.getString(R.string.widget_todo_title_fallback)
+        if (library.isEmpty()) return fallback
         val base = library.trimEnd('/').substringAfterLast('/').substringAfterLast('\\')
-        return base.ifEmpty { "Todos" }
+        return base.ifEmpty { fallback }
     }
 
     // [total] is the exact open count (payload `total`), so no "more
     // than this" suffix is needed even when the rows are truncated.
-    private fun countFor(total: Int): String {
+    private fun countFor(context: Context, total: Int): String {
         if (total == 0) return ""
-        return "$total open"
+        return context.getString(R.string.widget_todo_count_open, total)
     }
 
     private fun addTodo(context: Context, id: Int): PendingIntent {
