@@ -8,7 +8,17 @@ import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
+
+/// Whether the host has hunspell and a dictionary: without them there is no
+/// load to wait for.
+final bool _hasHunspell = () {
+  final checker = HunspellSpellChecker.open();
+  if (checker == null) return false;
+  checker.dispose();
+  return true;
+}();
 
 const MarkdownTheme _theme = MarkdownTheme(
   body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
@@ -215,4 +225,31 @@ void main() {
     // The prose word once, and never the one in the code span.
     expect(_underlined(tester), <String>['wrold']);
   });
+
+  testWidgets('the underline arrives when the dictionary load lands (#453)', (
+    tester,
+  ) async {
+    // The real engine, which is the one whose load is a dictionary's: the
+    // state is opened with nothing loaded, so the first frames underline
+    // nothing, and the notification the load sends is what has the surface
+    // ask its lines again — no keystroke, no reopen.
+    final check = EditorSpellCheck();
+    addTearDown(check.dispose);
+    await _pump(tester, 'hello wrold\n', check);
+    expect(check.available, isFalse, reason: 'the load is off this isolate');
+    expect(_underlined(tester), isEmpty);
+
+    // The load is real work on another isolate, and a widget test's clock is
+    // not: the rounds below are the shape the case above waits for the
+    // tokenizer's reading with (#373).
+    for (var round = 0; round < 100 && !check.available; round++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(check.available, isTrue);
+    await tester.pump();
+    expect(_underlined(tester), <String>['wrold']);
+  }, skip: !_hasHunspell);
 }

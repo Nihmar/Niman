@@ -9,6 +9,7 @@ library;
 
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:niman/src/core/logging.dart';
@@ -106,6 +107,22 @@ String? _normalizeLocale(String locale) {
   return base;
 }
 
+/// One engine, opened but not yet wrapped: the library it will call into,
+/// the handle `Hunspell_create` answered, and the dictionary it read.
+typedef _Opened = ({
+  DynamicLibrary lib,
+  Pointer<Void> handle,
+  String dictionary,
+});
+
+/// A handle on its way from the isolate that opened it to the one that will
+/// use it (#453).
+///
+/// `Hunspell_create` parses the dictionary into memory and answers a handle
+/// into it; a `Pointer` cannot cross an isolate, and the address can
+/// ([HunspellSpellChecker.adopt]).
+typedef HunspellHandle = ({int address, String dictionary, int ms});
+
 /// [SpellChecker] over the system hunspell.
 final class HunspellSpellChecker implements SpellChecker {
   new _({
@@ -116,11 +133,54 @@ final class HunspellSpellChecker implements SpellChecker {
     required this._destroy,
   });
 
+  /// Wraps an opened handle with the library's own entry points.
+  new _bind(_Opened opened)
+    : this._(
+        handle: opened.handle,
+        spell: opened.lib
+            .lookupFunction<
+              Int32 Function(Pointer<Void>, Pointer<Utf8>),
+              int Function(Pointer<Void>, Pointer<Utf8>)
+            >('Hunspell_spell'),
+        suggest: opened.lib
+            .lookupFunction<
+              Int32 Function(
+                Pointer<Void>,
+                Pointer<Pointer<Pointer<Utf8>>>,
+                Pointer<Utf8>,
+              ),
+              int Function(
+                Pointer<Void>,
+                Pointer<Pointer<Pointer<Utf8>>>,
+                Pointer<Utf8>,
+              )
+            >('Hunspell_suggest'),
+        freeList: opened.lib
+            .lookupFunction<
+              Void Function(
+                Pointer<Void>,
+                Pointer<Pointer<Pointer<Utf8>>>,
+                Int32,
+              ),
+              void Function(Pointer<Void>, Pointer<Pointer<Pointer<Utf8>>>, int)
+            >('Hunspell_free_list'),
+        destroy: opened.lib
+            .lookupFunction<
+              Void Function(Pointer<Void>),
+              void Function(Pointer<Void>)
+            >('Hunspell_destroy'),
+      );
+
   /// Opens the library and a dictionary, or null when either is missing.
   ///
   /// [dictionary] picks a named `<name>.aff`/`.dic` pair (the user's
   /// choice); when null or gone, the locale's dictionary is used. The
   /// other arguments are test seams; the defaults are the system ones.
+  ///
+  /// This is the whole load on the calling isolate — the dictionary's read
+  /// and `Hunspell_create` over it, tens of milliseconds for a real
+  /// dictionary (#453) — so callers that own a frame want
+  /// [loadSpellCheckers] instead.
   static HunspellSpellChecker? open({
     DynamicLibrary? library,
     String? locale,
@@ -128,9 +188,61 @@ final class HunspellSpellChecker implements SpellChecker {
     String? dictionary,
   }) {
     // Timed for #315: a launch opens these engines more than once, and the
-    // frame that first asks for a verdict is where the dictionary's own
-    // read of its `.aff`/`.dic` used to land.
+    // frame that first asks for a verdict used to be where the dictionary's
+    // own read of its `.aff`/`.dic` landed.
     final clock = Stopwatch()..start();
+    final opened = _create(
+      library: library,
+      locale: locale,
+      dirs: dirs,
+      dictionary: dictionary,
+    );
+    if (opened == null) return null;
+    final checker = HunspellSpellChecker._bind(opened);
+    const AppLogger(name: 'spellcheck').info(
+      'hunspell ready: ${opened.dictionary} in ${clock.elapsedMilliseconds} ms',
+    );
+    return checker;
+  }
+
+  /// Adopts a handle [openHunspellHandles] opened on another isolate (#453).
+  ///
+  /// The library is looked up again here, and `dart:ffi` resolves the same
+  /// already-loaded one. The handle itself is the same too: its memory is the
+  /// process heap, and the isolate that allocated it stopped touching it the
+  /// moment it answered the address, so this isolate is the only one that
+  /// calls into it from here on. A handle that cannot be wrapped — no
+  /// library on this isolate, which the load would have failed on — is
+  /// destroyed rather than leaked.
+  static HunspellSpellChecker? adopt(HunspellHandle handle) {
+    final lib = _openLibrary();
+    if (lib == null) {
+      destroyHunspellHandles(<HunspellHandle>[handle]);
+      return null;
+    }
+    try {
+      return HunspellSpellChecker._bind((
+        lib: lib,
+        handle: Pointer<Void>.fromAddress(handle.address),
+        dictionary: handle.dictionary,
+      ));
+    } on Object catch (error) {
+      const AppLogger(name: 'spellcheck')
+          .warning('hunspell adopt failed: $error');
+      destroyHunspellHandles(<HunspellHandle>[handle]);
+      return null;
+    }
+  }
+
+  /// The library and a live handle over a dictionary, or null when either is
+  /// missing. The dictionary is parsed here; nothing is logged and nothing is
+  /// wrapped, so a caller can hand the handle on ([loadSpellCheckers]).
+  static _Opened? _create({
+    DynamicLibrary? library,
+    String? locale,
+    List<String>? dirs,
+    String? dictionary,
+  }) {
     final lib = library ?? _openLibrary();
     if (lib == null) return null;
     final dict = dictionary == null
@@ -148,44 +260,7 @@ final class HunspellSpellChecker implements SpellChecker {
           >('Hunspell_create');
       final handle = create(aff, dic);
       if (handle == nullptr) return null;
-      const AppLogger(
-        name: 'spellcheck',
-      ).info('hunspell ready: ${dict.dic} in ${clock.elapsedMilliseconds} ms');
-      return HunspellSpellChecker._(
-        handle: handle,
-        spell: lib
-            .lookupFunction<
-              Int32 Function(Pointer<Void>, Pointer<Utf8>),
-              int Function(Pointer<Void>, Pointer<Utf8>)
-            >('Hunspell_spell'),
-        suggest: lib
-            .lookupFunction<
-              Int32 Function(
-                Pointer<Void>,
-                Pointer<Pointer<Pointer<Utf8>>>,
-                Pointer<Utf8>,
-              ),
-              int Function(
-                Pointer<Void>,
-                Pointer<Pointer<Pointer<Utf8>>>,
-                Pointer<Utf8>,
-              )
-            >('Hunspell_suggest'),
-        freeList: lib
-            .lookupFunction<
-              Void Function(
-                Pointer<Void>,
-                Pointer<Pointer<Pointer<Utf8>>>,
-                Int32,
-              ),
-              void Function(Pointer<Void>, Pointer<Pointer<Pointer<Utf8>>>, int)
-            >('Hunspell_free_list'),
-        destroy: lib
-            .lookupFunction<
-              Void Function(Pointer<Void>),
-              void Function(Pointer<Void>)
-            >('Hunspell_destroy'),
-      );
+      return (lib: lib, handle: handle, dictionary: dict.dic);
     } on Object catch (error) {
       const AppLogger(name: 'spellcheck')
           .warning('hunspell open failed: $error');
@@ -264,10 +339,104 @@ final class HunspellSpellChecker implements SpellChecker {
   }
 }
 
+/// Opens one engine per name in [dictionaries] — the locale's when the list
+/// is empty — and answers their handles instead of wrappers (#453).
+///
+/// This is the load, and all of it: the directory scan, the library, and
+/// libhunspell's own `Hunspell_create` over the `.aff`/`.dic` it found. It
+/// runs on the isolate that calls it, and that isolate then stops touching
+/// what it opened: the handles stay alive on the process heap with the
+/// dictionary they parsed, for [HunspellSpellChecker.adopt] to wrap where
+/// they are used. A name that opens nothing is skipped, as [createSpellChecker]
+/// skips it; nothing opened answers an empty list, not an error.
+///
+/// Each handle carries how long its own load took, so the isolate that
+/// adopts it — the one whose log a user can export — says the number.
+List<HunspellHandle> openHunspellHandles({
+  List<String> dictionaries = const <String>[],
+}) {
+  final names = <String?>[if (dictionaries.isEmpty) null else ...dictionaries];
+  final handles = <HunspellHandle>[];
+  for (final name in names) {
+    final clock = Stopwatch()..start();
+    final opened = HunspellSpellChecker._create(dictionary: name);
+    if (opened == null) continue;
+    handles.add((
+      address: opened.handle.address,
+      dictionary: opened.dictionary,
+      ms: clock.elapsedMilliseconds,
+    ));
+  }
+  return handles;
+}
+
+/// Destroys handles nobody adopted — a load whose dictionary choice was
+/// replaced, or whose state was disposed, while it ran (#453).
+void destroyHunspellHandles(List<HunspellHandle> handles) {
+  if (handles.isEmpty) return;
+  final lib = HunspellSpellChecker._openLibrary();
+  if (lib == null) return;
+  final destroy = lib
+      .lookupFunction<
+        Void Function(Pointer<Void>),
+        void Function(Pointer<Void>)
+      >('Hunspell_destroy');
+  for (final handle in handles) {
+    destroy(Pointer<Void>.fromAddress(handle.address));
+  }
+}
+
+/// The engines [dictionaries] name, loaded off the isolate that owns the
+/// frame wherever the engine's load is a dictionary's (#453).
+///
+/// A dictionary is megabytes of text and libhunspell parses it inside
+/// `Hunspell_create`: the frame that first asks a note for its ranges is a
+/// stall of tens of milliseconds, worst on the first open, and nothing about
+/// the vocabulary — a word's verdict costs microseconds — explains it. So
+/// the load runs on an [Isolate.run] of its own and only its handles come
+/// back, and what the caller awaits is every bit of the load except the
+/// native call itself, which is the point.
+///
+/// It is a plain [Isolate.run] rather than `IsolateGauge`: the load starts
+/// in the state's constructor, which every widget test that mounts the shell
+/// reaches, and the gauge's overdue timers would then be created inside the
+/// test's fake clock and never cancelled — a pending timer in two hundred
+/// tests. The cost that matters is the load, and the number it prints is
+/// already in the log.
+///
+/// Nothing installed is not an error: the answer is [NoopSpellChecker]s, as
+/// [createSpellChecker]'s is. Windows' own checker is the exception — a COM
+/// object of the system's, asked for where it is used — and it is built on
+/// the calling isolate as it always was.
+Future<List<SpellChecker>> loadSpellCheckers(List<String> dictionaries) async {
+  if (Platform.isWindows) return _checkersHere(dictionaries);
+  final handles = await Isolate.run(
+    () => openHunspellHandles(dictionaries: dictionaries),
+  );
+  final checkers = <SpellChecker>[];
+  for (final handle in handles) {
+    final checker = HunspellSpellChecker.adopt(handle);
+    if (checker == null) continue;
+    const AppLogger(name: 'spellcheck')
+        .info('hunspell ready: ${handle.dictionary} in ${handle.ms} ms');
+    checkers.add(checker);
+  }
+  return checkers.isEmpty ? const <SpellChecker>[NoopSpellChecker()] : checkers;
+}
+
+/// The engines built where they are asked for: the machine's own on Windows,
+/// the no-op where nothing loads.
+List<SpellChecker> _checkersHere(List<String> dictionaries) => <SpellChecker>[
+  if (dictionaries.isEmpty) createSpellChecker(),
+  for (final name in dictionaries) createSpellChecker(dictionary: name),
+];
+
 /// The best checker this machine can offer: on Windows the system's own,
 /// then hunspell wherever it is installed.
 ///
 /// [dictionary] names the user's chosen dictionary (null = the locale's).
+/// This loads where it is called — see [loadSpellCheckers] for the path that
+/// does not — and is what the seeds, the tests and the dictionary list use.
 SpellChecker createSpellChecker({String? dictionary}) =>
     (Platform.isWindows
         ? WindowsSpellChecker.open(language: dictionary)
