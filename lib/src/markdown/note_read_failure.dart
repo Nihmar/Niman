@@ -12,13 +12,15 @@ library;
 /// Why a note's file could not be read as a note.
 final class NoteReadFailure implements Exception {
   /// A failure described by [detail]; [notText] when the file was read and
-  /// is not UTF-8 text.
+  /// is not text at all.
   const new(this.detail, {this.notText = false});
 
   /// The error as the reader saw it: for the log, never for the user.
   final String detail;
 
-  /// The file was read but is not UTF-8 text — an attachment, not a note.
+  /// The file was read but is not text — a binary file (a NUL byte, or
+  /// mostly undecodable bytes), an attachment rather than a note. A note
+  /// whose bytes are not UTF-8 is text on every path since #353.
   final bool notText;
 
   @override

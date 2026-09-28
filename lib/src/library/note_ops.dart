@@ -18,6 +18,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/lint/lint_rule.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_store.dart';
@@ -422,7 +423,7 @@ final class NoteOps implements NoteOperations {
   @override
   Future<String> readNote(String path) async {
     final bytes = await readNoteBytes(path);
-    final text = utf8.decode(bytes, allowMalformed: true);
+    final text = decodeNoteText(bytes);
     return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
         ? text.substring(1)
         : text;

@@ -5,13 +5,13 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:path/path.dart' as p;
 
@@ -117,7 +117,7 @@ Future<List<NoteContent>> readNoteContents(
       final wrote = known[rel];
       final before = wrote == null ? null : file.statSync();
       final bytes = await file.readAsBytes();
-      var text = utf8.decode(bytes, allowMalformed: true);
+      var text = decodeNoteText(bytes);
       // A UTF-8 BOM is content for FTS but noise for matching the editor.
       if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
         text = text.substring(1);
