@@ -152,12 +152,18 @@ jobs:
       - run: flutter pub get
       - run: flutter build linux --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
 
-      - name: Linux tarball (bundle + icon)
+      - name: Linux tarball (bundle + icon + `niman` launcher)
         run: |
           mkdir -p dist tarstage
           cp -a build/linux/x64/release/bundle tarstage/bundle
           cp assets/branding/app_icon.png tarstage/dev.niman.niman.png
-          tar -czf "dist/niman-$VERSION-linux-x64.tar.gz" -C tarstage bundle dev.niman.niman.png
+          # A `niman` command at the tarball root beside the bundle (#233):
+          # the portable build exposes the CLI the docs name, instead of
+          # only bundle/niman. The AppImage runs its own file, and the Arch
+          # package installs /usr/bin/niman — neither uses this launcher.
+          install -m755 packaging/linux/niman tarstage/niman
+          tar -czf "dist/niman-$VERSION-linux-x64.tar.gz" \
+            -C tarstage bundle dev.niman.niman.png niman
 
       - name: AppImage
         run: |

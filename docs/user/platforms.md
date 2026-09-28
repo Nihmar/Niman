@@ -63,6 +63,16 @@ everywhere; PDF goes through each platform's own printer (below).
   `text/markdown`, so Niman is offered for `.md` files and can be made
   their default app. Double-clicking one opens it in the Niman already
   running, or starts one.
+- **The `niman` command** is the package's, not the AppImage's. The Arch
+  package installs it at `/usr/bin/niman`, so it is on `PATH`. The
+  `.tar.gz` ships a `niman` launcher at its root beside the bundle: put
+  the extracted folder on `PATH`, or symlink that launcher into
+  `~/.local/bin`, to get the command. The AppImage puts nothing on
+  `PATH`: run its own file with the same arguments —
+  `./niman-<version>-linux-x64.AppImage --quick-note`, or
+  `./niman-<version>-linux-x64.AppImage note.md` — or symlink the AppImage
+  itself as `niman`. The flags are under
+  [shortcuts](shortcuts.md#cli-launch-flags-desktop).
 - **Dropping files and folders on the window** is the window's own GDK
   drop destination, which takes the `text/uri-list` a file manager
   offers. The frame around the window says a drag is over it, and the
@@ -112,6 +122,11 @@ everywhere; PDF goes through each platform's own printer (below).
   default only when nothing else claims `.md`, or when you pick it.
   Double-clicking one opens it in the Niman already running, or starts
   one.
+- **The `niman` command** is the `niman.exe` in the install folder
+  (`%LOCALAPPDATA%\Programs\Niman` for the per-user install). The
+  installer puts nothing on `PATH`, so call it by path or add that folder
+  yourself; the flags are under
+  [shortcuts](shortcuts.md#cli-launch-flags-desktop).
 - **Dropping files and folders on the window** takes the paths Win32
   hands the window (`WM_DROPFILES`), and the drop opens or imports what
   it names. The frame that Linux draws while a drag is over the window is

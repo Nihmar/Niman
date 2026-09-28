@@ -63,6 +63,22 @@ void main() {
       expect(File(p.join(source.path, 'one.md')).existsSync(), isTrue);
     });
 
+    test(
+      'a `.txt` is not a note, so the import leaves it behind (#233)',
+      () async {
+        write('one.md', '# One');
+        write('sub/todo.txt', 'buy milk');
+        final imported = await importMarkdownFolder(
+          source: source.path,
+          libraryRoot: library.path,
+        );
+        expect(imported?.notes, 1);
+        final target = p.join(library.path, 'Drafts');
+        expect(File(p.join(target, 'one.md')).existsSync(), isTrue);
+        expect(File(p.join(target, 'sub', 'todo.txt')).existsSync(), isFalse);
+      },
+    );
+
     test('a name already taken gets a number', () async {
       write('one.md', '# One');
       Directory(p.join(library.path, 'Drafts')).createSync();

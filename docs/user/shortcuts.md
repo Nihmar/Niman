@@ -180,6 +180,11 @@ Desktop builds accept `--quick-note`, `--journal-today`, `--new-todo`,
 `--new-note`, `--new-list`, `--new-voice`, routed through the same
 handler as the launcher actions — and the tray menu lists the same ones.
 
+The `niman` command is the package's: the Arch package and the Linux
+tarball's root launcher put it on `PATH`, while the AppImage and the
+Windows build are run by their own path — see
+[platforms](platforms.md#linux).
+
 A path opens that file: `niman ~/project/README.md` opens it the way
 **Open file** does (see
 [organization](organization.md#opening-a-file-outside-any-library)). A

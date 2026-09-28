@@ -60,7 +60,14 @@ void main() {
     await openLibrary(tester, filePicker);
     filePicker.file = '/elsewhere/README.md';
     await ctrlShiftO(tester);
-    expect(filePicker.offeredExtensions, containsAll(['md', 'markdown']));
+    // Open file offers exactly the editor-only set: Markdown and plain
+    // text. A `.txt` is a file opened on its own, never a note (#233) —
+    // the index, the importer and the export all keep a note to `.md`.
+    expect(
+      filePicker.offeredExtensions,
+      containsAll(['md', 'markdown', 'txt']),
+    );
+    expect(filePicker.offeredExtensions, hasLength(3));
     expect(outside, findsOne);
     expect(
       find.descendant(of: outside, matching: find.text('README.md')),

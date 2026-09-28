@@ -1,4 +1,4 @@
-/// A Markdown file opened on its own, outside any library (#77).
+/// A text file opened on its own, outside any library (#77).
 ///
 /// Nothing a library does happens to it: it is not indexed, has no
 /// history and no sync, its links are shown and not resolved, and its
@@ -14,7 +14,10 @@ import 'dart:io';
 import 'package:niman/src/core/files.dart';
 import 'package:path/path.dart' as p;
 
-/// The files opened on their own: the ones Markdown editors open.
+/// The files opened on their own: the ones a Markdown editor opens —
+/// Markdown and plain text. What a library calls a note is narrower:
+/// `isMarkdownNote` alone, so a `.txt` is never indexed, imported or
+/// exported as one (#233).
 const Set<String> editorOnlyExtensions = {'md', 'markdown', 'txt'};
 
 /// One file opened outside the library.

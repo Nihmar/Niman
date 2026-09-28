@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# The `niman` command for the portable Linux build (issue #233).
+#
+# The release tarball ships the Flutter bundle under bundle/ and this
+# launcher at its root: put the extracted folder on PATH, or symlink this
+# file into ~/.local/bin, and `niman <file>` / `niman --quick-note` work the
+# way docs/user/shortcuts.md describes. The AppImage needs no launcher — its
+# AppRun runs the same binary with the same arguments — and the Arch package
+# installs /usr/bin/niman itself.
+set -euo pipefail
+
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/bundle/niman" "$@"

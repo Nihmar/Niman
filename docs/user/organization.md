@@ -251,14 +251,23 @@ leaves those commands out too.
 
 ## Opening a file outside any library
 
-Not every Markdown file belongs in a library: a project's README, a
-draft from another app, a downloaded article. On Linux and Windows,
+Not every text file belongs in a library: a project's README, a draft
+from another app, a downloaded article. On Linux and Windows,
 **Open file** (`Ctrl+Shift+O`, or *Note: Open file…* in the command
 palette) opens one on its own, with Niman's editor and nothing else. The
 screen that opens a library offers the same button, so no library is
 needed at all. Double-clicking a `.md` file in the file manager does the
 same once Niman is its app (see [platforms](platforms.md)), and so does
 `niman <file>` on the command line.
+
+**Open file** filters to the text files the editor opens — `.md`,
+`.markdown` and `.txt`, the same three a drop takes. What a library calls
+a **note** is narrower: a note is a `.md`. A `.txt` picked from outside a
+library opens on its own like any other file, and one already inside a
+library is a row the editor opens, but no note is made of it: an import
+copies a folder's Markdown and leaves its `.txt` files where they are,
+and an export carries one alongside the pages instead of writing it as
+one.
 
 The file gets the editor, both of them, and the preview. It gets none of
 what a library adds:
@@ -293,7 +302,7 @@ Linux a frame around the window says so while you drag; on Windows the
 drop lands without it, for the reason
 [platforms](platforms.md#windows) gives.
 
-- **A Markdown file** (`.md`, `.markdown`, `.txt`) opens the way
+- **A text file** (`.md`, `.markdown`, `.txt`) opens the way
   [Open file](#opening-a-file-outside-any-library) opens one: as its
   note when it is inside the open library, on its own otherwise. Drop
   several and each opens, in a tab of its own.

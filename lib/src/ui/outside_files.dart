@@ -90,8 +90,8 @@ final outsideFilesProvider = Provider<OutsideFiles>((ref) {
   return files;
 });
 
-/// Asks for a Markdown file to open on its own; null when none was
-/// chosen.
+/// Asks for a text file to open on its own — Markdown or plain, the
+/// [editorOnlyExtensions] set; null when none was chosen.
 Future<String?> pickOutsideFile() async {
   final file = await FilePicker.pickFile(
     dialogTitle: AppStrings.openFileTitle,
