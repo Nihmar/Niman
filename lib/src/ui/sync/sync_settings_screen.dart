@@ -57,6 +57,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   /// field says so instead of the button greying out unexplained.
   String? _urlError;
 
+  /// The certificate the user confirmed while setting this address up
+  /// (#454), or null. Scoped to the address in the field: it is dropped
+  /// the moment that address changes, so a trust confirmed for one server
+  /// is never offered to another.
+  String? _trustedFingerprint;
+
   /// The fields as they were when [_result] was measured: "Save" is only
   /// offered for what was tested.
   ({String url, String user, String password})? _tested;
@@ -68,9 +74,9 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     super.initState();
     _sync.addListener(_onSync);
     unawaited(_sync.load());
-    for (final field in [_url, _user, _password]) {
-      field.addListener(_onField);
-    }
+    _url.addListener(_onUrlField);
+    _user.addListener(_onField);
+    _password.addListener(_onField);
   }
 
   @override
@@ -91,6 +97,17 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       setState(() {
         // Typing clears the address error: the complaint is answered.
         _urlError = null;
+      });
+    }
+  }
+
+  /// A change in the address: it also drops any certificate trust, which
+  /// belongs to the address it was confirmed for and not to a new one.
+  void _onUrlField() {
+    if (mounted) {
+      setState(() {
+        _urlError = null;
+        _trustedFingerprint = null;
       });
     }
   }
@@ -123,6 +140,9 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       _password.clear();
       _result = null;
       _tested = null;
+      // After the address is set: filling the field fires [_onUrlField],
+      // which would otherwise drop the trust the destination already has.
+      _trustedFingerprint = destination?.trustedCertFingerprint;
     });
   }
 
@@ -145,6 +165,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       url: fields.url,
       username: fields.user,
       password: _typedPassword,
+      trustedFingerprint: _trustedFingerprint,
     );
     if (!mounted) return;
     setState(() {
@@ -166,6 +187,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
         username: fields.user,
         password: _typedPassword,
         capabilities: result.capabilities,
+        trustedFingerprint: _trustedFingerprint,
       );
     } on Object catch (e) {
       _log.error('settings: save failed: $e');
@@ -201,6 +223,10 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     final result = await _sync.testConnection(
       url: destination.url,
       username: destination.username,
+      // The stored destination is the one this address is; its confirmed
+      // certificate is the one this test may use (#454).
+      trustedFingerprint:
+          _trustedFingerprint ?? destination.trustedCertFingerprint,
     );
     if (result.ok) {
       await _sync.save(
@@ -216,6 +242,67 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
         SnackBar(content: Text(syncTestFailure(result.outcome).title)),
       );
     }
+  }
+
+  /// Confirms the certificate a failed test reported (#454): shows its
+  /// fingerprint, remembers it for the address just tested, and tests
+  /// again with that one certificate trusted. Nothing is stored until the
+  /// destination is saved.
+  Future<void> _trustCertificate(SyncTestResult result) async {
+    final fingerprint = result.fingerprint;
+    if (fingerprint == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const Key('sync-trust-dialog'),
+        title: Text(AppStrings.syncCertTrustTitle),
+        content: Text(AppStrings.syncCertTrustBody(result.host, fingerprint)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          TextButton(
+            key: const Key('sync-trust-confirm'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppStrings.syncCertTrustAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _trustedFingerprint = fingerprint);
+    await _test();
+  }
+
+  /// Forgets the certificate trusted for this destination (#454); the
+  /// destination and its password stay. Confirmed first, because the next
+  /// sync will need the certificate confirmed again.
+  Future<void> _forgetCertificate() async {
+    final fingerprint = _sync.status.destination?.trustedCertFingerprint;
+    if (fingerprint == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const Key('sync-forget-certificate-dialog'),
+        title: Text(AppStrings.syncCertForgetTitle),
+        content: Text(AppStrings.syncCertForgetBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          TextButton(
+            key: const Key('sync-forget-certificate-confirm'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppStrings.syncCertForgetAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _sync.forgetCertificate();
+    if (mounted) setState(() {});
   }
 
   Future<void> _setTriggers({
@@ -453,13 +540,50 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     final caps = result.capabilities;
     if (!result.ok || caps == null) {
       final failure = syncTestFailure(result.outcome);
+      final fingerprint = result.fingerprint;
+      // The fingerprint belongs to the address this result was measured
+      // against. A result left over from another one still says what went
+      // wrong there, but it is not offered for trust: what would be stored
+      // is the certificate of an address the form no longer holds (#454).
+      final trustable = fingerprint != null && _tested == _fields;
       return Card.filled(
         key: const Key('sync-test-result'),
         margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         child: ListTile(
           leading: Icon(failure.icon, color: scheme.error),
           title: Text(failure.title),
-          subtitle: failure.hint.isEmpty ? null : Text(failure.hint),
+          subtitle: failure.hint.isEmpty && !trustable
+              ? null
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (failure.hint.isNotEmpty) Text(failure.hint),
+                    // The certificate the user may trust, by its
+                    // fingerprint, for this one destination (#454).
+                    if (trustable) ...[
+                      const SizedBox(height: 6),
+                      SelectableText(
+                        fingerprint,
+                        key: const Key('sync-test-fingerprint'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FilledButton.icon(
+                          key: const Key('sync-trust-certificate'),
+                          onPressed: _testing
+                              ? null
+                              : () => _trustCertificate(result),
+                          icon: const Icon(Icons.verified_user_outlined),
+                          label: Text(AppStrings.syncCertTrustAction),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
         ),
       );
     }
@@ -680,6 +804,16 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
               : AppStrings.syncProbedAgo(historyWhen(caps.probedAt, now)),
           onTap: _retest,
         ),
+        // The one certificate this destination may present, and the way
+        // back out of trusting it (#454).
+        if (destination.trustedCertFingerprint case final fingerprint?)
+          SettingsActionRow(
+            key: const Key('sync-forget-certificate'),
+            enabled: !status.running,
+            title: AppStrings.syncCertTrustedTitle,
+            description: AppStrings.syncCertTrustedSubtitle(fingerprint),
+            onTap: _forgetCertificate,
+          ),
         const Divider(height: 24),
         SettingsActionRow(
           key: const Key('sync-disconnect'),

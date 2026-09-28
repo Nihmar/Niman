@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
@@ -75,15 +76,23 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   @override
   Future<void> load() async {}
 
+  /// The fingerprint the last [testConnection] was given (#454).
+  String? testedFingerprint;
+
   @override
   Future<SyncTestResult> testConnection({
     required String url,
     required String username,
     String? password,
+    String? trustedFingerprint,
   }) async {
     calls.add('test $url');
+    testedFingerprint = trustedFingerprint;
     return testResult;
   }
+
+  /// The fingerprint the last [save] was given (#454).
+  String? savedFingerprint;
 
   @override
   Future<void> save({
@@ -91,12 +100,28 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
     required String username,
     String? password,
     WebDavCapabilities? capabilities,
+    String? trustedFingerprint,
   }) async {
     calls.add('save $url');
     savedPassword = password;
+    savedFingerprint = trustedFingerprint;
     status = SyncStatus(
-      destination: destination(url: url, username: username),
+      destination: destination(
+        url: url,
+        username: username,
+        trustedFingerprint: trustedFingerprint,
+      ),
       capabilities: capabilities,
+    );
+  }
+
+  @override
+  Future<void> forgetCertificate() async {
+    calls.add('forget certificate');
+    final row = _status.destination;
+    if (row == null) return;
+    status = _status.copyWith(
+      destination: row.copyWith(trustedCertFingerprint: const Value(null)),
     );
   }
 
@@ -200,6 +225,7 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
     bool autoSync = true,
     int intervalSeconds = 60,
     bool wifiOnly = false,
+    String? trustedFingerprint,
   }) => SyncDestination(
     libraryPath: '/lib',
     url: url,
@@ -208,6 +234,7 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
     autoSync: autoSync,
     intervalSeconds: intervalSeconds,
     wifiOnly: wifiOnly,
+    trustedCertFingerprint: trustedFingerprint,
     capabilities: '{}',
     lastSyncAtMs: lastSyncAtMs,
     lastError: lastError,

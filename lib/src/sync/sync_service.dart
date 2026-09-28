@@ -40,7 +40,12 @@ enum SyncTestOutcome {
   /// The server answers but is not WebDAV, or refuses what sync needs.
   unsupported,
 
-  /// Anything else (a TLS failure, an unexpected answer).
+  /// The server's TLS certificate is not trusted (#366, #454): the user
+  /// may confirm it, by fingerprint, for this destination.
+  certificate,
+
+  /// Anything else (a TLS failure that is not the certificate, an
+  /// unexpected answer).
   failed,
 }
 
@@ -53,6 +58,8 @@ final class SyncTestResult {
     this.capabilities,
     this.elapsedMs = 0,
     this.detail = '',
+    this.host = '',
+    this.fingerprint,
   });
 
   /// How it ended.
@@ -66,6 +73,15 @@ final class SyncTestResult {
 
   /// Technical detail for the log and a secondary line; never a secret.
   final String detail;
+
+  /// The host the certificate was presented for, when [outcome] is
+  /// [SyncTestOutcome.certificate] (#454).
+  final String host;
+
+  /// The certificate's SHA-256 fingerprint, when [outcome] is
+  /// [SyncTestOutcome.certificate] and one is known — what the
+  /// confirmation shows and stores. Null when the platform reported none.
+  final String? fingerprint;
 
   /// Whether the folder can be used.
   bool get ok => outcome == SyncTestOutcome.ok;
@@ -211,21 +227,38 @@ abstract interface class SyncService implements Listenable {
 
   /// Probes the folder at [url] with [username] and [password] (null uses
   /// the stored password). Stores nothing.
+  ///
+  /// [trustedFingerprint] is the certificate the user just confirmed for
+  /// this address (#454), when there is one to use; null tests with the
+  /// device's own certificate store alone. It is not read from the stored
+  /// destination here: a test may be about an address that is not saved
+  /// yet, and the caller decides what it has confirmed.
   Future<SyncTestResult> testConnection({
     required String url,
     required String username,
     String? password,
+    String? trustedFingerprint,
   });
 
   /// Stores the destination: [password] null keeps the stored one, empty
   /// removes it; [capabilities] from the test just run. A different URL
   /// or user makes the next sync a first sync.
+  ///
+  /// [trustedFingerprint] non-null remembers the certificate the user
+  /// confirmed while setting the destination up (#454); null leaves
+  /// whatever is stored (a change of URL or user has already dropped it).
   Future<void> save({
     required String url,
     required String username,
     String? password,
     WebDavCapabilities? capabilities,
+    String? trustedFingerprint,
   });
+
+  /// Forgets the certificate trusted for this destination (#454): the next
+  /// connection must have it confirmed again. The destination itself, its
+  /// state and its password are untouched.
+  Future<void> forgetCertificate();
 
   /// Forgets the destination, the sync state and the password; no file is
   /// touched on either side.
@@ -285,7 +318,12 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     required this.secrets,
     NetworkMonitor? network,
     this.phone = false,
-    WebDavClient Function(Uri url, String username, String password)?
+    WebDavClient Function(
+      Uri url,
+      String username,
+      String password,
+      String? trustedFingerprint,
+    )?
     testClientFactory,
     DateTime Function()? now,
     Duration quickDelay = const Duration(seconds: 5),
@@ -322,7 +360,7 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
   /// Where the password is.
   final SyncSecretStore secrets;
 
-  final WebDavClient Function(Uri, String, String) _testClient;
+  final WebDavClient Function(Uri, String, String, String?) _testClient;
   final DateTime Function() _now;
   final StreamController<Set<String>> _changes =
       StreamController<Set<String>>.broadcast();
@@ -334,7 +372,13 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     Uri url,
     String username,
     String password,
-  ) => WebDavClient(url: url, username: username, password: password);
+    String? trustedFingerprint,
+  ) => WebDavClient(
+    url: url,
+    username: username,
+    password: password,
+    trustedCertificateFingerprint: trustedFingerprint,
+  );
 
   SyncStatus _status = const SyncStatus();
 
@@ -480,6 +524,7 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     required String url,
     required String username,
     String? password,
+    String? trustedFingerprint,
   }) async {
     final parsed = parseUrl(url);
     final uri = parsed.url;
@@ -492,12 +537,20 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     }
     final secret = password ?? await secrets.read(root) ?? '';
     final clock = Stopwatch()..start();
+    final trust = trustedFingerprint == null
+        ? 'no trusted certificate'
+        : 'a trusted certificate';
     _log.info(
       'test: ${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}'
       '${uri.path}, ${username.isEmpty ? 'no user' : 'user set'}, '
-      '${password == null ? 'stored password' : 'typed password'}',
+      '${password == null ? 'stored password' : 'typed password'}, $trust',
     );
-    final client = _testClient(uri, username.trim(), secret);
+    final client = _testClient(
+      uri,
+      username.trim(),
+      secret,
+      trustedFingerprint,
+    );
     try {
       final capabilities = await probeWebDav(client, now: _now);
       final result = SyncTestResult(
@@ -513,15 +566,23 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
         WebDavNotFound() => SyncTestOutcome.notFound,
         WebDavUnsupported() => SyncTestOutcome.unsupported,
         WebDavRetryable() => SyncTestOutcome.offline,
+        WebDavCertificateFailure() => SyncTestOutcome.certificate,
         WebDavPrecondition() ||
-        WebDavProtocolFailure() ||
-        WebDavCertificateFailure() => SyncTestOutcome.failed,
+        WebDavProtocolFailure() => SyncTestOutcome.failed,
       };
       _log.warning('test: ${outcome.name}: ${e.message}');
       return SyncTestResult(
         outcome: outcome,
         elapsedMs: clock.elapsedMilliseconds,
         detail: e.message,
+        host: switch (e) {
+          WebDavCertificateFailure(:final host) => host,
+          _ => '',
+        },
+        fingerprint: switch (e) {
+          WebDavCertificateFailure(:final fingerprint) => fingerprint,
+          _ => null,
+        },
       );
     } finally {
       client.close();
@@ -534,6 +595,7 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     required String username,
     String? password,
     WebDavCapabilities? capabilities,
+    String? trustedFingerprint,
   }) async {
     final uri = parseUrl(url).url;
     if (uri == null) throw ArgumentError('Not a usable address');
@@ -547,6 +609,12 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
       intervalSeconds: previous?.intervalSeconds ?? 60,
       wifiOnly: previous?.wifiOnly ?? false,
     );
+    // After the URL and the user are settled: a save that retargeted the
+    // destination has already dropped the old trust, and this writes the
+    // certificate confirmed for the address being saved now (#454).
+    if (trustedFingerprint != null) {
+      await store.setTrustedFingerprint(root, trustedFingerprint);
+    }
     if (password != null) {
       if (password.isEmpty) {
         await secrets.delete(root);
@@ -558,6 +626,13 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     scheduler.clearPause();
     await load();
     await scheduler.settingsChanged();
+  }
+
+  @override
+  Future<void> forgetCertificate() async {
+    _log.info('forget the trusted certificate of $root');
+    await store.setTrustedFingerprint(root, null);
+    await load();
   }
 
   @override

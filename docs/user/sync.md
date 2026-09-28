@@ -163,7 +163,7 @@ touched when it stops:
 | Waiting for your confirmation | An automatic sync would have removed many files: **Sync now** shows what, and asks. |
 | Waiting for Wi-Fi | **Wi-Fi only** is on and the phone is on mobile data. |
 | Not synced · N | Those files are tried again at the next sync (a full disk on the server, for example). |
-| The certificate for *address* is not trusted | The server presented a TLS certificate the device cannot verify — an OpenMediaVault NAS, for one, ships a self-signed one — so the handshake stopped before anything was sent. The failure names the address, and the certificate's fingerprint when the system reports one. There are two ways out: use `http://` on a network you trust (see step 2 above), or trust that one certificate. Trusting a certificate is a per-server decision, keyed to its fingerprint; **Niman does not have that option yet**, and whether to add it is still open — it is not built quietly behind your back. |
+| The certificate for *address* is not trusted | The server presented a TLS certificate the device cannot verify — an OpenMediaVault NAS, for one, ships a self-signed one — so the handshake stopped before anything was sent. The failure names the address and the certificate's fingerprint. **Trust this certificate** in the WebDAV settings shows that fingerprint and, when you confirm it, accepts **that one certificate, for that one server, on this device** — no other certificate is ever accepted, here or anywhere else in Niman. Trust it only if the fingerprint matches the one the server's owner gave you; if it does not, use `http://` on a network you trust instead (step 2). The trust lives in the destination's settings, and **Forget** on the same row takes it back. |
 
 ### Change or disconnect
 
@@ -174,6 +174,9 @@ In Settings → Sync → WebDAV:
   nothing). Leave the password empty to keep the saved one.
 - **Test the server again** refreshes what Niman knows about the server
   (it also does so by itself every 30 days).
+- **Certificate trusted** (only when a self-signed certificate was
+  confirmed) forgets it: the next sync needs the certificate confirmed
+  again. It is per device, so another device trusts it separately.
 - **Disconnect this library** stops syncing on this device and forgets
   the password. No file is deleted, here or on the server.
 

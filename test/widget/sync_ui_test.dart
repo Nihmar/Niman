@@ -134,6 +134,126 @@ void main() {
       );
     });
 
+    // #454: a self-signed destination can be trusted once, by fingerprint.
+    // The fingerprint shown is the one the test reported, nothing is trusted
+    // until the dialog is confirmed, and the next test uses exactly that.
+    testWidgets('a refused certificate shows its fingerprint and is trusted '
+        'only on confirmation (#454)', (tester) async {
+      const fingerprint =
+          'AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:'
+          'AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99';
+      sync.testResult = const SyncTestResult(
+        outcome: SyncTestOutcome.certificate,
+        host: 'nas.local',
+        fingerprint: fingerprint,
+      );
+      await pumpScreen(tester);
+      await type(tester, 'sync-url', 'https://nas.local/dav/');
+      await tester.tap(find.byKey(const Key('sync-test')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('The certificate is not trusted'), findsOneWidget);
+      expect(find.text(fingerprint), findsOneWidget);
+      expect(sync.testedFingerprint, isNull);
+      final save = find.byKey(const Key('sync-save'));
+      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+
+      // Cancel: the fingerprint has been shown, and nothing is trusted.
+      final trust = find.byKey(const Key('sync-trust-certificate'));
+      await tester.ensureVisible(trust);
+      await tester.tap(trust);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('sync-trust-dialog')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('sync-trust-dialog')),
+          matching: find.textContaining(fingerprint),
+        ),
+        findsOneWidget,
+        reason: 'the confirmation shows what it would trust',
+      );
+      await tester.tap(find.text(AppStrings.actionCancel));
+      await tester.pumpAndSettle();
+      expect(
+        sync.testedFingerprint,
+        isNull,
+        reason: 'cancelling trusts nothing and tests nothing again',
+      );
+
+      // Confirm: the next test carries exactly the confirmed fingerprint.
+      sync.testResult = SyncTestResult(
+        outcome: SyncTestOutcome.ok,
+        capabilities: WebDavCapabilities(probedAt: DateTime(2026, 9, 15)),
+        elapsedMs: 5,
+      );
+      await tester.tap(trust);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('sync-trust-confirm')));
+      await tester.pumpAndSettle();
+      expect(sync.testedFingerprint, fingerprint);
+      expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+    });
+
+    testWidgets('a failure left over from another address is not offered '
+        'for trust (#454)', (tester) async {
+      const fingerprint = 'AA:BB:CC';
+      sync.testResult = const SyncTestResult(
+        outcome: SyncTestOutcome.certificate,
+        host: 'old.example',
+        fingerprint: fingerprint,
+      );
+      await pumpScreen(tester);
+      await type(tester, 'sync-url', 'https://old.example/dav/');
+      await tester.tap(find.byKey(const Key('sync-test')));
+      await tester.pumpAndSettle();
+      final trust = find.byKey(const Key('sync-trust-certificate'));
+      await tester.ensureVisible(trust);
+      await tester.tap(trust);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.actionCancel));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('sync-trust-certificate')), findsOneWidget);
+
+      // The address in the field is no longer the one the result is about:
+      // its fingerprint is not the one a confirmation would store.
+      await type(tester, 'sync-url', 'https://nas.local/dav/');
+      expect(find.text('The certificate is not trusted'), findsOneWidget);
+      expect(find.byKey(const Key('sync-trust-certificate')), findsNothing);
+      expect(find.byKey(const Key('sync-test-fingerprint')), findsNothing);
+    });
+
+    testWidgets('a trusted certificate is shown and forgotten from the '
+        'overview (#454)', (tester) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(
+          url: 'https://nas.local/dav/',
+          lastSyncAtMs: 1,
+          trustedFingerprint: 'AA:BB:CC',
+        ),
+      );
+      await pumpScreen(tester);
+      expect(find.text('SHA-256 AA:BB:CC'), findsOneWidget);
+
+      final forget = find.byKey(const Key('sync-forget-certificate'));
+      await tester.ensureVisible(forget);
+      await tester.tap(forget);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('sync-forget-certificate-dialog')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const Key('sync-forget-certificate-confirm')),
+      );
+      await tester.pumpAndSettle();
+      expect(sync.calls, contains('forget certificate'));
+      expect(
+        find.byKey(const Key('sync-forget-certificate')),
+        findsNothing,
+        reason: 'the next connection must have it confirmed again',
+      );
+    });
+
     testWidgets('configured: sync now, edit keeps the password, disconnect', (
       tester,
     ) async {

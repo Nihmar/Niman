@@ -516,6 +516,98 @@ void main() {
       await expectLater(other.options(), throwsA(isA<WebDavProtocolFailure>()));
     });
   });
+
+  // #454: a self-signed destination can be trusted once, by fingerprint.
+  // The client is given exactly one fingerprint and accepts exactly that
+  // certificate — never another, and never by a switch.
+  group('trusted certificate', () {
+    late FakeWebDavServer secure;
+    late String fingerprint;
+
+    /// A security context presenting the checked-in self-signed pair.
+    SecurityContext context() => SecurityContext()
+      ..useCertificateChainBytes(
+        File('test/fakes/self_signed_cert.pem').readAsBytesSync(),
+      )
+      ..usePrivateKeyBytes(
+        File('test/fakes/self_signed_key.pem').readAsBytesSync(),
+      );
+
+    /// The certificate's own Sha-256 fingerprint, from its PEM: the value
+    /// the user confirms and the destination stores.
+    String fingerprintOfPem(String path) {
+      // The armor, and the line breaks the armor is written with: base64
+      // takes neither.
+      final body = File(path)
+          .readAsStringSync()
+          .replaceAll(RegExp('-----[^-]+-----'), '')
+          .replaceAll(RegExp(r'\s'), '');
+      return sha256Fingerprint(base64.decode(body));
+    }
+
+    setUp(() async {
+      secure = await FakeWebDavServer.startSecure(context());
+      fingerprint = fingerprintOfPem('test/fakes/self_signed_cert.pem');
+    });
+
+    tearDown(() => secure.close());
+
+    test('the confirmed fingerprint is accepted', () async {
+      final trusted = WebDavClient(
+        url: secure.url,
+        trustedCertificateFingerprint: fingerprint,
+      );
+      addTearDown(trusted.close);
+      expect((await trusted.options()).isWebDav, isTrue);
+      expect(secure.requests, isNotEmpty);
+    });
+
+    test('a certificate the fingerprint does not match is still refused '
+        '(#366)', () async {
+      final other = WebDavClient(
+        url: secure.url,
+        trustedCertificateFingerprint: 'AB' * 32,
+      );
+      addTearDown(other.close);
+      await expectLater(
+        other.options(),
+        throwsA(
+          isA<WebDavCertificateFailure>()
+              .having((f) => f.host, 'host', '127.0.0.1')
+              .having((f) => f.fingerprint, 'fingerprint', fingerprint)
+              .having((f) => f.message, 'message', contains('not trusted')),
+        ),
+      );
+    });
+
+    test('with no fingerprint at all the self-signed server is refused '
+        '(#366)', () async {
+      final refused = WebDavClient(url: secure.url);
+      addTearDown(refused.close);
+      await expectLater(
+        refused.options(),
+        throwsA(
+          isA<WebDavCertificateFailure>().having(
+            (f) => f.fingerprint,
+            'fingerprint',
+            fingerprint,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'a fingerprint written without the separators still matches',
+      () async {
+        final compact = WebDavClient(
+          url: secure.url,
+          trustedCertificateFingerprint: fingerprint.replaceAll(':', ''),
+        );
+        addTearDown(compact.close);
+        expect((await compact.options()).isWebDav, isTrue);
+      },
+    );
+  });
 }
 
 /// An [HttpClient] that reaches the loopback fake over plain http even when
@@ -545,6 +637,11 @@ final class _PlainHttp implements HttpClient {
 
   @override
   set userAgent(String? value) => _inner.userAgent = value;
+
+  @override
+  set badCertificateCallback(
+    bool Function(X509Certificate cert, String host, int port)? value,
+  ) => _inner.badCertificateCallback = value;
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
@@ -579,6 +676,13 @@ final class _TlsRefusingHttp implements HttpClient {
 
   @override
   set userAgent(String? value) {}
+
+  // The client installs its callback on every `HttpClient`, including this
+  // fake; the failure it raises never reaches one, so it is dropped.
+  @override
+  set badCertificateCallback(
+    bool Function(X509Certificate cert, String host, int port)? value,
+  ) {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
