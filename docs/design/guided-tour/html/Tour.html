@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman — the guided tour</title>
+<style>
+/* The app's own palette: lib/src/ui/theme/niman.dart (dark).
+   Night wears the logo as drawn — cream on anthracite, the blue the accent. */
+:root{
+  --background:#23262B; --backdrop:#1B1D21; --surface:#2C3037; --surface-high:#363B44;
+  --text:#F2EDE5; --muted:#A6A29A; --outline:#4A4F59;
+  --accent:#587CD3; --on-accent:#F2EDE5; --error:#E0687A;
+  --wikilink:#587CD3; --link:#7CA0E6; --code:#7FD1C4; --tag:#6FB8CC; --task:#8FBF7F;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:26px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:#14161A;color:var(--text);font-size:13px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:12px;font-weight:600;margin:34px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+p.lead{margin:0 0 8px;color:var(--muted);font-size:13px;max-width:960px;line-height:1.55}
+p.lead b{color:var(--text);font-weight:600}
+.legend{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.6;max-width:960px}
+.legend code{font-family:ui-monospace,monospace;background:var(--surface);padding:1px 5px;border-radius:4px;color:var(--code);font-size:11.5px}
+.note{color:var(--muted);font-size:12px;margin:22px 0 0;max-width:960px;line-height:1.55}
+.note code{font-family:ui-monospace,monospace;background:var(--surface);padding:1px 5px;border-radius:4px;color:var(--code);font-size:11.5px}
+
+/* — the desktop window — */
+.win{position:relative;width:1280px;height:800px;background:var(--backdrop);border:1px solid var(--surface);border-radius:7px;overflow:hidden}
+.tb{height:40px;background:var(--surface);display:flex;align-items:stretch;font-size:12.5px;color:var(--muted)}
+.tb .side{width:308px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding-left:12px}
+.tb .barmark{width:16px;height:16px;color:var(--accent);flex-shrink:0}
+.tb .tabs{display:flex;align-items:center;gap:6px;padding-left:6px;border-left:1px solid var(--outline);height:40px}
+.tb .tab{display:flex;align-items:center;height:28px;padding:0 12px;border-radius:7px;background:var(--surface-high);color:#C8C3BA;font-size:13px}
+.tb .tab.on{background:var(--backdrop);border:1px solid var(--outline);color:var(--text)}
+.tb .winbtns{margin-left:auto;display:flex;align-items:center}
+.tb .winbtns i{width:46px;height:40px;display:flex;align-items:center;justify-content:center;font-style:normal;color:var(--muted)}
+.bodyrow{display:flex;align-items:stretch;height:760px}
+.rail{width:48px;flex-shrink:0;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px;color:var(--muted)}
+.rail .ico{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.rail .ico.on{background:var(--surface-high);color:var(--accent)}
+.rail .grow{flex-grow:1}
+.div{width:1px;flex-shrink:0;background:var(--outline)}
+.tree{width:258px;flex-shrink:0;background:var(--surface);display:flex;flex-direction:column;font-size:13px}
+.tree .bar{height:34px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px;color:var(--muted)}
+.tree .rows{flex-grow:1;min-height:0;padding:2px 0;color:#C8C3BA}
+.tree .r{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px}
+.tree .r.ind{padding-left:26px}
+.tree .r.sel{background:var(--surface-high);box-shadow:inset 2px 0 0 var(--accent);color:var(--text)}
+.tree .foot{height:40px;flex-shrink:0;border-top:1px solid var(--outline);display:flex;align-items:center;padding:0 8px;gap:4px}
+.tree .foot .new{display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:6px;background:var(--surface-high);color:var(--text);font-size:13px}
+.tree .foot .grow{flex-grow:1}
+.tree .foot i{width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-style:normal}
+.pane{flex-grow:1;min-width:0;background:var(--backdrop);display:flex;flex-direction:column}
+.pane .toolbar{height:38px;flex-shrink:0;display:flex;justify-content:center;border-bottom:1px solid var(--surface)}
+.pane .toolbar .inner{width:700px;display:flex;align-items:center;gap:1px;color:var(--muted);font-size:13px}
+.pane .toolbar .bt{width:28px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.pane .toolbar .sep{width:1px;height:16px;background:var(--surface-high);margin:0 5px}
+.pane .toolbar .spread{flex-grow:1}
+.pane .notebody{flex-grow:1;min-height:0;display:flex;justify-content:center;padding-top:30px}
+.pane .col{width:700px}
+.pane h3{margin:0 0 18px;font-size:26px;font-weight:650;color:var(--text)}
+.pane p{font-size:15px;line-height:1.65;color:#E3DED6;margin:0 0 16px}
+.status{height:27px;flex-shrink:0;background:var(--surface);display:flex;align-items:center;padding:0 10px;gap:4px;color:var(--muted);font-size:11.5px}
+.status .bt{height:21px;padding:0 6px;border-radius:4px;display:inline-flex;align-items:center;gap:5px}
+.status .grow{flex-grow:1}
+.status .pill{height:21px;padding:0 8px;border-radius:4px;display:inline-flex;align-items:center;gap:5px;color:var(--muted)}
+.dock{width:300px;flex-shrink:0;background:var(--surface);display:flex;flex-direction:column;font-size:12.5px;color:#C8C3BA}
+.dock .tabs{height:36px;flex-shrink:0;display:flex;align-items:stretch;border-bottom:1px solid var(--outline);padding:0 6px;gap:2px}
+.dock .tabs div{display:flex;align-items:center;padding:0 10px;color:var(--muted);border-bottom:2px solid transparent}
+.dock .tabs div.on{color:var(--accent);border-bottom-color:var(--accent)}
+.dock .l{display:flex;align-items:center;gap:8px;height:28px;padding:0 12px}
+.dock .l.h2{padding-left:26px;color:var(--muted)}
+.dock .l.h3{padding-left:40px;color:var(--muted)}
+
+/* — the tour over the window: the dim, the hole, the card — */
+/* The app draws one path: the whole window at the scrim (55%), minus a
+   rounded hole around the control, edged in 2 px of the accent. The hole is
+   the control's own rect inflated 6 px, radius 12 — nothing of the control
+   is hidden. */
+.spot{position:absolute;border:2px solid var(--accent);border-radius:12px;
+  box-shadow:0 0 0 2000px rgba(10,11,13,.55);z-index:20;pointer-events:none}
+.card{position:absolute;width:400px;background:var(--surface);border-radius:12px;
+  box-shadow:0 16px 40px rgba(0,0,0,.5);padding:6px 16px 8px;z-index:30;color:var(--text)}
+.card .top{display:flex;align-items:center;height:36px}
+.card .count{font-size:12px;color:var(--muted)}
+.card .skip{margin-left:auto;font-size:13px;color:var(--accent)}
+.card h4{margin:0 0 8px;font-size:16px;font-weight:600}
+.card p{margin:0 0 8px;font-size:13.5px;line-height:1.5;color:#E3DED6}
+.card .actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;height:44px}
+.card .back{font-size:13px;color:var(--accent)}
+.card .next{background:var(--accent);color:var(--on-accent);font-size:13px;font-weight:600;padding:9px 18px;border-radius:20px}
+.caption{color:var(--muted);font-size:12px;margin:8px 0 0;max-width:960px;line-height:1.5}
+.caption b{color:var(--text);font-weight:600}
+
+/* — the offer, and the deck it follows — */
+.deck{width:640px;background:var(--surface);border:1px solid var(--outline);border-radius:14px;padding:22px 26px}
+.deck h3{margin:0 0 14px;font-size:19px;font-weight:650;color:var(--text)}
+.deck .answers{display:flex;gap:10px;margin:0 0 10px}
+.deck .answers div{flex:1;height:44px;border-radius:10px;border:1px solid var(--outline);display:flex;align-items:center;justify-content:center;font-size:14px;color:#C8C3BA}
+.deck .answers div.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.deck .qnote{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}
+.deck .offer{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--accent);border-radius:10px;background:rgba(88,124,211,.10)}
+.deck .offer .box{width:20px;height:20px;border-radius:5px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.deck .offer b{font-size:14px;font-weight:600;color:var(--text)}
+.deck .offer .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.deck .end{display:flex;justify-content:flex-end;margin-top:16px}
+.deck .end .go{background:var(--accent);color:var(--on-accent);font-size:13.5px;font-weight:600;padding:10px 20px;border-radius:20px}
+.dialog{position:absolute;inset:0;background:rgba(10,11,13,.55);display:flex;align-items:center;justify-content:center;z-index:40}
+.dlg{width:460px;background:var(--surface);border-radius:24px;padding:22px 24px 14px;box-shadow:0 20px 50px rgba(0,0,0,.55)}
+.dlg h3{margin:0 0 12px;font-size:19px;font-weight:650;color:var(--text)}
+.dlg p{margin:0 0 6px;font-size:14px;line-height:1.55;color:#C8C3BA}
+.dlg .actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:14px}
+.dlg .actions .no{font-size:13.5px;font-weight:600;color:var(--accent);padding:9px 12px}
+.dlg .actions .yes{background:var(--accent);color:var(--on-accent);font-size:13.5px;font-weight:600;padding:9px 18px;border-radius:20px}
+
+/* — where it comes back: a settings pane's rows and a palette row — */
+.sheet{width:520px;background:var(--backdrop);border:1px solid var(--surface);border-radius:10px;overflow:hidden}
+.sheet .head{height:46px;display:flex;align-items:center;padding:0 18px;border-bottom:1px solid var(--surface);font-size:15px;font-weight:650;color:var(--text)}
+.sheet .grp{padding:14px 18px 4px;font-size:11px;letter-spacing:.5px;color:var(--muted)}
+.sheet .row{display:flex;align-items:center;gap:10px;height:38px;padding:0 18px;font-size:14px;color:#E3DED6;border-left:2px solid transparent}
+.sheet .row.on{border-left-color:var(--accent);padding-left:16px}
+.pal{width:640px;background:var(--surface);border:1px solid var(--outline);border-radius:12px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55)}
+.pal .field{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--surface-high);color:var(--muted);font-size:15px}
+.pal .field .grow{flex-grow:1;color:var(--muted)}
+.pal .kc{display:inline-block;min-width:18px;padding:1px 6px;border-radius:4px;background:var(--surface-high);border:1px solid var(--outline);font-size:11px;color:#C8C3BA;text-align:center}
+.pal .grp{padding:8px 16px 5px;font-size:11px;letter-spacing:.5px;color:var(--muted)}
+.pal .r{display:flex;align-items:center;gap:11px;height:36px;padding:0 18px;font-size:14px;color:#E3DED6}
+.pal .r.sel{background:var(--surface-high);border-left:2px solid var(--accent);padding-left:16px;color:var(--text)}
+
+/* — the playground: the last step, and the cheatsheet it opens — */
+.cheat{width:1000px;background:var(--backdrop);border:1px solid var(--surface);border-radius:10px;overflow:hidden}
+.cheat .appbar{height:52px;display:flex;align-items:center;gap:10px;padding:0 18px;background:var(--surface);font-size:15px;font-weight:650;color:var(--text)}
+.cheat .item{padding:0 16px}
+.cheat .ih{display:flex;align-items:center;height:44px}
+.cheat .ih b{font-size:14px;font-weight:600;color:var(--text)}
+.cheat .ih .tools{margin-left:auto;display:flex;gap:6px;color:var(--muted);font-size:14px}
+.cheat .ih .tools i{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-style:normal}
+.cheat .pair{display:flex;gap:16px;align-items:stretch}
+.cheat .pair > div{flex:1}
+.cheat .written{font-family:ui-monospace,monospace;font-size:12.5px;line-height:1.65;background:var(--background);border-radius:6px;padding:12px;color:var(--code);white-space:pre-wrap}
+.cheat .shown{border:1px solid var(--outline);border-radius:6px;padding:12px;font-size:14px;line-height:1.6;color:#E3DED6}
+.cheat .hr{height:1px;background:var(--surface);margin:14px 0}
+.cheat .tl{color:var(--tag)}
+.cheat .wl{color:var(--wikilink)}
+</style>
+</head>
+<body>
+
+<h1>The guided tour</h1>
+<p class="lead">Issue <b>#266</b> asks for a guided tour of the app's features: one step at a time, each step pointing at the real control. This file draws the <b>desktop</b> shape, the <b>offer</b>, where the tour comes back, and the <b>playground</b>. The phone has its own file, <code>Phone.html</code>.</p>
+<p class="lead">The welcome deck introduces the app; the tour is act two — the same ground again, over a real library. <b>Everything dims; the control being talked about does not.</b> A step's target is measured from the widget itself, so the hole lands on the real control, not on a picture of one.</p>
+<p class="legend">One scrim, one hole, one card. The dim is the app's scrim at <code>55%</code>; the hole is the control's own rectangle inflated <code>6 px</code>, edged in <code>2 px</code> of the accent at a <code>12 px</code> radius. The card carries the step counter (<code>n of m</code>), the heading, the prose, and <code>Skip</code> — then <code>Back</code> and <code>Next</code> at its foot, the last step's button reading <code>Done</code>. A phone walk is <b>7</b> steps, a wide window <b>8</b>: the dock is the one a phone has not got.</p>
+
+<h2>1 — desktop · the tree <span style="color:var(--text)">(step 1 of 8)</span></h2>
+<div class="win">
+  <div class="tb">
+    <div class="side"><svg class="barmark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="6" y1="2.5" x2="6" y2="13.5" stroke-width="2.4"/></svg><span>Guides</span></div>
+    <div class="tabs"><div class="tab on">Markdown basics</div><div class="tab">Notes</div></div>
+    <div class="winbtns"><i>&mdash;</i><i>&#9634;</i><i>&#10005;</i></div>
+  </div>
+  <div class="bodyrow">
+    <div class="rail">
+      <div class="ico on">&#9636;</div><div class="ico">&#9745;</div><div class="ico">&#9906;</div><div class="ico">&#9998;</div>
+      <div class="grow"></div>
+      <div class="ico">&#9681;</div><div class="ico">&#9881;</div>
+    </div>
+    <div class="div"></div>
+    <div class="tree">
+      <div class="bar"><span>&#43;</span><span>&#128193;</span><span>&#8645;</span></div>
+      <div class="rows">
+        <div class="r">&#8962; Library</div>
+        <div class="r ind">&#9656; Attachments</div>
+        <div class="r ind">&#9662; Guides</div>
+        <div class="r ind sel" style="padding-left:46px">&#9636; Markdown basics.md</div>
+        <div class="r" style="padding-left:46px">&#9636; Notes.md</div>
+        <div class="r ind">&#9656; Personal</div>
+        <div class="r ind">&#9656; Work</div>
+        <div class="r">&#9636; todo.txt</div>
+      </div>
+      <div class="foot"><span class="new">&#43; New</span><span class="grow"></span><i>&#8635;</i><i>&#128465;</i></div>
+    </div>
+    <div class="div"></div>
+    <div class="pane">
+      <div class="toolbar"><div class="inner">
+        <span class="bt" style="font-weight:700">B</span><span class="bt" style="font-style:italic">I</span><span class="bt" style="text-decoration:line-through">S</span>
+        <span class="sep"></span><span class="bt" style="font-weight:600">H</span><span class="bt">&#8226;&#8212;</span><span class="bt">1.</span>
+        <span class="sep"></span><span class="bt">&#128279;</span><span class="bt">&lt;/&gt;</span>
+        <span class="spread"></span><span class="bt">&#8942;</span>
+      </div></div>
+      <div class="notebody"><div class="col">
+        <h3>Markdown basics</h3>
+        <p>Markdown is a way of writing that reads as plainly as it is written. A heading is a <span style="color:var(--code)">#</span>, a link is brackets around the words it shows.</p>
+        <p>Niman keeps every note as one <code style="color:var(--code)">.md</code> file in a folder you chose. Nothing in the app is stored anywhere else.</p>
+      </div></div>
+      <div class="status">
+        <span class="bt">&#9776;</span><span class="bt">&#9906;</span>
+        <span class="pill">&lt;/&gt; Source</span>
+        <span class="grow"></span><span>47 words</span><span style="padding-left:10px">Saved</span>
+      </div>
+    </div>
+  </div>
+  <!-- the tour: the tree is the control, the rest of the window is at the scrim -->
+  <div class="spot" style="left:43px;top:34px;width:270px;height:772px"></div>
+  <div class="card" style="left:352px;top:230px">
+    <div class="top"><span class="count">1 of 8</span><span class="skip">Skip</span></div>
+    <h4>Your library</h4>
+    <p>This is the folder you chose, folder by folder. Anything you do to a file outside Niman shows up here the moment it lands.</p>
+    <div class="actions"><span class="next">Next</span></div>
+  </div>
+</div>
+<p class="caption">The hole is the tree pane's own rectangle, so the tree keeps its colour, its scroll and its rows while the note, the rail and the title bar sit under the scrim. <b>Step 1 has no <code>Back</code></b> — there is nowhere behind it.</p>
+
+<h2>2 — desktop · the mode switch <span style="color:var(--text)">(step 4 of 8)</span></h2>
+<div class="win">
+  <div class="tb">
+    <div class="side"><svg class="barmark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="6" y1="2.5" x2="6" y2="13.5" stroke-width="2.4"/></svg><span>Guides</span></div>
+    <div class="tabs"><div class="tab on">Markdown basics</div><div class="tab">Notes</div></div>
+    <div class="winbtns"><i>&mdash;</i><i>&#9634;</i><i>&#10005;</i></div>
+  </div>
+  <div class="bodyrow">
+    <div class="rail"><div class="ico on">&#9636;</div><div class="ico">&#9745;</div><div class="ico">&#9906;</div><div class="ico">&#9998;</div><div class="grow"></div><div class="ico">&#9681;</div><div class="ico">&#9881;</div></div>
+    <div class="div"></div>
+    <div class="tree">
+      <div class="bar"><span>&#43;</span><span>&#128193;</span><span>&#8645;</span></div>
+      <div class="rows">
+        <div class="r">&#8962; Library</div>
+        <div class="r ind">&#9662; Guides</div>
+        <div class="r ind sel" style="padding-left:46px">&#9636; Markdown basics.md</div>
+        <div class="r ind">&#9656; Personal</div>
+      </div>
+      <div class="foot"><span class="new">&#43; New</span><span class="grow"></span><i>&#8635;</i><i>&#128465;</i></div>
+    </div>
+    <div class="div"></div>
+    <div class="pane">
+      <div class="toolbar"><div class="inner">
+        <span class="bt" style="font-weight:700">B</span><span class="bt" style="font-style:italic">I</span><span class="bt" style="text-decoration:line-through">S</span>
+        <span class="sep"></span><span class="bt" style="font-weight:600">H</span><span class="bt">&#8226;&#8212;</span>
+        <span class="spread"></span><span class="bt">&#8942;</span>
+      </div></div>
+      <div class="notebody"><div class="col">
+        <h3>Markdown basics</h3>
+        <p>Markdown is a way of writing that reads as plainly as it is written.</p>
+        <p>The note is the same whichever surface you are in — the switch at the foot of the page flips it.</p>
+      </div></div>
+      <div class="status">
+        <span class="bt">&#9776;</span><span class="bt">&#9906;</span>
+        <span class="pill">&lt;/&gt; Source</span>
+        <span class="grow"></span><span>47 words</span><span style="padding-left:10px">Saved</span>
+      </div>
+    </div>
+  </div>
+  <div class="spot" style="left:342px;top:772px;width:124px;height:26px"></div>
+  <div class="card" style="left:180px;bottom:52px">
+    <div class="top"><span class="count">4 of 8</span><span class="skip">Skip</span></div>
+    <h4>Three ways to write</h4>
+    <p>Write the Markdown source, write it as it reads, or read it — this switch is per note, and the library setting decides what opens.</p>
+    <div class="actions"><span class="back">Back</span><span class="next">Next</span></div>
+  </div>
+</div>
+<p class="caption">The switch is small and low, so the card goes above it — the app puts the card below the control when there is room under it and above it otherwise, kept inside the window. The step is <b>dropped entirely</b> when the library offers only one editor: a switch that is not there is not pointed at.</p>
+
+<h2>3 — desktop · the dock <span style="color:var(--text)">(step 7 of 8)</span></h2>
+<div class="win">
+  <div class="tb">
+    <div class="side"><svg class="barmark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="6" y1="2.5" x2="6" y2="13.5" stroke-width="2.4"/></svg><span>Guides</span></div>
+    <div class="tabs"><div class="tab on">Markdown basics</div></div>
+    <div class="winbtns"><i>&mdash;</i><i>&#9634;</i><i>&#10005;</i></div>
+  </div>
+  <div class="bodyrow">
+    <div class="rail"><div class="ico on">&#9636;</div><div class="ico">&#9745;</div><div class="ico">&#9906;</div><div class="ico">&#9998;</div><div class="grow"></div><div class="ico">&#9681;</div><div class="ico">&#9881;</div></div>
+    <div class="div"></div>
+    <div class="tree">
+      <div class="bar"><span>&#43;</span><span>&#128193;</span><span>&#8645;</span></div>
+      <div class="rows">
+        <div class="r">&#8962; Library</div>
+        <div class="r ind">&#9662; Guides</div>
+        <div class="r ind sel" style="padding-left:46px">&#9636; Markdown basics.md</div>
+      </div>
+      <div class="foot"><span class="new">&#43; New</span><span class="grow"></span><i>&#8635;</i><i>&#128465;</i></div>
+    </div>
+    <div class="div"></div>
+    <div class="pane">
+      <div class="toolbar"><div class="inner">
+        <span class="bt" style="font-weight:700">B</span><span class="bt" style="font-style:italic">I</span><span class="bt">&#8226;&#8212;</span>
+        <span class="spread"></span><span class="bt">&#8942;</span>
+      </div></div>
+      <div class="notebody"><div class="col">
+        <h3>Markdown basics</h3>
+        <p>A heading, a list, a quote: the outline beside this note is built from the same lines.</p>
+      </div></div>
+      <div class="status">
+        <span class="bt">&#9776;</span><span class="pill">&lt;/&gt; Source</span>
+        <span class="grow"></span><span>47 words</span><span style="padding-left:10px">Saved</span>
+      </div>
+    </div>
+    <div class="div"></div>
+    <div class="dock">
+      <div class="tabs"><div class="on">Outline</div><div>Tags</div><div>History</div></div>
+      <div class="l">&#9656; Markdown basics</div>
+      <div class="l h2">Writing</div>
+      <div class="l h3">Reading it back</div>
+      <div class="l h2">Links</div>
+      <div class="l h3">See also</div>
+    </div>
+  </div>
+  <div class="spot" style="left:974px;top:34px;width:312px;height:772px"></div>
+  <div class="card" style="left:540px;bottom:120px">
+    <div class="top"><span class="count">7 of 8</span><span class="skip">Skip</span></div>
+    <h4>Outline, tags, history</h4>
+    <p>The outline of the note, its tags and its past versions, beside it. On a phone the note menu opens the same three.</p>
+    <div class="actions"><span class="back">Back</span><span class="next">Next</span></div>
+  </div>
+</div>
+<p class="caption">On a phone there is no dock, so <b>this step is not built</b>: the same three panes live behind the note's own menu, which is what the card's last line says. A step with no target is skipped, never pointed at nothing.</p>
+
+<h2>4 — the offer · the deck asks, the shell confirms</h2>
+<p class="lead">The tour is offered once, and only when a library is open to point at. The deck's last page carries the choice; the shell shows the dialog after the first library opens. Both are skippable, and the offer is <b>spent when shown</b> — declining leaves the tour to Help and the palette, and nothing is asked twice.</p>
+<div class="deck">
+  <h3>Have you written Markdown before?</h3>
+  <div class="answers"><div>Never</div><div class="on">A little</div><div>All the time</div></div>
+  <p class="qnote">This only sets how the app starts. You can turn any editor on or off in Settings &#8594; Editor at any time.</p>
+  <div class="offer">
+    <span class="box">&#10003;</span>
+    <div>
+      <b>Show me around the app</b>
+      <div class="sub">The tour starts once your first library is open, and points at the real controls.</div>
+    </div>
+  </div>
+  <div class="end"><span class="go">Start writing</span></div>
+</div>
+<p class="caption">The welcome deck's last page, with the offer checked. Nothing about the tour happens here — the box is only remembered.</p>
+
+<div class="win" style="margin-top:20px">
+  <div class="tb">
+    <div class="side"><svg class="barmark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="6" y1="2.5" x2="6" y2="13.5" stroke-width="2.4"/></svg><span>Guides</span></div>
+    <div class="tabs"><div class="tab on">Markdown basics</div></div>
+    <div class="winbtns"><i>&mdash;</i><i>&#9634;</i><i>&#10005;</i></div>
+  </div>
+  <div class="bodyrow">
+    <div class="rail"><div class="ico on">&#9636;</div><div class="ico">&#9745;</div><div class="ico">&#9906;</div><div class="ico">&#9998;</div><div class="grow"></div><div class="ico">&#9681;</div><div class="ico">&#9881;</div></div>
+    <div class="div"></div>
+    <div class="tree"><div class="bar"><span>&#43;</span></div><div class="rows"><div class="r">&#8962; Library</div><div class="r ind">&#9662; Guides</div><div class="r ind sel" style="padding-left:46px">&#9636; Markdown basics.md</div></div><div class="foot"><span class="new">&#43; New</span></div></div>
+    <div class="div"></div>
+    <div class="pane">
+      <div class="toolbar"><div class="inner"><span class="bt" style="font-weight:700">B</span><span class="bt" style="font-style:italic">I</span><span class="spread"></span><span class="bt">&#8942;</span></div></div>
+      <div class="notebody"><div class="col"><h3>Markdown basics</h3><p>Markdown is a way of writing that reads as plainly as it is written.</p></div></div>
+      <div class="status"><span class="bt">&#9776;</span><span class="pill">&lt;/&gt; Source</span><span class="grow"></span><span>47 words</span></div>
+    </div>
+  </div>
+  <div class="dialog"><div class="dlg">
+    <h3>Show you around?</h3>
+    <p>A few steps through the app, pointing at the real controls. You can stop at any step and pick it up later from the command palette.</p>
+    <div class="actions"><span class="no">Not now</span><span class="yes">Show me</span></div>
+  </div></div>
+</div>
+<p class="caption">The one dialog the tour ever raises, over the library the deck just opened. <b>You can stop at any step</b> — <code>Skip</code> leaves the walk where it is, and the palette's <i>Take the tour</i> resumes or starts over.</p>
+
+<h2>5 — where it comes back · Help and the palette</h2>
+<p class="lead">Two ways back, and no third. The settings row and a palette command run the same walk, from where it was left.</p>
+<div style="display:flex;gap:28px;align-items:flex-start">
+  <div class="sheet">
+    <div class="head">Diagnostics and info</div>
+    <div class="grp">ABOUT</div>
+    <div class="row">Version 0.0.9</div>
+    <div class="row">Changelog</div>
+    <div class="row">Keyboard cheatsheet</div>
+    <div class="row on">Take the tour</div>
+    <div class="row">What Niman can do</div>
+  </div>
+  <div class="pal">
+    <div class="field"><span>&#8250;&#95;</span><span class="grow">Type a command, or a note's name&#8230;</span><span class="kc">Esc</span></div>
+    <div class="grp">COMMANDS</div>
+    <div class="r sel">&#9906; Take the tour</div>
+    <div class="r">&#9998; What Niman can do</div>
+    <div class="r">&#9741; Markdown cheatsheet</div>
+  </div>
+</div>
+<p class="caption">The Help row (<i>Take the tour</i>) and the palette command are the same call: a walk left half-way resumes, a finished one starts over. <i>What Niman can do</i> beside them reopens the <b>deck</b>, read-only — the deck is once, but nothing of it is lost.</p>
+
+<h2>6 — the playground · the cheatsheet, not a sample note</h2>
+<p class="lead">The tour writes nothing of its own. Its last step hands over to the <b>cheatsheet</b> (#265): the walk ends, the cheatsheet opens, and each example can be put in the note already open. No sample note is created in anyone's library — the user keeps only what they choose to <b>Insert</b>.</p>
+<div class="win" style="height:520px">
+  <div class="tb">
+    <div class="side"><svg class="barmark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="6" y1="2.5" x2="6" y2="13.5" stroke-width="2.4"/></svg><span>Guides</span></div>
+    <div class="tabs"><div class="tab on">Markdown basics</div></div>
+    <div class="winbtns"><i>&mdash;</i><i>&#9634;</i><i>&#10005;</i></div>
+  </div>
+  <div class="bodyrow" style="height:480px">
+    <div class="rail"><div class="ico on">&#9636;</div><div class="ico">&#9745;</div><div class="ico">&#9906;</div><div class="grow"></div><div class="ico">&#9881;</div></div>
+    <div class="div"></div>
+    <div class="tree"><div class="rows"><div class="r">&#8962; Library</div><div class="r ind sel" style="padding-left:26px">&#9636; Markdown basics.md</div></div></div>
+    <div class="div"></div>
+    <div class="pane"><div class="notebody"><div class="col"><h3>Markdown basics</h3><p>The note the examples land in.</p></div></div></div>
+  </div>
+  <!-- the last step: it does not point at a shell control, it hands over -->
+  <div class="spot" style="left:250px;top:150px;width:0;height:0;border:0;box-shadow:0 0 0 2000px rgba(10,11,13,.55)"></div>
+  <div class="card" style="left:440px;top:150px">
+    <div class="top"><span class="count">8 of 8</span><span class="skip">Skip</span></div>
+    <h4>Every construct, written beside it</h4>
+    <p>This is the cheatsheet. Each example can be copied, and Insert puts it in the note you have open.</p>
+    <div class="actions"><span class="back">Back</span><span class="next">Open it</span></div>
+  </div>
+</div>
+<p class="caption">The last step's button is not <code>Next</code> but <b>Open it</b>: the card closes, the cheatsheet opens, and the tour is done. The window behind it is at the scrim, as over any other step.</p>
+
+<div class="cheat" style="margin-top:20px">
+  <div class="appbar">&#8592; &nbsp; Markdown cheatsheet</div>
+  <div class="item">
+    <div class="ih"><b>Headings</b><span class="tools"><i>&#10697;</i><i>&#8681;</i></span></div>
+    <div class="pair">
+      <div><div class="written"># Heading 1
+## Heading 2
+### Heading 3</div></div>
+      <div><div class="shown"><div style="font-size:22px;font-weight:700">Heading 1</div><div style="font-size:18px;font-weight:650">Heading 2</div><div style="font-size:15px;font-weight:600">Heading 3</div></div></div>
+    </div>
+    <div class="hr"></div>
+    <div class="ih"><b>Wikilinks</b><span class="tools"><i>&#10697;</i><i>&#8681;</i></span></div>
+    <div class="pair">
+      <div><div class="written">[[Note]], [[Note#Heading]], [[Note|shown text]]</div></div>
+      <div><div class="shown"><span class="wl">Note</span>, <span class="wl">Note &#8250; Heading</span>, <span class="wl">shown text</span></div></div>
+    </div>
+    <div class="hr"></div>
+    <div class="ih"><b>Tags</b><span class="tools"><i>&#10697;</i><i>&#8681;</i></span></div>
+    <div class="pair">
+      <div><div class="written">#idea #work/project</div></div>
+      <div><div class="shown"><span class="tl">#idea</span> &nbsp; <span class="tl">#work/project</span></div></div>
+    </div>
+  </div>
+</div>
+<p class="caption">The cheatsheet, written beside shown, with <b>Copy</b> and <b>Insert in the note</b> on every row — the icon on the right. It is a page the app already has; the tour only opens it and ends, so there is nothing of the tour's own to clean up afterwards. <b>Why the cheatsheet and not a sample note:</b> a note the tour made would either be left behind in the library or have to be deleted afterwards; the cheatsheet is already there, it teaches the syntax rather than one note's words, and the user leaves with exactly what they chose to insert.</p>
+
+<p class="note">Mockups, not screenshots of the app: everything here is HTML drawn to look like Niman, using the real palette from <code>lib/src/ui/theme/niman.dart</code> (night). Where a mockup and the app disagree, the app ships — these record what was drawn, and what it asks. The tour's steps, targets and overlay live in <code>lib/src/ui/tour/</code>; the offer and the entries in <code>lib/src/ui/tour/tour_host.dart</code>.</p>
+
+</body>
+</html>
