@@ -552,8 +552,9 @@ final class LiveTables {
 
   /// The ranges of [text]'s cells' text, trimmed: what is between its
   /// pipes, as the read view reads them — a pipe at either end is the
-  /// row's edge, not a cell's, and an empty cell's text starts past its
-  /// pipe.
+  /// row's edge, not a cell's, an escaped pipe (`\|`) is a cell's text
+  /// rather than an edge (`block_view.dart`'s `_tableRows`), and an empty
+  /// cell's text starts past its pipe.
   static List<(int, int)> cellsOf(String text) {
     var start = 0;
     var end = text.length;
@@ -568,7 +569,13 @@ final class LiveTables {
     final cells = <(int, int)>[];
     var from = start;
     for (var at = start; at <= end; at++) {
-      if (at < end && text.codeUnitAt(at) != 0x7C) continue;
+      // A pipe splits the row unless it is escaped, as the read view splits
+      // it: `| a \| b | c |` is two cells, not three (#361).
+      if (at < end &&
+          (text.codeUnitAt(at) != 0x7C ||
+              (at > 0 && text.codeUnitAt(at - 1) == 0x5C))) {
+        continue;
+      }
       var left = from;
       var right = at;
       while (left < right && _space(text.codeUnitAt(left))) {

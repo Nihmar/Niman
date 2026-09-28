@@ -211,6 +211,37 @@ void main() {
       expect(texts.any((text) => text.contains('*big*')), isFalse);
     },
   );
+  testWidgets('a footnote body runs on to its indented continuation (#361)', (
+    tester,
+  ) async {
+    // A definition was read off its own line only, so the body the note ended
+    // with was the first line of the note and the lines indented under it
+    // lived in the file alone. The package reads them as one body
+    // (`FootnoteDefSyntax`: an indented line continues the definition).
+    tester.view.physicalSize = const Size(600, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(
+      tester,
+      'a claim[^1]\n\n[^1]: Where the body starts,\n'
+      '    and runs on here.\n',
+    );
+    final texts = [
+      for (final widget in tester.widgetList<RichText>(
+        find.descendant(
+          of: find.byType(FootnoteRow),
+          matching: find.byType(RichText),
+        ),
+      ))
+        widget.text.toPlainText(),
+    ];
+    expect(texts.any((text) => text.contains('body starts')), isTrue);
+    expect(
+      texts.any((text) => text.contains('runs on here')),
+      isTrue,
+      reason: 'the continued line is drawn with the body: $texts',
+    );
+  });
   testWidgets("a tight list's items touch, and a blank line is live's row", (
     tester,
   ) async {

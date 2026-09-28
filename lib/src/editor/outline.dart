@@ -59,14 +59,22 @@ List<OutlineEntry> outlineOfText(String text) {
 /// text is the rest of its line, trimmed — the same three things the
 /// tokenizer reports.
 ///
+/// A setext heading is a heading block too, but one of two lines with no
+/// marker to count, and [outlineOfText] reads `#`s only: it is left out here
+/// rather than listed by this path and not the other (#361).
+///
 /// [line] reads a line's text by its index; the caller holds the buffer.
 List<OutlineEntry> outlineOfBlocks(
   BlockIndex index,
   String Function(int line) line,
 ) {
   final out = <OutlineEntry>[];
+  // One line is an ATX heading, whose text starts past its `#`s, which is how
+  // the entry's text is read below.
   bool isHeading(Block block) =>
-      block.kind == BlockKind.heading && block.headingLevel > 0;
+      block.kind == BlockKind.heading &&
+      block.headingLevel > 0 &&
+      block.lineCount == 1;
   final blocks = index.blocks;
   // A scanner's list moves its blocks a chunk at a time, and reading each
   // one where it is makes a block: only the headings are asked for there.
