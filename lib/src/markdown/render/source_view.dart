@@ -101,8 +101,10 @@ const Color _currentMatchColor = Color(0xAAFF8F00);
 const double _gutterGap = lineNumbersGap;
 
 /// A link the writer Ctrl+clicked: its token's kind (a wikilink or a Markdown
-/// link) and its text as written, brackets and all.
-typedef SourceLinkTap = void Function(TokenKind kind, String raw);
+/// link), its text as written, brackets and all, and — for a Markdown link —
+/// the target its parse resolved (a reference link's, too), or null for a
+/// wikilink.
+typedef SourceLinkTap = void Function(TokenKind kind, String raw, String? href);
 
 /// The source surface: the note's text, its caret, and where a tap lands.
 final class MarkdownSourceView extends StatefulWidget {
@@ -1931,15 +1933,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final link = linkAt(offset);
     if (link == null) return false;
     placeCaret(offset);
-    open(link.$1, link.$2);
+    open(link.$1, link.$2, link.$3);
     return true;
   }
 
-  /// The wikilink or Markdown link under [offset] — its kind and its text as
-  /// written — or null. An offset on either edge of the link is on it: a
-  /// click lands between characters, and a click on the first or the last
-  /// one lands on the edge.
-  (TokenKind, String)? linkAt(int offset) {
+  /// The wikilink or Markdown link under [offset] — its kind, its text as
+  /// written, and a Markdown link's resolved target — or null. An offset on
+  /// either edge of the link is on it: a click lands between characters, and a
+  /// click on the first or the last one lands on the edge.
+  ///
+  /// A reference link's own source carries no `](href)`, so its target comes
+  /// from the parse the line was drawn from; an inline link keeps spelling
+  /// its own, which the handler reads off as it always has.
+  (TokenKind, String, String?)? linkAt(int offset) {
     final buffer = widget.buffer;
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
     final local = offset - buffer.offsetOfLine(line);
@@ -1959,10 +1965,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         end++;
       }
       if (local >= token.start && local <= tokens[end].end) {
-        return (
-          token.kind,
-          styled.text.substring(token.start, tokens[end].end),
-        );
+        final raw = styled.text.substring(token.start, tokens[end].end);
+        // A reference link spells no `](href)`: its target has to come from
+        // the parse the line was drawn from. An inline link keeps reading it
+        // out of its own source, as it always has.
+        final href = token.kind == TokenKind.link && !raw.contains('](')
+            ? _styler?.linkHrefAt(line, token.start)
+            : null;
+        return (token.kind, raw, href);
       }
       at = end;
     }

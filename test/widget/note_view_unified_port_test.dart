@@ -375,6 +375,42 @@ void main() {
     expect(opened, <String>['Target.md|null']);
   }, variant: _desktop);
 
+  testWidgets(
+    'Ctrl+click on a reference link opens it (link_navigation_test)',
+    (tester) async {
+      // #417: a `[text][label]` link spells no `](href)` in its own source, so
+      // the run's target has to ride the tap; before the fix the handler cut an
+      // empty href and the link died as "not found".
+      final links = FakeLinkSource();
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: '[la nota][n]\n\n[n]: https://example.org\n',
+            path: '/notes/current.md',
+            libraryRoot: '/notes',
+            links: links,
+            live: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text('[la nota][n]', findRichText: true),
+      );
+      // Inside `la nota`, where the line's own layout draws offset 3.
+      final at = paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(const TextPosition(offset: 3), Rect.zero) +
+            const Offset(2, 8),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(links.queries, contains('md:https://example.org'));
+    },
+    variant: _desktop,
+  );
+
   testWidgets('an anchor to open on lands on its heading '
       '(link_navigation_test)', (tester) async {
     await tester.pumpWidget(

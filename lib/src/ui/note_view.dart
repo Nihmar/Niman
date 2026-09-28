@@ -1283,7 +1283,8 @@ final class _NoteViewState extends State<NoteView>
         mathCache: _mathCache,
         embedResolver: _resolveEmbed,
         findMatches: _sourceFind,
-        onOpenLink: (kind, raw) => unawaited(_openLinkToken(kind, raw)),
+        onOpenLink: (kind, raw, href) =>
+            unawaited(_openLinkToken(kind, raw, href)),
         onChanged: (edit) {
           _sourceFind.noteEdited();
           _noteChanged(caretLine: _surfaceCaretLine ?? _caretLine, edit: edit);
@@ -1502,8 +1503,10 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// Opens a link token's target: [raw] is the token as written, `[[…]]` for
-  /// a wikilink and `[…](…)` for a Markdown link.
-  Future<void> _openLinkToken(TokenKind kind, String raw) async {
+  /// a wikilink and `[…](…)` for a Markdown link; [href] is the target its
+  /// parse resolved, when the tap carried one — a reference link has no
+  /// `](href)` in [raw] to read it from.
+  Future<void> _openLinkToken(TokenKind kind, String raw, String? href) async {
     if (kind == TokenKind.wikilink) {
       await openWiki(
         context,
@@ -1512,8 +1515,8 @@ final class _NoteViewState extends State<NoteView>
       );
     } else {
       final close = raw.indexOf(']');
-      final href = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
-      await openHref(context, href, _linkTargets);
+      final inline = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
+      await openHref(context, href ?? inline, _linkTargets);
     }
   }
 
