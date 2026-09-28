@@ -1877,6 +1877,17 @@ class $SyncDestinationsTable extends SyncDestinations
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _trustedCertFingerprintMeta =
+      const VerificationMeta('trustedCertFingerprint');
+  @override
+  late final GeneratedColumn<String> trustedCertFingerprint =
+      GeneratedColumn<String>(
+        'trusted_cert_fingerprint',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _capabilitiesMeta = const VerificationMeta(
     'capabilities',
   );
@@ -1920,6 +1931,7 @@ class $SyncDestinationsTable extends SyncDestinations
     autoSync,
     intervalSeconds,
     wifiOnly,
+    trustedCertFingerprint,
     capabilities,
     lastSyncAtMs,
     lastError,
@@ -1988,6 +2000,15 @@ class $SyncDestinationsTable extends SyncDestinations
         wifiOnly.isAcceptableOrUnknown(data['wifi_only']!, _wifiOnlyMeta),
       );
     }
+    if (data.containsKey('trusted_cert_fingerprint')) {
+      context.handle(
+        _trustedCertFingerprintMeta,
+        trustedCertFingerprint.isAcceptableOrUnknown(
+          data['trusted_cert_fingerprint']!,
+          _trustedCertFingerprintMeta,
+        ),
+      );
+    }
     if (data.containsKey('capabilities')) {
       context.handle(
         _capabilitiesMeta,
@@ -2049,6 +2070,10 @@ class $SyncDestinationsTable extends SyncDestinations
         DriftSqlType.bool,
         data['${effectivePrefix}wifi_only'],
       )!,
+      trustedCertFingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trusted_cert_fingerprint'],
+      ),
       capabilities: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}capabilities'],
@@ -2093,6 +2118,15 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
   /// Whether the automatic triggers skip mobile data.
   final bool wifiOnly;
 
+  /// The SHA-256 fingerprint, uppercase hex bytes joined with `:`, of the
+  /// one certificate the user trusted for this destination (#454); null =
+  /// nothing is trusted beyond the device's own certificate store.
+  ///
+  /// Device state, like [url] and [username]: it is learned on this device,
+  /// it names the exact certificate rather than the server, and a
+  /// destination pointed somewhere else must be confirmed again.
+  final String? trustedCertFingerprint;
+
   /// The capability probe's JSON (`WebDavCapabilities`); `{}` = never
   /// probed.
   final String capabilities;
@@ -2110,6 +2144,7 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
     required this.autoSync,
     required this.intervalSeconds,
     required this.wifiOnly,
+    this.trustedCertFingerprint,
     required this.capabilities,
     this.lastSyncAtMs,
     this.lastError,
@@ -2124,6 +2159,11 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
     map['auto_sync'] = Variable<bool>(autoSync);
     map['interval_seconds'] = Variable<int>(intervalSeconds);
     map['wifi_only'] = Variable<bool>(wifiOnly);
+    if (!nullToAbsent || trustedCertFingerprint != null) {
+      map['trusted_cert_fingerprint'] = Variable<String>(
+        trustedCertFingerprint,
+      );
+    }
     map['capabilities'] = Variable<String>(capabilities);
     if (!nullToAbsent || lastSyncAtMs != null) {
       map['last_sync_at_ms'] = Variable<int>(lastSyncAtMs);
@@ -2143,6 +2183,9 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
       autoSync: Value(autoSync),
       intervalSeconds: Value(intervalSeconds),
       wifiOnly: Value(wifiOnly),
+      trustedCertFingerprint: trustedCertFingerprint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trustedCertFingerprint),
       capabilities: Value(capabilities),
       lastSyncAtMs: lastSyncAtMs == null && nullToAbsent
           ? const Value.absent()
@@ -2166,6 +2209,9 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
       autoSync: serializer.fromJson<bool>(json['autoSync']),
       intervalSeconds: serializer.fromJson<int>(json['intervalSeconds']),
       wifiOnly: serializer.fromJson<bool>(json['wifiOnly']),
+      trustedCertFingerprint: serializer.fromJson<String?>(
+        json['trustedCertFingerprint'],
+      ),
       capabilities: serializer.fromJson<String>(json['capabilities']),
       lastSyncAtMs: serializer.fromJson<int?>(json['lastSyncAtMs']),
       lastError: serializer.fromJson<String?>(json['lastError']),
@@ -2182,6 +2228,9 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
       'autoSync': serializer.toJson<bool>(autoSync),
       'intervalSeconds': serializer.toJson<int>(intervalSeconds),
       'wifiOnly': serializer.toJson<bool>(wifiOnly),
+      'trustedCertFingerprint': serializer.toJson<String?>(
+        trustedCertFingerprint,
+      ),
       'capabilities': serializer.toJson<String>(capabilities),
       'lastSyncAtMs': serializer.toJson<int?>(lastSyncAtMs),
       'lastError': serializer.toJson<String?>(lastError),
@@ -2196,6 +2245,7 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
     bool? autoSync,
     int? intervalSeconds,
     bool? wifiOnly,
+    Value<String?> trustedCertFingerprint = const Value.absent(),
     String? capabilities,
     Value<int?> lastSyncAtMs = const Value.absent(),
     Value<String?> lastError = const Value.absent(),
@@ -2207,6 +2257,9 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
     autoSync: autoSync ?? this.autoSync,
     intervalSeconds: intervalSeconds ?? this.intervalSeconds,
     wifiOnly: wifiOnly ?? this.wifiOnly,
+    trustedCertFingerprint: trustedCertFingerprint.present
+        ? trustedCertFingerprint.value
+        : this.trustedCertFingerprint,
     capabilities: capabilities ?? this.capabilities,
     lastSyncAtMs: lastSyncAtMs.present ? lastSyncAtMs.value : this.lastSyncAtMs,
     lastError: lastError.present ? lastError.value : this.lastError,
@@ -2224,6 +2277,9 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
           ? data.intervalSeconds.value
           : this.intervalSeconds,
       wifiOnly: data.wifiOnly.present ? data.wifiOnly.value : this.wifiOnly,
+      trustedCertFingerprint: data.trustedCertFingerprint.present
+          ? data.trustedCertFingerprint.value
+          : this.trustedCertFingerprint,
       capabilities: data.capabilities.present
           ? data.capabilities.value
           : this.capabilities,
@@ -2244,6 +2300,7 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
           ..write('autoSync: $autoSync, ')
           ..write('intervalSeconds: $intervalSeconds, ')
           ..write('wifiOnly: $wifiOnly, ')
+          ..write('trustedCertFingerprint: $trustedCertFingerprint, ')
           ..write('capabilities: $capabilities, ')
           ..write('lastSyncAtMs: $lastSyncAtMs, ')
           ..write('lastError: $lastError')
@@ -2260,6 +2317,7 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
     autoSync,
     intervalSeconds,
     wifiOnly,
+    trustedCertFingerprint,
     capabilities,
     lastSyncAtMs,
     lastError,
@@ -2275,6 +2333,7 @@ class SyncDestination extends DataClass implements Insertable<SyncDestination> {
           other.autoSync == this.autoSync &&
           other.intervalSeconds == this.intervalSeconds &&
           other.wifiOnly == this.wifiOnly &&
+          other.trustedCertFingerprint == this.trustedCertFingerprint &&
           other.capabilities == this.capabilities &&
           other.lastSyncAtMs == this.lastSyncAtMs &&
           other.lastError == this.lastError);
@@ -2288,6 +2347,7 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
   final Value<bool> autoSync;
   final Value<int> intervalSeconds;
   final Value<bool> wifiOnly;
+  final Value<String?> trustedCertFingerprint;
   final Value<String> capabilities;
   final Value<int?> lastSyncAtMs;
   final Value<String?> lastError;
@@ -2300,6 +2360,7 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
     this.autoSync = const Value.absent(),
     this.intervalSeconds = const Value.absent(),
     this.wifiOnly = const Value.absent(),
+    this.trustedCertFingerprint = const Value.absent(),
     this.capabilities = const Value.absent(),
     this.lastSyncAtMs = const Value.absent(),
     this.lastError = const Value.absent(),
@@ -2313,6 +2374,7 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
     this.autoSync = const Value.absent(),
     this.intervalSeconds = const Value.absent(),
     this.wifiOnly = const Value.absent(),
+    this.trustedCertFingerprint = const Value.absent(),
     this.capabilities = const Value.absent(),
     this.lastSyncAtMs = const Value.absent(),
     this.lastError = const Value.absent(),
@@ -2327,6 +2389,7 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
     Expression<bool>? autoSync,
     Expression<int>? intervalSeconds,
     Expression<bool>? wifiOnly,
+    Expression<String>? trustedCertFingerprint,
     Expression<String>? capabilities,
     Expression<int>? lastSyncAtMs,
     Expression<String>? lastError,
@@ -2340,6 +2403,8 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
       if (autoSync != null) 'auto_sync': autoSync,
       if (intervalSeconds != null) 'interval_seconds': intervalSeconds,
       if (wifiOnly != null) 'wifi_only': wifiOnly,
+      if (trustedCertFingerprint != null)
+        'trusted_cert_fingerprint': trustedCertFingerprint,
       if (capabilities != null) 'capabilities': capabilities,
       if (lastSyncAtMs != null) 'last_sync_at_ms': lastSyncAtMs,
       if (lastError != null) 'last_error': lastError,
@@ -2355,6 +2420,7 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
     Value<bool>? autoSync,
     Value<int>? intervalSeconds,
     Value<bool>? wifiOnly,
+    Value<String?>? trustedCertFingerprint,
     Value<String>? capabilities,
     Value<int?>? lastSyncAtMs,
     Value<String?>? lastError,
@@ -2368,6 +2434,8 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
       autoSync: autoSync ?? this.autoSync,
       intervalSeconds: intervalSeconds ?? this.intervalSeconds,
       wifiOnly: wifiOnly ?? this.wifiOnly,
+      trustedCertFingerprint:
+          trustedCertFingerprint ?? this.trustedCertFingerprint,
       capabilities: capabilities ?? this.capabilities,
       lastSyncAtMs: lastSyncAtMs ?? this.lastSyncAtMs,
       lastError: lastError ?? this.lastError,
@@ -2399,6 +2467,11 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
     if (wifiOnly.present) {
       map['wifi_only'] = Variable<bool>(wifiOnly.value);
     }
+    if (trustedCertFingerprint.present) {
+      map['trusted_cert_fingerprint'] = Variable<String>(
+        trustedCertFingerprint.value,
+      );
+    }
     if (capabilities.present) {
       map['capabilities'] = Variable<String>(capabilities.value);
     }
@@ -2424,6 +2497,7 @@ class SyncDestinationsCompanion extends UpdateCompanion<SyncDestination> {
           ..write('autoSync: $autoSync, ')
           ..write('intervalSeconds: $intervalSeconds, ')
           ..write('wifiOnly: $wifiOnly, ')
+          ..write('trustedCertFingerprint: $trustedCertFingerprint, ')
           ..write('capabilities: $capabilities, ')
           ..write('lastSyncAtMs: $lastSyncAtMs, ')
           ..write('lastError: $lastError, ')
@@ -5630,6 +5704,7 @@ typedef $$SyncDestinationsTableCreateCompanionBuilder =
       Value<bool> autoSync,
       Value<int> intervalSeconds,
       Value<bool> wifiOnly,
+      Value<String?> trustedCertFingerprint,
       Value<String> capabilities,
       Value<int?> lastSyncAtMs,
       Value<String?> lastError,
@@ -5644,6 +5719,7 @@ typedef $$SyncDestinationsTableUpdateCompanionBuilder =
       Value<bool> autoSync,
       Value<int> intervalSeconds,
       Value<bool> wifiOnly,
+      Value<String?> trustedCertFingerprint,
       Value<String> capabilities,
       Value<int?> lastSyncAtMs,
       Value<String?> lastError,
@@ -5691,6 +5767,11 @@ class $$SyncDestinationsTableFilterComposer
 
   ColumnFilters<bool> get wifiOnly => $composableBuilder(
     column: $table.wifiOnly,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get trustedCertFingerprint => $composableBuilder(
+    column: $table.trustedCertFingerprint,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5754,6 +5835,11 @@ class $$SyncDestinationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get trustedCertFingerprint => $composableBuilder(
+    column: $table.trustedCertFingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get capabilities => $composableBuilder(
     column: $table.capabilities,
     builder: (column) => ColumnOrderings(column),
@@ -5803,6 +5889,11 @@ class $$SyncDestinationsTableAnnotationComposer
 
   GeneratedColumn<bool> get wifiOnly =>
       $composableBuilder(column: $table.wifiOnly, builder: (column) => column);
+
+  GeneratedColumn<String> get trustedCertFingerprint => $composableBuilder(
+    column: $table.trustedCertFingerprint,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get capabilities => $composableBuilder(
     column: $table.capabilities,
@@ -5862,6 +5953,7 @@ class $$SyncDestinationsTableTableManager
                 Value<bool> autoSync = const Value.absent(),
                 Value<int> intervalSeconds = const Value.absent(),
                 Value<bool> wifiOnly = const Value.absent(),
+                Value<String?> trustedCertFingerprint = const Value.absent(),
                 Value<String> capabilities = const Value.absent(),
                 Value<int?> lastSyncAtMs = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
@@ -5874,6 +5966,7 @@ class $$SyncDestinationsTableTableManager
                 autoSync: autoSync,
                 intervalSeconds: intervalSeconds,
                 wifiOnly: wifiOnly,
+                trustedCertFingerprint: trustedCertFingerprint,
                 capabilities: capabilities,
                 lastSyncAtMs: lastSyncAtMs,
                 lastError: lastError,
@@ -5888,6 +5981,7 @@ class $$SyncDestinationsTableTableManager
                 Value<bool> autoSync = const Value.absent(),
                 Value<int> intervalSeconds = const Value.absent(),
                 Value<bool> wifiOnly = const Value.absent(),
+                Value<String?> trustedCertFingerprint = const Value.absent(),
                 Value<String> capabilities = const Value.absent(),
                 Value<int?> lastSyncAtMs = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
@@ -5900,6 +5994,7 @@ class $$SyncDestinationsTableTableManager
                 autoSync: autoSync,
                 intervalSeconds: intervalSeconds,
                 wifiOnly: wifiOnly,
+                trustedCertFingerprint: trustedCertFingerprint,
                 capabilities: capabilities,
                 lastSyncAtMs: lastSyncAtMs,
                 lastError: lastError,

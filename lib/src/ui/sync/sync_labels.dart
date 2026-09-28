@@ -178,6 +178,11 @@ Color syncStatusColor(SyncStatus status, ColorScheme scheme) {
     hint: AppStrings.syncTestUnsupportedHint,
     icon: Icons.block,
   ),
+  SyncTestOutcome.certificate => (
+    title: AppStrings.syncTestCertificate,
+    hint: AppStrings.syncTestCertificateHint,
+    icon: Icons.gpp_maybe_outlined,
+  ),
   SyncTestOutcome.failed || SyncTestOutcome.ok => (
     title: AppStrings.syncTestFailed,
     hint: '',

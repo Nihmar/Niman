@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
@@ -71,6 +72,13 @@ const List<String> _editorSettingColumns = [
   "editor_toolbar TEXT NOT NULL DEFAULT ''",
 ];
 
+/// Takes the v32 certificate-trust column back off `sync_destinations`: a
+/// database shaped like v31 or earlier has no such column, and the upgrade
+/// that adds it is what the tests about those shapes are about (#454).
+Future<void> _dropTrustedCertFingerprint(AppDatabase db) => db.customStatement(
+  'ALTER TABLE sync_destinations DROP COLUMN trusted_cert_fingerprint',
+);
+
 /// The names of those tables, for asserting they are gone.
 const List<String> _indexTableNames = [
   'notes',
@@ -92,6 +100,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 32) await _dropTrustedCertFingerprint(db);
   if (version < 31) {
     for (final column in [
       'welcome_seen',
@@ -1138,7 +1147,9 @@ void main() {
           "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/W')",
         );
         // What a v26 release leaves after opening a v27 database: the
-        // number taken back down, the columns already gone.
+        // number taken back down, the columns already gone — and nothing
+        // of v32's certificate trust, which no v26 build had (#454).
+        await _dropTrustedCertFingerprint(db);
         await db.customStatement('PRAGMA user_version = 26');
         await db.close();
       }
@@ -1200,6 +1211,9 @@ void main() {
           'ALTER TABLE sync_items DROP COLUMN base_text',
         );
       }
+      // Both branches are older than the certificate trust (#454): a v27 or
+      // v28 database is one without the column.
+      await _dropTrustedCertFingerprint(db);
       await db.customStatement('PRAGMA user_version = $version');
       await db.close();
     }
@@ -1388,6 +1402,37 @@ void main() {
     });
   });
 
+  group('v31 → v32: a destination may trust a certificate (#454)', () {
+    test('an existing install upgrades trusting nothing, row intact', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 31);
+        await db.customStatement(
+          'INSERT INTO sync_destinations (library_path, url, username) '
+          "VALUES ('/lib/Work', 'https://nas.example/dav/', 'ale')",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final store = SyncStore(db);
+      final row = (await store.destination('/lib/Work'))!;
+      expect(row.url, 'https://nas.example/dav/');
+      expect(row.username, 'ale');
+      // The upgrade trusts nothing it was not told to: a destination that
+      // worked over http is not quietly accepted over https.
+      expect(row.trustedCertFingerprint, equals(null));
+
+      // And the column takes writes after the upgrade.
+      await store.setTrustedFingerprint('/lib/Work', 'AA:BB:CC');
+      expect(
+        (await store.destination('/lib/Work'))!.trustedCertFingerprint,
+        'AA:BB:CC',
+      );
+      await db.close();
+    });
+  });
+
   // #312: the app database had one connection per caller, and on the first
   // launch after an update two of them upgraded the same file at once: both
   // read the old schema, one added `welcome_seen`, and the other's `ALTER`
@@ -1434,8 +1479,8 @@ void main() {
       ]);
       expect(rows[0], hasLength(1));
       expect(rows[1], hasLength(1));
-      expect(await versionOf(first), 31);
-      expect(await versionOf(second), 31);
+      expect(await versionOf(first), 32);
+      expect(await versionOf(second), 32);
       // The upgrade ran once, and the row that was there is the row it
       // welcomed.
       expect((await AppSettingsRepo(first).firstRun()).deckSeen, isTrue);
@@ -1469,7 +1514,7 @@ void main() {
 
       final db = open();
       expect((await AppSettingsRepo(db).firstRun()).deckSeen, isFalse);
-      expect(await versionOf(db), 31);
+      expect(await versionOf(db), 32);
       await db.close();
     });
 

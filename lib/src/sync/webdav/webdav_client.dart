@@ -85,16 +85,26 @@ final class WebDavClient {
   /// sent with every request. Credentials in the URL itself are refused,
   /// so they can never reach a log line through it. [httpClient] is for
   /// tests; the client closes only the one it created.
+  ///
+  /// [trustedCertificateFingerprint] is the SHA-256 fingerprint of the one
+  /// server certificate this destination may present when the device
+  /// cannot verify it (#454): the certificate the user confirmed. It is
+  /// the only thing accepted — every other certificate is refused, as it
+  /// is with no fingerprint at all — and it is per client, so nothing is
+  /// trusted app-wide. Null trusts nothing beyond the device's own
+  /// certificate store.
   new({
     required Uri url,
     String username = '',
     String password = '',
+    String? trustedCertificateFingerprint,
     HttpClient? httpClient,
     this.timeout = const Duration(seconds: 30),
   }) : baseUrl = _normalizeBase(url),
        _authorization = username.isEmpty
            ? null
            : 'Basic ${base64.encode(utf8.encode('$username:$password'))}',
+       _trustedFingerprint = _fingerprintKey(trustedCertificateFingerprint),
        _ownsHttp = httpClient == null,
        _http = httpClient ?? HttpClient() {
     _http
@@ -102,6 +112,13 @@ final class WebDavClient {
       ..idleTimeout = const Duration(seconds: 15)
       ..autoUncompress = false
       ..userAgent = 'Niman';
+    // The device refused the server's certificate: the user may have
+    // confirmed this exact one for this destination (#454). Accepting
+    // anything else — any other certificate, whatever host — is not what
+    // this does: the callback answers true only for the confirmed
+    // fingerprint, for the destination's own host, and false for
+    // everything else, which leaves the failure #366 already described.
+    _http.badCertificateCallback = _onBadCertificate;
     _baseSegments = [
       for (final segment in baseUrl.pathSegments)
         if (segment.isNotEmpty) segment,
@@ -123,6 +140,16 @@ final class WebDavClient {
   final String? _authorization;
   final bool _ownsHttp;
   final HttpClient _http;
+
+  /// The only certificate fingerprint this client accepts when the device
+  /// cannot verify it (hex digits only, uppercased), or null when it
+  /// accepts none (#454).
+  final String? _trustedFingerprint;
+
+  /// The fingerprint of the last certificate the callback refused, so the
+  /// failure can name what it refused even where the exception does not.
+  String? _refusedFingerprint;
+
   late final List<String> _baseSegments;
   DateTime? _serverDate;
 
@@ -157,6 +184,23 @@ final class WebDavClient {
       port: url.hasPort ? url.port : null,
       path: path,
     );
+  }
+
+  /// Whether the device may proceed with a certificate it could not verify:
+  /// true only for the one fingerprint the user confirmed for this
+  /// destination, presented by the destination's own host, and false for
+  /// everything else (#454), which leaves the failure [WebDavFailure] #366
+  /// already described. Called by `dart:io` only when verification failed.
+  bool _onBadCertificate(X509Certificate certificate, String host, int port) {
+    final fingerprint = sha256Fingerprint(certificate.der);
+    final trusted = _trustedFingerprint;
+    if (trusted != null &&
+        host.toLowerCase() == baseUrl.host.toLowerCase() &&
+        _fingerprintKey(fingerprint) == trusted) {
+      return true;
+    }
+    _refusedFingerprint = fingerprint;
+    return false;
   }
 
   /// The absolute URL of [path]; [collection] adds the trailing slash
@@ -570,6 +614,9 @@ final class WebDavClient {
     for (var hop = 0; ; hop++) {
       final HttpClientResponse response;
       try {
+        // One attempt, one certificate: the callback may have caught a
+        // refusal on an earlier hop, and that fingerprint is not this one.
+        _refusedFingerprint = null;
         final request = await _http.openUrl(verb, uri).timeout(timeout);
         request
           ..followRedirects = false
@@ -687,13 +734,19 @@ final class WebDavClient {
 
   /// The failure for a refused certificate, or null when [e] is TLS
   /// trouble of another kind (a version mismatch, a dropped handshake).
+  ///
+  /// A fingerprint the callback caught is the certificate itself and is
+  /// preferred over one guessed out of the exception's text; when the
+  /// callback never ran (an injected client in tests), the text is all
+  /// there is.
   WebDavCertificateFailure? _certificateFailure(
     String method,
     String path,
     TlsException e,
   ) {
-    if (!_certificateRefused(e)) return null;
-    final fingerprint = _fingerprintIn(e);
+    final caught = _refusedFingerprint;
+    if (caught == null && !_certificateRefused(e)) return null;
+    final fingerprint = caught ?? _fingerprintIn(e);
     final host = baseUrl.host;
     final authority = baseUrl.hasPort ? '$host:${baseUrl.port}' : host;
     final digest = fingerprint == null ? '' : ', fingerprint $fingerprint';
@@ -860,6 +913,15 @@ final class WebDavClient {
     return bare.length <= 12 ? bare : bare.substring(0, 12);
   }
 
+  /// The comparison form of a certificate fingerprint: the hex digits
+  /// alone, uppercased, so a stored `AB:CD:…` matches one written without
+  /// the separators. An empty or separator-only string is no fingerprint.
+  static String? _fingerprintKey(String? fingerprint) {
+    if (fingerprint == null) return null;
+    final digits = fingerprint.replaceAll(RegExp('[^0-9A-Fa-f]'), '');
+    return digits.isEmpty ? null : digits.toUpperCase();
+  }
+
   /// The port [uri] spells, or null when it leaves it to the scheme's
   /// default (`80`/`443`): `http://nas/dav` and `https://nas/dav` then
   /// have the same spelled port, as a scheme upgrade must keep its
@@ -882,6 +944,20 @@ final class WebDavClient {
     return etag;
   }
 }
+
+/// The SHA-256 fingerprint of a DER-encoded certificate: uppercase hex
+/// bytes joined with `:`, the way `openssl x509 -fingerprint -sha256`
+/// prints it. This is the value a destination stores and compares against
+/// (#454), so it is computed from the certificate's own bytes rather than
+/// from anything a message says.
+String sha256Fingerprint(List<int> der) =>
+    _formatFingerprint(sha256.convert(der).bytes);
+
+/// [digest] as uppercase hex bytes joined with `:`.
+String _formatFingerprint(List<int> digest) => [
+  for (final byte in digest)
+    byte.toRadixString(16).padLeft(2, '0').toUpperCase(),
+].join(':');
 
 final class _DigestSink implements Sink<Digest> {
   late Digest value;

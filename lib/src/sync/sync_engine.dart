@@ -308,6 +308,9 @@ final class SyncEngine {
     url: Uri.parse(destination.url),
     username: destination.username,
     password: password,
+    // The certificate the user confirmed for this destination, if any:
+    // the device state that makes a self-signed server usable (#454).
+    trustedCertificateFingerprint: destination.trustedCertFingerprint,
   );
 
   /// Runs a sync. [confirm] is asked before a first sync and before a plan

@@ -2264,6 +2264,35 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testen mislyktes';
   @override
+  String get syncTestCertificate => 'The certificate is not trusted';
+  @override
+  String get syncTestCertificateHint =>
+      'The certificate cannot be verified. Trust it only if its fingerprint '
+      'matches the one the server shows.';
+  @override
+  String get syncCertTrustTitle => 'Trust this certificate?';
+  @override
+  String syncCertTrustBody(String host, String fingerprint) =>
+      'The certificate for $host cannot be verified.\n\n'
+      'SHA-256 fingerprint:\n$fingerprint\n\n'
+      'Trust it only if this is the certificate you expect. Niman accepts '
+      'this one certificate for this destination and no other.';
+  @override
+  String get syncCertTrustAction => 'Trust this certificate';
+  @override
+  String get syncCertTrustedTitle => 'Certificate trusted';
+  @override
+  String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
+  @override
+  String get syncCertForgetTitle => 'Forget this certificate?';
+  @override
+  String get syncCertForgetBody =>
+      'This destination is tested against the device certificate store '
+      'again, and a self-signed certificate will have to be confirmed once '
+      'more. Nothing else changes.';
+  @override
+  String get syncCertForgetAction => 'Forget';
+  @override
   String get syncNowAction => 'Synkroniser nå';
   @override
   String get syncSectionServer => 'Server';

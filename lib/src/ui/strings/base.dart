@@ -1117,6 +1117,17 @@ abstract base class Strings {
   String get syncTestUnsupported;
   String get syncTestUnsupportedHint;
   String get syncTestFailed;
+  // A self-signed destination, trusted once by fingerprint (#454).
+  String get syncTestCertificate;
+  String get syncTestCertificateHint;
+  String get syncCertTrustTitle;
+  String syncCertTrustBody(String host, String fingerprint);
+  String get syncCertTrustAction;
+  String get syncCertTrustedTitle;
+  String syncCertTrustedSubtitle(String fingerprint);
+  String get syncCertForgetTitle;
+  String get syncCertForgetBody;
+  String get syncCertForgetAction;
   String get syncNowAction;
   String get syncSectionServer;
   String get syncServerRow;

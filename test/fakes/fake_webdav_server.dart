@@ -53,7 +53,7 @@ DateTime _second(DateTime at) {
 /// server can play Nextcloud (everything on) or a bare nginx/OMV share
 /// (no ETags, no preconditions, no `MOVE`).
 final class FakeWebDavServer {
-  new _(this._server) {
+  new _(this._server, {this.scheme = 'http'}) {
     _tree[''] = _Node.folder(_tick);
     _server.listen((request) => unawaited(_handle(request)));
   }
@@ -63,15 +63,28 @@ final class FakeWebDavServer {
     await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
   );
 
+  /// Starts a TLS server on a free loopback port, presenting the
+  /// certificate [context] holds — for the self-signed destination the
+  /// user may trust by fingerprint (#454).
+  static Future<FakeWebDavServer> startSecure(SecurityContext context) async =>
+      FakeWebDavServer._(
+        await HttpServer.bindSecure(InternetAddress.loopbackIPv4, 0, context),
+        scheme: 'https',
+      );
+
   final HttpServer _server;
+
+  /// `http`, or `https` for a [startSecure] server.
+  final String scheme;
+
   final Map<String, _Node> _tree = {};
   int _tick = 1;
 
-  /// The mount's URL, `http://127.0.0.1:<port>/dav/`.
-  Uri get url => Uri.parse('http://127.0.0.1:${_server.port}/dav/');
+  /// The mount's URL, `<scheme>://127.0.0.1:<port>/dav/`.
+  Uri get url => Uri.parse('$scheme://127.0.0.1:${_server.port}/dav/');
 
-  /// `http://127.0.0.1:<port>`.
-  Uri get origin => Uri.parse('http://127.0.0.1:${_server.port}');
+  /// `<scheme>://127.0.0.1:<port>`.
+  Uri get origin => Uri.parse('$scheme://127.0.0.1:${_server.port}');
 
   /// Every request received, in order.
   final List<FakeWebDavRequest> requests = [];

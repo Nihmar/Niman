@@ -110,6 +110,12 @@ final class SyncStore {
               autoSync: Value(autoSync),
               intervalSeconds: Value(math.max(0, intervalSeconds)),
               wifiOnly: Value(wifiOnly),
+              // A different remote is a different trust: the confirmed
+              // certificate travels with the address it was confirmed for
+              // and is dropped when that address (or user) changes (#454).
+              trustedCertFingerprint: existing == null || retarget
+                  ? const Value(null)
+                  : Value(existing.trustedCertFingerprint),
               capabilities: existing == null || retarget
                   ? const Value('{}')
                   : Value(existing.capabilities),
@@ -184,6 +190,31 @@ final class SyncStore {
   Future<WebDavCapabilities?> capabilities(String libraryPath) async {
     final row = await destination(libraryPath);
     return row == null ? null : WebDavCapabilities.decode(row.capabilities);
+  }
+
+  /// Remembers, or (with null) forgets, the one certificate [libraryPath]'s
+  /// destination may present (#454): the SHA-256 fingerprint of the
+  /// certificate the user confirmed. Null — the default — trusts nothing
+  /// beyond the device's own certificate store.
+  ///
+  /// Per destination (one row per library), the way the URL and the user
+  /// name are; the same server on another device starts untrusted there.
+  Future<void> setTrustedFingerprint(
+    String libraryPath,
+    String? fingerprint,
+  ) async {
+    final path = p.normalize(libraryPath);
+    final updated =
+        await (_db.update(
+          _db.syncDestinations,
+        )..where((t) => t.libraryPath.equals(path))).write(
+          SyncDestinationsCompanion(trustedCertFingerprint: Value(fingerprint)),
+        );
+    _log.info(
+      'destination: certificate trust of $path '
+      '${fingerprint == null ? 'forgotten' : 'set to $fingerprint'}'
+      '${updated == 0 ? ' (no destination)' : ''}',
+    );
   }
 
   /// Records how a sync of [libraryPath] ended: without [error], a success

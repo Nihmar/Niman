@@ -1301,6 +1301,18 @@ final class AppStrings {
   static String get syncTestUnsupported => _s.syncTestUnsupported;
   static String get syncTestUnsupportedHint => _s.syncTestUnsupportedHint;
   static String get syncTestFailed => _s.syncTestFailed;
+  static String get syncTestCertificate => _s.syncTestCertificate;
+  static String get syncTestCertificateHint => _s.syncTestCertificateHint;
+  static String get syncCertTrustTitle => _s.syncCertTrustTitle;
+  static String syncCertTrustBody(String host, String fingerprint) =>
+      _s.syncCertTrustBody(host, fingerprint);
+  static String get syncCertTrustAction => _s.syncCertTrustAction;
+  static String get syncCertTrustedTitle => _s.syncCertTrustedTitle;
+  static String syncCertTrustedSubtitle(String fingerprint) =>
+      _s.syncCertTrustedSubtitle(fingerprint);
+  static String get syncCertForgetTitle => _s.syncCertForgetTitle;
+  static String get syncCertForgetBody => _s.syncCertForgetBody;
+  static String get syncCertForgetAction => _s.syncCertForgetAction;
   static String get syncNowAction => _s.syncNowAction;
   static String get syncSectionServer => _s.syncSectionServer;
   static String get syncServerRow => _s.syncServerRow;

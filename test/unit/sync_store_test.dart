@@ -150,6 +150,51 @@ void main() {
       expect(row.username, 'someone');
     });
 
+    test('a trusted certificate is per destination and survives an option '
+        'change, but a retarget drops it (#454)', () async {
+      for (final library in [lib, other]) {
+        await store.saveDestination(
+          libraryPath: library,
+          url: Uri.parse('https://nas/'),
+        );
+      }
+      await store.setTrustedFingerprint(lib, 'AA:BB:CC');
+      expect(
+        (await store.destination(lib))!.trustedCertFingerprint,
+        'AA:BB:CC',
+      );
+      expect(
+        (await store.destination(other))!.trustedCertFingerprint,
+        isNull,
+        reason: 'the trust belongs to one destination, not to the server',
+      );
+
+      // Changing only the trigger options keeps it.
+      await store.saveDestination(
+        libraryPath: lib,
+        url: Uri.parse('https://nas/'),
+        enabled: false,
+      );
+      expect(
+        (await store.destination(lib))!.trustedCertFingerprint,
+        'AA:BB:CC',
+      );
+
+      // Pointing the destination elsewhere forgets it.
+      await store.saveDestination(
+        libraryPath: lib,
+        url: Uri.parse('https://other/'),
+      );
+      expect((await store.destination(lib))!.trustedCertFingerprint, isNull);
+
+      // And it can be revoked without touching the destination.
+      await store.setTrustedFingerprint(lib, 'DD:EE:FF');
+      await store.setTrustedFingerprint(lib, null);
+      final row = (await store.destination(lib))!;
+      expect(row.trustedCertFingerprint, isNull);
+      expect(row.url, 'https://other/');
+    });
+
     test('removeLibrary drops destination, items and queue of that library '
         'only', () async {
       for (final library in [lib, other]) {

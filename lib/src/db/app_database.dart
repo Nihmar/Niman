@@ -287,6 +287,16 @@ class SyncDestinations extends Table {
   BoolColumn get wifiOnly =>
       boolean().named('wifi_only').withDefault(const Constant(false))();
 
+  /// The SHA-256 fingerprint, uppercase hex bytes joined with `:`, of the
+  /// one certificate the user trusted for this destination (#454); null =
+  /// nothing is trusted beyond the device's own certificate store.
+  ///
+  /// Device state, like [url] and [username]: it is learned on this device,
+  /// it names the exact certificate rather than the server, and a
+  /// destination pointed somewhere else must be confirmed again.
+  TextColumn get trustedCertFingerprint =>
+      text().named('trusted_cert_fingerprint').nullable()();
+
   /// The capability probe's JSON (`WebDavCapabilities`); `{}` = never
   /// probed.
   TextColumn get capabilities => text().withDefault(const Constant('{}'))();
@@ -426,7 +436,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 31;
+  int get schemaVersion => 32;
 
   /// The index that makes a custom theme's name unique without regard to
   /// case, and the name it answers to (issue #269).
@@ -766,6 +776,18 @@ class AppDatabase extends _$AppDatabase {
               'UPDATE app_settings SET welcome_seen = 1',
             );
           }
+        }
+        // Only on a table that was already there: below v22 it was just
+        // created, with the column.
+        if (from >= 22 && from < 32) {
+          // The certificate trust of a destination (#454). Nullable and
+          // null by default: an upgrade trusts nothing new, so a
+          // self-signed server it worked with before (over http) is not
+          // quietly accepted over https until the user says so.
+          await m.database.customStatement(
+            'ALTER TABLE sync_destinations ADD COLUMN '
+            'trusted_cert_fingerprint TEXT',
+          );
         }
         // The whole chain is in the file now, with the number that says so
         // (see [_migrating]).

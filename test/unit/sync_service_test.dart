@@ -31,12 +31,24 @@ void main() {
   late LibrarySyncService service;
   late String path;
 
-  WebDavClient client(Uri url, String user, String password) => WebDavClient(
-    url: url,
-    username: user,
-    password: password,
-    timeout: const Duration(seconds: 5),
-  );
+  /// The fingerprint each client was built with (#454).
+  final testedFingerprints = <String?>[];
+
+  WebDavClient client(
+    Uri url,
+    String user,
+    String password, [
+    String? trustedFingerprint,
+  ]) {
+    testedFingerprints.add(trustedFingerprint);
+    return WebDavClient(
+      url: url,
+      username: user,
+      password: password,
+      trustedCertificateFingerprint: trustedFingerprint,
+      timeout: const Duration(seconds: 5),
+    );
+  }
 
   setUp(() async {
     server = await FakeWebDavServer.start();
@@ -153,6 +165,51 @@ void main() {
       );
       expect(result.ok, isTrue);
     });
+
+    test('the confirmed fingerprint is handed to the client (#454)', () async {
+      final result = await service.testConnection(
+        url: '${server.url}',
+        username: '',
+        password: '',
+        trustedFingerprint: 'AA:BB:CC:DD',
+      );
+      expect(result.ok, isTrue);
+      expect(
+        testedFingerprints.last,
+        'AA:BB:CC:DD',
+        reason: 'the one certificate the user confirmed reaches the client',
+      );
+      expect(
+        await store.destination(path),
+        isNull,
+        reason: 'and stores nothing',
+      );
+    });
+  });
+
+  test('save stores the confirmed certificate and forgetCertificate revokes '
+      'it, leaving the destination alone (#454)', () async {
+    await service.save(
+      url: '${server.url}',
+      username: '',
+      trustedFingerprint: 'AA:BB:CC:DD',
+    );
+    expect(
+      (await store.destination(path))!.trustedCertFingerprint,
+      'AA:BB:CC:DD',
+    );
+
+    // A later save that carries no fingerprint keeps the stored one.
+    await service.save(url: '${server.url}', username: '');
+    expect(
+      (await store.destination(path))!.trustedCertFingerprint,
+      'AA:BB:CC:DD',
+    );
+
+    await service.forgetCertificate();
+    final row = (await store.destination(path))!;
+    expect(row.trustedCertFingerprint, isNull);
+    expect(row.url, '${server.url}');
   });
 
   test('save, sync, resolve and disconnect move the status along', () async {
