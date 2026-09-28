@@ -1230,17 +1230,17 @@ final class ChineseStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ 「$path」嵌套过深';
   @override
-  String get frontmatterTitle => 'Frontmatter';
+  String get frontmatterTitle => 'Properties';
   @override
-  String get frontmatterShowRaw => 'Show raw YAML';
+  String get frontmatterShowRaw => 'Raw YAML';
   @override
-  String get frontmatterShowFields => 'Show fields';
+  String get frontmatterShowFields => 'Fields';
   @override
-  String get frontmatterAddField => 'Add field';
+  String get frontmatterAddField => 'Add a property';
   @override
-  String get frontmatterNewField => 'New field';
+  String get frontmatterNewField => 'New property';
   @override
-  String get frontmatterEditField => 'Edit field';
+  String get frontmatterEditField => 'Edit property';
   @override
   String get frontmatterKeyLabel => 'Key';
   @override
@@ -1250,19 +1250,19 @@ final class ChineseStrings extends Strings {
   @override
   String get frontmatterListHint => 'Separate items with commas';
   @override
-  String get frontmatterRemoveField => 'Remove field';
+  String get frontmatterRemoveField => 'Remove property';
   @override
-  String get frontmatterNoFields => 'No fields';
+  String get frontmatterNoFields => 'No properties';
   @override
-  String get frontmatterTypeText => 'Text';
+  String get frontmatterTypeText => 'text';
   @override
-  String get frontmatterTypeNumber => 'Number';
+  String get frontmatterTypeNumber => 'number';
   @override
-  String get frontmatterTypeDate => 'Date';
+  String get frontmatterTypeDate => 'date';
   @override
-  String get frontmatterTypeBoolean => 'True/false';
+  String get frontmatterTypeBoolean => 'boolean';
   @override
-  String get frontmatterTypeList => 'List';
+  String get frontmatterTypeList => 'list';
   @override
   String frontmatterInvalid(String reason) => 'frontmatter 未读取：$reason';
   @override

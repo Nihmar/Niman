@@ -1,14 +1,17 @@
-// The frontmatter fields panel (#157) as the app uses it: a `NoteView` with a
-// note in it, the read pane on top. These drive it through `NoteView` and the
-// note's own editor buffer — no widget class from the panel is imported — so
-// they say what the panel does to the file, not how it is built.
+// The frontmatter fields panel (#157) in the **live editor**: the same rows
+// the read pane shows, at the top of the editor, above the note's first line.
+// These drive the editor through `NoteView` and the note's own buffer — no
+// widget class from the panel is imported — so they say what the panel does to
+// the file, not how it is built. The read pane's own cases are in
+// `frontmatter_fields_test.dart`; together the two hold that one widget serves
+// both surfaces.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 
-/// The note the pane is handed.
+/// The note the editor is handed.
 const String _note =
     '---\n'
     'title: Enciclopedia\n'
@@ -19,14 +22,13 @@ const String _note =
     '\n'
     'Body text.\n';
 
-/// A note view over [note], the read pane showing.
+/// A note view over [note] with the **editor** on stage, not the read pane.
 Widget _app(String note) => MaterialApp(
   home: Scaffold(
     body: NoteView(
-      path: '/tmp/niman-frontmatter-panel-test.md',
+      path: '/tmp/niman-frontmatter-editor-test.md',
       showLineNumbers: true,
       autofocusEditor: false,
-      showPreview: true,
       readNote: (_) async => note,
       writeNote: (_, _) async {},
     ),
@@ -69,31 +71,39 @@ Future<void> _fillField(
 }
 
 void main() {
-  testWidgets('a field edit writes the YAML the parser reads back', (
-    tester,
-  ) async {
-    // The regression: before the panel there was no UI at all, so the panel
-    // and the edit below are both new.
+  testWidgets('the editor shows the same rows above the note', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
 
     expect(
       find.byKey(const Key('frontmatter-fields')),
       findsOneWidget,
-      reason: 'the read pane shows the note frontmatter as fields',
+      reason: 'the live editor shows the note frontmatter as fields',
     );
+    // One row per key, the key's own type chip, and the add row last.
+    expect(find.byKey(const Key('frontmatter-field-title')), findsOneWidget);
+    expect(find.byKey(const Key('frontmatter-type-title')), findsOneWidget);
+    expect(find.byKey(const Key('frontmatter-field-pinned')), findsOneWidget);
+    expect(find.byKey(const Key('frontmatter-add')), findsOneWidget);
+    // The note's own first line is still there, under the panel.
+    expect(_text(tester), _note);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 
-    // A text field: tap the value, change it, save.
+  testWidgets('a field edit in the editor writes the note', (tester) async {
+    await tester.pumpWidget(_app(_note));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const Key('frontmatter-value-title')));
     await tester.pumpAndSettle();
     await _fillField(tester, value: 'Nuova');
 
     final parsed = parseFrontmatter(_text(tester))!;
     expect(parsed.title, 'Nuova');
-    expect(parsed.fields['title'], ['Nuova']);
     expect(_text(tester), contains('title: Nuova\n'));
 
-    // It is one edit, and it undoes like any other.
+    // One edit, undoable like any other.
     final editor = tester.state<MarkdownSourceViewState>(
       find.byType(MarkdownSourceView, skipOffstage: false),
     );
@@ -103,27 +113,10 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('ticking a boolean field writes the note', (tester) async {
+  testWidgets('adding and removing a field in the editor', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('frontmatter-toggle-pinned')));
-    await tester.pumpAndSettle();
-
-    expect(_text(tester), contains('pinned: true\n'));
-    expect(parseFrontmatter(_text(tester))!.pinned, isTrue);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('a new list stays a list and a date stays a date', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_app(_note));
-    await tester.pumpAndSettle();
-
-    // Add a list field: the panel draws it as chips, and the file keeps a
-    // YAML list.
     await tester.tap(find.byKey(const Key('frontmatter-add')));
     await tester.pumpAndSettle();
     await _fillField(tester, key: 'people', type: 'list', value: 'Ada, Grace');
@@ -133,34 +126,17 @@ void main() {
     expect(
       find.byKey(const Key('frontmatter-chip-people-Ada')),
       findsOneWidget,
-      reason: 'a list is drawn as a list',
+      reason: 'a list is drawn as a list in the editor too',
     );
-
-    // Change the date: it stays a bare date, read back as one.
-    await tester.tap(find.byKey(const Key('frontmatter-value-date')));
-    await tester.pumpAndSettle();
-    await _fillField(tester, value: '2026-10-02');
-
-    expect(_text(tester), contains('date: 2026-10-02\n'));
-    expect(parseFrontmatter(_text(tester))!.date, DateTime(2026, 10, 2));
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('removing a field takes its line out', (tester) async {
-    await tester.pumpWidget(_app(_note));
-    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('frontmatter-remove-pinned')));
     await tester.pumpAndSettle();
-
     expect(_text(tester), isNot(contains('pinned:')));
-    expect(parseFrontmatter(_text(tester))!.pinned, isFalse);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('the raw YAML is one toggle away', (tester) async {
+  testWidgets('the raw YAML is one toggle away in the editor', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('frontmatter-toggle-pinned')), findsOneWidget);
@@ -174,7 +150,6 @@ void main() {
       findsNothing,
       reason: 'the fields give way to the source they were read from',
     );
-    expect(find.textContaining('title: Enciclopedia'), findsWidgets);
 
     await tester.tap(find.byKey(const Key('frontmatter-raw-toggle')));
     await tester.pumpAndSettle();
@@ -182,7 +157,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a block the parser refuses shows raw, and is left alone', (
+  testWidgets('a block the parser refuses shows no rows in the editor', (
     tester,
   ) async {
     const malformed =
@@ -196,18 +171,10 @@ void main() {
 
     expect(find.byKey(const Key('frontmatter-panel-error')), findsOneWidget);
     expect(find.byKey(const Key('frontmatter-raw')), findsOneWidget);
-    expect(find.byKey(const Key('frontmatter-toggle-pinned')), findsNothing);
     expect(find.byKey(const Key('frontmatter-add')), findsNothing);
-    // Nothing the panel draws changed the note.
+    expect(find.byKey(const Key('frontmatter-toggle-pinned')), findsNothing);
+    // Nothing the panel draws changed the note: the YAML is left as written.
     expect(_text(tester), malformed);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('a note with no frontmatter shows no panel', (tester) async {
-    await tester.pumpWidget(_app('Body only.\n'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('frontmatter-fields')), findsNothing);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

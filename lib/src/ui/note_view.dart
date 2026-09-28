@@ -1243,6 +1243,10 @@ final class _NoteViewState extends State<NoteView>
       _unifiedText = text;
     }
     final buffer = surface.buffer;
+    // The fields panel, when the note has a block for it: the same widget the
+    // read pane puts above its note, above this one too, so the two surfaces
+    // cannot drift (#157).
+    final frontmatter = _frontmatterFields();
     // At the *note* text size, as the preview is (T-M6-12): without this the
     // surface drew the note at the interface size, so the note's size setting
     // did nothing. The find bar above it keeps the interface's.
@@ -1307,6 +1311,11 @@ final class _NoteViewState extends State<NoteView>
               keyPrefix: 'source',
             ),
           ),
+          // The fields panel, above the note's first line, in the same place
+          // the read view shows it: the note itself is still the source, and
+          // its frontmatter lines are still text below this (#157).
+          if (frontmatter != null)
+            NoteColumnPadding(column: widget.noteColumn, child: frontmatter),
           Expanded(child: note),
         ],
       ),
@@ -1404,17 +1413,18 @@ final class _NoteViewState extends State<NoteView>
     if (panel == null) return _buildPreview(context);
     return Column(
       children: [
-        panel,
+        NoteColumnPadding(column: widget.noteColumn, child: panel),
         Expanded(child: _buildPreview(context)),
       ],
     );
   }
 
-  /// The frontmatter panel, or null when the note has no readable block.
+  /// The frontmatter fields panel, or null when the note has no readable block.
   ///
-  /// A prototype (#157): the panel is dropped here, at the read pane's top,
-  /// and deleting these three methods takes the feature back out — the note,
-  /// the file and the source editor are not touched by any of it.
+  /// The **one** panel both surfaces show (#157): the read pane puts it above
+  /// its preview, the live editor above its note, and neither keeps a copy of
+  /// the note — both hand the same head to the same widget and read the file
+  /// back through it.
   Widget? _frontmatterFields() {
     final head = _frontmatterHeadOf(_surface?.buffer);
     if (head == null) return null;

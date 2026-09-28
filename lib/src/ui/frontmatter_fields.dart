@@ -1,15 +1,18 @@
 /// The frontmatter fields panel (#157): a note's leading YAML block drawn as
-/// typed fields — one row per key, a checkbox for a boolean, chips for a list —
-/// with the raw YAML always a toggle away.
+/// typed fields — one row per key, the key in a left column, the value, and a
+/// small chip naming the type (text, number, date, boolean, list) — with the
+/// raw YAML always a toggle away.
 ///
-/// This is a prototype, and deliberately a *view*: `note` is read for the
+/// This is the **one** widget both surfaces put above the note: the read pane
+/// and the live editor call it with the same head and the same two callbacks,
+/// so the two cannot drift. It is deliberately a *view*: `note` is read for the
 /// block, an edit is handed back through `onSet`/`onRemove`, and the owner
 /// writes it through the editor's own path — one `.md` file, one undo step,
 /// saved like any edit. The panel never holds the note's source, so it cannot
-/// become a second store. A block the parser refuses
-/// ([parseFrontmatterBlock]) shows its raw source and the parser's reason and
-/// no field rows, so a note whose frontmatter Niman cannot read is never made
-/// worse by the panel. A note with no block shows nothing.
+/// become a second store. A block the parser refuses ([parseFrontmatterBlock])
+/// shows its reason and its raw source and no field rows, so a note whose
+/// frontmatter Niman cannot read is never made worse by the panel. A note with
+/// no block shows nothing.
 library;
 
 import 'package:flutter/material.dart';
@@ -46,182 +49,237 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   /// Whether the raw YAML is showing instead of the fields.
   bool _raw = false;
 
-  /// Whether the panel is folded to its header row.
-  bool _collapsed = false;
+  /// The width of the key column, so every row's value starts on the same x.
+  static const double _keyColumn = 150;
 
   /// How tall the field list may be before it scrolls on its own, so a note
   /// with many keys never pushes the note it is read with off the pane.
-  static const double _maxListHeight = 220;
+  static const double _maxListHeight = 260;
 
   @override
   Widget build(BuildContext context) {
     final block = frontmatterBlock(widget.note);
     if (block == null) return const SizedBox.shrink();
-    final theme = Theme.of(context);
     final parsed = frontmatterFieldsIn(block.text);
     final malformed = parsed.error != null;
-    final source = block.text;
-    return Material(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: malformed
+          ? _brokenPanel(context, block.text, parsed.error!)
+          : _fieldsPanel(context, block.text, parsed.fields),
+    );
+  }
+
+  /// The panel with a block the parser could read: the header, and the fields
+  /// or the raw source behind the toggle.
+  Widget _fieldsPanel(
+    BuildContext context,
+    String source,
+    List<FrontmatterField> fields,
+  ) {
+    final theme = Theme.of(context);
+    return Container(
       key: const Key('frontmatter-fields'),
-      color: theme.colorScheme.surfaceContainerLow,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.22,
+        ),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _header(context, malformed: malformed),
-          const Divider(height: 1),
-          if (!_collapsed)
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: _maxListHeight),
-              child: SingleChildScrollView(
-                child: _raw || malformed
-                    ? _rawSource(context, source, parsed.error)
-                    : _fields(context, parsed.fields),
-              ),
+          _header(context),
+          const SizedBox(height: 4),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: _maxListHeight),
+            child: SingleChildScrollView(
+              child: _raw
+                  ? _rawSource(context, source)
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: _fields(context, fields),
+                    ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  /// The panel's one row of chrome: the fold, the title, and — when the block
-  /// parses, so there is something to show on the other side — the raw toggle.
-  Widget _header(BuildContext context, {required bool malformed}) {
-    final theme = Theme.of(context);
-    return Row(
+  /// The panel with a block the parser refused: the reason and the raw source,
+  /// and no field rows — the block is left exactly as it is written.
+  Widget _brokenPanel(BuildContext context, String source, String error) {
+    return Column(
+      key: const Key('frontmatter-fields'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(width: 4),
-        IconButton(
-          key: const Key('frontmatter-collapse'),
-          visualDensity: VisualDensity.compact,
-          iconSize: 18,
-          tooltip: AppStrings.frontmatterTitle,
-          icon: Icon(_collapsed ? Icons.expand_more : Icons.expand_less),
-          onPressed: () => setState(() => _collapsed = !_collapsed),
-        ),
-        Expanded(
-          child: Text(
-            AppStrings.frontmatterTitle,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        if (!malformed)
-          IconButton(
-            key: const Key('frontmatter-raw-toggle'),
-            visualDensity: VisualDensity.compact,
-            iconSize: 18,
-            tooltip: _raw
-                ? AppStrings.frontmatterShowFields
-                : AppStrings.frontmatterShowRaw,
-            icon: Icon(_raw ? Icons.tune : Icons.code),
-            onPressed: () => setState(() => _raw = !_raw),
-          ),
+        _broken(context, error),
+        const SizedBox(height: 10),
+        _rawSource(context, source),
       ],
     );
   }
 
-  /// The block as it is written, with the parser's reason above it when it did
-  /// not parse. Readable, not typed in here: the source editor is where the
-  /// YAML itself is edited.
-  Widget _rawSource(BuildContext context, String source, String? error) {
+  /// The panel's one row of chrome: the title on the left, the raw toggle on
+  /// the right.
+  Widget _header(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                AppStrings.frontmatterInvalid(error),
-                key: const Key('frontmatter-panel-error'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            AppStrings.frontmatterTitle.toUpperCase(),
+            key: const Key('frontmatter-properties'),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              letterSpacing: 1.1,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        InkWell(
+          key: const Key('frontmatter-raw-toggle'),
+          borderRadius: BorderRadius.circular(999),
+          onTap: () => setState(() => _raw = !_raw),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              _raw
+                  ? AppStrings.frontmatterShowFields
+                  : AppStrings.frontmatterShowRaw,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary,
               ),
             ),
-          SelectableText(
-            source,
-            key: const Key('frontmatter-raw'),
-            style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  /// The reason a block does not parse, in the error's own colour.
+  Widget _broken(BuildContext context, String error) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.error;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.07),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Text(
+        AppStrings.frontmatterInvalid(error),
+        key: const Key('frontmatter-panel-error'),
+        style: theme.textTheme.bodySmall?.copyWith(color: color),
+      ),
+    );
+  }
+
+  /// The block as it is written, under a rule: read, not typed in here — the
+  /// source editor is where the YAML itself is edited.
+  Widget _rawSource(BuildContext context, String source) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
+      ),
+      padding: const EdgeInsets.only(top: 9, bottom: 2),
+      child: SelectableText(
+        source,
+        key: const Key('frontmatter-raw'),
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontFamily: 'monospace',
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
 
   /// One row per key, then the add.
-  Widget _fields(BuildContext context, List<FrontmatterField> fields) {
+  List<Widget> _fields(BuildContext context, List<FrontmatterField> fields) {
     final theme = Theme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (fields.isEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-            child: Text(
-              AppStrings.frontmatterNoFields,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        for (final field in fields) _fieldRow(context, field),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
-            child: TextButton.icon(
-              key: const Key('frontmatter-add'),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(AppStrings.frontmatterAddField),
-              onPressed: () => _add(context),
+    return [
+      if (fields.isEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+          child: Text(
+            AppStrings.frontmatterNoFields,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-      ],
-    );
+      for (final field in fields) _fieldRow(context, field),
+      _addRow(context),
+    ];
   }
 
   Widget _fieldRow(BuildContext context, FrontmatterField field) {
     final theme = Theme.of(context);
     return Padding(
       key: Key('frontmatter-field-${field.key}'),
-      padding: const EdgeInsets.fromLTRB(12, 2, 4, 2),
+      padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
         children: [
-          Icon(
-            _iconOf(field.type),
-            size: 16,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 7),
           SizedBox(
-            width: 96,
+            width: _keyColumn,
             child: Text(
               field.key,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(child: _fieldValue(context, field)),
+          const SizedBox(width: 10),
+          _typeChip(context, field),
           IconButton(
             key: Key('frontmatter-remove-${field.key}'),
             visualDensity: VisualDensity.compact,
             iconSize: 16,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
             tooltip: AppStrings.frontmatterRemoveField,
             icon: const Icon(Icons.close),
             onPressed: () => widget.onRemove(field.key),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The type the parser gave the field, as the drawing's small chip.
+  Widget _typeChip(BuildContext context, FrontmatterField field) {
+    final theme = Theme.of(context);
+    return Container(
+      key: Key('frontmatter-type-${field.key}'),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        _typeLabel(field.type),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontSize: 10.5,
+        ),
       ),
     );
   }
@@ -233,12 +291,25 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       case FrontmatterFieldType.boolean:
         return Align(
           alignment: AlignmentDirectional.centerStart,
-          child: Checkbox(
-            key: Key('frontmatter-toggle-${field.key}'),
-            visualDensity: VisualDensity.compact,
-            value: field.value?.toLowerCase() == 'true',
-            onChanged: (value) =>
-                widget.onSet(field.key, (value ?? false) ? 'true' : 'false'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Checkbox(
+                key: Key('frontmatter-toggle-${field.key}'),
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                value: field.value?.toLowerCase() == 'true',
+                onChanged: (value) => widget.onSet(
+                  field.key,
+                  (value ?? false) ? 'true' : 'false',
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                field.value ?? 'false',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
           ),
         );
       case FrontmatterFieldType.list:
@@ -266,6 +337,8 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
               key: Key('frontmatter-add-item-${field.key}'),
               visualDensity: VisualDensity.compact,
               iconSize: 16,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 28, height: 28),
               tooltip: AppStrings.frontmatterEditField,
               icon: const Icon(Icons.add),
               onPressed: () => _edit(context, field),
@@ -291,6 +364,47 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     }
   }
 
+  /// The last row: a small box with a plus and the words that add a key.
+  Widget _addRow(BuildContext context) {
+    final theme = Theme.of(context);
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: InkWell(
+        key: const Key('frontmatter-add'),
+        borderRadius: BorderRadius.circular(7),
+        onTap: () => _add(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Icon(
+                  Icons.add,
+                  size: 13,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                AppStrings.frontmatterAddField,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _add(BuildContext context) async {
     final result = await showFrontmatterFieldDialog(context);
     if (result == null) return;
@@ -308,11 +422,11 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     widget.onSet(field.key, frontmatterFieldYaml(result.type, result.values));
   }
 
-  static IconData _iconOf(FrontmatterFieldType type) => switch (type) {
-    FrontmatterFieldType.text => Icons.notes,
-    FrontmatterFieldType.number => Icons.numbers,
-    FrontmatterFieldType.date => Icons.event_outlined,
-    FrontmatterFieldType.boolean => Icons.check_box_outlined,
-    FrontmatterFieldType.list => Icons.list,
+  static String _typeLabel(FrontmatterFieldType type) => switch (type) {
+    FrontmatterFieldType.text => AppStrings.frontmatterTypeText,
+    FrontmatterFieldType.number => AppStrings.frontmatterTypeNumber,
+    FrontmatterFieldType.date => AppStrings.frontmatterTypeDate,
+    FrontmatterFieldType.boolean => AppStrings.frontmatterTypeBoolean,
+    FrontmatterFieldType.list => AppStrings.frontmatterTypeList,
   };
 }
