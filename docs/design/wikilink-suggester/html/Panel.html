@@ -83,13 +83,23 @@ h3.title{font-size:23px;font-weight:700;margin:0 0 14px}
 .probe{margin:14px 0 0;color:var(--muted);font-size:12px;line-height:1.55;max-width:940px}
 .note{color:var(--muted);font-size:12px;margin:22px 0 0;max-width:940px;line-height:1.55}
 .note code{font-family:ui-monospace,monospace;background:var(--surface);padding:1px 5px;border-radius:4px;color:var(--code);font-size:11.5px}
+/* — decided-against, the dead link, and the source surface — */
+.panel.against{opacity:.5}
+.struck{text-decoration:line-through}
+.dead{color:var(--error);text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px}
+.hint{position:absolute;left:0;top:1.7em;z-index:6;background:var(--surface-high);border:1px solid var(--outline);border-radius:7px;padding:4px 9px;font-size:11.5px;color:var(--muted);box-shadow:0 8px 20px rgba(0,0,0,.45);white-space:nowrap}
+.hint b{color:var(--text)}
+.win.mini{width:560px}
+.win.mini .workspace{min-height:250px}
+.src{font-family:ui-monospace,monospace;font-size:12.5px;color:#C8C3BA}
+.src .sline{position:relative;line-height:1.7;white-space:pre-wrap;margin:0 0 6px}
 </style>
 </head>
 <body>
 
 <h1>Wikilink suggester</h1>
-<p class="lead">While a wikilink is being typed, a small panel lists what can go there and filters as the text grows. <b>1</b> to <b>4</b> are the states the issue describes; <b>5</b> is a probe for the book forms. Each is drawn at window size over the note, then again larger, because the panel is too small to judge at arm's length.</p>
-<p class="lead">The panel is drawn in the <b>live editor</b>, where the caret is and where the link is written. It sits under the caret's own rectangle — the same seam the touch toolbar uses — and never in the note's text.</p>
+<p class="lead">While a wikilink is being typed, a small panel lists what can go there and filters as the text grows. <b>1</b> to <b>4</b> are the states the issue describes, <b>5</b> the book target, <b>6</b> the same panel over the source. Each is drawn in the app's window, most again larger, because the panel is too small to judge at arm's length.</p>
+<p class="lead">These are the <b>decided</b> shapes: the maintainer answered the three questions the drawing was made to ask (<b>Decisions, 2026-09-28</b>, on <code>#475</code>). The panel appears in the <b>live editor</b>, where the caret is and where the link is written, and in <b>source</b> too — the same panel, the same rows, over the raw text.</p>
 <p class="legend">Rows read <b>name</b> then the folder, dimmed, so a link can name the right one. A row found through an alias carries the alias: <code>alias md</code>. The matched run is in bold: <b>Li</b>nks, Dead <b>li</b>nks. Keys: <code>&uarr;&darr;</code> move, <code>&crarr;</code> or <code>Tab</code> insert, <code>Esc</code> close.</p>
 
 <h2>1 — after <code>[[</code> · the library's notes, folder dimmed</h2>
@@ -283,11 +293,11 @@ h3.title{font-size:23px;font-weight:700;margin:0 0 14px}
   </div>
 </div>
 
-<h2>4 — nothing matches · the panel's words, and an optional <code>New note</code></h2>
-<p class="lead">Two panels, side by side, so the one row can be judged on its own: the left is what the panel says with nothing found; the right adds the optional <b>New note</b> row. Question 1 asks for the right one.</p>
-<div style="display:flex;gap:34px;align-items:flex-start;margin-top:12px">
+<h2>4 — nothing matches · the decided shape, and the row decided against</h2>
+<p class="lead"><b>4a</b> is the decided shape: the panel says nothing matched and offers nothing. <b>4b</b> adds the <b>New note</b> row that question 1 asked for — drawn crossed out, because the answer was no: the panel lists only what exists. A note nobody has written is made from the dead link itself, on ctrl+click — see <b>4c</b>.</p>
+<div style="display:flex;gap:34px;align-items:flex-start;margin-top:12px;flex-wrap:wrap">
   <div>
-    <p class="lab" style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 7px">4a — nothing found, no row</p>
+    <p class="lab" style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 7px">4a — decided · the panel says so, and nothing else</p>
     <div class="panel detail" style="width:400px">
       <div class="empty">No note matches <b>&ldquo;zzz&rdquo;</b>.
         <div class="sub">nothing in the library has that name or alias</div>
@@ -296,49 +306,58 @@ h3.title{font-size:23px;font-weight:700;margin:0 0 14px}
     </div>
   </div>
   <div>
-    <p class="lab" style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 7px">4b — the optional New note row</p>
-    <div class="panel detail" style="width:400px">
+    <p class="lab" style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 7px">4b — decided against · the <code>New note</code> row</p>
+    <div class="panel detail against" style="width:400px">
       <div class="empty" style="padding-bottom:9px">No note matches <b>&ldquo;zzz&rdquo;</b>.
         <div class="sub">nothing in the library has that name or alias</div>
       </div>
-      <div class="newrow"><span class="plus">&#65291;</span><span>New note <b>&ldquo;zzz&rdquo;</b></span></div>
+      <div class="newrow"><span class="plus">&#65291;</span><span class="struck">New note <b>&ldquo;zzz&rdquo;</b></span></div>
       <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>move</span><span class="dot">&middot;</span><kbd>&crarr;</kbd><span>or</span><kbd>Tab</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
     </div>
   </div>
 </div>
-<div class="win" style="margin-top:20px">
-  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>&mdash;</span><span>&#9634;</span><span>&#10005;</span></div>
-  <div class="workspace">
-    <div class="rail"><i class="on">&#9636;</i><i>&#8981;</i><i>&#9998;</i><i>&#9776;</i><span class="grow"></span><i>&#9881;</i></div>
-    <div class="tree">
-      <div class="row">&#8962; Library</div>
-      <div class="row ind">&#9662; Guides</div>
-      <div class="row sel ind">&#9636; Editing.md</div>
-      <div class="row ind">&#9636; Markdown basics.md</div>
+<h2>4c — where the note comes from · ctrl+click on the dead link</h2>
+<p class="lead">The panel offers nothing, so the link itself is the affordance: a wikilink that names no note is a <b>dead link</b>, and ctrl+click on one creates the note it names and opens it (<code>#477</code>). The panel never writes it.</p>
+<div style="display:flex;gap:28px;align-items:flex-start;margin-top:12px;flex-wrap:wrap">
+  <div class="win mini">
+    <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>&mdash;</span><span>&#9634;</span><span>&#10005;</span></div>
+    <div class="workspace">
+      <div class="rail"><i class="on">&#9636;</i><i>&#8981;</i><i>&#9998;</i><i>&#9776;</i><span class="grow"></span><i>&#9881;</i></div>
+      <div class="pane">
+        <div class="notebar"><span>&#9636;</span><span class="on">&#9673;</span><span>&#9675;</span><span>&#8942;</span></div>
+        <div class="notecol" style="width:auto;padding:14px 20px 22px">
+          <h3 class="title">Editing</h3>
+          <div class="body">
+            <p>The name typed is not one the library knows.</p>
+            <p class="line"><span class="dead">[[zzz]]</span><span class="caret"></span>
+              <div class="hint">ctrl+click &middot; create <b>zzz.md</b></div>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="pane">
-      <div class="notebar"><span>&#9636;</span><span class="on">&#9673;</span><span>&#9675;</span><span>&#8942;</span></div>
-      <div class="notecol">
-        <h3 class="title">Editing</h3>
-        <div class="body">
-          <p>The name typed is not one the library knows.</p>
-          <p class="line"><span class="wl">[[zzz</span><span class="caret"></span>
-            <div class="panel drop">
-              <div class="empty">No note matches <b>&ldquo;zzz&rdquo;</b>.
-                <div class="sub">nothing in the library has that name or alias</div>
-              </div>
-              <div class="newrow"><span class="plus">&#65291;</span><span>New note <b>&ldquo;zzz&rdquo;</b></span></div>
-              <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>move</span><span class="dot">&middot;</span><kbd>&crarr;</kbd><span>or</span><kbd>Tab</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
-            </div>
-          </p>
-          <p>The panel never invents a note on its own: the row in <b>4b</b> would be the only way a link can be completed to a note that does not exist yet, and it is drawn as an option to take or leave.</p>
+  </div>
+  <div style="align-self:center;color:var(--muted);font-size:22px">&rarr;</div>
+  <div class="win mini">
+    <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>&mdash;</span><span>&#9634;</span><span>&#10005;</span></div>
+    <div class="workspace">
+      <div class="rail"><i class="on">&#9636;</i><i>&#8981;</i><i>&#9998;</i><i>&#9776;</i><span class="grow"></span><i>&#9881;</i></div>
+      <div class="pane">
+        <div class="notebar"><span>&#9636;</span><span class="on">&#9673;</span><span>&#9675;</span><span>&#8942;</span></div>
+        <div class="notecol" style="width:auto;padding:14px 20px 22px">
+          <h3 class="title">zzz</h3>
+          <div class="body">
+            <p class="line"><span class="caret"></span></p>
+            <p class="probe" style="margin-top:6px">A new, empty note — the same path a new note from the shell takes. The original link now resolves.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<h2>5 — probe · the book forms, <code>[[Dune.pdf#</code></h2>
+<h2>5 — a book target · the decided <code>#</code> form: pages and chapters</h2>
+<p class="lead">Books are in scope: when the link's target resolves to a PDF or an EPUB, the <code>#</code> completion offers its pages and chapters — <b>&#91;&#91;Dune.pdf#page=34&#93;&#93;</b> and <b>&#91;&#91;Dune.epub#chapter=&hellip;&amp;line=12&#93;&#93;</b>, the forms <code>docs/user/links.md</code> documents. These are the decided shapes, not a probe.</p>
 <div class="win">
   <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>&mdash;</span><span>&#9634;</span><span>&#10005;</span></div>
   <div class="workspace">
@@ -364,14 +383,14 @@ h3.title{font-size:23px;font-weight:700;margin:0 0 14px}
               <div class="foot"><kbd>&crarr;</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
             </div>
           </p>
-          <p>The one usable row offers the <b>form</b> the resolver already reads, not a list — because a book has no names to suggest, only numbers to type.</p>
+          <p>A PDF's pages are numbers, so the row offers the <b>form</b> the resolver already reads and the number is typed. An EPUB's chapters have names — those it lists, below.</p>
         </div>
       </div>
     </div>
   </div>
 </div>
 <div class="detailwrap">
-  <p class="lab">Detail — the probe, larger</p>
+  <p class="lab">Detail — the PDF panel, larger</p>
   <div class="panel detail">
     <div class="cap"><span>Places in</span><b>Dune.pdf</b></div>
     <div class="row sel"><span class="nm">page=</span><span class="grow"></span><span class="fld">type a number</span></div>
@@ -379,7 +398,96 @@ h3.title{font-size:23px;font-weight:700;margin:0 0 14px}
     <div class="foot"><kbd>&crarr;</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
   </div>
 </div>
-<p class="probe">This last state is drawn only so question 3 can be answered by looking: there is nothing to suggest after <b>Dune.pdf#</b> but the form itself. Whether that single row earns its place, or the book forms stay out of the first pass, is the maintainer's call.</p>
+<div class="win" style="margin-top:16px">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>&mdash;</span><span>&#9634;</span><span>&#10005;</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">&#9636;</i><i>&#8981;</i><i>&#9998;</i><i>&#9776;</i><span class="grow"></span><i>&#9881;</i></div>
+    <div class="tree">
+      <div class="row">&#8962; Library</div>
+      <div class="row ind">&#9662; Books</div>
+      <div class="row ind">&#9636; Dune.epub</div>
+      <div class="row ind">&#9662; Guides</div>
+      <div class="row sel ind">&#9636; Editing.md</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>&#9636;</span><span class="on">&#9673;</span><span>&#9675;</span><span>&#8942;</span></div>
+      <div class="notecol">
+        <h3 class="title">Editing</h3>
+        <div class="body">
+          <p>A book is linked by a place in it: <b>&#91;&#91;Dune.epub#chapter=&hellip;&amp;line=12&#93;&#93;</b>.</p>
+          <p class="line"><span class="wl">[[Dune.epub#</span><span class="caret"></span>
+            <div class="panel drop">
+              <div class="cap"><span>Chapters in</span><b>Dune.epub</b></div>
+              <div class="row sel"><span class="nm">Chapter 1 &mdash; Dune</span><span class="grow"></span><span class="fld">ch1.xhtml</span></div>
+              <div class="row"><span class="nm">Chapter 2 &mdash; Muad'Dib</span><span class="grow"></span><span class="fld">ch2.xhtml</span></div>
+              <div class="row"><span class="nm">Chapter 3 &mdash; The Prophet</span><span class="grow"></span><span class="fld">ch3.xhtml</span></div>
+              <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>move</span><span class="dot">&middot;</span><kbd>&crarr;</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
+            </div>
+          </p>
+          <p>An EPUB's chapters have names — a list to filter like any other; each row is a chapter and the file inside the book that holds it. Typing <b>&amp;line=</b> after a chapter takes a line.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="detailwrap">
+  <p class="lab">Detail — the EPUB panel, larger</p>
+  <div class="panel detail">
+    <div class="cap"><span>Chapters in</span><b>Dune.epub</b></div>
+    <div class="row sel"><span class="nm">Chapter 1 &mdash; Dune</span><span class="grow"></span><span class="fld">ch1.xhtml</span></div>
+    <div class="row"><span class="nm">Chapter 2 &mdash; Muad'Dib</span><span class="grow"></span><span class="fld">ch2.xhtml</span></div>
+    <div class="row"><span class="nm">Chapter 3 &mdash; The Prophet</span><span class="grow"></span><span class="fld">ch3.xhtml</span></div>
+    <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>move</span><span class="dot">&middot;</span><kbd>&crarr;</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
+  </div>
+</div>
+<p class="probe">This state was drawn as a <b>probe</b> to settle question 3, leaning that a book had "no list to offer", only a <code>page=</code> form to type. The decision went the other way: books are in scope, and the completion offers their pages and chapters. A PDF's pages are still numbers to type, but an EPUB's named chapters are a list to filter like any other.</p>
+
+<h2>6 — in <code>source</code> too · the same panel over the raw text</h2>
+<p class="lead">The panel is not the live editor's alone. The decision put it in <b>source</b> as well: over the raw text, the same rows and the same keys, positioned from the caret just as in the live editor.</p>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>&mdash;</span><span>&#9634;</span><span>&#10005;</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">&#9636;</i><i>&#8981;</i><i>&#9998;</i><i>&#9776;</i><span class="grow"></span><i>&#9881;</i></div>
+    <div class="tree">
+      <div class="row">&#8962; Library</div>
+      <div class="row ind">&#9656; Archive</div>
+      <div class="row ind">&#9662; Guides</div>
+      <div class="row sel ind">&#9636; Editing.md</div>
+      <div class="row ind">&#9636; Markdown basics.md</div>
+      <div class="row ind">&#9636; Notes.md</div>
+      <div class="row ind">&#9656; Personal</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>&#9636;</span><span>&#9673;</span><span class="on">&#9675;</span><span>&#8942;</span></div>
+      <div class="notecol">
+        <div class="src">
+          <div class="sline"># Editing</div>
+          <div class="sline">&nbsp;</div>
+          <div class="sline">Wikilinks are the connective tissue of the library: one note points at another by name.</div>
+          <div class="sline"><span class="wl">[[note</span><span class="caret"></span>
+            <div class="panel drop">
+              <div class="row sel"><span class="nm"><b>Note</b>s</span><span class="grow"></span><span class="fld">Archive</span></div>
+              <div class="row"><span class="nm"><b>Note</b>s</span><span class="grow"></span><span class="fld">Guides</span></div>
+              <div class="row"><span class="nm">Meeting <b>note</b>s</span><span class="grow"></span><span class="fld">Personal</span></div>
+              <div class="row"><span class="nm">Meeting <b>note</b>s</span><span class="grow"></span><span class="fld">Work</span></div>
+              <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>move</span><span class="dot">&middot;</span><kbd>&crarr;</kbd><span>or</span><kbd>Tab</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="detailwrap">
+  <p class="lab">Detail — the panel, larger (over source)</p>
+  <div class="panel detail">
+    <div class="row sel"><span class="nm"><b>Note</b>s</span><span class="grow"></span><span class="fld">Archive</span></div>
+    <div class="row"><span class="nm"><b>Note</b>s</span><span class="grow"></span><span class="fld">Guides</span></div>
+    <div class="row"><span class="nm">Meeting <b>note</b>s</span><span class="grow"></span><span class="fld">Personal</span></div>
+    <div class="row"><span class="nm">Meeting <b>note</b>s</span><span class="grow"></span><span class="fld">Work</span></div>
+    <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>move</span><span class="dot">&middot;</span><kbd>&crarr;</kbd><span>or</span><kbd>Tab</kbd><span>insert</span><span class="dot">&middot;</span><kbd>Esc</kbd><span>close</span></div>
+  </div>
+</div>
 
 <p class="note">Mockups, not screenshots of the app: everything here is HTML drawn to look like Niman, using the palette from <code>lib/src/ui/theme/niman.dart</code>. Where a mockup and the app disagree, the app ships.</p>
 </body>

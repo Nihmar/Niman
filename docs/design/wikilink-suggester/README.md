@@ -5,12 +5,13 @@ typed, list what can go there and filter as the text grows — the library's not
 after `[[`, their headings after a `#`. Writing a link today means remembering
 the exact name; a typo writes a dead link that only the report finds later.
 
-These are the **drawings**, so the shape is settled by looking at it. They
-answer nothing on the maintainer's behalf: the three questions the issue opened
-with are drawn as *states*, to be taken or left.
+The maintainer answered the three questions these drawings were made to ask (the
+**Decisions (2026-09-28)** section of `#475`), so they are no longer open. Each
+state below is the **decided** shape; where a question is still open it is named
+as such.
 
-Five states, in [html/Panel.html](html/Panel.html), each at window size and
-again larger (the panel is too small to judge at arm's length):
+Six states, in [html/Panel.html](html/Panel.html), each drawn in the app's
+window, most again larger (the panel is too small to judge at arm's length):
 
 1. **After `[[`** — the library's notes, each row a name and the folder
    dimmed. Two pairs share a stem, so the folder is what tells them apart, and
@@ -20,39 +21,57 @@ again larger (the panel is too small to judge at arm's length):
    carries the keys (`↑↓ move · ⏎ or Tab insert · Esc close`).
 3. **After `#`** — the headings of the note just named, filtered the same way;
    and the empty target (`[[#…`) offering the **current** note's headings.
-4. **Nothing matches** — the panel's own words; and, as a *separate state*, the
-   optional **`New note`** row (question 1).
-5. **The book probe** — what `[[Dune.pdf#` could offer (question 3).
+4. **Nothing matches** — **4a**, the decided shape: the panel says so and offers
+   nothing. **4b**, the `New note` row, is drawn **decided against** — the panel
+   lists only what exists. **4c** draws where a new note actually comes from:
+   ctrl+click on the dead link (`#477`).
+5. **A book target** — the decided `#` shape when the link names a PDF or an
+   EPUB: the completion offers its pages and chapters,
+   `[[Dune.pdf#page=34]]` and `[[Dune.epub#chapter=…&line=12]]`, the forms
+   `docs/user/links.md` documents.
+6. **In `source` too** — the same panel over the raw text: both surfaces carry
+   it.
 
 What every state keeps: the panel writes nothing but the link that was chosen —
-it never invents a note, and `Escape` leaves the text alone. The rows come from
-the index the app already keeps (`note_stems`, aliases, the outline's heading
-scan); nothing here needs a new scan to fill.
+it never invents a note; a note nobody has written is made from the dead link
+itself, on ctrl+click (`#477`), not from a row in the panel. `Escape` closes the
+panel and leaves the text alone. The rows come from the index the app already
+keeps (`note_stems`, aliases, the outline's heading scan); nothing here needs a
+new scan to fill.
 
-The panel is drawn in the **live editor**, at the caret's own rectangle — the
-same seam the touch toolbar uses. Whether `source` gets it too is question 2,
-and is left open.
+The panel appears in **both** surfaces: drawn here in the **live editor**, at
+the caret's own rectangle — the same seam the touch toolbar uses — and drawn
+again over **`source`** (state 6), the same rows over the raw text.
 
 They are mockups, not screenshots of the app: everything here is HTML drawn to
 look like Niman, using the real palette from `lib/src/ui/theme/niman.dart`.
 Where a mockup and the app disagree, the app is what ships — these record what
-was drawn, and what it asks.
+was drawn, and what was decided.
 
-## What the drawings ask
+## What the drawings record
 
-* **A `New note` entry when nothing matches** (question 1). Drawn as two states
-  side by side: **4a** is the panel's own words with nothing found, **4b** adds
-  the `New note “zzz”` row. They are shown together so the row can be accepted
-  or dropped on its own; the drawing does not decide.
-* **Live surface only, or `source` too** (question 2). Every state is drawn in
-  the live editor, where the caret and the line layout live. The drawing does
-  not answer whether `source` shares it.
-* **The book forms** (question 3). Drawn as a small probe (state 5) rather than
-  argued in prose, so the question can be answered by looking — and because the
-  probe *is* the answer: after `Dune.pdf#` there is no list to offer, only the
-  form `page=` to type. A page is picked, not named, so a suggester has nothing
-  to suggest. The row is drawn; whether it earns its place is the maintainer's
-  call.
+The maintainer's three answers (2026-09-28, on `#475`):
+
+* **A `New note` row when nothing matches — no.** A wikilink that names nothing
+  is a *dead link*, and a dead link is where a new note comes from: ctrl+click
+  on it creates the note it names (`#477`). So the panel lists only what exists
+  and says so plainly when nothing matches — **4a** is the decided shape; the
+  `New note` row (**4b**) is kept only to record that it was asked and turned
+  down.
+* **Live surface only, or `source` too — both.** The panel is drawn in the live
+  editor and again over `source` (**6**): the same rows and the same keys, in
+  the raw text.
+* **The book forms — in scope.** When the link's target resolves to a PDF or an
+  EPUB, the `#` completion offers its pages and chapters (**5**):
+  `[[Dune.pdf#page=34]]`, `[[Dune.epub#chapter=…&line=12]]`. The earlier lean —
+  that a book had "no list to offer", only a `page=` form to type — was the
+  drawing agent's, not the decision; it went the other way, and an EPUB's named
+  chapters are as much a list to filter as the library's notes.
+
+Still open: **what a tap does on touch.** There is no ctrl on a phone, so what a
+tap on a dead link should do — offer the creation, or keep the present message —
+is left to [`#477`](https://github.com/Nihmar/Niman/issues/477), the issue that
+carries the question.
 
 ## Re-rendering these
 
@@ -64,4 +83,4 @@ chrome --headless --disable-gpu --hide-scrollbars \
   --window-size=1280,900 --screenshot=Panel.png html/Panel.html
 ```
 
-Each window is 1180px wide and best read in a browser at any width.
+The full windows are 1180px wide and best read in a browser at any width.
