@@ -877,6 +877,80 @@ void main() {
         reason: 'clearing a parent does not clear its children',
       );
     });
+
+    testWidgets('a tap does not finish a scan the edit left owed', (
+      tester,
+    ) async {
+      // #387: the cascade reads the note's blocks to know the branch, and
+      // settling the scan for them put the rest of the note on the tap's
+      // frame. A tap on a note whose scan is owed ticks the one box and
+      // reads no more lines than the box's own; the cascade waits for the
+      // scan to catch up (`docs/records/huge-notes.md` item 3).
+      final note = [
+        'caret',
+        '',
+        '- [ ] parent',
+        '  - [ ] child',
+        '- [ ] sib',
+        for (var at = 0; at < 20000; at++) 'prose $at',
+      ].join('\n');
+      final state = await pumpMode(
+        tester,
+        MarkdownSurfaceMode.live,
+        caret: 0,
+        text: note,
+        cascadeChecklist: true,
+      );
+      final buffer = state.widget.buffer;
+      expect(state.scanSettled, isTrue);
+
+      // An edit far down the note leaves the scan owed far below the boxes.
+      state.replaceText(
+        buffer.offsetOfLine(1000),
+        buffer.offsetOfLine(1000),
+        r'$$'
+        '\n',
+      );
+      expect(state.scanSettled, isFalse, reason: 'the edit paid its budget');
+      final scanned = state.scanProgress;
+
+      await tester.tapAt(
+        boxOf(tester, '- [ ] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      expect(
+        state.scanProgress - scanned,
+        lessThan(100),
+        reason: 'the tap must not read the rest of the note',
+      );
+      expect(state.scanSettled, isFalse, reason: 'the tap must not settle it');
+      expect(
+        buffer.text,
+        contains('- [x] parent\n  - [ ] child'),
+        reason: 'the scan is owed, so the box ticks on its own',
+      );
+
+      // Caught up, the cascade applies: clearing does not carry down, and
+      // the next tick does.
+      await tester.pump(Duration.zero);
+      expect(state.scanSettled, isTrue);
+      await tester.tapAt(
+        boxOf(tester, '- [x] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(buffer.text, contains('- [ ] parent\n  - [ ] child'));
+      await tester.tapAt(
+        boxOf(tester, '- [ ] parent'),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      expect(
+        buffer.text,
+        contains('- [x] parent\n  - [x] child'),
+        reason: 'the scan has caught up, so the tick carries down the branch',
+      );
+    });
   });
 
   testWidgets('live draws a format inside another as both', (tester) async {
