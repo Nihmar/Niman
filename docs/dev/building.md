@@ -14,6 +14,23 @@
 - Android NDK 29.0.13113456 (required by `whisper_ggml`).
 - The APK is 64-bit only (`arm64-v8a`, `x86_64`): `armeabi-v7a` is
   excluded at packaging in `android/app/build.gradle.kts`.
+- **Linux desktop build**: GTK 3 and the plugins' system libraries — the
+  list CI installs, in `check.yml` and `release.yml` alike:
+
+  ```
+  sudo apt-get install -y clang cmake git ninja-build pkg-config \
+    libgtk-3-dev liblzma-dev libstdc++-13-dev \
+    libayatana-appindicator3-dev libsecret-1-dev libjsoncpp-dev \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+  ```
+
+  Two more are for the checks rather than the build: `xvfb`, which gives
+  the integration suite the display the GTK bundle needs on a headless
+  host, and `hunspell` with `hunspell-en-us` and `hunspell-it`, without
+  which the live cases of `test/unit/spell_check_test.dart` skip.
+- **Windows desktop build**: Visual Studio with the *Desktop development
+  with C++* workload. The installer additionally needs Inno Setup 6 —
+  `choco install innosetup`, as `release.yml` does.
 
 ## Helper scripts
 
