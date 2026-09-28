@@ -245,6 +245,58 @@ void main() {
       expect(report.occurrences, 0);
     });
 
+    test('a note that cannot be written is reported as failed', () async {
+      // A note that reads fine but whose directory refuses the atomic temp
+      // write: the read-only/full-disk case. The run must report it as
+      // failed instead of letting it pass as a note with no match.
+      final locked = Directory(p.join(root.path, 'locked'))..createSync();
+      await File(p.join(locked.path, 'note.md')).writeAsString('cat here\n');
+      await Indexer(db).fullScan(root.path);
+      if (Platform.isWindows) {
+        return; // The chmod below is POSIX-only.
+      }
+      expect((await Process.run('chmod', ['555', locked.path])).exitCode, 0);
+      try {
+        final report = await replace.replaceAll(
+          term: 'cat',
+          replacement: 'dog',
+          caseSensitive: false,
+          only: {'locked/note.md'},
+        );
+
+        expect(report.notesScanned, 1);
+        expect(report.occurrences, 0); // Nothing was written…
+        expect(report.notesChanged, 0);
+        // …and the note is named as failed, not silently "no match".
+        expect(report.failed, ['locked/note.md']);
+        expect(
+          await File(p.join(locked.path, 'note.md')).readAsString(),
+          'cat here\n',
+        );
+      } finally {
+        await Process.run('chmod', ['755', locked.path]);
+      }
+    });
+
+    test('a punctuation-only term neither throws nor matches', () async {
+      // A lone quote names no token: the phrase builder drops it the way
+      // query.dart's buildFtsQuery drops a quote-only token, so no
+      // malformed FTS phrase ever reaches SQLite.
+      expect(ftsPhraseOf('"'), isNull);
+      expect(ftsPhraseOf('  --  '), isNull);
+
+      final preview = await replace.previewMatches('"', caseSensitive: false);
+      expect(preview, isEmpty);
+      final report = await replace.replaceAll(
+        term: '"',
+        replacement: 'x',
+        caseSensitive: false,
+      );
+      expect(report.notesScanned, 0);
+      expect(report.occurrences, 0);
+      expect(report.failed, isEmpty);
+    });
+
     test(
       'each rewritten note keeps its old text as a replace version',
       () async {

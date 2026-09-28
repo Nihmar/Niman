@@ -12,6 +12,7 @@ final class FakeReplaceSource implements ReplaceSource {
     notesChanged: 2,
     occurrences: 5,
     skipped: [],
+    failed: [],
   );
 
   /// Every preview request, in order.
