@@ -470,14 +470,16 @@ final class IndexReconciler {
         await _db.customStatement('DELETE FROM scan_orphans WHERE path = ?', [
           orphanPath,
         ]);
-        if (contentOwed) reread.add(newPath);
+        if (contentOwed || orphan.title == null) reread.add(newPath);
         wrote = true;
       }
       if (page.length < _pairPage) break;
     }
     // The orphan's content rows are the ones it never lost, but an
     // incomplete index may have been missing them — its directory was
-    // scanned before the pair existed, so nothing filled the gap.
+    // scanned before the pair existed, so nothing filled the gap. A note
+    // without a frontmatter title is re-read regardless: its search title
+    // is the old filename until the pass re-derives it (#352).
     if (reread.isNotEmpty) {
       final contents = await _tree.readRelContents(
         root,

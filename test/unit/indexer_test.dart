@@ -695,6 +695,65 @@ void main() {
     });
 
     test(
+      'a rename keeps the alias stems and re-derives the search title',
+      () async {
+        // A note whose search title is its filename (no frontmatter title) and
+        // which carries an alias. Both were wrong after a rename: the alias
+        // row was dropped, and the FTS title kept the old filename (#352).
+        File(
+          p.join(root.path, 'note1.md'),
+        ).writeAsStringSync('---\naliases: [nickname]\n---\nbody text here\n');
+        await indexer.fullScan(root.path);
+        final before = (await dao.find('note1.md'))!;
+        final resolved = await LinkResolver(db).resolveWiki('nickname');
+        expect((resolved as ResolvedNote).note.id, before.id);
+
+        File(p.join(root.path, 'note1.md'))
+            .renameSync(p.join(root.path, 'renamed.md'));
+        await indexer.applyEvents(root.path, [
+          p.join(root.path, 'renamed.md'),
+          p.join(root.path, 'note1.md'),
+        ]);
+
+        final after = (await dao.find('renamed.md'))!;
+        expect(after.id, before.id); // paired: the id survived the rename
+
+        // (a) The alias was not dropped by the rename: [[nickname]] resolves.
+        final still = await LinkResolver(db).resolveWiki('nickname');
+        expect((still as ResolvedNote).note.id, after.id);
+
+        // (b) The search title is the new filename, not the old one.
+        expect(await _titleHits(db, 'renamed'), 1);
+        expect(await _titleHits(db, 'note1'), 0);
+      },
+    );
+
+    test('a rename keeps the alias stems when the note has a frontmatter '
+        'title too', () async {
+      // With a frontmatter title the content pass is legitimately skipped on a
+      // rename (the title does not move), so the alias rows must survive
+      // without it — the rename-pair path alone (#352).
+      File(p.join(root.path, 'note1.md')).writeAsStringSync(
+        '---\ntitle: Renamable\naliases: [nickname]\n---\nbody text here\n',
+      );
+      await indexer.fullScan(root.path);
+      final before = (await dao.find('note1.md'))!;
+
+      File(p.join(root.path, 'note1.md'))
+          .renameSync(p.join(root.path, 'renamed.md'));
+      await indexer.applyEvents(root.path, [
+        p.join(root.path, 'renamed.md'),
+        p.join(root.path, 'note1.md'),
+      ]);
+
+      final after = (await dao.find('renamed.md'))!;
+      expect(after.id, before.id);
+      final resolved = await LinkResolver(db).resolveWiki('nickname');
+      expect((resolved as ResolvedNote).note.id, after.id);
+      expect(await _ftsTitleIs(db, after.id, 'Renamable'), isTrue);
+    });
+
+    test(
       'rescanFiles catches a rewrite the (size, mtime) shortcut misses',
       () async {
         // A same-size rewrite with an unchanged mtime: applyEvents trusts
@@ -987,6 +1046,18 @@ Future<bool> _ftsTitleIs(IndexDatabase db, int id, String title) async {
       )
       .get();
   return rows.isNotEmpty;
+}
+
+/// How many full-text rows match [term] in the title column — the word search
+/// a stale title would be found by.
+Future<int> _titleHits(IndexDatabase db, String term) async {
+  final rows = await db
+      .customSelect(
+        'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?1',
+        variables: [Variable<String>('title : "$term"')],
+      )
+      .get();
+  return rows.length;
 }
 
 /// The index state a rebuild reproduces: per-note content rows.
