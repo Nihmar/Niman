@@ -27,6 +27,7 @@ Substitution, not a language — unknown `{{…}}` is copied verbatim:
 | `{{cursor}}` | Caret stop after insertion (writes nothing; `{{cursor:2}}` numbers stops) |
 | `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… |
 | `{{clipboard}}` | Paste contents (title-cased by filters below) |
+| `{{selection}}` | The text selected in the editor when the note was created (empty when nothing is) |
 | `{{ask:Label}}` / `{{ask:Label:default}}` | Prompt for a value when creating |
 | `{{choice:Label:a,b,c}}` | Pick from a list when creating |
 | `{{parent}}` | Reserved: answered by the creation flow (e.g. `[[{{parent}}]]`); never `{{ask:parent}}` |
@@ -48,16 +49,19 @@ Append with `|`: `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
 
 ## File directives
 
-A template's frontmatter may carry creation directives:
+A template's frontmatter may carry creation directives — under a `niman`
+map of their own, so they never become properties of the note:
 
 ```markdown
 ---
-folder: Journal/{{date:YYYY}}/{{date:MM}}
-filename: "{{date:YYYY-MM-DD}} {{title}}"
+niman:
+  folder: Journal/{{date:YYYY}}/{{date:MM}}
+  filename: "{{date:YYYY-MM-DD}} {{title}}"
 ---
 ```
 
 `folder` / `filename` accept placeholders (resolved before the path is
-used). The remaining frontmatter merges into the new note. A malformed
-directives block aborts creation with the reason shown — the note is not
-half-created.
+used). The remaining frontmatter merges into the new note. A `niman`
+block that does not parse declares nothing: the note is still created —
+in the folder the creation came from, under the name the template gives
+it — and a message says what the block's problem is.

@@ -12,7 +12,9 @@ deletion that has sat in `.trash/` longer than that is deleted for good
 the next time the library opens. It happens quietly and there is no
 undo, which is why nothing is deleted until you choose a wait. Only what
 Niman put in the trash is counted — a file you moved into `.trash/`
-yourself carries no deletion date and is left where it is.
+yourself carries no deletion date and is left where it is. **Empty
+trash**, by hand, is not that: it takes everything in `.trash/`, yours
+included.
 
 ## History
 
