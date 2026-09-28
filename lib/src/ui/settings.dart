@@ -15,6 +15,7 @@ import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/settings_section_pane.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 /// The settings home (issue #104): the areas a settings screen splits
@@ -27,6 +28,7 @@ final class SettingsBody extends StatefulWidget {
   /// Creates the settings body.
   const new({
     required this.controller,
+    this.unsaved,
     this.onClosed,
     this.spellCheck,
     this.transcription,
@@ -38,6 +40,10 @@ final class SettingsBody extends StatefulWidget {
 
   /// The session of the library whose settings this body edits.
   final LibrarySession controller;
+
+  /// The open notes, saved before the library leaves (#351): Maintenance
+  /// hands it to the switch screen. Null where none is wired.
+  final UnsavedTracker? unsaved;
 
   /// Called after "Close library" closes the session; the shell returns
   /// to the Files tab.
@@ -398,6 +404,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
           if (area.group == SettingsGroup.library) row(area),
         SettingsMaintenanceGroup(
           controller: controller,
+          unsaved: widget.unsaved,
           onClosed: widget.onClosed,
           compact: navigation != null,
           libraryRows: widget.libraryRows,

@@ -7,6 +7,7 @@ import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_navigation.dart';
 import 'package:niman/src/ui/settings_section_pane.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The Settings tab: the settings list without its own Scaffold — the
 /// shell provides the app bar.
@@ -19,6 +20,7 @@ final class SettingsTab extends StatefulWidget {
   /// Creates the settings tab.
   const new({
     required this.controller,
+    this.unsaved,
     this.spellCheck,
     this.transcription,
     this.libraryRows = true,
@@ -28,6 +30,11 @@ final class SettingsTab extends StatefulWidget {
 
   /// The session of the library whose settings this tab edits.
   final LibrarySession controller;
+
+  /// The open notes, saved before the library leaves (#351): the switch
+  /// screen Maintenance opens saves them through it. Null where none is
+  /// wired.
+  final UnsavedTracker? unsaved;
 
   /// The editor's spelling state (T-PP-09), for its toggle; null hides it.
   final EditorSpellCheck? spellCheck;
@@ -65,6 +72,7 @@ final class _SettingsTabState extends State<SettingsTab> {
         if (constraints.maxWidth < wideBreakpoint) {
           return SettingsBody(
             controller: widget.controller,
+            unsaved: widget.unsaved,
             spellCheck: widget.spellCheck,
             transcription: widget.transcription,
             libraryRows: widget.libraryRows,
@@ -77,6 +85,7 @@ final class _SettingsTabState extends State<SettingsTab> {
               width: SettingsTab.listWidth,
               child: SettingsBody(
                 controller: widget.controller,
+                unsaved: widget.unsaved,
                 spellCheck: widget.spellCheck,
                 transcription: widget.transcription,
                 navigation: _navigation,

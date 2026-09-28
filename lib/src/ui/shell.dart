@@ -2794,6 +2794,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       MaterialPageRoute<void>(
         builder: (context) => SwitchLibraryScreen(
           controller: widget.controller,
+          // The phone screen saves the open notes before it switches
+          // (#351), as the library window above does.
+          unsaved: widget.unsavedTracker,
           onSwitched: () => Navigator.of(context).pop(),
         ),
       ),
@@ -4295,6 +4298,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         // A palette pick opens the tab where it points, once (#229).
         key: ValueKey(_settingsTarget),
         controller: controller,
+        // The phone's Maintenance rows switch the library themselves:
+        // they save the open notes first (#351).
+        unsaved: widget.unsavedTracker,
         spellCheck: widget.spellCheck,
         transcription: widget.transcription,
         target: _settingsTarget,
