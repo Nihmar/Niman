@@ -271,22 +271,37 @@ final class IndexTree {
   ///
   /// Returns `newRel → oldRel`; pairs are one-to-one and unique, so a
   /// scan that moved two files onto each other's paths pairs nothing.
+  ///
+  /// The batch's vanished rows are read once, in chunks, and indexed by
+  /// digest here. The pairing used to ask the index for one gone row per
+  /// (live × gone) pair — `SELECT … WHERE path = ?` inside both loops —
+  /// so a 1000-note folder move, one `applyEvents` batch, cost in the
+  /// order of 10⁶ statements (#360).
   Future<Map<String, String>> pairRenames(
     String root,
     Map<String, DiskProbe> live,
     Set<String> gone,
     Map<String, NoteContent> contents,
   ) async {
+    final goneRows = await _dao.byPaths(gone);
+    // Candidates by digest: the digest is what proves the note is the same
+    // one, so only the rows sharing a new note's digest can pair with it
+    // (the size and mtime test then narrows those, as it always has).
+    final byDigest = <String, List<Note>>{};
+    for (final goneRel in gone) {
+      final row = goneRows[goneRel];
+      final digest = row?.sha256;
+      if (row == null || row.isDir || digest == null) continue;
+      (byDigest[digest] ??= []).add(row);
+    }
     final paired = <String, String>{};
     for (final entry in live.entries) {
       final content = contents[entry.key];
       if (content == null) continue;
+      final candidates = byDigest[content.sha256];
+      if (candidates == null) continue;
       String? candidate;
-      for (final goneRel in gone) {
-        final row = await _dao.find(goneRel);
-        if (row == null || row.isDir || row.sha256 != content.sha256) {
-          continue;
-        }
+      for (final row in candidates) {
         if (row.size != entry.value.size ||
             row.modified != toStoredSecond(entry.value.modified)) {
           continue;
@@ -295,7 +310,7 @@ final class IndexTree {
           candidate = null; // ambiguous — pair nothing
           break;
         }
-        candidate = goneRel;
+        candidate = row.path;
       }
       if (candidate != null) {
         paired[entry.key] = candidate;

@@ -1,6 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
 
+/// Paths per `WHERE path IN (…)` statement: SQLite binds 999 variables by
+/// default (32766 since 3.32), so a whole candidate set is looked up in
+/// statement-sized chunks rather than in one (#360).
+const _pathChunk = 500;
+
 /// Query helpers over the materialized notes tree.
 final class NoteDao {
   /// Creates the DAO backed by the given [IndexDatabase].
@@ -65,6 +70,33 @@ final class NoteDao {
       _db.notes,
     )..where((t) => t.path.equals(path))).get();
     return rows.isEmpty ? null : rows.first;
+  }
+
+  /// The rows at [paths], keyed by path, one `WHERE path IN (…)` per
+  /// [_pathChunk] paths (a path the index does not hold is absent from the
+  /// map, which is what [missingAmong] reads backwards).
+  ///
+  /// A candidate set is looked up whole: pairing a batch's new paths
+  /// against its vanished ones used to ask for one gone row at a time,
+  /// `SELECT … WHERE path = ?` per (live × gone) pair — a 1000-note folder
+  /// move ran in the order of 10⁶ statements inside one batch (#360).
+  Future<Map<String, Note>> byPaths(Iterable<String> paths) async {
+    final wanted = paths.toSet().toList(growable: false);
+    if (wanted.isEmpty) return const {};
+    final rows = <String, Note>{};
+    for (var i = 0; i < wanted.length; i += _pathChunk) {
+      final end = i + _pathChunk < wanted.length
+          ? i + _pathChunk
+          : wanted.length;
+      final batch = wanted.sublist(i, end);
+      final found = await (_db.select(
+        _db.notes,
+      )..where((t) => t.path.isIn(batch))).get();
+      for (final row in found) {
+        rows[row.path] = row;
+      }
+    }
+    return rows;
   }
 
   /// Which of [paths] the index does not hold, in one query: the notes a

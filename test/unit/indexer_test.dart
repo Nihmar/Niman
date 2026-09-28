@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Value, Variable;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, QueryExecutor, QueryInterceptor, Value, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
@@ -16,10 +17,12 @@ void main() {
   late IndexDatabase db;
   late Indexer indexer;
   late NoteDao dao;
+  late _QueryCounter counter;
 
   setUp(() async {
     root = await Directory.current.createTemp('niman_index_');
-    db = IndexDatabase(NativeDatabase.memory());
+    counter = _QueryCounter();
+    db = IndexDatabase(NativeDatabase.memory().interceptWith(counter));
     addTearDown(db.close);
     indexer = Indexer(db);
     dao = indexer.dao;
@@ -1034,6 +1037,93 @@ void main() {
       expect(await db.select(db.frontmatterFields).get(), isEmpty);
     });
   });
+
+  group('the cost of pairing a batch (#360)', () {
+    test(
+      'a folder of 300 notes moved in one batch pairs at a linear cost',
+      () async {
+        const notes = 300;
+        final src = Directory(p.join(root.path, 'src'))..createSync();
+        for (var i = 0; i < notes; i++) {
+          File(p.join(src.path, 'n$i.md')).writeAsStringSync('body number $i');
+        }
+        await indexer.fullScan(root.path);
+        final ids = <String, int>{
+          for (final row in await dao.allRows())
+            if (!row.isDir) row.path: row.id,
+        };
+        expect(ids.length, notes + 3); // note1, note2, docs/doc1
+
+        // A folder move as the watcher reports it: every old path gone,
+        // every new one live, in one batch.
+        Directory(p.join(root.path, 'src'))
+            .renameSync(p.join(root.path, 'moved'));
+        final batch = [
+          p.join(root.path, 'src'),
+          for (final rel in ids.keys) p.join(root.path, rel),
+          p.join(root.path, 'moved'),
+          for (var i = 0; i < notes; i++) p.join(root.path, 'moved', 'n$i.md'),
+        ];
+
+        counter.reset();
+        await indexer.applyEvents(root.path, batch);
+        final selects = counter.selects.length;
+
+        // The pairing is unchanged: every note kept its row id, and the
+        // old paths are gone.
+        for (var i = 0; i < notes; i++) {
+          final after = (await dao.find('moved/n$i.md'))!;
+          expect(after.id, ids['src/n$i.md']);
+          expect(after.parent, (await dao.find('moved'))!.id);
+        }
+        expect(await dao.find('src'), isNull);
+        expect(await dao.find('src/n0.md'), isNull);
+        expect(await dao.find('moved/n$notes.md'), isNull);
+
+        // The pairing's own cost: one lookup of the batch's vanished rows,
+        // not one `SELECT … WHERE path = ?` per (live × gone) pair, which
+        // for this batch is 300 × 301 ≈ 90 000 statements.
+        expect(
+          selects,
+          lessThan(10 * notes),
+          reason:
+              '$selects SELECT statements for a $notes-note move: the '
+              'pairing must cost the batch, not the product',
+        );
+      },
+    );
+
+    test('a candidate set is read across the statement chunking', () async {
+      await indexer.fullScan(root.path);
+      // More paths than one statement may bind, with the rows the index
+      // holds last: they are only found if every chunk is queried.
+      final wanted = [
+        for (var i = 0; i < 1200; i++) 'missing/n$i.md',
+        'note1.md',
+        'docs/doc1.md',
+      ];
+      final rows = await dao.byPaths(wanted);
+      expect(rows.keys.toSet(), {'note1.md', 'docs/doc1.md'});
+    });
+  });
+}
+
+/// Counts the statements the index issues, so a test can hold a batch to a
+/// cost linear in its size rather than quadratic in it (#360).
+final class _QueryCounter extends QueryInterceptor {
+  final selects = <String>[];
+
+  void reset() => selects.clear();
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    selects.add(statement);
+    return executor.runSelect(statement, args);
+  }
 }
 
 /// Whether the full-text row of note [id] has [title] for its title: the
