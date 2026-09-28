@@ -6,6 +6,7 @@ import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 
 /// The Maintenance group of the settings home (issue #104): the actions
@@ -16,6 +17,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
   /// Creates the group for [controller]'s library session.
   const new({
     required this.controller,
+    this.unsaved,
     this.onClosed,
     this.compact = false,
     this.libraryRows = true,
@@ -24,6 +26,10 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
 
   /// The session the actions act on.
   final LibrarySession controller;
+
+  /// The open notes, saved before the library leaves (#351): the switch
+  /// screen writes them before it switches. Null where none is wired.
+  final UnsavedTracker? unsaved;
 
   /// Fired when the library closes or switches; the shell leaves the
   /// settings behind with it.
@@ -101,6 +107,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (context) => SwitchLibraryScreen(
           controller: controller,
+          unsaved: unsaved,
           onSwitched: () {
             Navigator.of(context).pop();
             onClosed?.call();

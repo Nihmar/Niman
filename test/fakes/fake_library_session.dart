@@ -879,9 +879,21 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// Every [saveNote] call, in order: `(path, content, editSession)`.
   final List<(String, String, int?)> saves = [];
 
+  /// Held while a test wants a write open in flight (#351): [saveNote]
+  /// records the call and then waits on it before it lands.
+  Completer<void>? saveGate;
+
+  /// Thrown by [saveNote] instead of writing, for a test that wants a
+  /// failed write.
+  Exception? saveError;
+
   @override
   Future<void> saveNote(String path, String content, {int? editSession}) async {
     saves.add((path, content, editSession));
+    final failure = saveError;
+    if (failure != null) throw failure;
+    final gate = saveGate;
+    if (gate != null) await gate.future;
     (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
     _bump();
   }
