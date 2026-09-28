@@ -81,6 +81,35 @@ void main() {
     });
   });
 
+  // Europe/Rome falls back on 2026-10-25, so 24 October plus 168 hours is
+  // 30 October 23:00 local and drops the seventh calendar day (#380). Only
+  // a zone that actually falls back in that week can show it: run this file
+  // as `TZ=Europe/Rome flutter test test/unit/todo_filter_test.dart`.
+  final zoneFallsBack =
+      DateTime(2026, 10, 24).timeZoneOffset !=
+      DateTime(2026, 10, 26).timeZoneOffset;
+
+  group('next7 across a DST fall-back', () {
+    final lines = entries([
+      'sixth day due:2026-10-30',
+      'seventh day due:2026-10-31',
+      'eighth day due:2026-11-01',
+    ]);
+
+    test('holds seven calendar days, not 168 hours', () {
+      expect(
+        descriptions(
+          applyTodoFilter(
+            lines,
+            const TodoFilter(dueRange: TodoDueRange.next7),
+            DateTime(2026, 10, 24),
+          ),
+        ),
+        ['sixth day due:2026-10-30', 'seventh day due:2026-10-31'],
+      );
+    }, skip: zoneFallsBack ? null : 'needs TZ=Europe/Rome (see the comment)');
+  });
+
   group('token chips', () {
     final lines = entries(['a +p1 @c1', 'b +p1 +p2', 'c @c1 #t1']);
 
