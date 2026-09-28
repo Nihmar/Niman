@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -252,6 +253,63 @@ void main() {
         reason: 'the body must give up on the client timeout',
       );
       expect(await stalled.readBytes('a.bin'), hasLength(50000));
+    });
+
+    // The timeout bounds a silence, not the transfer: a body that keeps
+    // arriving on a slow link is not cut off because the whole of it takes
+    // longer than the timeout, or a large file would never sync.
+    test('a body that keeps arriving outlives the timeout', () async {
+      const timeout = Duration(milliseconds: 600);
+      final bytes = List<int>.generate(60000, (i) => i % 251);
+      server
+        ..putFile('a.bin', bytes)
+        ..trickleNextGet = const Duration(milliseconds: 250);
+      final slow = WebDavClient(url: server.url, timeout: timeout);
+      addTearDown(slow.close);
+      final clock = Stopwatch()..start();
+      expect(await slow.readBytes('a.bin'), bytes);
+      expect(
+        clock.elapsed,
+        greaterThan(timeout),
+        reason: 'the transfer as a whole outlasted the timeout',
+      );
+    });
+
+    test('an upload that keeps moving outlives the timeout; one that '
+        'stops fails as WebDavRetryable', () async {
+      const timeout = Duration(milliseconds: 600);
+      final client = WebDavClient(url: server.url, timeout: timeout);
+      addTearDown(client.close);
+      Stream<List<int>> pieces({required bool stops}) async* {
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+          yield List<int>.filled(1000, i);
+          if (stops && i == 1) await Completer<void>().future;
+        }
+      }
+
+      final clock = Stopwatch()..start();
+      await client.upload(
+        'slow.bin',
+        open: () => pieces(stops: false),
+        length: 6000,
+      );
+      expect(clock.elapsed, greaterThan(timeout));
+      expect(server.file('slow.bin'), hasLength(6000));
+
+      await expectLater(
+        client
+            .upload('stuck.bin', open: () => pieces(stops: true), length: 6000)
+            .timeout(const Duration(seconds: 10)),
+        throwsA(
+          isA<WebDavRetryable>().having(
+            (failure) => failure.message,
+            'message',
+            contains('sending the body stalled'),
+          ),
+        ),
+      );
+      expect(server.exists('stuck.bin'), isFalse);
     });
 
     test(
