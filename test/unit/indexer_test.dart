@@ -614,6 +614,31 @@ void main() {
       expect((resolved as ResolvedNote).note.id, indexed.id);
     });
 
+    test('a unicode tag is one tag, inline and in frontmatter alike', () async {
+      // `#città` used to index as `citt` and `#идея` not at all, so the same
+      // tag written inline and in the frontmatter made two rows in `tags` —
+      // and a search for either found neither.
+      File(p.join(root.path, 'unicode.md')).writeAsStringSync(
+        '---\ntags: [città, идея]\n---\nvedi #città e #идея\n',
+      );
+      await indexer.fullScan(root.path);
+
+      final note = (await dao.find('unicode.md'))!;
+      final noteTags = await (db.select(
+        db.noteTags,
+      )..where((t) => t.noteId.equals(note.id))).get();
+      expect(noteTags.map((t) => '${t.tag}:${t.isFrontmatter}').toSet(), {
+        'città:true',
+        'città:false',
+        'идея:true',
+        'идея:false',
+      });
+      expect((await db.select(db.tags).get()).map((t) => t.name).toSet(), {
+        'città',
+        'идея',
+      });
+    });
+
     test(
       'delete db → a fresh rescan reproduces FTS, tags, links, stems',
       () async {

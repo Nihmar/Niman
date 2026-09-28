@@ -185,6 +185,14 @@ void main() {
       expect(inlineTags('#lead and #word'), ['lead', 'word']);
       expect(inlineTags('C#sharp'), isEmpty);
     });
+
+    test('a unicode #tag is one tag, inline as in frontmatter', () {
+      // An ASCII-only pattern read `#città` as `citt` and `#идея` as nothing,
+      // while YAML's `tags:` kept the whole word: one tag, two rows.
+      expect(inlineTags('vedi #città e #идея'), ['città', 'идея']);
+      const note = '---\ntags: [città, идея]\n---\n\nVedi #città e #идея.';
+      expect(inlineTags(note), parseFrontmatter(note)!.tags);
+    });
   });
 
   group('normalizeTag', () {

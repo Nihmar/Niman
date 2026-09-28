@@ -90,6 +90,10 @@ Two places, both searchable:
 
 Search a single tag with `#tag` (see [search](search.md)).
 
+A tag's characters are letters and digits — any script's, so `#città` and
+`#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note
+body are read the same way, so the same tag written either way is one tag.
+
 ## Moving a note or a folder
 
 Long-press a row in the tree (right-click on desktop) and pick **Move**.

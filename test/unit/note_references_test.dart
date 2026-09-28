@@ -70,6 +70,14 @@ void main() {
     ]);
   });
 
+  test('a unicode tag is one tag, inline and in frontmatter alike', () {
+    // The masker's tag characters were ASCII: `#città` indexed as `citt` and
+    // `#идея` not at all, while the frontmatter's `tags:` kept the word.
+    expect(noteReferencesOf('vedi #città e #идея').tags, ['città', 'идея']);
+    const note = '---\ntags: [città, идея]\n---\n\nVedi #città e #идея.\n';
+    expect(noteReferencesOf(note).tags, parseFrontmatter(note)!.tags);
+  });
+
   test('nothing is read where the note shows no tag or link', () {
     final refs = noteReferencesOf(
       '---\n'
