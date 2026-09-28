@@ -119,15 +119,32 @@ final class CounterStore {
 
   /// The counters in [file], or none when it is missing or does not
   /// parse.
+  ///
+  /// A file that is there and cannot be read right now — locked while a
+  /// sync renames over it, a FUSE hiccup — is not an empty one: [use]
+  /// writes back what it read, so taking it for empty wrote a file holding
+  /// the one counter in hand, every other one gone and this one back at 1,
+  /// handing out numbers already used. That failure is thrown instead, and
+  /// the creation that asked reports it.
   static Future<Map<String, int>> _read(File file) async {
+    final String text;
     try {
-      final decoded = jsonDecode(await file.readAsString());
+      text = await file.readAsString();
+    } on PathNotFoundException {
+      return {};
+    } on FileSystemException catch (error) {
+      // Bytes that are not UTF-8 are a corrupt file, not a failed read.
+      if (error.osError != null) rethrow;
+      return {};
+    }
+    try {
+      final decoded = jsonDecode(text);
       if (decoded is! Map) return {};
       return {
         for (final entry in decoded.entries)
           if (entry.value is int) entry.key.toString(): entry.value as int,
       };
-    } on Object catch (_) {
+    } on FormatException {
       return {};
     }
   }
