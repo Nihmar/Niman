@@ -619,7 +619,16 @@ final class BlockView extends StatelessWidget {
       return (display: '', isTask: false, checked: false, ordered: false);
     }
     final rest = line.substring(at).trimLeft();
-    if (rest.startsWith('[') && rest.length > 2 && rest[2] == ']') {
+    // A task box is `[ ]`, `[x]` or `[X]` and nothing else: GFM knows one
+    // state, and `[-]` — a third state other editors draw a dash for — is
+    // the item's own text, not a box (#233). The rest of the app's task
+    // boxes read the same state character (`md_editing.dart`, the styler).
+    final boxed =
+        rest.length > 2 &&
+        rest[0] == '[' &&
+        (rest[1] == ' ' || rest[1] == 'x' || rest[1] == 'X') &&
+        rest[2] == ']';
+    if (boxed) {
       return (
         display: '',
         isTask: true,

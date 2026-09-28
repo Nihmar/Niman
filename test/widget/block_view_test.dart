@@ -288,6 +288,22 @@ void main() {
     }
   });
 
+  testWidgets('`[-]` is not a task box: only `[ ]`, `[x]` and `[X]` are', (
+    tester,
+  ) async {
+    // GFM knows one state, `[ ]` or `[x]`/`[X]`. `[-]` is a third state
+    // Obsidian draws and Niman does not (#233): the item keeps its bullet
+    // and the `[-]` stays its text, drawn as it was written.
+    await tester.pumpWidget(
+      _view('- [-] half done\n- [ ] open\n- [x] done', _syncCache()),
+    );
+    await tester.pump();
+    expect(findBullet(), findsOne);
+    expect(findCheckbox(ticked: false), findsOne);
+    expect(findCheckbox(ticked: true), findsOne);
+    expect(_screenText(tester), contains('[-] half done'));
+  });
+
   testWidgets("a list's numbers end at one edge, clear of the text", (
     tester,
   ) async {
