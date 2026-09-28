@@ -88,6 +88,11 @@ versions would last five seconds.
   rotation.
 - Rotation runs after each snapshot and deletes the oldest unpinned
   versions beyond the limit (file first, then manifest).
+- A version is trusted only when its bytes still hash to the manifest's
+  `sha256`. A file that drifted (a partial write, a sync race, an edit by
+  hand) is never returned, nor pinned as the base: the version counts as
+  having no base, so the path is treated as a conflict rather than a merge
+  (#378).
 
 ### Settings (`.niman/settings.json`, per library)
 

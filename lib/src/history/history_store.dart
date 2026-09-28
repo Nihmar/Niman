@@ -197,10 +197,39 @@ SnapshotOutcome snapshotBeforeWrite(
   );
 }
 
-/// The text of version [number] of [rel], or null when it is gone.
+/// The bytes of version [number] of [rel], or null when it is gone — or
+/// when its file no longer hashes to the sha256 the manifest records (a
+/// partial write, a killed process, a sync race, an edit by hand).
+///
+/// A drifted version is never handed back as the content its hash claims:
+/// the file is kept, and the version is treated the way a missing one is,
+/// so a caller that would use it as a merge base gets no base and the path
+/// becomes a conflict instead (see #378).
 List<int>? readHistoryVersion(String root, String rel, int number) {
   final file = File(historyVersionPath(root, rel, number));
-  return file.existsSync() ? file.readAsBytesSync() : null;
+  if (!file.existsSync()) return null;
+  return _verifiedVersionBytes(file, _storedSha256(root, rel, number));
+}
+
+/// The sha256 the manifest of [rel] records for version [number], or empty
+/// when it does not describe it (a rebuilt entry) or cannot be read.
+String _storedSha256(String root, String rel, int number) {
+  final file = File(historyManifestPath(root, rel));
+  if (!file.existsSync()) return '';
+  return HistoryManifest.decode(file.readAsStringSync())
+          .version(number)
+          ?.sha256 ??
+      '';
+}
+
+/// The bytes of [file] when they hash to [expected], else null. An empty
+/// [expected] is a version the manifest never recorded: there is nothing to
+/// check it against, so the bytes are read as they are.
+List<int>? _verifiedVersionBytes(File file, String expected) {
+  if (!file.existsSync()) return null;
+  final bytes = file.readAsBytesSync();
+  if (expected.isEmpty) return bytes;
+  return sha256.convert(bytes).toString() == expected ? bytes : null;
 }
 
 /// Pins version [number] of [rel] under [pin] (null unpins), then rotates
@@ -251,10 +280,17 @@ List<int> pinHistoryVersion(
   var manifest = readHistoryManifest(root, rel);
   int? number;
   for (final version in manifest.versions.reversed) {
-    if (version.sha256 == sha) {
-      number = version.number;
-      break;
-    }
+    if (version.sha256 != sha) continue;
+    // A version whose file drifted is not the content its hash claims and
+    // is never pinned as the base (#378): an intact older one may still
+    // hold it, so the search goes on.
+    final bytes = _verifiedVersionBytes(
+      File(historyVersionPath(root, rel, version.number)),
+      version.sha256,
+    );
+    if (bytes == null) continue;
+    number = version.number;
+    break;
   }
   var wrote = false;
   if (number == null) {
