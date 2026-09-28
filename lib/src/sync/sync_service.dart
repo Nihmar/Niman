@@ -576,21 +576,23 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
   @override
   Future<SyncReport> syncNow({SyncConfirm? confirm}) async {
     await scheduler.manualRunStarting();
-    final report = await _runEngine(
+    final run = await _runEngine(
       quick: false,
       background: false,
       confirm: confirm,
     );
-    scheduler.runFinished(report);
+    // A run the scheduler started settles itself; settling it here too
+    // would count its failure twice and double the backoff (#391).
+    if (!run.joined) scheduler.runFinished(run.report);
     await _refreshQueue();
-    return report;
+    return run.report;
   }
 
   /// Runs going, and how many of them the user started.
   int _runs = 0;
   int _manualRuns = 0;
 
-  Future<SyncReport> _runEngine({
+  Future<SyncRun> _runEngine({
     required bool quick,
     required bool background,
     SyncConfirm? confirm,
@@ -605,12 +607,13 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
       ),
     );
     try {
-      final report = await engine.run(
+      final run = await engine.run(
         quick: quick,
         confirm: confirm,
         onProgress: (stage, done, total) =>
             _set(_status.copyWith(stage: stage, done: done, total: total)),
       );
+      final report = run.report;
       if (report.changedLocally.isNotEmpty && !_changes.isClosed) {
         _changes.add(Set.unmodifiable(report.changedLocally));
       }
@@ -623,7 +626,7 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
           lastReport: _reportToShow(report),
         ),
       );
-      return report;
+      return run;
     } finally {
       _runs--;
       if (!background) _manualRuns--;

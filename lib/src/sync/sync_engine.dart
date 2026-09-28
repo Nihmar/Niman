@@ -175,6 +175,11 @@ enum SyncStage {
 /// Reports a run's [stage] and, while applying, [done] of [total].
 typedef SyncProgress = void Function(SyncStage stage, int done, int total);
 
+/// What a call to `SyncEngine.run` got: the run's `report`, and `joined` —
+/// true when the call joined a run that was already going, which is settled
+/// by the caller that started it (#391).
+typedef SyncRun = ({SyncReport report, bool joined});
+
 /// Why a conflict resolution or a conflict read could not complete.
 final class SyncFailure implements Exception {
   /// A failure for [reason], with a [detail] safe to show.
@@ -262,7 +267,7 @@ final class SyncEngine {
   /// still waiting for one.
   static const _hashPasses = 3;
 
-  Future<SyncReport>? _running;
+  Future<SyncRun>? _running;
   bool _runningQuick = false;
 
   /// Runs and conflict resolutions go one at a time.
@@ -318,8 +323,10 @@ final class SyncEngine {
   ///
   /// A call while a full run goes joins it, as does a quick call while a
   /// quick run goes; a full call while a quick run goes waits for it and
-  /// then runs.
-  Future<SyncReport> run({
+  /// then runs. The result says whether this call joined a run already
+  /// going: one run is settled once, by the caller that started it, and a
+  /// joined call only reads the report.
+  Future<SyncRun> run({
     SyncConfirm? confirm,
     SyncProgress? onProgress,
     bool quick = false,
@@ -330,10 +337,11 @@ final class SyncEngine {
         'run: a ${_runningQuick ? 'quick' : 'full'} run is going for $root, '
         'joining it',
       );
-      return running;
+      return running.then((run) => (report: run.report, joined: true));
     }
-    late final Future<SyncReport> next;
+    late final Future<SyncRun> next;
     next = _exclusively(() => _run(confirm, onProgress, quick: quick))
+        .then((report) => (report: report, joined: false))
         .whenComplete(() {
           if (identical(_running, next)) _running = null;
         });

@@ -101,13 +101,13 @@ final class _Device {
   void delete(String rel) => File(p.join(path, rel)).deleteSync();
 
   Future<SyncReport> sync({SyncConfirm? confirm}) async {
-    final report = await engine.run(confirm: confirm);
+    final report = (await engine.run(confirm: confirm)).report;
     await ops.writer.indexed;
     return report;
   }
 
   Future<SyncReport> quick() async {
-    final report = await engine.run(quick: true);
+    final report = (await engine.run(quick: true)).report;
     await ops.writer.indexed;
     return report;
   }
@@ -633,14 +633,14 @@ void main() {
       // Another device rewrites the same three bytes while the plan is
       // being applied.
       var rewritten = false;
-      final report = await a.engine.run(
+      final report = (await a.engine.run(
         onProgress: (stage, _, _) {
           if (stage == SyncStage.applying && !rewritten) {
             rewritten = true;
             server.putFile('a.md', utf8.encode('bbb'));
           }
         },
-      );
+      )).report;
       await a.ops.writer.indexed;
       expect(
         report.done[SyncActionKind.deleteRemote],
@@ -886,12 +886,12 @@ void main() {
       a.write('l.md', 'local');
       final stages = <SyncStage>[];
       final counts = <(int, int)>[];
-      final report = await a.engine.run(
+      final report = (await a.engine.run(
         onProgress: (stage, done, total) {
           if (stages.isEmpty || stages.last != stage) stages.add(stage);
           if (stage == SyncStage.applying) counts.add((done, total));
         },
-      );
+      )).report;
       expect(stages, [
         SyncStage.connecting,
         SyncStage.scanning,
@@ -1254,7 +1254,7 @@ void main() {
           a.write('a.md', 'v$run');
           await a.store.retryNow(a.path);
           var rewritten = false;
-          last = await a.engine.run(
+          last = (await a.engine.run(
             onProgress: (stage, _, _) {
               // The file changes under the run, every time.
               if (stage == SyncStage.applying && !rewritten) {
@@ -1262,7 +1262,7 @@ void main() {
                 a.write('a.md', 'v$run and more');
               }
             },
-          );
+          )).report;
           await a.ops.writer.indexed;
           expect(last.skipped, ['a.md']);
           expect(
