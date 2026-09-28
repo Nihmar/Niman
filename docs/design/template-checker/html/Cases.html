@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman — template checker, the error cases</title>
+<style>
+/* Niman's own palette, dark set: lib/src/ui/theme/niman.dart. */
+:root{
+  --background:#23262B;
+  --backdrop:#1B1D21;
+  --surface:#2C3037;
+  --surface-high:#363B44;
+  --text:#F2EDE5;
+  --muted:#A6A29A;
+  --outline:#4A4F59;
+  --accent:#587CD3;
+  --on-accent:#F2EDE5;
+  --error:#E0687A;           /* the spelling squiggle's colour */
+  --syntax-template:#A8C77A; /* a {{…}} placeholder */
+  --syntax-dim:#6B7079;      /* the marker "# " */
+  --syntax-task:#8FBF7F;     /* a task box, borrowed for "no problems" */
+  --syntax-link:#7CA0E6;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:26px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:var(--backdrop);color:var(--text);font-size:13px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:12px;font-weight:600;margin:30px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+p.lead{margin:0 0 6px;color:var(--muted);font-size:13px;max-width:920px;line-height:1.55}
+p.lead b{color:var(--text);font-weight:600}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+.squig{text-decoration:underline wavy var(--error);text-decoration-thickness:1.2px;text-underline-offset:3px;text-decoration-skip-ink:none}
+.ph{color:var(--syntax-template)}
+.dim{color:var(--syntax-dim)}
+/* — the case list: one row per form the checker reads — */
+.lint{border:1px solid var(--outline);border-radius:9px;background:rgba(54,59,68,.28);overflow:hidden;max-width:1040px;margin-bottom:10px}
+.lrow{display:flex;gap:12px;padding:10px 13px;border-top:1px solid var(--outline)}
+.lrow:first-child{border-top:0}
+.ldot{width:8px;height:8px;border-radius:50%;background:var(--error);margin-top:6px;flex-shrink:0}
+.lbody{flex:1;min-width:0}
+.lspan{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.lmsg{color:var(--text);font-size:12.5px;margin-top:4px}
+.lfix{color:var(--muted);font-size:12.5px;margin-top:5px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.lfix code{color:var(--syntax-template);background:rgba(168,199,122,.12);border-radius:4px;padding:0 4px}
+.lfix .none{color:var(--muted)}
+.fix{background:var(--accent);color:var(--on-accent);border:0;border-radius:6px;padding:3px 11px;font:inherit;font-weight:600;font-size:12px}
+/* — the app window, for the quiet and the creation states — */
+.win{width:1180px;background:var(--background);border:1px solid var(--surface);border-radius:7px;overflow:hidden;margin-bottom:8px}
+.titlebar{height:38px;background:var(--surface);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:12px;color:var(--muted)}
+.mark{width:22px;height:22px;border-radius:5px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700}
+.grow{flex:1}
+.workspace{display:flex;align-items:stretch;min-height:430px;position:relative}
+.rail{width:44px;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:3px;color:var(--muted)}
+.rail .on{color:var(--accent)}
+.rail i{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-style:normal}
+.tree{width:210px;background:var(--backdrop);border-right:1px solid var(--surface);padding:8px 6px;color:var(--muted);font-size:12.5px}
+.tree .row{padding:5px 9px;border-radius:6px;display:flex;gap:8px;align-items:center}
+.tree .row.sel{background:var(--surface-high);color:var(--text)}
+.tree .ind{padding-left:22px}
+.pane{flex:1;min-width:0;display:flex;flex-direction:column}
+.notebar{height:38px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 12px;color:var(--muted);font-size:15px}
+.notebar .on{color:var(--accent)}
+.notecol{width:660px;max-width:calc(100% - 56px);margin:0 auto;padding:6px 0 26px;position:relative}
+h3.title{font-size:22px;font-weight:700;margin:0 0 14px}
+.src{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.95;margin:0;white-space:pre;color:var(--text)}
+.statusrow{height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--muted);font-size:12px;border-top:1px solid var(--surface)}
+.statusrow .si{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.statusrow .on{color:var(--accent)}
+.statusrow .ok{color:var(--syntax-task)}
+/* — the variant strip: the status row on its own — */
+.strip{width:660px;border:1px solid var(--outline);border-radius:8px;display:flex;align-items:center;gap:6px;padding:0 12px;height:46px;color:var(--muted);font-size:12px;background:var(--background)}
+.strip .ok{color:var(--syntax-task)}
+/* — the creation dialog — */
+.scrim{position:absolute;inset:0;background:rgba(27,29,33,.68)}
+.dialog{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:412px;background:var(--surface);border:1px solid var(--outline);border-radius:12px;padding:16px 16px 12px;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.dtitle{font-size:16px;font-weight:600;margin-bottom:14px}
+.dfield{margin-bottom:12px}
+.dlab{font-size:11px;color:var(--muted);margin-bottom:4px}
+.dinput{background:var(--surface-high);border-bottom:1px solid var(--accent);padding:7px 9px;border-radius:5px 5px 0 0;font-size:13px}
+.dselect{display:flex;justify-content:space-between}
+.dnote{display:flex;gap:10px;align-items:center}
+.dnote .ic{color:var(--syntax-link)}
+.dhint{font-size:12px;color:var(--muted)}
+.dactions{display:flex;justify-content:flex-end;gap:12px;margin-top:14px;align-items:center}
+.dbtn{font-size:13px;color:var(--muted)}
+.dbtn.primary{background:var(--accent);color:var(--on-accent);border-radius:6px;font-weight:600;padding:6px 14px}
+p.caption{color:var(--muted);font-size:12.5px;margin:8px 0 0;max-width:1010px;line-height:1.55}
+p.caption b{color:var(--text);font-weight:600}
+p.note{color:var(--muted);font-size:12px;margin:18px 0 0;max-width:1010px;line-height:1.55}
+</style>
+</head>
+<body>
+
+<h1>Template checker — the error cases</h1>
+<p class="lead">Every form from the issue's tables, drawn as the checker would report it: the offending span with the wavy mark, the message, and the fix — or, where the issue's boundary says a fix is not safe, a plain “no fix offered”. The messages are illustrative; the engine PR owns the wording, this fixes the shape of a row and of a hint.</p>
+
+<h2>1 · What the checker says, per case</h2>
+<div class="lint">
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan"><span class="ph squig">{{titlex}}</span></div>
+      <div class="lmsg">Unknown placeholder ‘titlex’.</div>
+      <div class="lfix">Did you mean <code>{{title}}</code>? <button class="fix">Fix</button></div>
+    </div>
+  </div>
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan"><span class="ph squig">{{title</span></div>
+      <div class="lmsg">Unclosed ‘{{’ — no matching ‘}}’.</div>
+      <div class="lfix"><span class="none">No fix offered — at the end of a line there is no <code>}}</code> to close it. A <code>}}</code> further along would close it.</span></div>
+    </div>
+  </div>
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan">title<span class="ph squig">}}</span></div>
+      <div class="lmsg">‘}}’ with nothing to close.</div>
+      <div class="lfix"><span class="none">No fix offered — there is no opening to match; the text is left as written.</span></div>
+    </div>
+  </div>
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan"><span class="ph squig">{{title|pad:wide}}</span></div>
+      <div class="lmsg">‘pad’ needs a whole number.</div>
+      <div class="lfix">Did you mean <code>{{title|pad:3}}</code>? <button class="fix">Fix</button></div>
+    </div>
+  </div>
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan"><span class="ph squig">{{time:HH'|'mm</span></div>
+      <div class="lmsg">Unclosed quote in the date format.</div>
+      <div class="lfix">Did you mean <code>{{time:HH'|'mm}}</code>? <button class="fix">Fix</button></div>
+    </div>
+  </div>
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan"><span class="ph squig">{{title|+xd}}</span></div>
+      <div class="lmsg">‘+xd’ is not a filter this build knows.</div>
+      <div class="lfix"><span class="none">No fix offered — a shift count is not a number, and there is no safe default.</span></div>
+    </div>
+  </div>
+  <div class="lrow">
+    <span class="ldot"></span>
+    <div class="lbody">
+      <div class="lspan"><span class="ph squig">{{}}</span></div>
+      <div class="lmsg">Empty placeholder.</div>
+      <div class="lfix"><span class="none">No fix offered — nothing to name, so nothing to suggest.</span></div>
+    </div>
+  </div>
+</div>
+<p class="caption">The boundary the issue sets is drawn in the third line of each row: a suggestion is proposed only when the fix is computable and safe — a closest known name, a width, a missing brace — and otherwise the row reports the problem and offers nothing. The squiggle is the palette's <code>error</code>, <code>#E0687A</code>, the colour the spelling's own squiggle is drawn in.</p>
+
+<h2>2 · The quiet state — a template with no problems</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▾ Templates</div>
+      <div class="row sel ind">▤ Journal.md</div>
+      <div class="row ind">▸ Lists</div>
+      <div class="row ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span>◉</span><span class="on">◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <h3 class="title">Journal</h3>
+        <div class="src">
+          <div class="line"><span class="dim"># </span><span class="ph">{{title}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Kickoff for <span class="ph">{{title}}</span> on <span class="ph">{{date:YYYY-MM-DD}}</span> at <span class="ph">{{time:HH:mm}}</span>.</div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Owner: <span class="ph">{{ask:Owner}}</span></div>
+        </div>
+      </div>
+      <div class="statusrow"><span class="si on">☰</span><span class="si">⌕</span><span class="si">✎</span><span class="grow"></span><span>12 words · Saved</span></div>
+    </div>
+  </div>
+</div>
+<div class="strip"><span class="grow"></span><span>12 words · Saved</span></div>
+<p class="caption"><b>The quiet state is the absence of the checker.</b> No banner, no squiggle, no hint — the count line simply is not there (drawn above as the status row with nothing added to it). A line that always reads “Template syntax OK” would be noise on every template that is fine, which is most of them; the strip below it is that variant, drawn only to be rejected. The one place a positive confirmation could earn its room is the moment a template is saved with the checker on, and even there the absence says the same thing.</p>
+<div class="strip" style="margin-top:8px"><span class="grow"></span><span class="ok">✓ Template syntax OK</span><span>· 12 words · Saved</span></div>
+
+<h2>3 · While a template is being created</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▾ Templates</div>
+      <div class="row ind">▸ Lists</div>
+      <div class="row sel ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span>◉</span><span>◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <h3 class="title">Journal</h3>
+        <div class="src">
+          <div class="line"><span class="dim"># </span><span class="ph">{{title}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Owner: <span class="ph">{{ask:Owner}}</span></div>
+          <div class="line">Channel: <span class="ph">{{choice:Channel:Email,Chat}}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="scrim"></div>
+    <div class="dialog">
+      <div class="dtitle">Fill in the template</div>
+      <div class="dfield"><div class="dlab">Owner</div><div class="dinput">Ada</div></div>
+      <div class="dfield"><div class="dlab">Channel</div><div class="dinput dselect"><span>Email</span><span>▾</span></div></div>
+      <div class="dfield dnote"><span class="ic">🔗</span><div><div class="dlab">Linked from</div><div class="dhint">No note</div></div></div>
+      <div class="dactions"><span class="dbtn">Cancel</span><span class="dbtn primary">OK</span></div>
+    </div>
+  </div>
+</div>
+<p class="caption"><b>The checker does not change anything here, and does not need to.</b> The <code>{{ask:…}}</code> and <code>{{choice:…}}</code> answers are filled in the <b>Fill in the template</b> dialog, and that dialog does not edit the template's source — it collects answers, and the source is not editable behind it. There is nothing here to underline and nothing to point at. The checker's feedback belongs to the editor, where the source is: if it runs on save, a template saved with a problem shows its banner the next time the template is opened for editing, not while a note is being made from it. So the two screens do not meet, and this state adds nothing to the drawing beyond saying so.</p>
+
+<p class="note">Mockups, not screenshots of the app: everything here is HTML drawn to look like Niman, using the palette from <code>lib/src/ui/theme/niman.dart</code>. Where a mockup and the app disagree, the app ships.</p>
+</body>
+</html>
