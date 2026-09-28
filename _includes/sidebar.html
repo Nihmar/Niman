@@ -1,0 +1,65 @@
+{%- comment -%}
+  The docs sidebar: every page under `docs/user/`, `docs/dev/` and
+  `docs/records/`, grouped the way the documentation is grouped.
+
+  The guides are listed in the order they are written in — the order of
+  `index.md` "The user guide" for `docs/user/`, of its "Building and changing
+  Niman" list for `docs/dev/`, and of the table in `docs/records/README.md`
+  for the records. A page that is not in one of those lists (a record added
+  without a table row, say) is still shown, after the listed ones, so the
+  sidebar is driven by `site.pages` and nothing can go missing.
+{%- endcomment -%}
+<nav class="sidebar-nav" aria-label="Documentation contents">
+  <a class="sidebar__home{% if page.url == '/docs/' %} is-current{% endif %}" href="{{ site.baseurl }}/docs/"{% if page.url == '/docs/' %} aria-current="page"{% endif %}>Documentation</a>
+
+  <p class="sidebar__group" id="sidebar-user">Guides</p>
+  <ul class="sidebar__list" aria-labelledby="sidebar-user">
+    {%- assign user_slugs = 'getting-started,editing,lists,organization,export,journal,search,links,templates,tasks,themes,settings,shortcuts,sync,widgets,platforms' | split: ',' -%}
+    {%- for slug in user_slugs -%}
+      {%- assign path = 'docs/user/' | append: slug | append: '.md' -%}
+      {%- assign doc = site.pages | where: 'path', path | first -%}
+      {%- if doc %}{% include sidebar_item.html doc=doc %}{% endif -%}
+    {%- endfor -%}
+    {%- for doc in site.pages -%}
+      {%- if doc.path contains 'docs/user/' -%}
+        {%- assign slug = doc.path | split: '/' | last | remove: '.md' -%}
+        {%- unless user_slugs contains slug %}{% include sidebar_item.html doc=doc %}{% endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  <p class="sidebar__group" id="sidebar-dev">Building and changing</p>
+  <ul class="sidebar__list" aria-labelledby="sidebar-dev">
+    {%- assign dev_slugs = 'architecture,building,conventions,site,releasing' | split: ',' -%}
+    {%- for slug in dev_slugs -%}
+      {%- assign path = 'docs/dev/' | append: slug | append: '.md' -%}
+      {%- assign doc = site.pages | where: 'path', path | first -%}
+      {%- if doc %}{% include sidebar_item.html doc=doc %}{% endif -%}
+    {%- endfor -%}
+    {%- for doc in site.pages -%}
+      {%- if doc.path contains 'docs/dev/' -%}
+        {%- assign slug = doc.path | split: '/' | last | remove: '.md' -%}
+        {%- unless dev_slugs contains slug %}{% include sidebar_item.html doc=doc %}{% endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  <p class="sidebar__group" id="sidebar-records">Design records</p>
+  <ul class="sidebar__list" aria-labelledby="sidebar-records">
+    <li class="sidebar__item">
+      <a class="sidebar__link{% if page.url == '/docs/records/' %} is-current{% endif %}" href="{{ site.baseurl }}/docs/records/"{% if page.url == '/docs/records/' %} aria-current="page"{% endif %}>Records overview</a>
+    </li>
+    {%- assign record_slugs = 'unified-surface,editor-alternatives,read-live-parity,huge-notes,workspace,epub-reader,annotations,sync,index-reconcile,transcription' | split: ',' -%}
+    {%- for slug in record_slugs -%}
+      {%- assign path = 'docs/records/' | append: slug | append: '.md' -%}
+      {%- assign doc = site.pages | where: 'path', path | first -%}
+      {%- if doc %}{% include sidebar_item.html doc=doc %}{% endif -%}
+    {%- endfor -%}
+    {%- for doc in site.pages -%}
+      {%- if doc.path contains 'docs/records/' -%}
+        {%- assign slug = doc.path | split: '/' | last | remove: '.md' -%}
+        {%- unless record_slugs contains slug or slug == 'README' %}{% include sidebar_item.html doc=doc %}{% endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</nav>

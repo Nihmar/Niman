@@ -1,0 +1,11 @@
+{%- comment -%}
+  One sidebar entry. `doc` is a page from `site.pages`; the entry is marked
+  when it is the page being read.
+{%- endcomment -%}
+{%- assign is_current = false -%}
+{%- if include.doc.url == page.url -%}
+  {%- assign is_current = true -%}
+{%- endif -%}
+<li class="sidebar__item">
+  <a class="sidebar__link{% if is_current %} is-current{% endif %}" href="{{ site.baseurl }}{{ include.doc.url }}"{% if is_current %} aria-current="page"{% endif %}>{{ include.doc.title | default: include.doc.name }}</a>
+</li>

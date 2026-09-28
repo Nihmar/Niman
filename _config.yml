@@ -7,12 +7,32 @@
 # nothing to install or update by hand. One thing is not literal: Liquid
 # renders before Markdown, so that workflow hands Niman's own `{{…}}` template
 # syntax to Liquid as a raw block before the build (see the step there).
+#
+# The look is Niman's own, not a theme's: `_layouts/` (the shell, the landing
+# and a documentation page), `_includes/` (the header nav, the docs sidebar
+# and the footer) and `assets/css/site.css` are all written in this repository,
+# and the stylesheet's palette is taken from the app's own theme
+# (`lib/src/core/theme_tokens.dart`, filled in by `lib/src/ui/theme/niman.dart`)
+# so the site and the app read as one project.
 
 title: Niman
 description: >-
   A multiplatform Markdown note-taking app where your notes are just files.
 
-theme: minima
+# No theme: the layouts and the stylesheet are Niman's own. GitHub Pages'
+# build would otherwise fall back to its own default theme — the gem sets
+# `jekyll-theme-primer` when a site names none — so the theme is turned off
+# here rather than left to that fallback.
+theme: null
+
+# Every page wears the shell in `_layouts/default.html`; a page under `docs/`
+# also gets the breadcrumb, the sidebar and the "edit this page" link from
+# `_layouts/page.html`. The landing (`index.md`) names `layout: home` itself.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
 
 # The site is HTML pages, not a second copy of the Markdown: once a file under
 # `docs/` has been rendered, the original is not carried into the site beside
@@ -20,18 +40,12 @@ theme: minima
 optional_front_matter:
   remove_originals: true
 
-# A project site is served from a subpath of the domain, and the theme's own
-# links (its stylesheet, its "home" link) are built from `baseurl`: it must
-# name that subpath, and `actions/configure-pages` reports the one Pages is
-# configured with if it does not match.
+# A project site is served from a subpath of the domain, so every internal URL
+# the site writes is built from `baseurl`: it must name that subpath, and
+# `actions/configure-pages` reports the one Pages is configured with if it does
+# not match.
 url: https://nihmar.github.io
 baseurl: /Niman
-
-# The header of every page: the three ways into the docs.
-header_pages:
-  - docs/README.md
-  - docs/user/getting-started.md
-  - docs/records/README.md
 
 # The site is the documentation, not the app: the source tree, the toolchain,
 # the CI and the notes a checkout happens to hold are not part of it.

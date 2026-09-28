@@ -7,8 +7,8 @@ Four folders, by what each holds:
   templates, tasks and reminders, themes, home-screen widgets, settings,
   shortcuts, sync, and platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
-  instructions, code conventions and the release process. Living
-  documentation, kept current with the code.
+  instructions, code conventions, the documentation site and the release
+  process. Living documentation, kept current with the code.
 - **`records/`** — the design, research and measurement records behind
   the features, kept as they were written (not kept current): the unified
   Markdown surface and its parity and huge-note measurements, the rejected

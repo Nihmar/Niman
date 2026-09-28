@@ -1,0 +1,45 @@
+---
+layout: default
+---
+{%- comment -%}
+  A documentation page: the sidebar, a breadcrumb, the Markdown the page is
+  written as, and a link to the file it comes from. The page's own first
+  heading is its title — Jekyll takes `page.title` from it — so the layout
+  does not repeat it above the content.
+{%- endcomment -%}
+{%- assign crumb_section = '' -%}
+{%- assign crumb_section_url = '' -%}
+{%- if page.path contains 'docs/user/' -%}
+  {%- assign crumb_section = 'Guides' -%}
+  {%- assign crumb_section_url = '/docs/' -%}
+{%- elsif page.path contains 'docs/dev/' -%}
+  {%- assign crumb_section = 'Building and changing' -%}
+{%- elsif page.path contains 'docs/records/' -%}
+  {%- assign crumb_section = 'Design records' -%}
+  {%- assign crumb_section_url = '/docs/records/' -%}
+{%- elsif page.path contains 'docs/design/' -%}
+  {%- assign crumb_section = 'Design mockups' -%}
+{%- endif -%}
+<div class="docs">
+  <aside class="docs__sidebar">
+    <details class="docs__toc">
+      <summary class="docs__toc-summary">Contents</summary>
+      {% include sidebar.html %}
+    </details>
+  </aside>
+  <article class="prose">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{ site.baseurl }}/">{{ site.title }}</a></li>
+        <li><a href="{{ site.baseurl }}/docs/">Docs</a></li>
+        {%- if crumb_section != '' %}
+        <li>{% if crumb_section_url != '' %}<a href="{{ site.baseurl }}{{ crumb_section_url }}">{{ crumb_section }}</a>{% else %}{{ crumb_section }}{% endif %}</li>
+        {%- endif %}
+      </ol>
+    </nav>
+    {{ content }}
+    <p class="edit-this">
+      <a href="https://github.com/Nihmar/Niman/blob/main/{{ page.path }}">Edit this page on GitHub</a>
+    </p>
+  </article>
+</div>
