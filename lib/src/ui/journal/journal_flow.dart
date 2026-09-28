@@ -200,20 +200,6 @@ final class JournalFlow {
     final slash = path.lastIndexOf('/');
     final parent = slash < 0 ? '' : path.substring(0, slash);
     final name = path.substring(slash + 1, path.length - '.md'.length);
-    final root = controller.root;
-    final names = counterNames(source);
-    final counters = names.isNotEmpty && root != null
-        ? await CounterStore.load(root)
-        : null;
-    int Function(String)? counter;
-    if (counters != null) {
-      final store = counters;
-      final used = <String, int>{};
-      for (final name in names) {
-        used[name] = await store.use(name);
-      }
-      counter = (name) => used[name]!;
-    }
     // The day's own date, at this moment's time: an entry made for last
     // Monday says Monday, and `{{time}}` still says when it was written.
     final now = _clock();
@@ -229,13 +215,20 @@ final class JournalFlow {
         ? await templates.clipboardText()
         : '';
     await guard(() async {
+      // Per-creation counters (#52, #359), reserved on disk under the guard
+      // that reports a file that cannot be read or written.
+      final reserved = await CounterStore.reserve(
+        controller.root,
+        counterNames(source),
+      );
+      final counters = reserved?.store;
       final rendered = renderTemplateWithCaret(
         source,
         title: name,
         now: when,
         answers: answers,
         context: TemplateContext(folder: parent, clipboard: clipboard),
-        counter: counter,
+        counter: reserved?.counter,
       );
       if (parent.isNotEmpty) await ops.ensureFolder(parent);
       final row = await ops.createNote(

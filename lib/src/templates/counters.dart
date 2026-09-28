@@ -36,6 +36,28 @@ final class CounterStore {
     return CounterStore._(file, await _read(file));
   }
 
+  /// Reserves one number for each of [names] — the `{{counter:…}}` of one
+  /// note being created (`counterNames`) — in the library at [root], and
+  /// answers the store with the callback the engine reads them through:
+  /// every `{{counter:name}}` in the note, directives and body alike, gets
+  /// the one number reserved for its name.
+  ///
+  /// Null when there is nothing to reserve (no names, or no library): a
+  /// template with no counter never touches the file. Each reservation is
+  /// on disk when this returns (#359), so a creation called off afterwards
+  /// may skip a number. Throws what the file does ([use]); the creation
+  /// flows run it where their failures are reported.
+  static Future<({CounterStore store, int Function(String name) counter})?>
+  reserve(String? root, List<String> names) async {
+    if (root == null || names.isEmpty) return null;
+    final store = await load(root);
+    final used = <String, int>{};
+    for (final name in names) {
+      used[name] = await store.use(name);
+    }
+    return (store: store, counter: (String name) => used[name]!);
+  }
+
   /// The serialized writer chain of each counters file, keyed by path.
   ///
   /// A store is made per creation, so two over one library are two

@@ -155,28 +155,22 @@ final class ShellTemplateFlow {
           ? await clipboardText()
           : '',
     );
-    // Per-creation counters (#52): every `{{counter:name}}` in this note —
-    // directives reads and body alike — shares one reserved number, so the
-    // name is handed out once and reused. The reservation is written to
-    // the counter file at once rather than at the end of the creation, so
-    // a creation racing this one in another window takes the number after
-    // it instead of the same one (#359); a creation called off after this
-    // point may therefore skip a number. A template with no counter never
-    // touches the store file at all.
-    final root = controller.root;
-    final names = counterNames(template);
-    final counters = names.isNotEmpty && root != null
-        ? await CounterStore.load(root)
-        : null;
-    int Function(String)? counter;
-    if (counters != null) {
-      final store = counters;
-      final used = <String, int>{};
-      for (final name in names) {
-        used[name] = await store.use(name);
-      }
-      counter = (name) => used[name]!;
-    }
+    // Per-creation counters (#52, #359): one number per name, reserved on
+    // disk before anything reads it. The file is read and written here, so
+    // the reservation runs under [guard], where a failure is reported
+    // instead of escaping the flow.
+    ({CounterStore store, int Function(String name) counter})? reserved;
+    var reservedOk = false;
+    await guard(() async {
+      reserved = await CounterStore.reserve(
+        controller.root,
+        counterNames(template),
+      );
+      reservedOk = true;
+    });
+    if (!reservedOk) return;
+    final counters = reserved?.store;
+    final counter = reserved?.counter;
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
     // is known, so a folder may be built from it.

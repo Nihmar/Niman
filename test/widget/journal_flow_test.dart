@@ -1,11 +1,14 @@
 // #7: a day's entry is opened when it exists and made when it does not —
 // today's at once, another day's after asking — from the journal's
 // template, dated with its own day.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/journal/journal_settings.dart';
 import 'package:niman/src/ui/journal/journal_flow.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 
@@ -129,6 +132,66 @@ void main() {
     await tester.pump();
     expect(created.single.$1, today);
     expect(find.textContaining('Templates/Missing.md'), findsOne);
+  });
+
+  // The counter file is read and written while the entry is made (#359):
+  // a file that cannot be read is a failure the flow reports, under its
+  // guard, never an exception escaping it — and never a reason to write a
+  // fresh counter file over the one that is there.
+  testWidgets('a counter file that cannot be read is reported, not thrown', (
+    tester,
+  ) async {
+    final dir = (await tester.runAsync(
+      () => Directory.systemTemp.createTemp('niman_journal_counter_'),
+    ))!;
+    addTearDown(() => dir.deleteSync(recursive: true));
+    // A folder where the file should be: the read fails, whatever the
+    // platform, with an error of the operating system.
+    Directory(p.join(dir.path, '.niman', 'counters.json'))
+        .createSync(recursive: true);
+    final errors = <Object>[];
+    final library = FakeLibrarySession();
+    addTearDown(library.dispose);
+    await library.open(dir.path, create: false);
+    await library.ensureFolder('Templates');
+    await library.createNote(
+      parentPath: 'Templates',
+      name: 'Day',
+      content: '# Day {{counter:day}}\n',
+    );
+    await library.setJournal(
+      const JournalSettings(template: 'Templates/Day.md'),
+    );
+    final journal = JournalFlow(
+      controller: library,
+      templates: ShellTemplateFlow(
+        controller: library,
+        origin: () => (selected: null, isDir: false, treeVisible: true),
+        createParent: () => '',
+        guard: (action) => action(),
+        opensPreviewOnly: () => false,
+        onNoteFiled: ({required path, required preview, required caret}) {},
+      ),
+      guard: (action) async {
+        try {
+          await action();
+        } on Object catch (error) {
+          errors.add(error);
+        }
+      },
+      onOpen: opened.add,
+      onCreated: (path, caret) => created.add((path, caret)),
+      clock: () => now,
+    );
+    final context = await pump(tester);
+    await tester.runAsync(() => journal.openToday(context));
+    expect(errors.single, isA<FileSystemException>());
+    expect(created, isEmpty, reason: 'no entry without its number');
+    expect(
+      Directory(p.join(dir.path, '.niman', 'counters.json')).existsSync(),
+      isTrue,
+      reason: 'nothing was written over what is there',
+    );
   });
 
   testWidgets('previous and next skip the days without an entry', (
