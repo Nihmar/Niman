@@ -125,7 +125,7 @@ Every entry exists on Android, Linux and Windows.
   - [x] `docs/user/`: a new `export.md`, linked from `organization.md`;
   - [x] `platforms.md`: the PDF engine per platform and the Linux fallback; *(with #63)*
   - [x] `settings.md`, if a setting appears; *(no setting)*
-  - [ ] `CHANGELOG.md` at the release.
+  - [x] `CHANGELOG.md` at the release. *(shipped in 0.1.0)*
 - [x] **Widget tests:** the menu entries, the chooser, the save call through the fake picker, and cancellation.
 
 ## 4. Order of work

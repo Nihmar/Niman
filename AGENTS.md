@@ -33,10 +33,15 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
     plus `./scripts/niman.sh integration` for `integration_test/`
   - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`),
     plus `scripts\niman.bat integration` for the headless files there
-- On Windows, ~20 tests fail on path separators and temp-dir cleanup (pre-existing, green on Linux). Use `pwsh scripts/newfail.ps1` — it prints only failures not in `scripts/known-failures.txt`. Exit code 1 = something new broke. Options: optional path filter, `-Update` to rewrite the baseline.
+- The suite is green on Linux, and on Windows too: the eighteen entries
+  `scripts/known-failures.txt` used to carry were real bugs, fixed rather than
+  tolerated (2026-09-10). What remains on Windows is five flakes — the same
+  fault under full-suite load, a rename or a delete on a file another process
+  still holds; they pass in isolation. Use `pwsh scripts/newfail.ps1` — it prints only failures not in `scripts/known-failures.txt`. Exit code 1 = something new broke. Options: optional path filter, `-Update` to rewrite the baseline.
 - `flutter analyze --fatal-infos` (infos are fatal, and `flutter test` does not
   catch one in a file it merely compiles: re-run analyze after adding any file).
-- `flutter test` runs `test/unit/` + `test/widget/`. Single test: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
+- `flutter test` runs `test/unit/`, `test/widget/` **and `test/perf/`** — which
+  is why a perf file's bars are gated (see below). Single test: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
 - **Performance tests print; the absolutes do not gate.** `test/perf/` measures
   wall-clock, and a shared CI runner read 365 ms for the fixture this host reads
   at 168 **on the same commit** — a ceiling calibrated here fails there for the
