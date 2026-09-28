@@ -563,6 +563,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.surface?.attachView(this);
     widget.spellCheck?.addListener(_onSpellingChanged);
     widget.findMatches?.addListener(_onSpellingChanged);
+    widget.mathCache?.addListener(_onMathTypeset);
     _scheduleCaret();
     final scroll = widget.surface?.takePendingScroll();
     if (scroll != null) {
@@ -709,6 +710,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       oldWidget.findMatches?.removeListener(_onSpellingChanged);
       widget.findMatches?.addListener(_onSpellingChanged);
     }
+    if (!identical(oldWidget.mathCache, widget.mathCache)) {
+      oldWidget.mathCache?.removeListener(_onMathTypeset);
+      widget.mathCache?.addListener(_onMathTypeset);
+    }
     if (!identical(oldWidget.buffer, widget.buffer)) {
       // Another note: the keyboard, the history and the caret were this one's.
       final attached = _input.isAttached;
@@ -763,6 +768,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
     widget.findMatches?.removeListener(_onSpellingChanged);
+    widget.mathCache?.removeListener(_onMathTypeset);
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
@@ -787,6 +793,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// lines on screen are drawn again.
   void _onSpellingChanged() {
     if (mounted) setState(() {});
+  }
+
+  /// A formula was typeset, or failed to be: the lines that concealed their
+  /// source for it are laid out again.
+  ///
+  /// The line the caret is on is one of them, and it is taller or shorter
+  /// now — the spacer takes the formula's room. Nothing about the caret
+  /// changed, so no edit came through `_scheduleCaret`: the measurement has to
+  /// be asked for by the relayout itself. Post-frame, so a notification that
+  /// lands while a frame is building asks for the next one rather than
+  /// setting state here.
+  void _onMathTypeset() {
+    if (mounted) _measureCaretAfterFrame();
   }
 
   /// The runs on line [index], or none while a long note's colours are
@@ -2387,6 +2406,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         // read, the caret's line has no tokens and the toolbar would show
         // every button dark on a note whose syntax the writer is inside.
         _publishActive(_caretSpot.value);
+        // And it is the caret's line landing: a heading, or a formula, is
+        // drawn at another height than the plain line the caret was measured
+        // over. The reading came in outside any edit, so nothing else asks
+        // for the caret to be measured again.
+        _measureCaretAfterFrame();
       }),
     );
   }
