@@ -42,6 +42,8 @@ class FlutterWindow : public Win32Window {
   // Takes the buttons' rectangles, in physical pixels from the window's
   // client origin.
   void SetCaptionButtons(const flutter::EncodableMap& buttons);
+  // Reads the paths of a WM_DROPFILES drop and hands them to Dart (#224).
+  void SendDrop(WPARAM wparam);
 
   // The project to run.
   flutter::DartProject project_;
@@ -70,6 +72,9 @@ class FlutterWindow : public Win32Window {
   // The caption button the mouse went down on, 0 when it went down anywhere
   // else: the release is what acts, and only over the button it started on.
   LRESULT pressed_caption_button_ = 0;
+  // Files and folders dropped on the window (#224): niman/drop.
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
+      drop_channel_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

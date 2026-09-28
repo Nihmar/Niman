@@ -10,6 +10,10 @@
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
+  // The window's drop target (#224): GDK reads the drop here, Dart opens
+  // or imports what it names.
+  FlMethodChannel* drop_channel;
+  gboolean drag_over;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -17,6 +21,79 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
   gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
+}
+
+// Tells Dart what the window's drop target sees.
+static void drop_send(MyApplication* self, const gchar* method, FlValue* args) {
+  if (self->drop_channel == nullptr) {
+    return;
+  }
+  fl_method_channel_invoke_method(self->drop_channel, method, args, nullptr,
+                                  nullptr, nullptr);
+}
+
+// Something is being dragged over the window: the frame Dart draws says a
+// drop would be taken.
+static gboolean drop_drag_motion(GtkWidget* widget, GdkDragContext* context,
+                                 gint x, gint y, guint time,
+                                 gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  if (!self->drag_over) {
+    self->drag_over = TRUE;
+    drop_send(self, "dragEntered", nullptr);
+  }
+  // The default handler answers the drag (GTK_DEST_DEFAULT_MOTION), which
+  // is what keeps the window a drop destination at all.
+  return FALSE;
+}
+
+// The drag left the window, or landed on it.
+static void drop_drag_leave(GtkWidget* widget, GdkDragContext* context,
+                            guint time, gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  if (!self->drag_over) {
+    return;
+  }
+  self->drag_over = FALSE;
+  drop_send(self, "dragExited", nullptr);
+}
+
+// The drop's own data: the file URIs it carries, one path each.
+//
+// Only text/uri-list is asked for (see where the target is set up): the
+// portal file-transfer target KDE offers beside it holds a one-time key
+// instead of URIs, and a key nothing resolves is what made a drop on
+// Wayland look like no drop at all (#224). A URI that is not a file this
+// process can read — another host's, or a key that arrived anyway — is
+// named in the log and left out of what Dart is handed.
+static void drop_data_received(GtkWidget* widget, GdkDragContext* context,
+                               gint x, gint y, GtkSelectionData* data,
+                               guint info, guint time, gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  self->drag_over = FALSE;
+
+  g_autoptr(FlValue) paths = fl_value_new_list();
+  g_auto(GStrv) uris = gtk_selection_data_get_uris(data);
+  for (gint i = 0; uris != nullptr && uris[i] != nullptr; i++) {
+    g_autoptr(GFile) file = g_file_new_for_uri(uris[i]);
+    g_autofree gchar* path = g_file_get_path(file);
+    if (path != nullptr) {
+      fl_value_append_take(paths, fl_value_new_string(path));
+    } else {
+      g_warning("drop: %s is not a local file", uris[i]);
+    }
+  }
+  if (fl_value_get_length(paths) == 0) {
+    g_autofree gchar* text = reinterpret_cast<gchar*>(
+        gtk_selection_data_get_text(data));
+    g_warning("drop: nothing openable in the drop (%s)",
+              text != nullptr ? text : "no data");
+  }
+  drop_send(self, "drop", paths);
+  // No gtk_drag_finish() here: the destination's defaults
+  // (GTK_DEST_DEFAULT_ALL, where the target is set up) include the drop, so
+  // GTK answers the source itself once this handler has returned and the
+  // data has been taken. A second finish would answer it twice.
 }
 
 // Implements GApplication::activate.
@@ -75,6 +152,25 @@ static void my_application_activate(GApplication* application) {
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 
+  // Files and folders dropped on the window (#224): the window is the
+  // drop destination, and the paths it takes are handed to Dart over
+  // niman/drop.
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  self->drop_channel = fl_method_channel_new(
+      fl_engine_get_binary_messenger(fl_view_get_engine(view)), "niman/drop",
+      FL_METHOD_CODEC(codec));
+  // text/uri-list (and what GDK accepts beside it), never the portal
+  // file-transfer target: that one carries a key this runner does not
+  // resolve, and taking it is what left a drop on KDE/Wayland with
+  // nothing to open (#224).
+  gtk_drag_dest_set(GTK_WIDGET(view), GTK_DEST_DEFAULT_ALL, nullptr, 0,
+                    GDK_ACTION_COPY);
+  gtk_drag_dest_add_uri_targets(GTK_WIDGET(view));
+  g_signal_connect(view, "drag-motion", G_CALLBACK(drop_drag_motion), self);
+  g_signal_connect(view, "drag-leave", G_CALLBACK(drop_drag_leave), self);
+  g_signal_connect(view, "drag-data-received", G_CALLBACK(drop_data_received),
+                   self);
+
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
@@ -121,6 +217,10 @@ static void my_application_shutdown(GApplication* application) {
 static void my_application_dispose(GObject* object) {
   MyApplication* self = MY_APPLICATION(object);
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
+  if (self->drop_channel != nullptr) {
+    g_object_unref(self->drop_channel);
+    self->drop_channel = nullptr;
+  }
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 

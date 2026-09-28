@@ -268,8 +268,10 @@ this is not offered there yet.
 ## Dropping files on the window
 
 On Linux and Windows, files and folders dragged from the file manager
-onto Niman's window are taken in, over whichever screen is showing. A
-frame around the window says so while you drag.
+onto Niman's window are taken in, over whichever screen is showing. On
+Linux a frame around the window says so while you drag; on Windows the
+drop lands without it, for the reason
+[platforms](platforms.md#windows) gives.
 
 - **A Markdown file** (`.md`, `.markdown`, `.txt`) opens the way
   [Open file](#opening-a-file-outside-any-library) opens one: as its

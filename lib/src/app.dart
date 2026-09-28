@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/changelog.dart';
+import 'package:niman/src/core/drop_in.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/text_scale.dart';
@@ -94,6 +95,7 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
           child: Consumer(
             builder: (context, ref, _) => AppDropTarget(
               requests: ref.watch(launchRequestsProvider),
+              drops: ref.watch(dropTargetServiceProvider),
               child: child ?? const SizedBox.shrink(),
             ),
           ),
