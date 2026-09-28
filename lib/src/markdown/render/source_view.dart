@@ -2045,23 +2045,30 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// something
   /// the note does not have — which is what a device showed when the two
   /// drifted.
-  StyledLine _lineAt(int index) {
+  StyledLine _lineAt(int index) => StyledLine(
+    widget.buffer.lineAt(index),
+    _tokensAt(index) ?? const <Token>[],
+  );
+
+  /// Line [index]'s tokens, or null while they are **not known**: the line of
+  /// a long note, before the background reading lands ([_restyle]).
+  ///
+  /// A null is not "this line has no tokens" — it is "nobody has read it
+  /// yet", and the two must not be confused by a reader that takes tokens as
+  /// the line's *structure*: the spelling's skip ranges are made of them
+  /// (#373).
+  List<Token>? _tokensAt(int index) {
     final text = widget.buffer.lineAt(index);
     final own = widget.lineTokens;
-    if (own != null) return StyledLine(text, own(text));
+    if (own != null) return own(text);
     final styler = _styler;
-    if (styler == null || index < 0 || index >= lineCount) {
-      return StyledLine(text, const <Token>[]);
-    }
+    if (styler == null) return null;
     final tokens = styler.tokensOf(index);
-    if (!widget.templateCommands) return StyledLine(text, tokens);
+    if (!widget.templateCommands) return tokens;
     final commands = templateCommandsIn(text);
-    return StyledLine(
-      text,
-      commands.isEmpty
-          ? tokens
-          : overlayTokens(tokens, commands, TokenKind.templateCommand),
-    );
+    return commands.isEmpty
+        ? tokens
+        : overlayTokens(tokens, commands, TokenKind.templateCommand);
   }
 
   /// The part of the selection that falls inside line [index], as offsets local
@@ -3590,14 +3597,18 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The misspelled ranges of line [index], whose text is [text]: the ranges
   /// the checker finds outside what the tokenizer says is not prose (code,
   /// maths, links, markers).
+  ///
+  /// A line whose tokens are not known yet is not judged at all, and nothing
+  /// is cached for it: judged, its skip set would be empty and the whole line
+  /// — code, links and maths included — would come back underlined, and on a
+  /// long note that first judgement is what the styler's reading lands on
+  /// (#373). It is judged on the frame the tokens arrive.
   List<TextRange> _spellRanges(int index, String text) {
     final spell = widget.spellCheck;
     if (spell == null) return const <TextRange>[];
-    return spell.rangesFor(
-      index,
-      text,
-      skip: spellSkipRanges(_lineAt(index).tokens),
-    );
+    final tokens = _tokensAt(index);
+    if (tokens == null) return const <TextRange>[];
+    return spell.rangesFor(index, text, skip: spellSkipRanges(tokens));
   }
 
   // ------------------------------------------------------- touch selection

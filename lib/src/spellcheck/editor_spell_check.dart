@@ -3,8 +3,9 @@
 /// Line-oriented and lazy on purpose. The editor asks about a line only when
 /// it lays it out, so the cost is O(visible lines), never O(file) — the same
 /// budget the incremental highlighter keeps (`editor/highlight_sync.dart`).
-/// A line's answer is cached by its text, and each word's verdict is cached
-/// once, so re-scrolling and a repeated word cost nothing.
+/// A line's answer is cached by its text *and* the ranges it was told to
+/// skip, and each word's verdict is cached once, so re-scrolling and a
+/// repeated word cost nothing.
 library;
 
 import 'dart:async';
@@ -52,12 +53,24 @@ const Set<TokenKind> _skipKinds = <TokenKind>{
 /// ranges the checker must ignore.
 typedef SpellLine = ({String text, List<TextRange> skip});
 
-/// One checked line: the text it was checked for and the ranges found.
+/// One checked line: the text it was checked for, the ranges the checker was
+/// told to skip, and the ranges found.
+///
+/// The skip is part of the answer rather than a detail of the question: a
+/// line asked about with nothing to skip — its tokens not known yet — is a
+/// different question from the same line asked about with its code, maths
+/// and links skipped, and the first answer must not stand for the second
+/// (#373).
 final class _CheckedLine {
-  const new(this.text, this.ranges);
+  const new(this.text, this.skip, this.ranges);
 
   final String text;
+  final List<TextRange> skip;
   final List<TextRange> ranges;
+
+  /// Whether this answer is [line]'s, checked with [skip] — the cache hit.
+  bool answers(String line, List<TextRange> skip) =>
+      text == line && listEquals(this.skip, skip);
 }
 
 /// The document-level spelling state the editor's span builder consults.
@@ -220,9 +233,12 @@ final class EditorSpellCheck extends ChangeNotifier {
 
   /// The misspelled ranges of [line], within [line]'s own coordinates.
   ///
-  /// [skip] comes from [spellSkipRanges]. The first call for a text checks it
-  /// and caches; later calls are a string compare. Nothing is computed while
-  /// [enabled] is false or the engine is unavailable.
+  /// [skip] comes from [spellSkipRanges] and is part of the key: a note long
+  /// enough to be styled in the background is asked about its lines before
+  /// their tokens are read, and the answer of that ask — with nothing to
+  /// skip — must not stand once the tokens arrive (#373). Later calls for
+  /// the same text *and* the same skip are a compare. Nothing is computed
+  /// while [enabled] is false or the engine is unavailable.
   List<TextRange> rangesFor(
     int index,
     String line, {
@@ -230,11 +246,11 @@ final class EditorSpellCheck extends ChangeNotifier {
   }) {
     if (!_enabled) return const <TextRange>[];
     final cached = _lines[index];
-    if (cached != null && cached.text == line) return cached.ranges;
+    if (cached != null && cached.answers(line, skip)) return cached.ranges;
     final checker = _checker ??= _newChecker();
     if (!checker.available) return const <TextRange>[];
     final ranges = _checkLine(checker, line, skip);
-    _lines[index] = _CheckedLine(line, ranges);
+    _lines[index] = _CheckedLine(line, skip, ranges);
     return ranges;
   }
 
