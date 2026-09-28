@@ -111,6 +111,74 @@ void main() {
       expect(find.byType(MarkdownReadView), findsNothing);
     });
 
+    testWidgets('one press brings the preview up on a huge note', (
+      tester,
+    ) async {
+      // #432: on a note long enough to be scanned in the background, the first
+      // press of the preview toggle brought up a *blank* pane — the read view
+      // had been built off stage with the empty page, kept it as "the revision
+      // on screen" while the note's own scan ran, and only drew the note when
+      // that scan landed (4.7 s on the 246 MB stress note). The reader pressed
+      // again. The toggle is one press by contract: what it flips to is up,
+      // with the note's top in it, on the frame that press builds.
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final note = StringBuffer('The first line of a huge note.\n');
+      for (var at = 0; at < 60000; at++) {
+        note.write('Line $at of a huge note, long enough to be a line.\n');
+      }
+      var preview = false;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) => MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: [
+                  IconButton(
+                    key: const Key('editor-preview-toggle'),
+                    icon: const Icon(Icons.visibility),
+                    onPressed: () => setState(() => preview = !preview),
+                  ),
+                  Expanded(
+                    child: _view(
+                      path: '/notes/huge.md',
+                      showPreview: preview,
+                      readNote: (_) async => note.toString(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(MarkdownSourceView), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+      await tester.pump();
+
+      expect(find.byType(MarkdownReadView), findsOneWidget);
+      final read = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(
+        read.scanning,
+        isTrue,
+        reason: 'the note is long enough to be scanned in the background',
+      );
+      expect(
+        find.textContaining(
+          'The first line of a huge note',
+          findRichText: true,
+        ),
+        findsOneWidget,
+        reason: 'the note is on the pane the first press brought up',
+      );
+    });
+
     testWidgets('autosaves ~500 ms after the last edit', (tester) async {
       final writes = <String>[];
       await tester.pumpWidget(

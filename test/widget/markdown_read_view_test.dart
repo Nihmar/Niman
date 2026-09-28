@@ -658,6 +658,39 @@ void main() {
       expect(parser.scope?.footnotes.single.body, 'a note');
     });
 
+    testWidgets('the empty page a pane opened on is not a revision to keep', (
+      tester,
+    ) async {
+      // #432: a note view builds its read pane before the note has a buffer,
+      // so the pane's first scan is the empty page. Handed the note itself, it
+      // kept that page — `_shown` was not null — instead of drawing the top of
+      // the note, and the pane stayed blank until the whole scan landed.
+      final parser = BlockParser();
+      await tester.pumpWidget(view(SourceBuffer.empty(), parser));
+      await tester.pump();
+
+      await tester.pumpWidget(view(SourceBuffer.fromText(_note(20)), parser));
+      await tester.pump();
+
+      final state = tester.state<MarkdownReadViewState>(
+        find.byType(MarkdownReadView),
+      );
+      expect(
+        state.scanning,
+        isTrue,
+        reason: 'the note is scanned off the frame',
+      );
+      expect(
+        find.textContaining('Paragraph 0', findRichText: true),
+        findsOne,
+        reason: 'the top of the note takes the empty page at once',
+      );
+      expect(find.byKey(const Key('read-view-reading-rest')), findsOneWidget);
+
+      await settle(tester);
+      expect(state.blockCount, greaterThan(20));
+    });
+
     testWidgets("each revision's definitions are the ones drawn", (
       tester,
     ) async {

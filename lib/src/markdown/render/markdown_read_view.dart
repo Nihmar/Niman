@@ -139,6 +139,15 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// before it, drawn until the scan comes back.
   SourceBuffer? _shown;
 
+  /// Whether the pane has a revision worth keeping on screen while the next
+  /// one is scanned: it has none before its first scan, and an *empty page* —
+  /// what a note view hands it while the note has no buffer yet, off stage —
+  /// is not one. Keeping that page is what made the first press of the preview
+  /// on a huge note bring up a blank pane (#432): the pane had drawn the empty
+  /// page, so a revision "was" on screen, and the top of the note did not take
+  /// its place until the whole scan landed.
+  bool get _nothingToKeep => _shown == null || _shown!.length == 0;
+
   /// Counts the scans started, so an answer that a later one overtook is
   /// dropped.
   int _scans = 0;
@@ -442,7 +451,8 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
   /// revision before it stays on screen when there is one — a buffer the
   /// editor handed over as a copy does not change under it — and nothing
   /// when the buffer is one that changed in place, whose old blocks no
-  /// longer match its lines.
+  /// longer match its lines, or when the page it holds is empty (see
+  /// [_nothingToKeep]).
   void _rescan() {
     final buffer = widget.buffer;
     final scan = ++_scans;
@@ -468,7 +478,7 @@ final class MarkdownReadViewState extends State<MarkdownReadView> {
     }
     _scanning = true;
     if (identical(_shown, buffer)) _clear();
-    if (_shown == null) {
+    if (_nothingToKeep) {
       // Nothing to draw for the wait, which on a phone was 22 s of an empty
       // pane for the 247 MB note (device log, 2026-09-24): the top of the
       // note goes on screen now, and the rest comes with the scan.
