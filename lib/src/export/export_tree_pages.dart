@@ -42,7 +42,12 @@ abstract final class ExportTreePages {
   static ExportTreeWalk walk(String dir) {
     final entries = <ExportTreeEntry>[];
     void visit(Directory current, String rel) {
-      final children = current.listSync()
+      // No link is followed: a symbolic link inside the folder is listed as
+      // a `Link`, which is neither a `Directory` nor a `File`, so it adds
+      // nothing and is never walked into — content outside the exported
+      // tree stays out, and a link cycle cannot recurse (every other walker
+      // sets this too).
+      final children = current.listSync(followLinks: false)
         ..sort((a, b) => a.path.compareTo(b.path));
       for (final child in children) {
         final name = p.basename(child.path);
