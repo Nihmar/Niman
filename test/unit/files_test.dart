@@ -244,6 +244,74 @@ void main() {
     });
   });
 
+  group('sweepStaleTempFiles', () {
+    // A temp file old enough that no running write could be what left it.
+    void makeStale(File file) {
+      file
+        ..writeAsStringSync('half-written')
+        ..setLastModifiedSync(
+          DateTime.now().subtract(const Duration(hours: 1)),
+        );
+    }
+
+    test('removes the temp files a killed write left, and nothing else', () {
+      final note = File(p.join(tempDir.path, 'a.md'))
+        ..writeAsStringSync('the note');
+      final hidden = File(p.join(tempDir.path, '.hidden'))
+        ..writeAsStringSync('not a temp');
+      final atomic = File(
+        p.join(tempDir.path, '.a.md.niman-tmp-1790060822793600'),
+      );
+      final sync = File(
+        p.join(tempDir.path, '.a.md.niman-tmp-sync-1790060822793601'),
+      );
+      makeStale(atomic);
+      makeStale(sync);
+
+      expect(sweepStaleTempFiles(tempDir.path), 2);
+
+      expect(atomic.existsSync(), isFalse);
+      expect(sync.existsSync(), isFalse);
+      expect(note.readAsStringSync(), 'the note');
+      expect(hidden.existsSync(), isTrue);
+    });
+
+    test('keeps a temp file young enough to be a write in flight', () {
+      final fresh = File(
+        p.join(tempDir.path, '.a.md.niman-tmp-1790060822793602'),
+      )..writeAsStringSync('being written');
+
+      expect(sweepStaleTempFiles(tempDir.path), 0);
+      expect(fresh.existsSync(), isTrue);
+    });
+
+    test('walks the hidden folders a state write leaves its temp in', () {
+      final state = Directory(p.join(tempDir.path, '.niman'))..createSync();
+      final settings = File(p.join(state.path, 'settings.json'))
+        ..writeAsStringSync('{}');
+      final temp = File(
+        p.join(state.path, '.settings.json.niman-tmp-1790060822793600'),
+      );
+      makeStale(temp);
+
+      expect(sweepStaleTempFiles(tempDir.path), 1);
+
+      expect(temp.existsSync(), isFalse);
+      expect(settings.readAsStringSync(), '{}');
+    });
+
+    test('leaves a .git folder — the user keeps it — alone', () {
+      final git = Directory(p.join(tempDir.path, '.git'))..createSync();
+      final temp = File(
+        p.join(git.path, '.notes.md.niman-tmp-1790060822793600'),
+      );
+      makeStale(temp);
+
+      expect(sweepStaleTempFiles(tempDir.path), 0);
+      expect(temp.existsSync(), isTrue);
+    });
+  });
+
   group('DiskStamp', () {
     test('matches the file it stamped, and not a changed one', () async {
       final file = File(p.join(tempDir.path, 'stamp.md'))

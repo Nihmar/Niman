@@ -48,7 +48,10 @@ lines or when responsibilities mix.
   (`library_device_settings`, `LibraryConfig.deviceKeys`) once into
   `LibraryConfigRepo` (cached per session) → scan files off the UI
   isolate (`Isolate.run` — every stat is a FUSE round trip on Android) →
-  upsert into `IndexDatabase` on main.
+  upsert into `IndexDatabase` on main. Behind the ready bump, a sweep off
+  the UI isolate removes the `.niman-tmp-*` files a killed write left
+  (`core/files.dart`, #379), taking only files older than
+  `staleTempMinimumAge` so a write in flight is never touched.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Every mode of the surface shares one tokenizer for links.
