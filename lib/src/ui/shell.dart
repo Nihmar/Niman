@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/launch_requests.dart';
@@ -503,6 +504,15 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// the already-open note is reopened and on app resume, so the
   /// mounted NoteView re-reads the file when its buffer is clean.
   int _noteReloadToken = 0;
+
+  /// What a frame the shell draws costs it (#324): the region above the two
+  /// panes — the title bar, the tabs, the rail, the tree, the settings page.
+  ///
+  /// The editor and the read pane report their own share of a frame (#316,
+  /// #323); a frame that misses with both under their bars had no line of its
+  /// own, so the shell names it. Nothing of it runs unless `NIMAN_FRAMES` is
+  /// set (see [FrameCost]).
+  final FrameCost _frameCost = shellFrameCost();
 
   /// The currently selected bottom tab (narrow layout).
   ///
@@ -2345,9 +2355,13 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
     );
-    return narrow
-        ? NarrowShellLayout(props: props)
-        : WideShellLayout(props: props);
+    // The region above the two panes, measured so a frame that misses with
+    // both panes under their bars has a name of its own (#324).
+    return _frameCost.timed(
+      () => narrow
+          ? NarrowShellLayout(props: props)
+          : WideShellLayout(props: props),
+    );
   }
 
   /// The open note's actions on the phone's note bar: the kind toggles,

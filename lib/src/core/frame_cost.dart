@@ -12,6 +12,30 @@ import 'package:niman/src/core/logging.dart';
 /// covers all of it, `_reportSlowFrames` (main.dart) included.
 const bool nimanFrames = bool.fromEnvironment('NIMAN_FRAMES');
 
+/// The region a frame the two panes are silent in is reported under (#324):
+/// the shell — the title bar, the tabs, the rail, the tree and the settings
+/// page — which is everything above the editor and the read pane.
+const String shellFrameLabel = 'shell';
+
+/// A [FrameCost] for the shell: the region above the two panes (#324).
+///
+/// The editor and the read pane each name their own share of a frame (#316,
+/// #323). A frame that misses *outside* them used to have no line of its own
+/// — the app-wide `[frames] slow frame` (main.dart) names no region, and a
+/// pane under its bar says nothing at all, so silence read the same at 2 ms
+/// and at 15.9 ms. This wraps the shell so those frames are named too, under
+/// [shellFrameLabel] rather than nothing.
+///
+/// The bar is a whole frame ([FrameCost.paneBarMicros]), as for a pane: what
+/// the shell's line adds is the frame at its top, the panes' own lines being
+/// the shares inside it.
+FrameCost shellFrameCost({AppLogger log = const AppLogger(name: 'shell')}) =>
+    FrameCost(
+      label: shellFrameLabel,
+      log: log,
+      barMicros: FrameCost.paneBarMicros,
+    );
+
 /// What one frame of a view cost, in parts, and the line it is reported in
 /// (#316).
 ///
@@ -116,13 +140,19 @@ final class FrameCost {
     _booked = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _booked = false;
-      _report();
+      report();
     });
   }
 
   /// Writes the measured parts of a frame this view drew, when they together
-  /// miss [barMicros], or when the edit path alone misses [editBarMicros].
-  void _report() {
+  /// miss [barMicros], or when the edit path alone misses [editBarMicros],
+  /// and zeroes them for the next frame.
+  ///
+  /// [book] runs this after the frame it is about. It is visible to tests so
+  /// the name a region reports a frame under can be read without a frame the
+  /// test harness could make miss the bar.
+  @visibleForTesting
+  void report() {
     final sum = total;
     if (sum >= barMicros || edit >= editBarMicros) {
       log.debug(
