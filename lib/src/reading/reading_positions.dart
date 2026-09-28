@@ -13,12 +13,14 @@
 /// writes it back as the reader moves, so a copy the sync just brought is
 /// what the next open reads. The writes of one library run one after the
 /// other, each reading the file afresh, so two panes never lose each
-/// other's entry.
+/// other's entry. A write drops the entries of files that are gone (#367),
+/// so the file does not grow with every book since deleted.
 library;
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
@@ -84,6 +86,13 @@ final class ReadingPositions {
 
   /// Runs [change] over the entries, after every earlier write of this
   /// library, and writes them back when it says it changed them.
+  ///
+  /// The write drops the entries whose file is gone from the library
+  /// (#367), and does both that and the encoding on a background isolate:
+  /// the file is one of the sync's library state files, rewritten whole on
+  /// every rest, and a `stat` per entry on the UI isolate is a FUSE round
+  /// trip on Android (AGENTS.md). The on-disk format is unchanged, so a
+  /// build that predates the pruning still reads the file.
   Future<void> _update(
     bool Function(Map<String, Object?> entries) change,
   ) async {
@@ -95,9 +104,7 @@ final class ReadingPositions {
       if (before != null) await before;
       final entries = await _load();
       if (!change(entries)) return;
-      await _file.parent.create(recursive: true);
-      final text = const JsonEncoder.withIndent('  ').convert(entries);
-      await writeFileAtomically(_file, utf8.encode('$text\n'));
+      await Isolate.run(() => _pruneAndWrite(root, entries));
     } on Object catch (error) {
       _log.warning('could not write $filePath: $error');
     } finally {
@@ -124,4 +131,24 @@ final class ReadingPositions {
     }
     return {};
   }
+}
+
+/// Drops the entries of [entries] whose file is gone from the library at
+/// [root], then writes what is left to `.niman/reading.json` (#367).
+///
+/// Top level for `Isolate.run`: the closure carries only [root] and
+/// [entries], both plain values. The existence of every entry's file is a
+/// `stat`, and the file is re-encoded and written whole, so the work stays
+/// off the UI isolate (AGENTS.md). The format is what it always was — an
+/// object keyed by library-relative path — so an older build reads it
+/// unchanged.
+Future<void> _pruneAndWrite(String root, Map<String, Object?> entries) async {
+  final kept = <String, Object?>{
+    for (final entry in entries.entries)
+      if (File(p.join(root, entry.key)).existsSync()) entry.key: entry.value,
+  };
+  final file = File(p.join(root, ReadingPositions.filePath));
+  await file.parent.create(recursive: true);
+  final text = const JsonEncoder.withIndent('  ').convert(kept);
+  await writeFileAtomically(file, utf8.encode('$text\n'));
 }
