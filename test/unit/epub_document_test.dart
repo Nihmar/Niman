@@ -186,6 +186,34 @@ void main() {
     expect(() => readEpub(empty.path, pictures), throwsFormatException);
   });
 
+  test('a book whose chapters are all missing is a FormatException (#377)', () {
+    // The spine names files the archive does not hold, as a malformed or
+    // DRM-stripped book does: nothing is left to read.
+    final file = writeTestEpub(
+      book('hollow.epub'),
+      chapters: [
+        (path: 'a.xhtml', body: '<p>a</p>'),
+        (path: 'b.xhtml', body: '<p>b</p>'),
+      ],
+      omit: {'a.xhtml', 'b.xhtml'},
+    );
+    expect(() => readEpub(file.path, pictures), throwsFormatException);
+  });
+
+  test('a book with a chapter left opens, its missing ones aside (#377)', () {
+    final file = writeTestEpub(
+      book('part.epub'),
+      chapters: [
+        (path: 'gone.xhtml', body: '<p>gone</p>'),
+        (path: 'here.xhtml', body: '<p>Here.</p>'),
+      ],
+      omit: {'gone.xhtml'},
+    );
+    final document = readEpub(file.path, pictures);
+    expect(document.markdown, 'Here.\n');
+    expect(document.chapters, [(file: 'OEBPS/here.xhtml', line: 0)]);
+  });
+
   test("a book's pictures have a folder of their own, per version", () {
     final file = writeTestEpub(
       book('v.epub'),
