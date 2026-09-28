@@ -502,11 +502,11 @@ const Duration _renameGrace = Duration(seconds: 3);
 /// owning and closing the download's sink first.
 ///
 /// What is left is to stop waiting on it. The rename is given
-/// [_renameGrace] and, if it has not returned, the bytes are copied to
-/// the target instead and the temp dropped. The copy is verified by size
-/// before the temp goes, because a copy — unlike a rename — is not
-/// atomic, and half a file recorded as whole would be worse than a slow
-/// sync.
+/// [_renameGrace] and, if it has not returned, the bytes are copied to a
+/// sibling of the target and renamed onto it, and the temp dropped. The
+/// copy is verified by size before that rename, because a copy — unlike
+/// a rename — is not atomic, and half a file recorded as whole would be
+/// worse than a slow sync.
 ///
 /// The abandoned rename is left running. It has never been seen to
 /// finish; if it ever did, it would put the same bytes at the same path.
@@ -529,9 +529,18 @@ Future<void> _renameOrCopy(String abs, String tempAbs) async {
 /// swap, kept apart so it can be tested without a rename that hangs
 /// (issue #103).
 ///
-/// The copy is checked by size before the temp goes: a copy is not
+/// The copy goes to a sibling of the target in [abs]'s own directory,
+/// renamed onto it once the bytes are all there — the shape
+/// [atomicTempPath] and [writeFileAtomically] already use (issue #369).
+/// Copying straight onto [abs] made the copy itself the live file, so a
+/// kill mid-copy left a truncated note, or an attachment the next sync
+/// would upload over the good remote, under its real name, with no temp
+/// left to recover from.
+///
+/// The staged copy is checked by size before it is renamed: a copy is not
 /// atomic, unlike the rename it stands in for, and half a file recorded
-/// as a whole one would outlive the sync that wrote it.
+/// as a whole one would outlive the sync that wrote it. A short copy is
+/// dropped there, leaving [abs] as it was.
 ///
 /// A temp that will not delete is left where it is. The abandoned rename
 /// may still hold it; it is hidden, the indexer skips it, and the bytes
@@ -541,12 +550,30 @@ Future<void> copyFileOver(String abs, String tempAbs) async {
   const log = AppLogger(name: 'swap');
   final name = p.basename(abs);
   final expected = (await FileStat.stat(tempAbs)).size;
-  await File(tempAbs).copy(abs);
-  final copied = (await FileStat.stat(abs)).size;
-  if (copied != expected) {
-    throw FileSystemException('copied $copied of $expected bytes', abs);
+  final staged = atomicTempPath(
+    File(abs),
+    DateTime.now().microsecondsSinceEpoch,
+  );
+  try {
+    await File(tempAbs).copy(staged.path);
+    final copied = (await FileStat.stat(staged.path)).size;
+    if (copied != expected) {
+      throw FileSystemException('copied $copied of $expected bytes', abs);
+    }
+    await staged.rename(abs);
+  } on Object {
+    // The staged copy never becomes the live file: a failure here leaves
+    // [abs] holding exactly the bytes it held before (issue #369).
+    if (staged.existsSync()) {
+      try {
+        await staged.delete();
+      } on FileSystemException {
+        // Already gone. Nothing to tidy.
+      }
+    }
+    rethrow;
   }
-  log.warning('"$name": copied $copied bytes in place');
+  log.warning('"$name": copied $expected bytes in place');
   try {
     await File(tempAbs).delete().timeout(_renameGrace);
   } on Object catch (error) {
