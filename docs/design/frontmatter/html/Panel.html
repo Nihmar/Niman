@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman — frontmatter</title>
+<style>
+/* The app's own palette: lib/src/ui/theme/niman.dart (dark). */
+:root{
+  --backdrop:#1B1D21; --surface:#2C3037; --surface-high:#363B44;
+  --text:#F2EDE5; --muted:#A6A29A; --outline:#4A4F59;
+  --accent:#587CD3; --error:#E0687A;
+  --code:#7FD1C4; --link:#7CA0E6; --tag:#C6A0F6; --math:#D8A56B;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:26px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:#14161A;color:var(--text);font-size:13px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:12px;font-weight:600;margin:30px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+p.lead{margin:0 0 6px;color:var(--muted);font-size:13px;max-width:900px;line-height:1.55}
+p.lead b{color:var(--text);font-weight:600}
+.win{width:1180px;background:var(--backdrop);border:1px solid var(--surface);border-radius:7px;overflow:hidden}
+.titlebar{height:38px;background:var(--surface);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:12px;color:var(--muted)}
+.mark{width:22px;height:22px;border-radius:5px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.tab{height:26px;display:flex;align-items:center;gap:7px;padding:0 12px;border-radius:6px;background:var(--surface-high);color:var(--text)}
+.grow{flex:1}
+.workspace{display:flex;align-items:stretch;min-height:430px}
+.rail{width:44px;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:3px;color:var(--muted)}
+.rail .on{color:var(--accent)}
+.rail i{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-style:normal}
+.tree{width:220px;background:#23262B;border-right:1px solid var(--surface);padding:8px 6px;color:#C8C3BA;font-size:12.5px}
+.tree .row{padding:5px 9px;border-radius:6px;display:flex;gap:8px;align-items:center}
+.tree .row.sel{background:var(--surface-high);color:var(--text)}
+.tree .ind{padding-left:24px}
+.pane{flex:1;min-width:0;display:flex;flex-direction:column}
+.notebar{height:40px;display:flex;align-items:center;justify-content:flex-end;gap:4px;padding:0 12px;color:var(--muted)}
+.notebar .on{color:var(--accent)}
+.notecol{width:660px;max-width:calc(100% - 60px);margin:0 auto;padding:2px 0 22px}
+h3.title{font-size:23px;font-weight:700;margin:0 0 14px}
+.body p{line-height:1.62;margin:0 0 12px}
+.body code{font-family:ui-monospace,monospace;background:var(--surface);padding:1px 5px;border-radius:4px;color:var(--code);font-size:12px}
+.body b{font-weight:600}
+/* — the fields panel — */
+.fields{border:1px solid var(--outline);border-radius:9px;padding:10px 12px 8px;margin:0 0 20px;background:rgba(54,59,68,.28)}
+.fields .cap{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 9px}
+.fields .cap .grow{flex:1}
+.tog{font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--link);border:1px solid var(--outline);border-radius:999px;padding:2px 9px}
+.f{border-radius:7px}
+.f:hover{background:var(--surface-high)}
+.f .line{display:flex;align-items:center;gap:10px;padding:5px 7px}
+.f .key{width:150px;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f .val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f .chip{font-size:10.5px;color:var(--muted);border:1px solid var(--outline);border-radius:999px;padding:1px 7px}
+.f .x{color:var(--muted);opacity:0;font-size:12px}
+.f:hover .x{opacity:.7}
+.f.hot{background:var(--surface-high);box-shadow:inset 2px 0 0 var(--accent)}
+.tag{display:inline-block;background:rgba(198,160,246,.14);color:var(--tag);border-radius:999px;padding:1px 8px;margin-right:5px;font-size:12px}
+.add{display:flex;align-items:center;gap:8px;padding:6px 7px;color:var(--muted)}
+.add .plus{width:18px;height:18px;border:1px dashed var(--outline);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1}
+/* — the raw YAML state — */
+.yaml{margin:2px 0 0;border-top:1px solid var(--outline);padding-top:9px}
+.yaml pre{margin:0;font-family:ui-monospace,monospace;font-size:12px;line-height:1.5;color:var(--muted);white-space:pre}
+.yaml pre b{color:var(--text);font-weight:500}
+.yaml pre i{color:var(--code);font-style:normal}
+/* — the broken state — */
+.broken{border:1px solid rgba(224,104,122,.5);border-radius:9px;padding:10px 12px;margin:0 0 20px;color:var(--error);background:rgba(224,104,122,.07)}
+.broken .why{color:var(--muted);font-size:12px;margin-top:3px}
+.note{color:var(--muted);font-size:12px;margin:6px 0 0}
+</style>
+</head>
+<body>
+
+<h1>Frontmatter</h1>
+<p class="lead">The same note, three states, drawn to be looked at rather than argued about. <b>A</b> and <b>B</b> answer “where do the fields live?” — above the note in the <b>read view</b>, or inline at the top of the <b>live editor</b>, where the writing happens. <b>C</b> is the state that decides whether the panel is safe: a frontmatter the parser refuses.</p>
+<p class="lead">Every state keeps the raw YAML one toggle away, and the file stays the only source of truth: a field edit is one edit, one undo step, one write.</p>
+
+<h2>A — the fields in the read view, raw YAML a toggle away</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▸ Journal</div>
+      <div class="row ind">▸ Lists</div>
+      <div class="row sel ind">▤ Welcome.md</div>
+      <div class="row ind">▤ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span class="on">◉</span><span>◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <div class="fields">
+          <div class="cap"><span>Properties</span><span class="grow"></span><span class="tog">Raw YAML</span></div>
+          <div class="f hot"><div class="line"><span class="key">title</span><span class="val">Welcome</span><span class="chip">text</span><span class="x">✕</span></div></div>
+          <div class="f"><div class="line"><span class="key">tags</span><span class="val"><span class="tag">welcome</span><span class="tag">markdown</span></span><span class="chip">list</span><span class="x">✕</span></div></div>
+          <div class="f"><div class="line"><span class="key">priority</span><span class="val">3</span><span class="chip">number</span><span class="x">✕</span></div></div>
+          <div class="f"><div class="line"><span class="key">due</span><span class="val">2026-10-01</span><span class="chip">date</span><span class="x">✕</span></div></div>
+          <div class="f"><div class="line"><span class="key">pinned</span><span class="val">yes</span><span class="chip">boolean</span><span class="x">✕</span></div></div>
+          <div class="add"><span class="plus">+</span><span>Add a property</span></div>
+        </div>
+        <h3 class="title">Welcome</h3>
+        <div class="body">
+          <p>One note is <b>one <code>.md</code> file</b> on disk. The database is only a rebuildable index — the files are the source of truth.</p>
+          <p>See also <span style="color:var(--link)">Guides/Editing</span> and the <span class="tag">welcome</span> tag.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>B — the fields inline, at the top of the live editor</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▸ Journal</div>
+      <div class="row sel ind">▤ Welcome.md</div>
+      <div class="row ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span class="on">▤</span><span>◉</span><span>◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <div class="fields">
+          <div class="cap"><span>1</span><span class="grow"></span><span class="tog">Raw YAML</span></div>
+          <div class="f"><div class="line"><span class="key">title</span><span class="val">Welcome</span><span class="chip">text</span><span class="x">✕</span></div></div>
+          <div class="f hot"><div class="line"><span class="key">tags</span><span class="val"><span class="tag">welcome</span><span class="tag">markdown</span></span><span class="chip">list</span><span class="x">✕</span></div></div>
+          <div class="add"><span class="plus">+</span><span>Add a property</span></div>
+        </div>
+        <div class="body">
+          <p style="color:var(--muted);font-size:12px;margin:0 0 10px">— the note itself, as it is written —</p>
+          <p>One note is <b>one <code>.md</code> file</b> on disk. The database is only a rebuildable index.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>C — frontmatter that does not parse: the panel stays out of it</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row sel ind">▤ Notes on the move.md</div>
+      <div class="row ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span class="on">◉</span><span>◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <div class="broken">This note's frontmatter does not parse, so it is left as written.
+          <div class="why">unexpected <code style="color:var(--error)">[</code> at line 2 — fix it here, or in the raw YAML below.</div>
+        </div>
+        <div class="yaml">
+          <pre><b>---</b>
+title: <i>[unclosed</i>
+tags: <i>[a, b</i>
+<b>---</b></pre>
+        </div>
+        <h3 class="title">Notes on the move</h3>
+        <div class="body"><p>The panel never rewrites what it cannot read: no field rows, no silent repair, and the raw YAML is right there.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note">Mockups, not screenshots of the app: everything here is HTML drawn to look like Niman, using the palette from <code>lib/src/ui/theme/niman.dart</code>. Where a mockup and the app disagree, the app ships.</p>
+</body>
+</html>
