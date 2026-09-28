@@ -66,6 +66,10 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
 /// selects whole. An offset that sits on no word character — a space, a comma —
 /// selects that one character, which is what editors do rather than selecting
 /// the nothing between two words.
+///
+/// A *character* here is a grapheme cluster, not a code unit — the same rule
+/// the character motions use — so a range never holds half of an emoji, and
+/// what a copy carries survives a round trip (#376).
 (int, int) wordRangeAt(String text, int offset) {
   final at = offset.clamp(0, text.length);
   if (at >= text.length && at > 0) {
@@ -76,12 +80,19 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
 }
 
 /// Expands around [at] over the word characters that touch it.
+///
+/// The unit the offset sits on, and the two ends of the answer, are grapheme
+/// clusters rather than code units. The offset need not be on a boundary: a
+/// click or a long press in the middle of a surrogate pair sits on half an
+/// emoji, and answering with that half is a range the selection, the clipboard
+/// and the platform `TextSelection` cannot use (#376).
 (int, int) _expand(String text, int at, {required int fallback}) {
   if (at < 0 || at >= text.length) return (fallback, fallback + 1);
-  final unit = String.fromCharCode(text.codeUnitAt(at));
-  if (!_wordChar(unit)) return (at, at + 1);
-  var start = at;
-  var end = at + 1;
+  final (unitStart, unitEnd) = _clusterAt(text, at);
+  final unit = text.substring(unitStart, unitEnd);
+  if (!_wordChar(unit)) return (unitStart, unitEnd);
+  var start = unitStart;
+  var end = unitEnd;
   while (start > 0 &&
       _wordChar(String.fromCharCode(text.codeUnitAt(start - 1)))) {
     start--;
@@ -90,7 +101,30 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
       _wordChar(String.fromCharCode(text.codeUnitAt(end)))) {
     end++;
   }
-  return (start, end);
+  // A run that stopped inside a cluster — the accent after its letter, half a
+  // pair — takes that cluster whole rather than cutting it, so both ends of
+  // the range stand on a boundary.
+  return (_clusterAt(text, start).$1, _clusterAt(text, end - 1).$2);
+}
+
+/// The grapheme cluster of [text] that holds code unit [at], as
+/// `(start, end)`.
+///
+/// The string twin of [_lastUnit] and [_firstUnit], with the one difference a
+/// click needs: [at] need not stand on a cluster boundary. An offset in the
+/// middle of a surrogate pair is answered with the pair, because that is the
+/// whole of what it sits on.
+(int, int) _clusterAt(String text, int at) {
+  final from = at - _window < 0 ? 0 : at - _window;
+  final to = at + _window > text.length ? text.length : at + _window;
+  var start = from;
+  for (final unit in text.substring(from, to).characters) {
+    final end = start + unit.length;
+    if (at < end) return (start, end);
+    start = end;
+  }
+  // The window always reaches past [at], so the loop has answered by here.
+  return (text.length, text.length);
 }
 
 /// The run of non-whitespace the caret [offset] is in, as `(start, end)`.
@@ -233,9 +267,10 @@ int _textStart(SourceBuffer buffer, int at) {
 ///
 /// A cluster is a handful of code units — an emoji with its modifiers, a
 /// letter with its accents, a `\r\n` — so a window this wide always holds the
-/// whole of the one next to the caret. What it replaces copied the note from
-/// its start to the caret (or from the caret to its end) on every press, and
-/// several times per character of a word motion.
+/// whole of the one next to the caret, and of the one [wordRangeAt] expands a
+/// click's offset to. What it replaces copied the note from its start to the
+/// caret (or from the caret to its end) on every press, and several times per
+/// character of a word motion.
 const int _window = 64;
 
 /// The grapheme cluster ending at [at].
