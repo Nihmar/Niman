@@ -38,6 +38,7 @@ final class NoteLinkTargets {
     this.onOpenNote,
     this.createMissingNote,
     this.folderExists,
+    this.modifier = false,
   });
 
   /// Resolves a link against the library; null while the library is not
@@ -68,6 +69,13 @@ final class NoteLinkTargets {
 
   /// Whether a folder exists, for the dead-link offer (a test seam).
   final Future<bool> Function(String root, String rel)? folderExists;
+
+  /// The tap carried the platform's link modifier (Ctrl, Cmd on macOS) —
+  /// the editor surface's own way to follow a link. A *dead* link is then
+  /// created on the spot and opened, the modifier standing as its own
+  /// confirmation, rather than offered (#477); a resolved link is
+  /// followed as always, and every other tap keeps the offer.
+  final bool modifier;
 }
 
 /// The preview's link handler (T-M3-07): `.md` relative links navigate
@@ -220,6 +228,10 @@ Future<void> _applyResolved(
 
 /// The dead-link offer (issue #78): propose where the missing note
 /// would be created, ask, create through the library's own path.
+///
+/// A Ctrl/Cmd+click (#477) is its own confirmation: the proposal and the
+/// creation are the same, only the asking is skipped, so the note lands
+/// where an ordinary new note would, and the writer is left in it.
 Future<DeadLinkOutcome> _handleDeadLink(
   BuildContext context,
   String target,
@@ -235,13 +247,15 @@ Future<DeadLinkOutcome> _handleDeadLink(
   final seam = link.folderExists;
   final handler = MissingNoteHandler(
     location: link.missingNoteLocation,
-    confirm: (path) async {
-      // The dialog needs a live context; an unmounted note declines,
-      // and a dismiss (outside tap) reads as one.
-      if (!context.mounted) return false;
-      final confirmed = await showMissingNoteDialog(context, path: path);
-      return confirmed ?? false;
-    },
+    confirm: link.modifier
+        ? (_) async => true
+        : (path) async {
+            // The dialog needs a live context; an unmounted note declines,
+            // and a dismiss (outside tap) reads as one.
+            if (!context.mounted) return false;
+            final confirmed = await showMissingNoteDialog(context, path: path);
+            return confirmed ?? false;
+          },
     folderExists: seam == null
         ? (rel) => _folderExists(root, rel)
         : (rel) => seam(root, rel),

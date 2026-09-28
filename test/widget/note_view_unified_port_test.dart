@@ -54,6 +54,8 @@ NoteView _note({
   Future<String> Function(String root, String source)? importImage,
   NoteColumn column = NoteColumn.off,
   Future<String> Function(String path)? readNote,
+  Future<String> Function(String path)? createMissingNote,
+  Future<bool> Function(String root, String rel)? folderExists,
 }) => NoteView(
   key: key,
   path: path,
@@ -77,6 +79,8 @@ NoteView _note({
   noteColumn: column,
   readNote: readNote ?? (_) async => text,
   writeNote: (_, content) async => writes?.add(content),
+  createMissingNote: createMissingNote,
+  folderExists: folderExists,
 );
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -426,6 +430,191 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(_surface(tester).selection, const SelectionModel.at(6));
+  });
+
+  group('a dead wikilink is where a note comes from (#477)', () {
+    // The clicked note sits at `/lib/Notes/Current.md` in a library rooted
+    // at `/lib`, and `[[Name]]` names a note nobody has written: a dead
+    // link beside its own folder.
+    const text = 'see [[Name]] here\n';
+
+    /// Taps `[[Name]]` in the editor surface, Ctrl held when [control]; the
+    /// editor only follows a link on that modifier.
+    Future<void> tapName(WidgetTester tester, {bool control = true}) async {
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text('see [[Name]] here', findRichText: true),
+      );
+      // Inside `[[Name]]`: offset 7 is the `a` of `Name`.
+      final at = paragraph.localToGlobal(
+        paragraph.getOffsetForCaret(const TextPosition(offset: 7), Rect.zero) +
+            const Offset(2, 8),
+      );
+      if (control) {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      }
+      await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+      if (control) await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Ctrl+click on a dead wikilink creates and opens its note', (
+      tester,
+    ) async {
+      final links = FakeLinkSource(notes: <String>['Notes/Current.md']);
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: text,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: links,
+            opened: opened,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              links.notes.add(rel);
+              return rel;
+            },
+            folderExists: (_, _) async => true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tapName(tester);
+      expect(created, <String>['Notes/Name.md'], reason: 'beside the link');
+      expect(opened, <String>[
+        'Notes/Name.md|null',
+      ], reason: 'the writer is left in it');
+      // The link resolves now: a second Ctrl+click opens it, makes nothing.
+      await tapName(tester);
+      expect(created, <String>['Notes/Name.md'], reason: 'the link resolved');
+      expect(opened, <String>['Notes/Name.md|null', 'Notes/Name.md|null']);
+    }, variant: _desktop);
+
+    testWidgets('a plain click on a dead wikilink only places the caret', (
+      tester,
+    ) async {
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: text,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: FakeLinkSource(notes: <String>['Notes/Current.md']),
+            opened: opened,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              return rel;
+            },
+            folderExists: (_, _) async => true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tapName(tester, control: false);
+      expect(created, isEmpty, reason: 'a plain click never creates');
+      expect(opened, isEmpty);
+      expect(
+        _surface(tester).selection.extent,
+        7,
+        reason: 'the caret went there, as a click does',
+      );
+    }, variant: _desktop);
+
+    testWidgets('Ctrl+click on a resolved link creates nothing', (
+      tester,
+    ) async {
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: text,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: FakeLinkSource(
+              notes: <String>['Notes/Current.md', 'Notes/Name.md'],
+            ),
+            opened: opened,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              return rel;
+            },
+            folderExists: (_, _) async => true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tapName(tester);
+      expect(opened, <String>['Notes/Name.md|null']);
+      expect(created, isEmpty, reason: 'it resolved; nothing to make');
+    }, variant: _desktop);
+
+    testWidgets('a tap on a dead wikilink only offers to create it', (
+      tester,
+    ) async {
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: text,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: FakeLinkSource(notes: <String>['Notes/Current.md']),
+            showPreview: true,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              return rel;
+            },
+            folderExists: (_, _) async => true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tapOnText(find.textRange.ofSubstring('Name'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Note does not exist'),
+        findsOneWidget,
+        reason: 'the message says so, and offers',
+      );
+      expect(created, isEmpty, reason: 'offered, not created');
+    });
+
+    testWidgets('on touch, the offer’s Create makes and opens the note', (
+      tester,
+    ) async {
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _note(
+            text: text,
+            path: '/lib/Notes/Current.md',
+            libraryRoot: '/lib',
+            links: FakeLinkSource(notes: <String>['Notes/Current.md']),
+            showPreview: true,
+            opened: opened,
+            createMissingNote: (rel) async {
+              created.add(rel);
+              return rel;
+            },
+            folderExists: (_, _) async => true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // A finger: `tapOnText` taps with a touch pointer.
+      await tester.tapOnText(find.textRange.ofSubstring('Name'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+      expect(created, <String>['Notes/Name.md']);
+      expect(opened, <String>['Notes/Name.md|null']);
+    });
   });
 
   group('a template’s {{cursor}} (#53)', () {

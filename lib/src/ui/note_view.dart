@@ -1019,7 +1019,7 @@ final class _NoteViewState extends State<NoteView>
       });
       final anchor = widget.initialAnchor;
       if (anchor != null && mounted) {
-        jumpToAnchor(context, anchor, _linkTargets);
+        jumpToAnchor(context, anchor, _linkTargets());
       }
       widget.onLoaded?.call(path, text.length);
       _recordDiskStat(path);
@@ -1394,11 +1394,13 @@ final class _NoteViewState extends State<NoteView>
     mathCache: _mathCache,
     controller: _previewScroll,
     onTapLink: (text, href) =>
-        unawaited(openHref(context, href ?? '', _linkTargets)),
+        unawaited(openHref(context, href ?? '', _linkTargets())),
     onTapWikiLink: (span) => unawaited(
       // The same rule the masker and the preview use, so a wikilink means one
-      // thing however it is drawn.
-      openWiki(context, parseWikiRef(span.text), _linkTargets),
+      // thing however it is drawn. `span.inner` is the `[[…]]` content: the
+      // brackets are the span's, and `parseWikiRef` reads the inside (#477
+      // needs the target it names).
+      openWiki(context, parseWikiRef(span.inner), _linkTargets()),
     ),
     embedResolver: _resolveEmbed,
     column: widget.noteColumn,
@@ -1586,17 +1588,20 @@ final class _NoteViewState extends State<NoteView>
   /// a wikilink and `[…](…)` for a Markdown link; [href] is the target its
   /// parse resolved, when the tap carried one — a reference link has no
   /// `](href)` in [raw] to read it from.
+  ///
+  /// The editor surface only follows a link on a Ctrl/Cmd+click, so the
+  /// targets carry the modifier: a dead link is created on the spot (#477).
   Future<void> _openLinkToken(TokenKind kind, String raw, String? href) async {
     if (kind == TokenKind.wikilink) {
       await openWiki(
         context,
         parseWikiRef(raw.substring(2, raw.length - 2)),
-        _linkTargets,
+        _linkTargets(modifier: true),
       );
     } else {
       final close = raw.indexOf(']');
       final inline = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
-      await openHref(context, href ?? inline, _linkTargets);
+      await openHref(context, href ?? inline, _linkTargets(modifier: true));
     }
   }
 
@@ -1839,7 +1844,12 @@ final class _NoteViewState extends State<NoteView>
 
   /// What following a link from this note needs (issue #100 moved the
   /// following itself into `note_links.dart`).
-  NoteLinkTargets get _linkTargets => NoteLinkTargets(
+  ///
+  /// [modifier] marks a tap the editor surface carried with the platform's
+  /// link modifier (Ctrl, Cmd on macOS): its own way to follow a link,
+  /// where a dead one is created on the spot rather than offered (#477).
+  /// The preview follows links on a plain tap, so it keeps the offer.
+  NoteLinkTargets _linkTargets({bool modifier = false}) => NoteLinkTargets(
     source: widget.linkSource,
     notePath: widget.path,
     libraryRoot: widget.libraryRoot,
@@ -1849,6 +1859,7 @@ final class _NoteViewState extends State<NoteView>
     onOpenNote: widget.onOpenNote,
     createMissingNote: widget.createMissingNote,
     folderExists: widget.folderExists,
+    modifier: modifier,
   );
 
   void _onFocusChanged() {
