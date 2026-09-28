@@ -796,11 +796,24 @@ final class BlockScanner {
     }
     final quoteDepth = _quoteDepthAfter(line, text, state);
     final listStack = _listAfter(text, state);
+    final table = _tableContinues(line, state);
+    final indentedCode = _indentedCodeContinues(line, text, state);
+    // A line that leaves the scan outside every construct is the shared
+    // state, not a new object equal to it. That is the common line of a long
+    // note of prose, and a state apiece was 68 MB of the shell running the
+    // million-line fixture (#346: 281 MB held after that scan, 213 MB with
+    // the shared state, `ProcessInfo` RSS) — a million copies of one value,
+    // held for as long as the scan is. [LineState.initial] is what this would
+    // build, field for field, and everything that reads a state compares it
+    // by value, the scan's own convergence check included.
+    if (quoteDepth == 0 && listStack.isEmpty && !table && !indentedCode) {
+      return LineState.initial;
+    }
     return LineState(
       quoteDepth: quoteDepth,
       listStack: listStack,
-      table: _tableContinues(line, state),
-      indentedCode: _indentedCodeContinues(line, text, state),
+      table: table,
+      indentedCode: indentedCode,
     );
   }
 

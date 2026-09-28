@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// A document with one of everything the scanner knows.
@@ -435,6 +436,41 @@ void main() {
 
     test('a pipe line without a delimiter row is prose', () {
       expect(_kinds('a | b'), <BlockKind>[BlockKind.paragraph]);
+    });
+  });
+
+  group('the state a line enters', () {
+    // A plain line leaves the scan where it found it, so the state it enters
+    // is the one a document starts in — and a million-line note of prose held
+    // a million objects equal to it, 68 MB of the shell that runs the
+    // million-line fixture (#346). Every reader compares states by value, so
+    // the shared one is the same answer.
+    test('a plain line enters the shared state', () {
+      final scanner = BlockScanner(
+        SourceBuffer.fromText(
+          List<String>.generate(
+            2000,
+            (line) => 'prose line $line with a few words on it',
+          ).join('\n'),
+        ),
+      );
+      expect(scanner.index.blocks.length, 1);
+      for (var line = 1; line < scanner.buffer.lineCount; line++) {
+        expect(
+          identical(scanner.stateEntering(line), LineState.initial),
+          isTrue,
+          reason: 'the state entering line $line is a copy of the plain one',
+        );
+      }
+    });
+
+    test('a line inside a construct enters its own state', () {
+      final scanner = BlockScanner(
+        SourceBuffer.fromText('> a quote\n> continued\n'),
+      );
+      expect(scanner.index.blocks.first.kind, BlockKind.quote);
+      expect(scanner.stateEntering(1).quoteDepth, 1);
+      expect(identical(scanner.stateEntering(1), LineState.initial), isFalse);
     });
   });
 
