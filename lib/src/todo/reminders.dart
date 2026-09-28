@@ -400,6 +400,16 @@ final class LocalReminderService implements ReminderService {
   }
 
   /// Schedules every reminder in [wanted] still in the future.
+  ///
+  /// A reminder whose moment has already passed is normally skipped: an
+  /// instant in the past cannot be armed, and on Android the OS already
+  /// delivered the alarm it stood for. The exception is a backend that
+  /// [ReminderBackend.firesOverdue] -- the desktops, whose timer fires an
+  /// already-past reminder on the spot. There an overdue reminder inside
+  /// [reminderGrace] is one that came due while Niman was closed (or
+  /// while a stale set waited out the grant round trip), and it is shown
+  /// now; past the grace window it is too old to be useful and is skipped
+  /// like everywhere else.
   Future<void> _scheduleAll(
     Map<int, TodoReminder> wanted, {
     required bool exact,
@@ -408,9 +418,12 @@ final class LocalReminderService implements ReminderService {
       _log.info('todo reminders: exact denied, falling back to inexact');
     }
     final now = _clock();
+    final overdueFires = _backend.firesOverdue;
     var scheduled = 0;
     for (final reminder in wanted.values) {
-      if (!reminder.when.isAfter(now)) {
+      final overdue = !reminder.when.isAfter(now);
+      final overdueBy = now.difference(reminder.when);
+      if (overdue && !(overdueFires && overdueBy <= reminderGrace)) {
         // Two ways to get here: the set is stale, because it is computed
         // before the grant round trip and that can open a system screen
         // and take minutes; or the reminder is inside `reminderGrace`,
@@ -427,9 +440,14 @@ final class LocalReminderService implements ReminderService {
       try {
         await _backend.schedule(reminder, exact: exact);
         _log.info(
-          'todo reminders: armed ${reminder.id} '
-          'for ${reminder.when.toIso8601String()} '
-          '(in ${_since(reminder.when.difference(now))}) ${reminder.title}',
+          overdue
+              ? 'todo reminders: showing overdue ${reminder.id} '
+                    '${reminder.when.toIso8601String()} '
+                    '(${_since(overdueBy)} ago) ${reminder.title}'
+              : 'todo reminders: armed ${reminder.id} '
+                    'for ${reminder.when.toIso8601String()} '
+                    '(in ${_since(reminder.when.difference(now))}) '
+                    '${reminder.title}',
         );
       } on Object catch (error) {
         // One bad alarm must not abort the rest of the set.

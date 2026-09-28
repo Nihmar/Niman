@@ -111,7 +111,9 @@ const reminderGrace = Duration(hours: 1);
 /// injected clock in tests, real time on device).
 ///
 /// Reminders inside the grace window are kept so the sweep leaves their
-/// alarms alone; scheduling skips them, since their moment has passed.
+/// alarms alone. An Android alarm is a future instant, so scheduling
+/// skips them there; a desktop timer fires an already-past reminder, so
+/// one that came due while Niman was closed is shown late (#356).
 Map<int, TodoReminder> wantedReminders(
   TodoSnapshot snapshot,
   DateTime now, {

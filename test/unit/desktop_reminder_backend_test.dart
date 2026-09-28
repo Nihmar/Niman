@@ -2,9 +2,10 @@
 // The plugin is faked so the timer, the pending map and the full-replace
 // semantics are exercised without a desktop session.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/todo/desktop_notifier.dart';
 import 'package:niman/src/todo/reminder_backend_desktop.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
+
+import '../fakes/fake_desktop_notifier.dart';
 
 void main() {
   late FakeDesktopNotifier notifier;
@@ -70,6 +71,8 @@ void main() {
       final line = state(r, pending: false);
       expect(line, contains('NOT FIRED'));
       expect(line, contains('not running'));
+      // #356: no timer was armed, so the line must not claim it fires now.
+      expect(line, isNot(contains('fires now')));
     });
 
     test('one still armed past its time was slept through', () async {
@@ -142,29 +145,4 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 70));
     expect(notifier.shown, isEmpty);
   });
-}
-
-/// Records what the backend asked the platform to show.
-final class FakeDesktopNotifier implements DesktopNotifier {
-  /// Reminders the backend posted.
-  final List<TodoReminder> shown = [];
-
-  /// How many times the backend initialized the plugin.
-  int initCalls = 0;
-
-  void Function(String? payload)? _onTap;
-
-  @override
-  Future<void> init({required void Function(String? payload) onTap}) async {
-    initCalls++;
-    _onTap = onTap;
-  }
-
-  @override
-  Future<void> show(TodoReminder reminder) async {
-    shown.add(reminder);
-  }
-
-  /// Simulates a notification tap with [payload].
-  void emit(String? payload) => _onTap?.call(payload);
 }

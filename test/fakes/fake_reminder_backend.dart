@@ -10,9 +10,18 @@ import 'package:niman/src/todo/todo_reminder.dart';
 /// force two reconciles to overlap.
 final class FakeReminderBackend implements ReminderBackend {
   /// Creates a backend that already holds [pending] alarms.
-  new({List<int>? pending}) : _pending = <int>{...?pending};
+  ///
+  /// [firesOverdue] defaults to the Android answer (false); pass true for
+  /// a fake desktop, whose timer fires an already-past reminder.
+  new({List<int>? pending, this.firesOverdue = false})
+    : _pending = <int>{...?pending};
 
   final Set<int> _pending;
+
+  /// Whether the fake stands in for a backend that shows overdue
+  /// reminders (the desktops) rather than dropping them (Android).
+  @override
+  final bool firesOverdue;
 
   /// Every call in order, as `ready`, `pending`, `cancel:<id>`,
   /// `schedule:<id>` — the trace an interleaving test reads.

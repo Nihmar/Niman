@@ -64,6 +64,17 @@ abstract interface class ReminderBackend {
   /// [exact] picks minute precision over a Doze-batched fallback.
   Future<void> schedule(TodoReminder reminder, {required bool exact});
 
+  /// Whether [schedule] posts a reminder whose moment has already passed.
+  ///
+  /// Android's alarm is a future instant: a past one cannot be armed, and
+  /// the alarm the OS fired is the delivery, so this is false there. A
+  /// desktop timer has no such limit — [schedule] arms a zero delay for
+  /// an already-past reminder — so a reminder that came due while Niman
+  /// was closed is not lost: it is shown on the next run (T-PP-03). This
+  /// is what tells the scheduling policy whether an overdue reminder is
+  /// worth showing or must be skipped.
+  bool get firesOverdue;
+
   /// The payload of the notification that started the app, once.
   Future<String?> launchPayload();
 

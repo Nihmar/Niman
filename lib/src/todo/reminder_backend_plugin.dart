@@ -191,6 +191,12 @@ final class PluginReminderBackend implements ReminderBackend {
   @override
   Future<void> cancel(int id) => _plugin.cancel(id: id);
 
+  /// False: an Android alarm is a future instant. A reminder whose moment
+  /// passed while the app was closed was already delivered by the system,
+  /// so there is nothing for the app to show late.
+  @override
+  bool get firesOverdue => false;
+
   @override
   String overdueState(
     TodoReminder reminder, {

@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/todo/reminder_backend_desktop.dart';
 import 'package:niman/src/todo/reminder_health.dart';
 import 'package:niman/src/todo/reminder_settings.dart';
 import 'package:niman/src/todo/reminders.dart';
 
+import '../fakes/fake_desktop_notifier.dart';
 import '../fakes/fake_reminder_backend.dart';
 
 /// A [ReminderSettings] answering fixed values, recording the screens
@@ -286,6 +288,63 @@ void main() {
     expect(backend.cancelled, isEmpty);
     expect(backend.scheduled, isEmpty, reason: 'a past instant cannot arm');
     await service.dispose();
+  });
+
+  // #356. On a desktop the alarm is an in-process timer, so a reminder
+  // due while Niman was closed has no OS alarm behind it and used to be
+  // dropped: `_scheduleAll` skipped every past reminder. A backend that
+  // can fire an already-past reminder must be handed the wanted one
+  // inside the grace window instead. Android, whose OS already fired the
+  // alarm, keeps skipping it.
+  group('an overdue reminder on a backend that fires overdue', () {
+    test('one due while Niman was closed is shown now', () async {
+      backend = FakeReminderBackend(firesOverdue: true);
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: 0, minutes: -30)]));
+
+      expect(backend.scheduled.map((r) => r.id), [1]);
+      await service.dispose();
+    });
+
+    test('one past the grace window is not shown on launch', () async {
+      backend = FakeReminderBackend(firesOverdue: true);
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: -3)]));
+
+      expect(backend.scheduled, isEmpty);
+      await service.dispose();
+    });
+
+    test('Android keeps dropping it: the OS alarm already fired', () async {
+      // The capability is the whole difference: the same past set that a
+      // desktop shows is skipped where the OS owns the alarm.
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: 0, minutes: -30)]));
+
+      expect(backend.scheduled, isEmpty);
+      await service.dispose();
+    });
+
+    test('it reaches a desktop notifier through the real backend', () async {
+      final notifier = FakeDesktopNotifier();
+      final service = LocalReminderService(
+        backend: DesktopReminderBackend(notifier: notifier),
+        settings: settings,
+        clock: DateTime.now,
+      );
+      await service.reconcile({
+        7: TodoReminder(
+          id: 7,
+          title: 'task',
+          body: 'body',
+          when: DateTime.now().subtract(const Duration(minutes: 30)),
+        ),
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(notifier.shown.map((r) => r.id), [7]);
+      await service.dispose();
+    });
   });
 
   // T-RL-01: the user reports reminders arriving minutes late, and
