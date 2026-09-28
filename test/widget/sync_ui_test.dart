@@ -12,6 +12,7 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_conflict_screen.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_settings_screen.dart';
@@ -523,6 +524,26 @@ void main() {
       await tester.tap(find.byKey(const Key('sync-save-merge')));
       await tester.pumpAndSettle();
       expect(sync.mergedText, note(['a', 'mine']));
+    });
+
+    testWidgets('a re-read that fails leaves nothing to save', (tester) async {
+      sync.texts = conflictTextsOf(
+        base: note(['a', 'b']),
+        local: note(['a', 'mine']),
+        remote: note(['a', 'theirs']),
+      );
+      sync.resolveFailures.add(SyncFailure.stale('changed'));
+      await pumpConflict(tester);
+      // The first read worked; the re-read after the moved resolution fails.
+      sync.textsFailures.add(SyncFailure.stale('changed'));
+      await tester.tap(find.byKey(const Key('sync-save-merge')));
+      await tester.pumpAndSettle();
+
+      // The re-read said why, and there is no merge to save over it.
+      expect(sync.mergedText, isNull, reason: 'nothing was written');
+      expect(find.text(AppStrings.syncConflictLoadFailed), findsOneWidget);
+      expect(find.byKey(const Key('sync-save-merge')), findsNothing);
+      expect(sync.calls, ['texts note.md', 'merge note.md', 'texts note.md']);
     });
 
     testWidgets('without a base every difference is a choice', (tester) async {

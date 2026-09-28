@@ -53,6 +53,9 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   /// The texts [conflictTexts] answers.
   ConflictTexts texts = conflictTextsOf(local: 'mine', remote: 'theirs');
 
+  /// What the next [conflictTexts] calls throw, one each, before any answers.
+  final List<SyncFailure> textsFailures = [];
+
   /// What the next resolutions throw, one each, before any succeeds.
   final List<SyncFailure> resolveFailures = [];
 
@@ -122,6 +125,7 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   @override
   Future<ConflictTexts> conflictTexts(String path) async {
     calls.add('texts $path');
+    if (textsFailures.isNotEmpty) throw textsFailures.removeAt(0);
     return texts;
   }
 
