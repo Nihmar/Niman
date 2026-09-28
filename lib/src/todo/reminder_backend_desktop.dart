@@ -86,6 +86,12 @@ final class DesktopReminderBackend implements ReminderBackend {
     _armed[reminder.id] = timer;
   }
 
+  /// True: an already-past reminder arms a zero-delay timer above, so one
+  /// that came due while Niman was closed is shown on the next run rather
+  /// than dropped.
+  @override
+  bool get firesOverdue => true;
+
   /// Posts [reminder], logging rather than throwing: the timer callback has
   /// no caller to return an error to.
   Future<void> _show(TodoReminder reminder) async {
@@ -120,7 +126,7 @@ final class DesktopReminderBackend implements ReminderBackend {
       return 'timer fired ${_late(fired.difference(reminder.when))} late';
     }
     return 'NOT FIRED: no timer in this run, Niman was not running at its '
-        'time; it fires now';
+        'time';
   }
 
   /// A lateness, short: "0 s", "42 s", "3 min".

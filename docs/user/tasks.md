@@ -87,6 +87,7 @@ in the log, saying what happened to it:
   alarms and battery optimization.
 - **Linux and Windows**, where the alarm is a timer inside Niman:
   `timer fired … late`, `timer STILL ARMED past its time` (the machine
-  slept through it) or `NOT FIRED` (Niman was not running at its time;
-  it fires as soon as Niman starts). A desktop reminder needs Niman
-  running, in the tray if the window is closed.
+  slept through it) or `NOT FIRED` (Niman was not running at its time).
+  A desktop reminder needs Niman running, in the tray if the window is
+  closed; one that came due while it was closed is shown on the next
+  run, as long as it is still within the hour it stays wanted.
