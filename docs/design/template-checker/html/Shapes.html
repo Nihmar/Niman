@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman — template checker, the two shapes</title>
+<style>
+/* Niman's own palette, dark set: lib/src/ui/theme/niman.dart. */
+:root{
+  --background:#23262B;      /* the ground of the mark */
+  --backdrop:#1B1D21;        /* one step below the ground */
+  --surface:#2C3037;         /* the raised rows, the chrome */
+  --surface-high:#363B44;    /* menus, the popup */
+  --text:#F2EDE5;            /* the cream "N" */
+  --muted:#A6A29A;           /* secondary text */
+  --outline:#4A4F59;         /* dividers and borders */
+  --accent:#587CD3;          /* the logo's blue square */
+  --on-accent:#F2EDE5;
+  --error:#E0687A;           /* the colour the spelling squiggle is drawn in */
+  --syntax-template:#A8C77A; /* a {{…}} placeholder, in the source */
+  --syntax-dim:#6B7079;      /* the marker "# " */
+  --syntax-task:#8FBF7F;     /* a task box, borrowed for "no problems" */
+}
+*{box-sizing:border-box}
+body{margin:0;padding:26px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:var(--backdrop);color:var(--text);font-size:13px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+h2{font-size:12px;font-weight:600;margin:30px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+p.lead{margin:0 0 6px;color:var(--muted);font-size:13px;max-width:920px;line-height:1.55}
+p.lead b{color:var(--text);font-weight:600}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0 4px;color:var(--muted);font-size:12px}
+.legend span{display:flex;align-items:center;gap:7px}
+.swatch{width:26px;height:12px;border-radius:3px;display:inline-block}
+.win{width:1180px;background:var(--background);border:1px solid var(--surface);border-radius:7px;overflow:hidden;margin-bottom:8px}
+.titlebar{height:38px;background:var(--surface);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:12px;color:var(--muted)}
+.mark{width:22px;height:22px;border-radius:5px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700}
+.grow{flex:1}
+.workspace{display:flex;align-items:stretch;min-height:430px}
+.rail{width:44px;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:3px;color:var(--muted)}
+.rail .on{color:var(--accent)}
+.rail i{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-style:normal}
+.tree{width:210px;background:var(--backdrop);border-right:1px solid var(--surface);padding:8px 6px;color:var(--muted);font-size:12.5px}
+.tree .row{padding:5px 9px;border-radius:6px;display:flex;gap:8px;align-items:center}
+.tree .row.sel{background:var(--surface-high);color:var(--text)}
+.tree .ind{padding-left:22px}
+.pane{flex:1;min-width:0;display:flex;flex-direction:column}
+.notebar{height:38px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 12px;color:var(--muted);font-size:15px}
+.notebar .on{color:var(--accent)}
+.notecol{width:660px;max-width:calc(100% - 56px);margin:0 auto;padding:6px 0 26px;position:relative}
+h3.title{font-size:22px;font-weight:700;margin:0 0 14px}
+.src{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.95;margin:0;white-space:pre;color:var(--text)}
+.line{position:relative;overflow:visible}
+.line.has-hint{margin-bottom:160px}
+.ph{color:var(--syntax-template)}
+.dim{color:var(--syntax-dim)}
+.squig{text-decoration:underline wavy var(--error);text-decoration-thickness:1.2px;text-underline-offset:3px;text-decoration-skip-ink:none}
+/* the hint on the span */
+.hint{position:absolute;left:6ch;top:calc(100% + 7px);z-index:5;width:330px;background:var(--surface-high);border:1px solid var(--outline);border-radius:9px;padding:9px 11px 10px;font-family:"Segoe UI",system-ui,sans-serif;font-size:12.5px;line-height:1.45;color:var(--text);white-space:normal;box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.hint::before{content:"";position:absolute;top:-6px;left:52px;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:6px solid var(--surface-high)}
+.hint .msg{color:var(--text)}
+.hint .did{margin-top:5px;color:var(--muted)}
+.hint code{color:var(--syntax-template);background:rgba(168,199,122,.14);border-radius:4px;padding:0 4px}
+.hint .nofix{margin-top:5px;color:var(--muted)}
+.hint .act{display:flex;align-items:center;gap:10px;margin-top:8px}
+.fix{background:var(--accent);color:var(--on-accent);border:0;border-radius:6px;padding:3px 11px;font:inherit;font-weight:600;font-size:12px}
+.no{color:var(--muted);font-size:12px}
+/* the banner / status line */
+.banner{display:flex;align-items:center;gap:8px;border:1px solid rgba(224,104,122,.45);background:rgba(224,104,122,.08);color:var(--error);border-radius:8px;padding:6px 11px;font-size:12.5px;margin:0 0 15px}
+.banner .grow{flex:1}
+.banner .chev{color:var(--muted)}
+.panel{border:1px solid var(--outline);border-radius:9px;margin:0 0 15px;background:rgba(54,59,68,.28);overflow:hidden}
+.phead{padding:8px 12px 6px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.pitem{padding:8px 12px;border-top:1px solid var(--outline)}
+.pitem .pline{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.pitem .pmsg{color:var(--text);margin-top:3px;font-size:12.5px}
+.pitem .pfix{color:var(--muted);margin-top:4px;font-size:12.5px;display:flex;align-items:center;gap:9px}
+.pitem .pfix code{color:var(--syntax-template)}
+/* the status row, as the app has one */
+.statusrow{height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--muted);font-size:12px;border-top:1px solid var(--surface)}
+.statusrow .si{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.statusrow .on{color:var(--accent)}
+p.caption{color:var(--muted);font-size:12.5px;margin:8px 0 0;max-width:1010px;line-height:1.55}
+p.caption b{color:var(--text);font-weight:600}
+p.note{color:var(--muted);font-size:12px;margin:18px 0 0;max-width:1010px;line-height:1.55}
+</style>
+</head>
+<body>
+
+<h1>Template checker — the two shapes</h1>
+<p class="lead">One template note, drawn twice, with the same three problems in it. <b>Shape (i)</b> marks the offending span and offers the fix where the mistake is; <b>Shape (ii)</b> counts the problems in a quiet line and lists them. Both mark the same text, so the two can be compared by looking rather than by arguing.</p>
+<div class="legend">
+  <span><i class="swatch" style="background:#A8C77A"></i> a <code>{{…}}</code> placeholder — the engine's template colour</span>
+  <span><i class="swatch" style="background:#E0687A"></i> the checker's mark — the palette's <code>error</code>, the colour the spelling's own squiggle is drawn in</span>
+</div>
+
+<h2>Shape (i) — a squiggle under the span, and a hint on it</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▾ Templates</div>
+      <div class="row sel ind">▤ Journal.md</div>
+      <div class="row ind">▸ Lists</div>
+      <div class="row ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span>◉</span><span class="on">◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <h3 class="title">Journal</h3>
+        <div class="src">
+          <div class="line"><span class="dim"># </span><span class="ph">{{title}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line has-hint">Kickoff with <span class="ph squig">{{titlex}}</span> and a <span class="ph squig">{{title|pad:wide}}</span> code.
+            <div class="hint">
+              <div class="msg">Unknown placeholder ‘titlex’.</div>
+              <div class="did">Did you mean <code>{{title}}</code>?</div>
+              <div class="act"><button class="fix">Fix</button><span class="no">Dismiss</span></div>
+            </div>
+          </div>
+          <div class="line">Owner: <span class="ph">{{ask:Owner}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line has-hint">Filed by <span class="ph squig">{{title|+xd}}</span>
+            <div class="hint" style="left:2ch">
+              <div class="msg">‘+xd’ is not a filter this build knows.</div>
+              <div class="nofix">No fix offered — the text is left as written.</div>
+              <div class="act"><span class="no">Dismiss</span></div>
+            </div>
+          </div>
+          <div class="line">&nbsp;</div>
+        </div>
+      </div>
+      <div class="statusrow"><span class="si on">☰</span><span class="si">⌕</span><span class="si">✎</span><span class="grow"></span><span>14 words · Saved</span></div>
+    </div>
+  </div>
+</div>
+<p class="caption"><b>Points at the text.</b> The wavy line sits under the exact span and moves with it as the line is edited; the hint appears on the span, so the message and its fix are where the mistake is. The no-fix case says so plainly: the hint carries only <b>Dismiss</b>, no button that would rewrite text the author did not mean. <b>Cost:</b> only the problems on screen are marked — one scrolled away is invisible until it comes back — and the hint needs a hover, or a tap on touch. Two hints are drawn open here so both the fix and the no-fix shape can be seen; in use only one is open at a time.</p>
+
+<h2>Shape (ii) — a quiet line at the top of the note</h2>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▾ Templates</div>
+      <div class="row sel ind">▤ Journal.md</div>
+      <div class="row ind">▸ Lists</div>
+      <div class="row ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span>◉</span><span class="on">◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <div class="banner"><span>⚠</span><span>3 problems in this template</span><span class="grow"></span><span class="chev">▾</span></div>
+        <h3 class="title">Journal</h3>
+        <div class="src">
+          <div class="line"><span class="dim"># </span><span class="ph">{{title}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Kickoff with <span class="ph">{{titlex}}</span> and a <span class="ph">{{title|pad:wide}}</span> code.</div>
+          <div class="line">Owner: <span class="ph">{{ask:Owner}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Filed by <span class="ph">{{title|+xd}}</span></div>
+        </div>
+      </div>
+      <div class="statusrow"><span class="si on">☰</span><span class="si">⌕</span><span class="si">✎</span><span class="grow"></span><span>14 words · Saved</span></div>
+    </div>
+  </div>
+</div>
+<div class="win">
+  <div class="titlebar"><span class="mark">N</span><span>Notes</span><span class="grow"></span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="workspace">
+    <div class="rail"><i class="on">▤</i><i>⌕</i><i>✎</i><i>☰</i><span class="grow"></span><i>⚙</i></div>
+    <div class="tree">
+      <div class="row">⌂ Library</div>
+      <div class="row ind">▾ Templates</div>
+      <div class="row sel ind">▤ Journal.md</div>
+      <div class="row ind">▸ Lists</div>
+      <div class="row ind">▸ Guides</div>
+    </div>
+    <div class="pane">
+      <div class="notebar"><span>▤</span><span>◉</span><span class="on">◌</span><span>⋮</span></div>
+      <div class="notecol">
+        <div class="panel">
+          <div class="phead">3 problems in this template</div>
+          <div class="pitem">
+            <div class="pline"><span class="ph">{{titlex}}</span></div>
+            <div class="pmsg">Unknown placeholder ‘titlex’.</div>
+            <div class="pfix">Did you mean <code>{{title}}</code>? <button class="fix">Fix</button></div>
+          </div>
+          <div class="pitem">
+            <div class="pline"><span class="ph">{{title|pad:wide}}</span></div>
+            <div class="pmsg">‘pad’ needs a whole number.</div>
+            <div class="pfix">Did you mean <code>{{title|pad:3}}</code>? <button class="fix">Fix</button></div>
+          </div>
+          <div class="pitem">
+            <div class="pline"><span class="ph">{{title|+xd}}</span></div>
+            <div class="pmsg">‘+xd’ is not a filter this build knows.</div>
+            <div class="pfix">No fix offered — left as written.</div>
+          </div>
+        </div>
+        <h3 class="title">Journal</h3>
+        <div class="src">
+          <div class="line"><span class="dim"># </span><span class="ph">{{title}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Kickoff with <span class="ph">{{titlex}}</span> and a <span class="ph">{{title|pad:wide}}</span> code.</div>
+          <div class="line">Owner: <span class="ph">{{ask:Owner}}</span></div>
+          <div class="line">&nbsp;</div>
+          <div class="line">Filed by <span class="ph">{{title|+xd}}</span></div>
+        </div>
+      </div>
+      <div class="statusrow"><span class="si on">☰</span><span class="si">⌕</span><span class="si">✎</span><span class="grow"></span><span>14 words · Saved</span></div>
+    </div>
+  </div>
+</div>
+<p class="caption"><b>Lists everything at once, and survives scrolling.</b> The count is a one-line summary that reads the same however far the note is scrolled; the list it opens is the whole set, one row per problem, each carrying its own fix or its own “no fix offered”. <b>Cost:</b> it does not point at the text — the span is read in the list and then hunted for in the note — and an open list pushes the note down. Drawn here at the top of the note; it could instead sit in the bottom status row, where it would cost the note nothing and stay put while the text scrolls under it.</p>
+
+<p class="note">Mockups, not screenshots of the app: everything here is HTML drawn to look like Niman, using the palette from <code>lib/src/ui/theme/niman.dart</code>. Where a mockup and the app disagree, the app ships.</p>
+</body>
+</html>
