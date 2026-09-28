@@ -734,17 +734,7 @@ final class _NoteViewState extends State<NoteView>
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
-    // Device trace (preview toggle needs two presses on huge notes) —
-    // temporary: remove once the trace is in.
     if (oldWidget.showPreview != widget.showPreview) {
-      final scroll = _previewScroll.hasClients
-          ? '${_previewScroll.offset.toStringAsFixed(0)}/'
-                '${_previewScroll.position.maxScrollExtent.toStringAsFixed(0)}'
-          : 'detached';
-      const AppLogger(name: 'preview').info(
-        'flip showPreview=${widget.showPreview} '
-        'scroll=$scroll',
-      );
       if (widget.showPreview && _previewStale) {
         _previewStale = false;
         _previewOf = _surface?.buffer;
@@ -1673,6 +1663,8 @@ final class _NoteViewState extends State<NoteView>
 
   static const int _syncWorkLimit = 64 * 1024;
 
+  /// How long the writer has to pause before the word count and the outline
+  /// are worked out again.
   ///
   /// They read the whole note — joined, sent to an isolate, scanned — so a
   /// note of hundreds of megabytes waits for a real pause rather than for

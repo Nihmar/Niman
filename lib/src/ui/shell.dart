@@ -987,10 +987,6 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     if (!_notePreview) FocusManager.instance.primaryFocus?.unfocus();
     final show = !_notePreview;
     _updateShownTab((m) => m.copyWith(preview: show));
-    // Device trace (preview toggle needs two presses on huge notes) —
-    // temporary: remove once the trace is in.
-    const AppLogger(name: 'preview')
-        .info('toggle → ${show ? 'preview' : 'editor'}');
   }
 
   /// Whether a note opened right now would show only the preview (the
