@@ -1,6 +1,9 @@
 // T-PP-22: the app's own window title bar — the sidebar toggle, the drag
 // area, and the window buttons over the seam (the close button goes
 // through it, so it meets the unsaved-edits guard like the system one).
+//
+// #169 rides the same bar: where those buttons ended up goes to the window
+// seam, which is what Windows hit-tests for Snap Layouts.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/title_bar.dart';
@@ -58,4 +61,69 @@ void main() {
     await tester.pump();
     expect(find.byIcon(Icons.filter_none), findsOne);
   });
+
+  testWidgets('tells the window where the caption buttons are (#169)', (
+    tester,
+  ) async {
+    // The report is in physical pixels; at ratio 1 it is the drawn
+    // rectangle itself, so the two can be compared as they stand.
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final window = FakeWindowController();
+    await tester.pumpWidget(_host(window));
+    await tester.pump();
+
+    final reported = window.captionButtons.last;
+    expect(reported.minimize, _drawnRect(tester, 'window-minimize'));
+    expect(reported.maximize, _drawnRect(tester, 'window-maximize'));
+    expect(reported.close, _drawnRect(tester, 'window-close'));
+  });
+
+  testWidgets('reports the buttons in physical pixels (#169)', (tester) async {
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+
+    final window = FakeWindowController();
+    await tester.pumpWidget(_host(window));
+    await tester.pump();
+
+    expect(
+      window.captionButtons.last.close,
+      _scaled(_drawnRect(tester, 'window-close'), 2),
+    );
+  });
+
+  testWidgets('the rectangles follow the bar as it lays out again (#169)', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 600);
+    addTearDown(tester.view.reset);
+
+    final window = FakeWindowController();
+    await tester.pumpWidget(_host(window));
+    final narrow = window.captionButtons.last.close;
+
+    // A wider window moves the buttons to its right edge; the platform has
+    // to be told again, or it hit-tests where they used to be.
+    tester.view.physicalSize = const Size(1200, 800);
+    await tester.pump();
+
+    final wide = window.captionButtons.last.close;
+    expect(wide.right, greaterThan(narrow.right));
+    expect(wide, _drawnRect(tester, 'window-close'));
+  });
 }
+
+/// Where the button [label] was drawn, in the view's logical pixels.
+Rect _drawnRect(WidgetTester tester, String label) =>
+    tester.getRect(find.byKey(Key(label)));
+
+/// [rect] scaled by [scale], the way a report scales drawn pixels.
+Rect _scaled(Rect rect, double scale) => Rect.fromLTWH(
+  rect.left * scale,
+  rect.top * scale,
+  rect.width * scale,
+  rect.height * scale,
+);

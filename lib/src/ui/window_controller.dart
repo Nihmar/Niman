@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:ui' show Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/ui/caption_buttons.dart';
 import 'package:window_manager/window_manager.dart'
     show TitleBarStyle, WindowListener, WindowManager;
 
@@ -43,6 +45,18 @@ abstract interface class WindowController {
   /// its own. What that takes differs per desktop, see the implementation.
   Future<void> applyCustomTitleBar();
 
+  /// Tells the platform where the title bar drew its buttons (#169), each
+  /// in physical pixels from the window's client origin.
+  ///
+  /// The Windows runner answers `WM_NCHITTEST` with the caption-button hit
+  /// codes over them, which is what makes Windows offer Snap Layouts on
+  /// hover over maximize; a platform with no runner listening does nothing.
+  void reportCaptionButtons({
+    required Rect minimize,
+    required Rect maximize,
+    required Rect close,
+  });
+
   /// Minimizes the window (the title bar's button).
   Future<void> minimize();
 
@@ -67,6 +81,10 @@ final class WindowManagerController implements WindowController {
   static const AppLogger _log = AppLogger(name: 'window');
 
   final WindowManager _manager = WindowManager.instance;
+
+  /// The caption buttons' rectangles on their way to the Windows runner
+  /// (#169); inert on the desktops whose runner does not listen.
+  final CaptionButtonsChannel _captionButtons = CaptionButtonsChannel();
 
   /// The listener bridge (created with the controller; outlives the guard
   /// that owns the handler).
@@ -114,6 +132,19 @@ final class WindowManagerController implements WindowController {
     if (Platform.isLinux) await _manager.setAsFrameless();
     await _manager.setTitleBarStyle(TitleBarStyle.hidden);
     _log.info('custom title bar applied');
+  }
+
+  @override
+  void reportCaptionButtons({
+    required Rect minimize,
+    required Rect maximize,
+    required Rect close,
+  }) {
+    _captionButtons.report(
+      minimize: minimize,
+      maximize: maximize,
+      close: close,
+    );
   }
 
   @override
@@ -209,6 +240,13 @@ final class NoopWindowController implements WindowController {
 
   @override
   Future<void> applyCustomTitleBar() async {}
+
+  @override
+  void reportCaptionButtons({
+    required Rect minimize,
+    required Rect maximize,
+    required Rect close,
+  }) {}
 
   @override
   Future<void> minimize() async {}
