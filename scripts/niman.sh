@@ -55,6 +55,18 @@ integration() {
 apk() {
   # The official APK by default; "beta" builds the testing build.
   local flavor="${1:-official}"
+  # Only the flavors declared in android/app/build.gradle.kts exist: refuse
+  # anything else before building, or the run reports a path
+  # (app-<typo>-release.apk) for an artifact that never was produced
+  # (issue #393).
+  case "$flavor" in
+    official | beta) ;;
+    *)
+      echo "error: unknown apk flavor '$flavor' (expected official or beta)" >&2
+      usage >&2
+      return 2
+      ;;
+  esac
   if [ "$flavor" = "beta" ]; then
     # The testing build (issue #106): the release pipeline plus the
     # flavor's separate application ID; APP_CHANNEL marks the Dart
