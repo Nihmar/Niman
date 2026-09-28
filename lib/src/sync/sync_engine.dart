@@ -841,7 +841,7 @@ final class SyncEngine {
       await client.uploadFile(
         path,
         File(p.join(root, path)),
-        ifMatch: capabilities.ifMatch ? remote?.etag : null,
+        ifMatch: capabilities.ifMatch ? remote?.guardEtag : null,
       );
       final listed = await client.stat(path);
       if (listed == null) {
@@ -904,7 +904,7 @@ final class SyncEngine {
         await client.uploadFile(
           path,
           File(p.join(root, path)),
-          ifMatch: capabilities.ifMatch ? remote?.etag : null,
+          ifMatch: capabilities.ifMatch ? remote?.guardEtag : null,
           ifNoneMatch: remote == null && capabilities.ifNoneMatch,
         );
         final listed = await client.stat(path);
@@ -1266,14 +1266,14 @@ final class SyncEngine {
   /// built from the remote [expectedSha] holds, and the remote must still
   /// hold it when the merged text is written over it. On a server that
   /// honors ETags the upload carries If-Match instead, and this does
-  /// nothing.
+  /// nothing — unless the ETag is weak, which the upload cannot carry.
   Future<void> _guardMergeUpload(
     _RunContext c,
     SyncDecision d,
     WebDavResource remote, {
     required String expectedSha,
   }) async {
-    if (c.capabilities.ifMatch && remote.etag != null) return;
+    if (c.capabilities.ifMatch && remote.guardEtag != null) return;
     await _remoteUnchangedSince(c, d.path, expectedSha: expectedSha);
   }
 
@@ -1739,7 +1739,7 @@ final class SyncEngine {
       await c.client.uploadFile(
         d.path,
         file,
-        ifMatch: c.capabilities.ifMatch ? remote.etag : null,
+        ifMatch: c.capabilities.ifMatch ? remote.guardEtag : null,
       );
       listed =
           await c.client.stat(d.path) ??
@@ -1832,7 +1832,7 @@ final class SyncEngine {
     await c.client.uploadFile(
       d.path,
       File(p.join(root, d.path)),
-      ifMatch: c.capabilities.ifMatch ? remote.etag : null,
+      ifMatch: c.capabilities.ifMatch ? remote.guardEtag : null,
       modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
     );
     final listed = await c.client.stat(d.path);

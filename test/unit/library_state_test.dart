@@ -311,6 +311,29 @@ void main() {
     expect((await second.savedWorkspace).activePath, 'a.md');
     await second.close();
     await second.dispose();
+
+    // A resume opens without the blocking scan, from the last index — and a
+    // rebuilt index has no last state: it must not open empty and wait for
+    // the reconciliation to fill it.
+    indexFileOf(root.path)
+        .writeAsStringSync('this is not a sqlite database at all');
+    final resumed = LibraryController(
+      appDb,
+      indexDbFactory: (libraryPath) async => IndexDatabase(
+        NativeDatabase.createInBackground(
+          indexFileOf(libraryPath),
+          setup: indexDatabaseSetup,
+        ),
+      ),
+      indexFileOf: (libraryPath) async => indexFileOf(libraryPath),
+      rescanInterval: const Duration(hours: 1),
+      resumeReconcileDelay: const Duration(hours: 1),
+    );
+    await resumed.open(root.path, create: false, blockingScan: false);
+    expect(resumed.phase, LibraryPhase.ready);
+    expect(await names(resumed), ['a.md']);
+    await resumed.close();
+    await resumed.dispose();
   });
 
   test('a closed session reads no tree at all', () async {

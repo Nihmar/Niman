@@ -51,6 +51,17 @@ void main() {
       expect(handedOut, [1, 2]);
     });
 
+    test('a creation reserves one number per name, once', () async {
+      expect(await CounterStore.reserve(root.path, const []), isNull);
+      expect(await CounterStore.reserve(null, const ['quest']), isNull);
+      final first = (await CounterStore.reserve(root.path, ['quest', 'bug']))!;
+      expect(first.counter('quest'), 1);
+      expect(first.counter('quest'), 1, reason: 'read twice, handed out once');
+      expect(first.counter('bug'), 1);
+      final second = (await CounterStore.reserve(root.path, ['quest']))!;
+      expect(second.counter('quest'), 2);
+    });
+
     test('a missing or corrupt file starts empty', () async {
       final fresh = await CounterStore.load(root.path);
       expect(await fresh.use('quest'), 1);

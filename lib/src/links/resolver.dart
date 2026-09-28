@@ -123,6 +123,24 @@ final class LinkResolver implements LinkSource {
     return _resolvePath(hash == -1 ? path : path + h.substring(hash));
   }
 
+  /// Whether the note at [path] is one a target naming [target] — already
+  /// normalized, `.md` dropped (`folder/note`) — qualifies among the notes
+  /// that share its stem: the whole path, or its tail after a `/`.
+  ///
+  /// For a `.md` note the target's extension was stripped, so the note is
+  /// matched as `$target.md`; a non-md target (an embed, `foo.png`) keeps
+  /// its extension and matches as it is. The suggester (#475) writes the
+  /// shortest target this admits for exactly one note, so what it writes is
+  /// what this resolves.
+  static bool pathMatches(String path, String target) {
+    final lower = path.toLowerCase();
+    final withMd = '$target.md';
+    return lower == target ||
+        lower == withMd ||
+        lower.endsWith('/$target') ||
+        lower.endsWith('/$withMd');
+  }
+
   /// Whether [s] starts with a URI scheme (`http://`, `https://`, …).
   static bool hasScheme(String s) =>
       RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://').hasMatch(s);
@@ -264,18 +282,10 @@ final class LinkResolver implements LinkSource {
     if (notes.length == 1 && !t.contains('/')) {
       return ResolvedNote(note: notes.single, heading: heading);
     }
-    // Same-stem candidates: qualify by the target's path prefix. For a
-    // `.md` target the extension was already stripped, so the candidate
-    // name is `$t.md`; for non-md targets (embeds — `foo.png`) the target
-    // keeps its extension and matches as-is.
-    final withMd = '$t.md';
+    // Same-stem candidates: qualify by the target's path prefix.
     final qualified = <Note>[
       for (final n in notes)
-        if (n.path.toLowerCase() == t ||
-            n.path.toLowerCase() == withMd ||
-            n.path.toLowerCase().endsWith('/$t') ||
-            n.path.toLowerCase().endsWith('/$withMd'))
-          n,
+        if (pathMatches(n.path, t)) n,
     ];
     if (qualified.length == 1) {
       return ResolvedNote(note: qualified.single, heading: heading);

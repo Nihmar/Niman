@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' show InsertMode;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 
 void main() {
@@ -111,6 +112,37 @@ void main() {
       ('Notes', 'Archive'),
       ('Meeting notes', 'Work'),
     ], reason: 'the two prefix matches by path, the contains match after them');
+  });
+
+  // A bare name two notes share resolves to neither for sure: the row the
+  // user picked has to write a target that opens that row's note.
+  test('a shared name is qualified until it names the picked note', () async {
+    await addNote('Work/Meeting.md', stems: ['meeting']);
+    await addNote('Home/Meeting.md', stems: ['meeting']);
+    await addNote('Work/Plan.md', stems: ['plan']);
+    final suggester = suggesterOver(const <String, String>{});
+
+    final rows = await suggester.notes('');
+    final targets = {for (final r in rows) '${r.folder}/${r.name}': r.target};
+    expect(targets, {
+      'Home/Meeting': 'Home/Meeting',
+      'Work/Meeting': 'Work/Meeting',
+      'Work/Plan': 'Plan',
+    }, reason: 'a name nobody else has stays bare');
+
+    final resolver = LinkResolver(db);
+    for (final row in rows) {
+      final resolved = await resolver.resolveWiki(row.target);
+      expect(
+        resolved,
+        isA<ResolvedNote>().having(
+          (r) => r.note.path,
+          'path',
+          '${row.folder}/${row.name}.md',
+        ),
+        reason: 'what is written is what the link opens: ${row.target}',
+      );
+    }
   });
 
   test('books are listed, other attachments are not', () async {

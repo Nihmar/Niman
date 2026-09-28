@@ -130,11 +130,11 @@ final class WebDavClient {
   final Uri baseUrl;
 
   /// How long to wait for a connection, for a response to start, and for
-  /// a body to arrive.
+  /// the next chunk of a body, either way.
   ///
   /// The last one is what stops a server that sent its headers and then
   /// went quiet from holding a sync run open for the rest of the session
-  /// (#348).
+  /// (#348). It bounds a silence, not a whole transfer ([_unlessStalled]).
   final Duration timeout;
 
   final String? _authorization;
@@ -361,14 +361,16 @@ final class WebDavClient {
     final hasher = sha256.startChunkedConversion(digest);
     var bytes = 0;
     try {
-      await response
-          .map((chunk) {
-            hasher.add(chunk);
-            bytes += chunk.length;
-            return chunk;
-          })
-          .pipe(into)
-          .timeout(timeout);
+      await _unlessStalled(
+        (progress) => response
+            .map((chunk) {
+              progress();
+              hasher.add(chunk);
+              bytes += chunk.length;
+              return chunk;
+            })
+            .pipe(into),
+      );
     } on TimeoutException {
       // Headers and no body: dropping the connection is what makes the
       // server stop, and the failure is the retryable kind the caller
@@ -439,7 +441,10 @@ final class WebDavClient {
     DateTime? modified,
   }) async {
     final clock = Stopwatch()..start();
-    final guard = _usableIfMatch(ifMatch);
+    // A weak ETag cannot guard anything (a caller that plans with
+    // [WebDavResource.guardEtag] never hands one over); dropped rather than
+    // sent, it would fail every write with 412.
+    final guard = ifMatchGuard(ifMatch);
     final response = await _send(
       'PUT',
       path,
@@ -547,7 +552,7 @@ final class WebDavClient {
     String? ifMatch,
   }) async {
     final clock = Stopwatch()..start();
-    final guard = _usableIfMatch(ifMatch);
+    final guard = ifMatchGuard(ifMatch);
     final response = await _send(
       'DELETE',
       path,
@@ -635,7 +640,14 @@ final class WebDavClient {
         } else {
           request.contentLength = length;
           try {
-            await request.addStream(bodyNow()).timeout(timeout);
+            await _unlessStalled(
+              (progress) => request.addStream(
+                bodyNow().map((chunk) {
+                  progress();
+                  return chunk;
+                }),
+              ),
+            );
           } on TimeoutException {
             // A server that takes the headers and reads nothing leaves
             // the write waiting forever; abort it rather than hang the
@@ -835,6 +847,38 @@ final class WebDavClient {
     );
   }
 
+  /// [transfer] run to its end, or a [TimeoutException] once [timeout]
+  /// passes with no chunk moving.
+  ///
+  /// [transfer] calls the `progress` it is handed for every chunk that
+  /// goes through, and each call starts the wait over. The bound is on the
+  /// silence, not on the whole transfer: a body that stops arriving (or a
+  /// server that stops reading one) fails within [timeout] (#348), while a
+  /// large file on a slow link, which keeps moving, takes as long as it
+  /// takes — a limit on the whole transfer failed every run for a file
+  /// that needs longer than [timeout] to cross, so it never synced.
+  Future<void> _unlessStalled(
+    Future<void> Function(void Function() progress) transfer,
+  ) async {
+    final stalled = Completer<void>();
+    Timer? wait;
+    void progress() {
+      wait?.cancel();
+      wait = Timer(timeout, () {
+        if (!stalled.isCompleted) {
+          stalled.completeError(TimeoutException('no data moved', timeout));
+        }
+      });
+    }
+
+    progress();
+    try {
+      await Future.any([transfer(progress), stalled.future]);
+    } finally {
+      wait?.cancel();
+    }
+  }
+
   /// The retryable failure of an attempt that outlived [timeout], with
   /// [what] saying what never came through — the answer, the body.
   ///
@@ -928,21 +972,6 @@ final class WebDavClient {
   /// credentials.
   static int? _spelledPort(Uri uri) =>
       uri.port == (uri.scheme == 'https' ? 443 : 80) ? null : uri.port;
-
-  /// [etag] when it can guard an `If-Match`, or null when it cannot.
-  ///
-  /// `If-Match` uses strong comparison (RFC 7232, 3.1), and a weak
-  /// validator (`W/"x"`, which servers like Nextcloud hand out and
-  /// `webdav_multistatus.dart` stores as sent) is never strong, so it can
-  /// never match: sending it turns every guarded `PUT`/`DELETE` into a
-  /// 412, forever. There is no legal way to make it strong, so the guard
-  /// is dropped and the write goes unguarded.
-  static String? _usableIfMatch(String? etag) {
-    if (etag == null || etag.startsWith('W/') || etag.startsWith('w/')) {
-      return null;
-    }
-    return etag;
-  }
 }
 
 /// The SHA-256 fingerprint of a DER-encoded certificate: uppercase hex

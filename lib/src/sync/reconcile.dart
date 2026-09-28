@@ -372,7 +372,9 @@ SyncDecision reconcilePath({
 
   final guardIfMatch = capabilities?.ifMatch ?? false;
   final guardIfNoneMatch = capabilities?.ifNoneMatch ?? false;
-  final etag = remote?.etag;
+  // Only an ETag that can guard the write: a weak one is dropped by the
+  // client, so a write planned on it must check the remote first instead.
+  final etag = remote?.guardEtag;
   SyncDecision overwriteRemote(SyncActionKind kind) => decide(
     kind,
     ifMatch: guardIfMatch ? etag : null,

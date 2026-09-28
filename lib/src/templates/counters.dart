@@ -36,6 +36,28 @@ final class CounterStore {
     return CounterStore._(file, await _read(file));
   }
 
+  /// Reserves one number for each of [names] — the `{{counter:…}}` of one
+  /// note being created (`counterNames`) — in the library at [root], and
+  /// answers the store with the callback the engine reads them through:
+  /// every `{{counter:name}}` in the note, directives and body alike, gets
+  /// the one number reserved for its name.
+  ///
+  /// Null when there is nothing to reserve (no names, or no library): a
+  /// template with no counter never touches the file. Each reservation is
+  /// on disk when this returns (#359), so a creation called off afterwards
+  /// may skip a number. Throws what the file does ([use]); the creation
+  /// flows run it where their failures are reported.
+  static Future<({CounterStore store, int Function(String name) counter})?>
+  reserve(String? root, List<String> names) async {
+    if (root == null || names.isEmpty) return null;
+    final store = await load(root);
+    final used = <String, int>{};
+    for (final name in names) {
+      used[name] = await store.use(name);
+    }
+    return (store: store, counter: (String name) => used[name]!);
+  }
+
   /// The serialized writer chain of each counters file, keyed by path.
   ///
   /// A store is made per creation, so two over one library are two
@@ -119,15 +141,32 @@ final class CounterStore {
 
   /// The counters in [file], or none when it is missing or does not
   /// parse.
+  ///
+  /// A file that is there and cannot be read right now — locked while a
+  /// sync renames over it, a FUSE hiccup — is not an empty one: [use]
+  /// writes back what it read, so taking it for empty wrote a file holding
+  /// the one counter in hand, every other one gone and this one back at 1,
+  /// handing out numbers already used. That failure is thrown instead, and
+  /// the creation that asked reports it.
   static Future<Map<String, int>> _read(File file) async {
+    final String text;
     try {
-      final decoded = jsonDecode(await file.readAsString());
+      text = await file.readAsString();
+    } on PathNotFoundException {
+      return {};
+    } on FileSystemException catch (error) {
+      // Bytes that are not UTF-8 are a corrupt file, not a failed read.
+      if (error.osError != null) rethrow;
+      return {};
+    }
+    try {
+      final decoded = jsonDecode(text);
       if (decoded is! Map) return {};
       return {
         for (final entry in decoded.entries)
           if (entry.value is int) entry.key.toString(): entry.value as int,
       };
-    } on Object catch (_) {
+    } on FormatException {
       return {};
     }
   }

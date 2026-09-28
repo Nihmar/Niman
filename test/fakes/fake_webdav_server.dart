@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' show min;
 import 'dart:typed_data';
 
 /// One request the fake received.
@@ -183,6 +184,12 @@ final class FakeWebDavServer {
   /// nothing: the connection stays open with no body, as a wedged server
   /// leaves it (#348). [close] ends whatever is left of it.
   void stallNextGet() => _stallGets++;
+
+  /// Set, the next GET sends its body in six pieces, this pause before each
+  /// one — a slow link, whose body keeps arriving however long the whole
+  /// takes. Cleared by that GET.
+  Duration? trickleNextGet;
+  static const _tricklePieces = 6;
 
   final Map<String, int> _failPuts = {};
 
@@ -539,6 +546,18 @@ final class FakeWebDavServer {
       socket.add(node.bytes.sublist(0, node.bytes.length ~/ 2));
       await socket.flush();
       socket.destroy();
+      return;
+    }
+    final pause = trickleNextGet;
+    if (pause != null) {
+      trickleNextGet = null;
+      final bytes = node.bytes;
+      final piece = (bytes.length / _tricklePieces).ceil();
+      for (var at = 0; at < bytes.length; at += piece) {
+        await Future<void>.delayed(pause);
+        response.add(bytes.sublist(at, min(at + piece, bytes.length)));
+        await response.flush();
+      }
       return;
     }
     response.add(node.bytes);

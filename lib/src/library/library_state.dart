@@ -520,10 +520,14 @@ final class LibraryController implements LibrarySession {
     // A library indexed for the first time opens on its tree, and its
     // notes are read behind it: the search, the tags and the links fill
     // in as they are read.
-    var contentOwed = false;
-    if (blockingScan) {
-      contentOwed = await indexer.indexTreeFirst(abs);
-    }
+    //
+    // Blocking or not: an index with no rows — a library never indexed
+    // on this device, or one [_openIndex] just rebuilt because sqlite
+    // reported it damaged (#368) — has no last state for a fast resume to
+    // show, and opening on it showed an empty library until the delayed
+    // reconciliation. On an index that has rows this is one query and
+    // writes nothing.
+    final contentOwed = await indexer.indexTreeFirst(abs);
     if (blockingScan && !contentOwed) {
       // Only here: the first index is the scan long enough to be worth
       // watching, and reporting costs a message per note.
