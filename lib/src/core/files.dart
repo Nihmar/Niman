@@ -6,15 +6,48 @@ import 'package:path/path.dart' as p;
 /// Suffix added to the target name when writing a temporary file.
 const _tempMarker = '.niman-tmp';
 
-/// Maximum length of a note or folder name.
+/// Maximum length of a note or folder name, in UTF-8 bytes.
 ///
-/// Ext4 caps components at 255 bytes; 200 chars leaves headroom for
-/// multibyte encodings.
-const _maxNameLength = 200;
+/// A filesystem caps one component at 255 bytes, and the budget stops short
+/// of that so the extension a caller appends (`.md`) still fits under the cap.
+/// It is a budget of bytes, not of UTF-16 code units: an astral character is
+/// four bytes and two units, so a name of 200 units can be 800 bytes and be
+/// refused outright (#354).
+const _maxNameBytes = 200;
 
 /// Characters that cannot appear in a note or folder name on Android or
 /// Linux.
 final RegExp _invalidChars = RegExp(r'[\/\\:*?"<>|]');
+
+/// The names Windows reserves for devices.
+///
+/// A file or folder whose *stem* — the text before the first dot, whatever
+/// its case — is one of these is that device rather than a file: `CON`,
+/// `con.md` and `NUL.txt` all open the device, or fail to open at all (#354).
+final Set<String> _reservedNames = <String>{
+  'CON',
+  'PRN',
+  'AUX',
+  'NUL',
+  for (var i = 1; i <= 9; i++) 'COM$i',
+  for (var i = 1; i <= 9; i++) 'LPT$i',
+};
+
+/// Prefixed to a reserved stem, so the name stops naming a device and starts
+/// naming a file.
+const _reservedPrefix = '_';
+
+/// Trailing spaces and dots, which Windows drops from a component name:
+/// `CON ` and `CON.` are the console device as much as `CON` is.
+final RegExp _trailingSpaceOrDot = RegExp(r'[ .]+$');
+
+/// Whether this platform's filesystems fold case: Windows and Apple's do,
+/// Linux and Android do not.
+///
+/// A volume that was formatted case-sensitively is the exception, and the one
+/// [_excludedEntry] asks the directory itself about.
+final bool _caseInsensitivePaths =
+    Platform.isWindows || Platform.isMacOS || Platform.isIOS;
 
 /// Collapses runs of whitespace to single spaces.
 final RegExp _whitespaceRuns = RegExp(r'\s+');
@@ -134,21 +167,97 @@ Future<String> hashFileSha256(File file) async {
 /// Sanitizes [input] into a valid note or folder name.
 ///
 /// Strips path separators and OS-illegal characters, collapses whitespace,
-/// trims trailing dots, and caps the length at [_maxNameLength]. Returns
-/// [fallback] when nothing usable remains.
+/// trims trailing dots, moves a reserved device name out of the way, and caps
+/// the length at [_maxNameBytes] UTF-8 bytes. Returns [fallback] when nothing
+/// usable remains.
 String sanitizeName(String input, {required String fallback}) {
   var name = input.trim();
   name = name.replaceAll(_invalidChars, '');
   name = name.replaceAll(_whitespaceRuns, ' ');
   name = name.trim();
   name = name.replaceAll(_trailingDots, '');
-  if (name.length > _maxNameLength) {
-    name = name.substring(0, _maxNameLength);
-  }
+  name = _withoutReservedStem(name);
+  name = _truncateToBytes(name, _maxNameBytes);
   if (name.isEmpty) {
     return fallback;
   }
   return name;
+}
+
+/// [name] with a prefix in front when its stem names a Windows device.
+String _withoutReservedStem(String name) {
+  final dot = name.indexOf('.');
+  final stem = (dot < 0 ? name : name.substring(0, dot)).replaceAll(
+    _trailingSpaceOrDot,
+    '',
+  );
+  if (!_reservedNames.contains(stem.toUpperCase())) {
+    return name;
+  }
+  return '$_reservedPrefix$name';
+}
+
+/// [name] cut to at most [maxBytes] UTF-8 bytes, on a rune boundary.
+///
+/// A code unit is not a byte: counting units against a byte budget both
+/// overshoots the filesystem's 255-byte component limit (200 astral
+/// characters are 800 bytes) and cuts between the two halves of a surrogate
+/// pair, leaving a lone surrogate that encoding turns into U+FFFD (#354).
+String _truncateToBytes(String name, int maxBytes) {
+  var used = 0;
+  var end = 0;
+  for (final rune in name.runes) {
+    final size = _utf8Length(rune);
+    if (used + size > maxBytes) {
+      break;
+    }
+    used += size;
+    end += rune > 0xFFFF ? 2 : 1;
+  }
+  return end == name.length ? name : name.substring(0, end);
+}
+
+/// The number of bytes [rune] takes in UTF-8.
+int _utf8Length(int rune) {
+  if (rune <= 0x7F) {
+    return 1;
+  }
+  if (rune <= 0x7FF) {
+    return 2;
+  }
+  if (rune <= 0xFFFF) {
+    return 3;
+  }
+  return 4;
+}
+
+/// Whether [abs] — a candidate name inside [dir] — can only be [exclude], the
+/// entry a rename is moving onto its own name.
+///
+/// `package:path` folds case on Windows, where an entry has one name however
+/// it is spelled. Apple's filesystems answer for either spelling too, but
+/// nothing in the two strings says so: compared as strings `A.md` and `a.md`
+/// are different paths, so the search never recognises the entry it was told
+/// to leave alone and returns `A_1.md` for a rename that only changes the
+/// case (#354).
+///
+/// On a case-sensitive volume the two spellings really are two entries, and
+/// there the directory's own listing settles it: a candidate found among the
+/// entries belongs to somebody else, and the collision stands.
+bool _excludedEntry(Directory dir, String abs, String? exclude) {
+  if (exclude == null) {
+    return false;
+  }
+  if (p.equals(abs, exclude)) {
+    return true;
+  }
+  if (!_caseInsensitivePaths || abs.toLowerCase() != exclude.toLowerCase()) {
+    return false;
+  }
+  final candidate = p.basename(abs);
+  return !dir
+      .listSync(followLinks: false)
+      .any((entry) => p.basename(entry.path) == candidate);
 }
 
 /// Returns a collision-free file name for [base] with extension [ext]
@@ -169,7 +278,7 @@ Future<String> uniqueFileName(
   for (var i = 0; i < _uniqueAttempts; i++) {
     final candidate = i == 0 ? '$base$ext' : '${base}_$i$ext';
     final abs = p.join(dir.path, candidate);
-    if (abs == exclude) return candidate;
+    if (_excludedEntry(dir, abs, exclude)) return candidate;
     final exists = File(abs).existsSync() || Directory(abs).existsSync();
     if (!exists) {
       return candidate;
@@ -189,7 +298,7 @@ Future<String> uniqueFolderName(
   for (var i = 0; i < _uniqueAttempts; i++) {
     final candidate = i == 0 ? base : '${base}_$i';
     final abs = p.join(dir.path, candidate);
-    if (abs == exclude) return candidate;
+    if (_excludedEntry(dir, abs, exclude)) return candidate;
     if (!Directory(abs).existsSync()) {
       return candidate;
     }

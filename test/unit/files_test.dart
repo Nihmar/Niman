@@ -8,8 +8,48 @@ import 'package:path/path.dart' as p;
 
 final DateTime _epoch = DateTime.fromMillisecondsSinceEpoch(0);
 
+/// Whether [text] holds a UTF-16 code unit without its partner — what a
+/// `substring` cut through an astral character leaves behind.
+bool _hasLoneSurrogate(String text) {
+  for (var i = 0; i < text.length; i++) {
+    final unit = text.codeUnitAt(i);
+    if (unit >= 0xDC00 && unit <= 0xDFFF) {
+      return true;
+    }
+    if (unit >= 0xD800 && unit <= 0xDBFF) {
+      final next = i + 1 < text.length ? text.codeUnitAt(i + 1) : 0;
+      if (next < 0xDC00 || next > 0xDFFF) {
+        return true;
+      }
+      i++;
+    }
+  }
+  return false;
+}
+
+/// Whether the filesystem under the working directory treats `Case.md` and
+/// `case.md` as one entry.
+///
+/// Asked of the filesystem rather than of the platform: a case-sensitive
+/// volume can sit under any of them.
+bool _fsFoldsCase() {
+  final dir = Directory.current.createTempSync('niman_case_probe_');
+  try {
+    File(p.join(dir.path, 'Case.md')).writeAsStringSync('x');
+    return File(p.join(dir.path, 'case.md')).existsSync();
+  } finally {
+    dir.deleteSync(recursive: true);
+  }
+}
+
 void main() {
   late Directory tempDir;
+  // Decided before the tests are declared, because `skip:` is read then. On a
+  // case-sensitive filesystem two names differing only in case are two
+  // entries, and there is nothing for the guarded tests to prove (#354).
+  final caseSkipReason = _fsFoldsCase()
+      ? null
+      : 'the filesystem keeps Note.md and note.md apart';
 
   setUp(() async {
     tempDir = await Directory.current.createTemp('niman_files_');
@@ -35,6 +75,45 @@ void main() {
 
     test('caps the name at 200 characters', () {
       expect(sanitizeName('a' * 300, fallback: 'X').length, 200);
+    });
+
+    test('never lets a reserved device name through (#354)', () {
+      // These name a Windows device, not a file: a note or an imported
+      // folder spelled that way cannot be opened there.
+      for (final reserved in <String>['CON', 'NUL', 'COM1', 'LPT9', 'con']) {
+        expect(sanitizeName(reserved, fallback: 'X'), isNot(reserved));
+      }
+      // The stem decides, whatever follows it.
+      expect(sanitizeName('CON.md', fallback: 'X'), isNot('CON.md'));
+      expect(sanitizeName('NUL.txt', fallback: 'X'), isNot('NUL.txt'));
+      expect(sanitizeName('aux..', fallback: 'X'), isNot('aux'));
+    });
+
+    test('leaves names that only look reserved alone (#354)', () {
+      expect(sanitizeName('Console', fallback: 'X'), 'Console');
+      expect(sanitizeName('COM10', fallback: 'X'), 'COM10');
+      expect(sanitizeName('my-CON', fallback: 'X'), 'my-CON');
+      expect(sanitizeName('.CON', fallback: 'X'), '.CON');
+    });
+
+    test('cuts a long astral name to a utf-8 byte budget (#354)', () {
+      // 300 astral characters: 600 UTF-16 units and 1200 bytes. Counting
+      // units kept 100 of them — 400 bytes, past the filesystem's 255-byte
+      // component limit.
+      final name = sanitizeName('𝔘' * 300, fallback: 'X');
+      expect(utf8.encode(name).length, lessThanOrEqualTo(255));
+      expect(name.runes.length, greaterThan(10));
+      expect(name, '𝔘' * name.runes.length);
+    });
+
+    test('never cuts a surrogate pair in half (#354)', () {
+      // The 200th code unit here is the high half of an astral character, so
+      // a code-unit cut leaves a lone surrogate that encoding silently turns
+      // into U+FFFD.
+      final name = sanitizeName('a' * 199 + '𝔘' * 3, fallback: 'X');
+      expect(_hasLoneSurrogate(name), isFalse);
+      expect(utf8.encode(name).length, lessThanOrEqualTo(255));
+      expect(name.startsWith('a' * 199), isTrue);
     });
 
     test('falls back when nothing usable remains', () {
@@ -69,6 +148,35 @@ void main() {
       );
       expect(name, 'Note.md');
     });
+
+    test(
+      'compares the excluded path as a path, not as a string (#354)',
+      () async {
+        final selfPath = p.join(tempDir.path, 'Note.md');
+        File(selfPath).writeAsStringSync('x');
+        final name = await uniqueFileName(
+          tempDir,
+          'Note',
+          '.md',
+          exclude: p.join(tempDir.path, '.', 'Note.md'),
+        );
+        expect(name, 'Note.md');
+      },
+    );
+
+    test('a rename that only changes case keeps the name (#354)', () async {
+      final selfPath = p.join(tempDir.path, 'Note.md');
+      File(selfPath).writeAsStringSync('x');
+      // On a case-insensitive filesystem the two spellings are one entry,
+      // so `Note.md` is not in the way of `note.md`.
+      final name = await uniqueFileName(
+        tempDir,
+        'note',
+        '.md',
+        exclude: selfPath,
+      );
+      expect(name, 'note.md');
+    }, skip: caseSkipReason);
   });
 
   group('uniqueFolderName', () {
@@ -80,6 +188,19 @@ void main() {
       Directory(p.join(tempDir.path, 'Docs')).createSync();
       expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs_1');
     });
+
+    test(
+      'a folder rename that only changes case keeps the name (#354)',
+      () async {
+        final selfPath = p.join(tempDir.path, 'Docs');
+        Directory(selfPath).createSync();
+        expect(
+          await uniqueFolderName(tempDir, 'docs', exclude: selfPath),
+          'docs',
+        );
+      },
+      skip: caseSkipReason,
+    );
   });
 
   group('trash names', () {
