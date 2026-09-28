@@ -122,27 +122,58 @@ final class ShellEditorSettings {
   /// since switched off falls back to an editor the library still
   /// offers — better than stranding the note on a surface that is gone.
   static Future<ShellEditorSettings> read(LibrarySession session) async {
-    final lineNumbers = await session.lineNumbersEnabled;
-    final readableLineLength = await session.readableLineLength;
-    final noteColumnWidth = await session.noteColumnWidth;
-    final typewriter = await session.typewriter;
-    final autofocus = await session.editorAutofocusEnabled;
-    final linkType = await session.linkType;
-    final missingNoteLocation = await session.missingNoteLocation;
-    final attachmentsFolder =
-        await session.ops?.attachmentsFolder ?? defaultAttachmentsFolder;
-    final templateFolder =
-        await session.ops?.templateFolder ?? defaultTemplateFolder;
-    final indentWidth = await session.indentWidth;
-    final treeSort = await session.treeSort;
-    final treeWidth = await session.treeWidth;
-    final dockWidth = await session.dockWidth;
-    final toolbar = await session.editorToolbar;
-    final tidyOnClose = await session.tidyOnClose;
-    final cascadeChecklist = await session.cascadeChecklist;
-    final lintRulesOff = await session.lintRulesOff;
-    final editorKind = await session.editorKind;
-    final editorsEnabled = await session.enabledEditors;
+    // The reads go out together, not one after another (#362): the mount
+    // path awaited nineteen settings in sequence, and each await is a turn
+    // of the event loop between the mount and the frame the settings land
+    // in. Every one is started before the first is awaited.
+    final ops = session.ops;
+    final head = (
+      session.lineNumbersEnabled,
+      session.readableLineLength,
+      session.noteColumnWidth,
+      session.typewriter,
+      session.editorAutofocusEnabled,
+      session.linkType,
+      session.missingNoteLocation,
+      session.indentWidth,
+    ).wait;
+    final body = (
+      session.treeSort,
+      session.treeWidth,
+      session.dockWidth,
+      session.editorToolbar,
+      session.tidyOnClose,
+      session.cascadeChecklist,
+      session.lintRulesOff,
+      session.editorKind,
+      session.enabledEditors,
+    ).wait;
+    final folders = (
+      ops?.attachmentsFolder ?? Future<String>.value(defaultAttachmentsFolder),
+      ops?.templateFolder ?? Future<String>.value(defaultTemplateFolder),
+    ).wait;
+    final (
+      lineNumbers,
+      readableLineLength,
+      noteColumnWidth,
+      typewriter,
+      autofocus,
+      linkType,
+      missingNoteLocation,
+      indentWidth,
+    ) = await head;
+    final (
+      treeSort,
+      treeWidth,
+      dockWidth,
+      toolbar,
+      tidyOnClose,
+      cascadeChecklist,
+      lintRulesOff,
+      editorKind,
+      editorsEnabled,
+    ) = await body;
+    final (attachmentsFolder, templateFolder) = await folders;
     final enabled = editorsEnabled.isEmpty
         ? const {EditorKind.source, EditorKind.wysiwyg}
         : editorsEnabled;

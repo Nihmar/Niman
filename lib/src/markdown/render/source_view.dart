@@ -34,6 +34,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/context_menu_items.dart';
@@ -581,8 +582,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     onTyped: _typed,
     onTokenizer: (edit, buffer) {
       // The edit path's clock: opened here and closed by `onEdited`, the
-      // two ends of the same `_replace` (#316).
-      _editClock = Stopwatch()..start();
+      // two ends of the same `_replace` (#316) — and only when a profiling
+      // round asked for the frame's parts (#362): a release build reads no
+      // clock on the path it would be measuring.
+      if (nimanFrames) _editClock = Stopwatch()..start();
       _styleEdited(edit);
     },
     selection: () => _selection,
@@ -643,6 +646,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Closes the edit path's clock, if one is open, and books this frame's
   /// report.
   void _bookFrame() {
+    if (!nimanFrames) return;
     final clock = _editClock;
     if (clock != null) {
       _cost.edit += clock.elapsedMicroseconds;
@@ -2759,9 +2763,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   @override
   Widget build(BuildContext context) {
-    // Every frame the view builds is measured, for the report (#316).
-    final cost = _cost;
-    final clock = Stopwatch()..start();
+    // Every frame the view builds is measured, for the report (#316) —
+    // when a profiling round asked for it: what a frame costs is read off
+    // a `Stopwatch` here and in the render object below, on the very path
+    // the report is about, and a release build runs neither (#362).
+    final clock = nimanFrames ? (Stopwatch()..start()) : null;
     final syntax = widget.syntax ?? SyntaxColors.of(context);
     _syntax = syntax;
     _scaler = MediaQuery.textScalerOf(context);
@@ -3050,8 +3056,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ),
       ),
     );
-    cost.build += clock.elapsedMicroseconds;
-    return _TimedSubtree(cost: cost, onSlow: _bookReport, child: content);
+    if (clock == null) return content;
+    _cost.build += clock.elapsedMicroseconds;
+    return _TimedSubtree(cost: _cost, onSlow: _bookReport, child: content);
   }
 
   // ---------------------------------------------------------- table handles

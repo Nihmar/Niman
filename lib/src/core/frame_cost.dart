@@ -2,6 +2,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/core/logging.dart';
 
+/// Whether the frame instrumentation runs: `--dart-define=NIMAN_FRAMES=true`
+/// in a profiling build, and off in every other one (#362).
+///
+/// What a frame cost is read off `Stopwatch`es allocated on the path being
+/// measured — one for the build, one in `performLayout` and one in `paint`
+/// per wrapped subtree — so a release build runs none of it: the timers
+/// inside the frames #316 is about were charged to those frames. The flag
+/// covers all of it, `_reportSlowFrames` (main.dart) included.
+const bool nimanFrames = bool.fromEnvironment('NIMAN_FRAMES');
+
 /// What one frame of a view cost, in parts, and the line it is reported in
 /// (#316).
 ///
@@ -67,10 +77,14 @@ final class FrameCost {
   bool _booked = false;
 
   /// Opens the edit clock: the tokenizer callback of an edit calls this.
-  void startEdit() => _editClock = Stopwatch()..start();
+  void startEdit() {
+    if (!nimanFrames) return;
+    _editClock = Stopwatch()..start();
+  }
 
   /// Closes the edit clock and books this frame's report.
   void endEdit() {
+    if (!nimanFrames) return;
     final clock = _editClock;
     if (clock != null) {
       edit += clock.elapsedMicroseconds;
@@ -81,7 +95,11 @@ final class FrameCost {
 
   /// Runs [build], times it, and wraps what it returned so the layout and the
   /// paint under it are timed too.
+  ///
+  /// Off, this is [build] and nothing else: no clock, and no render object
+  /// around it to time its layout and its paint.
   Widget timed(Widget Function() build) {
+    if (!nimanFrames) return build();
     final clock = Stopwatch()..start();
     final child = build();
     this.build += clock.elapsedMicroseconds;
@@ -94,7 +112,7 @@ final class FrameCost {
   /// and the paint: a frame no keystroke caused still has to be bookable, and a
   /// widget does not build on a scroll.
   void book() {
-    if (_booked) return;
+    if (!nimanFrames || _booked) return;
     _booked = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _booked = false;
