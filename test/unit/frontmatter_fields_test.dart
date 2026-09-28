@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
+import 'package:yaml/yaml.dart';
 
 /// A note with the block under test at the top.
 String _note(String block) => '---\n$block---\n\nBody text.\n';
@@ -103,6 +104,50 @@ void main() {
         '"a: b"',
       );
       expect(frontmatterFieldYaml(FrontmatterFieldType.text, ['']), '""');
+    });
+
+    // Quoting by a hand-kept list of characters missed a trailing `:`
+    // (`Todo:` broke the whole block), a comma inside a flow list (one item
+    // became two) and a line break (a multi-line value lost its break and
+    // left a line at column 0): whatever is written must read back as the
+    // text it was written from, on its key's one line.
+    test('every value reads back as the text it was written from', () {
+      for (final text in [
+        'Todo:',
+        'a: b',
+        'x #y',
+        'line one\nline two',
+        'say "hi"',
+        r'back\slash',
+        '- item',
+        '[x]',
+        '{x}',
+        '&a',
+        '*b',
+        '!t',
+        '%p',
+        '@q',
+        '`r',
+        'Doe, J',
+        'tab\there',
+        'true',
+        '42',
+        '2026-09-01',
+        '',
+      ]) {
+        final yaml = frontmatterFieldYaml(FrontmatterFieldType.text, [text]);
+        expect(yaml, isNot(contains('\n')), reason: text);
+        expect((loadYaml('k: $yaml') as Map)['k'], text, reason: text);
+      }
+    });
+
+    test('a list item holding a comma stays one item', () {
+      final yaml = frontmatterFieldYaml(FrontmatterFieldType.list, [
+        'Doe, J',
+        'Roe, K',
+        'x',
+      ]);
+      expect((loadYaml('k: $yaml') as Map)['k'], ['Doe, J', 'Roe, K', 'x']);
     });
   });
 

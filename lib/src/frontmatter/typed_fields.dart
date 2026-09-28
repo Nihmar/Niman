@@ -13,6 +13,7 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/frontmatter/yaml_scalar.dart';
 import 'package:yaml/yaml.dart';
 
 /// The type of a frontmatter field, as far as the panel can tell it apart.
@@ -164,11 +165,12 @@ String frontmatterFieldYaml(FrontmatterFieldType type, List<String> values) {
   return switch (type) {
     FrontmatterFieldType.boolean => _isTruthy(first) ? 'true' : 'false',
     FrontmatterFieldType.number =>
-      num.tryParse(first.trim()) == null ? _yamlText(first) : first.trim(),
-    FrontmatterFieldType.date =>
-      DateTime.tryParse(first.trim()) == null ? _yamlText(first) : first.trim(),
-    FrontmatterFieldType.list =>
-      '[${[for (final value in values) _yamlText(value)].join(', ')}]',
+      yamlReadsBack(first.trim(), (value) => value is num)
+          ? first.trim()
+          : _yamlText(first),
+    // A date is a string to YAML: written plain whenever it reads back so.
+    FrontmatterFieldType.date => _yamlText(first),
+    FrontmatterFieldType.list => _yamlList(values),
     FrontmatterFieldType.text => _yamlText(first),
   };
 }
@@ -177,37 +179,18 @@ String frontmatterFieldYaml(FrontmatterFieldType type, List<String> values) {
 bool _isTruthy(String value) =>
     const {'true', 'yes', 'on', '1'}.contains(value.trim().toLowerCase());
 
-/// [value] as a YAML scalar: plain when the plain form reads back as this
-/// same text, quoted when YAML would read it as something else.
-String _yamlText(String value) {
-  final text = value.trim();
-  if (text.isEmpty) return '""';
-  if (!_needsQuotes(text)) return text;
-  final escaped = text.replaceAll(r'\', r'\\').replaceAll('"', r'\"');
-  return '"$escaped"';
+/// [values] as a flow list, `[a, b]`, each item quoted as it needs to be to
+/// stay one item.
+String _yamlList(List<String> values) {
+  final items = [for (final value in values) _yamlText(value, inFlow: true)];
+  return '[${items.join(', ')}]';
 }
 
-/// Whether a plain YAML scalar would read as anything other than [text].
-bool _needsQuotes(String text) {
-  if (text.startsWith(RegExp(r'''[-?:,\[\]{}#&*!|>'"%@`]'''))) return true;
-  if (text.contains(': ') || text.contains(' #')) return true;
-  if (text.contains('\n')) return true;
-  final lower = text.toLowerCase();
-  if (const {
-    'true',
-    'false',
-    'yes',
-    'no',
-    'on',
-    'off',
-    'null',
-    '~',
-  }.contains(lower)) {
-    return true;
-  }
-  if (num.tryParse(text) != null) return true;
-  return DateTime.tryParse(text) != null;
-}
+/// [value], trimmed, as a YAML scalar that reads back as that same text:
+/// plain when YAML reads the plain form so, quoted otherwise
+/// ([yamlString] asks the parser). [inFlow] is for an item of `[a, b]`.
+String _yamlText(String value, {bool inFlow = false}) =>
+    yamlString(value.trim(), inFlow: inFlow);
 
 /// A date as YAML writes it: `2026-03-01` at midnight, the timestamp
 /// otherwise — the same shape the parser stores.
