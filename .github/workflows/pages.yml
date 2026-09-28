@@ -1,0 +1,80 @@
+name: pages
+
+# The documentation is published as a project site on every push to `main`
+# (#441). The build is GitHub Pages' own environment
+# (`actions/jekyll-build-pages`, the image a branch-based Pages site is built
+# in), so the site is the repository's Markdown rendered as it stands:
+# `docs/user/*.md` and the records are pages, `index.md` is the home, and
+# `_config.yml` holds the title, the theme and the base path. No second copy of
+# the docs, no Gemfile, no Node/Python build.
+# Enabling Pages (Settings → Pages → Source: GitHub Actions) is a one-time
+# click a maintainer has to make; until then this workflow has nowhere to
+# deploy to.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Deploying needs the Pages API and an OIDC token; reading the repository is
+# all the build asks for.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. A run in progress is left to finish — the queued
+# one is dropped in favour of the newest push, so the site is never left in a
+# half-deployed state.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Liquid renders before Markdown, and GitHub's own build has no switch to
+      # turn it off: Jekyll decides per file, from the content, whether a page
+      # is rendered with Liquid at all. Niman's docs are Markdown *with* its
+      # own template syntax in them — `{{date:FORMAT}}`, `{{ask:Label}}`, the
+      # `{{…}}` the templates page documents — and Liquid would read those as
+      # its tags and drop them, leaving that page with holes in it. So every
+      # line that carries one is handed to Liquid as a raw block, in the
+      # checkout only: the pages published are then the Markdown in the
+      # repository, character for character. Two files are left out: `index.md`
+      # is the site's own page and uses Liquid (`{{ site.baseurl }}`) on
+      # purpose, and a file called `README.md` is not rendered by this build at
+      # all (Jekyll only ever makes an index of it), so nothing has to be kept
+      # from it.
+      - name: Keep Niman's placeholders out of Liquid's way
+        run: |
+          find . -name '*.md' -not -name 'README.md' -not -path './index.md' -print0 \
+            | xargs -0 sed -i -e '/{{/{s/^/{% raw %}/;s/$/{% endraw %}/}'
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    name: Deploy to Pages
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
