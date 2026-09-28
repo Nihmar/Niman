@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
@@ -58,14 +59,42 @@ typedef WatchSource = Stream<WatchChange> Function(String root);
 /// mechanism applies. When the OS cannot deliver every event (FUSE, inotify
 /// limits), the periodic full rescan in the library controller is the
 /// safety net (see the M1 plan risks).
+///
+/// A source stream that *ends* — an inotify limit, a FUSE hiccup, the
+/// directory going away — is resubscribed to, with a backoff, so the watch
+/// outlives one stream; a burst larger than the pending caps ships as
+/// several batches instead of growing one unbounded list.
 final class FileWatcher {
   /// Creates a watcher for [root] with the given [debounce] window;
   /// [source] replaces the OS watch and is injected in tests.
-  new(this.root, {this.debounce = defaultDebounce, WatchSource? source})
-    : _source = source ?? _watchFileSystem;
+  new(
+    this.root, {
+    this.debounce = defaultDebounce,
+    this.restartBackoff = defaultRestartBackoff,
+    WatchSource? source,
+  }) : _source = source ?? _watchFileSystem;
 
   /// How long a batching window stays open, by default.
   static const defaultDebounce = Duration(milliseconds: 250);
+
+  /// How long the first resubscribe waits after the source stream ended;
+  /// later attempts double it, up to [maxRestartBackoff].
+  static const defaultRestartBackoff = Duration(seconds: 1);
+
+  /// The longest wait between resubscribe attempts.
+  static const maxRestartBackoff = Duration(seconds: 30);
+
+  /// How many distinct paths one pending batch lists before it ships.
+  /// Past it the batch is sent as it stands and a fresh window opens: a
+  /// burst arrives as several bounded batches, never as one unbounded
+  /// list, and no change is dropped. The count is of distinct paths — the
+  /// batch is a coalesced set — so no arrival rate can fill it.
+  static const maxPendingPaths = 4096;
+
+  /// How many directories one pending batch asks to resync before it
+  /// ships. Each resync walks a whole subtree, so this sits well below
+  /// [maxPendingPaths]; it bounds [WatchBatch.resyncDirs] the same way.
+  static const maxPendingResyncDirs = 256;
 
   static const AppLogger _log = AppLogger(name: 'watcher');
 
@@ -75,6 +104,10 @@ final class FileWatcher {
   /// How long the batching window stays open after the change that
   /// opened it. Later changes do not extend it.
   final Duration debounce;
+
+  /// How long the first resubscribe waits after the source stream ended;
+  /// later attempts double it, up to [maxRestartBackoff].
+  final Duration restartBackoff;
 
   final WatchSource _source;
   final StreamController<WatchBatch> _controller =
@@ -86,6 +119,11 @@ final class FileWatcher {
   // ignore: cancel_subscriptions
   StreamSubscription<WatchChange>? _subscription;
   Timer? _timer;
+
+  /// The pending resubscribe, armed when the source stream ends; cancelled
+  /// in [stop].
+  Timer? _restartTimer;
+  int _restartAttempts = 0;
   bool _started = false;
   bool _closed = false;
 
@@ -123,30 +161,99 @@ final class FileWatcher {
 
   void _listen(Stream<WatchChange> stream) {
     _subscription = stream.listen(
-      _onChange,
+      _onEvent,
       onError: (Object error) {
         // Transient FS errors are recoverable via the periodic rescan, but
         // they are exactly what this log is meant to surface.
         _log.warning('watcher stream error: $error');
       },
-      onDone: () {
-        _log.warning('watcher stream closed before stop()');
-        _subscription = null;
-      },
+      onDone: _onStreamDone,
     );
+  }
+
+  void _onEvent(WatchChange change) {
+    // A delivered change proves this watch works, so a later end starts
+    // over from the first, short wait instead of the long one.
+    _restartAttempts = 0;
+    _onChange(change);
+  }
+
+  /// The source stream ended on its own (an inotify limit, a FUSE hiccup,
+  /// the directory going away). The watch does not come back by itself,
+  /// and the periodic rescan alone is a long delay for the user's own
+  /// edits, so resubscribe — with [restartBackoff] doubling up to
+  /// [maxRestartBackoff], the shape `syncBackoff` uses, so a source that
+  /// keeps ending immediately is not hammered.
+  void _onStreamDone() {
+    _subscription = null;
+    if (_closed) return;
+    _scheduleRestart('stream ended before stop()');
+  }
+
+  void _scheduleRestart(String reason) {
+    final wait = _nextRestartWait();
+    _restartAttempts++;
+    _log.warning('watcher $reason; resubscribing in ${wait.inMilliseconds} ms');
+    _restartTimer = Timer(wait, _restart);
+  }
+
+  Duration _nextRestartWait() {
+    // 2^8 · the first wait already passes the cap; the clamp keeps the
+    // shift small.
+    final factor = 1 << math.min(_restartAttempts, 8);
+    final wait = restartBackoff * factor;
+    return wait > maxRestartBackoff ? maxRestartBackoff : wait;
+  }
+
+  void _restart() {
+    _restartTimer = null;
+    if (_closed) return;
+    final Stream<WatchChange> stream;
+    try {
+      stream = _source(root);
+    } on Object catch (error) {
+      // The same failure that ended the stream (the root gone, a watch
+      // limit) can also refuse a new one; keep trying, on the backoff.
+      _log.warning('watcher resubscribe failed: $error');
+      _scheduleRestart('resubscribe failed');
+      return;
+    }
+    _listen(stream);
   }
 
   void _onChange(WatchChange change) {
     if (_closed) return;
     if (change.isMove) {
-      _resyncDirs.add(p.dirname(change.path));
+      _addResyncDir(p.dirname(change.path));
     }
-    _paths.add(change.path);
+    _addPath(change.path);
     final destination = change.destination;
     if (destination != null) {
-      _paths.add(destination);
+      _addPath(destination);
     }
     _timer ??= Timer(debounce, _flush);
+  }
+
+  /// Adds one changed path, unless that would push the pending batch past
+  /// [maxPendingPaths]: then the batch ships as it stands and this path
+  /// opens the next one. Nothing is dropped — a storm is delivered as
+  /// several batches instead of one list that grows with the burst.
+  void _addPath(String path) {
+    if (!_paths.contains(path) && _paths.length >= maxPendingPaths) {
+      _flush();
+    }
+    _paths.add(path);
+  }
+
+  /// Adds one directory to resync, bounded like [_addPath] by
+  /// [maxPendingResyncDirs] (a resync walks a subtree, so far fewer of
+  /// them are pending at once).
+  void _addResyncDir(String dir) {
+    if (!_resyncDirs.contains(dir) &&
+        _resyncDirs.length >= maxPendingResyncDirs) {
+      _flush();
+    }
+    _resyncDirs.add(dir);
   }
 
   static String _typeName(FileSystemEvent event) {
@@ -159,6 +266,10 @@ final class FileWatcher {
   }
 
   void _flush() {
+    // Cancelling, not just dropping the handle: a full pending set flushes
+    // before its window closed, and the armed timer must not fire a second,
+    // empty batch afterwards.
+    _timer?.cancel();
     _timer = null;
     if (_closed) return;
     final batch = WatchBatch(
@@ -176,6 +287,8 @@ final class FileWatcher {
     _closed = true;
     _timer?.cancel();
     _timer = null;
+    _restartTimer?.cancel();
+    _restartTimer = null;
     final sub = _subscription;
     _subscription = null;
     _paths.clear();

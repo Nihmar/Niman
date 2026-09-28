@@ -146,4 +146,111 @@ void main() {
     await watcher.stop();
     expect(watcher.start, throwsStateError);
   });
+
+  test('resubscribes when the source stream ends (#389)', () async {
+    final first = StreamController<WatchChange>();
+    final second = StreamController<WatchChange>();
+    var opened = 0;
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 20),
+      restartBackoff: const Duration(milliseconds: 5),
+      source: (_) => opened++ == 0 ? first.stream : second.stream,
+    );
+    final before = p.join(root.path, 'before.md');
+    final after = p.join(root.path, 'after.md');
+    final batches = await runWith(watcher, (b) async {
+      final firstBatch = watcher.events.first;
+      first.add(WatchChange(before));
+      expect((await firstBatch).paths, contains(before));
+      // The OS stream ends on its own (an inotify limit, a FUSE hiccup,
+      // the directory going away): the watch has to come back by itself,
+      // or nothing is ever noticed again for the rest of the session.
+      await first.close();
+      final deadline = DateTime.now().add(const Duration(seconds: 2));
+      while (opened < 2 && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(opened, 2, reason: 'the watcher resubscribes after an end');
+      final next = watcher.events.first;
+      second.add(WatchChange(after));
+      expect((await next).paths, contains(after));
+    });
+    await second.close();
+    expect(batches, hasLength(2));
+  });
+
+  test('a burst past the path cap ships in bounded batches (#389)', () async {
+    const cap = FileWatcher.maxPendingPaths;
+    final changes = StreamController<WatchChange>();
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 20),
+      source: (_) => changes.stream,
+    );
+    final burst = List.generate(
+      cap * 2 + 17,
+      (i) => p.join(root.path, 'f$i.md'),
+    );
+    final batches = await runWith(watcher, (b) async {
+      for (final path in burst) {
+        changes.add(WatchChange(path));
+      }
+      // A window well past the last event: without a cap the whole burst
+      // would sit in one pending set and ship as one batch.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    await changes.close();
+    for (final batch in batches) {
+      expect(batch.paths.length, lessThanOrEqualTo(cap));
+    }
+    expect(batches.length, greaterThan(1), reason: 'the burst ships in pieces');
+    // Bounded, but nothing is lost: every path of the burst still ships.
+    expect(batches.expand((b) => b.paths).toSet(), burst.toSet());
+  });
+
+  test('a burst past the resync cap ships in bounded batches (#389)', () async {
+    const cap = FileWatcher.maxPendingResyncDirs;
+    final changes = StreamController<WatchChange>();
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 20),
+      source: (_) => changes.stream,
+    );
+    final batches = await runWith(watcher, (b) async {
+      for (var i = 0; i < cap + 5; i++) {
+        final dir = p.join(root.path, 'd$i');
+        changes.add(WatchChange.move(p.join(dir, 'note.md')));
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    await changes.close();
+    for (final batch in batches) {
+      expect(batch.resyncDirs.length, lessThanOrEqualTo(cap));
+    }
+    expect(batches.length, greaterThan(1), reason: 'the burst ships in pieces');
+  });
+
+  test(
+    'stopping during a pending resubscribe reopens nothing (#389)',
+    () async {
+      final changes = StreamController<WatchChange>();
+      var opened = 0;
+      final watcher = FileWatcher(
+        root.path,
+        restartBackoff: const Duration(milliseconds: 5),
+        source: (_) {
+          opened++;
+          return changes.stream;
+        },
+      );
+      await watcher.start();
+      await changes.close();
+      await watcher.stop();
+      // Long past the resubscribe the end had scheduled: a stopped watcher
+      // must not install a new OS watch behind the caller's back.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(opened, 1);
+    },
+  );
 }
