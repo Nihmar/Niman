@@ -3032,7 +3032,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       return;
     }
     final name = p.basename(p.normalize(path));
-    final count = markdownFilesIn(Directory(path)).length;
+    // The walk is a FUSE round trip per folder on Android: it runs off the
+    // UI isolate, so the count is awaited rather than read inline (#382).
+    final count = (await markdownFilesIn(path)).length;
+    if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     if (count == 0) {
       messenger.showSnackBar(
@@ -3066,9 +3069,9 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         libraryRoot: root,
       );
       if (imported == null || !mounted) return;
-      // The watcher would find them too; asking now shows them at once.
-      await widget.controller.rescanNow();
-      if (!mounted) return;
+      // The walk and the copy are off the UI isolate now (#382), and the
+      // watcher finds what landed on its own: a rescan here would only block
+      // the frame the reveal is drawn in, so it is left to converge.
       _revealFolder(imported.folder);
       messenger.showSnackBar(
         SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),

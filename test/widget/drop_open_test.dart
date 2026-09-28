@@ -84,7 +84,7 @@ void main() {
   });
 
   testWidgets('a folder from elsewhere is offered for import, copied in, '
-      'and the library re-read', (tester) async {
+      'and left to the watcher', (tester) async {
     final tmp = Directory.systemTemp.createTempSync('niman-drop');
     addTearDown(() => tmp.deleteSync(recursive: true));
     final drafts = Directory(p.join(tmp.path, 'Drafts'))..createSync();
@@ -100,19 +100,20 @@ void main() {
     expect(find.byKey(const Key('import-folder')), findsOne);
 
     await tester.tap(find.byKey(const Key('import-folder-yes')));
-    // The copy is real disk work: let it run, a frame at a time.
-    for (var i = 0; i < 40 && controller.rescans == 0; i++) {
+    // The copy is real disk work on a background isolate: let it run, a
+    // frame at a time.
+    final copied = File(p.join(controller.root!, 'Drafts', 'one.md'));
+    for (var i = 0; i < 40 && !copied.existsSync(); i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
       await tester.pump();
     }
     await settle(tester);
-    expect(
-      File(p.join(controller.root!, 'Drafts', 'one.md')).existsSync(),
-      isTrue,
-    );
-    expect(controller.rescans, 1);
+    expect(copied.existsSync(), isTrue);
+    // The import no longer blocks the frame on a full rescan (#382): what
+    // landed is left to the watcher, so no rescan is asked for here.
+    expect(controller.rescans, 0);
     expect(find.textContaining('Imported into Drafts'), findsOne);
   });
 

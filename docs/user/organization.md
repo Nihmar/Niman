@@ -295,7 +295,10 @@ pages are rewritten to the names they now have — so the result is a
 browsable, linked part of the library, not a pile of renamed files.
 Images and other attachments come along. What Notion exports for itself
 does not: the `.csv` of a database view, and hidden folders. The zip
-itself stays where it was (a share's copy is deleted with the share).
+itself stays where it was (a share's copy is deleted with the share). An
+export that would expand past what the app can take in — a zip bomb, or a
+workspace far larger than a notes app should hold — is refused before it
+is unpacked, rather than taking the app down with it.
 
 ## An Obsidian vault
 

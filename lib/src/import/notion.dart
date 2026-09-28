@@ -44,6 +44,16 @@ final RegExp _pageId = RegExp(
   r'|\s+[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$',
 );
 
+/// The most a Notion export may expand to, in uncompressed bytes: the sum
+/// of what its entries declare. A shared or dropped archive past this is
+/// refused before any entry is inflated, so a zip bomb costs the archive's
+/// own directory and nothing more (#382).
+const int notionImportMaxBytes = 1 << 30;
+
+/// The most files a Notion export may hold. Past this the import is refused
+/// before any entry is inflated (#382).
+const int notionImportMaxEntries = 100000;
+
 /// Imports the Notion export at [source] (a `.zip`) into [libraryRoot] as
 /// a new folder named after the export, and answers it with what it
 /// holds. Null when the zip holds nothing to import — a library can hold
@@ -51,7 +61,8 @@ final RegExp _pageId = RegExp(
 /// creating for it.
 ///
 /// Throws [FileSystemException] when [source] cannot be read, and
-/// [ArchiveException] when it is not a zip; the caller says so.
+/// [ArchiveException] when it is not a zip, holds too many entries, or its
+/// entries would expand past [notionImportMaxBytes]; the caller says so.
 Future<NotionImport?> importNotionZip({
   required String source,
   required String libraryRoot,
@@ -66,21 +77,45 @@ Future<NotionImport?> _importNotionZip({
   required String source,
   required String libraryRoot,
 }) async {
-  final archive = ZipDecoder().decodeBytes(await File(source).readAsBytes());
-  final entries = _keptEntries(archive);
-  if (entries.isEmpty) return null;
-  final strip = _commonRoot(entries);
-  final wanted = _exportName(strip, source);
-  final folder = freeFolderName(libraryRoot, wanted);
-  final target = Directory(p.join(libraryRoot, folder));
-  await target.create(recursive: true);
-  final plan = _planNames(entries, strip);
-  final written = await _writeAll(entries, plan, target: target);
-  if (written.notes == 0) {
-    await target.delete(recursive: true);
-    return null;
+  // Decoded through the file, not a byte buffer: the compressed archive is
+  // never held whole, and no entry is inflated until its size is known
+  // (#382).
+  final input = InputFileStream(source);
+  try {
+    final archive = ZipDecoder().decodeStream(input);
+    if (archive.length > notionImportMaxEntries) {
+      throw ArchiveException(
+        'not a Notion export: ${archive.length} entries, over the '
+        '$notionImportMaxEntries-entry limit',
+      );
+    }
+    final entries = _keptEntries(archive);
+    final expanded = entries.fold<int>(
+      0,
+      (sum, entry) => sum + entry.file.size,
+    );
+    if (expanded > notionImportMaxBytes) {
+      throw ArchiveException(
+        'not a Notion export: its entries expand to $expanded bytes, over '
+        'the $notionImportMaxBytes-byte budget',
+      );
+    }
+    if (entries.isEmpty) return null;
+    final strip = _commonRoot(entries);
+    final wanted = _exportName(strip, source);
+    final folder = freeFolderName(libraryRoot, wanted);
+    final target = Directory(p.join(libraryRoot, folder));
+    await target.create(recursive: true);
+    final plan = _planNames(entries, strip);
+    final written = await _writeAll(entries, plan, target: target);
+    if (written.notes == 0) {
+      await target.delete(recursive: true);
+      return null;
+    }
+    return (folder: folder, notes: written.notes, assets: written.assets);
+  } finally {
+    await input.close();
   }
-  return (folder: folder, notes: written.notes, assets: written.assets);
 }
 
 /// The file entries worth importing, in archive order: every file whose
@@ -225,6 +260,11 @@ Future<({int notes, int assets})> _writeAll(
     final rel = plan[entry.path];
     if (rel == null) continue;
     final bytes = entry.file.readBytes();
+    // The inflated bytes are cached on the archive entry, and the import
+    // holds the archive until it returns: release each entry as it is
+    // written, so the peak is one entry rather than the whole export
+    // (#382).
+    entry.file.clear();
     if (bytes == null) continue;
     final file = File(p.joinAll([target.path, ...p.posix.split(rel)]));
     await file.parent.create(recursive: true);
