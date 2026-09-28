@@ -152,20 +152,27 @@ final class ShellTemplateFlow {
           ? await clipboardText()
           : '',
     );
-    // Per-creation counters (#52): every `{{counter:name}}` in this note
-    // — directives reads and body alike — shares one memoized number, and
-    // nothing is persisted until the note below is actually created, so a
-    // cancelled creation burns no numbers. A template with no counter
-    // never touches the store file at all.
+    // Per-creation counters (#52): every `{{counter:name}}` in this note —
+    // directives reads and body alike — shares one reserved number, so the
+    // name is handed out once and reused. The reservation is written to
+    // the counter file at once rather than at the end of the creation, so
+    // a creation racing this one in another window takes the number after
+    // it instead of the same one (#359); a creation called off after this
+    // point may therefore skip a number. A template with no counter never
+    // touches the store file at all.
     final root = controller.root;
-    final counters = templateUses(template, 'counter') && root != null
+    final names = counterNames(template);
+    final counters = names.isNotEmpty && root != null
         ? await CounterStore.load(root)
         : null;
     int Function(String)? counter;
     if (counters != null) {
       final store = counters;
       final used = <String, int>{};
-      counter = (name) => used.putIfAbsent(name, () => store.use(name));
+      for (final name in names) {
+        used[name] = await store.use(name);
+      }
+      counter = (name) => used[name]!;
     }
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
