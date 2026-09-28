@@ -104,10 +104,13 @@ final class LibraryController implements LibrarySession {
   /// doubles as the M5 poll cadence.
   static const defaultRescanInterval = Duration(minutes: 5);
 
-  /// The root path of the currently open library, for crash reports (the
-  /// crash file is written next to the debug logs the user already exports
-  /// from there); null when no session is open. Set when a session opens,
-  /// cleared on close.
+  /// The root path of the currently open library; null when no session is
+  /// open. Set when a session opens, cleared on close.
+  ///
+  /// Nothing writes diagnostics here: a crash report carries the whole log
+  /// buffer, the note and library paths and the sync host, so it goes to the
+  /// app's private support folder instead — never into a library the sync
+  /// walks and uploads (#383).
   static String? currentRootPath;
 
   /// Default delay between a non-blocking resume becoming ready and its

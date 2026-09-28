@@ -107,6 +107,24 @@ void main() {
         expect(isSyncablePath(path), isTrue, reason: path);
       }
     });
+
+    // Issue #383: a crash report is the whole AppLog buffer — note paths,
+    // library paths, the sync host and user — so it never goes to the
+    // server, wherever it is found. The reporter keeps them out of the
+    // library in the first place; this is the second half of the guard.
+    test('a crash report is never syncable', () {
+      for (final path in [
+        'niman-crash-20260101-000000.txt',
+        'logs/niman-crash-20260101-000000.txt',
+        'Folder/Niman-Crash-20260101-000000.TXT',
+      ]) {
+        expect(isSyncablePath(path), isFalse, reason: path);
+      }
+      // Only the report's own shape: a note that merely starts like one is
+      // still the user's content.
+      expect(isSyncablePath('niman-crash-notes.md'), isTrue);
+      expect(isSyncablePath('niman-crash-20260101-000000.log'), isTrue);
+    });
   });
 
   group('local side', () {
