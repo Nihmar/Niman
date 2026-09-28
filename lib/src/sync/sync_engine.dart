@@ -1202,9 +1202,34 @@ final class SyncEngine {
 
   /// The remote still is what the scan saw, checked with a PROPFIND when
   /// the write has no precondition to guard it.
-  Future<void> _remoteStillAsPlanned(_RunContext c, SyncDecision d) async {
+  Future<void> _remoteStillAsPlanned(
+    _RunContext c,
+    SyncDecision d, {
+    String? expectedSha,
+  }) async {
     if (!d.checkRemoteFirst) return;
-    final path = d.fromPath ?? d.path;
+    await _remoteUnchangedSince(
+      c,
+      d.fromPath ?? d.path,
+      expectedSha: expectedSha,
+    );
+  }
+
+  /// The remote at [path] still holds what the plan saw it hold.
+  ///
+  /// A listing is only as good as its evidence: without file ETags a
+  /// same-second rewrite of the same size leaves ETag (null), size and the
+  /// one-second mtime all equal, so the listing alone reads as unchanged
+  /// and the write would destroy the rewrite. When the planned row could
+  /// not rule that out ([SyncItem.remoteUnverified]), the content decides:
+  /// the remote is hashed and compared with [expectedSha] — the content
+  /// the write is based on, the agreed one for an upload or a delete, the
+  /// fetched copy for a merge — and a mismatch skips the path (#350).
+  Future<void> _remoteUnchangedSince(
+    _RunContext c,
+    String path, {
+    String? expectedSha,
+  }) async {
     final now = await c.client.stat(path);
     final planned = c.remote[path];
     final same = now == null
@@ -1214,6 +1239,29 @@ final class SyncEngine {
               now.size == planned.size &&
               now.modified == planned.modified;
     if (!same) throw const _ChangedDuringSync();
+    if (now == null) return;
+    final row = c.rows[path];
+    final doubt = row?.remoteUnverified ?? _unverified(c, now.modified);
+    if (!doubt) return;
+    final expected = expectedSha ?? row?.localSha256;
+    if (expected == null) return;
+    final download = await c.client.download(path, _DiscardSink());
+    if (download.sha256 != expected) throw const _ChangedDuringSync();
+  }
+
+  /// Guards a merge upload that carries no If-Match (#350): the merge was
+  /// built from the remote [expectedSha] holds, and the remote must still
+  /// hold it when the merged text is written over it. On a server that
+  /// honors ETags the upload carries If-Match instead, and this does
+  /// nothing.
+  Future<void> _guardMergeUpload(
+    _RunContext c,
+    SyncDecision d,
+    WebDavResource remote, {
+    required String expectedSha,
+  }) async {
+    if (c.capabilities.ifMatch && remote.etag != null) return;
+    await _remoteUnchangedSince(c, d.path, expectedSha: expectedSha);
   }
 
   String _localShaOf(_RunContext c, String path) {
@@ -1531,29 +1579,47 @@ final class SyncEngine {
         // this device's good copy on the run after — with no history and no
         // way back (#336), so both sides are left as they are and the path is
         // reported like any other conflict.
-        final remoteMs = remote.modified?.millisecondsSinceEpoch ?? 0;
-        final merged = await _mergeState(
+        final merge = await _mergeState(
           c,
           d,
           fetched.temp,
           remote,
-          localNewer: local.mtimeMs >= remoteMs,
-        );
-        if (merged) return _Outcome.done;
-        await fetched.temp.delete();
-        return _reportConflict(
-          c,
-          d,
-          localSha: localSha,
           remoteSha: remoteSha,
-          why: 'a side is not a JSON object',
         );
+        switch (merge) {
+          case _StateMerge.merged:
+            return _Outcome.done;
+          case _StateMerge.notJson:
+            await fetched.temp.delete();
+            return _reportConflict(
+              c,
+              d,
+              localSha: localSha,
+              remoteSha: remoteSha,
+              why: 'a side is not a JSON object',
+            );
+          case _StateMerge.clockDecides:
+            await fetched.temp.delete();
+            return _reportConflict(
+              c,
+              d,
+              localSha: localSha,
+              remoteSha: remoteSha,
+              why: 'a key both sides changed, which no device clock can decide',
+            );
+        }
       }
 
       // Both sides changed: with the version they last agreed on, the edits
       // that do not overlap merge without asking anyone (docs/records/sync.md,
       // "Conflicts").
-      final merge = await _tryMerge(c, d, fetched.temp, remote);
+      final merge = await _tryMerge(
+        c,
+        d,
+        fetched.temp,
+        remote,
+        remoteSha: remoteSha,
+      );
       if (merge != null) {
         await fetched.temp.delete();
         c.report
@@ -1581,15 +1647,18 @@ final class SyncEngine {
 
   /// Merges a library state file ([mergeSettingsJson] key by key,
   /// [mergeCountersJson], [mergeWordList] word by word, [mergeReadingJson]
-  /// book by book) and writes the
-  /// result on whichever side lacks it; false, touching nothing, when a
-  /// JSON side does not parse.
-  Future<bool> _mergeState(
+  /// book by book) and writes the result on whichever side lacks it;
+  /// [_StateMerge.notJson] when a JSON side does not parse, and
+  /// [_StateMerge.clockDecides] when a `.niman/settings.json` key both
+  /// sides changed differently, which only the file mtimes could settle —
+  /// and the remote one is the uploading device's clock (#350). Both
+  /// cases touch nothing and leave the path to the caller.
+  Future<_StateMerge> _mergeState(
     _RunContext c,
     SyncDecision d,
     File remoteCopy,
     WebDavResource remote, {
-    required bool localNewer,
+    required String remoteSha,
   }) async {
     final file = File(p.join(root, d.path));
     final localText = utf8.decode(
@@ -1601,28 +1670,45 @@ final class SyncEngine {
       allowMalformed: true,
     );
     final base = c.rows[d.path]?.baseText;
-    final text = switch (d.path) {
-      NoteOps.settingsFilePath => mergeSettingsJson(
+    final String? text;
+    if (d.path == NoteOps.settingsFilePath) {
+      // The clock's vote each way: when the two merges differ, the clock
+      // was what picked the disputed key's side — no outcome may rest on
+      // it, so the key is left for the user instead.
+      final asLocal = mergeSettingsJson(
         base: base,
         local: localText,
         remote: remoteText,
-        localNewer: localNewer,
-      ),
-      _personalDictionaryPath => mergeWordList(
+        localNewer: true,
+      );
+      final asRemote = mergeSettingsJson(
         base: base,
         local: localText,
         remote: remoteText,
-      ),
-      ReadingPositions.filePath => mergeReadingJson(
-        base: base,
-        local: localText,
-        remote: remoteText,
-      ),
-      _ => mergeCountersJson(local: localText, remote: remoteText),
-    };
+        localNewer: false,
+      );
+      if (asLocal == null || asRemote == null) return _StateMerge.notJson;
+      if (asLocal != asRemote) {
+        _log.info(
+          'merge ${d.path}: a key both sides changed, left for the user',
+        );
+        return _StateMerge.clockDecides;
+      }
+      text = asLocal;
+    } else if (d.path == _personalDictionaryPath) {
+      text = mergeWordList(base: base, local: localText, remote: remoteText);
+    } else if (d.path == ReadingPositions.filePath) {
+      text = mergeReadingJson(base: base, local: localText, remote: remoteText);
+    } else {
+      text = mergeCountersJson(local: localText, remote: remoteText);
+    }
     if (text == null) {
       _log.info('merge ${d.path}: a side is not a JSON object');
-      return false;
+      return _StateMerge.notJson;
+    }
+    final uploads = text != remoteText;
+    if (uploads) {
+      await _guardMergeUpload(c, d, remote, expectedSha: remoteSha);
     }
     final changedLocally = text != localText;
     if (changedLocally) {
@@ -1636,7 +1722,7 @@ final class SyncEngine {
       await remoteCopy.delete();
     }
     var listed = remote;
-    if (text != remoteText) {
+    if (uploads) {
       await c.client.uploadFile(
         d.path,
         file,
@@ -1656,9 +1742,9 @@ final class SyncEngine {
     _log.info(
       'merge ${d.path}: ${base == null ? 'no base' : 'on the base'}'
       '${changedLocally ? ', written here' : ''}'
-      '${text != remoteText ? ', uploaded' : ''}',
+      '${uploads ? ', uploaded' : ''}',
     );
-    return true;
+    return _StateMerge.merged;
   }
 
   static const _personalDictionaryPath = '.niman/dictionary.txt';
@@ -1667,14 +1753,19 @@ final class SyncEngine {
   /// on both, or returns null when there is no base, the file is not
   /// text, or the edits overlap (then the conflict stays for the user).
   ///
+  /// A side that is not valid UTF-8 is not merged either: a lossy decode
+  /// would write U+FFFD over bytes nobody touched, here and on the server
+  /// (#350). Both sides stay and the path is reported.
+  ///
   /// The task files always merge: their lines are records, merged one by
   /// one ([mergeRecords]), and without a base they are the union of both.
   Future<({bool changedLocally})?> _tryMerge(
     _RunContext c,
     SyncDecision d,
     File remoteCopy,
-    WebDavResource remote,
-  ) async {
+    WebDavResource remote, {
+    required String remoteSha,
+  }) async {
     final base = d.baseVersion;
     final records = _isRecordFile(d.path);
     if (!NoteOps.keepsHistory(d.path)) return null;
@@ -1688,14 +1779,14 @@ final class SyncEngine {
         if (!records) return null;
       }
     }
-    final localText = utf8.decode(
+    final localText = _decodeUtf8(
       await File(p.join(root, d.path)).readAsBytes(),
-      allowMalformed: true,
     );
-    final remoteText = utf8.decode(
-      await remoteCopy.readAsBytes(),
-      allowMalformed: true,
-    );
+    final remoteText = _decodeUtf8(await remoteCopy.readAsBytes());
+    if (localText == null || remoteText == null) {
+      _log.info('merge ${d.path}: a side is not UTF-8, left for the user');
+      return null;
+    }
     final String text;
     final String how;
     if (records) {
@@ -1713,6 +1804,10 @@ final class SyncEngine {
       text = merge.text();
       how = merge.describe();
     }
+    // Guarded before anything is written: a remote that moved since the
+    // merge was built would be written over, and on a server without
+    // preconditions this is the only guard there is (#350).
+    await _guardMergeUpload(c, d, remote, expectedSha: remoteSha);
     final changedLocally = text != localText;
     if (changedLocally) await ops.syncMerge(d.path, text);
     // The file on disk is the merge now: hash and stat it as written.
@@ -1734,6 +1829,17 @@ final class SyncEngine {
     ]);
     _log.info('merge ${d.path}: $how, both sides now agree');
     return (changedLocally: changedLocally);
+  }
+
+  /// [bytes] as UTF-8, or null when they are not valid UTF-8: merging a
+  /// side that decoded only through `allowMalformed` would write U+FFFD
+  /// over every invalid byte, in regions nobody touched (#350).
+  static String? _decodeUtf8(List<int> bytes) {
+    try {
+      return utf8.decode(bytes);
+    } on FormatException {
+      return null;
+    }
   }
 
   /// Merges three texts, off the UI isolate when they are long.
@@ -1837,6 +1943,20 @@ final class SyncEngine {
 }
 
 enum _Outcome { done, skipped, conflict }
+
+/// What merging a library state file did.
+enum _StateMerge {
+  /// The merge went through and the row was recorded.
+  merged,
+
+  /// A side is not a JSON object; both sides stay.
+  notJson,
+
+  /// A `.niman/settings.json` key both sides changed differently, which
+  /// only the file mtimes could settle: both sides stay and the path is
+  /// reported (#350).
+  clockDecides,
+}
 
 /// Thrown inside an action when a side no longer looks like the plan: the
 /// path is skipped and the next run decides again.

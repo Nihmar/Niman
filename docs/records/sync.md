@@ -435,7 +435,14 @@ one runs joins it.
 5. **Apply**, one decision at a time. Before touching a side, the engine
    checks it still is what the scan saw (local size + mtime; the remote
    with a PROPFIND when the decision has no precondition): a path that
-   moved meanwhile is skipped and decided again next run. That PROPFIND
+   moved meanwhile is skipped and decided again next run. A listing
+   without file ETags cannot tell a same-second rewrite of the same size
+   from an unchanged file — size, mtime and the empty ETag all match — so
+   when the row could not rule that out (`remote_unverified`) the check
+   hashes the remote and compares it with the content the write is based
+   on, and a mismatch skips the path (#350). The same check guards the
+   two merge uploads, which otherwise carry no precondition on a bare
+   server. That PROPFIND
    is only as good as the client's reading of "not there": some servers
    answer a missing path with a `207` holding a `404`, which the parser
    now drops rather than reading as the file (#163).
@@ -480,21 +487,27 @@ one runs joins it.
      not to support it gets `move: false` stored. *moveLocal*:
      `NoteOps.syncMove`, history included.
    - *conflict*: the remote is downloaded and hashed. Equal content is
-     recorded. The library state files merge as JSON
+     recorded. A note whose bytes one side is not valid UTF-8 is not
+     merged: a lossy decode would write U+FFFD over bytes nobody touched,
+     here and on the server, so both sides stay and the path is reported
+     (#350). The library state files merge as JSON
      (`lib/src/sync/state_merge.dart`), since a line merge could break
      them: `settings.json` key by key over `base_text` — a key one side
-     changed takes that side, a key both changed takes the newer file
-     (local mtime vs remote `getlastmodified`), and without a base a key
-     either side has is kept; `counters.json` takes the highest value per
-     counter; `dictionary.txt` merges word by word over `base_text`
-     (case-insensitive, as the spell check reads it), and the shell
-     reloads the `PersonalDictionary` when a run changed it;
-     `reading.json` (#281) merges book by book like `settings.json`,
-     except that a book both sides moved in keeps the later reading by
-     the entries' own `at`, not the newer file — the file is written for
-     every book read, so its date says nothing of any one. Only a side that does not parse falls back to the newer file
-     whole. Anything else is left untouched on both sides and reported,
-     with the pinned base, for the merge (step 7).
+     changed takes that side, and without a base a key either side has is
+     kept; a key both sides changed differently is left to the user,
+     because the only tie-breaker was the file mtimes and the remote one
+     is the uploading device's clock (`X-OC-Mtime`), which would let a
+     device running fast decide every such key (#350); `counters.json`
+     takes the highest value per counter; `dictionary.txt` merges word by
+     word over `base_text` (case-insensitive, as the spell check reads
+     it), and the shell reloads the `PersonalDictionary` when a run
+     changed it; `reading.json` (#281) merges book by book like
+     `settings.json`, except that a book both sides moved in keeps the
+     later reading by the entries' own `at`, not the newer file — the file
+     is written for every book read, so its date says nothing of any one.
+     A side that does not parse is not merged either: both sides stay and
+     the path is reported. Anything else is left untouched on both sides
+     and reported, with the pinned base, for the merge (step 7).
 6. **Rows:** every success records local sha/size/mtime, remote ETag/
    size/mtime/file id, `remote_unverified` (no file ETags and the mtime
    within 2 s of the server's `Date`, never this device's clock), and —

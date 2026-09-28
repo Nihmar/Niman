@@ -84,6 +84,15 @@ final class _Device {
       ..setLastModifiedSync(DateTime.now().add(Duration(seconds: ++_tick)));
   }
 
+  /// Writes raw [bytes] at [rel], for a note whose bytes are not valid
+  /// UTF-8 and that a [String] write would re-encode.
+  void writeBytes(String rel, List<int> bytes) {
+    File(p.join(path, rel))
+      ..parent.createSync(recursive: true)
+      ..writeAsBytesSync(bytes)
+      ..setLastModifiedSync(DateTime.now().add(Duration(seconds: ++_tick)));
+  }
+
   String? read(String rel) {
     final file = File(p.join(path, rel));
     return file.existsSync() ? file.readAsStringSync() : null;
@@ -297,15 +306,52 @@ void main() {
   Map<String, Object?> jsonOf(String? text) =>
       (jsonDecode(text!) as Map).cast<String, Object?>();
 
-  test('library settings: a key both changed takes the newer side', () async {
-    a.write('.niman/settings.json', '{"historyVersions": 3}');
-    await a.sync();
-    b.write('.niman/settings.json', '{"historyVersions": 7}');
-    await b.sync();
-    // B's file was written later (the test mtimes only move forward).
-    expect(jsonOf(remoteText('.niman/settings.json')), {'historyVersions': 7});
-    expect(jsonOf(b.read('.niman/settings.json')), {'historyVersions': 7});
-  });
+  test(
+    'library settings: a key both changed is left to the merge, not a clock',
+    () async {
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      await a.sync();
+      b.write('.niman/settings.json', '{"historyVersions": 7}');
+      final report = await b.sync();
+      // Which value is newer is B's clock against the one that wrote the
+      // remote file, not a shared one: neither side is written over and
+      // the path is reported (#350).
+      expect(report.conflicts.single.path, '.niman/settings.json');
+      expect(jsonOf(remoteText('.niman/settings.json')), {
+        'historyVersions': 3,
+      });
+      expect(jsonOf(b.read('.niman/settings.json')), {'historyVersions': 7});
+    },
+  );
+
+  // #350: the remote mtime is the uploading device's clock (X-OC-Mtime),
+  // so comparing it with the local mtime let a device running fast decide
+  // every conflicted settings key. The clock no longer decides: both
+  // sides keep their text and the path is reported.
+  test(
+    'library settings: a fast clock does not decide a differed key',
+    () async {
+      server.ocMtime = true; // the server keeps the writer's mtime
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      await a.sync();
+      await b.sync();
+
+      b.write('.niman/settings.json', '{"historyVersions": 9}');
+      await b.sync(); // B's later edit is on the server
+      a.write('.niman/settings.json', '{"historyVersions": 5}');
+      // A's clock is an hour fast: by mtimes A's value is the newer one.
+      File(p.join(a.path, '.niman/settings.json'))
+          .setLastModifiedSync(DateTime.now().add(const Duration(hours: 1)));
+
+      final report = await a.sync();
+      expect(report.conflicts.single.path, '.niman/settings.json');
+      // Neither the server's 9 nor A's 5 is written over.
+      expect(jsonOf(remoteText('.niman/settings.json')), {
+        'historyVersions': 9,
+      });
+      expect(jsonOf(a.read('.niman/settings.json')), {'historyVersions': 5});
+    },
+  );
 
   test('library settings changed on two devices keep both changes', () async {
     a.write(
@@ -481,18 +527,25 @@ void main() {
       expect(report.skipped, isEmpty, reason: report.summary());
       expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
 
-      b.write('.niman/settings.json', '{"historyVersions": 7}');
+      b.write(
+        '.niman/settings.json',
+        '{"historyVersions": 3, "lineNumbers": true}',
+      );
       report = await b.sync();
       expect(report.skipped, isEmpty, reason: report.summary());
       // The settings merge key by key and are written back formatted: the
       // JSON is what they agree on, not the bytes.
       expect(jsonOf(remoteText('.niman/settings.json')), {
-        'historyVersions': 7,
+        'historyVersions': 3,
+        'lineNumbers': true,
       });
 
       report = await a.sync();
       expect(report.skipped, isEmpty, reason: report.summary());
-      expect(jsonOf(a.read('.niman/settings.json')), {'historyVersions': 7});
+      expect(jsonOf(a.read('.niman/settings.json')), {
+        'historyVersions': 3,
+        'lineNumbers': true,
+      });
       expect((await a.sync()).summary(), 'nothing to do');
       expect((await b.sync()).summary(), 'nothing to do');
     },
@@ -563,6 +616,39 @@ void main() {
       final report = await a.sync();
       expect(report.done[SyncActionKind.download], 1, reason: report.summary());
       expect(a.read('a.md'), 'bbb');
+    });
+
+    // #350: with no ETags a same-second rewrite of the same size leaves
+    // every field of the listing equal, so the look before the write read
+    // it as unchanged and the DELETE destroyed the other device's edit.
+    test('a same-second rewrite is not destroyed by a DELETE', () async {
+      // One frozen second for every write: the rewrite below cannot move
+      // the mtime, and there is no ETag to tell it apart either.
+      server.clock = () => DateTime.utc(2026, 9, 27, 12);
+
+      a.write('a.md', 'aaa');
+      await a.sync();
+      a.delete('a.md');
+
+      // Another device rewrites the same three bytes while the plan is
+      // being applied.
+      var rewritten = false;
+      final report = await a.engine.run(
+        onProgress: (stage, _, _) {
+          if (stage == SyncStage.applying && !rewritten) {
+            rewritten = true;
+            server.putFile('a.md', utf8.encode('bbb'));
+          }
+        },
+      );
+      await a.ops.writer.indexed;
+      expect(
+        report.done[SyncActionKind.deleteRemote],
+        isNull,
+        reason: report.summary(),
+      );
+      expect(report.skipped, ['a.md']);
+      expect(remoteText('a.md'), 'bbb', reason: 'the rewrite is still there');
     });
 
     test('a rename becomes delete + upload', () async {
@@ -960,6 +1046,39 @@ void main() {
       b.write('Dir/todo.txt', note(['theirs']));
       await b.sync();
       expect((await a.sync()).conflicts.single.path, 'Dir/todo.txt');
+    });
+
+    // #350: both sides were decoded with `allowMalformed`, so a merge
+    // re-encoded bytes it could not read — an untouched Latin-1 byte came
+    // back as U+FFFD, here and on the server.
+    test('a note with bytes UTF-8 cannot decode is not merged over', () async {
+      List<int> latin(String text) => latin1.encode(text);
+      void writeNote(_Device device, String text) =>
+          device.writeBytes('note.md', latin(text));
+
+      writeNote(a, '# Title\ncafé\nlast\n');
+      expect((await a.sync()).clean, isTrue);
+      expect((await b.sync()).clean, isTrue);
+
+      // Distinct regions, both keeping the Latin-1 é (0xE9).
+      writeNote(a, '# Notes\ncafé\nlast\n');
+      writeNote(b, '# Title\ncafé\nfin\n');
+      final up = await b.sync();
+      expect(up.clean, isTrue, reason: up.summary());
+
+      final report = await a.sync();
+      expect(report.merged, isEmpty, reason: report.summary());
+      expect(report.conflicts.single.path, 'note.md');
+      expect(
+        File(p.join(a.path, 'note.md')).readAsBytesSync(),
+        latin('# Notes\ncafé\nlast\n'),
+        reason: 'A keeps its bytes',
+      );
+      expect(
+        server.file('note.md'),
+        latin('# Title\ncafé\nfin\n'),
+        reason: "the server keeps B's bytes",
+      );
     });
   });
 
