@@ -172,6 +172,36 @@ void main() {
       ]);
     });
 
+    test(
+      'a line asked about before its skip is known is asked again (#373)',
+      () {
+        final check = EditorSpellCheck(
+          createChecker: (_) => _FakeChecker({'wrold', 'code'}),
+        );
+        const line = 'wrold `code`';
+        // The ask a big note makes while its styler is still reading the line:
+        // no tokens, so nothing to skip, so the code span is a word too.
+        expect(check.rangesFor(0, line, skip: const <TextRange>[]), [
+          const TextRange(start: 0, end: 5),
+          const TextRange(start: 7, end: 11),
+        ]);
+        // The tokens arrive: the code span is not prose, and the skip-free
+        // answer must not be the line's for good.
+        final skip = spellSkipRanges([
+          const Token(TokenKind.codeInline, 6, 12),
+        ]);
+        expect(check.rangesFor(0, line, skip: skip), [
+          const TextRange(start: 0, end: 5),
+        ]);
+        // And the other way round: the skipped answer does not stand for an
+        // ask with nothing to skip either.
+        expect(
+          check.rangesFor(0, line, skip: const <TextRange>[]),
+          hasLength(2),
+        );
+      },
+    );
+
     test('camel-case identifiers are left alone', () {
       final check = EditorSpellCheck(
         createChecker: (_) => _FakeChecker({'fooBar'}),

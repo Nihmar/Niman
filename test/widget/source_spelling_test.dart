@@ -185,4 +185,34 @@ void main() {
     await tester.pump();
     expect(_underlined(tester), isEmpty);
   });
+
+  testWidgets('a line whose tokens are still being read is not judged', (
+    tester,
+  ) async {
+    // A note long enough to be coloured in the background (#373): until that
+    // reading lands no line's tokens are known, and a line judged then would
+    // be judged with nothing to skip — its code underlined — and the
+    // underline would outlive the reading that says otherwise.
+    MarkdownSourceViewState.backgroundLines = 2;
+    addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+    final check = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
+    addTearDown(check.dispose);
+    await _pump(tester, 'wrold here\n\nand `wrold` in code\n', check);
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    expect(state.scanSettled, isFalse, reason: 'the reading has not landed');
+    expect(_underlined(tester), isEmpty, reason: 'nothing is judged yet');
+
+    for (var round = 0; round < 50 && !state.scanSettled; round++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(state.scanSettled, isTrue, reason: 'the reading landed');
+    await tester.pump();
+    // The prose word once, and never the one in the code span.
+    expect(_underlined(tester), <String>['wrold']);
+  });
 }
