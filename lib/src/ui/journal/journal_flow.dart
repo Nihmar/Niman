@@ -201,13 +201,18 @@ final class JournalFlow {
     final parent = slash < 0 ? '' : path.substring(0, slash);
     final name = path.substring(slash + 1, path.length - '.md'.length);
     final root = controller.root;
-    final counters = templateUses(source, 'counter') && root != null
+    final names = counterNames(source);
+    final counters = names.isNotEmpty && root != null
         ? await CounterStore.load(root)
         : null;
     int Function(String)? counter;
     if (counters != null) {
+      final store = counters;
       final used = <String, int>{};
-      counter = (key) => used.putIfAbsent(key, () => counters.use(key));
+      for (final name in names) {
+        used[name] = await store.use(name);
+      }
+      counter = (name) => used[name]!;
     }
     // The day's own date, at this moment's time: an entry made for last
     // Monday says Monday, and `{{time}}` still says when it was written.

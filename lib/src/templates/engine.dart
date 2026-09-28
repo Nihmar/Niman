@@ -265,6 +265,26 @@ bool templateUses(String source, String name) {
   return false;
 }
 
+/// Every `{{counter:name}}` name in [source], in order and without
+/// repeats — the numbers a creation has to reserve before it renders.
+///
+/// A store hands a value out once per name, and the whole note — the
+/// frontmatter directives, the body, and an `{{include:…}}` already
+/// pasted in — shares it. Reserving the set up front is what lets the
+/// engine keep a synchronous `{{counter}}` callback while the store
+/// itself reads and writes the file asynchronously (#359).
+List<String> counterNames(String source) {
+  final names = <String>[];
+  for (final match in templatePlaceholder.allMatches(source)) {
+    final parsed = parsePlaceholder(match.group(1)!);
+    if (parsed.name != 'counter') continue;
+    final name = parsed.argument ?? '';
+    if (name.isEmpty || names.contains(name)) continue;
+    names.add(name);
+  }
+  return names;
+}
+
 /// The label of an `{{ask:…}}` or `{{choice:…}}` argument: everything up
 /// to the first colon, which is where a hint or a list of options
 /// starts.
@@ -390,8 +410,8 @@ DateTime? _moveDate(DateTime when, String filter) {
     final sign = shift.group(1) == '-' ? -1 : 1;
     final count = sign * int.parse(shift.group(2)!);
     return switch (shift.group(3)!.toLowerCase()) {
-      'd' => when.add(Duration(days: count)),
-      'w' => when.add(Duration(days: count * 7)),
+      'd' => _addDays(when, count),
+      'w' => _addDays(when, count * 7),
       'm' => _addMonths(when, count),
       'y' => _addMonths(when, count * 12),
       _ => null,
@@ -401,12 +421,8 @@ DateTime? _moveDate(DateTime when, String filter) {
   if (colon < 0) return null;
   final unit = filter.substring(colon + 1).trim().toLowerCase();
   return switch ((filter.substring(0, colon).trim().toLowerCase(), unit)) {
-    ('startof', 'week') => _atMidnight(
-      when.subtract(Duration(days: when.weekday - 1)),
-    ),
-    ('endof', 'week') => _atMidnight(
-      when.add(Duration(days: 7 - when.weekday)),
-    ),
+    ('startof', 'week') => _addDays(_atMidnight(when), -(when.weekday - 1)),
+    ('endof', 'week') => _addDays(_atMidnight(when), 7 - when.weekday),
     ('startof', 'month') => DateTime(when.year, when.month),
     ('endof', 'month') => DateTime(when.year, when.month, _lastDay(when)),
     ('startof', 'year') => DateTime(when.year),
@@ -420,6 +436,30 @@ final RegExp _shiftPattern = RegExp(r'^([+-])(\d+)\s*([dwmy])$');
 
 DateTime _atMidnight(DateTime when) =>
     DateTime(when.year, when.month, when.day);
+
+/// [when] moved [days] *calendar* days, keeping the time of day.
+///
+/// Not `Duration(days:)`, which is exactly 24 hours: the day a clock
+/// springs forward is 23 hours long and the day it falls back is 25, so a
+/// 24-hour shift from a time before the change lands on the same date
+/// (or skips one) and `{{date|+1d}}` stops meaning "tomorrow". The
+/// journal back-link `[[{{date|-1d}}]]` would then point at the day it
+/// is written on (#359).
+///
+/// Built from the components rather than by adding, and the constructor
+/// takes the calendar over the wall clock: a time that does not exist on
+/// the landing day (the spring-forward gap) is shifted forward by an
+/// hour, which is the whole of the correction there is.
+DateTime _addDays(DateTime when, int days) => DateTime(
+  when.year,
+  when.month,
+  when.day + days,
+  when.hour,
+  when.minute,
+  when.second,
+  when.millisecond,
+  when.microsecond,
+);
 
 /// The last day of [when]'s month: day zero of the next one.
 int _lastDay(DateTime when) => DateTime(when.year, when.month + 1, 0).day;

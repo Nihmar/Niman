@@ -20,17 +20,17 @@ void main() {
   group('CounterStore', () {
     test('starts at 1 and counts up per name', () async {
       final store = await CounterStore.load(root.path);
-      expect(store.use('quest'), 1);
-      expect(store.use('quest'), 2);
-      expect(store.use('other'), 1);
+      expect(await store.use('quest'), 1);
+      expect(await store.use('quest'), 2);
+      expect(await store.use('other'), 1);
       expect(store.current('quest'), 2);
       expect(store.current('never'), 0);
     });
 
     test('survives a restart through .niman/counters.json', () async {
       final store = await CounterStore.load(root.path);
-      expect(store.use('quest'), 1);
-      expect(store.use('quest'), 2);
+      expect(await store.use('quest'), 1);
+      expect(await store.use('quest'), 2);
       await store.save();
       expect(
         File(p.join(root.path, '.niman', 'counters.json')).existsSync(),
@@ -38,16 +38,26 @@ void main() {
       );
       final reloaded = await CounterStore.load(root.path);
       expect(reloaded.current('quest'), 2);
-      expect(reloaded.use('quest'), 3);
+      expect(await reloaded.use('quest'), 3);
+    });
+
+    // #359: two creations starting together are two stores over one root.
+    // The value has to be on disk before it is handed back, or both read 0
+    // and both get 1.
+    test('two stores over one root hand out 1 then 2', () async {
+      final first = await CounterStore.load(root.path);
+      final second = await CounterStore.load(root.path);
+      final handedOut = [await first.use('quest'), await second.use('quest')];
+      expect(handedOut, [1, 2]);
     });
 
     test('a missing or corrupt file starts empty', () async {
       final fresh = await CounterStore.load(root.path);
-      expect(fresh.use('quest'), 1);
+      expect(await fresh.use('quest'), 1);
       final dir = Directory(p.join(root.path, '.niman'))..createSync();
       File(p.join(dir.path, 'counters.json')).writeAsStringSync('nope{');
       final corrupt = await CounterStore.load(root.path);
-      expect(corrupt.use('quest'), 1);
+      expect(await corrupt.use('quest'), 1);
     });
   });
 }

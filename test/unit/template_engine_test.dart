@@ -80,6 +80,18 @@ void main() {
       );
     });
 
+    // The names a creation reserves before it renders (#359): each one
+    // once, in order, and none of the nameless markers.
+    test('counterNames lists each named counter once', () {
+      expect(
+        counterNames(
+          '{{counter:quest}} {{title}} {{counter:quest}} '
+          '{{counter:other|pad:3}} {{counter}} {{counter:}}',
+        ),
+        ['quest', 'other'],
+      );
+    });
+
     test('cursor is removed and its offset reported', () {
       final out = applyTemplateWithCaret(
         'A{{title}}B{{cursor}}C',
@@ -247,6 +259,25 @@ void main() {
       expect(render('{{date:MMMM|+1m|upper}}'), 'APRIL');
       // The other way round there is no date left to move.
       expect(render('{{date:MMMM|upper|+1m}}'), '{{date:MMMM|upper|+1m}}');
+    });
+
+    // #359: `d` and `w` count calendar days, not 24 hours. Europe/Rome
+    // falls back in the small hours of 2026-10-25, so that day is 25
+    // hours long and 00:30 + 24h is still the 25th — the day the journal
+    // back-link `[[{{date|-1d}}]]` would then point at itself.
+    //
+    // Run with `TZ=Europe/Rome`: the assertion is about the local zone,
+    // and a zone without a transition cannot tell the two fixes apart.
+    test('a day is a calendar day, across a DST fall-back', () {
+      final afterMidnight = DateTime(2026, 10, 25, 0, 30);
+      expect(
+        applyTemplate(
+          '{{date:YYYY-MM-DD|+1d}}',
+          title: 'x',
+          now: afterMidnight,
+        ),
+        '2026-10-26',
+      );
     });
   });
 

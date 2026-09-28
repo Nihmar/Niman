@@ -25,7 +25,7 @@ Substitution, not a language — unknown `{{…}}` is copied verbatim:
 | `{{now}}` / `{{now:FORMAT}}` | Date + time (default `YYYY-MM-DD HH:mm`) |
 | `{{uuid}}` | A fresh UUID v4, one per occurrence |
 | `{{cursor}}` | Caret stop after insertion (writes nothing; `{{cursor:2}}` numbers stops) |
-| `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… |
+| `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… (two creations at once never share a number) |
 | `{{clipboard}}` | Paste contents (title-cased by filters below) |
 | `{{selection}}` | The text selected in the editor when the note was created (empty when nothing is) |
 | `{{ask:Label}}` / `{{ask:Label:default}}` | Prompt for a value when creating |
@@ -45,7 +45,9 @@ self-references inside directives resolve against the creation context.
 Append with `|`: `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
 `{{counter:quest|pad:3}}`. Known filters: case (`upper`, `lower`,
 `title`), `slug`, `trim`, numeric padding (`pad:3`), and date moves
-(`+7d`, `+1y`, … — applied left to right, before case filters).
+(`+7d`, `+1y`, … — applied left to right, before case filters). A move
+in days or weeks counts calendar days, not 24 hours, so `+1d` is always
+the next date — a clock change does not make it repeat a day.
 
 ## File directives
 

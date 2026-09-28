@@ -72,7 +72,8 @@ With one, the template is filled in as for any
 [template](templates.md), with one difference: the date is the entry's
 day, not the moment it was made, so an entry made for last Monday says
 Monday — and `{{date|-1d}}` links it to the Sunday before
-(`[[{{date|-1d}}]]`). `{{time}}` still says when it was written. The
+(`[[{{date|-1d}}]]`), a calendar day back even across a clock change.
+`{{time}}` still says when it was written. The
 template's own questions are asked; its `niman:` directives are not
 followed, since the journal already says where the entry goes and what
 it is called. A template that cannot be read is said so, and the entry
