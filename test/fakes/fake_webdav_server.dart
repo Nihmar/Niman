@@ -79,6 +79,9 @@ final class FakeWebDavServer {
   /// Files carry `getetag` (and PUT/GET return `ETag`).
   bool etags = true;
 
+  /// Served ETags are weak (`W/"…"`), as some servers hand out.
+  bool weakEtags = false;
+
   /// Folders carry a `getetag` that changes with their subtree.
   bool collectionEtags = true;
 
@@ -229,8 +232,20 @@ final class FakeWebDavServer {
     }
   }
 
-  String _etag(_Node node) =>
-      '"${node.version.toRadixString(16)}-${node.bytes.length}"';
+  String _etag(_Node node) {
+    final tag = '"${node.version.toRadixString(16)}-${node.bytes.length}"';
+    return weakEtags ? 'W/$tag' : tag;
+  }
+
+  /// Whether [ifMatch] selects [node] under RFC 7232's strong comparison:
+  /// `*` matches anything there, a weak validator (`W/"…"`) never does,
+  /// as a real server enforces.
+  bool _ifMatchHolds(String ifMatch, _Node? node) {
+    if (ifMatch == '*') return node != null;
+    if (node == null) return false;
+    final tag = _etag(node);
+    return !tag.startsWith('W/') && ifMatch == tag;
+  }
 
   // --- HTTP ---------------------------------------------------------------
 
@@ -341,8 +356,7 @@ final class FakeWebDavServer {
         final ifMatch = headers['if-match'];
         if (preconditions &&
             ifMatch != null &&
-            ifMatch != '*' &&
-            ifMatch != _etag(_tree[path]!)) {
+            !_ifMatchHolds(ifMatch, _tree[path])) {
           response.statusCode = 412;
           return;
         }
@@ -522,9 +536,7 @@ final class FakeWebDavServer {
     }
     if (preconditions) {
       final ifMatch = headers['if-match'];
-      if (ifMatch != null &&
-          (existing == null ||
-              (ifMatch != '*' && ifMatch != _etag(existing)))) {
+      if (ifMatch != null && !_ifMatchHolds(ifMatch, existing)) {
         response.statusCode = 412;
         return;
       }

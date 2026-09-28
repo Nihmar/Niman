@@ -381,12 +381,13 @@ final class WebDavClient {
     DateTime? modified,
   }) async {
     final clock = Stopwatch()..start();
+    final guard = _usableIfMatch(ifMatch);
     final response = await _send(
       'PUT',
       path,
       headers: {
         HttpHeaders.contentTypeHeader: 'application/octet-stream',
-        'If-Match': ?ifMatch,
+        'If-Match': ?guard,
         if (ifNoneMatch) 'If-None-Match': '*',
         if (modified != null)
           'X-OC-Mtime': '${modified.millisecondsSinceEpoch ~/ 1000}',
@@ -412,7 +413,7 @@ final class WebDavClient {
       etag: etag,
       bytes: length,
       extra:
-          '${ifMatch == null ? '' : ', if-match'}'
+          '${guard == null ? '' : ', if-match'}'
           '${ifNoneMatch ? ', if-none-match' : ''}'
           '${mtimeAccepted ? ', mtime kept' : ''}',
     );
@@ -488,11 +489,12 @@ final class WebDavClient {
     String? ifMatch,
   }) async {
     final clock = Stopwatch()..start();
+    final guard = _usableIfMatch(ifMatch);
     final response = await _send(
       'DELETE',
       path,
       collection: collection,
-      headers: {'If-Match': ?ifMatch},
+      headers: {'If-Match': ?guard},
     );
     final status = response.statusCode;
     if (status == 404) {
@@ -620,12 +622,17 @@ final class WebDavClient {
           status: status,
         );
       }
-      // Credentials never follow a redirect to another origin (an https
-      // → http downgrade included); once dropped they stay dropped.
+      // Credentials follow a redirect only while the origin stays the
+      // same: the same host and the same port a URL spells (a port
+      // neither spells is the scheme's default, so an `http://nas/dav`
+      // -> `https://nas/dav` upgrade keeps it, which is the setup the
+      // docs invite). A downgrade to plain http is another origin — the
+      // credentials would travel in the clear — and another host or port
+      // is too; once dropped they stay dropped.
       final sameOrigin =
-          next.scheme == uri.scheme &&
           next.host == uri.host &&
-          next.port == uri.port;
+          _spelledPort(next) == _spelledPort(uri) &&
+          !(uri.scheme == 'https' && next.scheme == 'http');
       if (!sameOrigin) sendAuth = false;
       if (status == 303) {
         verb = 'GET';
@@ -744,6 +751,28 @@ final class WebDavClient {
   static String _shortEtag(String etag) {
     final bare = etag.replaceFirst('W/', '').replaceAll('"', '');
     return bare.length <= 12 ? bare : bare.substring(0, 12);
+  }
+
+  /// The port [uri] spells, or null when it leaves it to the scheme's
+  /// default (`80`/`443`): `http://nas/dav` and `https://nas/dav` then
+  /// have the same spelled port, as a scheme upgrade must keep its
+  /// credentials.
+  static int? _spelledPort(Uri uri) =>
+      uri.port == (uri.scheme == 'https' ? 443 : 80) ? null : uri.port;
+
+  /// [etag] when it can guard an `If-Match`, or null when it cannot.
+  ///
+  /// `If-Match` uses strong comparison (RFC 7232, 3.1), and a weak
+  /// validator (`W/"x"`, which servers like Nextcloud hand out and
+  /// `webdav_multistatus.dart` stores as sent) is never strong, so it can
+  /// never match: sending it turns every guarded `PUT`/`DELETE` into a
+  /// 412, forever. There is no legal way to make it strong, so the guard
+  /// is dropped and the write goes unguarded.
+  static String? _usableIfMatch(String? etag) {
+    if (etag == null || etag.startsWith('W/') || etag.startsWith('w/')) {
+      return null;
+    }
+    return etag;
   }
 }
 
