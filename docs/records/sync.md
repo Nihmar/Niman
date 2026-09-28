@@ -396,8 +396,10 @@ for multistatus parsing: servers pick their own namespace prefixes
   `WebDavNotFound` (404/409 on a missing parent), `WebDavPrecondition`
   (412), `WebDavRetryable` (408/423/425/429/500/502/503/504 and socket
   errors, carrying `Retry-After`), `WebDavUnsupported` (no `DAV:`
-  header, a needed verb refused), `WebDavProtocolFailure` (anything
-  else);
+  header, a needed verb refused), `WebDavCertificateFailure` (the device
+  refuses the server's certificate; it carries the host and, when the
+  error exposes one, the fingerprint — the trust option itself is still
+  open, #366), `WebDavProtocolFailure` (anything else);
 - logs one line per request under `webdav`: verb, relative path, status,
   ETag (short), bytes, ms. It makes one attempt per call (plus
   redirects); retries and backoff belong to the queue, which logs them.

@@ -195,7 +195,9 @@ final class SyncFailure implements Exception {
       WebDavNotFound() => SyncAbort.remoteMissing,
       WebDavUnsupported() => SyncAbort.unsupported,
       WebDavRetryable() => SyncAbort.offline,
-      WebDavPrecondition() || WebDavProtocolFailure() => SyncAbort.failed,
+      WebDavPrecondition() ||
+      WebDavProtocolFailure() ||
+      WebDavCertificateFailure() => SyncAbort.failed,
     },
     error.message,
     moved: error is WebDavPrecondition,

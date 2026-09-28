@@ -451,6 +451,70 @@ void main() {
       await expectLater(gone.options(), throwsA(isA<WebDavRetryable>()));
       server = await FakeWebDavServer.start(); // for tearDown
     });
+
+    test(
+      'a refused certificate is its own failure naming the host (#366)',
+      () async {
+        final refused = WebDavClient(
+          url: Uri.parse('https://nas.example:8443/dav/'),
+          httpClient: _TlsRefusingHttp(
+            const HandshakeException(
+              'Handshake error in client (OS Error: '
+              'CERTIFICATE_VERIFY_FAILED: self signed certificate)',
+            ),
+          ),
+        );
+        addTearDown(refused.close);
+        await expectLater(
+          refused.options(),
+          throwsA(
+            isA<WebDavCertificateFailure>()
+                .having((f) => f.host, 'host', 'nas.example')
+                .having((f) => f.message, 'message', contains('nas.example'))
+                .having((f) => f.message, 'message', contains('not trusted'))
+                .having((f) => f.message, 'message', contains('8443'))
+                .having((f) => f.fingerprint, 'fingerprint', isNull),
+          ),
+        );
+      },
+    );
+
+    test('a certificate failure carries the fingerprint the error exposes '
+        '(#366)', () async {
+      const fingerprint =
+          'AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:'
+          'AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89';
+      final refused = WebDavClient(
+        url: Uri.parse('https://nas.example/dav/'),
+        httpClient: _TlsRefusingHttp(
+          const HandshakeException(
+            'CERTIFICATE_VERIFY_FAILED: self signed certificate, '
+            'SHA256:$fingerprint',
+          ),
+        ),
+      );
+      addTearDown(refused.close);
+      await expectLater(
+        refused.options(),
+        throwsA(
+          isA<WebDavCertificateFailure>()
+              .having((f) => f.fingerprint, 'fingerprint', fingerprint)
+              .having((f) => f.message, 'message', contains(fingerprint)),
+        ),
+      );
+    });
+
+    test('a TLS failure that is not the certificate stays a protocol '
+        'failure (#366)', () async {
+      final other = WebDavClient(
+        url: Uri.parse('https://nas.example/dav/'),
+        httpClient: _TlsRefusingHttp(
+          const TlsException('TLS protocol version not supported'),
+        ),
+      );
+      addTearDown(other.close);
+      await expectLater(other.options(), throwsA(isA<WebDavProtocolFailure>()));
+    });
   });
 }
 
@@ -481,6 +545,40 @@ final class _PlainHttp implements HttpClient {
 
   @override
   set userAgent(String? value) => _inner.userAgent = value;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnsupportedError('${invocation.memberName}');
+}
+
+/// An [HttpClient] that fails every request with a TLS [IOException], standing
+/// in for a handshake the device stopped. The fake server speaks plain http,
+/// so a certificate can only be raised through the client's own error mapping
+/// — which is what these tests are about. Every other member the client does
+/// not use is left unimplemented.
+final class _TlsRefusingHttp implements HttpClient {
+  new(this._error);
+
+  final IOException _error;
+
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) async =>
+      throw _error;
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  set connectionTimeout(Duration? value) {}
+
+  @override
+  set idleTimeout(Duration value) {}
+
+  @override
+  set autoUncompress(bool value) {}
+
+  @override
+  set userAgent(String? value) {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
