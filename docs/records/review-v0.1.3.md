@@ -1,0 +1,216 @@
+# Code review of `v0.1.3..main` — 2026-09-28
+
+A review of everything merged after the v0.1.3 tag: 187 commits, about
+21,000 lines changed under `lib/`. It ran in two passes. The first read the
+riskiest logic (sync, WebDAV, files, watcher, template counters, index
+rebuild, wikilink suggester); its fixes are in PR #487. The second split
+the rest of the diff into four areas (editor, UI and frontmatter, spelling
+/ templates / watcher / todo, sync and storage), each read by a separate
+reviewer.
+
+Line numbers refer to `main` at `0771606e`. **Verified** means the wrong
+result was reproduced by running the code (a throwaway probe or test);
+**read** means it was traced through the code, not run.
+
+## First pass — status
+
+| # | Finding | Status |
+|---|---------|--------|
+| 1 | Weak ETag: `If-Match` dropped by the client while the planner and the merge guard still count on it, so a write on Nextcloud could overwrite an edit made during the run | Fixed, `1c81b470` |
+| 2 | Body timeout bounded the whole transfer, so a large file on a slow link never synced | Fixed, `8ffdaff0` |
+| 3 | Wikilink suggester wrote the bare name even when another note shares it | Fixed, `45a13a34` |
+| 4 | A resumed or switched library opened empty on an index with no rows (never indexed here, or rebuilt after corruption) | Fixed, `40885eff` |
+| 5 | Counter reservation (file I/O) ran outside the creation flows' guard | Fixed, `8fb64e50` |
+| 6 | A counters file the OS refused to read was taken for empty and rewritten, wiping other counters | Fixed, `73b425be` |
+| 7 | Stale-temp sweep walks the whole library, `.history/` included, on every open | Open — the periodic rescan already walks the tree every 5 minutes; reducing it is a design choice |
+| 8 | Index warm-up awaited on the open path (was overlapped, #315) | Open — after fix 4 the first index query is needed right away; not changed without a measurement |
+| 9 | Counter reservation copied in two flows | Fixed with 5 (`CounterStore.reserve`) |
+| 10 | `source_view.dart` is 6,123 lines with 13 classes, against the "no god classes" rule | Deferred on purpose |
+
+Known limit left by fix 3: with `Notes.md` at the root and
+`Archive/Notes.md`, no target names the root note alone, because the
+resolver matches any path ending in what is written. Making an exact path
+win is a change to link semantics.
+
+## Second pass — findings
+
+Ordered by severity inside each group.
+
+### Data loss or a corrupted note
+
+1. **Frontmatter: a text value ending in `:` is written unquoted.**
+   `lib/src/frontmatter/typed_fields.dart:193` — `_needsQuotes` checks
+   `': '` but not a trailing `:`. Setting `title` to `Todo:` writes
+   `title: Todo:`; the block stops parsing and every field turns into the
+   error panel. *Verified.*
+2. **Frontmatter: list items holding a comma are split on rewrite.**
+   `typed_fields.dart:171`, `ui/frontmatter_field_dialog.dart:79`,
+   `ui/frontmatter_fields.dart:328` — items are emitted as plain flow
+   scalars and only their first character is checked. From
+   `authors: ["Doe, J", "Roe, K", x]`, deleting `x` writes
+   `authors: [Doe, J, Roe, K]`: four items. The `+` dialog joins on `, `
+   and splits on `,`, the same fault. *Verified.*
+3. **Frontmatter: editing a multi-line value corrupts it.**
+   `typed_fields.dart:186` with `edit.dart:107` — `description: |` over two
+   lines is saved as `"line one` + newline + `line two"` at column 0: the
+   newline is lost, and the next edit of the key leaves `line two"` behind
+   and the block no longer parses. *Verified.*
+4. **Frontmatter: editing a field whose key is quoted adds a duplicate.**
+   `typed_fields.dart:83` with `edit.dart:104` — `"due date": 2026-01-01`
+   is shown as `due date`; `_entryRange` looks for the unquoted text, finds
+   nothing and appends `due date: …`; the block fails with "Duplicate
+   mapping key". *Verified.*
+5. **Frontmatter: a list edit changes items nobody touched.**
+   `typed_fields.dart:116-119, 146-153, 171` — items round-trip as text:
+   `ids: [1, 2, 3]` minus `2` becomes `["1", "3"]`; booleans and dates are
+   quoted too; nested items are dropped (`[{name: A}, B]` minus `B` becomes
+   `[]`); deleting one of two equal chips removes both
+   (`frontmatter_fields.dart:332`). *Read.*
+6. **Invalid UTF-8 is rewritten as U+FFFD by a save and by bulk replace.**
+   `lib/src/markdown/note_load.dart:62,70` and
+   `lib/src/search/replace.dart:386,411` — both now decode with
+   `allowMalformed` and write the whole text back. A Latin-1 `caffè` (byte
+   `0xE8`) becomes `EF BF BD` on disk after one keystroke elsewhere in the
+   note, or after a Replace All that matched another word; v0.1.3 refused
+   such a file instead. History keeps the raw bytes only when it is on.
+   One cause, two places. *Read.*
+7. **A local `.niman/*.json` that does not parse is still uploaded.**
+   `lib/src/sync/sync_engine.dart:1385` — the #336 guard covers the
+   download only. A hand-edited `settings.json` with a syntax error goes up
+   over the good remote copy, and `.niman/` has no history. *Read.*
+8. **Rename in a case-sensitive Windows folder can replace another note.**
+   `lib/src/core/files.dart:347` — `_excludedEntry` returns early on
+   `p.equals`, which ignores case on Windows. In a folder made
+   case-sensitive (WSL, `fsutil`) holding `A.md` and `a.md`, renaming `A.md`
+   to `a` picks `a.md`, and the rename replaces it. Rare setup, data loss.
+   *Read.*
+9. **The merge guard reads the old row's `remoteUnverified`.**
+   `sync_engine.dart:1257` — the row describes the remote version before
+   the change being merged. On a server without ETags, a row recorded as
+   verified skips the hash even when the current listing is in the same
+   second as a second same-size rewrite, which the merge then overwrites
+   (it survives only in the other device's history). *Read.*
+
+### Certificates and credentials
+
+10. **The sync settings screen keeps a forgotten certificate trust in
+    memory.** `lib/src/ui/sync/sync_settings_screen.dart:229` with `:304`,
+    `:362` — `_forgetCertificate` and `_disconnect` do not clear
+    `_trustedFingerprint`, and `_retest` prefers it to the stored value.
+    After "Forget certificate" a retest trusts the old certificate, sends
+    Basic auth to it and reports OK while the stored value is null; after
+    disconnect, Test + Save stores it again without the confirmation
+    dialog. *Read.*
+11. **A redirect target's certificate is shown as the base host's, and
+    trusting it never works.** `lib/src/sync/webdav/webdav_client.dart:194-202`,
+    `:750` — the callback records the refused fingerprint for any host,
+    the failure names `baseUrl.host`, and the callback accepts it only for
+    `baseUrl.host`. A valid `nas.local` redirecting to a self-signed
+    `nas.lan:5006` prompts for `nas.local` with `nas.lan`'s fingerprint,
+    forever. *Read.*
+
+### Crashes and behaviour that is plainly wrong
+
+12. **The template checker crashes on `{{{title}}}`.**
+    `lib/src/templates/checker.dart:152` — `_checkBraces(source, 0, 1)`
+    sees `{{` at 0 and calls `substring(2, 1)`: `RangeError`. It runs in a
+    `Timer`, so the error is uncaught and the previous error list stays on
+    screen. *Verified.*
+13. **Desktop reminders fire again on every reconcile for an hour.**
+    `lib/src/todo/reminders.dart:426` with
+    `todo/reminder_backend_desktop.dart:75-87` — scheduling never checks
+    `_fired`; a reminder fired at 10:00 is still inside `reminderGrace` at
+    10:20 and `firesOverdue`, so any todo edit or focus regain notifies
+    again, until 11:00. *Read.*
+14. **Ticking a task inside a quote or callout in the read view does
+    nothing** (regression). `lib/src/ui/note_view.dart:1530` —
+    `taskBoxOffset` runs on the raw line and cannot get past `>`; the old
+    code used the tokenizer's box. `> - [ ] task` never ticks. *Verified.*
+15. **The wikilink panel opens whenever the caret enters an existing link,
+    and takes keys.** `lib/src/markdown/render/source_view.dart:3697`,
+    `:3985` — arrowing down onto `See [[Project plan]]` lands inside it and
+    the next Down moves the panel instead of the caret; Enter or Tab there
+    writes `[[Project plan]]ect plan]]`. *Read.*
+16. **Enter or Tab can accept a stale suggestion of the wrong kind.**
+    `source_view.dart:3763`, `:3868-3891` — the old rows stay while the new
+    query loads. `[[Pro`, then `#`, then Tab before the headings arrive
+    writes `[[Projects/Plan]]` and drops the `#`; `[[A#` changed to `[[B#`
+    can insert one of A's headings into B's link. *Read.*
+17. **Wrapped table rows break at the wrong places when a cell has hidden
+    marks.** `lib/src/markdown/render/live_tables.dart:384` — line
+    boundaries come back in visible-text positions and are added to a
+    source offset, so each break shifts by the hidden characters before
+    it: words split mid-word and the last piece can spill into the next
+    column. *Verified.*
+18. **Setext headings are detected where they are not.**
+    `lib/src/markdown/block_scanner.dart:856`, `:891` — `---` under a table
+    becomes a one-line heading instead of a rule; `> quote` + `lazy` +
+    `---` becomes a heading inside the quote; `one` + `two` + `---` makes
+    only `two` the heading, while the export makes `one two` one `<h2>`.
+    *Verified.*
+19. **The checklist cascade does nothing below a quote's first line.**
+    `lib/src/markdown/task_cascade.dart:36` — a quoted list is one block,
+    so `parent.startLine != line` empties the branch for every later item;
+    ticking `> - [ ] b` leaves `>   - [ ] b1` unticked. *Verified.*
+20. **The template checker misses what the engine leaves unrendered.**
+    `checker.dart:299`, `:304-315` against `templates/engine.dart:373-382`,
+    `:413-434` — `{{title|+1d}}`, `{{date|upper|+1d}}`, `{{title|}}`,
+    `{{counter}}` with no name and `{{cursor|upper}}` all check clean and
+    all stay standing in the note. *Verified.*
+21. **The caret is drawn in the wrong cell on a wrapped row's separator.**
+    `source_view.dart:2460` — an offset on `|` or its padding matches no
+    piece and falls back to the first one; Right from the end of cell 1
+    shows the caret in cell 1 for two presses. *Read.*
+22. **A tab's "missing" mark is cleared by an unrelated removal.**
+    `lib/src/workspace/workspace.dart:340-345` — `withMissing` takes the
+    set it gets as complete, but each re-index sends only its own removals:
+    delete A outside the app, then B, and A's tab no longer shows missing.
+    *Read.*
+23. **Changes made while the watcher restarts are lost until the periodic
+    rescan.** `lib/src/library/file_watcher.dart:187-222` — the stream is
+    resubscribed after 1–30 s with no resync of the root, so a save in
+    that window waits up to five minutes. *Read.*
+24. **Switching dictionaries during a spelling pass caches false
+    "correct" verdicts.** `lib/src/spellcheck/editor_spell_check.dart:138-140`,
+    `:363-364`, `:518` — the running pass keeps the disposed checker, whose
+    `isCorrect` answers true, into the new cache, and nothing clears it
+    when the new engine arrives. *Read.*
+25. **A spelling pass can wait on a superseded load and report the note
+    clean.** `editor_spell_check.dart:517` — the panel opens while the
+    first load runs, `setDictionaries` starts another, the pass's
+    `engineReady` returns early and `_checker` is still null. Short window.
+    *Read.*
+26. **`sanitizeName` can end a name with a dot or a space.**
+    `lib/src/core/files.dart:56`, `:274-276` — `_trailingDots` needs two
+    dots, and truncation to 200 bytes runs after the trim. `Draft.` stays
+    `Draft.`; Windows creates `Draft` while the index holds `Draft.`, and a
+    folder ending in a space cannot hold notes there. Folders only (notes
+    get `.md`). *Verified* (the output).
+27. **An escaped pipe at a row's end is taken for its edge.**
+    `live_tables.dart:568` — `| a | b \|` is `b \` in live mode and `b \|`
+    in the table model, so widths and edits disagree. Rare. *Read.*
+
+### Lower priority
+
+- Saving a frontmatter field rewrites untouched values in normal form:
+  `1.10` → `1.1`, `007` → `7`, and a timestamp with an offset becomes UTC
+  (`typed_fields.dart:104, 111, 139`).
+- `trashFileName` / `trashDirName` (`files.dart:487`, `:505`) check only an
+  entry of the same kind: trashing a file `X` while `.trash/X` is a folder
+  fails the delete (nothing lost).
+- The sync URL field's listener (`sync_settings_screen.dart:77`) fires on a
+  caret move too, so tapping the field drops a loaded trust — the safe
+  direction; the certificate is simply asked again.
+
+### Checked and found sound
+
+Switch-during-save ordering (#334), the unsaved-notes tracker, saving
+before a library switch or forget, the drop service, the tree sort cache,
+the replace preview, `template_hint`, frontmatter head-range math with
+CRLF; the certificate column migration, the redirect credential rule, the
+certificate callback never landing on a shared client, crash reports kept
+out of the library (#383); hunspell over FFI released on dispose, DST in
+the date filters, the watcher's batch caps; a frontmatter fence never read
+as a setext underline, the scanner's incremental rebuild over both setext
+lines, checklist lines in fences never ticked, one undo step per cascade,
+the shared `LineState.initial`, surrogate pairs in the tag masker.
