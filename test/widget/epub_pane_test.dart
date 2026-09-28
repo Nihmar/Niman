@@ -637,6 +637,23 @@ void main() {
     expect(find.byType(MarkdownReadView), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('a book that yields no chapter text says so (#377)', (
+    tester,
+  ) async {
+    // The spine names files the archive does not hold: nothing is left
+    // to read, so the pane reports the book unreadable rather than
+    // drawing a blank page.
+    final path = writeTestEpub(
+      p.join(dir.path, 'hollow.epub'),
+      chapters: [(path: 'a.xhtml', body: '<p>a</p>')],
+      omit: {'a.xhtml'},
+    ).path;
+    await pump(tester, path);
+    expect(find.byKey(const Key('attachment-unreadable')), findsOneWidget);
+    expect(find.byType(MarkdownReadView), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
 }
 
 /// Marks set by the test, a change fired by it, the marks opened recorded.

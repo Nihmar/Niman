@@ -233,6 +233,11 @@ EpubDocument readEpub(String path, String pictureDir) {
     text.write(converted.markdown);
     line += '\n'.allMatches(converted.markdown).length;
   }
+  // A spine that resolved to no readable text is as unreadable as an
+  // empty one: the reader is told rather than shown a blank pane (#377).
+  if (chapterStart.isEmpty) {
+    throw const FormatException('the book has no chapters');
+  }
   text.write('\n');
 
   int? lineOf(String file, String fragment) {
