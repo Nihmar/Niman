@@ -58,8 +58,15 @@ past its end, a chapter it lost) opens it where you left it.
 
 ## Dead links
 
-Clicking a link whose target note does not exist offers to create it:
-a dialog shows the proposed path with **Create** and **Cancel**. Create
+A link whose target note does not exist is a *dead link*, and a dead
+link is where a note comes from. In the editor, **Ctrl+click**
+(**Cmd+click** on macOS), the same gesture that follows a link, is its
+own confirmation: the note the link names is created on the spot and
+opened, and the writer is left in it.
+
+Anywhere else — a tap in the preview, or on a touch screen, where
+there is no Ctrl — following a dead link *offers* to create it: a
+dialog shows the proposed path with **Create** and **Cancel**. Create
 makes an empty note there (no frontmatter) and opens it in the editor;
 Cancel changes nothing — no file, no error, no second prompt.
 
