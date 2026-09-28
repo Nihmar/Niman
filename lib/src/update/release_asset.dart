@@ -47,18 +47,17 @@ enum LinuxVariant {
 /// `dev.niman.niman.beta` and which installs *beside* this app instead of
 /// updating it. GitHub lists assets in name order, `-android-testing.apk`
 /// before `-android.apk`, so "the first `.apk`" handed the updater the
-/// testing build (0.0.10). The official one is the one that is not a
-/// testing build; a page carrying nothing else still answers with what it
-/// has, so an old release stays updatable.
-/// Returns null when the release carries no APK.
+/// testing build (0.0.10). Only the official `.apk` is ever selected: a
+/// testing APK cannot update this install, so a page carrying nothing but
+/// testing builds has no update to offer at all.
+/// Returns null when the release carries no official APK.
 ReleaseAsset? selectAndroidAsset(List<ReleaseAsset> assets) {
-  ReleaseAsset? first;
   for (final asset in assets) {
     if (!asset.name.endsWith('.apk')) continue;
-    first ??= asset;
-    if (!asset.name.contains('-testing')) return asset;
+    if (asset.name.contains('-testing')) continue;
+    return asset;
   }
-  return first;
+  return null;
 }
 
 /// Selects the Windows update asset: the Inno Setup installer
@@ -72,9 +71,14 @@ ReleaseAsset? selectWindowsAsset(List<ReleaseAsset> assets) {
 }
 
 /// Selects the Linux update asset matching the installed [variant]:
-/// `.AppImage`, `.tar.gz`, or `.pkg.tar.zst`. For [LinuxVariant.unknown]
-/// (or when the matching file is missing) returns null so the caller can
-/// offer the user a picker over [linuxAssets] instead.
+/// `.AppImage`, `.tar.gz`, or `.pkg.tar.zst`.
+///
+/// An [LinuxVariant.unknown] install — a tarball and an Arch package leave
+/// no trace to tell them apart, see `detectLinuxVariant` — has no suffix
+/// to match, so the generic bundle from [linuxAssets] is offered instead
+/// of going quiet: a newer release reaches the user rather than a false
+/// "up to date".
+/// Returns null when the release carries no matching (or no Linux) asset.
 ReleaseAsset? selectLinuxAsset(
   List<ReleaseAsset> assets,
   LinuxVariant variant,
@@ -85,15 +89,26 @@ ReleaseAsset? selectLinuxAsset(
     LinuxVariant.archPackage => '.pkg.tar.zst',
     LinuxVariant.unknown => null,
   };
-  if (suffix == null) return null;
+  if (suffix == null) return _defaultLinuxAsset(linuxAssets(assets));
   for (final asset in assets) {
     if (asset.name.endsWith(suffix)) return asset;
   }
   return null;
 }
 
-/// Every Linux asset of a release, for the variant picker shown when the
-/// installed variant is unknown.
+/// The asset an unknown Linux install is offered: the `.tar.gz` bundle when
+/// the release has one, otherwise the first of its [linuxAssets]. The
+/// install cannot be told apart, so the most portable artifact leads.
+ReleaseAsset? _defaultLinuxAsset(List<ReleaseAsset> assets) {
+  if (assets.isEmpty) return null;
+  for (final asset in assets) {
+    if (asset.name.endsWith('.tar.gz')) return asset;
+  }
+  return assets.first;
+}
+
+/// Every Linux asset of a release, the pool [selectLinuxAsset] draws the
+/// [LinuxVariant.unknown] default from.
 List<ReleaseAsset> linuxAssets(List<ReleaseAsset> assets) => assets
     .where(
       (asset) =>
