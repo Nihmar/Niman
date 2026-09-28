@@ -330,6 +330,9 @@ void main() {
     final row = (await db.select(db.appSettings).get()).single;
     expect(row.id, 1);
     expect(row.libraryPath, '/old/root');
+    // The column the upgrade adds starts at its default, and v17 carries it
+    // into the parked settings rather than dropping it.
+    expect((await _parked(db))['/old/root']!['treeSort'], 'nameAsc');
     await db.close();
   });
 
@@ -371,8 +374,11 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
+      final parked = (await _parked(db))['/old/root']!;
+      expect(parked['treeSort'], 'nameDesc', reason: 'the value the row had');
       // Off by default: an upgrade must not start putting +project and
       // @context into notifications that never had them.
+      expect(parked['reminderShowTokens'], false);
       await db.close();
     },
   );
@@ -392,7 +398,11 @@ void main() {
     final row = (await db.select(db.appSettings).get()).single;
     expect(row.id, 1);
     expect(row.libraryPath, '/old/root');
-    // Wikilink by default; a 2-space indent (the pre-M5 default).
+    // Wikilink by default; a 2-space indent (the pre-M5 default), carried
+    // into the parked settings by v17.
+    final parked = (await _parked(db))['/old/root']!;
+    expect(parked['linkType'], 'wikilink');
+    expect(parked['indentWidth'], 2);
     await db.close();
   });
 
@@ -434,7 +444,11 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
-      // Empty is "the shipped toolbar"; nothing to migrate into it.
+      // The indent the row had is kept; empty is "the shipped toolbar";
+      // nothing to migrate into it.
+      final parked = (await _parked(db))['/old/root']!;
+      expect(parked['indentWidth'], 4);
+      expect(parked['editorToolbar'], '');
       await db.close();
     },
   );
@@ -455,8 +469,11 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
-      // An existing library follows the OS, as it did before the setting
+      // The toolbar the row had is carried into the parked settings; an
+      // existing library follows the OS, as it did before the setting
       // existed.
+      expect((await _parked(db))['/old/root']!['editorToolbar'], 'link,-bold');
+      expect(row.language, 'system');
       await db.close();
     },
   );
