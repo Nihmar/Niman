@@ -1,9 +1,11 @@
 name: check
 
 # The tests run on every pull request so the integration suite cannot rot
-# again unnoticed (issue #241). The WebDAV sync flow needs a Linux
-# display (`flutter test -d linux`) and stays a local run:
-# `./scripts/niman.sh integration`.
+# again unnoticed (issue #241). Everything a checkout can run runs here:
+# the formatting gate, analyze, the unit and widget suites, and the
+# integration files — the WebDAV sync flow included, on a virtual display
+# (`flutter test -d linux` under xvfb). The freeze harness keeps its
+# hand-seeded library and skips without it (issue #363).
 on:
   pull_request:
   push:
@@ -15,22 +17,27 @@ env:
 
 jobs:
   check:
-    name: Analyze and test
+    name: Format, analyze and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # The headless integration tests build the Linux desktop bundle,
-      # which needs the same system libraries as the release build, plus
-      # a virtual display: the bundle is a GTK app and cannot start on
-      # a runner with no X server.
-      - name: Install build dependencies
+      # The integration steps build the Linux desktop bundle (`-d linux`
+      # for the WebDAV flow), which needs the same system libraries as the
+      # release build, plus a virtual display: the bundle is a GTK app and
+      # cannot start on a runner with no X server.
+      # hunspell is the spell-check engine the app ships on Linux and
+      # Windows: without the library and the two dictionaries the live
+      # cases in test/unit/spell_check_test.dart skip, and the engine
+      # goes unexercised everywhere but a laptop (issue #363).
+      - name: Install build and test dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake git ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-13-dev \
             libayatana-appindicator3-dev libsecret-1-dev libjsoncpp-dev \
-            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev xvfb
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev xvfb \
+            hunspell hunspell-en-us hunspell-it
 
       - uses: subosito/flutter-action@v2
         with:
@@ -39,6 +46,10 @@ jobs:
           cache: true
 
       - run: flutter pub get
+      # AGENTS.md makes formatting a precondition of a commit; this is the
+      # gate that keeps it one (issue #363). --output=none only reports.
+      - name: Formatting gate
+        run: dart format --output=none --set-exit-if-changed lib test tool
       - run: flutter analyze --fatal-infos
       - run: flutter test
       # One file per step: files under integration_test/ share one
@@ -49,3 +60,9 @@ jobs:
         run: xvfb-run -a flutter test integration_test/app_boot_test.dart
       - name: Repro harness (skips without its seeded library)
         run: xvfb-run -a flutter test integration_test/template_backlink_freeze_test.dart
+      # The WebDAV flow (issue #20) binds the integration_test binding and
+      # drives the real app over the Linux desktop bundle: it needs a
+      # device, not only a display, so the headless steps above cannot run
+      # it (#363).
+      - name: WebDAV sync end to end (Linux desktop)
+        run: xvfb-run -a flutter test integration_test/sync_e2e_test.dart -d linux

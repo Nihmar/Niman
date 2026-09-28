@@ -33,10 +33,11 @@ test_all() {
 
 integration() {
   # The end-to-end tests (issue #241): the two that run headless first,
-  # then the WebDAV sync flow on the Linux desktop. The sync test needs
-  # a display; it cannot run headless or in CI. Each file gets its own
-  # invocation: files under integration_test/ share one device run, and
-  # a second file in the same command never starts.
+  # then the WebDAV sync flow on the Linux desktop. The sync test needs a
+  # display; locally the session has one, and CI runs it under xvfb with
+  # `-d linux` (#363). Each file gets its own invocation: files under
+  # integration_test/ share one device run, and a second file in the same
+  # command never starts.
   flutter test integration_test/app_boot_test.dart >"$log" 2>&1
   local status=$?
   tail -n 4 "$log"
