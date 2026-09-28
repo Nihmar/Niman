@@ -152,6 +152,64 @@ void main() {
     });
   });
 
+  test('an embed that leaves the library is not inlined (#385)', () async {
+    // The note names a file above the library; no export may carry its
+    // bytes. The library is a folder of its own so the parent is real.
+    final outer = await Directory.current.createTemp('niman_export_outside_');
+    addTearDown(() async {
+      if (outer.existsSync()) await outer.delete(recursive: true);
+    });
+    final library = Directory(p.join(outer.path, 'library'))..createSync();
+    final notePath = p.join(library.path, 'notes', 'here.md');
+    await Directory(p.join(library.path, 'notes')).create();
+    await File(notePath).writeAsString('x');
+    final bytes = <int>[9, 9, 9];
+    File(p.join(outer.path, 'private', 'shot.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(bytes);
+
+    const text = '![[../private/shot.png]]\n';
+    expect(
+      await ExportSources.images(
+        text: text,
+        notePath: notePath,
+        root: library.path,
+      ),
+      isEmpty,
+    );
+    expect(
+      await ExportSources.imagePaths(
+        text: text,
+        notePath: notePath,
+        root: library.path,
+      ),
+      isEmpty,
+    );
+    expect(
+      await ExportSources.imageUrls(
+        text: text,
+        notePath: notePath,
+        root: library.path,
+      ),
+      isEmpty,
+    );
+
+    // The same target below the note, inside the library, is still read:
+    // the confinement is the root, not the note's folder.
+    File(p.join(library.path, 'private', 'shot.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(bytes);
+    final inside = await ExportSources.images(
+      text: text,
+      notePath: notePath,
+      root: library.path,
+    );
+    expect(
+      inside.values.single,
+      'data:image/png;base64,${base64Encode(bytes)}',
+    );
+  });
+
   test('the page is built off the UI isolate', () async {
     const source = NoteHtmlSource(
       text: '# Title\n\nA formula, \$x^2\$, and **bold**.\n',
