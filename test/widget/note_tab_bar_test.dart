@@ -4,8 +4,25 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
+
+/// A note with a settable dirty bit, as the editor's is while it is typed
+/// into.
+final class _Note implements UnsavedNote {
+  new(this.path);
+
+  @override
+  final String path;
+
+  @override
+  bool unsaved = false;
+
+  @override
+  Future<void> save() async => unsaved = false;
+}
 
 void main() {
   final activated = <int>[];
@@ -95,5 +112,52 @@ void main() {
     await tester.tap(find.byKey(const Key('tab-list-1')));
     await tester.pumpAndSettle();
     expect(activated, [1]);
+  });
+
+  testWidgets('ten keystrokes rebuild the row once (#362)', (tester) async {
+    // The shell's own wiring for the row: the workspace and the unsaved
+    // tracker merged into a listenable the row redraws on
+    // (`Shell._tabsListenable`), the labels laid out per build.
+    final tracker = UnsavedTracker();
+    final note = _Note('Notes/alpha.md');
+    tracker.register(note);
+    final tabs = DeferredListenable(Listenable.merge([tracker]));
+    var builds = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 38,
+            child: ListenableBuilder(
+              listenable: tabs,
+              builder: (context, _) {
+                builds++;
+                return NoteTabBar(
+                  tabs: const [WorkspaceTab('Notes/alpha.md')],
+                  active: 0,
+                  unsaved: tracker.unsavedPaths.toSet(),
+                  onActivate: (_) {},
+                  onClose: (_) {},
+                  onNew: () {},
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(builds, 1);
+
+    // Ten characters typed into the note, each in the frame a keystroke
+    // gets: the first one gives the note its dot, and the other nine
+    // change nothing the row draws.
+    for (var at = 0; at < 10; at++) {
+      note.unsaved = true;
+      tracker.noteChanged();
+      await tester.pump();
+    }
+
+    expect(find.byKey(const Key('note-tab-dot-0')), findsOne);
+    expect(builds, 2);
   });
 }

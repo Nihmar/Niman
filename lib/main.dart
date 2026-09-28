@@ -9,6 +9,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/crash_reporter.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/frame_cost.dart';
 import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
@@ -165,9 +166,12 @@ Future<void> _attachLogFile() async {
 /// the UI isolate also charges the very frames it measures.
 ///
 /// Timing every frame is the right tool for a profiling round, not for a
-/// build someone uses. Put it back behind its own switch if a later round
-/// wants it.
+/// build someone uses: it is behind `NIMAN_FRAMES`
+/// (`--dart-define=NIMAN_FRAMES=true`), the switch the views' own frame
+/// lines wear, so a release build attaches no timings callback at all
+/// (#362).
 void _reportSlowFrames() {
+  if (!nimanFrames) return;
   const logger = AppLogger(name: 'frames');
   const budget = Duration(milliseconds: 16);
   SchedulerBinding.instance.addTimingsCallback((timings) {

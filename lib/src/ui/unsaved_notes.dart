@@ -59,20 +59,40 @@ final class UnsavedTracker extends ChangeNotifier {
     await Future.wait(dirty);
   }
 
+  /// The dirty set the listeners were last told about, as [unsavedPaths]
+  /// read then: what a call that publishes must differ from.
+  List<String> _published = const <String>[];
+
   /// Tracks [note]; it reads its dirty state live until [unregister].
   /// Registering the same note twice is a no-op.
   void register(UnsavedNote note) {
-    if (_notes.add(note)) notifyListeners();
+    if (_notes.add(note)) _publish();
   }
 
   /// Stops tracking [note].
   void unregister(UnsavedNote note) {
-    if (_notes.remove(note)) notifyListeners();
+    if (_notes.remove(note)) _publish();
   }
 
   /// A note's revision or a save landed (the note's state calls this on
   /// the keystroke/save paths), so the dirty set may have changed.
-  void noteChanged() => notifyListeners();
+  void noteChanged() => _publish();
+
+  /// Notifies the listeners when the dirty set reads differently from the
+  /// one they were last told about.
+  ///
+  /// [noteChanged] is called on every keystroke, and the set — which notes
+  /// hold edits the disk does not have — changes once, when the first of
+  /// them lands. Publishing each keystroke rebuilt the tab row it is
+  /// merged into, and its labels lay out per build: ten characters typed
+  /// into an unmodified note were ten rebuilds of the row a keystroke
+  /// spends its frame on (#362).
+  void _publish() {
+    final paths = unsavedPaths;
+    if (listEquals(paths, _published)) return;
+    _published = paths;
+    notifyListeners();
+  }
 }
 
 /// The single tracker for the app session.

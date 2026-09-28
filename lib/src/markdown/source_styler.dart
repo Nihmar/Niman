@@ -147,6 +147,13 @@ final class SourceStyler {
   /// parses the block it landed in rather than the screen.
   int get parses => _parser.parseCount;
 
+  /// How many blocks have had their text joined to find their parse, for
+  /// the test that proves a frame made after an Enter re-joins none of the
+  /// blocks it read on the frame before (#362): a hit in [_byStart] is what
+  /// spares the join and the hash of the whole block per line.
+  int get blockTextReads => _blockTextReads;
+  int _blockTextReads = 0;
+
   /// The buffer revision the blocks are of.
   int get revision => _revision ?? buffer.revision;
   int? _revision;
@@ -550,8 +557,20 @@ final class SourceStyler {
 
   /// The parse of [block], or null for one too long to parse.
   _Parsed? _parsedOf(Block block) {
+    // What the cached parse was made of, not the object it was made from:
+    // a block read back from a chunk that carries a shift is a fresh
+    // `Block` every time (`BlockList.operator []`), so `identical` never
+    // hit below an edit that changed the line count — every visible line
+    // re-joined its whole block and hashed it, per frame (#362, #316).
+    // Within one revision a block's text is its kind, its depths and its
+    // lines, and the map is cleared by every edit.
     final cached = _byStart[block.startLine];
-    if (cached != null && identical(cached.block, block)) return cached;
+    if (cached != null &&
+        cached.block.endLine == block.endLine &&
+        cached.block.sameShape(block)) {
+      return cached;
+    }
+    _blockTextReads++;
     final raw = BlockParser.blockText(block, buffer);
     if (raw.length > _inlineLimit) return null;
     final key = '${block.kind.index}:${block.quoteDepth}|$raw';

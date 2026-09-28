@@ -370,6 +370,45 @@ void main() {
       }
       expect(styler.parses - before, lessThanOrEqualTo(2));
     });
+
+    test('the frame after an Enter re-joins no block it read (#362)', () {
+      // Below an edit that changes the line count, the blocks are read back
+      // moved (`BlockList`, one shift per chunk): the object a parse was
+      // made of is not the one the next frame reads, so the cache looked it
+      // up by identity and every line below the Enter re-joined its whole
+      // block and hashed it (#316, on the path a keystroke draws). A chunk
+      // holds `BlockList.chunkSize` blocks, so the note is long enough for
+      // the lines on screen to be past the chunk the Enter landed in.
+      final lines = [
+        for (var at = 0; at < 1200; at++) 'Paragraph $at with **bold**.\n\n',
+      ];
+      final buffer = SourceBuffer.fromText(lines.join('\n'));
+      final styler = SourceStyler(buffer);
+      const from = 2000;
+      const to = 2060;
+      for (var at = from; at < to; at++) {
+        styler.tokensOf(at);
+      }
+      // An Enter at the top of the note, as a writer makes one.
+      styler.edited(buffer.replaceRange(0, 0, 'new\n'));
+      for (var at = from; at < to; at++) {
+        styler.tokensOf(at);
+      }
+      final reads = styler.blockTextReads;
+      expect(reads, greaterThan(0), reason: 'the edit moved every block');
+
+      for (var at = from; at < to; at++) {
+        styler.tokensOf(at);
+      }
+
+      expect(
+        styler.blockTextReads - reads,
+        0,
+        reason:
+            'the lines below the Enter, and their blocks, are what they '
+            'were',
+      );
+    });
   });
 
   test('a long note read in the background reads as one read here', () async {
