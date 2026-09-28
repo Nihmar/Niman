@@ -6,12 +6,20 @@
 /// A line's answer is cached by its text *and* the ranges it was told to
 /// skip, and each word's verdict is cached once, so re-scrolling and a
 /// repeated word cost nothing.
+///
+/// The engine is the one cost here that is not a line's: a dictionary is
+/// megabytes of text and libhunspell parses it inside `Hunspell_create`, so
+/// the load runs off the isolate that owns the frame and lands when it lands
+/// (#453). Until it does, [EditorSpellCheck.available] is false and nothing
+/// is underlined — no frame waits for it — and the notification it sends is
+/// what makes the editor ask its visible lines again.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
@@ -89,28 +97,49 @@ final class EditorSpellCheck extends ChangeNotifier {
        _override = createChecker,
        _dictionary = dictionary {
     dictionary?.addListener(_onDictionaryChanged);
+    _startEngines();
   }
 
   final SpellChecker Function(String? dictionary)? _override;
   List<String> _dictionaries;
   PersonalDictionary? _dictionary;
 
+  /// The engines the load answered, and what the editor reads: the personal
+  /// dictionary, when one is attached, in front of them (issue #60).
+  SpellChecker? _engines;
+  SpellChecker? _checker;
+
+  /// How many loads have been started: a load that lands after a newer
+  /// choice was made is dropped when it does, handles and all.
+  int _loads = 0;
+
+  Future<void> _engineReady = Future<void>.value();
+  bool _disposed = false;
+
+  /// Completes when the engines' load has landed, or has failed.
+  ///
+  /// Nothing on a frame waits for it (#453): until it lands [available] is
+  /// false, nothing is underlined, and the notification that follows is what
+  /// has the editor ask again. The spelling panel awaits it, because a pass
+  /// read before the dictionary was there would call the note clean.
+  Future<void> get engineReady => _engineReady;
+
   /// The active dictionary names, in selection order (empty = the
   /// machine's locale).
   List<String> get dictionaries => List.unmodifiable(_dictionaries);
 
   /// Changes the dictionaries: the current engines are dropped, their word
-  /// verdicts and line ranges forgotten, and new ones build on the next
-  /// request.
+  /// verdicts and line ranges forgotten, and the new ones load in the
+  /// background.
   void setDictionaries(List<String> dictionaries) {
     final normalized = _normalize(dictionaries);
     if (listEquals(_dictionaries, normalized)) return;
     _dictionaries = normalized;
     _checker?.dispose();
-    _checker = null;
     _lines.clear();
     _words.clear();
     _suggestions.clear();
+    _startEngines();
     notifyListeners();
   }
 
@@ -125,21 +154,64 @@ final class EditorSpellCheck extends ChangeNotifier {
     return names;
   }
 
-  /// One engine per selected dictionary; the locale's when none is chosen.
+  /// Starts the engines' load, off this isolate wherever the load is a
+  /// dictionary's (#453).
   ///
-  /// The personal dictionary, when attached, is checked before any engine
-  /// (issue #60): its words are always correct.
-  SpellChecker _newChecker() {
+  /// The state is built where a library opens, so the load it starts is
+  /// spent while the app is still finding its feet rather than on the frame
+  /// that first draws a note. The constructor's `createChecker` is the seam:
+  /// a fake has no dictionary to parse, so it is built here and is there at
+  /// once.
+  void _startEngines() {
+    final loads = ++_loads;
+    _engines = null;
+    _checker = null;
     final override = _override;
-    final checkers = _dictionaries.isEmpty
-        ? <SpellChecker>[override?.call(null) ?? createSpellChecker()]
-        : <SpellChecker>[
-            for (final name in _dictionaries)
-              override?.call(name) ?? createSpellChecker(dictionary: name),
-          ];
-    final base = checkers.length == 1
-        ? checkers.single
-        : MultiSpellChecker(checkers);
+    if (override != null) {
+      _engines = _multi(<SpellChecker>[
+        if (_dictionaries.isEmpty)
+          override(null)
+        else
+          for (final name in _dictionaries) override(name),
+      ]);
+      _checker = _wrapped(_engines!);
+      _engineReady = Future<void>.value();
+      return;
+    }
+    _engineReady = _load(loads, _dictionaries);
+  }
+
+  Future<void> _load(int loads, List<String> names) async {
+    List<SpellChecker> engines;
+    try {
+      engines = await loadSpellCheckers(names);
+    } on Object catch (error) {
+      const AppLogger(name: 'spellcheck')
+          .warning('the dictionary load failed: $error');
+      engines = <SpellChecker>[const NoopSpellChecker()];
+    }
+    if (loads != _loads) {
+      // A newer choice won while this one loaded: its engines are nobody's
+      // now, and the handles behind them are released here.
+      for (final engine in engines) {
+        engine.dispose();
+      }
+      return;
+    }
+    _engines = _multi(engines);
+    _checker = _wrapped(_engines!);
+    if (!_disposed) notifyListeners();
+  }
+
+  /// One engine, or several asked in turn: hunspell opens one dictionary per
+  /// handle, so a note that mixes languages is checked against one engine per
+  /// chosen language.
+  static SpellChecker _multi(List<SpellChecker> engines) =>
+      engines.length == 1 ? engines.single : MultiSpellChecker(engines);
+
+  /// [base] with the personal dictionary in front of it, when one is
+  /// attached (issue #60): its words are always correct.
+  SpellChecker _wrapped(SpellChecker base) {
     final dictionary = _dictionary;
     return dictionary == null
         ? base
@@ -149,7 +221,6 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// Prose words: a letter run, apostrophes and inner hyphens allowed.
   static final RegExp _word = RegExp(r"[\p{L}][\p{L}'’-]*", unicode: true);
 
-  SpellChecker? _checker;
   bool _enabled = true;
   final Map<int, _CheckedLine> _lines = <int, _CheckedLine>{};
   final Map<String, bool> _words = <String, bool>{};
@@ -158,9 +229,13 @@ final class EditorSpellCheck extends ChangeNotifier {
   bool get enabled => _enabled;
 
   /// Whether an engine and dictionary loaded (false = nothing to underline).
+  ///
+  /// False while the background load is in flight, which is not a frame's
+  /// business: nothing blocks on it, and the notification that follows the
+  /// load is what has the editor and the settings ask again.
   bool get available {
     if (!_enabled) return false;
-    return (_checker ??= _newChecker()).available;
+    return _checker?.available ?? false;
   }
 
   /// The library's personal dictionary (issue #60), or null while none is
@@ -170,13 +245,16 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// Swaps the personal dictionary: the word and line caches are forgotten
   /// — a word's verdict can change either way — and listeners are told so
   /// the editor re-scans.
+  ///
+  /// The words are Dart's and the engine stands: the wrapper in front of it
+  /// is all that changes, so nothing is loaded again (#453).
   void setPersonalDictionary(PersonalDictionary? dictionary) {
     if (identical(_dictionary, dictionary)) return;
     _dictionary?.removeListener(_onDictionaryChanged);
     _dictionary = dictionary;
     dictionary?.addListener(_onDictionaryChanged);
-    _checker?.dispose();
-    _checker = null;
+    final engines = _engines;
+    _checker = engines == null ? null : _wrapped(engines);
     _lines.clear();
     _words.clear();
     notifyListeners();
@@ -214,8 +292,8 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// attached.
   bool isMisspelled(String word) {
     if (!_enabled) return false;
-    final checker = _checker ??= _newChecker();
-    if (!checker.available) return false;
+    final checker = _checker;
+    if (checker == null || !checker.available) return false;
     if (!_checkable(word)) return false;
     return !(_words[word] ??= checker.isCorrect(word));
   }
@@ -238,7 +316,9 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// their tokens are read, and the answer of that ask — with nothing to
   /// skip — must not stand once the tokens arrive (#373). Later calls for
   /// the same text *and* the same skip are a compare. Nothing is computed
-  /// while [enabled] is false or the engine is unavailable.
+  /// while [enabled] is false or the engine is unavailable — the latter
+  /// includes the background load still being in flight (#453), which is
+  /// why an ask is never what waits for a dictionary.
   List<TextRange> rangesFor(
     int index,
     String line, {
@@ -247,8 +327,8 @@ final class EditorSpellCheck extends ChangeNotifier {
     if (!_enabled) return const <TextRange>[];
     final cached = _lines[index];
     if (cached != null && cached.answers(line, skip)) return cached.ranges;
-    final checker = _checker ??= _newChecker();
-    if (!checker.available) return const <TextRange>[];
+    final checker = _checker;
+    if (checker == null || !checker.available) return const <TextRange>[];
     final ranges = _checkLine(checker, line, skip);
     _lines[index] = _CheckedLine(line, skip, ranges);
     return ranges;
@@ -271,8 +351,8 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// Hunspell's suggestions for [word], best first; cached per word.
   List<String> suggestionsFor(String word) {
     if (!_enabled) return const <String>[];
-    final checker = _checker ??= _newChecker();
-    if (!checker.available) return const <String>[];
+    final checker = _checker;
+    if (checker == null || !checker.available) return const <String>[];
     return _suggestions[word] ??= checker.suggest(word);
   }
 
@@ -326,8 +406,13 @@ final class EditorSpellCheck extends ChangeNotifier {
 
   @override
   void dispose() {
+    // A load in flight is nobody's once this is disposed: the counter it
+    // checks when it lands is what releases its handles (#453).
+    _loads++;
+    _disposed = true;
     _checker?.dispose();
     _checker = null;
+    _engines = null;
     super.dispose();
   }
 }
@@ -420,11 +505,17 @@ final class SpellScan extends ChangeNotifier {
   bool get capped => _capped;
 
   /// Runs the pass to its end, a slice at a time.
+  ///
+  /// Waits for the engine's load first (#453): the pass is the one caller
+  /// that cannot leave the question to a later frame — read before the
+  /// dictionary was there, it would report the note clean. Only a load in
+  /// flight is waited on: when the engine is already there — the constructor
+  /// seam, or a load that landed first — nothing is awaited and the pass
+  /// runs in the turn it was opened on, as it always did.
   Future<void> run() async {
     final spell = _spell;
-    final checker = spell._enabled
-        ? (spell._checker ??= spell._newChecker())
-        : null;
+    if (spell._checker == null) await spell.engineReady;
+    final checker = spell._enabled ? spell._checker : null;
     if (checker == null || !checker.available) {
       _finish();
       return;

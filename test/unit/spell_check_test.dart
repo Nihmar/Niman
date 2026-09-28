@@ -521,13 +521,63 @@ void main() {
     expect(checker.suggest('helo'), contains('hello'));
   }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
 
-  test('the real engine finds a real typo', () {
+  test('the real engine finds a real typo', () async {
     final check = EditorSpellCheck();
     addTearDown(check.dispose);
+    // The dictionary is loaded on an isolate of its own (#453): the first
+    // pass is the one that marks the typo, and it is the one that waits.
+    await check.engineReady;
     const line = 'hello wrold';
     final ranges = check.rangesFor(0, line, skip: const <TextRange>[]);
     expect(ranges.map((r) => r.textInside(line)), ['wrold']);
   }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
+
+  test('the dictionary is loaded off the isolate that asks', () async {
+    final check = EditorSpellCheck();
+    addTearDown(check.dispose);
+    // #453: the frame that first asks a note for its ranges used to be the
+    // frame that parsed the dictionary — the whole load, synchronously, the
+    // moment `available` was read. Nothing is loaded in the turn the state
+    // is built, and an ask that arrives before the load lands is answered
+    // "nothing yet" rather than with a stall.
+    expect(
+      check.available,
+      isFalse,
+      reason: 'the load has not run on this isolate',
+    );
+    expect(
+      check.rangesFor(0, 'hello wrold', skip: const <TextRange>[]),
+      isEmpty,
+    );
+    // The load lands, the state says so, and the same ask answers with the
+    // typo — the editor re-asks because of the notification, not because
+    // anything waited.
+    await check.engineReady;
+    expect(check.available, isTrue);
+    expect(check.rangesFor(0, 'hello wrold', skip: const <TextRange>[]), [
+      const TextRange(start: 6, end: 11),
+    ]);
+  }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
+
+  test(
+    'a panel pass waits for the load instead of calling the note clean',
+    () async {
+      final check = EditorSpellCheck();
+      addTearDown(check.dispose);
+      // The panel is opened the moment the app is up (#453): a pass over the
+      // note read before the dictionary was there would find nothing wrong
+      // with it, and the panel would say so for good.
+      final scan = check.startScan(
+        lineCount: 1,
+        lineAt: (_) => (text: 'hello wrold', skip: const <TextRange>[]),
+      );
+      addTearDown(scan.dispose);
+      await scan.run();
+      expect(scan.done, isTrue);
+      expect(scan.issues.map((issue) => issue.word), ['wrold']);
+    },
+    skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed',
+  );
 
   test('the Italian dictionary checks Italian', () {
     final checker = HunspellSpellChecker.open(dictionary: 'it_IT');
