@@ -37,9 +37,11 @@ final class NoteSuggestion extends SuggestEntry {
   /// The folder the note sits in, relative to the library; empty at the root.
   final String folder;
 
-  /// What completing the link writes: the stem, `.md` dropped. The folder is
-  /// what tells two same-named notes apart on screen, not in the target, so a
-  /// bare name is written as the drawing shows.
+  /// What completing the link writes: the stem, `.md` dropped, when that
+  /// names this note alone; otherwise the shortest tail of its path that
+  /// does (`work/Meeting`), the way the resolver qualifies a shared name. A
+  /// bare name shared by two notes resolves to neither of them for sure, so
+  /// the row the user picked would not be the note the link opens.
   final String target;
 
   /// The alias the note was found through, when its own name did not match
@@ -116,7 +118,66 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<NoteSuggestion>> notes(String query) async {
     final q = query.trim().toLowerCase();
-    return _rank(await _rows(q), q);
+    return await _qualified(_rank(await _rows(q), q));
+  }
+
+  /// [ranked] with each target qualified as far as it takes to name that
+  /// note alone: one query for the notes that share any of their names,
+  /// then [_targetFor] each.
+  Future<List<NoteSuggestion>> _qualified(List<_Ranked> ranked) async {
+    if (ranked.isEmpty) return const <NoteSuggestion>[];
+    final stems = {
+      for (final r in ranked) LinkResolver.normalizeTarget(r.note.target),
+    };
+    final rows = await _db
+        .customSelect(
+          'SELECT DISTINCT s.stem AS stem, n.path AS path '
+          'FROM note_stems AS s JOIN notes AS n ON n.id = s.note_id '
+          'WHERE s.stem IN (${List.filled(stems.length, '?').join(', ')})',
+          variables: [for (final stem in stems) Variable<String>(stem)],
+        )
+        .get();
+    final sharing = <String, Set<String>>{};
+    for (final row in rows) {
+      (sharing[row.read<String>('stem')] ??= <String>{}).add(
+        row.read<String>('path'),
+      );
+    }
+    return [
+      for (final r in ranked)
+        NoteSuggestion(
+          name: r.note.name,
+          folder: r.note.folder,
+          alias: r.note.alias,
+          target: _targetFor(
+            r.path,
+            sharing[LinkResolver.normalizeTarget(r.note.target)] ??
+                const <String>{},
+          ),
+        ),
+    ];
+  }
+
+  /// The shortest tail of [path] (`.md` dropped) that the resolver takes for
+  /// this note alone among [candidates], the notes answering to its name:
+  /// the bare name when nothing else does, `folder/name` when that settles
+  /// it, and so on up to the whole path.
+  static String _targetFor(String path, Set<String> candidates) {
+    final bare = path.toLowerCase().endsWith('.md')
+        ? path.substring(0, path.length - 3)
+        : path;
+    final segments = bare.split('/');
+    for (var take = 1; take <= segments.length; take++) {
+      final target = segments.sublist(segments.length - take).join('/');
+      final normalized = LinkResolver.normalizeTarget(target);
+      final named = candidates.where(
+        (candidate) => LinkResolver.pathMatches(candidate, normalized),
+      );
+      if (named.length <= 1) return target;
+    }
+    // Two notes whose paths the rule cannot tell apart (`a/x` and `b/a/x`):
+    // the whole path is the closest a target gets.
+    return bare;
   }
 
   /// The matching `note_stems` rows joined to their file, prefix matches
@@ -174,12 +235,12 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   /// [rows] grouped by note and ranked: a note whose name or an alias starts
   /// with [q] first, then by path. A note found only through an alias carries
   /// it.
-  List<NoteSuggestion> _rank(List<_StemRow> rows, String q) {
+  List<_Ranked> _rank(List<_StemRow> rows, String q) {
     final byNote = <int, List<_StemRow>>{};
     for (final row in rows) {
       (byNote[row.id] ??= <_StemRow>[]).add(row);
     }
-    final ranked = <({NoteSuggestion note, bool prefix})>[];
+    final ranked = <({NoteSuggestion note, String path, bool prefix})>[];
     for (final group in byNote.values) {
       final first = group.first;
       final named = group.where((r) => r.source == 'file').firstOrNull;
@@ -194,6 +255,7 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
           target: name,
           alias: q.isNotEmpty && !nameMatched ? first.stem : null,
         ),
+        path: first.path,
         prefix: prefix,
       ));
     }
@@ -202,7 +264,7 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
       final byFolder = a.note.folder.compareTo(b.note.folder);
       return byFolder != 0 ? byFolder : a.note.name.compareTo(b.note.name);
     });
-    return [for (final r in ranked.take(limit)) r.note];
+    return [for (final r in ranked.take(limit)) (note: r.note, path: r.path)];
   }
 
   /// The name shown for [path]: the file's base name, `.md` dropped.
@@ -260,6 +322,10 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
     };
   }
 }
+
+/// A ranked row: the suggestion with its bare target, and the note's path,
+/// which qualifies the target when the name is shared.
+typedef _Ranked = ({NoteSuggestion note, String path});
 
 /// One `note_stems` row joined to its note.
 final class _StemRow {

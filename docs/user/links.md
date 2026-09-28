@@ -21,7 +21,9 @@ editors, under the caret:
 - after `[[` — the library's notes, the name shown and the folder dimmed
   (what tells two same-named notes apart). A note is matched by its name
   **and** by its frontmatter aliases, prefix matches first; a row found
-  through an alias says which one;
+  through an alias says which one. Choosing a note whose name another
+  note shares writes as much of its folder as it takes to name that one
+  (`[[Work/Meeting]]`), so the link opens the note that was picked;
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
