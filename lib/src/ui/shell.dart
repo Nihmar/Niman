@@ -786,8 +786,8 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   /// widgets (issue 6).
   StreamSubscription<int>? _libraryEvents;
 
-  /// Paths a re-index pruned from the tree: the tabs they held close
-  /// (issue #289).
+  /// Paths a re-index pruned from the tree: the tabs they hold stay, and
+  /// are flagged missing (issues #289, #372).
   StreamSubscription<Set<String>>? _libraryRemovals;
 
   /// Paths a sync just changed on disk: the open note among them is
@@ -1487,7 +1487,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       (_) => _homeWidgets.pushNotes(),
     );
     _libraryRemovals = widget.controller.removals.listen(
-      (paths) => _workspace.deletedAll(paths),
+      (paths) => _workspace.missing(paths),
     );
     _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
       // Words added on another device count as soon as they arrive.

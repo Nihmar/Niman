@@ -56,14 +56,14 @@ final class ShellWorkspace {
   /// Reads back what was left open in the library on this device.
   ///
   /// A note deleted before this session read the tree has no `removals`
-  /// event to arrive on: what the store still opens on one closes here
-  /// (#289).
+  /// event to arrive on: what the store still opens on one keeps its tab,
+  /// flagged missing, here (#289, #372).
   Future<void> load() async {
     controller.adopt(await _session.savedWorkspace);
     final open = [for (final tab in value.tabs) tab.path];
     if (open.isEmpty) return;
     final gone = await _session.missingPaths(open);
-    if (gone.isNotEmpty) controller.update((w) => w.deletedAll(gone));
+    if (gone.isNotEmpty) controller.update((w) => w.withMissing(gone));
   }
 
   /// Opens [notePath] now: in a new tab when [newTab] (or when one was
@@ -257,9 +257,12 @@ final class ShellWorkspace {
   /// [path] is gone: a note, or a folder with notes under it.
   void deleted(String path) => controller.update((w) => w.deleted(path));
 
-  /// Every path in [paths] is gone: a re-index pruned them (issue #289).
-  void deletedAll(Set<String> paths) =>
-      controller.update((w) => w.deletedAll(paths));
+  /// Every path in [paths] is gone from disk: a re-index pruned them, or
+  /// the library loaded without them (#289). Their tabs stay, flagged
+  /// missing — the file went from outside the app, not from a delete the
+  /// reader asked for here (issue #372).
+  void missing(Set<String> paths) =>
+      controller.update((w) => w.withMissing(paths));
 
   /// Writes what is pending and lets go.
   void dispose() => controller.dispose();

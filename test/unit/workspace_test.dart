@@ -226,7 +226,7 @@ void main() {
       expect(_row(w), '[x.md]');
     });
 
-    test('a re-index prunes every path it names, folders included', () {
+    test('closing every path it names closes the tabs under them too', () {
       final w = _opened(['x.md', 'Notes/a.md', 'Notes/b.md', 'y.md'])
           .activate(0, 1)
           .deletedAll({'Notes', 'y.md'});
@@ -240,6 +240,29 @@ void main() {
       expect(w.tabs.last.missing, isFalse);
       // And unmarked once it is back.
       expect(w.withMissing({}).tabs.first.missing, isFalse);
+    });
+
+    test('a folder gone from disk marks every tab under it', () {
+      final w = _opened([
+        'x.md',
+        'Notes/a.md',
+        'Notes/deep/b.md',
+        'Notes2/c.md',
+      ]).withMissing({'Notes'});
+      expect(w.tabs.map((t) => t.missing), [
+        false,
+        true,
+        true,
+        // A sibling that only shares the prefix is not under it.
+        false,
+      ]);
+      // A renamed folder takes its marks along, as it takes its paths.
+      expect(w.renamed('Notes', 'Archive').tabs.map((t) => t.missing), [
+        false,
+        true,
+        true,
+        false,
+      ]);
     });
   });
 

@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -71,6 +72,17 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await settle(tester);
   }
+
+  /// How tab [index] draws its label: struck through when the note is gone.
+  TextDecoration? tabDecoration(WidgetTester tester, int index) => tester
+      .widget<MarqueeText>(
+        find.descendant(
+          of: find.byKey(Key('note-tab-$index')),
+          matching: find.byType(MarqueeText),
+        ),
+      )
+      .style
+      ?.decoration;
 
   testWidgets('a click shows the note in the tab on screen', (tester) async {
     await pumpShell(tester);
@@ -171,7 +183,7 @@ void main() {
     expect(shown().showPreview, isFalse);
   });
 
-  testWidgets('a re-index that prunes a note closes its tab (#289)', (
+  testWidgets('a re-index that prunes a note keeps its tab, flagged (#372)', (
     tester,
   ) async {
     await pumpShell(tester);
@@ -183,18 +195,29 @@ void main() {
     controller.addRemoval({'beta.md'});
     await settle(tester);
 
+    // The file went from outside the app: the tab stays, struck through.
+    expect(tabs(), ['alpha.md', 'beta.md']);
+    expect(controller.workspace.tabs.last.missing, isTrue);
+    expect(find.byKey(const Key('note-tab-1')), findsOne);
+    expect(tabDecoration(tester, 1), TextDecoration.lineThrough);
+    expect(tabDecoration(tester, 0), isNot(TextDecoration.lineThrough));
+
+    // And closing it by hand still closes it.
+    await tester.tap(find.byKey(const Key('note-tab-close-1')));
+    await settle(tester);
     expect(tabs(), ['alpha.md']);
     expect(find.byKey(const Key('note-tab-1')), findsNothing);
   });
 
-  testWidgets('a note gone before the library opened is not restored (#289)', (
-    tester,
-  ) async {
+  testWidgets('a note gone before the library opened keeps its tab, flagged '
+      '(#372)', (tester) async {
     // The store still opens it, but this session's tree never had it: no
     // removal event is coming for it.
     controller.workspace = Workspace.empty.open('ghost.md');
     await pumpShell(tester);
 
-    expect(tabs(), isEmpty);
+    expect(tabs(), ['ghost.md']);
+    expect(controller.workspace.tabs.single.missing, isTrue);
+    expect(tabDecoration(tester, 0), TextDecoration.lineThrough);
   });
 }

@@ -1,8 +1,10 @@
 // The shell's own hand on the workspace (#23): what it does to the notes'
-// tabs. Only the piece the split's removal added is here — a template's
-// `open: preview` (#51), which is asked for before the note has a tab.
+// tabs. A template's `open: preview` (#51), which is asked for before the
+// note has a tab, and the library loading with a note the index no longer
+// holds (#372).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/workspace/workspace.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -42,6 +44,25 @@ void main() {
       workspace.showPreviewWhenOpen('Notes/Elsewhere.md');
       await pumpEventQueue();
       expect(workspace.value.tabs.single.memento.preview, isNull);
+    },
+  );
+
+  test(
+    'a note gone before the library opened keeps its tab, flagged',
+    () async {
+      // The store still opens it, this session's tree never had it: no
+      // `removals` event is coming, and the tab must not vanish for that.
+      final session = FakeLibrarySession();
+      addTearDown(session.dispose);
+      await session.createNote(parentPath: '', name: 'here');
+      session.workspace = Workspace.empty.open('gone.md').open('here.md');
+      final workspace = ShellWorkspace(session);
+      addTearDown(workspace.dispose);
+
+      await workspace.load();
+
+      expect(workspace.value.tabs.map((t) => t.path), ['gone.md', 'here.md']);
+      expect(workspace.value.tabs.map((t) => t.missing), [true, false]);
     },
   );
 }

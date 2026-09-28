@@ -26,7 +26,7 @@ Its rules are tested in `test/unit/workspace_test.dart`:
 | close | The showing tab gives way to its right neighbour, or its left one at the end of the row. A second pane left empty closes the split. |
 | rename / move | The note, or every note under a folder, keeps its tab and memento at the new path. |
 | delete | The note, or every note under a folder, closes. |
-| gone from disk | The tab stays, marked `missing`. The mark is never stored. |
+| gone from disk | The tab — and, for a gone folder, every tab under it — stays, marked `missing`. The mark is never stored. |
 
 ## Where it is kept
 
@@ -56,6 +56,11 @@ already changed something.
 - **Library changes.** The row actions report every rename, move and
   delete as `from → to` or as a path, so tabs under a renamed folder
   follow it.
+- **A file gone from outside the app.** The library hands the shell the
+  paths a re-index pruned (`LibrarySession.removals`, #289) and the ones
+  a loading workspace no longer finds (`missingPaths`); both go to
+  `ShellWorkspace.missing`, which flags those tabs and keeps them
+  (#372). A delete asked for in the app closes the tab instead.
 - **Keeping editors alive.** `mounted()` decides which editors stay
   mounted: each pane's showing tab, plus the four most recently shown,
   minus notes over 200K characters. Each mounted note has a `GlobalKey`,
