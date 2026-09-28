@@ -1,0 +1,122 @@
+---
+layout: default
+---
+{%- comment -%}
+  The landing: the mark, the tagline the README opens with, three ways in, the
+  screenshots the app makes itself, and the claims the README makes — nothing
+  the repository does not say. The prose below the features is `index.md`.
+{%- endcomment -%}
+<section class="hero">
+  <img class="hero__mark" src="{{ site.baseurl }}/logos/svg/niman-mark.svg" alt="The Niman mark: an anthracite square with a cream N and one blue tile" width="96" height="96">
+  <h1 class="hero__title">Niman Is More (than) A Notebook.</h1>
+  <p class="hero__lead">A multiplatform Markdown note-taking app where your notes are just files. One note = one <code>.md</code> file on disk — no lock-in, no proprietary format.</p>
+  <p class="hero__actions">
+    <a class="button button--primary" href="https://github.com/Nihmar/Niman/releases">Download</a>
+    <a class="button" href="#screenshots">Screenshots</a>
+    <a class="button" href="{{ site.baseurl }}/docs/">Docs</a>
+  </p>
+</section>
+
+<section class="section" id="screenshots">
+  <h2 class="section__title">Screenshots</h2>
+  <p class="section__lead">From the app itself, in English, on a library of sample notes — a phone (Android) and the Linux desktop.</p>
+
+  <h3 class="gallery__heading">Android</h3>
+  <div class="gallery gallery--phone">
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/android-files.jpg" alt="Android: the files view, with pinned notes, folders and the notes beside them" loading="lazy" width="270" height="600">
+      <figcaption>Files</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/android-editor-live.jpg" alt="Android: editing a note in live, with headings, bold text and typeset maths" loading="lazy" width="270" height="600">
+      <figcaption>Live editing</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/android-preview.jpg" alt="Android: the read view of the same note" loading="lazy" width="270" height="600">
+      <figcaption>Read view</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/android-search.jpg" alt="Android: searching a library, with the match in its excerpt" loading="lazy" width="270" height="600">
+      <figcaption>Search</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/android-settings.jpg" alt="Android: settings" loading="lazy" width="270" height="600">
+      <figcaption>Settings</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/android-widget.jpg" alt="Android: the home-screen notes widget" loading="lazy" width="270" height="600">
+      <figcaption>Home-screen widget</figcaption>
+    </figure>
+  </div>
+
+  <h3 class="gallery__heading">Desktop (Linux)</h3>
+  <div class="gallery gallery--desktop">
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/desktop-panes.jpg" alt="Desktop: three panes open — a journal entry in source and in live, and a note beside them" loading="lazy" width="480" height="300">
+      <figcaption>Three panes</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/desktop-editor-live.jpg" alt="Desktop: editing a note in live, with line numbers and the outline pane" loading="lazy" width="480" height="300">
+      <figcaption>Live editing</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/desktop-read-view.jpg" alt="Desktop: the read view of the same note, with the outline pane" loading="lazy" width="480" height="300">
+      <figcaption>Read view</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/desktop-journal.jpg" alt="Desktop: a journal entry, with the calendar and the recent days beside it" loading="lazy" width="480" height="300">
+      <figcaption>Journal</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="{{ site.baseurl }}/docs/images/desktop-settings.jpg" alt="Desktop: settings — the app's own sections and the library's" loading="lazy" width="480" height="300">
+      <figcaption>Settings</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="section section--features">
+  <h2 class="section__title">What Niman does</h2>
+  <p class="section__lead">What the app does today, in its own words from the README. What is planned is in the <a href="https://github.com/Nihmar/Niman/issues">issue tracker</a>.</p>
+  <div class="cards">
+    <article class="card">
+      <h3 class="card__title">Notes as files</h3>
+      <p class="card__body">One note = one <code>.md</code> file on disk, organized in folders however you like. The database is only a rebuildable index; your files are the source of truth.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">One surface, three modes</h3>
+      <p class="card__body">The source editor, the live (WYSIWYG) editor and the read view are one widget of Niman's own; switching modes does not move the page.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Links that reach anywhere</h3>
+      <p class="card__body">Wikilinks and Markdown links between notes, into a page of a PDF or a chapter of a book, with a dialog to create a missing note.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Journal, tasks and reminders</h3>
+      <p class="card__body">One note per day with a calendar; a todo list over <code>todo.txt</code>; reminders with exact alarms on Android and tray timers on the desktop.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Export, your way</h3>
+      <p class="card__body">A note, a folder or the whole library out as Markdown, a self-contained HTML page, a print-ready PDF or an EPUB book.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Sync to your own server</h3>
+      <p class="card__body">Per-library WebDAV sync to Nextcloud, ownCloud, a NAS or any WebDAV folder, with an offline queue that retries by itself.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Make it yours</h3>
+      <p class="card__body">Day, night or system brightness, and a palette — System, Niman, Catppuccin, Solarized, Gruvbox — or a theme of your own, exported as JSON.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Pictures, PDFs and books</h3>
+      <p class="card__body">Pictures, PDFs and EPUB books open in the note pane on every platform, zoomed and paged where they need it, opening where you left off.</p>
+    </article>
+    <article class="card">
+      <h3 class="card__title">Android, Linux, Windows</h3>
+      <p class="card__body">Niman runs on Android (minSdk 35), Linux (Wayland) and Windows. macOS and iOS are not built yet, but the code is kept portable.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section section--prose">
+  {{ content }}
+</section>

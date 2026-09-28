@@ -52,6 +52,7 @@ Full guides live in [`docs/`](docs/):
   [platform notes](docs/user/platforms.md).
 - **Contributor:** [architecture](docs/dev/architecture.md),
   [building](docs/dev/building.md), [conventions](docs/dev/conventions.md),
+  [the documentation site](docs/dev/site.md),
   [releasing](docs/dev/releasing.md), and the design records under
   [`docs/records/`](docs/records/) — the unified Markdown surface, read/live
   parity and huge notes, the workspace (open notes and tabs), the EPUB

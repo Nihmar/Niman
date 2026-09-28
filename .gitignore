@@ -131,6 +131,7 @@ coverage/
 # The documentation site, as Jekyll leaves it (CI builds into a container and
 # uploads the artifact, so this is only ever a local build's output).
 _site/
+.jekyll-cache/
 
 # Symbols
 app.*.symbols

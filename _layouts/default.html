@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="{{ page.lang | default: 'en' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title and page.title != site.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} — {{ site.description }}{% endif %}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}">
+    <link rel="canonical" href="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+    <link rel="icon" href="{{ site.baseurl }}/logos/svg/niman-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/site.css">
+    <meta name="color-scheme" content="light dark">
+    <!--
+      The chosen theme is applied before the body paints, so a page never
+      flashes the wrong ground. `data-theme` is absent until a choice is made,
+      and the stylesheet then follows `prefers-color-scheme`.
+    -->
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('niman-theme');
+          if (theme === 'light' || theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {% include nav.html %}
+    <main id="main" class="site-main">
+      {{ content }}
+    </main>
+    {% include footer.html %}
+    <script>
+      (function () {
+        var root = document.documentElement;
+
+        // The light/dark toggle. The choice is remembered; without one the
+        // page follows the system, which the stylesheet already honours.
+        var toggle = document.getElementById('theme-toggle');
+        if (toggle) {
+          function prefersDark() {
+            return window.matchMedia
+              && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          function current() {
+            return root.getAttribute('data-theme') || (prefersDark() ? 'dark' : 'light');
+          }
+          function apply(theme) {
+            root.setAttribute('data-theme', theme);
+            root.style.colorScheme = theme;
+            try { localStorage.setItem('niman-theme', theme); } catch (e) {}
+            toggle.setAttribute('aria-pressed', String(theme === 'dark'));
+          }
+          toggle.setAttribute('aria-pressed', String(current() === 'dark'));
+          toggle.addEventListener('click', function () {
+            apply(current() === 'dark' ? 'light' : 'dark');
+          });
+        }
+
+        // The docs sidebar is a native disclosure so a phone can fold it away;
+        // on a wide screen there is room for it, so it is opened for you.
+        var toc = document.querySelector('.docs__toc');
+        if (toc && window.matchMedia('(min-width: 900px)').matches) {
+          toc.open = true;
+        }
+      })();
+    </script>
+  </body>
+</html>
