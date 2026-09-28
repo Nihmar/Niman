@@ -166,7 +166,6 @@ void main() {
       for (final wanted in <String>[
         'paragraph',
         'heading',
-        'thematicBreak',
         'fencedCode',
         'indentedCode',
         'math',
@@ -180,6 +179,27 @@ void main() {
         expect(kinds[wanted], isNotNull, reason: 'no $wanted block');
         expect(kinds[wanted], greaterThan(0), reason: 'no $wanted block');
       }
+      // No thematic break, and there is none to find: the note's only
+      // rule-shaped line is the `------------` under `A setext two`, which is
+      // that heading's underline — `---` after a paragraph is a setext h2, not
+      // a rule (B3 of `docs/records/unified-surface.md`). The scan used to
+      // report a break there, the misreading #361 fixed; the corpus has the
+      // breaks (166 in the largest note), and this fixture is what the corpus
+      // lacks.
+      expect(
+        kinds['thematicBreak'],
+        isNull,
+        reason: 'the only rule-shaped line is a setext underline',
+      );
+      // Both setext forms, which are the note's only two-line headings: a text
+      // line and its underline, where a heading of the ATX kind takes its own
+      // line alone.
+      final setext = scanner.index.blocks
+          .where(
+            (block) => block.kind == BlockKind.heading && block.lineCount == 2,
+          )
+          .map((block) => block.headingLevel);
+      expect(setext, <int>[1, 2]);
       // Four fence pairs: no info string, a language, an empty one, and the
       // 2 000-line one.
       expect(kinds['fencedCode'], greaterThanOrEqualTo(4));
