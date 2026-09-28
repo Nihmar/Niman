@@ -9,24 +9,10 @@ library;
 
 import 'package:niman/src/templates/engine.dart';
 
-/// The names of the placeholders the engine answers: `engine.dart`'s and
-/// `{{include:…}}` (`includes.dart`).
-const Set<String> templateCommandNames = {
-  'title',
-  'date',
-  'time',
-  'now',
-  'uuid',
-  'counter',
-  'cursor',
-  'ask',
-  'choice',
-  'parent',
-  'folder',
-  'clipboard',
-  'selection',
-  'include',
-};
+/// The names of the placeholders the engine answers: `engine.dart`'s
+/// canonical vocabulary, which is also what `checker.dart` validates a
+/// template against.
+const Set<String> templateCommandNames = templatePlaceholderNames;
 
 /// Whether [body], the inside of a `{{…}}`, names a command the engine
 /// answers, whatever its argument and filters.

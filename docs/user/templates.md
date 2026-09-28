@@ -49,6 +49,42 @@ Append with `|`: `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
 in days or weeks counts calendar days, not 24 hours, so `+1d` is always
 the next date — a clock change does not make it repeat a day.
 
+## Checking a template
+
+A template can be read before it is used, and what the tables above
+accept is exactly what the checker accepts: it reads the engine's own
+vocabulary — the placeholder names, the filter names and the date tokens
+— so a name added to the engine is a name the checker already knows.
+It reports three kinds of mistake:
+
+- braces that do not pair up: `{{title`, `title}}`, `{{ {{title}} }}`,
+  `{{}}`;
+- a placeholder, filter or date token the engine does not answer:
+  `{{titlex}}`, `{{title|upperr}}`, `{{date:YYYYY}}`;
+- an argument the engine cannot read: `{{title|pad:wide}}`,
+  `{{date|+xd}}`, `{{time:HH'|mm}}`, `{{ask:}}`.
+
+Each mistake says where it is, what is wrong, and — where the correction
+is deterministic and safe — the text that fixes it. A name within two
+edits of exactly one known one is suggested: `{{titlex}}` → `{{title}}`,
+`{{title|upperr}}` → `{{title|upper}}`, `{{date:YYYYY}}` → `{{date:YYYY}}`.
+A suggestion is only ever text to apply over the mistake it is on; the
+checker rewrites nothing.
+
+Where the fix would be a guess, there is no suggestion and the mistake is
+reported alone: two known names equally close (`{{titel}}` is two edits
+from both `title` and `time`), a `pad:` width that is not a number (only
+the author knows the width), a date move whose count is not one
+(`{{date|+xd}}`), a field with no label (`{{ask:}}`), and an unclosed
+`{{` with text after it — closing that one would swallow a sentence the
+author wrote, so the checker points at it and stays quiet.
+
+It reads the placeholders only: nothing is said about the Markdown around
+them, about the frontmatter, or about the `niman:` directives block,
+each of which has its own parser. **The editor does not run the checker
+yet** — when it runs, and how a mistake is shown, is the other half of
+#71 and is still open.
+
 ## File directives
 
 A template's frontmatter may carry creation directives — under a `niman`
