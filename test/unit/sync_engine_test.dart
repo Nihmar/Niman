@@ -551,6 +551,35 @@ void main() {
     },
   );
 
+  // A weak ETag cannot carry If-Match, so the client drops it: an upload
+  // planned as guarded by one went out with no guard and no look first,
+  // and wrote over a rewrite made while the plan was applied.
+  test('with weak ETags a rewrite during the run is not overwritten', () async {
+    server.weakEtags = true;
+    a.write('a.md', 'one');
+    await a.sync();
+    expect((await a.store.capabilities(a.path))!.ifMatch, isTrue);
+    a.write('a.md', 'two, from here');
+
+    var rewritten = false;
+    final report = (await a.engine.run(
+      onProgress: (stage, _, _) {
+        if (stage == SyncStage.applying && !rewritten) {
+          rewritten = true;
+          server.putFile('a.md', utf8.encode('three, from elsewhere'));
+        }
+      },
+    )).report;
+    await a.ops.writer.indexed;
+    expect(
+      report.done[SyncActionKind.upload],
+      isNull,
+      reason: report.summary(),
+    );
+    expect(report.skipped, ['a.md']);
+    expect(remoteText('a.md'), 'three, from elsewhere');
+  });
+
   group('a bare server (no ETags, no preconditions, no MOVE)', () {
     setUp(() {
       server

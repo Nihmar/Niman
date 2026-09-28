@@ -50,9 +50,14 @@ final class WebDavResource {
   /// `getetag` exactly as sent (quotes included; a weak `W/` is kept
   /// too, since change detection compares it as it is), or null when the
   /// server has none. A weak validator is never replayed as `If-Match`:
-  /// the client drops it, strong comparison could not match it
-  /// (`webdav_client.dart`).
+  /// strong comparison could not match it ([guardEtag]).
   final String? etag;
+
+  /// [etag] when it can guard an `If-Match`, or null when it cannot: there
+  /// is none, or it is weak ([ifMatchGuard]). What a write that relies on
+  /// the precondition must ask, rather than [etag] — a write planned on a
+  /// weak one goes out unguarded and needs the remote checked first.
+  String? get guardEtag => ifMatchGuard(etag);
 
   /// `getcontentlength`, or null (folders, servers that omit it).
   final int? size;
@@ -94,6 +99,22 @@ final class WebDavResource {
 
 bool _sameMap(Map<String, String> a, Map<String, String> b) =>
     a.length == b.length && a.entries.every((e) => b[e.key] == e.value);
+
+/// [etag] when it can guard an `If-Match`, or null when it cannot.
+///
+/// `If-Match` uses strong comparison (RFC 7232, 3.1), and a weak validator
+/// (`W/"x"`, which servers like Nextcloud hand out) is never strong, so it
+/// can never match: sent, it turns every guarded `PUT`/`DELETE` into a 412,
+/// forever. There is no legal way to make it strong, so it guards nothing —
+/// and the planner, the engine and the client all read it through here, so
+/// a write that cannot carry the precondition is one they all know is
+/// unguarded, and checks the remote itself first.
+String? ifMatchGuard(String? etag) {
+  if (etag == null || etag.startsWith('W/') || etag.startsWith('w/')) {
+    return null;
+  }
+  return etag;
+}
 
 /// The items of a `207 Multi-Status` [body], with paths made relative to
 /// [base] (the folder URL the client was created with, trailing slash

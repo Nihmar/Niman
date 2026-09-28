@@ -439,7 +439,10 @@ final class WebDavClient {
     DateTime? modified,
   }) async {
     final clock = Stopwatch()..start();
-    final guard = _usableIfMatch(ifMatch);
+    // A weak ETag cannot guard anything (a caller that plans with
+    // [WebDavResource.guardEtag] never hands one over); dropped rather than
+    // sent, it would fail every write with 412.
+    final guard = ifMatchGuard(ifMatch);
     final response = await _send(
       'PUT',
       path,
@@ -547,7 +550,7 @@ final class WebDavClient {
     String? ifMatch,
   }) async {
     final clock = Stopwatch()..start();
-    final guard = _usableIfMatch(ifMatch);
+    final guard = ifMatchGuard(ifMatch);
     final response = await _send(
       'DELETE',
       path,
@@ -928,21 +931,6 @@ final class WebDavClient {
   /// credentials.
   static int? _spelledPort(Uri uri) =>
       uri.port == (uri.scheme == 'https' ? 443 : 80) ? null : uri.port;
-
-  /// [etag] when it can guard an `If-Match`, or null when it cannot.
-  ///
-  /// `If-Match` uses strong comparison (RFC 7232, 3.1), and a weak
-  /// validator (`W/"x"`, which servers like Nextcloud hand out and
-  /// `webdav_multistatus.dart` stores as sent) is never strong, so it can
-  /// never match: sending it turns every guarded `PUT`/`DELETE` into a
-  /// 412, forever. There is no legal way to make it strong, so the guard
-  /// is dropped and the write goes unguarded.
-  static String? _usableIfMatch(String? etag) {
-    if (etag == null || etag.startsWith('W/') || etag.startsWith('w/')) {
-      return null;
-    }
-    return etag;
-  }
 }
 
 /// The SHA-256 fingerprint of a DER-encoded certificate: uppercase hex

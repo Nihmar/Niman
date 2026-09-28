@@ -258,6 +258,28 @@ void main() {
       expect(d.why, contains('sha aaaa1111→bbbb2222'));
     });
 
+    // A weak ETag cannot carry If-Match (the client drops it), so a write
+    // planned on one is unguarded unless it checks the remote first.
+    test('a weak ETag is no guard: the write checks the remote first', () {
+      final upload = decide(
+        local: changedLocal,
+        remote: dav(etag: 'W/"e1"'),
+        agreed: row(etag: 'W/"e1"'),
+        caps: full,
+      );
+      expect(upload.kind, SyncActionKind.upload);
+      expect(upload.ifMatch, isNull);
+      expect(upload.checkRemoteFirst, isTrue);
+      final delete = decide(
+        remote: dav(etag: 'W/"e1"'),
+        agreed: row(etag: 'W/"e1"'),
+        caps: full,
+      );
+      expect(delete.kind, SyncActionKind.deleteRemote);
+      expect(delete.ifMatch, isNull);
+      expect(delete.checkRemoteFirst, isTrue);
+    });
+
     test('unchanged | changed → download', () {
       final d = decide(
         local: disk(),

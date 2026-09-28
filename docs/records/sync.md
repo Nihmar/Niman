@@ -395,8 +395,12 @@ for multistatus parsing: servers pick their own namespace prefixes
   them for good (#349);
 - guards a write with `If-Match` only when the validator is strong: a
   weak `W/"…"` (some servers hand one out) could never satisfy the
-  strong comparison RFC 7232 requires, so it is dropped and the write
-  goes unguarded rather than 412-ing forever (#349);
+  strong comparison RFC 7232 requires, so it is dropped rather than
+  412-ing forever (#349). The planner and the engine read the same rule
+  (`ifMatchGuard`): a write whose ETag is weak is planned as unguarded
+  and checks the remote first, exactly as on a server with no
+  preconditions — dropping the header alone let it write over an edit
+  made during the run;
 - maps statuses to typed failures: `WebDavAuthFailure` (401/403),
   `WebDavNotFound` (404/409 on a missing parent), `WebDavPrecondition`
   (412), `WebDavRetryable` (408/423/425/429/500/502/503/504 and socket
