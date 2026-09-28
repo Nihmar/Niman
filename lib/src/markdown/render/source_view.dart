@@ -439,6 +439,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// it left, which is what keeps this from growing with the note.
   final Map<int, GlobalKey> _lineKeys = <int, GlobalKey>{};
 
+  /// The keys of a wrapped table row's fragments past its first, by line and
+  /// fragment: a row laid out in fitted columns is several paragraphs, and
+  /// the caret and a tap have to find the one they are in.
+  final Map<(int, int), GlobalKey> _fragmentKeys = <(int, int), GlobalKey>{};
+
+  /// Where the caret's fragment sits in the line's box, beyond the indent
+  /// the painter knows about: a wrapped table row draws its cells away from
+  /// the line's left edge and below its first visual line, so the caret
+  /// rectangle — measured in the fragment's own paragraph — is shifted by
+  /// this before it is painted.
+  final ValueNotifier<Offset> _caretShift = ValueNotifier<Offset>(Offset.zero);
+
+  /// The width the lines' text has, from the last frame that laid it out:
+  /// what a table wider than it is fitted to.
+  double _textWidth = 0;
+
+  /// The text scaler and the syntax colours of the last frame that laid the
+  /// note out: read in `build`, where the inherited widgets may be asked,
+  /// and reused by the layouts the caret and the gestures ask for outside
+  /// it — a table's pieces are needed before the first frame, when asking
+  /// `MediaQuery` would be an error, and after it this is the same value
+  /// that frame used.
+  TextScaler _scaler = TextScaler.noScaling;
+  SyntaxColors? _syntax;
+
   /// The caret rectangle in the caret line's coordinates, recomputed after the
   /// frame that laid that line out. A notifier rather than `setState`: neither
   /// the blink nor the measurement may rebuild the note.
@@ -745,6 +770,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _typewriter.dispose();
     _semanticsTick.dispose();
     _caretRect.dispose();
+    _caretShift.dispose();
     _footnoteMath.dispose();
     _caretSpot.dispose();
     _caretOn.dispose();
@@ -802,9 +828,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// frame that measured it.
   Rect? get caretRect {
     final rect = _caretRect.value;
-    final line = _paragraphAt(_caretLineIndex);
-    if (rect == null || line == null || !line.attached) return null;
-    return rect.shift(line.localToGlobal(Offset.zero));
+    final line = _caretLineIndex;
+    if (rect == null || line < 0) return null;
+    final local = _selection.extent - widget.buffer.offsetOfLine(line);
+    final (_, paragraph) = _fragmentAt(line, local);
+    if (paragraph == null || !paragraph.attached) return null;
+    return rect.shift(paragraph.localToGlobal(Offset.zero));
   }
 
   /// The offset a tap at [global] lands on, or null when it lands outside a
@@ -817,15 +846,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// has to agree with them — or null when no drawn line is under it.
   int? _paintedOffsetAt(Offset global) {
     for (final entry in _lineKeys.entries) {
-      final object = entry.value.currentContext?.findRenderObject();
-      if (object is! RenderParagraph || !object.attached || !object.hasSize) {
-        continue;
+      final line = entry.key;
+      if (line >= widget.buffer.lineCount) continue;
+      final pieces = _piecesOf(line);
+      if (pieces.length == 1) {
+        final object = _renderOf(pieces.first.key);
+        if (object == null) continue;
+        final local = object.globalToLocal(global);
+        if (local.dy < 0 || local.dy >= object.size.height) continue;
+        return widget.buffer.offsetOfLine(line) +
+            pieces.first.start +
+            object.getPositionForOffset(local).offset;
       }
-      if (entry.key >= widget.buffer.lineCount) continue;
-      final local = object.globalToLocal(global);
-      if (local.dy < 0 || local.dy >= object.size.height) continue;
-      return widget.buffer.offsetOfLine(entry.key) +
-          object.getPositionForOffset(local).offset;
+      // A wrapped table row: the piece the point is in, which of the row's
+      // several paragraphs it is. A point in none of them — the room
+      // between the columns, or below the row — is not this line's: the
+      // next one is asked, and the height map answers for a point no drawn
+      // line holds at all.
+      final hit = _pieceAt(pieces, global);
+      if (hit == null) continue;
+      return widget.buffer.offsetOfLine(line) +
+          hit.piece.start +
+          hit.paragraph.getPositionForOffset(hit.local).offset;
     }
     return null;
   }
@@ -842,17 +884,27 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         box.globalToLocal(global).dy - widget.padding.top + _scroll.offset;
     final row = y < 0 ? 0 : _heights.indexAt(y) ?? _heights.length - 1;
     final line = _folds.lineOf(row);
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null || !paragraph.attached) return null;
+    final pieces = _piecesOf(line);
     // The point in the *paragraph's own* coordinates, from its own transform:
     // the insets, the gutter and a live-mode indent are all in that transform,
     // so none of them has to be subtracted by hand. (Doing it by hand
     // subtracted the gutter twice, and the caret landed a gutter's width left
     // of the finger.)
+    if (pieces.length > 1) {
+      final hit = _pieceUnder(pieces, global);
+      if (hit == null) return null;
+      return widget.buffer.offsetOfLine(line) +
+          hit.piece.start +
+          hit.paragraph.getPositionForOffset(hit.local).offset;
+    }
+    final paragraph = _renderOf(pieces.first.key);
+    if (paragraph == null || !paragraph.attached) return null;
     final position = paragraph.getPositionForOffset(
       paragraph.globalToLocal(global),
     );
-    return widget.buffer.offsetOfLine(line) + position.offset;
+    return widget.buffer.offsetOfLine(line) +
+        pieces.first.start +
+        position.offset;
   }
 
   /// Scrolls so [line] is at the top, as far as the map knows.
@@ -2076,6 +2128,150 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return key;
   }
 
+  /// The key of fragment [at] of line [line] — the line's own paragraph for
+  /// its first, and one per fragment of a table row laid out in fitted
+  /// columns — created on first use.
+  GlobalKey _fragmentKey(int line, int at) {
+    if (at == 0) return _keyFor(line);
+    final key = _fragmentKeys.putIfAbsent((line, at), GlobalKey.new);
+    if (_fragmentKeys.length > 512) {
+      _fragmentKeys.removeWhere((_, key) => key.currentContext == null);
+    }
+    return key;
+  }
+
+  /// The paragraph [key] draws, when a frame has laid it out.
+  RenderParagraph? _renderOf(GlobalKey key) {
+    final object = key.currentContext?.findRenderObject();
+    return object is RenderParagraph && object.attached && object.hasSize
+        ? object
+        : null;
+  }
+
+  /// The paragraphs line [line] is drawn in: the line's own, or a table row
+  /// laid out in fitted columns. Each says where its source starts on the
+  /// line and where it stands in the line's box — below the table's cell
+  /// padding for a wrapped row, so the caret's shift and the grid agree.
+  List<_Piece> _piecesOf(int line) {
+    _Piece one(int start, int end, [double x = 0, double y = 0]) =>
+        (key: _keyFor(line), start: start, end: end, x: x, y: y);
+    final length = widget.buffer.lineLengthAt(line);
+    final single = <_Piece>[one(0, length)];
+    final block = _styler?.blockOf(line);
+    if (block == null || block.kind != BlockKind.table) return single;
+    final row = _tableRowAt(context, line, block, _caretSpot.value);
+    final wrapped = row?.wrapped;
+    if (wrapped == null || wrapped.isEmpty) return single;
+    final pad = widget.theme.tableCellPadding.top;
+    final pieces = <_Piece>[];
+    var y = pad;
+    for (final visualLine in wrapped) {
+      for (final piece in visualLine.pieces) {
+        pieces.add((
+          key: _fragmentKey(line, pieces.length),
+          start: piece.start,
+          end: piece.end,
+          x: piece.x,
+          y: y,
+        ));
+      }
+      y += visualLine.height;
+    }
+    return pieces.isEmpty ? single : pieces;
+  }
+
+  /// The fragment of line [line] a caret at [local] of the line is drawn in,
+  /// and its paragraph when a frame has built it.
+  (_Piece?, RenderParagraph?) _fragmentAt(int line, int local) {
+    final pieces = _piecesOf(line);
+    for (final piece in pieces) {
+      if (local >= piece.start && local <= piece.end) {
+        return (piece, _renderOf(piece.key));
+      }
+    }
+    final first = pieces.isEmpty ? null : pieces.first;
+    return (first, first == null ? null : _renderOf(first.key));
+  }
+
+  /// The piece of a wrapped row [global] is *in*, and where in it the point
+  /// lands, or null when it is in none of them: the room between two columns
+  /// is nobody's, and a point outside the row belongs to a line the caller
+  /// has not asked yet.
+  ({_Piece piece, RenderParagraph paragraph, Offset local})? _pieceAt(
+    List<_Piece> pieces,
+    Offset global,
+  ) {
+    for (final piece in pieces) {
+      final paragraph = _renderOf(piece.key);
+      if (paragraph == null) continue;
+      final local = paragraph.globalToLocal(global);
+      if (local.dx < 0 ||
+          local.dx >= paragraph.size.width ||
+          local.dy < 0 ||
+          local.dy >= paragraph.size.height) {
+        continue;
+      }
+      return (piece: piece, paragraph: paragraph, local: local);
+    }
+    return null;
+  }
+
+  /// The fragment of a wrapped row under [global], and where in it the point
+  /// lands: the piece whose box holds it, or — under none, in the padding
+  /// between two columns or below the last line — the nearest one, the
+  /// vertical distance weighing more than the horizontal.
+  ({_Piece piece, RenderParagraph paragraph, Offset local})? _pieceUnder(
+    List<_Piece> pieces,
+    Offset global,
+  ) {
+    ({_Piece piece, RenderParagraph paragraph, Offset local})? best;
+    var bestDistance = double.infinity;
+    for (final piece in pieces) {
+      final paragraph = _renderOf(piece.key);
+      if (paragraph == null) continue;
+      final local = paragraph.globalToLocal(global);
+      final dx = local.dx < 0
+          ? -local.dx
+          : (local.dx > paragraph.size.width
+                ? local.dx - paragraph.size.width
+                : 0.0);
+      final dy = local.dy < 0
+          ? -local.dy
+          : (local.dy > paragraph.size.height
+                ? local.dy - paragraph.size.height
+                : 0.0);
+      if (dx == 0 && dy == 0) {
+        return (piece: piece, paragraph: paragraph, local: local);
+      }
+      final distance = dx + dy * 8;
+      if (distance >= bestDistance) continue;
+      bestDistance = distance;
+      best = (
+        piece: piece,
+        paragraph: paragraph,
+        local: Offset(
+          local.dx.clamp(0, paragraph.size.width),
+          local.dy.clamp(0, paragraph.size.height),
+        ),
+      );
+    }
+    return best;
+  }
+
+  /// How tall the line [line] is drawn: its paragraph's height, or the sum
+  /// of a wrapped table row's visual lines.
+  double _drawnHeightOf(int line) {
+    final block = _styler?.blockOf(line);
+    if (block != null && block.kind == BlockKind.table) {
+      final row = _tableRowAt(context, line, block, _caretSpot.value);
+      final wrapped = row?.wrapped;
+      if (wrapped != null && wrapped.isNotEmpty) {
+        return wrapped.fold<double>(0, (sum, one) => sum + one.height);
+      }
+    }
+    return _paragraphAt(line)?.size.height ?? 0;
+  }
+
   /// The line the caret sits on, or -1.
   int get _caretLineIndex {
     final line = widget.buffer.lineOf(_selection.extent);
@@ -2281,11 +2477,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       },
       styleOf: (token) => nestedTokenStyle(
         token,
-        widget.syntax ?? SyntaxColors.of(context),
+        _syntax ??
+            (widget.dark
+                ? SyntaxColors.fallbackDark
+                : SyntaxColors.fallbackLight),
         dark: widget.dark,
       ),
       theme: widget.theme,
-      scaler: MediaQuery.textScalerOf(context),
+      scaler: _scaler,
+      budget: _textWidth,
       reveal: inside ? at : null,
     );
   }
@@ -2469,14 +2669,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // A closing bracket a pair wrote is stepped over only on its own line.
     _brackets.caretOnLine(line);
     _publishActive(spot);
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null || line < 0) {
+    if (line < 0) {
       _caretRect.value = null;
+      _caretShift.value = Offset.zero;
       return;
     }
     final local = _selection.extent - widget.buffer.offsetOfLine(line);
+    // A table row laid out in fitted columns is drawn as one paragraph per
+    // piece: the caret is measured in — and drawn at — the piece it is in,
+    // and the painter is told how far that piece stands from the line's box.
+    final (piece, paragraph) = _fragmentAt(line, local);
+    if (paragraph == null || piece == null) {
+      _caretRect.value = null;
+      _caretShift.value = Offset.zero;
+      return;
+    }
+    _caretShift.value = Offset(piece.x, piece.y);
     final length = paragraph.text.toPlainText().length;
-    final position = TextPosition(offset: local.clamp(0, length));
+    final position = TextPosition(
+      offset: (local - piece.start).clamp(0, length),
+    );
     // The caret is the *surface's* answer, not a metric computed beside it: the
     // painter reports the offset the way it paints it, over the run it is
     // really
@@ -2520,6 +2732,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final cost = _cost;
     final clock = Stopwatch()..start();
     final syntax = widget.syntax ?? SyntaxColors.of(context);
+    _syntax = syntax;
+    _scaler = MediaQuery.textScalerOf(context);
     // The shortcuts wrap the focus, not the other way round: a
     // `CallbackShortcuts`
     // only sees a key that travels through it on the way to the focused node,
@@ -2572,6 +2786,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                 _leftInset;
             final available =
                 constraints.maxWidth - _leftInset - _rightInset - _gutter;
+            // The pane's text width: what a table wider than it is fitted to.
+            // Kept here so every caller that lays a table out reads the same
+            // number, the gesture path included.
+            _textWidth = available;
             // Typewriter mode: room for the last row to reach the middle,
             // under whatever the note ends with.
             final slack = widget.typewriter
@@ -2692,6 +2910,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 tableHeader:
                                     block?.kind == BlockKind.table &&
                                     index == block!.startLine,
+                                pieceKey: block?.kind == BlockKind.table
+                                    ? (at) => at == 0
+                                          ? _keyFor(index)
+                                          : _fragmentKey(index, at)
+                                    : null,
+                                pieceShift: _caretShift,
                                 definition:
                                     widget.hideMarkers &&
                                         block != null &&
@@ -2866,23 +3090,38 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
 
   /// [block]'s grid, globally: from its first row's top to its last row's
   /// foot, as wide as its columns — or null while those rows are not drawn.
+  ///
+  /// A row laid out in fitted columns is as tall as its wrapped pieces, and
+  /// its pieces stand away from its left edge: the grid reaches its foot,
+  /// not the height of its first paragraph.
   Rect? _tableGrid(Block block) {
-    final first = _paragraphAt(block.startLine);
-    final last = _paragraphAt(block.endLine - 1);
-    if (first == null || last == null) return null;
-    if (!first.attached || !last.attached) return null;
-    if (!first.hasSize || !last.hasSize) return null;
-    final row = _tableRowAt(context, block.startLine, block, _caretSpot.value);
+    final firstLine = block.startLine;
+    final lastLine = block.endLine - 1;
+    final row = _tableRowAt(context, firstLine, block, _caretSpot.value);
     if (row == null) return null;
+    final firstPiece = _piecesOf(firstLine).firstOrNull;
+    final lastPiece = _piecesOf(lastLine).firstOrNull;
+    if (firstPiece == null || lastPiece == null) return null;
+    final first = _renderOf(firstPiece.key);
+    final last = _renderOf(lastPiece.key);
+    if (first == null || last == null) return null;
     final pad = widget.theme.tableCellPadding;
-    final top = first.localToGlobal(Offset.zero);
-    final bottom = last.localToGlobal(Offset(0, last.size.height));
-    return Rect.fromLTRB(
-      top.dx,
-      top.dy - pad.top,
-      top.dx + row.edges.last,
-      bottom.dy + pad.bottom,
+    final wrapped = row.wrapped.isNotEmpty;
+    // The line's own box, from a piece's own transform: a piece stands away
+    // from the left edge and past the cell padding, so the box is that much
+    // up and left of it — the same origin the grid painter draws from.
+    final top = first.localToGlobal(
+      Offset(-firstPiece.x, -(wrapped ? firstPiece.y : pad.top)),
     );
+    final bottom = wrapped
+        ? last.localToGlobal(Offset(-lastPiece.x, -lastPiece.y)).dy +
+              _drawnHeightOf(lastLine) +
+              pad.top +
+              pad.bottom
+        : last.localToGlobal(Offset.zero).dy +
+              _drawnHeightOf(lastLine) +
+              pad.bottom;
+    return Rect.fromLTRB(top.dx, top.dy, top.dx + row.edges.last, bottom);
   }
 
   /// The handles of the table in play, in the overlay's coordinates.
@@ -3681,6 +3920,8 @@ final class _Line extends StatelessWidget {
     required this.definition,
     required this.tableRow,
     required this.tableHeader,
+    required this.pieceKey,
+    required this.pieceShift,
     required this.styled,
     required this.number,
     required this.gutterWidth,
@@ -3739,6 +3980,16 @@ final class _Line extends StatelessWidget {
 
   /// Whether the line is its table's header.
   final bool tableHeader;
+
+  /// The key of one piece of a line drawn as several paragraphs — a table
+  /// row laid out in fitted columns, whose pieces are numbered from its
+  /// first — or null for a line drawn as one.
+  final GlobalKey Function(int at)? pieceKey;
+
+  /// Where the caret's piece stands in the line's box, for a row laid out in
+  /// fitted columns: the caret is measured in the piece's own coordinates,
+  /// and this is what the painter shifts them by. Zero elsewhere.
+  final ValueListenable<Offset> pieceShift;
 
   final StyledLine styled;
   final int? number;
@@ -3941,6 +4192,20 @@ final class _Line extends StatelessWidget {
           ),
     ];
     final indent = _indent(context, revealed: revealed);
+    // A table too wide for the pane is drawn as the read view draws one: its
+    // columns fitted to the pane, each cell wrapped inside its own, the row
+    // taking as many visual lines as its tallest cell does. It is several
+    // paragraphs then, one per piece (`_piecesOf`), which is what lets the
+    // caret, a tap and the key table find the piece they are in.
+    if (table != null && table.wrapped.isNotEmpty) {
+      return _wrappedRow(
+        context,
+        table,
+        indent,
+        concealed: concealed,
+        formulas: inline,
+      );
+    }
     Widget paragraph = Text.rich(
       _span(
         revealed: revealed,
@@ -4145,6 +4410,7 @@ final class _Line extends StatelessWidget {
               rect: caret,
               on: caretOn,
               shift: Offset(_indent(context, revealed: true), 0),
+              pieceShift: pieceShift,
             )
           : null,
       child: child,
@@ -4374,6 +4640,179 @@ final class _Line extends StatelessWidget {
     return boxes.isEmpty ? 0 : boxes.first.left;
   }
 
+  /// A table row too wide for the pane: its columns fitted to it, each cell
+  /// wrapped inside its own, drawn as the read view draws the row — a
+  /// paragraph per piece of every visual line, at its column's edge, behind
+  /// the same grid, so every column shows and nothing is clipped.
+  ///
+  /// The pieces are fixed by the pane's width, so a piece is drawn at rest,
+  /// its marks hidden: a mark that showed would stand the piece wider than
+  /// the column it was fitted into. Editing is unchanged — the caret, a tap
+  /// and the key table all work on the source, and the pieces' keys are what
+  /// they are found through.
+  Widget _wrappedRow(
+    BuildContext context,
+    LiveTableRow row,
+    double indent, {
+    required List<_Concealed> concealed,
+    required List<InlineFormula> formulas,
+  }) {
+    final pad = theme.tableCellPadding;
+    final style = _lineStyle(revealed: false);
+    final strut = StrutStyle.fromTextStyle(style);
+    final ratio = MediaQuery.devicePixelRatioOf(context);
+    final children = <Widget>[];
+    var y = pad.top;
+    var at = 0;
+    for (final visual in row.wrapped) {
+      for (final piece in visual.pieces) {
+        final key = pieceKey?.call(at) ?? GlobalKey();
+        Widget paragraph = Text.rich(
+          _pieceSpan(
+            piece.start,
+            piece.end,
+            concealed: concealed,
+            formulas: formulas,
+          ),
+          key: key,
+          style: style,
+          strutStyle: strut,
+          // The piece is one visual line already: wrapping it again would
+          // carry its remainder under the wrong column, as the row's own
+          // paragraph did before it was fitted.
+          softWrap: false,
+        );
+        final mine = <InlineFormula>[
+          for (final formula in formulas)
+            if (formula.start >= piece.start && formula.end <= piece.end)
+              (
+                start: formula.start - piece.start,
+                end: formula.end - piece.start,
+                box: formula.box,
+                fontSize: formula.fontSize,
+                color: formula.color,
+              ),
+        ];
+        if (mine.isNotEmpty) {
+          paragraph = CustomPaint(
+            foregroundPainter: InlineMathPainter(
+              paragraph: key,
+              formulas: mine,
+              devicePixelRatio: ratio,
+            ),
+            child: paragraph,
+          );
+        }
+        final squiggles = _misspelledInPiece(piece.start, piece.end);
+        if (squiggles.isNotEmpty) {
+          paragraph = CustomPaint(
+            foregroundPainter: SquigglePainter(
+              paragraph: key,
+              ranges: squiggles,
+              color: misspelledColor,
+            ),
+            child: paragraph,
+          );
+        }
+        children.add(
+          Positioned(left: indent + piece.x, top: y, child: paragraph),
+        );
+        at++;
+      }
+      y += visual.height;
+    }
+    return CustomPaint(
+      painter: LiveTableGridPainter(
+        row: row,
+        left: indent,
+        color: theme.tableBorder,
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: y + pad.bottom,
+        child: Stack(children: children),
+      ),
+    );
+  }
+
+  /// The words of [start, end) of the line the spelling flags, as offsets
+  /// from the piece's own start: the line's ranges, clipped to the piece.
+  List<TextRange> _misspelledInPiece(int start, int end) => <TextRange>[
+    for (final range in _unjudged())
+      if (range.end > start && range.start < end)
+        TextRange(
+          start: range.start < start ? 0 : range.start - start,
+          end: range.end > end ? end - start : range.end - start,
+        ),
+  ];
+
+  /// The span of `[start, end)` of the line's source, for one piece of a
+  /// table row laid out in fitted columns: the line's own runs and what is
+  /// drawn in place of them, cut to the piece.
+  TextSpan _pieceSpan(
+    int start,
+    int end, {
+    required List<_Concealed> concealed,
+    required List<InlineFormula> formulas,
+  }) {
+    final spans = <InlineSpan>[];
+    if (end <= start) return TextSpan(children: spans);
+    final marks = <_Concealed>[
+      for (final hidden in concealed)
+        if (hidden.$2 > start && hidden.$1 < end)
+          (
+            hidden.$1 < start ? start : hidden.$1,
+            hidden.$2 > end ? end : hidden.$2,
+            hidden.$3,
+            whole: hidden.whole,
+          ),
+    ];
+    final ink = (
+      start: start,
+      end: end,
+      selected: _clipTo(selected, start, end),
+      composing: _clipTo(composing, start, end),
+      found: <(int, int, bool)>[
+        for (final match in found)
+          if (match.$2 > start && match.$1 < end)
+            (
+              match.$1 < start ? start : match.$1,
+              match.$2 > end ? end : match.$2,
+              match.$3,
+            ),
+      ],
+    );
+    var at = start;
+    for (final token in styled.tokens) {
+      if (token.end <= at || token.start >= end) continue;
+      final from = token.start < at ? at : token.start;
+      final to = token.end > end ? end : token.end;
+      if (from > at) _add(spans, at, from, null, marks, ink);
+      _add(
+        spans,
+        from,
+        to,
+        hidden(token, revealed: false)
+            ? _hiddenMarker
+            : nestedTokenStyle(token, syntax, dark: dark),
+        marks,
+        ink,
+      );
+      at = to;
+    }
+    if (at < end) _add(spans, at, end, null, marks, ink);
+    return TextSpan(children: spans);
+  }
+
+  /// [range] clipped to `[start, end)`, or null when it falls outside.
+  static (int, int)? _clipTo((int, int)? range, int start, int end) {
+    if (range == null || range.$2 <= start || range.$1 >= end) return null;
+    return (
+      range.$1 < start ? start : range.$1,
+      range.$2 > end ? end : range.$2,
+    );
+  }
+
   /// The line's tokens as styled runs. A token's override never changes the
   /// size
   /// or the height, so a line keeps the surface's metrics whatever it contains
@@ -4539,12 +4978,19 @@ final class _Line extends StatelessWidget {
     int end,
     TextStyle? style, [
     List<_Concealed> concealed = const <_Concealed>[],
+    _Ink? ink,
   ]) {
+    // A piece of a table row laid out in fitted columns draws the line's
+    // selection, its composition and the find bar's matches clipped to the
+    // piece; every other line draws them as they are.
+    final chosen = ink == null ? selected : ink.selected;
+    final written = ink == null ? composing : ink.composing;
+    final matches = ink == null ? found : ink.found;
     final cuts = <int>{start, end};
     for (final range in <(int, int)?>[
-      selected,
-      composing,
-      for (final match in found) (match.$1, match.$2),
+      chosen,
+      written,
+      for (final match in matches) (match.$1, match.$2),
       for (final hidden in concealed) (hidden.$1, hidden.$2),
     ]) {
       if (range == null) continue;
@@ -4567,14 +5013,14 @@ final class _Line extends StatelessWidget {
           whole = hidden.whole;
         }
       }
-      if (inside(selected)) {
+      if (inside(chosen)) {
         piece = (piece ?? const TextStyle()).copyWith(
           background: Paint()..color = _selectionColor,
         );
       }
       // A match is drawn over the selection: the current one *is* the
       // selection, and it has to read as the one the bar is on.
-      for (final match in found) {
+      for (final match in matches) {
         if (from >= match.$1 && to <= match.$2) {
           piece = (piece ?? const TextStyle()).copyWith(
             background: Paint()
@@ -4582,7 +5028,7 @@ final class _Line extends StatelessWidget {
           );
         }
       }
-      if (inside(composing)) {
+      if (inside(written)) {
         piece = (piece ?? const TextStyle()).copyWith(
           decoration: TextDecoration.underline,
         );
@@ -4603,6 +5049,23 @@ final class _Line extends StatelessWidget {
 /// the style that hides it, and whether it has to stay on one row — the room
 /// a formula is painted over does.
 typedef _Concealed = (int, int, TextStyle, {bool whole});
+
+/// The ranges a piece of a table row laid out in fitted columns draws its
+/// selection, its composition and the find bar's matches in: the line's own,
+/// clipped to the piece's source.
+typedef _Ink = ({
+  int start,
+  int end,
+  (int, int)? selected,
+  (int, int)? composing,
+  List<(int, int, bool)> found,
+});
+
+/// One paragraph a line is drawn in: the key it is built with, where its
+/// source starts on the line, and where it stands in the line's box — away
+/// from the left edge and below the first visual line for a fragment of a
+/// table row laid out in fitted columns.
+typedef _Piece = ({GlobalKey key, int start, int end, double x, double y});
 
 /// The note as a text field to the platform's accessibility: what
 /// `RenderEditable` tells it about a `TextField`, which the `Semantics`
@@ -4806,8 +5269,12 @@ final class _RowPainter extends CustomPainter {
 /// It reads the rectangle and the blink at *paint* time and repaints when
 /// either changes, so neither rebuilds the line it is drawn over.
 final class _CaretPainter extends CustomPainter {
-  new({required this.rect, required this.on, this.shift = Offset.zero})
-    : super(repaint: Listenable.merge(<Listenable>[rect, on]));
+  new({
+    required this.rect,
+    required this.on,
+    this.shift = Offset.zero,
+    this.pieceShift,
+  }) : super(repaint: Listenable.merge(<Listenable?>[rect, on, pieceShift]));
 
   /// The caret, in its line's *paragraph's* coordinates.
   final ValueListenable<Rect?> rect;
@@ -4818,12 +5285,17 @@ final class _CaretPainter extends CustomPainter {
   /// the left of the character it was at.
   final Offset shift;
 
+  /// Where the *piece* the caret is in sits in the same box, for a table row
+  /// laid out in fitted columns: the caret is measured in the piece's own
+  /// coordinates, so it is drawn from theirs.
+  final ValueListenable<Offset>? pieceShift;
+
   @override
   void paint(Canvas canvas, Size size) {
     final value = rect.value;
     if (!on.value || value == null) return;
     canvas.drawRect(
-      value.shift(shift),
+      value.shift(shift + (pieceShift?.value ?? Offset.zero)),
       Paint()..color = const Color(0xFF7AA2F7),
     );
   }
@@ -4832,7 +5304,8 @@ final class _CaretPainter extends CustomPainter {
   bool shouldRepaint(_CaretPainter oldDelegate) =>
       oldDelegate.rect != rect ||
       oldDelegate.on != on ||
-      oldDelegate.shift != shift;
+      oldDelegate.shift != shift ||
+      oldDelegate.pieceShift != pieceShift;
 }
 
 /// What a frame this view draws costs it (#316).

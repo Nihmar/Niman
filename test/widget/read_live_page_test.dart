@@ -519,6 +519,43 @@ void main() {
       expect(read[at].dy, closeTo(live[at].dy, 0.01), reason: words[at]);
     }
   });
+
+  testWidgets('a table too wide for a phone pane shows every column in both', (
+    tester,
+  ) async {
+    // #337: `live` clipped the columns past the pane while the read view
+    // wrapped them. A table wider than the pane is fitted to it now, its
+    // cells wrapped, so every column of it stands inside the pane in both
+    // views — neither of them hides a word.
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const note =
+        'caret\n\n| Name | Qty | Notes |\n|---|:-:|--:|\n'
+        '| apple | 3 | **fresh** |\n'
+        '| a longer name | 12 | one whose words go on and on |\n\n'
+        'after table\n';
+    const words = ['Qty', 'Notes', 'apple', 'fresh', 'longer', 'words', 'on'];
+    Future<List<Offset>> places({required bool read}) async {
+      await _pumpNote(tester, note, read: read);
+      return <Offset>[for (final word in words) _glyphOf(tester, word)];
+    }
+
+    final live = await places(read: false);
+    final read = await places(read: true);
+    for (var at = 0; at < words.length; at++) {
+      expect(
+        live[at].dx,
+        lessThan(320),
+        reason: 'live keeps ${words[at]} inside the pane',
+      );
+      expect(
+        read[at].dx,
+        lessThan(320),
+        reason: 'the read view keeps ${words[at]} inside the pane',
+      );
+    }
+  });
 }
 
 /// The colour the character at [offset] of [root]'s text is drawn in, the
