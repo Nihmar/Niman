@@ -10,6 +10,10 @@ name: pages
 # Enabling Pages (Settings → Pages → Source: GitHub Actions) is a one-time
 # click a maintainer has to make; until then this workflow has nowhere to
 # deploy to.
+#
+# A pull request gets the same build, read-only and without the deploy, in
+# `.github/workflows/site.yml` (issue #470): a change to the build belongs in
+# both files.
 on:
   push:
     branches:

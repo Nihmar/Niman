@@ -38,6 +38,10 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
     plus `./scripts/niman.sh integration` for `integration_test/`
   - Windows: `scripts\niman.bat check` (logs: `%TEMP%\niman\`),
     plus `scripts\niman.bat integration` for the headless files there
+- A second workflow (`.github/workflows/site.yml`) builds the documentation
+  site on every PR, with the deploy's own Jekyll steps and read-only (issue
+  #470): a change to `_config.yml`, `_layouts/`, `_includes/`, `assets/css/` or
+  a page has to pass it, and there is no Ruby here to try it by hand.
 - The suite is green on Linux, and on Windows too: the eighteen entries
   `scripts/known-failures.txt` used to carry were real bugs, fixed rather than
   tolerated (2026-09-10). What remains on Windows is five flakes — the same

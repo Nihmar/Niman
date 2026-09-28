@@ -1,0 +1,66 @@
+name: site
+
+# The documentation site is built from this repository by GitHub Pages' Jekyll,
+# and only on `main` (`.github/workflows/pages.yml`, issue #441). A `layout:`
+# no `_layouts/` file provides, a Liquid tag Liquid does not know, a `{% raw %}`
+# left open or a `_config.yml` key Jekyll refuses is therefore found when the
+# site deploys — or when it silently does not — rather than in the pull request
+# that broke it (issue #470). The restyle (#467) is exactly such a change: it
+# adds `_layouts/`, `_includes/` and `assets/css/site.css` that no pull request
+# ever built.
+#
+# This workflow is that build on a pull request, and nothing else: no artifact,
+# no `pages` permission, no `id-token`, no deploy job. It is a workflow of its
+# own rather than a job in `check.yml`, whose job is the Flutter one (format,
+# analyze, the unit, widget and integration suites): the two then run in
+# parallel, on separate runners, and neither one waits for the other. The two
+# files are mirrors — a change to the build belongs in both — so each names the
+# other.
+#
+# It runs on every pull request, with no `paths:` filter. The deploy renders the
+# repository as it stands: `_config.yml` decides, through its `exclude:` list,
+# what is not a page, and everything else in the checkout is part of the site. A
+# list of paths here would be a second copy of that list — it would drift from
+# it, and the check would go on passing while skipping the change that broke the
+# deploy, which is the failure this workflow exists to remove.
+on:
+  pull_request:
+  workflow_dispatch:
+
+# Reading the repository is all the build asks for; nothing here deploys
+# (issue #393).
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+    steps:
+      # Actions are pinned to a commit SHA, with the tag in a comment: a moving
+      # tag is a supply-chain hole (issue #393).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The deploy's own step, the same command character for character.
+      # Liquid renders before Markdown, and GitHub's build has no switch to turn
+      # it off: Jekyll decides per file, from the content, whether a page is
+      # rendered with Liquid at all. Niman's docs are Markdown *with* the app's
+      # own template syntax in them — `{{date:FORMAT}}`, `{{ask:Label}}`, the
+      # `{{…}}` the templates page documents — and Liquid would read those as
+      # its tags and drop them, leaving that page with holes in it. So every
+      # line that carries one is handed to Liquid as a raw block, in the
+      # checkout only: what this build reads is then what the deploy reads.
+      # Skipping it would leave a check that passes here and fails on `main`.
+      - name: Keep Niman's placeholders out of Liquid's way
+        run: |
+          find . -name '*.md' -not -name 'README.md' -not -path './index.md' -print0 \
+            | xargs -0 sed -i -e '/{{/{s/^/{% raw %}/;s/$/{% endraw %}/}'
+
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1
+        with:
+          source: ./
+          destination: ./_site
