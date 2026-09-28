@@ -44,6 +44,35 @@ Future<MarkdownSourceViewState> _pump(
 
 final SourceBuffer _buffer = SourceBuffer.fromText(_note);
 
+/// A two-column table whose first cell cannot fit a phone's pane.
+const String _longTable =
+    '| head | second |\n|---|---|\n'
+    '| a first cell far too long for the pane, and still going further |'
+    ' second |';
+
+/// Pumps [note] in `live` at the pane the test set, and hands back the view.
+Future<MarkdownSourceViewState> _pumpNote(
+  WidgetTester tester,
+  String note,
+) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => MarkdownSurface(
+            buffer: SourceBuffer.fromText(note),
+            mode: MarkdownSurfaceMode.live,
+            theme: markdownThemeOf(context),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+  await tester.pump();
+  return tester.state<MarkdownSourceViewState>(find.byType(MarkdownSourceView));
+}
+
 /// Where [text] starts on line [line] of [_note], plus [plus].
 int _at(int line, String text, [int plus = 0]) =>
     _buffer.offsetOfLine(line) + _buffer.lineAt(line).indexOf(text) + plus;
@@ -54,32 +83,13 @@ RenderParagraph _row(WidgetTester tester, String text) => tester
     .firstWhere((p) => p.text.toPlainText().contains(text));
 
 void main() {
-  testWidgets('a table row is one line, however long its cells', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 400);
+  testWidgets('a table that fits the pane is one line, however long its '
+      'cells', (tester) async {
+    tester.view.physicalSize = const Size(1200, 400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => MarkdownSurface(
-              buffer: SourceBuffer.fromText(
-                '| head | second |\n|---|---|\n'
-                '| a first cell far too long for the pane, and still going, '
-                'and going, and going, and going | second |',
-              ),
-              mode: MarkdownSurfaceMode.live,
-              theme: markdownThemeOf(context),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump();
+    await _pumpNote(tester, _longTable);
 
     final paragraphs = tester.renderObjectList<RenderParagraph>(
       find.byType(RichText),
@@ -93,6 +103,103 @@ void main() {
     // The cells after the long one stay on its line: a soft-wrapped row
     // dropped them wherever the wrap left the pen, in the wrong columns.
     expect(row.size.height, closeTo(header.size.height, 0.5));
+  });
+
+  testWidgets('a table too wide for the pane wraps its cells inside them', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _pumpNote(tester, _longTable);
+
+    const pane = 320.0;
+    final pieces = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        // The table's own text: a handle's glyph is an icon font's, and the
+        // surface overlays more than the note.
+        .where((p) => RegExp('[A-Za-z]').hasMatch(p.text.toPlainText()))
+        .toList();
+    // Every word of the table is drawn, and nothing reaches past the pane:
+    // the columns were fitted to it instead of the row being clipped.
+    for (final word in <String>[
+      'head',
+      'second',
+      'first',
+      'cell',
+      'long',
+      'pane',
+      'still',
+      'further',
+    ]) {
+      expect(
+        pieces.any((p) => p.text.toPlainText().contains(word)),
+        isTrue,
+        reason: word,
+      );
+    }
+    for (final piece in pieces) {
+      final box = piece.localToGlobal(Offset.zero) & piece.size;
+      expect(
+        box.right,
+        lessThanOrEqualTo(pane + 0.5),
+        reason:
+            '"${piece.text.toPlainText()}" at '
+            '${box.left}..${box.right}, ${box.top}..${box.bottom}',
+      );
+    }
+    // The long cell wraps: its last word is drawn below the header row.
+    final head = tester.getRect(
+      find.textContaining('head', findRichText: true),
+    );
+    final tail = tester.getRect(
+      find.textContaining('further', findRichText: true),
+    );
+    expect(
+      tail.top,
+      greaterThan(head.bottom),
+      reason: 'the long cell continues on a later visual line',
+    );
+    // The columns are kept: the second cell stands where the header set it.
+    final seconds = <double>[
+      for (final piece in pieces)
+        if (piece.text.toPlainText().contains('second'))
+          piece.localToGlobal(Offset.zero).dx,
+    ];
+    expect(seconds.length, 2, reason: 'header and body, one column each');
+    expect(seconds.first, closeTo(seconds.last, 0.5));
+  });
+
+  testWidgets('a tap in a wrapped row lands in the cell it was on', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final state = await _pumpNote(tester, _longTable);
+    final buffer = state.widget.buffer;
+    // The tail of the long cell is on a later visual line of the row.
+    final tail = find.textContaining('further', findRichText: true);
+    final box = tester.getRect(tail);
+    expect(box.right, lessThanOrEqualTo(320.5));
+    await tester.tapAt(box.center);
+    await tester.pump();
+
+    final line = buffer.lineOf(state.selection.extent);
+    expect(line, 2, reason: 'the tap was on the table, not a line about it');
+    final text = buffer.lineAt(line);
+    final local = state.selection.extent - buffer.offsetOfLine(line);
+    final piece = tester.widget<RichText>(tail).text.toPlainText();
+    final start = text.indexOf(piece);
+    expect(start, greaterThanOrEqualTo(0));
+    expect(local, inInclusiveRange(start, start + piece.length));
+    // And the caret is drawn where the tap was: on the piece's own line.
+    final caret = state.caretRect;
+    expect(caret, isNotNull);
+    expect(caret!.top, lessThan(box.bottom + 1));
+    expect(caret.bottom, greaterThan(box.top - 1));
   });
 
   testWidgets("a row's pipes are drawn as room, on the caret's row too", (

@@ -56,6 +56,7 @@ in a table's cell too, whose row stays on the grid.
 | `df4f5b9` | An HTML block is drawn in a code block's box in both modes, a row per line. |
 | `65919a1` | `live` hides a block of nothing but definitions while the caret is not in it, and ends the note with the read view's footnotes (`footnoteSliver`, shared); a tap on a footnote puts the caret in its definition. A link definition has no footnote to tap: it is reached with the caret, or in `source`. |
 | `78af1366` | The read view's table is as wide as its columns, where it spread what they left of the pane evenly across them. |
+| `7e73ab5a` | A table wider than the pane is **fitted** to it, its cells wrapped inside their columns (#337): every column shows in `live` as it does in the read view, where `live` clipped the ones past the pane. The two fit the same table slightly differently — `live` gives a column in proportion to what its widest cell wants, with its widest word kept whole; the read view's `Table` does the same, by Flutter's own algorithm — so an over-wide table's columns are not the same x in the two views. The 0.00 above is a table that fits the pane, and stays exact. |
 | `061458e` | `live` draws a table as the read view's grid over its own source: the pipes and the spaces round each cell drawn as room that puts the next cell on its column (`LiveTables`), a cell's padding round each row, the delimiter row taking no room, the grid painted behind (`LiveTableGridPainter`). The caret's row is drawn as written. It is what #261's editing builds on. |
 
 ## Decisions (2026-09-23)
