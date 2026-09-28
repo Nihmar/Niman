@@ -24,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/welcome.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -122,9 +123,18 @@ void main() {
       ..devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
+    // The first-run deck (#266) reads the real app database, not the
+    // session this test hands the app: on a fresh machine — a CI runner,
+    // a new install — it is unseen and covers the shell the walk below
+    // needs, so it is faked as already seen. The deck is the subject of
+    // app_boot_test.dart, not of this file.
+    final welcome = MemoryWelcomeStore()..deckSeen = true;
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [librarySessionProvider.overrideWithValue(controller)],
+        overrides: [
+          librarySessionProvider.overrideWithValue(controller),
+          welcomeStoreProvider.overrideWith((ref) async => welcome),
+        ],
         child: const NimanApp(),
       ),
     );
