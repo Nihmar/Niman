@@ -2,6 +2,17 @@
 #
 # The strict lint set from `very_good_analysis` is activated below; the
 # analyzer can also be run from the command line via `flutter analyze`.
+#
+# `language:` turns on the three strict modes: an implicit `dynamic` is
+# reported rather than silently accepted, un-typed generics are reported, and
+# a type argument the inference had to guess at is reported.
+#
+# Only `build/` is generated Dart. The platform trees hold no first-party
+# Dart; they are listed because the Flutter tool rewrites this file to add them
+# on every `flutter analyze`, `flutter test` and `flutter build`, and their
+# `flutter/ephemeral/.plugin_symlinks` entries point at the pub cache, whose
+# plugin sources must not be analyzed as part of this app.
+# `test/unit/analysis_options_test.dart` pins both halves.
 
 include: package:very_good_analysis/analysis_options.yaml
 
@@ -11,3 +22,7 @@ analyzer:
     - android/**
     - linux/**
     - windows/**
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
