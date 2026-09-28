@@ -26,6 +26,12 @@ Future<ProcessAnswer> _printPage(
   return (exit: 0, stdout: '');
 }
 
+/// A Unix socket is the unreadable note the failure tests make: Windows has
+/// no such file for the walk to list, so they run on Linux and macOS.
+final String? _unixSocketsSkip = Platform.isWindows
+    ? 'a Unix socket is Linux and macOS'
+    : null;
+
 void main() {
   late Directory lib;
   late String notes;
@@ -249,6 +255,55 @@ void main() {
       contains('Br\uFFFDoken'),
     );
   });
+
+  /// Binds the unreadable note the failure tests use: a Unix socket is
+  /// listed as a file, so the walk takes it for a note, and opening it is
+  /// what fails — a read error in the middle of the walk, the way a
+  /// permission error would be, without `chmod`.
+  Future<void> brokenNote() async {
+    final server = await ServerSocket.bind(
+      InternetAddress(
+        p.join(notes, 'broken.md'),
+        type: InternetAddressType.unix,
+      ),
+      0,
+    );
+    addTearDown(server.close);
+  }
+
+  test('a failed zip export leaves no archive behind', () async {
+    await brokenNote();
+    await expectLater(
+      TreeExport.run(
+        dir: notes,
+        zipPath: zip,
+        format: ExportTreeFormat.markdown,
+        language: 'en',
+      ),
+      // The read of `broken.md` is what failed; an isolate's uncaught
+      // error crosses the port as its text.
+      throwsA(predicate<Object>((error) => '$error'.contains('broken.md'))),
+    );
+    // The half-written zip is gone: what failed is not an export.
+    expect(File(zip).existsSync(), isFalse);
+  }, skip: _unixSocketsSkip);
+
+  test('a failed EPUB export leaves no archive behind', () async {
+    await brokenNote();
+    final epub = p.join(lib.path, 'book.epub');
+    await expectLater(
+      TreeExport.run(
+        dir: notes,
+        zipPath: epub,
+        format: ExportTreeFormat.epub,
+        language: 'en',
+      ),
+      throwsA(predicate<Object>((error) => '$error'.contains('broken.md'))),
+    );
+    // The failure path used to close the book — a whole, readable EPUB
+    // holding the chapters written before it — and leave it there.
+    expect(File(epub).existsSync(), isFalse);
+  }, skip: _unixSocketsSkip);
 
   test('a cancelled export leaves no zip behind', () async {
     // Enough entries that the isolate is still writing when the cancel
