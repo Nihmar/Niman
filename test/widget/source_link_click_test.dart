@@ -85,7 +85,7 @@ Future<MarkdownSourceViewState> _pump(
           theme: _theme,
           showLineNumbers: false,
           hideMarkers: mode == _Mode.live,
-          onOpenLink: (kind, raw) => _opened.add((kind, raw)),
+          onOpenLink: (kind, raw, href) => _opened.add((kind, raw)),
         ),
       ),
     ),

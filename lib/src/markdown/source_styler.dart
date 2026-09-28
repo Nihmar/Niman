@@ -361,6 +361,33 @@ final class SourceStyler {
     return out;
   }
 
+  /// The target the link run covering local offset [start] of [line] resolved
+  /// to — the `href` the parse gave it, so a reference link (`[text][label]`,
+  /// whose own source spells no `](href)`) is followed from the editor as the
+  /// read view follows it — or null when no link run covers [start].
+  String? linkHrefAt(int line, int start) {
+    final block = _scanner.blockAt(line);
+    if (block == null) return null;
+    final parsed = _parsedOf(block);
+    if (parsed == null) return null;
+    final index = line - block.startLine;
+    if (index < 0 || index >= parsed.lineStarts.length) return null;
+    final lineStart = parsed.lineStarts[index];
+    final lineEnd = index + 1 < parsed.lineStarts.length
+        ? parsed.lineStarts[index + 1] - 1
+        : parsed.parse.text.length;
+    final at =
+        start - _parsePrefix(block, line, buffer.lineAt(line)) + lineStart;
+    for (final run in parsed.parse.runs) {
+      final href = run.href;
+      if (run.kind != StyleKind.link || href == null) continue;
+      if (run.start < lineStart || run.end > lineEnd) continue;
+      if (at < run.start || at > run.end) continue;
+      return href;
+    }
+    return null;
+  }
+
   /// Line [line]'s tokens, disjoint and sorted.
   List<Token> tokensOf(int line) {
     final block = _scanner.blockAt(line);
