@@ -1339,6 +1339,40 @@ final class UkrainianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” вкладено надто глибоко';
   @override
+  String get frontmatterTitle => 'Frontmatter';
+  @override
+  String get frontmatterShowRaw => 'Show raw YAML';
+  @override
+  String get frontmatterShowFields => 'Show fields';
+  @override
+  String get frontmatterAddField => 'Add field';
+  @override
+  String get frontmatterNewField => 'New field';
+  @override
+  String get frontmatterEditField => 'Edit field';
+  @override
+  String get frontmatterKeyLabel => 'Key';
+  @override
+  String get frontmatterValueLabel => 'Value';
+  @override
+  String get frontmatterTypeLabel => 'Type';
+  @override
+  String get frontmatterListHint => 'Separate items with commas';
+  @override
+  String get frontmatterRemoveField => 'Remove field';
+  @override
+  String get frontmatterNoFields => 'No fields';
+  @override
+  String get frontmatterTypeText => 'Text';
+  @override
+  String get frontmatterTypeNumber => 'Number';
+  @override
+  String get frontmatterTypeDate => 'Date';
+  @override
+  String get frontmatterTypeBoolean => 'True/false';
+  @override
+  String get frontmatterTypeList => 'List';
+  @override
   String frontmatterInvalid(String reason) =>
       'Не вдалося прочитати метадані: $reason';
   @override

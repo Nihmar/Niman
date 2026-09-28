@@ -83,6 +83,23 @@ stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
 
+**In the read view the block is shown as fields.** The read pane puts the
+frontmatter at the top as one row per key — a text line, a number, a date, a
+tick for `true`/`false`, a chip per list item — with **Add field** to add a
+key and the `×` on a row to take one out. A toggle beside the title shows the
+same block as its raw YAML. In either view the file is the only copy: an edit
+rewrites that key's line and leaves the rest of the block — comments, quoting,
+the other keys — exactly where it was, and it saves and undoes like any other
+edit. The source editor keeps showing the frontmatter as text, which is still
+where the YAML itself is written; the fields are a second way into the same
+file, not a second file.
+
+A block that does not parse is shown as it is, with the reason and no field
+rows, so nothing the panel draws rewrites a note it cannot read; a note with
+no frontmatter shows no panel. Keys whose value is a nested mapping are left
+to the raw YAML, and the fields the panel draws are text, number, date,
+`true`/`false` and lists.
+
 ## Tags
 
 Two places, both searchable:
