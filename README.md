@@ -13,15 +13,28 @@ source of truth. No lock-in, no proprietary format.
 
 ## Screenshots
 
-From a phone (Android) — the desktop set follows.
+From the app itself, in English, on a library of sample notes: a phone
+(Android) and the Linux desktop.
+
+**Android** — device captures:
 
 <p>
-  <img src="docs/images/android-files.jpg" alt="The files view: pinned notes, folders and the notes beside them" width="160">
-  <img src="docs/images/android-editor-live.jpg" alt="Editing a note in live: headings, bold text and typeset maths" width="160">
-  <img src="docs/images/android-preview.jpg" alt="The read view of the same note" width="160">
-  <img src="docs/images/android-search.jpg" alt="Searching a library, with the match in its excerpt" width="160">
-  <img src="docs/images/android-settings.jpg" alt="Settings" width="160">
-  <img src="docs/images/android-widget.jpg" alt="The home-screen notes widget" width="160">
+  <img src="docs/images/android-files.jpg" alt="The files view: pinned notes, folders and the notes beside them" width="150">
+  <img src="docs/images/android-editor-live.jpg" alt="Editing a note in live: headings, bold text and typeset maths" width="150">
+  <img src="docs/images/android-preview.jpg" alt="The read view of the same note" width="150">
+  <img src="docs/images/android-search.jpg" alt="Searching a library, with the match in its excerpt" width="150">
+  <img src="docs/images/android-settings.jpg" alt="Settings" width="150">
+  <img src="docs/images/android-widget.jpg" alt="The home-screen notes widget" width="150">
+</p>
+
+**Desktop (Linux)** — window captures:
+
+<p>
+  <img src="docs/images/desktop-panes.jpg" alt="Three panes open: a journal entry in source and in live, and a note beside them" width="300">
+  <img src="docs/images/desktop-editor-live.jpg" alt="Editing a note in live, with line numbers and the outline pane" width="300">
+  <img src="docs/images/desktop-read-view.jpg" alt="The read view of the same note, with the outline pane" width="300">
+  <img src="docs/images/desktop-journal.jpg" alt="A journal entry, with the calendar and the recent days beside it" width="300">
+  <img src="docs/images/desktop-settings.jpg" alt="Settings: the app's own sections and the library's" width="300">
 </p>
 
 ## Documentation
