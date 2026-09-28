@@ -136,6 +136,8 @@ final class FakeWebDavServer {
   final List<({int status, String? retryAfter})> _failures = [];
   int _skipBeforeFailures = 0;
   int _dropGets = 0;
+  int _stallGets = 0;
+  final List<Socket> _stalled = [];
 
   /// After [after] normal requests, the next [count] answer [status]
   /// (with [retryAfter]).
@@ -160,6 +162,11 @@ final class FakeWebDavServer {
   }
 
   void dropNextGet() => _dropGets++;
+
+  /// The next GET sends its headers (`Content-Length` included) and then
+  /// nothing: the connection stays open with no body, as a wedged server
+  /// leaves it (#348). [close] ends whatever is left of it.
+  void stallNextGet() => _stallGets++;
 
   final Map<String, int> _failPuts = {};
 
@@ -206,7 +213,13 @@ final class FakeWebDavServer {
       (_tree.keys.where((k) => k.isNotEmpty).toList()..sort());
 
   /// Stops the server.
-  Future<void> close() => _server.close(force: true);
+  Future<void> close() async {
+    for (final socket in _stalled) {
+      socket.destroy();
+    }
+    _stalled.clear();
+    await _server.close(force: true);
+  }
 
   // --- tree ---------------------------------------------------------------
 
@@ -486,6 +499,13 @@ final class FakeWebDavServer {
       ..contentLength = node.bytes.length
       ..headers.set('Last-Modified', HttpDate.format(node.modified));
     if (etags) response.headers.set('ETag', _etag(node));
+    if (_stallGets > 0) {
+      _stallGets--;
+      final socket = await response.detachSocket();
+      _stalled.add(socket);
+      await socket.flush();
+      return;
+    }
     if (_dropGets > 0) {
       _dropGets--;
       final socket = await response.detachSocket();

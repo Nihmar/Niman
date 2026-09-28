@@ -112,7 +112,12 @@ final class WebDavClient {
   /// fragment or user info.
   final Uri baseUrl;
 
-  /// How long to wait for a connection and for a response to start.
+  /// How long to wait for a connection, for a response to start, and for
+  /// a body to arrive.
+  ///
+  /// The last one is what stops a server that sent its headers and then
+  /// went quiet from holding a sync run open for the rest of the session
+  /// (#348).
   final Duration timeout;
 
   final String? _authorization;
@@ -290,7 +295,8 @@ final class WebDavClient {
 
   /// `GET` [path] streamed into [into], which is closed at the end (also
   /// on failure). The sha256 is computed on the way; a body shorter or
-  /// longer than its `Content-Length` fails as [WebDavRetryable].
+  /// longer than its `Content-Length` fails as [WebDavRetryable], and so
+  /// does one that stops arriving for [timeout].
   Future<WebDavDownload> download(
     String path,
     StreamConsumer<List<int>> into,
@@ -317,7 +323,15 @@ final class WebDavClient {
             bytes += chunk.length;
             return chunk;
           })
-          .pipe(into);
+          .pipe(into)
+          .timeout(timeout);
+    } on TimeoutException {
+      // Headers and no body: dropping the connection is what makes the
+      // server stop, and the failure is the retryable kind the caller
+      // already backs off on (#348).
+      await _dropQuietly(response);
+      await _closeQuietly(into);
+      throw _timedOut('GET', path, 'the body stalled');
     } on IOException catch (e) {
       await _closeQuietly(into);
       throw _transportFailure('GET', path, e);
@@ -571,16 +585,19 @@ final class WebDavClient {
           request.contentLength = 0;
         } else {
           request.contentLength = length;
-          await request.addStream(bodyNow());
+          try {
+            await request.addStream(bodyNow()).timeout(timeout);
+          } on TimeoutException {
+            // A server that takes the headers and reads nothing leaves
+            // the write waiting forever; abort it rather than hang the
+            // run that owns the lock (#348).
+            request.abort();
+            throw _timedOut(method, path, 'sending the body stalled');
+          }
         }
         response = await request.close().timeout(timeout);
       } on TimeoutException {
-        _log.warning(
-          '$method ${_show(path)}: no answer in ${timeout.inSeconds} s',
-        );
-        throw WebDavRetryable(
-          '$method ${_show(path)}: no answer in ${timeout.inSeconds} s',
-        );
+        throw _timedOut(method, path, 'no answer');
       } on IOException catch (e) {
         throw _transportFailure(method, path, e);
       }
@@ -696,11 +713,39 @@ final class WebDavClient {
     );
   }
 
+  /// The retryable failure of an attempt that outlived [timeout], with
+  /// [what] saying what never came through — the answer, the body.
+  ///
+  /// One failure for every wait: a slow connection, a response that never
+  /// starts and a body that never arrives are all the same kind of bad
+  /// luck to the caller, and all worth retrying (#348).
+  WebDavRetryable _timedOut(String method, String path, String what) {
+    final text = '$method ${_show(path)}: $what in ${_describe(timeout)}';
+    _log.warning(text);
+    return WebDavRetryable(text);
+  }
+
+  /// [duration] the way a log line wants it: whole seconds, or the
+  /// milliseconds a shorter timeout really is.
+  static String _describe(Duration duration) => duration.inSeconds >= 1
+      ? '${duration.inSeconds} s'
+      : '${duration.inMilliseconds} ms';
+
   static Future<void> _closeQuietly(StreamConsumer<List<int>> into) async {
     try {
       await into.close();
     } on Object catch (_) {
       // The transfer's own failure is the one to report.
+    }
+  }
+
+  /// Ends a response that is not going to finish, so the connection is
+  /// not left open with a body nobody will read.
+  static Future<void> _dropQuietly(HttpClientResponse response) async {
+    try {
+      (await response.detachSocket()).destroy();
+    } on Object catch (_) {
+      // Already gone: nothing to drop.
     }
   }
 
