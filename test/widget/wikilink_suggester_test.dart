@@ -250,6 +250,81 @@ void main() {
     expect(buffer.text, '[[Notes#Links]]');
   });
 
+  testWidgets('a row found through an alias says so', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(tester, '[[md');
+
+    final drawn = panel(tester);
+    expect(drawn.entries.map((e) => (e as NoteSuggestion).name), [
+      'Markdown basics',
+    ]);
+    expect(drawn.entries.single, isA<NoteSuggestion>());
+    expect((drawn.entries.single as NoteSuggestion).alias, 'md');
+    expect(
+      find.textContaining('alias md'),
+      findsOneWidget,
+      reason: 'the row carries the alias it was found through',
+    );
+  });
+
+  testWidgets('the empty target offers the note being edited', (tester) async {
+    final buffer = SourceBuffer.fromText('# Links\n\nSee also [[#');
+    final state = await pump(tester, buffer, _library());
+    await tester.pumpAndSettle();
+
+    state.placeCaret(buffer.length);
+    await tester.pump();
+
+    final drawn = panel(tester);
+    expect(drawn.kind, WikilinkPanelKind.headings);
+    expect(
+      drawn.named,
+      isEmpty,
+      reason: 'the caption names the note being edited, not a target',
+    );
+    expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
+      'Links',
+    ]);
+  });
+
+  testWidgets('a book target offers its place form, not a list', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final suggester = FakeWikilinkSuggester(
+      places: const <BookSuggestion>[
+        BookSuggestion(form: 'page=', hint: 'type a number'),
+      ],
+    );
+    await pump(tester, buffer, suggester);
+
+    await type(tester, '[[Dune.pdf#');
+
+    final drawn = panel(tester);
+    expect(drawn.kind, WikilinkPanelKind.book);
+    expect(drawn.entries.single, isA<BookSuggestion>());
+    expect(find.textContaining('Places in'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    // The number still has to be typed, so the link is left open at the `=`.
+    expect(buffer.text, '[[Dune.pdf#page=');
+  });
+
+  testWidgets('the footer carries the keys the panel answers', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(tester, '[[');
+
+    expect(find.text('Tab'), findsOneWidget);
+    expect(find.text('insert'), findsOneWidget);
+    expect(find.text('close'), findsOneWidget);
+  });
+
   testWidgets('a name that matches nothing says so', (tester) async {
     final buffer = SourceBuffer.fromText('');
     await pump(tester, buffer, _library());
