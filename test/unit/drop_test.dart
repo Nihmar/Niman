@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/ui/drop_target.dart';
 import 'package:path/path.dart' as p;
@@ -83,5 +84,34 @@ void main() {
       );
       expect(library.listSync(), isEmpty);
     });
+
+    test(
+      'a folder of 2 000 notes is walked and copied off the UI isolate',
+      () async {
+        for (var i = 0; i < 2000; i++) {
+          write('notes/$i.md', '# $i');
+        }
+        final import = importMarkdownFolder(
+          source: source.path,
+          libraryRoot: library.path,
+        );
+        // The gauge is counted in before the isolate is awaited, so the job is
+        // visible on this isolate: an inline walk would leave it at zero
+        // (#382).
+        expect(
+          IsolateGauge.inFlight,
+          greaterThan(0),
+          reason: 'the import starts a background job, not an inline walk',
+        );
+        final imported = await import;
+        expect(IsolateGauge.inFlight, 0, reason: 'the job is counted back out');
+        expect(
+          IsolateGauge.peak,
+          greaterThanOrEqualTo(1),
+          reason: 'the walk and the copy ran as a counted job',
+        );
+        expect(imported?.notes, 2000);
+      },
+    );
   });
 }
