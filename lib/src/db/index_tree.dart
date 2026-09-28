@@ -433,9 +433,15 @@ final class IndexTree {
           ),
         );
         newIds[e.rel] = pairing.id;
-        pairedRels.add(e.rel);
         pairedOld.add(pairing.path);
         await _store.replaceFileStems(pairing.id, e.name);
+        // A note without a frontmatter title is searched under its filename,
+        // which the rename just changed — and the contentless FTS row can
+        // only be rewritten from the note's text. Leave such a pairing out
+        // of [pairedRels] so the caller's content pass re-derives the row;
+        // the pairing already read that text. A titled note keeps its rows:
+        // its title did not move (#352).
+        if (pairing.title != null) pairedRels.add(e.rel);
         wrote = true;
         continue;
       }

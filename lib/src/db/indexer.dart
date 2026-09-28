@@ -176,6 +176,13 @@ final class Indexer {
       // with it its FTS/tags/links rows) and is repointed at the new path.
       final paired = await _tree.pairRenames(root, live, gone, contents);
       final pairedOld = <String>{for (final o in paired.values) o};
+      // A paired note keeps its content rows only when it has a frontmatter
+      // title: without one its search title is its filename, which the
+      // rename just changed, and a contentless FTS row can be rewritten
+      // only from the note's text. Such a pair goes through the content
+      // pass below instead, from the text the pairing already read (#352).
+      final pairedKeep = <String>{};
+      final retitled = <NoteContent>[];
       for (final pair in paired.entries) {
         final oldRow = await _dao.find(pair.value);
         if (oldRow == null) continue;
@@ -197,6 +204,12 @@ final class Indexer {
           ),
         );
         await _store.replaceFileStems(oldRow.id, p.basename(pair.key));
+        final content = contents[pair.key];
+        if (oldRow.title != null || content == null) {
+          pairedKeep.add(pair.key);
+        } else {
+          retitled.add(content);
+        }
         wrote = true;
       }
 
@@ -239,9 +252,13 @@ final class Indexer {
         wrote |= deleted > 0;
       }
       // Content rows for everything whose digest actually changed — after
-      // the row writes, so links resolve against the whole batch.
+      // the row writes, so links resolve against the whole batch. A rename
+      // pair from above rides with them when its title is the filename
+      // (see [retitled]); [pairedKeep], not every pair, is what keeps its
+      // rows.
+      changed.addAll(retitled);
       for (final c in changed) {
-        await _store.applyContent({c.rel: c}, paired: paired.keys.toSet());
+        await _store.applyContent({c.rel: c}, paired: pairedKeep);
       }
       if (wrote) {
         final cb = onChanged;

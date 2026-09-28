@@ -116,6 +116,24 @@ void main() {
     );
   });
 
+  test('a title-less note moved into a folder the walk already passed '
+      'searches under its new name', () async {
+    await write('a/other.md', 'other');
+    await write('z/old name place.md', 'body\n');
+    await indexer.fullScan(root.path);
+    final before = (await dao.find('z/old name place.md'))!;
+
+    // No frontmatter title: the search title is the filename, so pairing the
+    // orphan must re-derive it, or the note keeps the name it no longer has.
+    await move('z/old name place.md', 'a/new name place.md');
+    await indexer.fullScan(root.path);
+
+    final after = (await dao.find('a/new name place.md'))!;
+    expect(after.id, before.id);
+    expect(await ftsHas(after.id, 'new name place'), isTrue);
+    expect(await ftsHas(after.id, 'old name place'), isFalse);
+  });
+
   test('a link to a moved note resolves against the surviving id', () async {
     await write('a/linker.md', 'links [[note]]\n');
     await write('z/note.md', 'note body\n');

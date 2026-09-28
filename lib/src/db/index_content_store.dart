@@ -48,9 +48,15 @@ final class IndexContentStore {
   static String? _stemFor(String name, [bool isDir = false]) =>
       isDir ? null : noteStem(name);
 
-  /// Makes the `note_stems` rows for note [noteId] match its current
-  /// [name]: deletes whatever is there (a rename moves the stem rows) and
-  /// inserts the row for the new name when the row is a file.
+  /// Makes the file stem of note [noteId] match its current [name]: deletes
+  /// the `source = 'file'` row (a rename moves it) and inserts the row for
+  /// the new name when the row is a file.
+  ///
+  /// The alias rows (`source = 'alias'`) are left alone: the frontmatter
+  /// that derives them does not change when a note is renamed, and the note
+  /// keeps its id, so `[[nickname]]` must keep resolving (#352). Deleting
+  /// them here dropped every alias of a renamed note — the rename-pair path
+  /// skips the content pass, so nothing rewrote them.
   Future<void> replaceFileStems(
     int noteId,
     String name, {
@@ -58,7 +64,7 @@ final class IndexContentStore {
   }) async {
     await (_db.delete(
       _db.noteStems,
-    )..where((s) => s.noteId.equals(noteId))).go();
+    )..where((s) => s.noteId.equals(noteId) & s.source.equals('file'))).go();
     final stem = _stemFor(name, isDir);
     if (stem == null) return;
     await _db
