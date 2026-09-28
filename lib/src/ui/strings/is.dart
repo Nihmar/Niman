@@ -1335,6 +1335,40 @@ final class IcelandicStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path" er teygð of djúpt';
   @override
+  String get frontmatterTitle => 'Properties';
+  @override
+  String get frontmatterShowRaw => 'Raw YAML';
+  @override
+  String get frontmatterShowFields => 'Fields';
+  @override
+  String get frontmatterAddField => 'Add a property';
+  @override
+  String get frontmatterNewField => 'New property';
+  @override
+  String get frontmatterEditField => 'Edit property';
+  @override
+  String get frontmatterKeyLabel => 'Key';
+  @override
+  String get frontmatterValueLabel => 'Value';
+  @override
+  String get frontmatterTypeLabel => 'Type';
+  @override
+  String get frontmatterListHint => 'Separate items with commas';
+  @override
+  String get frontmatterRemoveField => 'Remove property';
+  @override
+  String get frontmatterNoFields => 'No properties';
+  @override
+  String get frontmatterTypeText => 'text';
+  @override
+  String get frontmatterTypeNumber => 'number';
+  @override
+  String get frontmatterTypeDate => 'date';
+  @override
+  String get frontmatterTypeBoolean => 'boolean';
+  @override
+  String get frontmatterTypeList => 'list';
+  @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter ekki skilað: $reason';
   @override

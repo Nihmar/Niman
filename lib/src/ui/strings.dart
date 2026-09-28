@@ -820,6 +820,23 @@ final class AppStrings {
   static String includeMissing(String path) => _s.includeMissing(path);
   static String includeCycle(String path) => _s.includeCycle(path);
   static String includeTooDeep(String path) => _s.includeTooDeep(path);
+  static String get frontmatterTitle => _s.frontmatterTitle;
+  static String get frontmatterShowRaw => _s.frontmatterShowRaw;
+  static String get frontmatterShowFields => _s.frontmatterShowFields;
+  static String get frontmatterAddField => _s.frontmatterAddField;
+  static String get frontmatterNewField => _s.frontmatterNewField;
+  static String get frontmatterEditField => _s.frontmatterEditField;
+  static String get frontmatterKeyLabel => _s.frontmatterKeyLabel;
+  static String get frontmatterValueLabel => _s.frontmatterValueLabel;
+  static String get frontmatterTypeLabel => _s.frontmatterTypeLabel;
+  static String get frontmatterListHint => _s.frontmatterListHint;
+  static String get frontmatterRemoveField => _s.frontmatterRemoveField;
+  static String get frontmatterNoFields => _s.frontmatterNoFields;
+  static String get frontmatterTypeText => _s.frontmatterTypeText;
+  static String get frontmatterTypeNumber => _s.frontmatterTypeNumber;
+  static String get frontmatterTypeDate => _s.frontmatterTypeDate;
+  static String get frontmatterTypeBoolean => _s.frontmatterTypeBoolean;
+  static String get frontmatterTypeList => _s.frontmatterTypeList;
   static String frontmatterInvalid(String reason) =>
       _s.frontmatterInvalid(reason);
   static String templateFrontmatterInvalid(String template, String reason) =>

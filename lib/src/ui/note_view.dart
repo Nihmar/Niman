@@ -62,6 +62,7 @@ import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
+import 'package:niman/src/ui/frontmatter_fields.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -1242,6 +1243,10 @@ final class _NoteViewState extends State<NoteView>
       _unifiedText = text;
     }
     final buffer = surface.buffer;
+    // The fields panel, when the note has a block for it: the same widget the
+    // read pane puts above its note, above this one too, so the two surfaces
+    // cannot drift (#157).
+    final frontmatter = _frontmatterFields();
     // At the *note* text size, as the preview is (T-M6-12): without this the
     // surface drew the note at the interface size, so the note's size setting
     // did nothing. The find bar above it keeps the interface's.
@@ -1306,6 +1311,11 @@ final class _NoteViewState extends State<NoteView>
               keyPrefix: 'source',
             ),
           ),
+          // The fields panel, above the note's first line, in the same place
+          // the read view shows it: the note itself is still the source, and
+          // its frontmatter lines are still text below this (#157).
+          if (frontmatter != null)
+            NoteColumnPadding(column: widget.noteColumn, child: frontmatter),
           Expanded(child: note),
         ],
       ),
@@ -1395,6 +1405,88 @@ final class _NoteViewState extends State<NoteView>
     knownScan: _editorScanOf,
     onToggleTask: _toggleTaskFromRead,
   );
+
+  /// The read pane with the frontmatter fields panel over it (#157), or the
+  /// pane alone when the note has no block to show.
+  Widget _previewPane(BuildContext context) {
+    final panel = _frontmatterFields();
+    if (panel == null) return _buildPreview(context);
+    return Column(
+      children: [
+        NoteColumnPadding(column: widget.noteColumn, child: panel),
+        Expanded(child: _buildPreview(context)),
+      ],
+    );
+  }
+
+  /// The frontmatter fields panel, or null when the note has no readable block.
+  ///
+  /// The **one** panel both surfaces show (#157): the read pane puts it above
+  /// its preview, the live editor above its note, and neither keeps a copy of
+  /// the note — both hand the same head to the same widget and read the file
+  /// back through it.
+  Widget? _frontmatterFields() {
+    final head = _frontmatterHeadOf(_surface?.buffer);
+    if (head == null) return null;
+    return FrontmatterFields(
+      note: head,
+      onSet: _applyFieldEdit,
+      onRemove: (key) => _applyFieldEdit(key, null),
+    );
+  }
+
+  /// The note's leading frontmatter block as text — the fences included, and
+  /// the blank line after it — or null when [buffer] has no such block.
+  ///
+  /// The same head the other frontmatter edits work on: the closing fence's
+  /// line, plus the blank line the block's last key takes with it
+  /// (`frontmatter/edit.dart`). Only as far as the closing fence is read, and
+  /// never past [_frontmatterLookahead], so a huge note that opens `---` and
+  /// never closes it costs a few lines and not the file.
+  String? _frontmatterHeadOf(SourceBuffer? buffer) {
+    if (buffer == null || buffer.lineCount == 0) return null;
+    if (buffer.lineAt(0).trim() != '---') return null;
+    final head = StringBuffer();
+    for (var line = 0; line < buffer.lineCount; line++) {
+      final text = buffer.lineAt(line);
+      head
+        ..write(text)
+        ..write(buffer.terminatorAt(line));
+      if (head.length > _frontmatterLookahead) return null;
+      if (line > 0 && (text.trim() == '---' || text.trim() == '...')) {
+        final next = line + 1;
+        if (next < buffer.lineCount && buffer.lineAt(next).trim().isEmpty) {
+          head
+            ..write(buffer.lineAt(next))
+            ..write(buffer.terminatorAt(next));
+        }
+        return head.toString();
+      }
+    }
+    return null;
+  }
+
+  /// Writes one frontmatter field through the editor's own door (#157).
+  ///
+  /// The named key's line only, so the rest of the block — its key order, its
+  /// comments, its quoting — does not move; one `.md` file, one undo step,
+  /// saved like any other edit. A null [value] removes the key. The read
+  /// pane and the fields both follow from the surface's buffer, so there is no
+  /// second source of truth to keep in step.
+  void _applyFieldEdit(String key, String? value) {
+    final surface = _surface;
+    final buffer = surface?.buffer;
+    if (surface == null || buffer == null) return;
+    final head = _frontmatterHeadOf(buffer);
+    if (head == null) return;
+    final edited = value == null
+        ? removeFrontmatterKey(head, key)
+        : setFrontmatterKey(head, key, value);
+    if (edited == head) return;
+    surface.replaceRange(0, head.length, edited, caret: surface.selection);
+    _refreshPreview();
+    _refreshStats();
+  }
 
   /// Ticks or unticks the task item on [line] of the note the read pane is
   /// showing: an edit to the note itself, through the editor's own door —
@@ -2187,7 +2279,7 @@ final class _NoteViewState extends State<NoteView>
                             offstage: !showPreview,
                             child: KeyedSubtree(
                               key: const ValueKey('pane-preview'),
-                              child: _buildPreview(context),
+                              child: _previewPane(context),
                             ),
                           ),
                         ],

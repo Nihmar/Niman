@@ -83,6 +83,26 @@ stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
 
+**Both surfaces show the block as fields, above the note.** The read pane
+and the live editor put the frontmatter at the top as one row per key — the
+key in a left column, the value, and a small chip naming the type (text,
+number, date, boolean, list): a text line, a number, a date, a tick for
+`true`/`false`, a chip per list item. **Add a property** is the last row, and
+the `×` on a row takes one out. A **Raw YAML** toggle in the header shows the
+same block as written. It is the one panel in both places, so the two cannot
+drift.
+
+In either surface the file is the only copy: an edit rewrites that key's line
+and leaves the rest of the block — comments, quoting, the other keys — exactly
+where it was, and it saves and undoes like any other edit. The fields are a
+second way into the same file, not a second file.
+
+A block that does not parse shows no field rows at all: the panel says why and
+shows the raw YAML, which is left as written — nothing the panel draws rewrites
+a note it cannot read. A note with no frontmatter shows no panel. Keys whose
+value is a nested mapping are left to the raw YAML, and the fields the panel
+draws are text, number, date, `true`/`false` and lists.
+
 ## Tags
 
 Two places, both searchable:
