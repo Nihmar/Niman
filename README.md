@@ -11,6 +11,19 @@ source of truth. No lock-in, no proprietary format.
 
 > **Status:** the project is under active development.
 
+## Screenshots
+
+From a phone (Android) — the desktop set follows.
+
+<p>
+  <img src="docs/images/android-files.jpg" alt="The files view: pinned notes, folders and the notes beside them" width="160">
+  <img src="docs/images/android-editor-live.jpg" alt="Editing a note in live: headings, bold text and typeset maths" width="160">
+  <img src="docs/images/android-preview.jpg" alt="The read view of the same note" width="160">
+  <img src="docs/images/android-search.jpg" alt="Searching a library, with the match in its excerpt" width="160">
+  <img src="docs/images/android-settings.jpg" alt="Settings" width="160">
+  <img src="docs/images/android-widget.jpg" alt="The home-screen notes widget" width="160">
+</p>
+
 ## Documentation
 
 Full guides live in [`docs/`](docs/):
