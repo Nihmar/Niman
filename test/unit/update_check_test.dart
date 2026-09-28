@@ -56,14 +56,16 @@ void main() {
       expect(selectAndroidAsset(page)!.name, 'niman-1.0.0-android.apk');
     });
 
-    test('android with only a testing apk still answers with it', () {
+    test('android with only a testing apk offers nothing', () {
+      // A testing APK installs beside the app, so it can never update it:
+      // with no official APK there is no update to offer (issue #355).
       const page = [
         ReleaseAsset(
           name: 'niman-1.0.0-android-testing.apk',
           downloadUrl: 'https://example.com/niman-1.0.0-android-testing.apk',
         ),
       ];
-      expect(selectAndroidAsset(page)!.name, 'niman-1.0.0-android-testing.apk');
+      expect(selectAndroidAsset(page), isNull);
     });
 
     test('windows picks the installer, never the portable zip', () {
@@ -97,8 +99,13 @@ void main() {
       );
     });
 
-    test('linux unknown variant defers to the picker', () {
-      expect(selectLinuxAsset(sampleAssets(), LinuxVariant.unknown), isNull);
+    test('linux unknown variant offers the generic bundle', () {
+      // Re-scoped (issue #355): an unknown install used to answer null and
+      // leave the release unoffered; it now gets the `.tar.gz` bundle.
+      expect(
+        selectLinuxAsset(sampleAssets(), LinuxVariant.unknown)!.name,
+        'niman-1.0.0-linux-x64.tar.gz',
+      );
       expect(linuxAssets(sampleAssets()), hasLength(3));
     });
 
@@ -222,7 +229,9 @@ void main() {
       }
     });
 
-    test('unknown linux variant with no matching asset stays quiet', () {
+    test('unknown linux variant offers the release', () {
+      // Re-scoped (issue #355): a tarball/Arch install used to be told
+      // "up to date" no matter what; it is now offered the release.
       final result = checkForUpdate(
         release: release(),
         current: const AppVersion(0, 0, 3),
@@ -230,9 +239,30 @@ void main() {
         isWindows: false,
         linuxVariant: LinuxVariant.unknown,
       );
+      expect(result, isA<UpdateAvailable>());
+      expect(
+        (result as UpdateAvailable).asset.name,
+        'niman-1.0.0-linux-x64.tar.gz',
+      );
+    });
+
+    test('unknown linux variant with no linux asset stays quiet', () {
+      final result = checkForUpdate(
+        release: const LatestRelease(
+          version: AppVersion(1, 0, 0),
+          assets: [
+            ReleaseAsset(
+              name: 'niman-1.0.0-windows-x64-setup.exe',
+              downloadUrl: 'https://example.com/niman-1.0.0-setup.exe',
+            ),
+          ],
+        ),
+        current: const AppVersion(0, 0, 3),
+        isAndroid: false,
+        isWindows: false,
+        linuxVariant: LinuxVariant.unknown,
+      );
       expect(result, isA<UpToDate>());
-      // ... while the settings UI can still offer the picker:
-      expect(linuxAssets(release().assets), hasLength(3));
     });
   });
 }

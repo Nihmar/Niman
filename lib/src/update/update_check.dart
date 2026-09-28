@@ -75,8 +75,8 @@ final class UpToDate extends UpdateCheck {
 /// Compares [release] against [current] and selects this device's asset:
 /// [selectAndroidAsset] on Android, [selectWindowsAsset] on Windows,
 /// [selectLinuxAsset] with the installed [linuxVariant] on Linux.
-/// Returns [UpToDate] when nothing is newer or no asset matches (the
-/// Linux picker case surfaces through [linuxAssets] instead).
+/// Returns [UpToDate] when nothing is newer or the release carries no
+/// asset for this device.
 UpdateCheck checkForUpdate({
   required LatestRelease release,
   required AppVersion current,

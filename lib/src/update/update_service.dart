@@ -81,7 +81,7 @@ Future<AppVersion> currentAppVersion() async {
 ///
 /// An AppImage sets `APPIMAGE` to its own file; a tarball and an Arch
 /// package leave no reliable trace, so both read as [LinuxVariant.unknown]
-/// and the user picks from the downloaded assets instead.
+/// and are offered the release's generic `.tar.gz` bundle instead.
 LinuxVariant detectLinuxVariant() {
   final appImage = Platform.environment['APPIMAGE'];
   if (appImage != null && appImage.isNotEmpty) return LinuxVariant.appImage;
@@ -91,8 +91,8 @@ LinuxVariant detectLinuxVariant() {
 /// Runs the full update check for this device: latest release against the
 /// running version, with this platform's asset selected.
 ///
-/// Returns the available update, or null when current (or when no asset
-/// matches, e.g. an unknown Linux variant — the picker case).
+/// Returns the available update, or null when current (or when the release
+/// carries no asset for this device).
 Future<UpdateAvailable?> checkNow({required AppVersion current}) async {
   final release = await fetchLatestRelease();
   final check = checkForUpdate(
