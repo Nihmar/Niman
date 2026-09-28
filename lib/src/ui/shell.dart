@@ -1867,12 +1867,24 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
   }
 
   /// Flips the tree sort direction and persists it (T-UI-03).
+  ///
+  /// The flag flips first, in the [setState] the chevron reads; the tree
+  /// reads the same flag for its order, so the two turn over in one rebuild
+  /// rather than the chevron moving on alone. The write follows, and a
+  /// failure is swallowed rather than thrown: the flag stays flipped with
+  /// the rows it already moved, and no revision bump comes to drag either
+  /// of them back — the two stay consistent whatever the write did.
   Future<void> _toggleTreeSort() async {
     final next = _editorSettings.treeSort == TreeSort.nameAsc
         ? TreeSort.nameDesc
         : TreeSort.nameAsc;
     setState(() => _editorSettings = _editorSettings.copyWith(treeSort: next));
-    await widget.controller.setTreeSort(next);
+    try {
+      await widget.controller.setTreeSort(next);
+    } on Object catch (error) {
+      const AppLogger(name: 'shell').debug('tree sort write failed: $error');
+      return;
+    }
     widget.controller.notify();
   }
 
