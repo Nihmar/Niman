@@ -35,6 +35,7 @@ final class ReplaceReport {
     required this.notesChanged,
     required this.occurrences,
     required this.skipped,
+    required this.failed,
   });
 
   /// Candidate notes actually read (skip excluded).
@@ -48,6 +49,12 @@ final class ReplaceReport {
 
   /// Library-relative paths deliberately left alone (open notes).
   final List<String> skipped;
+
+  /// Library-relative paths the run could not touch: a note that could not
+  /// be read, or one whose rewrite failed (read-only, full disk, locked).
+  /// Distinct from [skipped] (left alone on purpose) and from a note that
+  /// simply did not match — a partial bulk rewrite shows up here.
+  final List<String> failed;
 }
 
 /// One example match in a note: the raw [match] text with the trimmed
@@ -213,6 +220,7 @@ final class ReplaceRunner implements ReplaceSource {
     // Android). One isolate per chunk of files.
     var notesChanged = 0;
     var occurrences = 0;
+    final failed = <String>[];
     // The isolate closure must not capture the runner (its drift database
     // is unsendable) — only plain values cross the boundary.
     final root = _root;
@@ -233,8 +241,14 @@ final class ReplaceRunner implements ReplaceSource {
       );
       final changed = <String>[];
       for (var j = 0; j < results.length; j++) {
-        final (wasChanged, count, snapshotLog) = results[j];
+        final (wasChanged, count, snapshotLog, failure) = results[j];
         if (snapshotLog != null) historyLog.info(snapshotLog);
+        if (failure != null) {
+          // The note matched but could not be read/written: report it as
+          // failed rather than letting it pass as a note with no match.
+          failed.add(rels[j]);
+          log.warning(failure);
+        }
         if (wasChanged) {
           notesChanged++;
           changed.add(p.join(root, rels[j]));
@@ -250,13 +264,14 @@ final class ReplaceRunner implements ReplaceSource {
     }
     log.debug(
       'replace "$term": $occurrences occurrence(s) in $notesChanged '
-      'note(s), ${clock.elapsedMilliseconds} ms',
+      'note(s), ${failed.length} failed, ${clock.elapsedMilliseconds} ms',
     );
     return ReplaceReport(
       notesScanned: todo.length,
       notesChanged: notesChanged,
       occurrences: occurrences,
       skipped: skipped,
+      failed: failed,
     );
   }
 
@@ -298,7 +313,9 @@ Future<List<ReplaceMatchNote?>> _previewChunk(
   for (final rel in rels) {
     final file = File(p.join(root, rel));
     try {
-      final text = file.readAsStringSync();
+      // The same leniency as the editor and the replace pass: a note with
+      // invalid UTF-8 bytes still takes part.
+      final text = utf8.decode(file.readAsBytesSync(), allowMalformed: true);
       final pattern = wholeWordPattern(term, caseSensitive: caseSensitive);
       if (pattern == null) {
         out.add(null);
@@ -342,11 +359,16 @@ ReplaceSample _sampleAround(String text, int start, int end, int radius) {
 }
 
 /// The off-isolate entry: replaces the term in every file of [rels]
-/// (absolute under [root]); one `(changed, occurrences, history log)` per
-/// file. With [history], each note's text is kept as a version before it
-/// is rewritten; the log line describes that snapshot (the isolate's own
-/// log buffer is not the app's, so the caller logs it).
-Future<List<(bool, int, String?)>> _replaceChunk(
+/// (absolute under [root]); one `(changed, occurrences, history log,
+/// failure log)` per file. With [history], each note's text is kept as a
+/// version before it is rewritten; the log line describes that snapshot
+/// (the isolate's own log buffer is not the app's, so the caller logs it).
+///
+/// The read and the write fail separately: a note whose read fails and one
+/// whose atomic write fails both leave `changed` false and `count` 0, but
+/// each carries a non-null failure log so the caller can report it instead
+/// of letting it pass as a note with no match.
+Future<List<(bool, int, String?, String?)>> _replaceChunk(
   String root,
   List<String> rels,
   String term,
@@ -354,38 +376,46 @@ Future<List<(bool, int, String?)>> _replaceChunk(
   bool caseSensitive,
   SnapshotRequest? history,
 ) async {
-  final out = <(bool, int, String?)>[];
+  final out = <(bool, int, String?, String?)>[];
   for (final rel in rels) {
     final file = File(p.join(root, rel));
-    var changed = false;
-    var count = 0;
-    String? snapshotLog;
+    final String original;
     try {
-      final original = file.readAsStringSync();
-      final result = replaceWholeWords(
-        original,
-        term,
-        replacement,
-        caseSensitive: caseSensitive,
-      );
-      count = result.$1;
-      if (count > 0) {
-        if (history != null) {
-          try {
-            snapshotLog = snapshotBeforeWrite(root, rel, history).describe(rel);
-          } on Object catch (e) {
-            snapshotLog = 'snapshot "$rel" failed, replacing anyway: $e';
-          }
-        }
-        await writeFileAtomically(file, utf8.encode(result.$2));
-        changed = true;
-      }
-    } on Object {
-      // Unreadable or gone (a scan can race a delete): leave it alone.
-      changed = false;
-      count = 0;
+      // The editor reads notes with `allowMalformed`, so a note it opens
+      // must be replaceable too; strict UTF-8 here would silently drop it.
+      original = utf8.decode(file.readAsBytesSync(), allowMalformed: true);
+    } on Object catch (e) {
+      out.add((false, 0, null, 'read "$rel" failed: $e'));
+      continue;
     }
-    out.add((changed, count, snapshotLog));
+    final result = replaceWholeWords(
+      original,
+      term,
+      replacement,
+      caseSensitive: caseSensitive,
+    );
+    final count = result.$1;
+    if (count == 0) {
+      out.add((false, 0, null, null));
+      continue;
+    }
+    String? snapshotLog;
+    if (history != null) {
+      try {
+        snapshotLog = snapshotBeforeWrite(root, rel, history).describe(rel);
+      } on Object catch (e) {
+        snapshotLog = 'snapshot "$rel" failed, replacing anyway: $e';
+      }
+    }
+    try {
+      await writeFileAtomically(file, utf8.encode(result.$2));
+    } on Object catch (e) {
+      // Read-only, full disk or locked: the file is left as it was. Count
+      // nothing and report the failure.
+      out.add((false, 0, snapshotLog, 'write "$rel" failed: $e'));
+      continue;
+    }
+    out.add((true, count, snapshotLog, null));
   }
   return out;
 }
@@ -438,9 +468,13 @@ RegExp? wholeWordPattern(String term, {required bool caseSensitive}) {
 
 /// The FTS phrase form of [term]: the whole term inside one quoted phrase
 /// (internal quotes doubled), so its tokens must be adjacent — the index
-/// approximation of the disk's whole-word rule. Null for an empty term.
+/// approximation of the disk's whole-word rule. Null for an empty term or
+/// one with no letter or digit: a punctuation-only term (`"`, `--`) names
+/// no token, and quoting it would build a phrase SQLite reads as empty —
+/// the same rule `query.dart`'s `buildFtsQuery` applies to its tokens.
 String? ftsPhraseOf(String term) {
   final t = term.trim();
   if (t.isEmpty) return null;
+  if (!RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(t)) return null;
   return '"${t.replaceAll('"', '""')}"';
 }

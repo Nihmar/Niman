@@ -559,11 +559,20 @@ final class _SearchScreenState extends State<SearchScreen> {
     final caseSensitive = _replaceCase;
     final only = _replaceOnly;
     setState(() => _previewBusy = true);
-    final notes = await source.previewMatches(
-      term,
-      caseSensitive: caseSensitive,
-      onlyPath: only,
-    );
+    final List<ReplaceMatchNote> notes;
+    try {
+      notes = await source.previewMatches(
+        term,
+        caseSensitive: caseSensitive,
+        onlyPath: only,
+      );
+    } on Object catch (e) {
+      // A failed scan must not leave the panel spinning over an empty list:
+      // clear the busy flag and show the empty preview.
+      if (mounted && _replaceMode) setState(() => _previewBusy = false);
+      const AppLogger(name: 'search.ui').warning('replace preview failed: $e');
+      return;
+    }
     if (!mounted || !_replaceMode) return;
     if (term != _query.text.trim() ||
         caseSensitive != _replaceCase ||
@@ -590,14 +599,19 @@ final class _SearchScreenState extends State<SearchScreen> {
       only: only == null ? null : {only},
     );
     if (!mounted) return;
-    final message = report.occurrences == 0
+    // A run that wrote nothing because it could not is not a "no match":
+    // the failed notes make the run report itself instead.
+    final failed = report.failed;
+    final message = report.occurrences == 0 && failed.isEmpty
         ? AppStrings.replaceNoMatch(term)
         : AppStrings.replaceDone(report.occurrences, term, report.notesChanged);
-    _snack(
-      report.skipped.isEmpty
-          ? message
-          : '$message${AppStrings.replaceSkipped(report.skipped.length)}',
-    );
+    final skipped = report.skipped.isEmpty
+        ? ''
+        : AppStrings.replaceSkipped(report.skipped.length);
+    final failures = failed.isEmpty
+        ? ''
+        : ' (${failed.length} note(s) could not be written)';
+    _snack('$message$skipped$failures');
     _leaveReplaceMode();
     // The watcher re-indexes the rewritten files: once it has, re-run the
     // query so the results reflect the new content.
