@@ -1,0 +1,66 @@
+# The documentation site (https://nihmar.github.io/Niman/).
+#
+# GitHub builds it: `.github/workflows/pages.yml` runs the `github-pages`
+# build (`actions/jekyll-build-pages`), the same environment a branch-based
+# Pages site is built in, so the site is the repository's own Markdown
+# rendered as it stands — there is no second copy of `docs/`, no Gemfile and
+# nothing to install or update by hand. One thing is not literal: Liquid
+# renders before Markdown, so that workflow hands Niman's own `{{…}}` template
+# syntax to Liquid as a raw block before the build (see the step there).
+
+title: Niman
+description: >-
+  A multiplatform Markdown note-taking app where your notes are just files.
+
+theme: minima
+
+# The site is HTML pages, not a second copy of the Markdown: once a file under
+# `docs/` has been rendered, the original is not carried into the site beside
+# it.
+optional_front_matter:
+  remove_originals: true
+
+# A project site is served from a subpath of the domain, and the theme's own
+# links (its stylesheet, its "home" link) are built from `baseurl`: it must
+# name that subpath, and `actions/configure-pages` reports the one Pages is
+# configured with if it does not match.
+url: https://nihmar.github.io
+baseurl: /Niman
+
+# The header of every page: the three ways into the docs.
+header_pages:
+  - docs/README.md
+  - docs/user/getting-started.md
+  - docs/records/README.md
+
+# The site is the documentation, not the app: the source tree, the toolchain,
+# the CI and the notes a checkout happens to hold are not part of it.
+exclude:
+  - android/
+  - ios/
+  - ipados/
+  - linux/
+  - macos/
+  - windows/
+  - lib/
+  - test/
+  - integration_test/
+  - tool/
+  - scripts/
+  - packaging/
+  - build/
+  - dist/
+  - logs/
+  - .dart_tool/
+  - .github/
+  - .worktrees/
+  - .commandcode/
+  - pubspec.yaml
+  - pubspec.lock
+  - analysis_options.yaml
+  - .metadata
+  - niman.iml
+  - .flutter-plugins-dependencies
+  - Quicknote.md
+  - STATUS-*.md
+  - REVIEW-*.md
