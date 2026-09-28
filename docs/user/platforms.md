@@ -182,7 +182,10 @@ like any other — and opened. A copy, because Android hands the sender's
 file as a read-only `content://` reference, not a path Niman could edit
 in place. A Notion export (a `.zip`) shared the same way is
 [imported](organization.md#importing-a-notion-export) instead of copied
-as one note.
+as one note. That copy is made in the background, so the app stays
+responsive while a large share is read, and it is capped at 512 MB: past
+that the share is refused rather than copied — the sender's text arrives
+instead, if it attached any.
 
 The **side panel** (outline, tags, history beside the note, and the
 [journal](journal.md)'s calendar) shows on
