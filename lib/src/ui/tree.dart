@@ -108,6 +108,12 @@ final class _NoteTreeState extends State<NoteTree> {
   int? _rowsRevision;
   Set<String> _rowsExpanded = const <String>{};
 
+  /// The sort direction the cached rows were flattened with. It decides the
+  /// order `_flatten` asks the index for, so a change of direction alone
+  /// must rebuild the rows — a revision bump does not necessarily follow,
+  /// and never does when the settings write that would have caused it fails.
+  bool _rowsNameDesc = false;
+
   /// Whether the pinned section is rolled up, once the library has been
   /// asked. Null until then, and the section builds expanded — the common
   /// answer, and the one that does not make the tree jump when the real
@@ -132,21 +138,31 @@ final class _NoteTreeState extends State<NoteTree> {
   void didUpdateWidget(NoteTree oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
+      // A new library: the rows belong to the old one, and so does the
+      // pinned section's roll-up — asked once per library, so it has to be
+      // asked again rather than carried over.
       _rows = null;
+      _pinnedCollapsed = null;
     }
   }
 
   /// The flattened rows for [revision], recomputed only when the index
-  /// revision or the set of expanded folders has changed.
+  /// revision, the sort direction or the set of expanded folders changed.
+  ///
+  /// The direction is part of the key: `_flatten` feeds it to the query, so
+  /// reusing rows across a direction change would show the old order — the
+  /// chevron flips and the list stays put.
   Future<_Rows> _rowsFor(int revision) {
     final cached = _rows;
     if (cached != null &&
         _rowsRevision == revision &&
+        _rowsNameDesc == widget.nameDesc &&
         _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
     }
     _rowsRevision = revision;
     _rowsExpanded = Set<String>.of(widget.expanded);
+    _rowsNameDesc = widget.nameDesc;
     return _rows = _flatten();
   }
 

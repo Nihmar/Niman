@@ -463,8 +463,13 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<TreeSort> get treeSort async => _config.treeSort;
 
+  /// When true, [setTreeSort] fails, like a settings file that cannot be
+  /// written. The flag the shell shows is still flipped optimistically.
+  bool failTreeSort = false;
+
   @override
   Future<void> setTreeSort(TreeSort sort) async {
+    if (failTreeSort) throw StateError('tree sort was not saved');
     _config = _config.copyWith(treeSort: sort);
   }
 
