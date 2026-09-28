@@ -396,6 +396,36 @@ void main() {
     expect(styler.blocks?.map((b) => b.kind), contains(BlockKind.listItem));
   });
 
+  test('the blocks wait for the scan, as the outline and the hand-over do', () {
+    // A tap on a task box reads them to decide whether ticking the box
+    // carries down its branch (#387), and settling there would put the rest
+    // of the note — the work the edit that opened it was spared — on the
+    // tap's frame.
+    final buffer = SourceBuffer.fromText(
+      [for (var at = 0; at < 3 * 4096; at++) 'line $at\n'].join('\n'),
+    );
+    final styler = SourceStyler(buffer);
+    expect(styler.blocks, isNotNull);
+
+    styler.edited(
+      buffer.replaceRange(
+        0,
+        0,
+        r'$$'
+        '\n',
+      ),
+    );
+    expect(styler.settled, isFalse);
+    expect(styler.blocks, isNull, reason: 'the tap must not finish the scan');
+
+    // Once the scan has caught up they are there again: the cascade waits
+    // for it, it is not refused.
+    while (!styler.settled) {
+      styler.advance();
+    }
+    expect(styler.blocks, isNotNull);
+  });
+
   test(
     'a background scan the buffer has moved on from has no blocks',
     () async {

@@ -249,18 +249,34 @@ final class SourceStyler {
   void advance() => _scanner.advance();
 
   /// The note's blocks, as the scan behind the colours has them, or null
-  /// when the scan is of a revision the buffer has moved on from.
+  /// when the scan is of a revision the buffer has moved on from, or still
+  /// owes part of the note ([settled]).
   ///
   /// The same answer the colours are drawn from, for a caller that wants the
   /// blocks themselves. O(blocks): [BlockScanner.index] copies its list.
+  ///
+  /// Null while the scan still owes the note, the rule [headings] and
+  /// [handOver] hold: the reader is a tap on a task box
+  /// (`MarkdownSourceViewState._toggleTaskAt`), which asks for the blocks to
+  /// decide whether ticking the box carries down its branch, and settling
+  /// here would put the rest of the note — the work an edit that changed what
+  /// follows was spared — on the tap's frame. The tap falls back to ticking
+  /// the one box, and the cascade applies on a later tap, once the scan has
+  /// caught up.
   ///
   /// A null [_revision] is the *current* one, as [revision] reads it: a
   /// styler built here has read the buffer as it is, and [edited] follows
   /// every edit into the scan. Testing `_revision` for null answered "not
   /// scanned" for exactly those, so every note small enough to be read here —
   /// and every note after its first keystroke — had no blocks to give.
-  List<Block>? get blocks =>
-      revision == buffer.revision ? _scanner.index.blocks : null;
+  List<Block>? get blocks => revision == buffer.revision && _scanner.settled
+      ? _scanner.index.blocks
+      : null;
+
+  /// How many lines the scan behind the colours has read, for the test that
+  /// holds a tap on a task box to the work the tap may do: one that settled
+  /// the scan read the rest of the note, and the count says so.
+  int get scannedLines => _scanner.scannedLineTotal;
 
   /// The note's blocks and definitions as of the buffer's revision, for a
   /// reader that would otherwise scan the note for them — or null when this

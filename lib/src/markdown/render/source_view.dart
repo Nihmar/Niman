@@ -413,6 +413,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// being read in the background, when there are no blocks at all.
   bool get scanSettled => _styler?.settled ?? false;
 
+  /// How many lines the scan behind the colours has read, for the test that
+  /// holds a tap on a task box to the work the tap may do: a tap on a note
+  /// whose scan is owed must not finish it ([SourceStyler.scannedLines]).
+  @visibleForTesting
+  int get scanProgress => _styler?.scannedLines ?? 0;
+
   /// The note's tags and links as of the buffer's revision, when the scan
   /// behind the colours keeps them ([SourceStyler.references]): a long note's
   /// save hands them to the index, which then does not read the note for
