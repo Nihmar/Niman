@@ -208,19 +208,70 @@ String? frontmatterErrorIn(String text) => parseFrontmatter(text)?.error;
 /// stops, so deciding whether a note needs a kind GUI costs a few lines of
 /// text rather than a YAML parse. Every note open takes this path; only
 /// the indexer pays for the full parse. Same block rules as
-/// [parseFrontmatter] — the value counts only when the block is closed.
+/// [parseFrontmatter]: the value counts only when the block is closed, only
+/// a key of the block's own mapping names the kind (a `type:` nested under
+/// another key is `meta.type`, not this note's type), and a trailing
+/// `# comment` is not part of the value.
 String? frontmatterTypeOf(String text) {
   final block = frontmatterBlock(text);
   if (block == null) return null;
+  final indent = _blockIndent(block.text);
   for (final line in block.text.split('\n')) {
     final trimmed = line.trim();
+    // A blank line, a comment, or a line nested under a key above it: not
+    // a key of this mapping, whatever `type:` may look like in it.
+    if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+    if (_indentOf(line) != indent) continue;
     final colon = trimmed.indexOf(':');
     if (colon <= 0) continue;
     if (trimmed.substring(0, colon).trim().toLowerCase() != 'type') continue;
-    final type = _unquote(trimmed.substring(colon + 1).trim());
-    return type.isEmpty ? null : type;
+    final value = _withoutComment(trimmed.substring(colon + 1).trim());
+    // Trimmed around the quotes as well: the full parse stores a scalar
+    // trimmed, so `type: " list "` is `list` there too.
+    return _nonEmpty(_unquote(value).trim());
   }
   return null;
+}
+
+/// The indentation of [source]'s first key — the column a key has to start
+/// at to be a key of the block's own mapping rather than a nested one.
+///
+/// YAML allows a whole mapping to be indented, so this is the first content
+/// line's indentation and not simply zero.
+String _blockIndent(String source) {
+  for (final line in source.split('\n')) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+    return _indentOf(line);
+  }
+  return '';
+}
+
+/// The leading spaces and tabs of [line].
+String _indentOf(String line) {
+  var i = 0;
+  while (i < line.length && (line[i] == ' ' || line[i] == '\t')) {
+    i++;
+  }
+  return line.substring(0, i);
+}
+
+/// [raw] with a trailing `# comment` cut off, as YAML reads it.
+///
+/// YAML starts a comment at a `#` that follows whitespace (or opens the
+/// value), and never inside quotes: `type: list # kind` reads `list`, while
+/// `type: list#kind` and `type: "list # kind"` keep the hash.
+String _withoutComment(String raw) {
+  if (raw.startsWith('"') || raw.startsWith("'")) {
+    final close = raw.indexOf(raw[0], 1);
+    return close < 0 ? raw : raw.substring(0, close + 1);
+  }
+  if (raw.startsWith('#')) return '';
+  for (var i = 1; i < raw.length; i++) {
+    if (raw[i] != '#') continue;
+    if (raw[i - 1] == ' ' || raw[i - 1] == '\t') return raw.substring(0, i);
+  }
+  return raw;
 }
 
 /// The normalized tag form: lowercased, no leading `#`, trimmed.

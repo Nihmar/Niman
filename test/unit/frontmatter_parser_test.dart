@@ -167,6 +167,54 @@ void main() {
       // the rest of the block being well-formed.
       expect(frontmatterTypeOf('---\ntype: list\nbad: [\n---'), 'list');
     });
+
+    test('a nested type is not the note type', () {
+      const nested = '---\nmeta:\n  type: list\n---\nbody';
+      expect(parseFrontmatter(nested)!.type, isNull); // it is meta.type
+      expect(frontmatterTypeOf(nested), isNull);
+    });
+
+    test('a trailing comment is cut off the value, as YAML cuts it', () {
+      const commented = '---\ntype: list # kind\n---\nbody';
+      expect(parseFrontmatter(commented)!.type, 'list');
+      expect(frontmatterTypeOf(commented), 'list');
+    });
+
+    test('the shortcut and the full parse read one block the same way', () {
+      const blocks = <String>[
+        'type: list',
+        'type: "list"',
+        "type: 'list'",
+        'title: X\ntype: list',
+        'type: list # kind',
+        'type: list   # kind',
+        'type: "list # kind"',
+        'type: " spaced "',
+        'type: list#kind', // no space, so not a comment
+        'type: # only a comment',
+        'type:',
+        '# a comment\ntype: list',
+        'meta:\n  type: list',
+        'meta:\n  type: list\ntype: todo',
+        'meta: {type: list}',
+        '  type: list', // a wholly indented block is still this mapping
+        '\ttype: list',
+        'tags:\n  - one\ntype: list',
+      ];
+      for (final block in blocks) {
+        final text = '---\n$block\n---\nbody';
+        expect(
+          frontmatterTypeOf(text),
+          parseFrontmatter(text)!.type,
+          reason: block,
+        );
+      }
+    });
+
+    test('the kind still needs a closed block', () {
+      expect(frontmatterTypeOf('---\ntype: list\nno close'), isNull);
+      expect(frontmatterTypeOf('---\ntype: list\n---\ntype: todo'), 'list');
+    });
   });
 
   group('inlineTags', () {
