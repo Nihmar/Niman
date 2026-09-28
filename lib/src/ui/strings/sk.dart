@@ -2690,4 +2690,9 @@ final class SlovakStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaškrtnutie políčka zaškrtne aj tie vnorené pod ním. '
       'Odškrtnutie ich nechá tak.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Znovu zostaviť index';
 }

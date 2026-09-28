@@ -2712,4 +2712,9 @@ final class UkrainianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Позначення прапорця позначає й вкладені під ним. Зняття '
       'позначки залишає їх як є.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Перебудувати індекс';
 }

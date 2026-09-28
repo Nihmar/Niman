@@ -2647,4 +2647,9 @@ final class EstonianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Märkeruudu märkimine märgib ka selle alla pesastatud. Märgi '
       'eemaldamine jätab need puutumata.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Ehita indeks uuesti üles';
 }

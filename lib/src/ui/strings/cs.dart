@@ -2682,4 +2682,9 @@ final class CzechStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaškrtnutí políčka zaškrtne i ta vnořená pod ním. Odškrtnutí '
       'je nechá být.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Znovu sestavit index';
 }

@@ -2729,4 +2729,9 @@ final class PolishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Zaznaczenie pola zaznacza też te zagnieżdżone pod nim. '
       'Odznaczenie zostawia je bez zmian.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Odbuduj indeks';
 }

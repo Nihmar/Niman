@@ -2724,4 +2724,9 @@ final class SpanishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar una casilla marca las que están anidadas debajo. '
       'Desmarcarla las deja como están.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Reconstruir el índice';
 }

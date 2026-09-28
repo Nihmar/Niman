@@ -4,6 +4,11 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
+// A connection on its own isolate reports what failed over there wrapped in
+// DriftRemoteException; the sqlite error behind it is how a damaged index is
+// told apart from a transient failure (#368).
+// ignore: experimental_member_use
+import 'package:drift/remote.dart' show DriftRemoteException;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
@@ -428,143 +433,7 @@ final class LibraryController implements LibrarySession {
       } else if (!rootDir.existsSync()) {
         throw ArgumentError('Directory does not exist: $abs');
       }
-      // This library's own index file (T-ML-03). Opening a second library
-      // no longer scans over the first one's rows, so coming back to it
-      // costs a reconciliation rather than a full walk.
-      //
-      // Asked for before anything else the open does, and warmed here: the
-      // connection's *first* query is what opens the file — sqlite, the
-      // schema and its FTS table, on the connection's own isolate — and the
-      // tree's first flatten used to be that query, so a cold index paid for
-      // it inside one frame's wait (`flatten: 105ms … [tree 103]`, #315).
-      // From here the wait runs beside the app's own settings work and the
-      // watcher instead of behind the first frame; a library that fails to
-      // open closes it again in `_teardown`.
-      final indexDb = await indexDbFactory(abs);
-      _indexDb = indexDb;
-      unawaited(_warmIndex(indexDb));
-      final appDb = await appDatabase;
-      AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
-      _startUpdateChecks(appDb);
-      // Before anything reads the settings: a library upgraded from the
-      // `library_settings` table gets its `.niman/settings.json` here,
-      // now that the folder is known to be reachable (T-ML-02).
-      await LegacyLibrarySettings(appDb).seed(abs);
-      final indexer = Indexer(indexDb)
-        ..onChanged = _bump
-        ..onRemoved = _onRemoved;
-      // One reader of `.niman/settings.json` per session: the four
-      // per-library settings and the overrides (T-ML-10) share its cache.
-      // The welcome's answer (#266) seeds the editors of every library
-      // this device has never stored settings for — not only the first.
-      // A failure to read it is not a reason to fail the open.
-      Map<String, Object?>? welcomeDefaults;
-      try {
-        welcomeDefaults = await DbWelcomeStore(AppSettingsRepo(appDb))
-            .firstLibraryEditorKeys();
-      } on Object catch (error) {
-        _log.warning('welcome editor defaults unavailable ($error)');
-      }
-      final config = LibraryConfigRepo(
-        abs,
-        device: DbDeviceSettingsStore(appDb),
-        welcomeDefaults: welcomeDefaults,
-      );
-      _configRepo = config;
-      final ops = NoteOps(
-        root: abs,
-        db: indexDb,
-        indexer: indexer,
-        config: config,
-      );
-      // A library indexed for the first time opens on its tree, and its
-      // notes are read behind it: the search, the tags and the links fill
-      // in as they are read.
-      var contentOwed = false;
-      if (blockingScan) {
-        contentOwed = await indexer.indexTreeFirst(abs);
-      }
-      if (blockingScan && !contentOwed) {
-        // Only here: the first index is the scan long enough to be worth
-        // watching, and reporting costs a message per note.
-        indexer.onProgress = _onIndexProgress;
-        try {
-          await indexer.fullScan(abs);
-        } finally {
-          indexer.onProgress = null;
-          _indexProgress = null;
-        }
-      }
-      final watcher = FileWatcher(abs, debounce: watcherDebounce);
-      watcher.events.listen(_onWatchBatch);
-      await watcher.start();
-      // Held so [_teardown] can stop it: an unheld watcher keeps its
-      // recursive watch (and its event handling) alive for the whole
-      // process, and every reopen adds another one.
-      _watcher = watcher;
-      _log.info('open: watcher started for $abs');
-      _rescanTimer = Timer.periodic(rescanInterval, (_) => _safeRescan(abs));
-      _indexer = indexer;
-      _ops = ops;
-      _root = abs;
-      // The library's WebDAV sync (M5): idle until configured; the state and
-      // the password are per device, keyed by this root.
-      final syncStore = SyncStore(appDb);
-      final sync = LibrarySyncService(
-        root: abs,
-        engine: SyncEngine(
-          root: abs,
-          ops: ops,
-          store: syncStore,
-          secrets: syncSecrets,
-        ),
-        store: syncStore,
-        secrets: syncSecrets,
-        network: syncNetwork?.call(),
-        phone: Platform.isAndroid || Platform.isIOS,
-      );
-      _sync = sync;
-      ops.syncHints = sync.hint;
-      // Loads the status, then the automatic triggers take over (the
-      // "library opened" full sync among them) — idle without a
-      // destination.
-      unawaited(sync.start());
-      // The library's own text sizes, on screen with it (T-M6-12) and
-      // before the ready bump, so nothing paints at the wrong size first.
-      final settings = await config.config;
-      AppTextScales.apply(
-        ui: settings.uiTextScale,
-        note: settings.noteTextScale,
-      );
-      await _publishEpubLook(settings.epubLook);
-      _phase = LibraryPhase.ready;
-      currentRootPath = abs;
-      // Warm the tree's first query while the caller still shows its
-      // opening state: the first flatten otherwise paid drift's statement
-      // preparation and SQLite's page cache right as the shell built
-      // (78-118 ms in the log, T-PP-22).
-      unawaited(_warmUpTree(indexer.dao));
-      await AppSettingsRepo(appDb).setLastLibraryPath(abs);
-      // The list the home screen shows (T-ML-04). Opening is what puts a
-      // folder on it, so a library the app has never seen needs no
-      // registration step of its own.
-      await LibraryRegistry(appDb).touch(abs);
-      // The native widget config activity cannot read the registry (no
-      // Dart engine at placement), so it reads this mirror instead.
-      unawaited(_saveWidgetLibraryMirror(appDb));
-      // Opening is when the trash empties itself, if the library asked
-      // it to (issue #79) — behind the ready bump, because a folder full
-      // of old deletions must not hold the library shut.
-      unawaited(_autoEmptyTrash(ops, settings.trashAutoEmptyDays));
-      // And, like the trash empty, behind the ready bump: the temp files a
-      // killed write left (issue #379) are swept on a background isolate so
-      // a folder full of them never holds the library shut.
-      unawaited(_sweepStaleTempFiles(abs));
-      _bump();
-      if (!blockingScan) {
-        _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
-      }
-      if (contentOwed) unawaited(_indexContents(abs));
+      await _startSession(abs, blockingScan: blockingScan);
       _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
       _log.error('open failed: $error');
@@ -574,6 +443,144 @@ final class LibraryController implements LibrarySession {
       await _teardown();
       _bump();
     }
+  }
+
+  /// Sets a session up for the library at [abs]: the index, the indexer, the
+  /// ops, the watcher and the sync.
+  ///
+  /// Shared by [open] and [rebuildIndex]: the first does the destination
+  /// checks and sets the phase around it, the second runs it over an index
+  /// file it has just deleted (#368).
+  Future<void> _startSession(String abs, {required bool blockingScan}) async {
+    // This library's own index file (T-ML-03). Opening a second library
+    // no longer scans over the first one's rows, so coming back to it
+    // costs a reconciliation rather than a full walk. [_openIndex] also
+    // warms the connection's first query — sqlite, the schema and its FTS
+    // table, on the connection's own isolate — so a cold index does not pay
+    // for it inside the tree's first flatten (`flatten: 105ms … [tree
+    // 103]`, #315), and it rebuilds a file sqlite reports as damaged
+    // rather than leaving the library shut (#368).
+    final indexDb = await _openIndex(abs);
+    _indexDb = indexDb;
+    final appDb = await appDatabase;
+    AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
+    _startUpdateChecks(appDb);
+    // Before anything reads the settings: a library upgraded from the
+    // `library_settings` table gets its `.niman/settings.json` here,
+    // now that the folder is known to be reachable (T-ML-02).
+    await LegacyLibrarySettings(appDb).seed(abs);
+    final indexer = Indexer(indexDb)
+      ..onChanged = _bump
+      ..onRemoved = _onRemoved;
+    // One reader of `.niman/settings.json` per session: the four
+    // per-library settings and the overrides (T-ML-10) share its cache.
+    // The welcome's answer (#266) seeds the editors of every library
+    // this device has never stored settings for — not only the first.
+    // A failure to read it is not a reason to fail the open.
+    Map<String, Object?>? welcomeDefaults;
+    try {
+      welcomeDefaults = await DbWelcomeStore(AppSettingsRepo(appDb))
+          .firstLibraryEditorKeys();
+    } on Object catch (error) {
+      _log.warning('welcome editor defaults unavailable ($error)');
+    }
+    final config = LibraryConfigRepo(
+      abs,
+      device: DbDeviceSettingsStore(appDb),
+      welcomeDefaults: welcomeDefaults,
+    );
+    _configRepo = config;
+    final ops = NoteOps(
+      root: abs,
+      db: indexDb,
+      indexer: indexer,
+      config: config,
+    );
+    // A library indexed for the first time opens on its tree, and its
+    // notes are read behind it: the search, the tags and the links fill
+    // in as they are read.
+    var contentOwed = false;
+    if (blockingScan) {
+      contentOwed = await indexer.indexTreeFirst(abs);
+    }
+    if (blockingScan && !contentOwed) {
+      // Only here: the first index is the scan long enough to be worth
+      // watching, and reporting costs a message per note.
+      indexer.onProgress = _onIndexProgress;
+      try {
+        await indexer.fullScan(abs);
+      } finally {
+        indexer.onProgress = null;
+        _indexProgress = null;
+      }
+    }
+    final watcher = FileWatcher(abs, debounce: watcherDebounce);
+    watcher.events.listen(_onWatchBatch);
+    await watcher.start();
+    // Held so [_teardown] can stop it: an unheld watcher keeps its
+    // recursive watch (and its event handling) alive for the whole
+    // process, and every reopen adds another one.
+    _watcher = watcher;
+    _log.info('open: watcher started for $abs');
+    _rescanTimer = Timer.periodic(rescanInterval, (_) => _safeRescan(abs));
+    _indexer = indexer;
+    _ops = ops;
+    _root = abs;
+    // The library's WebDAV sync (M5): idle until configured; the state and
+    // the password are per device, keyed by this root.
+    final syncStore = SyncStore(appDb);
+    final sync = LibrarySyncService(
+      root: abs,
+      engine: SyncEngine(
+        root: abs,
+        ops: ops,
+        store: syncStore,
+        secrets: syncSecrets,
+      ),
+      store: syncStore,
+      secrets: syncSecrets,
+      network: syncNetwork?.call(),
+      phone: Platform.isAndroid || Platform.isIOS,
+    );
+    _sync = sync;
+    ops.syncHints = sync.hint;
+    // Loads the status, then the automatic triggers take over (the
+    // "library opened" full sync among them) — idle without a
+    // destination.
+    unawaited(sync.start());
+    // The library's own text sizes, on screen with it (T-M6-12) and
+    // before the ready bump, so nothing paints at the wrong size first.
+    final settings = await config.config;
+    AppTextScales.apply(ui: settings.uiTextScale, note: settings.noteTextScale);
+    await _publishEpubLook(settings.epubLook);
+    _phase = LibraryPhase.ready;
+    currentRootPath = abs;
+    // Warm the tree's first query while the caller still shows its
+    // opening state: the first flatten otherwise paid drift's statement
+    // preparation and SQLite's page cache right as the shell built
+    // (78-118 ms in the log, T-PP-22).
+    unawaited(_warmUpTree(indexer.dao));
+    await AppSettingsRepo(appDb).setLastLibraryPath(abs);
+    // The list the home screen shows (T-ML-04). Opening is what puts a
+    // folder on it, so a library the app has never seen needs no
+    // registration step of its own.
+    await LibraryRegistry(appDb).touch(abs);
+    // The native widget config activity cannot read the registry (no
+    // Dart engine at placement), so it reads this mirror instead.
+    unawaited(_saveWidgetLibraryMirror(appDb));
+    // Opening is when the trash empties itself, if the library asked
+    // it to (issue #79) — behind the ready bump, because a folder full
+    // of old deletions must not hold the library shut.
+    unawaited(_autoEmptyTrash(ops, settings.trashAutoEmptyDays));
+    // And, like the trash empty, behind the ready bump: the temp files a
+    // killed write left (issue #379) are swept on a background isolate so
+    // a folder full of them never holds the library shut.
+    unawaited(_sweepStaleTempFiles(abs));
+    _bump();
+    if (!blockingScan) {
+      _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
+    }
+    if (contentOwed) unawaited(_indexContents(abs));
   }
 
   /// Closes the current library (stops watching; keeps the index) and clears
@@ -738,20 +745,25 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  /// Deletes the index file of a forgotten library, if it can be found.
+  /// Deletes the index file of a library, if it can be found.
   ///
-  /// Best effort: a failure here costs disk space, not correctness, and
-  /// must not turn "forget this library" into an error.
+  /// The file and the write-ahead log beside it go together: a rebuilt index
+  /// must not open on a stale journal. Best effort — a failure here costs
+  /// disk space, not correctness, and must not turn "forget this library" or
+  /// "rebuild its index" into an error.
   Future<void> _deleteIndexOf(String libraryPath) async {
     try {
       final locate = indexFileOf;
       if (locate == null) return;
       final file = await locate(libraryPath);
-      if (file.existsSync()) {
-        await file.delete();
+      for (final sidecar in const ['', '-wal', '-shm']) {
+        final part = File('${file.path}$sidecar');
+        if (part.existsSync()) {
+          await part.delete();
+        }
       }
     } on Object catch (error) {
-      _log.warning('forget: index file not removed ($error)');
+      _log.warning('index file not removed ($error)');
     }
   }
 
@@ -765,6 +777,40 @@ final class LibraryController implements LibrarySession {
     }
     _log.info('manual rescan requested');
     return indexer.fullScan(root);
+  }
+
+  /// Rebuilds the open library's index from disk (#368).
+  ///
+  /// The documented repair of an index (`AGENTS.md`): the file is deleted,
+  /// and the notes are read again into the empty one opened in its place.
+  /// Nothing outside the index moves — the registry row, the workspace
+  /// (what was open in it), the per-device settings and the sync
+  /// destination all stay — so repairing a damaged cache never costs the
+  /// library.
+  ///
+  /// The session is rebuilt in place, not closed and reopened, so the
+  /// library never leaves the screen; the phase a caller sees stays ready.
+  @override
+  Future<void> rebuildIndex() async {
+    final root = _root;
+    if (root == null || _phase != LibraryPhase.ready) {
+      throw StateError('No library is open');
+    }
+    _log.info('rebuild index requested: $root');
+    _lastError = null;
+    await _teardown();
+    await _deleteIndexOf(root);
+    try {
+      await _startSession(root, blockingScan: true);
+      _log.info('rebuild index complete: ready root=$root');
+    } on Object catch (error) {
+      _log.error('rebuild index failed: $error');
+      _lastError = '$error';
+      _phase = LibraryPhase.none;
+      _root = null;
+      await _teardown();
+    }
+    _bump();
   }
 
   /// Whether the in-app debug log buffer records events.
@@ -1493,21 +1539,82 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  /// Opens the index connection's file while the library is still being set
-  /// up (#315): one cheap query, for the isolate's boot, the sqlite open,
-  /// the schema and the FTS table.
+  /// Opens the index of the library at [libraryPath] and reads it once,
+  /// rebuilding the file in place when sqlite reports it damaged (#368).
   ///
-  /// A failure is logged and left alone: the connection remembers a failed
-  /// migration and rethrows it to every reader after, so the first one to
-  /// ask hears about it exactly as it would have without this.
+  /// The index is derived data and the documented way to repair it is to
+  /// delete the file and re-index (`AGENTS.md`, `IndexDatabase`), but the
+  /// only code that deleted one was `forgetLibrary`, which also drops the
+  /// registry row, the workspace, the device settings and the sync
+  /// destination — so a disk that filled or a killed migration left a
+  /// library that would not open and no way out but losing its entry. A
+  /// file sqlite answers with `SQLITE_CORRUPT` or `SQLITE_NOTADB` is
+  /// deleted and opened again — empty, at its schema — and the caller's
+  /// scan refills it from the notes on disk.
+  ///
+  /// The first query is also the connection's warm-up (#315): it is what
+  /// opens the file, so the tree's first flatten is never the query that
+  /// pays for the sqlite open, the schema and its FTS table.
+  Future<IndexDatabase> _openIndex(String libraryPath) async {
+    final db = await indexDbFactory(libraryPath);
+    try {
+      await _warmIndex(db);
+      return db;
+    } on Object catch (error) {
+      final damaged = _sqliteCause(error);
+      if (damaged == null || !_isDamagedIndex(damaged)) rethrow;
+      _log.warning('index of $libraryPath is damaged; rebuilding: $damaged');
+      await _closeIndex(db);
+      await _deleteIndexOf(libraryPath);
+      final fresh = await indexDbFactory(libraryPath);
+      await _warmIndex(fresh);
+      return fresh;
+    }
+  }
+
+  /// The sqlite error behind [error], or null when it holds none.
+  ///
+  /// A connection on its own isolate (`defaultIndexDatabase`) reports what
+  /// failed over there as drift's remote exception, with the sqlite error
+  /// itself as its cause.
+  static SqliteException? _sqliteCause(Object error) => switch (error) {
+    final SqliteException sqlite => sqlite,
+    final DriftRemoteException remote
+        when remote.remoteCause is SqliteException =>
+      remote.remoteCause as SqliteException,
+    _ => null,
+  };
+
+  /// Whether [error] says the file is unreadable: sqlite's `SQLITE_CORRUPT`
+  /// and `SQLITE_NOTADB` (sqlite.org/rescode.html).
+  ///
+  /// What a disk that ran out of room or a killed migration leaves behind,
+  /// as against a transient I/O error, which is waited out by the rescan
+  /// instead of costing a full re-index.
+  static bool _isDamagedIndex(SqliteException error) =>
+      error.resultCode == 11 || error.resultCode == 26;
+
+  /// Closes a connection whose open failed, so the file behind it can be
+  /// deleted (Windows will not delete an open file).
+  Future<void> _closeIndex(IndexDatabase db) async {
+    try {
+      await db.close();
+    } on Object catch (error) {
+      _log.debug('damaged index connection not closed cleanly ($error)');
+    }
+  }
+
+  /// Reads the index connection's file once, opening it (#315): the
+  /// isolate's boot, the sqlite open, the schema and the FTS table.
+  ///
+  /// Throws when the file cannot be read; [_openIndex] takes that as the
+  /// signal that the index is damaged and rebuilds it (#368). A connection
+  /// that failed this way rethrows to every reader after, so the throw is
+  /// the answer, not an accident.
   Future<void> _warmIndex(IndexDatabase db) async {
     final clock = Stopwatch()..start();
-    try {
-      await db.customSelect('SELECT 1').get();
-      _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
-    } on Object catch (error) {
-      _log.debug('index warm-up failed: $error');
-    }
+    await db.customSelect('SELECT 1').get();
+    _log.debug('index warm-up: ${clock.elapsedMilliseconds} ms');
   }
 
   Future<void> _safeRescan(String abs) async {

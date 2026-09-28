@@ -2708,4 +2708,9 @@ final class LithuanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Pažymėjus langelį pažymimi ir po juo įdėti. Nuėmus žymę jie '
       'paliekami.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Perkurti indeksą';
 }

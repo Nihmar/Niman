@@ -2746,4 +2746,9 @@ final class GermanStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Ein Häkchen setzt auch die darunter verschachtelten. Es '
       'wieder zu entfernen lässt sie, wie sie sind.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Index neu aufbauen';
 }

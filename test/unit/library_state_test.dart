@@ -11,6 +11,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_sync_secret_store.dart';
@@ -257,6 +258,59 @@ void main() {
     await controller.forgetLibrary(root.path);
     expect(await LibraryRegistry(await controller.appDatabase).all(), isEmpty);
     await controller.dispose();
+  });
+
+  test('opening a library whose index file is garbage rebuilds it', () async {
+    // #368: the index is derived data and deleting it is the documented
+    // repair, but only `forgetLibrary` did so — and it takes the registry
+    // row, the workspace, the settings and the sync destination with it.
+    // A corrupt file must cost the file, not the library.
+    //
+    // The index runs on its own isolate, as the app opens it
+    // (`defaultIndexDatabase`): the sqlite error arrives wrapped, and the
+    // rebuild has to see through that.
+    File indexFileOf(String libraryPath) =>
+        File(p.join(tmp.path, '${p.basename(libraryPath)}.db'));
+    LibraryController controller() => LibraryController(
+      appDb,
+      indexDbFactory: (libraryPath) async => IndexDatabase(
+        NativeDatabase.createInBackground(
+          indexFileOf(libraryPath),
+          setup: indexDatabaseSetup,
+        ),
+      ),
+      indexFileOf: (libraryPath) async => indexFileOf(libraryPath),
+      rescanInterval: const Duration(hours: 1),
+    );
+
+    final first = controller();
+    await first.open(root.path, create: false);
+    expect(await names(first), ['a.md']);
+    // The workspace the rebuild must not cost: the note was open, on this
+    // device, when the app last ran.
+    await first.saveWorkspace(Workspace.empty.open('a.md'));
+    await first.close();
+    await first.dispose();
+
+    // A disk that filled, or a killed migration: the file is no database.
+    indexFileOf(root.path)
+        .writeAsStringSync('this is not a sqlite database at all');
+
+    final second = controller();
+    await second.open(root.path, create: false);
+
+    // It opens ready on a rebuilt index...
+    expect(second.phase, LibraryPhase.ready);
+    expect(second.lastError, isNull);
+    // ...holding the notes again...
+    expect(await names(second), ['a.md']);
+    // ...and nothing else went with the damage: its registry row and the
+    // workspace it had are still there.
+    final db = await second.appDatabase;
+    expect((await LibraryRegistry(db).all()).single.path, root.path);
+    expect((await second.savedWorkspace).activePath, 'a.md');
+    await second.close();
+    await second.dispose();
   });
 
   test('a closed session reads no tree at all', () async {

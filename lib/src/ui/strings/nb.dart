@@ -2667,4 +2667,9 @@ final class NorwegianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Å huke av en boks huker også av dem som er nøstet under. Å '
       'fjerne haken lar dem stå.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Bygg indeksen på nytt';
 }

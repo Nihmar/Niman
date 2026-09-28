@@ -2766,4 +2766,9 @@ final class FrenchStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Cocher une case coche celles qui sont imbriquées dessous. La '
       'décocher les laisse telles quelles.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => "Reconstruire l'index";
 }

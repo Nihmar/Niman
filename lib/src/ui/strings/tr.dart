@@ -2651,4 +2651,9 @@ final class TurkishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Bir kutuyu işaretlemek altındaki iç içe kutuları da '
       'işaretler. İşareti kaldırmak onları olduğu gibi bırakır.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Dizini yeniden oluştur';
 }

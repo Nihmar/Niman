@@ -2710,4 +2710,9 @@ final class BosnianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Označavanje kućice označava i one ugniježđene ispod. '
       'Uklanjanje oznake ih ostavlja kakve jesu.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Ponovo izgradi indeks';
 }

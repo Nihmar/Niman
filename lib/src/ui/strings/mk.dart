@@ -2708,4 +2708,9 @@ final class MacedonianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Означувањето квадратче ги означува и вгнездените под него. '
       'Отстранувањето на ознаката ги остава како се.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Повторно изгради го индексот';
 }

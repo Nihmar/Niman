@@ -2721,4 +2721,9 @@ final class RomanianStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Bifarea unei casete le bifează și pe cele imbricate '
       'dedesubt. Debifarea le lasă așa.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Reconstruiește indexul';
 }

@@ -2689,4 +2689,9 @@ final class SwedishStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Att markera en ruta markerar dem som är nästlade under. Att '
       'avmarkera lämnar dem som de är.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => 'Bygg om indexet';
 }

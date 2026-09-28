@@ -1076,6 +1076,7 @@ final class AppStrings {
   static String get libraryPathTitle => _s.libraryPathTitle;
   static String get reindexTitle => _s.reindexTitle;
   static String get reindexDone => _s.reindexDone;
+  static String get rebuildIndexTitle => _s.rebuildIndexTitle;
   static String get closeLibraryTitle => _s.closeLibraryTitle;
   static String get exportLogTitle => _s.exportLogTitle;
   static String get exportLogSubtitle => _s.exportLogSubtitle;

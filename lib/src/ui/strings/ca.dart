@@ -2729,4 +2729,9 @@ final class CatalanStrings extends Strings {
   String get cascadeChecklistSubtitle =>
       'Marcar una casella marca les que hi ha imbricades a sota. '
       'Desmarcar-la les deixa tal com estan.';
+
+  // Rebuilding the index file (#368).
+
+  @override
+  String get rebuildIndexTitle => "Reconstrueix l'índex";
 }

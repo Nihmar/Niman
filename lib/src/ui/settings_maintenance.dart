@@ -59,6 +59,25 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
     }
   }
 
+  /// Deletes the index file and reads every note from disk into a fresh one
+  /// (#368): the repair for an index that went bad, which a re-index over the
+  /// damaged file could not do. The library is not forgotten — its entry, its
+  /// workspace, its settings and its sync destination all stay.
+  Future<void> _rebuildIndex(BuildContext context) async {
+    try {
+      await controller.rebuildIndex();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
+      }
+    } on Object catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
+      }
+    }
+  }
+
   /// Imports a Notion export (#25): picks the `.zip` Notion's "Markdown &
   /// CSV" export downloads, brings its pages into a new folder of the
   /// library, and says where they landed.
@@ -140,6 +159,16 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             leading: const Icon(Icons.refresh_outlined),
             title: Text(AppStrings.reindexTitle),
             onTap: () => _rescan(context),
+          ),
+        ),
+        HighlightRow(
+          key: SettingsKeys.rebuildIndex,
+          child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
+            leading: const Icon(Icons.build_outlined),
+            title: Text(AppStrings.rebuildIndexTitle),
+            onTap: () => _rebuildIndex(context),
           ),
         ),
         HighlightRow(
