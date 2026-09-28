@@ -1,0 +1,331 @@
+// The wikilink suggester panel (#475): while a wikilink is typed the panel
+// lists the library's notes after `[[` and a note's headings after `#`,
+// filters as the text grows, and completes the link on Enter/Tab without
+// writing anything but the link.
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/links/suggester.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/render/markdown_theme.dart';
+import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/render/wikilink_panel.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/surface.dart';
+
+import '../fakes/fake_wikilink_suggester.dart';
+
+const MarkdownTheme _theme = MarkdownTheme(
+  body: TextStyle(fontSize: 14, height: 1.5, fontFamily: 'monospace'),
+  heading1: TextStyle(fontSize: 25),
+  heading2: TextStyle(fontSize: 21),
+  heading3: TextStyle(fontSize: 18),
+  heading4: TextStyle(fontSize: 16),
+  heading5: TextStyle(fontSize: 14),
+  heading6: TextStyle(fontSize: 13),
+  code: TextStyle(fontSize: 14, fontFamily: 'monospace'),
+  quote: TextStyle(fontSize: 14),
+  tableCell: TextStyle(fontSize: 14),
+  tableHeader: TextStyle(fontSize: 14),
+  link: TextStyle(fontSize: 14),
+  wikilink: TextStyle(fontSize: 14),
+  tag: TextStyle(fontSize: 14),
+  marker: TextStyle(fontSize: 14),
+  codeHighlight: <String, TextStyle>{},
+  rule: Color(0xFF888888),
+  codeBackground: Color(0xFFEEEEEE),
+  quoteBar: Color(0xFFCCCCCC),
+  tableBorder: Color(0xFFCCCCCC),
+  markerDim: Color(0xFF999999),
+  blockSpacing: 10,
+  listIndentPerLevel: 22,
+  quoteIndentPerLevel: 12,
+  codePadding: 8,
+  quoteBarWidth: 3,
+  ruleThickness: 1,
+  tableCellPadding: EdgeInsets.all(4),
+  lineHeight: 21,
+);
+
+/// The library the panel reads in these tests.
+FakeWikilinkSuggester _library() => FakeWikilinkSuggester(
+  notes: const <NoteSuggestion>[
+    NoteSuggestion(name: 'Notes', folder: 'Archive', target: 'Notes'),
+    NoteSuggestion(name: 'Notes', folder: 'Guides', target: 'Notes'),
+    NoteSuggestion(
+      name: 'Markdown basics',
+      folder: 'Guides',
+      target: 'Markdown basics',
+      alias: 'md',
+    ),
+    NoteSuggestion(
+      name: 'Meeting notes',
+      folder: 'Personal',
+      target: 'Meeting notes',
+    ),
+    NoteSuggestion(
+      name: 'Meeting notes',
+      folder: 'Work',
+      target: 'Meeting notes',
+    ),
+  ],
+  headings: const <String, List<HeadingSuggestion>>{
+    'Notes': <HeadingSuggestion>[
+      HeadingSuggestion('Links'),
+      HeadingSuggestion('Link targets'),
+      HeadingSuggestion('Dead links'),
+    ],
+  },
+);
+
+void main() {
+  /// Pumps the live/source surface over [text] with [suggester], tapping it so
+  /// the platform's own text path is the one a keystroke takes.
+  Future<MarkdownSourceViewState> pump(
+    WidgetTester tester,
+    SourceBuffer buffer,
+    FakeWikilinkSuggester suggester, {
+    MarkdownSurfaceMode mode = MarkdownSurfaceMode.source,
+  }) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSurface(
+            buffer: buffer,
+            mode: mode,
+            theme: _theme,
+            showLineNumbers: false,
+            wikilinkSuggester: suggester,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    return tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+  }
+
+  /// Types the whole note's new text, the way the platform reports it.
+  Future<void> type(WidgetTester tester, String text) async {
+    tester.testTextInput.updateEditingValue(
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+  }
+
+  WikilinkPanel panel(WidgetTester tester) =>
+      tester.widget<WikilinkPanel>(find.byType(WikilinkPanel));
+
+  testWidgets('typing [[ lists the library notes', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    final suggester = _library();
+    final state = await pump(tester, buffer, suggester);
+
+    await type(tester, '[[');
+
+    expect(state.isSuggesterShown, isTrue);
+    expect(suggester.noteQueries, contains(''));
+    final drawn = panel(tester);
+    expect(drawn.kind, WikilinkPanelKind.notes);
+    expect(drawn.entries.whereType<NoteSuggestion>().map((n) => n.name), [
+      'Notes',
+      'Notes',
+      'Markdown basics',
+      'Meeting notes',
+      'Meeting notes',
+    ]);
+    // The folder tells the two same-named notes apart, and the alias row says
+    // how it was found.
+    expect(drawn.entries.whereType<NoteSuggestion>().map((n) => n.folder), [
+      'Archive',
+      'Guides',
+      'Guides',
+      'Personal',
+      'Work',
+    ]);
+  });
+
+  testWidgets('typing more narrows the list', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    final suggester = _library();
+    await pump(tester, buffer, suggester);
+
+    await type(tester, '[[');
+    await type(tester, '[[No');
+
+    final names = panel(tester).entries
+        .whereType<NoteSuggestion>()
+        .map((n) => n.name)
+        .toList();
+    expect(
+      names,
+      ['Notes', 'Notes', 'Meeting notes', 'Meeting notes'],
+      reason:
+          'the two prefix matches first, the contains matches after, '
+          'and the name that matched neither gone',
+    );
+    expect(suggester.noteQueries, ['', 'No']);
+  });
+
+  testWidgets('Enter completes the link and the caret lands after it', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final state = await pump(tester, buffer, _library());
+
+    await type(tester, '[[Note');
+    expect(panel(tester).entries, isNotEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    // The picked row, the prefix match at the top: the note named `Notes`,
+    // with the closing `]]` written behind it.
+    expect(buffer.text, '[[Notes]]');
+    expect(
+      state.selection.extent,
+      9,
+      reason: 'the caret stands past the closing brackets',
+    );
+    expect(state.isSuggesterShown, isFalse, reason: 'completing closes it');
+  });
+
+  testWidgets('Tab completes the link too', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(tester, '[[Meeting');
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    expect(buffer.text, '[[Meeting notes]]');
+  });
+
+  testWidgets('Up/Down move the picked row', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(tester, '[[');
+    expect(panel(tester).selected, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(panel(tester).selected, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(panel(tester).selected, 0);
+    // Down at the bottom stays on the last row.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(panel(tester).selected, 0);
+  });
+
+  testWidgets('# lists the named note headings and completes one', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final suggester = _library();
+    await pump(tester, buffer, suggester);
+
+    await type(tester, '[[Notes#Li');
+
+    expect(suggester.headingTargets, contains('Notes'));
+    final drawn = panel(tester);
+    expect(drawn.kind, WikilinkPanelKind.headings);
+    expect(drawn.entries.map((e) => (e as HeadingSuggestion).heading), [
+      'Links',
+      'Link targets',
+      'Dead links',
+    ], reason: 'prefix matches before contains');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(buffer.text, '[[Notes#Links]]');
+  });
+
+  testWidgets('a name that matches nothing says so', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    await pump(tester, buffer, _library());
+
+    await type(tester, '[[zzz');
+
+    expect(find.byType(WikilinkPanel), findsOneWidget);
+    expect(panel(tester).entries, isEmpty);
+    expect(
+      find.textContaining('No note matches', findRichText: true),
+      findsOneWidget,
+    );
+    // And the panel writes nothing: the dead name is left as typed.
+    expect(buffer.text, '[[zzz');
+  });
+
+  testWidgets('Escape closes the panel and leaves the text alone', (
+    tester,
+  ) async {
+    final buffer = SourceBuffer.fromText('');
+    final state = await pump(tester, buffer, _library());
+
+    await type(tester, '[[No');
+    expect(state.isSuggesterShown, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+
+    expect(state.isSuggesterShown, isFalse);
+    expect(buffer.text, '[[No', reason: 'Escape never edits the note');
+  });
+
+  testWidgets('the panel is drawn in both surfaces', (tester) async {
+    for (final mode in MarkdownSurfaceMode.values) {
+      final buffer = SourceBuffer.fromText('');
+      final state = await pump(tester, buffer, _library(), mode: mode);
+      await type(tester, '[[');
+      expect(
+        state.isSuggesterShown,
+        isTrue,
+        reason: '$mode draws the panel under the caret',
+      );
+      expect(find.byType(WikilinkPanel), findsOneWidget);
+      expect(
+        panel(tester).entries.whereType<NoteSuggestion>().map((n) => n.name),
+        contains('Notes'),
+        reason: '$mode lists the library notes',
+      );
+    }
+  });
+
+  testWidgets('a surface with no library draws no panel', (tester) async {
+    final buffer = SourceBuffer.fromText('');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            selection: const SelectionModel.at(0),
+            showLineNumbers: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(MarkdownSourceView));
+    await tester.pump();
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: '[[',
+        selection: TextSelection.collapsed(offset: 2),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(WikilinkPanel), findsNothing);
+  });
+}

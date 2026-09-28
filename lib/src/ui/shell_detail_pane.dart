@@ -10,6 +10,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/attachment_view.dart';
@@ -36,6 +37,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.toolbarLayout,
     required this.onEditorKindChanged,
     required this.linkSource,
+    required this.wikilinkSuggester,
     required this.onOpenNote,
     required this.kindMode,
     required this.onNoteKindChanged,
@@ -135,6 +137,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Link navigation (T-M3-07).
   final LinkSource? linkSource;
+
+  /// The library the wikilink suggester panel reads (#475).
+  final WikilinkSuggester? wikilinkSuggester;
 
   /// Opens a note from a link, landing on a heading anchor when given.
   final void Function(String path, String? anchor) onOpenNote;
@@ -289,6 +294,7 @@ final class ShellDetailPane extends StatelessWidget {
     onEditorKindChanged: onEditorKindChanged,
     libraryRoot: root,
     linkSource: linkSource,
+    wikilinkSuggester: wikilinkSuggester,
     onOpenNote: onOpenNote,
     initialAnchor: tab.anchor,
     initialCaretOffset: tab.caret,

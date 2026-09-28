@@ -18,6 +18,7 @@ import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/search/replace.dart';
@@ -678,4 +679,9 @@ abstract interface class LibrarySession {
   /// The link-resolution source (wiki targets + markdown hrefs against
   /// the open index).
   Future<LinkSource?> get linkSource;
+
+  /// The library the wikilink suggester panel reads (#475): the notes,
+  /// their aliases and their headings, over the open index. Null while no
+  /// library is ready.
+  Future<WikilinkSuggester?> get wikilinkSuggester;
 }

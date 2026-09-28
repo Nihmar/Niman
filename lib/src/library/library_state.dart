@@ -44,6 +44,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
@@ -373,6 +374,26 @@ final class LibraryController implements LibrarySession {
     final db = _indexDb;
     if (db == null) return null;
     return LinkResolver(db);
+  }
+
+  @override
+  Future<WikilinkSuggester?> get wikilinkSuggester async {
+    final db = _indexDb;
+    if (db == null) return null;
+    final reader = _ops;
+    return IndexWikilinkSuggester(
+      db,
+      // A named note's headings are read off the note itself; a note gone
+      // since the panel named it answers null rather than throwing.
+      readNote: (path) async {
+        if (reader == null) return null;
+        try {
+          return await reader.readNote(path);
+        } on Object {
+          return null;
+        }
+      },
+    );
   }
 
   /// Resumes the last opened library (if it still exists). Best effort:

@@ -30,6 +30,7 @@ import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/links/suggester.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
@@ -98,6 +99,7 @@ final class MarkdownSurface extends StatelessWidget {
     this.viewKey,
     this.lineTokens,
     this.templateCommands = false,
+    this.wikilinkSuggester,
     super.key,
   });
 
@@ -106,6 +108,10 @@ final class MarkdownSurface extends StatelessWidget {
 
   /// See [MarkdownSourceView.templateCommands].
   final bool templateCommands;
+
+  /// See [MarkdownSourceView.wikilinkSuggester]: the library the wikilink
+  /// suggester panel reads (#475), the same in both modes.
+  final WikilinkSuggester? wikilinkSuggester;
 
   /// The note.
   final SourceBuffer buffer;
@@ -257,5 +263,6 @@ final class MarkdownSurface extends StatelessWidget {
     autofocus: autofocus,
     lineTokens: lineTokens,
     templateCommands: templateCommands,
+    wikilinkSuggester: wikilinkSuggester,
   );
 }
