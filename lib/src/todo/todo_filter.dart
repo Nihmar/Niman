@@ -207,7 +207,11 @@ bool _dueInRange(DateTime? due, DateTime today, TodoDueRange range) {
       }
       final day = _day(due);
       final start = _day(today);
-      final end = start.add(const Duration(days: 7));
+      // Seven calendar days, not 168 hours: a span that holds a DST
+      // fall-back is an hour short of the seventh day, which would drop
+      // it from the window (#380). The day arithmetic below matches how
+      // the task dates themselves are written.
+      final end = DateTime(start.year, start.month, start.day + 7);
       return !day.isBefore(start) && !day.isAfter(end);
   }
 }
