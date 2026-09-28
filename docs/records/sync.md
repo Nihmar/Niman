@@ -383,7 +383,15 @@ for multistatus parsing: servers pick their own namespace prefixes
   `GET` into a sink with sha256 computed in flight, never a whole file
   in memory;
 - follows 301/302/307/308 itself (at most 5), keeping method, body and
-  auth only while the host stays the same;
+  auth while the origin stays the same: the host and the port the URL
+  spells, an omitted port being the scheme's default. An `http` → `https`
+  upgrade on the same host and port is that same origin and keeps the
+  credentials; a downgrade to plain http, or another host or port, drops
+  them for good (#349);
+- guards a write with `If-Match` only when the validator is strong: a
+  weak `W/"…"` (some servers hand one out) could never satisfy the
+  strong comparison RFC 7232 requires, so it is dropped and the write
+  goes unguarded rather than 412-ing forever (#349);
 - maps statuses to typed failures: `WebDavAuthFailure` (401/403),
   `WebDavNotFound` (404/409 on a missing parent), `WebDavPrecondition`
   (412), `WebDavRetryable` (408/423/425/429/500/502/503/504 and socket
@@ -397,8 +405,8 @@ for multistatus parsing: servers pick their own namespace prefixes
 It knows nothing about libraries, the database or Flutter, so it runs in
 any isolate and is tested against an in-process fake server
 (`test/fakes/fake_webdav_server.dart`, `HttpServer` on loopback) whose
-switches turn ETags, collection ETags, `If-Match`, `MOVE`, auth,
-redirects and injected failures on and off.
+switches turn ETags (strong or weak), collection ETags, `If-Match`, `MOVE`,
+auth, redirects and injected failures on and off.
 
 ### The engine (`lib/src/sync/sync_engine.dart`)
 

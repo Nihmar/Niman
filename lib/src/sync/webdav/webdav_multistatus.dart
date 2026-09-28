@@ -47,8 +47,11 @@ final class WebDavResource {
   /// Whether the item is a folder.
   final bool isCollection;
 
-  /// `getetag` exactly as sent (quotes and `W/` included, as `If-Match`
-  /// needs it), or null when the server has none.
+  /// `getetag` exactly as sent (quotes included; a weak `W/` is kept
+  /// too, since change detection compares it as it is), or null when the
+  /// server has none. A weak validator is never replayed as `If-Match`:
+  /// the client drops it, strong comparison could not match it
+  /// (`webdav_client.dart`).
   final String? etag;
 
   /// `getcontentlength`, or null (folders, servers that omit it).

@@ -121,6 +121,25 @@ void main() {
       expect(utf8.decode(server.file('a.md')!), 'three');
     });
 
+    test('a weak ETag is never sent as If-Match', () async {
+      server.weakEtags = true;
+      await put('a.md', 'one');
+      final listed = (await client.stat('a.md'))!;
+      expect(listed.etag, startsWith('W/'));
+      final before = server.requests.length;
+      await put('a.md', 'two', ifMatch: listed.etag);
+      final guarded = server.requests.skip(before).single;
+      expect(guarded.method, 'PUT');
+      expect(
+        guarded.headers['if-match'],
+        isNull,
+        reason:
+            'strong comparison could never match a weak validator, so '
+            'the guard is dropped',
+      );
+      expect(utf8.decode(server.file('a.md')!), 'two');
+    });
+
     test('PROPFIND lists children with decoded paths and properties', () async {
       server
         ..putFile('Folder A/Nota è.md', utf8.encode('hello'))
@@ -326,6 +345,39 @@ void main() {
       expect(other.requests.single.headers['authorization'], isNull);
     });
 
+    test('a same-host http -> https upgrade keeps the credentials', () async {
+      // The fake speaks plain http; the point here is the client's origin
+      // rule, so `_PlainHttp` carries the https hop to it unchanged.
+      server
+        ..credentials = (user: 'u', password: 'p')
+        ..redirects['/old/'] = (
+          status: 308,
+          target: server.origin.replace(scheme: 'https').resolve('/dav/'),
+        );
+      final http = HttpClient();
+      addTearDown(() => http.close(force: true));
+      final moved = WebDavClient(
+        url: server.origin.resolve('/old/'),
+        username: 'u',
+        password: 'p',
+        httpClient: _PlainHttp(http),
+      );
+      addTearDown(moved.close);
+      await moved.upload('a.md', open: bytesOf('body'), length: 4);
+      expect(utf8.decode(server.file('a.md')!), 'body');
+      expect(server.requests.map((r) => '$r').toList(), [
+        'PUT /old/a.md',
+        'PUT /dav/a.md',
+      ]);
+      expect(
+        server.requests.last.headers['authorization'],
+        isNotNull,
+        reason:
+            'a scheme upgrade on the same host and port is the same '
+            'origin',
+      );
+    });
+
     test('a redirect loop stops after five hops', () async {
       server.redirects['/dav/'] = (status: 302, target: server.url);
       await expectLater(
@@ -370,4 +422,37 @@ void main() {
       server = await FakeWebDavServer.start(); // for tearDown
     });
   });
+}
+
+/// An [HttpClient] that reaches the loopback fake over plain http even when
+/// the URL says `https`: the fake has no certificate, and the redirect test
+/// is about the client's credential rule, not TLS. Every other member the
+/// client does not use is left unimplemented.
+final class _PlainHttp implements HttpClient {
+  new(this._inner);
+
+  final HttpClient _inner;
+
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) =>
+      _inner.openUrl(method, url.replace(scheme: 'http'));
+
+  @override
+  void close({bool force = false}) => _inner.close(force: force);
+
+  @override
+  set connectionTimeout(Duration? value) => _inner.connectionTimeout = value;
+
+  @override
+  set idleTimeout(Duration value) => _inner.idleTimeout = value;
+
+  @override
+  set autoUncompress(bool value) => _inner.autoUncompress = value;
+
+  @override
+  set userAgent(String? value) => _inner.userAgent = value;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnsupportedError('${invocation.memberName}');
 }
