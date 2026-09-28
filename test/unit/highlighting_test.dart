@@ -111,6 +111,19 @@ void main() {
         '#tag',
       );
     });
+
+    test('a #tag keeps unicode letters whole', () {
+      final doc = HighlightDocument.fromText('vedi #città e #идея');
+      final text = doc.lines.single.text;
+      expect(doc.lines.single.tokens.map((t) => t.kind), [
+        TokenKind.tag,
+        TokenKind.tag,
+      ]);
+      expect(
+        doc.lines.single.tokens.map((t) => text.substring(t.start, t.end)),
+        ['#città', '#идея'],
+      );
+    });
   });
 
   group('inline math', () {

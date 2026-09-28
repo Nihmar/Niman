@@ -921,7 +921,11 @@ final class _InlineScanner {
   static final RegExp _highlight = RegExp(r'==[^\s=](?:[^=\n]*[^\s=])?==');
   static final RegExp _italicStar = RegExp(r'\*[^*\n]+\*');
   static final RegExp _italicUnder = RegExp('_(?:[^_]|_(?:[^_]))+_');
-  static final RegExp _tag = RegExp(r'#([\w/-]+)');
+
+  /// `#tag`: unicode letters and digits plus the `_`, `/` and `-` a tag has
+  /// always allowed — the same class `extension_masker` scans, so `#città`
+  /// is one tag here and one tag in the index.
+  static final RegExp _tag = RegExp(r'#([\p{L}\p{N}_/-]+)', unicode: true);
 
   /// The first match of [re] in [line] at/after [pos] (or null).
   static RegExpMatch? _first(RegExp re, String line, int pos) {

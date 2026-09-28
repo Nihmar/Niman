@@ -181,22 +181,35 @@ final class ExtensionMasker {
   }
 
   /// `#tag`, as the index and the tag panel read it.
+  ///
+  /// A tag's characters are unicode letters and digits plus the `_`, `/` and
+  /// `-` it has always allowed — the class the editor's own `#tag` pattern
+  /// scans — so `#città` and `#идея` are one tag each, and the frontmatter's
+  /// YAML, which keeps the whole word, agrees with them.
   ExtensionSpan? _tag(String text, int at) {
     if (text.codeUnitAt(at) != 0x23) return null;
     // A tag is not preceded by a word character: `a#b` is prose.
-    if (at > 0 && _isWord(text.codeUnitAt(at - 1))) return null;
+    if (at > 0 && _wordBefore(text, at)) return null;
     if (at > 0 && text.codeUnitAt(at - 1) == 0x5C) return null; // escaped
-    var end = at + 1;
-    while (end < text.length && _isTagChar(text.codeUnitAt(end))) {
-      end++;
-    }
-    if (end == at + 1) return null;
+    final body = _tagBody.matchAsPrefix(text, at + 1);
+    if (body == null) return null;
     return ExtensionSpan(
       kind: ExtensionKind.tag,
       start: at,
-      end: end,
-      text: text.substring(at, end),
+      end: body.end,
+      text: text.substring(at, body.end),
     );
+  }
+
+  /// Whether the character that ends just before [at] is a word character.
+  ///
+  /// The character is asked, not its last code unit: a letter outside the BMP
+  /// is one character in two units, and the surrogate alone is not a letter.
+  static bool _wordBefore(String text, int at) {
+    var start = at - 1;
+    final unit = text.codeUnitAt(start);
+    if (start > 0 && unit >= 0xDC00 && unit <= 0xDFFF) start--;
+    return _word.hasMatch(text.substring(start, at));
   }
 
   /// [text] with every span's characters replaced by placeholders.
@@ -213,12 +226,10 @@ final class ExtensionMasker {
     return buffer.toString();
   }
 
-  static bool _isWord(int char) =>
-      (char >= 0x30 && char <= 0x39) ||
-      (char >= 0x41 && char <= 0x5A) ||
-      (char >= 0x61 && char <= 0x7A) ||
-      char == 0x5F;
+  /// The characters a tag is made of: a unicode letter or digit, or `_`, `/`
+  /// or `-`. The editor's `#tag` pattern is the same class.
+  static final RegExp _tagBody = RegExp(r'[\p{L}\p{N}_/-]+', unicode: true);
 
-  static bool _isTagChar(int char) =>
-      _isWord(char) || char == 0x2F || char == 0x2D;
+  /// Whether a character is a word character: a letter, a digit or `_`.
+  static final RegExp _word = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
 }
