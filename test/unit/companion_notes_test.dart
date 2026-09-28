@@ -14,6 +14,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/markdown/note_load.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
 
@@ -173,5 +174,48 @@ void main() {
     test('a file with no companion has no marks', () async {
       expect(await companions.marksOf('Books/Dune.pdf'), isEmpty);
     });
+
+    test(
+      "a CRLF companion's mark opens where the editor shows it (#374)",
+      () async {
+        final file = File(p.join(root.path, 'My reading.md'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '---\r\n'
+            'annotates: "[[Dune.pdf]]"\r\n'
+            '---\r\n'
+            '\r\n'
+            '## Dune, p. 3\r\n'
+            '\r\n'
+            '[[Books/Dune.pdf#page=3|Dune, p. 3]]\r\n',
+          );
+        await Indexer(db).fullScan(root.path);
+        final mark = (await companions.marksOf('Books/Dune.pdf')).single;
+        // The text the editor opens the note with, which is what a caret
+        // stands at.
+        final shown = normalizedLineEndings(file.readAsStringSync());
+        expect(shown.substring(mark.offset), startsWith('## Dune, p. 3'));
+        expect(mark.title, 'Dune, p. 3');
+      },
+    );
+
+    test(
+      'an annotation written into a CRLF companion opens at itself (#374)',
+      () async {
+        await ops.createNote(
+          parentPath: '',
+          name: 'My reading',
+          content: '---\nannotates: "[[Dune.pdf]]"\n---\nMy own notes.\n',
+        );
+        final file = File(p.join(root.path, 'My reading.md'));
+        file.writeAsStringSync(
+          file.readAsStringSync().replaceAll('\n', '\r\n'),
+        );
+        await Indexer(db).fullScan(root.path);
+        final written = await write(on('Books/Dune.pdf', 9));
+        final shown = normalizedLineEndings(read(written.path));
+        expect(shown.substring(written.offset), startsWith('## p. 9'));
+      },
+    );
   });
 }
