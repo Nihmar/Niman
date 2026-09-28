@@ -648,6 +648,19 @@ abstract base class Strings {
   String get templateHelpIncludeBody;
   String get templateHelpExampleTitle;
 
+  // What the template checker says as a template is edited (T-TPL-09).
+
+  /// The hint's fix line, with the corrected text inside the sentence: the
+  /// hint draws [fix] apart from the words around it.
+  String templateHintDidYouMean(String fix);
+  String get templateHintNoFix;
+  String get templateHintFixAction;
+  String get templateHintDismissAction;
+
+  /// The problems a template has, for the count in the status row: what the
+  /// number beside it counts.
+  String templateProblems(int count);
+
   // What an {{include:…}} that could not be pasted leaves behind (T-TPL-06).
   String includeMissing(String path);
   String includeCycle(String path);

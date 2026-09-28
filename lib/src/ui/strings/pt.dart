@@ -2803,4 +2803,19 @@ final class PortugueseStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Reconstruir o índice';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Quis dizer $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nenhuma correção sugerida — o texto fica como está escrito.';
+  @override
+  String get templateHintFixAction => 'Corrigir';
+  @override
+  String get templateHintDismissAction => 'Dispensar';
+  @override
+  String templateProblems(int count) =>
+      count == 1 ? '1 problema neste modelo' : '$count problemas neste modelo';
 }

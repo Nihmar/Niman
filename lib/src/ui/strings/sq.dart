@@ -2809,4 +2809,20 @@ final class AlbanianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Rindërto indeksin';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'A e kishit fjalën $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nuk ofrohet rregullim — teksti mbetet ashtu si është shkruar.';
+  @override
+  String get templateHintFixAction => 'Rregullo';
+  @override
+  String get templateHintDismissAction => 'Hiq';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problem në këtë shabllon'
+      : '$count probleme në këtë shabllon';
 }

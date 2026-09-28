@@ -58,6 +58,7 @@ import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/templates/check_state.dart';
 import 'package:niman/src/todo/todo_txt_tokens.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/editor_menu.dart';
@@ -414,6 +415,12 @@ final class _NoteViewState extends State<NoteView>
   Timer? _statsTimer;
   int _wordCount = 0;
   List<OutlineEntry> _outline = const <OutlineEntry>[];
+
+  /// The template checker's state (T-TPL-09): the problems of the note when
+  /// it is a template, and nothing when it is not. Owned here, handed to the
+  /// surface — the same seam [NoteView.spellCheck] keeps — so the status row
+  /// can show the count the surface works out.
+  final TemplateCheck _templateCheck = TemplateCheck();
 
   /// [_outline], published for the panels beside the note (#175).
   final ValueNotifier<List<OutlineEntry>> _outlineNotifier = ValueNotifier(
@@ -817,6 +824,7 @@ final class _NoteViewState extends State<NoteView>
     _handMemento(widget.path);
     _mementoTimer?.cancel();
     _activeFormats.removeListener(_scheduleMemento);
+    _templateCheck.dispose();
     _saveTimer?.cancel();
     _statsTimer?.cancel();
     _previewTimer?.cancel();
@@ -1280,6 +1288,9 @@ final class _NoteViewState extends State<NoteView>
         formatMenu: _formatMenu,
         editorMenu: _editorMenu,
         spellCheck: widget.spellCheck,
+        // Only a template is checked: a `{{…}}` in an ordinary note is text
+        // like any other (T-TPL-09).
+        templateCheck: _templateIn(widget) ? _templateCheck : null,
         activeItems: _activeFormats,
         // What `live` draws in place of the source it hides: the formulas
         // and pictures the read view draws, from the same cache and disk.
@@ -2314,25 +2325,33 @@ final class _NoteViewState extends State<NoteView>
                   FrontmatterWarningBanner(message: _frontmatterError!),
                 NoteColumnPadding(
                   column: widget.noteColumn,
-                  child: NoteStatusRow(
-                    loading: _loading,
-                    showPreview: showPreview,
-                    showWysiwyg: _wysiwygIn(widget),
-                    spellCheckAvailable:
-                        widget.spellCheck != null &&
-                        widget.spellCheck!.available,
-                    // In its place, and off: a todo.txt has one pane.
-                    canSwitchEditorKind: widget.onEditorKindChanged != null,
-                    editorKindLocked: _plainTextIn(widget),
-                    wordCount: _wordCount,
-                    statusText: _status,
-                    statusActions: widget.statusActions,
-                    onOutline: _openOutline,
-                    onFind: () => _sourceFind.open(),
-                    onSpellCheck: _openSpellCheck,
-                    onToggleEditorKind: _toggleEditorKind,
-                    typewriter: widget.typewriter,
-                    onToggleTypewriter: widget.onToggleTypewriter,
+                  child: ListenableBuilder(
+                    listenable: _templateCheck,
+                    builder: (context, _) => NoteStatusRow(
+                      loading: _loading,
+                      showPreview: showPreview,
+                      showWysiwyg: _wysiwygIn(widget),
+                      spellCheckAvailable:
+                          widget.spellCheck != null &&
+                          widget.spellCheck!.available,
+                      // In its place, and off: a todo.txt has one pane.
+                      canSwitchEditorKind: widget.onEditorKindChanged != null,
+                      editorKindLocked: _plainTextIn(widget),
+                      wordCount: _wordCount,
+                      // Only a template is counted; elsewhere the checker
+                      // never ran and stays at nothing (T-TPL-09).
+                      templateProblems: _templateIn(widget)
+                          ? _templateCheck.problemCount
+                          : 0,
+                      statusText: _status,
+                      statusActions: widget.statusActions,
+                      onOutline: _openOutline,
+                      onFind: () => _sourceFind.open(),
+                      onSpellCheck: _openSpellCheck,
+                      onToggleEditorKind: _toggleEditorKind,
+                      typewriter: widget.typewriter,
+                      onToggleTypewriter: widget.onToggleTypewriter,
+                    ),
                   ),
                 ),
                 // The toolbar fades + sizes in and out (hidden in preview

@@ -2805,4 +2805,20 @@ final class ItalianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => "Ricostruisci l'indice";
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Intendevi $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nessuna correzione proposta — il testo resta come scritto.';
+  @override
+  String get templateHintFixAction => 'Correggi';
+  @override
+  String get templateHintDismissAction => 'Ignora';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problema in questo modello'
+      : '$count problemi in questo modello';
 }

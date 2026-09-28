@@ -2751,4 +2751,20 @@ final class EstonianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Ehita indeks uuesti üles';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Kas mõtlesid $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Parandust ei pakuta — tekst jääb kirjutatud kujul.';
+  @override
+  String get templateHintFixAction => 'Paranda';
+  @override
+  String get templateHintDismissAction => 'Aldesta';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 probleem selles šabloonis'
+      : '$count probleemi selles šabloonis';
 }

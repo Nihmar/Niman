@@ -79,6 +79,7 @@ import 'package:niman/src/markdown/render/note_margins.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
 import 'package:niman/src/markdown/render/source_folds.dart';
 import 'package:niman/src/markdown/render/squiggle_painter.dart';
+import 'package:niman/src/markdown/render/template_hint.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
@@ -87,6 +88,8 @@ import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/templates/check_state.dart';
+import 'package:niman/src/templates/checker.dart';
 import 'package:niman/src/templates/template_commands.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -130,6 +133,7 @@ final class MarkdownSourceView extends StatefulWidget {
     this.formatMenu,
     this.editorMenu,
     this.spellCheck,
+    this.templateCheck,
     this.findMatches,
     this.onOpenLink,
     this.activeItems,
@@ -230,6 +234,11 @@ final class MarkdownSourceView extends StatefulWidget {
   /// The note's spelling: the words it underlines, and the context menu's
   /// suggestions and Add to dictionary. Null checks nothing.
   final EditorSpellCheck? spellCheck;
+
+  /// The note's template syntax check (T-TPL-09): the problems it marks with
+  /// a wavy underline and offers to fix. Only read when [templateCommands] is
+  /// set — a note that is not a template is checked by nothing.
+  final TemplateCheck? templateCheck;
 
   /// What the find bar found, painted over the lines; null finds nothing.
   final SourceMatches? findMatches;
@@ -552,12 +561,32 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Where the context menu opens, in global coordinates, while it is up.
   Offset? _menuAt;
 
+  /// The overlay the template checker's hint is drawn in (T-TPL-09).
+  ///
+  /// Always up, like the table's handles: it draws nothing while the caret is
+  /// not on a problem.
+  final OverlayPortalController _hintOverlay = OverlayPortalController();
+
+  /// The problem the hint is showing — the span the caret is in — or null.
+  /// A notifier rather than a rebuild of the note: moving onto a problem
+  /// must repaint the overlay alone.
+  final ValueNotifier<({int start, int end, TemplateSyntaxError error})?>
+  _hint = ValueNotifier<({int start, int end, TemplateSyntaxError error})?>(
+    null,
+  );
+
   @override
   void initState() {
     super.initState();
-    // Always up: it draws nothing while no table is in play (#261).
+    // Always up: they draw nothing while nothing is in play (#261).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _tableOverlay.show();
+      if (!mounted) return;
+      _tableOverlay.show();
+      _hintOverlay.show();
+      // The first check, off the build: the problem marks are on the note the
+      // frame after it opens, and nothing waited for them (#316).
+      _refreshHint();
+      _runTemplateCheck();
     });
     _restyle();
     _scroll = widget.controller ?? ScrollController();
@@ -571,6 +600,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input = _makeInput();
     widget.surface?.attachView(this);
     widget.spellCheck?.addListener(_onSpellingChanged);
+    widget.templateCheck?.addListener(_onSpellingChanged);
     widget.findMatches?.addListener(_onSpellingChanged);
     widget.mathCache?.addListener(_onMathTypeset);
     _scheduleCaret();
@@ -706,9 +736,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   void didUpdateWidget(MarkdownSourceView oldWidget) {
     super.didUpdateWidget(oldWidget);
     // The note became a template, or stopped being one: its lines are
-    // coloured again at the build this update is part of.
+    // coloured again at the build this update is part of, and a template is
+    // checked off the build (the answer notifies listeners outside this one).
     if (oldWidget.templateCommands != widget.templateCommands) {
       setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _runTemplateCheck();
+        _refreshHint();
+      });
     }
     if (!identical(oldWidget.surface, widget.surface)) {
       oldWidget.surface?.detachView(this);
@@ -717,6 +753,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (!identical(oldWidget.spellCheck, widget.spellCheck)) {
       oldWidget.spellCheck?.removeListener(_onSpellingChanged);
       widget.spellCheck?.addListener(_onSpellingChanged);
+    }
+    if (!identical(oldWidget.templateCheck, widget.templateCheck)) {
+      oldWidget.templateCheck?.removeListener(_onSpellingChanged);
+      widget.templateCheck?.addListener(_onSpellingChanged);
+      // A check attached now (the note became a template, its folder having
+      // been read): the problems are worked out at once, not on the next
+      // keystroke. Off the build: the answer notifies listeners outside this
+      // view too, and one of them may be the widget now rebuilding it.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _runTemplateCheck();
+        _refreshHint();
+      });
     }
     if (!identical(oldWidget.findMatches, widget.findMatches)) {
       oldWidget.findMatches?.removeListener(_onSpellingChanged);
@@ -739,6 +788,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _folds.clear();
       _heights = _map();
       _seenRevision = widget.buffer.revision;
+      // Another note to check: the first answer is read off it, not off the
+      // one it replaced.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _runTemplateCheck();
+      });
       if (attached) _input.attach(viewId: View.of(context).viewId);
     } else if (widget.buffer.revision != _seenRevision) {
       // An edit this view did not make (a command, a revert): the colours are
@@ -749,6 +803,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _heights = _map();
       _seenRevision = widget.buffer.revision;
       _ownSelection = _ownSelection.clampTo(widget.buffer.length);
+      _scheduleTemplateCheck();
       // And the platform's copy is now of a note that is not there any more.
       _input.sendSelection();
     }
@@ -779,8 +834,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _tableHover.dispose();
     widget.surface?.detachView(this);
     widget.spellCheck?.removeListener(_onSpellingChanged);
+    widget.templateCheck?.removeListener(_onSpellingChanged);
     widget.findMatches?.removeListener(_onSpellingChanged);
     widget.mathCache?.removeListener(_onMathTypeset);
+    _hint.dispose();
     _input.detach();
     if (_ownsFocus) _focus.dispose();
     _blink?.cancel();
@@ -801,10 +858,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   int get lineCount => widget.buffer.lineCount;
 
   /// The spelling changed its mind (a dictionary loaded, a word added, the
-  /// underline switched off), or the find bar found something else: the
-  /// lines on screen are drawn again.
+  /// underline switched off), the template checker found something else, or
+  /// the find bar found something else: the lines on screen are drawn again,
+  /// and the hint is read off the problems as they now stand.
   void _onSpellingChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    _refreshHint();
+    setState(() {});
   }
 
   /// A formula was typeset, or failed to be: the lines that concealed their
@@ -978,6 +1038,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _seenRevision = buffer.revision;
     setState(() => _ownSelection = _ownSelection.clampTo(buffer.length));
     _input.sendSelection();
+    _runTemplateCheck();
     _scheduleCaret();
   }
 
@@ -1696,7 +1757,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The note changed, so the shell can save it.
-  void _notifyChanged(SourceEdit edit) => widget.onChanged?.call(edit);
+  void _notifyChanged(SourceEdit edit) {
+    // A template's problems are read off the text again, once the writer
+    // pauses: the keystroke that led here pays for the timer alone (#316).
+    _scheduleTemplateCheck();
+    widget.onChanged?.call(edit);
+  }
 
   /// How many taps have landed inside [_clickWindow], and when and where the
   /// last did.
@@ -2138,6 +2204,131 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     if (widget.spellCheck == null) return const <TextRange>[];
     return _spellRanges(index, widget.buffer.lineAt(index));
   }
+
+  /// The checker's problems on line [index], as offsets local to it.
+  ///
+  /// Empty unless the note is a template — a `{{…}}` in an ordinary note is
+  /// text, and the checker never sees it (T-TPL-09).
+  List<TextRange> _templateProblemsIn(int index) {
+    final check = widget.templateCheck;
+    if (check == null || !widget.templateCommands) return const <TextRange>[];
+    final start = widget.buffer.offsetOfLine(index);
+    final end = start + widget.buffer.lineLengthAt(index);
+    return <TextRange>[
+      for (final (range, _) in check.inRange(start, end)) range,
+    ];
+  }
+
+  /// Runs the template check on the note as it stands, now.
+  ///
+  /// Nothing runs on a note that is not a template: its `{{…}}` are text.
+  void _runTemplateCheck() {
+    final check = widget.templateCheck;
+    if (check == null || !widget.templateCommands) return;
+    check.run(widget.buffer.text);
+  }
+
+  /// Arms the template check's debounce: the note is read and checked once
+  /// the writer pauses, never on the keystroke itself (#316).
+  void _scheduleTemplateCheck() {
+    if (!widget.templateCommands) return;
+    widget.templateCheck?.schedule(() => widget.buffer.text);
+  }
+
+  /// Reads the hint off the caret: the problem whose span holds it, or none.
+  ///
+  /// Only a collapsed caret points at a span; a selection is not a place.
+  void _refreshHint() {
+    final check = widget.templateCheck;
+    final selection = _selection;
+    if (check == null || !widget.templateCommands || !selection.isCollapsed) {
+      _hint.value = null;
+      return;
+    }
+    final error = check.at(selection.extent);
+    _hint.value = error == null
+        ? null
+        : (start: error.offset, end: error.end, error: error);
+  }
+
+  /// Applies the fix the checker offered for [error], as one undoable edit.
+  ///
+  /// The checker answers about the text it was given, which is a debounce
+  /// behind the note: the fix is matched again against what is written now,
+  /// so it lands on the span it was offered for and nowhere else.
+  void _applyTemplateFix(TemplateSyntaxError error) {
+    final text = widget.buffer.text;
+    TemplateSyntaxError? target;
+    for (final current in checkTemplateSyntax(text)) {
+      if (current.suggestion == null) continue;
+      if (current.offset <= error.offset && error.offset < current.end) {
+        target = current;
+        break;
+      }
+    }
+    if (target == null || target.suggestion == null) return;
+    _replaceRange(target.offset, target.end, target.suggestion!);
+  }
+
+  /// The rectangle a problem's span covers, in global coordinates, or null
+  /// while the line that holds it is not built.
+  Rect? _templateSpanRect(int start, int end) {
+    final buffer = widget.buffer;
+    final line = buffer.lineOf(start);
+    final lineStart = buffer.offsetOfLine(line);
+    final paragraph = _paragraphAt(line);
+    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
+      return null;
+    }
+    final length = paragraph.text.toPlainText().length;
+    final from = (start - lineStart).clamp(0, length);
+    final to =
+        (end.clamp(lineStart, lineStart + buffer.lineLengthAt(line)) -
+                lineStart)
+            .clamp(from, length);
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: from, extentOffset: to),
+    );
+    if (boxes.isEmpty) return null;
+    var left = boxes.first.left;
+    var right = boxes.first.right;
+    for (final box in boxes) {
+      if (box.left < left) left = box.left;
+      if (box.right > right) right = box.right;
+    }
+    return Rect.fromLTRB(
+      left,
+      boxes.first.top,
+      right,
+      boxes.first.bottom,
+    ).shift(paragraph.localToGlobal(Offset.zero));
+  }
+
+  /// The template checker's hint, drawn in its overlay under the span the
+  /// caret is on, or nothing.
+  Widget _templateHint(BuildContext context) => ValueListenableBuilder(
+    valueListenable: _hint,
+    builder: (context, hint, _) {
+      if (hint == null) return const SizedBox.shrink();
+      final anchor = _templateSpanRect(hint.start, hint.end);
+      if (anchor == null) return const SizedBox.shrink();
+      final overlay = Overlay.of(context).context.findRenderObject();
+      final at = overlay is RenderBox && overlay.hasSize
+          ? overlay.globalToLocal(anchor.topLeft)
+          : anchor.topLeft;
+      return Stack(
+        children: [
+          TemplateHint(
+            anchor: Rect.fromLTWH(at.dx, at.dy, anchor.width, anchor.height),
+            message: hint.error.message,
+            suggestion: hint.error.suggestion,
+            onFix: () => _applyTemplateFix(hint.error),
+            onDismiss: () => _hint.value = null,
+          ),
+        ],
+      );
+    },
+  );
 
   /// The find bar's matches on line [index], as offsets local to it.
   List<(int, int, bool)> _foundIn(int index) {
@@ -2652,6 +2843,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Measures the caret after the frame that laid its line out.
   void _scheduleCaret() {
     _semanticsTick.value++;
+    // The caret moved: the hint follows it off the problems as they stand.
+    _refreshHint();
     _revealCaret();
     _restartBlink();
     _followCaret();
@@ -3002,6 +3195,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
                                 composing: _composingIn(index),
                                 misspelled: _misspelledIn(index),
                                 found: _foundIn(index),
+                                templateProblems: _templateProblemsIn(index),
                                 misspelledColor: Theme.of(context)
                                     .colorScheme
                                     .error,
@@ -3068,7 +3262,16 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
             listenable: Listenable.merge([_scroll, _tableHover, _caretSpot]),
             builder: (context, _) => _tableHandles(context),
           ),
-          child: note,
+          child: OverlayPortal(
+            // The checker's hint draws nearest the note — over the text it
+            // points at, under the handles, the toolbar and the menu.
+            controller: _hintOverlay,
+            overlayChildBuilder: (context) => ListenableBuilder(
+              listenable: _scroll,
+              builder: (context, _) => _templateHint(context),
+            ),
+            child: note,
+          ),
         ),
       ),
     );
@@ -3992,6 +4195,7 @@ final class _Line extends StatelessWidget {
     required this.width,
     required this.misspelled,
     required this.misspelledColor,
+    required this.templateProblems,
     required this.found,
     required this.rowColor,
     required this.fold,
@@ -4073,6 +4277,11 @@ final class _Line extends StatelessWidget {
 
   /// The colour their wavy underline is drawn in.
   final Color misspelledColor;
+
+  /// The template checker's problems on this line, as offsets local to it
+  /// (T-TPL-09). Drawn in the same wavy shape as the spelling's, on its own
+  /// layer, so the two never overwrite each other on a line that has both.
+  final List<TextRange> templateProblems;
 
   /// The find bar's matches on this line, local, and whether each is the
   /// current one.
@@ -4305,19 +4514,7 @@ final class _Line extends StatelessWidget {
     }
     final line = Padding(
       padding: EdgeInsets.only(left: indent),
-      // The spelling is painted over the paragraph rather than written into
-      // its runs: a style has one decoration, and a wavy underline there took
-      // a struck word's strike.
-      child: CustomPaint(
-        foregroundPainter: misspelled.isEmpty
-            ? null
-            : SquigglePainter(
-                paragraph: paragraphKey,
-                ranges: _unjudged(),
-                color: misspelledColor,
-              ),
-        child: paragraph,
-      ),
+      child: _withSquiggles(paragraph),
     );
     if (table != null) {
       // A cell's padding above and below its text, and the grid behind.
@@ -4772,6 +4969,17 @@ final class _Line extends StatelessWidget {
             child: paragraph,
           );
         }
+        final problems = _templateProblemsInPiece(piece.start, piece.end);
+        if (problems.isNotEmpty) {
+          paragraph = CustomPaint(
+            foregroundPainter: SquigglePainter(
+              paragraph: key,
+              ranges: problems,
+              color: misspelledColor,
+            ),
+            child: paragraph,
+          );
+        }
         children.add(
           Positioned(left: indent + piece.x, top: y, child: paragraph),
         );
@@ -4797,6 +5005,17 @@ final class _Line extends StatelessWidget {
   /// from the piece's own start: the line's ranges, clipped to the piece.
   List<TextRange> _misspelledInPiece(int start, int end) => <TextRange>[
     for (final range in _unjudged())
+      if (range.end > start && range.start < end)
+        TextRange(
+          start: range.start < start ? 0 : range.start - start,
+          end: range.end > end ? end - start : range.end - start,
+        ),
+  ];
+
+  /// The template problems of `[start, end)` of the line, as offsets from the
+  /// piece's own start: the line's ranges, clipped to the piece.
+  List<TextRange> _templateProblemsInPiece(int start, int end) => <TextRange>[
+    for (final range in templateProblems)
       if (range.end > start && range.start < end)
         TextRange(
           start: range.start < start ? 0 : range.start - start,
@@ -5025,6 +5244,39 @@ final class _Line extends StatelessWidget {
       for (final word in misspelled)
         if (word.end <= typing.$1 || word.start >= typing.$2) word,
     ];
+  }
+
+  /// The paragraph with the wavy marks painted over it rather than written
+  /// into its runs: a style has one decoration, and a wavy underline there
+  /// took a struck word's strike.
+  ///
+  /// The template checker's problems and the spelling's words are two layers
+  /// of the same shape, so a line that has both shows both — the checker's
+  /// mark is not lost under the spelling's, nor the other way round
+  /// (T-TPL-09).
+  Widget _withSquiggles(Widget paragraph) {
+    var marked = paragraph;
+    if (templateProblems.isNotEmpty) {
+      marked = CustomPaint(
+        foregroundPainter: SquigglePainter(
+          paragraph: paragraphKey,
+          ranges: templateProblems,
+          color: misspelledColor,
+        ),
+        child: marked,
+      );
+    }
+    if (misspelled.isNotEmpty) {
+      marked = CustomPaint(
+        foregroundPainter: SquigglePainter(
+          paragraph: paragraphKey,
+          ranges: _unjudged(),
+          color: misspelledColor,
+        ),
+        child: marked,
+      );
+    }
+    return marked;
   }
 
   /// Adds `[start, end)` to [spans], cut at the selection's and the composing

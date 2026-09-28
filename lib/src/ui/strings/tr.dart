@@ -2755,4 +2755,18 @@ final class TurkishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Dizini yeniden oluştur';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => '$fix mi demek istediniz?';
+  @override
+  String get templateHintNoFix =>
+      'Düzeltme önerilmiyor — metin yazıldığı gibi kalır.';
+  @override
+  String get templateHintFixAction => 'Düzelt';
+  @override
+  String get templateHintDismissAction => 'Kapat';
+  @override
+  String templateProblems(int count) => 'Bu şablonda $count sorun';
 }

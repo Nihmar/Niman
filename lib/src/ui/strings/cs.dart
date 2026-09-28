@@ -2786,4 +2786,24 @@ final class CzechStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Znovu sestavit index';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Mysleli jste $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Oprava se nenabízí — text zůstává tak, jak je napsán.';
+  @override
+  String get templateHintFixAction => 'Opravit';
+  @override
+  String get templateHintDismissAction => 'Zavřít';
+  @override
+  String templateProblems(int count) {
+    if (count == 1) return '1 problém v této šabloně';
+    if (count >= 2 && count <= 4) {
+      return '$count problémy v této šabloně';
+    }
+    return '$count problémů v této šabloně';
+  }
 }

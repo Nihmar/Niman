@@ -2775,4 +2775,20 @@ final class DanishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Genopbyg indeks';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Mente du $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Ingen rettelse foreslået — teksten står som skrevet.';
+  @override
+  String get templateHintFixAction => 'Ret';
+  @override
+  String get templateHintDismissAction => 'Afvis';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problem i denne skabelon'
+      : '$count problemer i denne skabelon';
 }

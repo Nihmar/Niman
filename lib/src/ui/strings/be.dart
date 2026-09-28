@@ -2814,4 +2814,28 @@ final class BelarusianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Перабудаваць індэкс';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Вы мелі на ўвазе $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Выпраўленне не прапануецца — тэкст застаецца як напісаны.';
+  @override
+  String get templateHintFixAction => 'Выправіць';
+  @override
+  String get templateHintDismissAction => 'Зачыніць';
+  @override
+  String templateProblems(int count) {
+    final mod10 = count % 10;
+    final mod100 = count % 100;
+    if (mod10 == 1 && mod100 != 11) {
+      return '1 праблема ў гэтым шаблоне';
+    }
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return '$count праблемы ў гэтым шаблоне';
+    }
+    return '$count праблем у гэтым шаблоне';
+  }
 }

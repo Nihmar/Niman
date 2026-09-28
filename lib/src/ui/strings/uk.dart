@@ -2816,4 +2816,28 @@ final class UkrainianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Перебудувати індекс';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Ви мали на увазі $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Виправлення не пропонується — текст залишається як написано.';
+  @override
+  String get templateHintFixAction => 'Виправити';
+  @override
+  String get templateHintDismissAction => 'Закрити';
+  @override
+  String templateProblems(int count) {
+    final mod10 = count % 10;
+    final mod100 = count % 100;
+    if (mod10 == 1 && mod100 != 11) {
+      return '1 проблема в цьому шаблоні';
+    }
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return '$count проблеми в цьому шаблоні';
+    }
+    return '$count проблем у цьому шаблоні';
+  }
 }

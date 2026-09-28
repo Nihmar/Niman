@@ -2776,4 +2776,19 @@ final class LatvianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Pārbūvēt indeksu';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Vai domājāt $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Labojums netiek piedāvāts — teksts paliek tāds, kā rakstīts.';
+  @override
+  String get templateHintFixAction => 'Labot';
+  @override
+  String get templateHintDismissAction => 'Noraidīt';
+  @override
+  String templateProblems(int count) =>
+      count == 1 ? '1 problēma šajā šablonā' : '$count problēmas šajā šablonā';
 }

@@ -2850,4 +2850,20 @@ final class GermanStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Index neu aufbauen';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Meinten Sie $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Keine Korrektur vorgeschlagen — der Text bleibt wie geschrieben.';
+  @override
+  String get templateHintFixAction => 'Korrigieren';
+  @override
+  String get templateHintDismissAction => 'Verwerfen';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 Problem in dieser Vorlage'
+      : '$count Probleme in dieser Vorlage';
 }

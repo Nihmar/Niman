@@ -2825,4 +2825,24 @@ final class RomanianStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Reconstruiește indexul';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Ai vrut să spui $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Nu se propune nicio corectare — textul rămâne așa cum a fost scris.';
+  @override
+  String get templateHintFixAction => 'Corectează';
+  @override
+  String get templateHintDismissAction => 'Respinge';
+  @override
+  String templateProblems(int count) {
+    if (count == 1) return '1 problemă în acest șablon';
+    if (count % 100 >= 1 && count % 100 <= 19) {
+      return '$count probleme în acest șablon';
+    }
+    return '$count de probleme în acest șablon';
+  }
 }

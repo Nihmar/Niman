@@ -815,6 +815,14 @@ final class AppStrings {
 
   static String get templateHelpExampleTitle => _s.templateHelpExampleTitle;
 
+  // What the template checker says as a template is edited (T-TPL-09).
+  static String templateHintDidYouMean(String fix) =>
+      _s.templateHintDidYouMean(fix);
+  static String get templateHintNoFix => _s.templateHintNoFix;
+  static String get templateHintFixAction => _s.templateHintFixAction;
+  static String get templateHintDismissAction => _s.templateHintDismissAction;
+  static String templateProblems(int count) => _s.templateProblems(count);
+
   // What an {{include:…}} that could not be pasted leaves behind, beside
   // the placeholder it could not replace (T-TPL-06).
   static String includeMissing(String path) => _s.includeMissing(path);

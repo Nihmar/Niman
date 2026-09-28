@@ -2815,4 +2815,18 @@ final class BasqueStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Berregin indizea';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Hau esan nahi zenuen: $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Ez da zuzenketarik eskaintzen — testua idatzita dagoen bezala uzten da.';
+  @override
+  String get templateHintFixAction => 'Zuzendu';
+  @override
+  String get templateHintDismissAction => 'Baztertu';
+  @override
+  String templateProblems(int count) => '$count arazo txantiloi honetan';
 }

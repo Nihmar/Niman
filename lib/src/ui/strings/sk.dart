@@ -2794,4 +2794,24 @@ final class SlovakStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Znovu zostaviť index';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => 'Mysleli ste $fix?';
+  @override
+  String get templateHintNoFix =>
+      'Oprava sa neponúka — text zostáva tak, ako je napísaný.';
+  @override
+  String get templateHintFixAction => 'Opraviť';
+  @override
+  String get templateHintDismissAction => 'Odhodiť';
+  @override
+  String templateProblems(int count) {
+    if (count == 1) return '1 problém v tejto šablóne';
+    if (count >= 2 && count <= 4) {
+      return '$count problémy v tejto šablóne';
+    }
+    return '$count problémov v tejto šablóne';
+  }
 }

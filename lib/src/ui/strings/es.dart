@@ -2828,4 +2828,20 @@ final class SpanishStrings extends Strings {
 
   @override
   String get rebuildIndexTitle => 'Reconstruir el índice';
+
+  // What the template checker says in the editor (T-TPL-09).
+
+  @override
+  String templateHintDidYouMean(String fix) => '¿Querías decir $fix?';
+  @override
+  String get templateHintNoFix =>
+      'No se ofrece ninguna corrección: el texto se deja como está escrito.';
+  @override
+  String get templateHintFixAction => 'Corregir';
+  @override
+  String get templateHintDismissAction => 'Descartar';
+  @override
+  String templateProblems(int count) => count == 1
+      ? '1 problema en esta plantilla'
+      : '$count problemas en esta plantilla';
 }
