@@ -224,6 +224,36 @@ void main() {
       expect(await client.readBytes('a.bin'), hasLength(50000));
     });
 
+    test('a body that never arrives is WebDavRetryable within twice the '
+        'timeout (#348)', () async {
+      const timeout = Duration(milliseconds: 600);
+      server
+        ..putFile('a.bin', List<int>.filled(50000, 1))
+        ..stallNextGet();
+      final stalled = WebDavClient(url: server.url, timeout: timeout);
+      addTearDown(stalled.close);
+      // The wait is bounded here too: on a client that never times the
+      // body out this fails as a test instead of hanging the suite.
+      final clock = Stopwatch()..start();
+      await expectLater(
+        stalled.readBytes('a.bin').timeout(const Duration(seconds: 10)),
+        throwsA(
+          isA<WebDavRetryable>().having(
+            (failure) => failure.message,
+            'message',
+            contains('body stalled'),
+          ),
+        ),
+        reason: 'headers and no body must fail, not wait for the session',
+      );
+      expect(
+        clock.elapsed,
+        lessThan(timeout * 2),
+        reason: 'the body must give up on the client timeout',
+      );
+      expect(await stalled.readBytes('a.bin'), hasLength(50000));
+    });
+
     test(
       'MKCOL creates, reports existing folders and missing parents',
       () async {
