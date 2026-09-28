@@ -47,13 +47,17 @@ const Map<ToolbarItem, SingleActivator> editorShortcutDefaults = {
     control: true,
     shift: true,
   ),
+  // The two that used to sit on the shell's own chords (#370): the
+  // editor's early handler took them from *Open file* (Ctrl+Shift+O) and
+  // *Toggle side panel* (Ctrl+Shift+B) whenever it had the focus. The
+  // app's shipped commands keep their keys; the formatting ones moved.
   ToolbarItem.orderedList: SingleActivator(
-    LogicalKeyboardKey.keyO,
+    LogicalKeyboardKey.keyD,
     control: true,
     shift: true,
   ),
   ToolbarItem.quote: SingleActivator(
-    LogicalKeyboardKey.keyB,
+    LogicalKeyboardKey.keyQ,
     control: true,
     shift: true,
   ),

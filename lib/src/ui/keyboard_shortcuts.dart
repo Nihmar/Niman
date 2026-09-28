@@ -27,11 +27,12 @@ import 'package:niman/src/ui/strings.dart';
 /// what they mean there: taking one is allowed, with a warning.
 ///
 /// The formatting keys (#205) are among them. They are a space of their
-/// own — they apply while an editor has the focus, where an app command
-/// on the same keys does not run — so they do not collide with a command,
-/// as `Ctrl+B` has not collided with the side panel since flutter_quill
-/// bound it. What the warning does is say so instead of leaving it to be
-/// discovered.
+/// own — they apply while an editor has the focus — and the shipped app
+/// commands keep off them (#370): the two formatting keys that had landed
+/// on *Open file* and *Toggle side panel* moved. `Ctrl+B` is the one the
+/// editor has always shared with the shell, bold inside it and the side
+/// panel outside; what the warning does is say so instead of leaving it
+/// to be discovered.
 Map<String, String> _editorKeys(BuildContext context) {
   final words = MaterialLocalizations.of(context);
   String keys(LogicalKeyboardKey key, {bool shift = false}) =>
@@ -84,8 +85,9 @@ Future<void> changeEditorShortcut(
 /// already mean — or null if the user backed out.
 ///
 /// Commands collide with commands and formatting with formatting: the
-/// two are separate spaces (see [_editorKeys]). The one being given the
-/// keys is left out, so re-recording its own keys asks nothing.
+/// two are separate spaces (see [_editorKeys]), and the shipped ones keep
+/// off each other's keys (#370). The one being given the keys is left
+/// out, so re-recording its own keys asks nothing.
 Future<KeyMap?> _cleared(
   BuildContext context,
   SingleActivator keys, {

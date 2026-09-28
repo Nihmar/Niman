@@ -37,17 +37,18 @@ Formatting, in both editors, on the note's selection:
 - `Ctrl/⌘+B` — bold, `Ctrl/⌘+I` — italic, `Ctrl/⌘+U` — underline
 - `Ctrl/⌘+Shift+S` — strikethrough, `Ctrl/⌘+Shift+E` — code block
 - `Ctrl/⌘+K` — link, `Ctrl/⌘+Shift+H` — heading level
-- `Ctrl/⌘+Shift+L` — bulleted list, `Ctrl/⌘+Shift+O` — numbered list
-- `Ctrl/⌘+Shift+B` — quote
+- `Ctrl/⌘+Shift+L` — bulleted list, `Ctrl/⌘+Shift+D` — numbered list
+- `Ctrl/⌘+Shift+Q` — quote
 - `Ctrl/⌘+M` / `Ctrl/⌘+Shift+M` — indent / outdent
 - highlight (`==…==`) has no key of its own as shipped: give it one in
   Settings → Keyboard shortcuts → **Formatting**
 
 These do exactly what the toolbar's buttons do, and they are
 changeable like the rest (Settings → Keyboard shortcuts →
-**Formatting**). They apply while an editor has the focus, which is why
-a combination may also be an app shortcut elsewhere: `Ctrl+Shift+B` is
-the side panel outside an editor and a quote inside one.
+**Formatting**). They apply while an editor has the focus, and the app's
+own commands keep off them, so a combination means one thing: `Ctrl/⌘+B`
+is bold inside an editor and the side panel outside one, the one overlap
+the two have always shared.
 
 Moving and selecting in the source editor, on Windows and Linux:
 

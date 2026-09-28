@@ -3,6 +3,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/editor_shortcuts.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 
@@ -35,6 +37,28 @@ void main() {
         .map((s) => describeActivator(s.activation))
         .toList();
     expect(keys.toSet().length, keys.length);
+  });
+
+  // #370: the editor's formatting keys and the shell's commands must not
+  // answer the same chord. The editor's early handler takes a key while it
+  // has the focus, so a command that shares one never runs there — the two
+  // formatting keys that sat on *Open file* and *Toggle side panel* did
+  // nothing for it. Ctrl+B is the one the editor has always shared with
+  // the shell (bold inside it, the side panel outside; see
+  // `ui/keyboard_shortcuts.dart`), and the fault was the two, not it.
+  test('no formatting key is also an app command key', () {
+    final appKeys = {
+      for (final shortcut in nimanAppShortcuts)
+        describeActivator(shortcut.activation),
+    };
+    final shared = [
+      for (final MapEntry(key: item, value: keys)
+          in editorShortcutDefaults.entries)
+        if (item != ToolbarItem.bold &&
+            appKeys.contains(describeActivator(keys)))
+          '${describeActivator(keys)} (${item.name})',
+    ];
+    expect(shared, isEmpty);
   });
 
   test('every command has a non-empty label', () {
