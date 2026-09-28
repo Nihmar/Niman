@@ -49,7 +49,7 @@
     <li class="sidebar__item">
       <a class="sidebar__link{% if page.url == '/docs/records/' %} is-current{% endif %}" href="{{ site.baseurl }}/docs/records/"{% if page.url == '/docs/records/' %} aria-current="page"{% endif %}>Records overview</a>
     </li>
-    {%- assign record_slugs = 'unified-surface,editor-alternatives,read-live-parity,huge-notes,workspace,epub-reader,annotations,sync,index-reconcile,transcription' | split: ',' -%}
+    {%- assign record_slugs = 'unified-surface,editor-alternatives,read-live-parity,huge-notes,desktop-performance,workspace,epub-reader,annotations,sync,index-reconcile,transcription' | split: ',' -%}
     {%- for slug in record_slugs -%}
       {%- assign path = 'docs/records/' | append: slug | append: '.md' -%}
       {%- assign doc = site.pages | where: 'path', path | first -%}

@@ -19,6 +19,7 @@ comments (`docs/records/<name>.md`).
 | [editor-alternatives.md](editor-alternatives.md) | The WYSIWYG packages measured and rejected before that decision |
 | [read-live-parity.md](read-live-parity.md) | Where the read view and `live` stand, and the decisions that aligned them |
 | [huge-notes.md](huge-notes.md) | The 246 MB note: what was measured and what changed because of it |
+| [desktop-performance.md](desktop-performance.md) | The desktop audit (#62): the cold-start and integration-test baseline, the animation inventory and the proposed policy |
 | [workspace.md](workspace.md) | The open-note model — tabs and panes (#23) |
 | [epub-reader.md](epub-reader.md) | Reading an EPUB into Markdown (#280) |
 | [annotations.md](annotations.md) | Annotating a PDF or a book in a companion note (#284) |
