@@ -15,6 +15,15 @@
 // million-line note runs only on such a run: 40 MB of string is more than the
 // default suite should hold, and the test shell died under it twice on a
 // loaded machine (#329).
+//
+// The shell on this file holds ~300 MB at its peak, and the fixture is most of
+// it: 271 MB while the million-line note is built, then 68 MB more of line
+// states while it is scanned (#346, `ProcessInfo` on this host). The note's own
+// 40 MB is the fixture's point, so what is trimmed is what is not: the note is
+// built a block of lines at a time — 219 MB at its worst — and a plain line's
+// state is the shared one (`block_scanner.dart`). The crash of #346 was a
+// `flutter_tester` segfault at the end of this file's run, never inside a test,
+// and `flutter test -v` is what carries the VM's own report if it comes back.
 // ignore_for_file: avoid_print
 import 'dart:io';
 
@@ -33,17 +42,31 @@ const double _backstop = 20;
 /// The design's ceiling for the check itself, in milliseconds.
 const double _ceiling = 0.5;
 
-/// A note of [lines] lines with a list 40 % of the way in.
-String _note(int lines) {
-  final buffer = StringBuffer();
-  for (var line = 0; line < lines; line++) {
-    if (line == lines * 2 ~/ 5) {
-      buffer.writeln('- [ ] a chore to count');
-    } else {
-      buffer.writeln('prose line $line with a few words on it');
+/// A note of [lines] lines with a list 40 % of the way in, a whole line
+/// [first] above it and a whole line [last] below it when they are given.
+///
+/// Built a block of lines at a time and joined — the same text, and the point
+/// of the block. A `writeln` per line held every line of the note as its own
+/// string next to the note itself until the collector reached them: 271 MB of a
+/// shell whose whole run peaked at 283 (measured with `ProcessInfo` while #346
+/// was narrowed). A block at a time, the build peaks at 219.
+String _note(int lines, {String? first, String? last}) {
+  const block = 4000;
+  final parts = <String>[?first];
+  for (var at = 0; at < lines; at += block) {
+    final end = at + block < lines ? at + block : lines;
+    final buffer = StringBuffer();
+    for (var line = at; line < end; line++) {
+      if (line == lines * 2 ~/ 5) {
+        buffer.writeln('- [ ] a chore to count');
+      } else {
+        buffer.writeln('prose line $line with a few words on it');
+      }
     }
+    parts.add(buffer.toString());
   }
-  return buffer.toString();
+  if (last != null) parts.add(last);
+  return parts.join();
 }
 
 void main() {
@@ -82,8 +105,10 @@ void main() {
   test('the check walks blocks, not lines', () {
     // The same list, once at the top of the note and once at the bottom: the
     // check has the same work to do, because the scan has done it already.
-    final top = SourceBuffer.fromText('- [ ] one\n${_note(200000)}');
-    final bottom = SourceBuffer.fromText('${_note(200000)}- [ ] one\n');
+    // The list item is written into the note as it is built: interpolating it
+    // held a second copy of the note while the first was still alive.
+    final top = SourceBuffer.fromText(_note(200000, first: '- [ ] one\n'));
+    final bottom = SourceBuffer.fromText(_note(200000, last: '- [ ] one\n'));
     final topScan = BlockScanner(top).index.blocks;
     final bottomScan = BlockScanner(bottom).index.blocks;
     final topCheck = Stopwatch()..start();
