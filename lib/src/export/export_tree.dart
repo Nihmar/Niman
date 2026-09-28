@@ -137,6 +137,10 @@ final class TreeExport {
   bool _cancelled = false;
   bool _settling = false;
 
+  /// Whether the isolate wrote the whole archive before it went: a cancel
+  /// that lands after this is too late, and must not delete the export.
+  bool _completed = false;
+
   /// The isolate's cancellation mailbox, sent over the events port.
   SendPort? _cancelPort;
 
@@ -235,6 +239,9 @@ final class TreeExport {
         // A typed failure the isolate asked to report without throwing:
         // only a message keeps the type across the boundary.
         unawaited(_settle(gauge, error: message));
+      } else if (message is _TreeExportDone) {
+        // The whole archive is written; a cancel from here on is too late.
+        _completed = true;
       }
     });
     _errors.listen(
@@ -252,10 +259,15 @@ final class TreeExport {
     _events.close();
     _errors.close();
     _exits.close();
-    if (_cancelled) {
+    if (_cancelled && !_completed) {
       final removed = await _removeZip();
       _done.completeError(ExportCancelled(zipLeftBehind: !removed));
     } else if (error != null) {
+      // A failed export is not an export: the half-written archive goes the
+      // way a cancelled one does, after the isolate has closed it. Left on
+      // disk it reads as a whole book (or zip) with chapters missing, while
+      // the snackbar says the export failed.
+      await _removeZip();
       _done.completeError(error);
     } else {
       _done.complete();
@@ -327,6 +339,13 @@ final class _TreeExportLog {
 
   /// Whether it is a warning, rather than information.
   final bool warning;
+}
+
+/// The isolate wrote the whole archive and is about to go: a cancel that
+/// lands from here on is too late, and must not delete a finished export.
+final class _TreeExportDone {
+  /// Creates the notice.
+  const new();
 }
 
 /// The request the export isolate is spawned with.
@@ -405,6 +424,9 @@ Future<void> _exportTree(TreeExportRequest request) async {
   final scratch = request.format == ExportTreeFormat.pdf
       ? Directory.systemTemp.createTempSync('niman-tree-pdf-')
       : null;
+  // Whether the loop broke on a cancel: a cancel that lands after the last
+  // entry is too late, and the archive it wrote is the whole export.
+  var stopped = false;
   try {
     // A book's progress counts chapters, not the tree: a folder's
     // attachments and its empty folders never enter the container (E10).
@@ -416,7 +438,10 @@ Future<void> _exportTree(TreeExportRequest request) async {
     var done = 0;
     for (final entry in tree.entries) {
       // Between entries, where the zip is never half-written.
-      if (cancelled) break;
+      if (cancelled) {
+        stopped = true;
+        break;
+      }
       // A book carries its chapters and the pictures they cite, not the
       // tree: an attachment nobody cites would only weigh the book down.
       if (book != null && !ExportTreePages.isNote(entry.rel)) continue;
@@ -506,5 +531,10 @@ Future<void> _exportTree(TreeExportRequest request) async {
     } on FileSystemException {
       // A temp directory left behind is not the export's failure.
     }
+  }
+  if (!stopped) {
+    // A cancel that arrives from here on is too late to stop anything; the
+    // parent must not delete the archive it just finished.
+    request.events.send(const _TreeExportDone());
   }
 }
