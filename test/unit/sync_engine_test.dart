@@ -365,13 +365,42 @@ void main() {
     expect(a.read('.niman/dictionary.txt'), 'Niman\nKaTeX\nWebDAV\n');
   });
 
-  test('library settings that do not parse still go whole', () async {
-    a.write('.niman/settings.json', '{"historyVersions": 3}');
-    await a.sync();
-    b.write('.niman/settings.json', '{broken');
-    await b.sync();
-    expect(remoteText('.niman/settings.json'), '{broken');
-  });
+  test(
+    'library settings that do not parse are a conflict, not a take-over',
+    () async {
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      await a.sync();
+      b.write('.niman/settings.json', '{broken');
+      final report = await b.sync();
+      expect(report.conflicts, hasLength(1));
+      expect(report.conflicts.single.path, '.niman/settings.json');
+      // Neither side was replaced: the server keeps A's settings and B keeps
+      // the file it wrote.
+      expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+      expect(b.read('.niman/settings.json'), '{broken');
+      // And A does not pull the broken copy over its own good one.
+      final after = await a.sync();
+      expect(after.conflicts, isEmpty);
+      expect(a.read('.niman/settings.json'), '{"historyVersions": 3}');
+      expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+    },
+  );
+
+  test(
+    'a broken state file on the server does not replace the local one',
+    () async {
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      await a.sync();
+      // Another tool leaves a half-written file on the server (#336): the plan
+      // is a download, and a download must not go through.
+      server.putFile('.niman/settings.json', utf8.encode('{broken'));
+      final report = await a.sync();
+      expect(report.conflicts, hasLength(1));
+      expect(report.conflicts.single.path, '.niman/settings.json');
+      expect(a.read('.niman/settings.json'), '{"historyVersions": 3}');
+      expect(remoteText('.niman/settings.json'), '{broken');
+    },
+  );
 
   test('library settings deleted on the server are put back', () async {
     a.write('.niman/settings.json', '{"historyVersions": 3}');

@@ -29,6 +29,14 @@ const Set<String> libraryStateFiles = {
   ReadingPositions.filePath,
 };
 
+/// The [libraryStateFiles] that hold JSON objects — all but the personal
+/// dictionary, which is a word list. A side that does not parse is not a
+/// newer version of the other: the sync reports it as a conflict rather than
+/// letting it replace the other device's copy (#336).
+final Set<String> jsonStateFiles = libraryStateFiles
+    .where((path) => path.endsWith('.json'))
+    .toSet();
+
 /// The paths the sync never touches.
 ///
 /// Dot folders and dot files are left out — `.trash/`, `.history/`, the

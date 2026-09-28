@@ -1223,6 +1223,38 @@ final class SyncEngine {
     return sha;
   }
 
+  /// Records [d]'s path as a conflict and touches neither side: the merge
+  /// screen is where it is resolved.
+  _Outcome _reportConflict(
+    _RunContext c,
+    SyncDecision d, {
+    required String localSha,
+    required String remoteSha,
+    required String why,
+  }) {
+    c.report.conflicts.add(
+      SyncConflict(
+        path: d.path,
+        localSha256: localSha,
+        remoteSha256: remoteSha,
+        baseVersion: d.baseVersion,
+      ),
+    );
+    _log.warning('conflict ${d.path}: $why; left for the merge');
+    return _Outcome.conflict;
+  }
+
+  /// Whether [file] holds a JSON object — what a [jsonStateFiles] side has to
+  /// be before the sync may replace the other with it (#336).
+  static Future<bool> _isJsonObject(File file) async {
+    try {
+      final text = utf8.decode(await file.readAsBytes(), allowMalformed: true);
+      return jsonDecode(text) is Map;
+    } on Object {
+      return false;
+    }
+  }
+
   /// Whether a listing of [modified] cannot rule out a second write within
   /// the same second: no file ETags, and the mtime is the server's current
   /// second (or the server sends no clock at all).
@@ -1402,6 +1434,26 @@ final class SyncEngine {
         if (fetched.temp.existsSync()) await fetched.temp.delete();
         rethrow;
       }
+      // A JSON state file whose remote copy does not parse is not a newer
+      // version of this device's: replacing a good local copy with it —
+      // there is no history for `.niman/*` — is how a half-written settings
+      // file wiped every setting on the run after (#336). Both sides stay,
+      // and the path is reported for the merge.
+      if (jsonStateFiles.contains(d.path) &&
+          // The async stat is on purpose: a blocking one on the UI isolate
+          // is the FUSE round trip this engine keeps off its frames.
+          // ignore: avoid_slow_async_io
+          await File(p.join(root, d.path)).exists() &&
+          !await _isJsonObject(fetched.temp)) {
+        await fetched.temp.delete();
+        return _reportConflict(
+          c,
+          d,
+          localSha: c.rows[d.path]?.localSha256 ?? '',
+          remoteSha: fetched.download.sha256,
+          why: 'the remote copy is not a JSON object',
+        );
+      }
       await ops.syncReplace(d.path, fetched.temp.path);
       final local = await _stat(d.path);
       if (local == null) throw const _StepFailure('downloaded but not on disk');
@@ -1455,91 +1507,77 @@ final class SyncEngine {
     return _Outcome.done;
   });
 
-  Future<_Outcome> _conflict(
-    _RunContext c,
-    SyncDecision d,
-  ) => _guarded(() async {
-    final local = (await _localStillAsPlanned(c, d.path))!;
-    final localSha = _localShaOf(c, d.path);
-    final fetched = await _fetch(c, d.path);
-    final remote = _remoteFrom(c, d.path, fetched.download);
-    final remoteSha = fetched.download.sha256;
+  Future<_Outcome> _conflict(_RunContext c, SyncDecision d) => _guarded(
+    () async {
+      final local = (await _localStillAsPlanned(c, d.path))!;
+      final localSha = _localShaOf(c, d.path);
+      final fetched = await _fetch(c, d.path);
+      final remote = _remoteFrom(c, d.path, fetched.download);
+      final remoteSha = fetched.download.sha256;
 
-    if (remoteSha == localSha) {
-      await fetched.temp.delete();
-      await store.putItems([
-        await _row(c, d.path, sha: localSha, local: local, remote: remote),
-      ]);
-      _log.info('conflict ${d.path}: same content on both sides, recorded');
-      return _Outcome.done;
-    }
-
-    if (d.path.startsWith('.niman/')) {
-      // Settings and counters are JSON: merged key by key, not by line,
-      // which could break them. Only a side that does not parse falls
-      // back to the newer file, whole.
-      final remoteMs = remote.modified?.millisecondsSinceEpoch ?? 0;
-      final merged = await _mergeState(
-        c,
-        d,
-        fetched.temp,
-        remote,
-        localNewer: local.mtimeMs >= remoteMs,
-      );
-      if (merged) return _Outcome.done;
-      if (remoteMs > local.mtimeMs) {
-        await _localStillAsPlanned(c, d.path);
-        await ops.syncReplace(d.path, fetched.temp.path);
-        final after = (await _stat(d.path))!;
-        await store.putItems([
-          await _row(c, d.path, sha: remoteSha, local: after, remote: remote),
-        ]);
-        c.report.changedLocally.add(d.path);
-        _log.info('conflict ${d.path}: remote is newer, taken');
-      } else {
+      if (remoteSha == localSha) {
         await fetched.temp.delete();
-        await c.client.uploadFile(
-          d.path,
-          File(p.join(root, d.path)),
-          ifMatch: c.capabilities.ifMatch ? remote.etag : null,
-        );
-        final listed = await c.client.stat(d.path);
-        if (listed == null) throw const _StepFailure('uploaded but not listed');
         await store.putItems([
-          await _row(c, d.path, sha: localSha, local: local, remote: listed),
+          await _row(c, d.path, sha: localSha, local: local, remote: remote),
         ]);
-        _log.info('conflict ${d.path}: local is newer, uploaded');
+        _log.info('conflict ${d.path}: same content on both sides, recorded');
+        return _Outcome.done;
       }
-      return _Outcome.done;
-    }
 
-    // Both sides changed: with the version they last agreed on, the edits
-    // that do not overlap merge without asking anyone (docs/records/sync.md,
-    // "Conflicts").
-    final merge = await _tryMerge(c, d, fetched.temp, remote);
-    if (merge != null) {
+      if (d.path.startsWith('.niman/')) {
+        // Settings and counters are JSON: merged key by key, not by line,
+        // which could break them. A side that does not parse is not a merge:
+        // taking the newer file whole replaced the other device's copy — and
+        // this device's good copy on the run after — with no history and no
+        // way back (#336), so both sides are left as they are and the path is
+        // reported like any other conflict.
+        final remoteMs = remote.modified?.millisecondsSinceEpoch ?? 0;
+        final merged = await _mergeState(
+          c,
+          d,
+          fetched.temp,
+          remote,
+          localNewer: local.mtimeMs >= remoteMs,
+        );
+        if (merged) return _Outcome.done;
+        await fetched.temp.delete();
+        return _reportConflict(
+          c,
+          d,
+          localSha: localSha,
+          remoteSha: remoteSha,
+          why: 'a side is not a JSON object',
+        );
+      }
+
+      // Both sides changed: with the version they last agreed on, the edits
+      // that do not overlap merge without asking anyone (docs/records/sync.md,
+      // "Conflicts").
+      final merge = await _tryMerge(c, d, fetched.temp, remote);
+      if (merge != null) {
+        await fetched.temp.delete();
+        c.report
+          ..merged.add(d.path)
+          ..changedLocally.addAll(merge.changedLocally ? [d.path] : const []);
+        return _Outcome.done;
+      }
+
       await fetched.temp.delete();
-      c.report
-        ..merged.add(d.path)
-        ..changedLocally.addAll(merge.changedLocally ? [d.path] : const []);
-      return _Outcome.done;
-    }
-
-    await fetched.temp.delete();
-    final conflict = SyncConflict(
-      path: d.path,
-      localSha256: localSha,
-      remoteSha256: remoteSha,
-      baseVersion: d.baseVersion,
-    );
-    c.report.conflicts.add(conflict);
-    _log.warning(
-      'conflict ${d.path}: both changed (local ${_short(localSha)}, '
-      'remote ${_short(remoteSha)}, base ${d.baseVersion ?? 'none'}); '
-      'left for the merge',
-    );
-    return _Outcome.conflict;
-  });
+      final conflict = SyncConflict(
+        path: d.path,
+        localSha256: localSha,
+        remoteSha256: remoteSha,
+        baseVersion: d.baseVersion,
+      );
+      c.report.conflicts.add(conflict);
+      _log.warning(
+        'conflict ${d.path}: both changed (local ${_short(localSha)}, '
+        'remote ${_short(remoteSha)}, base ${d.baseVersion ?? 'none'}); '
+        'left for the merge',
+      );
+      return _Outcome.conflict;
+    },
+  );
 
   /// Merges a library state file ([mergeSettingsJson] key by key,
   /// [mergeCountersJson], [mergeWordList] word by word, [mergeReadingJson]
