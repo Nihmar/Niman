@@ -32,6 +32,20 @@ final String? _unixSocketsSkip = Platform.isWindows
     ? 'a Unix socket is Linux and macOS'
     : null;
 
+/// Why the symlink tests do not run here, when the platform refuses to make
+/// a symbolic link — Windows without the privilege, for one.
+final String? _symlinkSkip = () {
+  final dir = Directory.systemTemp.createTempSync('niman_link_');
+  try {
+    Link(p.join(dir.path, 'probe')).createSync(dir.path);
+    return null;
+  } on FileSystemException {
+    return 'a symbolic link cannot be created here';
+  } finally {
+    dir.deleteSync(recursive: true);
+  }
+}();
+
 void main() {
   late Directory lib;
   late String notes;
@@ -179,6 +193,44 @@ void main() {
     expect(page, contains('href="q%3Fx.html"'));
     expect(page, contains('src="weird%23one.png"'));
   });
+
+  test('a symbolic link adds no entry to an export', () async {
+    // A folder and a file living outside the exported tree.
+    final outside = Directory(p.join(lib.path, 'outside'))
+      ..createSync(recursive: true);
+    await File(p.join(outside.path, 'leak.md')).writeAsString('# Leak\n');
+    // A link to that folder, wearing a normal name inside the export…
+    Link(p.join(notes, 'linked')).createSync(outside.path);
+    // …and a link straight to the file.
+    Link(p.join(notes, 'leak.md')).createSync(p.join(outside.path, 'leak.md'));
+
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.markdown,
+      language: 'en',
+    );
+    final files = await contents();
+    // The link is not walked into, so nothing outside the folder is carried.
+    expect(files.keys.any((name) => name.startsWith('linked/')), isFalse);
+    expect(files.keys.any((name) => name.contains('leak')), isFalse);
+  }, skip: _symlinkSkip);
+
+  test('a link cycle in the export folder does not recurse', () async {
+    // A link back at the export root: following it lists the root again,
+    // forever.
+    Link(p.join(notes, 'loop')).createSync(notes);
+
+    await TreeExport.run(
+      dir: notes,
+      zipPath: zip,
+      format: ExportTreeFormat.markdown,
+      language: 'en',
+    );
+    // Reaching this line is the walk terminating; the link is not an entry.
+    final files = await contents();
+    expect(files.keys.any((name) => name.startsWith('loop')), isFalse);
+  }, skip: _symlinkSkip);
 
   test('an empty folder is in every zip', () async {
     await Directory(p.join(notes, 'empty')).create();
