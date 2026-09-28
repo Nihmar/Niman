@@ -260,6 +260,18 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.noteTextScale),
     ),
     SettingsSearchEntry(
+      title: AppStrings.sourceFontTitle,
+      area: editor,
+      rowKey: SettingsKeys.sourceFont,
+      value: () async => switch (await controller.sourceFont) {
+        SourceFont.monospace => AppStrings.sourceFontMonospace,
+        SourceFont.sansSerif => AppStrings.sourceFontSansSerif,
+        SourceFont.serif => AppStrings.sourceFontSerif,
+      },
+      areaId: SettingsAreaId.editor,
+      open: () => pushEditor(SettingsKeys.sourceFont),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.indentWidthTitle,
       area: editor,
       rowKey: SettingsKeys.indentWidth,

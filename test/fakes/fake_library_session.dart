@@ -534,6 +534,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<SourceFont> get sourceFont async => _config.sourceFont;
+
+  @override
+  Future<void> setSourceFont(SourceFont font) async {
+    _config = _config.copyWith(sourceFont: font);
+  }
+
+  @override
   Future<int> get trashAutoEmptyDays async => _config.trashAutoEmptyDays;
 
   @override

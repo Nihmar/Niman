@@ -56,6 +56,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   LinkType _linkType = LinkType.wikilink;
   MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
   double _noteTextScale = defaultTextScale;
+  SourceFont _sourceFont = defaultSourceFont;
   int _indentWidth = 2;
   List<String> _spellDictionaries = const <String>[];
 
@@ -87,6 +88,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final linkType = await controller.linkType;
     final missingNoteLocation = await controller.missingNoteLocation;
     final noteTextScale = await controller.noteTextScale;
+    final sourceFont = await controller.sourceFont;
     final indentWidth = await controller.indentWidth;
     final spellDictionaries = await controller.spellDictionaries;
     final enabledEditors = await controller.enabledEditors;
@@ -103,6 +105,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _linkType = linkType;
       _missingNoteLocation = missingNoteLocation;
       _noteTextScale = noteTextScale;
+      _sourceFont = sourceFont;
       _indentWidth = indentWidth;
       _spellDictionaries = spellDictionaries;
       _enabledEditors = {...enabledEditors};
@@ -311,6 +314,29 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (scale == null) return;
     await widget.controller.setNoteTextScale(scale);
     if (mounted) setState(() => _noteTextScale = scale);
+  }
+
+  /// Asks which face the source editor is set in (issue #259). The read
+  /// view and `live` keep the note's own whatever this says.
+  Future<void> _chooseSourceFont() async {
+    final font = await showSettingsChoice<SourceFont>(
+      context,
+      dialogKey: const Key('source-font-dialog'),
+      title: AppStrings.sourceFontTitle,
+      subtitle: AppStrings.sourceFontSubtitle,
+      current: _sourceFont,
+      options: [
+        SettingsOption(SourceFont.monospace, AppStrings.sourceFontMonospace),
+        SettingsOption(SourceFont.sansSerif, AppStrings.sourceFontSansSerif),
+        SettingsOption(SourceFont.serif, AppStrings.sourceFontSerif),
+      ],
+    );
+    if (font == null) return;
+    await widget.controller.setSourceFont(font);
+    // Notify so the shell re-reads the value and an open source pane takes
+    // the new face without the note being reopened.
+    widget.controller.notify();
+    if (mounted) setState(() => _sourceFont = font);
   }
 
   /// Asks for the link format the editor's link button inserts.
@@ -615,6 +641,21 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               subtitle: AppStrings.noteTextScaleSubtitle,
               value: AppStrings.textScaleValue(_noteTextScale),
               onTap: () => unawaited(_chooseNoteTextScale()),
+            ),
+          ),
+          // Beside the note text size: both decide how the note reads in the
+          // editor, and this one only the source pane (#259).
+          HighlightRow(
+            key: SettingsKeys.sourceFont,
+            child: SettingsValueRow(
+              title: AppStrings.sourceFontTitle,
+              subtitle: AppStrings.sourceFontSubtitle,
+              value: switch (_sourceFont) {
+                SourceFont.monospace => AppStrings.sourceFontMonospace,
+                SourceFont.sansSerif => AppStrings.sourceFontSansSerif,
+                SourceFont.serif => AppStrings.sourceFontSerif,
+              },
+              onTap: () => unawaited(_chooseSourceFont()),
             ),
           ),
           HighlightRow(

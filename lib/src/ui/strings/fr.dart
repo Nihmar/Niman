@@ -332,6 +332,17 @@ final class FrenchStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'L’éditeur et l’aperçu, qui restent d’accord';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Apparence des livres';
   @override
   String get epubLookSubtitle =>

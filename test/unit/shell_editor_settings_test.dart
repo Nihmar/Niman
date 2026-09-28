@@ -5,6 +5,8 @@
 // place: Quill decoding a 246 MB note on the UI thread, a frozen app
 // (2026-09-23, sampled on the profile build).
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart'
+    show defaultSourceFont;
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/library/session.dart';
@@ -71,6 +73,9 @@ final class _CountedReads implements LibrarySession {
   Future<int> get indentWidth => _read(_inner.indentWidth);
 
   @override
+  Future<SourceFont> get sourceFont => _read(_inner.sourceFont);
+
+  @override
   Future<TreeSort> get treeSort => _read(_inner.treeSort);
 
   @override
@@ -120,6 +125,7 @@ void main() {
     missingNoteLocation: MissingNoteLocation.libraryRoot,
     attachmentsFolder: 'media',
     indentWidth: 4,
+    sourceFont: SourceFont.serif,
     treeSort: TreeSort.nameDesc,
     treeWidth: 321,
     tidyOnClose: false,
@@ -145,6 +151,7 @@ void main() {
       expect(copy.missingNoteLocation, MissingNoteLocation.libraryRoot);
       expect(copy.attachmentsFolder, 'media');
       expect(copy.indentWidth, 4);
+      expect(copy.sourceFont, SourceFont.serif);
       expect(copy.tidyOnClose, isFalse);
     }
   });
@@ -161,6 +168,19 @@ void main() {
     expect((await ShellEditorSettings.read(session)).tidyOnClose, isFalse);
   });
 
+  test('the read picks up the source font from the library (#259)', () async {
+    final session = FakeLibrarySession();
+    expect(
+      (await ShellEditorSettings.read(session)).sourceFont,
+      defaultSourceFont,
+    );
+    await session.setSourceFont(SourceFont.serif);
+    expect(
+      (await ShellEditorSettings.read(session)).sourceFont,
+      SourceFont.serif,
+    );
+  });
+
   test('the read asks for the settings together (#362)', () async {
     final session = _CountedReads(FakeLibrarySession());
 
@@ -169,7 +189,7 @@ void main() {
     expect(settings, ShellEditorSettings.defaults);
     expect(
       session.reads,
-      17,
+      18,
       reason: 'every setting the session answers; the two folders ride on ops',
     );
     expect(

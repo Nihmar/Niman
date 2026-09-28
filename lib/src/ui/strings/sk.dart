@@ -326,6 +326,17 @@ final class SlovakStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'Editor a náhľad sú vždy v súlade';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Vzhľad kníh';
   @override
   String get epubLookSubtitle =>

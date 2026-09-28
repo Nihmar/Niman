@@ -331,6 +331,17 @@ final class GreekStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Επεξεργαστής και προεπισκόπηση, πάντα συγχρονισμένοι';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Εμφάνιση βιβλίων';
   @override
   String get epubLookSubtitle =>

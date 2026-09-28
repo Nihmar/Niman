@@ -35,6 +35,7 @@ final class ShellEditorSettings {
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.templateFolder = defaultTemplateFolder,
     this.indentWidth = 2,
+    this.sourceFont = defaultSourceFont,
     this.treeSort = TreeSort.nameAsc,
     this.treeWidth = defaultTreeWidth,
     this.dockWidth = defaultDockWidth,
@@ -81,6 +82,9 @@ final class ShellEditorSettings {
 
   /// Spaces added per indent level.
   final int indentWidth;
+
+  /// The face the source editor is set in (issue #259).
+  final SourceFont sourceFont;
 
   /// The library tree's sort order (T-UI-03).
   final TreeSort treeSort;
@@ -136,6 +140,7 @@ final class ShellEditorSettings {
       session.linkType,
       session.missingNoteLocation,
       session.indentWidth,
+      session.sourceFont,
     ).wait;
     final body = (
       session.treeSort,
@@ -161,6 +166,7 @@ final class ShellEditorSettings {
       linkType,
       missingNoteLocation,
       indentWidth,
+      sourceFont,
     ) = await head;
     final (
       treeSort,
@@ -196,6 +202,7 @@ final class ShellEditorSettings {
       attachmentsFolder: attachmentsFolder,
       templateFolder: templateFolder,
       indentWidth: indentWidth,
+      sourceFont: sourceFont,
       treeSort: treeSort,
       treeWidth: treeWidth,
       dockWidth: dockWidth,
@@ -221,6 +228,7 @@ final class ShellEditorSettings {
     bool? typewriter,
     bool? tidyOnClose,
     Set<String>? lintRulesOff,
+    SourceFont? sourceFont,
   }) {
     return ShellEditorSettings(
       lineNumbers: lineNumbers,
@@ -234,6 +242,7 @@ final class ShellEditorSettings {
       attachmentsFolder: attachmentsFolder,
       templateFolder: templateFolder,
       indentWidth: indentWidth,
+      sourceFont: sourceFont ?? this.sourceFont,
       treeSort: treeSort ?? this.treeSort,
       treeWidth: treeWidth ?? this.treeWidth,
       dockWidth: dockWidth ?? this.dockWidth,
@@ -259,6 +268,7 @@ final class ShellEditorSettings {
         attachmentsFolder == other.attachmentsFolder &&
         templateFolder == other.templateFolder &&
         indentWidth == other.indentWidth &&
+        sourceFont == other.sourceFont &&
         treeSort == other.treeSort &&
         treeWidth == other.treeWidth &&
         dockWidth == other.dockWidth &&
@@ -283,6 +293,7 @@ final class ShellEditorSettings {
     attachmentsFolder,
     templateFolder,
     indentWidth,
+    sourceFont,
     treeSort,
     treeWidth,
     dockWidth,

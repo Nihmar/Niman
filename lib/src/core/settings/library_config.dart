@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
+        SourceFont,
         TreeSort,
         defaultAnnotationsFolder,
         defaultAttachmentsFolder,
@@ -139,12 +140,23 @@ const double minTextScale = 0.8;
 /// The largest accepted text scale.
 const double maxTextScale = 1.8;
 
+/// The source editor's font in a fresh library: the monospace face the
+/// editor has always been set in (issue #259).
+const SourceFont defaultSourceFont = SourceFont.monospace;
+
 /// The source editor's font size at [defaultTextScale], in logical
 /// pixels.
 ///
 /// It was the old source editor's default, kept so a note reads at the
 /// size it always had; the note scale multiplies it.
 const double baseNoteFontSize = 13;
+
+/// Reads a `sourceFont` out of the settings file.
+///
+/// Defaulted rather than clamped, like the enums it sits with: a name this
+/// build does not know — a newer build's, or a hand-typed one — is no more
+/// informative than a missing key, and the editor stays as it shipped.
+SourceFont normalizeSourceFont(Object? raw) => SourceFont.fromName(raw);
 
 /// Reads a text scale out of the settings file, into range.
 ///
@@ -363,6 +375,7 @@ final class LibraryConfig {
     this.editorToolbar = '',
     this.uiTextScale = defaultTextScale,
     this.noteTextScale = defaultTextScale,
+    this.sourceFont = defaultSourceFont,
     this.treeWidth = defaultTreeWidth,
     this.dockWidth = defaultDockWidth,
     this.spellDictionaries = const <String>[],
@@ -447,6 +460,7 @@ final class LibraryConfig {
       },
       uiTextScale: normalizeTextScale(json['uiTextScale']),
       noteTextScale: normalizeTextScale(json['noteTextScale']),
+      sourceFont: normalizeSourceFont(json['sourceFont']),
       treeWidth: normalizeTreeWidth(json['treeWidth']),
       dockWidth: normalizeDockWidth(json['dockWidth']),
       // The legacy single-dictionary key migrates to the list.
@@ -584,6 +598,17 @@ final class LibraryConfig {
   /// the preview alike (default 1.0).
   final double noteTextScale;
 
+  /// The face the source editor is set in (default [defaultSourceFont], the
+  /// monospace face it shipped with, issue #259).
+  ///
+  /// The read view and `live` are drawn in the note's own face whatever this
+  /// says: only the source pane, which is read as text, changes.
+  ///
+  /// Kept on the device ([deviceKeys]), like the note's text size it sits
+  /// under: the face a screen reads a file in is that screen's own answer,
+  /// and the folder travels between a phone and a desktop.
+  final SourceFont sourceFont;
+
   /// The tree pane's width in logical pixels (default
   /// [defaultTreeWidth]), dragged on wide screens.
   final double treeWidth;
@@ -644,6 +669,7 @@ final class LibraryConfig {
     String? editorToolbar,
     double? uiTextScale,
     double? noteTextScale,
+    SourceFont? sourceFont,
     double? treeWidth,
     double? dockWidth,
     List<String>? spellDictionaries,
@@ -682,6 +708,7 @@ final class LibraryConfig {
       editorToolbar: editorToolbar ?? this.editorToolbar,
       uiTextScale: uiTextScale ?? this.uiTextScale,
       noteTextScale: noteTextScale ?? this.noteTextScale,
+      sourceFont: sourceFont ?? this.sourceFont,
       treeWidth: treeWidth ?? this.treeWidth,
       dockWidth: dockWidth ?? this.dockWidth,
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
@@ -705,6 +732,7 @@ final class LibraryConfig {
     'editorToolbar',
     'uiTextScale',
     'noteTextScale',
+    'sourceFont',
     'treeWidth',
     'dockWidth',
     'editorKind',
@@ -769,6 +797,7 @@ final class LibraryConfig {
     'editorToolbar',
     'uiTextScale',
     'noteTextScale',
+    'sourceFont',
     'treeWidth',
     'dockWidth',
     'spellDictionary', // Legacy single-dictionary key (read, never written).
@@ -823,6 +852,7 @@ final class LibraryConfig {
       'editorToolbar': editorToolbar,
       'uiTextScale': uiTextScale,
       'noteTextScale': noteTextScale,
+      'sourceFont': sourceFont.name,
       'treeWidth': treeWidth,
       'dockWidth': dockWidth,
       'editorKind': editorKind.name,
@@ -926,6 +956,7 @@ final class LibraryConfig {
         editorToolbar == other.editorToolbar &&
         uiTextScale == other.uiTextScale &&
         noteTextScale == other.noteTextScale &&
+        sourceFont == other.sourceFont &&
         treeWidth == other.treeWidth &&
         dockWidth == other.dockWidth &&
         _deepEquals(spellDictionaries, other.spellDictionaries) &&

@@ -1125,6 +1125,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         attachmentsFolder: _editorSettings.attachmentsFolder,
         templateFolder: _editorSettings.templateFolder,
         indentWidth: _editorSettings.indentWidth,
+        sourceFont: _editorSettings.sourceFont,
         toolbarLayout: _editorSettings.toolbarLayout,
         showPreview: _notePreview,
         showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
@@ -4120,6 +4121,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           attachmentsFolder: _editorSettings.attachmentsFolder,
           templateFolder: _editorSettings.templateFolder,
           indentWidth: _editorSettings.indentWidth,
+          sourceFont: _editorSettings.sourceFont,
           toolbarLayout: _editorSettings.toolbarLayout,
           // A single enabled editor has nowhere to switch to:
           // the note hides its switch instead of offering a

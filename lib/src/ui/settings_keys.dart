@@ -48,6 +48,7 @@ abstract final class SettingsKeys {
   static const linkType = Key('link-type');
   static const missingNoteLocation = Key('missing-note-location');
   static const noteTextScale = Key('note-text-scale-setting');
+  static const sourceFont = Key('source-font-setting');
   static const indentWidth = Key('indent-width');
   static const tidyOnClose = Key('tidy-on-close-setting');
   static const lintRules = Key('lint-rules-setting');

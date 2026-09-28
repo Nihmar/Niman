@@ -563,6 +563,14 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the note text size.
   Future<void> setNoteTextScale(double scale);
 
+  /// The face the source editor is set in
+  /// (default [defaultSourceFont], issue #259). Only the source pane's own
+  /// style follows it; the read view and `live` keep the note's face.
+  Future<SourceFont> get sourceFont;
+
+  /// Sets (and persists) the source editor's face.
+  Future<void> setSourceFont(SourceFont font);
+
   /// How the library's books look (#280): their theme, brightness, font
   /// and text size.
   Future<EpubLook> get epubLook;

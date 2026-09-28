@@ -23,9 +23,12 @@ same Markdown either way, and only how it is drawn differs. The read view
 - **Source editor font**: the source pane is set in a **monospace** face —
   `monospace`, with `Consolas` / `DejaVu Sans Mono` / `Roboto Mono` as
   fallbacks — because the source is read as text: its markers, its indents and
-  its columns. The line numbers use the same face at the same size, dimmed, so
-  they line up with the characters they count. Making the face and size a
-  setting is issue #259.
+  its columns. **Settings → Editor → Source editor font** offers **Monospace**
+  (the default), **Sans serif** and **Serif** (`sourceFont`); the read view and
+  `live` keep the note's own face whatever is chosen, so switching panes never
+  changes the note's face. The line numbers use the same face at the same size,
+  dimmed, and the gutter measures a digit in it, so they line up with the
+  characters they count whichever face is chosen.
 - **Editing, in both modes**: Enter carries a list on, **Tab and Shift+Tab
   indent and outdent** (the note keeps the focus), PageUp/PageDown page, and
   on a phone a **long press selects a word**, with handles to adjust it and a

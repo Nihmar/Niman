@@ -330,6 +330,17 @@ final class GermanStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Der Editor und die Vorschau, die immer übereinstimmen';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Aussehen der Bücher';
   @override
   String get epubLookSubtitle =>

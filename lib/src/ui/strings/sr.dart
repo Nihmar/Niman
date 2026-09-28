@@ -328,6 +328,17 @@ final class SerbianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Уредитељ и преглед, који су увек у складу';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Изглед књига';
   @override
   String get epubLookSubtitle =>

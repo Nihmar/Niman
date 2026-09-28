@@ -325,6 +325,17 @@ final class HungarianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'A szerkesztő és az előnézet mindig azonos';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Könyvek megjelenése';
   @override
   String get epubLookSubtitle =>

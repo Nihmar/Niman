@@ -49,6 +49,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.marks,
     this.zen = false,
     this.typewriter = false,
+    this.sourceFont = SourceFont.monospace,
     this.cascadeChecklist = true,
     this.onToggleTypewriter,
     this.onMemento,
@@ -160,6 +161,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// Typewriter mode (#70), and the status row's switch for it.
   final bool typewriter;
 
+  /// The face the source pane is set in (issue #259).
+  final SourceFont sourceFont;
+
   /// Whether ticking a checklist item ticks the tasks nested under it
   /// (#326).
   final bool cascadeChecklist;
@@ -270,6 +274,7 @@ final class ShellDetailPane extends StatelessWidget {
     attachmentsFolder: attachmentsFolder,
     templateFolder: templateFolder,
     indentWidth: indentWidth,
+    sourceFont: sourceFont,
     toolbarLayout: toolbarLayout,
     // Wide only: the formatting toolbar sits above the editor (desktop
     // chrome); the phone keeps it under the editor, extending the

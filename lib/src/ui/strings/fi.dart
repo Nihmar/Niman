@@ -323,6 +323,17 @@ final class FinnishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'Muokkain ja esikatselu aina samassa';
   @override
+  String get sourceFontTitle => 'Source editor font';
+  @override
+  String get sourceFontSubtitle =>
+      "The face the source pane is set in; the preview keeps the note's own";
+  @override
+  String get sourceFontMonospace => 'Monospace';
+  @override
+  String get sourceFontSansSerif => 'Sans serif';
+  @override
+  String get sourceFontSerif => 'Serif';
+  @override
   String get epubLookTitle => 'Kirjojen ulkoasu';
   @override
   String get epubLookSubtitle =>

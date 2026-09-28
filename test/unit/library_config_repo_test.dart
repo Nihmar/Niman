@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/device_settings_store.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show SourceFont;
 
 void main() {
   late Directory lib;
@@ -124,6 +125,17 @@ void main() {
       );
       final fresh = LibraryConfigRepo(lib.path);
       expect((await fresh.config).cascadeChecklist, isFalse);
+    });
+
+    test("the source font is the device's, and reads back (#259)", () async {
+      // A face is how the editor reads on this screen, like the note's
+      // text size beside it: the device keeps it, the folder does not
+      // carry it.
+      await split.update((c) => c.copyWith(sourceFont: SourceFont.serif));
+      expect(fileJson().containsKey('sourceFont'), isFalse);
+      expect((await device.read(lib.path))!['sourceFont'], 'serif');
+      final fresh = LibraryConfigRepo(lib.path, device: device);
+      expect((await fresh.config).sourceFont, SourceFont.serif);
     });
 
     test('a device key alone never touches the file', () async {
