@@ -1073,9 +1073,9 @@ final class EnglishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Hide sidebar (Ctrl+B)';
+  String get hideSidebarTooltip => 'Hide sidebar';
   @override
-  String get showSidebarTooltip => 'Show sidebar (Ctrl+B)';
+  String get showSidebarTooltip => 'Show sidebar';
   @override
   String get windowMinimizeTooltip => 'Minimize';
   @override

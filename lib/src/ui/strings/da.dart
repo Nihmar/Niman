@@ -1075,9 +1075,9 @@ final class DanishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skjul sidepanelet (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skjul sidepanelet';
   @override
-  String get showSidebarTooltip => 'Vis sidepanelet (Ctrl+B)';
+  String get showSidebarTooltip => 'Vis sidepanelet';
   @override
   String get windowMinimizeTooltip => 'Minimer';
   @override

@@ -1084,9 +1084,9 @@ final class HungarianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Oldalsó sáv elrejtése (Ctrl+B)';
+  String get hideSidebarTooltip => 'Oldalsó sáv elrejtése';
   @override
-  String get showSidebarTooltip => 'Oldalsó sáv megjelenítése (Ctrl+B)';
+  String get showSidebarTooltip => 'Oldalsó sáv megjelenítése';
   @override
   String get windowMinimizeTooltip => 'Kicsinyítés';
   @override

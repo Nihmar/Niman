@@ -1084,9 +1084,9 @@ final class BasqueStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ezkutatu barra aldekoa (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ezkutatu barra aldekoa';
   @override
-  String get showSidebarTooltip => 'Erakutsi barra aldekoa (Ctrl+B)';
+  String get showSidebarTooltip => 'Erakutsi barra aldekoa';
   @override
   String get windowMinimizeTooltip => 'Minimizatu';
   @override

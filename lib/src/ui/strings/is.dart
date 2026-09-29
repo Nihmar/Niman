@@ -1080,9 +1080,9 @@ final class IcelandicStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Fela hliðarskjal (Ctrl+B)';
+  String get hideSidebarTooltip => 'Fela hliðarskjal';
   @override
-  String get showSidebarTooltip => 'Sýna hliðarskjal (Ctrl+B)';
+  String get showSidebarTooltip => 'Sýna hliðarskjal';
   @override
   String get windowMinimizeTooltip => 'Lágmarka';
   @override

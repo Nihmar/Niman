@@ -1093,9 +1093,9 @@ final class PolishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ukryj panel boczny (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ukryj panel boczny';
   @override
-  String get showSidebarTooltip => 'Pokaż panel boczny (Ctrl+B)';
+  String get showSidebarTooltip => 'Pokaż panel boczny';
   @override
   String get windowMinimizeTooltip => 'Zminimalizuj';
   @override

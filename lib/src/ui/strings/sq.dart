@@ -1084,9 +1084,9 @@ final class AlbanianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Fshih panelin anësor (Ctrl+B)';
+  String get hideSidebarTooltip => 'Fshih panelin anësor';
   @override
-  String get showSidebarTooltip => 'Shfaq panelin anësor (Ctrl+B)';
+  String get showSidebarTooltip => 'Shfaq panelin anësor';
   @override
   String get windowMinimizeTooltip => 'Minimizo';
   @override

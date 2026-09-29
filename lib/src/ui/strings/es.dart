@@ -1097,9 +1097,9 @@ final class SpanishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ocultar el panel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ocultar el panel';
   @override
-  String get showSidebarTooltip => 'Mostrar el panel (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostrar el panel';
   @override
   String get windowMinimizeTooltip => 'Minimizar';
   @override

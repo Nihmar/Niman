@@ -1084,9 +1084,9 @@ final class BosnianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Sakrij bočnu ploču (Ctrl+B)';
+  String get hideSidebarTooltip => 'Sakrij bočnu ploču';
   @override
-  String get showSidebarTooltip => 'Prikaži bočnu ploču (Ctrl+B)';
+  String get showSidebarTooltip => 'Prikaži bočnu ploču';
   @override
   String get windowMinimizeTooltip => 'Minimiziraj';
   @override

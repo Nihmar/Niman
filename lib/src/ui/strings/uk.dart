@@ -1082,9 +1082,9 @@ final class UkrainianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Приховати бічну панель (Ctrl+B)';
+  String get hideSidebarTooltip => 'Приховати бічну панель';
   @override
-  String get showSidebarTooltip => 'Показати бічну панель (Ctrl+B)';
+  String get showSidebarTooltip => 'Показати бічну панель';
   @override
   String get windowMinimizeTooltip => 'Зменшити';
   @override

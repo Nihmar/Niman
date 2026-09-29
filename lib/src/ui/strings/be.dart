@@ -1080,9 +1080,9 @@ final class BelarusianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Схаваць бакавую панэль (Ctrl+B)';
+  String get hideSidebarTooltip => 'Схаваць бакавую панэль';
   @override
-  String get showSidebarTooltip => 'Паказаць бакавую панэль (Ctrl+B)';
+  String get showSidebarTooltip => 'Паказаць бакавую панэль';
   @override
   String get windowMinimizeTooltip => 'Зменшыць';
   @override

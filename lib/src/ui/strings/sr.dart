@@ -1084,9 +1084,9 @@ final class SerbianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Сакриј бочни панел (Ctrl+B)';
+  String get hideSidebarTooltip => 'Сакриј бочни панел';
   @override
-  String get showSidebarTooltip => 'Прикажи бочни панел (Ctrl+B)';
+  String get showSidebarTooltip => 'Прикажи бочни панел';
   @override
   String get windowMinimizeTooltip => 'Минимизирај';
   @override

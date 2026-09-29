@@ -1079,9 +1079,9 @@ final class CroatianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Sakrij bočni panel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Sakrij bočni panel';
   @override
-  String get showSidebarTooltip => 'Prikaži bočni panel (Ctrl+B)';
+  String get showSidebarTooltip => 'Prikaži bočni panel';
   @override
   String get windowMinimizeTooltip => 'Minimiziraj';
   @override

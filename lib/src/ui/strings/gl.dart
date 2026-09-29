@@ -1090,9 +1090,9 @@ final class GalicianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ocultar o panel lateral (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ocultar o panel lateral';
   @override
-  String get showSidebarTooltip => 'Mostrar o panel lateral (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostrar o panel lateral';
   @override
   String get windowMinimizeTooltip => 'Minimizar';
   @override

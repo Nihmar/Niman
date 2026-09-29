@@ -1081,9 +1081,9 @@ final class SlovenianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skrij stranski panel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skrij stranski panel';
   @override
-  String get showSidebarTooltip => 'Prikaži stranski panel (Ctrl+B)';
+  String get showSidebarTooltip => 'Prikaži stranski panel';
   @override
   String get windowMinimizeTooltip => 'Pomanjšaj';
   @override

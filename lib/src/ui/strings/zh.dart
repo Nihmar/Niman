@@ -1007,9 +1007,9 @@ final class ChineseStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => '隐藏侧栏 (Ctrl+B)';
+  String get hideSidebarTooltip => '隐藏侧栏';
   @override
-  String get showSidebarTooltip => '显示侧栏 (Ctrl+B)';
+  String get showSidebarTooltip => '显示侧栏';
   @override
   String get windowMinimizeTooltip => '最小化';
   @override

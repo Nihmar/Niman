@@ -1062,9 +1062,9 @@ final class HindiStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'साइडबार छिपाएँ (Ctrl+B)';
+  String get hideSidebarTooltip => 'साइडबार छिपाएँ';
   @override
-  String get showSidebarTooltip => 'साइडबार दिखाएँ (Ctrl+B)';
+  String get showSidebarTooltip => 'साइडबार दिखाएँ';
   @override
   String get windowMinimizeTooltip => 'न्यूनतम करें';
   @override

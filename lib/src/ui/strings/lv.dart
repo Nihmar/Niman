@@ -1078,9 +1078,9 @@ final class LatvianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Paslēpt sānpaneli (Ctrl+B)';
+  String get hideSidebarTooltip => 'Paslēpt sānpaneli';
   @override
-  String get showSidebarTooltip => 'Rādīt sānpaneli (Ctrl+B)';
+  String get showSidebarTooltip => 'Rādīt sānpaneli';
   @override
   String get windowMinimizeTooltip => 'Minimizēt';
   @override

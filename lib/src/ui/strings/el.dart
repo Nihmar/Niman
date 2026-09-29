@@ -1108,9 +1108,9 @@ final class GreekStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Απόκρυψη πλαισίου (Ctrl+B)';
+  String get hideSidebarTooltip => 'Απόκρυψη πλαισίου';
   @override
-  String get showSidebarTooltip => 'Εμφάνιση πλαισίου (Ctrl+B)';
+  String get showSidebarTooltip => 'Εμφάνιση πλαισίου';
   @override
   String get windowMinimizeTooltip => 'Ελαχιστοποίηση';
   @override

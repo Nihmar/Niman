@@ -1095,9 +1095,9 @@ final class GermanStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Seitenleiste ausblenden (Ctrl+B)';
+  String get hideSidebarTooltip => 'Seitenleiste ausblenden';
   @override
-  String get showSidebarTooltip => 'Seitenleiste anzeigen (Ctrl+B)';
+  String get showSidebarTooltip => 'Seitenleiste anzeigen';
   @override
   String get windowMinimizeTooltip => 'Minimieren';
   @override

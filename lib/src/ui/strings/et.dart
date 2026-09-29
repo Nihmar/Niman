@@ -1069,9 +1069,9 @@ final class EstonianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Peida külgpaneel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Peida külgpaneel';
   @override
-  String get showSidebarTooltip => 'Kuva külgpaneel (Ctrl+B)';
+  String get showSidebarTooltip => 'Kuva külgpaneel';
   @override
   String get windowMinimizeTooltip => 'Minimeeri';
   @override

@@ -1083,9 +1083,9 @@ final class FinnishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Piilota sivupaneeli (Ctrl+B)';
+  String get hideSidebarTooltip => 'Piilota sivupaneeli';
   @override
-  String get showSidebarTooltip => 'Näytä sivupaneeli (Ctrl+B)';
+  String get showSidebarTooltip => 'Näytä sivupaneeli';
   @override
   String get windowMinimizeTooltip => 'Pienennä';
   @override

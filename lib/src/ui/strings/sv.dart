@@ -1082,9 +1082,9 @@ final class SwedishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Dölj sidopanelen (Ctrl+B)';
+  String get hideSidebarTooltip => 'Dölj sidopanelen';
   @override
-  String get showSidebarTooltip => 'Visa sidopanelen (Ctrl+B)';
+  String get showSidebarTooltip => 'Visa sidopanelen';
   @override
   String get windowMinimizeTooltip => 'Minimera';
   @override

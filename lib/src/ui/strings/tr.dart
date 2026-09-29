@@ -1072,9 +1072,9 @@ final class TurkishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Kenar çubuğunu gizle (Ctrl+B)';
+  String get hideSidebarTooltip => 'Kenar çubuğunu gizle';
   @override
-  String get showSidebarTooltip => 'Kenar çubuğunu göster (Ctrl+B)';
+  String get showSidebarTooltip => 'Kenar çubuğunu göster';
   @override
   String get windowMinimizeTooltip => 'Simge durumuna küçült';
   @override

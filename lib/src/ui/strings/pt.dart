@@ -1084,9 +1084,9 @@ final class PortugueseStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ocultar o painel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ocultar o painel';
   @override
-  String get showSidebarTooltip => 'Mostrar o painel (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostrar o painel';
   @override
   String get windowMinimizeTooltip => 'Minimizar';
   @override

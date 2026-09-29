@@ -1088,9 +1088,9 @@ final class ItalianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Nascondi il pannello (Ctrl+B)';
+  String get hideSidebarTooltip => 'Nascondi il pannello';
   @override
-  String get showSidebarTooltip => 'Mostra il pannello (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostra il pannello';
   @override
   String get windowMinimizeTooltip => 'Riduci a icona';
   @override

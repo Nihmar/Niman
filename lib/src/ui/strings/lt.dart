@@ -1078,9 +1078,9 @@ final class LithuanianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Paslėpti šoninį panelį (Ctrl+B)';
+  String get hideSidebarTooltip => 'Paslėpti šoninį panelį';
   @override
-  String get showSidebarTooltip => 'Rodyti šoninį panelį (Ctrl+B)';
+  String get showSidebarTooltip => 'Rodyti šoninį panelį';
   @override
   String get windowMinimizeTooltip => 'Sup mažinti';
   @override

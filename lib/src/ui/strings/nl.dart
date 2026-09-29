@@ -1085,9 +1085,9 @@ final class DutchStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Zijpaneel verbergen (Ctrl+B)';
+  String get hideSidebarTooltip => 'Zijpaneel verbergen';
   @override
-  String get showSidebarTooltip => 'Zijpaneel tonen (Ctrl+B)';
+  String get showSidebarTooltip => 'Zijpaneel tonen';
   @override
   String get windowMinimizeTooltip => 'Minimaliseren';
   @override

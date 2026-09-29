@@ -1099,9 +1099,9 @@ final class CatalanStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Amaga el panell lateral (Ctrl+B)';
+  String get hideSidebarTooltip => 'Amaga el panell lateral';
   @override
-  String get showSidebarTooltip => 'Mostra el panell lateral (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostra el panell lateral';
   @override
   String get windowMinimizeTooltip => 'Minimitza';
   @override

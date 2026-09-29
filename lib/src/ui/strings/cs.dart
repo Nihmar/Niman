@@ -1079,9 +1079,9 @@ final class CzechStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skrýt boční panel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skrýt boční panel';
   @override
-  String get showSidebarTooltip => 'Zobrazit boční panel (Ctrl+B)';
+  String get showSidebarTooltip => 'Zobrazit boční panel';
   @override
   String get windowMinimizeTooltip => 'Minimalizovat';
   @override

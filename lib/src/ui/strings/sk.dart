@@ -1082,9 +1082,9 @@ final class SlovakStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skryť bočný panel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skryť bočný panel';
   @override
-  String get showSidebarTooltip => 'Zobraziť bočný panel (Ctrl+B)';
+  String get showSidebarTooltip => 'Zobraziť bočný panel';
   @override
   String get windowMinimizeTooltip => 'Minimalizovať';
   @override

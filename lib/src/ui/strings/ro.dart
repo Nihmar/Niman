@@ -1091,9 +1091,9 @@ final class RomanianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ascunde panoul lateral (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ascunde panoul lateral';
   @override
-  String get showSidebarTooltip => 'Afișează panoul lateral (Ctrl+B)';
+  String get showSidebarTooltip => 'Afișează panoul lateral';
   @override
   String get windowMinimizeTooltip => 'Minimizează';
   @override

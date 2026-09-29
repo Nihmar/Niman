@@ -1018,9 +1018,9 @@ final class JapaneseStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'サイドバーを非表示 (Ctrl+B)';
+  String get hideSidebarTooltip => 'サイドバーを非表示';
   @override
-  String get showSidebarTooltip => 'サイドバーを表示 (Ctrl+B)';
+  String get showSidebarTooltip => 'サイドバーを表示';
   @override
   String get windowMinimizeTooltip => '最小化';
   @override

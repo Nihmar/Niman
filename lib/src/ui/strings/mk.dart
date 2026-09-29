@@ -1089,9 +1089,9 @@ final class MacedonianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Скриј го страничниот панел (Ctrl+B)';
+  String get hideSidebarTooltip => 'Скриј го страничниот панел';
   @override
-  String get showSidebarTooltip => 'Прикажи го страничниот панел (Ctrl+B)';
+  String get showSidebarTooltip => 'Прикажи го страничниот панел';
   @override
   String get windowMinimizeTooltip => 'Минимизирај';
   @override

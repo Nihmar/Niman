@@ -1088,9 +1088,9 @@ final class BulgarianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Скрий страничната лента (Ctrl+B)';
+  String get hideSidebarTooltip => 'Скрий страничната лента';
   @override
-  String get showSidebarTooltip => 'Покажи страничната лента (Ctrl+B)';
+  String get showSidebarTooltip => 'Покажи страничната лента';
   @override
   String get windowMinimizeTooltip => 'Минимизиране';
   @override

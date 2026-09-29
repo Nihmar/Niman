@@ -1099,9 +1099,9 @@ final class FrenchStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Masquer le panneau (Ctrl+B)';
+  String get hideSidebarTooltip => 'Masquer le panneau';
   @override
-  String get showSidebarTooltip => 'Afficher le panneau (Ctrl+B)';
+  String get showSidebarTooltip => 'Afficher le panneau';
   @override
   String get windowMinimizeTooltip => 'Réduire';
   @override
