@@ -3714,9 +3714,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // not the words shown.
     if (content.contains('|')) return null;
     final hash = content.indexOf('#');
+    // A link closed after the caret — one already written, typed into — has
+    // the rest of what is being completed there too: the target runs on to a
+    // `#`, a `|` or the `]]`, a heading to a `|` or the `]]`. A `]]` past
+    // another `[[` is that link's, and this one is still open.
+    var end = at;
+    var closeAt = -1;
+    final reopen = text.indexOf('[[', at);
+    if (close != -1 && (reopen == -1 || reopen > close)) {
+      closeAt = lineStart + close;
+      end = close;
+      for (final stop in hash == -1 ? const ['#', '|'] : const ['|']) {
+        final found = text.indexOf(stop, at);
+        if (found != -1 && found < end) end = found;
+      }
+    }
     return _LinkQuery(
       start: lineStart + open + 2,
       caret: caret,
+      end: lineStart + end,
+      closeAt: closeAt,
       target: hash == -1 ? content : content.substring(0, hash),
       heading: hash == -1 ? '' : content.substring(hash + 1),
       hasHash: hash != -1,
@@ -3882,37 +3899,39 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final entry = panel.entries.elementAtOrNull(panel.selected);
     if (entry == null) return;
     final query = panel.query;
-    // Whether the pair's closing `]]` already stands at the caret: when it
-    // does, completing writes the target alone and the caret steps past it.
-    final closer =
-        query.caret + 2 <= widget.buffer.length &&
-            widget.buffer.substring(query.caret, query.caret + 2) == ']]'
-        ? 2
-        : 0;
     _closeSuggest();
     switch (entry) {
       case NoteSuggestion():
-        _completeSuggest(query.start, query.caret, entry.target, closer);
+        _completeSuggest(query, query.start, entry.target);
       case HeadingSuggestion():
-        _completeSuggest(query.hashAt, query.caret, entry.heading, closer);
+        _completeSuggest(query, query.hashAt, entry.heading);
       case BookSuggestion():
         // A form, not a link: the number is typed after it, so the caret
         // stops at the `=` and the link is left open.
-        _completeSuggest(query.hashAt, query.caret, entry.form, -1);
+        _completeSuggest(query, query.hashAt, entry.form, form: true);
     }
   }
 
-  /// Replaces `[from, to)` with [text] as one undoable edit, the caret after
-  /// it — past the pair's own `]]` at [closer] 2, past the one written at 0,
-  /// and at the end of the text for a form (-1).
-  void _completeSuggest(int from, int to, String text, int closer) {
-    final insert = closer == 0 ? '$text]]' : text;
-    _replaceRange(
-      from,
-      to,
-      insert,
-      caret: SelectionModel.at(from + text.length + (closer < 0 ? 0 : 2)),
-    );
+  /// Replaces what [query] completes — from [from] to its end — with [text]
+  /// as one undoable edit. The caret lands past the link's `]]`: the one it
+  /// already has, whatever follows the text before it, or one written after
+  /// the text when it has none. A [form] leaves the caret after the text.
+  void _completeSuggest(
+    _LinkQuery query,
+    int from,
+    String text, {
+    bool form = false,
+  }) {
+    final to = query.end;
+    final closed = query.closeAt >= 0;
+    final insert = form || closed ? text : '$text]]';
+    final shift = text.length - (to - from);
+    final caret = form
+        ? from + text.length
+        : closed
+        ? query.closeAt + shift + 2
+        : from + insert.length;
+    _replaceRange(from, to, insert, caret: SelectionModel.at(caret));
     _ensureCaretVisible();
   }
 
@@ -4544,6 +4563,8 @@ final class _LinkQuery {
   const new({
     required this.start,
     required this.caret,
+    required this.end,
+    required this.closeAt,
     required this.target,
     required this.heading,
     required this.hasHash,
@@ -4551,6 +4572,14 @@ final class _LinkQuery {
 
   final int start;
   final int caret;
+
+  /// Where the part being completed ends: the caret in a link still open,
+  /// the `#`, `|` or `]]` that ends it in a link closed after the caret.
+  final int end;
+
+  /// Where the link's closing `]]` stands, or -1 while it has none.
+  final int closeAt;
+
   final String target;
   final String heading;
   final bool hasHash;

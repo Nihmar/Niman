@@ -108,12 +108,13 @@ void main() {
     );
   }
 
-  /// Types the whole note's new text, the way the platform reports it.
-  Future<void> type(WidgetTester tester, String text) async {
+  /// Types the whole note's new text, the way the platform reports it, the
+  /// caret at [caret] — the end when none is given.
+  Future<void> type(WidgetTester tester, String text, {int? caret}) async {
     tester.testTextInput.updateEditingValue(
       TextEditingValue(
         text: text,
-        selection: TextSelection.collapsed(offset: text.length),
+        selection: TextSelection.collapsed(offset: caret ?? text.length),
       ),
     );
     await tester.pump();
@@ -465,6 +466,90 @@ void main() {
     state.placeCaret(buffer.length);
     await tester.pump();
     expect(state.isSuggesterShown, isFalse);
+  });
+
+  group('completing inside a written link', () {
+    /// Puts the caret at [at] in [before], types [typed] there, and presses
+    /// [key] on the row the panel picked: the note that is left.
+    Future<(String, int)> complete(
+      WidgetTester tester,
+      String before,
+      int at,
+      String typed,
+      LogicalKeyboardKey key,
+    ) async {
+      final buffer = SourceBuffer.fromText(before);
+      final state = await pump(tester, buffer, _library());
+      state.placeCaret(at);
+      await tester.pump();
+      await type(
+        tester,
+        before.replaceRange(at, at, typed),
+        caret: at + typed.length,
+      );
+      expect(state.isSuggesterShown, isTrue, reason: 'typing opened it');
+      expect(panel(tester).entries, isNotEmpty);
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+      expect(state.isSuggesterShown, isFalse);
+      return (buffer.text, state.selection.extent);
+    }
+
+    testWidgets('replaces the rest of the target, not a second closer', (
+      tester,
+    ) async {
+      // `See [[Mee|ng notes]] now`: the target runs on to the `]]`.
+      final (text, caret) = await complete(
+        tester,
+        'See [[Meng notes]] now',
+        8,
+        'e',
+        LogicalKeyboardKey.enter,
+      );
+      expect(text, 'See [[Meeting notes]] now');
+      expect(caret, 'See [[Meeting notes]]'.length, reason: 'past the `]]`');
+    });
+
+    testWidgets('keeps the heading and the alias after the target', (
+      tester,
+    ) async {
+      final (text, caret) = await complete(
+        tester,
+        '[[Ma#Intro|shown]]',
+        4,
+        'r',
+        LogicalKeyboardKey.tab,
+      );
+      expect(text, '[[Markdown basics#Intro|shown]]');
+      expect(caret, text.length, reason: 'past the link');
+    });
+
+    testWidgets('replaces the rest of a heading', (tester) async {
+      final (text, caret) = await complete(
+        tester,
+        '[[Notes#Lnks]] and on',
+        9,
+        'i',
+        LogicalKeyboardKey.enter,
+      );
+      expect(text, '[[Notes#Links]] and on');
+      expect(caret, '[[Notes#Links]]'.length);
+    });
+
+    testWidgets('leaves what follows a link with no closer alone', (
+      tester,
+    ) async {
+      // The `]]` further on is the next link's: this one was never closed,
+      // so the completion closes it and eats nothing.
+      final (text, _) = await complete(
+        tester,
+        '[[Me and [[Notes]]',
+        4,
+        'e',
+        LogicalKeyboardKey.tab,
+      );
+      expect(text, '[[Meeting notes]] and [[Notes]]');
+    });
   });
 
   testWidgets('a surface with no library draws no panel', (tester) async {

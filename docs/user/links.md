@@ -32,7 +32,9 @@ the note's. The panel lists:
   `chapter=`.
 
 `↑`/`↓` move, `⏎` or `Tab` complete the link, `Esc` closes the panel and
-leaves the text as it was. The panel writes nothing but the link that was
+leaves the text as it was. Typed into a link already closed, the choice
+replaces the whole name (or heading) up to its `#`, `|` or `]]`; what
+follows is kept. The panel writes nothing but the link that was
 chosen: no note is created from it, and a name that matches nothing is
 left as typed (see *Dead links* below for where a new note comes from).
 The rows come from the index the app already keeps; nothing is scanned to
