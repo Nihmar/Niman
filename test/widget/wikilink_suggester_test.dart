@@ -778,6 +778,52 @@ void main() {
     });
   });
 
+  group('the note replaced under the panel', () {
+    Future<MarkdownSourceViewState> open(
+      WidgetTester tester,
+      SourceBuffer buffer,
+    ) async {
+      final state = await pump(tester, buffer, _library());
+      await type(tester, '[[Note');
+      expect(state.isSuggesterShown, isTrue);
+      expect(panel(tester).entries, isNotEmpty, reason: 'a key would write');
+      return state;
+    }
+
+    testWidgets('replacing the whole text closes the panel', (tester) async {
+      // The disk or the WYSIWYG says the note is another text: the panel held
+      // offsets into the text that went, and the key after it wrote a
+      // completion into the new one (#494).
+      final buffer = SourceBuffer.fromText('');
+      final state = await open(tester, buffer);
+
+      state.replaceAll('Another note that is longer than the link was\n');
+      await tester.pump();
+      expect(state.isSuggesterShown, isFalse);
+      expect(find.byType(WikilinkPanel), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        buffer.text,
+        isNot(contains(']]')),
+        reason: 'the key went to the note',
+      );
+    });
+
+    testWidgets('an undo follows the text it left, or closes', (tester) async {
+      // An undo is an edit no keystroke made: the link the panel stood in is
+      // gone, and so must the panel be.
+      final buffer = SourceBuffer.fromText('');
+      final state = await open(tester, buffer);
+
+      expect(state.undo(), isTrue);
+      await tester.pump();
+      expect(buffer.text, isNot(contains('[[')), reason: 'the link is undone');
+      expect(state.isSuggesterShown, isFalse);
+    });
+  });
+
   group('a link typed in code', () {
     /// Types [text] with the caret at [caret] and holds that the library was
     /// not asked and the key that follows writes no link: nothing but the

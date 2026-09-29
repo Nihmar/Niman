@@ -1069,6 +1069,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final buffer = widget.buffer;
     buffer.replaceRange(0, buffer.length, text);
     _history.clear();
+    // The panel holds offsets into the text that went (#494).
+    _closeSuggest();
     _restyle();
     _folds.clear();
     _heights = _map();
@@ -1124,6 +1126,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
+    // An undo is an edit no keystroke made: the panel is read again off the
+    // text it left — it follows a link still there and closes on one gone
+    // (#494).
+    _refreshSuggest();
     if (edit != null) _notifyChanged(edit);
     return true;
   }
