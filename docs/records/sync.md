@@ -460,6 +460,12 @@ one runs joins it and gets the same report, saying that it joined.
    - *upload*: missing remote folders are created (once per run), `PUT`
      streamed from disk with `If-Match` / `If-None-Match` and
      `X-OC-Mtime`, then a `PROPFIND Depth: 0` for the metadata to record.
+     A JSON state file (`settings.json`, `counters.json`, `reading.json`)
+     that is not a JSON object is never written over the other side, in
+     either direction: the upload of a local copy that does not parse, and
+     the download of a remote one that does not, leave both sides as they
+     are and report the path as a conflict (#336) — `.niman/` has no
+     history to bring the good copy back.
    - *download*: `GET` into `.<name>.niman-tmp-sync-<µs>` next to the
      target, size checked against the listing (unless the ETag says the
      file was rewritten since), then `NoteOps.syncReplace`: in the note's

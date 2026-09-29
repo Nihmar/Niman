@@ -140,10 +140,11 @@ with the tasks of both.
 Library settings (`.niman/settings.json`) never conflict: they merge
 setting by setting. A setting changed on one device only is kept; the
 same setting changed differently on both takes the device that saved
-last. A settings file that arrives broken — a half-written copy from
-another tool, an edit that is not valid JSON — is not merged and not
-taken over: the sync reports it as a conflict and leaves both copies
-where they are, so a good file is never replaced by a broken one.
+last. A settings file that is broken on either side — a half-written
+copy from another tool, a hand edit here that is not valid JSON — is
+not merged and not sent over the other: the sync reports it as a
+conflict and leaves both copies where they are, so a good file is never
+replaced by a broken one, on this device or on the server.
 Template counters (`.niman/counters.json`) keep the highest number
 either device reached, so a number is never handed out twice. The
 personal dictionary merges word by word: a word added on either device

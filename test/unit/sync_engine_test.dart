@@ -448,6 +448,22 @@ void main() {
     },
   );
 
+  test(
+    'a broken state file here does not replace the one on the server',
+    () async {
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      await a.sync();
+      // A hand edit leaves a syntax error: the plan is an upload, and an
+      // upload must not go through either — `.niman/` has no history.
+      a.write('.niman/settings.json', '{broken');
+      final report = await a.sync();
+      expect(report.conflicts, hasLength(1), reason: report.summary());
+      expect(report.conflicts.single.path, '.niman/settings.json');
+      expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+      expect(a.read('.niman/settings.json'), '{broken');
+    },
+  );
+
   test('library settings deleted on the server are put back', () async {
     a.write('.niman/settings.json', '{"historyVersions": 3}');
     await a.sync();

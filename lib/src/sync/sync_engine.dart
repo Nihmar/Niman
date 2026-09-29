@@ -1387,6 +1387,21 @@ final class SyncEngine {
     final local = (await _localStillAsPlanned(c, d.path))!;
     await _remoteStillAsPlanned(c, d);
     final sha = _localShaOf(c, d.path);
+    // The #336 rule holds both ways: a JSON state file that does not parse
+    // here — a hand edit with a syntax error — is not a newer version of the
+    // remote copy either, and `.niman/*` has no history to bring that one
+    // back. Both sides stay, and the path is reported for the merge.
+    if (jsonStateFiles.contains(d.path) &&
+        c.remote[d.path] != null &&
+        !await _isJsonObject(File(p.join(root, d.path)))) {
+      return _reportConflict(
+        c,
+        d,
+        localSha: sha,
+        remoteSha: c.rows[d.path]?.localSha256 ?? '',
+        why: 'the local copy is not a JSON object',
+      );
+    }
     await _ensureRemoteParent(c, d.path);
     await c.client.uploadFile(
       d.path,
