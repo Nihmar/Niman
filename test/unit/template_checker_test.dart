@@ -47,6 +47,60 @@ void main() {
       expect(errors.map((error) => error.suggestion), [null, null]);
     });
 
+    test('a brace next to a placeholder is literal, not a pair', () {
+      // `{{{title}}}` is a `{`, the placeholder and a `}`: the engine
+      // renders `{Title}`, and the lone braces either side are text.
+      expect(checkTemplateSyntax('{{{title}}}'), isEmpty);
+      expect(checkTemplateSyntax('x{{{title}}'), isEmpty);
+      // Two whole pairs around one are two stray pairs.
+      final errors = checkTemplateSyntax('{{{{title}}}}');
+      expect(errors.map((error) => error.offset), [0, 11]);
+      expect(errors.map((error) => error.length), [2, 2]);
+    });
+
+    test('no arrangement of braces makes the checker throw', () {
+      // Every string of up to eight characters over `{`, `}` and a
+      // letter — each brace run at every boundary a placeholder can have —
+      // plus the shapes a person actually types. The checker runs on a
+      // timer while the template is edited, so a throw is an uncaught
+      // error and a stale list of mistakes on screen.
+      final sources = <String>[
+        '{{{title}}}',
+        '{{{{title}}}}',
+        '{{title}}}',
+        '{{{title}}',
+        '}}{{title}}{{',
+        '{{title}}{{',
+        '{{date:YYYY}}{{{',
+        '{ {{title}} }',
+        '{{ {{title}}',
+      ];
+      void grow(String prefix) {
+        sources.add(prefix);
+        if (prefix.length == 8) return;
+        for (final char in ['{', '}', 'a']) {
+          grow('$prefix$char');
+        }
+      }
+
+      grow('');
+      for (final source in sources) {
+        final errors = checkTemplateSyntax(source);
+        for (final error in errors) {
+          expect(
+            error.offset,
+            inInclusiveRange(0, source.length),
+            reason: source,
+          );
+          expect(
+            error.end,
+            inInclusiveRange(error.offset, source.length),
+            reason: source,
+          );
+        }
+      }
+    });
+
     test('empty placeholder: {{}} and {{ }} have nothing to suggest', () {
       for (final source in ['{{}}', '{{ }}']) {
         final error = only(source);

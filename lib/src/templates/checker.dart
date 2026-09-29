@@ -134,15 +134,22 @@ List<TemplateSyntaxError> checkTemplateSyntax(String source) {
 
 /// The `{{` and `}}` of `[from], [to)` — the text between two placeholders,
 /// or either end of the file — where no placeholder can be.
+///
+/// A pair counts only when both of its braces stand inside the window. In
+/// `{{{title}}}` the window before the placeholder is the one `{` at 0,
+/// and the `{` after it is the placeholder's own: read against the whole
+/// source that looks like a `{{` opening a run that ends before it starts.
 void _checkBraces(
   String source,
   int from,
   int to,
   List<TemplateSyntaxError> errors,
 ) {
+  bool pairAt(String pair, int i) => i + 2 <= to && source.startsWith(pair, i);
+
   var i = from;
   while (i < to) {
-    if (source.startsWith('{{', i)) {
+    if (pairAt('{{', i)) {
       // The run the braces open: up to the next placeholder or the end of
       // the file, without the whitespace that trails it.
       var end = to;
@@ -164,7 +171,7 @@ void _checkBraces(
       i = end;
       continue;
     }
-    if (source.startsWith('}}', i)) {
+    if (pairAt('}}', i)) {
       // The engine reads a closing pair with nothing open before it as
       // literal text, so there is nothing to close and nothing to suggest.
       errors.add(
