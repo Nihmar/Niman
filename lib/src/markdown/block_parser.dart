@@ -667,8 +667,8 @@ final class DocumentScope {
 
   /// Scans [lines] of [source], in ascending order, for both kinds of
   /// definition: the same answer as [DocumentScope.scan] when they include
-  /// every line
-  /// that [DocumentScope.mayHold] one.
+  /// every line a scope is read from — every definition, every footnote
+  /// citation, and every line a footnote's body runs on to.
   ///
   /// What a reader that keeps track of those lines rescans after an edit,
   /// instead of the note.
@@ -726,20 +726,28 @@ final class DocumentScope {
     );
   }
 
-  /// Whether [line] can be part of what a scope is made of: a definition, a
-  /// footnote reference — whose order is the footnotes' numbering — or a line
-  /// a footnote's body runs on to.
+  /// Whether [line] can be part of what a scope is made of on its own: it
+  /// opens with `[` (a definition), or cites a footnote, whose order is the
+  /// footnotes' numbering.
   ///
-  /// The continuation lines are here because a footnote's body is read across
-  /// lines ([_footnoteBody]): a reader that rescans only the lines a
-  /// definition *opens* on would keep a body the note no longer has. Being
-  /// line-local, this is a superset of what each line is — an indented line
-  /// that continues nothing is read again for nothing — and an edit that
-  /// touches one is what pays for it.
-  static bool mayHold(String line) =>
-      _opensWithBracket(line) ||
-      line.contains('[^') ||
-      _continuesFootnote(line);
+  /// A line a footnote's body runs on to is not here: that depends on the
+  /// line above it ([continuesFootnote]), and only a footnote definition
+  /// makes one ([definesFootnote]).
+  static bool opensDefinition(String line) =>
+      _opensWithBracket(line) || line.contains('[^');
+
+  /// Whether [line] defines a footnote: it opens with `[` and carries a
+  /// footnote label, the one definition whose body runs on to the lines
+  /// indented under it.
+  static bool definesFootnote(String line) =>
+      _footnoteDefinition.hasMatch(line);
+
+  /// Whether [text] runs on the footnote definition above it: a line with
+  /// text, indented four spaces in.
+  static bool continuesFootnote(String text) {
+    final trimmed = text.trimLeft();
+    return trimmed.isNotEmpty && text.length - trimmed.length >= 4;
+  }
 
   /// Whether [line] opens with `[` after at most three spaces: the only
   /// lines a definition can be.
@@ -760,17 +768,10 @@ final class DocumentScope {
     final parts = <String>[own.trim()];
     for (var at = line + 1; at < source.lineCount; at++) {
       final text = source.lineAt(at);
-      if (!_continuesFootnote(text)) break;
+      if (!continuesFootnote(text)) break;
       parts.add(text.trim());
     }
     return parts.join('\n').trim();
-  }
-
-  /// Whether [text] runs on the footnote definition above it: a line with
-  /// text, indented four spaces in.
-  static bool _continuesFootnote(String text) {
-    final trimmed = text.trimLeft();
-    return trimmed.isNotEmpty && text.length - trimmed.length >= 4;
   }
 
   /// A link reference definition, in its single-line form.

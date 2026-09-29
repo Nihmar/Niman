@@ -409,6 +409,47 @@ void main() {
             'were',
       );
     });
+
+    test('a keystroke in indented code rescans no definition (#496)', () {
+      // A note that is mostly indented lines — code, verse, a nested list —
+      // which used to be definition candidates for being indented: an edit
+      // to any of them read every one of them again. One real footnote
+      // stays among them and is still held.
+      final lines = <String>[
+        'see [^a] here',
+        '[^a]: the one definition',
+        '    its body',
+        'a plain break',
+        for (var at = 0; at < 2000; at++) '    code line $at',
+      ];
+      final buffer = SourceBuffer.fromText(lines.join('\n'));
+      final styler = SourceStyler(buffer);
+      expect(styler.footnotes, hasLength(1), reason: 'the footnote is held');
+      final before = styler.definitionLinesRescanned;
+      for (var at = 0; at < 20; at++) {
+        final offset = buffer.offsetOfLine(100 + at);
+        final edit = at.isEven
+            ? buffer.insert(offset, 'x')
+            : buffer.insert(offset, '\n    more code');
+        styler.edited(edit);
+      }
+      expect(
+        styler.definitionLinesRescanned - before,
+        0,
+        reason: 'a keystroke in indented code touches no definition',
+      );
+    });
+
+    test('an edit to a footnote body still updates the footnote (#496)', () {
+      final buffer = SourceBuffer.fromText(
+        'see [^a]\n[^a]: first\n    body here\n',
+      );
+      final styler = SourceStyler(buffer);
+      expect(styler.footnotes.single.body, 'first\nbody here');
+      final at = buffer.offsetOfLine(2) + 4;
+      styler.edited(buffer.replaceRange(at, at + 4, 'BODY'));
+      expect(styler.footnotes.single.body, 'first\nBODY here');
+    });
   });
 
   test('a long note read in the background reads as one read here', () async {
