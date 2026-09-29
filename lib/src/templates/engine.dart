@@ -202,22 +202,22 @@ String applyTemplate(
       out.write(whole);
       continue;
     }
+    final dateFormat = templateDateFormats[name];
+    if (dateFormat != null) {
+      out.write(_dateValue(clock, argument, dateFormat, filters) ?? whole);
+      continue;
+    }
     out.write(switch (name) {
       'title' => _applyTextFilters(title, filters) ?? whole,
       'uuid' => _applyTextFilters(newUuid(), filters) ?? whole,
-      'counter' => switch (argument?.trim()) {
-        null || '' => whole,
+      'counter' => switch (templateCounterName(argument)) {
+        null => whole,
         final counterName =>
           counter == null
               ? whole
               : (_applyTextFilters(counter(counterName).toString(), filters) ??
                     whole),
       },
-      'date' =>
-        _dateValue(clock, argument, defaultDateFormat, filters) ?? whole,
-      'time' =>
-        _dateValue(clock, argument, defaultTimeFormat, filters) ?? whole,
-      'now' => _dateValue(clock, argument, defaultNowFormat, filters) ?? whole,
       'ask' || 'choice' => switch (answers?[fieldLabel(argument)]) {
         final answer? => _applyTextFilters(answer, filters) ?? whole,
         null => whole,
@@ -309,12 +309,31 @@ List<String> counterNames(String source) {
   for (final match in templatePlaceholder.allMatches(source)) {
     final parsed = parsePlaceholder(match.group(1)!);
     if (parsed.name != 'counter') continue;
-    final name = parsed.argument ?? '';
-    if (name.isEmpty || names.contains(name)) continue;
+    final name = templateCounterName(parsed.argument);
+    if (name == null || names.contains(name)) continue;
     names.add(name);
   }
   return names;
 }
+
+/// The counter a `{{counter:…}}` argument names, or null when it names
+/// none — `{{counter}}`, `{{counter:}}` — and the placeholder stands.
+String? templateCounterName(String? argument) {
+  final name = argument?.trim() ?? '';
+  return name.isEmpty ? null : name;
+}
+
+/// The placeholders that write the clock, each with the format it uses
+/// when none is written.
+///
+/// These are the only ones a date move applies to: [_dateValue] reads the
+/// leading moves of their filters, and every other placeholder reads its
+/// filters as text from the first.
+const Map<String, String> templateDateFormats = {
+  'date': defaultDateFormat,
+  'time': defaultTimeFormat,
+  'now': defaultNowFormat,
+};
 
 /// The label of an `{{ask:…}}` or `{{choice:…}}` argument: everything up
 /// to the first colon, which is where a hint or a list of options
@@ -368,18 +387,29 @@ String? _dateValue(
   final format = (argument == null || argument.isEmpty)
       ? defaultFormat
       : argument;
+  final moves = templateLeadingMoves(filters);
   var when = clock;
-  var index = 0;
-  while (index < filters.length) {
-    final moved = _moveDate(when, filters[index].trim());
-    if (moved == null) break;
-    when = moved;
-    index++;
+  for (final filter in filters.take(moves)) {
+    when = templateDateMove(filter)!(when);
   }
   return _applyTextFilters(
     formatDateTime(when, format),
-    filters.sublist(index),
+    filters.sublist(moves),
   );
+}
+
+/// How many of [filters], from the first, move a date — the run a date
+/// placeholder applies to its moment before it formats it.
+///
+/// A move after that run has no moment left to move: it is read as a text
+/// filter, which it is not, and the placeholder stands. The checker reads
+/// a pipeline with this same count, so what it accepts is what renders.
+int templateLeadingMoves(List<String> filters) {
+  var count = 0;
+  while (count < filters.length && templateDateMove(filters[count]) != null) {
+    count++;
+  }
+  return count;
 }
 
 /// Every filter that reads its value as text — the names in the
@@ -402,7 +432,7 @@ const Set<String> templateTextFilters = {
 };
 
 /// The two filters that snap a date to the start or the end of one of
-/// [templateDateUnits]; see [_moveDate].
+/// [templateDateUnits]; see [templateDateMove].
 const Set<String> templateDateFilters = {'startof', 'endof'};
 
 /// The units `startof:` and `endof:` take — a week, a month, a year.
@@ -413,28 +443,46 @@ const Set<String> templateDateUnits = {'week', 'month', 'year'};
 String? _applyTextFilters(String value, List<String> filters) {
   var out = value;
   for (final raw in filters) {
-    final filter = raw.trim();
-    final colon = filter.indexOf(':');
-    final name = (colon < 0 ? filter : filter.substring(0, colon))
-        .trim()
-        .toLowerCase();
-    final argument = colon < 0 ? null : filter.substring(colon + 1);
-    final applied = switch (name) {
-      'upper' => out.toUpperCase(),
-      'lower' => out.toLowerCase(),
-      'trim' => out.trim(),
-      // The same slug the `[[note#heading]]` anchors use, so a template
-      // can build a link to a note it is naming.
-      'slug' => headingSlug(out),
-      'title' => _titleCase(out),
-      'pad' => _pad(out, argument),
-      'default' => out.trim().isEmpty ? (argument ?? '') : out,
-      _ => null,
-    };
-    if (applied == null) return null;
-    out = applied;
+    final apply = templateTextFilter(raw);
+    if (apply == null) return null;
+    out = apply(out);
   }
   return out;
+}
+
+/// A filter as written — `pad: 3`, ` UPPER` — split into its name, trimmed
+/// and lower-cased, and its argument, as written, or null with no colon.
+({String name, String? argument}) parseTemplateFilter(String raw) {
+  final filter = raw.trim();
+  final colon = filter.indexOf(':');
+  return (
+    name: (colon < 0 ? filter : filter.substring(0, colon))
+        .trim()
+        .toLowerCase(),
+    argument: colon < 0 ? null : filter.substring(colon + 1),
+  );
+}
+
+/// What the text filter [raw] does to a value, or null when [raw] is not
+/// one this build applies — an unknown name, an empty one, a `pad` whose
+/// width is not a number, a date move.
+///
+/// Reading a filter and applying it are two steps, so the checker asks
+/// the first of the very function the engine applies.
+String Function(String)? templateTextFilter(String raw) {
+  final (:name, :argument) = parseTemplateFilter(raw);
+  return switch (name) {
+    'upper' => (out) => out.toUpperCase(),
+    'lower' => (out) => out.toLowerCase(),
+    'trim' => (out) => out.trim(),
+    // The same slug the `[[note#heading]]` anchors use, so a template
+    // can build a link to a note it is naming.
+    'slug' => headingSlug,
+    'title' => _titleCase,
+    'pad' => _pad(argument),
+    'default' => (out) => out.trim().isEmpty ? (argument ?? '') : out,
+    _ => null,
+  };
 }
 
 /// Each word's first letter upper-cased — except a word that already has
@@ -450,40 +498,56 @@ String _titleCase(String value) => value.replaceAllMapped(RegExp(r'\S+'), (m) {
 
 /// `pad:3` — left-padded with zeros to that width; a width that is not a
 /// number is not a filter (null, so the placeholder stands).
-String? _pad(String value, String? argument) {
+String Function(String)? _pad(String? argument) {
   final width = int.tryParse(argument?.trim() ?? '');
   if (width == null || width < 0) return null;
-  return value.padLeft(width, '0');
+  return (value) => value.padLeft(width, '0');
 }
 
-/// [when] moved by [filter], or null when [filter] does not move dates.
+/// What the date move [raw] does to a moment, or null when [raw] does not
+/// move dates.
 ///
 /// `+3d` `-1w` `+1m` `+1y` shift; `startof:week` and `endof:month` snap.
 /// Adding months keeps the day where it fits — 31 January plus a month
 /// is 28 February, not 3 March, because "next month" means the month.
-DateTime? _moveDate(DateTime when, String filter) {
+///
+/// Reading and moving are two steps, like [templateTextFilter]'s: the
+/// checker asks whether a filter is a move without a moment to move, and
+/// nothing is counted until one is.
+DateTime Function(DateTime)? templateDateMove(String raw) {
+  final filter = raw.trim();
   final shift = templateDateShift.firstMatch(filter);
   if (shift != null) {
     final sign = shift.group(1) == '-' ? -1 : 1;
-    final count = sign * int.parse(shift.group(2)!);
+    final digits = shift.group(2)!;
+    int count() => sign * int.parse(digits);
     return switch (shift.group(3)!.toLowerCase()) {
-      'd' => _addDays(when, count),
-      'w' => _addDays(when, count * 7),
-      'm' => _addMonths(when, count),
-      'y' => _addMonths(when, count * 12),
+      'd' => (when) => _addDays(when, count()),
+      'w' => (when) => _addDays(when, count() * 7),
+      'm' => (when) => _addMonths(when, count()),
+      'y' => (when) => _addMonths(when, count() * 12),
       _ => null,
     };
   }
-  final colon = filter.indexOf(':');
-  if (colon < 0) return null;
-  final unit = filter.substring(colon + 1).trim().toLowerCase();
-  return switch ((filter.substring(0, colon).trim().toLowerCase(), unit)) {
-    ('startof', 'week') => _addDays(_atMidnight(when), -(when.weekday - 1)),
-    ('endof', 'week') => _addDays(_atMidnight(when), 7 - when.weekday),
-    ('startof', 'month') => DateTime(when.year, when.month),
-    ('endof', 'month') => DateTime(when.year, when.month, _lastDay(when)),
-    ('startof', 'year') => DateTime(when.year),
-    ('endof', 'year') => DateTime(when.year, 12, 31),
+  final (:name, :argument) = parseTemplateFilter(filter);
+  if (argument == null) return null;
+  return switch ((name, argument.trim().toLowerCase())) {
+    ('startof', 'week') => (when) => _addDays(
+      _atMidnight(when),
+      -(when.weekday - 1),
+    ),
+    ('endof', 'week') => (when) => _addDays(
+      _atMidnight(when),
+      7 - when.weekday,
+    ),
+    ('startof', 'month') => (when) => DateTime(when.year, when.month),
+    ('endof', 'month') => (when) => DateTime(
+      when.year,
+      when.month,
+      _lastDay(when),
+    ),
+    ('startof', 'year') => (when) => DateTime(when.year),
+    ('endof', 'year') => (when) => DateTime(when.year, 12, 31),
     _ => null,
   };
 }
