@@ -112,16 +112,20 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// Posts [reminder], logging rather than throwing: the timer callback has
   /// no caller to return an error to.
   ///
-  /// A show that fails is not recorded as shown, so the next reconcile in
-  /// the grace window hands the reminder over again: the system's daemon
-  /// not answering at login is a delivery that has not happened, not one
-  /// that cannot be improved on.
+  /// The reminder is recorded as shown before the show starts, not after
+  /// it returns: a reconcile in the meantime would arm it and post it a
+  /// second time. A show that fails takes the record back, so the next
+  /// reconcile in the grace window hands the reminder over again: the
+  /// system's daemon not answering at login is a delivery that has not
+  /// happened, not one that cannot be improved on.
   Future<void> _show(TodoReminder reminder) async {
+    final settle = _shown.begin(reminder);
     try {
       await _notifier.show(reminder);
-      _shown.record(reminder, DateTime.now());
+      settle(DateTime.now());
       _log.info('todo reminders: fired ${reminder.id} ${reminder.title}');
     } on Object catch (error) {
+      settle(null);
       _log.warning(
         'todo reminders: show failed for id ${reminder.id} ($error)',
       );
@@ -143,6 +147,9 @@ final class DesktopReminderBackend implements ReminderBackend {
     if (pending) {
       return 'timer STILL ARMED past its time: the machine slept through '
           'it, or the process stalled';
+    }
+    if (_shown.isShowing(reminder)) {
+      return 'timer fired, its notification is still being posted';
     }
     final firedAt = _shown.shownAt(reminder);
     if (firedAt != null) {
