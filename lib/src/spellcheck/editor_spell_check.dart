@@ -183,6 +183,7 @@ final class EditorSpellCheck extends ChangeNotifier {
       ]);
       _checker = _wrapped(_engines!);
       _engineReady = Future<void>.value();
+      if (_engines!.available) _offered = true;
       return;
     }
     _engineReady = _load(loads, _dictionaries);
@@ -207,6 +208,7 @@ final class EditorSpellCheck extends ChangeNotifier {
     }
     _engines = _multi(engines);
     _checker = _wrapped(_engines!);
+    if (_engines!.available) _offered = true;
     if (!_disposed) notifyListeners();
   }
 
@@ -244,6 +246,18 @@ final class EditorSpellCheck extends ChangeNotifier {
     if (!_enabled) return false;
     return _checker?.available ?? false;
   }
+
+  /// Whether spelling is offered on this machine: an engine loaded here at
+  /// some point.
+  ///
+  /// Unlike [available] this does not flicker: it stays true while a new
+  /// dictionary loads and while the checker is switched off, so a settings
+  /// row built on it is not the row that disappears under the tap that used
+  /// it (#493). False where nothing ever loads (Android, a desktop without
+  /// hunspell), which is where the rows belong hidden.
+  bool get offered => _offered;
+
+  bool _offered = false;
 
   /// The library's personal dictionary (issue #60), or null while none is
   /// attached (before a library opens, or on a closed session).
