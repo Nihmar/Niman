@@ -1469,8 +1469,15 @@ final class SyncEngine {
         // The consumer closes the sink; closing a closed sink is a no-op
         // that hands back the same `done`. Awaiting it is what says the
         // bytes are on disk and the handle is gone before anyone renames.
-        await sink.close().catchError((Object _) {});
-        await sink.done.catchError((Object _) {});
+        // A sink the transfer still holds throws straight out of
+        // `close()`, though, and that StateError must not replace the
+        // transfer's own failure (#495).
+        try {
+          await sink.close();
+          await sink.done;
+        } on Object {
+          // The transfer's own failure is the one to report.
+        }
       }
       // The client already checked Content-Length. A chunked answer has none,
       // so compare with the listing too — unless the ETag says the file was

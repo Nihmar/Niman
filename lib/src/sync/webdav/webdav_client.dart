@@ -366,25 +366,54 @@ final class WebDavClient {
     final digest = _DigestSink();
     final hasher = sha256.startChunkedConversion(digest);
     var bytes = 0;
+    // The body is copied through a subscription this client owns, into a
+    // stream it can end: giving up on the transfer cancels the copy and
+    // closes that stream, which releases the sink for its caller to close.
+    // Handing the response straight to `pipe` left the sink bound to a
+    // copy that may never finish — the socket cannot always be detached —
+    // and `IOSink.close()` on a bound sink throws where no caller can
+    // catch it, so a `StateError` replaced the transfer's own failure
+    // (#495).
+    final body = StreamController<List<int>>();
+    StreamSubscription<List<int>>? source;
+    // The sink's own backpressure reaches the connection, so a slow disk
+    // does not read the whole body into memory.
+    void pause() => source?.pause();
+    void resume() => source?.resume();
+    body
+      ..onPause = pause
+      ..onResume = resume;
+    // Stops the copy into [into]: once it returns, the pipe is done and
+    // the sink is no longer bound.
+    Future<void> endCopy() async {
+      await source?.cancel();
+      await body.close();
+    }
+
     try {
-      await _unlessStalled(
-        (progress) => response
-            .map((chunk) {
-              progress();
-              hasher.add(chunk);
-              bytes += chunk.length;
-              return chunk;
-            })
-            .pipe(into),
-      );
+      await _unlessStalled((progress) {
+        source = response.listen(
+          (chunk) {
+            progress();
+            hasher.add(chunk);
+            bytes += chunk.length;
+            body.add(chunk);
+          },
+          onError: body.addError,
+          onDone: body.close,
+        );
+        return body.stream.pipe(into);
+      });
     } on TimeoutException {
-      // Headers and no body: dropping the connection is what makes the
-      // server stop, and the failure is the retryable kind the caller
-      // already backs off on (#348).
+      await endCopy();
+      // Dropping the connection is what makes the server stop. Best
+      // effort: the stall fails as the retryable kind the caller already
+      // backs off on either way (#348).
       await _dropQuietly(response);
       await _closeQuietly(into);
       throw _timedOut('GET', path, 'the body stalled');
     } on IOException catch (e) {
+      await endCopy();
       await _closeQuietly(into);
       throw _transportFailure('GET', path, e);
     }

@@ -18,14 +18,27 @@ import 'package:path/path.dart' as p;
 
 import '../fakes/fake_sync_secret_store.dart';
 import '../fakes/fake_webdav_server.dart';
+import '../fakes/undetachable_http_client.dart';
 
 /// One device: its own library folder, index, app database and engine,
 /// all pointed at the same server.
 final class _Device {
-  new _(this.root, this.dbDir, this.index, this.app, this.ops, this.store)
-    : secrets = FakeSyncSecretStore();
+  new _(
+    this.root,
+    this.dbDir,
+    this.index,
+    this.app,
+    this.ops,
+    this.store, {
+    this.timeout = const Duration(seconds: 5),
+    this.httpClient,
+  }) : secrets = FakeSyncSecretStore();
 
-  static Future<_Device> create(String name) async {
+  static Future<_Device> create(
+    String name, {
+    Duration timeout = const Duration(seconds: 5),
+    HttpClient? httpClient,
+  }) async {
     final root = await Directory.current.createTemp('niman_sync_$name');
     final dbDir = await Directory.current.createTemp('niman_sync_db_$name');
     final index = IndexDatabase(
@@ -39,7 +52,16 @@ final class _Device {
       indexer: Indexer(index),
       config: LibraryConfigRepo(path),
     );
-    return _Device._(root, dbDir, index, app, ops, SyncStore(app));
+    return _Device._(
+      root,
+      dbDir,
+      index,
+      app,
+      ops,
+      SyncStore(app),
+      timeout: timeout,
+      httpClient: httpClient,
+    );
   }
 
   final Directory root;
@@ -49,6 +71,13 @@ final class _Device {
   final NoteOps ops;
   final SyncStore store;
   final FakeSyncSecretStore secrets;
+
+  /// How long the engine's client waits for the next chunk of a body.
+  final Duration timeout;
+
+  /// The transport the engine's client reaches the server over; null for
+  /// a real [HttpClient].
+  final HttpClient? httpClient;
 
   String get path => p.normalize(root.path);
 
@@ -61,7 +90,8 @@ final class _Device {
       url: Uri.parse(destination.url),
       username: destination.username,
       password: password,
-      timeout: const Duration(seconds: 5),
+      timeout: timeout,
+      httpClient: httpClient,
     ),
   );
 
@@ -853,6 +883,50 @@ void main() {
       expect(retry.clean, isTrue, reason: retry.summary());
       expect(remoteText('a.md'), 'a2');
     });
+
+    test(
+      'a download whose body stalls fails the run, and records it',
+      () async {
+        // The connection cannot be detached, so dropping the socket is not
+        // what releases the temp file's sink: the client's own copy of the
+        // body has to end on the stall.
+        final transport = UndetachableHttpClient();
+        addTearDown(transport.dispose);
+        final stalled = await _Device.create(
+          'stalled',
+          timeout: const Duration(milliseconds: 500),
+          httpClient: transport,
+        );
+        addTearDown(stalled.close);
+        await stalled.connect(server.url);
+        server
+          ..putFile('Remote.md', utf8.encode('from the server'))
+          ..stallNextGet();
+
+        final report = await stalled.sync();
+
+        expect(
+          report.aborted,
+          SyncAbort.offline,
+          reason:
+              'a stalled body is the retryable failure the run backs '
+              'off on: ${report.summary()}',
+        );
+        expect(
+          (await stalled.store.destination(stalled.path))!.lastError,
+          isNotNull,
+          reason: 'the run settled its own failure',
+        );
+        expect(stalled.read('Remote.md'), isNull);
+        expect(
+          stalled.root.listSync().where(
+            (e) => p.basename(e.path).contains('niman-tmp-sync'),
+          ),
+          isEmpty,
+          reason: 'the fetched temp is gone',
+        );
+      },
+    );
   });
 
   group('one conflict at a time', () {
