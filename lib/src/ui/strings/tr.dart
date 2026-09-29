@@ -1994,7 +1994,8 @@ final class TurkishStrings extends Strings {
   @override
   String get historyBaseKept => 'Eşitleme tabanı sınırın ötesinde de saklanır.';
   @override
-  String get historyOff => 'Bu kütüphanede geçmiş kapalı (Ayarlar, Kütüphane).';
+  String get historyOff =>
+      'Bu kütüphanede geçmiş kapalı (Ayarlar, Çöp kutusu ve kronoloji).';
   @override
   String get historyLoadFailed => 'Geçmiş okunamadı';
   @override

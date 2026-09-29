@@ -2056,7 +2056,7 @@ final class GermanStrings extends Strings {
   @override
   String get historyOff =>
       'Der Verlauf ist für diese Bibliothek ausgeschaltet '
-      '(Einstellungen, Bibliothek).';
+      '(Einstellungen, Papierkorb und Verlauf).';
   @override
   String get historyLoadFailed => 'Verlauf konnte nicht gelesen werden';
   @override

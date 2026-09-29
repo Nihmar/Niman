@@ -2026,7 +2026,7 @@ final class HungarianStrings extends Strings {
   @override
   String get historyOff =>
       'Az előzmények ki vannak kapcsolva ebben a könyvtárban '
-      '(Beállítások, Könyvtár).';
+      '(Beállítások, Kuka és kronológia).';
   @override
   String get historyLoadFailed => 'Az előzmények nem olvashatók';
   @override

@@ -2010,7 +2010,7 @@ final class IcelandicStrings extends Strings {
       'Samstillingargrunnurinn er geymdur umfram hámarkið.';
   @override
   String get historyOff =>
-      'Ferill er óvirkur fyrir þetta bókasafn (Stillingar, Bókasafn).';
+      'Ferill er óvirkur fyrir þetta bókasafn (Stillingar, Korpur og tímará).';
   @override
   String get historyLoadFailed => 'Gat ekki lesið ferilinn';
   @override

@@ -2031,7 +2031,8 @@ final class MacedonianStrings extends Strings {
       'Основата за синхронизација се чува и над ограничувањето.';
   @override
   String get historyOff =>
-      'Историјата е исклучена за оваа библиотека (Поставки, Библиотека).';
+      'Историјата е исклучена за оваа библиотека '
+      '(Поставки, Корпа и хронологија).';
   @override
   String get historyLoadFailed => 'Не може да се прочита историјата';
   @override

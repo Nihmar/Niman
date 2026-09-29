@@ -2009,7 +2009,8 @@ final class LatvianStrings extends Strings {
       'Sinhronizācijas bāze tiek saglabāta arī pāri limitam.';
   @override
   String get historyOff =>
-      'Šai bibliotēkai vēsture ir izslēgta (Iestatījumi, Bibliotēka).';
+      'Šai bibliotēkai vēsture ir izslēgta '
+      '(Iestatījumi, Konteiners un hronoloģija).';
   @override
   String get historyLoadFailed => 'Nevarēja nolasīt vēsturi';
   @override

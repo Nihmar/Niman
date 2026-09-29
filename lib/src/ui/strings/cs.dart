@@ -2003,7 +2003,7 @@ final class CzechStrings extends Strings {
   String get historyBaseKept => 'Základ synchronizace se uchovává i nad limit.';
   @override
   String get historyOff =>
-      'Historie je pro tuto knihovnu vypnutá (Nastavení, Knihovna).';
+      'Historie je pro tuto knihovnu vypnutá (Nastavení, Koš a historie).';
   @override
   String get historyLoadFailed => 'Historii se nepodařilo načíst';
   @override

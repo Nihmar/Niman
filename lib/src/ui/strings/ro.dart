@@ -2033,7 +2033,7 @@ final class RomanianStrings extends Strings {
   @override
   String get historyOff =>
       'Istoricul este dezactivat pentru această bibliotecă '
-      '(Setări, Bibliotecă).';
+      '(Setări, Coș și cronologie).';
   @override
   String get historyLoadFailed => 'Istoricul nu a putut fi citit';
   @override

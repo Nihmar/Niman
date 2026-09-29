@@ -2009,7 +2009,7 @@ final class SlovakStrings extends Strings {
   String get historyBaseKept => 'Základ synchronizácie sa uchová aj nad limit.';
   @override
   String get historyOff =>
-      'História je pre túto knižnicu vypnutá (Nastavenia, Knižnica).';
+      'História je pre túto knižnicu vypnutá (Nastavenia, Kôš a kronológia).';
   @override
   String get historyLoadFailed => 'Históriu sa nepodarilo načítať';
   @override

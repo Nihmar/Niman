@@ -1836,7 +1836,7 @@ final class ChineseStrings extends Strings {
   @override
   String get historyBaseKept => '同步基准不受上限限制，始终保留。';
   @override
-  String get historyOff => '此文库的历史记录已关闭（设置，文库）。';
+  String get historyOff => '此文库的历史记录已关闭（设置，回收站和版本）。';
   @override
   String get historyLoadFailed => '无法读取历史记录';
   @override

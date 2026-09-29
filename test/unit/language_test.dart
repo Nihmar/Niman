@@ -219,6 +219,20 @@ void main() {
       }
     });
 
+    // The history-off notice points at where the switch is: it used to
+    // name "Settings, Library", which stopped being a place when the
+    // settings were reshaped (#498).
+    test('the history-off notice names the Trash and history section', () {
+      for (final language in AppLanguages.supported) {
+        AppLanguages.choice = language;
+        expect(
+          AppStrings.historyOff,
+          contains(AppStrings.settingsAreaTrashHistory),
+          reason: language.name,
+        );
+      }
+    });
+
     test('month and weekday names are translated and complete', () {
       AppLanguages.choice = AppLanguage.english;
       expect(AppStrings.monthNamesShort.length, 12);

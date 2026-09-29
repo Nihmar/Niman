@@ -2047,7 +2047,7 @@ final class SpanishStrings extends Strings {
   @override
   String get historyOff =>
       'El historial está desactivado en esta biblioteca '
-      '(Ajustes, Biblioteca).';
+      '(Ajustes, Papelera y cronología).';
   @override
   String get historyLoadFailed => 'No se pudo leer el historial';
   @override

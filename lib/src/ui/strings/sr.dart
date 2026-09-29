@@ -2020,7 +2020,8 @@ final class SerbianStrings extends Strings {
       'Основа синхронизације се чува и преко ограничења.';
   @override
   String get historyOff =>
-      'Историја је искључена за ову библиотеку (Подешавања, Библиотека).';
+      'Историја је искључена за ову библиотеку '
+      '(Подешавања, Кош и хронологија).';
   @override
   String get historyLoadFailed => 'Историја се не може прочитати';
   @override

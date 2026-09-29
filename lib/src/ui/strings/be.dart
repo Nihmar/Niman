@@ -2014,7 +2014,7 @@ final class BelarusianStrings extends Strings {
       'Аснова сінхранізацыі захоўваецца і па-за лімітам.';
   @override
   String get historyOff =>
-      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Бібліятэка).';
+      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Кошык і гісторыя).';
   @override
   String get historyLoadFailed => 'Не ўдалося прачытаць гісторыю';
   @override

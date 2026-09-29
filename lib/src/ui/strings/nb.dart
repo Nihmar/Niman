@@ -2001,7 +2001,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get historyOff =>
       'Historikk er slått av for dette biblioteket '
-      '(Innstillinger, Bibliotek).';
+      '(Innstillinger, Papirkorg og historikk).';
   @override
   String get historyLoadFailed => 'Kunne ikke lese historikken';
   @override

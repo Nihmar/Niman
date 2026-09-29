@@ -2031,7 +2031,7 @@ final class GalicianStrings extends Strings {
   @override
   String get historyOff =>
       'O historial está desactivado nesta biblioteca '
-      '(Configuración, Biblioteca).';
+      '(Configuración, Paperilleiro e cronoloxía).';
   @override
   String get historyLoadFailed => 'Non se puido ler o historial';
   @override

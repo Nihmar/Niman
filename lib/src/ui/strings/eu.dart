@@ -2025,7 +2025,7 @@ final class BasqueStrings extends Strings {
   @override
   String get historyOff =>
       'Historia desaktibatuta dago biblioteka honetan '
-      '(Ezarpenak, Biblioteka).';
+      '(Ezarpenak, Zakarrontzia eta kronologia).';
   @override
   String get historyLoadFailed => 'Ezin izan da historia irakurri';
   @override

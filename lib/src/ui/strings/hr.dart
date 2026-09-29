@@ -2013,7 +2013,8 @@ final class CroatianStrings extends Strings {
       'Osnova sinkronizacije čuva se i iznad ograničenja.';
   @override
   String get historyOff =>
-      'Povijest je isključena za ovu biblioteku (Postavke, Biblioteka).';
+      'Povijest je isključena za ovu biblioteku '
+      '(Postavke, Korpa i hronologija).';
   @override
   String get historyLoadFailed => 'Povijest se nije mogla pročitati';
   @override

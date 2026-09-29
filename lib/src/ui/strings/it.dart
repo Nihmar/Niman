@@ -2033,7 +2033,7 @@ final class ItalianStrings extends Strings {
   @override
   String get historyOff =>
       'La cronologia è disattivata per questa libreria '
-      '(Impostazioni, Libreria).';
+      '(Impostazioni, Cestino e cronologia).';
   @override
   String get historyLoadFailed => 'Impossibile leggere la cronologia';
   @override

@@ -2002,7 +2002,8 @@ final class DanishStrings extends Strings {
   String get historyBaseKept => 'Synkbasen bevares ud over grænsen.';
   @override
   String get historyOff =>
-      'Historik er slået fra for dette bibliotek (Indstillinger, Bibliotek).';
+      'Historik er slået fra for dette bibliotek '
+      '(Indstillinger, Affald og historik).';
   @override
   String get historyLoadFailed => 'Kunne ikke læse historikken';
   @override

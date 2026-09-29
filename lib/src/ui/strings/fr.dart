@@ -2069,7 +2069,7 @@ final class FrenchStrings extends Strings {
   @override
   String get historyOff =>
       'L’historique est désactivé pour cette bibliothèque '
-      '(Paramètres, Bibliothèque).';
+      '(Paramètres, Corbeille et chronologie).';
   @override
   String get historyLoadFailed => 'Impossible de lire l’historique';
   @override

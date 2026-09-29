@@ -2084,7 +2084,7 @@ final class GreekStrings extends Strings {
   @override
   String get historyOff =>
       'Το ιστορικό είναι απενεργοποιημένο για αυτή τη βιβλιοθήκη '
-      '(Ρυθμίσεις, Βιβλιοθήκη).';
+      '(Ρυθμίσεις, Σκουπιδιέρα και χρονολόγιο).';
   @override
   String get historyLoadFailed => 'Δεν ήταν δυνατή η ανάγνωση του ιστορικού';
   @override

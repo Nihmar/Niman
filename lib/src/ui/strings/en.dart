@@ -1993,7 +1993,7 @@ final class EnglishStrings extends Strings {
   String get historyBaseKept => 'The sync base is kept beyond the limit.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'History is off for this library (Settings, Trash and history).';
   @override
   String get historyLoadFailed => 'Could not read the history';
   @override

@@ -1882,7 +1882,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get historyBaseKept => '同期ベースは上限を超えても保持されます。';
   @override
-  String get historyOff => 'このライブラリでは履歴がオフです（設定、ライブラリ）。';
+  String get historyOff => 'このライブラリでは履歴がオフです（設定、ごみ箱と履歴）。';
   @override
   String get historyLoadFailed => '履歴を読み込めませんでした';
   @override

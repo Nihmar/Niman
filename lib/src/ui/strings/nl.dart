@@ -2038,7 +2038,7 @@ final class DutchStrings extends Strings {
   @override
   String get historyOff =>
       'Geschiedenis staat uit voor deze bibliotheek '
-      '(Instellingen, Bibliotheek).';
+      '(Instellingen, Prullenbak en chronologie).';
   @override
   String get historyLoadFailed => 'Kon de geschiedenis niet lezen';
   @override

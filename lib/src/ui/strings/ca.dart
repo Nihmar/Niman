@@ -2051,7 +2051,7 @@ final class CatalanStrings extends Strings {
   @override
   String get historyOff =>
       'L’historial està desactivat per a aquesta biblioteca '
-      '(Configuració, Biblioteca).';
+      '(Configuració, Paperera i cronologia).';
   @override
   String get historyLoadFailed => 'No s’ha pogut llegir l’historial';
   @override

@@ -2018,7 +2018,8 @@ final class UkrainianStrings extends Strings {
   String get historyBaseKept => 'База синхронізації зберігається понад ліміт.';
   @override
   String get historyOff =>
-      'Історію вимкнено для цієї бібліотеки (Налаштування, Бібліотека).';
+      'Історію вимкнено для цієї бібліотеки '
+      '(Налаштування, Кошик і хронологія).';
   @override
   String get historyLoadFailed => 'Не вдалося прочитати історію';
   @override

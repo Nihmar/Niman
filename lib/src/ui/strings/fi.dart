@@ -2026,7 +2026,8 @@ final class FinnishStrings extends Strings {
   String get historyBaseKept => 'Synkronointipohja säilyy myös rajan yli.';
   @override
   String get historyOff =>
-      'Historia on pois päältä tässä kirjastossa (Asetukset, Kirjasto).';
+      'Historia on pois päältä tässä kirjastossa '
+      '(Asetukset, Roskakori ja kronologia).';
   @override
   String get historyLoadFailed => 'Historiaa ei voitu lukea';
   @override

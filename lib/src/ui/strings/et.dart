@@ -1989,7 +1989,7 @@ final class EstonianStrings extends Strings {
       'Sünkroonimisalus säilitatakse ka üle piirangu.';
   @override
   String get historyOff =>
-      'Ajalugu on selles kogus välja lülitatud (Seaded, Kogu).';
+      'Ajalugu on selles kogus välja lülitatud (Seaded, Prügikast ja ajalugu).';
   @override
   String get historyLoadFailed => 'Ajalugu ei õnnestunud lugeda';
   @override

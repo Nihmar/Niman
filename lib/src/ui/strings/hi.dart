@@ -1983,7 +1983,7 @@ final class HindiStrings extends Strings {
       'सिंक आधार सीमा से अधिक होने पर भी रखा जाता है।';
   @override
   String get historyOff =>
-      'इस लाइब्रेरी के लिए इतिहास बंद है (सेटिंग, लाइब्रेरी)।';
+      'इस लाइब्रेरी के लिए इतिहास बंद है (सेटिंग, ट्रैश और क्रोनोलॉजी)।';
   @override
   String get historyLoadFailed => 'इतिहास नहीं पढ़ा जा सका';
   @override

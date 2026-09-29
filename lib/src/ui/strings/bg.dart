@@ -2031,7 +2031,7 @@ final class BulgarianStrings extends Strings {
       'Базата за синхронизация се пази и извън лимита.';
   @override
   String get historyOff =>
-      'Историята е изключена за тази библиотека (Настройки, Библиотека).';
+      'Историята е изключена за тази библиотека (Настройки, Кош и история).';
   @override
   String get historyLoadFailed => 'Не може да се прочете историята';
   @override

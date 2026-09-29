@@ -2004,7 +2004,8 @@ final class SlovenianStrings extends Strings {
       'Osnova sinhronizacije se ohrani tudi prek omejitve.';
   @override
   String get historyOff =>
-      'Zgodovina je za to knjižnico izklopljena (Nastavitve, Knjižnica).';
+      'Zgodovina je za to knjižnico izklopljena '
+      '(Nastavitve, Koš in kronologija).';
   @override
   String get historyLoadFailed => 'Zgodovine ni bilo mogoče prebrati';
   @override

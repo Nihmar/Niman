@@ -2020,7 +2020,7 @@ final class SwedishStrings extends Strings {
   @override
   String get historyOff =>
       'Historiken är avstängd för det här biblioteket '
-      '(Inställningar, Bibliotek).';
+      '(Inställningar, Papperskorgen och kronologi).';
   @override
   String get historyLoadFailed => 'Kunde inte läsa historiken';
   @override

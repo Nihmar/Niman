@@ -2018,7 +2018,7 @@ final class BosnianStrings extends Strings {
   @override
   String get historyOff =>
       'Historija je isključena za ovu biblioteku '
-      '(Podešavanja, Biblioteka).';
+      '(Podešavanja, Korpa i hronologija).';
   @override
   String get historyLoadFailed => 'Historija se ne može pročitati';
   @override

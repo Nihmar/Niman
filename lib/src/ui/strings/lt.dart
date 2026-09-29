@@ -2015,7 +2015,7 @@ final class LithuanianStrings extends Strings {
       'Sinchronizavimo bazė išsaugoma ir viršijus ribą.';
   @override
   String get historyOff =>
-      'Šios bibliotekos istorija išjungta (Nustatymai, Biblioteka).';
+      'Šios bibliotekos istorija išjungta (Nustatymai, Šiukšlinė ir istorija).';
   @override
   String get historyLoadFailed => 'Nepavyko perskaityti istorijos';
   @override

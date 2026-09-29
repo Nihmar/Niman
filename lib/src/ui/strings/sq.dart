@@ -2031,7 +2031,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get historyOff =>
       'Historiku është i çaktivizuar për këtë bibliotekë '
-      '(Vendosjet, Biblioteka).';
+      '(Vendosjet, Koshi e kronologjia).';
   @override
   String get historyLoadFailed => 'Historiku nuk u lexua';
   @override

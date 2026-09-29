@@ -2039,7 +2039,8 @@ final class PolishStrings extends Strings {
       'Baza synchronizacji jest zachowywana ponad limit.';
   @override
   String get historyOff =>
-      'Historia jest wyłączona dla tej biblioteki (Ustawienia, Biblioteka).';
+      'Historia jest wyłączona dla tej '
+      'biblioteki (Ustawienia, Kosz i historia).';
   @override
   String get historyLoadFailed => 'Nie udało się odczytać historii';
   @override
