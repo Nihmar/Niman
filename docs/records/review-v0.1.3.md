@@ -1,12 +1,13 @@
 # Code review of `v0.1.3..main` — 2026-09-28
 
 A review of everything merged after the v0.1.3 tag: 187 commits, about
-21,000 lines changed under `lib/`. It ran in two passes. The first read the
-riskiest logic (sync, WebDAV, files, watcher, template counters, index
+21,000 lines changed under `lib/`. It ran in three passes. The first read
+the riskiest logic (sync, WebDAV, files, watcher, template counters, index
 rebuild, wikilink suggester); its fixes are in PR #487. The second split
 the rest of the diff into four areas (editor, UI and frontmatter, spelling
 / templates / watcher / todo, sync and storage), each read by a separate
-reviewer.
+reviewer; its fixes are in PR #489. The third read `main` after #489 in
+seven areas, translations and user docs among them.
 
 Line numbers refer to `main` at `0771606e`. **Verified** means the wrong
 result was reproduced by running the code (a throwaway probe or test);
@@ -253,3 +254,171 @@ the date filters, the watcher's batch caps; a frontmatter fence never read
 as a setext underline, the scanner's incremental rebuild over both setext
 lines, checklist lines in fences never ticked, one undo step per cascade,
 the shared `LineState.initial`, surrogate pairs in the tag masker.
+
+## Third pass — findings
+
+`v0.1.3..main` at `327a3008` (PR #489 merged), read in seven areas: the
+source editor, Markdown parsing and links, sync and the updater, library
+and files, templates / todo / frontmatter, the app shell, translations and
+user docs. Nothing listed above — fixed or left open — is repeated.
+**Read** as above; **plausible** means traced but not certain the failing
+path is reached. Line numbers are at `327a3008`.
+
+### Broken behaviour
+
+1. **Windows: the caption buttons' hit areas outlive the title bar.**
+   `ui/title_bar.dart:260` with `windows/runner/flutter_window.cpp:297` —
+   `_WindowButtonsState` reports its rectangles and never withdraws them.
+   Below 600 px the narrow layout draws no `AppTitleBar`, but the runner
+   still answers `HTCLOSE` / `HTMAXBUTTON` / `HTMINBUTTON` at the old right
+   edge: a click on an app-bar action there closes, maximizes or minimizes
+   the window. Nothing sets a minimum window width. *Read.*
+2. **A relative Markdown link no longer resolves.** `links/resolver.dart:282`
+   — the #330 change keeps the one-candidate shortcut for bare stems only,
+   and nothing normalizes `..` or a leading `/`. `[x](../Notes/a.md)` from
+   `Sub/b.md` is unresolved even when `a.md` is the only one; the indexer's
+   `resolveBatch` shares the tail, so these links also leave the link index.
+   *Read.*
+3. **The index connection leaks when its first query fails for another
+   reason than damage.** `library/library_state.dart:1612` — `_openIndex`
+   rethrows before `_indexDb` is set, so `_teardown` finds nothing to close.
+   A locked file or a full disk leaves the connection and its isolate open;
+   on Windows the file stays locked, and every retry adds one. *Read.*
+4. **The spell-check rows vanish after a dictionary is picked.**
+   `ui/settings_editor.dart:695` — `setDictionaries` restarts the engines,
+   `available` is false until the load lands, and the screen listens to
+   nothing, so the switch and the dictionary rows stay gone until it is
+   reopened. *Read.*
+5. **A wrapped table row anchors handles, the suggester and template hints
+   on its first piece.** `markdown/render/source_view.dart:4331`
+   (`_caretRectAt`) and `:2316` (`_templateSpanRect`) still use
+   `_paragraphAt(line)`, which for a wrapped live-table row is piece 0; the
+   piece-aware `caretRect` fix missed them. *Read.*
+6. **A desktop reminder shows again after its task is edited.**
+   `todo/reminder_backend_desktop.dart:88` — the "already shown" record is
+   keyed by the reminder id, a hash of the whole description; changing the
+   text (or `due:`) inside the grace hour makes a new id and a second
+   notification. *Read.*
+7. **`[[Aux]]` creates `_Aux.md`, which the link never finds.**
+   `core/files.dart:292` — `sanitizeName` prefixes a Windows device stem on
+   every platform (deliberately), but the resolver does not apply the same
+   mapping, so the missing-note offer repeats and makes `_Aux_1.md`. *Read.*
+8. **A stalled download can throw out of the sync run.**
+   `sync/webdav/webdav_client.dart:370` with `sync/sync_engine.dart:1472` —
+   on a body stall the client gives up while `pipe` may still hold the sink;
+   `IOSink.close()` on a bound sink throws synchronously, so `.catchError`
+   never attaches and a `StateError` replaces the retryable failure. Nothing
+   records the error, and on Windows the temp file stays open.
+   *Plausible.*
+9. **Completing a book form overwrites the number typed after it.**
+   `source_view.dart:3934` — accepting `page=` reopens the panel for the same
+   book, and Enter or Tab after `12` writes `page=` again. *Read.*
+10. **"Close library" in Settings does not save the open notes.**
+    `ui/settings_maintenance.dart:212`, and `ui/shell_home_widgets.dart:177`
+    (a widget or launch pointing at another library) — the #351 save ran
+    only on the switch screen. *Plausible.*
+11. **"Rebuild index" can run twice at once.**
+    `ui/settings_maintenance.dart:68` — no busy state; a second tap tears
+    down and deletes the index the first is opening, and on Windows the
+    failed delete closes the library. *Plausible.*
+12. **Replace All rewrites a file the editor refuses as binary.**
+    `search/replace.dart:319`, `:387` — no `looksBinary` check; a UTF-16
+    note is rewritten as mojibake. *Plausible.*
+13. **A frontmatter edit drops the entry's indentation, anchor and comment.**
+    `frontmatter/edit.dart:55` — an indented block stops parsing after an
+    edit, `tags: &t [a, b]` loses `&t` and its alias breaks the panel,
+    `title: A # keep` loses the comment. *Read.*
+14. **The suggester stays open over a swapped buffer.**
+    `source_view.dart:765` — `didUpdateWidget` does not close it, and a
+    completion writes at the old offsets. *Plausible.*
+15. **The suggester opens inside code.** `source_view.dart:3736` — `[[` in a
+    fence or inline code offers notes and inserts one. *Read.*
+16. **A note name holding `#`, `|` or `]]` is inserted as a broken link.**
+    `links/suggester.dart:255` — `C# tips` is written `[[C# tips]]`, read
+    back as target `c`. *Read.*
+17. **Reading positions drop another device's entry.**
+    `reading/reading_positions.dart:145` — pruning removes a book whose file
+    has not arrived yet, and the next sync deletes the position. *Plausible.*
+18. **The Windows rename fallback renames again, with no timeout.**
+    `library/note_writer.dart:563` — `copyFileOver` ends in
+    `staged.rename(abs)`, the call it exists to avoid (#103). *Plausible.*
+19. **A merge the guard stops leaves the fetched temp behind.**
+    `sync/sync_engine.dart:1744`, `:1843` — `_ChangedDuringSync` after
+    `_fetch`; `.x.md.niman-tmp-sync-*` stays until the next open. *Read.*
+20. **An interrupted update download keeps the installer's name.**
+    `update/update_service.dart` (`downloadAsset`) — only a digest mismatch
+    deletes the file, and the body has no stall timeout. *Read.*
+21. **Cancelling the name dialog burns a counter.**
+    `ui/shell_template_flow.dart:164` — the reservation now comes before
+    the dialog. *Read.*
+22. **A reminder whose notification failed is never retried.**
+    `reminder_backend_desktop.dart:96` — shown is recorded before `show`.
+    *Plausible.*
+23. **A stray `}}` is reported as a template error.** `templates/checker.dart:178`
+    — the engine keeps it as text; LaTeX and JSON in a template get a
+    problem mark. *Read.*
+24. **The typewriter row highlight ignores a wrapped row's piece shift.**
+    `source_view.dart:6064`. Cosmetic. *Read.*
+25. **The Notion import's size budget trusts declared sizes.**
+    `import/notion.dart:88` — entries are inflated with `readBytes()`
+    after a check on what the archive claims. *Plausible.*
+
+### Hot paths
+
+26. **Live tables measure every word of the table on each revision.**
+    `markdown/render/live_tables.dart:586` — `_leastWidth` runs one painter
+    per word even when the table fits, and the cache clears on every edit
+    and every reveal change.
+27. **Headings are read from disk on every key after `#`.**
+    `links/suggester.dart:285` — the whole target note is read, decoded and
+    outlined on the UI isolate per keystroke.
+28. **Every line indented four spaces is a definition candidate.**
+    `markdown/block_parser.dart:739` (`mayHold`) with
+    `markdown/source_styler.dart:222` — an edit to such a line rescans all
+    of them: O(n) per keystroke in code or verse.
+29. **The suggester's `%q%` query sorts every match before its limit.**
+    `links/suggester.dart:211` — a computed `ORDER BY` defeats the cap.
+30. **`looksBinary` walks the bytes twice in Dart before the native
+    decode.** `markdown/note_bytes.dart:63` — and one U+0000 refuses a note
+    the index and replace accept.
+31. **The installer is hashed on the UI isolate.** `update/update_service.dart`
+    (`_verifyDownload`) with `core/files.dart:239` — a 100 MB file, read
+    synchronously.
+32. **A case-only rename lists the whole folder on the UI isolate** (Windows,
+    macOS). `core/files.dart:356`.
+
+### Translations and user docs
+
+33. **43 keys added since v0.1.3 are English in the locales.** The
+    properties panel, the source font, the certificate dialog in all 36;
+    ten failure snackbars in all but Italian.
+34. **New UI text is written in English in the code.** The wikilink panel
+    (`wikilink_panel.dart:119`, `:364`), the book-place hints
+    (`suggester.dart:302`), the template checker's messages
+    (`checker.dart:169`, `:463`).
+35. **`templateProblems` says "1 …" for 21, 31, …** in `uk`, `lt`, `be`;
+    `hr`, `bs`, `sr` test only `count == 1`.
+36. **The docs name settings sections that no longer exist.** "Settings →
+    About" (`getting-started.md:43`, `settings.md:168`, the `CHANGELOG.md`
+    header shown in the app), "Settings → Library" (`organization.md:41`,
+    `:414`), "Settings → Auto-empty trash" (`organization.md:9`).
+37. **`organization.md:86` places the fields panel in the read pane and the
+    live editor**; it is above the note in both editors.
+38. **Fourteen string keys are never read** (`settingsSectionAbout`,
+    `settingsSectionLibrary`, `syncDoneSnack`, …).
+39. **`historyOff` sends the user to "Settings, Library".**
+40. **The sidebar tooltip hard-codes Ctrl+B**, which can be rebound.
+
+Left out: `{{date:YYYY-'W'WW}}` gives the calendar year beside an ISO week
+at the turn of the year — true, but already so in v0.1.3.
+
+### Third pass — checked and found sound
+
+Certificate pinning scope, the redirect credential rule, weak-ETag
+guarding, the scheduler's joined runs, the updater's asset choice and
+digest compare; the app-DB v32 migration, history sha checks, watcher
+batching, pair-rename indexing; unsaved edits on a note switch, hunspell
+handles, `mounted` guards in the shell diff; counter serialization, the
+checker reading the engine's own rules, Android alarms skipping overdue
+ones; setext rework, `cellRangesOf`, the streaming decoder, `embed_path`'s
+confinement; interpolation parameters across every locale.
