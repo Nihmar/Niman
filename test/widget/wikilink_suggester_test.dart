@@ -695,6 +695,89 @@ void main() {
     });
   });
 
+  group('a note the panel was not opened on', () {
+    /// Pumps the view over [buffer] with [suggester] and hands back its state.
+    /// [focus] taps it, so the platform's own text path is the one a keystroke
+    /// takes: only the first pump of a test needs it, the shell rebuilding the
+    /// view leaving the focus — and the keyboard — where they were.
+    Future<MarkdownSourceViewState> view(
+      WidgetTester tester,
+      SourceBuffer buffer,
+      FakeWikilinkSuggester suggester, {
+      bool focus = false,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSourceView(
+              buffer: buffer,
+              theme: _theme,
+              showLineNumbers: false,
+              wikilinkSuggester: suggester,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      if (focus) {
+        await tester.tap(find.byType(MarkdownSourceView));
+        await tester.pump();
+      }
+      return tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+    }
+
+    testWidgets('a swapped buffer closes the panel', (tester) async {
+      // The shell loads another note into the same view — the note view's
+      // own key keeps the state — and the panel held offsets into the text
+      // that went: the key after it wrote a completion into the new note.
+      final first = SourceBuffer.fromText('');
+      final state = await view(tester, first, _library(), focus: true);
+      await type(tester, '[[Note');
+      expect(state.isSuggesterShown, isTrue);
+      expect(panel(tester).entries, isNotEmpty, reason: 'a key would write');
+
+      final second = SourceBuffer.fromText('Another note\n');
+      final reopened = await view(tester, second, _library());
+      expect(
+        identical(state, reopened),
+        isTrue,
+        reason: 'one view, another note: the panel held the old offsets',
+      );
+      expect(state.isSuggesterShown, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(second.text, 'Another note\n', reason: 'the key went to the note');
+    });
+
+    testWidgets('a revision made behind the view closes the panel', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final state = await view(tester, buffer, _library(), focus: true);
+      await type(tester, '[[Note');
+      expect(state.isSuggesterShown, isTrue);
+
+      // An edit this view did not make — a command, a revert — read on the
+      // frame the shell rebuilds it in: the link the panel stood in is not
+      // there any more.
+      buffer.replaceRange(0, 0, '# Other\n');
+      final reopened = await view(tester, buffer, _library());
+      expect(identical(state, reopened), isTrue);
+      expect(state.isSuggesterShown, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        buffer.text,
+        isNot(contains('Notes]]')),
+        reason: 'the key went to the note',
+      );
+    });
+  });
+
   testWidgets('a surface with no library draws no panel', (tester) async {
     final buffer = SourceBuffer.fromText('');
     await tester.pumpWidget(

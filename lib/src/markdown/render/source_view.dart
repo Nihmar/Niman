@@ -806,6 +806,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
     if (!identical(oldWidget.buffer, widget.buffer)) {
       // Another note: the keyboard, the history and the caret were this one's.
+      // The panel too, and it is the one thing here that cannot be rebuilt
+      // from the new text: it holds the offsets of the link it was opened in
+      // and the rows that complete it, so `Enter` would write a note name
+      // into the note that took its place (#494).
+      _dropSuggestInUpdate();
       final attached = _input.isAttached;
       _input.detach();
       _history = widget.history ?? widget.surface?.history ?? EditHistory();
@@ -826,7 +831,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     } else if (widget.buffer.revision != _seenRevision) {
       // An edit this view did not make (a command, a revert): the colours are
       // read again rather than adjusted, because there is no `SourceEdit` to
-      // follow.
+      // follow. The link the panel stood in may be gone or moved — the caret
+      // is clamped into whatever replaced it — and its offsets are the ones
+      // read from the text that went, so the panel goes with them (#494).
+      _dropSuggestInUpdate();
       _restyle();
       _folds.clear();
       _heights = _map();
@@ -3931,6 +3939,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _suggestSeq++;
     setState(() => _suggest = null);
     _suggestOverlay.hide();
+  }
+
+  /// Drops the panel from a `didUpdateWidget`, which runs inside the build.
+  ///
+  /// The overlay portal refuses to be hidden there, so the panel is dropped
+  /// off the state the build that follows reads — no key and no draw of it
+  /// this frame — and the portal is hidden once the frame is over. A panel
+  /// opened in the meantime, for the text that replaced it, is left standing.
+  void _dropSuggestInUpdate() {
+    if (_suggest == null) return;
+    _suggestSeq++;
+    _suggest = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _suggest != null) return;
+      _suggestOverlay.hide();
+    });
   }
 
   /// Moves the panel's selection by [by], kept inside the rows.
