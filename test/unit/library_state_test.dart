@@ -11,6 +11,8 @@ import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/reading/book_location.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -436,6 +438,30 @@ void main() {
     expect(await second.treeSort, TreeSort.nameDesc);
     await second.close();
     await second.dispose();
+  });
+
+  test('deleting a book drops where it was left', () async {
+    // #492: the write no longer prunes an absent file on its own, so the
+    // deletion has to. The indexer's prune of the deleted path is what the
+    // library saw leave, and it takes the reading position with it.
+    File(p.join(root.path, 'book.epub')).writeAsBytesSync([0]);
+    final controller = makeController();
+    await controller.open(root.path, create: false);
+    final positions = ReadingPositions(root.path);
+    await positions.write('book.epub', const PdfLocation(page: 5));
+    expect(await positions.read('book.epub'), const PdfLocation(page: 5));
+
+    await controller.ops!.delete('book.epub');
+
+    final deadline = DateTime.now().add(const Duration(seconds: 5));
+    while (await positions.read('book.epub') != null) {
+      if (DateTime.now().isAfter(deadline)) {
+        fail('the deleted book kept its reading position');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    await controller.close();
+    await controller.dispose();
   });
 }
 

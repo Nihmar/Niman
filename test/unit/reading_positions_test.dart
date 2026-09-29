@@ -196,8 +196,34 @@ void main() {
       expect(await positions.read('ab/three.pdf'), const PdfLocation(page: 3));
     });
 
+    test('keep a position whose book has not arrived here yet', () async {
+      // #492: the sync brings device A's position for a book whose file has
+      // not downloaded here. Writing another book's position rewrote the
+      // file, pruned the unknown book, and the next sync deleted A's entry.
+      kept()
+        ..parent.createSync(recursive: true)
+        ..writeAsStringSync(
+          const JsonEncoder.withIndent('  ').convert({
+            'books/Dune.epub': {
+              'chapter': 'ch1.xhtml',
+              'line': 7,
+              'fraction': 0.0,
+              'at': '2026-09-25T10:00:00.000Z',
+            },
+          }),
+        );
+      holding('papers/x.pdf');
+      await positions.write('papers/x.pdf', const PdfLocation(page: 2));
+      final json = jsonDecode(kept().readAsStringSync()) as Map;
+      expect(json.keys, containsAll(['books/Dune.epub', 'papers/x.pdf']));
+      expect(
+        await positions.read('books/Dune.epub'),
+        const EpubLocation(chapter: 'ch1.xhtml', line: 7),
+      );
+    });
+
     test(
-      'drop the entries of files that are gone, and keep the rest',
+      'drop the entries of files the library saw leave, and keep the rest',
       () async {
         holding('books/Dune.epub');
         holding('papers/x.pdf');
@@ -206,18 +232,32 @@ void main() {
           const EpubLocation(chapter: 'ch1.xhtml', line: 7),
         );
         await positions.write('papers/x.pdf', const PdfLocation(page: 2));
-        // The book leaves the library; the next write drops its entry.
+        // The book leaves the library and the indexer reports it gone.
         File(p.join(root.path, 'books', 'Dune.epub')).deleteSync();
-        await positions.write('papers/x.pdf', const PdfLocation(page: 3));
+        await positions.removed({'books/Dune.epub'});
         final json = jsonDecode(kept().readAsStringSync()) as Map;
         expect(json.keys, ['papers/x.pdf']);
         expect(await positions.read('books/Dune.epub'), isNull);
-        expect(
-          await positions.read('papers/x.pdf'),
-          const PdfLocation(page: 3),
-        );
+        expect(await positions.read('papers/x.pdf'), const PdfLocation(page: 2));
       },
     );
+
+    test('a folder the library saw leave takes the books under it', () async {
+      holding('books/shelf/Dune.epub');
+      holding('books/Mistborn.epub');
+      await positions.write(
+        'books/shelf/Dune.epub',
+        const EpubLocation(chapter: 'ch1.xhtml', line: 7),
+      );
+      await positions.write('books/Mistborn.epub', const PdfLocation(page: 2));
+      await positions.removed({'books/shelf'});
+      expect(await positions.read('books/shelf/Dune.epub'), isNull);
+      // A sibling whose name begins the same is another folder.
+      expect(
+        await positions.read('books/Mistborn.epub'),
+        const PdfLocation(page: 2),
+      );
+    });
 
     test('a file that does not read is started over', () async {
       kept()

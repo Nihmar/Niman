@@ -45,6 +45,7 @@ import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
@@ -497,7 +498,7 @@ final class LibraryController implements LibrarySession {
     await LegacyLibrarySettings(appDb).seed(abs);
     final indexer = Indexer(indexDb)
       ..onChanged = _bump
-      ..onRemoved = _onRemoved;
+      ..onRemoved = (removed) => _onRemoved(abs, removed);
     // One reader of `.niman/settings.json` per session: the four
     // per-library settings and the overrides (T-ML-10) share its cache.
     // The welcome's answer (#266) seeds the editors of every library
@@ -1457,9 +1458,12 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  void _onRemoved(Set<String> removed) {
+  /// Fires with the paths a re-index pruned, and drops their reading
+  /// positions: those files are ones the library saw leave (#492).
+  void _onRemoved(String root, Set<String> removed) {
     if (removed.isEmpty || _removals.isClosed) return;
     _removals.add(removed);
+    unawaited(ReadingPositions(root).removed(removed));
   }
 
   /// Drops everything that belongs to the open library, the index file
