@@ -125,6 +125,22 @@ void main() {
     },
   );
 
+  test('a text note is decoded once, by either reader (#496)', () {
+    // Deciding that a note is text used to decode it, and reading it decoded
+    // it again: on the 246 MB stress note a second transient copy and a
+    // second pass. A counter, not a clock.
+    final file = File(p.join(dir.path, 'once.md'))
+      ..writeAsStringSync('# Title\n\nwords in città\n');
+
+    var decodes = noteBytesNativeDecodes;
+    expect(loadNoteSync(file.path), isA<LoadedNote>());
+    expect(noteBytesNativeDecodes - decodes, 1, reason: 'the loader');
+
+    decodes = noteBytesNativeDecodes;
+    expect(readNoteTextSync(file.path), '# Title\n\nwords in città\n');
+    expect(noteBytesNativeDecodes - decodes, 1, reason: 'the reload path');
+  });
+
   test('line endings are made LF, and an LF note is left as it is', () {
     expect(normalizedLineEndings('a\r\nb\rc\n'), 'a\nb\nc\n');
     const lf = 'a\nb\n';

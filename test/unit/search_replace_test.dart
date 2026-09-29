@@ -10,6 +10,7 @@ import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:path/path.dart' as p;
 
@@ -230,6 +231,41 @@ void main() {
         expect(report.notesChanged, 0);
         expect(report.failed, ['utf16.md']);
         expect(await file('utf16.md').readAsBytes(), bytes);
+      },
+    );
+
+    // A note the pass reads is decided on and decoded in one call: a second
+    // decode of a 246 MB note is a second transient allocation of it (#496).
+    test(
+      'a text note is decoded once by the preview and by the replace',
+      () async {
+        final bytes = utf8.encode('a cat in città\n');
+        await file('once.md').writeAsBytes(bytes);
+
+        var decodes = noteBytesNativeDecodes;
+        final preview = await previewChunk(
+          root.path,
+          ['once.md'],
+          'cat',
+          20,
+          3,
+          caseSensitive: false,
+        );
+        expect(preview.single, isNotNull);
+        expect(noteBytesNativeDecodes - decodes, 1, reason: 'the preview');
+
+        decodes = noteBytesNativeDecodes;
+        final results = await replaceChunk(
+          root.path,
+          ['once.md'],
+          'cat',
+          'dog',
+          null,
+          caseSensitive: false,
+        );
+        expect(results.single.$1, isTrue);
+        expect(noteBytesNativeDecodes - decodes, 1, reason: 'the replace');
+        expect(await read('once.md'), 'a dog in città\n');
       },
     );
 

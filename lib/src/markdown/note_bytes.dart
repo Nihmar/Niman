@@ -17,8 +17,9 @@
 /// file's encoding changes, the words in it do not (decided 2026-09-28).
 ///
 /// The loader still refuses a file that is not text at all (issue #156):
-/// [looksBinary] is that judgement, kept apart from the decode so it can be
-/// read and tested on its own.
+/// [decodeNoteTextIfText] decides and decodes in one call, so a note's bytes
+/// are decoded once; [looksBinary] is the judgement alone, for a reader that
+/// wants no text.
 library;
 
 import 'dart:convert';
@@ -31,6 +32,7 @@ import 'package:meta/meta.dart';
 /// read by.
 String decodeNoteText(List<int> bytes) {
   try {
+    noteBytesNativeDecodes++;
     return utf8.decode(bytes);
   } on FormatException {
     return _decodeMixed(bytes);
@@ -67,7 +69,13 @@ int noteBytesNativeDecodes = 0;
 @visibleForTesting
 int noteBytesWalks = 0;
 
-/// Whether [bytes] are a binary file rather than a note's text.
+/// [bytes] as a note's text, or null when they are a binary file: the
+/// judgement of [looksBinary] and the decode of [decodeNoteText] in one
+/// call, so the bytes of a note are decoded once.
+///
+/// Asking first and decoding after decoded every note twice — on the
+/// 246 MB stress note a second transient copy of it as a `String`, and a
+/// second native pass (#496).
 ///
 /// The native `utf8.decode` answers first: a file it reads whole has no byte
 /// outside a UTF-8 sequence, so all that is left to judge is its NULs — no
@@ -76,8 +84,8 @@ int noteBytesWalks = 0;
 /// share of bytes in no UTF-8 sequence. The walk used to run on every note,
 /// twice, before the decode (seconds on the 246 MB stress note), and a lone
 /// U+0000 refused a note the index and replace accept.
-bool looksBinary(List<int> bytes) {
-  if (bytes.isEmpty) return false;
+String? decodeNoteTextIfText(List<int> bytes) {
+  if (bytes.isEmpty) return '';
   final String text;
   try {
     noteBytesNativeDecodes++;
@@ -97,16 +105,24 @@ bool looksBinary(List<int> bytes) {
         at += length;
       }
     }
-    return undecodable / bytes.length > _binaryRatio ||
-        nuls / bytes.length > _binaryRatio;
+    if (undecodable / bytes.length > _binaryRatio ||
+        nuls / bytes.length > _binaryRatio) {
+      return null;
+    }
+    return _decodeMixed(bytes);
   }
-  if (!text.contains('\u0000')) return false;
+  if (!text.contains('\u0000')) return text;
   var nuls = 0;
   for (var at = 0; at < text.length; at++) {
     if (text.codeUnitAt(at) == 0) nuls++;
   }
-  return nuls / text.length > _binaryRatio;
+  return nuls / text.length > _binaryRatio ? null : text;
 }
+
+/// Whether [bytes] are a binary file rather than a note's text: what
+/// [decodeNoteTextIfText] answers with null. A caller that goes on to read
+/// the note uses that, not this and then [decodeNoteText].
+bool looksBinary(List<int> bytes) => decodeNoteTextIfText(bytes) == null;
 
 /// [bytes], which are not all UTF-8: each valid run decoded as UTF-8, each
 /// byte outside one as its Windows-1252 character.

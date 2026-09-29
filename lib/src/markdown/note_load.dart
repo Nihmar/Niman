@@ -18,6 +18,7 @@ library;
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -47,26 +48,29 @@ String normalizedLineEndings(String text) => text.contains('\r')
 /// The closure crosses to the isolate with nothing but [path] in it, which
 /// is why this is a top-level function: one made inside a widget's state
 /// carries the state with it, and the isolate refuses it.
-Future<Object> loadNote(String path) => Isolate.run(() => _loadNote(path));
+Future<Object> loadNote(String path) => Isolate.run(() => loadNoteSync(path));
 
 /// Reads the text of the note at [path], in an isolate: the text as it is
 /// written, or a [NoteReadFailure] saying the file is not text. What a
 /// reload compares against the note on screen.
-Future<Object> readNoteText(String path) => Isolate.run(() => _readText(path));
+Future<Object> readNoteText(String path) =>
+    Isolate.run(() => readNoteTextSync(path));
 
-Object _readText(String path) {
-  final bytes = File(path).readAsBytesSync();
-  if (looksBinary(bytes)) {
-    return NoteReadFailure('$path: not text', notText: true);
-  }
-  return decodeNoteText(bytes);
+/// [readNoteText] on the calling isolate: what the isolate runs, kept
+/// callable on its own for the test that counts its decodes.
+@visibleForTesting
+Object readNoteTextSync(String path) {
+  final text = decodeNoteTextIfText(File(path).readAsBytesSync());
+  if (text == null) return NoteReadFailure('$path: not text', notText: true);
+  return text;
 }
 
-Object _loadNote(String path) {
-  final bytes = File(path).readAsBytesSync();
-  if (looksBinary(bytes)) {
-    return NoteReadFailure('$path: not text', notText: true);
-  }
-  final text = normalizedLineEndings(decodeNoteText(bytes));
+/// [loadNote] on the calling isolate: what the isolate runs, kept callable
+/// on its own for the test that counts its decodes.
+@visibleForTesting
+Object loadNoteSync(String path) {
+  final read = decodeNoteTextIfText(File(path).readAsBytesSync());
+  if (read == null) return NoteReadFailure('$path: not text', notText: true);
+  final text = normalizedLineEndings(read);
   return LoadedNote(text: text, buffer: SourceBuffer.fromText(text));
 }
