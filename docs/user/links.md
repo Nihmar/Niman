@@ -83,6 +83,13 @@ the note; `[[/docs/a]]` and `[[../Notes/a]]` follow the same rules as the
 Markdown forms. A note outside the library is not in the index and so is
 not a link target. `\` in a path is `/`.
 
+Moving a note, or a folder of them, moves what its relative links name: the
+backlinks and dead links follow the new folder at once, without opening or
+editing the note. A link that names another note by its name only
+(`[[a]]`) does not care where either note is. A link written with a path
+*to* a note that moved, from a note that did not, is read again when that
+note is next indexed.
+
 ## Links into a PDF or a book
 
 A link can point at a place inside a PDF or an EPUB book; following it

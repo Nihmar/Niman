@@ -260,6 +260,15 @@ final class Indexer {
       for (final c in changed) {
         await _store.applyContent({c.rel: c}, paired: pairedKeep);
       }
+      // A pair that keeps its rows still reads its links from a new folder,
+      // maybe: the edges of the ones that depend on it are written again
+      // (#491), from the text the pairing already read.
+      final movedKept = <String, NoteContent>{
+        for (final rel in pairedKeep) rel: ?contents[rel],
+      };
+      if (movedKept.isNotEmpty) {
+        await _store.applyContent(movedKept, paired: pairedKeep);
+      }
       if (wrote) {
         final cb = onChanged;
         if (cb != null) cb();

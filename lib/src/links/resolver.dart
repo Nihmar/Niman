@@ -194,6 +194,20 @@ final class LinkResolver implements LinkSource {
   /// `#fragment` are handled by [_resolvePath], in that order.
   static String normalizeTarget(String target) => _clean(target).toLowerCase();
 
+  /// Whether [target], written in a note, names something that depends on
+  /// the folder the note is in: a Markdown path is tried beside the note
+  /// first, and a wiki target that starts with `/`, or has a `.` or `..`
+  /// segment, is walked from it (#491). A bare wiki name is not: it is found
+  /// by its name wherever the note is.
+  static bool dependsOnLocation(String target, {required bool markdown}) {
+    if (markdown) return true;
+    final kept = _clean(target);
+    final hash = kept.indexOf('#');
+    final path = hash == -1 ? kept : kept.substring(0, hash);
+    return path.startsWith('/') ||
+        path.split('/').any((s) => s == '.' || s == '..');
+  }
+
   /// [target] trimmed, its backslashes slashes, its leading `./` gone.
   static String _clean(String target) {
     var t = target.trim().replaceAll(r'\', '/');

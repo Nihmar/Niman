@@ -208,7 +208,10 @@ final class IndexContentStore {
   /// — for changed notes. Runs after the notes rows of the batch are
   /// written, so links pointing at notes indexed later in the same walk
   /// resolve; [paired] rels keep their existing rows (their content did
-  /// not change — the rename only moved the path).
+  /// not change — the rename only moved the path), but their link edges are
+  /// written again when one of their links reads from the note's folder
+  /// ([LinkResolver.dependsOnLocation]): the note may have moved to another
+  /// one (#491).
   ///
   /// With [pendingLink] set, the link edges are handed to it instead of
   /// resolved here: the caller collects them and writes them once its tree
@@ -223,11 +226,20 @@ final class IndexContentStore {
     // from Markdown, and the completeness check counts `.md` rows, so a
     // non-note that reached here would be indexed and then permanently
     // look like a missing row to the repair pass.
-    final items = <(Note, NoteContent)>[
-      for (final c in contents.values)
-        if (!paired.contains(c.rel) && isNoteFile(p.basename(c.rel)))
-          if (await _dao.find(c.rel) case final Note row) (row, c),
-    ];
+    final items = <(Note, NoteContent)>[];
+    // A paired note keeps its rows, and with them the edges it resolved
+    // from its old folder: the ones that read from its folder are written
+    // again, and only those notes (the cost is the move's, not the
+    // library's).
+    final moved = <(Note, NoteContent)>[];
+    for (final c in contents.values) {
+      if (!isNoteFile(p.basename(c.rel))) continue;
+      final isPaired = paired.contains(c.rel);
+      if (isPaired && !c.links.any(_dependsOnLocation)) continue;
+      if (await _dao.find(c.rel) case final Note row) {
+        (isPaired ? moved : items).add((row, c));
+      }
+    }
 
     // One-time repairs, before the early return: an index built before
     // files gained stems (embeds — `![[foo.png]]` by bare name) has every
@@ -237,7 +249,7 @@ final class IndexContentStore {
     // (T-M3-09 device report: `![[…]]` images stayed placeholders).
     // A directory-at-a-time scan asks for them once, not per directory.
     if (repair) await repairDerivedRows();
-    if (items.isEmpty) return;
+    if (items.isEmpty && moved.isEmpty) return;
 
     // Link targets resolve once per pass — one stems lookup per distinct
     // stem and one notes lookup, via [LinkResolver.resolveBatch] — instead
@@ -246,7 +258,7 @@ final class IndexContentStore {
     // the edges there is nothing to resolve yet.
     final batchQueries = <LinkQuery>{};
     if (pendingLink == null) {
-      for (final (row, c) in items) {
+      for (final (row, c) in [...items, ...moved]) {
         for (final link in c.links) {
           final query = _linkQuery(link, row.path);
           if (query != null) batchQueries.add(query);
@@ -272,6 +284,25 @@ final class IndexContentStore {
       });
       if (end < items.length) await Future<void>.delayed(Duration.zero);
     }
+    for (var i = 0; i < moved.length; i += _contentChunk) {
+      final end = i + _contentChunk < moved.length
+          ? i + _contentChunk
+          : moved.length;
+      await _db.transaction(() async {
+        for (final (row, c) in moved.sublist(i, end)) {
+          await _writeLinks(row, c, resolved, pendingLink);
+        }
+      });
+      if (end < moved.length) await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  /// Whether [link] resolves from the folder of the note it is written in,
+  /// so that moving the note can change what it names.
+  static bool _dependsOnLocation(ParsedLink link) {
+    final target = _linkTarget(link);
+    return target != null &&
+        LinkResolver.dependsOnLocation(target, markdown: link is MarkdownLink);
   }
 
   /// The target text of [link] to resolve by, or null for a link that
