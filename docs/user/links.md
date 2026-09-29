@@ -33,7 +33,15 @@ the note's. The panel lists:
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
-  `chapter=`.
+  `chapter=`. Once the form's key is written, what follows the `=` is the
+  number you type: the panel is not offered again there, so `⏎` or `Tab`
+  cannot write the form over it.
+
+The panel does not open inside code or maths: a `[[` in a fenced or
+indented code block, in display maths or in an inline code or maths span is
+the code's own text, and completing it there would write a note name and a
+`]]` into it. In a very long note whose colours are still being read, the
+panel waits for them — the next keystroke in the link opens it.
 
 `↑`/`↓` move, `⏎` or `Tab` complete the link, `Esc` closes the panel and
 leaves the text as it was. Typed into a link already closed, the choice
