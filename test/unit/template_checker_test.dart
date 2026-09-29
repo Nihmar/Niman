@@ -25,27 +25,24 @@ void main() {
       expect(error.suggestion, '{{title}}');
     });
 
-    test('unclosed closing braces: title}} is reported and left alone', () {
-      final error = only('title}}');
-      expect(error.kind, TemplateSyntaxErrorKind.structural);
-      expect(error.offset, 5);
-      expect(error.length, 2);
-      expect(error.suggestion, isNull);
+    test('a closing pair with nothing open is text, not a mistake', () {
+      // #497. The engine reads `}}` with nothing open before it as ordinary
+      // text, so there is nothing to close and nothing to report: LaTeX and
+      // inline JSON in a template body are not mistakes.
+      expect(checkTemplateSyntax(r'$x^{2^{n}}$'), isEmpty);
+      expect(checkTemplateSyntax('{"a":{"b":1}}'), isEmpty);
+      expect(checkTemplateSyntax('title}}'), isEmpty);
     });
 
-    test('nested braces inside a placeholder: {{ {{title}} }} is split', () {
-      // The inner placeholder is one the engine answers, so the row is the
-      // pair of braces left over around it — one unmatched at each end,
-      // and no correction: the fix is to drop them, not to add more.
-      final errors = checkTemplateSyntax('{{ {{title}} }}');
-      expect(errors, hasLength(2));
-      expect(errors.map((error) => error.offset), [0, 13]);
-      expect(errors.map((error) => error.length), [2, 2]);
-      expect(errors.map((error) => error.kind), [
-        TemplateSyntaxErrorKind.structural,
-        TemplateSyntaxErrorKind.structural,
-      ]);
-      expect(errors.map((error) => error.suggestion), [null, null]);
+    test('nested braces inside a placeholder: {{ {{title}} is one pair', () {
+      // The inner placeholder is one the engine answers; the pair left over
+      // around it is the opening one at the front, and no correction is
+      // offered: the fix is to drop it, not to add more.
+      final error = only('{{ {{title}} }}');
+      expect(error.kind, TemplateSyntaxErrorKind.structural);
+      expect(error.offset, 0);
+      expect(error.length, 2);
+      expect(error.suggestion, isNull);
     });
 
     test('a brace next to a placeholder is literal, not a pair', () {
@@ -53,10 +50,10 @@ void main() {
       // renders `{Title}`, and the lone braces either side are text.
       expect(checkTemplateSyntax('{{{title}}}'), isEmpty);
       expect(checkTemplateSyntax('x{{{title}}'), isEmpty);
-      // Two whole pairs around one are two stray pairs.
-      final errors = checkTemplateSyntax('{{{{title}}}}');
-      expect(errors.map((error) => error.offset), [0, 11]);
-      expect(errors.map((error) => error.length), [2, 2]);
+      // Two opening braces around one are one stray pair.
+      final error = only('{{{{title}}}}');
+      expect(error.offset, 0);
+      expect(error.length, 2);
     });
 
     test('no arrangement of braces makes the checker throw', () {
@@ -109,7 +106,7 @@ void main() {
         expect(error.offset, 0, reason: source);
         expect(error.length, source.length, reason: source);
         expect(error.suggestion, isNull, reason: source);
-        expect(error.message, contains('no name'), reason: source);
+        expect(error.problem, TemplateProblem.emptyPlaceholder, reason: source);
       }
     });
   });
@@ -120,7 +117,8 @@ void main() {
       expect(error.kind, TemplateSyntaxErrorKind.unknown);
       expect(error.offset, 0);
       expect(error.length, 10);
-      expect(error.message, "unknown placeholder 'titlex'");
+      expect(error.problem, TemplateProblem.unknownPlaceholder);
+      expect(error.parameters, <String>['titlex']);
       expect(error.suggestion, '{{title}}');
       // Case-insensitive: the engine folds the name, and so does the
       // check, so the same typo in capitals is the same typo.
@@ -137,7 +135,8 @@ void main() {
       expect(error.kind, TemplateSyntaxErrorKind.unknown);
       expect(error.offset, 0);
       expect(error.length, 16);
-      expect(error.message, "unknown filter 'upperr'");
+      expect(error.problem, TemplateProblem.unknownFilter);
+      expect(error.parameters, <String>['upperr']);
       expect(error.suggestion, '{{title|upper}}');
       // The filters around it are the ones that were written.
       expect(only('{{title|slug|upperr}}').suggestion, '{{title|slug|upper}}');
@@ -148,7 +147,8 @@ void main() {
       expect(error.kind, TemplateSyntaxErrorKind.unknown);
       expect(error.offset, 0);
       expect(error.length, 14);
-      expect(error.message, "unknown date token 'YYYYY'");
+      expect(error.problem, TemplateProblem.unknownDateToken);
+      expect(error.parameters, <String>['YYYYY']);
       expect(error.suggestion, '{{date:YYYY}}');
       // Only the token is replaced, not the rest of the format.
       expect(only('{{date:YYYYY-MM}}').suggestion, '{{date:YYYY-MM}}');
@@ -159,7 +159,8 @@ void main() {
     test('pad: with a non-numeric width is reported, not guessed at', () {
       final error = only('{{title|pad:wide}}');
       expect(error.kind, TemplateSyntaxErrorKind.argument);
-      expect(error.message, contains('number for its width'));
+      expect(error.problem, TemplateProblem.padWidth);
+      expect(error.parameters, <String>['pad', 'wide']);
       // The issue's table suggests `pad:3`; a width is a number only the
       // author knows, so the checker reports and suggests nothing.
       expect(error.suggestion, isNull);
@@ -170,7 +171,7 @@ void main() {
       for (final source in ['{{date|+xd}}', '{{title|+xd}}', '{{date|+7dd}}']) {
         final error = only(source);
         expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
-        expect(error.message, contains('not a date move'), reason: source);
+        expect(error.problem, TemplateProblem.notADateMove, reason: source);
         expect(error.suggestion, isNull, reason: source);
       }
       for (final source in [
@@ -190,7 +191,7 @@ void main() {
       // is exactly the correction the row asks for.
       final unclosed = only("{{time:HH'|'mm");
       expect(unclosed.kind, TemplateSyntaxErrorKind.structural);
-      expect(unclosed.message, contains('unclosed opening braces'));
+      expect(unclosed.problem, TemplateProblem.unclosedBraces);
       expect(unclosed.suggestion, "{{time:HH'|'mm}}");
       // A quote that really is unclosed: everything after it, the pipe
       // included, is read as ordinary text, and closing it would change
@@ -198,7 +199,7 @@ void main() {
       // stops there.
       final quote = only("{{time:HH'|mm}}");
       expect(quote.kind, TemplateSyntaxErrorKind.argument);
-      expect(quote.message, contains('unclosed quote'));
+      expect(quote.problem, TemplateProblem.unclosedQuote);
       expect(quote.suggestion, isNull);
     });
 
@@ -206,7 +207,7 @@ void main() {
       for (final source in ['{{ask:}}', '{{ask}}', '{{choice:}}']) {
         final error = only(source);
         expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
-        expect(error.message, contains('no label'), reason: source);
+        expect(error.problem, TemplateProblem.askNoLabel, reason: source);
         expect(error.suggestion, isNull, reason: source);
       }
       for (final source in [
@@ -414,7 +415,7 @@ void main() {
       for (final source in ['{{title|+1d}}', '{{date|upper|+1d}}']) {
         final error = only(source);
         expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
-        expect(error.message, contains('moves a date'), reason: source);
+        expect(error.problem, TemplateProblem.dateMove, reason: source);
         expect(error.suggestion, isNull, reason: source);
       }
     });

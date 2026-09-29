@@ -140,11 +140,7 @@ final class DutchStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotheek';
-  @override
   String get settingsSectionReminders => 'Herinneringen';
-  @override
-  String get settingsSectionShortcuts => 'Toetsenbord';
   @override
   String get keyboardShortcutsTitle => 'Sneltoetsen';
 
@@ -188,8 +184,6 @@ final class DutchStrings extends Strings {
   String updateSavedTo(Object path) => 'Update opgeslagen in $path';
   @override
   String get updateInstallerStarted => 'Installatieprogramma gestart';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostiek';
   @override
   String get settingsSpellCheckTitle => 'Spellingscontrole';
   @override
@@ -246,8 +240,6 @@ final class DutchStrings extends Strings {
   String get themeBrightnessNight => 'Donker';
   @override
   String get themeTitle => 'Thema';
-  @override
-  String get themeSubtitle => 'De kleuren van de interface en van de notitie';
   @override
   String get themePaletteSystem => 'Systeem';
   // Settings: the themes page (issue #269).
@@ -328,16 +320,17 @@ final class DutchStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'De editor en het voorbeeld, die altijd overeenkomen';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Lettertype van de broneditor';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Het lettertype van het bronvenster; de voorvertoning houdt dat van de '
+      'notitie';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monospatie';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Zonder schreven';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Met schreven';
   @override
   String get epubLookTitle => 'Uiterlijk van boeken';
   @override
@@ -461,7 +454,7 @@ final class DutchStrings extends Strings {
   @override
   String get audioSavingRecording => 'Opslaan…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audio kon niet worden afgespeeld';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -603,10 +596,6 @@ final class DutchStrings extends Strings {
   String get cheatsheetCopied => 'Gekopieerd';
   @override
   String get cheatsheetInsert => 'In de notitie invoegen';
-  @override
-  String get cheatsheetWritten => 'Geschreven';
-  @override
-  String get cheatsheetShown => 'Getoond';
   @override
   String get cheatHeadings => 'Koppen';
   @override
@@ -751,8 +740,6 @@ final class DutchStrings extends Strings {
   @override
   String get showEditorTooltip => 'Editor tonen';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(ruwe HTML-tabel)';
 
   // Search (T-M3-05).
   @override
@@ -1004,8 +991,6 @@ final class DutchStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Geen prioriteit';
-  @override
   String get todoNoPriorityShort => 'Geen';
   @override
   String get todoMorePriorities => 'Meer…';
@@ -1100,9 +1085,9 @@ final class DutchStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Zijpaneel verbergen (Ctrl+B)';
+  String get hideSidebarTooltip => 'Zijpaneel verbergen';
   @override
-  String get showSidebarTooltip => 'Zijpaneel tonen (Ctrl+B)';
+  String get showSidebarTooltip => 'Zijpaneel tonen';
   @override
   String get windowMinimizeTooltip => 'Minimaliseren';
   @override
@@ -1138,7 +1123,7 @@ final class DutchStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sluiten';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Actie kon niet worden voltooid';
   @override
   String get newFolderTitle => 'Nieuwe map';
   @override
@@ -1164,8 +1149,6 @@ final class DutchStrings extends Strings {
   @override
   String get currentQuickNote => 'Huidige snelnotitie';
   @override
-  String get pinnedSection => 'Vastgezet';
-  @override
   String pinnedSectionCount(int count) => 'Vastgezet · $count';
   @override
   String get templateFolderTitle => 'Sjabloonmap';
@@ -1174,7 +1157,7 @@ final class DutchStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nieuw uit sjabloon hier';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Sjabloon kon niet worden geopend';
   @override
   String get templateFormTitle => 'Sjabloon invullen';
   @override
@@ -1350,39 +1333,39 @@ final class DutchStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” is te diep genest';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Eigenschappen';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Ruwe YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Velden';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Eigenschap toevoegen';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nieuwe eigenschap';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Eigenschap bewerken';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Sleutel';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Waarde';
   @override
   String get frontmatterTypeLabel => 'Type';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Scheid items met komma’s';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Eigenschap verwijderen';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Geen eigenschappen';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'getal';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleaans';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lijst';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter niet gelezen: $reason';
@@ -1596,7 +1579,7 @@ final class DutchStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion-export importeren';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-export kon niet worden geïmporteerd';
   @override
   String dropRejected(String names) =>
       'Hier openen alleen Markdown-bestanden en mappen: $names';
@@ -1768,8 +1751,6 @@ final class DutchStrings extends Strings {
   @override
   String get shortcutRedo => 'Opnieuw';
   @override
-  String get shortcutChange => 'Sneltoets wijzigen';
-  @override
   String shortcutCaptureTitle(String command) => 'Toetsen voor $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1872,9 +1853,10 @@ final class DutchStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Definitief verwijderen';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Notitie kon niet worden hersteld of verwijderd';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Prullenbak kon niet worden geleegd';
 
   // The open/create library screen.
   @override
@@ -1958,15 +1940,13 @@ final class DutchStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Instellingen';
-  @override
   String get libraryPathTitle => 'Bibliotheekpad';
   @override
   String get reindexTitle => 'Nu herindexeren';
   @override
   String get reindexDone => 'Herindexeren afgerond';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Bibliotheek kon niet opnieuw worden gelezen';
   @override
   String get closeLibraryTitle => 'Bibliotheek sluiten';
   @override
@@ -1998,20 +1978,18 @@ final class DutchStrings extends Strings {
       'Geen exacte heel-woordmatch van “$term” '
       '${only == null ? 'gevonden' : 'gevonden in $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'hele bibliotheek';
   @override
   String replaceScopeNote(String note) => 'in $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'in 1 notitie' : 'in $count notities';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 notitie kon niet worden geschreven)'
+      : ' ($count notities konden niet worden geschreven)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Over';
   @override
   String get versionTitle => 'Versie';
   @override
@@ -2060,7 +2038,7 @@ final class DutchStrings extends Strings {
   @override
   String get historyOff =>
       'Geschiedenis staat uit voor deze bibliotheek '
-      '(Instellingen, Bibliotheek).';
+      '(Instellingen, Prullenbak en chronologie).';
   @override
   String get historyLoadFailed => 'Kon de geschiedenis niet lezen';
   @override
@@ -2350,34 +2328,35 @@ final class DutchStrings extends Strings {
   @override
   String get syncTestFailed => 'De test is mislukt';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Het certificaat is niet vertrouwd';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Het certificaat kan niet worden geverifieerd. Vertrouw het alleen als '
+      'de vingerafdruk overeenkomt met die de server toont.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Dit certificaat vertrouwen?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Het certificaat voor $host kan niet worden '
+      'geverifieerd.\n\nSHA-256-vingerafdruk:\n$fingerprint\n\nVertrouw '
+      'het alleen als dit het certificaat is dat je verwacht. Niman '
+      'accepteert alleen dit ene certificaat voor deze bestemming en '
+      'geen ander.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Dit certificaat vertrouwen';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificaat vertrouwd';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Dit certificaat vergeten?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Deze bestemming wordt opnieuw getest tegen het certificaatarchief van '
+      'het apparaat, en een zelfondertekend certificaat moet nog één keer '
+      'worden bevestigd. Verder verandert er niets.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Vergeten';
   @override
   String get syncNowAction => 'Nu synchroniseren';
   @override
@@ -2496,10 +2475,6 @@ final class DutchStrings extends Strings {
   String get syncRetryAction => 'Opnieuw proberen';
   @override
   String get syncOpenSettingsAction => 'Instellingen';
-  @override
-  String get syncCloseAction => 'Sluiten';
-  @override
-  String get syncDoneSnack => 'Gesynchroniseerd';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Gesynchroniseerd · 1 elders verwijderd bestand staat in '
@@ -2839,4 +2814,89 @@ final class DutchStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 probleem in dit sjabloon'
       : '$count problemen in dit sjabloon';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Koppen in $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Plaatsen in $named';
+  @override
+  String get wikilinkThisNote => 'deze notitie';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Geen kop komt overeen met “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Geen notitie komt overeen met “$query”.';
+  @override
+  String get wikilinkNoHeading => 'deze notitie heeft geen kop met die naam';
+  @override
+  String get wikilinkNoNote =>
+      'niets in de bibliotheek heeft die naam of dat alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Een pagina kies je; die staat niet in een lijst: typ het nummer.';
+  @override
+  String get wikilinkFooterMove => 'verplaatsen';
+  @override
+  String get wikilinkFooterOr => 'of';
+  @override
+  String get wikilinkFooterInsert => 'invoegen';
+  @override
+  String get wikilinkFooterClose => 'sluiten';
+  @override
+  String get suggesterPageHint => 'typ een nummer';
+  @override
+  String get suggesterChapterHint => 'noem een bestand in het boek';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'geopende accolades zonder slot: niets sluit deze placeholder';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'lege placeholder: geen naam tussen de accolades';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'onbekende placeholder “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” heeft geen label: het vraagt niets, en de placeholder blijft '
+      'staan';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” heeft geen naam: het telt niets, en de placeholder blijft staan';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” neemt geen filters: de cursor wordt niet geplaatst, en de '
+      'placeholder blijft staan';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'niet-gesloten aanhalingsteken in de datumnotatie: alles erna wordt als '
+      'gewone tekst gelezen';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'onbekend datumsymbool “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'leeg filter: geen naam na de “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” verschuift een datum: alleen $formats nemen een verschuiving, '
+      'en alleen vóór elk ander filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” is geen datumverschuiving: een verschuiving is een aantal en '
+      'een eenheid, zoals “+7d” of “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” zet vast op $units, niet op “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” heeft een getal nodig voor de breedte, en “$argument” is er '
+      'geen';
+  @override
+  String templateProblemUnknownFilter(String name) => 'onbekend filter “$name”';
 }

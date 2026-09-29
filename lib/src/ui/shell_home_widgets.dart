@@ -14,6 +14,7 @@ import 'package:niman/src/core/app_theme.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_placement.dart';
@@ -38,10 +39,16 @@ final class ShellHomeWidgets {
     required this.openTodo,
     required this.openNote,
     required this.mounted,
+    required this.onTargetBlocked,
+    this.unsaved,
   });
 
   /// The open library's session (and the one a target switches away from).
   final LibrarySession controller;
+
+  /// The open notes, written before a target switches libraries (#493).
+  /// Null where none is wired (tests).
+  final UnsavedTracker? unsaved;
 
   /// Taps on a placed widget, at launch and while running.
   final WidgetTargetService targets;
@@ -64,6 +71,11 @@ final class ShellHomeWidgets {
   /// Whether the shell is still on screen: a push after it went is a
   /// no-op, and a target it can no longer open belongs to its successor.
   final bool Function() mounted;
+
+  /// Says a target could not be followed because a note would not save: the
+  /// shell shows the message the other ways out of a library show, so a tap
+  /// on a widget that did nothing says why.
+  final void Function() onTargetBlocked;
 
   /// The target a library switch is carrying.
   ///
@@ -168,11 +180,23 @@ final class ShellHomeWidgets {
     final current = controller.root;
     if (current == null ||
         p.normalize(target.libraryPath) != p.normalize(current)) {
-      // Another library. A slow switch tears the shell down mid-way, so
-      // the navigation waits for the new shell — but a fast one completes
-      // before any frame lands, and this shell survives. `mounted` tells
-      // the two apart: a replacing frame would have disposed that state
-      // already, so a still-mounted shell owns the navigation.
+      // Another library. Its switch is a way out of this one, so the open
+      // notes go to disk first (#493): a note that will not save keeps the
+      // library the target was pointing away from, and the target with it.
+      final failed = await saveBeforeLeaving(unsaved);
+      if (failed != null) {
+        _log.warning(
+          'widget target left unopened: a note would not save ($failed)',
+        );
+        if (mounted()) onTargetBlocked();
+        return;
+      }
+      if (!mounted()) return;
+      // A slow switch tears the shell down mid-way, so the navigation
+      // waits for the new shell — but a fast one completes before any
+      // frame lands, and this shell survives. `mounted` tells the two
+      // apart: a replacing frame would have disposed that state already,
+      // so a still-mounted shell owns the navigation.
       _pending = target;
       await controller.switchTo(target.libraryPath);
       if (!mounted()) return;

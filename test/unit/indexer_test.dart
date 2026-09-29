@@ -617,6 +617,183 @@ void main() {
       expect((resolved as ResolvedNote).note.id, indexed.id);
     });
 
+    test('a percent-encoded Markdown href is an edge, as it opens', () async {
+      File(p.join(root.path, 'My Note.md')).writeAsStringSync('target');
+      File(p.join(root.path, 'src.md'))
+          .writeAsStringSync('[x](My%20Note.md#top)');
+      await indexer.fullScan(root.path);
+
+      final src = (await dao.find('src.md'))!;
+      final target = (await dao.find('My Note.md'))!;
+      final edges = await (db.select(
+        db.noteLinks,
+      )..where((l) => l.fromNote.equals(src.id))).get();
+      expect([for (final l in edges) l.toNote], [target.id]);
+    });
+
+    group('a note that moved (#491)', () {
+      void write(String rel, String text) {
+        final file = File(p.join(root.path, p.joinAll(rel.split('/'))));
+        file.parent.createSync(recursive: true);
+        file.writeAsStringSync(text);
+      }
+
+      void move(String from, String to) {
+        final target = p.join(root.path, p.joinAll(to.split('/')));
+        Directory(p.dirname(target)).createSync(recursive: true);
+        final source = p.join(root.path, p.joinAll(from.split('/')));
+        if (FileSystemEntity.isDirectorySync(source)) {
+          Directory(source).renameSync(target);
+        } else {
+          File(source).renameSync(target);
+        }
+      }
+
+      Future<void> applyMove(List<String> rels) => indexer.applyEvents(
+        root.path,
+        [for (final rel in rels) p.join(root.path, p.joinAll(rel.split('/')))],
+      );
+
+      Future<Set<String>> targetsOf(String rel) async {
+        final from = (await dao.find(rel))!;
+        final rows = await (db.select(
+          db.noteLinks,
+        )..where((l) => l.fromNote.equals(from.id))).get();
+        final out = <String>{};
+        for (final l in rows) {
+          final to = await (db.select(
+            db.notes,
+          )..where((n) => n.id.equals(l.toNote))).getSingle();
+          out.add(to.path);
+        }
+        return out;
+      }
+
+      String title({required bool titled}) =>
+          titled ? '---\ntitle: B\n---\n' : '';
+
+      // `../A/a.md` and `[[../A/a]]` name `A/a.md` from `P`, and `P/A/a.md`
+      // from `P/Q`.
+      void seed({required bool titled}) {
+        write('A/a.md', 'root a');
+        write('P/A/a.md', 'near a');
+        write('P/b.md', '${title(titled: titled)}[x](../A/a.md) [[../A/a]]');
+      }
+
+      for (final titled in [true, false]) {
+        final kind = titled ? 'with a title' : 'without one';
+
+        test('a note moved one folder deeper reads its links from there, '
+            '$kind', () async {
+          seed(titled: titled);
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('P/b.md'), {'A/a.md'});
+
+          move('P/b.md', 'P/Q/b.md');
+          await applyMove(['P/b.md', 'P/Q/b.md']);
+          expect(await targetsOf('P/Q/b.md'), {'P/A/a.md'});
+        });
+
+        test('a link the move makes dead is dropped, $kind', () async {
+          seed(titled: titled);
+          await indexer.fullScan(root.path);
+          move('P/b.md', 'P/Q/R/b.md');
+          await applyMove(['P/b.md', 'P/Q/R/b.md']);
+          expect(await targetsOf('P/Q/R/b.md'), isEmpty);
+        });
+
+        test('a folder moved carries its notes to their new links, '
+            '$kind', () async {
+          write('Old/c.md', 'old c');
+          write('New/c.md', 'new c');
+          write('Old/Sub/b.md', '${title(titled: titled)}[x](../c.md)');
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('Old/Sub/b.md'), {'Old/c.md'});
+
+          move('Old/Sub', 'New/Sub');
+          await applyMove(['Old/Sub', 'New/Sub']);
+          expect(await targetsOf('New/Sub/b.md'), {'New/c.md'});
+        });
+
+        test('a scan that finds it moved reads its links from there, '
+            '$kind', () async {
+          seed(titled: titled);
+          await indexer.fullScan(root.path);
+          move('P/b.md', 'P/Q/b.md');
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('P/Q/b.md'), {'P/A/a.md'});
+        });
+
+        test('a scan that reaches its new folder first does the same, '
+            '$kind', () async {
+          write('A/a.md', 'root a');
+          write('Z/A/a.md', 'near a');
+          write(
+            'Z/Y/b.md',
+            '${title(titled: titled)}[x](../A/a.md) [[../A/a]]',
+          );
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('Z/Y/b.md'), {'Z/A/a.md'});
+
+          // The note goes to a folder walked before the one it left; from
+          // `Z` the same link names `A/a.md`.
+          move('Z/Y/b.md', 'Z/b.md');
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('Z/b.md'), {'A/a.md'});
+
+          move('Z/b.md', 'B/b.md');
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('B/b.md'), {'A/a.md'});
+        });
+      }
+
+      test(
+        'a link to a note by its name follows the note that moved',
+        () async {
+          write('a.md', 'target');
+          write('b.md', '[[a]] [x](a.md)');
+          await indexer.fullScan(root.path);
+          expect(await targetsOf('b.md'), {'a.md'});
+
+          move('a.md', 'Deep/a.md');
+          await applyMove(['a.md', 'Deep/a.md']);
+          expect(await targetsOf('b.md'), {'Deep/a.md'});
+        },
+      );
+    });
+
+    test('a relative link is an edge to the note it names (#491)', () async {
+      void write(String rel, String text) {
+        final file = File(p.join(root.path, p.joinAll(rel.split('/'))));
+        file.parent.createSync(recursive: true);
+        file.writeAsStringSync(text);
+      }
+
+      write('Deep/Notes/a.md', 'near');
+      write('Notes/a.md', 'far');
+      write('Deep/Sub/b.md', '[up](../Notes/a.md) [root](/Notes/a.md)');
+      await indexer.fullScan(root.path);
+
+      final b = (await dao.find('Deep/Sub/b.md'))!;
+      final near = (await dao.find('Deep/Notes/a.md'))!;
+      final far = (await dao.find('Notes/a.md'))!;
+      Future<Set<int>> edges() async => {
+        for (final l in await (db.select(
+          db.noteLinks,
+        )..where((l) => l.fromNote.equals(b.id))).get())
+          l.toNote,
+      };
+      // `..` walks from Deep/Sub, the leading `/` from the root.
+      expect(await edges(), {near.id, far.id});
+
+      // The same links, written by a rescan of the one note that changed.
+      write('Deep/Sub/b.md', '[up](../Notes/a.md) and more');
+      await indexer.applyEvents(root.path, [
+        p.join(root.path, 'Deep', 'Sub', 'b.md'),
+      ]);
+      expect(await edges(), {near.id});
+    });
+
     test('a unicode tag is one tag, inline and in frontmatter alike', () async {
       // `#città` used to index as `citt` and `#идея` not at all, so the same
       // tag written inline and in the frontmatter made two rows in `tags` —

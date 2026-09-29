@@ -101,3 +101,20 @@ final unsavedTrackerProvider = Provider<UnsavedTracker>((ref) {
   ref.onDispose(tracker.dispose);
   return tracker;
 });
+
+/// Writes every unsaved note before the library is left, and answers the
+/// error that stopped it — null when every note is on disk.
+///
+/// The one way out of a library (#351, #493): the switch screen, the
+/// library window, the settings' Close library row and a widget target
+/// pointing at another library all take the shell away from the open
+/// editors, so each one awaits this first and stays when a write fails.
+Future<Object?> saveBeforeLeaving(UnsavedTracker? unsaved) async {
+  if (unsaved == null) return null;
+  try {
+    await unsaved.saveAll();
+    return null;
+  } on Object catch (error) {
+    return error;
+  }
+}

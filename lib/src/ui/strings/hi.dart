@@ -133,11 +133,7 @@ final class HindiStrings extends Strings {
   @override
   String get settingsSectionEditor => 'एडिटर';
   @override
-  String get settingsSectionLibrary => 'लाइब्रेरी';
-  @override
   String get settingsSectionReminders => 'रिमाइंडर';
-  @override
-  String get settingsSectionShortcuts => 'कीबोर्ड';
   @override
   String get keyboardShortcutsTitle => 'कीबोर्ड शॉर्टकट';
 
@@ -180,8 +176,6 @@ final class HindiStrings extends Strings {
   String updateSavedTo(Object path) => 'अपडेट $path में सहेजा गया';
   @override
   String get updateInstallerStarted => 'इंस्टॉलर शुरू हुआ';
-  @override
-  String get settingsSectionDiagnostics => 'निदान';
   @override
   String get settingsSpellCheckTitle => 'व्याकरण जाँचें';
   @override
@@ -235,8 +229,6 @@ final class HindiStrings extends Strings {
   String get themeBrightnessNight => 'डार्क';
   @override
   String get themeTitle => 'थीम';
-  @override
-  String get themeSubtitle => 'इंटरफ़ेस और नोट के रंग';
   @override
   String get themePaletteSystem => 'सिस्टम';
   // Settings: the themes page (issue #269).
@@ -316,16 +308,16 @@ final class HindiStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'एडिटर और पूर्वावलोकन, जो हमेशा एक-दूसरे से मिलते हैं';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'स्रोत संपादक का फ़ॉन्ट';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'स्रोत फलक जिस फ़ॉन्ट में है; पूर्वावलोकन नोट का अपना फ़ॉन्ट रखता है';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'समान-चौड़ाई';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'सेरिफ़ रहित';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'सेरिफ़ सहित';
   @override
   String get epubLookTitle => 'किताबों का रूप';
   @override
@@ -449,7 +441,7 @@ final class HindiStrings extends Strings {
   @override
   String get audioSavingRecording => 'सहेजा जा रहा है…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'ऑडियो चलाया नहीं जा सका';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -589,10 +581,6 @@ final class HindiStrings extends Strings {
   String get cheatsheetCopied => 'कॉपी हो गया';
   @override
   String get cheatsheetInsert => 'नोट में डालें';
-  @override
-  String get cheatsheetWritten => 'लिखा हुआ';
-  @override
-  String get cheatsheetShown => 'दिखाया गया';
   @override
   String get cheatHeadings => 'शीर्षक';
   @override
@@ -737,8 +725,6 @@ final class HindiStrings extends Strings {
   @override
   String get showEditorTooltip => 'एडिटर दिखाएँ';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(कच्चा HTML तालिका)';
 
   // Search (T-M3-05).
   @override
@@ -982,8 +968,6 @@ final class HindiStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'बिना प्राथमिकता';
-  @override
   String get todoNoPriorityShort => 'कोई नहीं';
   @override
   String get todoMorePriorities => 'और…';
@@ -1078,9 +1062,9 @@ final class HindiStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'साइडबार छिपाएँ (Ctrl+B)';
+  String get hideSidebarTooltip => 'साइडबार छिपाएँ';
   @override
-  String get showSidebarTooltip => 'साइडबार दिखाएँ (Ctrl+B)';
+  String get showSidebarTooltip => 'साइडबार दिखाएँ';
   @override
   String get windowMinimizeTooltip => 'न्यूनतम करें';
   @override
@@ -1116,7 +1100,7 @@ final class HindiStrings extends Strings {
   @override
   String get closeMenuTooltip => 'बंद करें';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'यह कार्रवाई पूरी नहीं हो सकी';
   @override
   String get newFolderTitle => 'नया फ़ोल्डर';
   @override
@@ -1144,8 +1128,6 @@ final class HindiStrings extends Strings {
   @override
   String get currentQuickNote => 'मौजूदा क्विक नोट';
   @override
-  String get pinnedSection => 'पिन्ड';
-  @override
   String pinnedSectionCount(int count) => 'पिन्ड · $count';
   @override
   String get templateFolderTitle => 'टेम्पलेट फ़ोल्डर';
@@ -1154,7 +1136,7 @@ final class HindiStrings extends Strings {
   @override
   String get newFromTemplateHere => 'यहाँ टेम्पलेट से नया';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'टेम्पलेट खोला नहीं जा सका';
   @override
   String get templateFormTitle => 'टेम्पलेट भरें';
   @override
@@ -1313,39 +1295,39 @@ final class HindiStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ «$path» बहुत गहरे तक जड़ा है';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'प्रॉपर्टी';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'कच्चा YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'फ़ील्ड';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'प्रॉपर्टी जोड़ें';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'नई प्रॉपर्टी';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'प्रॉपर्टी संपादित करें';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'कुंजी';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'मान';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'प्रकार';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'मदों को अल्पविराम से अलग करें';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'प्रॉपर्टी हटाएँ';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'कोई प्रॉपर्टी नहीं';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'पाठ';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'संख्या';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'दिनांक';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'बूलियन';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'सूची';
   @override
   String frontmatterInvalid(String reason) =>
       'फ़्रंटमैटर नहीं पढ़ा गया: $reason';
@@ -1550,7 +1532,7 @@ final class HindiStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion निर्यात आयात करें';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion निर्यात आयात नहीं हो सका';
   @override
   String dropRejected(String names) =>
       'यहाँ केवल Markdown फ़ाइलें और फ़ोल्डर खुलते हैं: $names';
@@ -1721,8 +1703,6 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutRedo => 'फिर से करें';
   @override
-  String get shortcutChange => 'शॉर्टकट बदलें';
-  @override
   String shortcutCaptureTitle(String command) => '$command के लिए कुंजियाँ';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1822,9 +1802,9 @@ final class HindiStrings extends Strings {
   @override
   String get trashDeletePermanently => 'हमेशा के लिए हटाएँ';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'नोट पुनर्स्थापित या हटाया नहीं जा सका';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'ट्रैश खाली नहीं किया जा सका';
 
   // The open/create library screen.
   @override
@@ -1906,15 +1886,13 @@ final class HindiStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'सेटिंग';
-  @override
   String get libraryPathTitle => 'लाइब्रेरी-पाथ';
   @override
   String get reindexTitle => 'अभी दोबारा इंडेक्स करें';
   @override
   String get reindexDone => 'दोबारा इंडेक्स पूरा';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'लाइब्रेरी दोबारा पढ़ी नहीं जा सकी';
   @override
   String get closeLibraryTitle => 'लाइब्रेरी बंद करें';
   @override
@@ -1944,20 +1922,18 @@ final class HindiStrings extends Strings {
       '«$term» का कोई सटीक पूरा-शब्द मेल नहीं '
       '${only == null ? 'मिला' : '$only में मिला'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'पूरी लाइब्रेरी';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note में';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 नोट में' : '$count नोट्स में';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 नोट लिखी नहीं जा सकी)'
+      : ' ($count नोट्स लिखी नहीं जा सकीं)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'परिचय';
   @override
   String get versionTitle => 'संस्करण';
   @override
@@ -2007,7 +1983,7 @@ final class HindiStrings extends Strings {
       'सिंक आधार सीमा से अधिक होने पर भी रखा जाता है।';
   @override
   String get historyOff =>
-      'इस लाइब्रेरी के लिए इतिहास बंद है (सेटिंग, लाइब्रेरी)।';
+      'इस लाइब्रेरी के लिए इतिहास बंद है (सेटिंग, ट्रैश और क्रोनोलॉजी)।';
   @override
   String get historyLoadFailed => 'इतिहास नहीं पढ़ा जा सका';
   @override
@@ -2292,34 +2268,34 @@ final class HindiStrings extends Strings {
   @override
   String get syncTestFailed => 'जाँच सफल नहीं हुई';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'प्रमाणपत्र पर भरोसा नहीं है';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'प्रमाणपत्र सत्यापित नहीं हो सकता। इस पर तभी भरोसा करें जब इसका '
+      'फ़िंगरप्रिंट सर्वर के दिखाए फ़िंगरप्रिंट से मेल खाता हो।';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'इस प्रमाणपत्र पर भरोसा करें?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      '«$host» का प्रमाणपत्र सत्यापित नहीं हो सकता।\n\nSHA-256 '
+      'फ़िंगरप्रिंट:\n$fingerprint\n\nइस पर तभी भरोसा करें जब यह वही '
+      'प्रमाणपत्र हो जिसकी आप अपेक्षा करते हैं। Niman इस गंतव्य के लिए '
+      'केवल यही एक प्रमाणपत्र स्वीकार करता है, कोई और नहीं।';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'इस प्रमाणपत्र पर भरोसा करें';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'प्रमाणपत्र विश्वसनीय';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'यह प्रमाणपत्र भुला दें?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'यह गंतव्य डिवाइस के प्रमाणपत्र भंडार के सामने फिर जाँचा जाएगा, और '
+      'स्व-हस्ताक्षरित प्रमाणपत्र एक बार फिर पुष्ट करना होगा। और कुछ नहीं '
+      'बदलता।';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'भुला दें';
   @override
   String get syncNowAction => 'अभी सिंक करें';
   @override
@@ -2433,10 +2409,6 @@ final class HindiStrings extends Strings {
   String get syncRetryAction => 'फिर कोशिश करें';
   @override
   String get syncOpenSettingsAction => 'सेटिंग';
-  @override
-  String get syncCloseAction => 'बंद करें';
-  @override
-  String get syncDoneSnack => 'सिंक पूरा हुआ';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'सिंक पूरा हुआ · कहीं और हटाई गई 1 फ़ाइल ट्रैश में है'
@@ -2759,4 +2731,91 @@ final class HindiStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? 'इस टेम्पलेट में 1 समस्या'
       : 'इस टेम्पलेट में $count समस्याएँ';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named में हेडिंग';
+  @override
+  String wikilinkPlacesIn(String named) => '$named में स्थान';
+  @override
+  String get wikilinkThisNote => 'इस नोट में';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      '«$query» से मेल खाती कोई हेडिंग नहीं।';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      '«$query» से मेल खाता कोई नोट नहीं।';
+  @override
+  String get wikilinkNoHeading => 'इस नोट में उस नाम की कोई हेडिंग नहीं है';
+  @override
+  String get wikilinkNoNote => 'लाइब्रेरी में उस नाम या उपनाम वाला कुछ नहीं है';
+  @override
+  String wikilinkAlias(String alias) => 'उपनाम $alias';
+  @override
+  String get wikilinkBookNote =>
+      'पृष्ठ चुना जाता है, सूची से नाम नहीं दिया जाता: उसका नंबर लिखें।';
+  @override
+  String get wikilinkFooterMove => 'खिसकाएँ';
+  @override
+  String get wikilinkFooterOr => 'या';
+  @override
+  String get wikilinkFooterInsert => 'डालें';
+  @override
+  String get wikilinkFooterClose => 'बंद करें';
+  @override
+  String get suggesterPageHint => 'कोई संख्या लिखें';
+  @override
+  String get suggesterChapterHint => 'किताब की कोई फ़ाइल चुनें';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'खुले घुंघराले कोष्ठक बिना बंद हुए: इस प्लेसहोल्डर को कुछ भी बंद नहीं '
+      'करता';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'खाली प्लेसहोल्डर: कोष्ठकों के बीच कोई नाम नहीं';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'अज्ञात प्लेसहोल्डर «$name»';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '«$name» में लेबल नहीं: यह कुछ नहीं पूछता, और प्लेसहोल्डर ज्यों का त्यों '
+      'रहता है';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '«$name» में नाम नहीं: यह कुछ नहीं गिनता, और प्लेसहोल्डर ज्यों का त्यों '
+      'रहता है';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '«$name» फ़िल्टर नहीं लेता: कर्सर नहीं रखा जाता, और प्लेसहोल्डर ज्यों का '
+      'त्यों रहता है';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'तारीख़ के प्रारूप में बिना बंद हुआ उद्धरण चिह्न: इसके बाद सब साधारण पाठ '
+      'की तरह पढ़ा जाता है';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'अज्ञात तारीख़ टोकन «$token»';
+  @override
+  String get templateProblemEmptyFilter =>
+      'खाली फ़िल्टर: «|» के बाद कोई नाम नहीं';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '«$filter» तारीख़ खिसकाता है: खिसकाव सिर्फ़ $formats लेते हैं, और सिर्फ़ '
+      'किसी भी अन्य फ़िल्टर से पहले';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '«$filter» तारीख़ का खिसकाव नहीं है: खिसकाव एक संख्या और एक इकाई है, '
+      'जैसे '
+      '«+7d» या «-1w»';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '«$filter» $units पर लगता है, «$unit» पर नहीं';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '«$filter» की चौड़ाई के लिए संख्या चाहिए, और «$argument» संख्या नहीं है';
+  @override
+  String templateProblemUnknownFilter(String name) => 'अज्ञात फ़िल्टर «$name»';
 }

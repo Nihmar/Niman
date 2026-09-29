@@ -139,11 +139,7 @@ final class DanishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotek';
-  @override
   String get settingsSectionReminders => 'Påmindelser';
-  @override
-  String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Genveje';
 
@@ -187,8 +183,6 @@ final class DanishStrings extends Strings {
   String updateSavedTo(Object path) => 'Opdatering gemt i $path';
   @override
   String get updateInstallerStarted => 'Installationsprogrammet er startet';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostik';
   @override
   String get settingsSpellCheckTitle => 'Stavekontrol';
   @override
@@ -245,8 +239,6 @@ final class DanishStrings extends Strings {
   String get themeBrightnessNight => 'Mørk';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Farverne i grænsefladen og i noten';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -324,16 +316,16 @@ final class DanishStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editoren og forhåndsvisningen, som altid er enige';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Skrifttypen i kildekodeeditoren';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Skrifttypen i kildekodepanelet; forhåndsvisningen beholder notens egen';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Fastbredde';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Uden seriffer';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Med seriffer';
   @override
   String get epubLookTitle => 'Bøgernes udseende';
   @override
@@ -457,7 +449,7 @@ final class DanishStrings extends Strings {
   @override
   String get audioSavingRecording => 'Gemmer…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Lyden kunne ikke afspilles';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -597,10 +589,6 @@ final class DanishStrings extends Strings {
   String get cheatsheetCopied => 'Kopieret';
   @override
   String get cheatsheetInsert => 'Indsæt i noten';
-  @override
-  String get cheatsheetWritten => 'Skrevet';
-  @override
-  String get cheatsheetShown => 'Vist';
   @override
   String get cheatHeadings => 'Overskrifter';
   @override
@@ -744,8 +732,6 @@ final class DanishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Vis editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rå HTML-tabel)';
 
   // Search (T-M3-05).
   @override
@@ -995,8 +981,6 @@ final class DanishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ingen prioritet';
-  @override
   String get todoNoPriorityShort => 'Ingen';
   @override
   String get todoMorePriorities => 'Flere…';
@@ -1091,9 +1075,9 @@ final class DanishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skjul sidepanelet (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skjul sidepanelet';
   @override
-  String get showSidebarTooltip => 'Vis sidepanelet (Ctrl+B)';
+  String get showSidebarTooltip => 'Vis sidepanelet';
   @override
   String get windowMinimizeTooltip => 'Minimer';
   @override
@@ -1129,7 +1113,7 @@ final class DanishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Luk';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Handlingen kunne ikke fuldføres';
   @override
   String get newFolderTitle => 'Ny mappe';
   @override
@@ -1156,8 +1140,6 @@ final class DanishStrings extends Strings {
   @override
   String get currentQuickNote => 'Aktuel kviknote';
   @override
-  String get pinnedSection => 'Fastgjort';
-  @override
   String pinnedSectionCount(int count) => 'Fastgjort · $count';
   @override
   String get templateFolderTitle => 'Skabelonmappe';
@@ -1166,7 +1148,7 @@ final class DanishStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Ny fra skabelon her';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Skabelonen kunne ikke åbnes';
   @override
   String get templateFormTitle => 'Udfyld skabelonen';
   @override
@@ -1331,39 +1313,39 @@ final class DanishStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” er for dybt nystet';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Egenskaber';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Rå YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Felter';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Tilføj en egenskab';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ny egenskab';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Rediger egenskab';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Nøgle';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Værdi';
   @override
   String get frontmatterTypeLabel => 'Type';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Adskil elementer med kommaer';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Fjern egenskab';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Ingen egenskaber';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'tal';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dato';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'boolsk';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'liste';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter blev ikke læst: $reason';
@@ -1571,7 +1553,7 @@ final class DanishStrings extends Strings {
   @override
   String get notionImportTitle => 'Importer Notion-eksport';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-eksporten kunne ikke importeres';
   @override
   String dropRejected(String names) =>
       'Kun Markdown-filer og mapper åbnes her: $names';
@@ -1741,8 +1723,6 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutRedo => 'Gentag';
   @override
-  String get shortcutChange => 'Skift genvejen';
-  @override
   String shortcutCaptureTitle(String command) => 'Taster til $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1841,9 +1821,9 @@ final class DanishStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Slet permanent';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Noten kunne ikke gendannes eller slettes';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Affaldet kunne ikke tømmes';
 
   // The open/create library screen.
   @override
@@ -1925,15 +1905,13 @@ final class DanishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Indstillinger';
-  @override
   String get libraryPathTitle => 'Bibliotekssti';
   @override
   String get reindexTitle => 'Indeksér om nu';
   @override
   String get reindexDone => 'Omindexering fuldført';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteket kunne ikke læses igen';
   @override
   String get closeLibraryTitle => 'Luk biblioteket';
   @override
@@ -1965,20 +1943,18 @@ final class DanishStrings extends Strings {
       'Ingen præcis helt-ord-match på “$term” '
       '${only == null ? 'blev fundet' : 'fundet i $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'hele biblioteket';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'i $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'i 1 note' : 'i $count noter';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 note kunne ikke skrives)'
+      : ' ($count noter kunne ikke skrives)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Om';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2026,7 +2002,8 @@ final class DanishStrings extends Strings {
   String get historyBaseKept => 'Synkbasen bevares ud over grænsen.';
   @override
   String get historyOff =>
-      'Historik er slået fra for dette bibliotek (Indstillinger, Bibliotek).';
+      'Historik er slået fra for dette bibliotek '
+      '(Indstillinger, Affald og historik).';
   @override
   String get historyLoadFailed => 'Kunne ikke læse historikken';
   @override
@@ -2312,34 +2289,34 @@ final class DanishStrings extends Strings {
   @override
   String get syncTestFailed => 'Testen virkede ikke';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikatet er ikke betroet';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikatet kan ikke bekræftes. Stol kun på det, hvis dets '
+      'fingeraftryk svarer til det, serveren viser.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Stol på dette certifikat?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikatet til $host kan ikke '
+      'bekræftes.\n\nSHA-256-fingeraftryk:\n$fingerprint\n\nStol kun på '
+      'det, hvis det er det certifikat, du forventer. Niman accepterer '
+      'kun dette ene certifikat til denne destination og ingen andre.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Stol på dette certifikat';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikatet er betroet';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Glem dette certifikat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Denne destination prøves igen mod enhedens certifikatlager, og et '
+      'selvsigneret certifikat skal bekræftes endnu en gang. Intet andet '
+      'ændres.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Glem';
   @override
   String get syncNowAction => 'Synkronisér nu';
   @override
@@ -2457,10 +2434,6 @@ final class DanishStrings extends Strings {
   String get syncRetryAction => 'Prøv igen';
   @override
   String get syncOpenSettingsAction => 'Indstillinger';
-  @override
-  String get syncCloseAction => 'Luk';
-  @override
-  String get syncDoneSnack => 'Synkroniseret';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkroniseret · 1 fil slettet et andet sted ligger i '
@@ -2791,4 +2764,88 @@ final class DanishStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem i denne skabelon'
       : '$count problemer i denne skabelon';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Overskrifter i $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Steder i $named';
+  @override
+  String get wikilinkThisNote => 'denne note';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ingen overskrift matcher “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) => 'Ingen noter matcher “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'denne note har ingen overskrift med det navn';
+  @override
+  String get wikilinkNoNote => 'intet i biblioteket har det navn eller alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'En side vælges, den navngives ikke fra en liste: skriv dens nummer.';
+  @override
+  String get wikilinkFooterMove => 'flyt';
+  @override
+  String get wikilinkFooterOr => 'eller';
+  @override
+  String get wikilinkFooterInsert => 'indsæt';
+  @override
+  String get wikilinkFooterClose => 'luk';
+  @override
+  String get suggesterPageHint => 'skriv et tal';
+  @override
+  String get suggesterChapterHint => 'navngiv en fil i bogen';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'åbnede krøllparenteser uden slutning: intet lukker denne pladsholder';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tom pladsholder: intet navn mellem krøllparenteserne';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'ukendt pladsholder “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” har ingen etiket: den spørger om intet, og pladsholderen står '
+      'tilbage';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” har intet navn: den tæller intet, og pladsholderen står tilbage';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” tager ingen filtre: markøren placeres ikke, og pladsholderen '
+      'står tilbage';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'uafsluttet citationstegn i datoformatet: alt efter læses som almindelig '
+      'tekst';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'ukendt datotoken “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tomt filter: intet navn efter “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” flytter en dato: kun $formats tager en forskydning, og kun '
+      'før '
+      'ethvert andet filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” er ikke en datoforskydning: en forskydning er et antal og en '
+      'enhed, som “+7d” eller “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” sætter til $units, ikke “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” skal have et tal til bredden, og “$argument” er ikke et';
+  @override
+  String templateProblemUnknownFilter(String name) => 'ukendt filter “$name”';
 }

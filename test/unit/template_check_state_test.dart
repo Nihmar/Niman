@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/templates/check_state.dart';
 
 /// A template with one mistake the checker can fix and one it cannot: an
-/// unknown placeholder, and closing braces with nothing open.
-const String _source = '{{titlex}}\n\ntitle}}\n';
+/// unknown placeholder, and a `pad:` whose width is not a number.
+const String _source = '{{titlex}}\n\n{{title|pad:wide}}\n';
 
 /// A state that has read [source] already, the way one is handed to the
 /// surface when a template opens.
@@ -85,7 +85,7 @@ void main() {
     expect(range.start, 0, reason: 'local to the line, not to the note');
     expect(range.end, 10);
     expect(error.suggestion, '{{title}}');
-    expect(error.message, contains('titlex'));
+    expect(error.parameters, <String>['titlex']);
 
     // A window that holds none of it: the first line.
     expect(check.inRange(0, 3), isEmpty);
@@ -107,10 +107,10 @@ void main() {
   });
 
   test('a span the checker cannot fix is reported with no suggestion', () {
-    final check = _checked('title}}\n');
-    expect(check.problemCount, 1, reason: '`}}` with nothing open');
+    final check = _checked('{{title|pad:wide}}\n');
+    expect(check.problemCount, 1, reason: 'a width only the author knows');
 
-    final error = check.at(5);
+    final error = check.at(2);
     expect(error, isNotNull);
     expect(error?.suggestion, isNull, reason: 'nothing safe to write');
     check.dispose();

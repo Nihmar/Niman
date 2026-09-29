@@ -139,11 +139,7 @@ final class HungarianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Szerkesztő';
   @override
-  String get settingsSectionLibrary => 'Könyvtár';
-  @override
   String get settingsSectionReminders => 'Emlékeztetők';
-  @override
-  String get settingsSectionShortcuts => 'Billentyűzet';
   @override
   String get keyboardShortcutsTitle => 'Billentyűparancsok';
 
@@ -186,8 +182,6 @@ final class HungarianStrings extends Strings {
   String updateSavedTo(Object path) => 'Frissítés mentve ide: $path';
   @override
   String get updateInstallerStarted => 'A telepítő elindult';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnosztika';
   @override
   String get settingsSpellCheckTitle => 'Helyesírásellenőrzés';
   @override
@@ -244,8 +238,6 @@ final class HungarianStrings extends Strings {
   String get themeBrightnessNight => 'Sötét';
   @override
   String get themeTitle => 'Téma';
-  @override
-  String get themeSubtitle => 'A felület és a jegyzet színei';
   @override
   String get themePaletteSystem => 'Rendszer';
   // Settings: the themes page (issue #269).
@@ -325,16 +317,16 @@ final class HungarianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'A szerkesztő és az előnézet mindig azonos';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Forrásszerkesztő betűtípusa';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'A forráspanel betűtípusa; az előnézet a jegyzet sajátját tartja meg';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Fix szélességű';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Talpak nélkül';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Talpas';
   @override
   String get epubLookTitle => 'Könyvek megjelenése';
   @override
@@ -459,7 +451,7 @@ final class HungarianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Mentés…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'A hangot nem sikerült lejátszani';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -600,10 +592,6 @@ final class HungarianStrings extends Strings {
   String get cheatsheetCopied => 'Másolva';
   @override
   String get cheatsheetInsert => 'Beszúrás a jegyzetbe';
-  @override
-  String get cheatsheetWritten => 'Leírva';
-  @override
-  String get cheatsheetShown => 'Megjelenítve';
   @override
   String get cheatHeadings => 'Címsorok';
   @override
@@ -749,8 +737,6 @@ final class HungarianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Szerkesztő megjelenítése';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(nyers HTML táblázat)';
 
   // Search (T-M3-05).
   @override
@@ -1001,8 +987,6 @@ final class HungarianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Nincs prioritás';
-  @override
   String get todoNoPriorityShort => 'Nincs';
   @override
   String get todoMorePriorities => 'Több…';
@@ -1100,9 +1084,9 @@ final class HungarianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Oldalsó sáv elrejtése (Ctrl+B)';
+  String get hideSidebarTooltip => 'Oldalsó sáv elrejtése';
   @override
-  String get showSidebarTooltip => 'Oldalsó sáv megjelenítése (Ctrl+B)';
+  String get showSidebarTooltip => 'Oldalsó sáv megjelenítése';
   @override
   String get windowMinimizeTooltip => 'Kicsinyítés';
   @override
@@ -1138,7 +1122,7 @@ final class HungarianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Bezárás';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'A műveletet nem sikerült befejezni';
   @override
   String get newFolderTitle => 'Új mappa';
   @override
@@ -1165,8 +1149,6 @@ final class HungarianStrings extends Strings {
   @override
   String get currentQuickNote => 'Jelenlegi gyorsjegyzet';
   @override
-  String get pinnedSection => 'Rögzített';
-  @override
   String pinnedSectionCount(int count) => 'Rögzített · $count';
   @override
   String get templateFolderTitle => 'Sablonmappa';
@@ -1175,7 +1157,7 @@ final class HungarianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Új sablonból ide';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'A sablont nem sikerült megnyitni';
   @override
   String get templateFormTitle => 'Sablon kitöltése';
   @override
@@ -1342,39 +1324,39 @@ final class HungarianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ „$path” túl mélyen egymásba illesztve';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Tulajdonságok';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Nyers YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Mezők';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Tulajdonság hozzáadása';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Új tulajdonság';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Tulajdonság szerkesztése';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Kulcs';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Érték';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Típus';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Az elemeket vesszővel válaszd el';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Tulajdonság eltávolítása';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Nincs tulajdonság';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'szöveg';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'szám';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dátum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logikai';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lista';
   @override
   String frontmatterInvalid(String reason) =>
       'A frontmatter nem olvasható: $reason';
@@ -1587,7 +1569,7 @@ final class HungarianStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion-exportálás importálása';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'A Notion-exportot nem sikerült importálni';
   @override
   String dropRejected(String names) =>
       'Itt csak Markdown-fájlok és mappák nyílnak meg: $names';
@@ -1759,8 +1741,6 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ismétlés';
   @override
-  String get shortcutChange => 'Billentyűparancs módosítása';
-  @override
   String shortcutCaptureTitle(String command) => 'Billentyűk: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1862,9 +1842,10 @@ final class HungarianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Végleges törlés';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'A jegyzetet nem sikerült visszaállítani vagy törölni';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'A kukát nem sikerült kiüríteni';
 
   // The open/create library screen.
   @override
@@ -1947,15 +1928,13 @@ final class HungarianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Beállítások';
-  @override
   String get libraryPathTitle => 'A könyvtár útvonala';
   @override
   String get reindexTitle => 'Újra indexelés most';
   @override
   String get reindexDone => 'Újra indexelés kész';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'A könyvtárat nem sikerült újraolvasni';
   @override
   String get closeLibraryTitle => 'Könyvtár bezárása';
   @override
@@ -1987,20 +1966,18 @@ final class HungarianStrings extends Strings {
       'Nincs pontos, teljes szó találat a „$term” esetén'
       '${only == null ? '' : ' a $only-ban'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'a teljes könyvtár';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note fájlban';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 jegyzetben' : '$count jegyzetekben';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 jegyzetet nem sikerült kiírni)'
+      : ' ($count jegyzetet nem sikerült kiírni)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Névjegy';
   @override
   String get versionTitle => 'Verzió';
   @override
@@ -2049,7 +2026,7 @@ final class HungarianStrings extends Strings {
   @override
   String get historyOff =>
       'Az előzmények ki vannak kapcsolva ebben a könyvtárban '
-      '(Beállítások, Könyvtár).';
+      '(Beállítások, Kuka és kronológia).';
   @override
   String get historyLoadFailed => 'Az előzmények nem olvashatók';
   @override
@@ -2338,34 +2315,33 @@ final class HungarianStrings extends Strings {
   @override
   String get syncTestFailed => 'A teszt nem sikerült';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'A tanúsítvány nem megbízható';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'A tanúsítvány nem ellenőrizhető. Csak akkor bízz benne, ha az '
+      'ujjlenyomata megegyezik a szerver által mutatottal.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Megbízni ebben a tanúsítványban?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'A(z) $host tanúsítványa nem ellenőrizhető.\n\nSHA-256 '
+      'ujjlenyomat:\n$fingerprint\n\nCsak akkor bízz benne, ha ez a várt '
+      'tanúsítvány. A Niman ehhez a célhoz csak ezt az egy tanúsítványt '
+      'fogadja el, másikat nem.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Megbízom ebben a tanúsítványban';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Tanúsítvány megbízható';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Elfelejteni ezt a tanúsítványt?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ez a cél újra az eszköz tanúsítványtárával szemben ellenőrződik, és az '
+      'önaláírt tanúsítványt még egyszer meg kell erősíteni. Más nem változik.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Elfelejtés';
   @override
   String get syncNowAction => 'Szinkronizálás most';
   @override
@@ -2483,10 +2459,6 @@ final class HungarianStrings extends Strings {
   String get syncRetryAction => 'Próbáld újra';
   @override
   String get syncOpenSettingsAction => 'Beállítások';
-  @override
-  String get syncCloseAction => 'Bezárás';
-  @override
-  String get syncDoneSnack => 'Szinkronizálva';
   @override
   String syncTrashedSnack(int count) =>
       'Szinkronizálva · $count máshol törölt fájl a kukába került';
@@ -2817,4 +2789,86 @@ final class HungarianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 probléma ebben a sablonban'
       : '$count probléma ebben a sablonban';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Címsorok: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Helyek: $named';
+  @override
+  String get wikilinkThisNote => 'ez a jegyzet';
+  @override
+  String wikilinkNoMatchHeading(String query) => 'Nincs „$query” címsor.';
+  @override
+  String wikilinkNoMatchNote(String query) => 'Nincs „$query” jegyzet.';
+  @override
+  String get wikilinkNoHeading => 'ennek a jegyzetnek nincs ilyen nevű címsora';
+  @override
+  String get wikilinkNoNote =>
+      'a könyvtárban semminek nincs ilyen neve vagy álneve';
+  @override
+  String wikilinkAlias(String alias) => 'álnév: $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Az oldalt kiválasztják, nem listából nevezik meg: írd be a számát.';
+  @override
+  String get wikilinkFooterMove => 'mozgatás';
+  @override
+  String get wikilinkFooterOr => 'vagy';
+  @override
+  String get wikilinkFooterInsert => 'beszúrás';
+  @override
+  String get wikilinkFooterClose => 'bezárás';
+  @override
+  String get suggesterPageHint => 'írj be egy számot';
+  @override
+  String get suggesterChapterHint => 'nevezd meg a könyv egy fájlját';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'nyitó kapcsos zárójel zárás nélkül: semmi nem zárja be ezt a helyőrzőt';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'üres helyőrző: nincs név a kapcsos zárójelek között';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'ismeretlen helyőrző „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” címke nélkül: nem kérdez semmit, és a helyőrző a helyén marad';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” név nélkül: nem számol semmit, és a helyőrző a helyén marad';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nem fogad szűrőket: a kurzor nem kerül a helyére, és a helyőrző '
+      'a helyén marad';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'zárás nélküli idézőjel a dátumformátumban: minden utána közönséges '
+      'szövegként olvasódik';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'ismeretlen dátumjelölő „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'üres szűrő: nincs név a „|” után';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” dátumot mozgat: mozgatást csak a $formats fogad, és csak '
+      'minden más szűrő előtt';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nem dátummozgatás: a mozgatás egy szám és egy egység, mint a '
+      '„+7d” vagy a „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” a $units egységhez igazít, nem a „$unit” egységhez';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” számot kér a szélességéhez, a „$argument” pedig nem az';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'ismeretlen szűrő „$name”';
 }

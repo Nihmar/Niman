@@ -29,7 +29,7 @@ final class FakeLinkSource implements LinkSource {
   );
 
   @override
-  Future<ResolveResult> resolveWiki(String target) async {
+  Future<ResolveResult> resolveWiki(String target, {String? from}) async {
     queries.add('wiki:$target');
     final t = target.trim().toLowerCase();
     if (t.isEmpty) return UnresolvedNote(target: target);
@@ -48,7 +48,7 @@ final class FakeLinkSource implements LinkSource {
   }
 
   @override
-  Future<ResolveResult> resolveMarkdown(String href) async {
+  Future<ResolveResult> resolveMarkdown(String href, {String? from}) async {
     queries.add('md:$href');
     final h = href.trim();
     if (h.startsWith('http://') || h.startsWith('https://')) {

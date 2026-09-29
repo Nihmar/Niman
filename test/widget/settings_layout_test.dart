@@ -63,7 +63,7 @@ void main() {
       expect(find.text(heading), findsOne, reason: heading);
     }
     // The About section is gone: its rows sit under Diagnostics.
-    expect(find.text(AppStrings.settingsSectionAbout), findsNothing);
+    expect(find.text('About'), findsNothing);
   });
 
   testWidgets('no setting is a SegmentedButton any more', (tester) async {

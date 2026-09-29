@@ -4,6 +4,7 @@
 // leaves the temp behind — including when the rename cannot happen.
 // Issue #369: the copy that stands in for the hung rename lands on a temp
 // of its own, so the live path never holds half a file either.
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -147,6 +148,60 @@ void main() {
       );
       expect(seen, contains(-1));
       expect(seen, contains(newSize));
+    });
+
+    test(
+      'a staged rename that hangs is left for a direct copy (issue #492)',
+      () async {
+        // The rename the copy stands in for hangs on Windows (#103), and the
+        // staged rename is a rename too: it gets the same grace, and past it
+        // the bytes go straight on, so a hung swap cannot stall the run.
+        final target = p.join(root.path, 'clip.wav');
+        final source = await temp('.clip.wav.niman-tmp-copy-7', 'audio bytes');
+        var renamed = false;
+
+        await copyFileOver(
+          target,
+          source,
+          grace: const Duration(milliseconds: 50),
+          renameStaged: (staged, abs) async {
+            renamed = true;
+            await Completer<void>().future; // never returns
+          },
+        ).timeout(const Duration(seconds: 5));
+
+        expect(renamed, isTrue);
+        expect(File(target).readAsStringSync(), 'audio bytes');
+        expect(File(source).existsSync(), isFalse);
+        expect(Directory(root.path).listSync().map((e) => p.basename(e.path)), [
+          p.basename(target),
+        ], reason: 'a hung staged rename leaves no temp of its own behind');
+      },
+    );
+
+    test('a staged delete that hangs does not stall the copy (#492)', () async {
+      // After the staged rename is given up on, the staged file goes, and the
+      // abandoned rename may still hold it on Windows: a delete that waits on
+      // that hangs the swap as the rename did. It gets the same grace, and a
+      // temp it could not remove is left where it is.
+      final target = p.join(root.path, 'clip.wav');
+      final source = await temp('.clip.wav.niman-tmp-copy-8', 'audio bytes');
+      var deleteAsked = false;
+
+      await copyFileOver(
+        target,
+        source,
+        grace: const Duration(milliseconds: 50),
+        renameStaged: (staged, abs) => Completer<void>().future,
+        deleteStaged: (staged) {
+          deleteAsked = true;
+          return Completer<void>().future; // never returns
+        },
+      ).timeout(const Duration(seconds: 5));
+
+      expect(deleteAsked, isTrue);
+      expect(File(target).readAsStringSync(), 'audio bytes');
+      expect(File(source).existsSync(), isFalse);
     });
 
     test('a copy that fails leaves the live file exactly as it was', () async {

@@ -143,11 +143,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Уредник';
   @override
-  String get settingsSectionLibrary => 'Библиотека';
-  @override
   String get settingsSectionReminders => 'Подсетници';
-  @override
-  String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Тастатурски прецици';
 
@@ -190,8 +186,6 @@ final class MacedonianStrings extends Strings {
   String updateSavedTo(Object path) => 'Ажурирањето е зачувано во $path';
   @override
   String get updateInstallerStarted => 'Инсталерот е стартуван';
-  @override
-  String get settingsSectionDiagnostics => 'Дијагностика';
   @override
   String get settingsSpellCheckTitle => 'Проверка на правопис';
   @override
@@ -248,8 +242,6 @@ final class MacedonianStrings extends Strings {
   String get themeBrightnessNight => 'Темно';
   @override
   String get themeTitle => 'Тема';
-  @override
-  String get themeSubtitle => 'Бои на интерфејсот и на белешката';
   @override
   String get themePaletteSystem => 'Систем';
   // Settings: the themes page (issue #269).
@@ -328,16 +320,17 @@ final class MacedonianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Уредникот и прегледот, кои секогаш се усогласени';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Фонт на уредувачот на изворниот текст';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Фонтот со кој е сложена панелата со изворниот текст; прегледот ја '
+      'задржува онаа на белешката';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Еднаква ширина';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Без серифи';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Со серифи';
   @override
   String get epubLookTitle => 'Изглед на книгите';
   @override
@@ -461,7 +454,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Се зачувува…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Аудиото не можеше да се пушти';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -607,10 +600,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Вметни во белешката';
   @override
-  String get cheatsheetWritten => 'Напишано';
-  @override
-  String get cheatsheetShown => 'Прикажано';
-  @override
   String get cheatHeadings => 'Наслови';
   @override
   String get cheatEmphasis => 'Задебелено, курзив, прецртано';
@@ -753,8 +742,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Прикажи уредник';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(сурва HTML табела)';
 
   // Search (T-M3-05).
   @override
@@ -1008,8 +995,6 @@ final class MacedonianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без приоритет';
-  @override
   String get todoNoPriorityShort => 'Нема';
   @override
   String get todoMorePriorities => 'Повеќе…';
@@ -1104,9 +1089,9 @@ final class MacedonianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Скриј го страничниот панел (Ctrl+B)';
+  String get hideSidebarTooltip => 'Скриј го страничниот панел';
   @override
-  String get showSidebarTooltip => 'Прикажи го страничниот панел (Ctrl+B)';
+  String get showSidebarTooltip => 'Прикажи го страничниот панел';
   @override
   String get windowMinimizeTooltip => 'Минимизирај';
   @override
@@ -1142,7 +1127,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Затвори';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Дејството не можеше да се заврши';
   @override
   String get newFolderTitle => 'Нова папка';
   @override
@@ -1170,8 +1155,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get currentQuickNote => 'Тековно брзо белешко';
   @override
-  String get pinnedSection => 'Заквакани';
-  @override
   String pinnedSectionCount(int count) => 'Заквакани · $count';
   @override
   String get templateFolderTitle => 'Папка со шаблони';
@@ -1180,7 +1163,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Ново од шаблон овде';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Шаблонот не можеше да се отвори';
   @override
   String get templateFormTitle => 'Пополни го шаблон';
   @override
@@ -1348,39 +1331,39 @@ final class MacedonianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ „$path" е вгнездено премногу длабоко';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Својства';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Суров YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Полиња';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Додај својство';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ново својство';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Уреди својство';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Клуч';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Вредност';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Тип';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Оддели ги ставките со запирки';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Отстрани својство';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Нема својства';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'текст';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'број';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'датум';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'логичко';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'список';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter не е прочитан: $reason';
@@ -1592,7 +1575,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get notionImportTitle => 'Увези извоз од Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Извозот од Notion не можеше да се увезе';
   @override
   String dropRejected(String names) =>
       'Тука се отвораат само Markdown датотеки и папки: $names';
@@ -1762,8 +1745,6 @@ final class MacedonianStrings extends Strings {
   @override
   String get shortcutRedo => 'Повтори';
   @override
-  String get shortcutChange => 'Промени кратенка';
-  @override
   String shortcutCaptureTitle(String command) => 'Копчиња за „$command“';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1865,9 +1846,9 @@ final class MacedonianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Избриши трајно';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Белешката не можеше да се врати или избрише';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Корпата не можеше да се испразни';
 
   // The open/create library screen.
   @override
@@ -1951,15 +1932,13 @@ final class MacedonianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Поставки';
-  @override
   String get libraryPathTitle => 'Патешка на библиотека';
   @override
   String get reindexTitle => 'Повторно индексирај сега';
   @override
   String get reindexDone => 'Повторно индексирано';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Библиотеката не можеше повторно да се прочита';
   @override
   String get closeLibraryTitle => 'Затвори библиотека';
   @override
@@ -1992,20 +1971,19 @@ final class MacedonianStrings extends Strings {
       'Нема точно совпаѓање на цел збор „$term"'
       '${only == null ? 'не е пронајдено' : 'пронајдено во $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'целата библиотека';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'во $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'во $count белешка'
+      : 'во $count белешки';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count белешка не е запишана)'
+      : ' ($count белешки не се запишани)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'За';
   @override
   String get versionTitle => 'Верзија';
   @override
@@ -2054,7 +2032,8 @@ final class MacedonianStrings extends Strings {
       'Основата за синхронизација се чува и над ограничувањето.';
   @override
   String get historyOff =>
-      'Историјата е исклучена за оваа библиотека (Поставки, Библиотека).';
+      'Историјата е исклучена за оваа библиотека '
+      '(Поставки, Корпа и хронологија).';
   @override
   String get historyLoadFailed => 'Не може да се прочита историјата';
   @override
@@ -2340,34 +2319,34 @@ final class MacedonianStrings extends Strings {
   @override
   String get syncTestFailed => 'Тестот не успеа';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Сертификатот не е доверлив';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Сертификатот не може да се потврди. Верувајте му само ако неговиот '
+      'отпечаток се совпаѓа со тој што го покажува серверот.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Да се верува на овој сертификат?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Сертификатот за $host не може да се потврди.\n\nSHA-256 '
+      'отпечаток:\n$fingerprint\n\nВерувајте му само ако е тоа '
+      'очекуваниот сертификат. Niman прифаќа само овој сертификат за '
+      'оваа дестинација и никој друг.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Верувај му на овој сертификат';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Сертификатот е доверен';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Да се заборави овој сертификат?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Оваа дестинација повторно се проверува против складиштето на '
+      'сертификати на уредот и самопотпишан сертификат ќе треба да се потврди '
+      'уште еднаш. Ништо друго не се менува.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Заборави';
   @override
   String get syncNowAction => 'Синхронизирај сега';
   @override
@@ -2487,10 +2466,6 @@ final class MacedonianStrings extends Strings {
   String get syncRetryAction => 'Обиди се повторно';
   @override
   String get syncOpenSettingsAction => 'Поставки';
-  @override
-  String get syncCloseAction => 'Затвори';
-  @override
-  String get syncDoneSnack => 'Синхронизирана';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Синхронизирана · $count датотека избришана на друго место '
@@ -2825,7 +2800,93 @@ final class MacedonianStrings extends Strings {
   @override
   String get templateHintDismissAction => 'Одбаци';
   @override
-  String templateProblems(int count) => count == 1
-      ? '1 проблем во овој шаблон'
+  String templateProblems(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count проблем во овој шаблон'
       : '$count проблеми во овој шаблон';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Наслови во $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Места во $named';
+  @override
+  String get wikilinkThisNote => 'оваа белешка';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ниту еден наслов не се совпаѓа со „$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ниту една белешка не се совпаѓа со „$query".';
+  @override
+  String get wikilinkNoHeading => 'оваа белешка нема наслов со тоа име';
+  @override
+  String get wikilinkNoNote =>
+      'ништо во библиотеката го нема тоа име или алијас';
+  @override
+  String wikilinkAlias(String alias) => 'алијас $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Страницата се избира, не се именува од список: внесете го нејзиниот '
+      'број.';
+  @override
+  String get wikilinkFooterMove => 'помести';
+  @override
+  String get wikilinkFooterOr => 'или';
+  @override
+  String get wikilinkFooterInsert => 'вметни';
+  @override
+  String get wikilinkFooterClose => 'затвори';
+  @override
+  String get suggesterPageHint => 'внесете број';
+  @override
+  String get suggesterChapterHint => 'именувајте датотека во книгата';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'отворени загради без затворање: ништо не го затвора ова место за замена';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'празно место за замена: нема име помеѓу заградите';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'непознато место за замена „$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name" нема ознака: ништо не прашува, а местото за замена останува на '
+      'место';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name" нема име: ништо не брои, а местото за замена останува на место';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name" не прима филтри: кацачкото не се поставува, а местото за замена '
+      'останува на место';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'незатворен наводник во форматот на датумот: сè по него се чита како '
+      'обичен текст';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'непознат токен за датум „$token"';
+  @override
+  String get templateProblemEmptyFilter => 'празен филтер: нема име по „|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter" поместува датум: поместување примаат само $formats, и тоа '
+      'само '
+      'пред кој било друг филтер';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter" не е поместување на датум: поместувањето се број и единица, '
+      'како „+7d" или „-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter" се прицврстува на $units, а не на „$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter" бара број за својата ширина, а „$argument" не е број';
+  @override
+  String templateProblemUnknownFilter(String name) => 'непознат филтер „$name"';
 }

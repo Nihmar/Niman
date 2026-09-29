@@ -56,6 +56,16 @@ abstract interface class ReminderBackend {
   /// what was asked for.
   Future<List<int>> pendingIds();
 
+  /// Tells the backend the whole set the service is reconciling to,
+  /// before it schedules any of it (#497).
+  ///
+  /// A backend that keeps its own record of what it delivered — the
+  /// desktop one, which no OS holds the alarms for — reads from it which
+  /// of its tasks were edited (an id that left the set, an id that came
+  /// in) and which are new. The OS-scheduled backend has no record and
+  /// ignores it.
+  void noteWanted(Iterable<TodoReminder> wanted);
+
   /// Cancels the pending alarm [id], if any.
   Future<void> cancel(int id);
 

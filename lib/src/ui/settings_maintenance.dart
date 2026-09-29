@@ -61,25 +61,6 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
     }
   }
 
-  /// Deletes the index file and reads every note from disk into a fresh one
-  /// (#368): the repair for an index that went bad, which a re-index over the
-  /// damaged file could not do. The library is not forgotten — its entry, its
-  /// workspace, its settings and its sync destination all stay.
-  Future<void> _rebuildIndex(BuildContext context) async {
-    try {
-      await controller.rebuildIndex();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
-      }
-    } on Object catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
-      }
-    }
-  }
-
   /// Imports a Notion export (#25): picks the `.zip` Notion's "Markdown &
   /// CSV" export downloads, brings its pages into a new folder of the
   /// library, and says where they landed.
@@ -120,6 +101,22 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         SnackBar(content: Text(AppStrings.notionImportFailed)),
       );
     }
+  }
+
+  /// Closes the library the one way out of a library does (#493): the open
+  /// notes are written and awaited first, and a note that will not save
+  /// keeps the library open and says why.
+  Future<void> _closeLibrary(BuildContext context) async {
+    final failed = await saveBeforeLeaving(unsaved);
+    if (failed != null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.closeSaveFailed)));
+      }
+      return;
+    }
+    await controller.close();
+    onClosed?.call();
   }
 
   /// Opens the known-library list and switches to whatever is picked
@@ -169,13 +166,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         ),
         HighlightRow(
           key: SettingsKeys.rebuildIndex,
-          child: ListTile(
-            dense: compact,
-            visualDensity: compact ? VisualDensity.compact : null,
-            leading: const Icon(Icons.build_outlined),
-            title: Text(AppStrings.rebuildIndexTitle),
-            onTap: () => _rebuildIndex(context),
-          ),
+          child: _RebuildIndexTile(controller: controller, compact: compact),
         ),
         HighlightRow(
           key: SettingsKeys.notionImport,
@@ -208,14 +199,64 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
               visualDensity: compact ? VisualDensity.compact : null,
               leading: const Icon(Icons.link_off_outlined),
               title: Text(AppStrings.closeLibraryTitle),
-              onTap: () async {
-                await controller.close();
-                onClosed?.call();
-              },
+              onTap: () => _closeLibrary(context),
             ),
           ),
         ],
       ],
     );
   }
+}
+
+/// The "Rebuild index" row (#493): it carries its own busy state, so the
+/// row is disabled while a rebuild runs and a second tap cannot tear down
+/// and delete the fresh index the first is building.
+final class _RebuildIndexTile extends StatefulWidget {
+  const new({required this.controller, required this.compact});
+
+  /// The session whose index is rebuilt.
+  final LibrarySession controller;
+
+  /// Whether the row sits in the desktop's narrow column (#172).
+  final bool compact;
+
+  @override
+  State<_RebuildIndexTile> createState() => _RebuildIndexTileState();
+}
+
+final class _RebuildIndexTileState extends State<_RebuildIndexTile> {
+  bool _rebuilding = false;
+
+  /// Deletes the index file and reads every note from disk into a fresh one
+  /// (#368): the repair for an index that went bad, which a re-index over the
+  /// damaged file could not do. The library is not forgotten — its entry, its
+  /// workspace, its settings and its sync destination all stay.
+  Future<void> _rebuild() async {
+    setState(() => _rebuilding = true);
+    try {
+      await widget.controller.rebuildIndex();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
+      }
+    } on Object catch (error) {
+      const AppLogger(name: 'maintenance')
+          .error('index rebuild failed: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.reindexFailed)));
+      }
+    } finally {
+      if (mounted) setState(() => _rebuilding = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    dense: widget.compact,
+    visualDensity: widget.compact ? VisualDensity.compact : null,
+    leading: const Icon(Icons.build_outlined),
+    title: Text(AppStrings.rebuildIndexTitle),
+    onTap: _rebuilding ? null : _rebuild,
+  );
 }

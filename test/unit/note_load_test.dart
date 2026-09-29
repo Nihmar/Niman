@@ -92,6 +92,55 @@ void main() {
     expect((loaded as NoteReadFailure).notText, isTrue);
   });
 
+  test(
+    'a lone U+0000 in a long note is text, for both readers (#496)',
+    () async {
+      // The rule is the NUL's share of the file, the same one the index,
+      // replace and export read by: one NUL among the words of a note is a
+      // stray character, not a sign of a binary file. Both the editor loader
+      // and the reload path open it, and keep the character.
+      const text = 'A long enough note, with words.\nOne\u0000stray NUL.\n';
+      final file = File(p.join(dir.path, 'nul.md'))..writeAsStringSync(text);
+      final loaded = await loadNote(file.path);
+      expect(loaded, isA<LoadedNote>());
+      expect((loaded as LoadedNote).text, text);
+      expect(await readNoteText(file.path), text);
+    },
+  );
+
+  test(
+    'a file that is a third NUL is binary, for both readers (#496)',
+    () async {
+      // `a\0b` is one NUL in three bytes, the share the rule draws the line
+      // at: both readers refuse it, the same answer, rather than one taking it
+      // and the other not.
+      final file = File(p.join(dir.path, 'binary.md'))
+        ..writeAsBytesSync(<int>[0x61, 0x00, 0x62]);
+      final loaded = await loadNote(file.path);
+      expect(loaded, isA<NoteReadFailure>());
+      expect((loaded as NoteReadFailure).notText, isTrue);
+      final reread = await readNoteText(file.path);
+      expect(reread, isA<NoteReadFailure>());
+      expect((reread as NoteReadFailure).notText, isTrue);
+    },
+  );
+
+  test('a text note is decoded once, by either reader (#496)', () {
+    // Deciding that a note is text used to decode it, and reading it decoded
+    // it again: on the 246 MB stress note a second transient copy and a
+    // second pass. A counter, not a clock.
+    final file = File(p.join(dir.path, 'once.md'))
+      ..writeAsStringSync('# Title\n\nwords in città\n');
+
+    var decodes = noteBytesNativeDecodes;
+    expect(loadNoteSync(file.path), isA<LoadedNote>());
+    expect(noteBytesNativeDecodes - decodes, 1, reason: 'the loader');
+
+    decodes = noteBytesNativeDecodes;
+    expect(readNoteTextSync(file.path), '# Title\n\nwords in città\n');
+    expect(noteBytesNativeDecodes - decodes, 1, reason: 'the reload path');
+  });
+
   test('line endings are made LF, and an LF note is left as it is', () {
     expect(normalizedLineEndings('a\r\nb\rc\n'), 'a\nb\nc\n');
     const lf = 'a\nb\n';

@@ -13,8 +13,10 @@
 /// writes it back as the reader moves, so a copy the sync just brought is
 /// what the next open reads. The writes of one library run one after the
 /// other, each reading the file afresh, so two panes never lose each
-/// other's entry. A write drops the entries of files that are gone (#367),
-/// so the file does not grow with every book since deleted.
+/// other's entry. The entries of books the library saw leave are dropped
+/// (#367), on the deletion rather than on the next write: a write does not
+/// stat the library, so a position the sync brought for a book whose file
+/// has not arrived yet is not mistaken for a deleted one (#492).
 library;
 
 import 'dart:async';
@@ -84,15 +86,35 @@ final class ReadingPositions {
     return true;
   });
 
+  /// Drops the entries of [paths], library-relative, and of the books under
+  /// them: the files the library saw leave (#492).
+  ///
+  /// Only a deletion the library observed comes through here. A write does
+  /// not drop an absent file on its own: on this device that can be a
+  /// position the sync brought for a book whose file has not arrived yet,
+  /// and dropping it would delete the other device's position at the next
+  /// sync.
+  Future<void> removed(Iterable<String> paths) {
+    final gone = paths.toList(growable: false);
+    if (gone.isEmpty) return Future<void>.value();
+    return _update((entries) {
+      final leaving =
+          entries.keys
+              .where(
+                (key) => gone.any((path) => key == path || isUnder(path, key)),
+              )
+              .toList(growable: false)
+            ..forEach(entries.remove);
+      return leaving.isNotEmpty;
+    });
+  }
+
   /// Runs [change] over the entries, after every earlier write of this
   /// library, and writes them back when it says it changed them.
   ///
-  /// The write drops the entries whose file is gone from the library
-  /// (#367), and does both that and the encoding on a background isolate:
-  /// the file is one of the sync's library state files, rewritten whole on
-  /// every rest, and a `stat` per entry on the UI isolate is a FUSE round
-  /// trip on Android (AGENTS.md). The on-disk format is unchanged, so a
-  /// build that predates the pruning still reads the file.
+  /// The encoding and the write run on a background isolate: the file is
+  /// one of the sync's library state files, rewritten whole on every rest
+  /// (AGENTS.md). The on-disk format is unchanged.
   Future<void> _update(
     bool Function(Map<String, Object?> entries) change,
   ) async {
@@ -104,7 +126,7 @@ final class ReadingPositions {
       if (before != null) await before;
       final entries = await _load();
       if (!change(entries)) return;
-      await Isolate.run(() => _pruneAndWrite(root, entries));
+      await Isolate.run(() => _writeEntries(root, entries));
     } on Object catch (error) {
       _log.warning('could not write $filePath: $error');
     } finally {
@@ -133,22 +155,15 @@ final class ReadingPositions {
   }
 }
 
-/// Drops the entries of [entries] whose file is gone from the library at
-/// [root], then writes what is left to `.niman/reading.json` (#367).
+/// Encodes [entries] and writes them whole to `.niman/reading.json`.
 ///
 /// Top level for `Isolate.run`: the closure carries only [root] and
-/// [entries], both plain values. The existence of every entry's file is a
-/// `stat`, and the file is re-encoded and written whole, so the work stays
-/// off the UI isolate (AGENTS.md). The format is what it always was — an
-/// object keyed by library-relative path — so an older build reads it
-/// unchanged.
-Future<void> _pruneAndWrite(String root, Map<String, Object?> entries) async {
-  final kept = <String, Object?>{
-    for (final entry in entries.entries)
-      if (File(p.join(root, entry.key)).existsSync()) entry.key: entry.value,
-  };
+/// [entries], both plain values, so the re-encode and the write stay off the
+/// UI isolate (AGENTS.md). The format is what it always was — an object
+/// keyed by library-relative path — so an older build reads it unchanged.
+Future<void> _writeEntries(String root, Map<String, Object?> entries) async {
   final file = File(p.join(root, ReadingPositions.filePath));
   await file.parent.create(recursive: true);
-  final text = const JsonEncoder.withIndent('  ').convert(kept);
+  final text = const JsonEncoder.withIndent('  ').convert(entries);
   await writeFileAtomically(file, utf8.encode('$text\n'));
 }

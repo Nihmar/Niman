@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
 
 /// Suffix added to the target name when writing a temporary file.
@@ -276,7 +277,7 @@ String sanitizeName(String input, {required String fallback}) {
   name = name.replaceAll(_invalidChars, '');
   name = name.replaceAll(_whitespaceRuns, ' ');
   name = name.replaceAll(_trailingSpaceOrDot, '').trim();
-  name = _withoutReservedStem(name);
+  name = withoutReservedStem(name);
   // Cutting and trimming cannot make a device's stem of one that was not:
   // they keep the first dot when it falls inside the budget, and a stem
   // that runs past it is far longer than any device name.
@@ -289,7 +290,11 @@ String sanitizeName(String input, {required String fallback}) {
 }
 
 /// [name] with a prefix in front when its stem names a Windows device.
-String _withoutReservedStem(String name) {
+///
+/// The one mapping [sanitizeName] applies to a name on every platform, so
+/// it is also what a link target is matched by: `[[Aux]]` and the `_Aux.md`
+/// the app creates for it are one name (#491).
+String withoutReservedStem(String name) {
   final dot = name.indexOf('.');
   final stem = (dot < 0 ? name : name.substring(0, dot)).replaceAll(
     _trailingSpaceOrDot,
@@ -348,15 +353,57 @@ int _utf8Length(int rune) {
 /// it — a candidate found among the entries belongs to somebody else, and
 /// the collision stands. Only the exact spelling is taken without asking,
 /// or the rename would replace the other note.
-bool _excludedEntry(Directory dir, String abs, String? exclude) =>
-    isExcludedEntry(
-      abs,
-      exclude,
-      foldsCase: _caseInsensitivePaths,
-      entryNames: () => dir
-          .listSync(followLinks: false)
-          .map((entry) => p.basename(entry.path)),
-    );
+Future<bool> _excludedEntry(Directory dir, String abs, String? exclude) =>
+    excludedEntryIn(dir.path, abs, exclude, foldsCase: _caseInsensitivePaths);
+
+/// [_excludedEntry] with the folder's path and the platform's folding handed
+/// in, so a case-only rename's lookup can be pinned in a test on any host.
+@visibleForTesting
+Future<bool> excludedEntryIn(
+  String dir,
+  String abs,
+  String? exclude, {
+  required bool foldsCase,
+}) async {
+  // The folder's own names settle one case only — a candidate differing from
+  // the entry being renamed in case alone. Run the decision with a callback
+  // that records whether it is reached, so the walk is done only when it
+  // decides the answer.
+  var asked = false;
+  final decided = isExcludedEntry(
+    abs,
+    exclude,
+    foldsCase: foldsCase,
+    entryNames: () {
+      asked = true;
+      return const <String>[];
+    },
+  );
+  if (!asked) return decided;
+  // The walk is O(entries), and a case-only rename asks it of whatever folder
+  // the note is in: a library of tens of thousands of notes must not pay it on
+  // the UI isolate. The closure carries the two strings alone, so the isolate
+  // can take it.
+  final name = p.basename(abs);
+  final held = await IsolateGauge.run(
+    () => _holdsName(dir, name),
+    'rename "$name"',
+  );
+  return !held;
+}
+
+/// Whether the directory at [dir] holds an entry named [name] exactly as
+/// written.
+///
+/// Top-level and synchronous so `Isolate.run` can take it: its closure
+/// carries two strings, and the `listSync` behind it cannot run on the UI
+/// isolate. A filesystem that folds case answers for either spelling of a
+/// path, so only the folder's own listing says whether the name belongs to
+/// somebody else (#354, #492).
+bool _holdsName(String dir, String name) =>
+    Directory(dir)
+        .listSync(followLinks: false)
+        .any((entry) => p.basename(entry.path) == name);
 
 /// The decision [_excludedEntry] makes, with what it asks the platform and
 /// the directory handed in: whether its filesystems fold case, and the names
@@ -406,7 +453,7 @@ Future<String> uniqueFileName(
   for (var i = 0; i < _uniqueAttempts; i++) {
     final candidate = i == 0 ? '$base$ext' : '${base}_$i$ext';
     final abs = p.join(dir.path, candidate);
-    if (_excludedEntry(dir, abs, exclude)) return candidate;
+    if (await _excludedEntry(dir, abs, exclude)) return candidate;
     if (!_entryExists(abs)) {
       return candidate;
     }
@@ -425,7 +472,7 @@ Future<String> uniqueFolderName(
   for (var i = 0; i < _uniqueAttempts; i++) {
     final candidate = i == 0 ? base : '${base}_$i';
     final abs = p.join(dir.path, candidate);
-    if (_excludedEntry(dir, abs, exclude)) return candidate;
+    if (await _excludedEntry(dir, abs, exclude)) return candidate;
     if (!_entryExists(abs)) {
       return candidate;
     }

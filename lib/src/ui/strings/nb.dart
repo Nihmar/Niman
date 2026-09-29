@@ -138,11 +138,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotek';
-  @override
   String get settingsSectionReminders => 'Påminnelser';
-  @override
-  String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturforkortelser';
 
@@ -186,8 +182,6 @@ final class NorwegianStrings extends Strings {
   String updateSavedTo(Object path) => 'Oppdateringen er lagret i $path';
   @override
   String get updateInstallerStarted => 'Installasjonsprogrammet er startet';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostikk';
   @override
   String get settingsSpellCheckTitle => 'Stavekontroll';
   @override
@@ -244,8 +238,6 @@ final class NorwegianStrings extends Strings {
   String get themeBrightnessNight => 'Mørk';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Fargene i grensesnittet og i notatet';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -322,16 +314,17 @@ final class NorwegianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editoren og forhåndsvisingen, som alltid er enige';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Skrifttypen til kildekodeeditoren';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Skrifttypen kildekodepanelet er satt i; forhåndsvisningen beholder '
+      'notatets egen';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Fast bredde';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Uten seriffer';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Med seriffer';
   @override
   String get epubLookTitle => 'Bøkenes utseende';
   @override
@@ -455,7 +448,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Lagrer…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Lyden kunne ikke spilles av';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -596,10 +589,6 @@ final class NorwegianStrings extends Strings {
   String get cheatsheetCopied => 'Kopiert';
   @override
   String get cheatsheetInsert => 'Sett inn i notatet';
-  @override
-  String get cheatsheetWritten => 'Skrevet';
-  @override
-  String get cheatsheetShown => 'Vist';
   @override
   String get cheatHeadings => 'Overskrifter';
   @override
@@ -743,8 +732,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Vis editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rå HTML-tabell)';
 
   // Search (T-M3-05).
   @override
@@ -992,8 +979,6 @@ final class NorwegianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ingen prioritet';
-  @override
   String get todoNoPriorityShort => 'Ingen';
   @override
   String get todoMorePriorities => 'Flere…';
@@ -1088,9 +1073,9 @@ final class NorwegianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skjul sidepanelet (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skjul sidepanelet';
   @override
-  String get showSidebarTooltip => 'Vis sidepanelet (Ctrl+B)';
+  String get showSidebarTooltip => 'Vis sidepanelet';
   @override
   String get windowMinimizeTooltip => 'Minimer';
   @override
@@ -1126,7 +1111,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Lukk';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Handlingen kunne ikke fullføres';
   @override
   String get newFolderTitle => 'Ny mappe';
   @override
@@ -1153,8 +1138,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get currentQuickNote => 'Gjeldende hurtignotat';
   @override
-  String get pinnedSection => 'Festet';
-  @override
   String pinnedSectionCount(int count) => 'Festet · $count';
   @override
   String get templateFolderTitle => 'Malmappe';
@@ -1163,7 +1146,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Ny fra mal her';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Malen kunne ikke åpnes';
   @override
   String get templateFormTitle => 'Fyll inn malen';
   @override
@@ -1328,39 +1311,39 @@ final class NorwegianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” er for dypt nøstet';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Egenskaper';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Rå YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Felter';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Legg til en egenskap';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ny egenskap';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Rediger egenskap';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Nøkkel';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Verdi';
   @override
   String get frontmatterTypeLabel => 'Type';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Skill elementer med komma';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Fjern egenskap';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Ingen egenskaper';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'tall';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dato';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'boolsk';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'liste';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter ikke lest: $reason';
   @override
@@ -1565,7 +1548,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importer Notion-eksport';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-eksporten kunne ikke importeres';
   @override
   String dropRejected(String names) =>
       'Bare Markdown-filer og mapper åpnes her: $names';
@@ -1734,8 +1717,6 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutRedo => 'Gjør om';
   @override
-  String get shortcutChange => 'Endre snarveien';
-  @override
   String shortcutCaptureTitle(String command) => 'Taster for $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1835,9 +1816,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Slett permanent';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Notatet kunne ikke gjenopprettes eller slettes';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Papirkorgen kunne ikke tømmes';
 
   // The open/create library screen.
   @override
@@ -1920,15 +1902,13 @@ final class NorwegianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Innstillinger';
-  @override
   String get libraryPathTitle => 'Bibliotekssti';
   @override
   String get reindexTitle => 'Indeksér om nå';
   @override
   String get reindexDone => 'Omindexering fullført';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteket kunne ikke leses på nytt';
   @override
   String get closeLibraryTitle => 'Lukk biblioteket';
   @override
@@ -1960,20 +1940,18 @@ final class NorwegianStrings extends Strings {
       'Ingen eksakt helt-ord-treff på “$term” '
       '${only == null ? 'ble funnet' : 'funnet i $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'hele biblioteket';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'i $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'i 1 notat' : 'i $count notater';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 notat kunne ikke skrives)'
+      : ' ($count notater kunne ikke skrives)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Om';
   @override
   String get versionTitle => 'Versjon';
   @override
@@ -2023,7 +2001,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get historyOff =>
       'Historikk er slått av for dette biblioteket '
-      '(Innstillinger, Bibliotek).';
+      '(Innstillinger, Papirkorg og historikk).';
   @override
   String get historyLoadFailed => 'Kunne ikke lese historikken';
   @override
@@ -2309,34 +2287,34 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testen mislyktes';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikatet er ikke betrodd';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikatet kan ikke bekreftes. Stol på det bare hvis fingeravtrykket '
+      'stemmer med det serveren viser.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Stol på dette sertifikatet?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Sertifikatet for $host kan ikke '
+      'bekreftes.\n\nSHA-256-fingeravtrykk:\n$fingerprint\n\nStol på det '
+      'bare hvis det er sertifikatet du forventer. Niman godtar bare '
+      'dette ene sertifikatet for denne destinasjonen, og ingen andre.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Stol på dette sertifikatet';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikatet er betrodd';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Glem dette sertifikatet?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Denne destinasjonen prøves på nytt mot enhetens sertifikatlager, og et '
+      'selvsignert sertifikat må bekreftes enda en gang. Ingenting annet '
+      'endres.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Glem';
   @override
   String get syncNowAction => 'Synkroniser nå';
   @override
@@ -2453,10 +2431,6 @@ final class NorwegianStrings extends Strings {
   String get syncRetryAction => 'Prøv igjen';
   @override
   String get syncOpenSettingsAction => 'Innstillinger';
-  @override
-  String get syncCloseAction => 'Lukk';
-  @override
-  String get syncDoneSnack => 'Synkronisert';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkronisert · 1 fil slettet et annet sted ligger i '
@@ -2786,4 +2760,92 @@ final class NorwegianStrings extends Strings {
   @override
   String templateProblems(int count) =>
       count == 1 ? '1 problem i denne malen' : '$count problemer i denne malen';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Overskrifter i $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Steder i $named';
+  @override
+  String get wikilinkThisNote => 'dette notatet';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ingen overskrift samsvarer med “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ingen notater samsvarer med “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'dette notatet har ingen overskrift med det navnet';
+  @override
+  String get wikilinkNoNote =>
+      'ingenting i biblioteket har det navnet eller aliaset';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'En side velges, den navngis ikke fra en liste: skriv inn nummeret.';
+  @override
+  String get wikilinkFooterMove => 'flytt';
+  @override
+  String get wikilinkFooterOr => 'eller';
+  @override
+  String get wikilinkFooterInsert => 'sett inn';
+  @override
+  String get wikilinkFooterClose => 'lukk';
+  @override
+  String get suggesterPageHint => 'skriv et tall';
+  @override
+  String get suggesterChapterHint => 'navngi en fil i boken';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'åpnede krøllparenteser uten slutt: ingenting lukker denne plassholderen';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tom plassholder: ingen navn mellom krøllparentesene';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'ukjent plassholder “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” har ingen etikett: den spør om ingenting, og plassholderen blir '
+      'stående';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” har ingen navn: den teller ingenting, og plassholderen blir '
+      'stående';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” tar ingen filtre: markøren plasseres ikke, og plassholderen '
+      'blir '
+      'stående';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'uavsluttet anførselstegn i datoformatet: alt etter leses som vanlig '
+      'tekst';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'ukjent datotoken “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tomt filter: ingen navn etter “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” flytter en dato: bare $formats tar en forskyvning, og bare '
+      'før '
+      'ethvert annet filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” er ikke en datoforskyvning: en forskyvning er et antall og en '
+      'enhet, som “+7d” eller “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” fester til $units, ikke “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” trenger et tall for bredden, og “$argument” er ikke ett';
+  @override
+  String templateProblemUnknownFilter(String name) => 'ukjent filter “$name”';
 }

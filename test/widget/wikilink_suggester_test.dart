@@ -333,6 +333,51 @@ void main() {
     expect(buffer.text, '[[Dune.pdf#page=');
   });
 
+  testWidgets('the number typed after a book form is not overwritten', (
+    tester,
+  ) async {
+    // `[[Dune.pdf#` and Enter write the form `page=`, leaving the caret on
+    // its `=` for the number. What follows is the writer's number, which no
+    // row completes: a second key wrote the form over it (#494).
+    const written = '[[Dune.pdf#page=12';
+    final suggester = FakeWikilinkSuggester(
+      places: const <BookSuggestion>[
+        BookSuggestion(form: 'page=', hint: 'type a number'),
+      ],
+    );
+
+    Future<String> form(LogicalKeyboardKey key) async {
+      final buffer = SourceBuffer.fromText('');
+      final state = await pump(tester, buffer, suggester);
+      await type(tester, '[[Dune.pdf#');
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Dune.pdf#page=');
+
+      await type(tester, written);
+      expect(
+        state.isSuggesterShown,
+        isFalse,
+        reason: 'the form is written through: nothing is left to complete',
+      );
+
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+      return buffer.text;
+    }
+
+    for (final key in <LogicalKeyboardKey>[
+      LogicalKeyboardKey.enter,
+      LogicalKeyboardKey.tab,
+    ]) {
+      expect(
+        await form(key),
+        startsWith(written),
+        reason: '$key leaves the number the writer typed',
+      );
+    }
+  });
+
   testWidgets('the footer carries the keys the panel answers', (tester) async {
     final buffer = SourceBuffer.fromText('');
     await pump(tester, buffer, _library());
@@ -647,6 +692,233 @@ void main() {
         LogicalKeyboardKey.tab,
       );
       expect(text, '[[Meeting notes]] and [[Notes]]');
+    });
+  });
+
+  group('a note the panel was not opened on', () {
+    /// Pumps the view over [buffer] with [suggester] and hands back its state.
+    /// [focus] taps it, so the platform's own text path is the one a keystroke
+    /// takes: only the first pump of a test needs it, the shell rebuilding the
+    /// view leaving the focus — and the keyboard — where they were.
+    Future<MarkdownSourceViewState> view(
+      WidgetTester tester,
+      SourceBuffer buffer,
+      FakeWikilinkSuggester suggester, {
+      bool focus = false,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MarkdownSourceView(
+              buffer: buffer,
+              theme: _theme,
+              showLineNumbers: false,
+              wikilinkSuggester: suggester,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      if (focus) {
+        await tester.tap(find.byType(MarkdownSourceView));
+        await tester.pump();
+      }
+      return tester.state<MarkdownSourceViewState>(
+        find.byType(MarkdownSourceView),
+      );
+    }
+
+    testWidgets('a swapped buffer closes the panel', (tester) async {
+      // The shell loads another note into the same view — the note view's
+      // own key keeps the state — and the panel held offsets into the text
+      // that went: the key after it wrote a completion into the new note.
+      final first = SourceBuffer.fromText('');
+      final state = await view(tester, first, _library(), focus: true);
+      await type(tester, '[[Note');
+      expect(state.isSuggesterShown, isTrue);
+      expect(panel(tester).entries, isNotEmpty, reason: 'a key would write');
+
+      final second = SourceBuffer.fromText('Another note\n');
+      final reopened = await view(tester, second, _library());
+      expect(
+        identical(state, reopened),
+        isTrue,
+        reason: 'one view, another note: the panel held the old offsets',
+      );
+      expect(state.isSuggesterShown, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(second.text, 'Another note\n', reason: 'the key went to the note');
+    });
+
+    testWidgets('a revision made behind the view closes the panel', (
+      tester,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final state = await view(tester, buffer, _library(), focus: true);
+      await type(tester, '[[Note');
+      expect(state.isSuggesterShown, isTrue);
+
+      // An edit this view did not make — a command, a revert — read on the
+      // frame the shell rebuilds it in: the link the panel stood in is not
+      // there any more.
+      buffer.replaceRange(0, 0, '# Other\n');
+      final reopened = await view(tester, buffer, _library());
+      expect(identical(state, reopened), isTrue);
+      expect(state.isSuggesterShown, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        buffer.text,
+        isNot(contains('Notes]]')),
+        reason: 'the key went to the note',
+      );
+    });
+  });
+
+  group('the note replaced under the panel', () {
+    Future<MarkdownSourceViewState> open(
+      WidgetTester tester,
+      SourceBuffer buffer,
+    ) async {
+      final state = await pump(tester, buffer, _library());
+      await type(tester, '[[Note');
+      expect(state.isSuggesterShown, isTrue);
+      expect(panel(tester).entries, isNotEmpty, reason: 'a key would write');
+      return state;
+    }
+
+    testWidgets('replacing the whole text closes the panel', (tester) async {
+      // The disk or the WYSIWYG says the note is another text: the panel held
+      // offsets into the text that went, and the key after it wrote a
+      // completion into the new one (#494).
+      final buffer = SourceBuffer.fromText('');
+      final state = await open(tester, buffer);
+
+      state.replaceAll('Another note that is longer than the link was\n');
+      await tester.pump();
+      expect(state.isSuggesterShown, isFalse);
+      expect(find.byType(WikilinkPanel), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        buffer.text,
+        isNot(contains(']]')),
+        reason: 'the key went to the note',
+      );
+    });
+
+    testWidgets('an undo follows the text it left, or closes', (tester) async {
+      // An undo is an edit no keystroke made: the link the panel stood in is
+      // gone, and so must the panel be.
+      final buffer = SourceBuffer.fromText('');
+      final state = await open(tester, buffer);
+
+      expect(state.undo(), isTrue);
+      await tester.pump();
+      expect(buffer.text, isNot(contains('[[')), reason: 'the link is undone');
+      expect(state.isSuggesterShown, isFalse);
+    });
+  });
+
+  group('a link typed in code', () {
+    /// Types [text] with the caret at [caret] and holds that the library was
+    /// not asked and the key that follows writes no link: nothing but the
+    /// code's own text is left.
+    Future<void> typedInCode(
+      WidgetTester tester,
+      String text,
+      int caret,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+
+      await type(tester, text, caret: caret);
+
+      expect(suggester.noteQueries, isEmpty, reason: 'the library was asked');
+      expect(state.isSuggesterShown, isFalse);
+      expect(find.byType(WikilinkPanel), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        buffer.text,
+        isNot(contains(']]')),
+        reason: 'the key went to the code',
+      );
+      expect(buffer.text, isNot(contains('Notes')), reason: 'no note name');
+    }
+
+    testWidgets('a fenced block lists nothing', (tester) async {
+      // A bash fence, the caret after the `[[Note` typed in it: the panel
+      // listed the library and Enter wrote a note name and its `]]` into the
+      // code.
+      await typedInCode(tester, '```bash\n[[Note\n```\n', 14);
+    });
+
+    testWidgets('inline code lists nothing', (tester) async {
+      await typedInCode(tester, 'text `[[Note` more\n', 12);
+    });
+
+    testWidgets('display maths lists nothing', (tester) async {
+      await typedInCode(tester, '\$\$\n[[Note\n\$\$\n', 9);
+    });
+
+    testWidgets('inline maths lists nothing', (tester) async {
+      await typedInCode(tester, 'x \$[[Note\$ y\n', 9);
+    });
+
+    testWidgets('a note whose colours are unread opens none, then does', (
+      tester,
+    ) async {
+      // A long note is read in the background: until it lands its lines have
+      // no tokens, which is "nobody has read it yet" and not "no code here" —
+      // the fence the caret is in was answered as prose (#494).
+      MarkdownSourceViewState.backgroundLines = 2;
+      addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+      // Long enough for the reading to be in the background.
+      final buffer = SourceBuffer.fromText('\n\n\n');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+
+      await type(tester, '```bash\n[[Note\n```\n', caret: 14);
+      expect(state.tokensOf(1), isEmpty, reason: 'nobody has read the line');
+      expect(suggester.noteQueries, isEmpty, reason: 'the library was asked');
+      expect(state.isSuggesterShown, isFalse);
+
+      for (var round = 0; round < 50 && state.tokensOf(1).isEmpty; round++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+      expect(state.tokensOf(1), isNotEmpty, reason: 'the reading landed');
+      // Read, the fence is code: still none there.
+      await type(tester, '```bash\n[[Notes\n```\n', caret: 15);
+      expect(suggester.noteQueries, isEmpty);
+      expect(state.isSuggesterShown, isFalse);
+
+      // And a link in prose is the writer's once the line is read.
+      await type(tester, '[[Note\n', caret: 6);
+      expect(state.isSuggesterShown, isTrue);
+      expect(suggester.noteQueries, ['Note']);
+    });
+
+    testWidgets('a link after a span is prose still', (tester) async {
+      // The caret past a span's last delimiter is outside it, and so is the
+      // `[[` the link was read from: the ordinary panel is the writer's.
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+
+      await type(tester, 'a `x` [[Note\n', caret: 12);
+
+      expect(state.isSuggesterShown, isTrue);
+      expect(suggester.noteQueries, ['Note']);
     });
   });
 

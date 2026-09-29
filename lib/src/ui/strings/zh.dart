@@ -129,11 +129,7 @@ final class ChineseStrings extends Strings {
   @override
   String get settingsSectionEditor => '编辑器';
   @override
-  String get settingsSectionLibrary => '文库';
-  @override
   String get settingsSectionReminders => '提醒';
-  @override
-  String get settingsSectionShortcuts => '键盘';
   @override
   String get keyboardShortcutsTitle => '键盘快捷键';
 
@@ -174,8 +170,6 @@ final class ChineseStrings extends Strings {
   String updateSavedTo(Object path) => '更新已保存到 $path';
   @override
   String get updateInstallerStarted => '安装程序已启动';
-  @override
-  String get settingsSectionDiagnostics => '诊断';
   @override
   String get settingsSpellCheckTitle => '拼写检查';
   @override
@@ -227,8 +221,6 @@ final class ChineseStrings extends Strings {
   String get themeBrightnessNight => '深色';
   @override
   String get themeTitle => '主题';
-  @override
-  String get themeSubtitle => '界面和笔记的颜色';
   @override
   String get themePaletteSystem => '跟随系统';
   // Settings: the themes page (issue #269).
@@ -300,16 +292,15 @@ final class ChineseStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => '编辑器与预览，两者始终一致';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => '源码编辑器字体';
   @override
-  String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+  String get sourceFontSubtitle => '源码面板所用的字体；预览保留笔记自身的字体';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => '等宽';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => '无衬线';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => '衬线';
   @override
   String get epubLookTitle => '书籍外观';
   @override
@@ -430,7 +421,7 @@ final class ChineseStrings extends Strings {
   @override
   String get audioSavingRecording => '正在保存…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => '无法播放此音频';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -566,10 +557,6 @@ final class ChineseStrings extends Strings {
   String get cheatsheetCopied => '已复制';
   @override
   String get cheatsheetInsert => '插入到笔记';
-  @override
-  String get cheatsheetWritten => '写法';
-  @override
-  String get cheatsheetShown => '效果';
   @override
   String get cheatHeadings => '标题';
   @override
@@ -711,8 +698,6 @@ final class ChineseStrings extends Strings {
   @override
   String get showEditorTooltip => '显示编辑器';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '（原始 HTML 表格）';
 
   // Search (T-M3-05).
   @override
@@ -937,8 +922,6 @@ final class ChineseStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => '无优先级';
-  @override
   String get todoNoPriorityShort => '无';
   @override
   String get todoMorePriorities => '更多…';
@@ -1024,9 +1007,9 @@ final class ChineseStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => '隐藏侧栏 (Ctrl+B)';
+  String get hideSidebarTooltip => '隐藏侧栏';
   @override
-  String get showSidebarTooltip => '显示侧栏 (Ctrl+B)';
+  String get showSidebarTooltip => '显示侧栏';
   @override
   String get windowMinimizeTooltip => '最小化';
   @override
@@ -1062,7 +1045,7 @@ final class ChineseStrings extends Strings {
   @override
   String get closeMenuTooltip => '关闭';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => '无法完成该操作';
   @override
   String get newFolderTitle => '新建文件夹';
   @override
@@ -1089,8 +1072,6 @@ final class ChineseStrings extends Strings {
   @override
   String get currentQuickNote => '当前快速笔记';
   @override
-  String get pinnedSection => '已置顶';
-  @override
   String pinnedSectionCount(int count) => '已置顶 · $count';
   @override
   String get templateFolderTitle => '模板文件夹';
@@ -1099,7 +1080,7 @@ final class ChineseStrings extends Strings {
   @override
   String get newFromTemplateHere => '在此从模板新建';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => '无法打开模板';
   @override
   String get templateFormTitle => '填写模板';
   @override
@@ -1230,39 +1211,39 @@ final class ChineseStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ 「$path」嵌套过深';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => '属性';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => '原始 YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => '字段';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => '添加属性';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => '新建属性';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => '编辑属性';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => '键';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => '值';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => '类型';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => '各项之间用逗号分隔';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => '移除属性';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => '没有属性';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => '文本';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => '数字';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => '日期';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => '布尔值';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => '列表';
   @override
   String frontmatterInvalid(String reason) => 'frontmatter 未读取：$reason';
   @override
@@ -1449,7 +1430,7 @@ final class ChineseStrings extends Strings {
   @override
   String get notionImportTitle => '导入 Notion 导出';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => '无法导入 Notion 导出';
   @override
   String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';
   @override
@@ -1601,8 +1582,6 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutRedo => '重做';
   @override
-  String get shortcutChange => '更改快捷键';
-  @override
   String shortcutCaptureTitle(String command) => '“$command”的按键';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1694,9 +1673,9 @@ final class ChineseStrings extends Strings {
   @override
   String get trashDeletePermanently => '永久删除';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => '无法恢复或删除笔记';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => '无法清空回收站';
 
   // The open/create library screen.
   @override
@@ -1767,15 +1746,13 @@ final class ChineseStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => '设置';
-  @override
   String get libraryPathTitle => '文库路径';
   @override
   String get reindexTitle => '立即重建索引';
   @override
   String get reindexDone => '索引重建完成';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => '无法重新读取文库';
   @override
   String get closeLibraryTitle => '关闭文库';
   @override
@@ -1804,20 +1781,16 @@ final class ChineseStrings extends Strings {
       '没有找到整词「$term」的完全匹配'
       '${only == null ? '' : '，$only 中也没有'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => '整个文库';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note 中';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count == 1 ? '笔记 1 篇' : '$count 篇笔记';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) =>
+      count == 1 ? '（1 篇笔记无法写入）' : '（$count 篇笔记无法写入）';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => '关于';
   @override
   String get versionTitle => '版本';
   @override
@@ -1863,7 +1836,7 @@ final class ChineseStrings extends Strings {
   @override
   String get historyBaseKept => '同步基准不受上限限制，始终保留。';
   @override
-  String get historyOff => '此文库的历史记录已关闭（设置，文库）。';
+  String get historyOff => '此文库的历史记录已关闭（设置，回收站和版本）。';
   @override
   String get historyLoadFailed => '无法读取历史记录';
   @override
@@ -2105,34 +2078,27 @@ final class ChineseStrings extends Strings {
   @override
   String get syncTestFailed => '测试失败';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => '该证书不受信任';
   @override
-  String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+  String get syncTestCertificateHint => '无法验证该证书。仅当其指纹与服务器显示的一致时才信任它。';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => '信任此证书？';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      '无法验证 $host 的证书。\n\nSHA-256 '
+      '指纹：\n$fingerprint\n\n仅当这是你预期的证书时才信任它。Niman 仅为该目标接受这一个证书，不接受其他证书。';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => '信任此证书';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => '证书已受信任';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => '忘记此证书？';
   @override
-  String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+  String get syncCertForgetBody => '该目标将重新对照设备证书存储进行验证，自签名证书需要再确认一次。其他内容不变。';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => '忘记';
   @override
   String get syncNowAction => '立即同步';
   @override
@@ -2233,10 +2199,6 @@ final class ChineseStrings extends Strings {
   String get syncRetryAction => '重试';
   @override
   String get syncOpenSettingsAction => '设置';
-  @override
-  String get syncCloseAction => '关闭';
-  @override
-  String get syncDoneSnack => '已同步';
   @override
   String syncTrashedSnack(int count) => '已同步 · $count 个在其他地方删除的文件已移入回收站';
   @override
@@ -2489,4 +2451,73 @@ final class ChineseStrings extends Strings {
   String get templateHintDismissAction => '忽略';
   @override
   String templateProblems(int count) => '此模板中有 $count 个问题';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named中的标题';
+  @override
+  String wikilinkPlacesIn(String named) => '$named中的位置';
+  @override
+  String get wikilinkThisNote => '本笔记';
+  @override
+  String wikilinkNoMatchHeading(String query) => '没有标题与「$query」匹配。';
+  @override
+  String wikilinkNoMatchNote(String query) => '没有笔记与「$query」匹配。';
+  @override
+  String get wikilinkNoHeading => '本笔记没有该名称的标题';
+  @override
+  String get wikilinkNoNote => '资料库中没有这个名称或别名的内容';
+  @override
+  String wikilinkAlias(String alias) => '别名 $alias';
+  @override
+  String get wikilinkBookNote => '页码不是从列表中选择的，请直接输入数字。';
+  @override
+  String get wikilinkFooterMove => '移动';
+  @override
+  String get wikilinkFooterOr => '或';
+  @override
+  String get wikilinkFooterInsert => '插入';
+  @override
+  String get wikilinkFooterClose => '关闭';
+  @override
+  String get suggesterPageHint => '输入一个数字';
+  @override
+  String get suggesterChapterHint => '输入书中的一个文件名';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces => '左花括号没有闭合：没有任何内容关闭这个占位符';
+  @override
+  String get templateProblemEmptyPlaceholder => '空占位符：花括号之间没有名称';
+  @override
+  String templateProblemUnknownPlaceholder(String name) => '未知占位符「$name」';
+  @override
+  String templateProblemAskNoLabel(String name) => '「$name」没有标签：它什么都不问，占位符原样保留';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '「$name」没有名称：它什么都不计数，占位符原样保留';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '「$name」不接受筛选器：光标不会被放置，占位符原样保留';
+  @override
+  String get templateProblemUnclosedQuote => '日期格式中的引号没有闭合：其后的内容都按普通文本读取';
+  @override
+  String templateProblemUnknownDateToken(String token) => '未知的日期标记「$token」';
+  @override
+  String get templateProblemEmptyFilter => '空过滤器：「|」之后没有名称';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '「$filter」 移动日期：只有 $formats 接受移动，而且只能在其他任何过滤器之前';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '「$filter」 不是日期移动：移动是数量和单位，例如 「+7d」 或 「-1w」';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '「$filter」 对齐到 $units，而不是 「$unit」';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '「$filter」 的宽度需要一个数字，而 「$argument」 不是数字';
+  @override
+  String templateProblemUnknownFilter(String name) => '未知过滤器「$name」';
 }

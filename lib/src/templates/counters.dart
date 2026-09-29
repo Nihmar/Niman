@@ -9,7 +9,9 @@
 // reading 0 and both writing 1 (#359). The caller reserves each
 // `{{counter:name}}` once and reuses it for the rest of the note, and
 // [save] merges the file back so a number another writer reached first is
-// never dropped.
+// never dropped. A number is on disk before its note exists, so a creation
+// that fails after reserving hands it back ([giveBack]) — only while nothing
+// reserved after it.
 library;
 
 import 'dart:convert';
@@ -17,6 +19,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
 
 /// The counters of one library.
@@ -44,9 +47,10 @@ final class CounterStore {
   ///
   /// Null when there is nothing to reserve (no names, or no library): a
   /// template with no counter never touches the file. Each reservation is
-  /// on disk when this returns (#359), so a creation called off afterwards
-  /// may skip a number. Throws what the file does ([use]); the creation
-  /// flows run it where their failures are reported.
+  /// on disk when this returns (#359), before the note exists, so a
+  /// creation that fails afterwards has to [giveBack] the numbers or they
+  /// are skipped. Throws what the file does ([use]); the creation flows run
+  /// it where their failures are reported.
   static Future<({CounterStore store, int Function(String name) counter})?>
   reserve(String? root, List<String> names) async {
     if (root == null || names.isEmpty) return null;
@@ -65,8 +69,14 @@ final class CounterStore {
   /// read-modify-write steps queue up instead of interleaving.
   static final Map<String, Future<void>> _chains = {};
 
+  static const AppLogger _log = AppLogger(name: 'templates');
+
   final File? _file;
   final Map<String, int> _values;
+
+  /// The number [use] handed out for each name, and not given back: what
+  /// [giveBack] returns.
+  final Map<String, int> _taken = {};
 
   static File _fileFor(String root) =>
       File(p.join(root, '.niman', 'counters.json'));
@@ -80,7 +90,7 @@ final class CounterStore {
   Future<int> use(String name) async {
     final file = _file;
     if (file == null) {
-      return _values[name] = (_values[name] ?? 0) + 1;
+      return _taken[name] = _values[name] = (_values[name] ?? 0) + 1;
     }
     return await _serialized(file.path, () async {
       final onDisk = await _read(file);
@@ -90,8 +100,75 @@ final class CounterStore {
       onDisk[name] = next;
       _values[name] = next;
       await _write(file, onDisk);
+      _taken[name] = next;
       return next;
     });
+  }
+
+  /// Runs [creation], the making of the note [store]'s numbers were reserved
+  /// for, and gives the numbers back when it throws (the error still goes
+  /// on to the caller). Once the note is made they are used, and nothing
+  /// reaches back for them. [store] is null when the template has no
+  /// counter.
+  static Future<T> whileCreating<T>(
+    CounterStore? store,
+    Future<T> Function() creation,
+  ) async {
+    try {
+      return await creation();
+    } on Object {
+      await store?.giveBack();
+      rethrow;
+    }
+  }
+
+  /// Gives back the numbers this store handed out, for a note that was not
+  /// made: the next creation takes them again instead of skipping them.
+  ///
+  /// A name's number goes back only when the file still holds it — nothing
+  /// reserved after it. Another creation on top (a second window, a quick
+  /// note) may already be using the next number, and lowering the counter
+  /// under it would hand the same number out twice; a gap is the lesser
+  /// evil, so that number stays taken. It runs on the same chain as [use],
+  /// so it sees every reservation that came before it in the queue.
+  ///
+  /// Never throws: it runs while a creation's own failure is being
+  /// reported, which it must not replace. A file that cannot be read or
+  /// written leaves the numbers taken, as they were before this existed.
+  Future<void> giveBack() async {
+    final taken = Map<String, int>.of(_taken);
+    _taken.clear();
+    if (taken.isEmpty) return;
+    final file = _file;
+    if (file == null) {
+      _takeBack(taken, _values);
+      return;
+    }
+    try {
+      await _serialized(file.path, () async {
+        final onDisk = await _read(file);
+        if (_takeBack(taken, onDisk)) await _write(file, onDisk);
+        _takeBack(taken, _values);
+      });
+    } on Object catch (error) {
+      _log.warning('counters: could not give back $taken ($error)');
+    }
+  }
+
+  /// Lowers each of [taken] in [values] by one where it still stands at the
+  /// number taken; drops an entry that goes back to 0. Whether any changed.
+  static bool _takeBack(Map<String, int> taken, Map<String, int> values) {
+    var changed = false;
+    for (final MapEntry(key: name, value: number) in taken.entries) {
+      if (values[name] != number) continue;
+      if (number > 1) {
+        values[name] = number - 1;
+      } else {
+        values.remove(name);
+      }
+      changed = true;
+    }
+    return changed;
   }
 
   /// The last value this store handed out for [name], or 0 when it never

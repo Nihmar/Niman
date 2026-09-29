@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/links/suggester.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// What the panel is listing.
 enum WikilinkPanelKind {
@@ -114,27 +115,27 @@ final class WikilinkPanel extends StatelessWidget {
   }
 
   /// `Headings in <b>Editing</b>` / `Places in <b>Dune.pdf</b>`.
+  ///
+  /// The sentence is the language's, so the name is found inside it rather
+  /// than glued to an English lead: a language that puts the name first
+  /// gets the drawing's bold name where it belongs.
   Widget _caption(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final lead = kind == WikilinkPanelKind.book ? 'Places in ' : 'Headings in ';
+    final named = this.named.isEmpty ? AppStrings.wikilinkThisNote : this.named;
+    final sentence = kind == WikilinkPanelKind.book
+        ? AppStrings.wikilinkPlacesIn(named)
+        : AppStrings.wikilinkHeadingsIn(named);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: scheme.outline)),
       ),
       child: Text.rich(
-        TextSpan(
-          style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
-          children: <InlineSpan>[
-            TextSpan(text: lead),
-            TextSpan(
-              text: named.isEmpty ? 'this note' : named,
-              style: TextStyle(
-                color: scheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        _emphasized(
+          sentence,
+          named,
+          TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+          TextStyle(color: scheme.onSurface, fontWeight: FontWeight.w600),
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -145,10 +146,13 @@ final class WikilinkPanel extends StatelessWidget {
   /// The panel's own words when nothing matched.
   Widget _empty(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final what = kind == WikilinkPanelKind.headings ? 'heading' : 'note';
-    final sub = kind == WikilinkPanelKind.headings
-        ? 'this note has no heading with that name'
-        : 'nothing in the library has that name or alias';
+    final headings = kind == WikilinkPanelKind.headings;
+    final sentence = headings
+        ? AppStrings.wikilinkNoMatchHeading(query)
+        : AppStrings.wikilinkNoMatchNote(query);
+    final sub = headings
+        ? AppStrings.wikilinkNoHeading
+        : AppStrings.wikilinkNoNote;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 13, 12, 13),
       child: Column(
@@ -156,19 +160,11 @@ final class WikilinkPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text.rich(
-            TextSpan(
-              style: TextStyle(fontSize: 12.5, color: scheme.onSurfaceVariant),
-              children: <InlineSpan>[
-                TextSpan(text: 'No $what matches '),
-                TextSpan(
-                  text: '“$query”',
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const TextSpan(text: '.'),
-              ],
+            _emphasized(
+              sentence,
+              query,
+              TextStyle(fontSize: 12.5, color: scheme.onSurfaceVariant),
+              TextStyle(color: scheme.onSurface, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 3),
@@ -251,7 +247,7 @@ final class WikilinkPanel extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                'alias ${note.alias}',
+                AppStrings.wikilinkAlias(note.alias!),
                 style: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant),
               ),
             ),
@@ -312,7 +308,7 @@ final class WikilinkPanel extends StatelessWidget {
   Widget _bodyNote(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = kind == WikilinkPanelKind.book
-        ? 'A page is picked, not named from a list: type its number.'
+        ? AppStrings.wikilinkBookNote
         : '';
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 11),
@@ -361,18 +357,43 @@ final class WikilinkPanel extends StatelessWidget {
           if (!empty && !book) ...<Widget>[
             key('↑'),
             key('↓'),
-            label('move'),
+            label(AppStrings.wikilinkFooterMove),
             dot(),
           ],
           key('⏎'),
-          if (!book && !empty) label('or'),
+          if (!book && !empty) label(AppStrings.wikilinkFooterOr),
           if (!book && !empty) key('Tab'),
-          label('insert'),
+          label(AppStrings.wikilinkFooterInsert),
           if (!empty) dot(),
           key('Esc'),
-          label('close'),
+          label(AppStrings.wikilinkFooterClose),
         ],
       ),
+    );
+  }
+
+  /// [sentence] with [value] drawn bold, wherever the language put it.
+  ///
+  /// The sentence is the language's own — it may open with the value, hold
+  /// it in the middle or quote it — so the value is looked for in it
+  /// instead of being concatenated here. A sentence that does not hold it
+  /// (an empty value, say) is drawn as it stands.
+  static InlineSpan _emphasized(
+    String sentence,
+    String value,
+    TextStyle base,
+    TextStyle bold,
+  ) {
+    final at = value.isEmpty ? -1 : sentence.indexOf(value);
+    if (at < 0) return TextSpan(text: sentence, style: base);
+    return TextSpan(
+      style: base,
+      children: <InlineSpan>[
+        if (at > 0) TextSpan(text: sentence.substring(0, at)),
+        TextSpan(text: value, style: bold),
+        if (at + value.length < sentence.length)
+          TextSpan(text: sentence.substring(at + value.length)),
+      ],
     );
   }
 

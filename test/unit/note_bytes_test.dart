@@ -86,5 +86,57 @@ void main() {
       // other, not a sign of a binary file.
       expect(looksBinary(utf8.encode('�' * 20)), isFalse);
     });
+
+    test('a valid UTF-8 note takes one native decode, no byte walk (#496)', () {
+      // The two Dart passes over the bytes — a NUL scan and a UTF-8
+      // sequence walk — ran before the native decode on every note.
+      final decodes = noteBytesNativeDecodes;
+      final walks = noteBytesWalks;
+      expect(looksBinary(utf8.encode('città — 日本 🎉\n')), isFalse);
+      expect(noteBytesNativeDecodes - decodes, 1);
+      expect(noteBytesWalks - walks, 0);
+    });
+
+    test(
+      'one call decides and decodes: the text, or null for a binary file',
+      () {
+        final decodes = noteBytesNativeDecodes;
+        final walks = noteBytesWalks;
+        expect(
+          decodeNoteTextIfText(utf8.encode('città — 日本\n')),
+          'città — 日本\n',
+        );
+        expect(noteBytesNativeDecodes - decodes, 1, reason: 'one decode');
+        expect(noteBytesWalks - walks, 0);
+
+        expect(decodeNoteTextIfText(const <int>[]), '');
+        // The lenient reading of a Latin-1 note, and the refusal of the rest,
+        // are `decodeNoteText` and `looksBinary`'s.
+        const latin1 = <int>[0x63, 0x61, 0x66, 0xE9, 0x0A];
+        expect(decodeNoteTextIfText(latin1), decodeNoteText(latin1));
+        expect(decodeNoteTextIfText(List<int>.filled(64, 0xFF)), isNull);
+        expect(decodeNoteTextIfText(<int>[0xFF, 0xFE, 0x00, 0xC3]), isNull);
+        expect(decodeNoteTextIfText(List<int>.filled(64, 0)), isNull);
+        final stray = <int>[
+          ...utf8.encode('a long note, '),
+          0,
+          ...utf8.encode('and then more text\n'),
+        ];
+        expect(decodeNoteTextIfText(stray), decodeNoteText(stray));
+      },
+    );
+
+    test('NUL bytes are weighed by their share, not refused outright', () {
+      // A third of the file: binary, and so a UTF-16 file it reads.
+      expect(looksBinary(List<int>.filled(64, 0)), isTrue);
+      // One stray NUL in a note that is otherwise text: read as text, the
+      // same answer the index, replace and export give it.
+      final stray = <int>[
+        ...utf8.encode('a long note, '),
+        0,
+        ...utf8.encode('and then more text\n'),
+      ];
+      expect(looksBinary(stray), isFalse);
+    });
   });
 }

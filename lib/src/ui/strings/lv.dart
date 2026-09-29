@@ -140,11 +140,7 @@ final class LatvianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktors';
   @override
-  String get settingsSectionLibrary => 'Bibliotēka';
-  @override
   String get settingsSectionReminders => 'Atgādinājumi';
-  @override
-  String get settingsSectionShortcuts => 'Tastatūra';
   @override
   String get keyboardShortcutsTitle => 'Tastatūras saīsinājumi';
 
@@ -187,8 +183,6 @@ final class LatvianStrings extends Strings {
   String updateSavedTo(Object path) => 'Atjauninājums saglabāts: $path';
   @override
   String get updateInstallerStarted => 'Instalētājs palaists';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Orfogrāfiskā pārbaude';
   @override
@@ -243,8 +237,6 @@ final class LatvianStrings extends Strings {
   String get themeBrightnessNight => 'Tumša';
   @override
   String get themeTitle => 'Tēma';
-  @override
-  String get themeSubtitle => 'Saskarnes un piezīmju krāsas';
   @override
   String get themePaletteSystem => 'Sistēma';
   // Settings: the themes page (issue #269).
@@ -321,16 +313,17 @@ final class LatvianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktors un priekšskatījums vienmēr ir saskaņā';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Pirmkoda redaktora fonts';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Fonts, kādā salikts pirmkoda panelis; priekšskatījums patur piezīmes '
+      'pašas fontu';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Vienplatumā';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Bez serifiem';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Ar serifiem';
   @override
   String get epubLookTitle => 'Grāmatu izskats';
   @override
@@ -453,7 +446,7 @@ final class LatvianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Saglabā…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Neizdevās atskaņot audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -600,10 +593,6 @@ final class LatvianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Ievietot piezīmē';
   @override
-  String get cheatsheetWritten => 'Rakstīts';
-  @override
-  String get cheatsheetShown => 'Parādīts';
-  @override
   String get cheatHeadings => 'Virsraksti';
   @override
   String get cheatEmphasis => 'Treknraksts, slīpraksts, pārsvītrots';
@@ -747,8 +736,6 @@ final class LatvianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Rādīt redaktoru';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(neapstrādāta HTML tabula)';
 
   // Search (T-M3-05).
   @override
@@ -996,8 +983,6 @@ final class LatvianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez prioritātes';
-  @override
   String get todoNoPriorityShort => 'Nav';
   @override
   String get todoMorePriorities => 'Vairāk…';
@@ -1093,9 +1078,9 @@ final class LatvianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Paslēpt sānpaneli (Ctrl+B)';
+  String get hideSidebarTooltip => 'Paslēpt sānpaneli';
   @override
-  String get showSidebarTooltip => 'Rādīt sānpaneli (Ctrl+B)';
+  String get showSidebarTooltip => 'Rādīt sānpaneli';
   @override
   String get windowMinimizeTooltip => 'Minimizēt';
   @override
@@ -1131,7 +1116,7 @@ final class LatvianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Aizvērt';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Neizdevās pabeigt darbību';
   @override
   String get newFolderTitle => 'Jauns katalogs';
   @override
@@ -1158,8 +1143,6 @@ final class LatvianStrings extends Strings {
   @override
   String get currentQuickNote => 'Pašreizējā ātrā piezīme';
   @override
-  String get pinnedSection => 'Piestiprināts';
-  @override
   String pinnedSectionCount(int count) => 'Piestiprināts · $count';
   @override
   String get templateFolderTitle => 'Šablonu katalogs';
@@ -1168,7 +1151,7 @@ final class LatvianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Jauns no šablona šeit';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Neizdevās atvērt veidni';
   @override
   String get templateFormTitle => 'Aizpildīt šablonu';
   @override
@@ -1331,39 +1314,39 @@ final class LatvianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” ir pārāk dziļi ievietots';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Īpašības';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Neapstrādāts YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Lauki';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Pievienot īpašību';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Jauna īpašība';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Rediģēt īpašību';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Atslēga';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Vērtība';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tips';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Atdala vienumus ar komatiem';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Noņemt īpašību';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Nav īpašību';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'teksts';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'skaitlis';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datums';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'loģisks';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'saraksts';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatteru nevarēja izlasīt: $reason';
@@ -1573,7 +1556,7 @@ final class LatvianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importēt Notion eksportu';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Neizdevās importēt Notion eksportu';
   @override
   String dropRejected(String names) =>
       'Šeit atveras tikai Markdown faili un mapes: $names';
@@ -1742,8 +1725,6 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutRedo => 'Atkārtot';
   @override
-  String get shortcutChange => 'Mainīt īsinājumtaustiņu';
-  @override
   String shortcutCaptureTitle(String command) => 'Taustiņi: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1844,9 +1825,9 @@ final class LatvianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Dzēst neatgriezeniski';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Neizdevās atjaunot vai dzēst piezīmi';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Neizdevās iztukšot konteineru';
 
   // The open/create library screen.
   @override
@@ -1930,15 +1911,13 @@ final class LatvianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Iestatījumi';
-  @override
   String get libraryPathTitle => 'Bibliotēkas ceļš';
   @override
   String get reindexTitle => 'Pārraudzīt tagad';
   @override
   String get reindexDone => 'Pārraudzīšana pabeigta';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Neizdevās no jauna nolasīt bibliotēku';
   @override
   String get closeLibraryTitle => 'Aizvērt bibliotēku';
   @override
@@ -1970,20 +1949,22 @@ final class LatvianStrings extends Strings {
       '„$term” nav precīza visa vārda sakritējuma'
       '${only == null ? '' : ' netika atrasts $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'visa bibliotēka';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'failā $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count piezīmē'
+      : '$count piezīmēs';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) =>
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? ' ($count piezīmju neizdevās ierakstīt)'
+      : count % 10 == 1
+      ? ' ($count piezīmi neizdevās ierakstīt)'
+      : ' ($count piezīmes neizdevās ierakstīt)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Par lietotni';
   @override
   String get versionTitle => 'Versija';
   @override
@@ -2032,7 +2013,8 @@ final class LatvianStrings extends Strings {
       'Sinhronizācijas bāze tiek saglabāta arī pāri limitam.';
   @override
   String get historyOff =>
-      'Šai bibliotēkai vēsture ir izslēgta (Iestatījumi, Bibliotēka).';
+      'Šai bibliotēkai vēsture ir izslēgta '
+      '(Iestatījumi, Konteiners un hronoloģija).';
   @override
   String get historyLoadFailed => 'Nevarēja nolasīt vēsturi';
   @override
@@ -2314,34 +2296,34 @@ final class LatvianStrings extends Strings {
   @override
   String get syncTestFailed => 'Pārbaude neizdevās';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikātam neuzticas';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikātu nevar pārbaudīt. Uzticieties tam tikai tad, ja tā '
+      'nospiedums sakrīt ar to, ko rāda serveris.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Uzticēties šim sertifikātam?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Sertifikātu $host nevar pārbaudīt.\n\nSHA-256 '
+      'nospiedums:\n$fingerprint\n\nUzticieties tam tikai tad, ja tas ir '
+      'gaidītais sertifikāts. Niman šim galamērķim pieņem tikai šo '
+      'sertifikātu un nevienu citu.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Uzticēties šim sertifikātam';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikātam uzticas';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Aizmirst šo sertifikātu?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Šis galamērķis atkal tiek pārbaudīts pret ierīces sertifikātu krātuvi, '
+      'un pašparakstīts sertifikāts būs jāapstiprina vēlreiz. Nekas cits '
+      'nemainās.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Aizmirst';
   @override
   String get syncNowAction => 'Sinhronizēt tagad';
   @override
@@ -2458,10 +2440,6 @@ final class LatvianStrings extends Strings {
   String get syncRetryAction => 'Mēģināt vēlreiz';
   @override
   String get syncOpenSettingsAction => 'Iestatījumi';
-  @override
-  String get syncCloseAction => 'Aizvērt';
-  @override
-  String get syncDoneSnack => 'Sinhronizēta';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Sinhronizēta · $count citur izdzēsts fails ir konteinerā'
@@ -2790,5 +2768,96 @@ final class LatvianStrings extends Strings {
   String get templateHintDismissAction => 'Noraidīt';
   @override
   String templateProblems(int count) =>
-      count == 1 ? '1 problēma šajā šablonā' : '$count problēmas šajā šablonā';
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? '$count problēmu šajā šablonā'
+      : count % 10 == 1
+      ? '$count problēma šajā šablonā'
+      : '$count problēmas šajā šablonā';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Virsraksti: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Vietas: $named';
+  @override
+  String get wikilinkThisNote => 'šī piezīme';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Neviens virsraksts neatbilst „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Neviena piezīme neatbilst „$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'šai piezīmei nav virsraksta ar šādu nosaukumu';
+  @override
+  String get wikilinkNoNote =>
+      'bibliotēkā nekas nav ar šādu nosaukumu vai aizstājvārdu';
+  @override
+  String wikilinkAlias(String alias) => 'aizstājvārds $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Lappuse tiek izvēlēta, nevis nosaukta no saraksta: ierakstiet tās '
+      'numuru.';
+  @override
+  String get wikilinkFooterMove => 'pārvietot';
+  @override
+  String get wikilinkFooterOr => 'vai';
+  @override
+  String get wikilinkFooterInsert => 'ievietot';
+  @override
+  String get wikilinkFooterClose => 'aizvērt';
+  @override
+  String get suggesterPageHint => 'ierakstiet skaitli';
+  @override
+  String get suggesterChapterHint => 'nosauciet failu grāmatā';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'atvērtas krokainās iekavas bez aizvēršanas: nekas neaizver šo vietturi';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tukšs vietturis: starp iekavām nav nosaukuma';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nezināms vietturis „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” bez etiķetes: tas neko nejautā, un vietturis paliek savā vietā';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” bez nosaukuma: tas neko neskaita, un vietturis paliek savā '
+      'vietā';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nepieņem filtrus: kursors netiek novietots, un vietturis paliek '
+      'savā vietā';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neaizvērtas pēdiņas datuma formātā: viss pēc tām tiek lasīts kā parasts '
+      'teksts';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nezināms datuma tokens „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'tukšs filtrs: pēc „|” nav nosaukuma';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” pārvieto datumu: pārvietošanu pieņem tikai $formats, un tikai '
+      'pirms jebkura cita filtra';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nav datuma pārvietošana: pārvietošana ir skaitlis un vienība, '
+      'piemēram, „+7d” vai „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” pieskaņojas $units, nevis „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” platuma dēļ vajag skaitli, un „$argument” nav skaitlis';
+  @override
+  String templateProblemUnknownFilter(String name) => 'nezināms filtrs „$name”';
 }

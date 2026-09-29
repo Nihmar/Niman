@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:path/path.dart' as p;
 
 final DateTime _epoch = DateTime.fromMillisecondsSinceEpoch(0);
@@ -247,6 +248,55 @@ void main() {
           entryNames: () => const ['A.md'],
         ),
         isFalse,
+      );
+    });
+  });
+
+  group('excludedEntryIn', () {
+    test(
+      'a case-only rename asks the folder off the UI isolate (#492)',
+      () async {
+        final self = p.join(tempDir.path, 'Note.md');
+        File(self).writeAsStringSync('x');
+        // A folder that folds case leaves `note.md` and `Note.md` one entry, so
+        // only the folder's own listing can say whether the exact spelling is
+        // held. That walk is O(entries) and must not run on this isolate.
+        final lookup = excludedEntryIn(
+          tempDir.path,
+          p.join(tempDir.path, 'note.md'),
+          self,
+          foldsCase: true,
+        );
+        expect(
+          IsolateGauge.inFlight,
+          greaterThan(0),
+          reason: 'the folder is walked on a background isolate, not this one',
+        );
+        expect(
+          await lookup,
+          isTrue,
+          reason: 'Note.md is the entry being renamed',
+        );
+        expect(IsolateGauge.inFlight, 0, reason: 'the job is counted back out');
+      },
+    );
+
+    test('a spelling the folder holds is somebody else (#492)', () async {
+      // A case-sensitive folder holding both spellings: the lookup finds the
+      // candidate itself and the collision stands. Only the candidate's
+      // spelling is written — a folder that folds case (NTFS, APFS) cannot
+      // hold both, and writing the second would rewrite the first, so the
+      // listing would never show the spelling the lookup has to find.
+      File(p.join(tempDir.path, 'a.md')).writeAsStringSync('y');
+      expect(
+        await excludedEntryIn(
+          tempDir.path,
+          p.join(tempDir.path, 'a.md'),
+          p.join(tempDir.path, 'A.md'),
+          foldsCase: true,
+        ),
+        isFalse,
+        reason: 'the folder holds a.md itself',
       );
     });
   });

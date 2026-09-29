@@ -12,6 +12,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/files.dart' show relPath;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -76,6 +77,16 @@ final class NoteLinkTargets {
   /// confirmation, rather than offered (#477); a resolved link is
   /// followed as always, and every other tap keeps the offer.
   final bool modifier;
+
+  /// The open note's path in the library, slash-separated — what a `..` in
+  /// a link walks from (#491); null for a note opened from outside one.
+  String? get notePathInLibrary {
+    final root = libraryRoot;
+    if (root == null || !p.isWithin(p.normalize(root), p.normalize(notePath))) {
+      return null;
+    }
+    return relPath(notePath, root);
+  }
 }
 
 /// The preview's link handler (T-M3-07): `.md` relative links navigate
@@ -92,7 +103,10 @@ Future<void> openHref(
     '(source ${source == null ? 'not loaded' : 'ready'})',
   );
   if (source == null) return;
-  final resolved = await source.resolveMarkdown(href);
+  final resolved = await source.resolveMarkdown(
+    href,
+    from: link.notePathInLibrary,
+  );
   log.debug('md link "$href" -> ${describeResolved(resolved)}');
   if (!context.mounted) return;
   await _applyResolved(context, resolved, link);
@@ -127,7 +141,8 @@ Future<void> openWiki(
   if (source == null) return;
   // The documented form: `[[target]]`, `[[target#heading]]`,
   // `[[target|alias]]` — the first part is the target.
-  var resolved = await source.resolveWiki(ref.target);
+  final from = link.notePathInLibrary;
+  var resolved = await source.resolveWiki(ref.target, from: from);
   final outcome = describeResolved(resolved);
   log.debug('wikilink target "${ref.target}" -> $outcome');
   var anchor = ref.heading;
@@ -149,7 +164,7 @@ Future<void> openWiki(
         'wikilink: target-first unresolved — retrying the aliased '
         'part "$aliasTarget" as the target',
       );
-      final swapped = await source.resolveWiki(aliasTarget.trim());
+      final swapped = await source.resolveWiki(aliasTarget.trim(), from: from);
       final swappedOutcome = describeResolved(swapped);
       log.debug('wikilink alias "$aliasTarget" -> $swappedOutcome');
       if (swapped is ResolvedNote || swapped is AmbiguousNote) {

@@ -145,11 +145,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktorius';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'PrimINIMAI';
-  @override
-  String get settingsSectionShortcuts => 'Klaviatūra';
   @override
   String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
 
@@ -192,8 +188,6 @@ final class LithuanianStrings extends Strings {
   String updateSavedTo(Object path) => 'Atnaujinimas išsaugotas: $path';
   @override
   String get updateInstallerStarted => 'Diegimo programa paleista';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Rašybos patikra';
   @override
@@ -247,8 +241,6 @@ final class LithuanianStrings extends Strings {
   String get themeBrightnessNight => 'Tamsi';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Sąsajos ir pastabų spalvos';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -325,16 +317,17 @@ final class LithuanianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktorius ir peržiūra visada suderinami';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Šaltinio redaktoriaus šriftas';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Šriftas, kuriuo surinkta šaltinio sritis; peržiūra išlaiko užrašo '
+      'šriftą';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Vienodo pločio';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Be serifų';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Su serifais';
   @override
   String get epubLookTitle => 'Knygų išvaizda';
   @override
@@ -456,7 +449,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Išsaugoma…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Nepavyko paleisti garso';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -604,10 +597,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Įterpti į užrašą';
   @override
-  String get cheatsheetWritten => 'Parašyta';
-  @override
-  String get cheatsheetShown => 'Rodoma';
-  @override
   String get cheatHeadings => 'Antraštės';
   @override
   String get cheatEmphasis => 'Paryškintas, kursyvas, perbrauktas';
@@ -751,8 +740,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Rodyti redaktorių';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(neapdorota HTML lentelė)';
 
   // Search (T-M3-05).
   @override
@@ -997,8 +984,6 @@ final class LithuanianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez prioriteto';
-  @override
   String get todoNoPriorityShort => 'Nėra';
   @override
   String get todoMorePriorities => 'Daugiau…';
@@ -1093,9 +1078,9 @@ final class LithuanianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Paslėpti šoninį panelį (Ctrl+B)';
+  String get hideSidebarTooltip => 'Paslėpti šoninį panelį';
   @override
-  String get showSidebarTooltip => 'Rodyti šoninį panelį (Ctrl+B)';
+  String get showSidebarTooltip => 'Rodyti šoninį panelį';
   @override
   String get windowMinimizeTooltip => 'Sup mažinti';
   @override
@@ -1131,7 +1116,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Uždaryti';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Nepavyko užbaigti veiksmo';
   @override
   String get newFolderTitle => 'Naujas katalogas';
   @override
@@ -1159,8 +1144,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get currentQuickNote => 'Dabartinė greita pastaba';
   @override
-  String get pinnedSection => 'Prisegta';
-  @override
   String pinnedSectionCount(int count) => 'Prisegta · $count';
   @override
   String get templateFolderTitle => 'Šablonų katalogas';
@@ -1169,7 +1152,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nauja iš šablonų čia';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Nepavyko atidaryti šablono';
   @override
   String get templateFormTitle => 'Užpildyti šabloną';
   @override
@@ -1336,39 +1319,39 @@ final class LithuanianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” įterpta per giliai';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Savybės';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Neapdorotas YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Laukai';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Pridėti savybę';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nauja savybė';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Redaguoti savybę';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Raktas';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Reikšmė';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tipas';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Atskirkite elementus kableliais';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Pašalinti savybę';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Savybių nėra';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekstas';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'skaičius';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'data';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'loginė reikšmė';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'sąrašas';
   @override
   String frontmatterInvalid(String reason) =>
       'Metaduomenų nepavyko perskaityti: $reason';
@@ -1576,7 +1559,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importuoti „Notion“ eksportą';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Nepavyko importuoti Notion eksporto';
   @override
   String dropRejected(String names) =>
       'Čia atidaromi tik Markdown failai ir aplankai: $names';
@@ -1747,8 +1730,6 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutRedo => 'Pakartoti';
   @override
-  String get shortcutChange => 'Keisti spartųjį klavišą';
-  @override
   String shortcutCaptureTitle(String command) => 'Klavišai: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1849,9 +1830,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Ištrinti nevildinamai';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Nepavyko atkurti ar ištrinti pastabos';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Nepavyko išvalyti šiukšlinės';
 
   // The open/create library screen.
   @override
@@ -1936,15 +1917,13 @@ final class LithuanianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Nustatymai';
-  @override
   String get libraryPathTitle => 'Bibliotekos kelias';
   @override
   String get reindexTitle => 'Perskirti dabar';
   @override
   String get reindexDone => 'Perskirta baigta';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Nepavyko iš naujo nuskaityti bibliotekos';
   @override
   String get closeLibraryTitle => 'Uždaryti biblioteką';
   @override
@@ -1976,20 +1955,22 @@ final class LithuanianStrings extends Strings {
       '„$term” neturi tikslaus visą žodį atitinkančio atitikmens'
       '${only == null ? '' : ' – tik $only rasta'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'visa biblioteka';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'faile $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? '$count pastabų'
+      : count % 10 == 1 && count % 100 != 11
+      ? '$count pastaboje'
+      : '$count pastabose';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count pastabos nepavyko įrašyti)'
+      : ' ($count pastabų nepavyko įrašyti)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Apie';
   @override
   String get versionTitle => 'Versija';
   @override
@@ -2038,7 +2019,7 @@ final class LithuanianStrings extends Strings {
       'Sinchronizavimo bazė išsaugoma ir viršijus ribą.';
   @override
   String get historyOff =>
-      'Šios bibliotekos istorija išjungta (Nustatymai, Biblioteka).';
+      'Šios bibliotekos istorija išjungta (Nustatymai, Šiukšlinė ir istorija).';
   @override
   String get historyLoadFailed => 'Nepavyko perskaityti istorijos';
   @override
@@ -2324,34 +2305,34 @@ final class LithuanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Patikrinti nepavyko';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikatu nepasitikima';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikato patikrinti nepavyksta. Pasitikėkite juo tik jei jo '
+      'atspaudas sutampa su tuo, kurį rodo serveris.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Pasitikėti šiuo sertifikatu?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Nepavyksta patikrinti $host sertifikato.\n\nSHA-256 '
+      'atspaudas:\n$fingerprint\n\nPasitikėkite juo tik jei tai '
+      'laukiamas sertifikatas. Niman priima tik šį sertifikatą šiai '
+      'paskirčiai ir jokio kito.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Pasitikėti šiuo sertifikatu';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikatu pasitikima';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Pamiršti šį sertifikatą?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ši paskirtis vėl tikrinama pagal įrenginio sertifikatų saugyklą, o '
+      'savarankiškai pasirašytą sertifikatą teks patvirtinti dar kartą. '
+      'Daugiau niekas nesikeičia.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Pamiršti';
   @override
   String get syncNowAction => 'Sinchronizuoti dabar';
   @override
@@ -2468,10 +2449,6 @@ final class LithuanianStrings extends Strings {
   String get syncRetryAction => 'Bandyti dar kartą';
   @override
   String get syncOpenSettingsAction => 'Nustatymai';
-  @override
-  String get syncCloseAction => 'Uždaryti';
-  @override
-  String get syncDoneSnack => 'Sinchronizuota';
   @override
   String syncTrashedSnack(int count) => switch ((count % 10, count % 100)) {
     (_, >= 11 && <= 19) =>
@@ -2829,11 +2806,101 @@ final class LithuanianStrings extends Strings {
     final mod10 = count % 10;
     final mod100 = count % 100;
     if (mod10 == 1 && mod100 != 11) {
-      return '1 problema šiame šablone';
+      return '$count problema šiame šablone';
     }
     if (mod10 >= 2 && mod10 <= 9 && (mod100 < 11 || mod100 > 19)) {
       return '$count problemos šiame šablone';
     }
     return '$count problemų šiame šablone';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Antraštės: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Vietos: $named';
+  @override
+  String get wikilinkThisNote => 'ši pastaba';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Nė viena antraštė neatitinka „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nė viena pastaba neatitinka „$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'šioje pastaboje nėra antraštės tokiu pavadinimu';
+  @override
+  String get wikilinkNoNote =>
+      'bibliotekoje nėra nieko tokiu pavadinimu ar slapyvardžiu';
+  @override
+  String wikilinkAlias(String alias) => 'slapyvardis $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Puslapis pasirenkamas, o ne įvardijamas iš sąrašo: įrašykite jo numerį.';
+  @override
+  String get wikilinkFooterMove => 'perkelti';
+  @override
+  String get wikilinkFooterOr => 'arba';
+  @override
+  String get wikilinkFooterInsert => 'įterpti';
+  @override
+  String get wikilinkFooterClose => 'uždaryti';
+  @override
+  String get suggesterPageHint => 'įrašykite skaičių';
+  @override
+  String get suggesterChapterHint => 'pavadinkite failą knygoje';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'atidaryti riestiniai skliaustai neuždaryti: niekas neuždaro šios vietos '
+      'rezervavimo žymos';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tuščia vietos rezervavimo žyma: tarp skliaustų nėra pavadinimo';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nežinoma vietos rezervavimo žyma „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” be etiketės: nieko neklausia, o vietos rezervavimo žyma lieka '
+      'vietoje';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” be pavadinimo: nieko neskaičiuoja, o vietos rezervavimo žyma '
+      'lieka vietoje';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” nepriima filtrų: žymeklis neįrašomas, o vietos rezervavimo žyma '
+      'lieka vietoje';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neuždaryta kabutė datų formate: viskas po jos skaitoma kaip paprastas '
+      'tekstas';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nežinomas datos tokenas „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'tuščias filtras: po „|” nėra pavadinimo';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” perkelia datą: perkėlimą priima tik $formats, ir tik prieš '
+      'bet '
+      'kurį kitą filtrą';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nėra datos perkėlimas: perkėlimas yra skaičius ir vienetas, '
+      'kaip „+7d” arba „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” pritraukia prie $units, o ne prie „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” reikia skaičiaus jo pločiui, o „$argument” juo nėra';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'nežinomas filtras „$name”';
 }

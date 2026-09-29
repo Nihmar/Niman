@@ -33,6 +33,10 @@ short setup dialog: pick the library from the ones you have open
   adds an item from a home-screen dialog.
 - **Tap the note:** opens it in the app.
 
+A widget that points at another library than the open one switches to it,
+saving the open notes first; a note that cannot be saved keeps the current
+library open and says so, and the tap opens nothing.
+
 Both wear the app theme (brightness and palette) and refresh when
 the app resumes or the files they show change. To point an instance
 at another library or note, remove the widget and place it again —

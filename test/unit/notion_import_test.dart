@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:path/path.dart' as p;
 
+import '../fakes/raw_deflate_zip.dart';
+
 void main() {
   late Directory tmp;
   late Directory library;
@@ -153,4 +155,71 @@ void main() {
       expect(library.listSync(), isEmpty, reason: 'nothing was written');
     },
   );
+
+  test(
+    'a stream that expands past its declared size is refused (#492)',
+    () async {
+      // The central directory says 10 bytes over a deflate stream that really
+      // inflates to 200 kB: the declared-size sum passes the budget, and only
+      // the length that comes out of the stream can stop it. A small budget
+      // stands in for the gigabyte one, so the test inflates kilobytes and the
+      // lying entry costs the budget, not the stream. `package:archive`
+      // inflates the whole stream — it does not stop at the declared size — so
+      // the guard has to read what is produced.
+      final archive = Archive()
+        ..add(
+          ArchiveFile.string('$workspace/Big ${id(1)}.md', 'x' * 200000)
+            ..size = 10,
+        );
+      final source = File(p.join(tmp.path, 'Export ${id(99)}.zip'))
+        ..writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+      await expectLater(
+        importNotionZipWithBudget(
+          source: source.path,
+          libraryRoot: library.path,
+          maxBytes: 1024,
+        ),
+        throwsA(isA<ArchiveException>()),
+      );
+
+      expect(
+        library.listSync(),
+        isEmpty,
+        reason: 'the refused import leaves no half-built folder',
+      );
+    },
+  );
+
+  test('an entry is refused at the budget, before its stream ends', () async {
+    // 480 kB of zeros, then a block that is not valid deflate. A budget of
+    // 64 kB is passed long before that block, so the refusal can only be
+    // budget's: an inflate that ran the stream out first would fail on the
+    // invalid block (FormatException), having expanded all of it (#492).
+    final source = File(p.join(tmp.path, 'Export ${id(99)}.zip'))
+      ..writeAsBytesSync(
+        rawDeflateZip(
+          '$workspace/Big ${id(1)}.md',
+          storedZerosThenInvalid(blocks: 8, size: 60000),
+          declared: 10,
+        ),
+      );
+
+    await expectLater(
+      importNotionZipWithBudget(
+        source: source.path,
+        libraryRoot: library.path,
+        maxBytes: 64 * 1024,
+      ),
+      throwsA(
+        isA<ArchiveException>().having(
+          (e) => e.message,
+          'message',
+          contains('budget'),
+        ),
+      ),
+    );
+
+    expect(library.listSync(), isEmpty);
+  });
 }

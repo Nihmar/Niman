@@ -25,11 +25,23 @@ the note's. The panel lists:
   **and** by its frontmatter aliases, prefix matches first; a row found
   through an alias says which one. Choosing a note whose name another
   note shares writes as much of its folder as it takes to name that one
-  (`[[Work/Meeting]]`), so the link opens the note that was picked;
+  (`[[Work/Meeting]]`), so the link opens the note that was picked. A note
+  whose name holds `#`, `|`, `[` or `]` is not listed: a `[[…]]` target
+  has no escape for them, and the row would write a link that reads back
+  as another note — link to one of those with a Markdown link instead
+  (`[C# tips](C%23%20tips.md)`);
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or
-  `chapter=`.
+  `chapter=`. Once the form's key is written, what follows the `=` is the
+  number you type: the panel is not offered again there, so `⏎` or `Tab`
+  cannot write the form over it.
+
+The panel does not open inside code or maths: a `[[` in a fenced or
+indented code block, in display maths or in an inline code or maths span is
+the code's own text, and completing it there would write a note name and a
+`]]` into it. In a very long note whose colours are still being read, the
+panel waits for them — the next keystroke in the link opens it.
 
 `↑`/`↓` move, `⏎` or `Tab` complete the link, `Esc` closes the panel and
 leaves the text as it was. Typed into a link already closed, the choice
@@ -50,6 +62,33 @@ Obsidian writes it: `[x](My%20Note.md)` is `My Note.md`. A path with no
 extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
 footnote's own text is.
+
+A path is read the way Markdown reads it, against the library:
+
+- `/docs/a.md` is `docs/a.md` **from the library root**, and no other note
+  whose path merely ends in it;
+- `../Notes/a.md` walks **from the folder of the note it is written in**
+  (in `Deep/Sub/b.md` it is `Deep/Notes/a.md`, in `Sub/b.md` it is
+  `Notes/a.md`), and names exactly that path. One that climbs out of the
+  library names nothing: the link is dead, it never falls back to a note of
+  the same name elsewhere;
+- a plain path (`a.md`, `sub/a.md`) is tried **beside the note first**:
+  in `Sub/b.md`, `[x](a.md)` is `Sub/a.md` when there is one. When there is
+  not, it is found as a wikilink is: by its name, and the note's folder
+  qualifies it (`sub/a.md` matches `x/sub/a.md`), the picker offering the
+  candidates when more than one fits.
+
+A wikilink is a name, not a path, so a plain `[[a]]` is never read beside
+the note; `[[/docs/a]]` and `[[../Notes/a]]` follow the same rules as the
+Markdown forms. A note outside the library is not in the index and so is
+not a link target. `\` in a path is `/`.
+
+Moving a note, or a folder of them, moves what its relative links name: the
+backlinks and dead links follow the new folder at once, without opening or
+editing the note. A link that names another note by its name only
+(`[[a]]`) does not care where either note is. A link written with a path
+*to* a note that moved, from a note that did not, is read again when that
+note is next indexed.
 
 ## Links into a PDF or a book
 

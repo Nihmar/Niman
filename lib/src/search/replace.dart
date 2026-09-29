@@ -19,6 +19,7 @@ import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:drift/drift.dart' show Variable;
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -170,13 +171,13 @@ final class ReplaceRunner implements ReplaceSource {
     for (var i = 0; i < candidates.length; i += chunk) {
       final end = math.min(i + chunk, candidates.length);
       final results = await Isolate.run(
-        () => _previewChunk(
+        () => previewChunk(
           root,
           candidates.sublist(i, end),
           term,
-          caseSensitive,
           _sampleRadius,
           _samplesPerNote,
+          caseSensitive: caseSensitive,
         ),
       );
       for (final note in results) {
@@ -231,13 +232,13 @@ final class ReplaceRunner implements ReplaceSource {
     for (var i = 0; i < todo.length; i += chunk) {
       final rels = todo.sublist(i, math.min(i + chunk, todo.length));
       final results = await Isolate.run(
-        () => _replaceChunk(
+        () => replaceChunk(
           root,
           rels,
           term,
           replacement,
-          caseSensitive,
           history,
+          caseSensitive: caseSensitive,
         ),
       );
       final changed = <String>[];
@@ -302,21 +303,29 @@ final class ReplaceRunner implements ReplaceSource {
 /// The off-isolate preview entry: whole-word scan of the files at [rels]
 /// (absolute under [root]); one match-note per file with occurrences, null
 /// for a file without matches.
-Future<List<ReplaceMatchNote?>> _previewChunk(
+@visibleForTesting
+Future<List<ReplaceMatchNote?>> previewChunk(
   String root,
   List<String> rels,
   String term,
-  bool caseSensitive,
   int radius,
-  int samplesPerNote,
-) async {
+  int samplesPerNote, {
+  required bool caseSensitive,
+}) async {
   final out = <ReplaceMatchNote?>[];
   for (final rel in rels) {
     final file = File(p.join(root, rel));
     try {
-      // The same leniency as the editor and the replace pass: a note with
-      // invalid UTF-8 bytes still takes part.
-      final text = decodeNoteText(file.readAsBytesSync());
+      final bytes = file.readAsBytesSync();
+      // A file the editor refuses as "not text" is not a match either,
+      // whatever the lenient decode would make of its bytes (#496). The
+      // same leniency as the editor and the replace pass otherwise: a note
+      // with invalid UTF-8 bytes still takes part, decoded once.
+      final text = decodeNoteTextIfText(bytes);
+      if (text == null) {
+        out.add(null);
+        continue;
+      }
       final pattern = wholeWordPattern(term, caseSensitive: caseSensitive);
       if (pattern == null) {
         out.add(null);
@@ -369,24 +378,33 @@ ReplaceSample _sampleAround(String text, int start, int end, int radius) {
 /// whose atomic write fails both leave `changed` false and `count` 0, but
 /// each carries a non-null failure log so the caller can report it instead
 /// of letting it pass as a note with no match.
-Future<List<(bool, int, String?, String?)>> _replaceChunk(
+@visibleForTesting
+Future<List<(bool, int, String?, String?)>> replaceChunk(
   String root,
   List<String> rels,
   String term,
   String replacement,
-  bool caseSensitive,
-  SnapshotRequest? history,
-) async {
+  SnapshotRequest? history, {
+  required bool caseSensitive,
+}) async {
   final out = <(bool, int, String?, String?)>[];
   for (final rel in rels) {
     final file = File(p.join(root, rel));
-    final String original;
+    final List<int> bytes;
     try {
-      // The editor reads notes with `allowMalformed`, so a note it opens
-      // must be replaceable too; strict UTF-8 here would silently drop it.
-      original = decodeNoteText(file.readAsBytesSync());
+      bytes = file.readAsBytesSync();
     } on Object catch (e) {
       out.add((false, 0, null, 'read "$rel" failed: $e'));
+      continue;
+    }
+    // A file the editor refuses as "not text" is left as it is and reported:
+    // decoding it leniently and writing it back would replace its bytes with
+    // Windows-1252 mojibake (#496).
+    // The editor reads notes leniently, so a note it opens must be
+    // replaceable too; strict UTF-8 here would silently drop it.
+    final original = decodeNoteTextIfText(bytes);
+    if (original == null) {
+      out.add((false, 0, null, 'binary "$rel": left alone'));
       continue;
     }
     final result = replaceWholeWords(

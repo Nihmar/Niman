@@ -304,10 +304,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       throw StateError('No library is open');
     }
     indexRebuilds++;
+    // Held while a test wants the run in flight (the row's busy state, or
+    // a second tap landing mid-run).
+    final gate = rebuildGate;
+    if (gate != null) await gate.future;
+    final error = rebuildError;
+    if (error != null) throw error;
   }
+
+  /// Set to make [rebuildIndex] fail once its gate, if any, is open.
+  Exception? rebuildError;
 
   /// How many times the index was rebuilt on request (#368).
   int indexRebuilds = 0;
+
+  /// Set to pause [rebuildIndex] in flight; complete it to finish.
+  Completer<void>? rebuildGate;
 
   @override
   Future<bool> get debugLogsEnabled async => true;
@@ -1068,12 +1080,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<TemplateSource?> get templateSource async => _FakeTemplateSource(this);
 
+  /// Thrown by [createNote] while non-null, like a disk that refuses the
+  /// file.
+  Exception? createNoteError;
+
   @override
   Future<Note> createNote({
     required String parentPath,
     required String name,
     String content = '',
   }) async {
+    final failure = createNoteError;
+    if (failure != null) throw failure;
     _checkParent(parentPath);
     final clean = sanitizeName(name, fallback: defaultNoteName);
     final unique = _uniqueInParent(parentPath, clean, '.md');

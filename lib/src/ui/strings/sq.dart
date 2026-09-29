@@ -139,11 +139,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktues';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'Kujtesat';
-  @override
-  String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Shkurtoret e tastaturës';
 
@@ -186,8 +182,6 @@ final class AlbanianStrings extends Strings {
   String updateSavedTo(Object path) => 'Përditësimi u ruajt në $path';
   @override
   String get updateInstallerStarted => 'Instaluesi u nis';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostikimi';
   @override
   String get settingsSpellCheckTitle => 'Kontrolli i shkrimit';
   @override
@@ -244,8 +238,6 @@ final class AlbanianStrings extends Strings {
   String get themeBrightnessNight => 'E errët';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Ngjyrat e ndërfaqes dhe të shënit';
   @override
   String get themePaletteSystem => 'Sistemi';
   // Settings: the themes page (issue #269).
@@ -323,16 +315,17 @@ final class AlbanianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktori dhe parapamja, gjithmonë të bashkërenditura';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Shkronja e redaktuesit të burimit';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Shkronja me të cilën është vendosur paneli i burimit; parapamja mban '
+      'atë të shënimit';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Me gjerësi të njëjtë';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Pa serifa';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Me serifa';
   @override
   String get epubLookTitle => 'Pamja e librave';
   @override
@@ -457,7 +450,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Po ruhet…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audioja nuk u luajt dot';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -598,10 +591,6 @@ final class AlbanianStrings extends Strings {
   String get cheatsheetCopied => 'U kopjua';
   @override
   String get cheatsheetInsert => 'Fut në shënim';
-  @override
-  String get cheatsheetWritten => 'Shkruar';
-  @override
-  String get cheatsheetShown => 'Shfaqur';
   @override
   String get cheatHeadings => 'Titujt';
   @override
@@ -745,8 +734,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Shfaq redaktorin';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tabela HTML e thjeshtë)';
 
   // Search (T-M3-05).
   @override
@@ -1002,8 +989,6 @@ final class AlbanianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Pa përparësi';
-  @override
   String get todoNoPriorityShort => "S'ka";
   @override
   String get todoMorePriorities => 'Më shumë…';
@@ -1099,9 +1084,9 @@ final class AlbanianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Fshih panelin anësor (Ctrl+B)';
+  String get hideSidebarTooltip => 'Fshih panelin anësor';
   @override
-  String get showSidebarTooltip => 'Shfaq panelin anësor (Ctrl+B)';
+  String get showSidebarTooltip => 'Shfaq panelin anësor';
   @override
   String get windowMinimizeTooltip => 'Minimizo';
   @override
@@ -1137,7 +1122,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Mbyll';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Veprimi nuk u përfundua dot';
   @override
   String get newFolderTitle => 'Tresë e re';
   @override
@@ -1166,8 +1151,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get currentQuickNote => 'Shënim i shpejtë aktual';
   @override
-  String get pinnedSection => 'Të ngjitur';
-  @override
   String pinnedSectionCount(int count) => 'Të ngjitur · $count';
   @override
   String get templateFolderTitle => 'Tresë e shablloneve';
@@ -1176,7 +1159,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'E re nga shabllon këtu';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Shablloni nuk u hap dot';
   @override
   String get templateFormTitle => 'Plotëso shabllonin';
   @override
@@ -1348,39 +1331,39 @@ final class AlbanianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ „$path" është i vendosur tepër thellë';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Vetitë';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML i papërpunuar';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Fushat';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Shto një veti';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Veti e re';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Ndrysho vetinë';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Çelësi';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Vlera';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Lloji';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Ndaji elementet me presje';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Hiq vetinë';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Pa veti';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'numër';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datë';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logjike';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'listë';
   @override
   String frontmatterInvalid(String reason) => "Frontmatter s'lexohet: $reason";
   @override
@@ -1590,7 +1573,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importo eksportin e Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Eksporti i Notion nuk u importua dot';
   @override
   String dropRejected(String names) =>
       'Këtu hapen vetëm skedarë Markdown dhe dosje: $names';
@@ -1760,8 +1743,6 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ribëj';
   @override
-  String get shortcutChange => 'Ndrysho shkurtoren';
-  @override
   String shortcutCaptureTitle(String command) => 'Tastet për $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1863,9 +1844,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Fshi përfundimisht';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Shënimi nuk u rikthye ose fshi dot';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Koshi nuk u zbraz dot';
 
   // The open/create library screen.
   @override
@@ -1950,15 +1931,13 @@ final class AlbanianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Vendosjet';
-  @override
   String get libraryPathTitle => 'Rruga e bibliotekës';
   @override
   String get reindexTitle => 'Rindekso tani';
   @override
   String get reindexDone => 'U rindeksua';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteka nuk u rilexua dot';
   @override
   String get closeLibraryTitle => 'Mbyll bibliotekën';
   @override
@@ -1991,20 +1970,18 @@ final class AlbanianStrings extends Strings {
       'S\'ka përputhje të plotë të fjalës „$term"'
       '${only == null ? "s'u gjet" : 'u gjet në $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'e gjithë biblioteka';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'në $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'në 1 shënim' : 'në $count shënime';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 shënim nuk u shkrua dot)'
+      : ' ($count shënime nuk u shkruan dot)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Rreth';
   @override
   String get versionTitle => 'Versioni';
   @override
@@ -2054,7 +2031,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get historyOff =>
       'Historiku është i çaktivizuar për këtë bibliotekë '
-      '(Vendosjet, Biblioteka).';
+      '(Vendosjet, Koshi e kronologjia).';
   @override
   String get historyLoadFailed => 'Historiku nuk u lexua';
   @override
@@ -2342,34 +2319,34 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testi nuk funksionoi';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikata nuk është e besuar';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikata nuk mund të verifikohet. Besoje vetëm nëse gjurma e saj '
+      'përputhet me atë që tregon serveri.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Të besohet kjo certifikatë?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikata për $host nuk mund të verifikohet.\n\nGjurma '
+      'SHA-256:\n$fingerprint\n\nBesoje vetëm nëse është certifikata që '
+      'pret. Niman pranon vetëm këtë certifikatë për këtë destinacion '
+      'dhe asnjë tjetër.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Besoju kësaj certifikate';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikata e besuar';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Të harrohet kjo certifikatë?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ky destinacion testohet përsëri kundër depos së certifikatave të '
+      'pajisjes dhe një certifikatë e vetë-nënshkruar do të duhet të '
+      'konfirmohet edhe një herë. Asgjë tjetër nuk ndryshon.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Harroje';
   @override
   String get syncNowAction => 'Sinkronizo tani';
   @override
@@ -2489,10 +2466,6 @@ final class AlbanianStrings extends Strings {
   String get syncRetryAction => 'Provo përsëri';
   @override
   String get syncOpenSettingsAction => 'Vendosjet';
-  @override
-  String get syncCloseAction => 'Mbyll';
-  @override
-  String get syncDoneSnack => 'Sinkronizuar';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sinkronizuar · 1 skedar i fshirë diku tjetër është në kosh'
@@ -2825,4 +2798,92 @@ final class AlbanianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem në këtë shabllon'
       : '$count probleme në këtë shabllon';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titujt në $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Vendndodhjet në $named';
+  @override
+  String get wikilinkThisNote => 'ky shënim';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Asnjë titull nuk përputhet me „$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Asnjë shënim nuk përputhet me „$query".';
+  @override
+  String get wikilinkNoHeading => 'ky shënim nuk ka titull me atë emër';
+  @override
+  String get wikilinkNoNote =>
+      'asgjë në bibliotekë nuk e ka atë emër ose alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Një faqe zgjidhet, nuk emërtohet nga një listë: shkruaj numrin e saj.';
+  @override
+  String get wikilinkFooterMove => 'lëviz';
+  @override
+  String get wikilinkFooterOr => 'ose';
+  @override
+  String get wikilinkFooterInsert => 'fut';
+  @override
+  String get wikilinkFooterClose => 'mbyll';
+  @override
+  String get suggesterPageHint => 'shkruaj një numër';
+  @override
+  String get suggesterChapterHint => 'emërto një skedar në libër';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'kllapa hapëse pa mbyllje: asgjë nuk e mbyll këtë vendëzëvendësues';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'vendëzëvendësues bosh: nuk ka emër midis kllapave';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'vendëzëvendësues i panjohur „$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name" nuk ka etiketë: nuk pyet asgjë dhe vendëzëvendësuesi mbetet në '
+      'vend';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name" nuk ka emër: nuk numëron asgjë dhe vendëzëvendësuesi mbetet në '
+      'vend';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name" nuk pranon filtra: kursori nuk vendoset dhe vendëzëvendësuesi '
+      'mbetet në vend';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'kuotë e pambyllur në formatin e datës: gjithçka pas saj lexohet si '
+      'tekst '
+      'i zakonshëm';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token date i panjohur „$token"';
+  @override
+  String get templateProblemEmptyFilter => 'filtër bosh: nuk ka emër pas „|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter" lëviz një datë: lëvizjen e pranojnë vetëm $formats, dhe vetëm '
+      'përpara çdo filtri tjetër';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter" nuk është lëvizje date: një lëvizje është një numër dhe një '
+      'njësi, si „+7d" ose „-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter" kapet në $units, jo në „$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter" kërkon një numër për gjerësinë e vet, dhe „$argument" nuk '
+      'është një i tillë';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtër i panjohur „$name"';
 }

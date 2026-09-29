@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:niman/src/todo/desktop_notifier.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
 
@@ -9,6 +11,18 @@ import 'package:niman/src/todo/todo_reminder.dart';
 final class FakeDesktopNotifier implements DesktopNotifier {
   /// Reminders the backend posted.
   final List<TodoReminder> shown = [];
+
+  /// How many upcoming `show` calls fail — the daemon not answering at
+  /// login, which the backend only logs.
+  int failShows = 0;
+
+  /// Held open while non-null, so a show can be caught in flight: the
+  /// daemon that is slow to answer. Completing it with an error is a show
+  /// that failed after the wait.
+  Completer<void>? holdShow;
+
+  /// Every `show` the backend attempted, failed ones included.
+  int showCalls = 0;
 
   /// How many times the backend initialized the plugin.
   int initCalls = 0;
@@ -23,6 +37,15 @@ final class FakeDesktopNotifier implements DesktopNotifier {
 
   @override
   Future<void> show(TodoReminder reminder) async {
+    showCalls++;
+    final hold = holdShow;
+    if (hold != null) {
+      await hold.future;
+    }
+    if (failShows > 0) {
+      failShows--;
+      throw StateError('the notification daemon did not answer');
+    }
     shown.add(reminder);
   }
 

@@ -143,11 +143,7 @@ final class GalicianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Biblioteca';
-  @override
   String get settingsSectionReminders => 'Lembranzas';
-  @override
-  String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atallos de teclado';
 
@@ -191,8 +187,6 @@ final class GalicianStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualización gardada en $path';
   @override
   String get updateInstallerStarted => 'Instalador iniciado';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnóstico';
   @override
   String get settingsSpellCheckTitle => 'Comprobación ortográfica';
   @override
@@ -249,8 +243,6 @@ final class GalicianStrings extends Strings {
   String get themeBrightnessNight => 'Escuro';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'As cores da interfaz e da nota';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -329,16 +321,17 @@ final class GalicianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'O editor e a previsualización, sempre de acordo';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Tipografía do editor de código fonte';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'A tipografía do panel de código fonte; a previsualización conserva a da '
+      'nota';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monoespazada';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Sen serifa';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Con serifa';
   @override
   String get epubLookTitle => 'Aspecto dos libros';
   @override
@@ -463,7 +456,7 @@ final class GalicianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Gardando…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Non se puido reproducir o audio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -605,10 +598,6 @@ final class GalicianStrings extends Strings {
   String get cheatsheetCopied => 'Copiado';
   @override
   String get cheatsheetInsert => 'Inserir na nota';
-  @override
-  String get cheatsheetWritten => 'Escrito';
-  @override
-  String get cheatsheetShown => 'Amosado';
   @override
   String get cheatHeadings => 'Títulos';
   @override
@@ -753,8 +742,6 @@ final class GalicianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Mostrar o editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(táboa HTML a bruto)';
 
   // Search (T-M3-05).
   @override
@@ -1006,8 +993,6 @@ final class GalicianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Sen prioridade';
-  @override
   String get todoNoPriorityShort => 'Ninguna';
   @override
   String get todoMorePriorities => 'Máis…';
@@ -1105,9 +1090,9 @@ final class GalicianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ocultar o panel lateral (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ocultar o panel lateral';
   @override
-  String get showSidebarTooltip => 'Mostrar o panel lateral (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostrar o panel lateral';
   @override
   String get windowMinimizeTooltip => 'Minimizar';
   @override
@@ -1143,7 +1128,7 @@ final class GalicianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Pechar';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Non se puido rematar a acción';
   @override
   String get newFolderTitle => 'Cartafol novo';
   @override
@@ -1170,8 +1155,6 @@ final class GalicianStrings extends Strings {
   @override
   String get currentQuickNote => 'Nota rápida actual';
   @override
-  String get pinnedSection => 'Fixadas';
-  @override
   String pinnedSectionCount(int count) => 'Fixadas · $count';
   @override
   String get templateFolderTitle => 'Cartafol de plantillas';
@@ -1180,7 +1163,7 @@ final class GalicianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nova desde unha plantilla aquí';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Non se puido abrir o modelo';
   @override
   String get templateFormTitle => 'Encher a plantilla';
   @override
@@ -1349,39 +1332,39 @@ final class GalicianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” está demasiado anidada';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Propiedades';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML en bruto';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Campos';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Engadir unha propiedade';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Propiedade nova';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Editar a propiedade';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Clave';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Valor';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tipo';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separa os elementos con comas';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Quitar a propiedade';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Non hai propiedades';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'texto';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'número';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'data';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleano';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lista';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter non lido: $reason';
   @override
@@ -1590,7 +1573,8 @@ final class GalicianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importar exportación de Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'Non se puido importar a exportación de Notion';
   @override
   String dropRejected(String names) =>
       'Aquí só se abren ficheiros Markdown e cartafoles: $names';
@@ -1761,8 +1745,6 @@ final class GalicianStrings extends Strings {
   @override
   String get shortcutRedo => 'Refacer';
   @override
-  String get shortcutChange => 'Cambiar o atallo';
-  @override
   String shortcutCaptureTitle(String command) => 'Teclas para $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1861,9 +1843,9 @@ final class GalicianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Borrar permanentemente';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Non se puido restaurar nin eliminar a nota';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Non se puido baleirar o paperilleiro';
 
   // The open/create library screen.
   @override
@@ -1948,15 +1930,13 @@ final class GalicianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Configuración';
-  @override
   String get libraryPathTitle => 'Camiño da biblioteca';
   @override
   String get reindexTitle => 'Reindexar agora';
   @override
   String get reindexDone => 'Reindexación completada';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Non se puido volver ler a biblioteca';
   @override
   String get closeLibraryTitle => 'Pechar a biblioteca';
   @override
@@ -1990,20 +1970,18 @@ final class GalicianStrings extends Strings {
       'Non se encontrou coincidencia exacta de palabra completa para '
       '“$term” ${only == null ? 'atopouse' : 'atopouse en $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'toda a biblioteca';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'en $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'nunha nota' : 'en $count notas';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 nota non se puido escribir)'
+      : ' ($count notas non se puideron escribir)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Sobre';
   @override
   String get versionTitle => 'Versión';
   @override
@@ -2053,7 +2031,7 @@ final class GalicianStrings extends Strings {
   @override
   String get historyOff =>
       'O historial está desactivado nesta biblioteca '
-      '(Configuración, Biblioteca).';
+      '(Configuración, Paperilleiro e cronoloxía).';
   @override
   String get historyLoadFailed => 'Non se puido ler o historial';
   @override
@@ -2337,34 +2315,34 @@ final class GalicianStrings extends Strings {
   @override
   String get syncTestFailed => 'A proba non funcionou';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'O certificado non é de confianza';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Non se pode verificar o certificado. Confía nel só se a súa pegada '
+      'coincide coa que mostra o servidor.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Confiar neste certificado?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Non se pode verificar o certificado de $host.\n\nPegada '
+      'SHA-256:\n$fingerprint\n\nConfía nel só se é o certificado que '
+      'esperas. Niman acepta só este certificado para este destino e '
+      'ningún outro.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Confiar neste certificado';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificado de confianza';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Esquecer este certificado?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Este destino volve probarse contra o almacén de certificados do '
+      'dispositivo e haberá que confirmar unha vez máis un certificado '
+      'autoasinado. Nada máis cambia.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Esquecer';
   @override
   String get syncNowAction => 'Sincronizar agora';
   @override
@@ -2485,10 +2463,6 @@ final class GalicianStrings extends Strings {
   String get syncRetryAction => 'Tentar de novo';
   @override
   String get syncOpenSettingsAction => 'Configuración';
-  @override
-  String get syncCloseAction => 'Pechar';
-  @override
-  String get syncDoneSnack => 'Sincronizada';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronizada · 1 ficheiro borrado noutro lugar está no '
@@ -2820,4 +2794,92 @@ final class GalicianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problema nesta plantilla'
       : '$count problemas nesta plantilla';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Títulos en $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Localizacións en $named';
+  @override
+  String get wikilinkThisNote => 'esta nota';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ningún título coincide con “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ningunha nota coincide con “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'esta nota non ten ningún título con ese nome';
+  @override
+  String get wikilinkNoNote => 'nada na biblioteca ten ese nome nin ese alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Unha páxina escóllese, non se nomea dunha lista: escribe o seu número.';
+  @override
+  String get wikilinkFooterMove => 'mover';
+  @override
+  String get wikilinkFooterOr => 'ou';
+  @override
+  String get wikilinkFooterInsert => 'inserir';
+  @override
+  String get wikilinkFooterClose => 'pechar';
+  @override
+  String get suggesterPageHint => 'escribe un número';
+  @override
+  String get suggesterChapterHint => 'nomea un ficheiro do libro';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'chaves de apertura sen pechar: nada pecha este marcapase';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'marcapase baleiro: non hai ningún nome entre as chaves';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'marcapase descoñecido “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” non ten etiqueta: non pregunta nada, e o marcapase queda tal '
+      'cal';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” non ten nome: non conta nada, e o marcapase queda tal cal';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” non acepta filtros: o cursor non se coloca, e o marcapase queda '
+      'tal cal';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'comiña sen pechar no formato de data: todo o que segue lese como texto '
+      'normal';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de data descoñecido “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtro baleiro: non hai ningún nome despois do “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” despraza unha data: só $formats aceptan un desprazamento, e '
+      'só '
+      'antes de calquera outro filtro';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” non é un desprazamento de data: un desprazamento é un número '
+      'e '
+      'unha unidade, como “+7d” ou “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” axústase a $units, non a “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” precisa un número para o seu ancho, e “$argument” non o é';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtro descoñecido “$name”';
 }

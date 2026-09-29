@@ -18,14 +18,27 @@ import 'package:path/path.dart' as p;
 
 import '../fakes/fake_sync_secret_store.dart';
 import '../fakes/fake_webdav_server.dart';
+import '../fakes/undetachable_http_client.dart';
 
 /// One device: its own library folder, index, app database and engine,
 /// all pointed at the same server.
 final class _Device {
-  new _(this.root, this.dbDir, this.index, this.app, this.ops, this.store)
-    : secrets = FakeSyncSecretStore();
+  new _(
+    this.root,
+    this.dbDir,
+    this.index,
+    this.app,
+    this.ops,
+    this.store, {
+    this.timeout = const Duration(seconds: 5),
+    this.httpClient,
+  }) : secrets = FakeSyncSecretStore();
 
-  static Future<_Device> create(String name) async {
+  static Future<_Device> create(
+    String name, {
+    Duration timeout = const Duration(seconds: 5),
+    HttpClient? httpClient,
+  }) async {
     final root = await Directory.current.createTemp('niman_sync_$name');
     final dbDir = await Directory.current.createTemp('niman_sync_db_$name');
     final index = IndexDatabase(
@@ -39,7 +52,16 @@ final class _Device {
       indexer: Indexer(index),
       config: LibraryConfigRepo(path),
     );
-    return _Device._(root, dbDir, index, app, ops, SyncStore(app));
+    return _Device._(
+      root,
+      dbDir,
+      index,
+      app,
+      ops,
+      SyncStore(app),
+      timeout: timeout,
+      httpClient: httpClient,
+    );
   }
 
   final Directory root;
@@ -49,6 +71,13 @@ final class _Device {
   final NoteOps ops;
   final SyncStore store;
   final FakeSyncSecretStore secrets;
+
+  /// How long the engine's client waits for the next chunk of a body.
+  final Duration timeout;
+
+  /// The transport the engine's client reaches the server over; null for
+  /// a real [HttpClient].
+  final HttpClient? httpClient;
 
   String get path => p.normalize(root.path);
 
@@ -61,7 +90,8 @@ final class _Device {
       url: Uri.parse(destination.url),
       username: destination.username,
       password: password,
-      timeout: const Duration(seconds: 5),
+      timeout: timeout,
+      httpClient: httpClient,
     ),
   );
 
@@ -739,6 +769,63 @@ void main() {
       expect(a.read('note.md'), '# Title\none\ntwo\nthree, mine\n');
     });
 
+    // #495: the merge's fetch left the remote body in a temp next to the
+    // note, and the guard stopping the upload (`_ChangedDuringSync`, after
+    // the download) threw past every delete: one more
+    // `.note.md.niman-tmp-sync-<µs>` in the library folder on each retry,
+    // until the next open's sweep.
+    test('a merge the guard stops leaves no fetched temp behind', () async {
+      var now = DateTime.utc(2026, 9, 27, 12);
+      server.clock = () => now;
+      String note(String first) => '# Title\n$first\ntwo\nthree\n';
+      List<String> temps() => [
+        for (final entry in a.root.listSync())
+          if (p.basename(entry.path).contains('niman-tmp-sync')) entry.path,
+      ];
+
+      a.write('note.md', note('one'));
+      expect((await a.sync()).clean, isTrue);
+      now = now.add(const Duration(minutes: 1));
+      expect((await a.sync()).clean, isTrue);
+      expect((await b.sync()).clean, isTrue);
+
+      now = now.add(const Duration(minutes: 1));
+      b.write('note.md', note('ONE'));
+      expect((await b.sync()).clean, isTrue);
+      a.write('note.md', '# Title\none\ntwo\nthree, mine\n');
+
+      // Another device rewrites B's line once A has downloaded the copy
+      // its merge is built from.
+      var fetched = false;
+      var rewritten = false;
+      server.beforeAnswer = (request) {
+        if (!request.path.endsWith('/note.md')) return;
+        if (request.method == 'GET') fetched = true;
+        if (request.method == 'PROPFIND' && fetched && !rewritten) {
+          rewritten = true;
+          server.putFile('note.md', utf8.encode(note('Uno')));
+        }
+      };
+      final stopped = await a.sync();
+      expect(rewritten, isTrue);
+      expect(stopped.skipped, ['note.md'], reason: stopped.summary());
+      expect(
+        temps(),
+        isEmpty,
+        reason: 'the temp the merge fetched goes when the merge stops',
+      );
+      expect(a.read('note.md'), '# Title\none\ntwo\nthree, mine\n');
+
+      // With nothing rewriting the remote, the merge goes through and
+      // still consumes the temp.
+      server.beforeAnswer = null;
+      final merged = await a.sync();
+      expect(merged.merged, ['note.md'], reason: merged.summary());
+      expect(temps(), isEmpty, reason: 'the temp is consumed by the merge');
+      expect(a.read('note.md'), '# Title\nUno\ntwo\nthree, mine\n');
+      expect(remoteText('note.md'), '# Title\nUno\ntwo\nthree, mine\n');
+    });
+
     test('a rename becomes delete + upload', () async {
       a.write('x.md', 'x');
       await a.sync();
@@ -852,6 +939,85 @@ void main() {
       final retry = await a.sync();
       expect(retry.clean, isTrue, reason: retry.summary());
       expect(remoteText('a.md'), 'a2');
+    });
+
+    test(
+      'a download whose body stalls fails the run, and records it',
+      () async {
+        // The connection cannot be detached, so dropping the socket is not
+        // what releases the temp file's sink: the client's own copy of the
+        // body has to end on the stall.
+        final transport = UndetachableHttpClient();
+        addTearDown(transport.dispose);
+        final stalled = await _Device.create(
+          'stalled',
+          timeout: const Duration(milliseconds: 500),
+          httpClient: transport,
+        );
+        addTearDown(stalled.close);
+        await stalled.connect(server.url);
+        server
+          ..putFile('Remote.md', utf8.encode('from the server'))
+          ..stallNextGet();
+
+        final report = await stalled.sync();
+
+        expect(
+          report.aborted,
+          SyncAbort.offline,
+          reason:
+              'a stalled body is the retryable failure the run backs '
+              'off on: ${report.summary()}',
+        );
+        expect(
+          (await stalled.store.destination(stalled.path))!.lastError,
+          isNotNull,
+          reason: 'the run settled its own failure',
+        );
+        expect(stalled.read('Remote.md'), isNull);
+        expect(
+          stalled.root.listSync().where(
+            (e) => p.basename(e.path).contains('niman-tmp-sync'),
+          ),
+          isEmpty,
+          reason: 'the fetched temp is gone',
+        );
+      },
+    );
+
+    test('a download whose body stalls on a plain HttpClient fails the run '
+        'and drops the connection (#495)', () async {
+      final stalled = await _Device.create(
+        'stalled',
+        timeout: const Duration(milliseconds: 500),
+      );
+      addTearDown(stalled.close);
+      await stalled.connect(server.url);
+      server
+        ..putFile('Remote.md', utf8.encode('from the server'))
+        ..stallNextGet();
+
+      final report = await stalled.sync();
+
+      expect(report.aborted, SyncAbort.offline, reason: report.summary());
+      expect(
+        (await stalled.store.destination(stalled.path))!.lastError,
+        isNotNull,
+        reason: 'the run settled its own failure',
+      );
+      expect(stalled.read('Remote.md'), isNull);
+      expect(
+        stalled.root.listSync().where(
+          (e) => p.basename(e.path).contains('niman-tmp-sync'),
+        ),
+        isEmpty,
+        reason: 'the fetched temp is gone, so its handle is too',
+      );
+      await server.stalledConnectionsClosed.timeout(
+        const Duration(seconds: 10),
+        onTimeout: () =>
+            fail('the stalled connection was left open after the run'),
+      );
     });
   });
 

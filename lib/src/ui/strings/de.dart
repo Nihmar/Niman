@@ -142,11 +142,7 @@ final class GermanStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliothek';
-  @override
   String get settingsSectionReminders => 'Erinnerungen';
-  @override
-  String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturkürzel';
 
@@ -190,8 +186,6 @@ final class GermanStrings extends Strings {
   String updateSavedTo(Object path) => 'Update gespeichert unter $path';
   @override
   String get updateInstallerStarted => 'Installationsprogramm gestartet';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnose';
   @override
   String get settingsSpellCheckTitle => 'Rechtschreibung prüfen';
   @override
@@ -248,8 +242,6 @@ final class GermanStrings extends Strings {
   String get themeBrightnessNight => 'Dunkel';
   @override
   String get themeTitle => 'Design';
-  @override
-  String get themeSubtitle => 'Die Farben der Oberfläche und der Notiz';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -330,16 +322,16 @@ final class GermanStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Der Editor und die Vorschau, die immer übereinstimmen';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Schriftart des Quelltexteditors';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Die Schriftart der Quelltextansicht; die Vorschau behält die der Notiz';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Festbreite';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Serifenlos';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Mit Serifen';
   @override
   String get epubLookTitle => 'Aussehen der Bücher';
   @override
@@ -462,7 +454,7 @@ final class GermanStrings extends Strings {
   @override
   String get audioSavingRecording => 'Wird gespeichert…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audio konnte nicht abgespielt werden';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -604,10 +596,6 @@ final class GermanStrings extends Strings {
   String get cheatsheetCopied => 'Kopiert';
   @override
   String get cheatsheetInsert => 'In die Notiz einfügen';
-  @override
-  String get cheatsheetWritten => 'Geschrieben';
-  @override
-  String get cheatsheetShown => 'Angezeigt';
   @override
   String get cheatHeadings => 'Überschriften';
   @override
@@ -752,8 +740,6 @@ final class GermanStrings extends Strings {
   @override
   String get showEditorTooltip => 'Editor zeigen';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rohe HTML-Tabelle)';
 
   // Search (T-M3-05).
   @override
@@ -1012,8 +998,6 @@ final class GermanStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ohne Priorität';
-  @override
   String get todoNoPriorityShort => 'Keine';
   @override
   String get todoMorePriorities => 'Mehr…';
@@ -1111,9 +1095,9 @@ final class GermanStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Seitenleiste ausblenden (Ctrl+B)';
+  String get hideSidebarTooltip => 'Seitenleiste ausblenden';
   @override
-  String get showSidebarTooltip => 'Seitenleiste anzeigen (Ctrl+B)';
+  String get showSidebarTooltip => 'Seitenleiste anzeigen';
   @override
   String get windowMinimizeTooltip => 'Minimieren';
   @override
@@ -1149,7 +1133,7 @@ final class GermanStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Schließen';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Aktion konnte nicht abgeschlossen werden';
   @override
   String get newFolderTitle => 'Neuer Ordner';
   @override
@@ -1176,8 +1160,6 @@ final class GermanStrings extends Strings {
   @override
   String get currentQuickNote => 'Aktuelle Schnellnotiz';
   @override
-  String get pinnedSection => 'Angeheftet';
-  @override
   String pinnedSectionCount(int count) => 'Angeheftet · $count';
   @override
   String get templateFolderTitle => 'Vorlagen-Ordner';
@@ -1186,7 +1168,7 @@ final class GermanStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Neu aus Vorlage hier';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Vorlage konnte nicht geöffnet werden';
   @override
   String get templateFormTitle => 'Vorlage ausfüllen';
   @override
@@ -1357,39 +1339,39 @@ final class GermanStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path“ ist zu tief verschachtelt';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Eigenschaften';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Rohes YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Felder';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Eigenschaft hinzufügen';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Neue Eigenschaft';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Eigenschaft bearbeiten';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Schlüssel';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Wert';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Typ';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Einträge mit Kommas trennen';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Eigenschaft entfernen';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Keine Eigenschaften';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'Text';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'Zahl';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'Datum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'Boolesch';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'Liste';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter nicht gelesen: $reason';
@@ -1602,7 +1584,8 @@ final class GermanStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion-Export importieren';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'Notion-Export konnte nicht importiert werden';
   @override
   String dropRejected(String names) =>
       'Hier öffnen sich nur Markdown-Dateien und Ordner: $names';
@@ -1776,8 +1759,6 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutRedo => 'Wiederholen';
   @override
-  String get shortcutChange => 'Kürzel ändern';
-  @override
   String shortcutCaptureTitle(String command) => 'Tasten für $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1884,9 +1865,10 @@ final class GermanStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Endgültig löschen';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Notiz konnte nicht wiederhergestellt oder gelöscht werden';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Papierkorb konnte nicht geleert werden';
 
   // The open/create library screen.
   @override
@@ -1973,15 +1955,13 @@ final class GermanStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Einstellungen';
-  @override
   String get libraryPathTitle => 'Bibliothekspfad';
   @override
   String get reindexTitle => 'Jetzt neu indizieren';
   @override
   String get reindexDone => 'Neu-Indizierung abgeschlossen';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Bibliothek konnte nicht neu eingelesen werden';
   @override
   String get closeLibraryTitle => 'Bibliothek schließen';
   @override
@@ -2015,20 +1995,18 @@ final class GermanStrings extends Strings {
       'Kein exakter Treffer des ganzen Worts „$term“ '
       '${only == null ? 'gefunden' : 'gefunden in $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'gesamte Bibliothek';
   @override
   String replaceScopeNote(String note) => 'in $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'in 1 Notiz' : 'in $count Notizen';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 Notiz konnte nicht geschrieben werden)'
+      : ' ($count Notizen konnten nicht geschrieben werden)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Info';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2078,7 +2056,7 @@ final class GermanStrings extends Strings {
   @override
   String get historyOff =>
       'Der Verlauf ist für diese Bibliothek ausgeschaltet '
-      '(Einstellungen, Bibliothek).';
+      '(Einstellungen, Papierkorb und Verlauf).';
   @override
   String get historyLoadFailed => 'Verlauf konnte nicht gelesen werden';
   @override
@@ -2369,34 +2347,35 @@ final class GermanStrings extends Strings {
   @override
   String get syncTestFailed => 'Der Test hat nicht funktioniert';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Dem Zertifikat wird nicht vertraut';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Das Zertifikat lässt sich nicht überprüfen. Vertraue ihm nur, wenn sein '
+      'Fingerabdruck dem entspricht, den der Server zeigt.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Diesem Zertifikat vertrauen?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Das Zertifikat für $host lässt sich nicht '
+      'überprüfen.\n\nSHA-256-Fingerabdruck:\n$fingerprint\n\nVertraue '
+      'ihm nur, wenn es das Zertifikat ist, das du erwartest. Niman '
+      'akzeptiert nur dieses eine Zertifikat für dieses Ziel und kein '
+      'anderes.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Diesem Zertifikat vertrauen';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Vertrauenswürdiges Zertifikat';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Dieses Zertifikat vergessen?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Dieses Ziel wird erneut gegen den Zertifikatsspeicher des Geräts '
+      'geprüft, und ein selbstsigniertes Zertifikat muss noch einmal bestätigt '
+      'werden. Sonst ändert sich nichts.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Vergessen';
   @override
   String get syncNowAction => 'Jetzt synchronisieren';
   @override
@@ -2520,10 +2499,6 @@ final class GermanStrings extends Strings {
   String get syncRetryAction => 'Erneut versuchen';
   @override
   String get syncOpenSettingsAction => 'Einstellungen';
-  @override
-  String get syncCloseAction => 'Schließen';
-  @override
-  String get syncDoneSnack => 'Synchronisiert';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synchronisiert · 1 anderswo gelöschte Datei liegt im '
@@ -2866,4 +2841,94 @@ final class GermanStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 Problem in dieser Vorlage'
       : '$count Probleme in dieser Vorlage';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Überschriften in $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Stellen in $named';
+  @override
+  String get wikilinkThisNote => 'diese Notiz';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Keine Überschrift passt zu „$query“.';
+  @override
+  String wikilinkNoMatchNote(String query) => 'Keine Notiz passt zu „$query“.';
+  @override
+  String get wikilinkNoHeading =>
+      'diese Notiz hat keine Überschrift mit diesem Namen';
+  @override
+  String get wikilinkNoNote =>
+      'nichts in der Bibliothek trägt diesen Namen oder Alias';
+  @override
+  String wikilinkAlias(String alias) => 'Alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Eine Seite wird gewählt, nicht aus einer Liste benannt: gib ihre Nummer '
+      'ein.';
+  @override
+  String get wikilinkFooterMove => 'bewegen';
+  @override
+  String get wikilinkFooterOr => 'oder';
+  @override
+  String get wikilinkFooterInsert => 'einfügen';
+  @override
+  String get wikilinkFooterClose => 'schließen';
+  @override
+  String get suggesterPageHint => 'eine Zahl eingeben';
+  @override
+  String get suggesterChapterHint => 'eine Datei im Buch benennen';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'geöffnete geschweifte Klammern ohne Schluss: nichts schließt diesen '
+      'Platzhalter';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'leerer Platzhalter: kein Name zwischen den Klammern';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'unbekannter Platzhalter „$name“';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name“ hat keine Beschriftung: es fragt nichts, und der Platzhalter '
+      'bleibt stehen';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name“ hat keinen Namen: es zählt nichts, und der Platzhalter bleibt '
+      'stehen';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name“ nimmt keine Filter: der Cursor wird nicht gesetzt, und der '
+      'Platzhalter bleibt stehen';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'nicht geschlossenes Anführungszeichen im Datumsformat: alles danach '
+      'wird '
+      'als gewöhnlicher Text gelesen';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'unbekanntes Datums-Token „$token“';
+  @override
+  String get templateProblemEmptyFilter =>
+      'leerer Filter: kein Name nach dem „|“';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter“ verschiebt ein Datum: nur $formats nehmen eine Verschiebung, '
+      'und nur vor jedem anderen Filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter“ ist keine Datumsverschiebung: eine Verschiebung ist eine Zahl '
+      'und eine Einheit, wie „+7d“ oder „-1w“';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter“ richtet sich auf $units aus, nicht auf „$unit“';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter“ braucht eine Zahl für die Breite, und „$argument“ ist keine';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'unbekannter Filter „$name“';
 }

@@ -6,9 +6,10 @@ Deletes go to `.trash/` (soft delete) or remove the file permanently
 (hard delete), depending on the library's `trashEnabled` setting
 (default true). Restore by moving the file back out of `.trash/`.
 
-**Emptying it on its own.** *Settings → Auto-empty trash* is **Never**
-until you set it: pick a wait (a week, a month, a year) and every
-deletion that has sat in `.trash/` longer than that is deleted for good
+**Emptying it on its own.** *Settings → Trash and history → Auto-empty
+trash* is **Never** until you set it: pick a wait (a week, a month, a
+year) and every deletion that has sat in `.trash/` longer than that is
+deleted for good
 the next time the library opens. It happens quietly and there is no
 undo, which is why nothing is deleted until you choose a wait. Only what
 Niman put in the trash is counted — a file you moved into `.trash/`
@@ -38,7 +39,7 @@ seconds.
 
 **How many.** The last `historyVersions` versions per note (default 10;
 0 keeps none). Older ones are dropped as new ones arrive. Both settings
-live in **Settings → Library** and in `.niman/settings.json`;
+live in **Settings → Trash and history** and in `.niman/settings.json`;
 out-of-range values in a hand-edited file read back as the defaults.
 
 **Browse and restore.** Long-press a note in the tree (right-click on
@@ -83,19 +84,22 @@ stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
 
-**Both surfaces show the block as fields, above the note.** The read pane
-and the live editor put the frontmatter at the top as one row per key — the
+**Both editors and the read pane show the block as fields, above the
+note.** Each puts the frontmatter at the top as one row per key — the
 key in a left column, the value, and a small chip naming the type (text,
 number, date, boolean, list): a text line, a number, a date, a tick for
 `true`/`false`, a chip per list item. **Add a property** is the last row, and
 the `×` on a row takes one out. A **Raw YAML** toggle in the header shows the
-same block as written. It is the one panel in both places, so the two cannot
+same block as written. It is one panel everywhere, so the surfaces cannot
 drift.
 
-In either surface the file is the only copy: an edit rewrites that key's line
+In every surface the file is the only copy: an edit rewrites that key's line
 and leaves the rest of the block — comments, quoting, the other keys — exactly
-where it was, and it saves and undoes like any other edit. The fields are a
-second way into the same file, not a second file.
+where it was, and it saves and undoes like any other edit. The rewritten line
+keeps the indentation, the `&anchor` an `*alias` points at and the comment
+that follows its value (or, for a value that goes on over several lines, the
+one after the key), and a key that is added joins the others at their
+indentation. A comment on an item of a list that is rewritten goes with it. The fields are a second way into the same file, not a second file.
 
 A value is shown as it is written (`1.10` stays `1.10`), and a value saved
 unchanged writes nothing. A list's items are edited as a comma-separated line
@@ -411,7 +415,7 @@ it, and the text lands when a view of the note takes it.
 
 The first time, Niman asks which **model** to use and downloads it once.
 The models stay in the app's storage on this device — never in the library,
-never synced. **Settings → Library → Transcription** holds the model and
+never synced. **Settings → Transcription** holds the model and
 the **language** spoken in your recordings (naming it beats letting whisper
 detect it, and *Same as the app* follows the app's language). Tiny, base,
 small, medium and large are offered, from fastest-and-least-accurate to

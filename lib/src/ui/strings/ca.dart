@@ -142,11 +142,7 @@ final class CatalanStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Biblioteca';
-  @override
   String get settingsSectionReminders => 'Recordatoris';
-  @override
-  String get settingsSectionShortcuts => 'Teclat';
   @override
   String get keyboardShortcutsTitle => 'Dreceres de teclat';
 
@@ -190,8 +186,6 @@ final class CatalanStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualització guardada a $path';
   @override
   String get updateInstallerStarted => 'Instal·lador iniciat';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnòstic';
   @override
   String get settingsSpellCheckTitle => 'Comprovació d’ortografia';
   @override
@@ -248,8 +242,6 @@ final class CatalanStrings extends Strings {
   String get themeBrightnessNight => 'Fosc';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Els colors de la interfície i de la nota';
   @override
   String get themePaletteSystem => 'Sistema';
   // Settings: the themes page (issue #269).
@@ -328,16 +320,17 @@ final class CatalanStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'L’editor i la previsualització, sempre d’acord';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Tipografia de l’editor de codi font';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'La tipografia del plafó de codi font; la previsualització manté la de '
+      'la nota';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monoespaiada';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Sense serifes';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Amb serifes';
   @override
   String get epubLookTitle => 'Aspecte dels llibres';
   @override
@@ -464,7 +457,7 @@ final class CatalanStrings extends Strings {
   @override
   String get audioSavingRecording => 'Desant…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'No s’ha pogut reproduir l’àudio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -606,10 +599,6 @@ final class CatalanStrings extends Strings {
   String get cheatsheetCopied => 'Copiat';
   @override
   String get cheatsheetInsert => 'Insereix a la nota';
-  @override
-  String get cheatsheetWritten => 'Escrit';
-  @override
-  String get cheatsheetShown => 'Mostrat';
   @override
   String get cheatHeadings => 'Títols';
   @override
@@ -755,8 +744,6 @@ final class CatalanStrings extends Strings {
   @override
   String get showEditorTooltip => 'Mostra l’editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(taula HTML en brut)';
 
   // Search (T-M3-05).
   @override
@@ -1014,8 +1001,6 @@ final class CatalanStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Sense prioritat';
-  @override
   String get todoNoPriorityShort => 'Cap';
   @override
   String get todoMorePriorities => 'Més…';
@@ -1114,9 +1099,9 @@ final class CatalanStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Amaga el panell lateral (Ctrl+B)';
+  String get hideSidebarTooltip => 'Amaga el panell lateral';
   @override
-  String get showSidebarTooltip => 'Mostra el panell lateral (Ctrl+B)';
+  String get showSidebarTooltip => 'Mostra el panell lateral';
   @override
   String get windowMinimizeTooltip => 'Minimitza';
   @override
@@ -1152,7 +1137,7 @@ final class CatalanStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Tanca';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'No s’ha pogut acabar l’acció';
   @override
   String get newFolderTitle => 'Carpeta nova';
   @override
@@ -1180,8 +1165,6 @@ final class CatalanStrings extends Strings {
   @override
   String get currentQuickNote => 'Nota ràpida actual';
   @override
-  String get pinnedSection => 'Fixades';
-  @override
   String pinnedSectionCount(int count) => 'Fixades · $count';
   @override
   String get templateFolderTitle => 'Carpeta de plantilles';
@@ -1190,7 +1173,7 @@ final class CatalanStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nova des d’una plantilla aquí';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'No s’ha pogut obrir la plantilla';
   @override
   String get templateFormTitle => 'Ompla la plantilla';
   @override
@@ -1365,39 +1348,39 @@ final class CatalanStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” és massa enfilada';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Propietats';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML en brut';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Camps';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Afegeix una propietat';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Propietat nova';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Edita la propietat';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Clau';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Valor';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tipus';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separa els elements amb comes';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Elimina la propietat';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Cap propietat';
   @override
   String get frontmatterTypeText => 'text';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'nombre';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'data';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleà';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'llista';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter no llegit: $reason';
   @override
@@ -1608,7 +1591,8 @@ final class CatalanStrings extends Strings {
   @override
   String get notionImportTitle => 'Importa exportació de Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'No s’ha pogut importar l’exportació de Notion';
   @override
   String dropRejected(String names) =>
       'Aquí només s’obren fitxers Markdown i carpetes: $names';
@@ -1778,8 +1762,6 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutRedo => 'Refés';
   @override
-  String get shortcutChange => 'Canvia la drecera';
-  @override
   String shortcutCaptureTitle(String command) => 'Tecles per a $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1880,9 +1862,9 @@ final class CatalanStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Esborra permanentment';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'No s’ha pogut restaurar ni eliminar la nota';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'No s’ha pogut buidar la paperera';
 
   // The open/create library screen.
   @override
@@ -1969,15 +1951,13 @@ final class CatalanStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Configuració';
-  @override
   String get libraryPathTitle => 'Camí de la biblioteca';
   @override
   String get reindexTitle => 'Torna a indexar ara';
   @override
   String get reindexDone => 'Reindexació completada';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'No s’ha pogut tornar a llegir la biblioteca';
   @override
   String get closeLibraryTitle => 'Tanca la biblioteca';
   @override
@@ -2011,20 +1991,18 @@ final class CatalanStrings extends Strings {
       'No s’ha trobat cap coincidència exacta de paraula sencera per '
       'a “$term” ${only == null ? 's’ha trobat' : 'trobat a $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'tota la biblioteca';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'a $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'a 1 nota' : 'a $count notes';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 nota no s’ha pogut escriure)'
+      : ' ($count notes no s’han pogut escriure)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Quant a';
   @override
   String get versionTitle => 'Versió';
   @override
@@ -2073,7 +2051,7 @@ final class CatalanStrings extends Strings {
   @override
   String get historyOff =>
       'L’historial està desactivat per a aquesta biblioteca '
-      '(Configuració, Biblioteca).';
+      '(Configuració, Paperera i cronologia).';
   @override
   String get historyLoadFailed => 'No s’ha pogut llegir l’historial';
   @override
@@ -2360,34 +2338,34 @@ final class CatalanStrings extends Strings {
   @override
   String get syncTestFailed => 'La prova no ha funcionat';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'El certificat no és de confiança';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'No es pot verificar el certificat. Confia-hi només si la seva empremta '
+      'coincideix amb la que mostra el servidor.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Confiar en aquest certificat?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'No es pot verificar el certificat de $host.\n\nEmpremta '
+      'SHA-256:\n$fingerprint\n\nConfia-hi només si és el certificat que '
+      'esperes. Niman accepta només aquest certificat per a aquesta '
+      'destinació i cap altre.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Confia en aquest certificat';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificat de confiança';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Oblidar aquest certificat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Aquesta destinació es torna a provar contra l’emmagatzematge de '
+      'certificats del dispositiu i caldrà tornar a confirmar un certificat '
+      'autofirmat. Res més no canvia.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Oblida';
   @override
   String get syncNowAction => 'Sincronitza ara';
   @override
@@ -2508,10 +2486,6 @@ final class CatalanStrings extends Strings {
   String get syncRetryAction => 'Torna-ho a provar';
   @override
   String get syncOpenSettingsAction => 'Configuració';
-  @override
-  String get syncCloseAction => 'Tanca';
-  @override
-  String get syncDoneSnack => 'Sincronitzada';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronitzada · 1 fitxer esborrat en un altre lloc és a '
@@ -2849,4 +2823,92 @@ final class CatalanStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problema en aquesta plantilla'
       : '$count problemes en aquesta plantilla';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Títols a $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Ubicacions a $named';
+  @override
+  String get wikilinkThisNote => 'aquesta nota';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Cap títol coincideix amb “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Cap nota coincideix amb “$query”.';
+  @override
+  String get wikilinkNoHeading => 'aquesta nota no té cap títol amb aquest nom';
+  @override
+  String get wikilinkNoNote =>
+      'res de la biblioteca no té aquest nom ni aquest àlies';
+  @override
+  String wikilinkAlias(String alias) => 'àlies $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Una pàgina es tria, no es nomena d’una llista: escriu-ne el número.';
+  @override
+  String get wikilinkFooterMove => 'mou';
+  @override
+  String get wikilinkFooterOr => 'o';
+  @override
+  String get wikilinkFooterInsert => 'insereix';
+  @override
+  String get wikilinkFooterClose => 'tanca';
+  @override
+  String get suggesterPageHint => 'escriu un número';
+  @override
+  String get suggesterChapterHint => 'nomena un fitxer del llibre';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'claus d’obertura sense tancar: res no tanca aquest espai reservat';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'espai reservat buit: no hi ha cap nom entre les claus';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'espai reservat desconegut “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” no té etiqueta: no pregunta res, i l’espai reservat queda tal '
+      'com és';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” no té nom: no compta res, i l’espai reservat queda tal com és';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” no accepta filtres: el cursor no es col·loca, i l’espai '
+      'reservat '
+      'queda tal com és';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'cometa sense tancar al format de data: tot el que segueix es llegeix '
+      'com '
+      'a text normal';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de data desconegut “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtre buit: no hi ha cap nom després del “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” desplaça una data: només $formats accepten un desplaçament, i '
+      'només abans de qualsevol altre filtre';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” no és un desplaçament de data: un desplaçament és un número i '
+      'una unitat, com “+7d” o “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” s’ajusta a $units, no a “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” necessita un número per a l’amplada, i “$argument” no ho és';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtre desconegut “$name”';
 }

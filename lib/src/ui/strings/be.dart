@@ -141,11 +141,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Рэдактар';
   @override
-  String get settingsSectionLibrary => 'Бібліятэка';
-  @override
   String get settingsSectionReminders => 'Напамінні';
-  @override
-  String get settingsSectionShortcuts => 'Клавіятура';
   @override
   String get keyboardShortcutsTitle => 'Комбінацыі клавіш';
 
@@ -190,8 +186,6 @@ final class BelarusianStrings extends Strings {
   String updateSavedTo(Object path) => 'Абнаўленне захавана ў $path';
   @override
   String get updateInstallerStarted => 'Усталёўшчык запушчаны';
-  @override
-  String get settingsSectionDiagnostics => 'Дыягустыка';
   @override
   String get settingsSpellCheckTitle => 'Праверка арфаграфіі';
   @override
@@ -245,8 +239,6 @@ final class BelarusianStrings extends Strings {
   String get themeBrightnessNight => 'Цёмная';
   @override
   String get themeTitle => 'Тэма';
-  @override
-  String get themeSubtitle => 'Колеры інтэрфейсу і заўваг';
   @override
   String get themePaletteSystem => 'Сістэма';
   // Settings: the themes page (issue #269).
@@ -323,16 +315,17 @@ final class BelarusianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Рэдактар і прагляд заўсёды сінхранізаваны';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Шрыфт рэдактара зыходнага тэксту';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Гарнітура, якой набрана панэль зыходнага тэксту; прагляд захоўвае '
+      'ўласную гарнітуру нататкі';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Манашырынны';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Без засечак';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'З засечкамі';
   @override
   String get epubLookTitle => 'Выгляд кніг';
   @override
@@ -455,7 +448,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Захаванне…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Не ўдалося прайграць гэтае аўдыё';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -602,10 +595,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Уставіць у нататку';
   @override
-  String get cheatsheetWritten => 'Напісана';
-  @override
-  String get cheatsheetShown => 'Паказана';
-  @override
   String get cheatHeadings => 'Загалоўкі';
   @override
   String get cheatEmphasis => 'Тоўсты, курсіў, закрэслены';
@@ -748,8 +737,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Паказаць рэдактар';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(HTML-табліца без апрацоўкі)';
 
   // Search (T-M3-05).
   @override
@@ -998,8 +985,6 @@ final class BelarusianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без прыярытэту';
-  @override
   String get todoNoPriorityShort => 'Няма';
   @override
   String get todoMorePriorities => 'Больш…';
@@ -1095,9 +1080,9 @@ final class BelarusianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Схаваць бакавую панэль (Ctrl+B)';
+  String get hideSidebarTooltip => 'Схаваць бакавую панэль';
   @override
-  String get showSidebarTooltip => 'Паказаць бакавую панэль (Ctrl+B)';
+  String get showSidebarTooltip => 'Паказаць бакавую панэль';
   @override
   String get windowMinimizeTooltip => 'Зменшыць';
   @override
@@ -1133,7 +1118,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Закрыць';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Не ўдалося завяршыць дзеянне';
   @override
   String get newFolderTitle => 'Новая папка';
   @override
@@ -1160,8 +1145,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get currentQuickNote => 'Поточная хуткая заўвага';
   @override
-  String get pinnedSection => 'Замацаваныя';
-  @override
   String pinnedSectionCount(int count) => 'Замацаваныя · $count';
   @override
   String get templateFolderTitle => 'Папка шаблонаў';
@@ -1170,7 +1153,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Новы з шаблона тут';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Не ўдалося адкрыць шаблон';
   @override
   String get templateFormTitle => 'Запоўніць шаблон';
   @override
@@ -1335,39 +1318,39 @@ final class BelarusianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” ўбудавана занадта глыбока';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Уласцівасці';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Чысты YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Палі';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Дадаць уласцівасць';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Новая ўласцівасць';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Рэдагаваць уласцівасць';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Ключ';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Значэнне';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Тып';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Раздзяляйце элементы коскамі';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Выдаліць уласцівасць';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Няма ўласцівасцей';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'тэкст';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'лік';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'дата';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'лагічнае';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'спіс';
   @override
   String frontmatterInvalid(String reason) =>
       'Не ўдалося прачытаць метаданныя: $reason';
@@ -1577,7 +1560,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get notionImportTitle => 'Імпарт экспарту Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Не ўдалося імпартаваць экспарт Notion';
   @override
   String dropRejected(String names) =>
       'Тут адкрываюцца толькі файлы Markdown і папкі: $names';
@@ -1748,8 +1731,6 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutRedo => 'Паўтарыць';
   @override
-  String get shortcutChange => 'Змяніць спалучэнне';
-  @override
   String shortcutCaptureTitle(String command) => 'Клавішы для «$command»';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1851,9 +1832,9 @@ final class BelarusianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Выдаліць канчаткова';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Не ўдалося аднавіць або выдаліць заўвагу';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Не ўдалося ачысціць кошык';
 
   // The open/create library screen.
   @override
@@ -1936,15 +1917,13 @@ final class BelarusianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Налады';
-  @override
   String get libraryPathTitle => 'Шлях бібліятэкі';
   @override
   String get reindexTitle => 'Пераіндэксаваць зараз';
   @override
   String get reindexDone => 'Пераіндэксацыя завершана';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Не ўдалося перачытаць бібліятэку';
   @override
   String get closeLibraryTitle => 'Зачыніць бібліятэку';
   @override
@@ -1976,20 +1955,23 @@ final class BelarusianStrings extends Strings {
       '«$term» не мае дакладнага супадзення цэлага слова'
       '${only == null ? '' : ' — знойдзена толькі $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'уся бібліятэка';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'у $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'у $count заўвазе'
+      : 'у $count заўвагах';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count заўвага не запісана)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count заўвагі не запісаны)'
+      : ' ($count заўваг не запісана)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Пра праграму';
   @override
   String get versionTitle => 'Версія';
   @override
@@ -2038,7 +2020,7 @@ final class BelarusianStrings extends Strings {
       'Аснова сінхранізацыі захоўваецца і па-за лімітам.';
   @override
   String get historyOff =>
-      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Бібліятэка).';
+      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Кошык і гісторыя).';
   @override
   String get historyLoadFailed => 'Не ўдалося прачытаць гісторыю';
   @override
@@ -2328,34 +2310,34 @@ final class BelarusianStrings extends Strings {
   @override
   String get syncTestFailed => 'Праверка не ўдалася';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Сертыфікат не лічыцца давераным';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Сертыфікат не ўдаецца праверыць. Давярайце яму, толькі калі яго адбітак '
+      'супадае з тым, што паказвае сервер.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Давяраць гэтаму сертыфікату?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Сертыфікат для $host не ўдаецца праверыць.\n\nАдбітак '
+      'SHA-256:\n$fingerprint\n\nДавярайце яму, толькі калі гэта чаканы '
+      'сертыфікат. Niman прымае толькі гэты сертыфікат для гэтага '
+      'прызначэння і ніякі іншы.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Давяраць гэтаму сертыфікату';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Сертыфікат давераны';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Забыць гэты сертыфікат?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Гэтае прызначэнне зноў правяраецца супраць сховішча сертыфікатаў '
+      'прылады, і самападпісаны сертыфікат давядзецца пацвердзіць яшчэ раз. '
+      'Больш нічога не змяняецца.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Забыць';
   @override
   String get syncNowAction => 'Сінхранізаваць зараз';
   @override
@@ -2482,10 +2464,6 @@ final class BelarusianStrings extends Strings {
   String get syncRetryAction => 'Паспрабаваць зноў';
   @override
   String get syncOpenSettingsAction => 'Налады';
-  @override
-  String get syncCloseAction => 'Зачыніць';
-  @override
-  String get syncDoneSnack => 'Сінхранізавана';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Сінхранізавана · $count файл, выдалены ў іншым месцы, у '
@@ -2831,11 +2809,99 @@ final class BelarusianStrings extends Strings {
     final mod10 = count % 10;
     final mod100 = count % 100;
     if (mod10 == 1 && mod100 != 11) {
-      return '1 праблема ў гэтым шаблоне';
+      return '$count праблема ў гэтым шаблоне';
     }
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
       return '$count праблемы ў гэтым шаблоне';
     }
     return '$count праблем у гэтым шаблоне';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Загалоўкі ў $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Месцы ў $named';
+  @override
+  String get wikilinkThisNote => 'гэтая нататка';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ніводзін загаловак не адпавядае „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ніводная нататка не адпавядае „$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'у гэтай нататцы няма загалоўка з такой назвай';
+  @override
+  String get wikilinkNoNote =>
+      'нічога ў бібліятэцы не мае такой назвы ці псеўданіма';
+  @override
+  String wikilinkAlias(String alias) => 'псеўданім $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Старонку выбіраюць, а не называюць са спіса: увядзіце яе нумар.';
+  @override
+  String get wikilinkFooterMove => 'перамясціць';
+  @override
+  String get wikilinkFooterOr => 'або';
+  @override
+  String get wikilinkFooterInsert => 'уставіць';
+  @override
+  String get wikilinkFooterClose => 'закрыць';
+  @override
+  String get suggesterPageHint => 'увядзіце лік';
+  @override
+  String get suggesterChapterHint => 'назавіце файл у кнізе';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'адкрытыя фігурныя дужкі без закрыцця: нішто не закрывае гэты '
+      'запаўняльнік';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'пусты запаўняльнік: паміж дужкамі няма назвы';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'невядомы запаўняльнік „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” без подпісу: ён нічога не пытае, і запаўняльнік застаецца на '
+      'месцы';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” без назвы: ён нічога не лічыць, і запаўняльнік застаецца на '
+      'месцы';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” не прымае фільтраў: курсор не ставіцца, і запаўняльнік '
+      'застаецца '
+      'на месцы';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'незакрытая лапка ў фармаце даты: усё пасля яе чытаецца як звычайны '
+      'тэкст';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'невядомы токен даты „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'пусты фільтр: пасля „|” няма назвы';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” перамяшчае дату: перамяшчэнне прымаюць толькі $formats, і '
+      'толькі перад любым іншым фільтрам';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” не з’яўляецца перамяшчэннем даты: перамяшчэнне — гэта лік і '
+      'адзінка, як „+7d” або „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” прывязваецца да $units, а не да „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” патрабуе лік для сваёй шырыні, а „$argument” ім не з’яўляецца';
+  @override
+  String templateProblemUnknownFilter(String name) => 'невядомы фільтр „$name”';
 }

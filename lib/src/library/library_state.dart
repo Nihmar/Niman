@@ -45,6 +45,7 @@ import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
+import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
@@ -388,12 +389,14 @@ final class LibraryController implements LibrarySession {
     final reader = _ops;
     return IndexWikilinkSuggester(
       db,
-      // A named note's headings are read off the note itself; a note gone
-      // since the panel named it answers null rather than throwing.
-      readNote: (path) async {
+      // A named note's headings are read off the note itself, on a
+      // background isolate (a novel's read and outline is seconds of work);
+      // a note gone since the panel named it answers null rather than
+      // throwing.
+      readHeadings: (path) async {
         if (reader == null) return null;
         try {
-          return await reader.readNote(path);
+          return await reader.noteHeadings(path);
         } on Object {
           return null;
         }
@@ -497,7 +500,7 @@ final class LibraryController implements LibrarySession {
     await LegacyLibrarySettings(appDb).seed(abs);
     final indexer = Indexer(indexDb)
       ..onChanged = _bump
-      ..onRemoved = _onRemoved;
+      ..onRemoved = (removed) => _onRemoved(abs, removed);
     // One reader of `.niman/settings.json` per session: the four
     // per-library settings and the overrides (T-ML-10) share its cache.
     // The welcome's answer (#266) seeds the editors of every library
@@ -824,12 +827,28 @@ final class LibraryController implements LibrarySession {
   ///
   /// The session is rebuilt in place, not closed and reopened, so the
   /// library never leaves the screen; the phase a caller sees stays ready.
+  /// A call that arrives while a rebuild runs joins it: the teardown and
+  /// the delete happen once, and the fresh index the first is opening is
+  /// not torn down and deleted under it (#493).
   @override
-  Future<void> rebuildIndex() async {
+  Future<void> rebuildIndex() {
+    final running = _rebuild;
+    if (running != null) return running;
     final root = _root;
     if (root == null || _phase != LibraryPhase.ready) {
-      throw StateError('No library is open');
+      return Future<void>.error(StateError('No library is open'));
     }
+    final future = _rebuildFrom(root).whenComplete(() {
+      _rebuild = null;
+    });
+    _rebuild = future;
+    return future;
+  }
+
+  /// The one rebuild in flight, if any.
+  Future<void>? _rebuild;
+
+  Future<void> _rebuildFrom(String root) async {
     _log.info('rebuild index requested: $root');
     _lastError = null;
     await _teardown();
@@ -1457,9 +1476,12 @@ final class LibraryController implements LibrarySession {
     }
   }
 
-  void _onRemoved(Set<String> removed) {
+  /// Fires with the paths a re-index pruned, and drops their reading
+  /// positions: those files are ones the library saw leave (#492).
+  void _onRemoved(String root, Set<String> removed) {
     if (removed.isEmpty || _removals.isClosed) return;
     _removals.add(removed);
+    unawaited(ReadingPositions(root).removed(removed));
   }
 
   /// Drops everything that belongs to the open library, the index file
@@ -1616,12 +1638,20 @@ final class LibraryController implements LibrarySession {
       return db;
     } on Object catch (error) {
       final damaged = _sqliteCause(error);
-      if (damaged == null || !_isDamagedIndex(damaged)) rethrow;
+      if (damaged == null || !_isDamagedIndex(damaged)) {
+        await _closeIndex(db);
+        rethrow;
+      }
       _log.warning('index of $libraryPath is damaged; rebuilding: $damaged');
       await _closeIndex(db);
       await _deleteIndexOf(libraryPath);
       final fresh = await indexDbFactory(libraryPath);
-      await _warmIndex(fresh);
+      try {
+        await _warmIndex(fresh);
+      } on Object {
+        await _closeIndex(fresh);
+        rethrow;
+      }
       return fresh;
     }
   }

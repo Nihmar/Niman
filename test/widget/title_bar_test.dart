@@ -4,8 +4,14 @@
 //
 // #169 rides the same bar: where those buttons ended up goes to the window
 // seam, which is what Windows hit-tests for Snap Layouts.
+//
+// #498 rides it too: the sidebar tooltip names the key bound now, not the
+// shipped one.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/title_bar.dart';
 
 import '../fakes/fake_window_controller.dart';
@@ -60,6 +66,26 @@ void main() {
     window.maximized.value = true;
     await tester.pump();
     expect(find.byIcon(Icons.filter_none), findsOne);
+  });
+
+  testWidgets('the sidebar tooltip follows the keys bound now (#498)', (
+    tester,
+  ) async {
+    final previous = AppKeyMap.current.value;
+    addTearDown(() => AppKeyMap.current.value = previous);
+
+    final window = FakeWindowController();
+    await tester.pumpWidget(_host(window));
+    expect(_sidebarTooltip(tester), contains('Ctrl+B'));
+
+    // The key is remapped (#159): the tooltip has to move with it, or it
+    // points at a key that does nothing.
+    AppKeyMap.current.value = previous.withBinding(
+      AppCommand.toggleSidebar,
+      const SingleActivator(LogicalKeyboardKey.keyB, alt: true),
+    );
+    await tester.pump();
+    expect(_sidebarTooltip(tester), contains('Alt+B'));
   });
 
   testWidgets('tells the window where the caption buttons are (#169)', (
@@ -119,6 +145,13 @@ void main() {
 /// Where the button [label] was drawn, in the view's logical pixels.
 Rect _drawnRect(WidgetTester tester, String label) =>
     tester.getRect(find.byKey(Key(label)));
+
+/// The sidebar toggle's tooltip, as it stands.
+String _sidebarTooltip(WidgetTester tester) =>
+    tester
+        .widget<IconButton>(find.byKey(const Key('toggle-sidebar')))
+        .tooltip ??
+    '';
 
 /// [rect] scaled by [scale], the way a report scales drawn pixels.
 Rect _scaled(Rect rect, double scale) => Rect.fromLTWH(

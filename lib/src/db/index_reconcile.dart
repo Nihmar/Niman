@@ -515,6 +515,7 @@ final class IndexReconciler {
     _log.debug(
       'pair: "${orphan.path}" -> "$newPath" (content unchanged, later home)',
     );
+    await _carryLinks(orphan, newPath);
     await _dao.deleteSubtree(newPath);
     final parentRel = parentOf(newPath);
     final parentId = parentRel.isEmpty
@@ -531,6 +532,42 @@ final class IndexReconciler {
     await _store.replaceFileStems(orphan.id, newName);
   }
 
+  /// Hands the links the fresh row at [newPath] queued to the [orphan] that
+  /// moved there, when one of them reads from the note's folder (#491).
+  ///
+  /// The orphan keeps its rows, its edges among them, and those were
+  /// resolved from its old folder. The fresh row's queued links are the
+  /// note's own, parsed when its directory was walked, so the note is not
+  /// read again: they replace the orphan's edges and resolve from the new
+  /// path at the end of the walk.
+  Future<void> _carryLinks(Note orphan, String newPath) async {
+    final fresh = await _dao.find(newPath);
+    if (fresh == null) return;
+    final queued = await _db
+        .customSelect(
+          'SELECT target, kind FROM pending_links WHERE note_id = ?',
+          variables: [Variable<int>(fresh.id)],
+        )
+        .get();
+    final depends = queued.any(
+      (row) => LinkResolver.dependsOnLocation(
+        row.read<String>('target'),
+        markdown: row.read<String>('kind') == 'md',
+      ),
+    );
+    if (!depends) return;
+    await _db.customStatement('DELETE FROM note_links WHERE from_note = ?', [
+      orphan.id,
+    ]);
+    await _db.customStatement('DELETE FROM pending_links WHERE note_id = ?', [
+      orphan.id,
+    ]);
+    await _db.customStatement(
+      'UPDATE OR IGNORE pending_links SET note_id = ? WHERE note_id = ?',
+      [orphan.id, fresh.id],
+    );
+  }
+
   /// Resolves and writes every link edge the walk queued, against the tree
   /// as it stands after the pairing and the prune: a link to a note a later
   /// directory introduced, or to one that moved, finds its row. Edges a
@@ -544,20 +581,27 @@ final class IndexReconciler {
     while (true) {
       final rows = await _db
           .customSelect(
-            'SELECT rowid, note_id, target, kind FROM pending_links '
-            'ORDER BY rowid LIMIT $_linkPage',
+            'SELECT l.rowid AS rowid, l.note_id AS note_id, '
+            'l.target AS target, l.kind AS kind, n.path AS path '
+            'FROM pending_links AS l LEFT JOIN notes AS n ON n.id = l.note_id '
+            'ORDER BY l.rowid LIMIT $_linkPage',
           )
           .get();
       if (rows.isEmpty) break;
-      final targets = <String>{
-        for (final row in rows) row.read<String>('target'),
-      };
-      final resolved = await LinkResolver(_db).resolveBatch(targets);
+      // A link resolves from the note it is written in: a `..` walks from
+      // that note's folder (#491).
+      LinkQuery queryOf(QueryRow row) => (
+        target: row.read<String>('target'),
+        from: row.readNullable<String>('path'),
+        markdown: row.read<String>('kind') == 'md',
+      );
+      final resolved = await LinkResolver(_db)
+          .resolveQueries({for (final row in rows) queryOf(row)});
       final last = rows.last.read<int>('rowid');
       await _db.transaction(() async {
         for (final row in rows) {
           final fromNote = row.read<int>('note_id');
-          final outcome = resolved[row.read<String>('target')];
+          final outcome = resolved[queryOf(row)];
           if (outcome is! ResolvedNote || outcome.note.id == fromNote) {
             continue;
           }

@@ -806,6 +806,11 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     }
     if (!identical(oldWidget.buffer, widget.buffer)) {
       // Another note: the keyboard, the history and the caret were this one's.
+      // The panel too, and it is the one thing here that cannot be rebuilt
+      // from the new text: it holds the offsets of the link it was opened in
+      // and the rows that complete it, so `Enter` would write a note name
+      // into the note that took its place (#494).
+      _dropSuggestInUpdate();
       final attached = _input.isAttached;
       _input.detach();
       _history = widget.history ?? widget.surface?.history ?? EditHistory();
@@ -826,7 +831,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     } else if (widget.buffer.revision != _seenRevision) {
       // An edit this view did not make (a command, a revert): the colours are
       // read again rather than adjusted, because there is no `SourceEdit` to
-      // follow.
+      // follow. The link the panel stood in may be gone or moved — the caret
+      // is clamped into whatever replaced it — and its offsets are the ones
+      // read from the text that went, so the panel goes with them (#494).
+      _dropSuggestInUpdate();
       _restyle();
       _folds.clear();
       _heights = _map();
@@ -1061,6 +1069,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final buffer = widget.buffer;
     buffer.replaceRange(0, buffer.length, text);
     _history.clear();
+    // The panel holds offsets into the text that went (#494).
+    _closeSuggest();
     _restyle();
     _folds.clear();
     _heights = _map();
@@ -1116,6 +1126,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _input.sendSelection();
     _scheduleCaret();
     _ensureCaretVisible();
+    // An undo is an edit no keystroke made: the panel is read again off the
+    // text it left — it follows a link still there and closes on one gone
+    // (#494).
+    _refreshSuggest();
     if (edit != null) _notifyChanged(edit);
     return true;
   }
@@ -1511,6 +1525,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       }
     }
     return true;
+  }
+
+  /// Whether the character at [local] of line [index] is code: a line of a
+  /// fenced or indented code block, a line of display maths, or an inline code
+  /// or maths span over the character.
+  ///
+  /// Answered by the colours the view already keeps, as [_isPlainLine] is, so
+  /// the two cannot disagree about what the note reads as code. A span is
+  /// drawn as several runs — its delimiters, its text — and they are disjoint,
+  /// so the character the offset stands on is the one to ask about: a caret
+  /// past a span's last delimiter is prose again, and a link typed there is
+  /// not the code's.
+  bool _inCodeAt(int index, int local) {
+    for (final token in _lineAt(index).tokens) {
+      final kind = token.kind;
+      if (kind == TokenKind.codeFence ||
+          kind == TokenKind.codeBlock ||
+          kind == TokenKind.mathBlock) {
+        return true;
+      }
+      final inline =
+          kind == TokenKind.codeInline || kind == TokenKind.mathInline;
+      if (inline && local >= token.start && local < token.end) return true;
+    }
+    return false;
   }
 
   /// Tab: moves the lines the selection touches in by `indentWidth` spaces —
@@ -2312,21 +2351,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   }
 
   /// The rectangle a problem's span covers, in global coordinates, or null
-  /// while the line that holds it is not built.
+  /// while the piece that holds it is not built.
+  ///
+  /// As [caretRect], the span is measured in the piece it is drawn in and
+  /// shifted by where that piece stands of the line's box — the piece its own
+  /// text ends in, since a piece a wrap broke after a space ends on that
+  /// space, and the span after it begins where the next piece does.
   Rect? _templateSpanRect(int start, int end) {
     final buffer = widget.buffer;
     final line = buffer.lineOf(start);
     final lineStart = buffer.offsetOfLine(line);
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
-      return null;
-    }
+    final lineEnd = lineStart + buffer.lineLengthAt(line);
+    final last = (end > start ? end - 1 : start).clamp(lineStart, lineEnd);
+    final (piece, paragraph) = _fragmentAt(line, last - lineStart);
+    if (piece == null || paragraph == null) return null;
     final length = paragraph.text.toPlainText().length;
-    final from = (start - lineStart).clamp(0, length);
-    final to =
-        (end.clamp(lineStart, lineStart + buffer.lineLengthAt(line)) -
-                lineStart)
-            .clamp(from, length);
+    final from = (start - lineStart - piece.start).clamp(0, length);
+    final to = (end.clamp(lineStart, lineEnd) - lineStart - piece.start).clamp(
+      from,
+      length,
+    );
     final boxes = paragraph.getBoxesForSelection(
       TextSelection(baseOffset: from, extentOffset: to),
     );
@@ -2361,7 +2405,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         children: [
           TemplateHint(
             anchor: Rect.fromLTWH(at.dx, at.dy, anchor.width, anchor.height),
-            message: hint.error.message,
+            message: templateProblemSentence(hint.error),
             suggestion: hint.error.suggestion,
             onFix: () => _applyTemplateFix(hint.error),
             onDismiss: () => _hint.value = null,
@@ -2806,6 +2850,8 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       scaler: _scaler,
       budget: _textWidth,
       reveal: inside ? at : null,
+      revealLine: inside ? at.line : null,
+      tokensFrom: _styler,
     );
   }
 
@@ -3744,6 +3790,20 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final at = caret - lineStart;
     final open = text.lastIndexOf('[[', at);
     if (open < 0 || open + 2 > at) return null;
+    // A link is prose: in a fence, an indented block or display maths, or in
+    // an inline code or maths span, there is none to complete. The panel would
+    // list the library for text the note reads as code and write the note name
+    // it completed there (#494). Asked of the `[[` read above as well as of
+    // the caret: a link opened in a span is the span's, even once the caret
+    // has left it, and a caret made in a span completes nothing outside it.
+    //
+    // A line of a long note whose colours are still being read has no tokens
+    // to ask — [_tokensAt] is null, "nobody has read it yet", which [_inCodeAt]
+    // would answer as "no code here" — and its fence state is a scan of the
+    // lines above it: not something to guess at here. No panel opens until
+    // the reading lands; the next keystroke in the link opens it (#494).
+    if (_tokensAt(line) == null) return null;
+    if (_inCodeAt(line, at) || _inCodeAt(line, open)) return null;
     final close = text.indexOf(']]', open + 2);
     if (close != -1 && close < at) return null;
     final content = text.substring(open + 2, at);
@@ -3766,7 +3826,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         if (found != -1 && found < end) end = found;
       }
     }
-    return _LinkQuery(
+    final query = _LinkQuery(
       start: lineStart + open + 2,
       caret: caret,
       end: lineStart + end,
@@ -3775,6 +3835,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       heading: hash == -1 ? '' : content.substring(hash + 1),
       hasHash: hash != -1,
     );
+    // A book's place is written through its `=` (`page=`): what follows is
+    // the number the form asked the writer for, and no row completes it. The
+    // key after it is the note's again, so the number stands (#494).
+    if (_modeOf(query) == WikilinkPanelKind.book &&
+        query.heading.contains('=')) {
+      return null;
+    }
+    return query;
   }
 
   /// Opens, filters or closes the panel for where the caret is now.
@@ -3918,6 +3986,22 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     _suggestSeq++;
     setState(() => _suggest = null);
     _suggestOverlay.hide();
+  }
+
+  /// Drops the panel from a `didUpdateWidget`, which runs inside the build.
+  ///
+  /// The overlay portal refuses to be hidden there, so the panel is dropped
+  /// off the state the build that follows reads — no key and no draw of it
+  /// this frame — and the portal is hidden once the frame is over. A panel
+  /// opened in the meantime, for the text that replaced it, is left standing.
+  void _dropSuggestInUpdate() {
+    if (_suggest == null) return;
+    _suggestSeq++;
+    _suggest = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _suggest != null) return;
+      _suggestOverlay.hide();
+    });
   }
 
   /// Moves the panel's selection by [by], kept inside the rows.
@@ -4326,16 +4410,19 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     );
   }
 
-  /// The caret rectangle at [offset] in global coordinates, from the line's
-  /// own paragraph — or null when that line is not built.
+  /// The caret rectangle at [offset] in global coordinates, from the piece of
+  /// its line the offset is drawn in — or null when that line is not built.
+  ///
+  /// A wrapped table row is drawn as one paragraph per piece, so the rectangle
+  /// is measured in that piece's own coordinates and shifted by where it
+  /// stands of the line's box, as [caretRect] is.
   Rect? _caretRectAt(int offset) {
     final buffer = widget.buffer;
     final line = buffer.lineOf(offset.clamp(0, buffer.length));
-    final paragraph = _paragraphAt(line);
-    if (paragraph == null || !paragraph.attached || !paragraph.hasSize) {
-      return null;
-    }
-    final local = (offset - buffer.offsetOfLine(line)).clamp(
+    final lineStart = buffer.offsetOfLine(line);
+    final (piece, paragraph) = _fragmentAt(line, offset - lineStart);
+    if (piece == null || paragraph == null) return null;
+    final local = (offset - lineStart - piece.start).clamp(
       0,
       paragraph.text.toPlainText().length,
     );
@@ -5167,7 +5254,7 @@ final class _Line extends StatelessWidget {
     valueListenable: spot,
     builder: (context, at, child) => CustomPaint(
       painter: at.line == index && rowColor != null
-          ? _RowPainter(rect: caret, color: rowColor!)
+          ? _RowPainter(rect: caret, color: rowColor!, pieceShift: pieceShift)
           : null,
       foregroundPainter: at.line == index
           ? _CaretPainter(
@@ -6061,25 +6148,44 @@ bool _isMarker(TokenKind kind) => switch (kind) {
 /// Lights the caret's row across the line, behind the text: typewriter mode's
 /// row being written. The row is the caret's own — its top and its height —
 /// so a wrapped paragraph lights the row the caret is on, not the paragraph.
+///
+/// A table row laid out in fitted columns is drawn a piece at a time, and the
+/// caret is measured inside the piece it is in: the light takes the piece's
+/// own shift, the way the caret does (`_CaretPainter`), so it stands on the
+/// visual line being written rather than a piece's height too high (#494).
 final class _RowPainter extends CustomPainter {
-  new({required this.rect, required this.color}) : super(repaint: rect);
+  new({required this.rect, required this.color, this.pieceShift})
+    : super(repaint: Listenable.merge(<Listenable?>[rect, pieceShift]));
 
   final ValueListenable<Rect?> rect;
   final Color color;
 
+  /// Where the *piece* the caret is in sits in the same box, for a table row
+  /// laid out in fitted columns: its `y` is what the light has to move by.
+  final ValueListenable<Offset>? pieceShift;
+
+  /// The rectangle the row is lit across, in the box this paints over: the
+  /// caret's own row, shifted with the piece the caret is in — the same
+  /// answer `_CaretPainter` draws from.
+  Rect? drawnRect(Size size) {
+    final value = rect.value;
+    if (value == null) return null;
+    final dy = pieceShift?.value.dy ?? 0;
+    return Rect.fromLTRB(0, value.top + dy, size.width, value.bottom + dy);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    final value = rect.value;
-    if (value == null) return;
-    canvas.drawRect(
-      Rect.fromLTRB(0, value.top, size.width, value.bottom),
-      Paint()..color = color,
-    );
+    final drawn = drawnRect(size);
+    if (drawn == null) return;
+    canvas.drawRect(drawn, Paint()..color = color);
   }
 
   @override
   bool shouldRepaint(_RowPainter oldDelegate) =>
-      oldDelegate.rect != rect || oldDelegate.color != color;
+      oldDelegate.rect != rect ||
+      oldDelegate.color != color ||
+      oldDelegate.pieceShift != pieceShift;
 }
 
 /// Draws the caret: a thin vertical bar at the rectangle the line's own layout

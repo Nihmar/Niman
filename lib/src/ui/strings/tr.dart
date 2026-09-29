@@ -137,11 +137,7 @@ final class TurkishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Düzenleyici';
   @override
-  String get settingsSectionLibrary => 'Kütüphane';
-  @override
   String get settingsSectionReminders => 'Hatırlatıcılar';
-  @override
-  String get settingsSectionShortcuts => 'Klavye';
   @override
   String get keyboardShortcutsTitle => 'Klavye kısayolu';
 
@@ -184,8 +180,6 @@ final class TurkishStrings extends Strings {
   String updateSavedTo(Object path) => 'Güncelleme şuraya kaydedildi: $path';
   @override
   String get updateInstallerStarted => 'Yükleyici başlatıldı';
-  @override
-  String get settingsSectionDiagnostics => 'Teşhis';
   @override
   String get settingsSpellCheckTitle => 'Yazım denetimi';
   @override
@@ -239,8 +233,6 @@ final class TurkishStrings extends Strings {
   String get themeBrightnessNight => 'Koyu';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Arayüz ve not renkleri';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -317,16 +309,16 @@ final class TurkishStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Düzenleyici ve önizleme, her zaman senkronize';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Kaynak düzenleyici yazı tipi';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Kaynak bölmesinin yazı tipi; önizleme notun kendi yazı tipini korur';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Eşaralıklı';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Serifsiz';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Serifli';
   @override
   String get epubLookTitle => 'Kitap görünümü';
   @override
@@ -451,7 +443,7 @@ final class TurkishStrings extends Strings {
   @override
   String get audioSavingRecording => 'Kaydediliyor…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Ses çalınamadı';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -594,10 +586,6 @@ final class TurkishStrings extends Strings {
   String get cheatsheetCopied => 'Kopyalandı';
   @override
   String get cheatsheetInsert => 'Nota ekle';
-  @override
-  String get cheatsheetWritten => 'Yazılan';
-  @override
-  String get cheatsheetShown => 'Gösterilen';
   @override
   String get cheatHeadings => 'Başlıklar';
   @override
@@ -742,8 +730,6 @@ final class TurkishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Düzenleyiciyi göster';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(çözümlenmemiş HTML tablo)';
 
   // Search (T-M3-05).
   @override
@@ -992,8 +978,6 @@ final class TurkishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Öncelik yok';
-  @override
   String get todoNoPriorityShort => 'Yok';
   @override
   String get todoMorePriorities => 'Daha fazla…';
@@ -1088,9 +1072,9 @@ final class TurkishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Kenar çubuğunu gizle (Ctrl+B)';
+  String get hideSidebarTooltip => 'Kenar çubuğunu gizle';
   @override
-  String get showSidebarTooltip => 'Kenar çubuğunu göster (Ctrl+B)';
+  String get showSidebarTooltip => 'Kenar çubuğunu göster';
   @override
   String get windowMinimizeTooltip => 'Simge durumuna küçült';
   @override
@@ -1126,7 +1110,7 @@ final class TurkishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Kapat';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'İşlem tamamlanamadı';
   @override
   String get newFolderTitle => 'Yeni klasör';
   @override
@@ -1154,8 +1138,6 @@ final class TurkishStrings extends Strings {
   @override
   String get currentQuickNote => 'Geçerli hızlı not';
   @override
-  String get pinnedSection => 'Sabitlenmiş';
-  @override
   String pinnedSectionCount(int count) => 'Sabitlenmiş · $count';
   @override
   String get templateFolderTitle => 'Şablon klasörü';
@@ -1164,7 +1146,7 @@ final class TurkishStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Buradan şablondan yeni';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Şablon açılamadı';
   @override
   String get templateFormTitle => 'Şablonu doldur';
   @override
@@ -1324,39 +1306,39 @@ final class TurkishStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ $path çok derin iç içe';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Özellikler';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Ham YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Alanlar';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Özellik ekle';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Yeni özellik';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Özelliği düzenle';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Anahtar';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Değer';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tür';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Öğeleri virgülle ayırın';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Özelliği kaldır';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Özellik yok';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'metin';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'sayı';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'tarih';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'mantıksal';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'liste';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter okunamadı: $reason';
   @override
@@ -1564,7 +1546,7 @@ final class TurkishStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion dışa aktarımını içe aktar';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion dışa aktarımı içe aktarılamadı';
   @override
   String dropRejected(String names) =>
       'Burada yalnızca Markdown dosyaları ve klasörler açılır: $names';
@@ -1733,8 +1715,6 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutRedo => 'Yinele';
   @override
-  String get shortcutChange => 'Kısayolu değiştir';
-  @override
   String shortcutCaptureTitle(String command) => '$command için tuşlar';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1835,9 +1815,9 @@ final class TurkishStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Kalıcı olarak sil';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Not geri yüklenemedi veya silinemedi';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Çöp kutusu boşaltılamadı';
 
   // The open/create library screen.
   @override
@@ -1919,15 +1899,13 @@ final class TurkishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Ayarlar';
-  @override
   String get libraryPathTitle => 'Kütüphane yolu';
   @override
   String get reindexTitle => 'Dekoru şimdi yeniden oluştur';
   @override
   String get reindexDone => 'Dekor yeniden oluşturuldu';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Kütüphane yeniden okunamadı';
   @override
   String get closeLibraryTitle => 'Kütüphaneyi kapat';
   @override
@@ -1959,20 +1937,17 @@ final class TurkishStrings extends Strings {
       '“$term” için tam kelime eşleşmesi yok'
       '${only == null ? ' bulunamadı' : ' $only içinde bulundu'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'tüm kütüphane';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note içinde';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 notta' : '$count notta';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) =>
+      count == 1 ? ' (1 not yazılamadı)' : ' ($count not yazılamadı)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Hakkında';
   @override
   String get versionTitle => 'Sürüm';
   @override
@@ -2019,7 +1994,8 @@ final class TurkishStrings extends Strings {
   @override
   String get historyBaseKept => 'Eşitleme tabanı sınırın ötesinde de saklanır.';
   @override
-  String get historyOff => 'Bu kütüphanede geçmiş kapalı (Ayarlar, Kütüphane).';
+  String get historyOff =>
+      'Bu kütüphanede geçmiş kapalı (Ayarlar, Çöp kutusu ve kronoloji).';
   @override
   String get historyLoadFailed => 'Geçmiş okunamadı';
   @override
@@ -2299,34 +2275,34 @@ final class TurkishStrings extends Strings {
   @override
   String get syncTestFailed => 'Test başarısız oldu';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikaya güvenilmiyor';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifika doğrulanamıyor. Yalnızca parmak izi sunucunun gösterdiğiyle '
+      'eşleşiyorsa güvenin.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Bu sertifikaya güvenilsin mi?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      '$host için sertifika doğrulanamıyor.\n\nSHA-256 parmak '
+      'izi:\n$fingerprint\n\nYalnızca beklediğiniz sertifika ise '
+      'güvenin. Niman bu hedef için yalnızca bu sertifikayı kabul eder, '
+      'başkasını kabul etmez.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Bu sertifikaya güven';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikaya güvenildi';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Bu sertifika unutulsun mu?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Bu hedef cihazın sertifika deposuna karşı yeniden sınanır ve kendinden '
+      'imzalı bir sertifikanın bir kez daha onaylanması gerekir. Başka hiçbir '
+      'şey değişmez.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Unut';
   @override
   String get syncNowAction => 'Şimdi eşitle';
   @override
@@ -2443,10 +2419,6 @@ final class TurkishStrings extends Strings {
   String get syncRetryAction => 'Yeniden dene';
   @override
   String get syncOpenSettingsAction => 'Ayarlar';
-  @override
-  String get syncCloseAction => 'Kapat';
-  @override
-  String get syncDoneSnack => 'Eşitlendi';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Eşitlendi · başka yerde silinen 1 dosya çöp kutusunda'
@@ -2769,4 +2741,88 @@ final class TurkishStrings extends Strings {
   String get templateHintDismissAction => 'Kapat';
   @override
   String templateProblems(int count) => 'Bu şablonda $count sorun';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named içindeki başlıklar';
+  @override
+  String wikilinkPlacesIn(String named) => '$named içindeki yerler';
+  @override
+  String get wikilinkThisNote => 'bu not';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      '“$query” ile eşleşen başlık yok.';
+  @override
+  String wikilinkNoMatchNote(String query) => '“$query” ile eşleşen not yok.';
+  @override
+  String get wikilinkNoHeading => 'bu notta o adı taşıyan başlık yok';
+  @override
+  String get wikilinkNoNote =>
+      'kitaplıkta o adı ya da takma adı taşıyan hiçbir şey yok';
+  @override
+  String wikilinkAlias(String alias) => 'takma ad: $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Sayfa listeden adlandırılmaz, seçilir: numarasını yazın.';
+  @override
+  String get wikilinkFooterMove => 'taşı';
+  @override
+  String get wikilinkFooterOr => 'veya';
+  @override
+  String get wikilinkFooterInsert => 'ekle';
+  @override
+  String get wikilinkFooterClose => 'kapat';
+  @override
+  String get suggesterPageHint => 'bir sayı yazın';
+  @override
+  String get suggesterChapterHint => 'kitaptaki bir dosyayı adlandırın';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'açık küme parantezleri kapanmıyor: bu yer tutucuyu kapatan bir şey yok';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'boş yer tutucu: parantezler arasında ad yok';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'bilinmeyen yer tutucu “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” etiketsiz: hiçbir şey sormuyor ve yer tutucu olduğu gibi '
+      'kalıyor';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” adsız: hiçbir şey saymıyor ve yer tutucu olduğu gibi kalıyor';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” filtre kabul etmiyor: imleç yerleştirilmiyor ve yer tutucu '
+      'olduğu gibi kalıyor';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'tarih biçiminde kapanmayan tırnak: sonrasındaki her şey normal metin '
+      'olarak okunur';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'bilinmeyen tarih belirteci “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'boş filtre: “|” sonrasında ad yok';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” bir tarihi taşır: taşımayı yalnızca $formats kabul eder ve '
+      'yalnızca başka bir filtreden önce';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” bir tarih taşıması değil: taşıma bir sayı ve bir birimdir, '
+      '“+7d” ya da “-1w” gibi';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” $units birimine sabitler, “$unit” birimine değil';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” genişliği için bir sayı ister ve “$argument” sayı değil';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'bilinmeyen filtre “$name”';
 }

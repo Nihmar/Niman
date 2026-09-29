@@ -13,6 +13,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/marquee_text.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -76,19 +78,31 @@ final class AppTitleBar extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 4),
-            IconButton(
-              key: const Key('toggle-sidebar'),
-              tooltip: sidebarVisible
-                  ? AppStrings.hideSidebarTooltip
-                  : AppStrings.showSidebarTooltip,
-              icon: Icon(
-                sidebarVisible
-                    ? Icons.vertical_split
-                    : Icons.chrome_reader_mode_outlined,
-              ),
-              iconSize: 18,
-              visualDensity: VisualDensity.compact,
-              onPressed: onToggleSidebar,
+            ValueListenableBuilder<KeyMap>(
+              // The keys are remappable (#159), so the tooltip is built
+              // from the map in force instead of a hard-coded pair (#498):
+              // the label and the key that runs the command cannot drift.
+              valueListenable: AppKeyMap.current,
+              builder: (context, keyMap, _) {
+                final keys = keyMap.bindingOf(AppCommand.toggleSidebar);
+                final label = sidebarVisible
+                    ? AppStrings.hideSidebarTooltip
+                    : AppStrings.showSidebarTooltip;
+                return IconButton(
+                  key: const Key('toggle-sidebar'),
+                  tooltip: keys == null
+                      ? label
+                      : '$label (${describeActivator(keys)})',
+                  icon: Icon(
+                    sidebarVisible
+                        ? Icons.vertical_split
+                        : Icons.chrome_reader_mode_outlined,
+                  ),
+                  iconSize: 18,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onToggleSidebar,
+                );
+              },
             ),
             if (tabs case final tabs?) ...[
               // The title keeps the tree's width; the tabs start at its
@@ -315,6 +329,19 @@ final class _WindowButtonsState extends State<_WindowButtons> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // The bar is going away — the narrow layout draws none (#490). A
+    // rectangle left over would keep the runner's hit test answering where
+    // the buttons were, so the window is told the three are nowhere.
+    widget.window.reportCaptionButtons(
+      minimize: Rect.zero,
+      maximize: Rect.zero,
+      close: Rect.zero,
+    );
+    super.dispose();
   }
 
   /// Hands the window seam the buttons' rectangles, in physical pixels: the

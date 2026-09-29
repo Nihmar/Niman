@@ -81,6 +81,9 @@ final class FakeReminderBackend implements ReminderBackend {
   }
 
   @override
+  void noteWanted(Iterable<TodoReminder> wanted) {}
+
+  @override
   Future<void> cancel(int id) async {
     calls.add('cancel:$id');
     cancelled.add(id);

@@ -23,12 +23,15 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/import/bounded_entry.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -66,16 +69,35 @@ const int notionImportMaxEntries = 100000;
 Future<NotionImport?> importNotionZip({
   required String source,
   required String libraryRoot,
-}) {
-  return IsolateGauge.run(
-    () => _importNotionZip(source: source, libraryRoot: libraryRoot),
-    'import Notion export "${p.basename(source)}"',
-  );
-}
+}) => importNotionZipWithBudget(
+  source: source,
+  libraryRoot: libraryRoot,
+  maxBytes: notionImportMaxBytes,
+);
+
+/// [importNotionZip] with its byte budget handed in.
+///
+/// The budget is a constant in the app; a test hands in a small one, so an
+/// entry whose stream expands past the size its directory declares (#492) is
+/// caught without inflating the gigabyte a real import allows.
+@visibleForTesting
+Future<NotionImport?> importNotionZipWithBudget({
+  required String source,
+  required String libraryRoot,
+  required int maxBytes,
+}) => IsolateGauge.run(
+  () => _importNotionZip(
+    source: source,
+    libraryRoot: libraryRoot,
+    maxBytes: maxBytes,
+  ),
+  'import Notion export "${p.basename(source)}"',
+);
 
 Future<NotionImport?> _importNotionZip({
   required String source,
   required String libraryRoot,
+  required int maxBytes,
 }) async {
   // Decoded through the file, not a byte buffer: the compressed archive is
   // never held whole, and no entry is inflated until its size is known
@@ -94,10 +116,10 @@ Future<NotionImport?> _importNotionZip({
       0,
       (sum, entry) => sum + entry.file.size,
     );
-    if (expanded > notionImportMaxBytes) {
+    if (expanded > maxBytes) {
       throw ArchiveException(
         'not a Notion export: its entries expand to $expanded bytes, over '
-        'the $notionImportMaxBytes-byte budget',
+        'the $maxBytes-byte budget',
       );
     }
     if (entries.isEmpty) return null;
@@ -106,13 +128,29 @@ Future<NotionImport?> _importNotionZip({
     final folder = freeFolderName(libraryRoot, wanted);
     final target = Directory(p.join(libraryRoot, folder));
     await target.create(recursive: true);
-    final plan = _planNames(entries, strip);
-    final written = await _writeAll(entries, plan, target: target);
-    if (written.notes == 0) {
-      await target.delete(recursive: true);
-      return null;
+    try {
+      final plan = _planNames(entries, strip);
+      final written = await _writeAll(
+        entries,
+        plan,
+        target: target,
+        maxBytes: maxBytes,
+      );
+      if (written.notes == 0) {
+        await target.delete(recursive: true);
+        return null;
+      }
+      return (folder: folder, notes: written.notes, assets: written.assets);
+    } on Object {
+      // A refused entry costs the folder the import had begun to build, not
+      // a half-written one left in the library.
+      try {
+        await target.delete(recursive: true);
+      } on FileSystemException {
+        // Already gone, or not there to remove; the failure stands.
+      }
+      rethrow;
     }
-    return (folder: folder, notes: written.notes, assets: written.assets);
   } finally {
     await input.close();
   }
@@ -236,10 +274,15 @@ String _cleanSegment(String segment, {required bool isDir}) {
 
 /// Copies every planned file into [target], rewriting the Markdown links
 /// that pointed at the names the plan changed.
+///
+/// [maxBytes] is the import's whole budget: each entry's inflated length is
+/// counted against it as it is read, so a stream that expands past what its
+/// entry declared is refused (#492).
 Future<({int notes, int assets})> _writeAll(
   List<({String path, ArchiveFile file})> entries,
   Map<String, String> plan, {
   required Directory target,
+  required int maxBytes,
 }) async {
   // Bare file names, too: Notion sometimes links a page by name without
   // its folder. Only unique ones — an ambiguous name links nothing.
@@ -256,16 +299,26 @@ Future<({int notes, int assets})> _writeAll(
   ambiguous.forEach(byName.remove);
   var notes = 0;
   var assets = 0;
+  var read = 0;
   for (final entry in entries) {
     final rel = plan[entry.path];
     if (rel == null) continue;
-    final bytes = entry.file.readBytes();
+    final Uint8List? bytes;
+    try {
+      bytes = readEntryWithin(entry.file, maxBytes - read);
+    } on EntryOverBudget {
+      throw ArchiveException(
+        'not a Notion export: an entry expands past the $maxBytes-byte budget',
+      );
+    }
     // The inflated bytes are cached on the archive entry, and the import
     // holds the archive until it returns: release each entry as it is
     // written, so the peak is one entry rather than the whole export
     // (#382).
     entry.file.clear();
+    // An entry with no content at all has nothing to write.
     if (bytes == null) continue;
+    read += bytes.length;
     final file = File(p.joinAll([target.path, ...p.posix.split(rel)]));
     await file.parent.create(recursive: true);
     if (p.posix.extension(entry.path).toLowerCase() == '.md') {

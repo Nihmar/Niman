@@ -58,12 +58,26 @@ typedef LinePicture = ({
 final class SourceStyler {
   /// Reads [buffer] here, now.
   new(this.buffer) : _scanner = BlockScanner(buffer) {
-    _definers.addAll(_definersOf(buffer));
+    final holdings = _holdingsOf(
+      buffer,
+      0,
+      buffer.lineCount,
+      runningBody: false,
+    );
+    _definers.addAll(holdings.lines);
+    _opensBody.addAll(holdings.running);
     _scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
   }
 
-  new _adopt(this.buffer, this._scanner, this._scope, List<int> definers) {
+  new _adopt(
+    this.buffer,
+    this._scanner,
+    this._scope,
+    List<int> definers,
+    List<bool> opensBody,
+  ) {
     _definers.addAll(definers);
+    _opensBody.addAll(opensBody);
   }
 
   /// Reads [buffer] in an isolate: the scan is O(note), 2 s on a 246 MB one.
@@ -78,22 +92,31 @@ final class SourceStyler {
   /// than the whole note's worth of reading.
   static Future<SourceStyler> inBackground(SourceBuffer buffer) async {
     final revision = buffer.revision;
-    final (scanner, scope, definers, references) = await Isolate.run(() {
-      final definers = _definersOf(buffer);
-      final scanner = BlockScanner(buffer);
-      final scope = DocumentScope.ofLines(buffer, revision, definers);
-      return (
-        scanner,
-        scope,
-        definers,
-        NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
-      );
-    });
+    final (scanner, scope, definers, opensBody, references) = await Isolate.run(
+      () {
+        final holdings = _holdingsOf(
+          buffer,
+          0,
+          buffer.lineCount,
+          runningBody: false,
+        );
+        final scanner = BlockScanner(buffer);
+        final scope = DocumentScope.ofLines(buffer, revision, holdings.lines);
+        return (
+          scanner,
+          scope,
+          holdings.lines,
+          holdings.running,
+          NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
+        );
+      },
+    );
     final styler = SourceStyler._adopt(
       buffer,
       BlockScanner.rebound(scanner, buffer),
       scope.on(buffer, revision),
       definers,
+      opensBody,
     ).._revision = revision;
     styler._references.adopt(references);
     // The record of what the edits do to the list starts at the list read.
@@ -168,15 +191,28 @@ final class SourceStyler {
   final Map<int, _Parsed> _byStart = <int, _Parsed>{};
 
   /// The lines that may hold a link or footnote definition, cite a footnote or
-  /// run its body on, in order ([DocumentScope.mayHold]): what an edit is
-  /// checked against, and all that is read again when it touches one.
+  /// run its body on, in order: what an edit is checked against, and all that
+  /// is read again when it touches one.
   ///
   /// The citations are here as much as the definitions: their order is the
   /// footnotes' numbering and the order of the section a note ends with, and
   /// a `[^1]` typed mid-sentence left a scope that said otherwise. The
   /// continuation lines are here as much as the definition's own: a footnote
-  /// is read across lines (#361).
+  /// is read across lines (#361). Only a line a footnote definition runs on
+  /// to is one — an indented code, verse or list line continues nothing
+  /// ([DocumentScope.continuesFootnote]), and holding all of them made every
+  /// keystroke in an indented note rescan the note (#496).
   final List<int> _definers = <int>[];
+
+  /// Whether each line of [_definers] leaves a footnote's body running on to
+  /// the line under it: a definition that opens one, or a line it runs on
+  /// to. What the next line's own membership is read from, in O(log n).
+  final List<bool> _opensBody = <bool>[];
+
+  /// How many definition lines the edits have read again here, for the test
+  /// that proves a keystroke in indented code rescans none (#496).
+  int get definitionLinesRescanned => _definitionLinesRescanned;
+  int _definitionLinesRescanned = 0;
 
   static const int _parseCacheSize = 4096;
 
@@ -220,6 +256,7 @@ final class SourceStyler {
     _scanner.edited(edit);
     _byStart.clear();
     if (_touchesDefinitions(edit)) {
+      _definitionLinesRescanned += _definers.length;
       final scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
       if (!_sameDefinitions(scope, _scope)) {
         _parses.clear();
@@ -778,43 +815,105 @@ final class SourceStyler {
 
   // --------------------------------------------------------------- definitions
 
-  static List<int> _definersOf(SourceBuffer buffer) => <int>[
-    for (var line = 0; line < buffer.lineCount; line++)
-      if (DocumentScope.mayHold(buffer.lineAt(line))) line,
-  ];
+  /// The definition candidate lines of `[from, to)` in [buffer], in order:
+  /// a definition, a footnote citation, or a line a footnote's body runs on
+  /// to. The result says, per line, whether it leaves a footnote's body
+  /// running (see [_opensBody]), and that state at [to]; `runningBody` is
+  /// that state before [from].
+  static _Holdings _holdingsOf(
+    SourceBuffer buffer,
+    int from,
+    int to, {
+    required bool runningBody,
+  }) {
+    final lines = <int>[];
+    final running = <bool>[];
+    var body = runningBody;
+    for (var line = from; line < to; line++) {
+      final text = buffer.lineAt(line);
+      final opens = DocumentScope.opensDefinition(text);
+      final opensFootnote = opens && DocumentScope.definesFootnote(text);
+      final continues = body && DocumentScope.continuesFootnote(text);
+      if (opens || continues) {
+        lines.add(line);
+        running.add(opensFootnote || continues);
+      }
+      body = opensFootnote || continues;
+    }
+    return (lines: lines, running: running, end: body);
+  }
 
-  /// Whether [edit] removed or wrote a line that can be a definition or cite
-  /// a footnote, with [_definers] moved to the lines after it.
-  bool _touchesDefinitions(SourceEdit edit) {
-    final first = edit.firstLine;
-    final untouched = edit.firstUntouchedLine;
+  /// Whether the definer at [line] leaves a footnote's body running, or
+  /// false when [line] is no definer.
+  bool _opensBodyAt(int line) {
+    final at = _lowerBound(_definers, line);
+    return at < _definers.length && _definers[at] == line && _opensBody[at];
+  }
+
+  /// The first index of [lines] whose value is at least [value].
+  static int _lowerBound(List<int> lines, int value) {
     var low = 0;
-    var high = _definers.length;
+    var high = lines.length;
     while (low < high) {
       final middle = (low + high) >> 1;
-      if (_definers[middle] < first) {
+      if (lines[middle] < value) {
         low = middle + 1;
       } else {
         high = middle;
       }
     }
-    var past = low;
-    while (past < _definers.length && _definers[past] < untouched) {
-      past++;
-    }
-    var touched = past > low;
-    final written = <int>[
-      for (var line = first; line < first + edit.insertedLines; line++)
-        if (DocumentScope.mayHold(buffer.lineAt(line))) line,
-    ];
-    if (written.isNotEmpty) touched = true;
+    return low;
+  }
+
+  /// Whether [edit] removed or wrote a line that can be a definition, cite a
+  /// footnote or run a footnote's body, with [_definers] and [_opensBody]
+  /// moved to the lines after it.
+  bool _touchesDefinitions(SourceEdit edit) {
+    final first = edit.firstLine;
     final delta = edit.lineDelta;
+    final untouchedOld = edit.firstUntouchedLine;
+    final untouchedNew = first + edit.insertedLines;
+
+    final low = _lowerBound(_definers, first);
+    final oldBody = untouchedOld > 0 && _opensBodyAt(untouchedOld - 1);
+    final holdings = _holdingsOf(
+      buffer,
+      first,
+      untouchedNew,
+      runningBody: first > 0 && _opensBodyAt(first - 1),
+    );
+
+    // The lines after the edit keep what they held only when the footnote
+    // body the edit starts from is still running at the surviving line; when
+    // it is not, the indented run under the edit changed what it holds, and
+    // is read to its end — as a run a body is running on to holds all of it,
+    // and as one no body runs on to holds only what cites a footnote or
+    // defines one on its own (the line an ended body leaves behind may
+    // still be a citation).
+    var stop = untouchedNew;
+    if (holdings.end != oldBody) {
+      while (stop < buffer.lineCount &&
+          DocumentScope.continuesFootnote(buffer.lineAt(stop))) {
+        stop++;
+      }
+      final run = _holdingsOf(
+        buffer,
+        untouchedNew,
+        stop,
+        runningBody: holdings.end,
+      );
+      holdings.lines.addAll(run.lines);
+      holdings.running.addAll(run.running);
+    }
+    final keepFrom = _lowerBound(_definers, stop - delta);
+    final touched = keepFrom > low || holdings.lines.isNotEmpty;
     if (delta != 0) {
-      for (var at = past; at < _definers.length; at++) {
+      for (var at = keepFrom; at < _definers.length; at++) {
         _definers[at] += delta;
       }
     }
-    _definers.replaceRange(low, past, written);
+    _definers.replaceRange(low, keepFrom, holdings.lines);
+    _opensBody.replaceRange(low, keepFrom, holdings.running);
     return touched;
   }
 
@@ -839,6 +938,10 @@ final class SourceStyler {
     return true;
   }
 }
+
+/// A run of a note's definition candidate lines: the lines, whether each
+/// leaves a footnote's body running, and that state at the run's end.
+typedef _Holdings = ({List<int> lines, List<bool> running, bool end});
 
 /// A block's parse, with where each of its lines starts in the parsed text.
 final class _Parsed {

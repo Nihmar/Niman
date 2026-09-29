@@ -579,6 +579,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     openTodo: _openTodo,
     openNote: _openNoteFromLink,
     mounted: () => mounted,
+    onTargetBlocked: () =>
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.closeSaveFailed))),
+    unsaved: widget.unsavedTracker,
   );
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected

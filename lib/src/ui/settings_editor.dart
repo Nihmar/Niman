@@ -692,24 +692,38 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onTap: () => unawaited(_chooseLintRules()),
             ),
           ),
-          if (spell != null && spell.available) ...[
-            SettingsSwitchRow(
-              key: const Key('spell-check-setting'),
-              title: AppStrings.settingsSpellCheckTitle,
-              description: AppStrings.settingsSpellCheckSubtitle,
-              value: spell.enabled,
-              onChanged: (value) =>
-                  setState(() => spell.setEnabled(enabled: value)),
+          if (spell != null)
+            ListenableBuilder(
+              listenable: spell,
+              // The rows are the spell state's, not this build's: keyed on
+              // `offered` they survive the reload a dictionary pick starts
+              // (and the switch that turns checking off) instead of
+              // vanishing with `available` (#493).
+              builder: (context, _) => !spell.offered
+                  ? const SizedBox.shrink()
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SettingsSwitchRow(
+                          key: const Key('spell-check-setting'),
+                          title: AppStrings.settingsSpellCheckTitle,
+                          description: AppStrings.settingsSpellCheckSubtitle,
+                          value: spell.enabled,
+                          onChanged: (value) =>
+                              setState(() => spell.setEnabled(enabled: value)),
+                        ),
+                        SettingsValueRow(
+                          key: const Key('spell-dictionary-setting'),
+                          title: AppStrings.spellCheckDictionaryTitle,
+                          value: _spellDictionaries.isEmpty
+                              ? AppStrings.spellCheckDictionarySystem
+                              : _spellDictionaries.join(', '),
+                          onTap: () =>
+                              unawaited(_chooseSpellDictionaries(spell)),
+                        ),
+                      ],
+                    ),
             ),
-            SettingsValueRow(
-              key: const Key('spell-dictionary-setting'),
-              title: AppStrings.spellCheckDictionaryTitle,
-              value: _spellDictionaries.isEmpty
-                  ? AppStrings.spellCheckDictionarySystem
-                  : _spellDictionaries.join(', '),
-              onTap: () => unawaited(_chooseSpellDictionaries(spell)),
-            ),
-          ],
         ],
       ),
     );

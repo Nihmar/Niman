@@ -151,9 +151,7 @@ final class AppStrings {
   // Settings: the section headings the list is grouped under.
   static String get settingsSectionAppearance => _s.settingsSectionAppearance;
   static String get settingsSectionEditor => _s.settingsSectionEditor;
-  static String get settingsSectionLibrary => _s.settingsSectionLibrary;
   static String get settingsSectionReminders => _s.settingsSectionReminders;
-  static String get settingsSectionShortcuts => _s.settingsSectionShortcuts;
   static String get keyboardShortcutsTitle => _s.keyboardShortcutsTitle;
 
   // Settings home (issue #104): the groups the areas sit under.
@@ -180,7 +178,6 @@ final class AppStrings {
   static String get updateCheckFailed => _s.updateCheckFailed;
   static String updateSavedTo(Object path) => _s.updateSavedTo(path);
   static String get updateInstallerStarted => _s.updateInstallerStarted;
-  static String get settingsSectionDiagnostics => _s.settingsSectionDiagnostics;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;
   static String get spellCheckDictionaryTitle => _s.spellCheckDictionaryTitle;
@@ -212,7 +209,6 @@ final class AppStrings {
   static String get themeBrightnessDay => _s.themeBrightnessDay;
   static String get themeBrightnessNight => _s.themeBrightnessNight;
   static String get themeTitle => _s.themeTitle;
-  static String get themeSubtitle => _s.themeSubtitle;
   static String get settingsSectionThemes => _s.settingsSectionThemes;
   static String get themesInUse => _s.themesInUse;
   static String get themeNewTitle => _s.themeNewTitle;
@@ -444,8 +440,6 @@ final class AppStrings {
   static String get cheatsheetCopy => _s.cheatsheetCopy;
   static String get cheatsheetCopied => _s.cheatsheetCopied;
   static String get cheatsheetInsert => _s.cheatsheetInsert;
-  static String get cheatsheetWritten => _s.cheatsheetWritten;
-  static String get cheatsheetShown => _s.cheatsheetShown;
   static String get cheatHeadings => _s.cheatHeadings;
   static String get cheatEmphasis => _s.cheatEmphasis;
   static String get cheatHtmlFormats => _s.cheatHtmlFormats;
@@ -519,7 +513,6 @@ final class AppStrings {
   static String get showPreviewTooltip => _s.showPreviewTooltip;
   static String get showEditorTooltip => _s.showEditorTooltip;
   // Raw-HTML table fallback.
-  static String get htmlTableFallback => _s.htmlTableFallback;
 
   // Search (T-M3-05).
   static String get searchHint => _s.searchHint;
@@ -658,7 +651,6 @@ final class AppStrings {
   static String get todoSortCreation => _s.todoSortCreation;
 
   // Task dialog pickers (T-TD-06).
-  static String get todoNoPriority => _s.todoNoPriority;
   static String get todoNoPriorityShort => _s.todoNoPriorityShort;
   static String get todoMorePriorities => _s.todoMorePriorities;
   static String get todoPriorityTitle => _s.todoPriorityTitle;
@@ -747,7 +739,6 @@ final class AppStrings {
   static String get newListNoteDefault => _s.newListNoteDefault;
   static String get setAsQuickNote => _s.setAsQuickNote;
   static String get currentQuickNote => _s.currentQuickNote;
-  static String get pinnedSection => _s.pinnedSection;
   static String pinnedSectionCount(int count) => _s.pinnedSectionCount(count);
   static String get templateFolderTitle => _s.templateFolderTitle;
   static String get newFromTemplateTitle => _s.newFromTemplateTitle;
@@ -814,6 +805,59 @@ final class AppStrings {
   static String get templateHelpIncludeBody => _s.templateHelpIncludeBody;
 
   static String get templateHelpExampleTitle => _s.templateHelpExampleTitle;
+
+  // The wikilink suggester panel (#475), and the two book forms it offers
+  // after `#`.
+  static String wikilinkHeadingsIn(String named) =>
+      _s.wikilinkHeadingsIn(named);
+  static String wikilinkPlacesIn(String named) => _s.wikilinkPlacesIn(named);
+  static String get wikilinkThisNote => _s.wikilinkThisNote;
+  static String wikilinkNoMatchHeading(String query) =>
+      _s.wikilinkNoMatchHeading(query);
+  static String wikilinkNoMatchNote(String query) =>
+      _s.wikilinkNoMatchNote(query);
+  static String get wikilinkNoHeading => _s.wikilinkNoHeading;
+  static String get wikilinkNoNote => _s.wikilinkNoNote;
+  static String wikilinkAlias(String alias) => _s.wikilinkAlias(alias);
+  static String get wikilinkBookNote => _s.wikilinkBookNote;
+  static String get wikilinkFooterMove => _s.wikilinkFooterMove;
+  static String get wikilinkFooterOr => _s.wikilinkFooterOr;
+  static String get wikilinkFooterInsert => _s.wikilinkFooterInsert;
+  static String get wikilinkFooterClose => _s.wikilinkFooterClose;
+  static String get suggesterPageHint => _s.suggesterPageHint;
+  static String get suggesterChapterHint => _s.suggesterChapterHint;
+
+  // What the template checker found, as the hint says it (T-TPL-09).
+  static String get templateProblemUnclosedBraces =>
+      _s.templateProblemUnclosedBraces;
+  static String get templateProblemEmptyPlaceholder =>
+      _s.templateProblemEmptyPlaceholder;
+  static String templateProblemUnknownPlaceholder(String name) =>
+      _s.templateProblemUnknownPlaceholder(name);
+  static String templateProblemAskNoLabel(String name) =>
+      _s.templateProblemAskNoLabel(name);
+  static String templateProblemCounterNoName(String name) =>
+      _s.templateProblemCounterNoName(name);
+  static String templateProblemCursorFilters(String name) =>
+      _s.templateProblemCursorFilters(name);
+  static String get templateProblemUnclosedQuote =>
+      _s.templateProblemUnclosedQuote;
+  static String templateProblemUnknownDateToken(String token) =>
+      _s.templateProblemUnknownDateToken(token);
+  static String get templateProblemEmptyFilter => _s.templateProblemEmptyFilter;
+  static String templateProblemDateMove(String filter, String formats) =>
+      _s.templateProblemDateMove(filter, formats);
+  static String templateProblemNotADateMove(String filter) =>
+      _s.templateProblemNotADateMove(filter);
+  static String templateProblemSnapUnit(
+    String filter,
+    String units,
+    String unit,
+  ) => _s.templateProblemSnapUnit(filter, units, unit);
+  static String templateProblemPadWidth(String filter, String argument) =>
+      _s.templateProblemPadWidth(filter, argument);
+  static String templateProblemUnknownFilter(String name) =>
+      _s.templateProblemUnknownFilter(name);
 
   // What the template checker says as a template is edited (T-TPL-09).
   static String templateHintDidYouMean(String fix) =>
@@ -1013,7 +1057,6 @@ final class AppStrings {
   static String get shortcutUseAnyway => _s.shortcutUseAnyway;
   static String get shortcutUndo => _s.shortcutUndo;
   static String get shortcutRedo => _s.shortcutRedo;
-  static String get shortcutChange => _s.shortcutChange;
   static String shortcutCaptureTitle(String command) =>
       _s.shortcutCaptureTitle(command);
   static String shortcutConflict(String keys, String other) =>
@@ -1108,7 +1151,6 @@ final class AppStrings {
   static String folderPickFailed(Object error) => _s.folderPickFailed(error);
 
   // Settings screen rows and messages.
-  static String get settingsTitle => _s.settingsTitle;
   static String get libraryPathTitle => _s.libraryPathTitle;
   static String get reindexTitle => _s.reindexTitle;
   static String get reindexDone => _s.reindexDone;
@@ -1135,7 +1177,6 @@ final class AppStrings {
   static String replaceWriteFailed(int count) => _s.replaceWriteFailed(count);
 
   // About (issue #80): the app's version and its changelog.
-  static String get settingsSectionAbout => _s.settingsSectionAbout;
   static String get versionTitle => _s.versionTitle;
   static String get changelogTitle => _s.changelogTitle;
   static String get changelogEmpty => _s.changelogEmpty;
@@ -1394,8 +1435,6 @@ final class AppStrings {
   static String get syncUpdatePasswordAction => _s.syncUpdatePasswordAction;
   static String get syncRetryAction => _s.syncRetryAction;
   static String get syncOpenSettingsAction => _s.syncOpenSettingsAction;
-  static String get syncCloseAction => _s.syncCloseAction;
-  static String get syncDoneSnack => _s.syncDoneSnack;
   static String syncTrashedSnack(int count) => _s.syncTrashedSnack(count);
   static String syncConflictsSnack(int count) => _s.syncConflictsSnack(count);
   static String get syncShowAction => _s.syncShowAction;

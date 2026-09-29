@@ -10,7 +10,59 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
+import 'package:niman/src/templates/checker.dart';
 import 'package:niman/src/ui/strings.dart';
+
+/// What [error] says, in the language the app speaks.
+///
+/// The checker reports the mistake as a [TemplateProblem] and the names it
+/// carries — a placeholder, a filter, a date token, all of them the
+/// template's own text — and the words around them are `ui/strings.dart`'s,
+/// so the sentence reads in the active language (T-TPL-09). A name the
+/// problem does not carry is drawn as nothing: the checker and the sentence
+/// are written side by side, and a missing one must not take the editor
+/// down.
+String templateProblemSentence(TemplateSyntaxError error) {
+  final names = error.parameters;
+  String name(int at) => at < names.length ? names[at] : '';
+  return switch (error.problem) {
+    TemplateProblem.unclosedBraces => AppStrings.templateProblemUnclosedBraces,
+    TemplateProblem.emptyPlaceholder =>
+      AppStrings.templateProblemEmptyPlaceholder,
+    TemplateProblem.unknownPlaceholder =>
+      AppStrings.templateProblemUnknownPlaceholder(name(0)),
+    TemplateProblem.askNoLabel => AppStrings.templateProblemAskNoLabel(name(0)),
+    TemplateProblem.counterNoName => AppStrings.templateProblemCounterNoName(
+      name(0),
+    ),
+    TemplateProblem.cursorFilters => AppStrings.templateProblemCursorFilters(
+      name(0),
+    ),
+    TemplateProblem.unclosedQuote => AppStrings.templateProblemUnclosedQuote,
+    TemplateProblem.unknownDateToken =>
+      AppStrings.templateProblemUnknownDateToken(name(0)),
+    TemplateProblem.emptyFilter => AppStrings.templateProblemEmptyFilter,
+    TemplateProblem.dateMove => AppStrings.templateProblemDateMove(
+      name(0),
+      name(1),
+    ),
+    TemplateProblem.notADateMove => AppStrings.templateProblemNotADateMove(
+      name(0),
+    ),
+    TemplateProblem.snapUnit => AppStrings.templateProblemSnapUnit(
+      name(0),
+      name(1),
+      name(2),
+    ),
+    TemplateProblem.padWidth => AppStrings.templateProblemPadWidth(
+      name(0),
+      name(1),
+    ),
+    TemplateProblem.unknownFilter => AppStrings.templateProblemUnknownFilter(
+      name(0),
+    ),
+  };
+}
 
 /// The hint card, positioned at [anchor] in the overlay's coordinates.
 ///

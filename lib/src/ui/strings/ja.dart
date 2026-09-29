@@ -129,11 +129,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get settingsSectionEditor => 'エディタ';
   @override
-  String get settingsSectionLibrary => 'ライブラリ';
-  @override
   String get settingsSectionReminders => 'リマインダー';
-  @override
-  String get settingsSectionShortcuts => 'キーボード';
   @override
   String get keyboardShortcutsTitle => 'キーボードショートカット';
 
@@ -174,8 +170,6 @@ final class JapaneseStrings extends Strings {
   String updateSavedTo(Object path) => 'アップデートを $path に保存しました';
   @override
   String get updateInstallerStarted => 'インストーラーを起動しました';
-  @override
-  String get settingsSectionDiagnostics => '診断';
   @override
   String get settingsSpellCheckTitle => 'スペルチェック';
   @override
@@ -226,8 +220,6 @@ final class JapaneseStrings extends Strings {
   String get themeBrightnessNight => 'ダーク';
   @override
   String get themeTitle => 'テーマ';
-  @override
-  String get themeSubtitle => 'UI とノートの色';
   @override
   String get themePaletteSystem => 'システム';
   // Settings: the themes page (issue #269).
@@ -300,16 +292,15 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'エディタとプレビューは常に同じです';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'ソースエディタのフォント';
   @override
-  String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+  String get sourceFontSubtitle => 'ソースペインの書体。プレビューはノート自身の書体を保ちます';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => '等幅';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'サンセリフ';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'セリフ';
   @override
   String get epubLookTitle => '本の表示';
   @override
@@ -430,7 +421,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get audioSavingRecording => '保存中…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => '音声を再生できませんでした';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -567,10 +558,6 @@ final class JapaneseStrings extends Strings {
   String get cheatsheetCopied => 'コピーしました';
   @override
   String get cheatsheetInsert => 'ノートに挿入';
-  @override
-  String get cheatsheetWritten => '記法';
-  @override
-  String get cheatsheetShown => '表示';
   @override
   String get cheatHeadings => '見出し';
   @override
@@ -712,8 +699,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get showEditorTooltip => 'エディタを表示';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '（生の HTML テーブル）';
 
   // Search (T-M3-05).
   @override
@@ -942,8 +927,6 @@ final class JapaneseStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => '優先度なし';
-  @override
   String get todoNoPriorityShort => 'なし';
   @override
   String get todoMorePriorities => 'もっと…';
@@ -1035,9 +1018,9 @@ final class JapaneseStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'サイドバーを非表示 (Ctrl+B)';
+  String get hideSidebarTooltip => 'サイドバーを非表示';
   @override
-  String get showSidebarTooltip => 'サイドバーを表示 (Ctrl+B)';
+  String get showSidebarTooltip => 'サイドバーを表示';
   @override
   String get windowMinimizeTooltip => '最小化';
   @override
@@ -1073,7 +1056,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get closeMenuTooltip => '閉じる';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => '操作を完了できませんでした';
   @override
   String get newFolderTitle => '新しいフォルダ';
   @override
@@ -1099,8 +1082,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get currentQuickNote => '現在のクイックノート';
   @override
-  String get pinnedSection => 'ピン留め';
-  @override
   String pinnedSectionCount(int count) => 'ピン留め · $count';
   @override
   String get templateFolderTitle => 'テンプレートフォルダ';
@@ -1109,7 +1090,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get newFromTemplateHere => 'ここにテンプレートから新規作成';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'テンプレートを開けませんでした';
   @override
   String get templateFormTitle => 'テンプレートを埋める';
   @override
@@ -1257,39 +1238,39 @@ final class JapaneseStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ 「$path」のネストが深すぎます';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'プロパティ';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => '生の YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'フィールド';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'プロパティを追加';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => '新しいプロパティ';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'プロパティを編集';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'キー';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => '値';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => '型';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => '項目はカンマで区切ります';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'プロパティを削除';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'プロパティはありません';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'テキスト';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => '数値';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => '日付';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => '真偽値';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'リスト';
   @override
   String frontmatterInvalid(String reason) => 'フロントマターを読み込めませんでした: $reason';
   @override
@@ -1481,7 +1462,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion エクスポートを読み込む';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion のエクスポートを読み込めませんでした';
   @override
   String dropRejected(String names) =>
       'ここで開けるのは Markdown ファイルとフォルダーだけです：$names';
@@ -1639,8 +1620,6 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutRedo => 'やり直す';
   @override
-  String get shortcutChange => 'ショートカットを変更';
-  @override
   String shortcutCaptureTitle(String command) => '「$command」のキー';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1736,9 +1715,9 @@ final class JapaneseStrings extends Strings {
   @override
   String get trashDeletePermanently => '完全に削除';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'ノートを復元または削除できませんでした';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'ごみ箱を空にできませんでした';
 
   // The open/create library screen.
   @override
@@ -1812,15 +1791,13 @@ final class JapaneseStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => '設定';
-  @override
   String get libraryPathTitle => 'ライブラリのパス';
   @override
   String get reindexTitle => '今すぐ再インデックス';
   @override
   String get reindexDone => '再インデックス完了';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'ライブラリを再読み込みできませんでした';
   @override
   String get closeLibraryTitle => 'ライブラリを閉じる';
   @override
@@ -1849,20 +1826,17 @@ final class JapaneseStrings extends Strings {
       '語全体「$term」の完全一致はありません'
       '${only == null ? '' : ' — $only 内には'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'ライブラリ全体';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note 内';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'ノート 1 件' : 'ノート $count 件';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) =>
+      count == 1 ? '（ノート 1 件を書き込めませんでした）' : '（$count 件のノートを書き込めませんでした）';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'アプリについて';
   @override
   String get versionTitle => 'バージョン';
   @override
@@ -1908,7 +1882,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get historyBaseKept => '同期ベースは上限を超えても保持されます。';
   @override
-  String get historyOff => 'このライブラリでは履歴がオフです（設定、ライブラリ）。';
+  String get historyOff => 'このライブラリでは履歴がオフです（設定、ごみ箱と履歴）。';
   @override
   String get historyLoadFailed => '履歴を読み込めませんでした';
   @override
@@ -2155,34 +2129,30 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncTestFailed => 'テストに失敗しました';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => '証明書は信頼されていません';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      '証明書を検証できません。指紋がサーバーの示すものと一致する場合にのみ信頼してください。';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'この証明書を信頼しますか？';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      '$host の証明書を検証できません。\n\nSHA-256 '
+      'フィンガープリント:\n$fingerprint\n\nこれが想定した証明書である場合にのみ信頼してください。Niman '
+      'はこの接続先について、この証明書だけを受け入れ、ほかの証明書は受け入れません。';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'この証明書を信頼する';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => '証明書を信頼しました';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'この証明書を忘れますか？';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'この接続先はデバイスの証明書ストアに対して再び検証され、自己署名証明書はもう一度確認が必要になります。ほかに変わるものはありません。';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => '忘れる';
   @override
   String get syncNowAction => '今すぐ同期';
   @override
@@ -2288,10 +2258,6 @@ final class JapaneseStrings extends Strings {
   String get syncRetryAction => '再試行';
   @override
   String get syncOpenSettingsAction => '設定';
-  @override
-  String get syncCloseAction => '閉じる';
-  @override
-  String get syncDoneSnack => '同期しました';
   @override
   String syncTrashedSnack(int count) =>
       '同期しました · 他の場所で削除されたファイル $count 件がごみ箱にあります';
@@ -2563,4 +2529,77 @@ final class JapaneseStrings extends Strings {
   String get templateHintDismissAction => '破棄';
   @override
   String templateProblems(int count) => 'このテンプレートに $count 件の問題';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => '$named の見出し';
+  @override
+  String wikilinkPlacesIn(String named) => '$named の場所';
+  @override
+  String get wikilinkThisNote => 'このノート';
+  @override
+  String wikilinkNoMatchHeading(String query) => '「$query」 に一致する見出しはありません。';
+  @override
+  String wikilinkNoMatchNote(String query) => '「$query」 に一致するノートはありません。';
+  @override
+  String get wikilinkNoHeading => 'このノートにその名前の見出しはありません';
+  @override
+  String get wikilinkNoNote => 'ライブラリにその名前または別名のものはありません';
+  @override
+  String wikilinkAlias(String alias) => '別名 $alias';
+  @override
+  String get wikilinkBookNote => 'ページは一覧から名前で選ぶものではなく、番号を入力します。';
+  @override
+  String get wikilinkFooterMove => '移動';
+  @override
+  String get wikilinkFooterOr => 'または';
+  @override
+  String get wikilinkFooterInsert => '挿入';
+  @override
+  String get wikilinkFooterClose => '閉じる';
+  @override
+  String get suggesterPageHint => '数字を入力';
+  @override
+  String get suggesterChapterHint => '本の中のファイル名を入力';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      '開き波かっこが閉じられていません: このプレースホルダーを閉じるものがありません';
+  @override
+  String get templateProblemEmptyPlaceholder => '空のプレースホルダー: 波かっこの中に名前がありません';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      '不明なプレースホルダー 「$name」';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '「$name」 にラベルがありません: 何も尋ねず、プレースホルダーはそのまま残ります';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '「$name」 に名前がありません: 何も数えず、プレースホルダーはそのまま残ります';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '「$name」 はフィルターを受け付けません: カーソルは置かれず、プレースホルダーはそのまま残ります';
+  @override
+  String get templateProblemUnclosedQuote =>
+      '日付フォーマットの引用符が閉じられていません: それ以降は通常のテキストとして読み込まれます';
+  @override
+  String templateProblemUnknownDateToken(String token) => '不明な日付トークン 「$token」';
+  @override
+  String get templateProblemEmptyFilter => '空のフィルター: 「|」 の後に名前がありません';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '「$filter」 は日付を移動します: 移動を受け付けるのは $formats だけで、ほかのどのフィルターよりも前に限ります';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '「$filter」 は日付の移動ではありません: 移動は数と単位で、「+7d」 や 「-1w」 のように書きます';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '「$filter」 は $units に合わせます。「$unit」 ではありません';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '「$filter」 の幅には数が必要ですが、「$argument」 は数ではありません';
+  @override
+  String templateProblemUnknownFilter(String name) => '不明なフィルター 「$name」';
 }

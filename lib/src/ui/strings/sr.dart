@@ -144,11 +144,7 @@ final class SerbianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Уредитељ';
   @override
-  String get settingsSectionLibrary => 'Библиотека';
-  @override
   String get settingsSectionReminders => 'Подсећања';
-  @override
-  String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Пречице на тастатури';
 
@@ -191,8 +187,6 @@ final class SerbianStrings extends Strings {
   String updateSavedTo(Object path) => 'Ажурирање сачувано у $path';
   @override
   String get updateInstallerStarted => 'Инсталер је покренут';
-  @override
-  String get settingsSectionDiagnostics => 'Диагностика';
   @override
   String get settingsSpellCheckTitle => 'Провера правописа';
   @override
@@ -249,8 +243,6 @@ final class SerbianStrings extends Strings {
   String get themeBrightnessNight => 'Тамна';
   @override
   String get themeTitle => 'Тема';
-  @override
-  String get themeSubtitle => 'Боје сучеља и белешке';
   @override
   String get themePaletteSystem => 'Систем';
   // Settings: the themes page (issue #269).
@@ -328,16 +320,16 @@ final class SerbianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Уредитељ и преглед, који су увек у складу';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Фонт уређивача изворног текста';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Писмо којим је сложен изворни прозор; преглед задржава писмо белешке';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Непропорционално';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Без серифа';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Са серифима';
   @override
   String get epubLookTitle => 'Изглед књига';
   @override
@@ -461,7 +453,7 @@ final class SerbianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Чување…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Звук није могао да се пусти';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -605,10 +597,6 @@ final class SerbianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Уметни у белешку';
   @override
-  String get cheatsheetWritten => 'Написано';
-  @override
-  String get cheatsheetShown => 'Приказано';
-  @override
   String get cheatHeadings => 'Наслови';
   @override
   String get cheatEmphasis => 'Подебљано, курзив, прецртано';
@@ -751,8 +739,6 @@ final class SerbianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Прикажи уредитељ';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(HTML табела извора)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class SerbianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Без приоритета';
-  @override
   String get todoNoPriorityShort => 'Ниједан';
   @override
   String get todoMorePriorities => 'Више…';
@@ -1100,9 +1084,9 @@ final class SerbianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Сакриј бочни панел (Ctrl+B)';
+  String get hideSidebarTooltip => 'Сакриј бочни панел';
   @override
-  String get showSidebarTooltip => 'Прикажи бочни панел (Ctrl+B)';
+  String get showSidebarTooltip => 'Прикажи бочни панел';
   @override
   String get windowMinimizeTooltip => 'Минимизирај';
   @override
@@ -1138,7 +1122,7 @@ final class SerbianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Затвори';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Радња није довршена';
   @override
   String get newFolderTitle => 'Нова фасцикла';
   @override
@@ -1166,8 +1150,6 @@ final class SerbianStrings extends Strings {
   @override
   String get currentQuickNote => 'Тренутна брза белешка';
   @override
-  String get pinnedSection => 'Прикачени';
-  @override
   String pinnedSectionCount(int count) => 'Прикачени · $count';
   @override
   String get templateFolderTitle => 'Фасцикла шаблона';
@@ -1176,7 +1158,7 @@ final class SerbianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Ново из шаблона овде';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Шаблон није могао да се отвори';
   @override
   String get templateFormTitle => 'Испуни шаблон';
   @override
@@ -1340,39 +1322,39 @@ final class SerbianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path" је увучено превише дубоко';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Својства';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Сирови YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Поља';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Додај својство';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ново својство';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Уреди својство';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Кључ';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Вредност';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Тип';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Одвој ставке зарезима';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Уклони својство';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Нема својстава';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'текст';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'број';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'датум';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'логичко';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'листа';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter није прочитан: $reason';
@@ -1583,7 +1565,7 @@ final class SerbianStrings extends Strings {
   @override
   String get notionImportTitle => 'Увези Notion извоз';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion извоз није могао да се увезе';
   @override
   String dropRejected(String names) =>
       'Овде се отварају само Markdown датотеке и фасцикле: $names';
@@ -1751,8 +1733,6 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutRedo => 'Понови';
   @override
-  String get shortcutChange => 'Промени пречицу';
-  @override
   String shortcutCaptureTitle(String command) => 'Тастери за „$command“';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1855,9 +1835,9 @@ final class SerbianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Обриши трајно';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Белешка није могла да се врати ни избрише';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Кош није могао да се испразни';
 
   // The open/create library screen.
   @override
@@ -1942,15 +1922,13 @@ final class SerbianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Подешавања';
-  @override
   String get libraryPathTitle => 'Путања библиотеке';
   @override
   String get reindexTitle => 'Поново индексирај сада';
   @override
   String get reindexDone => 'Поново индексирано';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Библиотека није могла поново да се прочита';
   @override
   String get closeLibraryTitle => 'Затвори библиотеку';
   @override
@@ -1982,20 +1960,27 @@ final class SerbianStrings extends Strings {
       'Нема тачног поклапања целих речи за „$term"'
       '${only == null ? 'није пронађено' : 'пронађено у $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'цела библиотека';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'у $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'у $count белешци'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'у $count белешке'
+      : 'у $count белешака';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count белешка није записана)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count белешке нису записане)'
+      : ' ($count белешака није записано)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'О апликацији';
   @override
   String get versionTitle => 'Верзија';
   @override
@@ -2044,7 +2029,8 @@ final class SerbianStrings extends Strings {
       'Основа синхронизације се чува и преко ограничења.';
   @override
   String get historyOff =>
-      'Историја је искључена за ову библиотеку (Подешавања, Библиотека).';
+      'Историја је искључена за ову библиотеку '
+      '(Подешавања, Кош и хронологија).';
   @override
   String get historyLoadFailed => 'Историја се не може прочитати';
   @override
@@ -2326,34 +2312,34 @@ final class SerbianStrings extends Strings {
   @override
   String get syncTestFailed => 'Тест није успео';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Сертификат није поуздан';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Сертификат се не може проверити. Веруј му само ако се његов отисак '
+      'поклапа са оним који приказује сервер.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Веровати овом сертификату?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Сертификат за $host не може да се провери.\n\nSHA-256 '
+      'отисак:\n$fingerprint\n\nВеруј му само ако је то очекивани '
+      'сертификат. Niman прихвата само овај сертификат за ово одредиште '
+      'и ниједан други.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Веруј овом сертификату';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Сертификат поуздан';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Заборавити овај сертификат?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ово одредиште се поново проверава према спремишту сертификата уређаја и '
+      'самопотписани сертификат ће морати да се потврди још једном. Ништа '
+      'друго се не мења.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Заборави';
   @override
   String get syncNowAction => 'Синхронизуј сада';
   @override
@@ -2481,10 +2467,6 @@ final class SerbianStrings extends Strings {
   String get syncRetryAction => 'Покушај поново';
   @override
   String get syncOpenSettingsAction => 'Подешавања';
-  @override
-  String get syncCloseAction => 'Затвори';
-  @override
-  String get syncDoneSnack => 'Синхронизовано';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Синхронизовано · $count фајл обрисан другде је у кошу'
@@ -2823,7 +2805,92 @@ final class SerbianStrings extends Strings {
   @override
   String get templateHintDismissAction => 'Одбаци';
   @override
-  String templateProblems(int count) => count == 1
-      ? '1 проблем у овом шаблону'
+  String templateProblems(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count проблем у овом шаблону'
       : '$count проблема у овом шаблону';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Наслови у $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Места у $named';
+  @override
+  String get wikilinkThisNote => 'ова белешка';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ниједан наслов се не поклапа са „$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ниједна белешка се не поклапа са „$query".';
+  @override
+  String get wikilinkNoHeading => 'ова белешка нема наслов с тим именом';
+  @override
+  String get wikilinkNoNote => 'ништа у библиотеци нема то име или алијас';
+  @override
+  String wikilinkAlias(String alias) => 'алијас $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Страница се бира, не именује из списка: упишите њен број.';
+  @override
+  String get wikilinkFooterMove => 'помери';
+  @override
+  String get wikilinkFooterOr => 'или';
+  @override
+  String get wikilinkFooterInsert => 'уметни';
+  @override
+  String get wikilinkFooterClose => 'затвори';
+  @override
+  String get suggesterPageHint => 'упишите број';
+  @override
+  String get suggesterChapterHint => 'именујте датотеку у књизи';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'отворене витичасте заграде без затварања: ништа не затвара ово заменско '
+      'место';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'празно заменско место: нема имена између заграда';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'непознато заменско место „$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name" нема ознаку: ништа не пита, а заменско место остаје на месту';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name" нема име: ништа не броји, а заменско место остаје на месту';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name" не прима филтере: карична се не поставља, а заменско место '
+      'остаје на месту';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'незатворен наводник у формату датума: све после њега чита се као обичан '
+      'текст';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'непознат токен датума „$token"';
+  @override
+  String get templateProblemEmptyFilter =>
+      'празан филтер: нема имена после „|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter" помера датум: помак примају само $formats, и само пре било '
+      'ког '
+      'другог филтера';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter" није помак датума: помак су број и јединица, као „+7d" или '
+      '„-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter" се качи на $units, а не на „$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter" треба број за своју ширину, а „$argument" то није';
+  @override
+  String templateProblemUnknownFilter(String name) => 'непознат филтер „$name"';
 }

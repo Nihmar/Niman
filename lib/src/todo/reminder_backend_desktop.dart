@@ -18,6 +18,7 @@ import 'dart:async';
 
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/desktop_notifier.dart';
+import 'package:niman/src/todo/desktop_shown_log.dart';
 import 'package:niman/src/todo/reminder_backend.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
 
@@ -32,9 +33,8 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// Armed timers by reminder id; the pending map the service reads back.
   final Map<int, Timer> _armed = {};
 
-  /// What each reminder fired for in this run, and when it did, by id
-  /// (#42): the moment it was due and the moment it was shown.
-  final Map<int, ({DateTime due, DateTime at})> _fired = {};
+  /// What this run has shown, by task and moment (#42, #497).
+  final DesktopShownLog _shown = DesktopShownLog();
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
@@ -68,6 +68,9 @@ final class DesktopReminderBackend implements ReminderBackend {
   Future<List<int>> pendingIds() async => _armed.keys.toList()..sort();
 
   @override
+  void noteWanted(Iterable<TodoReminder> wanted) => _shown.reconcile(wanted);
+
+  @override
   Future<void> cancel(int id) async {
     _armed.remove(id)?.cancel();
   }
@@ -80,9 +83,11 @@ final class DesktopReminderBackend implements ReminderBackend {
     _armed.remove(reminder.id)?.cancel();
     // Delivered already: the reminder stays wanted for `reminderGrace` past
     // its moment, so every reconcile in that window — a todo edit, a focus
-    // regain — schedules it again, and an alarm the OS delivered is not
-    // delivered twice. A new moment is a new reminder, and it fires.
-    if (_fired[reminder.id]?.due == reminder.when) {
+    // regain — schedules it again, and one that was shown is not shown
+    // twice. What "it" is — this task at this moment, surviving an edit of
+    // its text — is [DesktopShownLog]'s rule. A new moment, or another task
+    // at the same one, is a new reminder, and it fires.
+    if (_shown.isShown(reminder)) {
       _log.info(
         'todo reminders: ${reminder.id} already shown for '
         '${reminder.when.toIso8601String()}, not shown again',
@@ -92,7 +97,6 @@ final class DesktopReminderBackend implements ReminderBackend {
     final delay = reminder.when.difference(DateTime.now());
     final timer = Timer(delay.isNegative ? Duration.zero : delay, () {
       _armed.remove(reminder.id);
-      _fired[reminder.id] = (due: reminder.when, at: DateTime.now());
       unawaited(_show(reminder));
     });
     _armed[reminder.id] = timer;
@@ -107,11 +111,21 @@ final class DesktopReminderBackend implements ReminderBackend {
 
   /// Posts [reminder], logging rather than throwing: the timer callback has
   /// no caller to return an error to.
+  ///
+  /// The reminder is recorded as shown before the show starts, not after
+  /// it returns: a reconcile in the meantime would arm it and post it a
+  /// second time. A show that fails takes the record back, so the next
+  /// reconcile in the grace window hands the reminder over again: the
+  /// system's daemon not answering at login is a delivery that has not
+  /// happened, not one that cannot be improved on.
   Future<void> _show(TodoReminder reminder) async {
+    final settle = _shown.begin(reminder);
     try {
       await _notifier.show(reminder);
+      settle(DateTime.now());
       _log.info('todo reminders: fired ${reminder.id} ${reminder.title}');
     } on Object catch (error) {
+      settle(null);
       _log.warning(
         'todo reminders: show failed for id ${reminder.id} ($error)',
       );
@@ -134,9 +148,12 @@ final class DesktopReminderBackend implements ReminderBackend {
       return 'timer STILL ARMED past its time: the machine slept through '
           'it, or the process stalled';
     }
-    final fired = _fired[reminder.id];
-    if (fired != null && fired.due == reminder.when) {
-      return 'timer fired ${_late(fired.at.difference(reminder.when))} late';
+    if (_shown.isShowing(reminder)) {
+      return 'timer fired, its notification is still being posted';
+    }
+    final firedAt = _shown.shownAt(reminder);
+    if (firedAt != null) {
+      return 'timer fired ${_late(firedAt.difference(reminder.when))} late';
     }
     return 'NOT FIRED: no timer in this run, Niman was not running at its '
         'time';

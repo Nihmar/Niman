@@ -1,6 +1,8 @@
 // T-PP-03: the desktop backend keeps the reminder schedule in-process.
 // The plugin is faked so the timer, the pending map and the full-replace
 // semantics are exercised without a desktop session.
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/reminder_backend_desktop.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
@@ -104,6 +106,160 @@ void main() {
     await backend.schedule(moved, exact: true);
     await Future<void>.delayed(const Duration(milliseconds: 50));
     expect(notifier.shown.map((posted) => posted.id), [r.id, r.id]);
+  });
+
+  // #497. A firing is identified by its moment and by the task: editing
+  // the text — or moving `due:`, which is part of the description the id
+  // hashes — gives the task a new id while its `rem:` stands, and the
+  // reminder is already shown for that moment. Another task at that moment
+  // is shown (see reminder_service_test.dart).
+  test(
+    'an edit to the task does not show it again for the same moment',
+    () async {
+      final when = DateTime.now().subtract(const Duration(minutes: 5));
+      await backend.schedule(
+        TodoReminder(id: 1, title: 'Call Bob', body: 'body', when: when),
+        exact: true,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [1]);
+
+      // At 10:05 the user fixes a typo, or moves `due:`: a new id, the same
+      // moment, still inside the grace hour.
+      final edited = TodoReminder(
+        id: 2,
+        title: 'Call Bob today',
+        body: 'body',
+        when: when,
+      );
+      // The service says what it wants before it schedules: id 1 has left
+      // the set, so id 2 is the same task, rewritten.
+      backend.noteWanted([edited]);
+      await backend.schedule(edited, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [
+        1,
+      ], reason: 'the task was already shown for this moment');
+    },
+  );
+
+  // #497. A show that failed was still recorded as shown, and every later
+  // reconcile in the grace window took the "already shown" early return:
+  // the reminder was never retried.
+  test('a notification that failed is shown by the next reconcile', () async {
+    notifier.failShows = 1;
+    final when = DateTime.now().subtract(const Duration(minutes: 5));
+    final r = TodoReminder(id: 7, title: 'task', body: 'body', when: when);
+    await backend.schedule(r, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(notifier.shown, isEmpty, reason: 'the daemon did not answer');
+
+    // A todo edit inside the grace hour hands the same moment over again.
+    await backend.schedule(r, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(notifier.shown.map((posted) => posted.id), [7]);
+  });
+
+  // #497. `_fired` was written after the show returned, so a reconcile
+  // while a slow show was in flight armed the reminder again and it was
+  // posted twice.
+  group('a show still in flight', () {
+    late TodoReminder due;
+
+    setUp(() {
+      due = TodoReminder(
+        id: 9,
+        title: 'task',
+        body: 'body',
+        when: DateTime.now().subtract(const Duration(minutes: 5)),
+      );
+    });
+
+    test('is not posted again by a reconcile', () async {
+      final hold = notifier.holdShow = Completer<void>();
+      await backend.schedule(due, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.showCalls, 1);
+
+      await backend.schedule(due, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.showCalls, 1, reason: 'the first show has not returned');
+      expect(await backend.pendingIds(), isEmpty);
+
+      hold.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [9]);
+
+      await backend.schedule(due, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.showCalls, 1, reason: 'and it is shown, once');
+    });
+
+    test('is retried when it fails', () async {
+      final hold = notifier.holdShow = Completer<void>();
+      await backend.schedule(due, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      notifier.holdShow = null;
+      hold.completeError(StateError('the daemon gave up'));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown, isEmpty);
+
+      await backend.schedule(due, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [9]);
+    });
+
+    test('is retried after an edit while it was in flight', () async {
+      final hold = notifier.holdShow = Completer<void>();
+      await backend.schedule(due, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      // The text was fixed while the daemon was still answering: the same
+      // task, so it is not posted alongside the first.
+      final edited = TodoReminder(
+        id: 10,
+        title: 'task fixed',
+        body: 'body',
+        when: due.when,
+      );
+      backend.noteWanted([edited]);
+      await backend.schedule(edited, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.showCalls, 1);
+
+      // The first show fails; nothing else stands for the task, so the
+      // next reconcile posts it (and does not leave it "in flight").
+      notifier.holdShow = null;
+      hold.completeError(StateError('the daemon gave up'));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      backend.noteWanted([edited]);
+      await backend.schedule(edited, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [10]);
+    });
+
+    test('a failure is not masked by another task showing', () async {
+      final other = TodoReminder(
+        id: 11,
+        title: 'other task',
+        body: 'body',
+        when: due.when,
+      );
+      notifier.failShows = 1;
+      backend.noteWanted([due, other]);
+      await backend.schedule(due, exact: true);
+      await backend.schedule(other, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [11]);
+
+      // Same moment, the other task shown: the one that failed still goes.
+      backend.noteWanted([due, other]);
+      await backend.schedule(due, exact: true);
+      await backend.schedule(other, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [11, 9]);
+    });
   });
 
   test('a cancelled reminder never fires', () async {

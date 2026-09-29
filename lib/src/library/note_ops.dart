@@ -4,11 +4,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/frontmatter/edit_in_file.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -434,6 +436,23 @@ final class NoteOps implements NoteOperations {
   Future<Uint8List> readNoteBytes(String path) async {
     await _mustFind(path);
     return await File(_abs(path)).readAsBytes();
+  }
+
+  /// The headings of the note at [path], read and outlined where the note
+  /// lies — off the UI isolate (#491).
+  ///
+  /// The wikilink panel's rows after `#` are the note's whole outline, and
+  /// getting them means reading, decoding and walking the file: seconds on
+  /// a novel-length note, per keystroke if the panel paid it on the UI
+  /// isolate. The panel keeps the answer per revision, so this runs once
+  /// per target and not once per key.
+  Future<List<String>> noteHeadings(String path) async {
+    await _mustFind(path);
+    final abs = _abs(path);
+    return await IsolateGauge.run(
+      () => headingsOfNoteFile(abs),
+      'headings "$path"',
+    );
   }
 
   /// Pins or unpins the note at [path] by editing its frontmatter.
@@ -868,6 +887,20 @@ final class NoteOps implements NoteOperations {
     );
     await _writeManifest(manifest);
   }
+}
+
+/// The heading texts of the note file at absolute [path], read as it lies.
+///
+/// The whole file is read, decoded — leniently, without its BOM, as
+/// [NoteOps.readNote] does — and walked for its headings, so this is work
+/// for a background isolate ([IsolateGauge.run]), never the UI's (#491).
+List<String> headingsOfNoteFile(String path) {
+  final bytes = File(path).readAsBytesSync();
+  var text = decodeNoteText(bytes);
+  if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+    text = text.substring(1);
+  }
+  return [for (final heading in outlineOfText(text)) heading.text];
 }
 
 /// One manifest entry: where a trash item came from.

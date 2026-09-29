@@ -25,7 +25,7 @@ Substitution, not a language — unknown `{{…}}` is copied verbatim:
 | `{{now}}` / `{{now:FORMAT}}` | Date + time (default `YYYY-MM-DD HH:mm`) |
 | `{{uuid}}` | A fresh UUID v4, one per occurrence |
 | `{{cursor}}` | Caret stop after insertion (writes nothing; `{{cursor:2}}` numbers stops) |
-| `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… (two creations at once never share a number) |
+| `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… (two creations at once never share a number; cancelling the name prompt, or a note that fails to be created, does not use one up) |
 | `{{clipboard}}` | Paste contents (title-cased by filters below) |
 | `{{selection}}` | The text selected in the editor when the note was created (empty when nothing is) |
 | `{{ask:Label}}` / `{{ask:Label:default}}` | Prompt for a value when creating |
@@ -62,13 +62,17 @@ vocabulary — the placeholder names, the filter names and the date tokens
 stands, so a name added to the engine is a name the checker already
 knows. It reports three kinds of mistake:
 
-- braces that do not pair up: `{{title`, `title}}`, `{{ {{title}} }}`,
+- braces that do not pair up: `{{title`, `{{ {{title}}`,
   `{{}}`, and a `|` with no filter after it: `{{title|}}`;
 - a placeholder, filter or date token the engine does not answer:
   `{{titlex}}`, `{{title|upperr}}`, `{{date:YYYYY}}`;
 - an argument the engine cannot read, or a filter where it does not
   apply: `{{title|pad:wide}}`, `{{date|+xd}}`, `{{time:HH'|mm}}`,
   `{{ask:}}`, `{{counter}}`, `{{date|upper|+1d}}`, `{{cursor|upper}}`.
+
+Only an opening brace pair is reported. A `}}` with nothing open before it
+is text the engine leaves exactly as written, so LaTeX (`$x^{2^{n}}$`) and
+inline JSON (`{"a":{"b":1}}`) in a body are not mistakes.
 
 Each mistake says where it is, what is wrong, and — where the correction
 is deterministic and safe — the text that fixes it. A name within two

@@ -40,8 +40,8 @@ first library starts. *Never* opens notes in the live editor and does not
 offer the Markdown source; *A little* opens live with both editors
 offered; *All the time* opens the source, as the app has always come.
 Settings → Editor has the switches whenever you change your mind, and the
-deck is shown once: it lives under Settings → About as *What Niman can
-do*.
+deck is shown once: it lives under Settings → Diagnostics and info as
+*What Niman can do*.
 
 The last page can ask for a **tour** instead (*Show me around*), and so
 can the command palette later (*Take the tour*, which resumes a tour left

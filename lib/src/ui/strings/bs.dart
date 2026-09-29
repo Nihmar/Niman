@@ -144,11 +144,7 @@ final class BosnianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Uređivač';
   @override
-  String get settingsSectionLibrary => 'Biblioteka';
-  @override
   String get settingsSectionReminders => 'Podsjetke';
-  @override
-  String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Prečice na tastaturi';
 
@@ -191,8 +187,6 @@ final class BosnianStrings extends Strings {
   String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
   @override
   String get updateInstallerStarted => 'Program za instalaciju pokrenut';
-  @override
-  String get settingsSectionDiagnostics => 'Dijagnostika';
   @override
   String get settingsSpellCheckTitle => 'Provjera pravopisa';
   @override
@@ -249,8 +243,6 @@ final class BosnianStrings extends Strings {
   String get themeBrightnessNight => 'Tamna';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Boje sučelja i bilješke';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -329,16 +321,16 @@ final class BosnianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Uređivač i pregled, koji su uvijek u skladu';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Font izvornog uređivača';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Pismo kojim je složeno izvorno okno; pregled zadržava pismo bilješke';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Neproporcionalni';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Bez serifa';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Sa serifima';
   @override
   String get epubLookTitle => 'Izgled knjiga';
   @override
@@ -462,7 +454,7 @@ final class BosnianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Spremanje…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audio se nije mogao pustiti';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -606,10 +598,6 @@ final class BosnianStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Umetni u bilješku';
   @override
-  String get cheatsheetWritten => 'Napisano';
-  @override
-  String get cheatsheetShown => 'Prikazano';
-  @override
   String get cheatHeadings => 'Naslovi';
   @override
   String get cheatEmphasis => 'Podebljano, kurziv, precrtano';
@@ -752,8 +740,6 @@ final class BosnianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Prikaži uređivač';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tablica sirovog HTML-a)';
 
   // Search (T-M3-05).
   @override
@@ -1003,8 +989,6 @@ final class BosnianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez prioriteta';
-  @override
   String get todoNoPriorityShort => 'Nijedan';
   @override
   String get todoMorePriorities => 'Više…';
@@ -1100,9 +1084,9 @@ final class BosnianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Sakrij bočnu ploču (Ctrl+B)';
+  String get hideSidebarTooltip => 'Sakrij bočnu ploču';
   @override
-  String get showSidebarTooltip => 'Prikaži bočnu ploču (Ctrl+B)';
+  String get showSidebarTooltip => 'Prikaži bočnu ploču';
   @override
   String get windowMinimizeTooltip => 'Minimiziraj';
   @override
@@ -1138,7 +1122,7 @@ final class BosnianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Zatvori';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Radnja nije dovršena';
   @override
   String get newFolderTitle => 'Nova mapa';
   @override
@@ -1164,8 +1148,6 @@ final class BosnianStrings extends Strings {
   @override
   String get currentQuickNote => 'Trenutna brza bilješka';
   @override
-  String get pinnedSection => 'Prikvačeno';
-  @override
   String pinnedSectionCount(int count) => 'Prikvačeno · $count';
   @override
   String get templateFolderTitle => 'Mapa predložaka';
@@ -1174,7 +1156,7 @@ final class BosnianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Novo iz predloška ovdje';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Predložak se nije mogao otvoriti';
   @override
   String get templateFormTitle => 'Ispuni predložak';
   @override
@@ -1338,39 +1320,39 @@ final class BosnianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ "$path" je ugniježdeno preduboko';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Svojstva';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Sirovi YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Polja';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Dodaj svojstvo';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Novo svojstvo';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Uredi svojstvo';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Ključ';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Vrijednost';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tip';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Odvoji stavke zarezima';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Ukloni svojstvo';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Nema svojstava';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'broj';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logičko';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lista';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter nije pročitano: $reason';
@@ -1582,7 +1564,7 @@ final class BosnianStrings extends Strings {
   @override
   String get notionImportTitle => 'Uvezi Notion izvoz';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion izvoz se nije mogao uvesti';
   @override
   String dropRejected(String names) =>
       'Ovdje se otvaraju samo Markdown datoteke i mape: $names';
@@ -1751,8 +1733,6 @@ final class BosnianStrings extends Strings {
   @override
   String get shortcutRedo => 'Ponovi';
   @override
-  String get shortcutChange => 'Promijeni prečicu';
-  @override
   String shortcutCaptureTitle(String command) => 'Tipke za $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1854,9 +1834,9 @@ final class BosnianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Obriši trajno';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Bilješka se nije mogla vratiti ni izbrisati';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Korpa se nije mogla isprazniti';
 
   // The open/create library screen.
   @override
@@ -1938,15 +1918,13 @@ final class BosnianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Podešavanja';
-  @override
   String get libraryPathTitle => 'Putanje biblioteke';
   @override
   String get reindexTitle => 'Ponovno indeksiraj odmah';
   @override
   String get reindexDone => 'Ponovno indeksirano';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteka se nije mogla ponovo pročitati';
   @override
   String get closeLibraryTitle => 'Zatvori biblioteku';
   @override
@@ -1979,20 +1957,27 @@ final class BosnianStrings extends Strings {
       'Nema točnog podudaranja cijele riječi "$term"'
       '${only == null ? 'nije pronađeno' : 'pronađeno u $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'cijela biblioteka';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'u $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'u $count bilješci'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'u $count bilješke'
+      : 'u $count bilješki';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count bilješka nije zapisana)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count bilješke nisu zapisane)'
+      : ' ($count bilješki nije zapisano)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikaciji';
   @override
   String get versionTitle => 'Verzija';
   @override
@@ -2042,7 +2027,7 @@ final class BosnianStrings extends Strings {
   @override
   String get historyOff =>
       'Historija je isključena za ovu biblioteku '
-      '(Podešavanja, Biblioteka).';
+      '(Podešavanja, Korpa i hronologija).';
   @override
   String get historyLoadFailed => 'Historija se ne može pročitati';
   @override
@@ -2326,34 +2311,34 @@ final class BosnianStrings extends Strings {
   @override
   String get syncTestFailed => 'Test nije uspio';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikat nije pouzdan';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikat se ne može provjeriti. Vjeruj mu samo ako se njegov otisak '
+      'podudara s onim koji prikazuje server.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Vjerovati ovom certifikatu?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikat za $host se ne može provjeriti.\n\nSHA-256 '
+      'otisak:\n$fingerprint\n\nVjeruj mu samo ako je to certifikat koji '
+      'očekuješ. Niman prihvata samo ovaj certifikat za ovo odredište i '
+      'nijedan drugi.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Vjeruj ovom certifikatu';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikat pouzdan';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Zaboraviti ovaj certifikat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ovo odredište ponovo se provjerava prema spremištu certifikata uređaja '
+      'i samopotpisani certifikat morat će se još jednom potvrditi. Ništa se '
+      'drugo ne mijenja.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Zaboravi';
   @override
   String get syncNowAction => 'Sinhronizuj sada';
   @override
@@ -2482,10 +2467,6 @@ final class BosnianStrings extends Strings {
   String get syncRetryAction => 'Pokušaj ponovo';
   @override
   String get syncOpenSettingsAction => 'Podešavanja';
-  @override
-  String get syncCloseAction => 'Zatvori';
-  @override
-  String get syncDoneSnack => 'Sinhronizovano';
   @override
   String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
       ? 'Sinhronizovano · $count datoteka obrisana drugdje je u '
@@ -2827,7 +2808,91 @@ final class BosnianStrings extends Strings {
   @override
   String get templateHintDismissAction => 'Odbaci';
   @override
-  String templateProblems(int count) => count == 1
-      ? '1 problem u ovom predlošku'
+  String templateProblems(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count problem u ovom predlošku'
       : '$count problema u ovom predlošku';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Naslovi u $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Mjesta u $named';
+  @override
+  String get wikilinkThisNote => 'ova bilješka';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Nijedan naslov se ne poklapa sa "$query".';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nijedna bilješka se ne poklapa sa "$query".';
+  @override
+  String get wikilinkNoHeading => 'ova bilješka nema naslov s tim imenom';
+  @override
+  String get wikilinkNoNote => 'ništa u biblioteci nema to ime ni alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Stranica se bira, ne imenuje iz liste: upišite njen broj.';
+  @override
+  String get wikilinkFooterMove => 'pomjeri';
+  @override
+  String get wikilinkFooterOr => 'ili';
+  @override
+  String get wikilinkFooterInsert => 'umetni';
+  @override
+  String get wikilinkFooterClose => 'zatvori';
+  @override
+  String get suggesterPageHint => 'upišite broj';
+  @override
+  String get suggesterChapterHint => 'imenujte datoteku u knjizi';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'otvorene vitičaste zagrade bez zatvaranja: ništa ne zatvara ovo mjesto '
+      'zamjene';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'prazno mjesto zamjene: nema imena među zagradama';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'nepoznato mjesto zamjene "$name"';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '"$name" nema oznaku: ništa ne pita, a mjesto zamjene ostaje na mjestu';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '"$name" nema ime: ništa ne broji, a mjesto zamjene ostaje na mjestu';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '"$name" ne prima filtere: kursor se ne postavlja, a mjesto zamjene '
+      'ostaje na mjestu';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'nezatvoren navodnik u formatu datuma: sve poslije njega čita se kao '
+      'običan tekst';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'nepoznat token datuma "$token"';
+  @override
+  String get templateProblemEmptyFilter =>
+      'prazan filter: nema imena poslije "|"';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '"$filter" pomjera datum: pomak primaju samo $formats, i to samo prije '
+      'bilo kojeg drugog filtera';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '"$filter" nije pomak datuma: pomak su broj i jedinica, kao "+7d" ili '
+      '"-1w"';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '"$filter" prikvačuje na $units, a ne na "$unit"';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '"$filter" treba broj za svoju širinu, a "$argument" to nije';
+  @override
+  String templateProblemUnknownFilter(String name) => 'nepoznat filter "$name"';
 }

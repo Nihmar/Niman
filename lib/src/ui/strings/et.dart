@@ -138,11 +138,7 @@ final class EstonianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Redaktor';
   @override
-  String get settingsSectionLibrary => 'Kogu';
-  @override
   String get settingsSectionReminders => 'Meeldetuletused';
-  @override
-  String get settingsSectionShortcuts => 'Klaviatuur';
   @override
   String get keyboardShortcutsTitle => 'Klaviatuuri lühendid';
 
@@ -185,8 +181,6 @@ final class EstonianStrings extends Strings {
   String updateSavedTo(Object path) => 'Uuendus salvestati asukohta $path';
   @override
   String get updateInstallerStarted => 'Paigaldusprogramm käivitati';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Õigekirjapide';
   @override
@@ -242,8 +236,6 @@ final class EstonianStrings extends Strings {
   String get themeBrightnessNight => 'Tume';
   @override
   String get themeTitle => 'Teema';
-  @override
-  String get themeSubtitle => 'Kasutajaliides ja märgiste värvid';
   @override
   String get themePaletteSystem => 'Süsteem';
   // Settings: the themes page (issue #269).
@@ -321,16 +313,16 @@ final class EstonianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktor ja eelvaade on alati sünkroonis';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Lähteteksti redaktori font';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Font, milles lähteteksti paneel on; eelvaade jätab märkme oma fondi';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Ühe laiusega';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Ilma seriifideta';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Seriifidega';
   @override
   String get epubLookTitle => 'Raamatute välimus';
   @override
@@ -452,7 +444,7 @@ final class EstonianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Salvestamine…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Heli ei õnnestunud esitada';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -593,10 +585,6 @@ final class EstonianStrings extends Strings {
   String get cheatsheetCopied => 'Kopeeritud';
   @override
   String get cheatsheetInsert => 'Lisa märkmesse';
-  @override
-  String get cheatsheetWritten => 'Kirjutatud';
-  @override
-  String get cheatsheetShown => 'Näidatud';
   @override
   String get cheatHeadings => 'Pealkirjad';
   @override
@@ -741,8 +729,6 @@ final class EstonianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Kuva redaktorit';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(toore HTML-tabel)';
 
   // Search (T-M3-05).
   @override
@@ -989,8 +975,6 @@ final class EstonianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Prioriteedita';
-  @override
   String get todoNoPriorityShort => 'Puudub';
   @override
   String get todoMorePriorities => 'Rohkem …';
@@ -1085,9 +1069,9 @@ final class EstonianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Peida külgpaneel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Peida külgpaneel';
   @override
-  String get showSidebarTooltip => 'Kuva külgpaneel (Ctrl+B)';
+  String get showSidebarTooltip => 'Kuva külgpaneel';
   @override
   String get windowMinimizeTooltip => 'Minimeeri';
   @override
@@ -1123,7 +1107,7 @@ final class EstonianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sulge';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Toimingut ei õnnestunud lõpetada';
   @override
   String get newFolderTitle => 'Uus kaust';
   @override
@@ -1150,8 +1134,6 @@ final class EstonianStrings extends Strings {
   @override
   String get currentQuickNote => 'Aktuaalne kiirmärge';
   @override
-  String get pinnedSection => 'Kinnitatud';
-  @override
   String pinnedSectionCount(int count) => 'Kinnitatud · $count';
   @override
   String get templateFolderTitle => 'Šabloonide kaust';
@@ -1160,7 +1142,7 @@ final class EstonianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Uus šabloonist siia';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Malli ei õnnestunud avada';
   @override
   String get templateFormTitle => 'Täita šabloon';
   @override
@@ -1318,39 +1300,39 @@ final class EstonianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ „$path” on liiga sügavalt sisestatud';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Atribuudid';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Töötlemata YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Väljad';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Lisa atribuut';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Uus atribuut';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Muuda atribuuti';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Võti';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Väärtus';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tüüp';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Eralda üksused komadega';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Eemalda atribuut';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Atribuute pole';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'arv';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'kuupäev';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'tõeväärtus';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'loend';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatteri ei õnnestunud lugeda: $reason';
@@ -1559,7 +1541,7 @@ final class EstonianStrings extends Strings {
   @override
   String get notionImportTitle => 'Impordi Notioni eksport';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notioni eksporti ei õnnestunud importida';
   @override
   String dropRejected(String names) =>
       'Siin avanevad ainult Markdowni failid ja kaustad: $names';
@@ -1728,8 +1710,6 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutRedo => 'Tee uuesti';
   @override
-  String get shortcutChange => 'Muuda kiirklahvi';
-  @override
   String shortcutCaptureTitle(String command) => 'Klahvid: $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1831,9 +1811,9 @@ final class EstonianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Kustuta püsivalt';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Märget ei õnnestunud taastada ega kustutada';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Prügikasti ei õnnestunud tühjendada';
 
   // The open/create library screen.
   @override
@@ -1913,15 +1893,13 @@ final class EstonianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Seaded';
-  @override
   String get libraryPathTitle => 'Kogu aadress';
   @override
   String get reindexTitle => 'Indekseeri uuesti hetkel';
   @override
   String get reindexDone => 'Uuesti indekseerimine lõpetatud';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Kogu ei õnnestunud uuesti lugeda';
   @override
   String get closeLibraryTitle => 'Sulge kogu';
   @override
@@ -1951,20 +1929,18 @@ final class EstonianStrings extends Strings {
       '„$term” täpset täissõna vastet ei ole'
       '${only == null ? '' : ' ei leitud $only-s'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'terve kogu';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'failis $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 märkes' : '$count märkides';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 märget ei õnnestunud kirjutada)'
+      : ' ($count märget ei õnnestunud kirjutada)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Rakendusest';
   @override
   String get versionTitle => 'Versioon';
   @override
@@ -2013,7 +1989,7 @@ final class EstonianStrings extends Strings {
       'Sünkroonimisalus säilitatakse ka üle piirangu.';
   @override
   String get historyOff =>
-      'Ajalugu on selles kogus välja lülitatud (Seaded, Kogu).';
+      'Ajalugu on selles kogus välja lülitatud (Seaded, Prügikast ja ajalugu).';
   @override
   String get historyLoadFailed => 'Ajalugu ei õnnestunud lugeda';
   @override
@@ -2297,34 +2273,33 @@ final class EstonianStrings extends Strings {
   @override
   String get syncTestFailed => 'Test ei õnnestunud';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikaat ei ole usaldusväärne';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikaati ei saa kontrollida. Usalda seda ainult siis, kui selle '
+      'sõrmejälg vastab serveri näidatule.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Kas usaldada seda sertifikaati?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Sertifikaati hostile $host ei saa kontrollida.\n\nSHA-256 '
+      'sõrmejälg:\n$fingerprint\n\nUsalda seda ainult siis, kui see on '
+      'oodatud sertifikaat. Niman aktsepteerib selle sihtkoha jaoks '
+      'ainult seda üht sertifikaati ja ühtegi teist mitte.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Usalda seda sertifikaati';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikaat on usaldusväärne';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Kas unustada see sertifikaat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Seda sihtkohta kontrollitakse uuesti seadme sertifikaadihoidla vastu ja '
+      'iseallkirjastatud sertifikaat tuleb veel kord kinnitada. Muu ei muutu.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Unusta';
   @override
   String get syncNowAction => 'Sünkrooni kohe';
   @override
@@ -2439,10 +2414,6 @@ final class EstonianStrings extends Strings {
   String get syncRetryAction => 'Proovi uuesti';
   @override
   String get syncOpenSettingsAction => 'Seaded';
-  @override
-  String get syncCloseAction => 'Sulge';
-  @override
-  String get syncDoneSnack => 'Sünkroonitud';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sünkroonitud · 1 mujal kustutatud fail on prügikastis'
@@ -2767,4 +2738,86 @@ final class EstonianStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 probleem selles šabloonis'
       : '$count probleemi selles šabloonis';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Pealkirjad: $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Kohad: $named';
+  @override
+  String get wikilinkThisNote => 'see märge';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ükski pealkiri ei vasta päringule „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ükski märge ei vasta päringule „$query”.';
+  @override
+  String get wikilinkNoHeading => 'selles märkes pole sellenimelist pealkirja';
+  @override
+  String get wikilinkNoNote => 'kogus pole midagi selle nime või aliasega';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Leht valitakse, mitte ei nimetata nimekirjast: kirjuta selle number.';
+  @override
+  String get wikilinkFooterMove => 'liiguta';
+  @override
+  String get wikilinkFooterOr => 'või';
+  @override
+  String get wikilinkFooterInsert => 'sisesta';
+  @override
+  String get wikilinkFooterClose => 'sulge';
+  @override
+  String get suggesterPageHint => 'kirjuta number';
+  @override
+  String get suggesterChapterHint => 'nimeta fail raamatus';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'avatud loogsulud ilma lõputa: miski ei sulge seda kohatäidet';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tühi kohatäide: sulgude vahel pole nime';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'tundmatu kohatäide „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” ilma sildita: see ei küsi midagi ja kohatäide jääb paigale';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” ilma nimeta: see ei loenda midagi ja kohatäide jääb paigale';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” ei võta filtreid: kursorit ei asetata ja kohatäide jääb paigale';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'sulgemata jutumärk kuupäevaformaatis: kõik selle järel loetakse '
+      'tavalise '
+      'tekstina';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'tundmatu kuupäevatoken „$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tühi filter: „|” järel pole nime';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” liigutab kuupäeva: liigutamist võtavad vastu ainult $formats, '
+      'ja ainult enne ükskõik millist muud filtrit';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” ei ole kuupäeva liigutamine: liigutamine on arv ja ühik, nagu '
+      '„+7d” või „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” kinnitub $units külge, mitte „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” vajab laiuse jaoks arvu ja „$argument” pole see';
+  @override
+  String templateProblemUnknownFilter(String name) => 'tundmatu filter „$name”';
 }

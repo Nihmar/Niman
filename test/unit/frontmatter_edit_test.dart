@@ -158,6 +158,185 @@ void main() {
         '---\npinned: true\n---\n\n---\nnever closed',
       );
     });
+
+    // #497: an edit writes the entry back as it found it — the indentation
+    // it was written with, the `&anchor` a `*alias` points at, and the
+    // comment after the value — and a key it adds joins its siblings at
+    // their indentation.
+    test('an indented entry keeps its indentation', () {
+      expect(
+        setFrontmatterKey(
+          '---\n  title: A\n  tags: [x]\n---\nbody',
+          'title',
+          'B',
+        ),
+        '---\n  title: B\n  tags: [x]\n---\nbody',
+      );
+    });
+
+    test("an inserted key takes its siblings' indentation", () {
+      expect(
+        setFrontmatterKey(
+          '---\n  title: A\n  tags: [x]\n---\nbody',
+          'pinned',
+          'true',
+        ),
+        '---\n  title: A\n  tags: [x]\n  pinned: true\n---\nbody',
+      );
+    });
+
+    test('an anchored entry keeps its anchor, so its alias survives', () {
+      expect(
+        setFrontmatterKey(
+          '---\ntags: &t [a, b]\nalias: *t\n---\nbody',
+          'tags',
+          '[a]',
+        ),
+        '---\ntags: &t [a]\nalias: *t\n---\nbody',
+      );
+    });
+
+    test('a trailing comment survives an edit', () {
+      expect(
+        setFrontmatterKey('---\ntitle: A # keep\n---\nbody', 'title', 'B'),
+        '---\ntitle: B # keep\n---\nbody',
+      );
+    });
+
+    // #497: the comment kept is the one that follows the value — where the
+    // YAML parser says the value ends — or, for a value that starts on a
+    // later line, the one on the key's own line. A `#` inside the value is
+    // the value's: it is never a comment, and a comment on another line of
+    // a value that goes is not this entry's.
+    group("the comment kept is the entry's own", () {
+      String block(List<String> lines, {String eol = '\n'}) =>
+          ['---', ...lines, '---', 'body'].join(eol);
+
+      /// [key] set to [value] in a block made of [lines].
+      String set(
+        String key,
+        String value,
+        List<String> lines, {
+        String eol = '\n',
+      }) => setFrontmatterKey(block(lines, eol: eol), key, value);
+
+      test("a block list item's comment does not become the entry's", () {
+        expect(
+          set('tags', '[a]', ['tags:', '  - a', '  - b # about b', 'after: x']),
+          block(['tags: [a]', 'after: x']),
+        );
+      });
+
+      test('a comment on the key line of a block list is kept', () {
+        expect(
+          set('tags', '[a]', ['tags: # my tags', '  - a', '  - b # about b']),
+          block(['tags: [a] # my tags']),
+        );
+      });
+
+      test('a comment on the key line of a block map is kept', () {
+        expect(
+          set('meta', '{}', ['meta: # about meta', '  k: v', '  j: w # j']),
+          block(['meta: {} # about meta']),
+        );
+      });
+
+      test('an anchored block list keeps anchor and key-line comment', () {
+        expect(
+          set('tags', '[a]', [
+            'tags: &t # my tags',
+            '  - a',
+            '  - b',
+            'alias: *t',
+          ]),
+          block(['tags: &t [a] # my tags', 'alias: *t']),
+        );
+      });
+
+      test('the tail of a multi-line quoted string is not a comment', () {
+        expect(
+          set('title', 'B', [
+            'title: "one',
+            '  two # not a comment"',
+            'after: x',
+          ]),
+          block(['title: B', 'after: x']),
+        );
+      });
+
+      test('a comment after a multi-line quoted string is kept', () {
+        expect(
+          set('title', 'B', ['title: "one', '  two" # real', 'after: x']),
+          block(['title: B # real', 'after: x']),
+        );
+      });
+
+      test('a comment after a multi-line flow list is kept', () {
+        expect(
+          set('tags', '[x]', ['tags: [a,', '  b] # end', 'after: x']),
+          block(['tags: [x] # end', 'after: x']),
+        );
+      });
+
+      test('a plain scalar with an apostrophe keeps its comment', () {
+        expect(
+          set('title', 'B', ["title: it's # c", 'after: x']),
+          block(['title: B # c', 'after: x']),
+        );
+      });
+
+      test('a quoted # is text, and a comment after it is kept', () {
+        expect(set('title', 'B', ['title: "a # b"']), block(['title: B']));
+        expect(
+          set('title', 'B', ["title: 'a # b' # c"]),
+          block(['title: B # c']),
+        );
+      });
+
+      test("a block scalar's text is not a comment; its header's is", () {
+        expect(
+          set('title', 'B', ['title: |', '  text # not a comment', 'after: x']),
+          block(['title: B', 'after: x']),
+        );
+        expect(
+          set('title', 'B', ['title: >- # about it', '  text # x', 'after: x']),
+          block(['title: B # about it', 'after: x']),
+        );
+      });
+
+      test('CRLF: the comment is kept and no CR is doubled', () {
+        expect(
+          set('title', 'B', ['title: A # keep', 'after: x'], eol: '\r\n'),
+          block(['title: B # keep', 'after: x'], eol: '\r\n'),
+        );
+        expect(
+          set('tags', '[a]', [
+            'tags: # my tags',
+            '  - a',
+            'after: x',
+          ], eol: '\r\n'),
+          block(['tags: [a] # my tags', 'after: x'], eol: '\r\n'),
+        );
+      });
+
+      test('an alias value is its own line, comment kept', () {
+        expect(
+          set('alias', 'x', [
+            'tags: &t [a, b]',
+            'alias: *t # same',
+            'after: y',
+          ]),
+          block(['tags: &t [a, b]', 'alias: x # same', 'after: y']),
+        );
+      });
+
+      test("a block YAML refuses still keeps a plain value's comment", () {
+        expect(
+          set('title', 'B', ['title: A # keep', 'bad: "never closed']),
+          block(['title: B # keep', 'bad: "never closed']),
+        );
+      });
+    });
   });
 
   group('removeFrontmatterKey', () {

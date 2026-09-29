@@ -1,6 +1,7 @@
 // Typewriter mode and the Zen caret on the source surface (#245, phase 3;
 // the legacy editor's #70 and #69): the row being written keeps to the middle
 // and is lit, and Zen draws a thicker caret.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
@@ -160,5 +161,67 @@ void main() {
     final zen = await _pump(tester, caretWidth: 3, live: mode == _Mode.live);
     await tester.pump();
     expect(zen.caretRect!.width, 3);
+  });
+
+  /// A two-column table whose first cell wraps on a phone: its later visual
+  /// lines stand below its first, so the row light has somewhere to stand
+  /// wrong.
+  const wrapped =
+      '| head | second |\n|---|---|\n'
+      '| a first cell far too long for the pane, and still going further | '
+      'second |';
+
+  testWidgets("the row light stands on a wrapped row's own line (#494)", (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final buffer = SourceBuffer.fromText(wrapped);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MarkdownSourceView(
+            buffer: buffer,
+            theme: _theme,
+            showLineNumbers: false,
+            typewriter: true,
+            hideMarkers: true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    // The caret inside the long cell's last word: a piece on a visual line
+    // below the row's first, so its shift has a `y` that is not zero.
+    final text = buffer.lineAt(2);
+    state.placeCaret(buffer.offsetOfLine(2) + text.indexOf('further') + 1);
+    await tester.pump();
+
+    final caret = state.caretRect;
+    expect(caret, isNotNull);
+    final paints = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .where(
+          (paint) => paint.painter?.runtimeType.toString() == '_RowPainter',
+        )
+        .toList();
+    expect(paints, hasLength(1), reason: "the caret's row is lit");
+    final paint = paints.single;
+    // The rectangle the highlight really draws, in the box it paints over.
+    final drawn = (paint.painter as dynamic).drawnRect(paint.size) as Rect?;
+    expect(drawn, isNotNull);
+    // The caret is on a piece below the row's first, so the shift under test
+    // is not zero: without it the light stands a piece's height too high.
+    final row = (paint.painter as dynamic).rect as ValueListenable<Rect?>;
+    expect(drawn!.top, greaterThan(row.value!.top));
+    final box = tester.getRect(find.byWidget(paint));
+    // The light covers the caret: its top and foot are the caret's own,
+    // rather than a piece's height too high.
+    expect(box.top + drawn.top, closeTo(caret!.top, 0.5));
+    expect(box.top + drawn.bottom, closeTo(caret.bottom, 0.5));
   });
 }

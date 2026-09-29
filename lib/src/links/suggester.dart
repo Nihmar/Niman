@@ -4,15 +4,19 @@
 /// While a wikilink is typed the panel lists the library's notes after `[[`
 /// and a note's headings after `#`. Everything comes from what the app
 /// already keeps: the notes and their aliases from `note_stems` (one query,
-/// never a walk of the tree), a note's headings from the same block scan the
-/// outline reads ([outlineOfText]), and a book's place forms from the target
-/// itself. Nothing here scans the library to fill the panel.
+/// never a walk of the tree), a note's headings from its own file — read and
+/// outlined off the UI isolate, once per revision of it (#491) — and a
+/// book's place forms from the target itself. Nothing here scans the library
+/// to fill the panel.
 library;
+
+import 'dart:async' show unawaited;
+import 'dart:math' show min;
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 /// One row the panel can show.
@@ -77,11 +81,15 @@ final class BookSuggestion extends SuggestEntry {
 abstract interface class WikilinkSuggester {
   /// The notes and aliases matching [query], best match first: prefix
   /// matches before contains, then by path. An empty [query] lists the
-  /// library from the top.
+  /// library from the top. A note a `[[…]]` target cannot carry (#491) is
+  /// left out: the row would write a link the parser reads back as another
+  /// note.
   Future<List<NoteSuggestion>> notes(String query);
 
   /// The headings of the note named by the wiki [target] — `note`,
   /// `folder/note` — or none when it does not resolve or cannot be read.
+  /// The list is the note's own headings, as the outline reads them; the
+  /// panel filters it for the heading being typed.
   Future<List<HeadingSuggestion>> headings(String target);
 
   /// The place forms the book named by [target] offers, or none when the
@@ -92,24 +100,46 @@ abstract interface class WikilinkSuggester {
 /// The panel's suggestions, read off the library's index.
 ///
 /// One class, so every read the panel makes is one place: the notes from
-/// `note_stems`, a named note's headings from its own file through [readNote]
-/// and the outline's scan, and a book's forms from the target's extension.
+/// `note_stems`, a named note's headings through [readHeadings] — kept by
+/// note and revision, so a run of keystrokes after `#` reads the target
+/// once (#491) — and a book's forms from the target's extension.
 final class IndexWikilinkSuggester implements WikilinkSuggester {
-  /// Creates a suggester over [_db], reading a named note through [readNote]
-  /// (the session's own read of a library-relative path; null when it is
-  /// gone).
-  new(this._db, {required this.readNote}) : _resolver = LinkResolver(_db);
+  /// Creates a suggester over [_db], reading a named note's headings through
+  /// [readHeadings] (the session's own read and scan of a library-relative
+  /// path, off the UI isolate; null when it is gone).
+  new(this._db, {required this.readHeadings}) : _resolver = LinkResolver(_db);
 
   final IndexDatabase _db;
 
-  /// Reads a library-relative note path's text, or null when it is gone.
-  final Future<String?> Function(String path) readNote;
+  /// The headings of a library-relative note path, in document order, or
+  /// null when it is gone. The whole note is read, decoded and walked, so
+  /// the implementation runs it off the UI isolate.
+  final Future<List<String>?> Function(String path) readHeadings;
 
   final LinkResolver _resolver;
 
-  /// How many matching rows one query fetches before the list is ranked and
-  /// cut to [limit]. Bounds a contains query, which cannot use the stem
-  /// index (a leading `%`), at a fixed cost per keystroke (#475).
+  /// The headings already read, by note and revision. A run of keystrokes
+  /// after `#` names the same target each time and the panel filters the
+  /// list locally, so one read answers them all; only the note's own
+  /// revision (its mtime and size, as the index records it) can make the
+  /// list stale.
+  final Map<(int, DateTime, int), List<HeadingSuggestion>> _headingsByNote = {};
+
+  /// The reads under way, by the same key: what a key typed while one runs
+  /// waits for instead of starting another.
+  final Map<(int, DateTime, int), Future<List<HeadingSuggestion>>> _reading =
+      {};
+
+  /// How many notes' headings are kept. More than the run of keystrokes
+  /// needs, so moving between a few targets does not re-read; bounded, so a
+  /// long session cannot keep a novel's outline per note it ever named.
+  static const int _headingCacheNotes = 8;
+
+  /// How many matching rows are fetched before the list is ranked and cut to
+  /// [limit]. The indexed prefix query takes this many; the contains query —
+  /// which cannot use the stem index (a leading `%`) — is read only while the
+  /// prefix rows leave room, so a keystroke is not charged a `%q%` scan the
+  /// prefix already answered (#475, #491).
   static const int _fetch = 200;
 
   /// How many rows the panel is handed.
@@ -118,8 +148,38 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<NoteSuggestion>> notes(String query) async {
     final q = query.trim().toLowerCase();
-    return await _qualified(_rank(await _rows(q), q));
+    final ranked = _rank(await _rows(q), q);
+    // A row the panel cannot write takes no slot: [limit] rows are cut from
+    // the ones that read back, not from the ranking, or a run of names with
+    // a `#` at its head would leave the panel short (#491). A name is
+    // dropped before its target is qualified; the folder a qualified target
+    // adds can break it too, so those are counted after, and the ranking is
+    // read on in chunks until the panel is full or it runs out.
+    final out = <NoteSuggestion>[];
+    var at = 0;
+    while (out.length < limit && at < ranked.length) {
+      final end = min(at + limit - out.length, ranked.length);
+      for (final row in await _qualified(ranked.sublist(at, end))) {
+        if (_readsBack(row.target)) out.add(row);
+      }
+      at = end;
+    }
+    return out;
   }
+
+  /// Whether [target], written between the `[[` and the `]]`, reads back as
+  /// itself (#491).
+  ///
+  /// The link ends at its first `]]`, the editor's own wikilink token holds
+  /// no bracket, and the parser splits a target at its first `|` or `#`:
+  /// `[[C# tips]]` is target `C` with heading `tips`. A name holding one of
+  /// those has no wikilink spelling, so the row would write a link to a note
+  /// that is not there — it is left out of the panel instead.
+  static bool _readsBack(String target) => !_unlinkable.hasMatch(target);
+
+  /// The characters a `[[…]]` target cannot carry: `#` and `|` split it, and
+  /// a bracket ends it.
+  static final RegExp _unlinkable = RegExp(r'[#|\[\]]');
 
   /// [ranked] with each target qualified as far as it takes to name that
   /// note alone: one query for the notes that share any of their names,
@@ -181,7 +241,9 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   }
 
   /// The matching `note_stems` rows joined to their file, prefix matches
-  /// first. An empty [q] lists every file, by path.
+  /// first. An empty [q] lists every file, by path; a non-empty one reads the
+  /// indexed prefix matches, then the contains matches only while the cap has
+  /// room (#491).
   Future<List<_StemRow>> _rows(String q) async {
     // A note, a PDF or an EPUB: the files a `[[…]]` link names, and the
     // books the `#` half serves. Other attachments are left to embeds.
@@ -202,20 +264,38 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
           )
           .get();
     } else {
-      // A prefix match (`q%`) can use the stem index; a contains match
-      // (`%q%`) cannot, and is what the fetch cap bounds.
+      // A prefix match (`q%`) is answered by the stem index, so it is read
+      // first and cut by the cap. A contains match (`%q%`) has no index to
+      // use — SQLite would evaluate the LIKE against every stem and sort the
+      // matches before the LIMIT — so it is read, bounded by what the prefix
+      // left, only when the prefix rows do not fill the cap (#491).
       final escaped = _escapeLike(q);
-      result = await _db
+      final prefix = '$escaped%';
+      var rows = await _db
           .customSelect(
             "$select AND s.stem LIKE ? ESCAPE '\\' "
-            r"ORDER BY (s.stem LIKE ? ESCAPE '\') DESC, n.path ASC LIMIT ?",
-            variables: [
-              Variable<String>('%$escaped%'),
-              Variable<String>('$escaped%'),
-              const Variable<int>(_fetch),
-            ],
+            'ORDER BY n.path ASC LIMIT ?',
+            variables: [Variable<String>(prefix), const Variable<int>(_fetch)],
           )
           .get();
+      if (rows.length < _fetch) {
+        rows = [
+          ...rows,
+          ...await _db
+              .customSelect(
+                "$select AND s.stem LIKE ? ESCAPE '\\' "
+                r"AND s.stem NOT LIKE ? ESCAPE '\' "
+                'ORDER BY n.path ASC LIMIT ?',
+                variables: [
+                  Variable<String>('%$escaped%'),
+                  Variable<String>(prefix),
+                  Variable<int>(_fetch - rows.length),
+                ],
+              )
+              .get(),
+        ];
+      }
+      result = rows;
     }
     return [
       for (final row in result)
@@ -264,7 +344,10 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
       final byFolder = a.note.folder.compareTo(b.note.folder);
       return byFolder != 0 ? byFolder : a.note.name.compareTo(b.note.name);
     });
-    return [for (final r in ranked.take(limit)) (note: r.note, path: r.path)];
+    return [
+      for (final r in ranked)
+        if (_readsBack(r.note.target)) (note: r.note, path: r.path),
+    ];
   }
 
   /// The name shown for [path]: the file's base name, `.md` dropped.
@@ -285,25 +368,53 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   Future<List<HeadingSuggestion>> headings(String target) async {
     final note = await _resolved(target);
     if (note == null) return const <HeadingSuggestion>[];
-    final text = await readNote(note.path);
-    if (text == null) return const <HeadingSuggestion>[];
-    return [
-      for (final heading in outlineOfText(text))
-        HeadingSuggestion(heading.text),
-    ];
+    final key = (note.id, note.modified, note.size);
+    final kept = _headingsByNote[key];
+    if (kept != null) return kept;
+    // A read under way answers every ask for the same revision that comes
+    // before it lands: a slow note is still being read when the next key
+    // does, and the keys would each start a read of their own.
+    final reading = _reading[key] ??= _read(key, note.path);
+    return await reading;
+  }
+
+  /// One read of the note at [path], kept under [key] once it lands and
+  /// forgotten as a read under way however it ends. Empty when the note is
+  /// gone, which is not kept: it may come back.
+  Future<List<HeadingSuggestion>> _read(
+    (int, DateTime, int) key,
+    String path,
+  ) async {
+    try {
+      final texts = await readHeadings(path);
+      if (texts == null) return const <HeadingSuggestion>[];
+      final rows = [for (final text in texts) HeadingSuggestion(text)];
+      if (_headingsByNote.length >= _headingCacheNotes) {
+        _headingsByNote.remove(_headingsByNote.keys.first);
+      }
+      _headingsByNote[key] = rows;
+      return rows;
+    } finally {
+      unawaited(_reading.remove(key));
+    }
   }
 
   @override
   Future<List<BookSuggestion>> bookPlaces(String target) async {
     final note = await _resolved(target);
+    // The hint beside the form is a label, written when the panel is drawn:
+    // it follows the language the app speaks.
     switch (p.extension(note?.path ?? target).toLowerCase()) {
       case '.pdf':
-        return const <BookSuggestion>[
-          BookSuggestion(form: 'page=', hint: 'type a number'),
+        return <BookSuggestion>[
+          BookSuggestion(form: 'page=', hint: AppStrings.suggesterPageHint),
         ];
       case '.epub':
-        return const <BookSuggestion>[
-          BookSuggestion(form: 'chapter=', hint: 'name a file in the book'),
+        return <BookSuggestion>[
+          BookSuggestion(
+            form: 'chapter=',
+            hint: AppStrings.suggesterChapterHint,
+          ),
         ];
       default:
         return const <BookSuggestion>[];

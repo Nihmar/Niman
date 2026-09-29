@@ -142,11 +142,7 @@ final class SlovakStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Knižnica';
-  @override
   String get settingsSectionReminders => 'Pripomienky';
-  @override
-  String get settingsSectionShortcuts => 'Klávesnica';
   @override
   String get keyboardShortcutsTitle => 'Klávesové skratky';
 
@@ -190,8 +186,6 @@ final class SlovakStrings extends Strings {
   String updateSavedTo(Object path) => 'Aktualizácia uložená do $path';
   @override
   String get updateInstallerStarted => 'Inštalátor spustený';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostika';
   @override
   String get settingsSpellCheckTitle => 'Kontrola pravopisu';
   @override
@@ -248,8 +242,6 @@ final class SlovakStrings extends Strings {
   String get themeBrightnessNight => 'Tmavé';
   @override
   String get themeTitle => 'Téma';
-  @override
-  String get themeSubtitle => 'Farby rozhrania a poznámky';
   @override
   String get themePaletteSystem => 'Systém';
   // Settings: the themes page (issue #269).
@@ -326,16 +318,17 @@ final class SlovakStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'Editor a náhľad sú vždy v súlade';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Písmo editora zdrojového textu';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Písmo, ktorým je vysadené okno so zdrojovým textom; náhľad si drží '
+      'písmo poznámky';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Neproporcionálne';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Bez pätiek';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'S pätkami';
   @override
   String get epubLookTitle => 'Vzhľad kníh';
   @override
@@ -459,7 +452,7 @@ final class SlovakStrings extends Strings {
   @override
   String get audioSavingRecording => 'Ukladanie…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Zvuk sa nepodarilo prehrať';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -604,10 +597,6 @@ final class SlovakStrings extends Strings {
   @override
   String get cheatsheetInsert => 'Vložiť do poznámky';
   @override
-  String get cheatsheetWritten => 'Zápis';
-  @override
-  String get cheatsheetShown => 'Zobrazenie';
-  @override
   String get cheatHeadings => 'Nadpisy';
   @override
   String get cheatEmphasis => 'Tučné, kurzíva, prečiarknuté';
@@ -751,8 +740,6 @@ final class SlovakStrings extends Strings {
   @override
   String get showEditorTooltip => 'Zobraziť editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(hrubá HTML tabuľka)';
 
   // Search (T-M3-05).
   @override
@@ -1001,8 +988,6 @@ final class SlovakStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Bez priority';
-  @override
   String get todoNoPriorityShort => 'Žiadna';
   @override
   String get todoMorePriorities => 'Viac…';
@@ -1097,9 +1082,9 @@ final class SlovakStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Skryť bočný panel (Ctrl+B)';
+  String get hideSidebarTooltip => 'Skryť bočný panel';
   @override
-  String get showSidebarTooltip => 'Zobraziť bočný panel (Ctrl+B)';
+  String get showSidebarTooltip => 'Zobraziť bočný panel';
   @override
   String get windowMinimizeTooltip => 'Minimalizovať';
   @override
@@ -1135,7 +1120,7 @@ final class SlovakStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Zavrieť';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Akciu sa nepodarilo dokončiť';
   @override
   String get newFolderTitle => 'Nový priečinok';
   @override
@@ -1163,8 +1148,6 @@ final class SlovakStrings extends Strings {
   @override
   String get currentQuickNote => 'Aktuálna rýchla poznámka';
   @override
-  String get pinnedSection => 'Pripnuté';
-  @override
   String pinnedSectionCount(int count) => 'Pripnuté · $count';
   @override
   String get templateFolderTitle => 'Priečinok šablón';
@@ -1173,7 +1156,7 @@ final class SlovakStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nové zo šablóny sem';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Šablónu sa nepodarilo otvoriť';
   @override
   String get templateFormTitle => 'Vyplniť šablónu';
   @override
@@ -1335,39 +1318,39 @@ final class SlovakStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” je príliš hlboko vložené';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Vlastnosti';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Surové YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Polia';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Pridať vlastnosť';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nová vlastnosť';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Upraviť vlastnosť';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Kľúč';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Hodnota';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Typ';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Položky oddeľujte čiarkami';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Odobrať vlastnosť';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Žiadne vlastnosti';
   @override
   String get frontmatterTypeText => 'text';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'číslo';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dátum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logická hodnota';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'zoznam';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter sa nedal prečítať: $reason';
@@ -1575,7 +1558,7 @@ final class SlovakStrings extends Strings {
   @override
   String get notionImportTitle => 'Importovať export z Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Export z Notionu sa nepodarilo importovať';
   @override
   String dropRejected(String names) =>
       'Tu sa otvárajú len súbory Markdown a priečinky: $names';
@@ -1745,8 +1728,6 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutRedo => 'Znova';
   @override
-  String get shortcutChange => 'Zmeniť skratku';
-  @override
   String shortcutCaptureTitle(String command) => 'Klávesy pre $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1846,9 +1827,9 @@ final class SlovakStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Trvalo vymazať';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Poznámku sa nepodarilo obnoviť ani zmazať';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Kôš sa nepodarilo vysypať';
 
   // The open/create library screen.
   @override
@@ -1931,15 +1912,13 @@ final class SlovakStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Nastavenia';
-  @override
   String get libraryPathTitle => 'Cesta knižnice';
   @override
   String get reindexTitle => 'Preindexovať teraz';
   @override
   String get reindexDone => 'Preindexovanie dokončené';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Knižnicu sa nepodarilo znova načítať';
   @override
   String get closeLibraryTitle => 'Zavrieť knižnicu';
   @override
@@ -1972,20 +1951,20 @@ final class SlovakStrings extends Strings {
       'Žiadny presný výsledok celého slova pre „$term”'
       '${only == null ? '' : ' sa nenašiel v $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'celá knižnica';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'v $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'v 1 poznámke' : 'v $count poznámkach';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 poznámku nešlo zapísať)'
+      : count >= 2 && count <= 4
+      ? ' ($count poznámky nešlo zapísať)'
+      : ' ($count poznámok nešlo zapísať)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'O aplikácii';
   @override
   String get versionTitle => 'Verzia';
   @override
@@ -2032,7 +2011,7 @@ final class SlovakStrings extends Strings {
   String get historyBaseKept => 'Základ synchronizácie sa uchová aj nad limit.';
   @override
   String get historyOff =>
-      'História je pre túto knižnicu vypnutá (Nastavenia, Knižnica).';
+      'História je pre túto knižnicu vypnutá (Nastavenia, Kôš a kronológia).';
   @override
   String get historyLoadFailed => 'Históriu sa nepodarilo načítať';
   @override
@@ -2320,34 +2299,34 @@ final class SlovakStrings extends Strings {
   @override
   String get syncTestFailed => 'Test sa nepodaril';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikátu sa nedá dôverovať';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikát sa nedá overiť. Dôverujte mu len vtedy, keď jeho odtlačok '
+      'zodpovedá tomu, ktorý zobrazuje server.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Dôverovať tomuto certifikátu?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikát pre $host sa nedá overiť.\n\nOdtlačok '
+      'SHA-256:\n$fingerprint\n\nDôverujte mu len vtedy, keď je to '
+      'certifikát, ktorý očakávate. Niman prijme pre tento cieľ iba '
+      'tento certifikát a žiadny iný.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Dôverovať tomuto certifikátu';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikátu sa dôveruje';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Zabudnúť tento certifikát?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Tento cieľ sa znova overí proti úložisku certifikátov zariadenia a '
+      'samopodpísaný certifikát bude treba potvrdiť ešte raz. Nič iné sa '
+      'nemení.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Zabudnúť';
   @override
   String get syncNowAction => 'Synchronizovať teraz';
   @override
@@ -2470,10 +2449,6 @@ final class SlovakStrings extends Strings {
   String get syncRetryAction => 'Skúsiť znova';
   @override
   String get syncOpenSettingsAction => 'Nastavenia';
-  @override
-  String get syncCloseAction => 'Zavrieť';
-  @override
-  String get syncDoneSnack => 'Synchronizovaná';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synchronizovaná · 1 súbor vymazaný inde je v koši'
@@ -2814,4 +2789,89 @@ final class SlovakStrings extends Strings {
     }
     return '$count problémov v tejto šablóne';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Nadpisy v $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Miesta v $named';
+  @override
+  String get wikilinkThisNote => 'táto poznámka';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Žiadny nadpis nezodpovedá „$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Žiadna poznámka nezodpovedá „$query”.';
+  @override
+  String get wikilinkNoHeading => 'táto poznámka nemá nadpis s týmto názvom';
+  @override
+  String get wikilinkNoNote => 'nič v knižnici nemá tento názov ani alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'Strana sa vyberá, nepomenúva sa zo zoznamu: napíšte jej číslo.';
+  @override
+  String get wikilinkFooterMove => 'presunúť';
+  @override
+  String get wikilinkFooterOr => 'alebo';
+  @override
+  String get wikilinkFooterInsert => 'vložiť';
+  @override
+  String get wikilinkFooterClose => 'zavrieť';
+  @override
+  String get suggesterPageHint => 'napíšte číslo';
+  @override
+  String get suggesterChapterHint => 'pomenujte súbor v knihe';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'otvorené zložené zátvorky bez konca: nič túto zástupnú hodnotu '
+      'nezatvára';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'prázdna zástupná hodnota: medzi zátvorkami nie je žiadne meno';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'neznáma zástupná hodnota „$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '„$name” nemá označenie: na nič sa nepýta a zástupná hodnota zostáva '
+      'stáť';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '„$name” nemá názov: nič nepočíta a zástupná hodnota zostáva stáť';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '„$name” neprijíma filtre: kurzor sa neumiestni a zástupná hodnota '
+      'zostáva stáť';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'neuzavretá úvodzovka vo formáte dátumu: všetko za ňou sa číta ako bežný '
+      'text';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'neznámy token dátumu „$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'prázdny filter: za „|” nie je žiadne meno';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '„$filter” posúva dátum: posun prijímajú len $formats, a len pred '
+      'akýmkoľvek iným filtrom';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '„$filter” nie je posun dátumu: posun je počet a jednotka, ako „+7d” '
+      'alebo „-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '„$filter” sa prichytí na $units, nie na „$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '„$filter” potrebuje číslo pre svoju šírku, a „$argument” ním nie je';
+  @override
+  String templateProblemUnknownFilter(String name) => 'neznámy filter „$name”';
 }

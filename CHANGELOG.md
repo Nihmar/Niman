@@ -3,8 +3,8 @@
 All notable changes to Niman, newest version first.
 
 This file ships inside the build and feeds the in-app changelog (the
-launch dialog after an update and the screen under Settings → About).
-Update it in the release commit, before the tag.
+launch dialog after an update and the screen under Settings → Diagnostics
+and info). Update it in the release commit, before the tag.
 
 ## [0.1.3] - 2026-09-27
 
@@ -20,7 +20,7 @@ was gone.
 
 ### Changed
 - **Opening a library warms the index connection while the rest of the open runs.** The tree's first frame used to spend its whole ~50 ms on the index's first query — the one that opens the sqlite file, its schema and its FTS table. The connection is now asked for at the very start of the open, so the warm-up's ~160 ms of device log overlaps the open itself instead of its tail, on the connection's own isolate, and reports itself as `index warm-up: N ms`
-- **A slow frame is followed by the parts of it.** The debug log (*Settings → Diagnostics*) puts a line beside `[frames] slow frame` for each view that spent the frame — the editor's `[edit] keystroke frame: edit …, build …, layout …, paint …` and the read pane's `[read] read pane frame: …` — the frame's own number and the view's line adding up to the split, and what is left over being the shell's. Only the frames that miss their budget are written, and a view whose line has no edit in it is a frame nobody typed into
+- **A slow frame is followed by the parts of it.** The debug log (*Settings → Diagnostics and info*) puts a line beside `[frames] slow frame` for each view that spent the frame — the editor's `[edit] keystroke frame: edit …, build …, layout …, paint …` and the read pane's `[read] read pane frame: …` — the frame's own number and the view's line adding up to the split, and what is left over being the shell's. Only the frames that miss their budget are written, and a view whose line has no edit in it is a frame nobody typed into
 
 ### Fixed
 - **The first launch after an update no longer crashes.** The welcome gate, the update notice and the session each opened their own connection to `niman.db` and migrated it at once on the first run after an update: one added a column, another's `ALTER` came out as `duplicate column name` (the phone's crash reports). One connection is handed out now, the upgrade runs under the file's write lock in a single transaction with the version stamped inside it, and a step that throws rolls the whole migration back instead of leaving the file half stepped through

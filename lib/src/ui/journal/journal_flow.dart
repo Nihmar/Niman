@@ -230,12 +230,16 @@ final class JournalFlow {
         context: TemplateContext(folder: parent, clipboard: clipboard),
         counter: reserved?.counter,
       );
-      if (parent.isNotEmpty) await ops.ensureFolder(parent);
-      final row = await ops.createNote(
-        parentPath: parent,
-        name: name,
-        content: rendered.text,
-      );
+      // The numbers are on disk before the entry exists: one that could not
+      // be made gives them back rather than leaving a gap.
+      final row = await CounterStore.whileCreating(counters, () async {
+        if (parent.isNotEmpty) await ops.ensureFolder(parent);
+        return await ops.createNote(
+          parentPath: parent,
+          name: name,
+          content: rendered.text,
+        );
+      });
       await counters?.save();
       _log.info('journal: made ${journalDayLabel(day)} (${row.path})');
       onCreated(row.path, rendered.caret);

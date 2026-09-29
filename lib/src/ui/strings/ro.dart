@@ -144,11 +144,7 @@ final class RomanianStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotecă';
-  @override
   String get settingsSectionReminders => 'Mementouri';
-  @override
-  String get settingsSectionShortcuts => 'Tastatură';
   @override
   String get keyboardShortcutsTitle => 'Scurtături de tastatură';
 
@@ -192,8 +188,6 @@ final class RomanianStrings extends Strings {
   String updateSavedTo(Object path) => 'Actualizare salvată în $path';
   @override
   String get updateInstallerStarted => 'Programul de instalare a pornit';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostic';
   @override
   String get settingsSpellCheckTitle => 'Verificarea ortografiei';
   @override
@@ -250,8 +244,6 @@ final class RomanianStrings extends Strings {
   String get themeBrightnessNight => 'Întunecat';
   @override
   String get themeTitle => 'Temă';
-  @override
-  String get themeSubtitle => 'Culorile interfeței și ale notei';
   @override
   String get themePaletteSystem => 'Sistem';
   // Settings: the themes page (issue #269).
@@ -330,16 +322,17 @@ final class RomanianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editorul și previzualizarea, mereu de acord';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Fontul editorului de sursă';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Fontul în care este așezat panoul sursă; previzualizarea păstrează '
+      'fontul notei';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monospațiat';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Fără serife';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Cu serife';
   @override
   String get epubLookTitle => 'Aspectul cărților';
   @override
@@ -464,7 +457,7 @@ final class RomanianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Se salvează…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audio-ul nu a putut fi redat';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -527,7 +520,7 @@ final class RomanianStrings extends Strings {
   @override
   String wordCount(int count) => count == 1
       ? '1 cuvânt'
-      : count % 100 >= 20 || count == 0
+      : count % 100 >= 20 || count % 100 == 0
       ? '$count de cuvinte'
       : '$count cuvinte';
   @override
@@ -609,10 +602,6 @@ final class RomanianStrings extends Strings {
   String get cheatsheetCopied => 'Copiat';
   @override
   String get cheatsheetInsert => 'Inserează în notă';
-  @override
-  String get cheatsheetWritten => 'Scris';
-  @override
-  String get cheatsheetShown => 'Afișat';
   @override
   String get cheatHeadings => 'Titluri';
   @override
@@ -757,8 +746,6 @@ final class RomanianStrings extends Strings {
   @override
   String get showEditorTooltip => 'Afișează editorul';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(tabel HTML brut)';
 
   // Search (T-M3-05).
   @override
@@ -1010,8 +997,6 @@ final class RomanianStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Fără prioritate';
-  @override
   String get todoNoPriorityShort => 'Niciuna';
   @override
   String get todoMorePriorities => 'Mai multe…';
@@ -1106,9 +1091,9 @@ final class RomanianStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Ascunde panoul lateral (Ctrl+B)';
+  String get hideSidebarTooltip => 'Ascunde panoul lateral';
   @override
-  String get showSidebarTooltip => 'Afișează panoul lateral (Ctrl+B)';
+  String get showSidebarTooltip => 'Afișează panoul lateral';
   @override
   String get windowMinimizeTooltip => 'Minimizează';
   @override
@@ -1144,7 +1129,7 @@ final class RomanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Închide';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Acțiunea nu a putut fi finalizată';
   @override
   String get newFolderTitle => 'Dosar nou';
   @override
@@ -1171,8 +1156,6 @@ final class RomanianStrings extends Strings {
   @override
   String get currentQuickNote => 'Notă rapidă curentă';
   @override
-  String get pinnedSection => 'Fixate';
-  @override
   String pinnedSectionCount(int count) => 'Fixate · $count';
   @override
   String get templateFolderTitle => 'Dosar de șabloane';
@@ -1181,7 +1164,7 @@ final class RomanianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nouă din șablon aici';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Șablonul nu a putut fi deschis';
   @override
   String get templateFormTitle => 'Completează șablonul';
   @override
@@ -1347,39 +1330,39 @@ final class RomanianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” este înfipt prea adânc';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Proprietăți';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML brut';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Câmpuri';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Adaugă o proprietate';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Proprietate nouă';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Editează proprietatea';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Cheie';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Valoare';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tip';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separă elementele prin virgule';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Elimină proprietatea';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Nicio proprietate';
   @override
   String get frontmatterTypeText => 'text';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'număr';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dată';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logic';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'listă';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter necitit: $reason';
   @override
@@ -1589,7 +1572,7 @@ final class RomanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importă exportul Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Exportul din Notion nu a putut fi importat';
   @override
   String dropRejected(String names) =>
       'Aici se deschid doar fișiere Markdown și dosare: $names';
@@ -1759,8 +1742,6 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutRedo => 'Refă';
   @override
-  String get shortcutChange => 'Schimbă scurtătura';
-  @override
   String shortcutCaptureTitle(String command) => 'Taste pentru $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1861,9 +1842,9 @@ final class RomanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Șterge permanent';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Nota nu a putut fi restaurată sau ștearsă';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Coșul nu a putut fi golit';
 
   // The open/create library screen.
   @override
@@ -1946,15 +1927,13 @@ final class RomanianStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Setări';
-  @override
   String get libraryPathTitle => 'Calea bibliotecii';
   @override
   String get reindexTitle => 'Reindexează acum';
   @override
   String get reindexDone => 'Reindexare finalizată';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteca nu a putut fi recitită';
   @override
   String get closeLibraryTitle => 'Închide biblioteca';
   @override
@@ -1986,20 +1965,23 @@ final class RomanianStrings extends Strings {
       'Nicio potrivire exactă de cuvânt întreg pentru „$term”'
       '${only == null ? ' a fost găsită' : ' a fost găsită în $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'toată biblioteca';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'în $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count == 1
+      ? 'în 1 notă'
+      : count % 100 == 0 || count % 100 >= 20
+      ? 'în $count de note'
+      : 'în $count note';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 notă nu a putut fi scrisă)'
+      : count % 100 == 0 || count % 100 >= 20
+      ? ' ($count de note nu au putut fi scrise)'
+      : ' ($count note nu au putut fi scrise)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Despre';
   @override
   String get versionTitle => 'Versiune';
   @override
@@ -2056,7 +2038,7 @@ final class RomanianStrings extends Strings {
   @override
   String get historyOff =>
       'Istoricul este dezactivat pentru această bibliotecă '
-      '(Setări, Bibliotecă).';
+      '(Setări, Coș și cronologie).';
   @override
   String get historyLoadFailed => 'Istoricul nu a putut fi citit';
   @override
@@ -2346,34 +2328,34 @@ final class RomanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testul nu a reușit';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certificatul nu este de încredere';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certificatul nu poate fi verificat. Ai încredere în el doar dacă '
+      'amprenta lui se potrivește cu cea arătată de server.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Ai încredere în acest certificat?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certificatul pentru $host nu poate fi verificat.\n\nAmprentă '
+      'SHA-256:\n$fingerprint\n\nAi încredere în el doar dacă este '
+      'certificatul așteptat. Niman acceptă doar acest certificat pentru '
+      'această destinație și niciun altul.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Ai încredere în acest certificat';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificat de încredere';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Uităm acest certificat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Această destinație este testată din nou împotriva depozitului de '
+      'certificate al dispozitivului, iar un certificat auto-semnat va trebui '
+      'confirmat încă o dată. Nimic altceva nu se schimbă.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Uită';
   @override
   String get syncNowAction => 'Sincronizează acum';
   @override
@@ -2494,10 +2476,6 @@ final class RomanianStrings extends Strings {
   String get syncRetryAction => 'Încearcă din nou';
   @override
   String get syncOpenSettingsAction => 'Setări';
-  @override
-  String get syncCloseAction => 'Închide';
-  @override
-  String get syncDoneSnack => 'Sincronizată';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Sincronizată · 1 fișier șters în altă parte este în coș'
@@ -2845,4 +2823,93 @@ final class RomanianStrings extends Strings {
     }
     return '$count de probleme în acest șablon';
   }
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Titluri în $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Locuri în $named';
+  @override
+  String get wikilinkThisNote => 'această notă';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Niciun titlu nu corespunde cu “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Nicio notă nu corespunde cu “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'această notă nu are niciun titlu cu acest nume';
+  @override
+  String get wikilinkNoNote =>
+      'nimic din bibliotecă nu are acest nume sau alias';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'O pagină se alege, nu se numește dintr-o listă: scrie numărul ei.';
+  @override
+  String get wikilinkFooterMove => 'mută';
+  @override
+  String get wikilinkFooterOr => 'sau';
+  @override
+  String get wikilinkFooterInsert => 'inserează';
+  @override
+  String get wikilinkFooterClose => 'închide';
+  @override
+  String get suggesterPageHint => 'scrie un număr';
+  @override
+  String get suggesterChapterHint => 'numește un fișier din carte';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'acolade deschise fără închidere: nimic nu închide acest substituent';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'substituent gol: nu există niciun nume între acolade';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'substituent necunoscut “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” nu are etichetă: nu întreabă nimic, iar substituentul rămâne pe '
+      'loc';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” nu are nume: nu numără nimic, iar substituentul rămâne pe loc';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” nu acceptă filtre: cursorul nu este plasat, iar substituentul '
+      'rămâne pe loc';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'ghilimea neînchisă în formatul de dată: tot ce urmează este citit ca '
+      'text obișnuit';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'token de dată necunoscut “$token”';
+  @override
+  String get templateProblemEmptyFilter =>
+      'filtru gol: nu există niciun nume după “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” mută o dată: doar $formats acceptă o mutare, și doar înaintea '
+      'oricărui alt filtru';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” nu este o mutare de dată: o mutare este un număr și o '
+      'unitate, '
+      'ca “+7d” sau “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” se aliniază la $units, nu la “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” are nevoie de un număr pentru lățime, iar “$argument” nu este '
+      'unul';
+  @override
+  String templateProblemUnknownFilter(String name) =>
+      'filtru necunoscut “$name”';
 }

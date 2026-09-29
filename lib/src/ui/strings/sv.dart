@@ -141,11 +141,7 @@ final class SwedishStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Bibliotek';
-  @override
   String get settingsSectionReminders => 'Påminnelser';
-  @override
-  String get settingsSectionShortcuts => 'Tangentbord';
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
 
@@ -189,8 +185,6 @@ final class SwedishStrings extends Strings {
   String updateSavedTo(Object path) => 'Uppdateringen sparades i $path';
   @override
   String get updateInstallerStarted => 'Installationsprogrammet har startats';
-  @override
-  String get settingsSectionDiagnostics => 'Diagnostik';
   @override
   String get settingsSpellCheckTitle => 'Stavkontroll';
   @override
@@ -247,8 +241,6 @@ final class SwedishStrings extends Strings {
   String get themeBrightnessNight => 'Mörk';
   @override
   String get themeTitle => 'Tema';
-  @override
-  String get themeSubtitle => 'Färgerna i gränssnittet och i anteckningen';
   @override
   String get themePaletteSystem => 'System';
   // Settings: the themes page (issue #269).
@@ -326,16 +318,17 @@ final class SwedishStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editorn och förhandsvisningen, som alltid håller ihop';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Källkodredigerarens typsnitt';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Typsnittet som källkodsrutan är satt i; förhandsvisningen behåller '
+      'anteckningens eget';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Fast bredd';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Utan seriffer';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Med seriffer';
   @override
   String get epubLookTitle => 'Böckernas utseende';
   @override
@@ -460,7 +453,7 @@ final class SwedishStrings extends Strings {
   @override
   String get audioSavingRecording => 'Sparar…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Ljudet kunde inte spelas upp';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -602,10 +595,6 @@ final class SwedishStrings extends Strings {
   String get cheatsheetCopied => 'Kopierat';
   @override
   String get cheatsheetInsert => 'Infoga i anteckningen';
-  @override
-  String get cheatsheetWritten => 'Skrivet';
-  @override
-  String get cheatsheetShown => 'Visat';
   @override
   String get cheatHeadings => 'Rubriker';
   @override
@@ -750,8 +739,6 @@ final class SwedishStrings extends Strings {
   @override
   String get showEditorTooltip => 'Visa editor';
   // Raw-HTML table fallback.
-  @override
-  String get htmlTableFallback => '(rå HTML-tabell)';
 
   // Search (T-M3-05).
   @override
@@ -1001,8 +988,6 @@ final class SwedishStrings extends Strings {
 
   // Task dialog pickers (T-TD-06).
   @override
-  String get todoNoPriority => 'Ingen prioritet';
-  @override
   String get todoNoPriorityShort => 'Ingen';
   @override
   String get todoMorePriorities => 'Fler…';
@@ -1097,9 +1082,9 @@ final class SwedishStrings extends Strings {
 
   // The shell: app bar, tabs and tree actions.
   @override
-  String get hideSidebarTooltip => 'Dölj sidopanelen (Ctrl+B)';
+  String get hideSidebarTooltip => 'Dölj sidopanelen';
   @override
-  String get showSidebarTooltip => 'Visa sidopanelen (Ctrl+B)';
+  String get showSidebarTooltip => 'Visa sidopanelen';
   @override
   String get windowMinimizeTooltip => 'Minimera';
   @override
@@ -1135,7 +1120,7 @@ final class SwedishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Stäng';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Åtgärden kunde inte slutföras';
   @override
   String get newFolderTitle => 'Ny mapp';
   @override
@@ -1161,8 +1146,6 @@ final class SwedishStrings extends Strings {
   @override
   String get currentQuickNote => 'Aktuell snabbanteckning';
   @override
-  String get pinnedSection => 'Fästa';
-  @override
   String pinnedSectionCount(int count) => 'Fästa · $count';
   @override
   String get templateFolderTitle => 'Mallmapp';
@@ -1171,7 +1154,7 @@ final class SwedishStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Ny från mall här';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Mallen kunde inte öppnas';
   @override
   String get templateFormTitle => 'Fyll i mallen';
   @override
@@ -1340,39 +1323,39 @@ final class SwedishStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” är för djupt nästlad';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Egenskaper';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Rå YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Fält';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Lägg till en egenskap';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ny egenskap';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Redigera egenskap';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Nyckel';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Värde';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Typ';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separera poster med kommatecken';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Ta bort egenskap';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Inga egenskaper';
   @override
   String get frontmatterTypeText => 'text';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'tal';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleskt';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lista';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter inte läst: $reason';
   @override
@@ -1582,7 +1565,7 @@ final class SwedishStrings extends Strings {
   @override
   String get notionImportTitle => 'Importera Notion-export';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-exporten kunde inte importeras';
   @override
   String dropRejected(String names) =>
       'Här öppnas bara Markdown-filer och mappar: $names';
@@ -1751,8 +1734,6 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutRedo => 'Gör om';
   @override
-  String get shortcutChange => 'Ändra kortkommandot';
-  @override
   String shortcutCaptureTitle(String command) => 'Tangenter för $command';
   @override
   String shortcutConflict(String keys, String other) =>
@@ -1854,9 +1835,10 @@ final class SwedishStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Radera permanent';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Anteckningen kunde inte återställas eller tas bort';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Papperskorgen kunde inte tömmas';
 
   // The open/create library screen.
   @override
@@ -1939,15 +1921,13 @@ final class SwedishStrings extends Strings {
 
   // Settings screen rows and messages.
   @override
-  String get settingsTitle => 'Inställningar';
-  @override
   String get libraryPathTitle => 'Bibliotekspath';
   @override
   String get reindexTitle => 'Indexera om nu';
   @override
   String get reindexDone => 'Omindexering klar';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteket kunde inte läsas igen';
   @override
   String get closeLibraryTitle => 'Stäng biblioteket';
   @override
@@ -1980,20 +1960,18 @@ final class SwedishStrings extends Strings {
       'Ingen exakt helt-ord-träff på “$term” '
       '${only == null ? 'hittades' : 'hittad i $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'hela biblioteket';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'i $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'i 1 anteckning' : 'i $count anteckningar';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 anteckning kunde inte skrivas)'
+      : ' ($count anteckningar kunde inte skrivas)';
 
   // About (issue #80).
-  @override
-  String get settingsSectionAbout => 'Om';
   @override
   String get versionTitle => 'Version';
   @override
@@ -2042,7 +2020,7 @@ final class SwedishStrings extends Strings {
   @override
   String get historyOff =>
       'Historiken är avstängd för det här biblioteket '
-      '(Inställningar, Bibliotek).';
+      '(Inställningar, Papperskorgen och kronologi).';
   @override
   String get historyLoadFailed => 'Kunde inte läsa historiken';
   @override
@@ -2329,34 +2307,35 @@ final class SwedishStrings extends Strings {
   @override
   String get syncTestFailed => 'Testet fungerade inte';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikatet är inte betrott';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikatet kan inte verifieras. Lita bara på det om dess '
+      'fingeravtryck stämmer med det servern visar.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Lita på detta certifikat?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikatet för $host kan inte '
+      'verifieras.\n\nSHA-256-fingeravtryck:\n$fingerprint\n\nLita på '
+      'det bara om det är certifikatet du förväntar dig. Niman '
+      'accepterar bara det här certifikatet för den här destinationen, '
+      'och inga andra.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Lita på detta certifikat';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikatet är betrott';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Glöm detta certifikat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Den här destinationen testas mot enhetens certifikatarkiv igen, och ett '
+      'självsignerat certifikat måste bekräftas en gång till. Inget annat '
+      'ändras.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Glöm';
   @override
   String get syncNowAction => 'Synka nu';
   @override
@@ -2475,10 +2454,6 @@ final class SwedishStrings extends Strings {
   String get syncRetryAction => 'Försök igen';
   @override
   String get syncOpenSettingsAction => 'Inställningar';
-  @override
-  String get syncCloseAction => 'Stäng';
-  @override
-  String get syncDoneSnack => 'Synkat';
   @override
   String syncTrashedSnack(int count) => count == 1
       ? 'Synkat · 1 fil som tagits bort på annat håll ligger i '
@@ -2809,4 +2784,91 @@ final class SwedishStrings extends Strings {
   String templateProblems(int count) => count == 1
       ? '1 problem i den här mallen'
       : '$count problem i den här mallen';
+  // The wikilink panel (#475) and the two book forms it offers after `#`.
+
+  @override
+  String wikilinkHeadingsIn(String named) => 'Rubriker i $named';
+  @override
+  String wikilinkPlacesIn(String named) => 'Platser i $named';
+  @override
+  String get wikilinkThisNote => 'den här anteckningen';
+  @override
+  String wikilinkNoMatchHeading(String query) =>
+      'Ingen rubrik matchar “$query”.';
+  @override
+  String wikilinkNoMatchNote(String query) =>
+      'Ingen anteckning matchar “$query”.';
+  @override
+  String get wikilinkNoHeading =>
+      'den här anteckningen har ingen rubrik med det namnet';
+  @override
+  String get wikilinkNoNote =>
+      'inget i biblioteket har det namnet eller aliaset';
+  @override
+  String wikilinkAlias(String alias) => 'alias $alias';
+  @override
+  String get wikilinkBookNote =>
+      'En sida väljs, den namnges inte i en lista: skriv dess nummer.';
+  @override
+  String get wikilinkFooterMove => 'flytta';
+  @override
+  String get wikilinkFooterOr => 'eller';
+  @override
+  String get wikilinkFooterInsert => 'infoga';
+  @override
+  String get wikilinkFooterClose => 'stäng';
+  @override
+  String get suggesterPageHint => 'skriv ett nummer';
+  @override
+  String get suggesterChapterHint => 'namnge en fil i boken';
+
+  // What the template checker found, as the hint writes it (T-TPL-09).
+
+  @override
+  String get templateProblemUnclosedBraces =>
+      'öppnade klammerparenteser utan slut: inget stänger den här '
+      'platshållaren';
+  @override
+  String get templateProblemEmptyPlaceholder =>
+      'tom platshållare: inget namn mellan klammerparenteserna';
+  @override
+  String templateProblemUnknownPlaceholder(String name) =>
+      'okänd platshållare “$name”';
+  @override
+  String templateProblemAskNoLabel(String name) =>
+      '“$name” har ingen etikett: den frågar inget, och platshållaren står '
+      'kvar';
+  @override
+  String templateProblemCounterNoName(String name) =>
+      '“$name” har inget namn: den räknar inget, och platshållaren står kvar';
+  @override
+  String templateProblemCursorFilters(String name) =>
+      '“$name” tar inga filter: markören placeras inte, och platshållaren står '
+      'kvar';
+  @override
+  String get templateProblemUnclosedQuote =>
+      'ostängt citattecken i datumformatet: allt efter det läses som vanlig '
+      'text';
+  @override
+  String templateProblemUnknownDateToken(String token) =>
+      'okänd datumtoken “$token”';
+  @override
+  String get templateProblemEmptyFilter => 'tomt filter: inget namn efter “|”';
+  @override
+  String templateProblemDateMove(String filter, String formats) =>
+      '“$filter” flyttar ett datum: bara $formats tar en förskjutning, och '
+      'bara '
+      'före varje annat filter';
+  @override
+  String templateProblemNotADateMove(String filter) =>
+      '“$filter” är ingen datumförskjutning: en förskjutning är ett antal och '
+      'en enhet, som “+7d” eller “-1w”';
+  @override
+  String templateProblemSnapUnit(String filter, String units, String unit) =>
+      '“$filter” ställer in på $units, inte “$unit”';
+  @override
+  String templateProblemPadWidth(String filter, String argument) =>
+      '“$filter” behöver ett tal för sin bredd, och “$argument” är inget';
+  @override
+  String templateProblemUnknownFilter(String name) => 'okänt filter “$name”';
 }
