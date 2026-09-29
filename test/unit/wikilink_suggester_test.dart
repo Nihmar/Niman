@@ -3,6 +3,9 @@
 // a walk of the tree), a named note's headings through the session's own
 // read of it (once per revision, #491), and a book's place form from the
 // target itself.
+import 'dart:async';
+import 'dart:io';
+
 import 'package:drift/drift.dart'
     show ApplyInterceptor, InsertMode, QueryExecutor, QueryInterceptor, Value;
 import 'package:drift/native.dart';
@@ -237,6 +240,63 @@ void main() {
     );
     expect(await suggester.headings('Novel'), hasLength(2));
     expect(reads, ['Novel.md', 'Novel.md'], reason: 'a new revision re-reads');
+  });
+
+  // A note that reads slowly is still being read when the next key lands:
+  // each key after `#` asks for the same list, and the read of a novel is the
+  // cost, so the ones that arrive while it runs wait for it (#491).
+  test('keys typed while a note is read share that read', () async {
+    await addNote('Novel.md', stems: ['novel']);
+    final reads = <String>[];
+    final gate = Completer<List<String>>();
+    final suggester = IndexWikilinkSuggester(
+      db,
+      readHeadings: (path) {
+        reads.add(path);
+        return gate.future;
+      },
+    );
+    counter.reset();
+
+    final asked = [
+      for (var key = 0; key < 5; key++) suggester.headings('Novel'),
+    ];
+    // Every ask has named its note (two SELECTs each) and is past the check
+    // for a read already going; only now does the read finish.
+    while (counter.statements.length < 10) {
+      await pumpEventQueue(times: 1);
+    }
+    await pumpEventQueue();
+    gate.complete(const ['Chapter 1', 'Chapter 2']);
+
+    for (final headings in await Future.wait(asked)) {
+      expect(headings.map((h) => h.heading), ['Chapter 1', 'Chapter 2']);
+    }
+    expect(reads, ['Novel.md'], reason: 'one read answers the whole run');
+    expect((await suggester.headings('Novel')).map((h) => h.heading), [
+      'Chapter 1',
+      'Chapter 2',
+    ], reason: 'and it is kept once it lands');
+    expect(reads, hasLength(1));
+  });
+
+  test('a read that fails is not kept, the next key reads again', () async {
+    await addNote('Novel.md', stems: ['novel']);
+    var reads = 0;
+    final suggester = IndexWikilinkSuggester(
+      db,
+      readHeadings: (path) async {
+        if (++reads == 1) throw const FileSystemException('gone');
+        return const ['Chapter 1'];
+      },
+    );
+
+    await expectLater(
+      suggester.headings('Novel'),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect(await suggester.headings('Novel'), hasLength(1));
+    expect(reads, 2);
   });
 
   test('a target that names nothing suggests no heading', () async {

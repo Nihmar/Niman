@@ -10,6 +10,7 @@
 /// to fill the panel.
 library;
 
+import 'dart:async' show unawaited;
 import 'dart:math' show min;
 
 import 'package:drift/drift.dart';
@@ -123,6 +124,11 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   /// revision (its mtime and size, as the index records it) can make the
   /// list stale.
   final Map<(int, DateTime, int), List<HeadingSuggestion>> _headingsByNote = {};
+
+  /// The reads under way, by the same key: what a key typed while one runs
+  /// waits for instead of starting another.
+  final Map<(int, DateTime, int), Future<List<HeadingSuggestion>>> _reading =
+      {};
 
   /// How many notes' headings are kept. More than the run of keystrokes
   /// needs, so moving between a few targets does not re-read; bounded, so a
@@ -365,14 +371,32 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
     final key = (note.id, note.modified, note.size);
     final kept = _headingsByNote[key];
     if (kept != null) return kept;
-    final texts = await readHeadings(note.path);
-    if (texts == null) return const <HeadingSuggestion>[];
-    final rows = [for (final text in texts) HeadingSuggestion(text)];
-    if (_headingsByNote.length >= _headingCacheNotes) {
-      _headingsByNote.remove(_headingsByNote.keys.first);
+    // A read under way answers every ask for the same revision that comes
+    // before it lands: a slow note is still being read when the next key
+    // does, and the keys would each start a read of their own.
+    final reading = _reading[key] ??= _read(key, note.path);
+    return await reading;
+  }
+
+  /// One read of the note at [path], kept under [key] once it lands and
+  /// forgotten as a read under way however it ends. Empty when the note is
+  /// gone, which is not kept: it may come back.
+  Future<List<HeadingSuggestion>> _read(
+    (int, DateTime, int) key,
+    String path,
+  ) async {
+    try {
+      final texts = await readHeadings(path);
+      if (texts == null) return const <HeadingSuggestion>[];
+      final rows = [for (final text in texts) HeadingSuggestion(text)];
+      if (_headingsByNote.length >= _headingCacheNotes) {
+        _headingsByNote.remove(_headingsByNote.keys.first);
+      }
+      _headingsByNote[key] = rows;
+      return rows;
+    } finally {
+      unawaited(_reading.remove(key));
     }
-    _headingsByNote[key] = rows;
-    return rows;
   }
 
   @override
