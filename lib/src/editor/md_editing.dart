@@ -519,14 +519,19 @@ final RegExp _bareListItem = RegExp(r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]*$');
 
 /// A task box's state character, anywhere a list marker is followed by one:
 /// the space of `- [ ] `, the `x` of `- [x] `, without needing the trailing
-/// space `_listItem` wants.
+/// space `_listItem` wants — behind any quote marks the line opens with, each
+/// `>` with up to three spaces before it and one after.
 final RegExp _taskBoxState = RegExp(
-  r'^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+\[([ xX])\]',
+  r'^(?: {0,3}> ?)*[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+\[([ xX])\]',
 );
 
 /// The offset of the state character of the task box on [line] — the space
 /// of `- [ ] `, the `x` of `- [x] ` — or null when the line is not a task
 /// item.
+///
+/// The line's quote marks are passed over: a task item in a quote or a
+/// callout has its box behind them, and every caller — the read view's tick,
+/// the checklist cascade — hands over the raw line.
 ///
 /// Line-local, like [listItemHead]: the caller knows whether the line is
 /// inside a code fence.

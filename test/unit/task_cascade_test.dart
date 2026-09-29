@@ -32,6 +32,15 @@ void main() {
       expect(taskBoxOffset('- [x]'), 3);
     });
 
+    test('finds the box behind the quote marks', () {
+      // The read view hands over the raw line of a quoted task item.
+      expect(taskBoxOffset('> - [ ] quoted'), 5);
+      expect(taskBoxOffset('>- [x] tight'), 4);
+      expect(taskBoxOffset('> > 1. [ ] deeper'), 8);
+      expect(taskBoxOffset('   >   - [ ] indented'), 10);
+      expect(taskBoxOffset('> plain [ ] text'), isNull);
+    });
+
     test('is null off a task box', () {
       expect(taskBoxOffset('- plain'), isNull);
       expect(taskBoxOffset('a [ ] text'), isNull);

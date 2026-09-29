@@ -117,7 +117,7 @@ List<Block> _quotedItems(SourceBuffer buffer, Block quote) {
   for (final item in branch) {
     final at = item.startLine - first;
     if (at < 0 || at >= lines.length) continue;
-    final box = _boxOffset(lines[at], item.quoteDepth);
+    final box = taskBoxOffset(lines[at]);
     if (box == null) continue;
     final want = ticked ? 'x' : ' ';
     if (lines[at].codeUnitAt(box) == want.codeUnitAt(0)) continue;
@@ -126,17 +126,6 @@ List<Block> _quotedItems(SourceBuffer buffer, Block quote) {
   }
   if (!changed) return null;
   return (start: start, end: end, text: lines.join('\n'));
-}
-
-/// The offset of the task box's state character on [line], its [quoteDepth]
-/// quote marks passed over — a box inside a quote stands behind syntax that is
-/// not the item's own.
-int? _boxOffset(String line, int quoteDepth) {
-  final prefix = quoteDepth <= 0
-      ? 0
-      : BlockParser.quotePrefixLength(line, quoteDepth);
-  final box = taskBoxOffset(line.substring(prefix));
-  return box == null ? null : prefix + box;
 }
 
 /// The index of the block covering [line], by [Block.startLine] order.
