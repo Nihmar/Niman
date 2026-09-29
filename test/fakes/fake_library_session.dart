@@ -308,7 +308,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     // a second tap landing mid-run).
     final gate = rebuildGate;
     if (gate != null) await gate.future;
+    final error = rebuildError;
+    if (error != null) throw error;
   }
+
+  /// Set to make [rebuildIndex] fail once its gate, if any, is open.
+  Exception? rebuildError;
 
   /// How many times the index was rebuilt on request (#368).
   int indexRebuilds = 0;

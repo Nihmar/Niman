@@ -240,9 +240,11 @@ final class _RebuildIndexTileState extends State<_RebuildIndexTile> {
             .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
       }
     } on Object catch (error) {
+      const AppLogger(name: 'maintenance')
+          .error('index rebuild failed: $error');
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+            .showSnackBar(SnackBar(content: Text(AppStrings.reindexFailed)));
       }
     } finally {
       if (mounted) setState(() => _rebuilding = false);
