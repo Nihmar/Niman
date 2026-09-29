@@ -179,6 +179,31 @@ void main() {
       },
     );
 
+    test('a staged delete that hangs does not stall the copy (#492)', () async {
+      // After the staged rename is given up on, the staged file goes, and the
+      // abandoned rename may still hold it on Windows: a delete that waits on
+      // that hangs the swap as the rename did. It gets the same grace, and a
+      // temp it could not remove is left where it is.
+      final target = p.join(root.path, 'clip.wav');
+      final source = await temp('.clip.wav.niman-tmp-copy-8', 'audio bytes');
+      var deleteAsked = false;
+
+      await copyFileOver(
+        target,
+        source,
+        grace: const Duration(milliseconds: 50),
+        renameStaged: (staged, abs) => Completer<void>().future,
+        deleteStaged: (staged) {
+          deleteAsked = true;
+          return Completer<void>().future; // never returns
+        },
+      ).timeout(const Duration(seconds: 5));
+
+      expect(deleteAsked, isTrue);
+      expect(File(target).readAsStringSync(), 'audio bytes');
+      expect(File(source).existsSync(), isFalse);
+    });
+
     test('a copy that fails leaves the live file exactly as it was', () async {
       final target = p.join(root.path, 'clip.wav');
       final before = Uint8List(1 << 16)..fillRange(0, 1 << 16, 0x61);

@@ -546,7 +546,10 @@ Future<void> _renameOrCopy(String abs, String tempAbs) async {
 /// past it the bytes go straight onto [abs]: the rename this function
 /// stands in for hangs on Windows (issue #103), and the staged one is a
 /// rename too (#492). [renameStaged] and [grace] are seams for a test that
-/// hangs the staged rename without waiting the real grace out.
+/// hangs the staged rename without waiting the real grace out. Every delete
+/// the copy makes gets that grace too — the abandoned rename may hold the
+/// staged file, and a delete that waits on it would stall the run the same
+/// way; [deleteStaged] is the seam for a delete that hangs.
 ///
 /// A temp that will not delete is left where it is. The abandoned rename
 /// may still hold it; it is hidden, the indexer skips it, and the bytes
@@ -557,12 +560,14 @@ Future<void> copyFileOver(
   String tempAbs, {
   Duration grace = _renameGrace,
   Future<void> Function(File staged, String abs)? renameStaged,
+  Future<void> Function(File staged)? deleteStaged,
 }) async {
   const log = AppLogger(name: 'swap');
   final name = p.basename(abs);
   final expected = (await FileStat.stat(tempAbs)).size;
   final rename =
       renameStaged ?? (File staged, String target) => staged.rename(target);
+  final delete = deleteStaged ?? (File staged) => staged.delete();
   final staged = atomicTempPath(
     File(abs),
     DateTime.now().microsecondsSinceEpoch,
@@ -582,9 +587,10 @@ Future<void> copyFileOver(
       );
       await File(staged.path).copy(abs);
       try {
-        await staged.delete();
-      } on FileSystemException {
-        // The abandoned rename may still hold it.
+        await delete(staged).timeout(grace);
+      } on Object {
+        // The abandoned rename may still hold it: a delete that fails, or
+        // does not return, leaves a hidden temp the indexer skips.
       }
     }
   } on Object {
@@ -592,16 +598,16 @@ Future<void> copyFileOver(
     // [abs] holding exactly the bytes it held before (issue #369).
     if (staged.existsSync()) {
       try {
-        await staged.delete();
-      } on FileSystemException {
-        // Already gone. Nothing to tidy.
+        await delete(staged).timeout(grace);
+      } on Object {
+        // Already gone, or held by the abandoned rename. Nothing to tidy.
       }
     }
     rethrow;
   }
   log.warning('"$name": copied $expected bytes in place');
   try {
-    await File(tempAbs).delete().timeout(_renameGrace);
+    await File(tempAbs).delete().timeout(grace);
   } on Object catch (error) {
     log.warning('"$name": the temp could not be removed: $error');
   }
