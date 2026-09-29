@@ -553,42 +553,23 @@ final class LiveTables {
     return null;
   }
 
-  /// The ranges of [text]'s cells' text, trimmed: what is between its
-  /// pipes, as the read view reads them — a pipe at either end is the
-  /// row's edge, not a cell's, an escaped pipe (`\|`) is a cell's text
-  /// rather than an edge (`block_view.dart`'s `_tableRows`), and an empty
-  /// cell's text starts past its pipe.
+  /// The ranges of [text]'s cells' text, trimmed: the cells the table model
+  /// splits the row into (`MarkdownTable.cellRangesOf`) — a pipe at either
+  /// end is the row's edge, not a cell's, and an escaped pipe (`\|`) is a
+  /// cell's text rather than an edge, `| a \| b | c |` two cells, not three
+  /// (#361) — so live draws the cells an edit works on, trimmed as the
+  /// model trims them. An empty cell's text starts past its pipe.
   static List<(int, int)> cellsOf(String text) {
-    var start = 0;
-    var end = text.length;
-    while (start < end && _space(text.codeUnitAt(start))) {
-      start++;
-    }
-    while (end > start && _space(text.codeUnitAt(end - 1))) {
-      end--;
-    }
-    if (start < end && text.codeUnitAt(start) == 0x7C) start++;
-    if (end > start && text.codeUnitAt(end - 1) == 0x7C) end--;
     final cells = <(int, int)>[];
-    var from = start;
-    for (var at = start; at <= end; at++) {
-      // A pipe splits the row unless it is escaped, as the read view splits
-      // it: `| a \| b | c |` is two cells, not three (#361).
-      if (at < end &&
-          (text.codeUnitAt(at) != 0x7C ||
-              (at > 0 && text.codeUnitAt(at - 1) == 0x5C))) {
+    for (final (from, to) in MarkdownTable.cellRangesOf(text)) {
+      final cell = text.substring(from, to);
+      final trimmed = cell.trim();
+      if (trimmed.isEmpty) {
+        cells.add((from, from));
         continue;
       }
-      var left = from;
-      var right = at;
-      while (left < right && _space(text.codeUnitAt(left))) {
-        left++;
-      }
-      while (right > left && _space(text.codeUnitAt(right - 1))) {
-        right--;
-      }
-      cells.add(left == right ? (from, from) : (left, right));
-      from = at + 1;
+      final left = from + cell.length - cell.trimLeft().length;
+      cells.add((left, left + trimmed.length));
     }
     return cells;
   }

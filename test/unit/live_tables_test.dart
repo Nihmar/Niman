@@ -9,6 +9,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/table/markdown_table.dart';
 
 /// The note the tests lay out: a two-column table whose first cell is longer
 /// than any phone pane.
@@ -107,6 +108,35 @@ void main() {
     final first = narrow.edges[1] - narrow.edges[0];
     final rest = narrow.edges.last - narrow.edges[1];
     expect(first, greaterThan(rest), reason: 'the long column got more room');
+  });
+
+  test('live splits a row into the cells the table model does', () {
+    // One rule for where a row's cells are: live draws and measures the
+    // cells the table model edits and pads, an escaped pipe at the row's
+    // end included — it is the last cell's text, not the row's edge.
+    const rows = <String>[
+      r'| a | b \|',
+      r'| a | b \| |',
+      r'| a \| b | c |',
+      r'a | b \\|',
+      '| a |  | c |',
+      'a | b',
+      '|a|b|',
+      '| a | b | ',
+      '| a | b |',
+      '',
+      '   ',
+    ];
+    for (final row in rows) {
+      expect(
+        <String>[
+          for (final (start, end) in LiveTables.cellsOf(row))
+            row.substring(start, end),
+        ],
+        <String>[for (final cell in MarkdownTable.splitRow(row)) cell.trim()],
+        reason: row,
+      );
+    }
   });
 
   testWidgets('a cell with hidden marks wraps between its words', (
