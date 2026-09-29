@@ -13,6 +13,14 @@ import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:path/path.dart' as p;
 
+/// [text] as a UTF-16LE note, BOM included: a file the editor refuses as
+/// binary (`looksBinary`), which the index keeps as a `.md` all the same.
+List<int> _utf16le(String text) => <int>[
+  0xFF,
+  0xFE,
+  for (final unit in text.codeUnits) ...<int>[unit & 0xFF, unit >> 8],
+];
+
 void main() {
   late Directory root;
   late IndexDatabase db;
@@ -194,6 +202,36 @@ void main() {
       expect(report.notesChanged, 1);
       expect(await file('latin1.md').readAsBytes(), utf8.encode('dog café\n'));
     });
+
+    // The editor refuses a UTF-16 note as "not text" (`looksBinary`); the
+    // index and this run used to read it leniently all the same, and a
+    // replace wrote Windows-1252 mojibake back over it (#496).
+    test(
+      'a note that looks binary is left alone and reported failed',
+      () async {
+        final bytes = _utf16le('a cat\n');
+        await file('utf16.md').writeAsBytes(bytes);
+
+        final preview = await replace.previewMatches(
+          'a',
+          caseSensitive: false,
+          onlyPath: 'utf16.md',
+        );
+        expect(preview, isEmpty, reason: 'a binary note is not a match');
+
+        final report = await replace.replaceAll(
+          term: 'a',
+          replacement: 'Z',
+          caseSensitive: false,
+          only: {'utf16.md'},
+        );
+        expect(report.notesScanned, 1);
+        expect(report.occurrences, 0);
+        expect(report.notesChanged, 0);
+        expect(report.failed, ['utf16.md']);
+        expect(await file('utf16.md').readAsBytes(), bytes);
+      },
+    );
 
     test('case-sensitive run touches only the exact case', () async {
       await file('a.md').writeAsString('cat Cat CAT\n');

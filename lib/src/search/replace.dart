@@ -314,9 +314,16 @@ Future<List<ReplaceMatchNote?>> _previewChunk(
   for (final rel in rels) {
     final file = File(p.join(root, rel));
     try {
+      final bytes = file.readAsBytesSync();
+      // A file the editor refuses as "not text" is not a match either,
+      // whatever the lenient decode would make of its bytes (#496).
+      if (looksBinary(bytes)) {
+        out.add(null);
+        continue;
+      }
       // The same leniency as the editor and the replace pass: a note with
       // invalid UTF-8 bytes still takes part.
-      final text = decodeNoteText(file.readAsBytesSync());
+      final text = decodeNoteText(bytes);
       final pattern = wholeWordPattern(term, caseSensitive: caseSensitive);
       if (pattern == null) {
         out.add(null);
@@ -380,15 +387,23 @@ Future<List<(bool, int, String?, String?)>> _replaceChunk(
   final out = <(bool, int, String?, String?)>[];
   for (final rel in rels) {
     final file = File(p.join(root, rel));
-    final String original;
+    final List<int> bytes;
     try {
-      // The editor reads notes with `allowMalformed`, so a note it opens
-      // must be replaceable too; strict UTF-8 here would silently drop it.
-      original = decodeNoteText(file.readAsBytesSync());
+      bytes = file.readAsBytesSync();
     } on Object catch (e) {
       out.add((false, 0, null, 'read "$rel" failed: $e'));
       continue;
     }
+    // A file the editor refuses as "not text" is left as it is and reported:
+    // decoding it leniently and writing it back would replace its bytes with
+    // Windows-1252 mojibake (#496).
+    if (looksBinary(bytes)) {
+      out.add((false, 0, null, 'binary "$rel": left alone'));
+      continue;
+    }
+    // The editor reads notes leniently, so a note it opens must be
+    // replaceable too; strict UTF-8 here would silently drop it.
+    final original = decodeNoteText(bytes);
     final result = replaceWholeWords(
       original,
       term,
