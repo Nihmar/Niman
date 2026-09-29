@@ -89,18 +89,25 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// means the machine's locale. [setDictionaries] changes them later.
   /// [dictionary] is the library's personal words (issue #60); the shell
   /// attaches it when a library opens, via [setPersonalDictionary].
+  /// [loadCheckers] replaces the background load of the engines
+  /// ([loadSpellCheckers]); a test injects it to decide when a load lands.
   new({
     List<String> dictionaries = const <String>[],
     SpellChecker Function(String? dictionary)? createChecker,
+    Future<List<SpellChecker>> Function(List<String> dictionaries)?
+    loadCheckers,
     PersonalDictionary? dictionary,
   }) : _dictionaries = _normalize(dictionaries),
        _override = createChecker,
+       _loadCheckers = loadCheckers ?? loadSpellCheckers,
        _dictionary = dictionary {
     dictionary?.addListener(_onDictionaryChanged);
     _startEngines();
   }
 
   final SpellChecker Function(String? dictionary)? _override;
+  final Future<List<SpellChecker>> Function(List<String> dictionaries)
+  _loadCheckers;
   List<String> _dictionaries;
   PersonalDictionary? _dictionary;
 
@@ -184,7 +191,7 @@ final class EditorSpellCheck extends ChangeNotifier {
   Future<void> _load(int loads, List<String> names) async {
     List<SpellChecker> engines;
     try {
-      engines = await loadSpellCheckers(names);
+      engines = await _loadCheckers(names);
     } on Object catch (error) {
       const AppLogger(name: 'spellcheck')
           .warning('the dictionary load failed: $error');
@@ -512,16 +519,36 @@ final class SpellScan extends ChangeNotifier {
   /// flight is waited on: when the engine is already there — the constructor
   /// seam, or a load that landed first — nothing is awaited and the pass
   /// runs in the turn it was opened on, as it always did.
+  ///
+  /// The pass is always the current engine's. The dictionaries can change
+  /// while it waits or while it hands the frame back, and then the engine
+  /// it holds is released — a released hunspell handle calls every word
+  /// correct — and the load it waits on is dropped when it lands. So it
+  /// waits for whichever load is the current one, and when the engine
+  /// changed under it, it starts over with the new one: no verdict of an
+  /// engine that is no longer current reaches the shared cache.
   Future<void> run() async {
     final spell = _spell;
-    if (spell._checker == null) await spell.engineReady;
-    final checker = spell._enabled ? spell._checker : null;
-    if (checker == null || !checker.available) {
+    if (spell._checker == null) await _engineLanded();
+    final first = _usableChecker();
+    if (first == null) {
       _finish();
       return;
     }
+    var checker = first;
     final clock = Stopwatch()..start();
     while (_linesDone < lineCount && !_cancelled) {
+      if (!identical(checker, spell._checker)) {
+        _issues.clear();
+        _linesDone = 0;
+        _capped = false;
+        if (spell._checker == null) await _engineLanded();
+        final next = _usableChecker();
+        if (next == null) break;
+        checker = next;
+        clock.reset();
+        continue;
+      }
       final index = _linesDone;
       final line = _lineAt(index);
       for (final match in EditorSpellCheck._word.allMatches(line.text)) {
@@ -529,6 +556,8 @@ final class SpellScan extends ChangeNotifier {
           continue;
         }
         final word = match.group(0)!;
+        // Within a slice nothing else runs, so the engine is still the
+        // one checked at the top of this line.
         if (!spell._misspelled(checker, word)) continue;
         _issues.add(
           SpellIssue(
@@ -555,6 +584,28 @@ final class SpellScan extends ChangeNotifier {
       }
     }
     _finish();
+  }
+
+  /// Waits until the current load has landed.
+  ///
+  /// The load awaited can be superseded while it runs: it then lands
+  /// without an engine, and the one to wait for is the newer load. The
+  /// wait stops once a landed load was still the current one, on a
+  /// disposed state, or on a cancelled pass.
+  Future<void> _engineLanded() async {
+    final spell = _spell;
+    while (spell._checker == null && !spell._disposed && !_cancelled) {
+      final pending = spell._engineReady;
+      await pending;
+      if (identical(pending, spell._engineReady)) return;
+    }
+  }
+
+  /// The engine the pass may ask: the current one, while checking is on
+  /// and a dictionary loaded.
+  SpellChecker? _usableChecker() {
+    final checker = _spell._enabled ? _spell._checker : null;
+    return checker != null && checker.available ? checker : null;
   }
 
   void _finish() {
