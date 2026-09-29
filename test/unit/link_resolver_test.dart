@@ -131,6 +131,45 @@ void main() {
     expect((r as ResolvedNote).note.id, note.id);
   });
 
+  // #491: `sanitizeName` moves a Windows device stem aside with a `_` on
+  // every platform, so the note `[[Aux]]` creates is `_Aux.md`. The
+  // resolver answers to the same name, or the link stays dead, the
+  // dead-link offer repeats and makes `_Aux_1.md`.
+  group('reserved device stems', () {
+    test('a bare reserved stem resolves to the note it made', () async {
+      final note = await addNote('_Aux.md', stem: '_aux');
+      expect(
+        await resolver.resolveWiki('Aux'),
+        isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+      );
+      expect(
+        await resolver.resolveWiki('_Aux'),
+        isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+      );
+    });
+
+    test('a path-qualified reserved stem resolves, batch too', () async {
+      final note = await addNote('Sub/_Aux.md', stem: '_aux');
+      expect(
+        await resolver.resolveWiki('Sub/Aux'),
+        isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+      );
+      final batch = await resolver.resolveBatch(['Sub/Aux.md']);
+      expect(
+        batch['Sub/Aux.md'],
+        isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+      );
+    });
+
+    test('a library that really holds an Aux.md keeps it', () async {
+      final note = await addNote('Aux.md', stem: 'aux');
+      expect(
+        await resolver.resolveWiki('Aux'),
+        isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+      );
+    });
+  });
+
   test('unknown targets are unresolved', () async {
     await addNote('note.md', stem: 'note');
     expect(await resolver.resolveWiki('missing'), isA<UnresolvedNote>());

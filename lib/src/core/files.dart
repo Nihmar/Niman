@@ -277,7 +277,7 @@ String sanitizeName(String input, {required String fallback}) {
   name = name.replaceAll(_invalidChars, '');
   name = name.replaceAll(_whitespaceRuns, ' ');
   name = name.replaceAll(_trailingSpaceOrDot, '').trim();
-  name = _withoutReservedStem(name);
+  name = withoutReservedStem(name);
   // Cutting and trimming cannot make a device's stem of one that was not:
   // they keep the first dot when it falls inside the budget, and a stem
   // that runs past it is far longer than any device name.
@@ -290,7 +290,11 @@ String sanitizeName(String input, {required String fallback}) {
 }
 
 /// [name] with a prefix in front when its stem names a Windows device.
-String _withoutReservedStem(String name) {
+///
+/// The one mapping [sanitizeName] applies to a name on every platform, so
+/// it is also what a link target is matched by: `[[Aux]]` and the `_Aux.md`
+/// the app creates for it are one name (#491).
+String withoutReservedStem(String name) {
   final dot = name.indexOf('.');
   final stem = (dot < 0 ? name : name.substring(0, dot)).replaceAll(
     _trailingSpaceOrDot,

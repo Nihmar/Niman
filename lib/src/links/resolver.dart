@@ -7,6 +7,7 @@
 /// picker.
 library;
 
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:path/path.dart' as p;
@@ -132,13 +133,35 @@ final class LinkResolver implements LinkSource {
   /// its extension and matches as it is. The suggester (#475) writes the
   /// shortest target this admits for exactly one note, so what it writes is
   /// what this resolves.
+  ///
+  /// A Windows device stem answers as it is and as `sanitizeName` moved it
+  /// aside: the note `[[Aux]]` creates is `_Aux.md`, and the link has to
+  /// find it (#491).
   static bool pathMatches(String path, String target) {
     final lower = path.toLowerCase();
-    final withMd = '$target.md';
-    return lower == target ||
-        lower == withMd ||
-        lower.endsWith('/$target') ||
-        lower.endsWith('/$withMd');
+    for (final t in _targetVariants(target)) {
+      final withMd = '$t.md';
+      if (lower == t ||
+          lower == withMd ||
+          lower.endsWith('/$t') ||
+          lower.endsWith('/$withMd')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// [target] and, when its last segment's stem names a Windows device, the
+  /// same target with that segment moved aside (`Aux` → `_Aux`): the name
+  /// the file the app created for it has.
+  static Iterable<String> _targetVariants(String target) sync* {
+    yield target;
+    final cut = target.lastIndexOf('/');
+    final segment = cut == -1 ? target : target.substring(cut + 1);
+    final moved = withoutReservedStem(segment);
+    if (moved != segment) {
+      yield cut == -1 ? moved : '${target.substring(0, cut + 1)}$moved';
+    }
   }
 
   /// Whether [s] starts with a URI scheme (`http://`, `https://`, …).
@@ -216,7 +239,7 @@ final class LinkResolver implements LinkSource {
     final stem = t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
     final stems = await (_db.select(
       _db.noteStems,
-    )..where((s) => s.stem.equals(stem))).get();
+    )..where((s) => s.stem.isIn(_stemVariants(stem)))).get();
     if (stems.isEmpty) return UnresolvedNote(target: raw);
     final ids = <int>{for (final s in stems) s.noteId};
     final notes = await (_db.select(
@@ -228,6 +251,14 @@ final class LinkResolver implements LinkSource {
       heading: heading,
       notes: notes,
     );
+  }
+
+  /// The stems [segment] — a target's last segment — can be indexed under:
+  /// itself, and the reserved-stem name `sanitizeName` would have given the
+  /// file ([withoutReservedStem], #491).
+  static Set<String> _stemVariants(String segment) {
+    final moved = withoutReservedStem(segment);
+    return moved == segment ? {segment} : {segment, moved};
   }
 
   /// Resolves many targets in a few queries (the indexer's content pass:
@@ -263,7 +294,7 @@ final class LinkResolver implements LinkSource {
           : spec0.$1;
       final stems = await (_db.select(
         _db.noteStems,
-      )..where((s) => s.stem.equals(lastSegment))).get();
+      )..where((s) => s.stem.isIn(_stemVariants(lastSegment)))).get();
       final ids = <int>{for (final s in stems) s.noteId};
       final notes = ids.isEmpty
           ? <Note>[]
