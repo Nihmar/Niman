@@ -32,9 +32,13 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// Armed timers by reminder id; the pending map the service reads back.
   final Map<int, Timer> _armed = {};
 
-  /// What each reminder fired for in this run, and when it did, by id
-  /// (#42): the moment it was due and the moment it was shown.
-  final Map<int, ({DateTime due, DateTime at})> _fired = {};
+  /// What each reminder fired for in this run, and when it did, by the
+  /// moment it was due (#42, #497): the moment is what identifies the
+  /// firing, because an edit to the task — its text, or `due:`, both part
+  /// of the description the id hashes — gives it a new id while its `rem:`
+  /// stands, and the same moment must not be shown twice. The id the task
+  /// had when it fired is kept beside the moment for the log.
+  final Map<DateTime, ({int id, DateTime at})> _fired = {};
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
@@ -80,11 +84,14 @@ final class DesktopReminderBackend implements ReminderBackend {
     _armed.remove(reminder.id)?.cancel();
     // Delivered already: the reminder stays wanted for `reminderGrace` past
     // its moment, so every reconcile in that window — a todo edit, a focus
-    // regain — schedules it again, and an alarm the OS delivered is not
-    // delivered twice. A new moment is a new reminder, and it fires.
-    if (_fired[reminder.id]?.due == reminder.when) {
+    // regain — schedules it again, and a moment that was shown is not
+    // shown twice. An edit gives the task a new id but not a new moment,
+    // so the moment is what the record is kept by. A new moment is a new
+    // reminder, and it fires.
+    final shown = _fired[reminder.when];
+    if (shown != null) {
       _log.info(
-        'todo reminders: ${reminder.id} already shown for '
+        'todo reminders: ${reminder.id} already shown as ${shown.id} for '
         '${reminder.when.toIso8601String()}, not shown again',
       );
       return;
@@ -92,7 +99,7 @@ final class DesktopReminderBackend implements ReminderBackend {
     final delay = reminder.when.difference(DateTime.now());
     final timer = Timer(delay.isNegative ? Duration.zero : delay, () {
       _armed.remove(reminder.id);
-      _fired[reminder.id] = (due: reminder.when, at: DateTime.now());
+      _fired[reminder.when] = (id: reminder.id, at: DateTime.now());
       unawaited(_show(reminder));
     });
     _armed[reminder.id] = timer;
@@ -134,8 +141,8 @@ final class DesktopReminderBackend implements ReminderBackend {
       return 'timer STILL ARMED past its time: the machine slept through '
           'it, or the process stalled';
     }
-    final fired = _fired[reminder.id];
-    if (fired != null && fired.due == reminder.when) {
+    final fired = _fired[reminder.when];
+    if (fired != null) {
       return 'timer fired ${_late(fired.at.difference(reminder.when))} late';
     }
     return 'NOT FIRED: no timer in this run, Niman was not running at its '

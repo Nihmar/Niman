@@ -106,6 +106,34 @@ void main() {
     expect(notifier.shown.map((posted) => posted.id), [r.id, r.id]);
   });
 
+  // #497. A firing is identified by its moment and by the task: editing
+  // the text — or moving `due:`, which is part of the description the id
+  // hashes — gives the task a new id while its `rem:` stands, and the
+  // reminder is already shown for that moment.
+  test(
+    'an edit to the task does not show it again for the same moment',
+    () async {
+      final when = DateTime.now().subtract(const Duration(minutes: 5));
+      await backend.schedule(
+        TodoReminder(id: 1, title: 'Call Bob', body: 'body', when: when),
+        exact: true,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [1]);
+
+      // At 10:05 the user fixes a typo, or moves `due:`: a new id, the same
+      // moment, still inside the grace hour.
+      await backend.schedule(
+        TodoReminder(id: 2, title: 'Call Bob today', body: 'body', when: when),
+        exact: true,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(notifier.shown.map((posted) => posted.id), [
+        1,
+      ], reason: 'the moment was already shown');
+    },
+  );
+
   test('a cancelled reminder never fires', () async {
     final r = reminder(const Duration(milliseconds: 30));
     await backend.schedule(r, exact: true);
