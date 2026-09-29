@@ -2,8 +2,10 @@
 ///
 /// The metadata fetch runs in an isolate ([fetchLatestRelease], through
 /// [Isolate.run]): no network I/O on the UI isolate. The download itself
-/// streams to disk with [HttpClient]; drift writes stay on the main
-/// isolate, in the scheduler's callbacks.
+/// streams to disk with [HttpClient], and its digest is computed on a
+/// background isolate ([IsolateGauge.run]) so a 60-100 MB installer is
+/// never read and hashed on the UI isolate (#495); drift writes stay on the
+/// main isolate, in the scheduler's callbacks.
 library;
 
 import 'dart:async';
@@ -15,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/update/app_version.dart';
 import 'package:niman/src/update/release_asset.dart';
 import 'package:niman/src/update/update_check.dart';
@@ -248,9 +251,12 @@ Future<void> _deleteQuietly(File file) async {
 
 /// Checks [file]'s bytes against [asset]'s published digest.
 ///
-/// Throws [UpdateIntegrityException] on a mismatch, or when the release
-/// carried no sha256 digest at all: an unverifiable download is not
-/// silently trusted. The caller removes the file.
+/// The file is read and hashed on a background isolate ([IsolateGauge.run]),
+/// never on the UI isolate: a 60-100 MB installer hashed with `readSync` in
+/// Dart froze the UI for a second or more (#495). Throws
+/// [UpdateIntegrityException] on a mismatch, or when the release carried no
+/// sha256 digest at all: an unverifiable download is not silently trusted.
+/// The caller removes the file.
 Future<void> _verifyDownload(ReleaseAsset asset, File file) async {
   final expected = asset.expectedSha256;
   if (expected == null) {
@@ -258,7 +264,13 @@ Future<void> _verifyDownload(ReleaseAsset asset, File file) async {
       'asset ${asset.name} published no sha256 digest to verify against',
     );
   }
-  final actual = await hashFileSha256(file);
+  // The closure carries only the path string: [IsolateGauge] spawns the
+  // read, and the gauge makes a stuck one visible in an exported log.
+  final path = file.path;
+  final actual = await IsolateGauge.run(
+    () => hashFileSha256(File(path)),
+    'verify ${asset.name}',
+  );
   if (actual != expected) {
     throw UpdateIntegrityException(
       'asset ${asset.name} failed its digest check '

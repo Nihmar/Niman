@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/update/release_asset.dart';
 import 'package:niman/src/update/update_service.dart';
 import 'package:path/path.dart' as p;
@@ -190,6 +191,25 @@ void main() {
       );
       expect(downloaded().existsSync(), isFalse);
       expect(File('${downloaded().path}.part').existsSync(), isFalse);
+    });
+
+    test('the installer is hashed off the UI isolate', () async {
+      final bytes = utf8.encode('the genuine installer bytes');
+      final file = await downloadAsset(
+        asset(served: bytes, digest: 'sha256:${sha256.convert(bytes)}'),
+        into: dir,
+      );
+      expect(await file.readAsBytes(), bytes);
+      // The digest is computed as a counted background job (IsolateGauge.run),
+      // the way the index's probes are: reading and hashing a 60-100 MB
+      // installer inline would freeze the UI isolate for a second or more,
+      // and would leave the gauge at zero (#495).
+      expect(
+        IsolateGauge.peak,
+        greaterThanOrEqualTo(1),
+        reason: 'the digest is computed off the UI isolate',
+      );
+      expect(IsolateGauge.inFlight, 0, reason: 'the job is counted back out');
     });
   });
 }
