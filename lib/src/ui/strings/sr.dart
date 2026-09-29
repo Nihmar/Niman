@@ -1964,11 +1964,20 @@ final class SerbianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'у $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'у 1 белешци' : 'у $count белешки';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'у $count белешци'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'у $count белешке'
+      : 'у $count белешака';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 белешка није записана)'
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count белешка није записана)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count белешке нису записане)'
       : ' ($count белешака није записано)';
 
   // About (issue #80).

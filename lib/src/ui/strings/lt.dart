@@ -1960,10 +1960,14 @@ final class LithuanianStrings extends Strings {
   String replaceScopeNote(String note) => 'faile $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? '1 pastaboje' : '$count pastabose';
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? '$count pastabų'
+      : count % 10 == 1 && count % 100 != 11
+      ? '$count pastaboje'
+      : '$count pastabose';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 pastabos nepavyko įrašyti)'
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count pastabos nepavyko įrašyti)'
       : ' ($count pastabų nepavyko įrašyti)';
 
   // About (issue #80).

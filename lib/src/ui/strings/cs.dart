@@ -1954,6 +1954,8 @@ final class CzechStrings extends Strings {
   @override
   String replaceWriteFailed(int count) => count == 1
       ? ' (1 poznámku nešlo zapsat)'
+      : count >= 2 && count <= 4
+      ? ' ($count poznámky nešlo zapsat)'
       : ' ($count poznámek nešlo zapsat)';
 
   // About (issue #80).

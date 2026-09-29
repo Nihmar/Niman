@@ -1949,10 +1949,10 @@ final class SlovenianStrings extends Strings {
   String replaceScopeNote(String note) => 'v $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'v 1 opombi' : 'v $count opombah';
+      count % 100 == 1 ? 'v $count opombi' : 'v $count opombah';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 opombe ni bilo mogoče zapisati)'
+  String replaceWriteFailed(int count) => count % 100 == 1
+      ? ' ($count opombe ni bilo mogoče zapisati)'
       : ' ($count opomb ni bilo mogoče zapisati)';
 
   // About (issue #80).

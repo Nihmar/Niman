@@ -1969,11 +1969,16 @@ final class RomanianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'în $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'în 1 notă' : 'în $count note';
+  String replaceScopeNotes(int count) => count == 1
+      ? 'în 1 notă'
+      : count % 100 == 0 || count % 100 >= 20
+      ? 'în $count de note'
+      : 'în $count note';
   @override
   String replaceWriteFailed(int count) => count == 1
       ? ' (1 notă nu a putut fi scrisă)'
+      : count % 100 == 0 || count % 100 >= 20
+      ? ' ($count de note nu au putut fi scrise)'
       : ' ($count note nu au putut fi scrise)';
 
   // About (issue #80).

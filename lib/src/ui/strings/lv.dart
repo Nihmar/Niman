@@ -1953,11 +1953,15 @@ final class LatvianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'failā $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? '1 piezīmē' : '$count piezīmēs';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count piezīmē'
+      : '$count piezīmēs';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 piezīmi neizdevās ierakstīt)'
+  String replaceWriteFailed(int count) =>
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? ' ($count piezīmju neizdevās ierakstīt)'
+      : count % 10 == 1
+      ? ' ($count piezīmi neizdevās ierakstīt)'
       : ' ($count piezīmes neizdevās ierakstīt)';
 
   // About (issue #80).

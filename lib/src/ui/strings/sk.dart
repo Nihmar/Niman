@@ -1960,6 +1960,8 @@ final class SlovakStrings extends Strings {
   @override
   String replaceWriteFailed(int count) => count == 1
       ? ' (1 poznámku nešlo zapísať)'
+      : count >= 2 && count <= 4
+      ? ' ($count poznámky nešlo zapísať)'
       : ' ($count poznámok nešlo zapísať)';
 
   // About (issue #80).

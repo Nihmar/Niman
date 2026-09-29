@@ -252,6 +252,79 @@ void main() {
       expect(differ, isEmpty);
     });
 
+    // The replace summary counts notes too, and the singular is the
+    // language's own: twenty-one notes are a singular in Ukrainian, Slovene
+    // counts by the last two digits, and `count == 1` said the plural for
+    // both. The word count is the language's rule for which counts are "one";
+    // the summary must agree with it on every count, and on no other. Only
+    // the singular is compared, because a language can merge its other forms
+    // (Polish says "notatkach" from two up) and Croatian spells its "few" and
+    // "many" nouns alike in the word count. A language whose word never
+    // changes form has no rule to hold the summary to.
+    test('the replace counts take the singular where the word count does', () {
+      String form(String text, int n) => text.replaceFirst('$n', '#');
+      final counts = <String, String Function(int)>{
+        'replaceScopeNotes': AppStrings.replaceScopeNotes,
+        'replaceWriteFailed': AppStrings.replaceWriteFailed,
+      };
+      final differ = <String>[];
+      for (final language in AppLanguages.supported) {
+        AppLanguages.choice = language;
+        final singular = form(AppStrings.wordCount(1), 1);
+        if (singular == form(AppStrings.wordCount(2), 2)) continue;
+        for (final entry in counts.entries) {
+          final one = form(entry.value(1), 1);
+          // Finnish puts one note and two in the same partitive.
+          if (one == form(entry.value(2), 2)) continue;
+          for (var n = 0; n <= 130; n++) {
+            final wordSaysOne = form(AppStrings.wordCount(n), n) == singular;
+            final summarySaysOne = form(entry.value(n), n) == one;
+            if (wordSaysOne != summarySaysOne) {
+              differ.add('${language.id} ${entry.key}: $n');
+              break;
+            }
+          }
+        }
+      }
+      expect(differ, isEmpty);
+    });
+
+    test('the replace counts follow the plural rule of the language', () {
+      AppLanguages.choice = AppLanguage.ukrainian;
+      expect(AppStrings.replaceScopeNotes(21), 'у 21 нотатці');
+      expect(
+        AppStrings.replaceWriteFailed(2),
+        ' (2 нотатки не вдалося записати)',
+      );
+      expect(
+        AppStrings.replaceWriteFailed(5),
+        ' (5 нотаток не вдалося записати)',
+      );
+      expect(
+        AppStrings.replaceWriteFailed(21),
+        ' (21 нотатку не вдалося записати)',
+      );
+
+      AppLanguages.choice = AppLanguage.croatian;
+      expect(AppStrings.replaceScopeNotes(21), 'u 21 napomeni');
+      expect(AppStrings.replaceScopeNotes(3), 'u 3 napomene');
+      expect(AppStrings.replaceScopeNotes(11), 'u 11 napomena');
+
+      AppLanguages.choice = AppLanguage.czech;
+      expect(AppStrings.replaceWriteFailed(1), ' (1 poznámku nešlo zapsat)');
+      expect(AppStrings.replaceWriteFailed(3), ' (3 poznámky nešlo zapsat)');
+      expect(AppStrings.replaceWriteFailed(5), ' (5 poznámek nešlo zapsat)');
+
+      AppLanguages.choice = AppLanguage.romanian;
+      expect(AppStrings.replaceScopeNotes(19), 'în 19 note');
+      expect(AppStrings.replaceScopeNotes(20), 'în 20 de note');
+      expect(AppStrings.replaceScopeNotes(100), 'în 100 de note');
+
+      AppLanguages.choice = AppLanguage.slovenian;
+      expect(AppStrings.replaceScopeNotes(101), 'v 101 opombi');
+      expect(AppStrings.replaceScopeNotes(102), 'v 102 opombah');
+    });
+
     test('every language answers the note statuses', () {
       for (final language in AppLanguages.supported) {
         AppLanguages.choice = language;

@@ -1961,11 +1961,20 @@ final class BosnianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'u $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'u 1 bilješci' : 'u $count bilješki';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'u $count bilješci'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'u $count bilješke'
+      : 'u $count bilješki';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 bilješka nije zapisana)'
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count bilješka nije zapisana)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count bilješke nisu zapisane)'
       : ' ($count bilješki nije zapisano)';
 
   // About (issue #80).

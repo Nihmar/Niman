@@ -1962,11 +1962,16 @@ final class UkrainianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'у $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'у 1 нотатці' : 'у $count нотатках';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'у $count нотатці'
+      : 'у $count нотатках';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 нотатку не вдалося записати)'
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count нотатку не вдалося записати)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count нотатки не вдалося записати)'
       : ' ($count нотаток не вдалося записати)';
 
   // About (issue #80).

@@ -1959,11 +1959,17 @@ final class BelarusianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'у $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'у 1 заўвазе' : 'у $count заўвагах';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'у $count заўвазе'
+      : 'у $count заўвагах';
   @override
-  String replaceWriteFailed(int count) =>
-      count == 1 ? ' (1 заўвага не запісана)' : ' ($count заўваг не запісаны)';
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count заўвага не запісана)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count заўвагі не запісаны)'
+      : ' ($count заўваг не запісана)';
 
   // About (issue #80).
   @override

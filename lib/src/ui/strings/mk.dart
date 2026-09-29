@@ -1975,11 +1975,12 @@ final class MacedonianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'во $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'во 1 белешка' : 'во $count белешки';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'во $count белешка'
+      : 'во $count белешки';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 белешка не е запишана)'
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count белешка не е запишана)'
       : ' ($count белешки не се запишани)';
 
   // About (issue #80).

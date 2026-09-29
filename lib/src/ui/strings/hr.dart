@@ -1957,11 +1957,20 @@ final class CroatianStrings extends Strings {
   @override
   String replaceScopeNote(String note) => 'u $note';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'u 1 napomeni' : 'u $count napomena';
+  String replaceScopeNotes(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'u $count napomeni'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'u $count napomene'
+      : 'u $count napomena';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 napomena nije zapisana)'
+  String replaceWriteFailed(int count) => count % 10 == 1 && count % 100 != 11
+      ? ' ($count napomena nije zapisana)'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? ' ($count napomene nisu zapisane)'
       : ' ($count napomena nije zapisano)';
 
   // About (issue #80).
