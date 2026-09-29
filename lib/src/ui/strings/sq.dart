@@ -323,16 +323,17 @@ final class AlbanianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktori dhe parapamja, gjithmonë të bashkërenditura';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Shkronja e redaktuesit të burimit';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Shkronja me të cilën është vendosur paneli i burimit; parapamja mban '
+      'atë të shënimit';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Me gjerësi të njëjtë';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Pa serifa';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Me serifa';
   @override
   String get epubLookTitle => 'Pamja e librave';
   @override
@@ -457,7 +458,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Po ruhet…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audioja nuk u luajt dot';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1137,7 +1138,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Mbyll';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Veprimi nuk u përfundua dot';
   @override
   String get newFolderTitle => 'Tresë e re';
   @override
@@ -1176,7 +1177,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'E re nga shabllon këtu';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Shablloni nuk u hap dot';
   @override
   String get templateFormTitle => 'Plotëso shabllonin';
   @override
@@ -1348,39 +1349,39 @@ final class AlbanianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ „$path" është i vendosur tepër thellë';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Vetitë';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML i papërpunuar';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Fushat';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Shto një veti';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Veti e re';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Ndrysho vetinë';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Çelësi';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Vlera';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Lloji';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Ndaji elementet me presje';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Hiq vetinë';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Pa veti';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'numër';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datë';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logjike';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'listë';
   @override
   String frontmatterInvalid(String reason) => "Frontmatter s'lexohet: $reason";
   @override
@@ -1590,7 +1591,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importo eksportin e Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Eksporti i Notion nuk u importua dot';
   @override
   String dropRejected(String names) =>
       'Këtu hapen vetëm skedarë Markdown dhe dosje: $names';
@@ -1863,9 +1864,9 @@ final class AlbanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Fshi përfundimisht';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Shënimi nuk u rikthye ose fshi dot';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Koshi nuk u zbraz dot';
 
   // The open/create library screen.
   @override
@@ -1958,7 +1959,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get reindexDone => 'U rindeksua';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteka nuk u rilexua dot';
   @override
   String get closeLibraryTitle => 'Mbyll bibliotekën';
   @override
@@ -1991,16 +1992,16 @@ final class AlbanianStrings extends Strings {
       'S\'ka përputhje të plotë të fjalës „$term"'
       '${only == null ? "s'u gjet" : 'u gjet në $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'e gjithë biblioteka';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'në $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'në 1 shënim' : 'në $count shënime';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 shënim nuk u shkrua dot)'
+      : ' ($count shënime nuk u shkruan dot)';
 
   // About (issue #80).
   @override
@@ -2342,34 +2343,33 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testi nuk funksionoi';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikata nuk është e besuar';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikata nuk mund të verifikohet. Besoje vetëm nëse gjurma e saj '
+      'përputhet me atë që tregon serveri.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Të besohet kjo certifikatë?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikata për $host nuk mund të verifikohet.\n\nGjurma '
+      'SHA-256:\n$fingerprint\n\nBesoje vetëm nëse është certifikata që pret. '
+      'Niman pranon më shumë se një certifikatë nga i njëjti host.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Besoju kësaj certifikate';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikata e besuar';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Të harrohet kjo certifikatë?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ky destinacion testohet përsëri kundër depove të certifikatave të '
+      'pajisjes dhe një certifikatë e vetë-nënshkruar do të duhet të '
+      'konfirmohet edhe një herë. Asgjë tjetër nuk ndryshon.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Harroje';
   @override
   String get syncNowAction => 'Sinkronizo tani';
   @override

@@ -329,16 +329,17 @@ final class SlovenianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Urejevalnik in predogled sta vedno v koraku';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Pisava urejevalnika izvorne kode';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Pisava, v kateri je postavljeno izvorno okno; predogled obdrži pisavo '
+      'opombe';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Enakomerne širine';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Brez serifov';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'S serifi';
   @override
   String get epubLookTitle => 'Videz knjig';
   @override
@@ -460,7 +461,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Shranjevanje …';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Zvoka ni bilo mogoče predvajati';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1134,7 +1135,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Zapri';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Dejanja ni bilo mogoče dokončati';
   @override
   String get newFolderTitle => 'Nova mapa';
   @override
@@ -1171,7 +1172,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Novo iz predloge sem';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Predloge ni bilo mogoče odpreti';
   @override
   String get templateFormTitle => 'Izpolni predlogo';
   @override
@@ -1331,39 +1332,39 @@ final class SlovenianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” je predgloboko vstavljeno';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Lastnosti';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Surovi YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Polja';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Dodaj lastnost';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nova lastnost';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Uredi lastnost';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Ključ';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Vrednost';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Vrsta';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Elemente ločite z vejicami';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Odstrani lastnost';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Ni lastnosti';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'besedilo';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'število';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logična vrednost';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'seznam';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatterja ni bilo mogoče prebrati: $reason';
@@ -1571,7 +1572,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get notionImportTitle => 'Uvozi izvoz Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Izvoz iz Notiona ni bilo mogoče uvoziti';
   @override
   String dropRejected(String names) =>
       'Tu se odpirajo samo datoteke Markdown in mape: $names';
@@ -1842,9 +1843,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Trajno izbriši';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Opombe ni bilo mogoče obnoviti ali izbrisati';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Koša ni bilo mogoče izprazniti';
 
   // The open/create library screen.
   @override
@@ -1933,7 +1935,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get reindexDone => 'Ponovno indeksiranje dokončano';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Knjižnice ni bilo mogoče znova prebrati';
   @override
   String get closeLibraryTitle => 'Zapri knjižnico';
   @override
@@ -1964,16 +1966,16 @@ final class SlovenianStrings extends Strings {
       'Ni natančnega zadetka celih besed za „$term”'
       '${only == null ? '' : ' ni bilo najdeno v $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'celotna knjižnica';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'v $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'v 1 opombi' : 'v $count opombah';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 opombe ni bilo mogoče zapisati)'
+      : ' ($count opomb ni bilo mogoče zapisati)';
 
   // About (issue #80).
   @override
@@ -2318,34 +2320,33 @@ final class SlovenianStrings extends Strings {
   @override
   String get syncTestFailed => 'Preizkus ni uspel';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certifikatu ni za zaupati';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certifikata ni mogoče preveriti. Zaupajte mu le, če se njegov prstni '
+      'odtis ujema s tistim, ki ga prikazuje strežnik.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Zaupati temu certifikatu?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certifikata za $host ni mogoče preveriti.\n\nPrstni odtis '
+      'SHA-256:\n$fingerprint\n\nZaupajte mu le, če je to certifikat, ki ga '
+      'pričakujete. Niman sprejme več kot en certifikat z istega strežnika.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Zaupaj temu certifikatu';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certifikatu se zaupa';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Pozabiti ta certifikat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ta cilj se znova preveri proti shrambi certifikatov naprave in '
+      'samopodpisani certifikat bo treba potrditi še enkrat. Nič drugega se ne '
+      'spremeni.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Pozabi';
   @override
   String get syncNowAction => 'Sinhroniziraj zdaj';
   @override

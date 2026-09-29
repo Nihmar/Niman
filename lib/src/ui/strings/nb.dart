@@ -322,16 +322,17 @@ final class NorwegianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editoren og forhåndsvisingen, som alltid er enige';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Skrifttypen til kildekodeeditoren';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Skrifttypen kildekodepanelet er satt i; forhåndsvisningen beholder '
+      'notatets egen';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Fast bredde';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Uten seriffer';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Med seriffer';
   @override
   String get epubLookTitle => 'Bøkenes utseende';
   @override
@@ -455,7 +456,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Lagrer…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Lyden kunne ikke spilles av';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1126,7 +1127,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Lukk';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Handlingen kunne ikke fullføres';
   @override
   String get newFolderTitle => 'Ny mappe';
   @override
@@ -1163,7 +1164,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Ny fra mal her';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Malen kunne ikke åpnes';
   @override
   String get templateFormTitle => 'Fyll inn malen';
   @override
@@ -1328,39 +1329,39 @@ final class NorwegianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” er for dypt nøstet';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Egenskaper';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Rå YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Felter';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Legg til en egenskap';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ny egenskap';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Rediger egenskap';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Nøkkel';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Verdi';
   @override
   String get frontmatterTypeLabel => 'Type';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Skill elementer med komma';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Fjern egenskap';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Ingen egenskaper';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'tall';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dato';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'boolsk';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'liste';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter ikke lest: $reason';
   @override
@@ -1565,7 +1566,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importer Notion-eksport';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-eksporten kunne ikke importeres';
   @override
   String dropRejected(String names) =>
       'Bare Markdown-filer og mapper åpnes her: $names';
@@ -1835,9 +1836,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Slett permanent';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Notatet kunne ikke gjenopprettes eller slettes';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Papirkorgen kunne ikke tømmes';
 
   // The open/create library screen.
   @override
@@ -1928,7 +1930,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get reindexDone => 'Omindexering fullført';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteket kunne ikke leses på nytt';
   @override
   String get closeLibraryTitle => 'Lukk biblioteket';
   @override
@@ -1960,16 +1962,16 @@ final class NorwegianStrings extends Strings {
       'Ingen eksakt helt-ord-treff på “$term” '
       '${only == null ? 'ble funnet' : 'funnet i $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'hele biblioteket';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'i $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'i 1 notat' : 'i $count notater';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 notat kunne ikke skrives)'
+      : ' ($count notater kunne ikke skrives)';
 
   // About (issue #80).
   @override
@@ -2309,34 +2311,34 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testen mislyktes';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikatet er ikke betrodd';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikatet kan ikke bekreftes. Stol på det bare hvis fingeravtrykket '
+      'stemmer med det serveren viser.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Stol på dette sertifikatet?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Sertifikatet for $host kan ikke '
+      'bekreftes.\n\nSHA-256-fingeravtrykk:\n$fingerprint\n\nStol på det bare '
+      'hvis det er sertifikatet du forventer. Niman godtar mer enn ett '
+      'sertifikat fra samme vert.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Stol på dette sertifikatet';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikatet er betrodd';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Glem dette sertifikatet?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Denne destinasjonen prøves på nytt mot enhetens sertifikatlager, og et '
+      'selvsignert sertifikat må bekreftes enda en gang. Ingenting annet '
+      'endres.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Glem';
   @override
   String get syncNowAction => 'Synkroniser nå';
   @override

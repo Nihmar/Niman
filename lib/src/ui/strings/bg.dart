@@ -331,16 +331,17 @@ final class BulgarianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Редакторът и прегледът винаги са синхронизирани';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Шрифт на редактора за изходния текст';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Шрифтът на панела с изходния текст; прегледът запазва шрифта на '
+      'бележката';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Моноширинен';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Без серифи';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Със серифи';
   @override
   String get epubLookTitle => 'Облик на книгите';
   @override
@@ -462,7 +463,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Запазване…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Аудиото не можа да се възпроизведе';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1141,7 +1142,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Затваряне';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Действието не можа да завърши';
   @override
   String get newFolderTitle => 'Нова папка';
   @override
@@ -1178,7 +1179,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Нов от шаблон тук';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Шаблонът не можа да се отвори';
   @override
   String get templateFormTitle => 'Попълни шаблон';
   @override
@@ -1347,39 +1348,39 @@ final class BulgarianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” е вмъкната твърде дълбоко';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Свойства';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Суров YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Полета';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Добавяне на свойство';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Ново свойство';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Редакция на свойство';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Ключ';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Стойност';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Тип';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Разделяйте елементите със запетаи';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Премахване на свойство';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Няма свойства';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'текст';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'число';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'дата';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'булево';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'списък';
   @override
   String frontmatterInvalid(String reason) =>
       'Не може да се прочетат метаданните: $reason';
@@ -1591,7 +1592,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get notionImportTitle => 'Импортиране на експорт от Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'Експортът от Notion не можа да се импортира';
   @override
   String dropRejected(String names) =>
       'Тук се отварят само файлове Markdown и папки: $names';
@@ -1864,9 +1866,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Изтрий окончателно';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Бележката не можа да се възстанови или изтрие';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Кошът не можа да се изпразни';
 
   // The open/create library screen.
   @override
@@ -1958,7 +1961,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get reindexDone => 'Презиндексирането е завършено';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Библиотеката не можа да се прочете отново';
   @override
   String get closeLibraryTitle => 'Затвори библиотеката';
   @override
@@ -1990,16 +1993,16 @@ final class BulgarianStrings extends Strings {
       '„$term” няма точното съвпадение на цялата дума'
       '${only == null ? '' : ' — намерено е само $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'цялата библиотека';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'в $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'в 1 бележка' : 'в $count бележки';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 бележка не бе записана)'
+      : ' ($count бележки не бяха записани)';
 
   // About (issue #80).
   @override
@@ -2336,34 +2339,33 @@ final class BulgarianStrings extends Strings {
   @override
   String get syncTestFailed => 'Тестът не успя';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Сертификатът не е доверен';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Сертификатът не може да се провери. Доверете му се само ако отпечатъкът '
+      'му съвпада с този, който показва сървърът.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Да се довери ли на този сертификат?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Сертификатът за $host не може да се провери.\n\nОтпечатък '
+      'SHA-256:\n$fingerprint\n\nДоверете му се само ако това е очакваният '
+      'сертификат. Niman приема повече от един сертификат от един и същ хост.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Довери се на този сертификат';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Сертификатът е доверен';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Да се забрави ли този сертификат?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Тази дестинация се проверява отново спрямо хранилището със сертификати '
+      'на устройството и самоподписаният сертификат ще трябва да се потвърди '
+      'още веднъж. Нищо друго не се променя.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Забрави';
   @override
   String get syncNowAction => 'Синхронизирай сега';
   @override

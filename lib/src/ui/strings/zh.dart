@@ -300,16 +300,15 @@ final class ChineseStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => '编辑器与预览，两者始终一致';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => '源码编辑器字体';
   @override
-  String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+  String get sourceFontSubtitle => '源码面板所用的字体；预览保留笔记自身的字体';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => '等宽';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => '无衬线';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => '衬线';
   @override
   String get epubLookTitle => '书籍外观';
   @override
@@ -430,7 +429,7 @@ final class ChineseStrings extends Strings {
   @override
   String get audioSavingRecording => '正在保存…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => '无法播放此音频';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1062,7 +1061,7 @@ final class ChineseStrings extends Strings {
   @override
   String get closeMenuTooltip => '关闭';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => '无法完成该操作';
   @override
   String get newFolderTitle => '新建文件夹';
   @override
@@ -1099,7 +1098,7 @@ final class ChineseStrings extends Strings {
   @override
   String get newFromTemplateHere => '在此从模板新建';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => '无法打开模板';
   @override
   String get templateFormTitle => '填写模板';
   @override
@@ -1230,39 +1229,39 @@ final class ChineseStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ 「$path」嵌套过深';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => '属性';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => '原始 YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => '字段';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => '添加属性';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => '新建属性';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => '编辑属性';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => '键';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => '值';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => '类型';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => '各项之间用逗号分隔';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => '移除属性';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => '没有属性';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => '文本';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => '数字';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => '日期';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => '布尔值';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => '列表';
   @override
   String frontmatterInvalid(String reason) => 'frontmatter 未读取：$reason';
   @override
@@ -1449,7 +1448,7 @@ final class ChineseStrings extends Strings {
   @override
   String get notionImportTitle => '导入 Notion 导出';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => '无法导入 Notion 导出';
   @override
   String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';
   @override
@@ -1694,9 +1693,9 @@ final class ChineseStrings extends Strings {
   @override
   String get trashDeletePermanently => '永久删除';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => '无法恢复或删除笔记';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => '无法清空回收站';
 
   // The open/create library screen.
   @override
@@ -1775,7 +1774,7 @@ final class ChineseStrings extends Strings {
   @override
   String get reindexDone => '索引重建完成';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => '无法重新读取文库';
   @override
   String get closeLibraryTitle => '关闭文库';
   @override
@@ -1804,16 +1803,14 @@ final class ChineseStrings extends Strings {
       '没有找到整词「$term」的完全匹配'
       '${only == null ? '' : '，$only 中也没有'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => '整个文库';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note 中';
   @override
-  String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+  String replaceScopeNotes(int count) => count == 1 ? '笔记 1 篇' : '$count 篇笔记';
   @override
-  String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+  String replaceWriteFailed(int count) =>
+      count == 1 ? '（1 篇笔记无法写入）' : '（$count 篇笔记无法写入）';
 
   // About (issue #80).
   @override
@@ -2105,34 +2102,27 @@ final class ChineseStrings extends Strings {
   @override
   String get syncTestFailed => '测试失败';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => '该证书不受信任';
   @override
-  String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+  String get syncTestCertificateHint => '无法验证该证书。仅当其指纹与服务器显示的一致时才信任它。';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => '信任此证书？';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      '无法验证 $host 的证书。\n\nSHA-256 指纹：\n$fingerprint\n\n仅当这是你预期的证书时才信任它。Niman '
+      '接受来自同一主机的多个证书。';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => '信任此证书';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => '证书已受信任';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => '忘记此证书？';
   @override
-  String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+  String get syncCertForgetBody => '该目标将重新对照设备证书存储进行验证，自签名证书需要再确认一次。其他内容不变。';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => '忘记';
   @override
   String get syncNowAction => '立即同步';
   @override

@@ -325,16 +325,17 @@ final class LithuanianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktorius ir peržiūra visada suderinami';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Šaltinio redaktoriaus šriftas';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Šriftas, kuriuo surinkta šaltinio sritis; peržiūra išlaiko užrašo '
+      'šriftą';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Vienodo pločio';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Be serifų';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Su serifais';
   @override
   String get epubLookTitle => 'Knygų išvaizda';
   @override
@@ -456,7 +457,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Išsaugoma…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Nepavyko paleisti garso';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1131,7 +1132,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Uždaryti';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Nepavyko užbaigti veiksmo';
   @override
   String get newFolderTitle => 'Naujas katalogas';
   @override
@@ -1169,7 +1170,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nauja iš šablonų čia';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Nepavyko atidaryti šablono';
   @override
   String get templateFormTitle => 'Užpildyti šabloną';
   @override
@@ -1336,39 +1337,39 @@ final class LithuanianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path” įterpta per giliai';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Savybės';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Neapdorotas YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Laukai';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Pridėti savybę';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nauja savybė';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Redaguoti savybę';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Raktas';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Reikšmė';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tipas';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Atskirkite elementus kableliais';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Pašalinti savybę';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Savybių nėra';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekstas';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'skaičius';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'data';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'loginė reikšmė';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'sąrašas';
   @override
   String frontmatterInvalid(String reason) =>
       'Metaduomenų nepavyko perskaityti: $reason';
@@ -1576,7 +1577,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importuoti „Notion“ eksportą';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Nepavyko importuoti Notion eksporto';
   @override
   String dropRejected(String names) =>
       'Čia atidaromi tik Markdown failai ir aplankai: $names';
@@ -1849,9 +1850,9 @@ final class LithuanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Ištrinti nevildinamai';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Nepavyko atkurti ar ištrinti užrašo';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Nepavyko išvalyti šiukšlinės';
 
   // The open/create library screen.
   @override
@@ -1944,7 +1945,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get reindexDone => 'Perskirta baigta';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Nepavyko iš naujo nuskaityti bibliotekos';
   @override
   String get closeLibraryTitle => 'Uždaryti biblioteką';
   @override
@@ -1976,16 +1977,16 @@ final class LithuanianStrings extends Strings {
       '„$term” neturi tikslaus visą žodį atitinkančio atitikmens'
       '${only == null ? '' : ' – tik $only rasta'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'visa biblioteka';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'faile $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 pastaboje' : '$count pastabose';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 užrašo nepavyko įrašyti)'
+      : ' ($count užrašų nepavyko įrašyti)';
 
   // About (issue #80).
   @override
@@ -2324,34 +2325,34 @@ final class LithuanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Patikrinti nepavyko';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikatu nepasitikima';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikato patikrinti nepavyksta. Pasitikėkite juo tik jei jo '
+      'atspaudas sutampa su tuo, kurį rodo serveris.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Pasitikėti šiuo sertifikatu?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Nepavyksta patikrinti $host sertifikato.\n\nSHA-256 '
+      'atspaudas:\n$fingerprint\n\nPasitikėkite juo tik jei tai laukiamas '
+      'sertifikatas. Niman priima daugiau nei vieną sertifikatą iš to paties '
+      'serverio.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Pasitikėti šiuo sertifikatu';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikatu pasitikima';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Pamiršti šį sertifikatą?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ši paskirtis vėl tikrinama pagal įrenginio sertifikatų saugyklą, o '
+      'savarankiškai pasirašytą sertifikatą teks patvirtinti dar kartą. '
+      'Daugiau niekas nesikeičia.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Pamiršti';
   @override
   String get syncNowAction => 'Sinchronizuoti dabar';
   @override

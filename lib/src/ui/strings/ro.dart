@@ -330,16 +330,17 @@ final class RomanianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Editorul și previzualizarea, mereu de acord';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Fontul editorului de sursă';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Fontul în care este așezat panoul sursă; previzualizarea păstrează '
+      'fontul notei';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monospațiat';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Fără serife';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Cu serife';
   @override
   String get epubLookTitle => 'Aspectul cărților';
   @override
@@ -464,7 +465,7 @@ final class RomanianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Se salvează…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audio-ul nu a putut fi redat';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1144,7 +1145,7 @@ final class RomanianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Închide';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Acțiunea nu a putut fi finalizată';
   @override
   String get newFolderTitle => 'Dosar nou';
   @override
@@ -1181,7 +1182,7 @@ final class RomanianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nouă din șablon aici';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Șablonul nu a putut fi deschis';
   @override
   String get templateFormTitle => 'Completează șablonul';
   @override
@@ -1347,39 +1348,39 @@ final class RomanianStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” este înfipt prea adânc';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Proprietăți';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML brut';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Câmpuri';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Adaugă o proprietate';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Proprietate nouă';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Editează proprietatea';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Cheie';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Valoare';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tip';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separă elementele prin virgule';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Elimină proprietatea';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Nicio proprietate';
   @override
   String get frontmatterTypeText => 'text';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'număr';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dată';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'logic';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'listă';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter necitit: $reason';
   @override
@@ -1589,7 +1590,7 @@ final class RomanianStrings extends Strings {
   @override
   String get notionImportTitle => 'Importă exportul Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Exportul din Notion nu a putut fi importat';
   @override
   String dropRejected(String names) =>
       'Aici se deschid doar fișiere Markdown și dosare: $names';
@@ -1861,9 +1862,9 @@ final class RomanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Șterge permanent';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Nota nu a putut fi restaurată sau ștearsă';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Coșul nu a putut fi golit';
 
   // The open/create library screen.
   @override
@@ -1954,7 +1955,7 @@ final class RomanianStrings extends Strings {
   @override
   String get reindexDone => 'Reindexare finalizată';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Biblioteca nu a putut fi recitită';
   @override
   String get closeLibraryTitle => 'Închide biblioteca';
   @override
@@ -1986,16 +1987,16 @@ final class RomanianStrings extends Strings {
       'Nicio potrivire exactă de cuvânt întreg pentru „$term”'
       '${only == null ? ' a fost găsită' : ' a fost găsită în $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'toată biblioteca';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'în $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'în 1 notă' : 'în $count note';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 notă nu a putut fi scrisă)'
+      : ' ($count note nu au putut fi scrise)';
 
   // About (issue #80).
   @override
@@ -2346,34 +2347,34 @@ final class RomanianStrings extends Strings {
   @override
   String get syncTestFailed => 'Testul nu a reușit';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Certificatul nu este de încredere';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Certificatul nu poate fi verificat. Ai încredere în el doar dacă '
+      'amprenta lui se potrivește cu cea arătată de server.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Ai încredere în acest certificat?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Certificatul pentru $host nu poate fi verificat.\n\nAmprentă '
+      'SHA-256:\n$fingerprint\n\nAi încredere în el doar dacă este '
+      'certificatul așteptat. Niman acceptă mai multe certificate de la '
+      'același server.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Ai încredere în acest certificat';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificat de încredere';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Uităm acest certificat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Această destinație este testată din nou împotriva depozitului de '
+      'certificate al dispozitivului, iar un certificat auto-semnat va trebui '
+      'confirmat încă o dată. Nimic altceva nu se schimbă.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Uită';
   @override
   String get syncNowAction => 'Sincronizează acum';
   @override

@@ -321,16 +321,16 @@ final class EstonianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Redaktor ja eelvaade on alati sünkroonis';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Lähteteksti redaktori font';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Font, milles lähteteksti paneel on; eelvaade jätab märkme oma fondi';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Ühe laiusega';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Ilma seriifideta';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Seriifidega';
   @override
   String get epubLookTitle => 'Raamatute välimus';
   @override
@@ -452,7 +452,7 @@ final class EstonianStrings extends Strings {
   @override
   String get audioSavingRecording => 'Salvestamine…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Heli ei õnnestunud esitada';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1123,7 +1123,7 @@ final class EstonianStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sulge';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Toimingut ei õnnestunud lõpetada';
   @override
   String get newFolderTitle => 'Uus kaust';
   @override
@@ -1160,7 +1160,7 @@ final class EstonianStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Uus šabloonist siia';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Malli ei õnnestunud avada';
   @override
   String get templateFormTitle => 'Täita šabloon';
   @override
@@ -1318,39 +1318,39 @@ final class EstonianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ „$path” on liiga sügavalt sisestatud';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Atribuudid';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Töötlemata YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Väljad';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Lisa atribuut';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Uus atribuut';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Muuda atribuuti';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Võti';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Väärtus';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tüüp';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Eralda üksused komadega';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Eemalda atribuut';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Atribuute pole';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'arv';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'kuupäev';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'tõeväärtus';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'loend';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatteri ei õnnestunud lugeda: $reason';
@@ -1559,7 +1559,7 @@ final class EstonianStrings extends Strings {
   @override
   String get notionImportTitle => 'Impordi Notioni eksport';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notioni eksporti ei õnnestunud importida';
   @override
   String dropRejected(String names) =>
       'Siin avanevad ainult Markdowni failid ja kaustad: $names';
@@ -1831,9 +1831,9 @@ final class EstonianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Kustuta püsivalt';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'Märget ei õnnestunud taastada ega kustutada';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Prügikasti ei õnnestunud tühjendada';
 
   // The open/create library screen.
   @override
@@ -1921,7 +1921,7 @@ final class EstonianStrings extends Strings {
   @override
   String get reindexDone => 'Uuesti indekseerimine lõpetatud';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Kogu ei õnnestunud uuesti lugeda';
   @override
   String get closeLibraryTitle => 'Sulge kogu';
   @override
@@ -1951,16 +1951,16 @@ final class EstonianStrings extends Strings {
       '„$term” täpset täissõna vastet ei ole'
       '${only == null ? '' : ' ei leitud $only-s'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'terve kogu';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'failis $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 märkmes' : '$count märkmetes';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 märget ei õnnestunud kirjutada)'
+      : ' ($count märget ei õnnestunud kirjutada)';
 
   // About (issue #80).
   @override
@@ -2297,34 +2297,33 @@ final class EstonianStrings extends Strings {
   @override
   String get syncTestFailed => 'Test ei õnnestunud';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Sertifikaat ei ole usaldusväärne';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Sertifikaati ei saa kontrollida. Usalda seda ainult siis, kui selle '
+      'sõrmejälg vastab serveri näidatule.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Kas usaldada seda sertifikaati?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Sertifikaati hostile $host ei saa kontrollida.\n\nSHA-256 '
+      'sõrmejälg:\n$fingerprint\n\nUsalda seda ainult siis, kui see on oodatud '
+      'sertifikaat. Niman võtab vastu rohkem kui ühe sertifikaadi samalt '
+      'hostilt.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Usalda seda sertifikaati';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Sertifikaat on usaldusväärne';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Kas unustada see sertifikaat?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Seda sihtkohta kontrollitakse uuesti seadme sertifikaadihoidla vastu ja '
+      'iseallkirjastatud sertifikaat tuleb veel kord kinnitada. Muu ei muutu.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Unusta';
   @override
   String get syncNowAction => 'Sünkrooni kohe';
   @override

@@ -323,16 +323,17 @@ final class FinnishStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'Muokkain ja esikatselu aina samassa';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Lähdetekstieditorin fontti';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Fontti, jolla lähdetekstipaneeli on ladottu; esikatselu pitää '
+      'muistiinpanon oman';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Tasaleveä';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Ilman päätteitä';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Päätteellinen';
   @override
   String get epubLookTitle => 'Kirjojen ulkoasu';
   @override
@@ -457,7 +458,7 @@ final class FinnishStrings extends Strings {
   @override
   String get audioSavingRecording => 'Tallennetaan…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Äänen toisto ei onnistunut';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1136,7 +1137,7 @@ final class FinnishStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sulje';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Toimenpidettä ei voitu suorittaa loppuun';
   @override
   String get newFolderTitle => 'Uusi kansio';
   @override
@@ -1173,7 +1174,7 @@ final class FinnishStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Uusi mallipohjasta tähän';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Mallia ei voitu avata';
   @override
   String get templateFormTitle => 'Täytä mallipohja';
   @override
@@ -1346,39 +1347,39 @@ final class FinnishStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ “$path” on liian syvällisesti sisäkkäinen';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Ominaisuudet';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Raaka YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Kentät';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Lisää ominaisuus';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Uusi ominaisuus';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Muokkaa ominaisuutta';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Avain';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Arvo';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tyyppi';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Erota kohteet pilkuilla';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Poista ominaisuus';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Ei ominaisuuksia';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'teksti';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'luku';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'päivämäärä';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'totuusarvo';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'luettelo';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatteria ei voitu lukea: $reason';
@@ -1588,7 +1589,7 @@ final class FinnishStrings extends Strings {
   @override
   String get notionImportTitle => 'Tuo Notion-vienti';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-vientiä ei voitu tuoda';
   @override
   String dropRejected(String names) =>
       'Täällä avautuvat vain Markdown-tiedostot ja kansiot: $names';
@@ -1861,9 +1862,10 @@ final class FinnishStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Poista pysyvästi';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Muistiinpanoa ei voitu palauttaa eikä poistaa';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Roskakoria ei voitu tyhjentää';
 
   // The open/create library screen.
   @override
@@ -1955,7 +1957,7 @@ final class FinnishStrings extends Strings {
   @override
   String get reindexDone => 'Hakuelokuvaaminen valmis';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Kirjastoa ei voitu lukea uudelleen';
   @override
   String get closeLibraryTitle => 'Sulje kirjasto';
   @override
@@ -1987,16 +1989,16 @@ final class FinnishStrings extends Strings {
       'Ei täsmällistä kokonaissanan “$term” osumaa'
       '${only == null ? '' : ' löytyi ${only}ssa'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'koko kirjasto';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'tiedostossa $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 muistiinpanossa' : '$count muistiinpanoissa';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 muistiinpanoa ei voitu kirjoittaa)'
+      : ' ($count muistiinpanoa ei voitu kirjoittaa)';
 
   // About (issue #80).
   @override
@@ -2331,34 +2333,34 @@ final class FinnishStrings extends Strings {
   @override
   String get syncTestFailed => 'Testi epäonnistui';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Varmennetta ei luoteta';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Varmennetta ei voi tarkistaa. Luota siihen vain, jos sen sormenjälki '
+      'vastaa palvelimen näyttämää.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Luotetaanko tähän varmenteeseen?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Kohteen $host varmennetta ei voi '
+      'tarkistaa.\n\nSHA-256-sormenjälki:\n$fingerprint\n\nLuota siihen vain, '
+      'jos se on odottamasi varmenne. Niman hyväksyy useamman kuin yhden '
+      'varmenteen samalta palvelimelta.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Luota tähän varmenteeseen';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Varmenne on luotettu';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Unohdetaanko tämä varmenne?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Tämä kohde tarkistetaan uudelleen laitteen varmennevarastoa vasten, ja '
+      'itse allekirjoitettu varmenne on vahvistettava vielä kerran. Muu ei '
+      'muutu.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Unohda';
   @override
   String get syncNowAction => 'Synkronoi nyt';
   @override

@@ -322,16 +322,17 @@ final class IcelandicStrings extends Strings {
   @override
   String get noteTextScaleSubtitle => 'Ritari og forsýning, alltaf samstilltir';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Leturgerð frumkóðaritils';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Leturgerðin sem frumkóðasvæðið er sett í; forskoðunin heldur eigin '
+      'leturgerð minnisblaðsins';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Jafnbreitt';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Án stafsokka';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Með stafsokka';
   @override
   String get epubLookTitle => 'Útlit bóka';
   @override
@@ -455,7 +456,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get audioSavingRecording => 'Vistar…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Ekki tókst að spila hljóðið';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1133,7 +1134,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Loka';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Ekki tókst að ljúka aðgerðinni';
   @override
   String get newFolderTitle => 'Ný mappa';
   @override
@@ -1170,7 +1171,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nýtt frá smíð hér';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Ekki tókst að opna sniðmátið';
   @override
   String get templateFormTitle => 'Fylla út smíð';
   @override
@@ -1335,39 +1336,39 @@ final class IcelandicStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ „$path" er teygð of djúpt';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Eiginleikar';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Hrátt YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Reitir';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Bæta við eiginleika';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nýr eiginleiki';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Breyta eiginleika';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Lykill';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Gildi';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tegund';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Aðgreindu atriði með kommum';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Fjarlægja eiginleika';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Engir eiginleikar';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'texti';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'tala';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'dagsetning';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'bólskt';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'listi';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter ekki skilað: $reason';
@@ -1575,7 +1576,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get notionImportTitle => 'Flytja inn Notion-útflutning';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'Ekki tókst að flytja inn Notion-útflutninginn';
   @override
   String dropRejected(String names) =>
       'Hér opnast aðeins Markdown-skrár og möppur: $names';
@@ -1846,9 +1848,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Eyða varanlega';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Ekki tókst að endurheimta eða eyða minnisblaðinu';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Ekki tókst að tæma ruslið';
 
   // The open/create library screen.
   @override
@@ -1939,7 +1942,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get reindexDone => 'Vísu endurbyggt';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Ekki tókst að lesa bókasafnið aftur';
   @override
   String get closeLibraryTitle => 'Loka bókasafni';
   @override
@@ -1969,16 +1972,16 @@ final class IcelandicStrings extends Strings {
       'Ekki nákvæmur heilar orð samanburður „$term"'
       '${only == null ? "ekki fannst" : "fannst í $only"}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'allt bókasafnið';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'í $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'í 1 minnisblaði' : 'í $count minnisblöðum';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 minnisblað var ekki skrifað)'
+      : ' ($count minnisblöð voru ekki skrifuð)';
 
   // About (issue #80).
   @override
@@ -2315,34 +2318,33 @@ final class IcelandicStrings extends Strings {
   @override
   String get syncTestFailed => 'Prófunin tókst ekki';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Vottorðinu er ekki treyst';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Ekki er hægt að staðfesta vottorðið. Treystu því aðeins ef fingrafar '
+      'þess passar við það sem þjónninn sýnir.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Treysta þessu vottorði?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Ekki er hægt að staðfesta vottorðið fyrir $host.\n\nSHA-256 '
+      'fingrafar:\n$fingerprint\n\nTreystu því aðeins ef þetta er vottorðið '
+      'sem þú býst við. Niman samþykkir fleiri en eitt vottorð frá sama þjóni.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Treysta þessu vottorði';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Vottorð treyst';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Gleyma þessu vottorði?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Þessi áfangastaður er prófaður aftur gegn vottorðasafni tækisins og '
+      'sjálfvirkt undirritað vottorð þarf að staðfesta einu sinni enn. Ekkert '
+      'annað breytist.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Gleyma';
   @override
   String get syncNowAction => 'Samstilla núna';
   @override

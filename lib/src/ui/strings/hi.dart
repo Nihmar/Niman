@@ -316,16 +316,16 @@ final class HindiStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'एडिटर और पूर्वावलोकन, जो हमेशा एक-दूसरे से मिलते हैं';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'स्रोत संपादक का फ़ॉन्ट';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'स्रोत फलक जिस फ़ॉन्ट में है; पूर्वावलोकन नोट का अपना फ़ॉन्ट रखता है';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'समान-चौड़ाई';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'सेरिफ़ रहित';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'सेरिफ़ सहित';
   @override
   String get epubLookTitle => 'किताबों का रूप';
   @override
@@ -449,7 +449,7 @@ final class HindiStrings extends Strings {
   @override
   String get audioSavingRecording => 'सहेजा जा रहा है…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'ऑडियो चलाया नहीं जा सका';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1116,7 +1116,7 @@ final class HindiStrings extends Strings {
   @override
   String get closeMenuTooltip => 'बंद करें';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'यह कार्रवाई पूरी नहीं हो सकी';
   @override
   String get newFolderTitle => 'नया फ़ोल्डर';
   @override
@@ -1154,7 +1154,7 @@ final class HindiStrings extends Strings {
   @override
   String get newFromTemplateHere => 'यहाँ टेम्पलेट से नया';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'टेम्पलेट खोला नहीं जा सका';
   @override
   String get templateFormTitle => 'टेम्पलेट भरें';
   @override
@@ -1313,39 +1313,39 @@ final class HindiStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ «$path» बहुत गहरे तक जड़ा है';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'प्रॉपर्टी';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'कच्चा YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'फ़ील्ड';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'प्रॉपर्टी जोड़ें';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'नई प्रॉपर्टी';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'प्रॉपर्टी संपादित करें';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'कुंजी';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'मान';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'प्रकार';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'मदों को अल्पविराम से अलग करें';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'प्रॉपर्टी हटाएँ';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'कोई प्रॉपर्टी नहीं';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'पाठ';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'संख्या';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'दिनांक';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'बूलियन';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'सूची';
   @override
   String frontmatterInvalid(String reason) =>
       'फ़्रंटमैटर नहीं पढ़ा गया: $reason';
@@ -1550,7 +1550,7 @@ final class HindiStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion निर्यात आयात करें';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion निर्यात आयात नहीं हो सका';
   @override
   String dropRejected(String names) =>
       'यहाँ केवल Markdown फ़ाइलें और फ़ोल्डर खुलते हैं: $names';
@@ -1822,9 +1822,9 @@ final class HindiStrings extends Strings {
   @override
   String get trashDeletePermanently => 'हमेशा के लिए हटाएँ';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed => 'नोट पुनर्स्थापित या हटाया नहीं जा सका';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'ट्रैश खाली नहीं किया जा सका';
 
   // The open/create library screen.
   @override
@@ -1914,7 +1914,7 @@ final class HindiStrings extends Strings {
   @override
   String get reindexDone => 'दोबारा इंडेक्स पूरा';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'लाइब्रेरी दोबारा पढ़ी नहीं जा सकी';
   @override
   String get closeLibraryTitle => 'लाइब्रेरी बंद करें';
   @override
@@ -1944,16 +1944,16 @@ final class HindiStrings extends Strings {
       '«$term» का कोई सटीक पूरा-शब्द मेल नहीं '
       '${only == null ? 'मिला' : '$only में मिला'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'पूरी लाइब्रेरी';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => '$note में';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? '1 नोट में' : '$count नोट्स में';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 नोट लिखी नहीं जा सकी)'
+      : ' ($count नोट्स लिखी नहीं जा सकीं)';
 
   // About (issue #80).
   @override
@@ -2292,34 +2292,34 @@ final class HindiStrings extends Strings {
   @override
   String get syncTestFailed => 'जाँच सफल नहीं हुई';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'प्रमाणपत्र पर भरोसा नहीं है';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'प्रमाणपत्र सत्यापित नहीं हो सकता। इस पर तभी भरोसा करें जब इसका '
+      'फ़िंगरप्रिंट सर्वर के दिखाए फ़िंगरप्रिंट से मेल खाता हो।';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'इस प्रमाणपत्र पर भरोसा करें?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      '«$host» का प्रमाणपत्र सत्यापित नहीं हो सकता।\n\nSHA-256 '
+      'फ़िंगरप्रिंट:\n$fingerprint\n\nइस पर तभी भरोसा करें जब यह वही '
+      'प्रमाणपत्र हो जिसकी आप अपेक्षा करते हैं। Niman एक ही होस्ट से एक से '
+      'अधिक प्रमाणपत्र स्वीकार करता है।';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'इस प्रमाणपत्र पर भरोसा करें';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'प्रमाणपत्र विश्वसनीय';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'यह प्रमाणपत्र भुला दें?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'यह गंतव्य डिवाइस के प्रमाणपत्र भंडार के सामने फिर जाँचा जाएगा, और '
+      'स्व-हस्ताक्षरित प्रमाणपत्र एक बार फिर पुष्ट करना होगा। और कुछ नहीं '
+      'बदलता।';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'भुला दें';
   @override
   String get syncNowAction => 'अभी सिंक करें';
   @override

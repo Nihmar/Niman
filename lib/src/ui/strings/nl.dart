@@ -328,16 +328,17 @@ final class DutchStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'De editor en het voorbeeld, die altijd overeenkomen';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Lettertype van de broneditor';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Het lettertype van het bronvenster; de voorvertoning houdt dat van de '
+      'notitie';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monospatie';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Zonder schreven';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Met schreven';
   @override
   String get epubLookTitle => 'Uiterlijk van boeken';
   @override
@@ -461,7 +462,7 @@ final class DutchStrings extends Strings {
   @override
   String get audioSavingRecording => 'Opslaan…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Audio kon niet worden afgespeeld';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1138,7 +1139,7 @@ final class DutchStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Sluiten';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Actie kon niet worden voltooid';
   @override
   String get newFolderTitle => 'Nieuwe map';
   @override
@@ -1174,7 +1175,7 @@ final class DutchStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nieuw uit sjabloon hier';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Sjabloon kon niet worden geopend';
   @override
   String get templateFormTitle => 'Sjabloon invullen';
   @override
@@ -1350,39 +1351,39 @@ final class DutchStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” is te diep genest';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Eigenschappen';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Ruwe YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Velden';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Eigenschap toevoegen';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nieuwe eigenschap';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Eigenschap bewerken';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Sleutel';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Waarde';
   @override
   String get frontmatterTypeLabel => 'Type';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Scheid items met komma’s';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Eigenschap verwijderen';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Geen eigenschappen';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'tekst';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'getal';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'datum';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleaans';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lijst';
   @override
   String frontmatterInvalid(String reason) =>
       'Frontmatter niet gelezen: $reason';
@@ -1596,7 +1597,7 @@ final class DutchStrings extends Strings {
   @override
   String get notionImportTitle => 'Notion-export importeren';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed => 'Notion-export kon niet worden geïmporteerd';
   @override
   String dropRejected(String names) =>
       'Hier openen alleen Markdown-bestanden en mappen: $names';
@@ -1872,9 +1873,10 @@ final class DutchStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Definitief verwijderen';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Notitie kon niet worden hersteld of verwijderd';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Prullenbak kon niet worden geleegd';
 
   // The open/create library screen.
   @override
@@ -1966,7 +1968,7 @@ final class DutchStrings extends Strings {
   @override
   String get reindexDone => 'Herindexeren afgerond';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Bibliotheek kon niet opnieuw worden gelezen';
   @override
   String get closeLibraryTitle => 'Bibliotheek sluiten';
   @override
@@ -1998,16 +2000,16 @@ final class DutchStrings extends Strings {
       'Geen exacte heel-woordmatch van “$term” '
       '${only == null ? 'gevonden' : 'gevonden in $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'hele bibliotheek';
   @override
   String replaceScopeNote(String note) => 'in $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'in 1 notitie' : 'in $count notities';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 notitie kon niet worden geschreven)'
+      : ' ($count notities konden niet worden geschreven)';
 
   // About (issue #80).
   @override
@@ -2350,34 +2352,34 @@ final class DutchStrings extends Strings {
   @override
   String get syncTestFailed => 'De test is mislukt';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Het certificaat is niet vertrouwd';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Het certificaat kan niet worden geverifieerd. Vertrouw het alleen als '
+      'de vingerafdruk overeenkomt met die de server toont.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Dit certificaat vertrouwen?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Het certificaat voor $host kan niet worden '
+      'geverifieerd.\n\nSHA-256-vingerafdruk:\n$fingerprint\n\nVertrouw het '
+      'alleen als dit het certificaat is dat je verwacht. Niman accepteert '
+      'meer dan één certificaat van dezelfde host.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Dit certificaat vertrouwen';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificaat vertrouwd';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Dit certificaat vergeten?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Deze bestemming wordt opnieuw getest tegen het certificaatarchief van '
+      'het apparaat, en een zelfondertekend certificaat moet nog één keer '
+      'worden bevestigd. Verder verandert er niets.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Vergeten';
   @override
   String get syncNowAction => 'Nu synchroniseren';
   @override

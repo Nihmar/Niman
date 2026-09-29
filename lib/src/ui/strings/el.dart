@@ -331,16 +331,18 @@ final class GreekStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'Επεξεργαστής και προεπισκόπηση, πάντα συγχρονισμένοι';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle =>
+      'Γραμματοσειρά του επεξεργαστή πηγαίου κειμένου';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Η γραμματοσειρά του παραθύρου πηγαίου κειμένου· η προεπισκόπηση κρατά '
+      'αυτή της σημείωσης';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Σταθερού πλάτους';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Χωρίς ακρεμόνες';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Με ακρεμόνες';
   @override
   String get epubLookTitle => 'Εμφάνιση βιβλίων';
   @override
@@ -466,7 +468,7 @@ final class GreekStrings extends Strings {
   @override
   String get audioSavingRecording => 'Αποθήκευση…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Δεν ήταν δυνατή η αναπαραγωγή του ήχου';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1160,7 +1162,7 @@ final class GreekStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Κλείσιμο';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Δεν ήταν δυνατή η ολοκλήρωση της ενέργειας';
   @override
   String get newFolderTitle => 'Νέος φάκελος';
   @override
@@ -1198,7 +1200,7 @@ final class GreekStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Νέο από πρότυπο εδώ';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Δεν ήταν δυνατό το άνοιγμα του προτύπου';
   @override
   String get templateFormTitle => 'Συμπλήρωση προτύπου';
   @override
@@ -1378,39 +1380,39 @@ final class GreekStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ Το «$path» είναι ενταγμένο πολύ βαθιά';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Ιδιότητες';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'Ακατέργαστο YAML';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Πεδία';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Προσθήκη ιδιότητας';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Νέα ιδιότητα';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Επεξεργασία ιδιότητας';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Κλειδί';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Τιμή';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Τύπος';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Χωρίστε τα στοιχεία με κόμματα';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Αφαίρεση ιδιότητας';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Καμία ιδιότητα';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'κείμενο';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'αριθμός';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'ημερομηνία';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'λογικό';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'λίστα';
   @override
   String frontmatterInvalid(String reason) =>
       'Το frontmatter δεν διαβάζεται: $reason';
@@ -1626,7 +1628,8 @@ final class GreekStrings extends Strings {
   @override
   String get notionImportTitle => 'Εισαγωγή εξαγωγής Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'Δεν ήταν δυνατή η εισαγωγή της εξαγωγής Notion';
   @override
   String dropRejected(String names) =>
       'Εδώ ανοίγουν μόνο αρχεία Markdown και φάκελοι: $names';
@@ -1907,9 +1910,10 @@ final class GreekStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Μόνιμη διαγραφή';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Δεν ήταν δυνατή η επαναφορά ή η διαγραφή της σημείωσης';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Δεν ήταν δυνατό το άδειασμα του κάδου';
 
   // The open/create library screen.
   @override
@@ -2004,7 +2008,8 @@ final class GreekStrings extends Strings {
   @override
   String get reindexDone => 'Ο δείκτης επαναδημιουργήθηκε';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed =>
+      'Δεν ήταν δυνατή η εκ νέου ανάγνωση της βιβλιοθήκης';
   @override
   String get closeLibraryTitle => 'Κλείσιμο βιβλιοθήκης';
   @override
@@ -2039,16 +2044,16 @@ final class GreekStrings extends Strings {
       'Δεν υπάρχει ακριβές ταύτιμα όλης της λέξης «$term»'
       '${only == null ? 'δεν βρέθηκε' : 'βρέθηκε στο $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'ολόκληρη η βιβλιοθήκη';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'σε $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'σε 1 σημείωση' : 'σε $count σημειώσεις';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 σημείωση δεν γράφτηκε)'
+      : ' ($count σημειώσεις δεν γράφτηκαν)';
 
   // About (issue #80).
   @override
@@ -2392,34 +2397,34 @@ final class GreekStrings extends Strings {
   @override
   String get syncTestFailed => 'Η δοκιμή δεν πέτυχε';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Το πιστοποιητικό δεν είναι αξιόπιστο';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Το πιστοποιητικό δεν μπορεί να επαληθευτεί. Εμπιστευτείτε το μόνο αν το '
+      'αποτύπωμά του ταιριάζει με αυτό που δείχνει ο διακομιστής.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Να εμπιστευτείτε αυτό το πιστοποιητικό;';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Το πιστοποιητικό για $host δεν μπορεί να επαληθευτεί.\n\nΑποτύπωμα '
+      'SHA-256:\n$fingerprint\n\nΕμπιστευτείτε το μόνο αν είναι το '
+      'πιστοποιητικό που περιμένετε. Το Niman δέχεται περισσότερα από ένα '
+      'πιστοποιητικά από τον ίδιο διακομιστή.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Εμπιστευτείτε αυτό το πιστοποιητικό';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Το πιστοποιητικό είναι αξιόπιστο';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Να ξεχαστεί αυτό το πιστοποιητικό;';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Ο προορισμός ελέγχεται ξανά με το χώρο πιστοποιητικών της συσκευής και '
+      'ένα αυτοϋπογεγραμμένο πιστοποιητικό θα χρειαστεί άλλη μία επιβεβαίωση. '
+      'Τίποτα άλλο δεν αλλάζει.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Ξέχνα το';
   @override
   String get syncNowAction => 'Συγχρονισμός τώρα';
   @override

@@ -331,16 +331,17 @@ final class ItalianStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'L’editor e l’anteprima, che restano d’accordo';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Carattere dell’editor sorgente';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'Il carattere con cui è composto il riquadro sorgente; l’anteprima '
+      'mantiene quello della nota';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monospazio';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Senza grazie';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Con grazie';
   @override
   String get epubLookTitle => 'Aspetto dei libri';
   @override
@@ -1353,39 +1354,39 @@ final class ItalianStrings extends Strings {
   String includeTooDeep(String path) =>
       '⚠ “$path” è annidato troppo in profondità';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Proprietà';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML grezzo';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Campi';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Aggiungi una proprietà';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nuova proprietà';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Modifica proprietà';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Chiave';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Valore';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tipo';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separa le voci con le virgole';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Rimuovi proprietà';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Nessuna proprietà';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'testo';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'numero';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'data';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleano';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'elenco';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter non letto: $reason';
   @override
@@ -2340,34 +2341,35 @@ final class ItalianStrings extends Strings {
   @override
   String get syncTestFailed => 'Prova non riuscita';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'Il certificato non è attendibile';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Il certificato non può essere verificato. Consideralo attendibile solo '
+      'se la sua impronta corrisponde a quella mostrata dal server.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle =>
+      'Considerare attendibile questo certificato?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Il certificato di $host non può essere verificato.\n\nImpronta '
+      'SHA-256:\n$fingerprint\n\nConsideralo attendibile solo se è il '
+      'certificato che ti aspetti. Niman accetta più di un certificato dallo '
+      'stesso host.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Considera attendibile questo certificato';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificato attendibile';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Dimenticare questo certificato?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Questa destinazione viene di nuovo verificata rispetto all’archivio dei '
+      'certificati del dispositivo e un certificato autofirmato dovrà essere '
+      'confermato ancora una volta. Nient’altro cambia.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Dimentica';
   @override
   String get syncNowAction => 'Sincronizza ora';
   @override

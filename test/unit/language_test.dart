@@ -216,5 +216,100 @@ void main() {
       expect(AppStrings.languageName(AppLanguage.chinese), '中文');
       expect(AppStrings.languageName(AppLanguage.system), isNotEmpty);
     });
+
+    // The keys added after v0.1.3 shipped as the English text copied into
+    // every locale. The abstract `Strings` contract only checks that a
+    // member exists, so an English copy compiles and hides in plain
+    // sight; these probes ask each language for the key and compare the
+    // answer to English, which a copy cannot pass.
+    group('the keys added since v0.1.3 are translated', () {
+      // The answers that really are the same word in every language: a
+      // digest label is a digest label, whoever spells it.
+      const sameEverywhere = <String>{'syncCertTrustedSubtitle'};
+
+      // The words a language genuinely spells like English: a type is a
+      // type, and `in <path>` is what three languages say for it.
+      const sameWord = <String>{
+        'da/frontmatterTypeLabel',
+        'fr/frontmatterTypeLabel',
+        'nb/frontmatterTypeLabel',
+        'nl/frontmatterTypeLabel',
+        'ca/frontmatterTypeText',
+        'cs/frontmatterTypeText',
+        'ro/frontmatterTypeText',
+        'sk/frontmatterTypeText',
+        'sv/frontmatterTypeText',
+        'fr/frontmatterTypeDate',
+        'de/replaceScopeNote',
+        'it/replaceScopeNote',
+        'nl/replaceScopeNote',
+      };
+
+      final probes = <String, String Function()>{
+        'sourceFontTitle': () => AppStrings.sourceFontTitle,
+        'sourceFontSubtitle': () => AppStrings.sourceFontSubtitle,
+        'sourceFontMonospace': () => AppStrings.sourceFontMonospace,
+        'sourceFontSansSerif': () => AppStrings.sourceFontSansSerif,
+        'sourceFontSerif': () => AppStrings.sourceFontSerif,
+        'frontmatterTitle': () => AppStrings.frontmatterTitle,
+        'frontmatterShowRaw': () => AppStrings.frontmatterShowRaw,
+        'frontmatterShowFields': () => AppStrings.frontmatterShowFields,
+        'frontmatterAddField': () => AppStrings.frontmatterAddField,
+        'frontmatterNewField': () => AppStrings.frontmatterNewField,
+        'frontmatterEditField': () => AppStrings.frontmatterEditField,
+        'frontmatterKeyLabel': () => AppStrings.frontmatterKeyLabel,
+        'frontmatterValueLabel': () => AppStrings.frontmatterValueLabel,
+        'frontmatterTypeLabel': () => AppStrings.frontmatterTypeLabel,
+        'frontmatterListHint': () => AppStrings.frontmatterListHint,
+        'frontmatterRemoveField': () => AppStrings.frontmatterRemoveField,
+        'frontmatterNoFields': () => AppStrings.frontmatterNoFields,
+        'frontmatterTypeText': () => AppStrings.frontmatterTypeText,
+        'frontmatterTypeNumber': () => AppStrings.frontmatterTypeNumber,
+        'frontmatterTypeDate': () => AppStrings.frontmatterTypeDate,
+        'frontmatterTypeBoolean': () => AppStrings.frontmatterTypeBoolean,
+        'frontmatterTypeList': () => AppStrings.frontmatterTypeList,
+        'replaceScopeNote': () => AppStrings.replaceScopeNote('a.md'),
+        'replaceScopeWholeLibrary': () => AppStrings.replaceScopeWholeLibrary,
+        'replaceScopeNotes': () => AppStrings.replaceScopeNotes(2),
+        'replaceWriteFailed': () => AppStrings.replaceWriteFailed(2),
+        'audioPlayFailed': () => AppStrings.audioPlayFailed,
+        'shellActionFailed': () => AppStrings.shellActionFailed,
+        'templateOpenFailed': () => AppStrings.templateOpenFailed,
+        'notionImportFailed': () => AppStrings.notionImportFailed,
+        'trashActionFailed': () => AppStrings.trashActionFailed,
+        'trashEmptyFailed': () => AppStrings.trashEmptyFailed,
+        'reindexFailed': () => AppStrings.reindexFailed,
+        'syncTestCertificate': () => AppStrings.syncTestCertificate,
+        'syncTestCertificateHint': () => AppStrings.syncTestCertificateHint,
+        'syncCertTrustTitle': () => AppStrings.syncCertTrustTitle,
+        'syncCertTrustBody': () =>
+            AppStrings.syncCertTrustBody('host', 'fingerprint'),
+        'syncCertTrustAction': () => AppStrings.syncCertTrustAction,
+        'syncCertTrustedTitle': () => AppStrings.syncCertTrustedTitle,
+        'syncCertTrustedSubtitle': () =>
+            AppStrings.syncCertTrustedSubtitle('fingerprint'),
+        'syncCertForgetTitle': () => AppStrings.syncCertForgetTitle,
+        'syncCertForgetBody': () => AppStrings.syncCertForgetBody,
+        'syncCertForgetAction': () => AppStrings.syncCertForgetAction,
+      };
+
+      test('no language answers the English text', () {
+        AppLanguages.choice = AppLanguage.english;
+        final english = <String, String>{
+          for (final key in probes.keys) key: probes[key]!(),
+        };
+        for (final language in AppLanguages.supported) {
+          if (language == AppLanguage.english) continue;
+          AppLanguages.choice = language;
+          for (final key in probes.keys) {
+            final value = probes[key]!();
+            expect(value, isNotEmpty, reason: '${language.name} $key');
+            if (sameEverywhere.contains(key)) continue;
+            if (sameWord.contains('${language.id}/$key')) continue;
+            expect(value, isNot(english[key]), reason: '${language.name} $key');
+          }
+        }
+      });
+    });
   });
 }

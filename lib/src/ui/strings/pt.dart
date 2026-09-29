@@ -326,16 +326,17 @@ final class PortugueseStrings extends Strings {
   String get noteTextScaleSubtitle =>
       'O editor e a pré-visualização, que sempre coincidem';
   @override
-  String get sourceFontTitle => 'Source editor font';
+  String get sourceFontTitle => 'Tipo de letra do editor de código';
   @override
   String get sourceFontSubtitle =>
-      "The face the source pane is set in; the preview keeps the note's own";
+      'O tipo de letra do painel de código; a pré-visualização mantém o da '
+      'nota';
   @override
-  String get sourceFontMonospace => 'Monospace';
+  String get sourceFontMonospace => 'Monoespaçado';
   @override
-  String get sourceFontSansSerif => 'Sans serif';
+  String get sourceFontSansSerif => 'Sem serifa';
   @override
-  String get sourceFontSerif => 'Serif';
+  String get sourceFontSerif => 'Com serifa';
   @override
   String get epubLookTitle => 'Aspeto dos livros';
   @override
@@ -460,7 +461,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get audioSavingRecording => 'Salvando…';
   @override
-  String get audioPlayFailed => 'Could not play this audio';
+  String get audioPlayFailed => 'Não foi possível reproduzir o áudio';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -1137,7 +1138,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get closeMenuTooltip => 'Fechar';
   @override
-  String get shellActionFailed => 'Could not finish that action';
+  String get shellActionFailed => 'Não foi possível concluir a ação';
   @override
   String get newFolderTitle => 'Nova pasta';
   @override
@@ -1174,7 +1175,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get newFromTemplateHere => 'Nova a partir de modelo aqui';
   @override
-  String get templateOpenFailed => 'Could not open the template';
+  String get templateOpenFailed => 'Não foi possível abrir o modelo';
   @override
   String get templateFormTitle => 'Preencher o modelo';
   @override
@@ -1344,39 +1345,39 @@ final class PortugueseStrings extends Strings {
   @override
   String includeTooDeep(String path) => '⚠ “$path” está aninhado demais';
   @override
-  String get frontmatterTitle => 'Properties';
+  String get frontmatterTitle => 'Propriedades';
   @override
-  String get frontmatterShowRaw => 'Raw YAML';
+  String get frontmatterShowRaw => 'YAML em bruto';
   @override
-  String get frontmatterShowFields => 'Fields';
+  String get frontmatterShowFields => 'Campos';
   @override
-  String get frontmatterAddField => 'Add a property';
+  String get frontmatterAddField => 'Adicionar uma propriedade';
   @override
-  String get frontmatterNewField => 'New property';
+  String get frontmatterNewField => 'Nova propriedade';
   @override
-  String get frontmatterEditField => 'Edit property';
+  String get frontmatterEditField => 'Editar a propriedade';
   @override
-  String get frontmatterKeyLabel => 'Key';
+  String get frontmatterKeyLabel => 'Chave';
   @override
-  String get frontmatterValueLabel => 'Value';
+  String get frontmatterValueLabel => 'Valor';
   @override
-  String get frontmatterTypeLabel => 'Type';
+  String get frontmatterTypeLabel => 'Tipo';
   @override
-  String get frontmatterListHint => 'Separate items with commas';
+  String get frontmatterListHint => 'Separe os itens com vírgulas';
   @override
-  String get frontmatterRemoveField => 'Remove property';
+  String get frontmatterRemoveField => 'Remover a propriedade';
   @override
-  String get frontmatterNoFields => 'No properties';
+  String get frontmatterNoFields => 'Sem propriedades';
   @override
-  String get frontmatterTypeText => 'text';
+  String get frontmatterTypeText => 'texto';
   @override
-  String get frontmatterTypeNumber => 'number';
+  String get frontmatterTypeNumber => 'número';
   @override
-  String get frontmatterTypeDate => 'date';
+  String get frontmatterTypeDate => 'data';
   @override
-  String get frontmatterTypeBoolean => 'boolean';
+  String get frontmatterTypeBoolean => 'booleano';
   @override
-  String get frontmatterTypeList => 'list';
+  String get frontmatterTypeList => 'lista';
   @override
   String frontmatterInvalid(String reason) => 'Frontmatter não lido: $reason';
   @override
@@ -1586,7 +1587,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get notionImportTitle => 'Importar exportação do Notion';
   @override
-  String get notionImportFailed => 'Could not import the Notion export';
+  String get notionImportFailed =>
+      'Não foi possível importar a exportação do Notion';
   @override
   String dropRejected(String names) =>
       'Aqui só abrem ficheiros Markdown e pastas: $names';
@@ -1857,9 +1859,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Excluir permanentemente';
   @override
-  String get trashActionFailed => 'Could not restore or delete the note';
+  String get trashActionFailed =>
+      'Não foi possível restaurar ou eliminar a nota';
   @override
-  String get trashEmptyFailed => 'Could not empty the trash';
+  String get trashEmptyFailed => 'Não foi possível esvaziar o lixo';
 
   // The open/create library screen.
   @override
@@ -1951,7 +1954,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get reindexDone => 'Reindexação concluída';
   @override
-  String get reindexFailed => 'Could not re-scan the library';
+  String get reindexFailed => 'Não foi possível reler a biblioteca';
   @override
   String get closeLibraryTitle => 'Fechar a biblioteca';
   @override
@@ -1985,16 +1988,16 @@ final class PortugueseStrings extends Strings {
       'Nenhuma palavra inteira exata “$term” '
       '${only == null ? 'encontrada' : 'encontrada em $only'}';
   @override
-  String get replaceScopeWholeLibrary => 'whole library';
+  String get replaceScopeWholeLibrary => 'toda a biblioteca';
   @override
-  String replaceScopeNote(String note) => 'in $note';
+  String replaceScopeNote(String note) => 'em $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'in 1 note' : 'in $count notes';
+      count == 1 ? 'em 1 nota' : 'em $count notas';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 note could not be written)'
-      : ' ($count notes could not be written)';
+      ? ' (1 nota não pôde ser escrita)'
+      : ' ($count notas não puderam ser escritas)';
 
   // About (issue #80).
   @override
@@ -2334,34 +2337,33 @@ final class PortugueseStrings extends Strings {
   @override
   String get syncTestFailed => 'O teste não funcionou';
   @override
-  String get syncTestCertificate => 'The certificate is not trusted';
+  String get syncTestCertificate => 'O certificado não é de confiança';
   @override
   String get syncTestCertificateHint =>
-      'The certificate cannot be verified. Trust it only if its fingerprint '
-      'matches the one the server shows.';
+      'Não é possível verificar o certificado. Confie nele apenas se a sua '
+      'impressão digital corresponder à que o servidor mostra.';
   @override
-  String get syncCertTrustTitle => 'Trust this certificate?';
+  String get syncCertTrustTitle => 'Confiar neste certificado?';
   @override
   String syncCertTrustBody(String host, String fingerprint) =>
-      'The certificate for $host cannot be verified.\n\n'
-      'SHA-256 fingerprint:\n$fingerprint\n\n'
-      'Trust it only if this is the certificate you expect. Niman accepts '
-      'this one certificate for this destination and no other.';
+      'Não é possível verificar o certificado de $host.\n\nImpressão digital '
+      'SHA-256:\n$fingerprint\n\nConfie nele apenas se for o certificado que '
+      'espera. O Niman aceita mais do que um certificado do mesmo servidor.';
   @override
-  String get syncCertTrustAction => 'Trust this certificate';
+  String get syncCertTrustAction => 'Confiar neste certificado';
   @override
-  String get syncCertTrustedTitle => 'Certificate trusted';
+  String get syncCertTrustedTitle => 'Certificado de confiança';
   @override
   String syncCertTrustedSubtitle(String fingerprint) => 'SHA-256 $fingerprint';
   @override
-  String get syncCertForgetTitle => 'Forget this certificate?';
+  String get syncCertForgetTitle => 'Esquecer este certificado?';
   @override
   String get syncCertForgetBody =>
-      'This destination is tested against the device certificate store '
-      'again, and a self-signed certificate will have to be confirmed once '
-      'more. Nothing else changes.';
+      'Este destino é testado de novo contra o armazenamento de certificados '
+      'do dispositivo e um certificado autoassinado terá de ser confirmado '
+      'mais uma vez. Nada mais muda.';
   @override
-  String get syncCertForgetAction => 'Forget';
+  String get syncCertForgetAction => 'Esquecer';
   @override
   String get syncNowAction => 'Sincronizar agora';
   @override
