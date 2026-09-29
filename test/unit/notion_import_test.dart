@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/import/notion.dart';
 import 'package:path/path.dart' as p;
 
+import '../fakes/raw_deflate_zip.dart';
+
 void main() {
   late Directory tmp;
   late Directory library;
@@ -188,4 +190,36 @@ void main() {
       );
     },
   );
+
+  test('an entry is refused at the budget, before its stream ends', () async {
+    // 480 kB of zeros, then a block that is not valid deflate. A budget of
+    // 64 kB is passed long before that block, so the refusal can only be
+    // budget's: an inflate that ran the stream out first would fail on the
+    // invalid block (FormatException), having expanded all of it (#492).
+    final source = File(p.join(tmp.path, 'Export ${id(99)}.zip'))
+      ..writeAsBytesSync(
+        rawDeflateZip(
+          '$workspace/Big ${id(1)}.md',
+          storedZerosThenInvalid(blocks: 8, size: 60000),
+          declared: 10,
+        ),
+      );
+
+    await expectLater(
+      importNotionZipWithBudget(
+        source: source.path,
+        libraryRoot: library.path,
+        maxBytes: 64 * 1024,
+      ),
+      throwsA(
+        isA<ArchiveException>().having(
+          (e) => e.message,
+          'message',
+          contains('budget'),
+        ),
+      ),
+    );
+
+    expect(library.listSync(), isEmpty);
+  });
 }

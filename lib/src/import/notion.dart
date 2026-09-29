@@ -31,6 +31,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/import/bounded_entry.dart';
 import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
@@ -302,7 +303,14 @@ Future<({int notes, int assets})> _writeAll(
   for (final entry in entries) {
     final rel = plan[entry.path];
     if (rel == null) continue;
-    final bytes = _readWithin(entry.file, maxBytes - read, budget: maxBytes);
+    final Uint8List bytes;
+    try {
+      bytes = readEntryWithin(entry.file, maxBytes - read);
+    } on EntryOverBudget {
+      throw ArchiveException(
+        'not a Notion export: an entry expands past the $maxBytes-byte budget',
+      );
+    }
     read += bytes.length;
     // The inflated bytes are cached on the archive entry, and the import
     // holds the archive until it returns: release each entry as it is
@@ -328,73 +336,6 @@ Future<({int notes, int assets})> _writeAll(
     }
   }
   return (notes: notes, assets: assets);
-}
-
-/// The inflated bytes of [file], refusing to produce more than [remaining]
-/// of them.
-///
-/// The budget is checked against what the central directory declares before
-/// anything is inflated (see [_importNotionZip]), but a stream can expand
-/// past the size its entry declares — and `package:archive` inflates the
-/// whole stream either way, so the declared size stops nothing. The only
-/// place to stop it is the sink it writes into: [_BoundedBytes] counts what
-/// comes out and ends the decode at the budget, so a lying entry costs
-/// [remaining] bytes and no more (#492).
-///
-/// Throws [ArchiveException] when the entry would produce more than that,
-/// [budget] being the whole budget for the message.
-Uint8List _readWithin(ArchiveFile file, int remaining, {required int budget}) {
-  final output = _BoundedBytes(remaining);
-  try {
-    file.writeContent(output);
-  } on _OverBudget {
-    throw ArchiveException(
-      'not a Notion export: an entry expands past the $budget-byte budget',
-    );
-  }
-  return output.getBytes();
-}
-
-/// An output stream that holds at most a budget's worth of bytes and refuses
-/// the rest, ending the decode that writes into it (#492).
-final class _BoundedBytes extends OutputMemoryStream {
-  new(this.limit);
-
-  /// The most this holds before it refuses more.
-  final int limit;
-
-  void _guard(int more) {
-    if (length + more > limit) throw const _OverBudget();
-  }
-
-  @override
-  void writeByte(int value) {
-    _guard(1);
-    super.writeByte(value);
-  }
-
-  @override
-  void writeBytes(List<int> bytes, {int? length}) {
-    _guard(length ?? bytes.length);
-    super.writeBytes(bytes, length: length);
-  }
-
-  @override
-  void writeStream(InputStream stream) {
-    _guard(stream.length);
-    super.writeStream(stream);
-  }
-
-  @override
-  void writeBackReference(int distance, int count) {
-    _guard(count);
-    super.writeBackReference(distance, count);
-  }
-}
-
-/// The budget of [_BoundedBytes] reached: an entry tried to expand past it.
-final class _OverBudget implements Exception {
-  const new();
 }
 
 /// Rewrites the Markdown links of one note from the archive's names to the
