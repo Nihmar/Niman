@@ -825,12 +825,28 @@ final class LibraryController implements LibrarySession {
   ///
   /// The session is rebuilt in place, not closed and reopened, so the
   /// library never leaves the screen; the phase a caller sees stays ready.
+  /// A call that arrives while a rebuild runs joins it: the teardown and
+  /// the delete happen once, and the fresh index the first is opening is
+  /// not torn down and deleted under it (#493).
   @override
-  Future<void> rebuildIndex() async {
+  Future<void> rebuildIndex() {
+    final running = _rebuild;
+    if (running != null) return running;
     final root = _root;
     if (root == null || _phase != LibraryPhase.ready) {
-      throw StateError('No library is open');
+      return Future<void>.error(StateError('No library is open'));
     }
+    final future = _rebuildFrom(root).whenComplete(() {
+      _rebuild = null;
+    });
+    _rebuild = future;
+    return future;
+  }
+
+  /// The one rebuild in flight, if any.
+  Future<void>? _rebuild;
+
+  Future<void> _rebuildFrom(String root) async {
     _log.info('rebuild index requested: $root');
     _lastError = null;
     await _teardown();

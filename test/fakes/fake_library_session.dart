@@ -304,10 +304,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       throw StateError('No library is open');
     }
     indexRebuilds++;
+    // Held while a test wants the run in flight (the row's busy state, or
+    // a second tap landing mid-run).
+    final gate = rebuildGate;
+    if (gate != null) await gate.future;
   }
 
   /// How many times the index was rebuilt on request (#368).
   int indexRebuilds = 0;
+
+  /// Set to pause [rebuildIndex] in flight; complete it to finish.
+  Completer<void>? rebuildGate;
 
   @override
   Future<bool> get debugLogsEnabled async => true;

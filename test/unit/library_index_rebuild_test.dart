@@ -71,4 +71,39 @@ void main() {
     await expectLater(controller.rebuildIndex(), throwsStateError);
     await controller.dispose();
   });
+
+  test('two rebuilds in a row coalesce into one', () async {
+    // #493: rebuildIndex tears the session down and deletes the index. A
+    // second call while the first runs must not do that again over the file
+    // the first is opening or scanning.
+    var deletes = 0;
+    final controller = LibraryController(
+      appDb,
+      indexDbFactory: indexDb,
+      indexFileOf: (libraryPath) async {
+        deletes++;
+        return File(p.join(tmp.path, '${p.basename(libraryPath)}.db'));
+      },
+      rescanInterval: const Duration(hours: 1),
+    );
+    await controller.open(root.path, create: false);
+
+    final first = controller.rebuildIndex();
+    final second = controller.rebuildIndex();
+    expect(
+      identical(first, second),
+      isTrue,
+      reason: 'the second call joined the one already running',
+    );
+    await first;
+    await second;
+
+    expect(deletes, 1, reason: 'the index was deleted exactly once');
+    expect(controller.phase, LibraryPhase.ready);
+    expect((await controller.children(0)).map((note) => note.name).toList(), [
+      'a.md',
+    ]);
+    await controller.close();
+    await controller.dispose();
+  });
 }
