@@ -369,20 +369,23 @@ final class LiveTables {
       if (metrics.isEmpty) {
         ranges.add((start, end));
       } else {
+        // The painter measures the cell as it is drawn, its hidden marks
+        // left out: a line boundary comes back as an offset of that drawn
+        // text, and is read back into the source through the stretches it
+        // was made of (`_sourceOf`) — adding the cell's start would put
+        // every break short of its word by the marks before it.
+        final shown = _shownOf(tokens, start, end, hiddenAtRest);
         var from = start;
+        var drawn = 0;
         for (var line = 0; line < metrics.length; line++) {
           // The last visual line takes the cell's own end: the ranges are
           // contiguous, so they cut the cell's source into what each line
-          // shows and nothing falls between them. The painter measures the
-          // cell's own text, so a boundary comes back in its coordinates
-          // and the cell's start is added there — a range in the line's is
-          // what the pieces are.
-          var to = line == metrics.length - 1
-              ? end
-              : start +
-                    painter
-                        .getLineBoundary(TextPosition(offset: from - start))
-                        .end;
+          // shows and nothing falls between them.
+          var to = end;
+          if (line < metrics.length - 1) {
+            drawn = painter.getLineBoundary(TextPosition(offset: drawn)).end;
+            to = _sourceOf(shown, start, drawn);
+          }
           if (to < from || to > end) to = to < from ? from : end;
           ranges.add((from, to));
           from = to;
@@ -702,23 +705,62 @@ final class LiveTables {
     bool Function(Token token) hiddenAtRest,
     TextStyle? Function(Token token) styleOf,
   ) {
-    if (end <= start) return const <InlineSpan>[];
-    final spans = <InlineSpan>[];
+    return <InlineSpan>[
+      for (final (from, to, token) in _segments(tokens, start, end))
+        if (token == null)
+          TextSpan(text: text.substring(from, to))
+        else if (!hiddenAtRest(token))
+          TextSpan(text: text.substring(from, to), style: styleOf(token)),
+    ];
+  }
+
+  /// The stretches of source `[start, end)` is drawn from, in order: what
+  /// [_spans] draws of it, its hidden marks left out.
+  static List<(int, int)> _shownOf(
+    List<Token> tokens,
+    int start,
+    int end,
+    bool Function(Token token) hiddenAtRest,
+  ) => <(int, int)>[
+    for (final (from, to, token) in _segments(tokens, start, end))
+      if (token == null || !hiddenAtRest(token)) (from, to),
+  ];
+
+  /// The source offset the drawn text's offset [drawn] stands for, [shown]
+  /// being the stretches of source that text is made of, from [start]: the
+  /// [drawn]-th character of them laid end to end. An offset between two
+  /// stretches, where hidden marks sit, is the earlier one's end — a line
+  /// broken there ends on its text, and the marks open the next line, with
+  /// the word they belong to.
+  static int _sourceOf(List<(int, int)> shown, int start, int drawn) {
+    var left = drawn;
+    for (final (from, to) in shown) {
+      if (left <= to - from) return from + left;
+      left -= to - from;
+    }
+    return shown.isEmpty ? start : shown.last.$2;
+  }
+
+  /// `[start, end)` cut at [tokens]' edges: each token's stretch, clipped to
+  /// it, and the stretches between them, which have no token.
+  static List<(int, int, Token?)> _segments(
+    List<Token> tokens,
+    int start,
+    int end,
+  ) {
+    if (end <= start) return const <(int, int, Token?)>[];
+    final segments = <(int, int, Token?)>[];
     var at = start;
     for (final token in tokens) {
       if (token.end <= at || token.start >= end) continue;
       final from = token.start < at ? at : token.start;
       final to = token.end > end ? end : token.end;
-      if (from > at) spans.add(TextSpan(text: text.substring(at, from)));
-      if (!hiddenAtRest(token)) {
-        spans.add(
-          TextSpan(text: text.substring(from, to), style: styleOf(token)),
-        );
-      }
+      if (from > at) segments.add((at, from, null));
+      segments.add((from, to, token));
       at = to;
     }
-    if (at < end) spans.add(TextSpan(text: text.substring(at, end)));
-    return spans;
+    if (at < end) segments.add((at, end, null));
+    return segments;
   }
 
   /// How wide one character of a gap is before its spacing: a hundredth of
