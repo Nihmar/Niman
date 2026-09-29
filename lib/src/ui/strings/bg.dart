@@ -1648,6 +1648,11 @@ final class BulgarianStrings extends Strings {
       'PDF е картина на страниците; инсталирайте браузър за избираем текст.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Грешка в машината за PDF ($reason): бележката е начертана '
+      'като изображение.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF като изображение';
 
   @override

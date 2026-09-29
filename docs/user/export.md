@@ -26,13 +26,17 @@ one file:
   none of those browsers the note is drawn instead: a picture of its
   pages, which cannot be selected. That is not what everyone asked for,
   so Niman says it *before* it starts drawing and lets you stop there,
-  and says it again when the file is written. The drawn pages show the
-  note's pictures too — the fallback reads and draws them, it does not
-  leave them out — and their pages break between two lines, so a page
-  never cuts one in half. A PDF export says it is running while it runs —
-  the engine printing, or the pages being drawn one by one — and can be
-  stopped from the same dialog: a long note is minutes of work, not a
-  hang.
+  and says it again when the file is written. An engine that is there and
+  cannot print — a browser that refuses, a print that times out — is not
+  the same as no engine at all: the note is drawn anyway, and the message
+  names the reason. The engine prints with a profile of its own, never
+  the one your browser is using, so having Edge open does not stop the
+  export. The drawn pages show the note's pictures too — the fallback
+  reads and draws them, it does not leave them out — and their pages
+  break between two lines, so a page never cuts one in half. A PDF export
+  says it is running while it runs — the engine printing, or the pages
+  being drawn one by one — and can be stopped from the same dialog: a
+  long note is minutes of work, not a hang.
 - **EPUB** — the note as a book of one chapter, for an e-reader: the same
   page (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the
   file. A `cover:` key in the note's frontmatter names a picture the book

@@ -1638,6 +1638,10 @@ final class BosnianStrings extends Strings {
       'birati.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Greška PDF motora ($reason): bilješka je nacrtana kao slika.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF kao slika';
 
   @override

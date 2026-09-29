@@ -1641,6 +1641,11 @@ final class BasqueStrings extends Strings {
       'PDFa orrialdeen irudia da; instalatu nabigatzailea testua hautatzeko.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF motorrak huts egin du ($reason): oharra irudi gisa '
+      'marraztu da.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF irudi gisa';
 
   @override

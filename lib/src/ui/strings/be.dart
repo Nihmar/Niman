@@ -1634,6 +1634,11 @@ final class BelarusianStrings extends Strings {
       'выдзяляльны тэкст.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Памылка рухавіка PDF ($reason): нататка была намалявана як '
+      'выява.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF як выява';
 
   @override

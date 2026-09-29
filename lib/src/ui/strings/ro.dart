@@ -1646,6 +1646,11 @@ final class RomanianStrings extends Strings {
       'selectabil.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Motorul PDF a eșuat ($reason): nota a fost desenată ca '
+      'imagine.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF ca imagine';
 
   @override

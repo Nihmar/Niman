@@ -1629,6 +1629,11 @@ final class LatvianStrings extends Strings {
       'PDF ir lapu attēls; instalē pārlūku, lai tekstu varētu atlasīt.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF dzinējs neizdevās ($reason): piezīme tika uzzīmēta kā '
+      'attēls.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF kā attēls';
 
   @override

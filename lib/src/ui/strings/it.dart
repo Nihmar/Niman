@@ -1654,6 +1654,11 @@ final class ItalianStrings extends Strings {
       'avere testo selezionabile.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Il motore PDF ha fallito ($reason): la nota è stata disegnata '
+      'come immagine.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF come immagine';
 
   @override

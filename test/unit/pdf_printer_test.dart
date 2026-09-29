@@ -146,6 +146,35 @@ void main() {
         isTrue,
       );
     });
+
+    test('a missing engine is asked again, not remembered', () async {
+      // A machine that answers "none" once — a `reg.exe` the antivirus was
+      // scanning right after an install, a browser mid-update — is not a
+      // machine without a browser: the next export asks again (device
+      // report, 2026-09-29).
+      var found = false;
+      final printer = ProcessPdfPrinter(
+        findEngine: () async => found ? '/usr/bin/chromium' : null,
+      );
+
+      expect(await printer.canPrint, isFalse);
+      found = true;
+      expect(await printer.canPrint, isTrue);
+    });
+
+    test('the engine found is remembered', () async {
+      var asks = 0;
+      final printer = ProcessPdfPrinter(
+        findEngine: () async {
+          asks++;
+          return '/usr/bin/chromium';
+        },
+      );
+
+      expect(await printer.canPrint, isTrue);
+      expect(await printer.canPrint, isTrue);
+      expect(asks, 1, reason: 'a found engine is not searched for twice');
+    });
   });
 
   group('printing', () {
@@ -171,6 +200,13 @@ void main() {
       expect(calls.single.$2, contains('--no-pdf-header-footer'));
       expect(calls.single.$2, contains('--print-to-pdf=/tmp/out.pdf'));
       expect(calls.single.$2.last, Uri.file('/tmp/page.html').toString());
+      // The engine gets a profile of its own, beside the page: the user's
+      // Edge may be open, and a profile takes one process (device report,
+      // 2026-09-29).
+      expect(
+        calls.single.$2,
+        contains('--user-data-dir=${p.join('/tmp', 'engine-profile')}'),
+      );
     });
 
     test('no engine is no engine', () async {

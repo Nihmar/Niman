@@ -1494,6 +1494,9 @@ final class ChineseStrings extends Strings {
   String get exportPdfPicture => 'PDF 是页面的图片；安装浏览器后文字可选择。';
 
   @override
+  String exportPdfEngineFailed(Object reason) => 'PDF 引擎失败（$reason）：笔记已绘制为图片。';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF 为页面图片';
 
   @override

@@ -1633,6 +1633,11 @@ final class LithuanianStrings extends Strings {
       'galima žymėti.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF variklis nepavyko ($reason): užrašas nupieštas kaip '
+      'vaizdas.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF kaip vaizdas';
 
   @override

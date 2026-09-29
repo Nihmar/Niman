@@ -1626,6 +1626,11 @@ final class CzechStrings extends Strings {
       'vybrat.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Chyba PDF enginu ($reason): poznámka byla vykreslena jako '
+      'obrázek.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF jako obrázek';
 
   @override

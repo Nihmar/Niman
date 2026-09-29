@@ -1627,6 +1627,11 @@ final class SlovenianStrings extends Strings {
       'PDF je slika strani; za izbirno besedilo namestite brskalnik.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Pogon PDF je spodletel ($reason): zapisek je bil narisan kot '
+      'slika.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF kot slika';
 
   @override

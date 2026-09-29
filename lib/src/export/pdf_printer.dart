@@ -208,9 +208,18 @@ const List<String> chromiumExecutables = <String>[
 ];
 
 /// The flags every engine prints headless with.
-List<String> printFlags(String pdfPath) => <String>[
+///
+/// [profile] is the browser profile the engine is handed. Without one a
+/// Chromium opens the *user's own* profile, and a profile takes one process:
+/// an Edge already open answers the print with a refusal, or with nothing at
+/// all, which reads as a machine with no engine — pictures drawn silently
+/// (device report, 2026-09-29). The throwaway profile the printer passes
+/// lives in the export's own scratch, so it goes when that goes and the
+/// user's browser is never touched.
+List<String> printFlags(String pdfPath, {String? profile}) => <String>[
   '--headless=new',
   '--disable-gpu',
+  if (profile != null) '--user-data-dir=$profile',
   // The page is one local file and its pictures are `file:` URLs into the
   // library: without this a Chromium treats every file as its own opaque
   // origin and refuses to load them.
@@ -369,6 +378,12 @@ final class ProcessPdfPrinter implements PdfPrinter {
     if (!_searched) {
       _searched = true;
       _found = await (findEngine ?? _findEngine)();
+      // A found engine is remembered; a missing one is not. A machine that
+      // answers "none" this minute may have one the next — a browser
+      // mid-update, a `reg.exe` that timed out on the first run after an
+      // install — and a session-long "there is no browser" turns every
+      // later export into pictures (device report, 2026-09-29).
+      if (_found == null) _searched = false;
     }
     return _found;
   }
@@ -383,7 +398,7 @@ final class ProcessPdfPrinter implements PdfPrinter {
     final ProcessAnswer answer;
     try {
       answer = await run(exe, <String>[
-        ...printFlags(pdfPath),
+        ...printFlags(pdfPath, profile: _profileFor(htmlPath)),
         Uri.file(htmlPath).toString(),
       ], timeout: timeout);
     } on ProcessTimedOut {
@@ -399,6 +414,12 @@ final class ProcessPdfPrinter implements PdfPrinter {
     if (written == 0) return const PdfFailed('the PDF is empty');
     return const PdfPrinted();
   }
+
+  /// The engine's throwaway profile: a directory beside the page, inside
+  /// the export's own scratch. The engine makes it, and the sweep that
+  /// removes the scratch takes it with it.
+  static String _profileFor(String htmlPath) =>
+      p.join(p.dirname(htmlPath), 'engine-profile');
 
   /// The default discovery, with this printer's own process and file
   /// seams.

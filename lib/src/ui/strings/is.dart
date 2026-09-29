@@ -1633,6 +1633,10 @@ final class IcelandicStrings extends Strings {
       'texta.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF-vélin mistókst ($reason): skjalið var teiknað sem mynd.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF sem mynd';
 
   @override

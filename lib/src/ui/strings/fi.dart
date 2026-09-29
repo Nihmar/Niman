@@ -1645,6 +1645,11 @@ final class FinnishStrings extends Strings {
       'PDF on kuva sivuista; asenna selain, niin teksti on valittavissa.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF-moottori epäonnistui ($reason): muistiinpano piirrettiin '
+      'kuvana.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF kuvana';
 
   @override

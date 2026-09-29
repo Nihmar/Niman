@@ -1686,6 +1686,11 @@ final class GreekStrings extends Strings {
       'περιήγησης για επιλέξιμο κείμενο.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Ο μηχανισμός PDF απέτυχε ($reason): η σημείωση σχεδιάστηκε ως '
+      'εικόνα.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF ως εικόνα';
 
   @override

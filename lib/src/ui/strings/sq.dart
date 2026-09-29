@@ -1647,6 +1647,10 @@ final class AlbanianStrings extends Strings {
       'zgjedhshëm.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Motori PDF dështoi ($reason): shënimi u vizatua si imazh.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF si imazh';
 
   @override

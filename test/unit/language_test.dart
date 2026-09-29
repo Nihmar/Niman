@@ -486,6 +486,8 @@ void main() {
         'shellActionFailed': () => AppStrings.shellActionFailed,
         'templateOpenFailed': () => AppStrings.templateOpenFailed,
         'notionImportFailed': () => AppStrings.notionImportFailed,
+        'exportPdfEngineFailed': () =>
+            AppStrings.exportPdfEngineFailed('the engine exited with 3'),
         'trashActionFailed': () => AppStrings.trashActionFailed,
         'trashEmptyFailed': () => AppStrings.trashEmptyFailed,
         'reindexFailed': () => AppStrings.reindexFailed,

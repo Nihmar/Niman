@@ -1638,6 +1638,11 @@ final class SwedishStrings extends Strings {
       'PDF:en är en bild av sidorna; installera en webbläsare för valbar text.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF-motorn misslyckades ($reason): anteckningen ritades som '
+      'en bild.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF som bild';
 
   @override

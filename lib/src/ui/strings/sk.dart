@@ -1632,6 +1632,11 @@ final class SlovakStrings extends Strings {
       'PDF je obrázok stránok; nainštalujte prehliadač pre vyberateľný text.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF engine zlyhal ($reason): poznámka bola vykreslená ako '
+      'obrázok.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF ako obrázok';
 
   @override

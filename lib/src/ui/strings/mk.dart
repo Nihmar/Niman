@@ -1649,6 +1649,11 @@ final class MacedonianStrings extends Strings {
       'да се избере.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF моторот не успеа ($reason): белешката е нацртана како '
+      'слика.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF како слика';
 
   @override

@@ -1653,6 +1653,11 @@ final class DutchStrings extends Strings {
       'voor selecteerbare tekst.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'De PDF-engine is mislukt ($reason): de notitie is als '
+      'afbeelding getekend.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF als afbeelding';
 
   @override

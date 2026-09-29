@@ -1606,6 +1606,11 @@ final class HindiStrings extends Strings {
       'इंस्टॉल करें।';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF इंजन विफल रहा ($reason): नोट को चित्र के रूप में बनाया '
+      'गया।';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF चित्र के रूप में';
 
   @override
