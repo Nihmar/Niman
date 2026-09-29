@@ -41,3 +41,28 @@ was decided, and when.
   the type are one row, **Add a property** is the last row, and the **Raw
   YAML** toggle is the escape hatch. State C keeps the raw YAML as the only
   thing shown for a block that does not parse.
+
+## The panel as the note's head (2026-09-29)
+
+Once it was in the app, the panel always above the note was the report: *"the
+fact that it is ALWAYS visible makes the editor unusable, it eats too much
+space."* The shape that answered it, settled the same day:
+
+* **It opens closed** — one row of chrome, the fields a tap away on the
+  handle. A note opens as a note, not as a form.
+* **It belongs to the note's head.** Scroll the note past its frontmatter and
+  the panel steps aside; come back to the top and it is there as you left it,
+  closed or open. In the read pane the frontmatter takes no room in the
+  preview, so the panel *is* the head and any scroll past the top is past it;
+  in the editor the head is the block's own lines, at the row height the
+  surface draws them.
+* **Add a property never leaves.** It is the panel's one action: it is there
+  on a closed panel, and a long field list scrolls under it rather than over
+  it. A block the parser refused gets none — its keys are not this panel's to
+  add to.
+* **A date is picked.** A `date:` field opens the platform's own picker — the
+  value is a day, not a string that happens to parse — and the YAML gets the
+  `YYYY-MM-DD` the parser reads back as a date.
+* **A library can turn it off.** **Settings › Editor › Properties panel**
+  (`frontmatterPanel` in `.niman/settings.json`), on by default; off, a note
+  is its own text in both surfaces.

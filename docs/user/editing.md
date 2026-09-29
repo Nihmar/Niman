@@ -372,7 +372,8 @@ the text. It stays when there is nothing to format, in the preview or on
 a list note, so the ⋮ is always in the same place. The note's name is
 in the window's title. A note that opens with frontmatter shows its
 fields above the first line of the note as well, in both editors and in
-the read view (see [frontmatter](organization.md)).
+the read view: closed to one row until you open it, and away while the
+note is scrolled past its head (see [frontmatter](organization.md)).
 
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
 in the note's bar offers the same actions.

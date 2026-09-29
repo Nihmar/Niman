@@ -1320,6 +1320,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Уласцівасці';
   @override
+  String get frontmatterPanelTitle => 'Панэль уласцівасцей';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Паказвае ўласцівасці нататкі над ёй. Згорнуты, пакуль вы яго '
+      'не адкрыеце, і сыходзіць, калі пракруціць.';
+  @override
   String get frontmatterShowRaw => 'Чысты YAML';
   @override
   String get frontmatterShowFields => 'Палі';

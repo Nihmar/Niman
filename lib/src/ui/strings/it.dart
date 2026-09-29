@@ -1338,6 +1338,12 @@ final class ItalianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Proprietà';
   @override
+  String get frontmatterPanelTitle => 'Pannello delle proprietà';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Mostra le proprietà della nota sopra di essa. Chiuso finché '
+      'non lo apri, e si ritira quando scorri.';
+  @override
   String get frontmatterShowRaw => 'YAML grezzo';
   @override
   String get frontmatterShowFields => 'Campi';

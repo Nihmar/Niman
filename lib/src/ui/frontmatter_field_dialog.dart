@@ -6,8 +6,13 @@
 /// values are its items' own YAML, shown and read as the inside of a flow
 /// list (`frontmatterListItems`), so an item holding a comma stays one item.
 /// The key is fixed when an existing field is edited: renaming a key is an
-/// edit of its own the panel does not make.
+/// edit of its own the panel does not make. Each type gets the input it
+/// deserves: a switch for a boolean, and for a date the platform's own picker
+/// rather than a string that happens to parse as one — the answer comes back
+/// as the `YYYY-MM-DD` the parser reads as a date again.
 library;
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
@@ -58,8 +63,17 @@ final class _FrontmatterFieldDialogState
   late FrontmatterFieldType _type = widget.type;
   late bool _bool = _isTrue(widget.values);
 
+  /// The date a date field's value is: what the field was written with when
+  /// it parses as one, else null until the picker gives one. The dialog
+  /// answers the `YYYY-MM-DD` this writes back (`_dateText`), which is the
+  /// form the parser reads as a date again.
+  late DateTime? _date = _asDate(widget.values);
+
   static bool _isTrue(List<String> values) =>
       values.isNotEmpty && values.first.trim().toLowerCase() == 'true';
+
+  static DateTime? _asDate(List<String> values) =>
+      values.isEmpty ? null : DateTime.tryParse(values.first.trim());
 
   @override
   void dispose() {
@@ -70,11 +84,17 @@ final class _FrontmatterFieldDialogState
 
   bool get _adding => widget.fieldKey == null;
 
-  bool get _canSave => !_adding || _key.text.trim().isNotEmpty;
+  bool get _canSave =>
+      (!_adding || _key.text.trim().isNotEmpty) &&
+      // A date field with no date is no field: the picker is what fills it.
+      (_type != FrontmatterFieldType.date || _date != null);
 
   List<String> get _enteredValues {
     if (_type == FrontmatterFieldType.boolean) {
       return [if (_bool) 'true' else 'false'];
+    }
+    if (_type == FrontmatterFieldType.date) {
+      return [_dateText(_date!)];
     }
     if (_type == FrontmatterFieldType.list) {
       // Read as the inside of a flow list, the way the items are shown:
@@ -130,7 +150,15 @@ final class _FrontmatterFieldDialogState
                   ),
               ],
               onChanged: (type) {
-                if (type != null) setState(() => _type = type);
+                if (type == null) return;
+                setState(() {
+                  // A value typed as a date becomes the picker's own date, so
+                  // switching the type does not throw the value away.
+                  if (type == FrontmatterFieldType.date && _date == null) {
+                    _date = DateTime.tryParse(_value.text.trim());
+                  }
+                  _type = type;
+                });
               },
             ),
             const SizedBox(height: 12),
@@ -142,6 +170,8 @@ final class _FrontmatterFieldDialogState
                 title: Text(_bool ? 'true' : 'false'),
                 onChanged: (value) => setState(() => _bool = value),
               )
+            else if (_type == FrontmatterFieldType.date)
+              _dateField(context)
             else
               TextField(
                 key: const Key('frontmatter-value-field'),
@@ -170,6 +200,48 @@ final class _FrontmatterFieldDialogState
       ],
     );
   }
+
+  /// The value of a date field: the date itself, opened in the platform's own
+  /// picker. A date is picked rather than typed — the field is a `date:` one,
+  /// and the day it names is a day, not a string that happens to parse.
+  Widget _dateField(BuildContext context) {
+    final date = _date;
+    return InkWell(
+      key: const Key('frontmatter-date-field'),
+      borderRadius: BorderRadius.circular(4),
+      onTap: () => unawaited(_pickDate(context)),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: AppStrings.frontmatterValueLabel,
+          suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+        ),
+        child: Text(date == null ? '' : _dateText(date)),
+      ),
+    );
+  }
+
+  /// Asks the platform for a date, over the field's own or today's.
+  Future<void> _pickDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _date = DateTime(picked.year, picked.month, picked.day);
+      // What a text field would have held, for a type switched back to text.
+      _value.text = _dateText(_date!);
+    });
+  }
+
+  /// A date as the YAML carries it: `2026-09-01`, a bare timestamp the parser
+  /// reads back as a date.
+  static String _dateText(DateTime date) =>
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
 
   static String _typeLabel(FrontmatterFieldType type) => switch (type) {
     FrontmatterFieldType.text => AppStrings.frontmatterTypeText,

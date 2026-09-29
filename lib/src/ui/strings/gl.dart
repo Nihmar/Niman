@@ -1334,6 +1334,12 @@ final class GalicianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Propiedades';
   @override
+  String get frontmatterPanelTitle => 'Panel de propiedades';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Amosa as propiedades da nota enriba. Pechado ata que o abras, '
+      'e retírase ao desprazarte.';
+  @override
   String get frontmatterShowRaw => 'YAML en bruto';
   @override
   String get frontmatterShowFields => 'Campos';

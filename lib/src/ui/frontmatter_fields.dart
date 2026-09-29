@@ -13,6 +13,16 @@
 /// shows its reason and its raw source and no field rows, so a note whose
 /// frontmatter Niman cannot read is never made worse by the panel. A note with
 /// no block shows nothing.
+///
+/// The panel is the note's *head*, and it behaves like one: it opens closed —
+/// one row of chrome, the fields a tap away — and it takes no room at all
+/// while the note is scrolled past its head, so a long note is never read
+/// through a panel that belongs to its first lines. Which of the three states
+/// it is in is the owner's ([FrontmatterFields.panel]), because the read pane
+/// and the live editor show the same panel and a state kept here would let the
+/// two drift; the owner is handed the taps through
+/// [FrontmatterFields.onToggle]. The three animate into one another, so
+/// neither the note nor the panel jumps.
 library;
 
 import 'package:flutter/material.dart';
@@ -21,6 +31,20 @@ import 'package:niman/src/frontmatter/typed_fields.dart';
 import 'package:niman/src/ui/frontmatter_field_dialog.dart';
 import 'package:niman/src/ui/strings.dart';
 
+/// How much of the frontmatter panel is showing (#157).
+enum FrontmatterPanel {
+  /// The note is scrolled past its head, and the panel with it: no room at
+  /// all, not even the handle's row.
+  hidden,
+
+  /// The note is at its head and the panel is closed: one row of chrome, the
+  /// fields a tap away.
+  closed,
+
+  /// The reader opened it: the fields, or the raw YAML behind the toggle.
+  open,
+}
+
 /// A note's frontmatter as fields.
 final class FrontmatterFields extends StatefulWidget {
   /// Builds the panel over the note's head, [note].
@@ -28,6 +52,8 @@ final class FrontmatterFields extends StatefulWidget {
     required this.note,
     required this.onSet,
     required this.onRemove,
+    required this.panel,
+    required this.onToggle,
     super.key,
   });
 
@@ -40,6 +66,13 @@ final class FrontmatterFields extends StatefulWidget {
 
   /// Called with a key to take out of the block.
   final void Function(String key) onRemove;
+
+  /// How much of the panel is showing: the owner keeps this, because the two
+  /// surfaces show the panel at once and only one of them writes it down.
+  final FrontmatterPanel panel;
+
+  /// Called when the reader opens the closed panel, or closes the open one.
+  final VoidCallback onToggle;
 
   @override
   State<FrontmatterFields> createState() => _FrontmatterFieldsState();
@@ -56,28 +89,55 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
   /// with many keys never pushes the note it is read with off the pane.
   static const double _maxListHeight = 260;
 
+  /// How long the panel takes to open, close or leave: the toolbar's own
+  /// motion (note_view), so the chrome of a note moves at one pace.
+  static const Duration _motion = Duration(milliseconds: 200);
+
   @override
   Widget build(BuildContext context) {
     final block = frontmatterBlock(widget.note);
     if (block == null) return const SizedBox.shrink();
     final parsed = frontmatterFieldsIn(block.text);
     final malformed = parsed.error != null;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: malformed
-          ? _brokenPanel(context, block.text, parsed.error!)
-          : _fieldsPanel(context, block.text, parsed.fields),
+    // A hidden panel is the same panel at no height, never an absent one:
+    // it keeps its state (the raw toggle), and the size it gains back when
+    // the note returns to its head is animated rather than jumped.
+    return AnimatedSize(
+      duration: _motion,
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: widget.panel == FrontmatterPanel.hidden
+          ? const SizedBox(width: double.infinity, height: 0)
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: _panel(
+                context,
+                // The add row is the panel's one action and it is always
+                // there: on a closed panel it is what the panel is for, and
+                // under a long list it is not scrolled away with the rows —
+                // adding a key is never behind a scroll or a tap. A block the
+                // parser refused gets none: its keys are not this panel's to
+                // add to.
+                add: malformed ? null : _addRow(context),
+                body: (context) => malformed
+                    ? _brokenBody(context, block.text, parsed.error!)
+                    : _fieldsBody(context, block.text, parsed.fields),
+              ),
+            ),
     );
   }
 
-  /// The panel with a block the parser could read: the header, and the fields
-  /// or the raw source behind the toggle.
-  Widget _fieldsPanel(
-    BuildContext context,
-    String source,
-    List<FrontmatterField> fields,
-  ) {
+  /// The panel's chrome: its one row, and [body] under it while it is open.
+  ///
+  /// The row itself is always drawn — it is the handle that opens the panel,
+  /// so it keeps its place, and the body is what a tap adds or takes away.
+  Widget _panel(
+    BuildContext context, {
+    required WidgetBuilder body,
+    Widget? add,
+  }) {
     final theme = Theme.of(context);
+    final open = widget.panel == FrontmatterPanel.open;
     return Container(
       key: const Key('frontmatter-fields'),
       decoration: BoxDecoration(
@@ -87,35 +147,46 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
         border: Border.all(color: theme.colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(9),
       ),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+      // Tighter around a closed panel: one row of chrome with the fields
+      // away is a handle, and it is charged for what it is.
+      padding: EdgeInsets.fromLTRB(12, open ? 10 : 4, 12, open ? 8 : 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _header(context),
-          const SizedBox(height: 4),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: _maxListHeight),
-            child: SingleChildScrollView(
-              child: _raw
-                  ? _rawSource(context, source)
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: _fields(context, fields),
-                    ),
-            ),
-          ),
+          _header(context, open: open),
+          if (open) ...[const SizedBox(height: 4), body(context)],
+          ?add,
         ],
       ),
     );
   }
 
-  /// The panel with a block the parser refused: the reason and the raw source,
+  /// The body with a block the parser could read: the fields, or the raw
+  /// source behind the toggle.
+  Widget _fieldsBody(
+    BuildContext context,
+    String source,
+    List<FrontmatterField> fields,
+  ) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: _maxListHeight),
+      child: SingleChildScrollView(
+        child: _raw
+            ? _rawSource(context, source)
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: _fields(context, fields),
+              ),
+      ),
+    );
+  }
+
+  /// The body with a block the parser refused: the reason and the raw source,
   /// and no field rows — the block is left exactly as it is written.
-  Widget _brokenPanel(BuildContext context, String source, String error) {
+  Widget _brokenBody(BuildContext context, String source, String error) {
     return Column(
-      key: const Key('frontmatter-fields'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _broken(context, error),
@@ -125,43 +196,66 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     );
   }
 
-  /// The panel's one row of chrome: the title on the left, the raw toggle on
-  /// the right.
-  Widget _header(BuildContext context) {
+  /// The panel's one row of chrome: the handle that opens and closes it on
+  /// the left, the raw toggle on the right — the toggle only while the body it
+  /// switches is showing, and the handle's chevron saying which way a tap
+  /// goes (down when there is a body under it, right when there is not).
+  Widget _header(BuildContext context, {required bool open}) {
     final theme = Theme.of(context);
     return Row(
       children: [
         Expanded(
-          child: Text(
-            AppStrings.frontmatterTitle.toUpperCase(),
-            key: const Key('frontmatter-properties'),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              letterSpacing: 1.1,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        InkWell(
-          key: const Key('frontmatter-raw-toggle'),
-          borderRadius: BorderRadius.circular(999),
-          onTap: () => setState(() => _raw = !_raw),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-            decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              _raw
-                  ? AppStrings.frontmatterShowFields
-                  : AppStrings.frontmatterShowRaw,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.primary,
+          child: InkWell(
+            key: const Key('frontmatter-collapse-toggle'),
+            borderRadius: BorderRadius.circular(7),
+            onTap: widget.onToggle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(
+                children: [
+                  Icon(
+                    open ? Icons.expand_more : Icons.chevron_right,
+                    size: 18,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      AppStrings.frontmatterTitle.toUpperCase(),
+                      key: const Key('frontmatter-properties'),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        letterSpacing: 1.1,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
+        if (open)
+          InkWell(
+            key: const Key('frontmatter-raw-toggle'),
+            borderRadius: BorderRadius.circular(999),
+            onTap: () => setState(() => _raw = !_raw),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                _raw
+                    ? AppStrings.frontmatterShowFields
+                    : AppStrings.frontmatterShowRaw,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -207,7 +301,9 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     );
   }
 
-  /// One row per key, then the add.
+  /// One row per key: the list the panel scrolls, with the add under it. The
+  /// rows only — the add row is the panel's, so it stays put whatever this
+  /// list does (`_panel`).
   List<Widget> _fields(BuildContext context, List<FrontmatterField> fields) {
     final theme = Theme.of(context);
     return [
@@ -222,7 +318,6 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
           ),
         ),
       for (final field in fields) _fieldRow(context, field),
-      _addRow(context),
     ];
   }
 
@@ -364,7 +459,8 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
     }
   }
 
-  /// The last row: a small box with a plus and the words that add a key.
+  /// The panel's action row: a small box with a plus and the words that add a
+  /// key.
   Widget _addRow(BuildContext context) {
     final theme = Theme.of(context);
     return Align(

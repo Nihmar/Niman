@@ -4,7 +4,9 @@
 // they say what the panel does to the file, not how it is built.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/ui/note_view.dart';
 
@@ -19,14 +21,16 @@ const String _note =
     '\n'
     'Body text.\n';
 
-/// A note view over [note], the read pane showing.
-Widget _app(String note) => MaterialApp(
+/// A note view over [note], the read pane showing, with the library's
+/// properties-panel setting ([panel]).
+Widget _app(String note, {bool panel = true}) => MaterialApp(
   home: Scaffold(
     body: NoteView(
       path: '/tmp/niman-frontmatter-panel-test.md',
       showLineNumbers: true,
       autofocusEditor: false,
       showPreview: true,
+      frontmatterPanel: panel,
       readNote: (_) async => note,
       writeNote: (_, _) async {},
     ),
@@ -68,6 +72,35 @@ Future<void> _fillField(
   await tester.pumpAndSettle();
 }
 
+/// Opens the fields panel through its handle: the panel opens closed (#157).
+Future<void> _openPanel(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('frontmatter-collapse-toggle')));
+  await tester.pumpAndSettle();
+}
+
+/// Scrolls the read pane to [offset], so a case can drive the note past its
+/// head and back without a gesture.
+Future<void> _scrollReadPane(WidgetTester tester, double offset) async {
+  tester
+      .widget<MarkdownReadView>(find.byType(MarkdownReadView))
+      .controller!
+      .jumpTo(offset);
+  await tester.pumpAndSettle();
+}
+
+/// Picks day [day] in the picker a date field opens (#157).
+///
+/// The dialog seeds the picker with the date the field was written with, so
+/// the month it shows is that date's own.
+Future<void> _pickDay(WidgetTester tester, int day) async {
+  await tester.tap(find.byKey(const Key('frontmatter-date-field')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('$day').last);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('OK'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('a field edit writes the YAML the parser reads back', (
     tester,
@@ -80,8 +113,12 @@ void main() {
     expect(
       find.byKey(const Key('frontmatter-fields')),
       findsOneWidget,
-      reason: 'the read pane shows the note frontmatter as fields',
+      reason: 'the read pane shows the note frontmatter as a panel',
     );
+    // Closed on opening the note: the rows are a tap away (#157).
+    expect(find.byKey(const Key('frontmatter-value-title')), findsNothing);
+    await _openPanel(tester);
+    expect(find.byKey(const Key('frontmatter-value-title')), findsOneWidget);
 
     // A text field: tap the value, change it, save.
     await tester.tap(find.byKey(const Key('frontmatter-value-title')));
@@ -106,6 +143,7 @@ void main() {
   testWidgets('ticking a boolean field writes the note', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
+    await _openPanel(tester);
 
     await tester.tap(find.byKey(const Key('frontmatter-toggle-pinned')));
     await tester.pumpAndSettle();
@@ -122,6 +160,8 @@ void main() {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
 
+    await _openPanel(tester);
+
     // Add a list field: the panel draws it as chips, and the file keeps a
     // YAML list.
     await tester.tap(find.byKey(const Key('frontmatter-add')));
@@ -136,13 +176,21 @@ void main() {
       reason: 'a list is drawn as a list',
     );
 
-    // Change the date: it stays a bare date, read back as one.
+    // Change the date: a date is picked, not typed (#157), and the file
+    // keeps a bare date the parser reads back as one.
     await tester.tap(find.byKey(const Key('frontmatter-value-date')));
     await tester.pumpAndSettle();
-    await _fillField(tester, value: '2026-10-02');
+    expect(
+      find.byKey(const Key('frontmatter-value-field')),
+      findsNothing,
+      reason: 'a date field asks for a date, not for a string',
+    );
+    await _pickDay(tester, 2);
+    await tester.tap(find.byKey(const Key('frontmatter-save')));
+    await tester.pumpAndSettle();
 
-    expect(_text(tester), contains('date: 2026-10-02\n'));
-    expect(parseFrontmatter(_text(tester))!.date, DateTime(2026, 10, 2));
+    expect(_text(tester), contains('date: 2026-09-02\n'));
+    expect(parseFrontmatter(_text(tester))!.date, DateTime(2026, 9, 2));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
@@ -162,6 +210,8 @@ void main() {
         'Body text.\n';
     await tester.pumpWidget(_app(note));
     await tester.pumpAndSettle();
+
+    await _openPanel(tester);
 
     void delete(String key) =>
         tester.widget<InputChip>(find.byKey(Key(key))).onDeleted!();
@@ -199,6 +249,8 @@ void main() {
     await tester.pumpWidget(_app(note));
     await tester.pumpAndSettle();
 
+    await _openPanel(tester);
+
     for (final opener in [
       'frontmatter-value-version',
       'frontmatter-value-desc',
@@ -228,6 +280,8 @@ void main() {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
 
+    await _openPanel(tester);
+
     await tester.tap(find.byKey(const Key('frontmatter-remove-pinned')));
     await tester.pumpAndSettle();
 
@@ -240,6 +294,7 @@ void main() {
   testWidgets('the raw YAML is one toggle away', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
+    await _openPanel(tester);
     expect(find.byKey(const Key('frontmatter-toggle-pinned')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('frontmatter-raw-toggle')));
@@ -270,6 +325,7 @@ void main() {
         'Body text.\n';
     await tester.pumpWidget(_app(malformed));
     await tester.pumpAndSettle();
+    await _openPanel(tester);
 
     expect(find.byKey(const Key('frontmatter-panel-error')), findsOneWidget);
     expect(find.byKey(const Key('frontmatter-raw')), findsOneWidget);
@@ -278,6 +334,99 @@ void main() {
     // Nothing the panel draws changed the note.
     expect(_text(tester), malformed);
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  // The panel is the note's head (#157): one row of chrome on opening the
+  // note, the fields behind the handle.
+  testWidgets('the panel opens closed, and the handle opens and closes it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_note));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('frontmatter-fields')), findsOneWidget);
+    expect(find.byKey(const Key('frontmatter-value-title')), findsNothing);
+    expect(
+      find.byKey(const Key('frontmatter-add')),
+      findsOneWidget,
+      reason: 'the panel’s one action is there on a closed panel too',
+    );
+    expect(find.byKey(const Key('frontmatter-raw-toggle')), findsNothing);
+
+    await _openPanel(tester);
+    expect(find.byKey(const Key('frontmatter-value-title')), findsOneWidget);
+    expect(
+      find.byKey(const Key('frontmatter-raw-toggle')),
+      findsOneWidget,
+      reason: 'the raw toggle belongs to the body it switches',
+    );
+
+    await _openPanel(tester);
+    expect(find.byKey(const Key('frontmatter-fields')), findsOneWidget);
+    expect(find.byKey(const Key('frontmatter-value-title')), findsNothing);
+    expect(find.byKey(const Key('frontmatter-add')), findsOneWidget);
+    expect(_text(tester), _note, reason: 'closing the panel edits nothing');
+    expect(tester.takeException(), isNull);
+  });
+
+  // A note read to its end: the panel belongs to the head, and away from the
+  // head it takes no room at all (#157).
+  testWidgets('scrolling the note past its head puts the panel away', (
+    tester,
+  ) async {
+    final long =
+        '---\n'
+        'title: Enciclopedia\n'
+        '---\n'
+        '\n'
+        '${'Body text.\n' * 80}';
+    await tester.pumpWidget(_app(long));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('frontmatter-fields')), findsOneWidget);
+
+    await _scrollReadPane(tester, 200);
+    expect(
+      find.byKey(const Key('frontmatter-fields')),
+      findsNothing,
+      reason: 'the note left its head, and the panel left with it',
+    );
+
+    // Back at the head, the panel is back — as it was left: closed.
+    await _scrollReadPane(tester, 0);
+    expect(find.byKey(const Key('frontmatter-fields')), findsOneWidget);
+    expect(find.byKey(const Key('frontmatter-value-title')), findsNothing);
+    expect(find.byKey(const Key('frontmatter-add')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  // A phone pane is narrower than any note column, so there is no column to
+  // align to — and the panel used to run to the screen's own edge (device
+  // report, 2026-09-29). It keeps the note's own inset instead.
+  testWidgets('the panel keeps off the pane’s own edges', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(_app(_note));
+    await tester.pumpAndSettle();
+
+    const pane = 360.0; // 1080 physical pixels at 3×.
+    final panel = tester.getRect(find.byKey(const Key('frontmatter-fields')));
+    expect(panel.left, NoteColumn.textInset);
+    expect(panel.right, pane - NoteColumn.textInset);
+    expect(tester.takeException(), isNull);
+  });
+
+  // The library's own setting: a library that wants no panel gets none
+  // (#157).
+  testWidgets('the library setting hides the panel', (tester) async {
+    await tester.pumpWidget(_app(_note, panel: false));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('frontmatter-fields')), findsNothing);
+    expect(find.byKey(const Key('frontmatter-add')), findsNothing);
+    expect(_text(tester), _note);
     expect(tester.takeException(), isNull);
   });
 

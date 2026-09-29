@@ -1331,6 +1331,12 @@ final class FinnishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Ominaisuudet';
   @override
+  String get frontmatterPanelTitle => 'Ominaisuuspaneeli';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Näyttää muistiinpanon ominaisuudet sen yläpuolella. Kiinni, '
+      'kunnes avaat sen, ja väistyy vieritettäessä.';
+  @override
   String get frontmatterShowRaw => 'Raaka YAML';
   @override
   String get frontmatterShowFields => 'Kentät';

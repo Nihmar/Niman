@@ -1324,6 +1324,12 @@ final class SerbianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Својства';
   @override
+  String get frontmatterPanelTitle => 'Панел са својствима';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Приказује својства белешке изнад ње. Затворен док га не '
+      'отворите, и склања се при померању.';
+  @override
   String get frontmatterShowRaw => 'Сирови YAML';
   @override
   String get frontmatterShowFields => 'Поља';

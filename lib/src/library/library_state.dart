@@ -1028,6 +1028,15 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
+  Future<bool> get frontmatterPanel async => (await _library).frontmatterPanel;
+
+  @override
+  Future<void> setFrontmatterPanel({required bool enabled}) async {
+    _log.info('frontmatter panel set to $enabled');
+    await _editLibrary((c) => c.copyWith(frontmatterPanel: enabled));
+  }
+
+  @override
   Future<double> get noteColumnWidth async => (await _library).noteColumnWidth;
 
   @override

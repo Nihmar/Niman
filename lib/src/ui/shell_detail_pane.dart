@@ -53,6 +53,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.typewriter = false,
     this.sourceFont = SourceFont.monospace,
     this.cascadeChecklist = true,
+    this.frontmatterPanel = true,
     this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,
@@ -173,6 +174,9 @@ final class ShellDetailPane extends StatelessWidget {
   /// (#326).
   final bool cascadeChecklist;
 
+  /// Whether a note's properties panel shows above it (#157).
+  final bool frontmatterPanel;
+
   /// See [typewriter].
   final VoidCallback? onToggleTypewriter;
 
@@ -288,6 +292,7 @@ final class ShellDetailPane extends StatelessWidget {
     zen: zen,
     typewriter: typewriter,
     cascadeChecklist: cascadeChecklist,
+    frontmatterPanel: frontmatterPanel,
     onToggleTypewriter: onToggleTypewriter,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,

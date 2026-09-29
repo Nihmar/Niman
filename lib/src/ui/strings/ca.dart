@@ -1350,6 +1350,12 @@ final class CatalanStrings extends Strings {
   @override
   String get frontmatterTitle => 'Propietats';
   @override
+  String get frontmatterPanelTitle => 'Tauler de propietats';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Mostra les propietats de la nota a sobre. Tancat fins que '
+      'l’obriu, i s’aparta en desplaçar-vos.';
+  @override
   String get frontmatterShowRaw => 'YAML en brut';
   @override
   String get frontmatterShowFields => 'Camps';

@@ -1325,6 +1325,12 @@ final class BasqueStrings extends Strings {
   @override
   String get frontmatterTitle => 'Propietateak';
   @override
+  String get frontmatterPanelTitle => 'Propietateen panela';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Oharraren propietateak gainean erakusten ditu. Itxita egoten '
+      'da ireki arte, eta baztertu egiten da korritzean.';
+  @override
   String get frontmatterShowRaw => 'YAML gordina';
   @override
   String get frontmatterShowFields => 'Eremuak';

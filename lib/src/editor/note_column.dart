@@ -68,22 +68,39 @@ final class NoteColumn {
 /// For the chrome that follows the text — the toolbar, the find bars, the
 /// status row. Their background still spans the pane; only what is on
 /// them moves in.
+///
+/// A box that is *not* full bleed — the frontmatter fields panel — asks for
+/// [minInset] as well: with no column to align to (a phone pane), it would
+/// otherwise run to the pane's own edge, where a bordered box reads as cut
+/// off rather than as the note's.
 final class NoteColumnPadding extends StatelessWidget {
-  /// Pads [child] by [column]'s side space.
-  const new({required this.column, required this.child, super.key});
+  /// Pads [child] by [column]'s side space, never less than [minInset].
+  const new({
+    required this.column,
+    required this.child,
+    this.minInset = 0,
+    super.key,
+  });
 
   /// The column to align to.
   final NoteColumn column;
+
+  /// The least space to keep on each side, whatever the column says — the
+  /// note's own [NoteColumn.textInset] for the chrome that has an edge of
+  /// its own.
+  final double minInset;
 
   /// What goes inside it.
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    if (!column.enabled) return child;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = column.sideSpaceIn(constraints.maxWidth);
+        final side = math.max(
+          column.sideSpaceIn(constraints.maxWidth),
+          minInset,
+        );
         if (side == 0) return child;
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: side),

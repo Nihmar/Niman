@@ -1321,6 +1321,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Savybės';
   @override
+  String get frontmatterPanelTitle => 'Savybių skydelis';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Rodo užrašo savybes virš jo. Uždarytas, kol atversite, ir '
+      'pasitraukia slenkant.';
+  @override
   String get frontmatterShowRaw => 'Neapdorotas YAML';
   @override
   String get frontmatterShowFields => 'Laukai';

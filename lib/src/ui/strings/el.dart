@@ -1364,6 +1364,12 @@ final class GreekStrings extends Strings {
   @override
   String get frontmatterTitle => 'Ιδιότητες';
   @override
+  String get frontmatterPanelTitle => 'Πίνακας ιδιοτήτων';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Δείχνει τις ιδιότητες της σημείωσης από πάνω. Κλειστός μέχρι '
+      'να τον ανοίξετε, και αποσύρεται με την κύλιση.';
+  @override
   String get frontmatterShowRaw => 'Ακατέργαστο YAML';
   @override
   String get frontmatterShowFields => 'Πεδία';

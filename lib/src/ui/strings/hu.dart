@@ -1326,6 +1326,12 @@ final class HungarianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Tulajdonságok';
   @override
+  String get frontmatterPanelTitle => 'Tulajdonságok panel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'A jegyzet tulajdonságait mutatja felette. Csukva, amíg ki nem '
+      'nyitod, és elhúzódik görgetéskor.';
+  @override
   String get frontmatterShowRaw => 'Nyers YAML';
   @override
   String get frontmatterShowFields => 'Mezők';

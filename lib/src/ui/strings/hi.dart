@@ -1297,6 +1297,12 @@ final class HindiStrings extends Strings {
   @override
   String get frontmatterTitle => 'प्रॉपर्टी';
   @override
+  String get frontmatterPanelTitle => 'प्रॉपर्टी पैनल';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'नोट के गुण उसके ऊपर दिखाता है। जब तक आप इसे न खोलें बंद रहता '
+      'है, और स्क्रॉल करने पर हट जाता है।';
+  @override
   String get frontmatterShowRaw => 'कच्चा YAML';
   @override
   String get frontmatterShowFields => 'फ़ील्ड';

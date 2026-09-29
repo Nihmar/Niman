@@ -1317,6 +1317,12 @@ final class CroatianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Svojstva';
   @override
+  String get frontmatterPanelTitle => 'Ploča sa svojstvima';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Prikazuje svojstva bilješke iznad nje. Zatvorena dok je ne '
+      'otvorite, a sklanja se pri pomicanju.';
+  @override
   String get frontmatterShowRaw => 'Sirovi YAML';
   @override
   String get frontmatterShowFields => 'Polja';

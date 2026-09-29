@@ -164,6 +164,7 @@ final class NoteView extends StatefulWidget {
     this.zen = false,
     this.typewriter = false,
     this.cascadeChecklist = true,
+    this.frontmatterPanel = true,
     this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
@@ -180,6 +181,10 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the editor shows the keyboard on open (settings toggle).
   final bool autofocusEditor;
+
+  /// Whether the note's frontmatter is drawn as the properties panel above it
+  /// (settings toggle, #157). Off, the note is its own text in both surfaces.
+  final bool frontmatterPanel;
 
   /// Where the note's text sits across the pane (issue #171): both
   /// editors, the preview, the toolbar, the find bars and the status row
@@ -508,6 +513,28 @@ final class _NoteViewState extends State<NoteView>
       ValueNotifier<Set<ToolbarItem>>(const <ToolbarItem>{});
   late final ScrollController _previewScroll = ScrollController();
 
+  /// The editor surface's own scroll, so the fields panel can tell when the
+  /// note has been scrolled off its head and put itself away (#157). The
+  /// surface does not own it: it is handed in and the view keeps it.
+  final ScrollController _sourceScroll = ScrollController();
+
+  /// Whether the reader opened the fields panel (#157).
+  ///
+  /// Closed until they do: the panel belongs to the note's first lines, and
+  /// what it shows is a tap away rather than in the way of every note opened.
+  bool _frontmatterOpen = false;
+
+  /// Whether the pane on stage still shows the note's head (#157): the panel
+  /// goes away the moment the note is scrolled past it, and comes back with
+  /// the head, as the reader left it.
+  bool _frontmatterAtHead = true;
+
+  /// The note's head in the pane's own pixels (#157): the frontmatter block's
+  /// lines at the row height the editor draws them, and nothing at all over
+  /// the read pane, whose preview gives the block no room
+  /// (`markdown_read_view`) — there the panel above the note *is* the head.
+  double _frontmatterHeadExtent = 0;
+
   /// The source pane's state, for its headings: the outline is read off the
   /// blocks the colours are already drawn from.
   final GlobalKey<MarkdownSourceViewState> _sourceViewKey =
@@ -733,6 +760,10 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    // The fields panel rides the note's head (#157), in whichever pane is on
+    // stage: both scrolls are watched, and [_headInView] reads the one that is.
+    _previewScroll.addListener(_frontmatterScrolled);
+    _sourceScroll.addListener(_frontmatterScrolled);
     // The formatting keys, while this editor is the focused one (#205).
     _formatKeys.attach();
     _kindHost = NoteKindHostAdapter(
@@ -756,6 +787,12 @@ final class _NoteViewState extends State<NoteView>
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _keepPlaceAcrossModes(oldWidget);
+    if (oldWidget.path != widget.path) {
+      // Another note's head is not this one's (#157): the panel opens closed
+      // again, and the note on screen is taken at its head until it scrolls.
+      _frontmatterOpen = false;
+      _frontmatterAtHead = true;
+    }
     if (oldWidget.showPreview != widget.showPreview) {
       if (widget.showPreview && _previewStale) {
         _previewStale = false;
@@ -847,6 +884,9 @@ final class _NoteViewState extends State<NoteView>
     _activeFormats.dispose();
     _formatKeys.detach();
     _focus.dispose();
+    _previewScroll.removeListener(_frontmatterScrolled);
+    _sourceScroll.removeListener(_frontmatterScrolled);
+    _sourceScroll.dispose();
     _previewScroll.dispose();
     _mathCache.dispose();
     super.dispose();
@@ -1279,6 +1319,9 @@ final class _NoteViewState extends State<NoteView>
         // save-on-blur and the refocus when the preview goes all ask *it*
         // whether the editor has the focus.
         focusNode: _focus,
+        // The view keeps the scroll, so the fields panel can tell how far the
+        // note has been scrolled from its head (#157).
+        controller: _sourceScroll,
         mode: _unifiedMode,
         // Its metrics at the note's size: this context is above the scaler
         // set just around the surface.
@@ -1332,9 +1375,15 @@ final class _NoteViewState extends State<NoteView>
           ),
           // The fields panel, above the note's first line, in the same place
           // the read view shows it: the note itself is still the source, and
-          // its frontmatter lines are still text below this (#157).
+          // its frontmatter lines are still text below this (#157). The inset
+          // is the note's own: a box with an edge of its own does not run to
+          // the pane's edge when there is no column to align to.
           if (frontmatter != null)
-            NoteColumnPadding(column: widget.noteColumn, child: frontmatter),
+            NoteColumnPadding(
+              column: widget.noteColumn,
+              minInset: NoteColumn.textInset,
+              child: frontmatter,
+            ),
           Expanded(child: note),
         ],
       ),
@@ -1434,7 +1483,11 @@ final class _NoteViewState extends State<NoteView>
     if (panel == null) return _buildPreview(context);
     return Column(
       children: [
-        NoteColumnPadding(column: widget.noteColumn, child: panel),
+        NoteColumnPadding(
+          column: widget.noteColumn,
+          minInset: NoteColumn.textInset,
+          child: panel,
+        ),
         Expanded(child: _buildPreview(context)),
       ],
     );
@@ -1446,14 +1499,72 @@ final class _NoteViewState extends State<NoteView>
   /// its preview, the live editor above its note, and neither keeps a copy of
   /// the note — both hand the same head to the same widget and read the file
   /// back through it.
+  ///
+  /// How much of it shows is this view's ([_frontmatterOpen], [_headInView]),
+  /// so the two panes cannot drift: closed on opening a note, open while the
+  /// reader says so, and away while the note is scrolled off its head. The
+  /// library's setting decides whether there is a panel at all
+  /// (`widget.frontmatterPanel`), so a library that wants none gets none.
   Widget? _frontmatterFields() {
+    if (!widget.frontmatterPanel) return null;
     final head = _frontmatterHeadOf(_surface?.buffer);
     if (head == null) return null;
     return FrontmatterFields(
       note: head,
       onSet: _applyFieldEdit,
       onRemove: (key) => _applyFieldEdit(key, null),
+      panel: !_headInView()
+          ? FrontmatterPanel.hidden
+          : _frontmatterOpen
+          ? FrontmatterPanel.open
+          : FrontmatterPanel.closed,
+      onToggle: _toggleFrontmatter,
     );
+  }
+
+  /// Opens the closed fields panel, or closes the open one (#157).
+  void _toggleFrontmatter() =>
+      setState(() => _frontmatterOpen = !_frontmatterOpen);
+
+  /// Whether the pane on stage still shows the note's head (#157).
+  ///
+  /// A pane that has not been laid out yet — a note just opened — counts as
+  /// showing its head: the panel opens with the note it belongs to.
+  bool _headInView() {
+    final controller = _previewIn(widget) ? _previewScroll : _sourceScroll;
+    return !controller.hasClients ||
+        controller.offset <= _frontmatterHeadExtent;
+  }
+
+  /// The panel follows the note's head (#157): away once the note is scrolled
+  /// past it, back when the head is on screen again.
+  ///
+  /// The reader's own choice is kept as it was, so coming back to the top of a
+  /// note finds the panel closed or open exactly as they left it.
+  void _frontmatterScrolled() {
+    final atHead = _headInView();
+    if (atHead == _frontmatterAtHead) return;
+    setState(() => _frontmatterAtHead = atHead);
+  }
+
+  /// The note's head in the pane's own pixels (#157), for [_headInView]: the
+  /// frontmatter block's lines at the row height the surface draws them — the
+  /// same `theme.lineHeight`, at the note's own text scale, that the source
+  /// view's rows are measured with. Nothing over the read pane, whose preview
+  /// gives the block no room at all (`markdown_read_view`): there the panel
+  /// is what the head costs, so any scroll past the top is past the head.
+  double _headExtentOf(BuildContext context, {required bool showPreview}) {
+    if (showPreview) return 0;
+    final buffer = _surface?.buffer;
+    if (buffer == null || buffer.lineCount == 0) return 0;
+    final head = _frontmatterHeadOf(buffer);
+    if (head == null) return 0;
+    final scaler = noteTextScalerOf(context);
+    final row = scaler.scale(
+      markdownThemeOf(context, scaler: scaler).lineHeight,
+    );
+    // The head's lines: one terminator closes each of them.
+    return row * '\n'.allMatches(head).length;
   }
 
   /// The note's leading frontmatter block as text — the fences included, and
@@ -2238,6 +2349,10 @@ final class _NoteViewState extends State<NoteView>
   Widget build(BuildContext context) {
     final error = _error;
     final showPreview = _previewIn(widget);
+    // The head the fields panel follows, measured for the pane about to be
+    // built (#157): [_frontmatterScrolled] reads it on every scroll tick, and
+    // building a theme there would cost a frame's worth on each one.
+    _frontmatterHeadExtent = _headExtentOf(context, showPreview: showPreview);
     // The toolbar formats the editor: it hides while the preview holds
     // the pane, which has nothing to format. On the phone it also rides
     // the keyboard (it shows only while the keyboard is up); on desktop

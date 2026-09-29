@@ -1316,6 +1316,12 @@ final class LatvianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Īpašības';
   @override
+  String get frontmatterPanelTitle => 'Rekvizītu panelis';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Rāda piezīmes rekvizītus virs tās. Aizvērts, līdz to atverat, '
+      'un aiziet, kad ritina.';
+  @override
   String get frontmatterShowRaw => 'Neapstrādāts YAML';
   @override
   String get frontmatterShowFields => 'Lauki';

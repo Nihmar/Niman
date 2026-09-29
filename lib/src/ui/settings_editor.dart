@@ -50,6 +50,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   double _noteColumnWidth = defaultNoteColumnWidth;
   bool _typewriter = false;
   bool _cascadeChecklist = false;
+  bool _frontmatterPanel = true;
   bool _tidyOnClose = true;
   Set<String> _lintRulesOff = const <String>{};
   bool? _autofocusEditor;
@@ -82,6 +83,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     final noteColumnWidth = await controller.noteColumnWidth;
     final typewriter = await controller.typewriter;
     final cascadeChecklist = await controller.cascadeChecklist;
+    final frontmatterPanel = await controller.frontmatterPanel;
     final tidyOnClose = await controller.tidyOnClose;
     final lintRulesOff = await controller.lintRulesOff;
     final autofocus = await controller.editorAutofocusEnabled;
@@ -99,6 +101,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
       _noteColumnWidth = noteColumnWidth;
       _typewriter = typewriter;
       _cascadeChecklist = cascadeChecklist;
+      _frontmatterPanel = frontmatterPanel;
       _tidyOnClose = tidyOnClose;
       _lintRulesOff = lintRulesOff;
       _autofocusEditor = autofocus;
@@ -152,6 +155,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     await controller.setCascadeChecklist(enabled: value);
     controller.notify();
     if (mounted) setState(() => _cascadeChecklist = value);
+  }
+
+  /// Persists the properties-panel setting (#157); an open note takes it on
+  /// the spot, through the shell's refresh.
+  Future<void> _toggleFrontmatterPanel(bool value) async {
+    final controller = widget.controller;
+    await controller.setFrontmatterPanel(enabled: value);
+    controller.notify();
+    if (mounted) setState(() => _frontmatterPanel = value);
   }
 
   /// Persists tidy-on-close; the shell picks it up through its refresh,
@@ -594,6 +606,15 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               description: AppStrings.cascadeChecklistSubtitle,
               value: _cascadeChecklist,
               onChanged: (value) => unawaited(_toggleCascadeChecklist(value)),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.frontmatterPanel,
+            child: SettingsSwitchRow(
+              title: AppStrings.frontmatterPanelTitle,
+              description: AppStrings.frontmatterPanelSubtitle,
+              value: _frontmatterPanel,
+              onChanged: (value) => unawaited(_toggleFrontmatterPanel(value)),
             ),
           ),
           // Phones and tablets only: there is no on-screen keyboard to

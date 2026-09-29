@@ -1347,6 +1347,12 @@ final class SpanishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Propiedades';
   @override
+  String get frontmatterPanelTitle => 'Panel de propiedades';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Muestra las propiedades de la nota encima. Cerrado hasta que '
+      'lo abras, y se aparta al desplazarte.';
+  @override
   String get frontmatterShowRaw => 'YAML sin procesar';
   @override
   String get frontmatterShowFields => 'Campos';

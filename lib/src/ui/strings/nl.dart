@@ -1335,6 +1335,12 @@ final class DutchStrings extends Strings {
   @override
   String get frontmatterTitle => 'Eigenschappen';
   @override
+  String get frontmatterPanelTitle => 'Eigenschappenpaneel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Toont de eigenschappen van de notitie erboven. Gesloten tot '
+      'je het opent, en het wijkt bij scrollen.';
+  @override
   String get frontmatterShowRaw => 'Ruwe YAML';
   @override
   String get frontmatterShowFields => 'Velden';

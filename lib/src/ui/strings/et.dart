@@ -1302,6 +1302,12 @@ final class EstonianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Atribuudid';
   @override
+  String get frontmatterPanelTitle => 'Omaduste paneel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Näitab märkme omadusi selle kohal. Suletud, kuni selle avad, '
+      'ja taandub kerimisel.';
+  @override
   String get frontmatterShowRaw => 'Töötlemata YAML';
   @override
   String get frontmatterShowFields => 'Väljad';

@@ -415,6 +415,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get frontmatterPanel async => _config.frontmatterPanel;
+
+  @override
+  Future<void> setFrontmatterPanel({required bool enabled}) async {
+    _config = _config.copyWith(frontmatterPanel: enabled);
+  }
+
+  @override
   Future<double> get noteColumnWidth async => _config.noteColumnWidth;
 
   @override

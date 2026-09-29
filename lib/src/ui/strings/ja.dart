@@ -1240,6 +1240,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get frontmatterTitle => 'プロパティ';
   @override
+  String get frontmatterPanelTitle => 'プロパティパネル';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'ノートのプロパティを上に表示します。開くまで閉じており、スクロールすると引っ込みます。';
+  @override
   String get frontmatterShowRaw => '生の YAML';
   @override
   String get frontmatterShowFields => 'フィールド';

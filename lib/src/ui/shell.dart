@@ -1129,6 +1129,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         showLineNumbers: _editorSettings.lineNumbers,
         typewriter: _editorSettings.typewriter,
         cascadeChecklist: _editorSettings.cascadeChecklist,
+        frontmatterPanel: _editorSettings.frontmatterPanel,
         // No switch in the phone's status row: it has no room left for one.
         // Settings and the Search tab's commands reach it there.
         noteColumn: _editorSettings.noteColumn,
@@ -4118,6 +4119,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           zen: _inZen,
           typewriter: _editorSettings.typewriter,
           cascadeChecklist: _editorSettings.cascadeChecklist,
+          frontmatterPanel: _editorSettings.frontmatterPanel,
           onToggleTypewriter: _toggleTypewriter,
           onLoaded: _workspace.noteLoaded,
           onEditedNoteClosed: _tidyClosedNote,

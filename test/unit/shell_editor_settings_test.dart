@@ -94,6 +94,9 @@ final class _CountedReads implements LibrarySession {
   Future<bool> get cascadeChecklist => _read(_inner.cascadeChecklist);
 
   @override
+  Future<bool> get frontmatterPanel => _read(_inner.frontmatterPanel);
+
+  @override
   Future<Set<String>> get lintRulesOff => _read(_inner.lintRulesOff);
 
   @override
@@ -189,7 +192,7 @@ void main() {
     expect(settings, ShellEditorSettings.defaults);
     expect(
       session.reads,
-      18,
+      19,
       reason: 'every setting the session answers; the two folders ride on ops',
     );
     expect(

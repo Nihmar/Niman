@@ -1333,6 +1333,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Својства';
   @override
+  String get frontmatterPanelTitle => 'Панел со својства';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Ги прикажува својствата на белешката над неа. Затворен додека '
+      'не го отворите, и се повлекува при лизгање.';
+  @override
   String get frontmatterShowRaw => 'Суров YAML';
   @override
   String get frontmatterShowFields => 'Полиња';

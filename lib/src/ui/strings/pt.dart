@@ -1329,6 +1329,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get frontmatterTitle => 'Propriedades';
   @override
+  String get frontmatterPanelTitle => 'Painel de propriedades';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Mostra as propriedades da nota por cima. Fechado até o '
+      'abrires, e sai da frente ao deslocares.';
+  @override
   String get frontmatterShowRaw => 'YAML em bruto';
   @override
   String get frontmatterShowFields => 'Campos';

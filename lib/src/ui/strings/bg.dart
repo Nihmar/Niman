@@ -1332,6 +1332,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Свойства';
   @override
+  String get frontmatterPanelTitle => 'Панел със свойства';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Показва свойствата на бележката над нея. Затворен, докато не '
+      'го отворите, и се отдръпва при превъртане.';
+  @override
   String get frontmatterShowRaw => 'Суров YAML';
   @override
   String get frontmatterShowFields => 'Полета';

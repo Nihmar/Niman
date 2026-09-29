@@ -1320,6 +1320,12 @@ final class SlovakStrings extends Strings {
   @override
   String get frontmatterTitle => 'Vlastnosti';
   @override
+  String get frontmatterPanelTitle => 'Panel vlastností';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Zobrazuje vlastnosti poznámky nad ňou. Zatvorený, kým ho '
+      'neotvoríte, a ustúpi pri posúvaní.';
+  @override
   String get frontmatterShowRaw => 'Surové YAML';
   @override
   String get frontmatterShowFields => 'Polia';

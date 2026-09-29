@@ -42,6 +42,7 @@ final class ShellEditorSettings {
     this.toolbarLayout = ToolbarLayout.defaults,
     this.tidyOnClose = true,
     this.cascadeChecklist = true,
+    this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
   });
 
@@ -108,6 +109,9 @@ final class ShellEditorSettings {
   /// (#326).
   final bool cascadeChecklist;
 
+  /// Whether a note's properties panel shows above it (#157).
+  final bool frontmatterPanel;
+
   /// The #72 rules turned off, by id; see [lintRules] for the ones that
   /// run.
   final Set<String> lintRulesOff;
@@ -142,6 +146,9 @@ final class ShellEditorSettings {
       session.indentWidth,
       session.sourceFont,
     ).wait;
+    // Started here with the rest, awaited below: a record's `wait` covers
+    // nine futures, and this one makes the group ten (#157).
+    final panel = session.frontmatterPanel;
     final body = (
       session.treeSort,
       session.treeWidth,
@@ -180,6 +187,7 @@ final class ShellEditorSettings {
       editorsEnabled,
     ) = await body;
     final (attachmentsFolder, templateFolder) = await folders;
+    final frontmatterPanel = await panel;
     final enabled = editorsEnabled.isEmpty
         ? const {EditorKind.source, EditorKind.wysiwyg}
         : editorsEnabled;
@@ -209,6 +217,7 @@ final class ShellEditorSettings {
       toolbarLayout: ToolbarLayout.parse(toolbar),
       tidyOnClose: tidyOnClose,
       cascadeChecklist: cascadeChecklist,
+      frontmatterPanel: frontmatterPanel,
       lintRulesOff: lintRulesOff,
     );
   }
@@ -249,6 +258,7 @@ final class ShellEditorSettings {
       toolbarLayout: toolbarLayout,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
       cascadeChecklist: cascadeChecklist,
+      frontmatterPanel: frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
     );
   }
@@ -274,6 +284,7 @@ final class ShellEditorSettings {
         dockWidth == other.dockWidth &&
         tidyOnClose == other.tidyOnClose &&
         cascadeChecklist == other.cascadeChecklist &&
+        frontmatterPanel == other.frontmatterPanel &&
         setEquals(lintRulesOff, other.lintRulesOff) &&
         // The layout compares by what it is written as: two parses of the
         // same string are two objects.
@@ -300,6 +311,7 @@ final class ShellEditorSettings {
     toolbarLayout.encode(),
     tidyOnClose,
     cascadeChecklist,
+    frontmatterPanel,
     Object.hashAllUnordered(lintRulesOff),
   );
 }

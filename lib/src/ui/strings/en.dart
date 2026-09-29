@@ -1313,6 +1313,12 @@ final class EnglishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Properties';
   @override
+  String get frontmatterPanelTitle => 'Properties panel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Shows a note’s fields above it: closed until you open it, and out of '
+      'the way once you scroll.';
+  @override
   String get frontmatterShowRaw => 'Raw YAML';
   @override
   String get frontmatterShowFields => 'Fields';

@@ -1313,6 +1313,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Egenskaper';
   @override
+  String get frontmatterPanelTitle => 'Egenskapspanel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Viser notatets egenskaper over det. Lukket til du åpner det, '
+      'og viker unna når du ruller.';
+  @override
   String get frontmatterShowRaw => 'Rå YAML';
   @override
   String get frontmatterShowFields => 'Felter';

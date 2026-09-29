@@ -656,6 +656,8 @@ abstract base class Strings {
   String includeCycle(String path);
   String includeTooDeep(String path);
   String get frontmatterTitle;
+  String get frontmatterPanelTitle;
+  String get frontmatterPanelSubtitle;
   String get frontmatterShowRaw;
   String get frontmatterShowFields;
   String get frontmatterAddField;

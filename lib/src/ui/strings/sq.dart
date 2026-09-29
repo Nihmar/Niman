@@ -1333,6 +1333,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Vetitë';
   @override
+  String get frontmatterPanelTitle => 'Paneli i vetive';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Shfaq vetitë e shënimit sipër tij. I mbyllur derisa ta '
+      'hapësh, dhe tërhiqet kur lëviz.';
+  @override
   String get frontmatterShowRaw => 'YAML i papërpunuar';
   @override
   String get frontmatterShowFields => 'Fushat';

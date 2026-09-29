@@ -1320,6 +1320,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get frontmatterTitle => 'Eiginleikar';
   @override
+  String get frontmatterPanelTitle => 'Eiginleikaspjald';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Sýnir eiginleika skjalsins fyrir ofan það. Lokað þar til þú '
+      'opnar það, og víkur þegar skrollað er.';
+  @override
   String get frontmatterShowRaw => 'Hrátt YAML';
   @override
   String get frontmatterShowFields => 'Reitir';

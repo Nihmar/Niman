@@ -460,6 +460,8 @@ void main() {
         'sourceFontSansSerif': () => AppStrings.sourceFontSansSerif,
         'sourceFontSerif': () => AppStrings.sourceFontSerif,
         'frontmatterTitle': () => AppStrings.frontmatterTitle,
+        'frontmatterPanelTitle': () => AppStrings.frontmatterPanelTitle,
+        'frontmatterPanelSubtitle': () => AppStrings.frontmatterPanelSubtitle,
         'frontmatterShowRaw': () => AppStrings.frontmatterShowRaw,
         'frontmatterShowFields': () => AppStrings.frontmatterShowFields,
         'frontmatterAddField': () => AppStrings.frontmatterAddField,

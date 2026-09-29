@@ -1332,6 +1332,12 @@ final class RomanianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Proprietăți';
   @override
+  String get frontmatterPanelTitle => 'Panoul de proprietăți';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Arată proprietățile notei deasupra ei. Închis până îl '
+      'deschizi, și se retrage când derulezi.';
+  @override
   String get frontmatterShowRaw => 'YAML brut';
   @override
   String get frontmatterShowFields => 'Câmpuri';

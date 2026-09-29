@@ -1322,6 +1322,12 @@ final class BosnianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Svojstva';
   @override
+  String get frontmatterPanelTitle => 'Panel svojstava';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Prikazuje svojstva bilješke iznad nje. Zatvoren dok ga ne '
+      'otvorite, a sklanja se kad skrolujete.';
+  @override
   String get frontmatterShowRaw => 'Sirovi YAML';
   @override
   String get frontmatterShowFields => 'Polja';

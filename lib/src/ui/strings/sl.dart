@@ -1316,6 +1316,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Lastnosti';
   @override
+  String get frontmatterPanelTitle => 'Plošča z lastnostmi';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Prikaže lastnosti zapiska nad njim. Zaprta, dokler je ne '
+      'odprete, in se umakne ob drsenju.';
+  @override
   String get frontmatterShowRaw => 'Surovi YAML';
   @override
   String get frontmatterShowFields => 'Polja';

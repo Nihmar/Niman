@@ -1316,6 +1316,12 @@ final class CzechStrings extends Strings {
   @override
   String get frontmatterTitle => 'Vlastnosti';
   @override
+  String get frontmatterPanelTitle => 'Panel vlastností';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Zobrazuje vlastnosti poznámky nad ní. Zavřený, dokud ho '
+      'neotevřete, a ustoupí při posouvání.';
+  @override
   String get frontmatterShowRaw => 'Surové YAML';
   @override
   String get frontmatterShowFields => 'Pole';

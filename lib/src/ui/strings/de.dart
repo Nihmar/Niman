@@ -1341,6 +1341,12 @@ final class GermanStrings extends Strings {
   @override
   String get frontmatterTitle => 'Eigenschaften';
   @override
+  String get frontmatterPanelTitle => 'Eigenschaften-Leiste';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Zeigt die Eigenschaften der Notiz darüber. Geschlossen, bis '
+      'du sie öffnest, und tritt beim Scrollen beiseite.';
+  @override
   String get frontmatterShowRaw => 'Rohes YAML';
   @override
   String get frontmatterShowFields => 'Felder';

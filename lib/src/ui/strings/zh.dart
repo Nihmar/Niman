@@ -1213,6 +1213,10 @@ final class ChineseStrings extends Strings {
   @override
   String get frontmatterTitle => '属性';
   @override
+  String get frontmatterPanelTitle => '属性面板';
+  @override
+  String get frontmatterPanelSubtitle => '在笔记上方显示其属性。未打开前保持折叠，滚动时自动收起。';
+  @override
   String get frontmatterShowRaw => '原始 YAML';
   @override
   String get frontmatterShowFields => '字段';

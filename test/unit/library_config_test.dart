@@ -441,6 +441,7 @@ void main() {
         typewriter: true,
         tidyOnClose: false,
         cascadeChecklist: false,
+        frontmatterPanel: false,
       );
       await store.write(config);
       expect(await store.read(), config);
@@ -471,6 +472,7 @@ void main() {
         'typewriter',
         'tidyOnClose',
         'cascadeChecklist',
+        'frontmatterPanel',
       ]) {
         expect(content, contains('"$key"'), reason: key);
       }

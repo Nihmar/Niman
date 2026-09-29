@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
+import 'package:niman/src/markdown/surface.dart';
 import 'package:niman/src/ui/note_view.dart';
 
 /// The note the editor is handed.
@@ -70,6 +71,12 @@ Future<void> _fillField(
   await tester.pumpAndSettle();
 }
 
+/// Opens the fields panel through its handle: the panel opens closed (#157).
+Future<void> _openPanel(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('frontmatter-collapse-toggle')));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('the editor shows the same rows above the note', (tester) async {
     await tester.pumpWidget(_app(_note));
@@ -78,8 +85,9 @@ void main() {
     expect(
       find.byKey(const Key('frontmatter-fields')),
       findsOneWidget,
-      reason: 'the live editor shows the note frontmatter as fields',
+      reason: 'the live editor shows the note frontmatter as a panel',
     );
+    await _openPanel(tester);
     // One row per key, the key's own type chip, and the add row last.
     expect(find.byKey(const Key('frontmatter-field-title')), findsOneWidget);
     expect(find.byKey(const Key('frontmatter-type-title')), findsOneWidget);
@@ -95,6 +103,7 @@ void main() {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
 
+    await _openPanel(tester);
     await tester.tap(find.byKey(const Key('frontmatter-value-title')));
     await tester.pumpAndSettle();
     await _fillField(tester, value: 'Nuova');
@@ -117,6 +126,7 @@ void main() {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
 
+    await _openPanel(tester);
     await tester.tap(find.byKey(const Key('frontmatter-add')));
     await tester.pumpAndSettle();
     await _fillField(tester, key: 'people', type: 'list', value: 'Ada, Grace');
@@ -139,6 +149,7 @@ void main() {
   testWidgets('the raw YAML is one toggle away in the editor', (tester) async {
     await tester.pumpWidget(_app(_note));
     await tester.pumpAndSettle();
+    await _openPanel(tester);
     expect(find.byKey(const Key('frontmatter-toggle-pinned')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('frontmatter-raw-toggle')));
@@ -168,14 +179,53 @@ void main() {
         'Body text.\n';
     await tester.pumpWidget(_app(malformed));
     await tester.pumpAndSettle();
+    await _openPanel(tester);
 
     expect(find.byKey(const Key('frontmatter-panel-error')), findsOneWidget);
+    expect(
+      find.byKey(const Key('frontmatter-add')),
+      findsNothing,
+      reason: 'a block the parser refused is not one to add keys to',
+    );
     expect(find.byKey(const Key('frontmatter-raw')), findsOneWidget);
-    expect(find.byKey(const Key('frontmatter-add')), findsNothing);
     expect(find.byKey(const Key('frontmatter-toggle-pinned')), findsNothing);
     // Nothing the panel draws changed the note: the YAML is left as written.
     expect(_text(tester), malformed);
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  // The editor's head is its own frontmatter block: the panel is away once
+  // those lines are scrolled off, and back — as the reader left it — when
+  // they are on screen again (#157).
+  testWidgets('scrolling the editor past the YAML puts the panel away', (
+    tester,
+  ) async {
+    final long = '$_note${'Body text.\n' * 80}';
+    await tester.pumpWidget(_app(long));
+    await tester.pumpAndSettle();
+    await _openPanel(tester);
+    expect(find.byKey(const Key('frontmatter-add')), findsOneWidget);
+
+    final scroll = tester
+        .widget<MarkdownSurface>(find.byType(MarkdownSurface))
+        .controller!;
+    scroll.jumpTo(scroll.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('frontmatter-fields')),
+      findsNothing,
+      reason: 'the note left its head, and the panel left with it',
+    );
+
+    scroll.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('frontmatter-fields')), findsOneWidget);
+    expect(
+      find.byKey(const Key('frontmatter-value-title')),
+      findsOneWidget,
+      reason: 'the panel was left open, and the head brings it back open',
+    );
     expect(tester.takeException(), isNull);
   });
 }

@@ -1325,6 +1325,12 @@ final class SwedishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Egenskaper';
   @override
+  String get frontmatterPanelTitle => 'Egenskapspanel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Visar anteckningens egenskaper ovanför den. Stängt tills du '
+      'öppnar det, och viker undan när du rullar.';
+  @override
   String get frontmatterShowRaw => 'Rå YAML';
   @override
   String get frontmatterShowFields => 'Fält';

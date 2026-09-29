@@ -1353,6 +1353,12 @@ final class FrenchStrings extends Strings {
   @override
   String get frontmatterTitle => 'Propriétés';
   @override
+  String get frontmatterPanelTitle => 'Panneau des propriétés';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Affiche les propriétés de la note au-dessus. Fermé jusqu’à '
+      'son ouverture, et s’efface au défilement.';
+  @override
   String get frontmatterShowRaw => 'YAML brut';
   @override
   String get frontmatterShowFields => 'Champs';

@@ -367,6 +367,7 @@ final class LibraryConfig {
     this.reminderShowTokens = false,
     this.tidyOnClose = true,
     this.cascadeChecklist = true,
+    this.frontmatterPanel = true,
     this.lintRulesOff = const <String>{},
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
@@ -440,6 +441,7 @@ final class LibraryConfig {
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
       tidyOnClose: _boolOr(json['tidyOnClose'], true),
       cascadeChecklist: _boolOr(json['cascadeChecklist'], true),
+      frontmatterPanel: _boolOr(json['frontmatterPanel'], true),
       lintRulesOff: _lintRulesOffFrom(json['lintRulesOff']),
       treeSort: switch (json['treeSort']) {
         'nameDesc' => TreeSort.nameDesc,
@@ -564,6 +566,14 @@ final class LibraryConfig {
   /// leaves its children as they are.
   final bool cascadeChecklist;
 
+  /// Whether a note's leading frontmatter is drawn as the properties panel
+  /// above it (default true, #157).
+  ///
+  /// Off, the note is its own text everywhere and no panel stands over it.
+  /// On, the panel is the note's head: closed until it is opened, one row of
+  /// chrome while it is closed, and away once the note is scrolled past it.
+  final bool frontmatterPanel;
+
   /// The #72 rules this library has turned off, by [LintRule.id].
   ///
   /// The rules *left out* are stored: a rule added in a later build runs
@@ -661,6 +671,7 @@ final class LibraryConfig {
     bool? reminderShowTokens,
     bool? tidyOnClose,
     bool? cascadeChecklist,
+    bool? frontmatterPanel,
     Set<String>? lintRulesOff,
     TreeSort? treeSort,
     LinkType? linkType,
@@ -700,6 +711,7 @@ final class LibraryConfig {
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       tidyOnClose: tidyOnClose ?? this.tidyOnClose,
       cascadeChecklist: cascadeChecklist ?? this.cascadeChecklist,
+      frontmatterPanel: frontmatterPanel ?? this.frontmatterPanel,
       lintRulesOff: lintRulesOff ?? this.lintRulesOff,
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
@@ -789,6 +801,7 @@ final class LibraryConfig {
     'reminderShowTokens',
     'tidyOnClose',
     'cascadeChecklist',
+    'frontmatterPanel',
     'lintRulesOff',
     'treeSort',
     'linkType',
@@ -845,6 +858,7 @@ final class LibraryConfig {
       'reminderShowTokens': reminderShowTokens,
       'tidyOnClose': tidyOnClose,
       'cascadeChecklist': cascadeChecklist,
+      'frontmatterPanel': frontmatterPanel,
       'treeSort': treeSort.name,
       'linkType': linkType.name,
       'missingNoteLocation': missingNoteLocation.name,

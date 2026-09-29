@@ -413,6 +413,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the cascade-checklist toggle.
   Future<void> setCascadeChecklist({required bool enabled});
 
+  /// Whether a note's leading frontmatter is drawn as the properties panel
+  /// above it (default true, #157).
+  Future<bool> get frontmatterPanel;
+
+  /// Sets (and persists) the properties panel's visibility.
+  Future<void> setFrontmatterPanel({required bool enabled});
+
   /// The note column's text width, in logical pixels.
   Future<double> get noteColumnWidth;
 

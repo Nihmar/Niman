@@ -1324,6 +1324,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get frontmatterTitle => 'Властивості';
   @override
+  String get frontmatterPanelTitle => 'Панель властивостей';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Показує властивості нотатки над нею. Закрито, доки ви його не '
+      'відкриєте, і він відступає під час прокручування.';
+  @override
   String get frontmatterShowRaw => 'Необроблений YAML';
   @override
   String get frontmatterShowFields => 'Поля';

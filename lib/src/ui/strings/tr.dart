@@ -1308,6 +1308,12 @@ final class TurkishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Özellikler';
   @override
+  String get frontmatterPanelTitle => 'Özellikler paneli';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Notun özelliklerini üstünde gösterir. Siz açana kadar '
+      'kapalıdır ve kaydırınca çekilir.';
+  @override
   String get frontmatterShowRaw => 'Ham YAML';
   @override
   String get frontmatterShowFields => 'Alanlar';

@@ -1340,6 +1340,12 @@ final class PolishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Właściwości';
   @override
+  String get frontmatterPanelTitle => 'Panel właściwości';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Pokazuje właściwości notatki nad nią. Zamknięty, dopóki go '
+      'nie otworzysz, i ustępuje przy przewijaniu.';
+  @override
   String get frontmatterShowRaw => 'Surowy YAML';
   @override
   String get frontmatterShowFields => 'Pola';

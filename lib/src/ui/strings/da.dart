@@ -1315,6 +1315,12 @@ final class DanishStrings extends Strings {
   @override
   String get frontmatterTitle => 'Egenskaber';
   @override
+  String get frontmatterPanelTitle => 'Egenskabspanel';
+  @override
+  String get frontmatterPanelSubtitle =>
+      'Viser notens egenskaber over den. Lukket indtil du åbner det, '
+      'og væk når du ruller.';
+  @override
   String get frontmatterShowRaw => 'Rå YAML';
   @override
   String get frontmatterShowFields => 'Felter';

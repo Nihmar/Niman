@@ -873,6 +873,8 @@ final class AppStrings {
   static String includeCycle(String path) => _s.includeCycle(path);
   static String includeTooDeep(String path) => _s.includeTooDeep(path);
   static String get frontmatterTitle => _s.frontmatterTitle;
+  static String get frontmatterPanelTitle => _s.frontmatterPanelTitle;
+  static String get frontmatterPanelSubtitle => _s.frontmatterPanelSubtitle;
   static String get frontmatterShowRaw => _s.frontmatterShowRaw;
   static String get frontmatterShowFields => _s.frontmatterShowFields;
   static String get frontmatterAddField => _s.frontmatterAddField;
