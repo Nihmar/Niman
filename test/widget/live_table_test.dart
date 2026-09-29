@@ -234,6 +234,78 @@ void main() {
     expect(caret.bottom, greaterThan(box.top - 1));
   });
 
+  testWidgets("a caret in a wrapped row's room is drawn at its cell's edge", (
+    tester,
+  ) async {
+    // Typing a space after a cell's text leaves the caret in the room round
+    // the cells, which no piece of a wrapped row holds. It is drawn on its
+    // side of the pipe, at the nearer edge of that side's cell — where an
+    // unwrapped row, the room spread evenly between the two cells' text,
+    // draws it too — not in the row's first piece.
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final state = await _pumpNote(tester, _longTable);
+    final buffer = state.widget.buffer;
+    final text = buffer.lineAt(2);
+    Future<Rect> caretAt(int column) async {
+      state.placeCaret(buffer.offsetOfLine(2) + column);
+      await tester.pump();
+      return state.caretRect!;
+    }
+
+    final firstEnd = text.indexOf('further') + 'further'.length;
+    final secondStart = text.indexOf('second');
+    final secondEnd = secondStart + 'second'.length;
+    // Before the pipe: the first cell's end, on its last visual line.
+    expect(await caretAt(firstEnd + 1), await caretAt(firstEnd));
+    // After the pipe: the second cell's start.
+    expect(await caretAt(secondStart - 1), await caretAt(secondStart));
+    // Past the last cell, the closing pipe included: the last cell's end.
+    expect(await caretAt(secondEnd + 1), await caretAt(secondEnd));
+    expect(await caretAt(text.length), await caretAt(secondEnd));
+    // Before the row's first cell: its start.
+    expect(await caretAt(0), await caretAt(text.indexOf('a first')));
+  });
+
+  testWidgets('in source, a table too wide for the pane is its text', (
+    tester,
+  ) async {
+    // Source draws a table's row as the one paragraph it is, soft-wrapped:
+    // the caret is measured in that paragraph wherever it is on the row,
+    // not in pieces of a fitted layout only live draws.
+    tester.view.physicalSize = const Size(320, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => MarkdownSurface(
+              buffer: SourceBuffer.fromText(_longTable),
+              mode: MarkdownSurfaceMode.source,
+              theme: markdownThemeOf(context),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final state = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView),
+    );
+    final buffer = state.widget.buffer;
+    final text = buffer.lineAt(2);
+    for (final word in <String>['first', 'further', 'second']) {
+      state.placeCaret(buffer.offsetOfLine(2) + text.indexOf(word));
+      await tester.pump();
+      expect(state.caretRect, isNotNull, reason: word);
+    }
+  });
+
   testWidgets("a row's pipes are drawn as room, on the caret's row too", (
     tester,
   ) async {

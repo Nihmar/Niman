@@ -253,22 +253,14 @@ final class BlockScanner {
     _blocks.shiftFrom(tailStart, edit.lineDelta);
     var start = edit.firstLine;
     // The line before the edit reads the edited line when it asks whether
-    // it heads a table (the delimiter row is the line under it) or a setext
-    // heading (the underline is the line under it), so it is not the line it
-    // was: the rebuild takes in its whole block.
+    // it heads a table (the delimiter row is the line under it), so it is
+    // not the line it was: the rebuild takes in its whole block. A setext
+    // underline asks nothing of the lines above it — it turns the paragraph
+    // the rebuild has open into a heading when it reaches it — so neither
+    // one typed nor one taken away sends the rebuild back.
     if (start > 0 && start - 1 < buffer.lineCount) {
-      final before = _blockHolding(start - 1);
-      final underline =
-          start < buffer.lineCount && _setextLevel(_text(start)) > 0;
-      // A multi-line heading can only be a setext one, and its underline is
-      // the line the edit landed on or below: the text line above is read
-      // again with it.
-      final wasHeading =
-          before != null &&
-          before.kind == BlockKind.heading &&
-          before.endLine > start;
-      if (_hasPipe(_text(start - 1)) || underline || wasHeading) {
-        start = before?.startLine ?? 0;
+      if (_hasPipe(_text(start - 1))) {
+        start = _blockHolding(start - 1)?.startLine ?? 0;
       }
     }
     // An edit at or past a frontier lands on lines that are not current: the
@@ -329,7 +321,7 @@ final class BlockScanner {
     // The block the line before the rebuild is in, cut at the rebuild: what a
     // fresh scan has open when it reaches the edited line.
     final open = start > 0 && headEnd < _blocks.length
-        ? _cut(_at(headEnd), start)
+        ? _reopened(_at(headEnd), start)
         : null;
     final builder = _BlockBuilder(
       this,
@@ -478,7 +470,9 @@ final class BlockScanner {
   /// * the old block started above, and [line] goes on with an open block of
   ///   the same shape — then that block is the old one, and it ends where the
   ///   old one did (whether a line goes on with a block asks only the block's
-  ///   kind and the line).
+  ///   kind, its depths and the line). An open paragraph going on into an old
+  ///   setext heading is that heading's paragraph: the same lines take it to
+  ///   the same underline, so it is the heading, and ends where it did.
   ///
   /// Not a blank run, nor an item that counts differently: the block after a
   /// blank run counts its items from the block *before* it, which is the
@@ -493,7 +487,7 @@ final class BlockScanner {
     final (index, old, oldEnd) = _hintAt(line, tailStart, headEnd, edit);
     if (old == null || old.kind == BlockKind.blank) return -1;
     final open = builder.open;
-    final goesOn = open != null && _mergesInto(open.kind, open.startLine, line);
+    final goesOn = open != null && _mergesInto(open, line);
     if (old.startLine == line) {
       if (goesOn) return -1;
       if (old.kind == BlockKind.listItem &&
@@ -503,10 +497,49 @@ final class BlockScanner {
       }
       return index;
     }
-    if (!goesOn || !open.sameShape(old)) return -1;
+    if (!goesOn) return -1;
+    if (!open.sameShape(old)) {
+      // A heading that started above [line] is a setext one: an ATX
+      // heading is its own line alone.
+      final setext =
+          open.kind == BlockKind.paragraph &&
+          old.kind == BlockKind.heading &&
+          open.quoteDepth == old.quoteDepth &&
+          open.listDepth == old.listDepth;
+      if (!setext) return -1;
+      builder.headOpen(old.headingLevel);
+    }
     builder.openEnd = oldEnd;
     return index + 1;
   }
+
+  /// [block] cut at [end] to be taken open again: a setext heading cut short
+  /// of its underline is the paragraph it was before the underline reached
+  /// it, and goes on as one.
+  static Block _reopened(Block block, int end) {
+    final cut = _cut(block, end);
+    if (block.kind != BlockKind.heading || end >= block.endLine) return cut;
+    return Block(
+      kind: BlockKind.paragraph,
+      startLine: cut.startLine,
+      endLine: cut.endLine,
+      quoteDepth: cut.quoteDepth,
+      listDepth: cut.listDepth,
+      entering: cut.entering,
+    );
+  }
+
+  /// [block], a paragraph, as the setext heading of [level] its underline
+  /// makes it.
+  static Block _headed(Block block, int level) => Block(
+    kind: BlockKind.heading,
+    startLine: block.startLine,
+    endLine: block.endLine,
+    quoteDepth: block.quoteDepth,
+    listDepth: block.listDepth,
+    headingLevel: level,
+    entering: block.entering,
+  );
 
   /// [block] as it was before [end]: the run it covered up to a line inside
   /// it, which is what an edit leaves of the block it landed in.
@@ -649,24 +682,26 @@ final class BlockScanner {
       listOrdinal: kind == BlockKind.listItem
           ? _ordinalOf(line, listDepth, quoteDepth, previous)
           : 0,
-      headingLevel: kind == BlockKind.heading
-          ? (_headingLevel(text) > 0 ? _headingLevel(text) : _setextAt(line))
-          : 0,
+      // An ATX heading's: a setext one starts as its paragraph, and is
+      // made a heading when its underline goes on with it.
+      headingLevel: kind == BlockKind.heading ? _headingLevel(text) : 0,
       fenceInfo: kind == BlockKind.fencedCode ? _fenceInfo(line) : null,
       entering: _entering[line],
     );
   }
 
-  /// Whether line [end] belongs to the block that started on [start].
-  bool _mergesInto(BlockKind kind, int start, int end) {
-    switch (kind) {
+  /// Whether line [end] belongs to [open], the block the scan has open.
+  bool _mergesInto(Block open, int end) {
+    switch (open.kind) {
       case BlockKind.heading:
-        // A setext heading is its text line and the underline below it: the
-        // underline goes on with the line above, where an ATX heading takes
-        // only its own line.
-        return end == start + 1 &&
-            _setextLevel(_text(end)) > 0 &&
-            _setextHeadingText(_text(start));
+        // An ATX heading is its own line, and a setext one ends with its
+        // underline: nothing goes on with either.
+        return false;
+      case BlockKind.paragraph:
+        // A setext underline goes on with the paragraph it heads
+        // ([_underlineLevel]), which the builder then makes a heading.
+        return _kindOf(end) == BlockKind.paragraph ||
+            _underlineLevel(open, end) > 0;
       case BlockKind.thematicBreak:
         return false;
       case BlockKind.listItem:
@@ -677,14 +712,13 @@ final class BlockScanner {
         // A blank line ends the quoted run; a line that is still a quote line —
         // with a marker or lazily without one — continues it.
         return _kindOf(end) == BlockKind.quote;
-      case BlockKind.paragraph:
       case BlockKind.fencedCode:
       case BlockKind.indentedCode:
       case BlockKind.frontmatter:
       case BlockKind.html:
       case BlockKind.table:
       case BlockKind.blank:
-        return _kindOf(end) == kind;
+        return _kindOf(end) == open.kind;
       case BlockKind.math:
         // A display block runs while it is open, and the state entering the
         // line is the only thing that knows: the line that *closes* a block
@@ -731,11 +765,8 @@ final class BlockScanner {
     if (_htmlOpen(text) != null) return BlockKind.html;
     if (text.trim().isEmpty) return BlockKind.blank;
     if (_isTableRow(line)) return BlockKind.table;
-    // A setext heading is a paragraph line and an underline of `=` (level 1)
-    // or `-` (level 2): the export re-parses `Title\n---` with
-    // `SetextHeaderWithIdSyntax` and writes `<h2>` (#361), so both lines are
-    // one heading rather than a paragraph and a rule.
-    if (_setextAt(line) > 0) return BlockKind.heading;
+    // Not a setext heading, which no line is on its own: it is a paragraph
+    // whose underline goes on with it ([_underlineLevel]).
     if (_hr.hasMatch(text)) return BlockKind.thematicBreak;
     if (_headingLevel(text) > 0) return BlockKind.heading;
     // Code while it is four spaces in: a line less than that ends the block.
@@ -850,26 +881,40 @@ final class BlockScanner {
     return 0;
   }
 
-  /// The setext heading level [line] belongs to, or 0: 1 for a line under a
-  /// run of `=`, 2 for one under a run of `-`, on either the text line or
-  /// its underline.
-  int _setextAt(int line) {
-    final own = _setextLevel(_text(line));
-    if (own > 0 && line > 0 && _setextHeadingText(_text(line - 1))) {
-      return own;
+  /// The level of the setext heading [line] makes of [paragraph], the
+  /// paragraph the scan has open, when it is its underline — or 0.
+  ///
+  /// A setext heading is a paragraph and the underline under it: the whole
+  /// paragraph is the heading's text, as CommonMark and the export's
+  /// `SetextHeaderWithIdSyntax` read it (#361). So what the line above is
+  /// is asked of the block, not of its text: a table row, a quote, a list
+  /// item's marker line are no paragraph, and none of them is headed.
+  ///
+  /// And the underline has to stand in the paragraph's own container,
+  /// because a paragraph continues lazily and an underline never does: in
+  /// a quote it would need its own `>` (and then the quote's reading heads
+  /// it), in a list item it has to be indented into the item.
+  int _underlineLevel(Block paragraph, int line) {
+    final state = _entering[line];
+    if (state.quoteDepth != 0 || state.listDepth != paragraph.listDepth) {
+      return 0;
     }
-    if (line + 1 < buffer.lineCount && _setextHeadingText(_text(line))) {
-      final under = _setextLevel(_text(line + 1));
-      if (under > 0) return under;
+    final text = _text(line);
+    // In an item, the underline's up to three spaces are counted from the
+    // item's content column, which it has to reach.
+    final column = state.listIndent < 0 ? 0 : state.listIndent;
+    for (var at = 0; at < column; at++) {
+      if (at >= text.length || !_isSpace(text.codeUnitAt(at))) return 0;
     }
-    return 0;
+    return _setextLevel(text, column);
   }
 
   /// The setext heading level [text] is an underline for — 1 for `=`, 2 for
-  /// `-`, up to three spaces in and spaces after — or 0 when it is not one.
-  static int _setextLevel(String text) {
-    var at = 0;
-    while (at < 3 && at < text.length && _isSpace(text.codeUnitAt(at))) {
+  /// `-`, up to three spaces in from [from] and spaces after — or 0 when it
+  /// is not one.
+  static int _setextLevel(String text, [int from = 0]) {
+    var at = from;
+    while (at < from + 3 && at < text.length && _isSpace(text.codeUnitAt(at))) {
       at++;
     }
     if (at >= text.length) return 0;
@@ -883,23 +928,6 @@ final class BlockScanner {
       if (!_isSpace(text.codeUnitAt(end))) return 0;
     }
     return char == 0x3D ? 1 : 2;
-  }
-
-  /// Whether [text] is a line a setext underline can head: a non-blank line
-  /// no other construct claims — a heading, a rule, an underline, a fence, a
-  /// formula, HTML, a quote, a list item or indented code.
-  static bool _setextHeadingText(String text) {
-    if (text.trim().isEmpty) return false;
-    if (_setextLevel(text) > 0) return false;
-    if (_hr.hasMatch(text)) return false;
-    if (_headingLevel(text) > 0) return false;
-    if (_fenceOpen(text) != null) return false;
-    if (isDisplayLine(text.trim())) return false;
-    if (text.trimLeft().startsWith('<')) return false;
-    if (_quoteDepth(text) > 0) return false;
-    if (_listMarker(text) != null) return false;
-    if (text.length - text.trimLeft().length >= 4) return false;
-    return true;
   }
 
   /// The fence a line opens, or null.
@@ -1383,14 +1411,28 @@ final class _BlockBuilder {
   /// Adds [line], whose entering state is recorded.
   void add(int line) {
     final open = _open;
-    if (open != null && _scanner._mergesInto(open.kind, open.startLine, line)) {
-      openEnd = line + 1;
-      return;
+    if (open != null) {
+      // A paragraph that takes its underline is a setext heading from its
+      // first line on, and ends there.
+      final level = open.kind == BlockKind.paragraph
+          ? _scanner._underlineLevel(open, line)
+          : 0;
+      if (level > 0) headOpen(level);
+      if (level > 0 || _scanner._mergesInto(open, line)) {
+        openEnd = line + 1;
+        return;
+      }
     }
     final before = previous;
     _close();
     _open = _scanner._blockStarting(line, before);
     openEnd = line + 1;
+  }
+
+  /// Makes the open paragraph the setext heading of [level] its underline
+  /// makes it.
+  void headOpen(int level) {
+    _open = BlockScanner._headed(_open!, level);
   }
 
   /// The blocks built, the open one closed.

@@ -62,8 +62,7 @@ final class ShellWorkspace {
     controller.adopt(await _session.savedWorkspace);
     final open = [for (final tab in value.tabs) tab.path];
     if (open.isEmpty) return;
-    final gone = await _session.missingPaths(open);
-    if (gone.isNotEmpty) controller.update((w) => w.withMissing(gone));
+    missing(await _session.missingPaths(open));
   }
 
   /// Opens [notePath] now: in a new tab when [newTab] (or when one was
@@ -261,8 +260,39 @@ final class ShellWorkspace {
   /// the library loaded without them (#289). Their tabs stay, flagged
   /// missing — the file went from outside the app, not from a delete the
   /// reader asked for here (issue #372).
-  void missing(Set<String> paths) =>
-      controller.update((w) => w.withMissing(paths));
+  ///
+  /// Each call names only what one re-index removed, so it adds to the
+  /// flags; [indexChanged] is what lifts one.
+  void missing(Set<String> paths) {
+    if (paths.isEmpty) return;
+    _flagged++;
+    controller.update((w) => w.withMissing(paths));
+  }
+
+  /// How many times a tab was flagged missing: what tells [indexChanged]
+  /// its answer is older than a removal.
+  int _flagged = 0;
+
+  /// The index changed: a tab flagged missing whose note it holds again —
+  /// written back from outside, or restored — loses its flag.
+  ///
+  /// Only flagged tabs are asked about, and only to lift a flag: an index
+  /// that has not taken a new note in yet must not strike its tab through.
+  /// The answer is dropped when a removal flagged anything while the index
+  /// was being asked, since it may predate that removal; the next change
+  /// asks again.
+  Future<void> indexChanged() async {
+    final flagged = {
+      for (final tab in value.tabs)
+        if (tab.missing) tab.path,
+    };
+    if (flagged.isEmpty) return;
+    final before = _flagged;
+    final gone = await _session.missingPaths(flagged);
+    if (_flagged != before) return;
+    final back = flagged.difference(gone);
+    if (back.isNotEmpty) controller.update((w) => w.withPresent(back));
+  }
 
   /// Writes what is pending and lets go.
   void dispose() => controller.dispose();

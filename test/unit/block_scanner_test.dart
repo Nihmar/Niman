@@ -227,12 +227,73 @@ void main() {
       // An underline with nothing above it to head is a rule — and a `---` on
       // the note's first line is the frontmatter, not one.
       expect(_kinds('\n---').last, BlockKind.thematicBreak);
-      // And a paragraph is not interrupted by one: only the line above the
-      // underline is its heading's text, as the package reads it.
-      expect(_kinds('one\ntwo\n---'), <BlockKind>[
+    });
+
+    test('a setext heading is the whole paragraph above its underline', () {
+      // CommonMark, and the export's `SetextHeaderWithIdSyntax`: `one\ntwo`
+      // then `---` is one `<h2>` of both lines. The scanner headed the last
+      // line alone and left `one` a paragraph above it.
+      final blocks = BlockScanner(
+        SourceBuffer.fromText('before\n\none\ntwo\nthree\n===\nafter'),
+      ).index.blocks;
+      expect(blocks.map((block) => block.kind), <BlockKind>[
         BlockKind.paragraph,
+        BlockKind.blank,
+        BlockKind.heading,
+        BlockKind.paragraph,
+      ]);
+      expect(blocks[2].startLine, 2);
+      expect(blocks[2].endLine, 6);
+      expect(blocks[2].headingLevel, 1);
+    });
+
+    test("a table row is not a setext heading's text", () {
+      // A `---` under a table closes it and is a rule: only a paragraph can
+      // be turned into a heading, and the scanner read the last row's text
+      // alone and made the `---` a one-line heading of its own.
+      final blocks = BlockScanner(
+        SourceBuffer.fromText('| a | b |\n|---|---|\n| 1 | 2 |\n---'),
+      ).index.blocks;
+      expect(blocks.map((block) => block.kind), <BlockKind>[
+        BlockKind.table,
+        BlockKind.thematicBreak,
+      ]);
+      expect(blocks.first.endLine, 3);
+    });
+
+    test('an underline is never a lazy continuation', () {
+      // `lazy` goes on with the quote's paragraph; `---` cannot, so it is a
+      // rule after the quote rather than the underline of a heading in it.
+      final quoted = BlockScanner(SourceBuffer.fromText('> quote\nlazy\n---'))
+          .index
+          .blocks;
+      expect(quoted.map((block) => block.kind), <BlockKind>[
+        BlockKind.quote,
+        BlockKind.thematicBreak,
+      ]);
+      expect(quoted.first.endLine, 2);
+      // The same in a list item: a paragraph inside it takes an underline
+      // indented into the item, and not one at the margin.
+      expect(_kinds('- a\n\n  para\n---'), <BlockKind>[
+        BlockKind.listItem,
+        BlockKind.blank,
+        BlockKind.paragraph,
+        BlockKind.thematicBreak,
+      ]);
+      expect(_kinds('- a\n\n  para\n  ---'), <BlockKind>[
+        BlockKind.listItem,
+        BlockKind.blank,
         BlockKind.heading,
       ]);
+      // A sublist's content column is where its underline's indent counts
+      // from, and one short of it is outside the sublist.
+      expect(_kinds('- a\n  - b\n\n    para\n    ---').last, BlockKind.heading);
+      expect(
+        _kinds('- a\n  - b\n\n    para\n  ---').last,
+        BlockKind.thematicBreak,
+      );
+      // A paragraph after the list, past a blank line, is the note's own.
+      expect(_kinds('- a\n\npara\n---').last, BlockKind.heading);
     });
 
     test('a quoted task line is one quote, its children in it', () {
@@ -607,6 +668,8 @@ void main() {
         '| a | b |',
         '|---|---|',
         '---',
+        '===',
+        '  ---',
         '<div>',
         '</div>',
         '2. two',
@@ -660,6 +723,11 @@ void main() {
           'formula',
           [r'$$', for (var at = 0; at < 50000; at++) 'x_$at', r'$$'].join('\n'),
         ),
+        // A setext heading is its whole paragraph, underline and all.
+        (
+          'setext heading',
+          [for (var at = 0; at < 50000; at++) 'prose $at', '---'].join('\n'),
+        ),
       ]) {
         final buffer = SourceBuffer.fromText(text);
         final scanner = BlockScanner(buffer);
@@ -707,6 +775,8 @@ void main() {
         '| a | b |',
         '|---|---|',
         '---',
+        '===',
+        '  ---',
         '<div>',
         '</div>',
       ];

@@ -5,6 +5,7 @@
 // "suggested correction" the issue's Boundaries section overrules say so.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/templates/checker.dart';
+import 'package:niman/src/templates/engine.dart';
 
 void main() {
   /// The single error of [source], with the check that there is exactly
@@ -45,6 +46,60 @@ void main() {
         TemplateSyntaxErrorKind.structural,
       ]);
       expect(errors.map((error) => error.suggestion), [null, null]);
+    });
+
+    test('a brace next to a placeholder is literal, not a pair', () {
+      // `{{{title}}}` is a `{`, the placeholder and a `}`: the engine
+      // renders `{Title}`, and the lone braces either side are text.
+      expect(checkTemplateSyntax('{{{title}}}'), isEmpty);
+      expect(checkTemplateSyntax('x{{{title}}'), isEmpty);
+      // Two whole pairs around one are two stray pairs.
+      final errors = checkTemplateSyntax('{{{{title}}}}');
+      expect(errors.map((error) => error.offset), [0, 11]);
+      expect(errors.map((error) => error.length), [2, 2]);
+    });
+
+    test('no arrangement of braces makes the checker throw', () {
+      // Every string of up to eight characters over `{`, `}` and a
+      // letter — each brace run at every boundary a placeholder can have —
+      // plus the shapes a person actually types. The checker runs on a
+      // timer while the template is edited, so a throw is an uncaught
+      // error and a stale list of mistakes on screen.
+      final sources = <String>[
+        '{{{title}}}',
+        '{{{{title}}}}',
+        '{{title}}}',
+        '{{{title}}',
+        '}}{{title}}{{',
+        '{{title}}{{',
+        '{{date:YYYY}}{{{',
+        '{ {{title}} }',
+        '{{ {{title}}',
+      ];
+      void grow(String prefix) {
+        sources.add(prefix);
+        if (prefix.length == 8) return;
+        for (final char in ['{', '}', 'a']) {
+          grow('$prefix$char');
+        }
+      }
+
+      grow('');
+      for (final source in sources) {
+        final errors = checkTemplateSyntax(source);
+        for (final error in errors) {
+          expect(
+            error.offset,
+            inInclusiveRange(0, source.length),
+            reason: source,
+          );
+          expect(
+            error.end,
+            inInclusiveRange(error.offset, source.length),
+            reason: source,
+          );
+        }
+      }
     });
 
     test('empty placeholder: {{}} and {{ }} have nothing to suggest', () {
@@ -269,6 +324,99 @@ void main() {
         '{{title|upperr}}',
         '{{titlex|upper}}',
       ]);
+    });
+  });
+
+  group('the engine is the judge', () {
+    /// Whether the engine leaves [source]'s placeholder standing when
+    /// every answer it could need is supplied: a title, a clock, an id, the
+    /// fields' answers, a context and a counter.
+    bool standing(String source) => applyTemplateWithCaret(
+      source,
+      title: 'Note',
+      now: DateTime(2026, 3, 9, 7, 5),
+      uuid: () => 'id',
+      answers: const {'Name': 'Ada', 'Kind': 'a'},
+      context: TemplateContext.empty,
+      counter: (_) => 1,
+    ).text.contains('{{');
+
+    test('what the engine leaves standing is reported', () {
+      for (final source in [
+        // A move is read only as a leading run on a date placeholder.
+        '{{title|+1d}}',
+        '{{title|startof:month}}',
+        '{{date|upper|+1d}}',
+        '{{now|trim|endof:week}}',
+        // An empty filter is no filter the engine knows.
+        '{{title|}}',
+        '{{date|}}',
+        '{{title|upper||lower}}',
+        '{{title|:x}}',
+        // A counter with no name counts nothing.
+        '{{counter}}',
+        '{{counter:}}',
+        '{{counter: |pad:3}}',
+        // The caret takes no filters.
+        '{{cursor|upper}}',
+        '{{cursor:2|trim}}',
+      ]) {
+        expect(standing(source), isTrue, reason: 'the engine: $source');
+        expect(checkTemplateSyntax(source), isNotEmpty, reason: source);
+      }
+    });
+
+    test('what the engine answers in full is not reported', () {
+      for (final source in [
+        '{{date|+1d|upper}}',
+        '{{date|+1d|-2w|startof:month|upper|pad:12}}',
+        '{{date| +1d }}',
+        '{{time|endof:week}}',
+        '{{now:YYYY|+1y|trim}}',
+        '{{title|UPPER}}',
+        '{{title|default:x}}',
+        '{{counter:quest|pad:3}}',
+        '{{counter: quest }}',
+        '{{cursor}}',
+        '{{cursor:2}}',
+        '{{uuid|slug}}',
+        '{{ask:Name|lower}}',
+        '{{selection|default:none}}',
+      ]) {
+        expect(standing(source), isFalse, reason: 'the engine: $source');
+        expect(checkTemplateSyntax(source), isEmpty, reason: source);
+      }
+    });
+
+    test('a fix is offered only where it is one the engine answers', () {
+      // A stray pipe and a filtered caret have one reading.
+      expect(only('{{title|}}').suggestion, '{{title}}');
+      expect(only('{{title|upper|}}').suggestion, '{{title|upper}}');
+      expect(only('{{cursor|upper}}').suggestion, '{{cursor}}');
+      // A snap is suggested where a move is read, and nowhere else.
+      expect(only('{{date|endoff:month}}').suggestion, '{{date|endof:month}}');
+      expect(only('{{title|endoff:month}}').suggestion, isNull);
+      expect(only('{{date|upper|endoff:month}}').suggestion, isNull);
+      for (final source in [
+        '{{title|}}',
+        '{{cursor|upper}}',
+        '{{date|endoff:month}}',
+      ]) {
+        final suggestion = only(source).suggestion!;
+        expect(checkTemplateSyntax(suggestion), isEmpty, reason: suggestion);
+        expect(standing(suggestion), isFalse, reason: suggestion);
+      }
+    });
+
+    test('a misplaced move is named, and not corrected to a text filter', () {
+      // `+1d` is two edits from `pad`: the unknown-filter path would offer
+      // it, and a move is not a typo of a padding.
+      for (final source in ['{{title|+1d}}', '{{date|upper|+1d}}']) {
+        final error = only(source);
+        expect(error.kind, TemplateSyntaxErrorKind.argument, reason: source);
+        expect(error.message, contains('moves a date'), reason: source);
+        expect(error.suggestion, isNull, reason: source);
+      }
     });
   });
 }

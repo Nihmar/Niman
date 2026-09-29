@@ -140,10 +140,11 @@ with the tasks of both.
 Library settings (`.niman/settings.json`) never conflict: they merge
 setting by setting. A setting changed on one device only is kept; the
 same setting changed differently on both takes the device that saved
-last. A settings file that arrives broken — a half-written copy from
-another tool, an edit that is not valid JSON — is not merged and not
-taken over: the sync reports it as a conflict and leaves both copies
-where they are, so a good file is never replaced by a broken one.
+last. A settings file that is broken on either side — a half-written
+copy from another tool, a hand edit here that is not valid JSON — is
+not merged and not sent over the other: the sync reports it as a
+conflict and leaves both copies where they are, so a good file is never
+replaced by a broken one, on this device or on the server.
 Template counters (`.niman/counters.json`) keep the highest number
 either device reached, so a number is never handed out twice. The
 personal dictionary merges word by word: a word added on either device
@@ -163,7 +164,7 @@ touched when it stops:
 | Waiting for your confirmation | An automatic sync would have removed many files: **Sync now** shows what, and asks. |
 | Waiting for Wi-Fi | **Wi-Fi only** is on and the phone is on mobile data. |
 | Not synced · N | Those files are tried again at the next sync (a full disk on the server, for example). |
-| The certificate for *address* is not trusted | The server presented a TLS certificate the device cannot verify — an OpenMediaVault NAS, for one, ships a self-signed one — so the handshake stopped before anything was sent. The failure names the address and the certificate's fingerprint. **Trust this certificate** in the WebDAV settings shows that fingerprint and, when you confirm it, accepts **that one certificate, for that one server, on this device** — no other certificate is ever accepted, here or anywhere else in Niman. Trust it only if the fingerprint matches the one the server's owner gave you; if it does not, use `http://` on a network you trust instead (step 2). The trust lives in the destination's settings, and **Forget** on the same row takes it back. |
+| The certificate for *address* is not trusted | The server presented a TLS certificate the device cannot verify — an OpenMediaVault NAS, for one, ships a self-signed one — so the handshake stopped before anything was sent. The failure names the address and the certificate's fingerprint. **Trust this certificate** in the WebDAV settings shows that fingerprint and, when you confirm it, accepts **that one certificate, for that one server, on this device** — no other certificate is ever accepted, here or anywhere else in Niman. Trust it only if the fingerprint matches the one the server's owner gave you; if it does not, use `http://` on a network you trust instead (step 2). The trust lives in the destination's settings, and **Forget** on the same row takes it back. If your address redirects to another server and that one's certificate is refused, the failure names that other server and offers nothing to trust: fix the certificate there, or enter that server's address directly. |
 
 ### Change or disconnect
 

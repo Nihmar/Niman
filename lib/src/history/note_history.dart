@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:niman/src/core/logging.dart';
@@ -6,6 +5,7 @@ import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 
 /// The library's note history, from the main isolate's side.
 ///
@@ -90,7 +90,7 @@ final class NoteHistory {
       _log.warning('read "$path" v$number: gone');
       throw StateError('"$path" has no version $number');
     }
-    final text = utf8.decode(bytes, allowMalformed: true);
+    final text = decodeNoteText(bytes);
     _log.debug(
       'read "$path" v$number: ${bytes.length} b '
       '(${clock.elapsedMilliseconds} ms)',

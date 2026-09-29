@@ -1,10 +1,12 @@
 /// The editor behind the frontmatter fields panel (#157): a key, a type and a
 /// value, for adding a field or changing one.
 ///
-/// The answer is plain data — a key, a type and the values as text — and the
-/// panel turns it into the YAML the file gets
-/// (`frontmatterFieldYaml`). The key is fixed when an existing field is edited:
-/// renaming a key is an edit of its own the panel does not make.
+/// The answer is plain data — a key, a type and the values — and the panel
+/// turns it into the YAML the file gets (`frontmatterFieldYaml`). A list's
+/// values are its items' own YAML, shown and read as the inside of a flow
+/// list (`frontmatterListItems`), so an item holding a comma stays one item.
+/// The key is fixed when an existing field is edited: renaming a key is an
+/// edit of its own the panel does not make.
 library;
 
 import 'package:flutter/material.dart';
@@ -75,10 +77,9 @@ final class _FrontmatterFieldDialogState
       return [if (_bool) 'true' else 'false'];
     }
     if (_type == FrontmatterFieldType.list) {
-      return [
-        for (final part in _value.text.split(','))
-          if (part.trim().isNotEmpty) part.trim(),
-      ];
+      // Read as the inside of a flow list, the way the items are shown:
+      // `"Doe, J", x` is two items, and an item keeps its own YAML.
+      return frontmatterListItems(_value.text);
     }
     return [_value.text.trim()];
   }

@@ -175,6 +175,26 @@ void main() {
       expect(await read('c.md'), 'nothing here\n');
     });
 
+    // A byte that is not UTF-8 was decoded as U+FFFD and written back as
+    // one: Replace all changed an accent the user never touched. It is read
+    // as the Windows-1252 character it is, and survives in UTF-8.
+    test('a Latin-1 note keeps its accents through a replace', () async {
+      await file('latin1.md').writeAsBytes(<int>[
+        ...utf8.encode('cat caf'),
+        0xE9, // é in Latin-1
+        0x0A,
+      ]);
+      await Indexer(db).fullScan(root.path);
+      final report = await replace.replaceAll(
+        term: 'cat',
+        replacement: 'dog',
+        caseSensitive: false,
+        only: {'latin1.md'},
+      );
+      expect(report.notesChanged, 1);
+      expect(await file('latin1.md').readAsBytes(), utf8.encode('dog café\n'));
+    });
+
     test('case-sensitive run touches only the exact case', () async {
       await file('a.md').writeAsString('cat Cat CAT\n');
       await Indexer(db).fullScan(root.path);

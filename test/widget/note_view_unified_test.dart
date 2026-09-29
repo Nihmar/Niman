@@ -237,6 +237,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a checkbox in a quote in the read pane ticks the note', (
+    tester,
+  ) async {
+    // The box stands behind the quote's marks: a line that does not start
+    // with the list marker is still a task item's line.
+    const note = 'before\n\n> text\n>\n> - [ ] task\n';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteView(
+            path: '/tmp/niman-read-quoted-task-test.md',
+            showLineNumbers: true,
+            autofocusEditor: false,
+            showPreview: true,
+            readNote: (_) async => note,
+            writeNote: (_, _) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final editor = tester.state<MarkdownSourceViewState>(
+      find.byType(MarkdownSourceView, skipOffstage: false),
+    );
+    Finder inRead({required bool ticked}) => find.descendant(
+      of: find.byType(MarkdownReadView),
+      matching: findCheckbox(ticked: ticked),
+    );
+    expect(inRead(ticked: false), findsOneWidget);
+
+    await tester.tap(inRead(ticked: false));
+    await tester.pump();
+    expect(editor.widget.buffer.text, 'before\n\n> text\n>\n> - [x] task\n');
+
+    await tester.tap(inRead(ticked: true));
+    await tester.pump();
+    expect(editor.widget.buffer.text, note);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a tick in the read pane carries down the branch (#326)', (
     tester,
   ) async {

@@ -408,7 +408,10 @@ for multistatus parsing: servers pick their own namespace prefixes
   header, a needed verb refused), `WebDavCertificateFailure` (the device
   refuses the server's certificate; it carries the host and, when the
   error exposes one, the fingerprint — the trust option itself is still
-  open, #366), `WebDavProtocolFailure` (anything else);
+  open, #366; a certificate refused on a redirect target that is not the
+  destination's host names that host and carries no fingerprint, since
+  only the destination's host can be trusted),
+  `WebDavProtocolFailure` (anything else);
 - logs one line per request under `webdav`: verb, relative path, status,
   ETag (short), bytes, ms. It makes one attempt per call (plus
   redirects); retries and backoff belong to the queue, which logs them.
@@ -449,9 +452,11 @@ one runs joins it and gets the same report, saying that it joined.
    moved meanwhile is skipped and decided again next run. A listing
    without file ETags cannot tell a same-second rewrite of the same size
    from an unchanged file — size, mtime and the empty ETag all match — so
-   when the row could not rule that out (`remote_unverified`) the check
-   hashes the remote and compares it with the content the write is based
-   on, and a mismatch skips the path (#350). The same check guards the
+   when the listing cannot rule that out (the `remote_unverified` test,
+   applied to the mtime the server shows now: not the row's flag, which
+   for a merge describes the version being replaced) the check hashes the
+   remote and compares it with the content the write is based on, and a
+   mismatch skips the path (#350). The same check guards the
    two merge uploads, which otherwise carry no precondition on a bare
    server. That PROPFIND
    is only as good as the client's reading of "not there": some servers
@@ -460,6 +465,12 @@ one runs joins it and gets the same report, saying that it joined.
    - *upload*: missing remote folders are created (once per run), `PUT`
      streamed from disk with `If-Match` / `If-None-Match` and
      `X-OC-Mtime`, then a `PROPFIND Depth: 0` for the metadata to record.
+     A JSON state file (`settings.json`, `counters.json`, `reading.json`)
+     that is not a JSON object is never written over the other side, in
+     either direction: the upload of a local copy that does not parse, and
+     the download of a remote one that does not, leave both sides as they
+     are and report the path as a conflict (#336) — `.niman/` has no
+     history to bring the good copy back.
    - *download*: `GET` into `.<name>.niman-tmp-sync-<µs>` next to the
      target, size checked against the listing (unless the ETag says the
      file was rewritten since), then `NoteOps.syncReplace`: in the note's

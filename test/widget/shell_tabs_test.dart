@@ -220,4 +220,26 @@ void main() {
     expect(controller.workspace.tabs.single.missing, isTrue);
     expect(tabDecoration(tester, 0), TextDecoration.lineThrough);
   });
+
+  testWidgets(
+    'a flag outlives a later removal and goes when the note is back',
+    (tester) async {
+      controller.workspace = Workspace.empty.open('ghost.md').open('alpha.md');
+      await pumpShell(tester);
+      expect(controller.workspace.tabs.map((t) => t.missing), [true, false]);
+
+      // Another note deleted outside the app: its removal alone arrives.
+      controller.addRemoval({'alpha.md'});
+      await settle(tester);
+      expect(controller.workspace.tabs.map((t) => t.missing), [true, true]);
+
+      // The first one is written again: the index holds it, the flag goes.
+      await tester.runAsync(
+        () => controller.createNote(parentPath: '', name: 'ghost'),
+      );
+      await settle(tester);
+      expect(controller.workspace.tabs.first.missing, isFalse);
+      expect(tabDecoration(tester, 0), isNot(TextDecoration.lineThrough));
+    },
+  );
 }

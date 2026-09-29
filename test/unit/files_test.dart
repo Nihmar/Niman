@@ -123,7 +123,20 @@ void main() {
 
     test('removes trailing dot runs but keeps leading dots', () {
       expect(sanitizeName('notes...', fallback: 'X'), 'notes');
-      expect(sanitizeName('.hidden.', fallback: 'X'), '.hidden.');
+      expect(sanitizeName('.hidden.', fallback: 'X'), '.hidden');
+    });
+
+    test('never ends a name with a dot or a space', () {
+      // Windows drops both from the end of a component: a folder created as
+      // `Draft.` exists as `Draft`, and the index would hold a name the disk
+      // does not.
+      expect(sanitizeName('Draft.', fallback: 'X'), 'Draft');
+      expect(sanitizeName('Draft. .', fallback: 'X'), 'Draft');
+      // The byte cap can land just after a space or a dot: what it leaves
+      // is trimmed too.
+      expect(sanitizeName('${'a' * 199} b', fallback: 'X'), 'a' * 199);
+      expect(sanitizeName('${'a' * 199}.b', fallback: 'X'), 'a' * 199);
+      expect(sanitizeName('. .', fallback: 'X'), 'X');
     });
   });
 
@@ -179,6 +192,65 @@ void main() {
     }, skip: caseSkipReason);
   });
 
+  group('isExcludedEntry', () {
+    // The folding flag and the listing are handed in, so the case a
+    // case-sensitive folder on Windows presents — `A.md` and `a.md` side by
+    // side — is decided the same on every host, whatever its own
+    // filesystem can hold.
+    final renamed = p.join('lib', 'A.md');
+
+    test('the entry itself, spelled the same, is free', () {
+      expect(
+        isExcludedEntry(
+          renamed,
+          renamed,
+          foldsCase: true,
+          entryNames: () => const ['A.md', 'a.md'],
+        ),
+        isTrue,
+      );
+    });
+
+    test('another spelling is free when the folder folds case', () {
+      expect(
+        isExcludedEntry(
+          p.join('lib', 'a.md'),
+          renamed,
+          foldsCase: true,
+          entryNames: () => const ['A.md'],
+        ),
+        isTrue,
+      );
+    });
+
+    test('another spelling the folder holds is somebody else', () {
+      // A folder made case-sensitive (WSL, fsutil) on a platform that folds
+      // case: renaming `A.md` to `a` must not pick `a.md` as the entry being
+      // renamed, or the rename replaces the other note.
+      expect(
+        isExcludedEntry(
+          p.join('lib', 'a.md'),
+          renamed,
+          foldsCase: true,
+          entryNames: () => const ['A.md', 'a.md'],
+        ),
+        isFalse,
+      );
+    });
+
+    test('another spelling is somebody else where case is not folded', () {
+      expect(
+        isExcludedEntry(
+          p.join('lib', 'a.md'),
+          renamed,
+          foldsCase: false,
+          entryNames: () => const ['A.md'],
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('uniqueFolderName', () {
     test('keeps the name when unused', () async {
       expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs');
@@ -186,6 +258,11 @@ void main() {
 
     test('appends a numeric suffix on collision', () async {
       Directory(p.join(tempDir.path, 'Docs')).createSync();
+      expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs_1');
+    });
+
+    test('a file of that name is a collision too', () async {
+      File(p.join(tempDir.path, 'Docs')).writeAsStringSync('x');
       expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs_1');
     });
 
@@ -235,6 +312,33 @@ void main() {
         expect(File(p.join(tempDir.path, second)).existsSync(), isFalse);
       },
     );
+
+    test('a file never takes a name a folder holds', () async {
+      // Trashing a file `Note.md` while the trash holds a folder of that
+      // name: the rename onto the folder fails, and the delete with it.
+      Directory(p.join(tempDir.path, 'Note.md')).createSync();
+      final name = await trashFileName(tempDir, 'Note', '.md');
+      expect(name, isNot('Note.md'));
+      expect(name, endsWith('.md'));
+    });
+
+    test('a folder never takes a name a file holds', () async {
+      File(p.join(tempDir.path, 'Docs')).writeAsStringSync('x');
+      final name = await trashDirName(tempDir, 'Docs');
+      expect(name, matches(RegExp(r'^Docs\.\d{10}$')));
+    });
+
+    test('a timestamped name held by the other kind is passed over', () async {
+      File(p.join(tempDir.path, 'Docs')).writeAsStringSync('x');
+      final first = await trashDirName(tempDir, 'Docs');
+      File(p.join(tempDir.path, first)).writeAsStringSync('y');
+      final second = await trashDirName(tempDir, 'Docs');
+      expect(second, isNot(first));
+      expect(
+        FileSystemEntity.typeSync(p.join(tempDir.path, second)),
+        FileSystemEntityType.notFound,
+      );
+    });
 
     test('a second directory collision gets its own name too (#335)', () async {
       Directory(p.join(tempDir.path, 'Docs')).createSync();

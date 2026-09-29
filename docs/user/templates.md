@@ -45,29 +45,37 @@ self-references inside directives resolve against the creation context.
 Append with `|`: `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
 `{{counter:quest|pad:3}}`. Known filters: case (`upper`, `lower`,
 `title`), `slug`, `trim`, numeric padding (`pad:3`), and date moves
-(`+7d`, `+1y`, … — applied left to right, before case filters). A move
+(`+7d`, `+1y`, `startof:month`, … — applied left to right, before case
+filters). Moves apply only to `{{date}}`, `{{time}}` and `{{now}}`, and
+only as the first filters: `{{date|+1d|upper}}` works, while
+`{{date|upper|+1d}}` and `{{title|+1d}}` are left standing. A move
 in days or weeks counts calendar days, not 24 hours, so `+1d` is always
 the next date — a clock change does not make it repeat a day.
+`{{cursor}}` takes no filters.
 
 ## Checking a template
 
 A template can be read before it is used, and what the tables above
 accept is exactly what the checker accepts: it reads the engine's own
 vocabulary — the placeholder names, the filter names and the date tokens
-— so a name added to the engine is a name the checker already knows.
-It reports three kinds of mistake:
+— and asks the engine's own rules whether a filter applies where it
+stands, so a name added to the engine is a name the checker already
+knows. It reports three kinds of mistake:
 
 - braces that do not pair up: `{{title`, `title}}`, `{{ {{title}} }}`,
-  `{{}}`;
+  `{{}}`, and a `|` with no filter after it: `{{title|}}`;
 - a placeholder, filter or date token the engine does not answer:
   `{{titlex}}`, `{{title|upperr}}`, `{{date:YYYYY}}`;
-- an argument the engine cannot read: `{{title|pad:wide}}`,
-  `{{date|+xd}}`, `{{time:HH'|mm}}`, `{{ask:}}`.
+- an argument the engine cannot read, or a filter where it does not
+  apply: `{{title|pad:wide}}`, `{{date|+xd}}`, `{{time:HH'|mm}}`,
+  `{{ask:}}`, `{{counter}}`, `{{date|upper|+1d}}`, `{{cursor|upper}}`.
 
 Each mistake says where it is, what is wrong, and — where the correction
 is deterministic and safe — the text that fixes it. A name within two
 edits of exactly one known one is suggested: `{{titlex}}` → `{{title}}`,
 `{{title|upperr}}` → `{{title|upper}}`, `{{date:YYYYY}}` → `{{date:YYYY}}`.
+A stray `|` and the filters on a caret are dropped: `{{title|}}` →
+`{{title}}`, `{{cursor|upper}}` → `{{cursor}}`.
 A suggestion is only ever text to apply over the mistake it is on; the
 checker rewrites nothing.
 
@@ -75,7 +83,9 @@ Where the fix would be a guess, there is no suggestion and the mistake is
 reported alone: two known names equally close (`{{titel}}` is two edits
 from both `title` and `time`), a `pad:` width that is not a number (only
 the author knows the width), a date move whose count is not one
-(`{{date|+xd}}`), a field with no label (`{{ask:}}`), and an unclosed
+(`{{date|+xd}}`), a move out of its place (`{{date|upper|+1d}}` — before
+or after the case is the author's call), a field with no label
+(`{{ask:}}`), a counter with no name (`{{counter}}`), and an unclosed
 `{{` with text after it — closing that one would swallow a sentence the
 author wrote, so the checker points at it and stays quiet.
 

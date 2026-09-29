@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// Suffix added to the target name when writing a temporary file.
@@ -38,7 +39,8 @@ final Set<String> _reservedNames = <String>{
 const _reservedPrefix = '_';
 
 /// Trailing spaces and dots, which Windows drops from a component name:
-/// `CON ` and `CON.` are the console device as much as `CON` is.
+/// `CON ` and `CON.` are the console device as much as `CON` is, and a
+/// folder created as `Draft.` exists there as `Draft`.
 final RegExp _trailingSpaceOrDot = RegExp(r'[ .]+$');
 
 /// Whether this platform's filesystems fold case: Windows and Apple's do,
@@ -51,9 +53,6 @@ final bool _caseInsensitivePaths =
 
 /// Collapses runs of whitespace to single spaces.
 final RegExp _whitespaceRuns = RegExp(r'\s+');
-
-/// Two or more trailing dots, which are rejected or mangled by Windows.
-final RegExp _trailingDots = RegExp(r'\.{2,}$');
 
 /// The number of uniqueness attempts when resolving name collisions.
 const _uniqueAttempts = 100;
@@ -263,17 +262,26 @@ Future<String> hashFileSha256(File file) async {
 /// Sanitizes [input] into a valid note or folder name.
 ///
 /// Strips path separators and OS-illegal characters, collapses whitespace,
-/// trims trailing dots, moves a reserved device name out of the way, and caps
-/// the length at [_maxNameBytes] UTF-8 bytes. Returns [fallback] when nothing
-/// usable remains.
+/// moves a reserved device name out of the way, and caps the length at
+/// [_maxNameBytes] UTF-8 bytes. Returns [fallback] when nothing usable
+/// remains.
+///
+/// The result never ends with a dot or a space — not even where the byte cap
+/// cut it: Windows drops both from the end of a component, so the name on
+/// disk would differ from the one the caller records. A note's `.md` would
+/// shield its stem, but this does not know whether a note or a folder is
+/// being named, and one rule keeps the two alike.
 String sanitizeName(String input, {required String fallback}) {
   var name = input.trim();
   name = name.replaceAll(_invalidChars, '');
   name = name.replaceAll(_whitespaceRuns, ' ');
-  name = name.trim();
-  name = name.replaceAll(_trailingDots, '');
+  name = name.replaceAll(_trailingSpaceOrDot, '').trim();
   name = _withoutReservedStem(name);
+  // Cutting and trimming cannot make a device's stem of one that was not:
+  // they keep the first dot when it falls inside the budget, and a stem
+  // that runs past it is far longer than any device name.
   name = _truncateToBytes(name, _maxNameBytes);
+  name = name.replaceAll(_trailingSpaceOrDot, '');
   if (name.isEmpty) {
     return fallback;
   }
@@ -330,30 +338,54 @@ int _utf8Length(int rune) {
 /// Whether [abs] — a candidate name inside [dir] — can only be [exclude], the
 /// entry a rename is moving onto its own name.
 ///
-/// `package:path` folds case on Windows, where an entry has one name however
-/// it is spelled. Apple's filesystems answer for either spelling too, but
-/// nothing in the two strings says so: compared as strings `A.md` and `a.md`
-/// are different paths, so the search never recognises the entry it was told
-/// to leave alone and returns `A_1.md` for a rename that only changes the
-/// case (#354).
+/// Windows' and Apple's filesystems answer for either spelling of a name,
+/// but compared as strings `A.md` and `a.md` are different paths, so the
+/// search would never recognise the entry it was told to leave alone and
+/// would return `A_1.md` for a rename that only changes the case (#354).
 ///
-/// On a case-sensitive volume the two spellings really are two entries, and
-/// there the directory's own listing settles it: a candidate found among the
-/// entries belongs to somebody else, and the collision stands.
-bool _excludedEntry(Directory dir, String abs, String? exclude) {
+/// A folder can be case-sensitive even there (WSL, `fsutil`), and then the
+/// two spellings really are two entries: the directory's own listing settles
+/// it — a candidate found among the entries belongs to somebody else, and
+/// the collision stands. Only the exact spelling is taken without asking,
+/// or the rename would replace the other note.
+bool _excludedEntry(Directory dir, String abs, String? exclude) =>
+    isExcludedEntry(
+      abs,
+      exclude,
+      foldsCase: _caseInsensitivePaths,
+      entryNames: () => dir
+          .listSync(followLinks: false)
+          .map((entry) => p.basename(entry.path)),
+    );
+
+/// The decision [_excludedEntry] makes, with what it asks the platform and
+/// the directory handed in: whether its filesystems fold case, and the names
+/// the directory holds.
+@visibleForTesting
+bool isExcludedEntry(
+  String abs,
+  String? exclude, {
+  required bool foldsCase,
+  required Iterable<String> Function() entryNames,
+}) {
   if (exclude == null) {
     return false;
   }
-  if (p.equals(abs, exclude)) {
-    return true;
-  }
-  if (!_caseInsensitivePaths || abs.toLowerCase() != exclude.toLowerCase()) {
+  // The folder is compared as a path (a drive letter's case, a `.` segment),
+  // the name as written: `p.equals` folds case on Windows, and answering
+  // there would skip the listing for exactly the spelling it has to settle.
+  if (!p.equals(p.dirname(abs), p.dirname(exclude))) {
     return false;
   }
   final candidate = p.basename(abs);
-  return !dir
-      .listSync(followLinks: false)
-      .any((entry) => p.basename(entry.path) == candidate);
+  final excluded = p.basename(exclude);
+  if (candidate == excluded) {
+    return true;
+  }
+  if (!foldsCase || candidate.toLowerCase() != excluded.toLowerCase()) {
+    return false;
+  }
+  return !entryNames().contains(candidate);
 }
 
 /// Returns a collision-free file name for [base] with extension [ext]
@@ -375,8 +407,7 @@ Future<String> uniqueFileName(
     final candidate = i == 0 ? '$base$ext' : '${base}_$i$ext';
     final abs = p.join(dir.path, candidate);
     if (_excludedEntry(dir, abs, exclude)) return candidate;
-    final exists = File(abs).existsSync() || Directory(abs).existsSync();
-    if (!exists) {
+    if (!_entryExists(abs)) {
       return candidate;
     }
   }
@@ -395,12 +426,22 @@ Future<String> uniqueFolderName(
     final candidate = i == 0 ? base : '${base}_$i';
     final abs = p.join(dir.path, candidate);
     if (_excludedEntry(dir, abs, exclude)) return candidate;
-    if (!Directory(abs).existsSync()) {
+    if (!_entryExists(abs)) {
       return candidate;
     }
   }
   throw StateError('Could not find a free name for "$base" in "${dir.path}"');
 }
+
+/// Whether anything at all is at [path] — a file, a folder or a link, even
+/// one pointing nowhere.
+///
+/// A name is free only when no entry of any kind holds it: asking only
+/// after the kind about to be created lets a file pick the name of a folder
+/// (or the reverse), and the rename or create onto it then fails.
+bool _entryExists(String path) =>
+    FileSystemEntity.typeSync(path, followLinks: false) !=
+    FileSystemEntityType.notFound;
 
 /// The relative, slash-separated name of [path] inside [root].
 ///
@@ -478,13 +519,13 @@ int trashTimestampSuffix(DateTime now) {
 /// target, which silently destroyed the earlier copy, #335).
 Future<String> trashFileName(Directory dir, String base, String ext) async {
   final plain = '$base$ext';
-  if (!File(p.join(dir.path, plain)).existsSync()) {
+  if (!_entryExists(p.join(dir.path, plain))) {
     return plain;
   }
   final stamp = trashTimestampSuffix(DateTime.now());
   var counter = 1;
   var candidate = '$base.$stamp$ext';
-  while (File(p.join(dir.path, candidate)).existsSync()) {
+  while (_entryExists(p.join(dir.path, candidate))) {
     counter += 1;
     candidate = '$base.$stamp-$counter$ext';
   }
@@ -496,13 +537,13 @@ Future<String> trashFileName(Directory dir, String base, String ext) async {
 /// counter while even that is taken (#335).
 Future<String> trashDirName(Directory dir, String base) async {
   final plain = base;
-  if (!Directory(p.join(dir.path, plain)).existsSync()) {
+  if (!_entryExists(p.join(dir.path, plain))) {
     return plain;
   }
   final stamp = trashTimestampSuffix(DateTime.now());
   var counter = 1;
   var candidate = '$base.$stamp';
-  while (Directory(p.join(dir.path, candidate)).existsSync()) {
+  while (_entryExists(p.join(dir.path, candidate))) {
     counter += 1;
     candidate = '$base.$stamp-$counter';
   }

@@ -192,29 +192,37 @@ final class MarkdownTable {
   /// The cells of a table row, as written between its pipes: a pipe at
   /// either end is the row's edge, and an escaped one (`\|`) is a cell's
   /// text, not an edge.
-  static List<String> splitRow(String line) {
-    var text = line.trim();
-    if (text.startsWith('|')) text = text.substring(1);
-    if (text.endsWith('|') && !text.endsWith(r'\|')) {
-      text = text.substring(0, text.length - 1);
-    }
-    final cells = <String>[];
-    final cell = StringBuffer();
-    for (var at = 0; at < text.length; at++) {
-      final unit = text[at];
-      if (unit == r'\' && at + 1 < text.length && text[at + 1] == '|') {
-        cell.write(r'\|');
-        at++;
-      } else if (unit == '|') {
-        cells.add(cell.toString());
-        cell.clear();
-      } else {
-        cell.write(unit);
+  static List<String> splitRow(String line) => <String>[
+    for (final (start, end) in cellRangesOf(line)) line.substring(start, end),
+  ];
+
+  /// Where the cells of a table row are, as written between its pipes: each
+  /// cell's `[start, end)` in [line], untrimmed. A pipe at either end of the
+  /// row is its edge, and an escaped one (`\|`) is a cell's text, not an
+  /// edge — at the row's end too. The one rule a row is split by: the table
+  /// model's cells and the ones `live` draws are these.
+  static List<(int, int)> cellRangesOf(String line) {
+    var start = line.length - line.trimLeft().length;
+    var end = line.trimRight().length;
+    if (end < start) end = start;
+    if (start < end && _isEdge(line, start)) start++;
+    if (end > start && _isEdge(line, end - 1)) end--;
+    final cells = <(int, int)>[];
+    var from = start;
+    for (var at = start; at < end; at++) {
+      if (_isEdge(line, at)) {
+        cells.add((from, at));
+        from = at + 1;
       }
     }
-    cells.add(cell.toString());
+    cells.add((from, end));
     return cells;
   }
+
+  /// Whether [line] has an unescaped pipe at [at].
+  static bool _isEdge(String line, int at) =>
+      line.codeUnitAt(at) == 0x7C &&
+      (at == 0 || line.codeUnitAt(at - 1) != 0x5C);
 
   /// The alignments a delimiter row [line] gives its columns; empty when
   /// it is not one.

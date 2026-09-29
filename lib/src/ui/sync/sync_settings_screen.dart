@@ -58,9 +58,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   String? _urlError;
 
   /// The certificate the user confirmed while setting this address up
-  /// (#454), or null. Scoped to the address in the field: it is dropped
-  /// the moment that address changes, so a trust confirmed for one server
-  /// is never offered to another.
+  /// (#454), or null. Scoped to the form and the address in its field: it
+  /// is dropped the moment that address changes, so a trust confirmed for
+  /// one server is never offered to another, and when the form closes —
+  /// saved, or the destination disconnected — so that past that point the
+  /// stored destination is the only trust there is, and forgetting it
+  /// there forgets it.
   String? _trustedFingerprint;
 
   /// The fields as they were when [_result] was measured: "Save" is only
@@ -200,6 +203,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       _editing = false;
       _result = null;
       _tested = null;
+      _trustedFingerprint = null;
       _password.clear();
     });
     // A fresh destination goes straight to its first sync, which shows
@@ -224,9 +228,9 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       url: destination.url,
       username: destination.username,
       // The stored destination is the one this address is; its confirmed
-      // certificate is the one this test may use (#454).
-      trustedFingerprint:
-          _trustedFingerprint ?? destination.trustedCertFingerprint,
+      // certificate is the one this test may use (#454), and only that
+      // one: a trust the form held is not the destination's.
+      trustedFingerprint: destination.trustedCertFingerprint,
     );
     if (result.ok) {
       await _sync.save(
@@ -302,7 +306,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     );
     if (confirmed != true) return;
     await _sync.forgetCertificate();
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _trustedFingerprint = null);
   }
 
   Future<void> _setTriggers({
@@ -360,7 +364,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     );
     if (confirmed != true) return;
     await _sync.disconnect();
-    if (mounted) setState(() => _editing = false);
+    if (mounted) {
+      setState(() {
+        _editing = false;
+        _trustedFingerprint = null;
+      });
+    }
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/diff/record_merge.dart';
 import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/reading/reading_positions.dart';
 import 'package:niman/src/sync/conflict_texts.dart';
 import 'package:niman/src/sync/reconcile.dart';
@@ -772,8 +773,8 @@ final class SyncEngine {
         '${base == null ? 'no base' : '${base.length} chars of base'}',
       );
       return ConflictTexts(
-        local: utf8.decode(localBytes, allowMalformed: true),
-        remote: utf8.decode(remoteBytes, allowMalformed: true),
+        local: decodeNoteText(localBytes),
+        remote: decodeNoteText(remoteBytes),
         base: base,
         localSha256: sha256.convert(localBytes).toString(),
         remoteSha256: sha256.convert(remoteBytes).toString(),
@@ -1233,11 +1234,17 @@ final class SyncEngine {
   /// A listing is only as good as its evidence: without file ETags a
   /// same-second rewrite of the same size leaves ETag (null), size and the
   /// one-second mtime all equal, so the listing alone reads as unchanged
-  /// and the write would destroy the rewrite. When the planned row could
-  /// not rule that out ([SyncItem.remoteUnverified]), the content decides:
-  /// the remote is hashed and compared with [expectedSha] — the content
-  /// the write is based on, the agreed one for an upload or a delete, the
-  /// fetched copy for a merge — and a mismatch skips the path (#350).
+  /// and the write would destroy the rewrite. When the listing cannot rule
+  /// that out — the test [SyncItem.remoteUnverified] records, applied to
+  /// the mtime the server shows now — the content decides: the remote is
+  /// hashed and compared with [expectedSha] — the content the write is
+  /// based on, the agreed one for an upload or a delete, the fetched copy
+  /// for a merge — and a mismatch skips the path (#350).
+  ///
+  /// Not the row's own flag: the row describes the remote as last agreed,
+  /// which for a merge is the version being replaced, not the one the
+  /// merge was built from — a row recorded minutes ago reads as verified
+  /// while the listing is in the server's current second.
   Future<void> _remoteUnchangedSince(
     _RunContext c,
     String path, {
@@ -1253,10 +1260,8 @@ final class SyncEngine {
               now.modified == planned.modified;
     if (!same) throw const _ChangedDuringSync();
     if (now == null) return;
-    final row = c.rows[path];
-    final doubt = row?.remoteUnverified ?? _unverified(c, now.modified);
-    if (!doubt) return;
-    final expected = expectedSha ?? row?.localSha256;
+    if (!_unverified(c, now.modified)) return;
+    final expected = expectedSha ?? c.rows[path]?.localSha256;
     if (expected == null) return;
     final download = await c.client.download(path, _DiscardSink());
     if (download.sha256 != expected) throw const _ChangedDuringSync();
@@ -1386,6 +1391,21 @@ final class SyncEngine {
     final local = (await _localStillAsPlanned(c, d.path))!;
     await _remoteStillAsPlanned(c, d);
     final sha = _localShaOf(c, d.path);
+    // The #336 rule holds both ways: a JSON state file that does not parse
+    // here — a hand edit with a syntax error — is not a newer version of the
+    // remote copy either, and `.niman/*` has no history to bring that one
+    // back. Both sides stay, and the path is reported for the merge.
+    if (jsonStateFiles.contains(d.path) &&
+        c.remote[d.path] != null &&
+        !await _isJsonObject(File(p.join(root, d.path)))) {
+      return _reportConflict(
+        c,
+        d,
+        localSha: sha,
+        remoteSha: c.rows[d.path]?.localSha256 ?? '',
+        why: 'the local copy is not a JSON object',
+      );
+    }
     await _ensureRemoteParent(c, d.path);
     await c.client.uploadFile(
       d.path,

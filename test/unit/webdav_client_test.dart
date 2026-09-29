@@ -654,6 +654,42 @@ void main() {
       );
     });
 
+    // A redirect to another host: the certificate refused there is not the
+    // destination's, so it is neither named as the destination's nor
+    // offered for trust — trusting it could never work, since only the
+    // destination's host is accepted — and the failure names the host that
+    // presented it.
+    test("a certificate refused on a redirect target is that host's, and "
+        'not offered for trust', () async {
+      final target = secure.url.replace(host: 'localhost');
+      server.redirects['/dav/'] = (status: 307, target: target);
+      final redirected = WebDavClient(
+        url: server.url,
+        trustedCertificateFingerprint: fingerprint,
+      );
+      addTearDown(redirected.close);
+      await expectLater(
+        redirected.options(),
+        throwsA(
+          isA<WebDavCertificateFailure>()
+              .having((f) => f.host, 'host', 'localhost')
+              .having((f) => f.fingerprint, 'fingerprint', isNull)
+              .having(
+                (f) => f.message,
+                'message',
+                contains('localhost:${target.port}'),
+              )
+              .having((f) => f.message, 'message', isNot(contains(fingerprint)))
+              .having(
+                (f) => f.message,
+                'message',
+                isNot(contains('127.0.0.1')),
+              ),
+        ),
+      );
+      expect(server.requests, hasLength(1), reason: 'the redirect was taken');
+    });
+
     test(
       'a fingerprint written without the separators still matches',
       () async {

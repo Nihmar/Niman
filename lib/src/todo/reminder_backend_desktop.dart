@@ -32,8 +32,9 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// Armed timers by reminder id; the pending map the service reads back.
   final Map<int, Timer> _armed = {};
 
-  /// When each reminder fired in this run, by id (#42).
-  final Map<int, DateTime> _fired = {};
+  /// What each reminder fired for in this run, and when it did, by id
+  /// (#42): the moment it was due and the moment it was shown.
+  final Map<int, ({DateTime due, DateTime at})> _fired = {};
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
@@ -77,10 +78,21 @@ final class DesktopReminderBackend implements ReminderBackend {
     // Replacing the same id converges an edited time or body, exactly like
     // the OS replacement the Android backend relies on.
     _armed.remove(reminder.id)?.cancel();
+    // Delivered already: the reminder stays wanted for `reminderGrace` past
+    // its moment, so every reconcile in that window — a todo edit, a focus
+    // regain — schedules it again, and an alarm the OS delivered is not
+    // delivered twice. A new moment is a new reminder, and it fires.
+    if (_fired[reminder.id]?.due == reminder.when) {
+      _log.info(
+        'todo reminders: ${reminder.id} already shown for '
+        '${reminder.when.toIso8601String()}, not shown again',
+      );
+      return;
+    }
     final delay = reminder.when.difference(DateTime.now());
     final timer = Timer(delay.isNegative ? Duration.zero : delay, () {
       _armed.remove(reminder.id);
-      _fired[reminder.id] = DateTime.now();
+      _fired[reminder.id] = (due: reminder.when, at: DateTime.now());
       unawaited(_show(reminder));
     });
     _armed[reminder.id] = timer;
@@ -88,7 +100,8 @@ final class DesktopReminderBackend implements ReminderBackend {
 
   /// True: an already-past reminder arms a zero-delay timer above, so one
   /// that came due while Niman was closed is shown on the next run rather
-  /// than dropped.
+  /// than dropped — once: one this run already showed for that moment is
+  /// not armed again.
   @override
   bool get firesOverdue => true;
 
@@ -122,8 +135,8 @@ final class DesktopReminderBackend implements ReminderBackend {
           'it, or the process stalled';
     }
     final fired = _fired[reminder.id];
-    if (fired != null) {
-      return 'timer fired ${_late(fired.difference(reminder.when))} late';
+    if (fired != null && fired.due == reminder.when) {
+      return 'timer fired ${_late(fired.at.difference(reminder.when))} late';
     }
     return 'NOT FIRED: no timer in this run, Niman was not running at its '
         'time';

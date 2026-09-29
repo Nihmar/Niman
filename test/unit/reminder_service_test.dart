@@ -345,6 +345,38 @@ void main() {
       expect(notifier.shown.map((r) => r.id), [7]);
       await service.dispose();
     });
+
+    test('a reconcile does not show again what was shown', () async {
+      // Fired at its time, the reminder stays in the wanted set for the
+      // grace window: a todo edit or a focus regain reconciles it again,
+      // and that is not a second delivery. Its time changed is a new one.
+      final notifier = FakeDesktopNotifier();
+      final service = LocalReminderService(
+        backend: DesktopReminderBackend(notifier: notifier),
+        settings: settings,
+        clock: DateTime.now,
+      );
+      TodoReminder at(Duration ago) => TodoReminder(
+        id: 7,
+        title: 'task',
+        body: 'body',
+        when: DateTime.now().subtract(ago),
+      );
+      final first = at(const Duration(minutes: 20));
+      Future<void> reconcileAndSettle(TodoReminder reminder) async {
+        await service.reconcile({7: reminder});
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+
+      await reconcileAndSettle(first);
+      await reconcileAndSettle(first);
+      await reconcileAndSettle(first);
+      expect(notifier.shown.map((r) => r.id), [7]);
+
+      await reconcileAndSettle(at(const Duration(minutes: 5)));
+      expect(notifier.shown.map((r) => r.id), [7, 7]);
+      await service.dispose();
+    });
   });
 
   // T-RL-01: the user reports reminders arriving minutes late, and

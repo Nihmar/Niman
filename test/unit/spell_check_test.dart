@@ -1,6 +1,7 @@
 // T-PP-09 (revised): hunspell through FFI drives the editor's underline.
 // The engine is exercised live where the system has it, and the document
 // state is exercised with a fake so the logic runs everywhere.
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -302,6 +303,63 @@ void main() {
       await going;
       expect(stopped.linesDone, lessThan(40));
       expect(stopped.done, isFalse);
+    });
+
+    test('a pass across a dictionary change caches no verdict of the old '
+        'engine', () async {
+      // The old engine is released when the dictionaries change, and a
+      // released handle calls every word correct: a pass still asking it
+      // would store "correct" in the new engine's cache.
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}, cost: 2),
+      );
+      final scan = check.startScan(
+        lineCount: 40,
+        lineAt: (i) =>
+            (text: '${_letters(i)} wrold', skip: const <TextRange>[]),
+      );
+      // The first slice runs in this turn and hands the frame back well
+      // before the 40th line: every word costs 2 ms, a slice 8.
+      final running = scan.run();
+      expect(scan.done, isFalse);
+      check.setDictionaries(['en_US']);
+      await running;
+
+      expect(check.isMisspelled('wrold'), isTrue);
+      // The pass is the new engine's, from the first line.
+      expect(scan.linesDone, 40);
+      expect(scan.issues, hasLength(40));
+      expect(
+        scan.issues.map((issue) => issue.line),
+        List.generate(40, (i) => i),
+      );
+    });
+
+    test('a pass waits for the engine the latest choice loads', () async {
+      final first = Completer<List<SpellChecker>>();
+      final second = Completer<List<SpellChecker>>();
+      final check = EditorSpellCheck(
+        loadCheckers: (names) => names.isEmpty ? first.future : second.future,
+      );
+      addTearDown(check.dispose);
+      final scan = check.startScan(
+        lineCount: 1,
+        lineAt: (_) => (text: 'hello wrold', skip: const <TextRange>[]),
+      );
+      // The panel opens while the first load runs, and the choice changes
+      // before it lands: the load the pass waits on is nobody's by then.
+      final running = scan.run();
+      check.setDictionaries(['en_US']);
+      first.complete([_FakeChecker(const {})]);
+      await pumpEventQueue();
+      expect(scan.done, isFalse, reason: 'the current engine is not there');
+
+      second.complete([
+        _FakeChecker({'wrold'}),
+      ]);
+      await running;
+      expect(scan.done, isTrue);
+      expect(scan.issues.map((issue) => issue.word), ['wrold']);
     });
 
     test('reset forgets the cached lines', () {
@@ -625,11 +683,16 @@ final class _FakeChecker implements SpellChecker {
   final int cost;
   final void Function()? onSuggest;
 
+  /// Whether [dispose] ran: like hunspell's released handle, the checker
+  /// then calls every word correct.
+  bool disposed = false;
+
   @override
   bool get available => true;
 
   @override
   bool isCorrect(String word) {
+    if (disposed) return true;
     if (cost > 0) {
       final clock = Stopwatch()..start();
       while (clock.elapsedMilliseconds < cost) {}
@@ -644,5 +707,5 @@ final class _FakeChecker implements SpellChecker {
   }
 
   @override
-  void dispose() {}
+  void dispose() => disposed = true;
 }

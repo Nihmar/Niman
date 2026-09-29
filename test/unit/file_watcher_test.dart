@@ -177,7 +177,48 @@ void main() {
       expect((await next).paths, contains(after));
     });
     await second.close();
-    expect(batches, hasLength(2));
+    expect(batches, hasLength(3));
+    expect(batches.map((b) => b.missedChanges), [false, true, false]);
+  });
+
+  test('a resubscribe reports that changes may have gone unseen', () async {
+    // Between the end of one stream and the start of the next nothing is
+    // watching: a note saved then leaves no event, and without a word from
+    // the watcher it waits for the periodic rescan, minutes away.
+    final first = StreamController<WatchChange>();
+    final second = StreamController<WatchChange>();
+    var opened = 0;
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 20),
+      restartBackoff: const Duration(milliseconds: 5),
+      source: (_) => opened++ == 0 ? first.stream : second.stream,
+    );
+    final batches = await runWith(watcher, (b) async {
+      final reported = watcher.events.first;
+      await first.close();
+      final batch = await reported;
+      expect(opened, 2, reason: 'reported once the new watch is in place');
+      expect(batch.missedChanges, isTrue);
+    });
+    await second.close();
+    expect(batches, hasLength(1));
+  });
+
+  test('a batch of plain changes asks for no full walk', () async {
+    final changes = StreamController<WatchChange>();
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 20),
+      source: (_) => changes.stream,
+    );
+    final batches = await runWith(watcher, (b) async {
+      final first = watcher.events.first;
+      changes.add(WatchChange(p.join(root.path, 'a.md')));
+      await first;
+    });
+    await changes.close();
+    expect(batches.single.missedChanges, isFalse);
   });
 
   test('a burst past the path cap ships in bounded batches (#389)', () async {

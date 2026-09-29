@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
@@ -44,6 +43,7 @@ import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
+import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/reading/reading_positions.dart';
@@ -1501,9 +1501,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
     FocusManager.instance.addListener(_reclaimFocus);
     _zen.addListener(_onZenChanged);
     unawaited(_workspace.load());
-    _libraryEvents = widget.controller.events.listen(
-      (_) => _homeWidgets.pushNotes(),
-    );
+    _libraryEvents = widget.controller.events.listen((_) {
+      _homeWidgets.pushNotes();
+      unawaited(_workspace.indexChanged());
+    });
     _libraryRemovals = widget.controller.removals.listen(
       (paths) => _workspace.missing(paths),
     );
@@ -1726,7 +1727,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       await _importNotionArchive(source, name, consume: true);
       return;
     }
-    var text = utf8.decode(await source.readAsBytes(), allowMalformed: true);
+    var text = decodeNoteText(await source.readAsBytes());
     // A BOM is the platform's encoding marker, not part of the note.
     if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
       text = text.substring(1);

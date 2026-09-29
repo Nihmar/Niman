@@ -1,6 +1,8 @@
 // A [WikilinkSuggester] a widget test drives by hand (#475): the rows the
 // panel lists, in the order the library would rank them, and the headings a
 // named note answers with.
+import 'dart:async';
+
 import 'package:niman/src/links/suggester.dart';
 
 /// A canned [WikilinkSuggester] for the panel's widget tests.
@@ -25,9 +27,34 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
   /// Every heading target the panel asked for, in order.
   final List<String> headingTargets = <String>[];
 
+  /// While true, every answer waits for [release]: a test can press a key
+  /// while a query is still on its way, as a slow index or a slow read of a
+  /// note has it.
+  bool holding = false;
+
+  final List<Completer<void>> _held = <Completer<void>>[];
+
+  /// Lets every answer held so far through, and holds no more.
+  void release() {
+    holding = false;
+    for (final answer in _held) {
+      answer.complete();
+    }
+    _held.clear();
+  }
+
+  /// Returns at once, or — while [holding] — once [release] is called.
+  Future<void> _answer() {
+    if (!holding) return Future<void>.value();
+    final answer = Completer<void>();
+    _held.add(answer);
+    return answer.future;
+  }
+
   @override
   Future<List<NoteSuggestion>> notes(String query) async {
     noteQueries.add(query);
+    await _answer();
     // A word the fake does not know matches nothing, so a test can ask for
     // the empty state without an empty library.
     if (query.isNotEmpty && query.toLowerCase().contains('zzz')) {
@@ -51,9 +78,13 @@ final class FakeWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<HeadingSuggestion>> headings(String target) async {
     headingTargets.add(target);
+    await _answer();
     return _headings[target] ?? const <HeadingSuggestion>[];
   }
 
   @override
-  Future<List<BookSuggestion>> bookPlaces(String target) async => places;
+  Future<List<BookSuggestion>> bookPlaces(String target) async {
+    await _answer();
+    return places;
+  }
 }

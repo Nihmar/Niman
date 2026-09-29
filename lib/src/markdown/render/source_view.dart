@@ -86,6 +86,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/markdown/table/markdown_table.dart';
 import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -669,7 +670,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ensureCaretVisible();
       _notifyChanged(edit);
       _bookFrame();
-      _refreshSuggest();
+      _refreshSuggest(typed: true);
     },
   );
 
@@ -1368,7 +1369,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // backspace is as much an edit as a keystroke, and the edit says which
     // lines moved so the word count pays for those and not for the note.
     _notifyChanged(edit);
-    _refreshSuggest();
+    // An edit made where the writer is looking rather than typing — a box
+    // ticked — types no link.
+    _refreshSuggest(typed: follow);
   }
 
   /// Deletes the selection, or what is before the caret: one character, or a
@@ -2458,14 +2461,45 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The fragment of line [line] a caret at [local] of the line is drawn in,
   /// and its paragraph when a frame has built it.
   (_Piece?, RenderParagraph?) _fragmentAt(int line, int local) {
-    final pieces = _piecesOf(line);
+    final piece = _pieceHolding(_piecesOf(line), line, local);
+    return (piece, piece == null ? null : _renderOf(piece.key));
+  }
+
+  /// The piece of line [line] a caret at [local] is drawn in: the one whose
+  /// source holds it. A wrapped row's pieces hold only its cells' text, so
+  /// an offset in the room round them — a pipe, the spaces by it — is its
+  /// cell's, on its side of the pipe (`MarkdownTable.cellRangesOf`), and
+  /// drawn at that cell's nearer edge: the room before a pipe at the end of
+  /// the cell on its left, the room after it at the start of the one on its
+  /// right. That is the side an unwrapped row draws it on, the room's
+  /// characters spread evenly between the two cells' text.
+  _Piece? _pieceHolding(List<_Piece> pieces, int line, int local) {
     for (final piece in pieces) {
-      if (local >= piece.start && local <= piece.end) {
-        return (piece, _renderOf(piece.key));
+      if (local >= piece.start && local <= piece.end) return piece;
+    }
+    if (pieces.isEmpty) return null;
+    final cells = MarkdownTable.cellRangesOf(widget.buffer.lineAt(line));
+    var (from, to) = local < cells.first.$1 ? cells.first : cells.last;
+    for (final (start, end) in cells) {
+      if (local >= start && local <= end) {
+        (from, to) = (start, end);
+        break;
       }
     }
-    final first = pieces.isEmpty ? null : pieces.first;
-    return (first, first == null ? null : _renderOf(first.key));
+    // The cell's pieces are contiguous and none holds [local]: it is before
+    // all of them or past all of them.
+    _Piece? before;
+    _Piece? after;
+    for (final piece in pieces) {
+      if (piece.start < from || piece.end > to) continue;
+      if (piece.end < local && (before == null || piece.end > before.end)) {
+        before = piece;
+      }
+      if (piece.start > local && (after == null || piece.start < after.start)) {
+        after = piece;
+      }
+    }
+    return before ?? after ?? pieces.first;
   }
 
   /// The piece of a wrapped row [global] is *in*, and where in it the point
@@ -2738,12 +2772,17 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// How line [index] of table [block] is laid out with the caret at [at]:
   /// as every line of it is at rest, but for the run the caret is in, whose
   /// marks show as a paragraph's word does — and widen its column.
+  ///
+  /// Null outside `live`: source draws a table's line as the one paragraph
+  /// it is, so the caret, a tap and the grid are not to look for pieces of a
+  /// fitted row there.
   LiveTableRow? _tableRowAt(
     BuildContext context,
     int index,
     Block block,
     CaretSpot at,
   ) {
+    if (!widget.hideMarkers) return null;
     final inside = at.line >= block.startLine && at.line < block.endLine;
     return _tables.rowOf(
       index,
@@ -3712,9 +3751,26 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // not the words shown.
     if (content.contains('|')) return null;
     final hash = content.indexOf('#');
+    // A link closed after the caret — one already written, typed into — has
+    // the rest of what is being completed there too: the target runs on to a
+    // `#`, a `|` or the `]]`, a heading to a `|` or the `]]`. A `]]` past
+    // another `[[` is that link's, and this one is still open.
+    var end = at;
+    var closeAt = -1;
+    final reopen = text.indexOf('[[', at);
+    if (close != -1 && (reopen == -1 || reopen > close)) {
+      closeAt = lineStart + close;
+      end = close;
+      for (final stop in hash == -1 ? const ['#', '|'] : const ['|']) {
+        final found = text.indexOf(stop, at);
+        if (found != -1 && found < end) end = found;
+      }
+    }
     return _LinkQuery(
       start: lineStart + open + 2,
       caret: caret,
+      end: lineStart + end,
+      closeAt: closeAt,
       target: hash == -1 ? content : content.substring(0, hash),
       heading: hash == -1 ? '' : content.substring(hash + 1),
       hasHash: hash != -1,
@@ -3726,7 +3782,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Called from every caret move and edit; the text of the link is what
   /// decides whether the library is asked again, so a caret that moves inside
   /// an unchanged link does not.
-  void _refreshSuggest() {
+  ///
+  /// Only an edit — [typed] — opens the panel: it is for a link being typed,
+  /// and a caret moved into a link already written (an arrow, a click) is
+  /// just passing through, its keys still the note's. A move follows the
+  /// panel already open for as long as it stays in that link.
+  void _refreshSuggest({bool typed = false}) {
     if (!mounted) return;
     final suggester = widget.wikilinkSuggester;
     if (suggester == null) {
@@ -3739,6 +3800,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return;
     }
     final panel = _suggest;
+    if (!typed && (panel == null || panel.query.start != query.start)) {
+      _closeSuggest();
+      return;
+    }
     if (panel != null && panel.query.sameText(query)) {
       // The same link, the caret somewhere else in it: keep the rows and
       // follow the caret. A fresh object for the same text still names the
@@ -3762,7 +3827,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       // panel does not flash its empty words between two keystrokes.
       entries: previous?.entries ?? const <SuggestEntry>[],
       named: query.target.isEmpty ? '' : query.target,
-    );
+    )..answers = previous?.answers;
     setState(() => _suggest = panel);
     _suggestOverlay.show();
     final seq = ++_suggestSeq;
@@ -3807,6 +3872,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         ..kind = kind
         ..named = named
         ..entries = _shown(entries, query)
+        ..answers = query
         ..selected = 0;
     });
   }
@@ -3867,41 +3933,43 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// step — and closes the panel. Nothing is written but the link.
   void _acceptSuggest() {
     final panel = _suggest;
-    if (panel == null) return;
+    if (panel == null || !panel.isCurrent) return;
     final entry = panel.entries.elementAtOrNull(panel.selected);
     if (entry == null) return;
     final query = panel.query;
-    // Whether the pair's closing `]]` already stands at the caret: when it
-    // does, completing writes the target alone and the caret steps past it.
-    final closer =
-        query.caret + 2 <= widget.buffer.length &&
-            widget.buffer.substring(query.caret, query.caret + 2) == ']]'
-        ? 2
-        : 0;
     _closeSuggest();
     switch (entry) {
       case NoteSuggestion():
-        _completeSuggest(query.start, query.caret, entry.target, closer);
+        _completeSuggest(query, query.start, entry.target);
       case HeadingSuggestion():
-        _completeSuggest(query.hashAt, query.caret, entry.heading, closer);
+        _completeSuggest(query, query.hashAt, entry.heading);
       case BookSuggestion():
         // A form, not a link: the number is typed after it, so the caret
         // stops at the `=` and the link is left open.
-        _completeSuggest(query.hashAt, query.caret, entry.form, -1);
+        _completeSuggest(query, query.hashAt, entry.form, form: true);
     }
   }
 
-  /// Replaces `[from, to)` with [text] as one undoable edit, the caret after
-  /// it — past the pair's own `]]` at [closer] 2, past the one written at 0,
-  /// and at the end of the text for a form (-1).
-  void _completeSuggest(int from, int to, String text, int closer) {
-    final insert = closer == 0 ? '$text]]' : text;
-    _replaceRange(
-      from,
-      to,
-      insert,
-      caret: SelectionModel.at(from + text.length + (closer < 0 ? 0 : 2)),
-    );
+  /// Replaces what [query] completes — from [from] to its end — with [text]
+  /// as one undoable edit. The caret lands past the link's `]]`: the one it
+  /// already has, whatever follows the text before it, or one written after
+  /// the text when it has none. A [form] leaves the caret after the text.
+  void _completeSuggest(
+    _LinkQuery query,
+    int from,
+    String text, {
+    bool form = false,
+  }) {
+    final to = query.end;
+    final closed = query.closeAt >= 0;
+    final insert = form || closed ? text : '$text]]';
+    final shift = text.length - (to - from);
+    final caret = form
+        ? from + text.length
+        : closed
+        ? query.closeAt + shift + 2
+        : from + insert.length;
+    _replaceRange(from, to, insert, caret: SelectionModel.at(caret));
     _ensureCaretVisible();
   }
 
@@ -3982,7 +4050,15 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         _closeSuggest();
         return KeyEventResult.handled;
       }
-      if (suggest.entries.isNotEmpty && !shift && !control && !alt && !meta) {
+      // Only rows that answer the link as it stands take a key: while the
+      // next answer is on its way the rows drawn are the last link's, and the
+      // key does what it does with no rows.
+      if (suggest.isCurrent &&
+          suggest.entries.isNotEmpty &&
+          !shift &&
+          !control &&
+          !alt &&
+          !meta) {
         if (key == LogicalKeyboardKey.arrowUp) {
           _moveSuggest(-1);
           return KeyEventResult.handled;
@@ -4533,6 +4609,8 @@ final class _LinkQuery {
   const new({
     required this.start,
     required this.caret,
+    required this.end,
+    required this.closeAt,
     required this.target,
     required this.heading,
     required this.hasHash,
@@ -4540,6 +4618,14 @@ final class _LinkQuery {
 
   final int start;
   final int caret;
+
+  /// Where the part being completed ends: the caret in a link still open,
+  /// the `#`, `|` or `]]` that ends it in a link closed after the caret.
+  final int end;
+
+  /// Where the link's closing `]]` stands, or -1 while it has none.
+  final int closeAt;
+
   final String target;
   final String heading;
   final bool hasHash;
@@ -4575,6 +4661,14 @@ final class _SuggestPanel {
 
   /// The rows, best match first.
   List<SuggestEntry> entries;
+
+  /// The link text [entries] answer, or null for no query at all. It trails
+  /// [query] while the next answer is on its way: the rows of the link just
+  /// left stay drawn, but they are not this link's to complete.
+  _LinkQuery? answers;
+
+  /// Whether [entries] answer the link as it stands, so a key may take one.
+  bool get isCurrent => answers?.sameText(query) ?? false;
 
   /// The note (or book) named before `#`; empty for the note being edited.
   String named;

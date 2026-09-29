@@ -331,18 +331,37 @@ final class Workspace {
       _mapTab(path, (tab) => tab.copyWith(memento: memento));
 
   /// Marks the tabs at [paths] — and, for a folder, every tab under it —
-  /// as gone from disk, and every other tab as there: the file went away
-  /// from outside the app, so the tab stays and says so.
+  /// as gone from disk: the file went away from outside the app, so the tab
+  /// stays and says so.
   ///
   /// What the shell asks for when it notices a path is gone: a re-index
   /// that pruned it (#289), or a library loading with a note the index no
   /// longer holds (issue #372). The tabs themselves keep their place.
-  Workspace withMissing(Set<String> paths) => _mapTabs((tab) {
-    final gone = paths.any(
-      (path) => tab.path == path || tab.path.startsWith('$path/'),
+  ///
+  /// It adds to the marks and never lifts one: [paths] is what one re-index
+  /// removed, not everything that is gone, so a tab it does not name says
+  /// nothing about being back. That takes [withPresent].
+  Workspace withMissing(Set<String> paths) {
+    if (paths.isEmpty) return this;
+    return _mapTabs((tab) {
+      if (tab.missing) return tab;
+      final gone = paths.any(
+        (path) => tab.path == path || tab.path.startsWith('$path/'),
+      );
+      return gone ? tab.copyWith(missing: true) : tab;
+    });
+  }
+
+  /// Lifts the mark from the tabs at [paths]: their notes are on disk
+  /// again, which the shell learns from the index holding them.
+  Workspace withPresent(Set<String> paths) {
+    if (paths.isEmpty) return this;
+    return _mapTabs(
+      (tab) => tab.missing && paths.contains(tab.path)
+          ? tab.copyWith(missing: false)
+          : tab,
     );
-    return tab.missing == gone ? tab : tab.copyWith(missing: gone);
-  });
+  }
 
   /// The dock opened or closed.
   Workspace withDock({bool? open, DockPane? pane}) =>

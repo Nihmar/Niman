@@ -16,7 +16,9 @@ links inside code fences, math blocks, inline code, and frontmatter are
 never links, everywhere.
 
 While a link is typed, a small panel lists what can go there, in both
-editors, under the caret:
+editors, under the caret. Only typing opens it: a caret moved into a link
+already written — an arrow key, a click — opens nothing, and the keys stay
+the note's. The panel lists:
 
 - after `[[` — the library's notes, the name shown and the folder dimmed
   (what tells two same-named notes apart). A note is matched by its name
@@ -30,7 +32,9 @@ editors, under the caret:
   `chapter=`.
 
 `↑`/`↓` move, `⏎` or `Tab` complete the link, `Esc` closes the panel and
-leaves the text as it was. The panel writes nothing but the link that was
+leaves the text as it was. Typed into a link already closed, the choice
+replaces the whole name (or heading) up to its `#`, `|` or `]]`; what
+follows is kept. The panel writes nothing but the link that was
 chosen: no note is created from it, and a name that matches nothing is
 left as typed (see *Dead links* below for where a new note comes from).
 The rows come from the index the app already keeps; nothing is scanned to

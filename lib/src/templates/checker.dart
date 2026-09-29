@@ -3,10 +3,14 @@
 /// [checkTemplateSyntax] reads a template and reports what the engine
 /// would not answer: braces that do not pair up, a placeholder or a
 /// filter it does not know, a date format holding something that is not a
-/// token, and a filter argument it cannot read. The vocabulary it checks
-/// against — the placeholder names, the filter names and the date-format
-/// tokens — is read from `engine.dart` rather than copied, so a name the
-/// engine learns is a name the checker already knows.
+/// token, a filter argument it cannot read, and a filter where the engine
+/// does not apply it (a date move after a text filter, a filter on the
+/// caret). The vocabulary it checks against — the placeholder names, the
+/// filter names and the date-format tokens — is read from `engine.dart`
+/// rather than copied, so a name the engine learns is a name the checker
+/// already knows; and so are the rules: whether a filter is one is asked of
+/// `templateTextFilter` and `templateDateMove`, the functions the engine
+/// applies, and how far a pipeline moves a date of `templateLeadingMoves`.
 ///
 /// It reports; it never rewrites. [TemplateSyntaxError.suggestion] is the
 /// corrected text for the error's span, ready to replace
@@ -134,15 +138,22 @@ List<TemplateSyntaxError> checkTemplateSyntax(String source) {
 
 /// The `{{` and `}}` of `[from], [to)` — the text between two placeholders,
 /// or either end of the file — where no placeholder can be.
+///
+/// A pair counts only when both of its braces stand inside the window. In
+/// `{{{title}}}` the window before the placeholder is the one `{` at 0,
+/// and the `{` after it is the placeholder's own: read against the whole
+/// source that looks like a `{{` opening a run that ends before it starts.
 void _checkBraces(
   String source,
   int from,
   int to,
   List<TemplateSyntaxError> errors,
 ) {
+  bool pairAt(String pair, int i) => i + 2 <= to && source.startsWith(pair, i);
+
   var i = from;
   while (i < to) {
-    if (source.startsWith('{{', i)) {
+    if (pairAt('{{', i)) {
       // The run the braces open: up to the next placeholder or the end of
       // the file, without the whitespace that trails it.
       var end = to;
@@ -164,7 +175,7 @@ void _checkBraces(
       i = end;
       continue;
     }
-    if (source.startsWith('}}', i)) {
+    if (pairAt('}}', i)) {
       // The engine reads a closing pair with nothing open before it as
       // literal text, so there is nothing to close and nothing to suggest.
       errors.add(
@@ -275,7 +286,31 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
         ),
       );
     }
-  } else if (argument != null && _isDate(name)) {
+  } else if (name == 'counter') {
+    if (templateCounterName(argument) == null) {
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.argument,
+          "'counter' has no name: it counts nothing, and the placeholder is "
+          'left standing',
+        ),
+      );
+    }
+  } else if (name == 'cursor') {
+    if (filters.isNotEmpty) {
+      // The caret writes nothing for a filter to work on, so dropping them
+      // changes nothing but the placeholder standing.
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.argument,
+          "'cursor' takes no filters: the caret is not placed, and the "
+          'placeholder is left standing',
+          suggestion: rebuilt(name, argument, const []),
+        ),
+      );
+    }
+    return;
+  } else if (argument != null && templateDateFormats.containsKey(name)) {
     for (final fault in _formatFaults(argument)) {
       errors.add(
         at(
@@ -289,28 +324,66 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
     }
   }
 
-  for (var index = 0; index < filters.length; index++) {
-    final filter = filters[index].trim();
-    final colon = filter.indexOf(':');
-    final filterName = (colon < 0 ? filter : filter.substring(0, colon))
-        .trim()
-        .toLowerCase();
-    final filterArgument = colon < 0 ? null : filter.substring(colon + 1);
-    if (filterName.isEmpty) continue;
+  // The pipeline as the engine reads it: a date placeholder applies its
+  // leading moves to the moment, and from the first filter that is not
+  // one — on any other placeholder, from the first filter — every filter
+  // is a text filter, or the placeholder stands.
+  final dated = templateDateFormats.containsKey(name);
+  final moves = dated ? templateLeadingMoves(filters) : 0;
+  for (var index = moves; index < filters.length; index++) {
+    final raw = filters[index];
+    if (templateTextFilter(raw) != null) continue;
+    final filter = raw.trim();
+    final (name: filterName, argument: filterArgument) = parseTemplateFilter(
+      raw,
+    );
 
-    // `+7d`: a move of the date, read by [_moveDate] rather than by the
-    // text filters. A count or a unit that is not one is a mistake with no
-    // safe default — the author had a number in mind that is not written.
+    /// [filters] with this one replaced by [replacement], or dropped.
+    String replaced(String? replacement) => rebuilt(name, argument, [
+      for (var i = 0; i < filters.length; i++)
+        if (i != index) filters[i] else ?replacement,
+    ]);
+
+    if (filterName.isEmpty) {
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.structural,
+          "empty filter: there is no name after the '|'",
+          // A blank one is only a stray pipe; `:x` is an argument whose
+          // filter only its author knows.
+          suggestion: filter.isEmpty ? replaced(null) : null,
+        ),
+      );
+      continue;
+    }
+
+    // A move where the engine reads text: on a placeholder that is not a
+    // date, or after a text filter has already made the date a string.
+    // Where it was meant to go is the author's call, so nothing is moved.
+    if (templateDateMove(raw) != null) {
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.argument,
+          "'$filter' moves a date: only "
+          "${templateDateFormats.keys.join(', ')} take a move, and only "
+          'before any other filter',
+        ),
+      );
+      continue;
+    }
+
+    // `+7d`: a move of the date, read by [templateDateMove] rather than by
+    // the text filters. A count or a unit that is not one is a mistake with
+    // no safe default — the author had a number in mind that is not
+    // written.
     if (filterName.startsWith('+') || filterName.startsWith('-')) {
-      if (!templateDateShift.hasMatch(filter)) {
-        errors.add(
-          at(
-            TemplateSyntaxErrorKind.argument,
-            "'$filter' is not a date move: a move is a count and a unit, "
-            "like '+7d' or '-1w'",
-          ),
-        );
-      }
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.argument,
+          "'$filter' is not a date move: a move is a count and a unit, "
+          "like '+7d' or '-1w'",
+        ),
+      );
       continue;
     }
 
@@ -318,37 +391,34 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
     // does not snap to is one it will not apply.
     if (templateDateFilters.contains(filterName)) {
       final unit = (filterArgument ?? '').trim().toLowerCase();
-      if (!templateDateUnits.contains(unit)) {
-        errors.add(
-          at(
-            TemplateSyntaxErrorKind.argument,
-            "'$filterName' snaps to ${templateDateUnits.join(', ')}, not "
-            "'$unit'",
-          ),
-        );
-      }
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.argument,
+          "'$filterName' snaps to ${templateDateUnits.join(', ')}, not "
+          "'$unit'",
+        ),
+      );
       continue;
     }
 
     if (templateTextFilters.contains(filterName)) {
-      final width = int.tryParse((filterArgument ?? '').trim());
-      if (filterName == 'pad' && (width == null || width < 0)) {
-        // The issue asks for `pad:3` here; a width is a number only its
-        // author knows, so the checker reports and suggests nothing.
-        errors.add(
-          at(
-            TemplateSyntaxErrorKind.argument,
-            "'pad' needs a number for its width, and "
-            "'${filterArgument ?? ''}' is not one",
-          ),
-        );
-      }
+      // Only `pad` refuses an argument. The issue asks for `pad:3` here; a
+      // width is a number only its author knows, so the checker reports
+      // and suggests nothing.
+      errors.add(
+        at(
+          TemplateSyntaxErrorKind.argument,
+          "'pad' needs a number for its width, and "
+          "'${filterArgument ?? ''}' is not one",
+        ),
+      );
       continue;
     }
 
+    // A snap is a name to suggest only where a move would be read.
     final closest = _closest(filterName, {
       ...templateTextFilters,
-      ...templateDateFilters,
+      if (dated && index == moves) ...templateDateFilters,
     });
     errors.add(
       at(
@@ -356,20 +426,13 @@ void _checkPlaceholder(RegExpMatch match, List<TemplateSyntaxError> errors) {
         "unknown filter '$filterName'",
         suggestion: closest == null
             ? null
-            : rebuilt(name, argument, [
-                for (var i = 0; i < filters.length; i++)
-                  if (i == index)
-                    closest + (filterArgument == null ? '' : ':$filterArgument')
-                  else
-                    filters[i],
-              ]),
+            : replaced(
+                closest + (filterArgument == null ? '' : ':$filterArgument'),
+              ),
       ),
     );
   }
 }
-
-/// Whether the placeholder called [name] takes a date format.
-bool _isDate(String name) => name == 'date' || name == 'time' || name == 'now';
 
 /// One thing wrong with a date format: which family the mistake belongs
 /// to, what to say about it, and the format with it corrected — null when

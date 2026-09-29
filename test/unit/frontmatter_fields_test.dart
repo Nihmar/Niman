@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/frontmatter/typed_fields.dart';
+import 'package:yaml/yaml.dart';
 
 /// A note with the block under test at the top.
 String _note(String block) => '---\n$block---\n\nBody text.\n';
@@ -61,6 +62,47 @@ void main() {
       expect(parsed.fields.map((field) => field.key), ['title']);
     });
 
+    // A field is shown as it is written: a value opened and saved unchanged
+    // must leave the note as it was, and the parser's normal form (`1.1`,
+    // `7`, a UTC timestamp) is not what the user wrote.
+    test('values are shown as they are written', () {
+      final parsed = frontmatterFieldsIn(
+        'version: 1.10\nlead: 007\ndate: 2026-09-01T10:00+02:00\n',
+      );
+      final byKey = {for (final field in parsed.fields) field.key: field};
+      expect(byKey['version']!.value, '1.10');
+      expect(byKey['lead']!.value, '007');
+      expect(byKey['date']!.type, FrontmatterFieldType.date);
+      expect(byKey['date']!.value, '2026-09-01T10:00+02:00');
+    });
+
+    test("a list's items keep the YAML they are written as", () {
+      final parsed = frontmatterFieldsIn(
+        'ids: [1, "2", 3]\nauthors:\n  - Doe, J\n  - x\n',
+      );
+      final byKey = {for (final field in parsed.fields) field.key: field};
+      expect(byKey['ids']!.values, ['1', '2', '3']);
+      expect(byKey['ids']!.items, ['1', '"2"', '3']);
+      // Plain in a block list, but a flow list would split it: quoted.
+      expect(byKey['authors']!.values, ['Doe, J', 'x']);
+      expect(byKey['authors']!.items, ['"Doe, J"', 'x']);
+
+      // A list rewritten around a removed item leaves the others as they
+      // were: numbers stay numbers, the string stays a string.
+      final ids = byKey['ids']!;
+      final rewritten = frontmatterListYaml([...ids.items]..removeAt(2));
+      expect((loadYaml('k: $rewritten') as Map)['k'], [1, '2']);
+    });
+
+    test('a list holding anything but plain values has no row', () {
+      // A chip row cannot show a mapping or a null, and rewriting the list
+      // around a chip would drop it.
+      final parsed = frontmatterFieldsIn(
+        'title: T\nauthors: [{name: A}, B]\nrefs: [a, ~]\n',
+      );
+      expect(parsed.fields.map((field) => field.key), ['title']);
+    });
+
     test('an empty block has no fields', () {
       expect(frontmatterFieldsIn('').fields, isEmpty);
       expect(frontmatterFieldsIn('\n').fields, isEmpty);
@@ -103,6 +145,68 @@ void main() {
         '"a: b"',
       );
       expect(frontmatterFieldYaml(FrontmatterFieldType.text, ['']), '""');
+    });
+
+    // Quoting by a hand-kept list of characters missed a trailing `:`
+    // (`Todo:` broke the whole block), a comma inside a flow list (one item
+    // became two) and a line break (a multi-line value lost its break and
+    // left a line at column 0): whatever is written must read back as the
+    // text it was written from, on its key's one line.
+    test('every value reads back as the text it was written from', () {
+      for (final text in [
+        'Todo:',
+        'a: b',
+        'x #y',
+        'line one\nline two',
+        'say "hi"',
+        r'back\slash',
+        '- item',
+        '[x]',
+        '{x}',
+        '&a',
+        '*b',
+        '!t',
+        '%p',
+        '@q',
+        '`r',
+        'Doe, J',
+        'tab\there',
+        'true',
+        '42',
+        '2026-09-01',
+        '',
+      ]) {
+        final yaml = frontmatterFieldYaml(FrontmatterFieldType.text, [text]);
+        expect(yaml, isNot(contains('\n')), reason: text);
+        expect((loadYaml('k: $yaml') as Map)['k'], text, reason: text);
+      }
+    });
+
+    test('a list item holding a comma stays one item', () {
+      final yaml = frontmatterFieldYaml(FrontmatterFieldType.list, [
+        'Doe, J',
+        'Roe, K',
+        'x',
+      ]);
+      expect((loadYaml('k: $yaml') as Map)['k'], ['Doe, J', 'Roe, K', 'x']);
+    });
+  });
+
+  group('frontmatterListItems', () {
+    test('reads the list editor as the inside of a flow list', () {
+      expect(frontmatterListItems('"Doe, J", "Roe, K", x'), [
+        '"Doe, J"',
+        '"Roe, K"',
+        'x',
+      ]);
+      expect(frontmatterListItems('Ada, Grace'), ['Ada', 'Grace']);
+      expect(frontmatterListItems('1, "2"'), ['1', '"2"']);
+      expect(frontmatterListItems('  '), isEmpty);
+    });
+
+    test('text YAML cannot read as a list is split at its commas', () {
+      expect(frontmatterListItems('"open, b'), [r'"\"open"', 'b']);
+      expect(frontmatterListItems('a: b, c'), ['"a: b"', 'c']);
     });
   });
 

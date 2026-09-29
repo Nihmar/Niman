@@ -146,9 +146,10 @@ final class WebDavClient {
   /// accepts none (#454).
   final String? _trustedFingerprint;
 
-  /// The fingerprint of the last certificate the callback refused, so the
-  /// failure can name what it refused even where the exception does not.
-  String? _refusedFingerprint;
+  /// The last certificate the callback refused, with the host and port
+  /// that presented it, so the failure can name what it refused — and
+  /// where — even where the exception does not.
+  ({String host, int port, String fingerprint})? _refused;
 
   late final List<String> _baseSegments;
   DateTime? _serverDate;
@@ -195,13 +196,18 @@ final class WebDavClient {
     final fingerprint = sha256Fingerprint(certificate.der);
     final trusted = _trustedFingerprint;
     if (trusted != null &&
-        host.toLowerCase() == baseUrl.host.toLowerCase() &&
+        _isDestinationHost(host) &&
         _fingerprintKey(fingerprint) == trusted) {
       return true;
     }
-    _refusedFingerprint = fingerprint;
+    _refused = (host: host, port: port, fingerprint: fingerprint);
     return false;
   }
+
+  /// Whether [host] is the destination's own — the only host whose
+  /// certificate the user can be asked to trust (#454).
+  bool _isDestinationHost(String host) =>
+      host.toLowerCase() == baseUrl.host.toLowerCase();
 
   /// The absolute URL of [path]; [collection] adds the trailing slash
   /// folders need on most servers.
@@ -621,7 +627,7 @@ final class WebDavClient {
       try {
         // One attempt, one certificate: the callback may have caught a
         // refusal on an earlier hop, and that fingerprint is not this one.
-        _refusedFingerprint = null;
+        _refused = null;
         final request = await _http.openUrl(verb, uri).timeout(timeout);
         request
           ..followRedirects = false
@@ -660,7 +666,7 @@ final class WebDavClient {
       } on TimeoutException {
         throw _timedOut(method, path, 'no answer');
       } on IOException catch (e) {
-        throw _transportFailure(method, path, e);
+        throw _transportFailure(method, path, e, at: uri);
       }
       final status = response.statusCode;
       final date = response.headers.date;
@@ -722,7 +728,14 @@ final class WebDavClient {
     }
   }
 
-  WebDavFailure _transportFailure(String method, String path, IOException e) {
+  /// [at] is the URL the request went to, when a redirect may have taken
+  /// it off the destination.
+  WebDavFailure _transportFailure(
+    String method,
+    String path,
+    IOException e, {
+    Uri? at,
+  }) {
     final detail = switch (e) {
       TlsException(:final message) => 'TLS: $message',
       SocketException(:final osError, :final message) =>
@@ -738,7 +751,7 @@ final class WebDavClient {
       // message that names the destination so the user can act on it
       // (#366). Any other TLS trouble stays a protocol failure, as it
       // was.
-      return _certificateFailure(method, path, e) ??
+      return _certificateFailure(method, path, e, at: at) ??
           WebDavProtocolFailure(text);
     }
     return WebDavRetryable(text);
@@ -751,14 +764,32 @@ final class WebDavClient {
   /// preferred over one guessed out of the exception's text; when the
   /// callback never ran (an injected client in tests), the text is all
   /// there is.
+  ///
+  /// [at] is the URL the refused request went to (the destination when
+  /// null): a redirect can lead to another host, whose certificate is not
+  /// the destination's. That one is named as its own host's and carries
+  /// no fingerprint — trust is offered for the destination's host only,
+  /// and a fingerprint confirmed under the destination's name for another
+  /// host's certificate would never be accepted there.
   WebDavCertificateFailure? _certificateFailure(
     String method,
     String path,
-    TlsException e,
-  ) {
-    final caught = _refusedFingerprint;
-    if (caught == null && !_certificateRefused(e)) return null;
-    final fingerprint = caught ?? _fingerprintIn(e);
+    TlsException e, {
+    Uri? at,
+  }) {
+    final refused = _refused;
+    if (refused == null && !_certificateRefused(e)) return null;
+    final where = at ?? baseUrl;
+    final presenter = refused?.host ?? where.host;
+    if (!_isDestinationHost(presenter)) {
+      final port = refused?.port ?? where.port;
+      return WebDavCertificateFailure(
+        '$method ${_show(path)}: the certificate for $presenter:$port, '
+        'a redirect target, is not trusted',
+        host: presenter,
+      );
+    }
+    final fingerprint = refused?.fingerprint ?? _fingerprintIn(e);
     final host = baseUrl.host;
     final authority = baseUrl.hasPort ? '$host:${baseUrl.port}' : host;
     final digest = fingerprint == null ? '' : ', fingerprint $fingerprint';

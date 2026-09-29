@@ -448,6 +448,22 @@ void main() {
     },
   );
 
+  test(
+    'a broken state file here does not replace the one on the server',
+    () async {
+      a.write('.niman/settings.json', '{"historyVersions": 3}');
+      await a.sync();
+      // A hand edit leaves a syntax error: the plan is an upload, and an
+      // upload must not go through either — `.niman/` has no history.
+      a.write('.niman/settings.json', '{broken');
+      final report = await a.sync();
+      expect(report.conflicts, hasLength(1), reason: report.summary());
+      expect(report.conflicts.single.path, '.niman/settings.json');
+      expect(remoteText('.niman/settings.json'), '{"historyVersions": 3}');
+      expect(a.read('.niman/settings.json'), '{broken');
+    },
+  );
+
   test('library settings deleted on the server are put back', () async {
     a.write('.niman/settings.json', '{"historyVersions": 3}');
     await a.sync();
@@ -678,6 +694,49 @@ void main() {
       );
       expect(report.skipped, ['a.md']);
       expect(remoteText('a.md'), 'bbb', reason: 'the rewrite is still there');
+    });
+
+    // The guard before a merge upload judged the doubt by the agreed row,
+    // which describes the remote the merge replaces, not the one it was
+    // built from: a row recorded long ago reads as verified, and a
+    // same-second rewrite after the merge's download was written over.
+    test('a same-second rewrite is not destroyed by a merge', () async {
+      var now = DateTime.utc(2026, 9, 27, 12);
+      server.clock = () => now;
+      String note(String first) => '# Title\n$first\ntwo\nthree\n';
+
+      a.write('note.md', note('one'));
+      expect((await a.sync()).clean, isTrue);
+      now = now.add(const Duration(minutes: 1));
+      // Hashed and recorded again, a minute on: the row is verified now.
+      expect((await a.sync()).clean, isTrue);
+      final row = (await a.store.item(a.path, 'note.md'))!;
+      expect(row.remoteUnverified, isFalse);
+      expect((await b.sync()).clean, isTrue);
+
+      // One frozen second: B's edit and the rewrite below share it.
+      now = now.add(const Duration(minutes: 1));
+      b.write('note.md', note('ONE'));
+      expect((await b.sync()).clean, isTrue);
+      a.write('note.md', '# Title\none\ntwo\nthree, mine\n');
+
+      // Another device rewrites B's line, same size, once A has downloaded
+      // the copy its merge is built from.
+      var fetched = false;
+      var rewritten = false;
+      server.beforeAnswer = (request) {
+        if (!request.path.endsWith('/note.md')) return;
+        if (request.method == 'GET') fetched = true;
+        if (request.method == 'PROPFIND' && fetched && !rewritten) {
+          rewritten = true;
+          server.putFile('note.md', utf8.encode(note('Uno')));
+        }
+      };
+      final report = await a.sync();
+      expect(rewritten, isTrue);
+      expect(report.skipped, ['note.md'], reason: report.summary());
+      expect(remoteText('note.md'), note('Uno'), reason: 'the rewrite stays');
+      expect(a.read('note.md'), '# Title\none\ntwo\nthree, mine\n');
     });
 
     test('a rename becomes delete + upload', () async {

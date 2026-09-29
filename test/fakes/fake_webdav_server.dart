@@ -150,6 +150,10 @@ final class FakeWebDavServer {
   /// header. Tests move it to put writes in different seconds.
   DateTime Function() clock = DateTime.now;
 
+  /// Called with every request before it is answered — for a test that
+  /// has another client change the tree at one precise point of a run.
+  void Function(FakeWebDavRequest request)? beforeAnswer;
+
   final List<({int status, String? retryAfter})> _failures = [];
   int _skipBeforeFailures = 0;
   int _dropGets = 0;
@@ -286,9 +290,15 @@ final class FakeWebDavServer {
     final response = request.response;
     final headers = <String, String>{};
     request.headers.forEach((name, values) => headers[name] = values.first);
-    requests.add(FakeWebDavRequest(request.method, request.uri.path, headers));
+    final received = FakeWebDavRequest(
+      request.method,
+      request.uri.path,
+      headers,
+    );
+    requests.add(received);
     request.response.headers.date = clock();
     try {
+      beforeAnswer?.call(received);
       await _route(request, headers);
     } on Object catch (e) {
       try {

@@ -254,6 +254,76 @@ void main() {
       );
     });
 
+    /// A destination trusted by fingerprint, edited, tested and saved again:
+    /// the screen has held the trust in memory since the edit began.
+    Future<void> saveTrusted(WidgetTester tester) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(
+          url: 'https://nas.local/dav/',
+          lastSyncAtMs: 1,
+          trustedFingerprint: 'AA:BB:CC',
+        ),
+      );
+      await pumpScreen(tester);
+      await tester.tap(find.byKey(const Key('sync-edit-server')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('sync-test')));
+      await tester.pumpAndSettle();
+      expect(sync.testedFingerprint, 'AA:BB:CC');
+      await tester.tap(find.byKey(const Key('sync-save')));
+      await tester.pumpAndSettle();
+      expect(sync.savedFingerprint, 'AA:BB:CC');
+    }
+
+    testWidgets('a forgotten certificate is not trusted by the next test '
+        '(#454)', (tester) async {
+      await saveTrusted(tester);
+      final forget = find.byKey(const Key('sync-forget-certificate'));
+      await tester.ensureVisible(forget);
+      await tester.tap(forget);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('sync-forget-certificate-confirm')),
+      );
+      await tester.pumpAndSettle();
+
+      final retest = find.byKey(const Key('sync-retest'));
+      await tester.ensureVisible(retest);
+      await tester.tap(retest);
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'save https://nas.local/dav/');
+      expect(
+        sync.testedFingerprint,
+        isNull,
+        reason: 'the certificate has to be confirmed again',
+      );
+    });
+
+    testWidgets('a disconnected destination is not trusted by the next '
+        'setup (#454)', (tester) async {
+      await saveTrusted(tester);
+      final disconnect = find.byKey(const Key('sync-disconnect'));
+      await tester.ensureVisible(disconnect);
+      await tester.tap(disconnect);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('sync-disconnect-confirm')));
+      await tester.pumpAndSettle();
+
+      // The form is back with the old address in it: testing and saving
+      // it trusts nothing that was not confirmed again.
+      await tester.tap(find.byKey(const Key('sync-test')));
+      await tester.pumpAndSettle();
+      expect(sync.testedFingerprint, isNull);
+      await tester.tap(find.byKey(const Key('sync-save')));
+      await tester.pumpAndSettle();
+      expect(
+        sync.calls.where((call) => call.startsWith('save ')),
+        hasLength(2),
+        reason: 'saved again, after the disconnect',
+      );
+      expect(sync.savedFingerprint, isNull);
+    });
+
     testWidgets('configured: sync now, edit keeps the password, disconnect', (
       tester,
     ) async {
