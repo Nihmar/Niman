@@ -2764,7 +2764,11 @@ final class LatvianStrings extends Strings {
   String get templateHintDismissAction => 'Noraidīt';
   @override
   String templateProblems(int count) =>
-      count == 1 ? '1 problēma šajā šablonā' : '$count problēmas šajā šablonā';
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? '$count problēmu šajā šablonā'
+      : count % 10 == 1
+      ? '$count problēma šajā šablonā'
+      : '$count problēmas šajā šablonā';
   // The wikilink panel (#475) and the two book forms it offers after `#`.
 
   @override

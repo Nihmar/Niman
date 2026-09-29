@@ -520,7 +520,7 @@ final class RomanianStrings extends Strings {
   @override
   String wordCount(int count) => count == 1
       ? '1 cuvânt'
-      : count % 100 >= 20 || count == 0
+      : count % 100 >= 20 || count % 100 == 0
       ? '$count de cuvinte'
       : '$count cuvinte';
   @override

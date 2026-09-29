@@ -154,6 +154,8 @@ void main() {
       expect(AppStrings.wordCount(1), '1 cuvânt');
       expect(AppStrings.wordCount(19), '19 cuvinte');
       expect(AppStrings.wordCount(20), '20 de cuvinte');
+      expect(AppStrings.wordCount(100), '100 de cuvinte');
+      expect(AppStrings.wordCount(101), '101 cuvinte');
     });
 
     // The status row counts the checker's findings, and the same count in
@@ -196,6 +198,58 @@ void main() {
       expect(AppStrings.templateProblems(1), '1 проблем у овом шаблону');
       expect(AppStrings.templateProblems(21), '21 проблем у овом шаблону');
       expect(AppStrings.templateProblems(11), '11 проблема у овом шаблону');
+
+      AppLanguages.choice = AppLanguage.latvian;
+      expect(AppStrings.templateProblems(0), '0 problēmu šajā šablonā');
+      expect(AppStrings.templateProblems(1), '1 problēma šajā šablonā');
+      expect(AppStrings.templateProblems(2), '2 problēmas šajā šablonā');
+      expect(AppStrings.templateProblems(11), '11 problēmu šajā šablonā');
+      expect(AppStrings.templateProblems(21), '21 problēma šajā šablonā');
+
+      AppLanguages.choice = AppLanguage.macedonian;
+      expect(AppStrings.templateProblems(1), '1 проблем во овој шаблон');
+      expect(AppStrings.templateProblems(21), '21 проблем во овој шаблон');
+      expect(AppStrings.templateProblems(11), '11 проблеми во овој шаблон');
+
+      // Slovene counts by the last two digits: 101 is a "one" again.
+      AppLanguages.choice = AppLanguage.slovenian;
+      expect(AppStrings.templateProblems(2), '2 težavi v tej predlogi');
+      expect(AppStrings.templateProblems(101), '101 težava v tej predlogi');
+      expect(AppStrings.templateProblems(102), '102 težavi v tej predlogi');
+      expect(AppStrings.templateProblems(5), '5 težav v tej predlogi');
+    });
+
+    // The same rule, asked of every language at once: the counts that take
+    // one form in the word count must take one form in the problem count,
+    // and the counts that take different forms there must here. The nouns
+    // differ, so the number is cut out and the rest is compared as the
+    // form; a language whose word count never changes form has no rule to
+    // hold the problem count to.
+    test('the problem count changes form where the word count does', () {
+      String form(String text, int n) => text.replaceFirst('$n', '#');
+      // Counts grouped by the form they take, each named by its smallest.
+      List<int> classes(String Function(int) say) {
+        final firstOf = <String, int>{};
+        return [
+          for (var n = 0; n <= 130; n++)
+            firstOf.putIfAbsent(form(say(n), n), () => n),
+        ];
+      }
+
+      final differ = <String>[];
+      for (final language in AppLanguages.supported) {
+        AppLanguages.choice = language;
+        final words = classes(AppStrings.wordCount);
+        if (words.toSet().length == 1) continue;
+        final problems = classes(AppStrings.templateProblems);
+        for (var n = 0; n < words.length; n++) {
+          if (words[n] != problems[n]) {
+            differ.add('${language.id}: $n');
+            break;
+          }
+        }
+      }
+      expect(differ, isEmpty);
     });
 
     test('every language answers the note statuses', () {

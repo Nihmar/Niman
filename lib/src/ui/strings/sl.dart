@@ -2797,14 +2797,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get templateHintDismissAction => 'Zavrni';
   @override
-  String templateProblems(int count) {
-    if (count == 1) return '1 težava v tej predlogi';
-    if (count == 2) return '$count težavi v tej predlogi';
-    if (count == 3 || count == 4) {
-      return '$count težave v tej predlogi';
-    }
-    return '$count težav v tej predlogi';
-  }
+  String templateProblems(int count) => switch (count % 100) {
+    1 => '$count težava v tej predlogi',
+    2 => '$count težavi v tej predlogi',
+    3 || 4 => '$count težave v tej predlogi',
+    _ => '$count težav v tej predlogi',
+  };
   // The wikilink panel (#475) and the two book forms it offers after `#`.
 
   @override

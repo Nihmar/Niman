@@ -2799,8 +2799,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get templateHintDismissAction => 'Одбаци';
   @override
-  String templateProblems(int count) => count == 1
-      ? '1 проблем во овој шаблон'
+  String templateProblems(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count проблем во овој шаблон'
       : '$count проблеми во овој шаблон';
   // The wikilink panel (#475) and the two book forms it offers after `#`.
 
