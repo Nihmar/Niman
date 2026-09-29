@@ -408,7 +408,10 @@ for multistatus parsing: servers pick their own namespace prefixes
   header, a needed verb refused), `WebDavCertificateFailure` (the device
   refuses the server's certificate; it carries the host and, when the
   error exposes one, the fingerprint — the trust option itself is still
-  open, #366), `WebDavProtocolFailure` (anything else);
+  open, #366; a certificate refused on a redirect target that is not the
+  destination's host names that host and carries no fingerprint, since
+  only the destination's host can be trusted),
+  `WebDavProtocolFailure` (anything else);
 - logs one line per request under `webdav`: verb, relative path, status,
   ETag (short), bytes, ms. It makes one attempt per call (plus
   redirects); retries and backoff belong to the queue, which logs them.
