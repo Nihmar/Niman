@@ -1234,11 +1234,17 @@ final class SyncEngine {
   /// A listing is only as good as its evidence: without file ETags a
   /// same-second rewrite of the same size leaves ETag (null), size and the
   /// one-second mtime all equal, so the listing alone reads as unchanged
-  /// and the write would destroy the rewrite. When the planned row could
-  /// not rule that out ([SyncItem.remoteUnverified]), the content decides:
-  /// the remote is hashed and compared with [expectedSha] — the content
-  /// the write is based on, the agreed one for an upload or a delete, the
-  /// fetched copy for a merge — and a mismatch skips the path (#350).
+  /// and the write would destroy the rewrite. When the listing cannot rule
+  /// that out — the test [SyncItem.remoteUnverified] records, applied to
+  /// the mtime the server shows now — the content decides: the remote is
+  /// hashed and compared with [expectedSha] — the content the write is
+  /// based on, the agreed one for an upload or a delete, the fetched copy
+  /// for a merge — and a mismatch skips the path (#350).
+  ///
+  /// Not the row's own flag: the row describes the remote as last agreed,
+  /// which for a merge is the version being replaced, not the one the
+  /// merge was built from — a row recorded minutes ago reads as verified
+  /// while the listing is in the server's current second.
   Future<void> _remoteUnchangedSince(
     _RunContext c,
     String path, {
@@ -1254,10 +1260,8 @@ final class SyncEngine {
               now.modified == planned.modified;
     if (!same) throw const _ChangedDuringSync();
     if (now == null) return;
-    final row = c.rows[path];
-    final doubt = row?.remoteUnverified ?? _unverified(c, now.modified);
-    if (!doubt) return;
-    final expected = expectedSha ?? row?.localSha256;
+    if (!_unverified(c, now.modified)) return;
+    final expected = expectedSha ?? c.rows[path]?.localSha256;
     if (expected == null) return;
     final download = await c.client.download(path, _DiscardSink());
     if (download.sha256 != expected) throw const _ChangedDuringSync();

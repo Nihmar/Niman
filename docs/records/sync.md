@@ -449,9 +449,11 @@ one runs joins it and gets the same report, saying that it joined.
    moved meanwhile is skipped and decided again next run. A listing
    without file ETags cannot tell a same-second rewrite of the same size
    from an unchanged file — size, mtime and the empty ETag all match — so
-   when the row could not rule that out (`remote_unverified`) the check
-   hashes the remote and compares it with the content the write is based
-   on, and a mismatch skips the path (#350). The same check guards the
+   when the listing cannot rule that out (the `remote_unverified` test,
+   applied to the mtime the server shows now: not the row's flag, which
+   for a merge describes the version being replaced) the check hashes the
+   remote and compares it with the content the write is based on, and a
+   mismatch skips the path (#350). The same check guards the
    two merge uploads, which otherwise carry no precondition on a bare
    server. That PROPFIND
    is only as good as the client's reading of "not there": some servers
