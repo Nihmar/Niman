@@ -155,34 +155,46 @@ final class ShellTemplateFlow {
           ? await clipboardText()
           : '',
     );
-    // Per-creation counters (#52, #359): one number per name, reserved on
-    // disk before anything reads it. The file is read and written here, so
-    // the reservation runs under [guard], where a failure is reported
-    // instead of escaping the flow.
-    ({CounterStore store, int Function(String name) counter})? reserved;
-    var reservedOk = false;
-    await guard(() async {
-      reserved = await CounterStore.reserve(
-        controller.root,
-        counterNames(template),
-      );
-      reservedOk = true;
-    });
-    if (!reservedOk) return;
-    final counters = reserved?.store;
-    final counter = reserved?.counter;
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
-    // is known, so a folder may be built from it.
-    final declared = readTemplateDirectives(
+    // is known, so a folder may be built from it. No counter is reserved
+    // for this read: a `filename:` holding one is still a filename, so
+    // the answer is the same with or without a number.
+    final namesItself = readTemplateDirectives(
       template,
       answers: answers,
       context: surroundings,
-      counter: counter,
-    );
+    ).namesItself;
+    // Per-creation counters (#52, #359, #497): one number per name,
+    // reserved on disk once the name is known — never before the name
+    // dialog, which the user may still cancel and which used to burn a
+    // number. The file is read and written under [guard], where a failure
+    // is reported instead of escaping the flow.
+    ({CounterStore store, int Function(String name) counter})? reserved;
+    Future<bool> reserveCounters() async {
+      if (reserved != null) return true;
+      var reservedOk = false;
+      await guard(() async {
+        reserved = await CounterStore.reserve(
+          controller.root,
+          counterNames(template),
+        );
+        reservedOk = true;
+      });
+      return reservedOk;
+    }
+
     final String name;
-    if (declared.namesItself) {
-      name = declared.filename!;
+    if (namesItself) {
+      // The template's own name may hold a counter, so it is read with
+      // the numbers reserved.
+      if (!await reserveCounters()) return;
+      name = readTemplateDirectives(
+        template,
+        answers: answers,
+        context: surroundings,
+        counter: reserved?.counter,
+      ).filename!;
     } else {
       if (!context.mounted) return;
       final asked = await showNameDialog(
@@ -192,7 +204,10 @@ final class ShellTemplateFlow {
       );
       if (asked == null) return;
       name = asked;
+      if (!await reserveCounters()) return;
     }
+    final counters = reserved?.store;
+    final counter = reserved?.counter;
     await guard(() async {
       final directives = readTemplateDirectives(
         template,
