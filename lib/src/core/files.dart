@@ -407,8 +407,7 @@ Future<String> uniqueFileName(
     final candidate = i == 0 ? '$base$ext' : '${base}_$i$ext';
     final abs = p.join(dir.path, candidate);
     if (_excludedEntry(dir, abs, exclude)) return candidate;
-    final exists = File(abs).existsSync() || Directory(abs).existsSync();
-    if (!exists) {
+    if (!_entryExists(abs)) {
       return candidate;
     }
   }
@@ -427,12 +426,22 @@ Future<String> uniqueFolderName(
     final candidate = i == 0 ? base : '${base}_$i';
     final abs = p.join(dir.path, candidate);
     if (_excludedEntry(dir, abs, exclude)) return candidate;
-    if (!Directory(abs).existsSync()) {
+    if (!_entryExists(abs)) {
       return candidate;
     }
   }
   throw StateError('Could not find a free name for "$base" in "${dir.path}"');
 }
+
+/// Whether anything at all is at [path] — a file, a folder or a link, even
+/// one pointing nowhere.
+///
+/// A name is free only when no entry of any kind holds it: asking only
+/// after the kind about to be created lets a file pick the name of a folder
+/// (or the reverse), and the rename or create onto it then fails.
+bool _entryExists(String path) =>
+    FileSystemEntity.typeSync(path, followLinks: false) !=
+    FileSystemEntityType.notFound;
 
 /// The relative, slash-separated name of [path] inside [root].
 ///
@@ -510,13 +519,13 @@ int trashTimestampSuffix(DateTime now) {
 /// target, which silently destroyed the earlier copy, #335).
 Future<String> trashFileName(Directory dir, String base, String ext) async {
   final plain = '$base$ext';
-  if (!File(p.join(dir.path, plain)).existsSync()) {
+  if (!_entryExists(p.join(dir.path, plain))) {
     return plain;
   }
   final stamp = trashTimestampSuffix(DateTime.now());
   var counter = 1;
   var candidate = '$base.$stamp$ext';
-  while (File(p.join(dir.path, candidate)).existsSync()) {
+  while (_entryExists(p.join(dir.path, candidate))) {
     counter += 1;
     candidate = '$base.$stamp-$counter$ext';
   }
@@ -528,13 +537,13 @@ Future<String> trashFileName(Directory dir, String base, String ext) async {
 /// counter while even that is taken (#335).
 Future<String> trashDirName(Directory dir, String base) async {
   final plain = base;
-  if (!Directory(p.join(dir.path, plain)).existsSync()) {
+  if (!_entryExists(p.join(dir.path, plain))) {
     return plain;
   }
   final stamp = trashTimestampSuffix(DateTime.now());
   var counter = 1;
   var candidate = '$base.$stamp';
-  while (Directory(p.join(dir.path, candidate)).existsSync()) {
+  while (_entryExists(p.join(dir.path, candidate))) {
     counter += 1;
     candidate = '$base.$stamp-$counter';
   }

@@ -261,6 +261,11 @@ void main() {
       expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs_1');
     });
 
+    test('a file of that name is a collision too', () async {
+      File(p.join(tempDir.path, 'Docs')).writeAsStringSync('x');
+      expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs_1');
+    });
+
     test(
       'a folder rename that only changes case keeps the name (#354)',
       () async {
@@ -307,6 +312,33 @@ void main() {
         expect(File(p.join(tempDir.path, second)).existsSync(), isFalse);
       },
     );
+
+    test('a file never takes a name a folder holds', () async {
+      // Trashing a file `Note.md` while the trash holds a folder of that
+      // name: the rename onto the folder fails, and the delete with it.
+      Directory(p.join(tempDir.path, 'Note.md')).createSync();
+      final name = await trashFileName(tempDir, 'Note', '.md');
+      expect(name, isNot('Note.md'));
+      expect(name, endsWith('.md'));
+    });
+
+    test('a folder never takes a name a file holds', () async {
+      File(p.join(tempDir.path, 'Docs')).writeAsStringSync('x');
+      final name = await trashDirName(tempDir, 'Docs');
+      expect(name, matches(RegExp(r'^Docs\.\d{10}$')));
+    });
+
+    test('a timestamped name held by the other kind is passed over', () async {
+      File(p.join(tempDir.path, 'Docs')).writeAsStringSync('x');
+      final first = await trashDirName(tempDir, 'Docs');
+      File(p.join(tempDir.path, first)).writeAsStringSync('y');
+      final second = await trashDirName(tempDir, 'Docs');
+      expect(second, isNot(first));
+      expect(
+        FileSystemEntity.typeSync(p.join(tempDir.path, second)),
+        FileSystemEntityType.notFound,
+      );
+    });
 
     test('a second directory collision gets its own name too (#335)', () async {
       Directory(p.join(tempDir.path, 'Docs')).createSync();
