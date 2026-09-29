@@ -333,6 +333,51 @@ void main() {
     expect(buffer.text, '[[Dune.pdf#page=');
   });
 
+  testWidgets('the number typed after a book form is not overwritten', (
+    tester,
+  ) async {
+    // `[[Dune.pdf#` and Enter write the form `page=`, leaving the caret on
+    // its `=` for the number. What follows is the writer's number, which no
+    // row completes: a second key wrote the form over it (#494).
+    const written = '[[Dune.pdf#page=12';
+    final suggester = FakeWikilinkSuggester(
+      places: const <BookSuggestion>[
+        BookSuggestion(form: 'page=', hint: 'type a number'),
+      ],
+    );
+
+    Future<String> form(LogicalKeyboardKey key) async {
+      final buffer = SourceBuffer.fromText('');
+      final state = await pump(tester, buffer, suggester);
+      await type(tester, '[[Dune.pdf#');
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(buffer.text, '[[Dune.pdf#page=');
+
+      await type(tester, written);
+      expect(
+        state.isSuggesterShown,
+        isFalse,
+        reason: 'the form is written through: nothing is left to complete',
+      );
+
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+      return buffer.text;
+    }
+
+    for (final key in <LogicalKeyboardKey>[
+      LogicalKeyboardKey.enter,
+      LogicalKeyboardKey.tab,
+    ]) {
+      expect(
+        await form(key),
+        startsWith(written),
+        reason: '$key leaves the number the writer typed',
+      );
+    }
+  });
+
   testWidgets('the footer carries the keys the panel answers', (tester) async {
     final buffer = SourceBuffer.fromText('');
     await pump(tester, buffer, _library());

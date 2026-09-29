@@ -3771,7 +3771,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
         if (found != -1 && found < end) end = found;
       }
     }
-    return _LinkQuery(
+    final query = _LinkQuery(
       start: lineStart + open + 2,
       caret: caret,
       end: lineStart + end,
@@ -3780,6 +3780,14 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       heading: hash == -1 ? '' : content.substring(hash + 1),
       hasHash: hash != -1,
     );
+    // A book's place is written through its `=` (`page=`): what follows is
+    // the number the form asked the writer for, and no row completes it. The
+    // key after it is the note's again, so the number stands (#494).
+    if (_modeOf(query) == WikilinkPanelKind.book &&
+        query.heading.contains('=')) {
+      return null;
+    }
+    return query;
   }
 
   /// Opens, filters or closes the panel for where the caret is now.
