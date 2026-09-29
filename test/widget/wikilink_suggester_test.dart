@@ -778,6 +778,68 @@ void main() {
     });
   });
 
+  group('a link typed in code', () {
+    /// Types [text] with the caret at [caret] and holds that the library was
+    /// not asked and the key that follows writes no link: nothing but the
+    /// code's own text is left.
+    Future<void> typedInCode(
+      WidgetTester tester,
+      String text,
+      int caret,
+    ) async {
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+
+      await type(tester, text, caret: caret);
+
+      expect(suggester.noteQueries, isEmpty, reason: 'the library was asked');
+      expect(state.isSuggesterShown, isFalse);
+      expect(find.byType(WikilinkPanel), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        buffer.text,
+        isNot(contains(']]')),
+        reason: 'the key went to the code',
+      );
+      expect(buffer.text, isNot(contains('Notes')), reason: 'no note name');
+    }
+
+    testWidgets('a fenced block lists nothing', (tester) async {
+      // A bash fence, the caret after the `[[Note` typed in it: the panel
+      // listed the library and Enter wrote a note name and its `]]` into the
+      // code.
+      await typedInCode(tester, '```bash\n[[Note\n```\n', 14);
+    });
+
+    testWidgets('inline code lists nothing', (tester) async {
+      await typedInCode(tester, 'text `[[Note` more\n', 12);
+    });
+
+    testWidgets('display maths lists nothing', (tester) async {
+      await typedInCode(tester, '\$\$\n[[Note\n\$\$\n', 9);
+    });
+
+    testWidgets('inline maths lists nothing', (tester) async {
+      await typedInCode(tester, 'x \$[[Note\$ y\n', 9);
+    });
+
+    testWidgets('a link after a span is prose still', (tester) async {
+      // The caret past a span's last delimiter is outside it, and so is the
+      // `[[` the link was read from: the ordinary panel is the writer's.
+      final buffer = SourceBuffer.fromText('');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+
+      await type(tester, 'a `x` [[Note\n', caret: 12);
+
+      expect(state.isSuggesterShown, isTrue);
+      expect(suggester.noteQueries, ['Note']);
+    });
+  });
+
   testWidgets('a surface with no library draws no panel', (tester) async {
     final buffer = SourceBuffer.fromText('');
     await tester.pumpWidget(

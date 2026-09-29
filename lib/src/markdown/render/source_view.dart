@@ -1521,6 +1521,31 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     return true;
   }
 
+  /// Whether the character at [local] of line [index] is code: a line of a
+  /// fenced or indented code block, a line of display maths, or an inline code
+  /// or maths span over the character.
+  ///
+  /// Answered by the colours the view already keeps, as [_isPlainLine] is, so
+  /// the two cannot disagree about what the note reads as code. A span is
+  /// drawn as several runs — its delimiters, its text — and they are disjoint,
+  /// so the character the offset stands on is the one to ask about: a caret
+  /// past a span's last delimiter is prose again, and a link typed there is
+  /// not the code's.
+  bool _inCodeAt(int index, int local) {
+    for (final token in _lineAt(index).tokens) {
+      final kind = token.kind;
+      if (kind == TokenKind.codeFence ||
+          kind == TokenKind.codeBlock ||
+          kind == TokenKind.mathBlock) {
+        return true;
+      }
+      final inline =
+          kind == TokenKind.codeInline || kind == TokenKind.mathInline;
+      if (inline && local >= token.start && local < token.end) return true;
+    }
+    return false;
+  }
+
   /// Tab: moves the lines the selection touches in by `indentWidth` spaces —
   /// or, on a plain line with a collapsed caret, inserts them at the caret.
   ///
@@ -3757,6 +3782,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     final at = caret - lineStart;
     final open = text.lastIndexOf('[[', at);
     if (open < 0 || open + 2 > at) return null;
+    // A link is prose: in a fence, an indented block or display maths, or in
+    // an inline code or maths span, there is none to complete. The panel would
+    // list the library for text the note reads as code and write the note name
+    // it completed there (#494). Asked of the `[[` read above as well as of
+    // the caret: a link opened in a span is the span's, even once the caret
+    // has left it, and a caret made in a span completes nothing outside it.
+    if (_inCodeAt(line, at) || _inCodeAt(line, open)) return null;
     final close = text.indexOf(']]', open + 2);
     if (close != -1 && close < at) return null;
     final content = text.substring(open + 2, at);
