@@ -7,9 +7,11 @@
 /// quoting, key order, comments and indentation — correct YAML, and a
 /// diff the person who wrote the file did not ask for.
 ///
-/// So the edits are made on lines: the key's line is replaced, added
-/// before the closing fence, or removed with whatever it carried. What
-/// the app cannot express this way, it does not try to.
+/// So the edits are made on lines: the key's line is replaced — carrying
+/// over the indentation, the `&anchor` and the trailing comment it was
+/// written with — added before the closing fence at the indentation of the
+/// entries around it, or removed with whatever it carried. What the app
+/// cannot express this way, it does not try to.
 ///
 /// Which lines an entry covers is the YAML parser's answer whenever the
 /// block parses: a quoted key (`"due date":`), a literal block with a blank
@@ -27,10 +29,11 @@ import 'package:yaml/yaml.dart';
 ///
 /// A note with no frontmatter block gains one. A block that already
 /// declares [key] has that entry replaced — all the lines its value takes
-/// go with it, and the key keeps the spelling it was written with.
-/// Otherwise the entry is appended just before the closing fence, so the
-/// keys that were there keep their order; a new key YAML would misread
-/// (`due: date`) is quoted.
+/// go with it, and the entry keeps the spelling, the indentation, the
+/// `&anchor` and the trailing comment it was written with. Otherwise the
+/// entry is appended just before the closing fence, indented like the
+/// entries it joins, so the keys that were there keep their order; a new
+/// key YAML would misread (`due: date`) is quoted.
 ///
 /// [value] is written as-is: it is a YAML scalar the caller has already
 /// shaped (`true`, `2026-03-01`, `"a title"`).
@@ -45,14 +48,40 @@ String setFrontmatterKey(String text, String key, String value) {
   }
   // Splitting on \n leaves the \r of a CRLF file at the end of each line,
   // so the inserted one needs its own to match its neighbours.
-  String entry(String writtenKey) =>
-      eol == '\r\n' ? '$writtenKey: $value\r' : '$writtenKey: $value';
+  String entry(
+    String writtenKey, {
+    String indent = '',
+    String anchor = '',
+    String comment = '',
+  }) {
+    final line = StringBuffer(indent)
+      ..write(writtenKey)
+      ..write(':');
+    if (anchor.isNotEmpty) line.write(' $anchor');
+    line.write(' $value');
+    if (comment.isNotEmpty) line.write(' $comment');
+    return eol == '\r\n' ? '$line\r' : '$line';
+  }
+
   final lines = text.split('\n');
-  final found = _entryRange(lines, block, key);
+  final entries = _entriesOf(lines, block);
+  final found = _entryFor(entries, key);
   if (found == null) {
-    lines.insert(block.end, entry(yamlKey(key)));
+    // A new key joins the entries that are there, at their indentation.
+    final indent = entries.isEmpty ? '' : _indentOf(lines[entries.last.start]);
+    lines.insert(block.end, entry(yamlKey(key), indent: indent));
   } else {
-    lines.replaceRange(found.start, found.end, [entry(found.writtenKey)]);
+    // The entry is written back as it was found: its indentation, the
+    // `&anchor` an alias points at, and the comment after the value.
+    final line = lines[found.start];
+    lines.replaceRange(found.start, found.end, [
+      entry(
+        found.writtenKey,
+        indent: _indentOf(line),
+        anchor: _anchorOf(line, found.writtenKey),
+        comment: _commentOf(lines, found),
+      ),
+    ]);
   }
   return lines.join('\n');
 }
@@ -67,7 +96,7 @@ String removeFrontmatterKey(String text, String key) {
   final block = _blockRange(text);
   if (block == null) return text;
   final lines = text.split('\n');
-  final found = _entryRange(lines, block, key);
+  final found = _entryFor(_entriesOf(lines, block), key);
   if (found == null) return text;
   lines.removeRange(found.start, found.end);
   final left = block.end - (found.end - found.start);
@@ -103,19 +132,19 @@ String removeFrontmatterKey(String text, String key) {
 /// as YAML reads it.
 typedef _Entry = ({int start, int end, String writtenKey, String key});
 
-/// The top-level entry for [key] inside [block], every line of its value
-/// included, or null when the key is absent.
+/// The block's top-level entries: as the YAML parser places them, or read
+/// line by line when the parser refuses the block.
+List<_Entry> _entriesOf(List<String> lines, ({int start, int end}) block) =>
+    _entriesByYaml(lines, block) ?? _entriesByLines(lines, block);
+
+/// The entry among [entries] for [key], every line of its value included,
+/// or null when the key is absent.
 ///
 /// The key as YAML reads it is compared, so `"due date":` is the entry for
 /// `due date`; an exact match wins, then one that differs only in case.
 /// Top-level only: a key nested under another one is that key's business,
 /// and replacing it would move a value the caller never named.
-_Entry? _entryRange(
-  List<String> lines,
-  ({int start, int end}) block,
-  String key,
-) {
-  final entries = _entriesByYaml(lines, block) ?? _entriesByLines(lines, block);
+_Entry? _entryFor(List<_Entry> entries, String key) {
   final wanted = key.trim();
   for (final entry in entries) {
     if (entry.key == wanted) return entry;
@@ -125,6 +154,97 @@ _Entry? _entryRange(
     if (entry.key.toLowerCase() == folded) return entry;
   }
   return null;
+}
+
+/// The indentation [line] is written with: the spaces and tabs it opens on.
+String _indentOf(String line) {
+  var end = 0;
+  while (end < line.length && (line[end] == ' ' || line[end] == '\t')) {
+    end++;
+  }
+  return line.substring(0, end);
+}
+
+/// The text of [line] after the `:` that ends [writtenKey], or '' when the
+/// line is not the mapping line the key starts.
+String _afterKey(String line, String writtenKey) {
+  final at = _indentOf(line).length;
+  if (!line.startsWith(writtenKey, at)) return '';
+  final colon = line.indexOf(':', at + writtenKey.length);
+  return colon < 0 ? '' : line.substring(colon + 1);
+}
+
+/// The `&anchor` the entry whose key line is [line] gives its value, or ''
+/// when it gives none — a replacement that dropped it would leave every
+/// `*alias` in the block pointing at nothing.
+String _anchorOf(String line, String writtenKey) {
+  final after = _afterKey(line, writtenKey);
+  var at = 0;
+  while (at < after.length && (after[at] == ' ' || after[at] == '\t')) {
+    at++;
+  }
+  if (at >= after.length || after[at] != '&') return '';
+  final start = at;
+  while (at < after.length &&
+      after[at] != ' ' &&
+      after[at] != '\t' &&
+      after[at] != '\r') {
+    at++;
+  }
+  return after.substring(start, at);
+}
+
+/// The comment the entry of [found] trails, or '' when it has none.
+///
+/// The value is dropped, so the comment that followed it is kept; it is
+/// read off the entry's last line, except under a block scalar (`|` or
+/// `>`), whose indented lines are text where a `#` is not a comment.
+String _commentOf(List<String> lines, _Entry found) {
+  if (_blockScalarValue(lines[found.start], found.writtenKey)) return '';
+  return _trailingComment(lines[found.end - 1]);
+}
+
+/// Whether the value the entry whose key line is [line] opens is a block
+/// scalar (`|` or `>`), read past the key's whitespace and its anchor.
+bool _blockScalarValue(String line, String writtenKey) {
+  var rest = _afterKey(line, writtenKey).trimLeft();
+  if (rest.startsWith('&')) {
+    final space = rest.indexOf(RegExp(r'[ \t]'));
+    rest = space < 0 ? '' : rest.substring(space).trimLeft();
+  }
+  return rest.startsWith('|') || rest.startsWith('>');
+}
+
+/// The comment [line] ends with — a `#` at its start or after whitespace,
+/// outside quotes — or '' when it has none.
+String _trailingComment(String line) {
+  var quote = '';
+  for (var i = 0; i < line.length; i++) {
+    final char = line[i];
+    if (quote == '"' && char == r'\') {
+      i++;
+      continue;
+    }
+    if (quote.isNotEmpty) {
+      if (char == quote) {
+        // A doubled single quote is one quote inside the scalar.
+        if (quote == "'" && i + 1 < line.length && line[i + 1] == "'") {
+          i++;
+          continue;
+        }
+        quote = '';
+      }
+      continue;
+    }
+    if (char == '"' || char == "'") {
+      quote = char;
+      continue;
+    }
+    if (char == '#' && (i == 0 || line[i - 1] == ' ' || line[i - 1] == '\t')) {
+      return line.substring(i).trimRight();
+    }
+  }
+  return '';
 }
 
 /// The block's top-level entries as the YAML parser places them, or null

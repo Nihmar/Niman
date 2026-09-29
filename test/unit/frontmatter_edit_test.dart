@@ -158,6 +158,50 @@ void main() {
         '---\npinned: true\n---\n\n---\nnever closed',
       );
     });
+
+    // #497: an edit writes the entry back as it found it — the indentation
+    // it was written with, the `&anchor` a `*alias` points at, and the
+    // comment after the value — and a key it adds joins its siblings at
+    // their indentation.
+    test('an indented entry keeps its indentation', () {
+      expect(
+        setFrontmatterKey(
+          '---\n  title: A\n  tags: [x]\n---\nbody',
+          'title',
+          'B',
+        ),
+        '---\n  title: B\n  tags: [x]\n---\nbody',
+      );
+    });
+
+    test("an inserted key takes its siblings' indentation", () {
+      expect(
+        setFrontmatterKey(
+          '---\n  title: A\n  tags: [x]\n---\nbody',
+          'pinned',
+          'true',
+        ),
+        '---\n  title: A\n  tags: [x]\n  pinned: true\n---\nbody',
+      );
+    });
+
+    test('an anchored entry keeps its anchor, so its alias survives', () {
+      expect(
+        setFrontmatterKey(
+          '---\ntags: &t [a, b]\nalias: *t\n---\nbody',
+          'tags',
+          '[a]',
+        ),
+        '---\ntags: &t [a]\nalias: *t\n---\nbody',
+      );
+    });
+
+    test('a trailing comment survives an edit', () {
+      expect(
+        setFrontmatterKey('---\ntitle: A # keep\n---\nbody', 'title', 'B'),
+        '---\ntitle: B # keep\n---\nbody',
+      );
+    });
   });
 
   group('removeFrontmatterKey', () {

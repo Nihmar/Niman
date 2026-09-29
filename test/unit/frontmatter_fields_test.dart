@@ -252,7 +252,8 @@ void main() {
 
     test('leaves every other line of the block exactly where it was', () {
       // The hard constraint: a UI edit rewrites the named key's line and
-      // nothing else — key order, comments and quoting included.
+      // nothing else — key order, comments and quoting included. The
+      // edited entry keeps its own indentation, anchor and comment too.
       const block =
           '# the title, hand-quoted\n'
           'title: "Old"  # keep me\n'
@@ -267,7 +268,7 @@ void main() {
         edited,
         '---\n'
         '# the title, hand-quoted\n'
-        'title: New\n'
+        'title: New # keep me\n'
         'tags: [a, b]\n'
         'custom: 3\n'
         '---\n'

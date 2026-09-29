@@ -95,8 +95,10 @@ drift.
 
 In every surface the file is the only copy: an edit rewrites that key's line
 and leaves the rest of the block — comments, quoting, the other keys — exactly
-where it was, and it saves and undoes like any other edit. The fields are a
-second way into the same file, not a second file.
+where it was, and it saves and undoes like any other edit. The rewritten line
+keeps the indentation, the `&anchor` an `*alias` points at and the trailing
+comment it was written with, and a key that is added joins the others at their
+indentation. The fields are a second way into the same file, not a second file.
 
 A value is shown as it is written (`1.10` stays `1.10`), and a value saved
 unchanged writes nothing. A list's items are edited as a comma-separated line
