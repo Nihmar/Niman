@@ -422,3 +422,19 @@ handles, `mounted` guards in the shell diff; counter serialization, the
 checker reading the engine's own rules, Android alarms skipping overdue
 ones; setext rework, `cellRangesOf`, the streaming decoder, `embed_path`'s
 confinement; interpolation parameters across every locale.
+
+### Third pass — issues
+
+Tracked as issues, to be fixed on `fix/review-pass3`:
+
+| Issue | Findings |
+|-------|----------|
+| #490 | 1 |
+| #491 | 2, 7, 16, 27, 29 |
+| #492 | 3, 17, 18, 25, 32 |
+| #493 | 4, 10, 11 |
+| #494 | 5, 9, 14, 15, 24, 26 |
+| #495 | 8, 19, 20, 31 |
+| #496 | 12, 28, 30 |
+| #497 | 6, 13, 21, 22, 23 |
+| #498 | 33–40 |
