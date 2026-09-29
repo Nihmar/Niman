@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' show InsertMode;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/suggester.dart';
 
@@ -229,5 +230,38 @@ void main() {
     expect((await suggester.notes('%')).map((r) => r.name), [
       '100% notes',
     ], reason: 'a `%` in the query is a character, not a wildcard');
+  });
+
+  // #491: a `[[…]]` target has no escape. The link ends at its first `]]`
+  // and the parser splits the target at its first `|` or `#`, so a name
+  // holding one of those — `C# tips` → target `C`, heading `tips` — is a
+  // link to a note that does not exist. Offering every name and trusting
+  // the parser to read it back is what wrote those links.
+  test('a target that does not read back is not offered', () async {
+    await addNote('C# tips.md', stems: ['c# tips']);
+    await addNote('A|B.md', stems: ['a|b']);
+    await addNote('odd]]name.md', stems: ['odd]]name']);
+    // A folder the target has to name breaks it just as well: the row for
+    // `A#b/Plan.md` is the one that has to write `A#b/Plan`.
+    await addNote('A#b/Plan.md', stems: ['plan']);
+    await addNote('Other/Plan.md', stems: ['plan']);
+    await addNote('Notes.md', stems: ['notes']);
+    final suggester = suggesterOver(const <String, String>{});
+
+    final rows = await suggester.notes('');
+
+    expect(
+      {for (final r in rows) '${r.folder}/${r.name}': r.target},
+      {'/Notes': 'Notes', 'Other/Plan': 'Other/Plan'},
+      reason: 'what the panel writes is what the parser reads back',
+    );
+    for (final row in rows) {
+      final ref = parseWikiRef(row.target);
+      expect(
+        (ref.target, ref.heading, ref.alias),
+        (row.target, null, null),
+        reason: 'the target reads back as itself: ${row.target}',
+      );
+    }
   });
 }

@@ -25,7 +25,11 @@ the note's. The panel lists:
   **and** by its frontmatter aliases, prefix matches first; a row found
   through an alias says which one. Choosing a note whose name another
   note shares writes as much of its folder as it takes to name that one
-  (`[[Work/Meeting]]`), so the link opens the note that was picked;
+  (`[[Work/Meeting]]`), so the link opens the note that was picked. A note
+  whose name holds `#`, `|`, `[` or `]` is not listed: a `[[…]]` target
+  has no escape for them, and the row would write a link that reads back
+  as another note — link to one of those with a Markdown link instead
+  (`[C# tips](C%23%20tips.md)`);
 - after a `#` — the headings of the note just named, filtered the same
   way. `[[#` — no target — lists the headings of the note being edited;
 - after a `#` on a PDF or an EPUB — the place form to type, `page=` or

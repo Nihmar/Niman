@@ -77,7 +77,9 @@ final class BookSuggestion extends SuggestEntry {
 abstract interface class WikilinkSuggester {
   /// The notes and aliases matching [query], best match first: prefix
   /// matches before contains, then by path. An empty [query] lists the
-  /// library from the top.
+  /// library from the top. A note a `[[…]]` target cannot carry (#491) is
+  /// left out: the row would write a link the parser reads back as another
+  /// note.
   Future<List<NoteSuggestion>> notes(String query);
 
   /// The headings of the note named by the wiki [target] — `note`,
@@ -118,8 +120,26 @@ final class IndexWikilinkSuggester implements WikilinkSuggester {
   @override
   Future<List<NoteSuggestion>> notes(String query) async {
     final q = query.trim().toLowerCase();
-    return await _qualified(_rank(await _rows(q), q));
+    final rows = await _qualified(_rank(await _rows(q), q));
+    return [
+      for (final row in rows)
+        if (_readsBack(row.target)) row,
+    ];
   }
+
+  /// Whether [target], written between the `[[` and the `]]`, reads back as
+  /// itself (#491).
+  ///
+  /// The link ends at its first `]]`, the editor's own wikilink token holds
+  /// no bracket, and the parser splits a target at its first `|` or `#`:
+  /// `[[C# tips]]` is target `C` with heading `tips`. A name holding one of
+  /// those has no wikilink spelling, so the row would write a link to a note
+  /// that is not there — it is left out of the panel instead.
+  static bool _readsBack(String target) => !_unlinkable.hasMatch(target);
+
+  /// The characters a `[[…]]` target cannot carry: `#` and `|` split it, and
+  /// a bracket ends it.
+  static final RegExp _unlinkable = RegExp(r'[#|\[\]]');
 
   /// [ranked] with each target qualified as far as it takes to name that
   /// note alone: one query for the notes that share any of their names,
