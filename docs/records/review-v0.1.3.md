@@ -455,22 +455,22 @@ test that failed on the code before it. Hashes are that branch's.
 | 7 | Fixed, `b4b1f162` |
 | 8 | Fixed, `eda51ebb`. Left: the escape needs a response whose socket cannot be detached (the test's fake models one); with a plain `HttpClient` the pre-fix code passes |
 | 9 | Fixed, `ef0ae189` |
-| 10 | Fixed, `8e44001d` |
+| 10 | Fixed, `8e44001d`; the widget target's blocked switch says so, `6d983faf` |
 | 11 | Fixed, `11ec0038` |
 | 12 | Fixed, `bd0304dc`. Left: the indexer, export and the other readers still accept a file the loader refuses |
 | 13 | Fixed, `7535e938` |
 | 14 | Fixed, `2e9d6615` |
 | 15 | Fixed, `bf4bd391` |
 | 16 | Fixed, `e267184a` |
-| 17 | Fixed, `5aaa9b40` |
-| 18 | Fixed, `9dc5b2c8` |
+| 17 | Fixed, `5aaa9b40`. Left: a book deleted while the index has no row for it (never indexed here, or rebuilt) leaves its position behind, because nothing observes that deletion. No sound fix: on disk the entry looks the same as a position the sync brought for a book whose file has not arrived, and telling them apart would need a device-local record of the files this device knew, which the rebuild that causes the gap also loses. The entry is a few bytes, and it is dropped when the file is deleted with the index intact |
+| 18 | Fixed, `9dc5b2c8`; the staged file's delete after the guarded rename has the same timeout, `af5d54bf` |
 | 19 | Fixed, `7f8f3ef5` |
 | 20 | Fixed, `627508be` |
 | 21 | Fixed, `65d1becf` |
 | 22 | Fixed, `5ddba0d8` |
 | 23 | Fixed, `6c8827eb` — the problem kind and its key went with it when the branch met #498 (`f073ba12`) |
 | 24 | Fixed, `2f90c8a6` |
-| 25 | Fixed, `987da2b3` — `package:archive` does not stop at the declared size; the budget bounds the bytes written |
+| 25 | Fixed, `987da2b3` and `e6942019` — `package:archive` does not stop at the declared size, and on `dart:io` it hands its output to a sink only after inflating the whole stream, so the first fix refused after the allocation; the entry is now inflated in chunks that stop at the budget. An entry with no content is skipped again, `cb5b8f7f`. Left: a symlink entry is inflated by `ZipDecoder.decodeStream` itself, before any budget applies |
 | 26 | Fixed, `8c6c0266`. Left: a revision still clears the measurements — an edit re-measures each table once, not per word |
 | 27 | Fixed, `ea1a5022`. Left: the cache is keyed on the index's revision, so headings are as of the last index run |
 | 28 | Fixed, `f32fcf44` |
