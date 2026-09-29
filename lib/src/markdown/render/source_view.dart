@@ -669,7 +669,7 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       _ensureCaretVisible();
       _notifyChanged(edit);
       _bookFrame();
-      _refreshSuggest();
+      _refreshSuggest(typed: true);
     },
   );
 
@@ -1368,7 +1368,9 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // backspace is as much an edit as a keystroke, and the edit says which
     // lines moved so the word count pays for those and not for the note.
     _notifyChanged(edit);
-    _refreshSuggest();
+    // An edit made where the writer is looking rather than typing — a box
+    // ticked — types no link.
+    _refreshSuggest(typed: follow);
   }
 
   /// Deletes the selection, or what is before the caret: one character, or a
@@ -3726,7 +3728,12 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// Called from every caret move and edit; the text of the link is what
   /// decides whether the library is asked again, so a caret that moves inside
   /// an unchanged link does not.
-  void _refreshSuggest() {
+  ///
+  /// Only an edit — [typed] — opens the panel: it is for a link being typed,
+  /// and a caret moved into a link already written (an arrow, a click) is
+  /// just passing through, its keys still the note's. A move follows the
+  /// panel already open for as long as it stays in that link.
+  void _refreshSuggest({bool typed = false}) {
     if (!mounted) return;
     final suggester = widget.wikilinkSuggester;
     if (suggester == null) {
@@ -3739,6 +3746,10 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
       return;
     }
     final panel = _suggest;
+    if (!typed && (panel == null || panel.query.start != query.start)) {
+      _closeSuggest();
+      return;
+    }
     if (panel != null && panel.query.sameText(query)) {
       // The same link, the caret somewhere else in it: keep the rows and
       // follow the caret. A fresh object for the same text still names the

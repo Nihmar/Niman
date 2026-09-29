@@ -84,7 +84,7 @@ void main() {
   Future<MarkdownSourceViewState> pump(
     WidgetTester tester,
     SourceBuffer buffer,
-    FakeWikilinkSuggester suggester, {
+    FakeWikilinkSuggester? suggester, {
     MarkdownSurfaceMode mode = MarkdownSurfaceMode.source,
   }) async {
     await tester.pumpWidget(
@@ -123,6 +123,23 @@ void main() {
 
   WikilinkPanel panel(WidgetTester tester) =>
       tester.widget<WikilinkPanel>(find.byType(WikilinkPanel));
+
+  /// The note [key] leaves at [caret] in [text] on a surface with no library,
+  /// where no panel can take it: what the key does with no panel.
+  Future<String> withNoPanel(
+    WidgetTester tester,
+    String text,
+    int caret,
+    LogicalKeyboardKey key,
+  ) async {
+    final buffer = SourceBuffer.fromText(text);
+    final state = await pump(tester, buffer, null);
+    state.placeCaret(caret);
+    await tester.pump();
+    await tester.sendKeyEvent(key);
+    await tester.pump();
+    return buffer.text;
+  }
 
   testWidgets('typing [[ lists the library notes', (tester) async {
     final buffer = SourceBuffer.fromText('');
@@ -270,12 +287,13 @@ void main() {
   });
 
   testWidgets('the empty target offers the note being edited', (tester) async {
-    final buffer = SourceBuffer.fromText('# Links\n\nSee also [[#');
+    final buffer = SourceBuffer.fromText('# Links\n\nSee also [[');
     final state = await pump(tester, buffer, _library());
     await tester.pumpAndSettle();
 
     state.placeCaret(buffer.length);
     await tester.pump();
+    await type(tester, '# Links\n\nSee also [[#');
 
     final drawn = panel(tester);
     expect(drawn.kind, WikilinkPanelKind.headings);
@@ -374,6 +392,79 @@ void main() {
         reason: '$mode lists the library notes',
       );
     }
+  });
+
+  testWidgets('a caret moved into a written link opens no panel', (
+    tester,
+  ) async {
+    // The panel is for a link being typed: Down onto a line with a finished
+    // link lands the caret inside it, and that is a caret move, not typing.
+    const text = 'Intro text\nSee [[Project plan]]\nThe end\n';
+    final buffer = SourceBuffer.fromText(text);
+    final suggester = FakeWikilinkSuggester(
+      notes: const <NoteSuggestion>[
+        NoteSuggestion(
+          name: 'Project plan',
+          folder: '',
+          target: 'Project plan',
+        ),
+      ],
+    );
+    final state = await pump(tester, buffer, suggester);
+    // `Intro tex|t`, straight above `See [[Pro|ject plan]]`. The pumps
+    // between placing and moving are what the caret's rectangle is measured
+    // between.
+    state.placeCaret(9);
+    await tester.pump();
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      state.selection.extent,
+      buffer.offsetOfLine(1) + 9,
+      reason: 'Down landed inside the link, after `[[Pro`',
+    );
+    expect(state.isSuggesterShown, isFalse);
+    expect(suggester.noteQueries, isEmpty, reason: 'nothing was asked');
+
+    // The keys a panel would take stay the note's: Down goes on to the next
+    // line.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(buffer.lineOf(state.selection.extent), 2);
+
+    // A caret put there by hand is no typing either, and Enter there does
+    // what it does in a note with no panel — never a completion.
+    final inLink = buffer.offsetOfLine(1) + 9;
+    state.placeCaret(inLink);
+    await tester.pump();
+    expect(state.isSuggesterShown, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    final written = buffer.text;
+    expect(
+      written,
+      await withNoPanel(tester, text, inLink, LogicalKeyboardKey.enter),
+    );
+  });
+
+  testWidgets('a caret moved out of the link closes the panel', (tester) async {
+    // And moving back in does not open it again: the panel is for typing.
+    final buffer = SourceBuffer.fromText('See ');
+    final suggester = _library();
+    final state = await pump(tester, buffer, suggester);
+
+    await type(tester, 'See [[No');
+    expect(state.isSuggesterShown, isTrue);
+    state.placeCaret(2);
+    await tester.pump();
+    expect(state.isSuggesterShown, isFalse);
+    state.placeCaret(buffer.length);
+    await tester.pump();
+    expect(state.isSuggesterShown, isFalse);
   });
 
   testWidgets('a surface with no library draws no panel', (tester) async {
