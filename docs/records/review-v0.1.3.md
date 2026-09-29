@@ -455,7 +455,7 @@ test that failed on the code before it. Hashes are that branch's.
 | 7 | Fixed, `b4b1f162` |
 | 8 | Fixed, `eda51ebb`. Left: the escape needs a response whose socket cannot be detached (the test's fake models one); with a plain `HttpClient` the pre-fix code passes |
 | 9 | Fixed, `ef0ae189` |
-| 10 | Fixed, `8e44001d`; the widget target's blocked switch says so, `6d983faf` |
+| 10 | Fixed, `8e44001d`; the widget target's blocked switch says so, `d3ba103e` |
 | 11 | Fixed, `11ec0038` |
 | 12 | Fixed, `bd0304dc`. Left: the indexer, export and the other readers still accept a file the loader refuses |
 | 13 | Fixed, `7535e938` |
@@ -463,14 +463,14 @@ test that failed on the code before it. Hashes are that branch's.
 | 15 | Fixed, `bf4bd391` |
 | 16 | Fixed, `e267184a` |
 | 17 | Fixed, `5aaa9b40`. Left: a book deleted while the index has no row for it (never indexed here, or rebuilt) leaves its position behind, because nothing observes that deletion. No sound fix: on disk the entry looks the same as a position the sync brought for a book whose file has not arrived, and telling them apart would need a device-local record of the files this device knew, which the rebuild that causes the gap also loses. The entry is a few bytes, and it is dropped when the file is deleted with the index intact |
-| 18 | Fixed, `9dc5b2c8`; the staged file's delete after the guarded rename has the same timeout, `af5d54bf` |
+| 18 | Fixed, `9dc5b2c8`; the staged file's delete after the guarded rename has the same timeout, `31810e66` |
 | 19 | Fixed, `7f8f3ef5` |
 | 20 | Fixed, `627508be` |
 | 21 | Fixed, `65d1becf` |
 | 22 | Fixed, `5ddba0d8` |
 | 23 | Fixed, `6c8827eb` — the problem kind and its key went with it when the branch met #498 (`f073ba12`) |
 | 24 | Fixed, `2f90c8a6` |
-| 25 | Fixed, `987da2b3` and `e6942019` — `package:archive` does not stop at the declared size, and on `dart:io` it hands its output to a sink only after inflating the whole stream, so the first fix refused after the allocation; the entry is now inflated in chunks that stop at the budget. An entry with no content is skipped again, `cb5b8f7f`. Left: a symlink entry is inflated by `ZipDecoder.decodeStream` itself, before any budget applies |
+| 25 | Fixed, `987da2b3` and `c45e42b9` — `package:archive` does not stop at the declared size, and on `dart:io` it hands its output to a sink only after inflating the whole stream, so the first fix refused after the allocation; the entry is now inflated in chunks that stop at the budget. An entry with no content is skipped again, `d10949a9`. Left: a symlink entry is inflated by `ZipDecoder.decodeStream` itself, before any budget applies |
 | 26 | Fixed, `8c6c0266`. Left: a revision still clears the measurements — an edit re-measures each table once, not per word |
 | 27 | Fixed, `ea1a5022`. Left: the cache is keyed on the index's revision, so headings are as of the last index run |
 | 28 | Fixed, `f32fcf44` |
@@ -492,3 +492,41 @@ book-hints test (`1a6c05ac`), and #497's removal of the stray-`}}` report
 against #498's externalization of the checker's messages — the `closingBraces`
 kind lost its only raiser and went with its key. The analyzer infos the
 index-leak and reading fixes left are cleaned in `bb86683f`.
+
+### Third pass — verification
+
+Each fix above was read again against its issue (2026-09-29): whether it
+reaches the cause, whether its test fails on the code before it, and what
+it breaks. What that found was fixed on top, one commit each, with a test
+that fails before it unless said otherwise.
+
+| Found in | What was wrong | Fixed |
+|----------|----------------|-------|
+| `ba6d2e87` (2) | `..` was read from the library root, not the linking note; a leading `/` matched any path ending in it; a `..` past the root collapsed into a bare name, which the one-candidate rule then resolved to an unrelated note (#330 again) | `a77812d5` — a link is read from the note it is written in; the indexer passes the note's path |
+| `ba6d2e87` (2) | Relative links of a note that moves kept the edges resolved from its old folder | `486f68fd`. Left: a note that links *to* a moved note by path keeps its edge until it is next indexed — the index keeps resolved edges, not link text |
+| — (pre-existing) | `_clean` replaced two backslashes, so one `\` never separated folders | `64eb642b` |
+| — (pre-existing) | The indexer took Markdown hrefs undecoded: `My%20Note.md` was never an edge | `a3a463a3` |
+| `e267184a` (16) | Names the panel cannot write took slots before the cut to 50 | `78a78e9e` |
+| `ea1a5022` (27) | Keys typed while a note was read each started another read | `3d8e6a7a` |
+| `aad27780` (6) | Recorded by moment alone: two tasks at one moment silenced each other | `e0bf2024` — per task and moment; an id new at a shown moment is the same task only when a shown id of that moment left the set |
+| `5ddba0d8` (22) | A slow show could be posted twice; one task's success hid another's failure | `e05d8b7d` |
+| `65d1becf` (21) | A failed `createNote` still burnt the number (and the journal flow had the same fault) | `2687e372` |
+| `7535e938` (13) | The kept comment was read from the entry's last line: a block list item's comment moved onto the key, `it's # c` lost its comment | `2657491b` — the comment is what follows the value's parsed end |
+| `987da2b3` (25) | `package:archive` inflates a whole entry before handing it to a sink, so the budget refused after the allocation | `c45e42b9`, `d10949a9` (see 25) |
+| `9dc5b2c8` (18) | The staged file's delete had no timeout | `31810e66` |
+| `8e44001d` (10) | A widget target blocked by a failed save did nothing visible | `d3ba103e` |
+| `eda51ebb` (8) | A non-IO error from the sink left the body copy running | `ea107cc4`; real-client tests in `45bf33a9` (they pass on the pre-fix code too: with a detachable socket the old code released the sink) |
+| `f32fcf44` (28) | An edit ending a footnote body dropped the indented lines below it that still cite, so the incremental state left a fresh scan | `9a83bb1d` — compared with a fresh scan across edits |
+| `7ff51222` (30) | Deciding "binary" decoded the note once more; a NUL test named one rule and checked another | `dad9944b`, `ee3cd1f6` |
+| `8c6c0266` (26) | A revision still re-measured every cell of a table that does not fit; rows measured before the tokens landed stayed stale; a caret move laid out every row | `ce6b3314`, `f3fdb2c4`, `fca29134` |
+| `2e9d6615` (14), `bf4bd391` (15) | Replace all and undo left the link panel over old offsets; the panel could open in code before a line's tokens were read | `678784a8`, `e4324958`, docs `4c3589b8` |
+| `2407d53c` (32) | Its test wrote `A.md` then `a.md`, which a folder that folds case keeps as one file: it failed on Windows | `b2874220` |
+| `43d46e58` (33) | The certificate dialog said Niman accepts *more than one* certificate from the host, in all 36 locales; `de` monospace was "sans serif"; other words differed from each file's own | `780c823a`, `5cca44e9`; four more slips in `is`, `eu`, `fi`, `sq` fixed with the first |
+| `9730ce2a` (35) | `lv`, `mk`, `sl` kept `count == 1`; the replace summary did the same in ten languages | `1e175e84`, `089903ad` |
+| `f073ba12` (34) | A failed index rebuild showed the raw error | `a40b207f` |
+| `69fa6654` (38) | The unread-key test counted comments as reads | `00e9812e` |
+| `87da485e` (36) | "Settings → Library → Journal", and the 0.1.3 changelog's "Settings → Diagnostics" (already wrong at the tag) | `3a42c3d1` |
+
+Not fixed: a book deleted while the index has no row for it (see 17); a
+symlink entry inflated by the zip decoder itself (see 25). The new locale
+sentences have had no native speaker's review.
