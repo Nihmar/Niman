@@ -93,17 +93,35 @@ void main() {
   });
 
   test(
-    'a note with a single U+0000 is refused by both readers (#496)',
+    'a lone U+0000 in a long note is text, for both readers (#496)',
     () async {
-      // A third of the file is NUL — the share the binary rule draws the line
-      // at — so both the editor loader and the reload path refuse it, the
-      // same answer, rather than one taking it and the other not.
-      final file = File(p.join(dir.path, 'nul.md'))
+      // The rule is the NUL's share of the file, the same one the index,
+      // replace and export read by: one NUL among the words of a note is a
+      // stray character, not a sign of a binary file. Both the editor loader
+      // and the reload path open it, and keep the character.
+      const text = 'A long enough note, with words.\nOne\u0000stray NUL.\n';
+      final file = File(p.join(dir.path, 'nul.md'))..writeAsStringSync(text);
+      final loaded = await loadNote(file.path);
+      expect(loaded, isA<LoadedNote>());
+      expect((loaded as LoadedNote).text, text);
+      expect(await readNoteText(file.path), text);
+    },
+  );
+
+  test(
+    'a file that is a third NUL is binary, for both readers (#496)',
+    () async {
+      // `a\0b` is one NUL in three bytes, the share the rule draws the line
+      // at: both readers refuse it, the same answer, rather than one taking it
+      // and the other not.
+      final file = File(p.join(dir.path, 'binary.md'))
         ..writeAsBytesSync(<int>[0x61, 0x00, 0x62]);
       final loaded = await loadNote(file.path);
       expect(loaded, isA<NoteReadFailure>());
       expect((loaded as NoteReadFailure).notText, isTrue);
-      expect(await readNoteText(file.path), isA<NoteReadFailure>());
+      final reread = await readNoteText(file.path);
+      expect(reread, isA<NoteReadFailure>());
+      expect((reread as NoteReadFailure).notText, isTrue);
     },
   );
 
