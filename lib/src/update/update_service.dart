@@ -6,6 +6,7 @@
 /// isolate, in the scheduler's callbacks.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -165,14 +166,28 @@ final class UpdateIntegrityException implements Exception {
 /// Streams [asset] into [into] (default [updateDownloadDirectory]) and
 /// verifies the bytes against the digest the release published.
 ///
+/// The body lands in `<name>.part` and is renamed to the asset's base name
+/// only once its digest matches, so a file under the installer's name is
+/// always a whole, verified download and never a half-written one an
+/// interrupted transfer left behind (#495). That partial file is removed on
+/// every failure — a transport error or a stall, not only a digest
+/// mismatch. The body is bounded in silence, not in time: a server that
+/// sends its headers and then goes quiet fails within [stallTimeout]
+/// instead of holding the check open forever.
+///
 /// The file name is the asset's base name, so a hostile release cannot
 /// escape the folder. A download whose sha256 does not match the digest
 /// the release published, or an asset that published none, is deleted and
 /// rethrown as [UpdateIntegrityException]; the caller then neither offers
 /// nor applies it (issue #384).
-Future<File> downloadAsset(ReleaseAsset asset, {Directory? into}) async {
+Future<File> downloadAsset(
+  ReleaseAsset asset, {
+  Directory? into,
+  Duration stallTimeout = const Duration(seconds: 30),
+}) async {
   final dir = into ?? await updateDownloadDirectory();
   final file = File(p.join(dir.path, p.basename(asset.name)));
+  final part = File('${file.path}.part');
   final client = HttpClient();
   try {
     final request = await client
@@ -185,30 +200,66 @@ Future<File> downloadAsset(ReleaseAsset asset, {Directory? into}) async {
         uri: Uri.parse(asset.downloadUrl),
       );
     }
-    await response.pipe(file.openWrite());
+    final sink = part.openWrite();
+    try {
+      await sink.addStream(
+        response.timeout(
+          stallTimeout,
+          onTimeout: (events) => events.addError(
+            TimeoutException('no data for ${stallTimeout.inMilliseconds} ms'),
+          ),
+        ),
+      );
+    } finally {
+      await _closeQuietly(sink);
+    }
+    await _verifyDownload(asset, part);
+    await part.rename(file.path);
+    return file;
+  } on Object {
+    // Whatever failed — the transport, a stall, the digest — nothing
+    // unverified is left on disk.
+    await _deleteQuietly(part);
+    rethrow;
   } finally {
-    client.close();
+    client.close(force: true);
   }
-  await _verifyDownload(asset, file);
-  return file;
+}
+
+/// Closes [sink], swallowing a failure: the transfer's own error is the one
+/// the caller needs, and a sink that was already aborted must not replace it.
+Future<void> _closeQuietly(IOSink sink) async {
+  try {
+    await sink.close();
+  } on Object {
+    // The write already failed; the reason below is what matters.
+  }
+}
+
+/// Removes [file] if it is there, ignoring a failure: the caller is already
+/// unwinding an error.
+Future<void> _deleteQuietly(File file) async {
+  try {
+    await file.delete();
+  } on FileSystemException {
+    // Already gone, or its handle is not released yet.
+  }
 }
 
 /// Checks [file]'s bytes against [asset]'s published digest.
 ///
-/// Deletes the file and throws [UpdateIntegrityException] on a mismatch,
-/// or when the release carried no sha256 digest at all: an unverifiable
-/// download is not silently trusted.
+/// Throws [UpdateIntegrityException] on a mismatch, or when the release
+/// carried no sha256 digest at all: an unverifiable download is not
+/// silently trusted. The caller removes the file.
 Future<void> _verifyDownload(ReleaseAsset asset, File file) async {
   final expected = asset.expectedSha256;
   if (expected == null) {
-    await file.delete();
     throw UpdateIntegrityException(
       'asset ${asset.name} published no sha256 digest to verify against',
     );
   }
   final actual = await hashFileSha256(file);
   if (actual != expected) {
-    await file.delete();
     throw UpdateIntegrityException(
       'asset ${asset.name} failed its digest check '
       '(downloaded $actual, published $expected)',
