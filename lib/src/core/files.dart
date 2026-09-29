@@ -38,7 +38,8 @@ final Set<String> _reservedNames = <String>{
 const _reservedPrefix = '_';
 
 /// Trailing spaces and dots, which Windows drops from a component name:
-/// `CON ` and `CON.` are the console device as much as `CON` is.
+/// `CON ` and `CON.` are the console device as much as `CON` is, and a
+/// folder created as `Draft.` exists there as `Draft`.
 final RegExp _trailingSpaceOrDot = RegExp(r'[ .]+$');
 
 /// Whether this platform's filesystems fold case: Windows and Apple's do,
@@ -51,9 +52,6 @@ final bool _caseInsensitivePaths =
 
 /// Collapses runs of whitespace to single spaces.
 final RegExp _whitespaceRuns = RegExp(r'\s+');
-
-/// Two or more trailing dots, which are rejected or mangled by Windows.
-final RegExp _trailingDots = RegExp(r'\.{2,}$');
 
 /// The number of uniqueness attempts when resolving name collisions.
 const _uniqueAttempts = 100;
@@ -263,17 +261,26 @@ Future<String> hashFileSha256(File file) async {
 /// Sanitizes [input] into a valid note or folder name.
 ///
 /// Strips path separators and OS-illegal characters, collapses whitespace,
-/// trims trailing dots, moves a reserved device name out of the way, and caps
-/// the length at [_maxNameBytes] UTF-8 bytes. Returns [fallback] when nothing
-/// usable remains.
+/// moves a reserved device name out of the way, and caps the length at
+/// [_maxNameBytes] UTF-8 bytes. Returns [fallback] when nothing usable
+/// remains.
+///
+/// The result never ends with a dot or a space — not even where the byte cap
+/// cut it: Windows drops both from the end of a component, so the name on
+/// disk would differ from the one the caller records. A note's `.md` would
+/// shield its stem, but this does not know whether a note or a folder is
+/// being named, and one rule keeps the two alike.
 String sanitizeName(String input, {required String fallback}) {
   var name = input.trim();
   name = name.replaceAll(_invalidChars, '');
   name = name.replaceAll(_whitespaceRuns, ' ');
-  name = name.trim();
-  name = name.replaceAll(_trailingDots, '');
+  name = name.replaceAll(_trailingSpaceOrDot, '').trim();
   name = _withoutReservedStem(name);
+  // Cutting and trimming cannot make a device's stem of one that was not:
+  // they keep the first dot when it falls inside the budget, and a stem
+  // that runs past it is far longer than any device name.
   name = _truncateToBytes(name, _maxNameBytes);
+  name = name.replaceAll(_trailingSpaceOrDot, '');
   if (name.isEmpty) {
     return fallback;
   }

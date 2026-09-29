@@ -123,7 +123,20 @@ void main() {
 
     test('removes trailing dot runs but keeps leading dots', () {
       expect(sanitizeName('notes...', fallback: 'X'), 'notes');
-      expect(sanitizeName('.hidden.', fallback: 'X'), '.hidden.');
+      expect(sanitizeName('.hidden.', fallback: 'X'), '.hidden');
+    });
+
+    test('never ends a name with a dot or a space', () {
+      // Windows drops both from the end of a component: a folder created as
+      // `Draft.` exists as `Draft`, and the index would hold a name the disk
+      // does not.
+      expect(sanitizeName('Draft.', fallback: 'X'), 'Draft');
+      expect(sanitizeName('Draft. .', fallback: 'X'), 'Draft');
+      // The byte cap can land just after a space or a dot: what it leaves
+      // is trimmed too.
+      expect(sanitizeName('${'a' * 199} b', fallback: 'X'), 'a' * 199);
+      expect(sanitizeName('${'a' * 199}.b', fallback: 'X'), 'a' * 199);
+      expect(sanitizeName('. .', fallback: 'X'), 'X');
     });
   });
 
