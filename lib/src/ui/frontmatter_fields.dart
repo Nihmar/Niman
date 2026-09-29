@@ -109,7 +109,11 @@ final class _FrontmatterFieldsState extends State<FrontmatterFields> {
       child: widget.panel == FrontmatterPanel.hidden
           ? const SizedBox(width: double.infinity, height: 0)
           : Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              // Room above it as well as below: the panel is a box with an
+              // edge of its own, and one that touches the chrome over it —
+              // the journal's day strip, the find bar, the note's own row —
+              // reads as part of it (device report, 2026-09-29).
+              padding: const EdgeInsets.only(top: 12, bottom: 20),
               child: _panel(
                 context,
                 // The add row is the panel's one action and it is always

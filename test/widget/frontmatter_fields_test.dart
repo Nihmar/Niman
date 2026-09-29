@@ -415,6 +415,9 @@ void main() {
     final panel = tester.getRect(find.byKey(const Key('frontmatter-fields')));
     expect(panel.left, NoteColumn.textInset);
     expect(panel.right, pane - NoteColumn.textInset);
+    // And room over it: a box that touches the chrome above reads as part
+    // of it, which is what the journal's day strip showed (2026-09-29).
+    expect(panel.top, greaterThanOrEqualTo(12));
     expect(tester.takeException(), isNull);
   });
 
