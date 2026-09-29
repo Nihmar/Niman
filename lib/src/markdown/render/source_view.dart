@@ -86,6 +86,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
+import 'package:niman/src/markdown/table/markdown_table.dart';
 import 'package:niman/src/markdown/task_cascade.dart';
 import 'package:niman/src/preview/code_highlight.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -2460,14 +2461,45 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// The fragment of line [line] a caret at [local] of the line is drawn in,
   /// and its paragraph when a frame has built it.
   (_Piece?, RenderParagraph?) _fragmentAt(int line, int local) {
-    final pieces = _piecesOf(line);
+    final piece = _pieceHolding(_piecesOf(line), line, local);
+    return (piece, piece == null ? null : _renderOf(piece.key));
+  }
+
+  /// The piece of line [line] a caret at [local] is drawn in: the one whose
+  /// source holds it. A wrapped row's pieces hold only its cells' text, so
+  /// an offset in the room round them — a pipe, the spaces by it — is its
+  /// cell's, on its side of the pipe (`MarkdownTable.cellRangesOf`), and
+  /// drawn at that cell's nearer edge: the room before a pipe at the end of
+  /// the cell on its left, the room after it at the start of the one on its
+  /// right. That is the side an unwrapped row draws it on, the room's
+  /// characters spread evenly between the two cells' text.
+  _Piece? _pieceHolding(List<_Piece> pieces, int line, int local) {
     for (final piece in pieces) {
-      if (local >= piece.start && local <= piece.end) {
-        return (piece, _renderOf(piece.key));
+      if (local >= piece.start && local <= piece.end) return piece;
+    }
+    if (pieces.isEmpty) return null;
+    final cells = MarkdownTable.cellRangesOf(widget.buffer.lineAt(line));
+    var (from, to) = local < cells.first.$1 ? cells.first : cells.last;
+    for (final (start, end) in cells) {
+      if (local >= start && local <= end) {
+        (from, to) = (start, end);
+        break;
       }
     }
-    final first = pieces.isEmpty ? null : pieces.first;
-    return (first, first == null ? null : _renderOf(first.key));
+    // The cell's pieces are contiguous and none holds [local]: it is before
+    // all of them or past all of them.
+    _Piece? before;
+    _Piece? after;
+    for (final piece in pieces) {
+      if (piece.start < from || piece.end > to) continue;
+      if (piece.end < local && (before == null || piece.end > before.end)) {
+        before = piece;
+      }
+      if (piece.start > local && (after == null || piece.start < after.start)) {
+        after = piece;
+      }
+    }
+    return before ?? after ?? pieces.first;
   }
 
   /// The piece of a wrapped row [global] is *in*, and where in it the point
