@@ -10,6 +10,10 @@ final class FakeDesktopNotifier implements DesktopNotifier {
   /// Reminders the backend posted.
   final List<TodoReminder> shown = [];
 
+  /// How many upcoming `show` calls fail — the daemon not answering at
+  /// login, which the backend only logs.
+  int failShows = 0;
+
   /// How many times the backend initialized the plugin.
   int initCalls = 0;
 
@@ -23,6 +27,10 @@ final class FakeDesktopNotifier implements DesktopNotifier {
 
   @override
   Future<void> show(TodoReminder reminder) async {
+    if (failShows > 0) {
+      failShows--;
+      throw StateError('the notification daemon did not answer');
+    }
     shown.add(reminder);
   }
 

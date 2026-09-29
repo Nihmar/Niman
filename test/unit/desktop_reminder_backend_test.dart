@@ -134,6 +134,23 @@ void main() {
     },
   );
 
+  // #497. A show that failed was still recorded as shown, and every later
+  // reconcile in the grace window took the "already shown" early return:
+  // the reminder was never retried.
+  test('a notification that failed is shown by the next reconcile', () async {
+    notifier.failShows = 1;
+    final when = DateTime.now().subtract(const Duration(minutes: 5));
+    final r = TodoReminder(id: 7, title: 'task', body: 'body', when: when);
+    await backend.schedule(r, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(notifier.shown, isEmpty, reason: 'the daemon did not answer');
+
+    // A todo edit inside the grace hour hands the same moment over again.
+    await backend.schedule(r, exact: true);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(notifier.shown.map((posted) => posted.id), [7]);
+  });
+
   test('a cancelled reminder never fires', () async {
     final r = reminder(const Duration(milliseconds: 30));
     await backend.schedule(r, exact: true);

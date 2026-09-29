@@ -99,7 +99,6 @@ final class DesktopReminderBackend implements ReminderBackend {
     final delay = reminder.when.difference(DateTime.now());
     final timer = Timer(delay.isNegative ? Duration.zero : delay, () {
       _armed.remove(reminder.id);
-      _fired[reminder.when] = (id: reminder.id, at: DateTime.now());
       unawaited(_show(reminder));
     });
     _armed[reminder.id] = timer;
@@ -114,9 +113,15 @@ final class DesktopReminderBackend implements ReminderBackend {
 
   /// Posts [reminder], logging rather than throwing: the timer callback has
   /// no caller to return an error to.
+  ///
+  /// A show that fails is not recorded as shown, so the next reconcile in
+  /// the grace window hands the reminder over again: the system's daemon
+  /// not answering at login is a delivery that has not happened, not one
+  /// that cannot be improved on.
   Future<void> _show(TodoReminder reminder) async {
     try {
       await _notifier.show(reminder);
+      _fired[reminder.when] = (id: reminder.id, at: DateTime.now());
       _log.info('todo reminders: fired ${reminder.id} ${reminder.title}');
     } on Object catch (error) {
       _log.warning(
