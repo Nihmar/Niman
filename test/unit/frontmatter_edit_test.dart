@@ -87,6 +87,71 @@ void main() {
       );
     });
 
+    // The lines an entry covers are the YAML parser's answer: a guess from
+    // indentation never found a quoted key (the field panel added a second
+    // `due date:`, and the block stopped parsing) and left the rest of a
+    // value behind when a blank line or a line at column 0 was part of it.
+    test('a quoted key is found, and keeps its quotes', () {
+      expect(
+        setFrontmatterKey(
+          '---\n"due date": 2026-01-01\nb: 1\n---\nbody',
+          'due date',
+          'later',
+        ),
+        '---\n"due date": later\nb: 1\n---\nbody',
+      );
+      expect(
+        removeFrontmatterKey("---\n'due date': x\nb: 1\n---\nbody", 'due date'),
+        '---\nb: 1\n---\nbody',
+      );
+    });
+
+    test('every line of a value goes with it', () {
+      // A literal block with a blank line inside.
+      expect(
+        setFrontmatterKey(
+          '---\ndesc: |\n  one\n\n  two\nnext: x\n---\nbody',
+          'desc',
+          '"new"',
+        ),
+        '---\ndesc: "new"\nnext: x\n---\nbody',
+      );
+      // A quoted value that goes on at column 0.
+      expect(
+        setFrontmatterKey(
+          '---\nt: "line one\nline two"\nnext: 1\n---\nbody',
+          't',
+          'x',
+        ),
+        '---\nt: x\nnext: 1\n---\nbody',
+      );
+    });
+
+    test('a new key YAML would misread is quoted', () {
+      final out = setFrontmatterKey(
+        '---\ntitle: T\n---\nbody',
+        'due: date',
+        'x',
+      );
+      expect(out, '---\ntitle: T\n"due: date": x\n---\nbody');
+      expect(
+        setFrontmatterKey(out, 'due: date', 'y'),
+        '---\ntitle: T\n"due: date": y\n---\nbody',
+        reason: 'and found again under the quotes it was given',
+      );
+    });
+
+    test('a block YAML refuses is still edited by its lines', () {
+      expect(
+        setFrontmatterKey(
+          '---\ntitle: [unclosed\npinned: false\n---\nbody',
+          'pinned',
+          'true',
+        ),
+        '---\ntitle: [unclosed\npinned: true\n---\nbody',
+      );
+    });
+
     test('an unclosed block is not a block: a new one goes on top', () {
       expect(
         setFrontmatterKey('---\nnever closed', 'pinned', 'true'),

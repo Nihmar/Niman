@@ -10,15 +10,27 @@
 /// So the edits are made on lines: the key's line is replaced, added
 /// before the closing fence, or removed with whatever it carried. What
 /// the app cannot express this way, it does not try to.
+///
+/// Which lines an entry covers is the YAML parser's answer whenever the
+/// block parses: a quoted key (`"due date":`), a literal block with a blank
+/// line inside, a quoted value that goes on at column 0 — the node spans
+/// say where each one ends, where a guess from indentation did not (a
+/// quoted key was never found and got a duplicate; the rest of a value
+/// was left behind and broke the block). Only a block YAML refuses falls
+/// back to reading lines.
 library;
+
+import 'package:niman/src/frontmatter/yaml_scalar.dart';
+import 'package:yaml/yaml.dart';
 
 /// [text] with the top-level frontmatter [key] set to [value].
 ///
 /// A note with no frontmatter block gains one. A block that already
-/// declares [key] has that entry replaced — its continuation lines (an
-/// indented block list, a folded scalar) go with it. Otherwise the entry
-/// is appended just before the closing fence, so the keys that were there
-/// keep their order.
+/// declares [key] has that entry replaced — all the lines its value takes
+/// go with it, and the key keeps the spelling it was written with.
+/// Otherwise the entry is appended just before the closing fence, so the
+/// keys that were there keep their order; a new key YAML would misread
+/// (`due: date`) is quoted.
 ///
 /// [value] is written as-is: it is a YAML scalar the caller has already
 /// shaped (`true`, `2026-03-01`, `"a title"`).
@@ -29,17 +41,18 @@ String setFrontmatterKey(String text, String key, String value) {
     // A note that had no block gets one, and keeps its body a blank line
     // below — the shape every note written by hand has.
     final body = text.trimLeft();
-    return '---$eol$key: $value$eol---$eol$eol$body';
+    return '---$eol${yamlKey(key)}: $value$eol---$eol$eol$body';
   }
   // Splitting on \n leaves the \r of a CRLF file at the end of each line,
   // so the inserted one needs its own to match its neighbours.
-  final entry = eol == '\r\n' ? '$key: $value\r' : '$key: $value';
+  String entry(String writtenKey) =>
+      eol == '\r\n' ? '$writtenKey: $value\r' : '$writtenKey: $value';
   final lines = text.split('\n');
   final found = _entryRange(lines, block, key);
   if (found == null) {
-    lines.insert(block.end, entry);
+    lines.insert(block.end, entry(yamlKey(key)));
   } else {
-    lines.replaceRange(found.start, found.end, [entry]);
+    lines.replaceRange(found.start, found.end, [entry(found.writtenKey)]);
   }
   return lines.join('\n');
 }
@@ -85,24 +98,82 @@ String removeFrontmatterKey(String text, String key) {
   return null;
 }
 
-/// The half-open line range of the top-level entry for [key] inside
-/// [block], continuation lines included, or null when the key is absent.
+/// One top-level entry of a block: its half-open line range in the note's
+/// split lines, the key as it is written (quotes included), and the key
+/// as YAML reads it.
+typedef _Entry = ({int start, int end, String writtenKey, String key});
+
+/// The top-level entry for [key] inside [block], every line of its value
+/// included, or null when the key is absent.
 ///
+/// The key as YAML reads it is compared, so `"due date":` is the entry for
+/// `due date`; an exact match wins, then one that differs only in case.
 /// Top-level only: a key nested under another one is that key's business,
 /// and replacing it would move a value the caller never named.
-({int start, int end})? _entryRange(
+_Entry? _entryRange(
   List<String> lines,
   ({int start, int end}) block,
   String key,
 ) {
-  final wanted = key.trim().toLowerCase();
+  final entries = _entriesByYaml(lines, block) ?? _entriesByLines(lines, block);
+  final wanted = key.trim();
+  for (final entry in entries) {
+    if (entry.key == wanted) return entry;
+  }
+  final folded = wanted.toLowerCase();
+  for (final entry in entries) {
+    if (entry.key.toLowerCase() == folded) return entry;
+  }
+  return null;
+}
+
+/// The block's top-level entries as the YAML parser places them, or null
+/// when the block does not parse (or is not a mapping), which is the line
+/// reading's case.
+List<_Entry>? _entriesByYaml(List<String> lines, ({int start, int end}) block) {
+  final first = block.start + 1;
+  final YamlNode doc;
+  try {
+    doc = loadYamlNode(lines.sublist(first, block.end).join('\n'));
+  } on FormatException {
+    return null;
+  }
+  if (doc is! YamlMap) return doc.value == null ? const [] : null;
+  return [
+    for (final MapEntry(key: keyNode, value: valueNode) in doc.nodes.entries)
+      if (keyNode is YamlNode)
+        (
+          start: first + keyNode.span.start.line,
+          end:
+              first +
+              _endLine(
+                keyNode.span.start.line,
+                valueNode.span.end.line,
+                valueNode.span.end.column,
+              ),
+          writtenKey: keyNode.span.text,
+          key: '${keyNode.value}'.trim(),
+        ),
+  ];
+}
+
+/// The line after a value that ends at [endLine]:[endColumn], for an entry
+/// that starts on [startLine]: a span that stops at the start of a line (a
+/// block list takes its last line break) ends before that line.
+int _endLine(int startLine, int endLine, int endColumn) =>
+    endColumn == 0 && endLine > startLine ? endLine : endLine + 1;
+
+/// The block's top-level entries read line by line — for a block the YAML
+/// parser refuses, which is still edited rather than left stuck: a key
+/// starts a line at column 0, and every indented line (or `- ` item)
+/// under it belongs to it.
+List<_Entry> _entriesByLines(List<String> lines, ({int start, int end}) block) {
+  final entries = <_Entry>[];
   for (var i = block.start + 1; i < block.end; i++) {
     final line = lines[i];
     if (line.startsWith(' ') || line.startsWith('\t')) continue;
-    final colon = line.indexOf(':');
-    if (colon <= 0) continue;
-    if (line.substring(0, colon).trim().toLowerCase() != wanted) continue;
-    // Everything indented (or a `- ` item) under it belongs to this entry.
+    final written = _writtenKeyOf(line);
+    if (written == null) continue;
     var end = i + 1;
     while (end < block.end) {
       final next = lines[end];
@@ -113,9 +184,62 @@ String removeFrontmatterKey(String text, String key) {
       if (!isContinuation) break;
       end++;
     }
-    return (start: i, end: end);
+    entries.add((
+      start: i,
+      end: end,
+      writtenKey: written,
+      key: _keyValueOf(written),
+    ));
   }
-  return null;
+  return entries;
+}
+
+/// The key a mapping line starts with, as written — a quoted key through
+/// its closing quote, a plain one up to the `:` that ends it — or null
+/// when the line is no `key:` line (a comment, a stray scalar).
+String? _writtenKeyOf(String line) {
+  final quote = line.isEmpty ? '' : line[0];
+  var end = 0;
+  if (quote == '"' || quote == "'") {
+    end = 1;
+    while (end < line.length) {
+      final char = line[end];
+      if (quote == '"' && char == r'\') {
+        end += 2;
+        continue;
+      }
+      if (char == quote) {
+        // A doubled single quote is one quote inside the key.
+        if (quote == "'" && end + 1 < line.length && line[end + 1] == "'") {
+          end += 2;
+          continue;
+        }
+        break;
+      }
+      end++;
+    }
+    if (end >= line.length) return null;
+    final colon = line.indexOf(':', end + 1);
+    if (colon < 0 || line.substring(end + 1, colon).trim().isNotEmpty) {
+      return null;
+    }
+    return line.substring(0, end + 1);
+  }
+  final colon = RegExp(r':(?=\s|$)').firstMatch(line)?.start;
+  if (colon == null || colon == 0 || line.startsWith('#')) return null;
+  return line.substring(0, colon).trimRight();
+}
+
+/// [written], a key as written, as YAML reads it: a quoted key unquoted.
+String _keyValueOf(String written) {
+  if (!written.startsWith('"') && !written.startsWith("'")) return written;
+  try {
+    final value = loadYaml(written);
+    if (value is String) return value.trim();
+  } on FormatException {
+    // Kept as written: it can still match itself.
+  }
+  return written;
 }
 
 /// The line ending [text] is written with: CRLF when it uses any, else
