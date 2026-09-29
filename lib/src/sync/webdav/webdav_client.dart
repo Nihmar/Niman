@@ -416,6 +416,12 @@ final class WebDavClient {
       await endCopy();
       await _closeQuietly(into);
       throw _transportFailure('GET', path, e);
+    } on Object {
+      // Whatever else the sink threw: the copy is ours, so it ends here
+      // too, or it keeps reading and buffering a body nobody wants.
+      await endCopy();
+      await _closeQuietly(into);
+      rethrow;
     }
     hasher.close();
     final expected = response.contentLength;

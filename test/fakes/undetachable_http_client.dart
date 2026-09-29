@@ -16,12 +16,20 @@ final class UndetachableHttpClient implements HttpClient {
 
   final HttpClient _inner;
 
+  /// How many response bodies had their subscription cancelled — a copy
+  /// the client gave up on has to say so, or it keeps reading (and
+  /// buffering) a body nobody wants.
+  int cancelledBodies = 0;
+
   /// Closes the wrapped client.
   void dispose() => _inner.close(force: true);
 
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) async =>
-      _UndetachableRequest(await _inner.openUrl(method, url));
+      _UndetachableRequest(
+        await _inner.openUrl(method, url),
+        () => cancelledBodies++,
+      );
 
   @override
   void close({bool force = false}) => _inner.close(force: force);
@@ -49,9 +57,10 @@ final class UndetachableHttpClient implements HttpClient {
 }
 
 final class _UndetachableRequest implements HttpClientRequest {
-  new(this._inner);
+  new(this._inner, this._onCancel);
 
   final HttpClientRequest _inner;
+  final void Function() _onCancel;
 
   @override
   HttpHeaders get headers => _inner.headers;
@@ -74,7 +83,7 @@ final class _UndetachableRequest implements HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async =>
-      _UndetachableResponse(await _inner.close());
+      _UndetachableResponse(await _inner.close(), _onCancel);
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
@@ -82,9 +91,10 @@ final class _UndetachableRequest implements HttpClientRequest {
 }
 
 final class _UndetachableResponse implements HttpClientResponse {
-  new(this._inner);
+  new(this._inner, this._onCancel);
 
   final HttpClientResponse _inner;
+  final void Function() _onCancel;
 
   @override
   int get statusCode => _inner.statusCode;
@@ -104,11 +114,14 @@ final class _UndetachableResponse implements HttpClientResponse {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
-  }) => _inner.listen(
-    onData,
-    onError: onError,
-    onDone: onDone,
-    cancelOnError: cancelOnError,
+  }) => _CountedSubscription(
+    _inner.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    ),
+    _onCancel,
   );
 
   @override
@@ -124,4 +137,44 @@ final class _UndetachableResponse implements HttpClientResponse {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnsupportedError('${invocation.memberName}');
+}
+
+/// A subscription that says when it is cancelled (once).
+final class _CountedSubscription implements StreamSubscription<List<int>> {
+  new(this._inner, this._onCancel);
+
+  final StreamSubscription<List<int>> _inner;
+  final void Function() _onCancel;
+  var _cancelled = false;
+
+  @override
+  Future<void> cancel() {
+    if (!_cancelled) {
+      _cancelled = true;
+      _onCancel();
+    }
+    return _inner.cancel();
+  }
+
+  @override
+  void onData(void Function(List<int> data)? handleData) =>
+      _inner.onData(handleData);
+
+  @override
+  void onError(Function? handleError) => _inner.onError(handleError);
+
+  @override
+  void onDone(void Function()? handleDone) => _inner.onDone(handleDone);
+
+  @override
+  void pause([Future<void>? resumeSignal]) => _inner.pause(resumeSignal);
+
+  @override
+  void resume() => _inner.resume();
+
+  @override
+  bool get isPaused => _inner.isPaused;
+
+  @override
+  Future<E> asFuture<E>([E? futureValue]) => _inner.asFuture<E>(futureValue);
 }

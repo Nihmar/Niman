@@ -10,6 +10,7 @@ import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_webdav_server.dart';
+import '../fakes/undetachable_http_client.dart';
 
 void main() {
   late FakeWebDavServer server;
@@ -296,6 +297,34 @@ void main() {
       );
     });
 
+    // Not every failure into a sink is an `IOException`: a consumer of
+    // the body may throw anything. The copy of the response is the client's
+    // own, so it has to end on every way out, or it keeps reading (and
+    // buffering) a body nobody wants (#495).
+    test('a sink that fails with a non-IO error still ends the copy of the '
+        'body', () async {
+      final transport = UndetachableHttpClient();
+      addTearDown(transport.dispose);
+      server
+        ..putFile('a.bin', List<int>.filled(60000, 1))
+        ..trickleNextGet = const Duration(milliseconds: 50);
+      final own = WebDavClient(url: server.url, httpClient: transport);
+      addTearDown(own.close);
+      final sink = _FailingConsumer();
+
+      await expectLater(
+        own.download('a.bin', sink).timeout(const Duration(seconds: 10)),
+        throwsA(isA<FormatException>()),
+        reason: "the sink's own error is the one to report",
+      );
+
+      expect(sink.closed, isTrue, reason: 'the sink is released');
+      expect(
+        transport.cancelledBodies,
+        1,
+        reason: 'the response is no longer read once the transfer is over',
+      );
+    });
     // The timeout bounds a silence, not the transfer: a body that keeps
     // arriving on a slow link is not cut off because the whole of it takes
     // longer than the timeout, or a large file would never sync.
@@ -822,4 +851,19 @@ final class _TlsRefusingHttp implements HttpClient {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnsupportedError('${invocation.memberName}');
+}
+
+/// A consumer of a body that gives up on its first chunk with an error that
+/// is not an `IOException`, and notes whether it was closed.
+final class _FailingConsumer implements StreamConsumer<List<int>> {
+  bool closed = false;
+
+  @override
+  Future<void> addStream(Stream<List<int>> stream) async {
+    await stream.first;
+    throw const FormatException('the sink refuses the body');
+  }
+
+  @override
+  Future<void> close() async => closed = true;
 }
