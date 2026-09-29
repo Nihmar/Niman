@@ -1,7 +1,8 @@
 // How `live` lays a table out: its columns as wide as their widest cells,
 // drawn from the room between them — and, when that is wider than the pane,
 // fitted to the pane with each cell's text wrapped inside its own column
-// (#337).
+// (#337) — and how much of that work a revision, a caret move and a frame
+// may cost (#494).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -211,7 +212,174 @@ void main() {
       }
     }
   });
+
+  // The work a table costs, held to the number of measurements rather than to
+  // a wall-clock (a shared runner reads different milliseconds for the same
+  // commit): a revision measures each of the table's cells once, a table that
+  // fits measures no word at all, a caret move measures the row it entered and
+  // the row it left, and a row's pieces are laid out only when a frame draws
+  // it (#494).
+  testWidgets(
+    'a revision measures a fitting table once, a caret move its rows',
+    (tester) async {
+      final theme = await _theme(tester);
+      // A table that fits any pane: three rows of two cells, two words a cell,
+      // the last two rows carrying a bold run. A cell's width is work every
+      // lay-out needs; a word's is work only a fitted table needs — and the
+      // run's marks are what a caret move brings back to be measured.
+      const note =
+          '| head one | second two |\n|---|---|\n'
+          '| alpha **bold** | beta two |\n'
+          '| gamma **wide** | delta two |\n';
+      final buffer = SourceBuffer.fromText(note);
+      const block = Block(kind: BlockKind.table, startLine: 0, endLine: 4);
+      final tables = LiveTables();
+      int? revealed;
+      LiveTableRow? row(int line, {Object? reveal}) => tables.rowOf(
+        line,
+        block,
+        buffer,
+        tokensOf: (line) => _boldTokens(buffer.lineAt(line)),
+        hidden: (line, token) =>
+            token.marker && (reveal == null || line != revealed),
+        styleOf: (token) => null,
+        theme: theme,
+        scaler: TextScaler.noScaling,
+        budget: 2000,
+        reveal: reveal,
+        revealLine: reveal == null ? null : revealed,
+      );
+
+      int count(void Function() body) {
+        LiveTables.measurements = 0;
+        body();
+        return LiveTables.measurements;
+      }
+
+      void askAll({Object? reveal}) {
+        for (var line = 0; line < 4; line++) {
+          row(line, reveal: reveal);
+        }
+      }
+
+      // A revision: one painter a cell, none a word — the table fits.
+      expect(
+        count(askAll),
+        6,
+        reason: 'three rows of two cells, measured once',
+      );
+      // The same revision asks for its lines again: the work stands.
+      expect(count(askAll), 0, reason: 'the same revision measures nothing');
+      final atRest = row(3)!.edges.last;
+
+      // The caret enters the third row: its two cells are measured again, and
+      // the rows at rest are not — they stood measured already.
+      revealed = 2;
+      expect(count(() => askAll(reveal: 'run')), 2, reason: "the caret's row");
+      // The run's marks show on that row, so its cell widens: the row really
+      // was measured again, not merely skipped.
+      expect(
+        row(3, reveal: 'run')!.edges.last,
+        greaterThan(atRest),
+        reason: "the caret's row widens the table",
+      );
+
+      // A second move: the row the caret left, at rest, and the row it entered.
+      revealed = 3;
+      expect(
+        count(() => askAll(reveal: 'run')),
+        2 + 2,
+        reason: 'the row it left and the row it entered',
+      );
+      // Another run on the same row: the reveal changed, so the row is measured
+      // again — its marks stand differently.
+      expect(count(() => askAll(reveal: 'other')), 2, reason: 'the same row');
+      // The caret leaves the table: the row it left is measured at rest, and
+      // nothing else.
+      expect(count(askAll), 2, reason: 'the row the caret left');
+      expect(
+        row(3)!.edges.last,
+        closeTo(atRest, 0.5),
+        reason: 'the table is back as it was',
+      );
+    },
+  );
+
+  testWidgets(
+    "a fitted table measures its words once, a row's pieces when drawn",
+    (tester) async {
+      final theme = await _theme(tester);
+      // A table wider than any phone pane: two long rows of seven words and a
+      // short one, over a two-cell header.
+      const note =
+          '| head | second |\n|---|---|\n'
+          '| aaaaaaa bbbbbbb ccccccc ddddddd eeeeeee fffffff ggggggg'
+          ' | second |\n'
+          '| hhhhhhh iiiiiii jjjjjjj kkkkkkk lllllll mmmmmmm nnnnnnn'
+          ' | third |\n';
+      final buffer = SourceBuffer.fromText(note);
+      const block = Block(kind: BlockKind.table, startLine: 0, endLine: 4);
+      const budget = 320.0;
+      final tables = LiveTables();
+      int? revealed;
+      LiveTableRow? row(int line, {Object? reveal}) => tables.rowOf(
+        line,
+        block,
+        buffer,
+        tokensOf: (line) => const <Token>[],
+        hidden: (line, token) => false,
+        styleOf: (token) => null,
+        theme: theme,
+        scaler: TextScaler.noScaling,
+        budget: budget,
+        reveal: reveal,
+        revealLine: reveal == null ? null : revealed,
+      );
+
+      int count(void Function() body) {
+        LiveTables.measurements = 0;
+        body();
+        return LiveTables.measurements;
+      }
+
+      void askAll({Object? reveal}) {
+        for (var line = 0; line < 4; line++) {
+          row(line, reveal: reveal);
+        }
+      }
+
+      // The table wants more room than the pane, so every cell's widest word is
+      // measured beside the cell itself: six cells and eighteen words.
+      expect(count(askAll), 24, reason: 'six cells and eighteen words, once');
+      expect(count(askAll), 0, reason: 'the same revision measures nothing');
+      // No frame has drawn a row yet: the words stand measured and no piece has
+      // been laid out. A row pays for its pieces when a frame first asks.
+      expect(count(() => row(0)!.wrapped), 2, reason: "the header's two cells");
+      expect(count(() => row(0)!.wrapped), 0, reason: 'kept by the row');
+
+      // The caret enters the fourth row: that row's two cells and eight words
+      // are measured again, the table's own lay-out standing.
+      revealed = 3;
+      expect(
+        count(() => askAll(reveal: 'run')),
+        2 + 8,
+        reason: 'two cells and eight words of one row',
+      );
+      // The caret leaves the table: the row it left, at rest, and nothing else.
+      expect(count(askAll), 2 + 8, reason: 'the row the caret left');
+    },
+  );
 }
+
+/// The tokens of a line's `**bold**` runs: the opening and closing marks —
+/// which a lay-out hides at rest — and the word between them.
+List<Token> _boldTokens(String line) => <Token>[
+  for (final match in RegExp(r'\*\*(\w+)\*\*').allMatches(line)) ...[
+    Token(TokenKind.bold, match.start, match.start + 2, marker: true),
+    Token(TokenKind.bold, match.start + 2, match.end - 2),
+    Token(TokenKind.bold, match.end - 2, match.end, marker: true),
+  ],
+];
 
 /// The markdown theme of a `MaterialApp`, the one the surface is laid out
 /// with.

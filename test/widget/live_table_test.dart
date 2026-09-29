@@ -10,6 +10,8 @@ import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/touch_selection.dart';
 import 'package:niman/src/markdown/render/block_view.dart';
+import 'package:niman/src/markdown/render/live_table_grid.dart';
+import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/markdown_theme.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -22,20 +24,25 @@ const String _note =
     'caret\n\n| a | b |\n|---|---|\n| **one** | two |\n\nafter';
 
 /// Pumps [_note] in `live`, the caret held at [caret] — or left to the view,
-/// with none — and hands back the view.
+/// with none — and hands back the view. [buffer] draws the note in a buffer
+/// of the caller's, so two pumps can share one revision — a caret moved over
+/// the same text, not a new note — and [theme] one theme, so the two share
+/// the styles the table was measured with as well.
 Future<MarkdownSourceViewState> _pump(
   WidgetTester tester,
   int? caret, {
   bool numbers = false,
+  SourceBuffer? buffer,
+  MarkdownTheme? theme,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: Builder(
           builder: (context) => MarkdownSurface(
-            buffer: SourceBuffer.fromText(_note),
+            buffer: buffer ?? SourceBuffer.fromText(_note),
             mode: MarkdownSurfaceMode.live,
-            theme: markdownThemeOf(context),
+            theme: theme ?? markdownThemeOf(context),
             selection: caret == null ? null : SelectionModel.at(caret),
             showLineNumbers: numbers,
           ),
@@ -115,6 +122,23 @@ int _at(int line, String text, [int plus = 0]) =>
 RenderParagraph _row(WidgetTester tester, String text) => tester
     .renderObjectList<RenderParagraph>(find.byType(RichText))
     .firstWhere((p) => p.text.toPlainText().contains(text));
+
+/// How wide the table's grid is: the columns the rows in view were laid out
+/// with, which the caret's own row widens.
+double _tableWidth(WidgetTester tester) =>
+    _grids(tester)
+        .map((row) => row.edges.last)
+        .reduce((most, width) => width > most ? width : most);
+
+List<LiveTableRow> _grids(WidgetTester tester) => tester
+    .widgetList<CustomPaint>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CustomPaint && widget.painter is LiveTableGridPainter,
+      ),
+    )
+    .map((paint) => (paint.painter! as LiveTableGridPainter).row)
+    .toList();
 
 void main() {
   testWidgets('a table that fits the pane is one line, however long its '
@@ -333,6 +357,38 @@ void main() {
       closeTo(restTwo.dx, 0.5),
       reason: 'a cell with no mark showing stays on its column',
     );
+  });
+
+  testWidgets('a caret move measures the row it enters, and nothing else', (
+    tester,
+  ) async {
+    // The work a table costs, at the widget: a reveal change is the caret's
+    // own row showing its run's marks and no other row moving, so that row —
+    // and nothing of the table — is measured again. Pinned to the number of
+    // measurements, not to a wall-clock (#494).
+    tester.view.physicalSize = const Size(1200, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    // One buffer and one theme over both pumps: the caret moves over a text
+    // that was not edited and styles that did not change, so the reveal is
+    // all the second pump brings.
+    final buffer = SourceBuffer.fromText(_note);
+    final rest = await _pump(tester, _at(0, 'caret'), buffer: buffer);
+    final atRest = _tableWidth(tester);
+
+    LiveTables.measurements = 0;
+    await _pump(
+      tester,
+      _at(4, '**one**', 3),
+      buffer: buffer,
+      theme: rest.widget.theme,
+    );
+    // The caret's row's two cells, and none of the rows around it.
+    expect(LiveTables.measurements, 2, reason: "the caret's row alone");
+    // The marks its run shows widen that row's cell, and the table with it:
+    // the row really was measured again, not merely skipped.
+    expect(_tableWidth(tester), greaterThan(atRest));
   });
 
   testWidgets('the delimiter row takes no room with the line numbers on', (
