@@ -175,4 +175,25 @@ void main() {
     // No window title bar on the phone: the system chrome owns that.
     expect(find.byKey(const Key('title-bar')), findsNothing);
   });
+
+  // #490: the caption buttons' hit areas outlived the bar. Narrowing past
+  // the breakpoint disposes the title bar; the runner kept answering from
+  // the last rectangles, so a click at the old right edge closed the
+  // window from under the app bar.
+  testWidgets('narrow: the caption buttons are withdrawn with the bar', (
+    tester,
+  ) async {
+    await pumpShell(tester, const Size(1200, 900));
+    final wide = window.captionButtons.last;
+    expect(wide.close.width, greaterThan(0));
+
+    setSurfaceSize(tester, const Size(390, 844));
+    await settle(tester);
+
+    expect(find.byKey(const Key('title-bar')), findsNothing);
+    final narrow = window.captionButtons.last;
+    expect(narrow.minimize, Rect.zero);
+    expect(narrow.maximize, Rect.zero);
+    expect(narrow.close, Rect.zero);
+  });
 }

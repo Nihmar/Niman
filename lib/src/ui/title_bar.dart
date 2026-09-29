@@ -317,6 +317,19 @@ final class _WindowButtonsState extends State<_WindowButtons> {
     );
   }
 
+  @override
+  void dispose() {
+    // The bar is going away — the narrow layout draws none (#490). A
+    // rectangle left over would keep the runner's hit test answering where
+    // the buttons were, so the window is told the three are nowhere.
+    widget.window.reportCaptionButtons(
+      minimize: Rect.zero,
+      maximize: Rect.zero,
+      close: Rect.zero,
+    );
+    super.dispose();
+  }
+
   /// Hands the window seam the buttons' rectangles, in physical pixels: the
   /// Flutter view's top-left corner is the window's client origin, so the
   /// drawn point scaled by the device pixel ratio is the client point.
