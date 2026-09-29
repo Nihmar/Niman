@@ -872,6 +872,42 @@ void main() {
       await typedInCode(tester, 'x \$[[Note\$ y\n', 9);
     });
 
+    testWidgets('a note whose colours are unread opens none, then does', (
+      tester,
+    ) async {
+      // A long note is read in the background: until it lands its lines have
+      // no tokens, which is "nobody has read it yet" and not "no code here" —
+      // the fence the caret is in was answered as prose (#494).
+      MarkdownSourceViewState.backgroundLines = 2;
+      addTearDown(() => MarkdownSourceViewState.backgroundLines = 50000);
+      // Long enough for the reading to be in the background.
+      final buffer = SourceBuffer.fromText('\n\n\n');
+      final suggester = _library();
+      final state = await pump(tester, buffer, suggester);
+
+      await type(tester, '```bash\n[[Note\n```\n', caret: 14);
+      expect(state.tokensOf(1), isEmpty, reason: 'nobody has read the line');
+      expect(suggester.noteQueries, isEmpty, reason: 'the library was asked');
+      expect(state.isSuggesterShown, isFalse);
+
+      for (var round = 0; round < 50 && state.tokensOf(1).isEmpty; round++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+      expect(state.tokensOf(1), isNotEmpty, reason: 'the reading landed');
+      // Read, the fence is code: still none there.
+      await type(tester, '```bash\n[[Notes\n```\n', caret: 15);
+      expect(suggester.noteQueries, isEmpty);
+      expect(state.isSuggesterShown, isFalse);
+
+      // And a link in prose is the writer's once the line is read.
+      await type(tester, '[[Note\n', caret: 6);
+      expect(state.isSuggesterShown, isTrue);
+      expect(suggester.noteQueries, ['Note']);
+    });
+
     testWidgets('a link after a span is prose still', (tester) async {
       // The caret past a span's last delimiter is outside it, and so is the
       // `[[` the link was read from: the ordinary panel is the writer's.

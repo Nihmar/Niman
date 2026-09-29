@@ -3796,6 +3796,13 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
     // it completed there (#494). Asked of the `[[` read above as well as of
     // the caret: a link opened in a span is the span's, even once the caret
     // has left it, and a caret made in a span completes nothing outside it.
+    //
+    // A line of a long note whose colours are still being read has no tokens
+    // to ask — [_tokensAt] is null, "nobody has read it yet", which [_inCodeAt]
+    // would answer as "no code here" — and its fence state is a scan of the
+    // lines above it: not something to guess at here. No panel opens until
+    // the reading lands; the next keystroke in the link opens it (#494).
+    if (_tokensAt(line) == null) return null;
     if (_inCodeAt(line, at) || _inCodeAt(line, open)) return null;
     final close = text.indexOf(']]', open + 2);
     if (close != -1 && close < at) return null;
