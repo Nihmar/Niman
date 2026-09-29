@@ -122,6 +122,22 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
     }
   }
 
+  /// Closes the library the one way out of a library does (#493): the open
+  /// notes are written and awaited first, and a note that will not save
+  /// keeps the library open and says why.
+  Future<void> _closeLibrary(BuildContext context) async {
+    final failed = await saveBeforeLeaving(unsaved);
+    if (failed != null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.closeSaveFailed)));
+      }
+      return;
+    }
+    await controller.close();
+    onClosed?.call();
+  }
+
   /// Opens the known-library list and switches to whatever is picked
   /// (T-ML-06).
   ///
@@ -208,10 +224,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
               visualDensity: compact ? VisualDensity.compact : null,
               leading: const Icon(Icons.link_off_outlined),
               title: Text(AppStrings.closeLibraryTitle),
-              onTap: () async {
-                await controller.close();
-                onClosed?.call();
-              },
+              onTap: () => _closeLibrary(context),
             ),
           ),
         ],

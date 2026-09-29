@@ -75,13 +75,12 @@ final class _SwitchLibraryScreenState extends State<SwitchLibraryScreen> {
       _busy = true;
       _error = null;
     });
-    try {
-      await widget.unsaved?.saveAll();
-    } on Object catch (error) {
+    final failed = await saveBeforeLeaving(widget.unsaved);
+    if (failed != null) {
       if (mounted) {
         setState(() {
           _busy = false;
-          _error = '$error';
+          _error = '$failed';
         });
       }
       return;

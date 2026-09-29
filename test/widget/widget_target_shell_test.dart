@@ -11,6 +11,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:path/path.dart' as p;
 
@@ -20,11 +21,40 @@ import '../fakes/fake_todo_source.dart';
 import '../fakes/fake_widget_target_service.dart';
 import '../fakes/shell_harness.dart';
 
+/// An open note whose write is the session's, so a test can fail it.
+final class _OpenNote implements UnsavedNote {
+  new(this.session, this.path);
+
+  final FakeLibrarySession session;
+
+  @override
+  final String path;
+
+  @override
+  bool unsaved = true;
+
+  @override
+  Future<void> save() async {
+    await session.saveNote(path, 'edited');
+    unsaved = false;
+  }
+}
+
+final class _SaveFailed implements Exception {
+  const new(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 void main() {
   late FakeLibrarySession controller;
   late FakeShortcutService shortcuts;
   late FakeWidgetTargetService targets;
   late FakeFilePicker filePicker;
+  late UnsavedTracker unsaved;
 
   // Joined, not spelled: the create flow builds the root with
   // `package:path`, which uses '\' on Windows.
@@ -36,6 +66,9 @@ void main() {
     shortcuts = FakeShortcutService();
     targets = FakeWidgetTargetService();
     filePicker = useFakeFilePicker();
+    // Not disposed here: the shell watches it, and the test binding
+    // finalizes the tree after tear-down callbacks.
+    unsaved = UnsavedTracker();
   });
 
   Widget buildApp() {
@@ -44,6 +77,7 @@ void main() {
         librarySessionProvider.overrideWithValue(controller),
         shortcutServiceProvider.overrideWithValue(shortcuts),
         widgetTargetServiceProvider.overrideWithValue(targets),
+        unsavedTrackerProvider.overrideWithValue(unsaved),
         todoSourceFactoryProvider.overrideWithValue(
           (root) => FakeTodoSource(todo: const <String>[]),
         ),
@@ -104,6 +138,24 @@ void main() {
 
     expect(controller.root, other);
     expect(find.text(AppStrings.todoEmptyOpen), findsOneWidget);
+    await close();
+  });
+
+  testWidgets('a target for another library stays when a note will not save', (
+    tester,
+  ) async {
+    // #493: the switch a widget target starts is a way out of the library,
+    // so the open notes are written first; a note that will not save keeps
+    // the library the target was pointing away from.
+    await pumpApp(tester);
+    expect(controller.root, home);
+    unsaved.register(_OpenNote(controller, 'note.md'));
+    controller.saveError = const _SaveFailed('disk full');
+
+    targets.emit(WidgetTarget(kind: WidgetTargetKind.todo, libraryPath: other));
+    await settle(tester);
+
+    expect(controller.root, home, reason: 'the library did not go');
     await close();
   });
 
