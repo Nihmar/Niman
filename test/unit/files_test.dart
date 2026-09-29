@@ -192,6 +192,65 @@ void main() {
     }, skip: caseSkipReason);
   });
 
+  group('isExcludedEntry', () {
+    // The folding flag and the listing are handed in, so the case a
+    // case-sensitive folder on Windows presents — `A.md` and `a.md` side by
+    // side — is decided the same on every host, whatever its own
+    // filesystem can hold.
+    final renamed = p.join('lib', 'A.md');
+
+    test('the entry itself, spelled the same, is free', () {
+      expect(
+        isExcludedEntry(
+          renamed,
+          renamed,
+          foldsCase: true,
+          entryNames: () => const ['A.md', 'a.md'],
+        ),
+        isTrue,
+      );
+    });
+
+    test('another spelling is free when the folder folds case', () {
+      expect(
+        isExcludedEntry(
+          p.join('lib', 'a.md'),
+          renamed,
+          foldsCase: true,
+          entryNames: () => const ['A.md'],
+        ),
+        isTrue,
+      );
+    });
+
+    test('another spelling the folder holds is somebody else', () {
+      // A folder made case-sensitive (WSL, fsutil) on a platform that folds
+      // case: renaming `A.md` to `a` must not pick `a.md` as the entry being
+      // renamed, or the rename replaces the other note.
+      expect(
+        isExcludedEntry(
+          p.join('lib', 'a.md'),
+          renamed,
+          foldsCase: true,
+          entryNames: () => const ['A.md', 'a.md'],
+        ),
+        isFalse,
+      );
+    });
+
+    test('another spelling is somebody else where case is not folded', () {
+      expect(
+        isExcludedEntry(
+          p.join('lib', 'a.md'),
+          renamed,
+          foldsCase: false,
+          entryNames: () => const ['A.md'],
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('uniqueFolderName', () {
     test('keeps the name when unused', () async {
       expect(await uniqueFolderName(tempDir, 'Docs'), 'Docs');

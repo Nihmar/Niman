@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// Suffix added to the target name when writing a temporary file.
@@ -337,30 +338,54 @@ int _utf8Length(int rune) {
 /// Whether [abs] — a candidate name inside [dir] — can only be [exclude], the
 /// entry a rename is moving onto its own name.
 ///
-/// `package:path` folds case on Windows, where an entry has one name however
-/// it is spelled. Apple's filesystems answer for either spelling too, but
-/// nothing in the two strings says so: compared as strings `A.md` and `a.md`
-/// are different paths, so the search never recognises the entry it was told
-/// to leave alone and returns `A_1.md` for a rename that only changes the
-/// case (#354).
+/// Windows' and Apple's filesystems answer for either spelling of a name,
+/// but compared as strings `A.md` and `a.md` are different paths, so the
+/// search would never recognise the entry it was told to leave alone and
+/// would return `A_1.md` for a rename that only changes the case (#354).
 ///
-/// On a case-sensitive volume the two spellings really are two entries, and
-/// there the directory's own listing settles it: a candidate found among the
-/// entries belongs to somebody else, and the collision stands.
-bool _excludedEntry(Directory dir, String abs, String? exclude) {
+/// A folder can be case-sensitive even there (WSL, `fsutil`), and then the
+/// two spellings really are two entries: the directory's own listing settles
+/// it — a candidate found among the entries belongs to somebody else, and
+/// the collision stands. Only the exact spelling is taken without asking,
+/// or the rename would replace the other note.
+bool _excludedEntry(Directory dir, String abs, String? exclude) =>
+    isExcludedEntry(
+      abs,
+      exclude,
+      foldsCase: _caseInsensitivePaths,
+      entryNames: () => dir
+          .listSync(followLinks: false)
+          .map((entry) => p.basename(entry.path)),
+    );
+
+/// The decision [_excludedEntry] makes, with what it asks the platform and
+/// the directory handed in: whether its filesystems fold case, and the names
+/// the directory holds.
+@visibleForTesting
+bool isExcludedEntry(
+  String abs,
+  String? exclude, {
+  required bool foldsCase,
+  required Iterable<String> Function() entryNames,
+}) {
   if (exclude == null) {
     return false;
   }
-  if (p.equals(abs, exclude)) {
-    return true;
-  }
-  if (!_caseInsensitivePaths || abs.toLowerCase() != exclude.toLowerCase()) {
+  // The folder is compared as a path (a drive letter's case, a `.` segment),
+  // the name as written: `p.equals` folds case on Windows, and answering
+  // there would skip the listing for exactly the spelling it has to settle.
+  if (!p.equals(p.dirname(abs), p.dirname(exclude))) {
     return false;
   }
   final candidate = p.basename(abs);
-  return !dir
-      .listSync(followLinks: false)
-      .any((entry) => p.basename(entry.path) == candidate);
+  final excluded = p.basename(exclude);
+  if (candidate == excluded) {
+    return true;
+  }
+  if (!foldsCase || candidate.toLowerCase() != excluded.toLowerCase()) {
+    return false;
+  }
+  return !entryNames().contains(candidate);
 }
 
 /// Returns a collision-free file name for [base] with extension [ext]
