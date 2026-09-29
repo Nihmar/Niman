@@ -100,6 +100,7 @@ final class LibraryController implements LibrarySession {
     this.rescanInterval = defaultRescanInterval,
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
+    this.watchSource,
     SyncSecretStore? syncSecrets,
     this.syncNetwork,
   }) : _searchDbFactory = searchDbFactory ?? indexDbFactory,
@@ -154,6 +155,10 @@ final class LibraryController implements LibrarySession {
 
   /// Debounce window for the file watcher.
   final Duration watcherDebounce;
+
+  /// Where the file watcher gets its raw changes; null is the OS watch.
+  /// Tests inject a stream they drive, to end it at a moment they choose.
+  final WatchSource? watchSource;
 
   /// Where each library's WebDAV password lives (M5); the OS secure
   /// storage unless a test injects another.
@@ -539,7 +544,11 @@ final class LibraryController implements LibrarySession {
         _indexProgress = null;
       }
     }
-    final watcher = FileWatcher(abs, debounce: watcherDebounce);
+    final watcher = FileWatcher(
+      abs,
+      debounce: watcherDebounce,
+      source: watchSource,
+    );
     watcher.events.listen(_onWatchBatch);
     await watcher.start();
     // Held so [_teardown] can stop it: an unheld watcher keeps its
@@ -1497,6 +1506,15 @@ final class LibraryController implements LibrarySession {
     final root = _root;
     if (indexer == null || root == null || phase != LibraryPhase.ready) {
       return;
+    }
+    if (batch.missedChanges) {
+      // The watch was down for a while: what changed meanwhile left no
+      // event, and waiting for the periodic rescan leaves a note saved
+      // then out of the index for minutes. The root itself cannot be
+      // resynced (`Indexer.resync` passes over it), so it is walked whole.
+      _log.info('watch batch: the watch restarted, walking the library');
+      await _safeRescan(root);
+      if (phase != LibraryPhase.ready) return;
     }
     try {
       for (final dir in batch.resyncDirs) {

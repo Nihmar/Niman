@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -6,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
@@ -365,6 +367,42 @@ void main() {
     await controller.rescanNow();
     expect(controller.revision, quiet);
 
+    await controller.close();
+    await controller.dispose();
+  });
+
+  test('a note saved while the watch restarts is indexed at once', () async {
+    // The watch is fed by the test: its first stream ends, as an inotify
+    // limit or a FUSE hiccup ends the OS one, and the next stays open. The
+    // periodic rescan is an hour away, so only the watcher's own word can
+    // bring the note in.
+    // Indexed once already, so this open reads the notes before it returns
+    // instead of in a background pass that would find the note by itself.
+    final earlier = makeController();
+    await earlier.open(root.path, create: false);
+    await earlier.close();
+    await earlier.dispose();
+
+    final ended = StreamController<WatchChange>();
+    final next = StreamController<WatchChange>();
+    addTearDown(next.close);
+    var opened = 0;
+    final controller = LibraryController(
+      appDb,
+      indexDbFactory: indexDb,
+      rescanInterval: const Duration(hours: 1),
+      watchSource: (_) => opened++ == 0 ? ended.stream : next.stream,
+    );
+    await controller.open(root.path, create: false);
+
+    // Saved while nothing watches: no event will ever name it.
+    File(p.join(root.path, 'b.md')).writeAsStringSync('b');
+    await ended.close();
+
+    await expectConverged(
+      () async => (await names(controller)).contains('b.md'),
+    );
+    expect(opened, 2);
     await controller.close();
     await controller.dispose();
   });

@@ -8,7 +8,11 @@ import 'package:path/path.dart' as p;
 /// A batch of filesystem changes delivered by a [FileWatcher].
 final class WatchBatch {
   /// Creates a batch of changed paths.
-  const new({required this.paths, required this.resyncDirs});
+  const new({
+    required this.paths,
+    required this.resyncDirs,
+    this.missedChanges = false,
+  });
 
   /// Changed absolute paths; for renames this is the OLD path (the new
   /// path is unknown to the OS event).
@@ -17,6 +21,11 @@ final class WatchBatch {
   /// Directories to resync fully, as absolute paths: parents of rename
   /// events, whose new path is not part of the event stream.
   final List<String> resyncDirs;
+
+  /// Whether the watch was down for a while — its source stream ended and
+  /// was resubscribed to — so changes made meanwhile left no event, and
+  /// only a walk of the whole library finds them.
+  final bool missedChanges;
 }
 
 /// One raw change, as [FileWatcher]'s coalescing sees it.
@@ -62,7 +71,9 @@ typedef WatchSource = Stream<WatchChange> Function(String root);
 ///
 /// A source stream that *ends* — an inotify limit, a FUSE hiccup, the
 /// directory going away — is resubscribed to, with a backoff, so the watch
-/// outlives one stream; a burst larger than the pending caps ships as
+/// outlives one stream, and a batch flagged [WatchBatch.missedChanges]
+/// ships as soon as the new one is in place; a burst larger than the pending
+/// caps ships as
 /// several batches instead of growing one unbounded list.
 final class FileWatcher {
   /// Creates a watcher for [root] with the given [debounce] window;
@@ -114,6 +125,10 @@ final class FileWatcher {
       StreamController<WatchBatch>.broadcast();
   final Set<String> _paths = <String>{};
   final Set<String> _resyncDirs = <String>{};
+
+  /// Whether the pending batch reports a gap in the watch
+  /// ([WatchBatch.missedChanges]).
+  bool _missedChanges = false;
 
   /// Cancelled in [stop]; the lint cannot see the cross-method lifecycle.
   // ignore: cancel_subscriptions
@@ -219,6 +234,11 @@ final class FileWatcher {
       return;
     }
     _listen(stream);
+    // Nothing watched between the end and this subscription, so a change
+    // made then left no event. Said now, once the new watch is in place:
+    // whatever the walk this asks for misses, the new watch sees.
+    _missedChanges = true;
+    _flush();
   }
 
   void _onChange(WatchChange change) {
@@ -275,9 +295,11 @@ final class FileWatcher {
     final batch = WatchBatch(
       paths: _paths.toList(),
       resyncDirs: _resyncDirs.toList(),
+      missedChanges: _missedChanges,
     );
     _paths.clear();
     _resyncDirs.clear();
+    _missedChanges = false;
     _controller.add(batch);
   }
 
