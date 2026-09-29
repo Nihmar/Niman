@@ -92,6 +92,21 @@ void main() {
     expect((loaded as NoteReadFailure).notText, isTrue);
   });
 
+  test(
+    'a note with a single U+0000 is refused by both readers (#496)',
+    () async {
+      // A third of the file is NUL — the share the binary rule draws the line
+      // at — so both the editor loader and the reload path refuse it, the
+      // same answer, rather than one taking it and the other not.
+      final file = File(p.join(dir.path, 'nul.md'))
+        ..writeAsBytesSync(<int>[0x61, 0x00, 0x62]);
+      final loaded = await loadNote(file.path);
+      expect(loaded, isA<NoteReadFailure>());
+      expect((loaded as NoteReadFailure).notText, isTrue);
+      expect(await readNoteText(file.path), isA<NoteReadFailure>());
+    },
+  );
+
   test('line endings are made LF, and an LF note is left as it is', () {
     expect(normalizedLineEndings('a\r\nb\rc\n'), 'a\nb\nc\n');
     const lf = 'a\nb\n';

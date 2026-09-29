@@ -86,5 +86,28 @@ void main() {
       // other, not a sign of a binary file.
       expect(looksBinary(utf8.encode('�' * 20)), isFalse);
     });
+
+    test('a valid UTF-8 note takes one native decode, no byte walk (#496)', () {
+      // The two Dart passes over the bytes — a NUL scan and a UTF-8
+      // sequence walk — ran before the native decode on every note.
+      final decodes = noteBytesNativeDecodes;
+      final walks = noteBytesWalks;
+      expect(looksBinary(utf8.encode('città — 日本 🎉\n')), isFalse);
+      expect(noteBytesNativeDecodes - decodes, 1);
+      expect(noteBytesWalks - walks, 0);
+    });
+
+    test('NUL bytes are weighed by their share, not refused outright', () {
+      // A third of the file: binary, and so a UTF-16 file it reads.
+      expect(looksBinary(List<int>.filled(64, 0)), isTrue);
+      // One stray NUL in a note that is otherwise text: read as text, the
+      // same answer the index, replace and export give it.
+      final stray = <int>[
+        ...utf8.encode('a long note, '),
+        0,
+        ...utf8.encode('and then more text\n'),
+      ];
+      expect(looksBinary(stray), isFalse);
+    });
   });
 }
