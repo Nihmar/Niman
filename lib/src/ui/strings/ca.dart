@@ -1666,6 +1666,11 @@ final class CatalanStrings extends Strings {
       'text seleccionable.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'El motor de PDF ha fallat ($reason): la nota s’ha dibuixat '
+      'com una imatge.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF com a imatge';
 
   @override

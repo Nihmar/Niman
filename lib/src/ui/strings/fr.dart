@@ -1673,6 +1673,11 @@ final class FrenchStrings extends Strings {
       'sélectionnable.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Le moteur PDF a échoué ($reason) : la note a été dessinée '
+      'comme une image.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF en image';
 
   @override

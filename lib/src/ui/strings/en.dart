@@ -1622,6 +1622,10 @@ final class EnglishStrings extends Strings {
   String get exportPdfNoEngineTitle => 'PDF as a picture';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'The PDF engine failed ($reason): the note was drawn as a picture.';
+
+  @override
   String get exportPdfNoEngine =>
       'No browser engine was found on this machine. The note is '
       'drawn as a picture of its pages: the text can be neither '

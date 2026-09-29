@@ -1012,6 +1012,8 @@ final class AppStrings {
   static String get exportEpubNoFrontmatter => _s.exportEpubNoFrontmatter;
   static String get exportAnyway => _s.exportAnyway;
   static String get exportPdfNoEngineTitle => _s.exportPdfNoEngineTitle;
+  static String exportPdfEngineFailed(Object reason) =>
+      _s.exportPdfEngineFailed(reason);
   static String get exportPdfNoEngine => _s.exportPdfNoEngine;
   static String get exportPdfPicture => _s.exportPdfPicture;
   static String exportDone(String place) => _s.exportDone(place);

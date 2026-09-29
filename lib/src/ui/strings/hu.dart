@@ -1642,6 +1642,10 @@ final class HungarianStrings extends Strings {
       'A PDF az oldalak képe; választható szöveghez telepítsd a böngészőt.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'A PDF-motor hibázott ($reason): a jegyzet képként készült el.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF képként';
 
   @override

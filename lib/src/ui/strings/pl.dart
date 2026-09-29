@@ -1655,6 +1655,11 @@ final class PolishStrings extends Strings {
       'zaznaczać.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Silnik PDF zawiódł ($reason): notatka została narysowana jako '
+      'obraz.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF jako obraz';
 
   @override

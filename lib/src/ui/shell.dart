@@ -337,7 +337,16 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                   // The engine search is a process on Windows: looked up when
                   // a folder export actually asks for it, never at startup
                   // (L4), and awaited before the chooser can offer PDF (L5).
-                  pdfEngineLookup: () => ref.read(pdfEngineProvider.future),
+                  pdfEngineLookup: () async {
+                    final engine = await ref.read(pdfEngineProvider.future);
+                    // A "no engine" is not kept for the session: a slow
+                    // first lookup — a `reg.exe` the antivirus was scanning
+                    // right after an install — is not a machine without a
+                    // browser, and the next export deserves a fresh answer
+                    // (device report, 2026-09-29).
+                    if (engine == null) ref.invalidate(pdfEngineProvider);
+                    return engine;
+                  },
                   // A book's metadata source, checked before the export starts
                   // (E3); widget tests answer for their library root.
                   epubMetadataProblem: ref.read(epubMetadataProblemProvider),
@@ -3207,6 +3216,10 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
       final title = note == null ? p.basename(path) : displayNameOf(note);
       final ExportPayload payload;
       var selectable = true;
+      // Why a found engine could not print, when it could not: the note was
+      // drawn, and the user is told rather than left with pictures and no
+      // reason (device report, 2026-09-29).
+      String? engineFailure;
       if (format == ExportFormat.markdown) {
         // The file's own bytes: `readNote` would hand back a leniently
         // decoded text, and re-encoding that is not the file on disk.
@@ -3277,6 +3290,7 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
           );
           payload = printed.payload;
           selectable = printed.selectable;
+          engineFailure = printed.engineFailure;
         } on PdfExportCancelled {
           // The dialog closed itself; a cancel says nothing.
           return;
@@ -3354,7 +3368,11 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
         return;
       }
       if (place == null || !mounted) return;
-      _showExportDone(place, picture: !selectable);
+      _showExportDone(
+        place,
+        picture: !selectable,
+        engineFailure: engineFailure,
+      );
     });
   }
 
@@ -3547,16 +3565,23 @@ final class _LibraryShellState extends ConsumerState<_LibraryShell>
 
   /// Says where an export landed, with a way to its folder where the OS
   /// can be given one (a desktop; on Android the picker already knows),
-  /// and — for a PDF drawn here — that it is a picture of the pages.
-  void _showExportDone(String place, {bool picture = false}) {
+  /// and — for a PDF drawn here — that it is a picture of the pages, with
+  /// [engineFailure] saying why when the engine was there and failed.
+  void _showExportDone(
+    String place, {
+    bool picture = false,
+    String? engineFailure,
+  }) {
+    final lines = <String>[AppStrings.exportDone(place)];
+    if (picture) {
+      lines.add(AppStrings.exportPdfPicture);
+      if (engineFailure != null) {
+        lines.add(AppStrings.exportPdfEngineFailed(engineFailure));
+      }
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          picture
-              ? '${AppStrings.exportDone(place)}\n'
-                    '${AppStrings.exportPdfPicture}'
-              : AppStrings.exportDone(place),
-        ),
+        content: Text(lines.join('\n')),
         action: supportsTreeContextActions
             ? SnackBarAction(
                 label: AppStrings.openInFileManager,

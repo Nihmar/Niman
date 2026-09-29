@@ -246,8 +246,11 @@ void main() {
         onProgress: (report) => stages.add(report.stage),
       ),
     );
-    // The PDF is a picture of the pages, and the caller is told so.
+    // The PDF is a picture of the pages, and the caller is told so — and
+    // told why, so a failed engine is said out loud instead of handing
+    // over pictures with no reason (device report, 2026-09-29).
     expect(result!.selectable, isFalse);
+    expect(result.engineFailure, 'the engine exited with 2');
     expect(latin1.decode(result.payload.bytes.sublist(0, 8)), '%PDF-1.4');
     // The failing engine's drawing reports like the no-engine one's: without
     // them the dialog sat on the indeterminate printing bar (P2).

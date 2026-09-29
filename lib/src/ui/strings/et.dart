@@ -1614,6 +1614,10 @@ final class EstonianStrings extends Strings {
       'PDF on lehekülgede pilt; valitava teksti saamiseks paigalda brauseri.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF-mootor ebaõnnestus ($reason): märge joonistati pildina.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF pildina';
 
   @override

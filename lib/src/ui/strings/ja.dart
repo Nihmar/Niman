@@ -1528,6 +1528,10 @@ final class JapaneseStrings extends Strings {
   String get exportPdfPicture => 'PDF はページの画像です。ブラウザーをインストールするとテキストを選択できます。';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF エンジンが失敗しました（$reason）: ノートは画像として描画されました。';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF を画像として';
 
   @override

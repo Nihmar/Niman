@@ -1632,6 +1632,11 @@ final class CroatianStrings extends Strings {
       'označiti.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF motor nije uspio ($reason): bilješka je nacrtana kao '
+      'slika.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF kao slika';
 
   @override

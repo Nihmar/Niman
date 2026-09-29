@@ -1644,6 +1644,11 @@ final class PortugueseStrings extends Strings {
       'selecionável.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'O motor de PDF falhou ($reason): a nota foi desenhada como '
+      'imagem.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF como imagem';
 
   @override

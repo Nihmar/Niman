@@ -1649,6 +1649,11 @@ final class GalicianStrings extends Strings {
       'seleccionable.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'O motor de PDF fallou ($reason): a nota debuxouse como unha '
+      'imaxe.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF como imaxe';
 
   @override

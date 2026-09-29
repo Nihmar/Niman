@@ -812,6 +812,11 @@ abstract base class Strings {
   /// written is a picture of the pages, drawn here.
   String get exportPdfNoEngineTitle;
 
+  /// Why the engine could not print, when it was found and failed: the
+  /// note came out as a picture of its pages, and this says why (device
+  /// report, 2026-09-29 — the failure used to be silent).
+  String exportPdfEngineFailed(Object reason);
+
   /// The dialog's message: drawn page by page, with no text to select or
   /// search, and slower on a long note.
   String get exportPdfNoEngine;

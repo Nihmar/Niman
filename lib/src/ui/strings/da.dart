@@ -1627,6 +1627,11 @@ final class DanishStrings extends Strings {
       'markérbar tekst.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF-motoren fejlede ($reason): noten blev tegnet som et '
+      'billede.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF som billede';
 
   @override

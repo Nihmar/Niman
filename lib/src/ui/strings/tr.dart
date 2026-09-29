@@ -1619,6 +1619,11 @@ final class TurkishStrings extends Strings {
       'PDF, sayfaların bir resmidir; seçilebilir metin için tarayıcı kurun.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF motoru başarısız oldu ($reason): not bir görüntü olarak '
+      'çizildi.';
+
+  @override
   String get exportPdfNoEngineTitle => 'Görsel olarak PDF';
 
   @override

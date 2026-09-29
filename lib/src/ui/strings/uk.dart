@@ -1639,6 +1639,11 @@ final class UkrainianStrings extends Strings {
       'було виділяти.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Рушій PDF не впорався ($reason): нотатку намальовано як '
+      'зображення.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF як зображення';
 
   @override

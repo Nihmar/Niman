@@ -32,9 +32,17 @@ final class NoPdfEngine implements Exception {
   String toString() => 'No PDF engine was found';
 }
 
-/// A note's printed PDF: the file, and whether its text can be selected
-/// (a browser printed it) or it is a picture of the pages.
-typedef PdfExport = ({ExportPayload payload, bool selectable});
+/// A note's printed PDF: the file, whether its text can be selected (a
+/// browser printed it) or it is a picture of the pages, and — when the
+/// engine was found and failed — why, so the caller can say it rather than
+/// hand over pictures in silence (device report, 2026-09-29). Null when the
+/// engine printed, and when there was no engine at all: that case the
+/// caller asked about before the export.
+typedef PdfExport = ({
+  ExportPayload payload,
+  bool selectable,
+  String? engineFailure,
+});
 
 /// Hears what a running [exportNotePdf] is doing.
 typedef PdfProgressListener = void Function(PdfExportProgress progress);
@@ -68,6 +76,7 @@ Future<PdfExport> exportNotePdf({
   // the parse, the highlighting — is never built.
   if (!await chosen.canPrint) {
     return await _draw(
+      engineFailure: null,
       path: path,
       text: text,
       root: root,
@@ -101,10 +110,12 @@ Future<PdfExport> exportNotePdf({
         return (
           payload: _payload(path, await File(pdfPath).readAsBytes()),
           selectable: true,
+          engineFailure: null,
         );
       case PdfNoEngine():
         _log.warning('no PDF engine: drawing the note instead');
         return await _draw(
+          engineFailure: null,
           path: path,
           text: text,
           root: root,
@@ -117,6 +128,9 @@ Future<PdfExport> exportNotePdf({
       case PdfFailed(:final message):
         _log.warning('the PDF engine failed ($message): drawing the note');
         return await _draw(
+          // The engine was there and could not print: the caller says so
+          // rather than handing over a picture of the pages in silence.
+          engineFailure: message,
           path: path,
           text: text,
           root: root,
@@ -150,6 +164,7 @@ Future<PdfExport> _draw({
   required LinkSource? linkSource,
   required MarkdownTheme? theme,
   required MathCache? mathCache,
+  required String? engineFailure,
   PdfProgressListener? onProgress,
   bool Function()? isCancelled,
 }) async {
@@ -179,7 +194,11 @@ Future<PdfExport> _draw({
           ),
     isCancelled: isCancelled,
   );
-  return (payload: _payload(path, drawn), selectable: false);
+  return (
+    payload: _payload(path, drawn),
+    selectable: false,
+    engineFailure: engineFailure,
+  );
 }
 
 ExportPayload _payload(String path, Uint8List bytes) => (

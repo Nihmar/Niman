@@ -1660,6 +1660,11 @@ final class GermanStrings extends Strings {
       'auswählbar.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'Die PDF-Engine ist fehlgeschlagen ($reason): die Notiz wurde '
+      'als Bild gezeichnet.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF als Bild';
 
   @override

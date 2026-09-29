@@ -1621,6 +1621,10 @@ final class NorwegianStrings extends Strings {
       'PDF-en er et bilde av sidene; installer en nettleser for valgbar tekst.';
 
   @override
+  String exportPdfEngineFailed(Object reason) =>
+      'PDF-motoren feilet ($reason): notatet ble tegnet som et bilde.';
+
+  @override
   String get exportPdfNoEngineTitle => 'PDF som bilde';
 
   @override
