@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     db = IndexDatabase(NativeDatabase.memory());
-    suggester = IndexWikilinkSuggester(db, readNote: (_) async => null);
+    suggester = IndexWikilinkSuggester(db, readHeadings: (_) async => null);
   });
   tearDown(() => db.close());
 
