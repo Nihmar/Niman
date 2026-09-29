@@ -249,6 +249,9 @@ final class LocalReminderService implements ReminderService {
       'battery ${batteryExempt ? 'unrestricted' : 'optimized'}, '
       'background ${backgroundRestricted ? 'restricted' : 'allowed'}',
     );
+    // Before anything reads or schedules: an edited task has to read as
+    // the one already shown.
+    _backend.noteWanted(wanted.values);
     await _logOverdue(
       wanted,
       exact: exact,

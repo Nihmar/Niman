@@ -90,4 +90,7 @@ in the log, saying what happened to it:
   slept through it) or `NOT FIRED` (Niman was not running at its time).
   A desktop reminder needs Niman running, in the tray if the window is
   closed; one that came due while it was closed is shown on the next
-  run, as long as it is still within the hour it stays wanted.
+  run, as long as it is still within the hour it stays wanted. A reminder
+  is shown once: editing the task's text after it showed does not show it
+  again, while a second task due at the same minute is a reminder of its own
+  and is shown.

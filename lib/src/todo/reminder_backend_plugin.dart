@@ -188,6 +188,10 @@ final class PluginReminderBackend implements ReminderBackend {
     return pending.map((request) => request.id).toList()..sort();
   }
 
+  /// Nothing to carry: the OS holds the alarms, and delivers them once.
+  @override
+  void noteWanted(Iterable<TodoReminder> wanted) {}
+
   @override
   Future<void> cancel(int id) => _plugin.cancel(id: id);
 

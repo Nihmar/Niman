@@ -18,6 +18,7 @@ import 'dart:async';
 
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/desktop_notifier.dart';
+import 'package:niman/src/todo/desktop_shown_log.dart';
 import 'package:niman/src/todo/reminder_backend.dart';
 import 'package:niman/src/todo/todo_reminder.dart';
 
@@ -32,13 +33,8 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// Armed timers by reminder id; the pending map the service reads back.
   final Map<int, Timer> _armed = {};
 
-  /// What each reminder fired for in this run, and when it did, by the
-  /// moment it was due (#42, #497): the moment is what identifies the
-  /// firing, because an edit to the task — its text, or `due:`, both part
-  /// of the description the id hashes — gives it a new id while its `rem:`
-  /// stands, and the same moment must not be shown twice. The id the task
-  /// had when it fired is kept beside the moment for the log.
-  final Map<DateTime, ({int id, DateTime at})> _fired = {};
+  /// What this run has shown, by task and moment (#42, #497).
+  final DesktopShownLog _shown = DesktopShownLog();
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
@@ -72,6 +68,9 @@ final class DesktopReminderBackend implements ReminderBackend {
   Future<List<int>> pendingIds() async => _armed.keys.toList()..sort();
 
   @override
+  void noteWanted(Iterable<TodoReminder> wanted) => _shown.reconcile(wanted);
+
+  @override
   Future<void> cancel(int id) async {
     _armed.remove(id)?.cancel();
   }
@@ -84,14 +83,13 @@ final class DesktopReminderBackend implements ReminderBackend {
     _armed.remove(reminder.id)?.cancel();
     // Delivered already: the reminder stays wanted for `reminderGrace` past
     // its moment, so every reconcile in that window — a todo edit, a focus
-    // regain — schedules it again, and a moment that was shown is not
-    // shown twice. An edit gives the task a new id but not a new moment,
-    // so the moment is what the record is kept by. A new moment is a new
-    // reminder, and it fires.
-    final shown = _fired[reminder.when];
-    if (shown != null) {
+    // regain — schedules it again, and one that was shown is not shown
+    // twice. What "it" is — this task at this moment, surviving an edit of
+    // its text — is [DesktopShownLog]'s rule. A new moment, or another task
+    // at the same one, is a new reminder, and it fires.
+    if (_shown.isShown(reminder)) {
       _log.info(
-        'todo reminders: ${reminder.id} already shown as ${shown.id} for '
+        'todo reminders: ${reminder.id} already shown for '
         '${reminder.when.toIso8601String()}, not shown again',
       );
       return;
@@ -121,7 +119,7 @@ final class DesktopReminderBackend implements ReminderBackend {
   Future<void> _show(TodoReminder reminder) async {
     try {
       await _notifier.show(reminder);
-      _fired[reminder.when] = (id: reminder.id, at: DateTime.now());
+      _shown.record(reminder, DateTime.now());
       _log.info('todo reminders: fired ${reminder.id} ${reminder.title}');
     } on Object catch (error) {
       _log.warning(
@@ -146,9 +144,9 @@ final class DesktopReminderBackend implements ReminderBackend {
       return 'timer STILL ARMED past its time: the machine slept through '
           'it, or the process stalled';
     }
-    final fired = _fired[reminder.when];
-    if (fired != null) {
-      return 'timer fired ${_late(fired.at.difference(reminder.when))} late';
+    final firedAt = _shown.shownAt(reminder);
+    if (firedAt != null) {
+      return 'timer fired ${_late(firedAt.difference(reminder.when))} late';
     }
     return 'NOT FIRED: no timer in this run, Niman was not running at its '
         'time';

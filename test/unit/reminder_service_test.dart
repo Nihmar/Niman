@@ -377,6 +377,79 @@ void main() {
       expect(notifier.shown.map((r) => r.id), [7, 7]);
       await service.dispose();
     });
+
+    // #497. The record identifies "this task at this moment": an id that
+    // is new at a shown moment is the same task only when a shown id of
+    // that moment has left the set (the task was rewritten); otherwise it
+    // is another task, and it is shown.
+    group('a moment shown once is told apart by task', () {
+      late FakeDesktopNotifier notifier;
+      late LocalReminderService service;
+      late DateTime moment;
+
+      setUp(() {
+        notifier = FakeDesktopNotifier();
+        service = LocalReminderService(
+          backend: DesktopReminderBackend(notifier: notifier),
+          settings: settings,
+          clock: DateTime.now,
+        );
+        moment = DateTime.now().subtract(const Duration(minutes: 5));
+      });
+
+      tearDown(() => service.dispose());
+
+      TodoReminder task(int id) =>
+          TodoReminder(id: id, title: 'task $id', body: 'body', when: moment);
+
+      Future<void> reconcileAndSettle(List<TodoReminder> reminders) async {
+        await service.reconcile(wanted(reminders));
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+
+      test('editing a shown task does not show it again', () async {
+        await reconcileAndSettle([task(1)]);
+        expect(notifier.shown.map((r) => r.id), [1]);
+
+        // The text was fixed: id 1 is gone, id 2 stands at the same moment.
+        await reconcileAndSettle([task(2)]);
+        await reconcileAndSettle([task(2)]);
+        expect(notifier.shown.map((r) => r.id), [1]);
+
+        // And it is the same task from then on: edited again, still once.
+        await reconcileAndSettle([task(3)]);
+        expect(notifier.shown.map((r) => r.id), [1]);
+      });
+
+      test('a second task at a shown moment is shown', () async {
+        await reconcileAndSettle([task(1)]);
+        expect(notifier.shown.map((r) => r.id), [1]);
+
+        // Task 1 is still there: 2 is another task due at the same minute.
+        await reconcileAndSettle([task(1), task(2)]);
+        expect(notifier.shown.map((r) => r.id), [1, 2]);
+
+        // Neither shows again.
+        await reconcileAndSettle([task(1), task(2)]);
+        expect(notifier.shown.map((r) => r.id), [1, 2]);
+      });
+
+      test('two tasks edited at once are two edits, not two shows', () async {
+        await reconcileAndSettle([task(1), task(2)]);
+        expect(notifier.shown.map((r) => r.id), [1, 2]);
+
+        await reconcileAndSettle([task(3), task(4)]);
+        expect(notifier.shown.map((r) => r.id), [1, 2]);
+      });
+
+      test('a task added after another was deleted is shown', () async {
+        await reconcileAndSettle([task(1)]);
+        await reconcileAndSettle(const []);
+
+        await reconcileAndSettle([task(2)]);
+        expect(notifier.shown.map((r) => r.id), [1, 2]);
+      });
+    });
   });
 
   // T-RL-01: the user reports reminders arriving minutes late, and

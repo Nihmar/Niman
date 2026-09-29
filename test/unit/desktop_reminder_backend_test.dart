@@ -109,7 +109,8 @@ void main() {
   // #497. A firing is identified by its moment and by the task: editing
   // the text — or moving `due:`, which is part of the description the id
   // hashes — gives the task a new id while its `rem:` stands, and the
-  // reminder is already shown for that moment.
+  // reminder is already shown for that moment. Another task at that moment
+  // is shown (see reminder_service_test.dart).
   test(
     'an edit to the task does not show it again for the same moment',
     () async {
@@ -123,14 +124,20 @@ void main() {
 
       // At 10:05 the user fixes a typo, or moves `due:`: a new id, the same
       // moment, still inside the grace hour.
-      await backend.schedule(
-        TodoReminder(id: 2, title: 'Call Bob today', body: 'body', when: when),
-        exact: true,
+      final edited = TodoReminder(
+        id: 2,
+        title: 'Call Bob today',
+        body: 'body',
+        when: when,
       );
+      // The service says what it wants before it schedules: id 1 has left
+      // the set, so id 2 is the same task, rewritten.
+      backend.noteWanted([edited]);
+      await backend.schedule(edited, exact: true);
       await Future<void>.delayed(const Duration(milliseconds: 30));
       expect(notifier.shown.map((posted) => posted.id), [
         1,
-      ], reason: 'the moment was already shown');
+      ], reason: 'the task was already shown for this moment');
     },
   );
 
