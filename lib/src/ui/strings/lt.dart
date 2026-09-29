@@ -1830,7 +1830,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Ištrinti nevildinamai';
   @override
-  String get trashActionFailed => 'Nepavyko atkurti ar ištrinti užrašo';
+  String get trashActionFailed => 'Nepavyko atkurti ar ištrinti pastabos';
   @override
   String get trashEmptyFailed => 'Nepavyko išvalyti šiukšlinės';
 
@@ -1963,8 +1963,8 @@ final class LithuanianStrings extends Strings {
       count == 1 ? '1 pastaboje' : '$count pastabose';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 užrašo nepavyko įrašyti)'
-      : ' ($count užrašų nepavyko įrašyti)';
+      ? ' (1 pastabos nepavyko įrašyti)'
+      : ' ($count pastabų nepavyko įrašyti)';
 
   // About (issue #80).
   @override

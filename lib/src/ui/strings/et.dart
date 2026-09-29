@@ -1934,7 +1934,7 @@ final class EstonianStrings extends Strings {
   String replaceScopeNote(String note) => 'failis $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? '1 märkmes' : '$count märkmetes';
+      count == 1 ? '1 märkes' : '$count märkides';
   @override
   String replaceWriteFailed(int count) => count == 1
       ? ' (1 märget ei õnnestunud kirjutada)'

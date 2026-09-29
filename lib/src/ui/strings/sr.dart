@@ -1837,7 +1837,7 @@ final class SerbianStrings extends Strings {
   @override
   String get trashActionFailed => 'Белешка није могла да се врати ни избрише';
   @override
-  String get trashEmptyFailed => 'Корпа није могла да се испразни';
+  String get trashEmptyFailed => 'Кош није могао да се испразни';
 
   // The open/create library screen.
   @override
@@ -1969,7 +1969,7 @@ final class SerbianStrings extends Strings {
   @override
   String replaceWriteFailed(int count) => count == 1
       ? ' (1 белешка није записана)'
-      : ' ($count бележака није записано)';
+      : ' ($count белешака није записано)';
 
   // About (issue #80).
   @override

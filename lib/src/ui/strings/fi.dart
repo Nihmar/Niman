@@ -1845,7 +1845,7 @@ final class FinnishStrings extends Strings {
   String get trashActionFailed =>
       'Muistiinpanoa ei voitu palauttaa eikä poistaa';
   @override
-  String get trashEmptyFailed => 'Roskakoria ei voitu tyhjentää';
+  String get trashEmptyFailed => 'Koria ei voitu tyhjentää';
 
   // The open/create library screen.
   @override

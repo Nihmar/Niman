@@ -1831,7 +1831,7 @@ final class IcelandicStrings extends Strings {
   String get trashActionFailed =>
       'Ekki tókst að endurheimta eða eyða minnisblaðinu';
   @override
-  String get trashEmptyFailed => 'Ekki tókst að tæma ruslið';
+  String get trashEmptyFailed => 'Ekki tókst að tæma korpuna';
 
   // The open/create library screen.
   @override

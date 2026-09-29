@@ -327,7 +327,7 @@ final class GermanStrings extends Strings {
   String get sourceFontSubtitle =>
       'Die Schriftart der Quelltextansicht; die Vorschau behält die der Notiz';
   @override
-  String get sourceFontMonospace => 'Serifenlos';
+  String get sourceFontMonospace => 'Festbreite';
   @override
   String get sourceFontSansSerif => 'Serifenlos';
   @override

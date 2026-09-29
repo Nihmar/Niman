@@ -1893,7 +1893,7 @@ final class GreekStrings extends Strings {
   String get trashActionFailed =>
       'Δεν ήταν δυνατή η επαναφορά ή η διαγραφή της σημείωσης';
   @override
-  String get trashEmptyFailed => 'Δεν ήταν δυνατό το άδειασμα του κάδου';
+  String get trashEmptyFailed => 'Δεν ήταν δυνατό το άδειασμα της σκουπιδιέρας';
 
   // The open/create library screen.
   @override

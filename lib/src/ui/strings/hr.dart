@@ -1828,7 +1828,7 @@ final class CroatianStrings extends Strings {
   @override
   String get trashDeletePermanently => 'Trajno obriši';
   @override
-  String get trashActionFailed => 'Bilješka se nije mogla vratiti ni izbrisati';
+  String get trashActionFailed => 'Napomena se nije mogla vratiti ni izbrisati';
   @override
   String get trashEmptyFailed => 'Korpa se nije mogla isprazniti';
 
@@ -1958,11 +1958,11 @@ final class CroatianStrings extends Strings {
   String replaceScopeNote(String note) => 'u $note';
   @override
   String replaceScopeNotes(int count) =>
-      count == 1 ? 'u 1 bilješci' : 'u $count bilješki';
+      count == 1 ? 'u 1 napomeni' : 'u $count napomena';
   @override
   String replaceWriteFailed(int count) => count == 1
-      ? ' (1 bilješka nije zapisana)'
-      : ' ($count bilješki nije zapisano)';
+      ? ' (1 napomena nije zapisana)'
+      : ' ($count napomena nije zapisano)';
 
   // About (issue #80).
   @override

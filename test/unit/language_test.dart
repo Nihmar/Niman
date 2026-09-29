@@ -446,6 +446,28 @@ void main() {
         }
       });
 
+      // A failure snackbar names the trash the way the trash's own title
+      // does: two words for one place in one language read as two places.
+      // Inflection changes the ending, so the start of the word is what is
+      // compared. Hungarian is left out: its accusative lengthens the last
+      // vowel ("kuka", "kukát"), so the stem does not survive the ending.
+      test("the empty-trash failure uses the language's word for trash", () {
+        final differ = <String>[];
+        for (final language in AppLanguages.supported) {
+          if (language.id == 'hu') continue;
+          AppLanguages.choice = language;
+          final title = AppStrings.trashTitle.toLowerCase();
+          final stem = title.substring(0, title.length < 4 ? title.length : 4);
+          if (!AppStrings.trashEmptyFailed.toLowerCase().contains(stem)) {
+            differ.add(
+              '${language.id}: "${AppStrings.trashTitle}" / '
+              '"${AppStrings.trashEmptyFailed}"',
+            );
+          }
+        }
+        expect(differ, isEmpty);
+      });
+
       // What a translation says cannot be pinned by a test: the certificate
       // dialog once claimed, in all 36 languages, the opposite of what the
       // English source says, and every check passed. What a test can hold

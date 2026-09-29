@@ -1842,7 +1842,7 @@ final class PortugueseStrings extends Strings {
   String get trashActionFailed =>
       'Não foi possível restaurar ou eliminar a nota';
   @override
-  String get trashEmptyFailed => 'Não foi possível esvaziar o lixo';
+  String get trashEmptyFailed => 'Não foi possível esvaziar a lixeira';
 
   // The open/create library screen.
   @override
