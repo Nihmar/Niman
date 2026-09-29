@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_webdav_server.dart';
 
@@ -253,6 +254,46 @@ void main() {
         reason: 'the body must give up on the client timeout',
       );
       expect(await stalled.readBytes('a.bin'), hasLength(50000));
+    });
+
+    // The real thing: a stock `HttpClient` and a file's own sink, the pair
+    // the sync engine hands `download` (#495). The stall has to end the
+    // transfer, release the sink for its caller and drop the socket — not
+    // stop at a failure that leaves the file bound and the connection open.
+    test('a stalled body into a real file sink is a retryable failure, the '
+        'sink is released and the socket dropped (#495)', () async {
+      const timeout = Duration(milliseconds: 500);
+      server
+        ..putFile('a.bin', List<int>.filled(50000, 1))
+        ..stallNextGet();
+      final stalled = WebDavClient(url: server.url, timeout: timeout);
+      addTearDown(stalled.close);
+      final folder = Directory.systemTemp.createTempSync('niman-stall-');
+      addTearDown(() => folder.deleteSync(recursive: true));
+      final file = File(p.join(folder.path, 'a.part'));
+      final sink = file.openWrite();
+
+      await expectLater(
+        stalled.download('a.bin', sink).timeout(const Duration(seconds: 10)),
+        throwsA(
+          isA<WebDavRetryable>().having(
+            (failure) => failure.message,
+            'message',
+            contains('body stalled'),
+          ),
+        ),
+      );
+
+      // What `_fetch` does next: a bound sink throws here, out of reach of
+      // any `catchError`.
+      await sink.close();
+      await sink.done;
+      file.deleteSync();
+      await server.stalledConnectionsClosed.timeout(
+        const Duration(seconds: 10),
+        onTimeout: () =>
+            fail('the client left the stalled connection open after giving up'),
+      );
     });
 
     // The timeout bounds a silence, not the transfer: a body that keeps

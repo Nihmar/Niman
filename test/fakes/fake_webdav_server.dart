@@ -159,6 +159,7 @@ final class FakeWebDavServer {
   int _dropGets = 0;
   int _stallGets = 0;
   final List<Socket> _stalled = [];
+  final List<Future<void>> _stalledEnded = [];
 
   /// After [after] normal requests, the next [count] answer [status]
   /// (with [retryAfter]).
@@ -188,6 +189,11 @@ final class FakeWebDavServer {
   /// nothing: the connection stays open with no body, as a wedged server
   /// leaves it (#348). [close] ends whatever is left of it.
   void stallNextGet() => _stallGets++;
+
+  /// Completes once every connection [stallNextGet] left open has been
+  /// closed by the client — the proof that a client which gave up on a
+  /// body dropped the socket, rather than only stopped reading it.
+  Future<void> get stalledConnectionsClosed => Future.wait(_stalledEnded);
 
   /// Set, the next GET sends its body in six pieces, this pause before each
   /// one — a slow link, whose body keeps arriving however long the whole
@@ -547,6 +553,13 @@ final class FakeWebDavServer {
       _stallGets--;
       final socket = await response.detachSocket();
       _stalled.add(socket);
+      final ended = Completer<void>();
+      _stalledEnded.add(ended.future);
+      void end() {
+        if (!ended.isCompleted) ended.complete();
+      }
+
+      socket.listen((_) {}, onDone: end, onError: (Object _) => end());
       await socket.flush();
       return;
     }

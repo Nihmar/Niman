@@ -984,6 +984,41 @@ void main() {
         );
       },
     );
+
+    test('a download whose body stalls on a plain HttpClient fails the run '
+        'and drops the connection (#495)', () async {
+      final stalled = await _Device.create(
+        'stalled',
+        timeout: const Duration(milliseconds: 500),
+      );
+      addTearDown(stalled.close);
+      await stalled.connect(server.url);
+      server
+        ..putFile('Remote.md', utf8.encode('from the server'))
+        ..stallNextGet();
+
+      final report = await stalled.sync();
+
+      expect(report.aborted, SyncAbort.offline, reason: report.summary());
+      expect(
+        (await stalled.store.destination(stalled.path))!.lastError,
+        isNotNull,
+        reason: 'the run settled its own failure',
+      );
+      expect(stalled.read('Remote.md'), isNull);
+      expect(
+        stalled.root.listSync().where(
+          (e) => p.basename(e.path).contains('niman-tmp-sync'),
+        ),
+        isEmpty,
+        reason: 'the fetched temp is gone, so its handle is too',
+      );
+      await server.stalledConnectionsClosed.timeout(
+        const Duration(seconds: 10),
+        onTimeout: () =>
+            fail('the stalled connection was left open after the run'),
+      );
+    });
   });
 
   group('one conflict at a time', () {
