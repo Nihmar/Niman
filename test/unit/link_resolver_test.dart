@@ -138,6 +138,44 @@ void main() {
     expect(await resolver.resolveWiki('a/none'), isA<UnresolvedNote>());
   });
 
+  // #491: `..` climbs to the library root and no further — nothing above
+  // it is indexed — and a leading `/` is the root, so both spellings name
+  // the note the path says, as they did before the #330 path check.
+  group('relative and rooted paths', () {
+    const forms = ['../Notes/a', '/Notes/a', 'sub/../a'];
+
+    test('resolve like the path they end at', () async {
+      final note = await addNote('Notes/a.md', stem: 'a');
+      for (final form in forms) {
+        expect(
+          await resolver.resolveWiki(form),
+          isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+          reason: form,
+        );
+        expect(
+          await resolver.resolveMarkdown('$form.md'),
+          isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+          reason: '$form.md',
+        );
+      }
+    });
+
+    test('the batch resolution follows the single one', () async {
+      final note = await addNote('Notes/a.md', stem: 'a');
+      final batch = await resolver.resolveBatch([
+        ...[for (final form in forms) '$form.md'],
+        '../notes/A.md',
+      ]);
+      for (final entry in batch.entries) {
+        expect(
+          entry.value,
+          isA<ResolvedNote>().having((r) => r.note.id, 'note', note.id),
+          reason: entry.key,
+        );
+      }
+    });
+  });
+
   group('resolveMarkdown', () {
     test('http(s) and other schemes are external', () async {
       expect(

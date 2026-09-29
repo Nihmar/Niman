@@ -51,6 +51,11 @@ extension is not followed. `![alt](src)` images are not links,
 and neither is a footnote reference (`[^1]`); a link written inside a
 footnote's own text is.
 
+A path is read against the library: `/docs/a.md` from the root, and
+`../Notes/a.md` climbing no further than it (`Sub/b.md` with
+`[x](../Notes/a.md)` is `Notes/a.md`). A note outside the library is not
+in the index and so is not a link target.
+
 ## Links into a PDF or a book
 
 A link can point at a place inside a PDF or an EPUB book; following it

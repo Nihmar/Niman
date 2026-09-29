@@ -160,20 +160,44 @@ final class LinkResolver implements LinkSource {
   }
 
   /// [raw] split into its target, normalized ([normalizeTarget], `.md`
-  /// dropped), and its `#fragment`, null when empty. The fragment keeps
-  /// its case: a heading is found by its slug whatever its case, and a
-  /// place in a book (#282) names a file in it, whose name has one.
+  /// dropped, its path segments resolved by [_pathOf]), and its `#fragment`,
+  /// null when empty. The fragment keeps its case: a heading is found by its
+  /// slug whatever its case, and a place in a book (#282) names a file in
+  /// it, whose name has one.
   static ({String target, String? fragment}) _split(String raw) {
     final kept = _clean(raw);
     final hash = kept.indexOf('#');
     var target = (hash == -1 ? kept : kept.substring(0, hash)).toLowerCase();
     if (target.endsWith('.md')) target = target.substring(0, target.length - 3);
     return (
-      target: target,
+      target: _pathOf(target),
       fragment: hash == -1 || hash == kept.length - 1
           ? null
           : kept.substring(hash + 1),
     );
+  }
+
+  /// [target]'s path with its `.` and `..` segments resolved and a leading
+  /// `/` gone: the library-relative path the link names (#491).
+  ///
+  /// Everything the resolver sees is indexed against the library root, so
+  /// the linking note's own folder is the one thing a `..` cannot climb
+  /// out of: a segment that would leave the root is dropped, and `[[../a]]`
+  /// from the root is `[[a]]`. A target that resolves to no path at all
+  /// (`..`, `a/..`) is left as written — it names nothing, which is what it
+  /// named before.
+  static String _pathOf(String target) {
+    if (!target.startsWith('/') && !target.contains('..')) return target;
+    final resolved = <String>[];
+    for (final segment in target.split('/')) {
+      if (segment.isEmpty || segment == '.') continue;
+      if (segment == '..') {
+        if (resolved.isNotEmpty) resolved.removeLast();
+        continue;
+      }
+      resolved.add(segment);
+    }
+    return resolved.isEmpty ? target : resolved.join('/');
   }
 
   /// Resolves a path-style target: exact stem first (indexed, O(log n)),
