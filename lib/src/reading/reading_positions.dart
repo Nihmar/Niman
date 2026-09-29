@@ -98,12 +98,13 @@ final class ReadingPositions {
     final gone = paths.toList(growable: false);
     if (gone.isEmpty) return Future<void>.value();
     return _update((entries) {
-      final leaving = entries.keys
-          .where((key) => gone.any((path) => key == path || isUnder(path, key)))
-          .toList(growable: false);
-      for (final key in leaving) {
-        entries.remove(key);
-      }
+      final leaving =
+          entries.keys
+              .where(
+                (key) => gone.any((path) => key == path || isUnder(path, key)),
+              )
+              .toList(growable: false)
+            ..forEach(entries.remove);
       return leaving.isNotEmpty;
     });
   }

@@ -7,21 +7,20 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:path/path.dart' as p;
-import 'package:sqlite3/sqlite3.dart' show SqliteException;
 
 /// An index connection whose first query fails with an injected error, and
 /// which records its own close so a leak is observable.
 class _FailingIndex extends IndexDatabase {
-  _FailingIndex(super.e);
+  new(super.e);
 
-  late Object failWith;
+  late Exception failWith;
   bool closed = false;
 
   @override
   Selectable<QueryRow> customSelect(
     String query, {
     List<Variable> variables = const [],
-    Set<ResultSetImplementation> readsFrom = const {},
+    Set<ResultSetImplementation<dynamic, dynamic>> readsFrom = const {},
   }) {
     throw failWith;
   }
@@ -88,12 +87,11 @@ void main() {
     final controller = LibraryController(
       appDb,
       indexDbFactory: (libraryPath) async {
-        final db = _FailingIndex(
-          NativeDatabase(File(p.join(tmp.path, 'index.db'))),
-        );
-        db.failWith = opened.isEmpty
-            ? SqliteException(message: 'damaged', extendedResultCode: 11)
-            : const FileSystemException('no space left on device');
+        final db =
+            _FailingIndex(NativeDatabase(File(p.join(tmp.path, 'index.db'))))
+              ..failWith = opened.isEmpty
+                  ? SqliteException(message: 'damaged', extendedResultCode: 11)
+                  : const FileSystemException('no space left on device');
         opened.add(db);
         return db;
       },

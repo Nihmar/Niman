@@ -238,7 +238,10 @@ void main() {
         final json = jsonDecode(kept().readAsStringSync()) as Map;
         expect(json.keys, ['papers/x.pdf']);
         expect(await positions.read('books/Dune.epub'), isNull);
-        expect(await positions.read('papers/x.pdf'), const PdfLocation(page: 2));
+        expect(
+          await positions.read('papers/x.pdf'),
+          const PdfLocation(page: 2),
+        );
       },
     );
 

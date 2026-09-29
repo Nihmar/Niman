@@ -173,11 +173,9 @@ void main() {
         expect(renamed, isTrue);
         expect(File(target).readAsStringSync(), 'audio bytes');
         expect(File(source).existsSync(), isFalse);
-        expect(
-          Directory(root.path).listSync().map((e) => p.basename(e.path)),
-          [p.basename(target)],
-          reason: 'a hung staged rename leaves no temp of its own behind',
-        );
+        expect(Directory(root.path).listSync().map((e) => p.basename(e.path)), [
+          p.basename(target),
+        ], reason: 'a hung staged rename leaves no temp of its own behind');
       },
     );
 
