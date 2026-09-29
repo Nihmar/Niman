@@ -438,3 +438,57 @@ Tracked as issues, to be fixed on `fix/review-pass3`:
 | #496 | 12, 28, 30 |
 | #497 | 6, 13, 21, 22, 23 |
 | #498 | 33–40 |
+
+### Third pass — status
+
+Fixed on `fix/review-pass3` (2026-09-29), one commit per finding, each with a
+test that failed on the code before it. Hashes are that branch's.
+
+| # | Status |
+|---|--------|
+| 1 | Fixed, `01a3896d` |
+| 2 | Fixed, `ba6d2e87` |
+| 3 | Fixed, `740391a3` |
+| 4 | Fixed, `e3e2089a` |
+| 5 | Fixed, `9d9181b3` |
+| 6 | Fixed, `aad27780` |
+| 7 | Fixed, `b4b1f162` |
+| 8 | Fixed, `eda51ebb`. Left: the escape needs a response whose socket cannot be detached (the test's fake models one); with a plain `HttpClient` the pre-fix code passes |
+| 9 | Fixed, `ef0ae189` |
+| 10 | Fixed, `8e44001d` |
+| 11 | Fixed, `11ec0038` |
+| 12 | Fixed, `bd0304dc`. Left: the indexer, export and the other readers still accept a file the loader refuses |
+| 13 | Fixed, `7535e938` |
+| 14 | Fixed, `2e9d6615` |
+| 15 | Fixed, `bf4bd391` |
+| 16 | Fixed, `e267184a` |
+| 17 | Fixed, `5aaa9b40` |
+| 18 | Fixed, `9dc5b2c8` |
+| 19 | Fixed, `7f8f3ef5` |
+| 20 | Fixed, `627508be` |
+| 21 | Fixed, `65d1becf` |
+| 22 | Fixed, `5ddba0d8` |
+| 23 | Fixed, `6c8827eb` — the problem kind and its key went with it when the branch met #498 (`f073ba12`) |
+| 24 | Fixed, `2f90c8a6` |
+| 25 | Fixed, `987da2b3` — `package:archive` does not stop at the declared size; the budget bounds the bytes written |
+| 26 | Fixed, `8c6c0266`. Left: a revision still clears the measurements — an edit re-measures each table once, not per word |
+| 27 | Fixed, `ea1a5022`. Left: the cache is keyed on the index's revision, so headings are as of the last index run |
+| 28 | Fixed, `f32fcf44` |
+| 29 | Fixed, `37a51774` |
+| 30 | Fixed, `7ff51222`. Left: the rule is the loader's and the replace pass's, not yet every reader's |
+| 31 | Fixed, `f8390862` |
+| 32 | Fixed, `2407d53c`. Left: the lookup still walks the folder, now off the UI isolate — `dart:io` has no per-name call that returns the stored case |
+| 33 | Fixed, `43d46e58` |
+| 34 | Fixed, `f073ba12` |
+| 35 | Fixed, `9730ce2a` |
+| 36 | Fixed, `87da485e` |
+| 37 | Fixed, `bbeffe78` |
+| 38 | Fixed, `69fa6654` — with a test that fails when a contract key is read nowhere under `lib/` |
+| 39 | Fixed, `c8841d9a` |
+| 40 | Fixed, `888a4f82` |
+
+Crossings found while merging: #491's `readHeadings` seam against #498's
+book-hints test (`1a6c05ac`), and #497's removal of the stray-`}}` report
+against #498's externalization of the checker's messages — the `closingBraces`
+kind lost its only raiser and went with its key. The analyzer infos the
+index-leak and reading fixes left are cleaned in `bb86683f`.
