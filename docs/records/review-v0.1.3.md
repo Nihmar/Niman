@@ -202,6 +202,45 @@ Ordered by severity inside each group.
   caret move too, so tapping the field drops a loaded trust — the safe
   direction; the certificate is simply asked again.
 
+### Second pass — status
+
+Fixed on `fix/review-pass2` (2026-09-29), one commit per fix, each with a
+test that failed on the code before it. Hashes are that branch's.
+
+| # | Status |
+|---|--------|
+| 1 | Fixed, `c8f20819` — quoting is decided by reading the plain form back with the parser |
+| 2 | Fixed, `c8f20819` (the rewrite) and `851c7079` (the list editor reads items as a flow list) |
+| 3 | Fixed, `c8f20819` (a line break is escaped) and `ae45fd29` (an entry's lines come from the parser's spans) |
+| 4 | Fixed, `ae45fd29` |
+| 5 | Fixed, `851c7079` — items keep their own YAML, a chip is deleted by its place, a list a chip row cannot show has no row |
+| 6 | Fixed, `c99369f1` — a byte outside UTF-8 is read as its Windows-1252 character on every path (decided with the user: saving writes UTF-8) |
+| 7 | Fixed, `632fa831` |
+| 8 | Fixed, `1b0f5760` |
+| 9 | Fixed, `0c915947`. Left: the server clock is the one at the check, not at the download |
+| 10 | Fixed, `d5ac9893` |
+| 11 | Fixed, `f84d4aef` — a refusal on another host names that host and offers nothing to trust |
+| 12 | Fixed, `196a1df9` |
+| 13 | Fixed, `2ba8b38e`. Left: the "already shown" record lasts while the app runs, so a restart within the grace hour shows it again |
+| 14 | Fixed, `065a241e` — one way to find a box on a line, quotes included |
+| 15 | Fixed, `9efa5f2f` (only typing opens the panel) and `9f71580a` (a completion replaces the whole target) |
+| 16 | Fixed, `3c590983` |
+| 17 | Fixed, `74d889c9` |
+| 18 | Fixed, `22a8a56f` — all three cases, `one` + `two` + `---` included. Left: `_quoteDepthAfter` keeps a quote open over a lazy line, and a list item swallows a `---` at the margin |
+| 19 | Fixed, `5229f589` |
+| 20 | Fixed, `d1622d13` — the engine's filter rules are functions the checker calls. Left: `{{include:A\|B}}` is reported wrongly and `{{include:}}` not at all (the rule is in `includes.dart`); a huge move count still throws when a note is made |
+| 21 | Fixed, `080b7ae7`; and `7297ce98`, found alongside: in source mode a wide table's caret past its first piece was not drawn |
+| 22 | Fixed, `94dd279c` |
+| 23 | Fixed, `53886af4`. Left: the sync queue gets no hints for what changed while the watch was down; a stream *error* still triggers no rescan |
+| 24, 25 | Fixed together, `980e91b3` |
+| 26 | Fixed, `d6f78071` |
+| 27 | Fixed, `89d05651` — live mode uses the table model's splitter. Left: the read view's `_tableRows` still has its own |
+| Lower priority | The normalization on save: fixed with 5 (`851c7079`). The trash names: fixed, `670b2c90` (and the same fault in `uniqueFolderName`). The URL listener: left, it fails safe |
+
+Found on the way and fixed apart: two export tests that could not run on
+a Windows disk (`d454132b`). Still open: a migration test's teardown on
+Windows (`database_migration_test.dart`, the database left open).
+
 ### Checked and found sound
 
 Switch-during-save ordering (#334), the unsaved-notes tracker, saving
