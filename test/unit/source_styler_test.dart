@@ -10,6 +10,7 @@ import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/markdown/source_edit.dart';
 import 'package:niman/src/markdown/source_styler.dart';
 
 /// Line [line]'s tokens as `kind[text]`, a marker starred.
@@ -449,6 +450,128 @@ void main() {
       final at = buffer.offsetOfLine(2) + 4;
       styler.edited(buffer.replaceRange(at, at + 4, 'BODY'));
       expect(styler.footnotes.single.body, 'first\nBODY here');
+    });
+  });
+
+  group('the footnotes an edit leaves are the ones a fresh scan finds', () {
+    // The incremental state (which lines hold a definition, a citation or a
+    // footnote's body) has to be the scan's, whatever the edit did to the
+    // footnote a run of indented lines ran on from: a definition created,
+    // removed, its body extended, its body ended (#496).
+    String scopeOf(DocumentScope scope) => [
+      for (final entry in scope.links.entries)
+        '${entry.key}=${entry.value.destination}',
+      '${scope.footnoteCounts}',
+      '${scope.footnoteLabels}',
+      for (final note in scope.footnotes) '${note.label}:${note.body}',
+    ].join('\n');
+
+    void expectFresh(SourceStyler styler, String reason) {
+      final buffer = styler.buffer;
+      expect(
+        scopeOf(styler.scope),
+        scopeOf(DocumentScope.scan(buffer, buffer.revision)),
+        reason: '$reason:\n${buffer.text}',
+      );
+    }
+
+    SourceEdit setLine(SourceBuffer buffer, int line, String text) {
+      final start = buffer.offsetOfLine(line);
+      return buffer.replaceRange(
+        start,
+        start + buffer.lineLengthAt(line),
+        text,
+      );
+    }
+
+    SourceEdit addLine(SourceBuffer buffer, int line, String text) =>
+        buffer.insert(buffer.offsetOfLine(line), '$text\n');
+
+    SourceEdit dropLine(SourceBuffer buffer, int line) => buffer.replaceRange(
+      buffer.offsetOfLine(line),
+      buffer.offsetOfLine(line + 1),
+      '',
+    );
+
+    test('ending a footnote body keeps the citation its line still makes', () {
+      // Line 2 is a footnote's body while line 1 defines one, and a
+      // citation on its own account: once line 1 is not a definition it is
+      // only the citation, and `z` is still numbered.
+      final buffer = SourceBuffer.fromText(
+        'see [^a] and [^z]\n[^a]: def\n    code [^z]\n[^z]: zed\n',
+      );
+      final styler = SourceStyler(buffer)
+        ..edited(setLine(buffer, 1, 'not a definition'));
+      expectFresh(styler, 'the definition ended');
+
+      final alone = SourceBuffer.fromText(
+        '[^a]: def\n    code [^z]\n[^z]: zed',
+      );
+      final other = SourceStyler(alone);
+      expect(other.footnotes.map((note) => note.label), ['z']);
+      other.edited(setLine(alone, 0, 'plain'));
+      expectFresh(other, 'the only citation of z is the indented line');
+      expect(other.footnotes.map((note) => note.label), ['z']);
+    });
+
+    test('a definition created, removed, extended and ended', () {
+      final buffer = SourceBuffer.fromText(
+        'plain\n    code [^z]\n    more\nlast [^a]\n[^z]: zed\n[^a]: ay',
+      );
+      final styler = SourceStyler(buffer);
+      expectFresh(styler, 'as loaded');
+      styler.edited(setLine(buffer, 0, '[^q]: now a definition'));
+      expectFresh(styler, 'a definition created above an indented run');
+      styler.edited(addLine(buffer, 3, '    another body line [^a]'));
+      expectFresh(styler, 'its body extended');
+      styler.edited(setLine(buffer, 0, 'plain again'));
+      expectFresh(styler, 'the definition removed');
+      styler
+        ..edited(setLine(buffer, 0, '[^q]: back'))
+        ..edited(setLine(buffer, 2, 'a plain line ends the body'));
+      expectFresh(styler, 'the body ended from inside');
+      styler.edited(dropLine(buffer, 0));
+      expectFresh(styler, 'the definition line deleted');
+    });
+
+    test('every edit of a note of footnotes leaves the fresh scan', () {
+      const alphabet = <String>[
+        '',
+        'plain text',
+        'cites [^a] and [^z]',
+        '[^a]: first',
+        '[^z]: last',
+        '[r]: https://x',
+        '    body [^z]',
+        '    body [^a] too',
+        '    plain body',
+        '   [^a]: three spaces',
+      ];
+      final random = Random(496);
+      for (var round = 0; round < 120; round++) {
+        final lines = [
+          for (var at = 0; at < 12; at++)
+            alphabet[random.nextInt(alphabet.length)],
+        ];
+        final buffer = SourceBuffer.fromText(lines.join('\n'));
+        final styler = SourceStyler(buffer);
+        expectFresh(styler, 'round $round as loaded');
+        for (var step = 0; step < 25; step++) {
+          final text = alphabet[random.nextInt(alphabet.length)];
+          final line = random.nextInt(buffer.lineCount);
+          final edit = switch (random.nextInt(4)) {
+            0 => addLine(buffer, line, text),
+            1 when buffer.lineCount > 2 => dropLine(buffer, line),
+            2 => buffer.insert(
+              buffer.offsetOfLine(line) + buffer.lineLengthAt(line),
+              random.nextBool() ? ' [^z]' : '  ',
+            ),
+            _ => setLine(buffer, line, text),
+          };
+          styler.edited(edit);
+          expectFresh(styler, 'round $round step $step');
+        }
+      }
     });
   });
 

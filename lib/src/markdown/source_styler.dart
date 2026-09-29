@@ -886,17 +886,24 @@ final class SourceStyler {
     // The lines after the edit keep what they held only when the footnote
     // body the edit starts from is still running at the surviving line; when
     // it is not, the indented run under the edit changed what it holds, and
-    // is read to its end.
+    // is read to its end — as a run a body is running on to holds all of it,
+    // and as one no body runs on to holds only what cites a footnote or
+    // defines one on its own (the line an ended body leaves behind may
+    // still be a citation).
     var stop = untouchedNew;
     if (holdings.end != oldBody) {
       while (stop < buffer.lineCount &&
           DocumentScope.continuesFootnote(buffer.lineAt(stop))) {
-        if (holdings.end) {
-          holdings.lines.add(stop);
-          holdings.running.add(true);
-        }
         stop++;
       }
+      final run = _holdingsOf(
+        buffer,
+        untouchedNew,
+        stop,
+        runningBody: holdings.end,
+      );
+      holdings.lines.addAll(run.lines);
+      holdings.running.addAll(run.running);
     }
     final keepFrom = _lowerBound(_definers, stop - delta);
     final touched = keepFrom > low || holdings.lines.isNotEmpty;
